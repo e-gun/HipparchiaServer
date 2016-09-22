@@ -18,4 +18,14 @@ of course, most queries take <2s to execute. but servers live in the worst of al
 
 instructions on how to use Hipparchia can be found by clicking on the '?' button if you can make it to the front page.
 
+other things you will need:
+
+jquery:
+    http://jquery.com/download/
+
+jquery-ui:
+    http://jqueryui.com/download/
+
+dejavu fonts:
+    http://dejavu-fonts.org/wiki/Download
 
