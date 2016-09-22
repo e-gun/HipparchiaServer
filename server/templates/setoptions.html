@@ -1,0 +1,61 @@
+<div id="setoptions" class="center">
+    <br />
+      <fieldset>
+          <legend>Accents, diacriticals, and capitalization matter</legend>
+          <label for="accentsmatter_y">yes
+          <input type="radio" name="accents" id="accentsmatter_y" value="Y"></label>
+          <label for="accentsmatter_n">no</label>
+          <input type="radio" name="accents" id="accentsmatter_n" value="N"></label>
+      </fieldset>
+    <fieldset>
+        <legend>Lines of context to accompany search results</legend>
+        <input id="resultsspinner" type="text" value="6" width="25px;">
+    </fieldset>
+    <fieldset>
+        <legend>Lines of context in the browser window</legend>
+        <input id="browserspinner" type="text" value="20" width="25px;">
+    </fieldset>
+    <fieldset>
+        <legend>Maximum number of single-term search results to return</legend>
+        <input id="hitlimitspinner" type="text" value="500" width="25px;">
+    </fieldset>
+    <br />
+    <fieldset>
+      <legend>Sort results by</legend>
+        <select name="sortresults" id="sortresults">
+            <option value="shortname">Name</option>
+            <option value="floruit">Floruit</option>
+            <option value="authgenre">Genre</option>
+            <option value="location">Geography</option>
+        </select>
+    </fieldset>
+      <fieldset>
+          <legend>Authors to search</legend>
+          <label for="greekcorpus">Greek
+          <input type="radio" name="whatlang" id="greekcorpus" value="G"></label><br />
+          <label for="latincorpus">Latin
+          <input type="radio" name="whatlang" id="latincorpus" value="L"></label>
+          <label for="bothcorpora">Both
+          <input type="radio" name="whatlang" id="bothcorpora" value="B"></label><br />
+      </fieldset>
+        <br />
+        <div id="savedprofiles">
+           <br />
+            <span class="ui-icon ui-icon-disk"></span>
+            &nbsp;<button id="save01" class="ui-button ui-corner-all ui-widget" title="Save session in slot #1"><span class="saveoptions">➊</span></button>
+            &nbsp;<button id="save02" class="ui-button ui-corner-all ui-widget" title="Save session in slot #2"><span class="saveoptions">➋</span></button>
+            &nbsp;<button id="save03" class="ui-button ui-corner-all ui-widget" title="Save session in slot #3"><span class="saveoptions">➌</span></button>
+            &nbsp;<button id="save04" class="ui-button ui-corner-all ui-widget" title="Save session in slot #4"><span class="saveoptions">➍</span></button>
+            &nbsp;<button id="save05" class="ui-button ui-corner-all ui-widget" title="Save session in slot #5"><span class="saveoptions">➎</span></button>
+            <br />
+            <span class="ui-icon ui-icon-folder-open"></span>
+            &nbsp;<button id="load01" class="ui-button ui-corner-all ui-widget" title="Load session from slot #1"><span class="loadoptions">➀</span></button>
+            &nbsp;<button id="load02" class="ui-button ui-corner-all ui-widget" title="Load session from slot #2"><span class="loadoptions">➁</span></button>
+            &nbsp;<button id="load03" class="ui-button ui-corner-all ui-widget" title="Load session from slot #3"><span class="loadoptions">➂</span></button>
+            &nbsp;<button id="load04" class="ui-button ui-corner-all ui-widget" title="Load session from slot #4"><span class="loadoptions">➃</span></button>
+            &nbsp;<button id="load05" class="ui-button ui-corner-all ui-widget" title="Load session from slot #5"><span class="loadoptions">➄</span></button>
+            <br />
+        </div>
+    <br />
+
+</div>

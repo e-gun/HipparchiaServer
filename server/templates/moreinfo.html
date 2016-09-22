@@ -1,0 +1,155 @@
+
+<div id="moreinfotabs">
+  <ul>
+      <li><a href="#Interface"><span>Interface</span></a></li>
+      <li><a href="#Browsing"><span>Browsing</span></a></li>
+      <li><a href="#MakingSearchLists"><span>Searching: Building search lists</span></a></li>
+      <li><a href="#RegexSearching"><span>Searching: REGEX</span></a></li>
+      <li><a href="#Technology"><span>Technology</span></a></li>
+  </ul>
+  <div id="Interface">
+        <p class="interfacetips"><button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Help"><span class="ui-icon ui-icon-help"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Open/Close info panel</span></p>
+            <p class="explanation">If you are reading this, then you have already harnessed half of this button's power.</p>
+        <p class="interfacetips"><button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Reset session"><span class="ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Clear session</span></p>
+            <p class="explanation">This will reset all session variables. Strong stuff. Search criteria, etc. will all be cleared.</p>
+        <p class="interfacetips"><button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Include this category and/or genre"><span class="ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Add to search list.</span></p>
+            <p class="explanation">Whatever you see in the selection boxes will be added to the 'searching within' list. See the tab
+                <span class="italic">Searching: Building search lists for details.</span></p>
+        <p class="interfacetips"><button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Exclude this category and/or genre"><span class="ui-icon ui-icon-minus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Add to exclusion list.</span></p>
+            <p class="explanation">Whatever you see in the selection boxes will be added to the list of things that will not be searched.
+                See the tab <span class="italic">Searching: Building search lists for details.</span></p>
+        <p class="interfacetips"><button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="More search choices"><span class="ui-icon ui-icon-arrowreturnthick-1-s"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Show additional corpora</span></p>
+            <p class="explanation">Make further selection criteria avalable.</p>
+        <p class="interfacetips"><button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="More search choices"><span class="ui-icon ui-icon-arrowreturnthick-1-n"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Hide additional corpora</span></p>
+            <p class="explanation">Make further selection criteria unavalable.</p>
+        <p class="interfacetips"><button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Lexical tools"><span class="ui-icon ui-icon-wrench"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Open/Close lexical tools panel</span></p>
+            <p class="explanation">Look up words in the dictionary. Parse words.</p>
+        <p class="interfacetips"><button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Search"><span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Perform a search</span></p>
+            <p class="explanation">Will search based on the information in the neighboring boxes.</p>
+        <p class="interfacetips"><button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Configuration options"><span class="ui-icon ui-icon-gear"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Open/Close settings panel</span></p>
+            <p class="explanation">Changes your preferences here.</p>
+        <p class="interfacetips"><button id="concordance" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Build a concordance for this work"><span class="ui-icon ui-icon-newwin"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Build a concordance</span></p>
+            <p class="explanation">A concordance for the current work will be built in a new window. The time required increases dramatically as works get longer.
+                And it will take a very long time indeed to compile a concordance for something like Cassius Dio's <span class="italic">Historiae Romanae</span>.
+                Then again, how long would it take to do this by hand?
+                Some examples: Plato's <span class="italic">Apology</span> takes 1.8s. Demosthenes' <span class="italic">De Corona</span> takes 7.55s. Homer's <span class="italic">Odyssea</span> takes 96.33s. Dio takes 1578.22s.</p>
+            <p class="explanation">A warning on huge texts and concordances: the quantity of HTML can overwhelm your browser. This is not a problem with Hipparchia, but it is a problem.
+                It might be wisest to do something like <code>curl http://localhost:9999/concordance?work=gr0385w001_conc > ~/Desktop/dio_concordance.html</code> if you want to make sure you get and save the file.
+                You can then work on opening it without running the query again. A further note: if you are running via a virtual machine, a Dio concordance requires setting unwise values in <code>uwsgi.ini</code> and <code>nginx.conf</code>.
+            </p>
+
+        <p class="interfacetips"><button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Show/Hide local info about the works of this author"><span class="ui-icon ui-icon-person"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Show/Hide local info about the works of this author</span></p>
+            <p class="explanation">Take a peek at the database info attached to this author: genre classification of the author and the individual works;
+                date assigned; works of the author; editions from which the works are taken.
+            </p>
+
+        <p class="interfacetips">
+            <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Show/Hide list of available categories"><span class="ui-icon ui-icon-clipboard"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Show/Hide list of available categories</span></p>
+            <p class="explanation">View the list of categories into which authors and works have been sorted.
+                This option is only visible inside of 'further selection criteria' (<span class="ui-icon ui-icon-arrowreturnthick-1-s"></span>)</p>
+        </p>
+        <p>
+            <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Complicate the search"><span class="ui-button-icon ui-icon ui-icon-arrow-1-e"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Open complex searching options</span></p>
+            <p class="explanation">Search for X near Y and within N words/lines</p>
+  </div>
+    <div id="Browsing">
+   [tba]
+
+  </div>
+
+    <div id="MakingSearchLists">
+        <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Include this category and/or genre"><span class="ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Add an item to the search list</span><br />
+            <p class="explanation">Use the information in the box or boxes to the left of this button to append an item to the list of things one is searching for.
+                These can be whole authors, whole works, parts of works, whole classes of authors, and whole classes of work.</p>
+            <p class="explanation">For example: adding the author <span class="emph">Plato</span> and the class <span class="emph">Tragici</span>, you could compare Plato and tragedians.
+                Similarly the author <span class="emph">Plato</span> and the work genre <span class="emph">Satyr.</span> would let you compare Plato and satyr plays.
+                Likewise the work <span class="emph">Thucydides, <span class="italic">Historiae</span></span> could be combined with <span class="emph">Herodotus, <span class="italic">Historiae</span></span>.
+                This could be further refined down to <span class="emph">Thucydides, <span class="italic">Historiae</span> Book 1</span> and <span class="emph">Herodotus, <span class="italic">Historiae</span> Book 1</span>.
+                In fact absurd levels of specificity can be chosen: <span class="emph">Thucydides , <span class="italic">Historiae</span> Book 1, chapter 114, section 2, line 2</span> is a perfectly valid selection.
+            </p>
+        <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Exclude this category and/or genre"><span class="ui-icon ui-icon-minus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <span class="label">Add an item to the exclusion list</span><br />
+            <p class="explanation">Use the information in the box or boxes to the left of this button to append an item to the list of things one is not going to search for.
+                These can be whole authors, whole works, parts of works, whole classes of authors, and whole classes of work.</p>
+            <p class="explanation">For example: adding the author <span class="emph">Plato</span> and the class <span class="emph">Tragici</span> to the exclusion list, you could search for the use of a term outside of Plato and Tragedy.
+                Mixing inclusions and exclusions can produce interesting possibilities: the author <span class="emph">Plutarch</span> as a selection and the work genre <span class="emph">Biogr.</span> as an exclusion yields all of Plutarch but for the <span class="italic">Lives</span>.
+                Similarly adding <span class="emph">Homer</span> and <span class="emph">Epici</span> and excluding <span class="emph"><span class="italic">Ilias</span></span> and then setting the time restriction to 850BCE to 500 CE will give you non-Iliadic early epic. Consider tossing in some <span class="emph">Hymn.</span> for good measure...
+                It is also possible to search something like <span class="emph">Herodotus, <span class="italic">Histories</span></span> less books 1 and 2 by adding the former to the selection list and the latter to the exclusion list.
+                But excluding a subsection within a section is not supported: Book 1 less section 1 has not been implemented and probably never will be.
+            </p>
+
+        <p><span class="ui-button-icon ui-icon ui-icon-trash" title="Drag here to remove item from list">&nbsp;</span>
+            <span class="label">Remove item from list</span></p>
+            <p class="explanation"><span class="emph">Click and drag</span> items from the include/exclude list here. Release the mouse button. Boom: the item is gone.
+            </p>
+
+
+        <p><span class="ui-button-icon ui-icon ui-icon-info" title="Show/hide details of the current search list">&nbsp;</span>
+            <span class="label">Check the contents of your current search list</span></p>
+            <p class="explanation">If you searched now for <span class="emph">Tragici</span> what text would you in fact search? Click on the <span class="emph">info</span> button to find out.
+                This should give you a list of <span class="emph">works</span> that have all of the inclusions and exclusions currently in effect.
+            </p>
+
+            <fieldset><legend>Earliest date to search</legend><input type="text" value="-850" width="25px;"></fieldset>
+            <fieldset><legend>Latest date to search</legend><input  type="text" value="1500" width="25px;"></fieldset>
+           <p class="explanation">Choose a chronological span within which to limit the search. Note that the dates assigned to authors are very approximate
+               and derived from original data that can look like <span class="emph">i-iii A.D.</span>. Such an author would be assigned to <span class="emph">200 C.E.</span>. <span class="emph">iv B.C</span> becomes <span class="emph">350 BCE</span>. A variety of quirks in the
+               original data has become a variety of quirks here. Similarly many authors have no date at all and some works
+               have a variety of dates because they are composite. Works such as these are assigned to <span class="emph">1500 C.E.</span>, even if that is ridiculous. That number should be considered
+               equivalent to <span class="emph">unknown</span>. Check your search lists (<span class="ui-button-icon ui-icon ui-icon-info" title="Show/hide details of the current search list">&nbsp;</span>)
+               to make sure you are getting what you want. Searching within a date range that is smaller than one century is likely to yield some measure of disappointment.
+               Users are quite free to update authors with their own superior dates, but that requires learning SQL.<br />
+
+          Note that there is a conflict between time as an exclusion principle and the selection list. Which should take priority? This question has been resolved as follows: individual selections
+               trump generic chronological exclusions. And so:
+               <ul class="forexample">
+                    <li>zero selections + no date restriction (-850 to 1500): search the <span class="emph">whole corpus</span></li>
+                    <li>zero selections + a date restriction: search for everybody within that date range; e.g., <span class="emph">5th century BCE Greek authors</span></li>
+                    <li>zero selections + a class or classes + a date restriction: search for all members of the class(es) within that date range; e.g. <span class="emph">epic before 1 C.E.</span></li>
+                    <li>an author/work/passage + a class or classes + a date restriction: search for the specific item(s) and search for all members of the class(es) within that date range;
+                        e.g. <span class="emph">Plutarch's <span class="italic">Solon</span></span> and <span class="emph">4th century BCE Greek orators</span></li>
+                </ul>
+            </p>
+    </div>
+    <div id="RegexSearching">
+        Check your settings (<span class="ui-icon ui-icon-gear"></span>) for the kind of search you are running. Different searches use a different syntax.
+        Regex is a dark art unto itself. Consult the <a href="https://www.postgresql.org/docs/8.3/static/functions-matching.html#POSIX-EMBEDDED-OPTIONS-TABLE">manual directly</a>.
+        <br /><br />
+        The more salient things to know/use:
+        <ul>
+            <li><code>[abc]</code> brackets a set of acceptable characters to look for in the next position: a, or b, or c. <code>lauda[st]</code> will find laudas or laudat but not laudare. </li>
+            <li><code>[^abc]</code> brackets a set of characters to exclude in the next position: not a, nor b, nor c. <code>lauda[^t]</code> is a search that refuses to find laudat, but it will find laudant.</li>
+            <li><code>(a|b|abc)</code> brackets a set of strings to look for: a, or b, or abc. <code>laud(o|as|at)</code> is a search for the present singular indicative forms of laudare. It will also find conlaudat. Note how you could use <code>co(n|l)laud</code> to make sure you got alternate spellings of conlaudare.</li>
+            <li><code>.</code> any character: <code>laud.nt</code> will find laudant, laudent, and, theoretically, laudZnt</li>
+            <li><code>/s</code> whitespace: \ssed\setiam\s is a search for ' sed etiam '. Please use the 'within 1 word' function instead of /s unless you know why you are not doing so.
+        </ul>
+        <br />
+        Here are some examples that give you an idea of the sort of things that are possible:<br /><br />
+        <code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each.<br />
+        <code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where <span class="lat">non solum... sed etiam...</span> bracket just a single word.
+        <br />
+        Unfortunately a lot of swanky heavy duty regex searches do not make sense: the DB is organized as a collection of 'lines', and the sort of multi-line searching
+        via regex that one might do in a flat text file will fail.
+
+
+    </div>
+    <div id="Technology">
+        Python 3.5<br/>
+        PostgreSQL<br/>
+        Javascript<br/>
+    </div>
+</div>

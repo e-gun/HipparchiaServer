@@ -1,0 +1,85 @@
+
+function browseuponclick(url){
+	$.getJSON('/browseto?locus='+url, function (passagereturned) {
+		$('#browseforward').unbind('click');
+		$('#browseback').unbind('click');
+        if ( url.substr(0, 1) == 'l') {
+            var lang = 'latin';
+            } else {
+            var lang = 'greek';
+            }
+		var fb = parsepassagereturned(passagereturned);
+
+        $('#browseforward').bind('click', function(){
+        	browseuponclick(fb[0]);
+        	});
+        $('#browseback').bind('click', function(){
+        	browseuponclick(fb[1]);
+        	});
+        });
+    $.getScript('/static/hipparchia_parser.js');
+}
+
+
+var openbrowserfromclick = function() {
+    // now do the browsing
+    $.getJSON('/browseto?locus='+this.id, function (passagereturned) {
+		var fb = parsepassagereturned(passagereturned)
+
+        $('#browseforward').bind('click', function(){
+        	browseuponclick(fb[0]);
+        	});
+        $('#browseback').bind('click', function(){
+        	browseuponclick(fb[1]);
+        	});
+        });
+    // the parser can't attach actions to these items before they have been loaded
+     $.getScript('/static/hipparchia_parser.js');
+}
+
+function parsepassagereturned(passagereturned) {
+		$('#browserdialogtext').text('');
+        // the first item is info
+        // {'forwardsandback': ['/browseto?locus=lt1254w001_AT_2|2|3|6', '/browseto?locus=lt1254w001_AT_6|9|2|6']}
+        var fwdurl = passagereturned[0]['forwardsandback'][0]
+        var bkdurl = passagereturned[0]['forwardsandback'][1]
+        // the remaining lines are the lines of the passage
+        var dLen = passagereturned.length;
+        var linesreturned = []
+        for (i = 0; i < dLen; i++) {
+            linesreturned.push(passagereturned[i]['value']);
+        }
+
+        $('#browserdialogtext').html(linesreturned);
+        $('#browserdialog').show();
+        $.getScript('/static/hipparchia_parser.js');
+        $('observed').click( function(e) {
+            e.preventDefault();
+            $.getJSON('/observed?word='+this.id, function (definitionreturned) {
+                var windowWidth = $(window).width();
+                var windowHeight = $(window).height();
+                $( '#parserdialog' ).dialog({
+                    autoOpen: false,
+                    minWidth: windowWidth*.33,
+                    maxHeight: windowHeight*.9,
+                    // position: { my: "left top", at: "left top", of: window },
+                    title: definitionreturned[0]['observed'],
+                    draggable: true,
+                    icons: { primary: 'ui-icon-close' },
+                    click: function() { $( this ).dialog( 'close' ); }
+                    });
+                $( '#parserdialog' ).dialog( 'open' );
+                var dLen = definitionreturned.length;
+                var linesreturned = []
+                for (i = 0; i < dLen; i++) {
+                    linesreturned.push(definitionreturned[i]['value']);
+                    }
+                $( '#parserdialog' ).html(linesreturned);
+
+            });
+            return false;
+        });
+	return [fwdurl, bkdurl]
+}
+
+

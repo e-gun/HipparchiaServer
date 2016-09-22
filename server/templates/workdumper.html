@@ -1,0 +1,25 @@
+<!-- extend from base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<p class="center">
+    <a href ="/"><button id="back" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Back to the main page">
+        <span class="ui-icon ui-icon-arrowreturnthick-1-w"></span><span class="ui-button-icon-space"> </span>&nbsp;</button></a>
+    </p>
+
+{% autoescape false %}
+
+<h1>{{ author }},&nbsp;
+<span class="title">{{ title }}</span></h1>
+<br />
+{% if results|length > 0 %}
+    citation format: {{ structure }}
+{% endif %}
+<br />
+<br />
+{% for result in results %}
+	{{ result }}<br />
+{% endfor %}
+{% endautoescape %}
+
+{% endblock %}

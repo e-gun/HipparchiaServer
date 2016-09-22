@@ -1,0 +1,39 @@
+    <div id="searchfield">
+        <input type="text" name="authors" class="authorinput" id="authorsautocomplete" action="" placeholder="Authors (&uarr;/&darr;)">
+        <input type="text" name="works" class="workinput" id="worksautocomplete" placeholder="Works [inactive]">
+        <input type="text" name="level05" class="worklevel" id="level05" placeholder="[level05]">
+        <input type="text" name="level04" class="worklevel" id="level04" placeholder="[level04]">
+        <input type="text" name="level03" class="worklevel" id="level03" placeholder="[level03]">
+        <input type="text" name="level02" class="worklevel" id="level02" placeholder="[level02]">
+        <input type="text" name="level01" class="worklevel" id="level01" placeholder="[level01]">
+        <input type="text" name="level00" class="worklevel" id="level00" placeholder="[level00]">
+        <button id="pickauthor" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Include this author/work"><span class="ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+        <button id="excludeauthor" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Exclude this author/work"><span class="ui-icon ui-icon-minus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+        <button id="browseto" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse this location"><span class="ui-icon ui-icon-note"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+        <button id="concordance" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Build a concordance for this work"><span class="ui-icon ui-icon-newwin"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+        <button id="authinfo" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Show/Hide local info about the works of this author"><span class="ui-icon ui-icon-person"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+            <div id="authorholdings"></div>
+        <br />
+        <input type="text" name="genres" class="genreinput" id="genresautocomplete" placeholder="Author Categories">
+        <input type="text" name="workgenres" class="genreinput" id="workgenresautocomplete" placeholder="Work Genres">
+        <button id="pickgenre" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Include this category and/or genre"><span class="ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+        <button id="excludegenre" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Exclude this category and/or genre"><span class="ui-icon ui-icon-minus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+        <button id="genreinfo" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Show/Hide list of available categories"><span class="ui-icon ui-icon-clipboard"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+        <div id="genrelistcontents">&nbsp;</div>
+        <br />
+    <fieldset id="edts">
+        <legend>Earliest date to search</legend>
+        <input id="earliestdate" type="text" value="-850" width="25px;">
+    </fieldset>
+    <fieldset id="ldts">
+        <legend>Latest date to search</legend>
+        <input id="latestdate" type="text" value="1500" width="25px;">
+    </fieldset>
+    <fieldset id="spur">
+          <legend>Spurious works</legend>
+          <label for="spuriaincluded">include
+          <input type="radio" name="spuria" id="spuriaincluded" value="Y"></label>
+          <label for="spuriaexcluded">exclude</label>
+          <input type="radio" name="spuria" id="spuriaexcluded" value="N"></label>
+    </fieldset>
+    </div>

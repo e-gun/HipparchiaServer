@@ -1,0 +1,553 @@
+/** resets
+@yellow: #B68800;
+@orange: #E05F27;
+@red: #E74A93;
+@magenta: #E74A93;
+@violet: #797FD4;
+@blue: #288DD5;
+@cyan: #15968D;
+@green: #629655;
+**/
+
+@font-face {
+    font-family: DejaVu;
+    src: url(/static/ttf/DejaVuSans.ttf);
+}
+
+@font-face {
+    font-family: DejaVu;
+    src: url(/static/ttf/DejaVuSans-Bold.ttf);
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: DejaVu;
+    src: url(/static/ttf/DejaVuSans-Oblique.ttf);
+    font-style: italic;
+}
+
+@font-face {
+    font-family: DejaVu;
+    src: url(/static/ttf/DejaVuSansCondensed.ttf.ttf);
+    font-stretch: condensed;
+}
+
+
+body {
+	background: #f6f6f6;
+	margin: 10px 10px 10px 10px;
+	font-family: sans-serif;
+	color: #101010;
+	font-size: 80%;
+	line-height: 1.4;
+}
+
+bibl {
+	color: #859900;
+}
+
+author {
+	color: #6c71c4;
+}
+
+code {
+	font-size: 100%;
+	color: #086db5;
+	font-family: DejaVuSansMono;
+	src: url(/static/ttf/DejaVuSansMono.ttf);
+}
+
+div.threecolumn {
+    -webkit-column-count: 3; /* Chrome, Safari, Opera */
+    -moz-column-count: 3; /* Firefox */
+    column-count: 3;
+}
+
+div.fourcolumn {
+    -webkit-column-count: 4; /* Chrome, Safari, Opera */
+    -moz-column-count: 4; /* Firefox */
+    column-count: 4;
+}
+
+ul {
+	list-style-type: none;
+}
+
+ul.forexample {
+	list-style-type: lower-latin;
+	padding-left: 100px;
+	}
+
+input {
+	text-align: center;
+	padding: 5px;
+	display: inline;
+}
+
+quote, orth {
+	font-style: italic;
+}
+
+locus {
+	display: block;
+	padding-top: 20px;
+	padding-bottom: 5px;
+}
+
+table {
+	text-align: left;
+	font-weight: normal;
+}
+
+caption {
+	font-size: 120%;
+	font-weight: bold;
+	padding-bottom: 20px;
+}
+
+transl {
+	padding-right: 20px;
+}
+
+analysis {
+	font-style: italic;
+}
+
+browser {
+	color: #393F94;
+}
+
+currentlyviewing {
+	text-align: center;
+	font-weight: bold;
+	color: #393F94;
+	padding-bottom: 10px;
+}
+
+legend {
+	text-align: center;
+}
+
+fieldset {
+	display: inline-block;
+	border-width: 1px;
+}
+
+form {
+	display: inline;
+}
+
+hmu_mid_line_citation_boundary {
+	padding: 50px;
+}
+
+hmu_title {
+	font-weight: bold;
+	font-style: italic;
+}
+
+hmu_blank_quarter_spaces {
+	margin-left: 0px;
+}
+
+hmu_greek_in_a_latin_text { }
+
+hmu_roman_in_a_greek_text {
+	font-style: italic;
+}
+
+observed:hover{
+	color: #393F94;
+	text-shadow: 1px 1px #aaa; 
+	}
+
+sense {
+	padding: 10px;
+	margin-top: 20px;
+}
+
+th {
+	padding: 5px;
+	text-align: center;
+}
+
+
+td.word { 
+	font-weight: bold;
+}
+
+td.count {
+	color: #AE5727;
+	text-align: center;
+}
+
+td.passages {
+	font-weight: normal;
+}
+
+td.infocells {
+	background-color: hsl(200, 33%, 95%);
+	/* background-color: hsl(0, 0%, 95%); */
+	text-align: center;
+}
+
+td.infocellx {
+	background-color: hsl(0, 33%, 95%);
+	/* background-color: hsl(0, 0%, 90%); */
+	text-align: center;
+}
+
+#languageradio, #modeeradio {
+	text-align: center;
+	margin: auto;
+	display: block;
+}
+
+#searchfield, #lexica, #uiclickfield {
+	text-align: center;
+}
+
+
+#searchsummary {
+	padding: 10px;
+	text-align: left;
+	color: #AE5727;
+}
+
+#selectionstable {
+	width: 50%;
+	margin: auto;
+}
+
+#moreinfo {
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
+}
+
+#moreinfotabs {
+	position: fixed;
+	top: 125px;
+	right: 125px;
+	left: 125px;
+	bottom: 125px;
+	box-shadow: 5px 5px 2px #999;
+	padding: 10px;
+	background-color: #fafafa;
+	overflow: auto;
+}
+
+#outputbox {
+	text-align: center;
+	font-size: 90%;
+	color: #354b53;
+}
+
+#wordsearchform {
+	position: float;
+	}
+
+#parserdialog {
+    /* off because jquery is doing the work
+    position: float;
+    box-shadow: 5px 5px 2px #999;
+    padding: 10px;
+    background-color: #fafafa; */
+}
+
+#savedprofiles {
+	font-size: 130%;
+	}
+
+#browserdialog {
+	position: fixed;
+	top: 100px;
+	right: 50px;
+	box-shadow: 5px 5px 2px #999;
+	padding: 10px;
+	background-color: #fafafa;
+	font-size: 115%;
+	line-height: 1.2;
+}
+
+.15emexpandedtext {
+    letter-spacing: 0.15em;
+}
+
+
+#authorholdings, #searchlistcontents {
+	background-color: #fcfcfc;
+	border: 1px dotted black;
+	width: 50%;
+	margin: auto;
+}
+
+#searchlistcontents, #genrelistcontents {
+	text-align: left;
+	padding-top: 20;
+	padding-bottom: 20px;
+	padding-left: 20px;
+	padding-right: 20px;
+	background-color: #fcfcfc;
+	border: 1px dotted black;
+	width: 50%;
+	margin: auto;
+}
+
+#selectionsandexclusions {
+	width: 50%;
+	margin: auto;
+	text-align: center;
+}
+
+.browsercite {
+	color: #556970;
+}
+
+.browsercite {
+	color: #556970;
+	font-weight: bold;
+}
+
+.center { display: block; text-align: center; }
+
+.dictionaryform {
+	color: #556970;
+}
+
+.emph {
+	font-weight: bold;
+	font-color: #AE5727;
+}
+
+.emphatic {
+	font-weight: bold;
+	padding: 20px;
+}
+
+.explanation {
+	padding-left: 75px;
+}
+
+
+.foundtext {
+	color: #354b53;
+}
+
+.findnumber {
+	font-weight: normal;
+	color: #253940;
+}
+
+.foundauthor { }
+
+.foundwork {
+	font-style: italic;
+}
+
+.foundlocus {
+	
+}
+
+.italic {
+	font-style: italic;
+}
+
+.foundlocus:hover{
+	color: #393F94;
+	text-shadow: 1px 1px #aaa; 
+}
+
+.focusline, .highlight {
+	color: #880000;
+	font-weight: 600;
+}
+
+.match {
+	color: #000;
+	font-weight: 600;
+	border: 1px dotted black;
+}
+
+.instructionmanual {
+	padding: 20px;
+	}
+
+
+.saveoptions:hover, #clearselections:hover {
+	color: #daa;
+	}
+
+/* inactive
+.searchsel:hover {
+	color: #993354;
+	text-shadow: 1px 1px #aaa; 
+	}
+*/ 
+
+.loadoptions:hover {
+	color: #ada;
+	}
+
+.dictionaryheading {
+	color: #970;
+	font-weight: 600;
+	font-size: 120%;
+}
+
+.work, .title {
+	font-style: italic;
+	font-weight: bold;
+}
+
+.scholium {
+	font-style: italic;
+}
+
+.labelcell {
+	font-weight: 600;
+	font-color: #253940;
+	vertical-align: top;
+	text-align: center;
+}
+
+.infocell {
+	vertical-align: top;
+}
+
+.label {
+	font-weight: 600;
+	font-color: #253940;
+	padding-left: 25px;
+	padding-right: 10px;
+}
+
+span.lat {
+	font-style: italic;
+	font-color: #253940;
+}
+
+.level1 {
+	font-weight: bold;
+	font-size: 120%;
+}
+
+.level2 {
+	font-weight: bold;
+	font-size: 100%;
+}
+
+.level3 {
+	font-weight: bold;
+}
+
+.locus {
+	font-weight: normal;
+    padding-left: 40px;
+    padding-right: 20px;
+}
+
+.marginaltext{
+	color: #008800;
+	font-style: italic;
+	text-indent: -5px;
+	padding-right: -5px;
+}
+
+.obsv {
+	text-indent: -5px;
+}
+
+.observed {
+	color: #880000;
+	padding-right: 10px;
+}
+
+.overline {
+	text-decoration:overline;
+}
+
+.pickedgenre {
+
+}
+
+.pickedwork {
+	font-style: italic;
+}
+
+.picklabel {
+	font-weight: bold;
+	font-style: italic;
+}
+
+.pubvolumename {
+	font-size: 70%;
+	font-style: italic;
+	}
+
+.pubeditor, .pubpress, .pubcity, .pubyear, .pubseries {
+	font-size: 70%;
+}
+
+.quotedtext {
+    font-style: italic;
+}
+
+.romannumerals {
+	font-variant: small-caps;
+	color: 880000;
+}
+
+.serviusformatting {
+	font-style: italic;
+}
+
+.smlatcaps {
+    font-variant: small-caps;
+}
+
+.small {
+	font-size: 60%;
+	}
+
+.speakers, .speaker {
+	font-weight: bold;
+}
+
+.superscript { position: relative; top: -0.5em; font-size: 80%; }
+
+.smallerthannormalsuperscript { position: relative; top: -0.5em; font-size: 60%; }
+
+.textuallemma, .interlineartext, .interlinearmarginalia, .marginaltext {
+	text-style: italic;
+	text-color: 000088;
+}
+
+.overline { border-top: 1px #000; }
+
+.overunder {
+	border-bottom: 1px #000;
+	border-top: 1px #000;
+	}
+
+.ui-button { margin-bottom: 3px; }
+
+.ui-icon ui-icon-arrowthick-1-w:hover{
+	color: #393F94;
+	text-shadow: 1px 1px #aaa; 
+	}
+	
+.ui-icon ui-icon-arrowthick-1-e:hover{
+	color: #393F94;
+	text-shadow: 1px 1px #aaa; 
+	}
+
+.ui-helper-hidden-accessible {
+	position: absolute !important;
+	clip: rect(1px 1px 1px 1px);
+	clip: rect(1px,1px,1px,1px);
+}
+
+.smallcapitals, .uncial {
+	font-variant: small-caps;
+	}
