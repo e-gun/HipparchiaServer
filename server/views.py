@@ -19,7 +19,8 @@ from server.textsandconcordnaces.concordancemaker import buildconcordance
 from server.textsandconcordnaces.textbuilder import buildfulltext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, setsessionvarviadb, sessionselectionsashtml, rationalizeselections
-from .formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, sortauthorandworklists
+from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, sortauthorandworklists, \
+	dropdupes
 
 # all you need is read-only access
 # it is a terrible idea to connect with a user who can write
