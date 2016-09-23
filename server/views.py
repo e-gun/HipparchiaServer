@@ -1,12 +1,13 @@
+# -*- coding: utf-8 -*-
 import json
 import time
 import re
 import psycopg2
-from flask import render_template, redirect, request, url_for
+from flask import render_template, redirect, request, url_for, session
 
 import server.browsing.browserfunctions
 from server import hipparchia
-from server.dbsupport import dbfunctions
+from server.dbsupport.dbfunctions import dbauthorandworkmaker
 from server.dbsupport.citationfunctions import findvalidlevelvalues
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
@@ -18,13 +19,11 @@ from server.textsandconcordnaces.concordancemaker import buildconcordance
 from server.textsandconcordnaces.textbuilder import buildfulltext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, setsessionvarviadb, sessionselectionsashtml, rationalizeselections
-from .formatting_helper_functions import *
+from .formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, sortauthorandworklists
 
-# from flask_weasyprint import HTML, render_pdf
-# import pdfkit
-
-roconnection = psycopg2.connect(user=hipparchia.config['DBUSER'], host=hipparchia.config['DBHOST'], port=hipparchia.config['DBPORT'], database=hipparchia.config['DBNAME'], password=hipparchia.config['DBPASS'])
-dbconnection = roconnection
+# all you need is read-only access
+# it is a terrible idea to connect with a user who can write
+dbconnection = psycopg2.connect(user=hipparchia.config['DBUSER'], host=hipparchia.config['DBHOST'], port=hipparchia.config['DBPORT'], database=hipparchia.config['DBNAME'], password=hipparchia.config['DBPASS'])
 dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
 cursor = dbconnection.cursor()
@@ -212,7 +211,7 @@ def concordance():
 		print('failed to pick a text for the concordance builder:', work, str(len(work)))
 		work = 'lt0022w012_conc'
 	
-	author = dbfunctions.dbauthorandworkmaker(work[0:6], cursor)
+	author = dbauthorandworkmaker(work[0:6], cursor)
 	authorname = author.shortname
 	
 	allworks = []
@@ -278,7 +277,7 @@ def workdump():
 		pdf = True
 
 	if len(work) == 10:
-		author = dbfunctions.dbauthorandworkmaker(work[0:6], cursor)
+		author = dbauthorandworkmaker(work[0:6], cursor)
 		authorname = author.shortname
 		
 		for w in author.listofworks:
@@ -742,7 +741,7 @@ def grabtextforbrowsing():
 		safepassage.append(re.sub('[\W_|]+', '',level))
 	safepassage = tuple(safepassage[:5])
 	workdb = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
-	ao = dbfunctions.dbauthorandworkmaker(workdb[:6], cursor)
+	ao = dbauthorandworkmaker(workdb[:6], cursor)
 	workid = workdb[7:]
 	# first line is info; remaining lines are html
 	browserdata = server.browsing.browserfunctions.getandformatbrowsercontext(ao, int(workid), safepassage, ctx, numbersevery, cursor)
@@ -765,6 +764,7 @@ def findbyform():
 	word = word.lower()
 	
 	if re.search(r'[a-z]', word[0]) is not None:
+		word = stripaccents(word)
 		dict = 'latin'
 	else:
 		dict = 'greek'

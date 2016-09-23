@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import server.searching
 import psycopg2
 import re

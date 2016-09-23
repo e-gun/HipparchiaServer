@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 def findvalidlevelvalues(workdb, workstructure, partialcitationtuple, cursor):
 	"""
 	tell me some of a citation and i can tell you what is a valid choice at the next step

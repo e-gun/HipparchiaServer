@@ -150,7 +150,9 @@ hmu_blank_quarter_spaces {
 	margin-left: 0px;
 }
 
-hmu_greek_in_a_latin_text { }
+hmu_greek_in_a_latin_text { 
+
+}
 
 hmu_roman_in_a_greek_text {
 	font-style: italic;
@@ -270,8 +272,9 @@ td.infocellx {
 	line-height: 1.2;
 }
 
-.15emexpandedtext {
-    letter-spacing: 0.15em;
+.expanded {
+    letter-spacing: 0.15em; 
+    font-weight: 600;
 }
 
 

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from operator import itemgetter
 import re
 from .dbsupport.dbfunctions import *

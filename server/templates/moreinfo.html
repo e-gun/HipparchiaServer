@@ -135,7 +135,7 @@
             <li><code>[^abc]</code> brackets a set of characters to exclude in the next position: not a, nor b, nor c. <code>lauda[^t]</code> is a search that refuses to find laudat, but it will find laudant.</li>
             <li><code>(a|b|abc)</code> brackets a set of strings to look for: a, or b, or abc. <code>laud(o|as|at)</code> is a search for the present singular indicative forms of laudare. It will also find conlaudat. Note how you could use <code>co(n|l)laud</code> to make sure you got alternate spellings of conlaudare.</li>
             <li><code>.</code> any character: <code>laud.nt</code> will find laudant, laudent, and, theoretically, laudZnt</li>
-            <li><code>/s</code> whitespace: \ssed\setiam\s is a search for ' sed etiam '. Please use the 'within 1 word' function instead of /s unless you know why you are not doing so.
+            <li><code>\s</code> whitespace: \ssed\setiam\s is a search for ' sed etiam '. Please use the 'within 1 word' function instead of /s unless you know why you are not doing so.
         </ul>
         <br />
         Here are some examples that give you an idea of the sort of things that are possible:<br /><br />

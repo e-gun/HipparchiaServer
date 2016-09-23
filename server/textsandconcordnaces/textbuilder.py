@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 def buildfulltext(work, levelcount, higherlevels, linesevery, cursor):
 	"""
 	make a readable/printable version of a work and send it to its own page

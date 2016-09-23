@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 class dbAuthor(object):
 	"""
 	Created out of the DB info, not the IDT or the AUTHTAB

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import re
 
 # lifted from HipparchiaBuilder

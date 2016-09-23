@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from server import formatting_helper_functions
 from server.searching.searchfunctions import concordancelookup
 
