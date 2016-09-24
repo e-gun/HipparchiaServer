@@ -233,7 +233,7 @@ def sessionvariables(cursor):
 		session['linesofcontext'] = 6
 		session['browsercontext'] = '20'
 		session['maxresults'] = '250'
-		session['sortorder'] = 'shortname'
+		session['sortorder'] = 'name'
 		session['earliestdate'] = '-850'
 		session['latestdate'] = '1500'
 		session['xmission'] = 'Any'

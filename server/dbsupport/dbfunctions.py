@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 # assuming py35 or higher
-from flask import session
-import psycopg2
 
-from server import hipparchia
-from server.dbsupport.citationfunctions import finddblinefromlocus
 from .dbobjects import *
 
 
@@ -136,7 +132,7 @@ def simplecontextgrabber(workobject, focusline, linesofcontext, cursor):
 	data = (focusline - (linesofcontext / 2), focusline + (linesofcontext / 2))
 	cursor.execute(query, data)
 	foundlines = cursor.fetchall()
-	print('q/d',query,data)
+
 	return foundlines
 
 
