@@ -241,15 +241,15 @@ def formattedcittationincontext(line, workdbname, linesofcontext, searchterm, cu
 		
 	authorobject = dbauthorandworkmaker(workdbname[0:6], cursor)
 	citationincontext = []
-	locus = server.searching.searchformatting.resultformatter(line, searchterm, False)
+	locus = resultformatter(line, searchterm, False)
 	for w in authorobject.listofworks:
 		if w.universalid == workdbname:
 			workobject = w
 	citation = locusintocitation(workobject, locus['locus'])
 	citationincontext.append({'newfind': 1, 'author': authorobject.shortname,
-	                 'work': workobject.title, 'citation': citation, 'url': (workdbname+'_AT_'+'|'.join(locus['locus']))})
+	                 'work': workobject.title, 'citation': citation, 'url': (workdbname+'_LN_'+str(locus['index']))})
 	# store this here because there will a problem when you grab lots of diff authors and works
-	environs = simplecontextgrabber(workobject, locus['locus'], linesofcontext, cursor)
+	environs = simplecontextgrabber(workobject, locus['index'], linesofcontext, cursor)
 	# if you search at the edge of a text you might ask for too much context
 	if len(environs) != linesofcontext+1:
 		linesofcontext = len(environs) -1
@@ -257,10 +257,10 @@ def formattedcittationincontext(line, workdbname, linesofcontext, searchterm, cu
 	for found in environs:
 		count += 1
 		if divmod(linesofcontext, count) == (1,linesofcontext-count):
-			found = server.searching.searchformatting.resultformatter(found, searchterm, True)
+			found = resultformatter(found, searchterm, True)
 			count = -99
 		else:
-			found = server.searching.searchformatting.resultformatter(found, searchterm, False)
+			found = resultformatter(found, searchterm, False)
 		citationincontext.append(found)
 	return citationincontext
 

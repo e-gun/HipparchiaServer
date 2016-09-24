@@ -5,10 +5,9 @@ import re
 import psycopg2
 from flask import render_template, redirect, request, url_for, session
 
-import server.browsing.browserfunctions
 from server import hipparchia
 from server.dbsupport.dbfunctions import dbauthorandworkmaker
-from server.dbsupport.citationfunctions import findvalidlevelvalues
+from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formattedcittationincontext, formatauthinfo, formatworkinfo, formatauthorandworkinfo
@@ -21,12 +20,12 @@ from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessi
 	sessionvariables, setsessionvarviadb, sessionselectionsashtml, rationalizeselections
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, sortauthorandworklists, \
 	dropdupes
+from server.browsing.browserfunctions import getandformatbrowsercontext
 
 # all you need is read-only access
 # it is a terrible idea to connect with a user who can write
 dbconnection = psycopg2.connect(user=hipparchia.config['DBUSER'], host=hipparchia.config['DBHOST'], port=hipparchia.config['DBPORT'], database=hipparchia.config['DBNAME'], password=hipparchia.config['DBPASS'])
 dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-
 cursor = dbconnection.cursor()
 
 
@@ -267,16 +266,12 @@ def workdump():
 		linesevery = 10
 	
 	try:
+		# hook for future possibility of PDF output
+		# super slow, but maybe it can solve the problem with too much HTML spat at a browser?
 		mode = int(re.sub('[^\d]', '', request.args.get('mode', '')))
 	except:
 		mode = 0
 		
-	if mode == 0:
-		pdf = False
-	else:
-		# this will break on BSD because PDF modules are not yet available
-		pdf = True
-
 	if len(work) == 10:
 		author = dbauthorandworkmaker(work[0:6], cursor)
 		authorname = author.shortname
@@ -298,25 +293,14 @@ def workdump():
 		structure = ', '.join(structure)
 		
 		output = buildfulltext(work, levelcount, higherlevels, linesevery, cursor)
-		
 	else:
 		output = []
 
-	if pdf == True:
-		starttime = time.time()
-		try:
-			# page = pdfkit.from_file(render_template('workdumper.html', form=sf, results=output, author=authorname, title=title, structure=structure), False)
-			# insanely slow
-			page = render_pdf(HTML(string=render_template('workdumper.html', results=output, author=authorname, title=title, structure=structure)))
-		except:
-			page = render_template('workdumper.html')
-		print('PDF rendered in '+str(time.time()-starttime)+'s')
-	else:
-		try:
-			page = render_template('workdumper.html',results=output, author=authorname, title=title,
-			                       structure=structure)
-		except:
-			page = render_template('workdumper.html')
+	try:
+		page = render_template('workdumper.html',results=output, author=authorname, title=title,
+		                       structure=structure)
+	except:
+		page = render_template('workdumper.html')
 	
 	return page
 
@@ -730,22 +714,39 @@ def getgenrelistcontents():
 
 @hipparchia.route('/browseto', methods=['GET'])
 def grabtextforbrowsing():
-	# print(request.args)
-	# sample input: '/browseto?locus=gr0008w001_AT_23|3|3'
-	# parse and sanitize the input
-	browserdata = []
-	ctx = int(session['browsercontext'])
-	numbersevery = 5
-	passage = request.args.get('locus', '')[14:].split('|')
-	safepassage = []
-	for level in passage:
-		safepassage.append(re.sub('[\W_|]+', '',level))
-	safepassage = tuple(safepassage[:5])
+	"""
+	you want to browse something
+	there are two ways to get results here: tell me a line or tell me a citation
+		sample input: '/browseto?locus=gr0059w030_LN_48203'
+		sample input: '/browseto?locus=gr0008w001_AT_23|3|3'
+	:return:
+	"""
+	
 	workdb = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
 	ao = dbauthorandworkmaker(workdb[:6], cursor)
 	workid = workdb[7:]
+	
+	ctx = int(session['browsercontext'])
+	numbersevery = 5
+	passage = request.args.get('locus', '')[10:]
+
+	if passage[0:4] == '_LN_':
+		# you were sent here either by the hit list or a forward/back button in the passage browser
+		passage = re.sub('[\D]', '', passage[4:])
+	elif passage[0:4] == '_AT_':
+		# you were sent here by the citation builder autofill boxes
+		passage = request.args.get('locus', '')[14:].split('|')
+		safepassage = []
+		for level in passage:
+			safepassage.append(re.sub('[\W_|]+', '',level))
+		safepassage = tuple(safepassage[:5])
+		for worktocheck in ao.listofworks:
+			if worktocheck.worknumber == int(workid):
+				workobject = worktocheck
+		passage = finddblinefromlocus(workobject, safepassage, cursor)
+
 	# first line is info; remaining lines are html
-	browserdata = server.browsing.browserfunctions.getandformatbrowsercontext(ao, int(workid), safepassage, ctx, numbersevery, cursor)
+	browserdata = getandformatbrowsercontext(ao, int(workid), int(passage), ctx, numbersevery, cursor)
 	browserdata = json.dumps(browserdata)
 	
 	return browserdata

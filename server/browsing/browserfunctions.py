@@ -1,11 +1,11 @@
 import re
 
 from server.dbsupport.citationfunctions import locusintocitation
-from server.dbsupport.dbfunctions import simplecontextgrabber
+from server.dbsupport.dbfunctions import simplecontextgrabber, indexintocitationtuple
 from server.formatting_helper_functions import getpublicationinfo
 
 
-def getandformatbrowsercontext(authorobject, worknumber, citationtuple, linesofcontext, numbersevery, cursor):
+def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, linesofcontext, numbersevery, cursor):
 	"""
 	this function does a lot of work via a number of subfunctions
 	lots of refactoring required if you change anything...
@@ -17,6 +17,7 @@ def getandformatbrowsercontext(authorobject, worknumber, citationtuple, linesofc
 	:param cursor:
 	:return:
 	"""
+	
 	# work ID va work position on list of works problem: Euripides' work list starts at "gr0006w020";"Fragmenta"
 	# so you need to match the wk # to the right object early
 	for worktocheck in authorobject.listofworks:
@@ -25,39 +26,34 @@ def getandformatbrowsercontext(authorobject, worknumber, citationtuple, linesofc
 			table = workobject.universalid
 			title = workobject.title
 
-	# citationtuple ('9','109','8') to focus on line 9, section 109, book 8
-	# we will grab more than we need so we can set the 'nextpage' stuff right
-	rawpassage = simplecontextgrabber(workobject, citationtuple, linesofcontext*2, cursor)
+	rawpassage = simplecontextgrabber(workobject, locusindexvalue, linesofcontext*2, cursor)
+
 	# (71, None, '-1', '-1', '-1', '1', '70', "ὃϲ ᾔδη τά τ' ἐόντα τά τ' ἐϲϲόμενα πρό τ' ἐόντα, <hmu_endofpage /> ", "οϲ ηδη τα τ' εοντα τα τ' εϲϲομενα προ τ' εοντα,  ", '', '')
-	# info for the 'back' and 'forward' buttons: need something like 'gr0026w001_AT_3|88' in the end
+	# info for the 'back' and 'forward' buttons: need something like 'gr0059w034_LN_58073' in the end
 	formattedpassage = []
 	# enable a check to see if you tried to bite more than you can chew
 	workstarts, workstops = findfirstandlastlineofwork(workobject.universalid, cursor)
-
-	try:
-		first = list(rawpassage[0][1:7])
-	except:
-		first = list(workstarts[1:7])
-	first.reverse()
 	
 	try:
-		last = list(rawpassage[-1][1:7])
+		first = rawpassage[0][0]
 	except:
-		last = list(workstops[1:7])
-	last.reverse()
+		first = workstarts[0]
 	
-	first[:] = [x for x in first if (x != '-1') and (x != None)]
-	last[:] = [x for x in last if (x != '-1') and (x != None)]
-	first = '|'.join(first)
-	last = '|'.join(last)
+	try:
+		last = rawpassage[-1][0]
+	except:
+		last = workstops[0]
 
-	first = table + '_AT_' + first
-	last = table + '_AT_' + last
+	first = table + '_LN_' + str(first)
+	last = table + '_LN_' + str(last)
 	formattedpassage.append({'forwardsandback': [last,first]})
 	# now we get what we really want to see
 	# recalling rather than pruning because think about what happens if you are at the beginning or end of the work
-	rawpassage = simplecontextgrabber(workobject, citationtuple, linesofcontext, cursor)
+	rawpassage = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
 	biblio = getpublicationinfo(workobject, cursor)
+	
+	# ripe for refactoring?
+	citationtuple = indexintocitationtuple(workobject.universalid, locusindexvalue, cursor)
 	cv = locusintocitation(workobject, citationtuple)
 	cv = '<span class="author">'+authorobject.shortname+'</span>, <span class="work">'+title+'</span>, '+cv
 	cv = cv + '<br />' + biblio
@@ -87,6 +83,7 @@ def getandformatbrowsercontext(authorobject, worknumber, citationtuple, linesofc
 				linehtml += line[6-level]+'.'
 			linehtml = linehtml[:-1]+')</span></p>'
 		formattedpassage.append({'value':linehtml})
+		
 	return formattedpassage
 
 

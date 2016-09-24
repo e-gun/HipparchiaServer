@@ -75,6 +75,7 @@ def locusintocitation(workobject, citationtuple):
 	citation = citation[:-2]
 	return citation
 
+
 def locusintosearchitem(workobject, citationtuple):
 	"""
 	transform something like ('9','109','8') into a citations like "Book 8, section 108, line 9"
@@ -111,6 +112,7 @@ def finddblinefromlocus(workobject, citationtuple, cursor):
 		print('mismatch between shape of work and browsing request: impossible citation of,'
 		      +workobject.universalid+' '+workobject.title+'.')
 		print(wklvs,'vs',list(citationtuple))
+		print('safe to ignore if you requested the first line of a work')
 
 	workdbname = workobject.universalid
 	# step one: find the index number of the passage
