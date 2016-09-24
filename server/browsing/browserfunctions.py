@@ -26,29 +26,25 @@ def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, lineso
 			table = workobject.universalid
 			title = workobject.title
 
-	rawpassage = simplecontextgrabber(workobject, locusindexvalue, linesofcontext*2, cursor)
-
-	# (71, None, '-1', '-1', '-1', '1', '70', "ὃϲ ᾔδη τά τ' ἐόντα τά τ' ἐϲϲόμενα πρό τ' ἐόντα, <hmu_endofpage /> ", "οϲ ηδη τα τ' εοντα τα τ' εϲϲομενα προ τ' εοντα,  ", '', '')
-	# info for the 'back' and 'forward' buttons: need something like 'gr0059w034_LN_58073' in the end
-	formattedpassage = []
 	# enable a check to see if you tried to bite more than you can chew
 	workstarts, workstops = findfirstandlastlineofwork(workobject.universalid, cursor)
 	
-	try:
-		first = rawpassage[0][0]
-	except:
+	if locusindexvalue - linesofcontext < workstarts[0]:
 		first = workstarts[0]
+	else:
+		first = locusindexvalue - linesofcontext
 	
-	try:
-		last = rawpassage[-1][0]
-	except:
+	if locusindexvalue + linesofcontext > workstops[0]:
 		last = workstops[0]
-
+	else:
+		last = locusindexvalue + linesofcontext
+	
 	first = table + '_LN_' + str(first)
 	last = table + '_LN_' + str(last)
+	
+	formattedpassage = []
 	formattedpassage.append({'forwardsandback': [last,first]})
-	# now we get what we really want to see
-	# recalling rather than pruning because think about what happens if you are at the beginning or end of the work
+
 	rawpassage = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
 	biblio = getpublicationinfo(workobject, cursor)
 	

@@ -22,7 +22,6 @@ function browsetopassage() {
 
     loc = auth+'w'+wrk+'_AT_'+loc.slice(0,(loc.length)-1);
     browseuponclick(loc);
-    // BUG that the words in the passage are not clickable when called this way
 }
 
 

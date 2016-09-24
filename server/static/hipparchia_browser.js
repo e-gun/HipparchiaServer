@@ -1,30 +1,37 @@
 
 function browseuponclick(url){
-	$.getJSON('/browseto?locus='+url, function (passagereturned) {
-		$('#browseforward').unbind('click');
-		$('#browseback').unbind('click');
-        if ( url.substr(0, 1) == 'l') {
-            var lang = 'latin';
-            } else {
-            var lang = 'greek';
-            }
-		var fb = parsepassagereturned(passagereturned);
+	$.getJSON(
+	    { url: '/browseto?locus='+url,
+	    success: function (passagereturned) {
+            $('#browseforward').unbind('click');
+            $('#browseback').unbind('click');
 
-        $('#browseforward').bind('click', function(){
-        	browseuponclick(fb[0]);
-        	});
-        $('#browseback').bind('click', function(){
-        	browseuponclick(fb[1]);
-        	});
-        });
-    $.getScript('/static/hipparchia_parser.js');
-}
+            var fb = parsepassagereturned(passagereturned);
+            // left and right arrow keys
+
+            $('#browseforward').bind('click', function(){
+                browseuponclick(fb[0]);
+                });
+            $('#browseback').bind('click', function(){
+                browseuponclick(fb[1]);
+                });
+            }
+        }
+        );
+    }
 
 
 var openbrowserfromclick = function() {
     // now do the browsing
     $.getJSON('/browseto?locus='+this.id, function (passagereturned) {
 		var fb = parsepassagereturned(passagereturned)
+            // left and right arrow keys
+           $('#browserdialogtext').keydown(function(e) {
+                switch(e.which) {
+                    case 37: browseuponclick(fb[1]); break;
+                    case 39: browseuponclick(fb[0]); break;
+                    }
+                });
 
         $('#browseforward').bind('click', function(){
         	browseuponclick(fb[0]);
@@ -33,8 +40,6 @@ var openbrowserfromclick = function() {
         	browseuponclick(fb[1]);
         	});
         });
-    // the parser can't attach actions to these items before they have been loaded
-     $.getScript('/static/hipparchia_parser.js');
 }
 
 function parsepassagereturned(passagereturned) {
@@ -52,7 +57,6 @@ function parsepassagereturned(passagereturned) {
 
         $('#browserdialogtext').html(linesreturned);
         $('#browserdialog').show();
-        $.getScript('/static/hipparchia_parser.js');
         $('observed').click( function(e) {
             e.preventDefault();
             $.getJSON('/observed?word='+this.id, function (definitionreturned) {

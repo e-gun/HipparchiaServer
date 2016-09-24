@@ -52,6 +52,14 @@
 
 $(document).ready( function () {
 
+    $(document).keydown(function(e) {
+        // forward and back arrow; but the click does not exist until you open a passage browser
+        switch(e.which) {
+            case 37:  $('#browseback').click(); break;
+            case 39: $('#browseforward').click(); break;
+            }
+        });
+
     $('#clear_button').click(
         function() {
             window.location.href = '/clear';
@@ -133,7 +141,6 @@ $(document).ready( function () {
 		);
 	});
 
-// document.onload = reloadAuthorlist()
 
 
 </script>
@@ -175,9 +182,9 @@ $(document).ready( function () {
     <div id="browserdialog">
         <div id="browserdialogtext"></div>
         <div class="center">
-            <button id="browseback" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse backwards"><span class="ui-icon ui-icon-arrowthick-1-w">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+            <button id="browseback" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse backwards (click or press the &#8592; key)"><span class="ui-icon ui-icon-arrowthick-1-w">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
             <button id="browserclose" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Close the browser"><span class="ui-icon ui-icon-close">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-            <button id="browseforward" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse forwards"><span class="ui-icon ui-icon-arrowthick-1-e">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+            <button id="browseforward" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse forwards (click or press the &#8594; key)"><span class="ui-icon ui-icon-arrowthick-1-e">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
         </div>
         <div id="parserdialog">&nbsp;</div>
         <div id="dictdialog">&nbsp;</div>

@@ -136,7 +136,7 @@ def simplecontextgrabber(workobject, focusline, linesofcontext, cursor):
 	data = (focusline - (linesofcontext / 2), focusline + (linesofcontext / 2))
 	cursor.execute(query, data)
 	foundlines = cursor.fetchall()
-
+	print('q/d',query,data)
 	return foundlines
 
 
