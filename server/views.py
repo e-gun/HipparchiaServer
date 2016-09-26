@@ -441,28 +441,24 @@ def dbofferauthorhints():
 	# print('len of avail',len(''.join(session['availableauthors'])))
 
 	if session['corpora'] == 'B':
-		query = 'SELECT * from authors ORDER BY shortname ASC'
+		query = 'SELECT language,cleanname,universalid from authors ORDER BY cleanname ASC'
 		cursor.execute(query)
 	elif session['corpora'] == 'L':
-		query = 'SELECT * from authors WHERE universalid LIKE %s ORDER BY shortname ASC'
+		query = 'SELECT language,cleanname,universalid from authors WHERE universalid LIKE %s ORDER BY cleanname ASC'
 		data = ('lt%',)
 		cursor.execute(query,data)
 	elif session['corpora'] == 'G':
-		query = 'SELECT * from authors WHERE universalid LIKE %s ORDER BY shortname ASC'
+		query = 'SELECT language,cleanname,universalid from authors WHERE universalid LIKE %s ORDER BY cleanname ASC'
 		data = ('gr%',)
 		cursor.execute(query,data)
 
 	result = cursor.fetchall()
 	authorlist = []
 	for r in result:
-		if r[1] == 'L':
-			authorlist.append(r[4]+' ( '+r[3]+') ['+r[0]+']')
+		if r[0] == 'L':
+			authorlist.append(r[1]+' ['+r[2]+']')
 		else:
-			try:
-				g = ' ( '+r[6][0:4]+') '
-			except:
-				g = ''
-			authorlist.append(r[4] + g + '['+r[0]+']')
+			authorlist.append(r[1] + ' ['+r[2]+']')
 
 	hint = []
 
