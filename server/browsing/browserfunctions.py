@@ -54,6 +54,7 @@ def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, lineso
 	cv = '<span class="author">'+authorobject.shortname+'</span>, <span class="work">'+title+'</span>, '+cv
 	cv = cv + '<br />' + biblio
 	formattedpassage.append({'value':'<currentlyviewing>'+cv+'</currentlyviewing>'})
+	
 	linecount = 0
 	# insert something to highlight the citationtuple line
 	for line in rawpassage:

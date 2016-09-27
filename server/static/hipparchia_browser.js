@@ -24,6 +24,8 @@ function browseuponclick(url){
 var openbrowserfromclick = function() {
     // now do the browsing
     $.getJSON('/browseto?locus='+this.id, function (passagereturned) {
+        $('#browseforward').unbind('click');
+        $('#browseback').unbind('click');
 		var fb = parsepassagereturned(passagereturned)
             // left and right arrow keys
            $('#browserdialogtext').keydown(function(e) {

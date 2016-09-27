@@ -87,7 +87,7 @@ def polytonicsort(unsortedwords):
 def stripaccents(texttostrip):
 	"""
 	turn ᾶ into α, etc
-	a non-function that makes this set of substitutes available to more than one function
+
 	:return:
 	"""
 	substitutes = (
@@ -101,7 +101,7 @@ def stripaccents(texttostrip):
 		('(í|ï)', 'i'),
 		('(Ó|Ö)', 'O'),
 		('(ó|ö)', 'o'),
-		('(ῥ|Ῥ)', 'ρ'),
+		('(ῤ|ῥ|Ῥ)', 'ρ'),
 		# some sort of problem with acute alpha which seems to be unkillable
 		# (u'u\1f71',u'\u03b1'),
 		('(ἀ|ἁ|ἂ|ἃ|ἄ|ἅ|ἆ|ἇ|ᾀ|ᾁ|ᾂ|ᾃ|ᾄ|ᾅ|ᾆ|ᾇ|ᾲ|ᾳ|ᾴ|ᾶ|ᾷ|ᾰ|ᾱ|ὰ|ά)', 'α'),
