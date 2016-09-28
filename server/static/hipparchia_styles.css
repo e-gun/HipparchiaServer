@@ -205,10 +205,16 @@ td.infocellx {
 	display: block;
 }
 
-#searchfield, #lexica, #uiclickfield {
+#searchfield, #uiclickfield {
 	text-align: center;
 }
 
+#lexica {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+	transform: translateX(-50%);
+    }
 
 #searchsummary {
 	padding: 10px;
@@ -452,6 +458,7 @@ span.lat {
 
 .marginaltext{
 	color: #008800;
+	font-size: 80%;
 	font-style: italic;
 	text-indent: -5px;
 	padding-right: -5px;
