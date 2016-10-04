@@ -11,7 +11,7 @@ from server.formatting_helper_functions import tidyuplist, dropdupes
 from server.searching.searchformatting import aggregatelines, cleansearchterm, prunebydate, dbauthorandworkmaker, \
 	removespuria, sortandunpackresults
 from server.dbsupport.dbfunctions import setconnection
-
+from server import hipparchia
 
 class MPCounter(object):
 	def __init__(self):
@@ -37,15 +37,17 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist):
 	manager = Manager()
 	hits = manager.dict()
 	searching = manager.list(indexedauthorandworklist)
-
+	
+	workers = hipparchia.config['WORKERS']
+	
 	# a class and/or decorator would be nice, but you have a lot of trouble getting the (mp aware) args into the function
 	# the must be a way, but this also works
 	if searchtype == 'simple':
-		jobs = [Process(target=workonsimplesearch, args=(count, hits, seeking, searching)) for i in range(4)]
+		jobs = [Process(target=workonsimplesearch, args=(count, hits, seeking, searching)) for i in range(workers)]
 	elif searchtype == 'phrase':
-		jobs = [Process(target=workonphrasesearch, args=(hits, seeking, searching)) for i in range(4)]
+		jobs = [Process(target=workonphrasesearch, args=(hits, seeking, searching)) for i in range(workers)]
 	elif searchtype == 'proximity':
-		jobs = [Process(target=workonproximitysearch, args=(count, hits, seeking, proximate, searching)) for i in range(4)]
+		jobs = [Process(target=workonproximitysearch, args=(count, hits, seeking, proximate, searching)) for i in range(workers)]
 	else:
 		# impossible, but...
 		jobs = []
