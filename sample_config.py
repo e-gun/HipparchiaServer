@@ -1,5 +1,4 @@
-DEBUG=True
-WTF_CSRF_ENABLED = True
+DEBUG=False
 SECRET_KEY = 'yourkeyhere'
 
 # a read-only db user is highly recommended

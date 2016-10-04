@@ -363,3 +363,25 @@ def formatauthorandworkinfo(authorname,workinfo):
 	authorandworkinfo = a + ', '+ t + c + '<br />\n'
 		
 	return authorandworkinfo
+
+
+def sortandunpackresults(hits):
+	"""
+	multiprocessor hits will unsort the sorted author and work list as the different workers get their results out of order
+	these reults arrive bundled with all the hits in any given work listed after the work
+	sort and unpack this into a flat result list
+		{sortedawindex: (wkid, [(result1), (result2), ...])}
+		2455: ('gr0715w001', [(13697, '-1', '-1', '6', '28', '1', '7', 'τινεϲ ὀδόντεϲ παραφύονται, τοὺϲ μὲν προϲπεφυκόταϲ τῷ φατνίῳ διὰ ', 'τινεϲ οδοντεϲ παραφυονται, τουϲ μεν προϲπεφυκοταϲ τω φατνιω δια ', '', ''), (13698, '-1', '-1', '6', '28', '1', '8', 'τῶν ϲμιλιωτῶν ἐκκόψωμεν, τοὺϲ δὲ μὴ προϲπεφυκόταϲ διὰ τῆϲ ὀδοντ-', 'των ϲμιλιωτων εκκοψωμεν, τουϲ δε μη προϲπεφυκοταϲ δια τηϲ οδοντ-', 'ὀδοντάγραϲ οδονταγραϲ', '')])
+	:param hits:
+	:return: an ordered set of tuples [(wkid1, result1), (wkid1,result2), (wkid2, result1), ...]
+	"""
+	
+	results = []
+	listpositions = sorted(hits.keys())
+	
+	for position in listpositions:
+		found = hits[position]
+		for find in found[1]:
+			results.append((found[0],find))
+
+	return results

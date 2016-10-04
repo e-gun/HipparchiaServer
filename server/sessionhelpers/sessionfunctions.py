@@ -240,6 +240,7 @@ def sessionvariables(cursor):
 		session['spuria'] = 'Y'
 
 		# if you try to store all of the authors in the session you will have problems: the cookie gets too big
+
 		session['genres'] = setsessionvarviadb('genres', 'authors', cursor)
 		session['workgenres'] = setsessionvarviadb('workgenre', 'works', cursor)
 

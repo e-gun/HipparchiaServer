@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # assuming py35 or higher
-
+import psycopg2
 from .dbobjects import *
-
+from server import hipparchia
 
 def tablenamer(authorobject, thework):
 	# tell me the name of your table
@@ -154,3 +154,13 @@ def indexintocitationtuple(workdbname, indexvalue, cursor):
 	citationtuple = tuple(citationtuple)
 	
 	return citationtuple
+
+
+def setconnection(autocommit='n'):
+	dbconnection = psycopg2.connect(user=hipparchia.config['DBUSER'], host=hipparchia.config['DBHOST'],
+	                                port=hipparchia.config['DBPORT'], database=hipparchia.config['DBNAME'],
+	                                password=hipparchia.config['DBPASS'])
+	if autocommit == 'autocommit':
+		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+	
+	return dbconnection

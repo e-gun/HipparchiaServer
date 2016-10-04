@@ -230,3 +230,24 @@ def formatpublicationinfo(pubinfo):
 			publicationhtml += '<span class="pub' + tag + '">' + val[0] + found.group(1) + val[1] + '</span>'
 	
 	return publicationhtml
+
+
+def bcedating():
+	"""
+	return the English equivalents for session['earliestdate'] and session['latestdate']
+	:return:
+	"""
+	
+	dmax = session['latestdate']
+	dmin = session['earliestdate']
+	if dmax[0] == '-':
+		dmax = dmax[1:] + ' B.C.E.'
+	else:
+		dmax = dmax + ' C.E.'
+	
+	if dmin[0] == '-':
+		dmin = dmin[1:] + ' B.C.E.'
+	else:
+		dmin = dmin + 'C.E.'
+		
+	return dmin, dmax

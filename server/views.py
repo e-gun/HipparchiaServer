@@ -2,37 +2,35 @@
 import json
 import time
 import re
-import psycopg2
 from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import dbauthorandworkmaker
+from server.dbsupport.dbfunctions import dbauthorandworkmaker, setconnection
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formattedcittationincontext, formatauthinfo, formatworkinfo, formatauthorandworkinfo
 from server.searching.searchfunctions import compileauthorandworklist, phrasesearch, withinxlines, \
-	withinxwords, partialwordsearch, concsearch, flagexclusions, simplesearchworkwithexclusion
+	withinxwords, partialwordsearch, concsearch, flagexclusions, simplesearchworkwithexclusion, searchdispatcher
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordance
 from server.textsandconcordnaces.textbuilder import buildfulltext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, setsessionvarviadb, sessionselectionsashtml, rationalizeselections
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, sortauthorandworklists, \
-	dropdupes
+	dropdupes, bcedating
 from server.browsing.browserfunctions import getandformatbrowsercontext
 
 # all you need is read-only access
 # it is a terrible idea to connect with a user who can write
-dbconnection = psycopg2.connect(user=hipparchia.config['DBUSER'], host=hipparchia.config['DBHOST'], port=hipparchia.config['DBPORT'], database=hipparchia.config['DBNAME'], password=hipparchia.config['DBPASS'])
-dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+dbconnection = setconnection('autocommit')
 cursor = dbconnection.cursor()
 
 
 @hipparchia.route('/', methods=['GET', 'POST'])
 def search():
 	sessionvariables(cursor)
-	# need to sanitize input somehow...
+	# need to sanitize input at least a bit...
 	try:
 		seeking = re.sub(r'[\'"`!;&]', '', request.args.get('seeking', ''))
 	except:
@@ -50,75 +48,48 @@ def search():
 	linesofcontext = int(session['linesofcontext'])
 	searchtime = 0
 	
-	dmax = session['latestdate']
-	dmin = session['earliestdate']
-	if dmax[0] == '-':
-		dmax = dmax[1:] + ' B.C.E.'
-	else:
-		dmax = dmax + ' C.E.'
+	dmin, dmax = bcedating()
 	
-	if dmin[0] == '-':
-		dmin = dmin[1:] + ' B.C.E.'
-	else:
-		dmin = dmin + 'C.E.'
+	if session['corpora'] == 'G' and re.search('[a-zA-Z]', seeking) is not None:
+		# searching greek, but not typing in unicode greek: autoconvert
+		seeking = seeking.upper()
+		seeking = replacegreekbetacode(seeking)
+	
+	if session['corpora'] == 'G' and re.search('[a-zA-Z]', proximate) is not None:
+		proximate = proximate.upper()
+		proximate = replacegreekbetacode(proximate)
+	
+	phrasefinder = re.compile('[^\s]\s[^\s]')
 	
 	if len(seeking) > 0:
-		if session['corpora'] == 'G' and re.search('[a-zA-Z]',seeking) is not None:
-			seeking = seeking.upper()
-			seeking = replacegreekbetacode(seeking)
 		starttime = time.time()
 		authorandworklist = compileauthorandworklist(cursor)
-		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		
+		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		authorandworklist = flagexclusions(authorandworklist)
 		authorandworklist = sortauthorandworklists(authorandworklist, cursor)
 		
-		allfound = []
+		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
+		# so we slap on an index value
+		indexedworklist = []
+		index = -1
+		for w in authorandworklist:
+			index += 1
+			indexedworklist.append((index, w))
+		del authorandworklist
 		
-		if len(proximate) < 1:
+		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
 			# a simple search
-			# but somebody still might try to execute a phrase search: ' non solum ' inside the simple search box
-			hitcount = 0
-			starttime = time.time()
 			thesearch = seeking
 			htmlsearch = '<span class="emph">' + seeking + '</span>'
-			
-			phrasefinder = re.compile('[^\s]\s[^\s]')
-			for wkid in authorandworklist:
-				if len(allfound) < int(session['maxresults']):
-					if re.search(phrasefinder, seeking) is None:
-						if '_AT_' in wkid:
-							results = partialwordsearch(seeking, cursor, wkid)
-						elif 'x' in wkid:
-							wkid = re.sub('x', 'w', wkid)
-							results = simplesearchworkwithexclusion(seeking, cursor, wkid)
-						else:
-							results = concsearch(seeking, cursor, wkid)
-					else:
-						tmp = session['maxresults']
-						session['maxresults'] = 19999
-						results = phrasesearch(seeking, cursor, wkid)
-						session['maxresults'] = tmp
-					for result in results:
-						if len(allfound) < int(session['maxresults']):
-							hitcount += 1
-							if '_AT_' in wkid:
-								citwithcontext = formattedcittationincontext(result, wkid[0:10], linesofcontext, seeking, cursor)
-							else:
-								citwithcontext = formattedcittationincontext(result, wkid, linesofcontext, seeking, cursor)
-							# add the hit count to line zero which contains the metadata for the lines
-							citwithcontext[0]['hitnumber'] = hitcount
-							allfound.append(citwithcontext)
-						else:
-							pass
+			hits = searchdispatcher('simple', seeking, proximate, indexedworklist)
+		elif re.search(phrasefinder, seeking) is not None:
+			# a phrase search
+			thesearch = seeking
+			htmlsearch = '<span class="emph">' + seeking + '</span>'
+			hits = searchdispatcher('phrase', seeking, proximate, indexedworklist)
 		else:
 			# proximity search
-			if session['corpora'] == 'G' and re.search('[a-zA-Z]', proximate) is not None:
-				proximate = proximate.upper()
-				proximate = replacegreekbetacode(proximate)
-				
-			hitcount = 0
-			starttime = time.time()
 			if session['searchscope'] == 'W':
 				scope = 'words'
 			else:
@@ -128,35 +99,28 @@ def search():
 				nearstr = ''
 			else:
 				nearstr = ' not'
-			
 			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
-			
 			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
 			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
-			
-			if len(proximate) > len(seeking) and session['nearornot'] != 'F' and ' ' not in seeking and ' ' not in proximate:
-				# look for the longest word first since that is probably the quicker route
-				# but you cant swap seeking and proximate this way in a 'is not near' search without yielding the wrong focus
-				tmp = proximate
-				proximate = seeking
-				seeking = tmp
-			
-			for wkid in authorandworklist:
-				if len(allfound) < int(session['maxresults']):
-					# unflagged: there are no exclusions to apply to this specific work
-					if session['searchscope'] == 'L':
-						results = withinxlines(int(session['proximity']), seeking, proximate, cursor, wkid)
-					else:
-						results = withinxwords(int(session['proximity']), seeking, proximate, cursor, wkid)
-					for result in results:
-						if len(allfound) < int(session['maxresults']):
-							hitcount += 1
-							citwithcontext = formattedcittationincontext(result, wkid, linesofcontext, seeking, cursor)
-							# add the hit count to line zero which contains the metadata for the lines
-							citwithcontext[0]['hitnumber'] = hitcount
-							allfound.append(citwithcontext)
-						else:
-							pass
+			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist)
+		
+		allfound = []
+		hitcount = 0
+		for hit in hits:
+			if hitcount < int(session['maxresults']):
+				hitcount += 1
+				wkid = hit[0]
+				result = hit[1]
+				# print('item=', hit,'\n\tid:',wkid,'\n\tresult:',result)
+				if '_AT_' in wkid:
+					citwithcontext = formattedcittationincontext(result, wkid[0:10], linesofcontext, seeking, cursor)
+				else:
+					citwithcontext = formattedcittationincontext(result, wkid, linesofcontext, seeking, cursor)
+				# add the hit count to line zero which contains the metadata for the lines
+				citwithcontext[0]['hitnumber'] = hitcount
+				allfound.append(citwithcontext)
+			else:
+				pass
 		
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
@@ -168,13 +132,13 @@ def search():
 			hitmax = 'true'
 		
 		page = render_template('search.html', title=thesearch, found=allfound,
-		                       resultcount=resultcount, scope=str(len(authorandworklist)),
+		                       resultcount=resultcount, scope=str(len(indexedworklist)),
 		                       searchtime=str(searchtime), lookedfor=seeking, proximate=proximate,
 		                       thesearch=thesearch,
 		                       htmlsearch=htmlsearch, hitmax=hitmax, lang=session['corpora'],
 		                       sortedby=session['sortorder'],
 		                       dmin=dmin, dmax=dmax)
-
+	
 	else:
 		page = render_template('search.html', title=seeking, found=[], resultcount=0, searchtime='0', scope=0,
 		                       hitmax=0, lang=session['corpora'], sortedby=session['sortorder'],
@@ -941,3 +905,171 @@ def cookieintosession():
 	
 	response = redirect(url_for('search'))
 	return response
+
+
+#
+# testing
+#
+
+
+#
+# slated for removal
+#
+
+@hipparchia.route('/singlethreadedsearch', methods=['GET', 'POST'])
+def singlethreadedsearch():
+	# about 1/3rd to 1/4 the speed of the multiprocessor version 
+	sessionvariables(cursor)
+	try:
+		seeking = re.sub(r'[\'"`!;&]', '', request.args.get('seeking', ''))
+	except:
+		seeking = ''
+	
+	try:
+		proximate = re.sub(r'[\'"`!;&]', '', request.args.get('proximate', ''))
+	except:
+		proximate = ''
+	
+	if len(seeking) < 1 and len(proximate) > 0:
+		seeking = proximate
+		proximate = ''
+	
+	linesofcontext = int(session['linesofcontext'])
+	searchtime = 0
+	
+	dmax = session['latestdate']
+	dmin = session['earliestdate']
+	if dmax[0] == '-':
+		dmax = dmax[1:] + ' B.C.E.'
+	else:
+		dmax = dmax + ' C.E.'
+	
+	if dmin[0] == '-':
+		dmin = dmin[1:] + ' B.C.E.'
+	else:
+		dmin = dmin + 'C.E.'
+	
+	if len(seeking) > 0:
+		if session['corpora'] == 'G' and re.search('[a-zA-Z]', seeking) is not None:
+			seeking = seeking.upper()
+			seeking = replacegreekbetacode(seeking)
+		starttime = time.time()
+		authorandworklist = compileauthorandworklist(cursor)
+		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
+		
+		authorandworklist = flagexclusions(authorandworklist)
+		authorandworklist = sortauthorandworklists(authorandworklist, cursor)
+		
+		allfound = []
+		
+		if len(proximate) < 1:
+			# a simple search
+			# but somebody still might try to execute a phrase search: ' non solum ' inside the simple search box
+			hitcount = 0
+			starttime = time.time()
+			thesearch = seeking
+			htmlsearch = '<span class="emph">' + seeking + '</span>'
+			
+			phrasefinder = re.compile('[^\s]\s[^\s]')
+			for wkid in authorandworklist:
+				if len(allfound) < int(session['maxresults']):
+					if re.search(phrasefinder, seeking) is None:
+						if '_AT_' in wkid:
+							results = partialwordsearch(seeking, cursor, wkid)
+						elif 'x' in wkid:
+							wkid = re.sub('x', 'w', wkid)
+							results = simplesearchworkwithexclusion(seeking, cursor, wkid)
+						else:
+							results = concsearch(seeking, cursor, wkid)
+					else:
+						tmp = session['maxresults']
+						session['maxresults'] = 19999
+						results = phrasesearch(seeking, cursor, wkid)
+						session['maxresults'] = tmp
+					for result in results:
+						if len(allfound) < int(session['maxresults']):
+							hitcount += 1
+							if '_AT_' in wkid:
+								citwithcontext = formattedcittationincontext(result, wkid[0:10], linesofcontext,
+								                                             seeking, cursor)
+							else:
+								citwithcontext = formattedcittationincontext(result, wkid, linesofcontext, seeking,
+								                                             cursor)
+							# add the hit count to line zero which contains the metadata for the lines
+							citwithcontext[0]['hitnumber'] = hitcount
+							allfound.append(citwithcontext)
+						else:
+							pass
+		else:
+			# proximity search
+			if session['corpora'] == 'G' and re.search('[a-zA-Z]', proximate) is not None:
+				# searching greek, but not typing in unicode greek: autoconvert
+				proximate = proximate.upper()
+				proximate = replacegreekbetacode(proximate)
+			
+			hitcount = 0
+			starttime = time.time()
+			if session['searchscope'] == 'W':
+				scope = 'words'
+			else:
+				scope = 'lines'
+			
+			if session['nearornot'] == 'T':
+				nearstr = ''
+			else:
+				nearstr = ' not'
+			
+			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
+			
+			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
+			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
+			
+			if len(proximate) > len(seeking) and session[
+				'nearornot'] != 'F' and ' ' not in seeking and ' ' not in proximate:
+				# look for the longest word first since that is probably the quicker route
+				# but you cant swap seeking and proximate this way in a 'is not near' search without yielding the wrong focus
+				tmp = proximate
+				proximate = seeking
+				seeking = tmp
+			
+			for wkid in authorandworklist:
+				if len(allfound) < int(session['maxresults']):
+					# unflagged: there are no exclusions to apply to this specific work
+					if session['searchscope'] == 'L':
+						results = withinxlines(int(session['proximity']), seeking, proximate, cursor, wkid)
+					else:
+						results = withinxwords(int(session['proximity']), seeking, proximate, cursor, wkid)
+					for result in results:
+						if len(allfound) < int(session['maxresults']):
+							hitcount += 1
+							citwithcontext = formattedcittationincontext(result, wkid, linesofcontext, seeking, cursor)
+							# add the hit count to line zero which contains the metadata for the lines
+							citwithcontext[0]['hitnumber'] = hitcount
+							allfound.append(citwithcontext)
+						else:
+							pass
+		
+		searchtime = time.time() - starttime
+		searchtime = round(searchtime, 2)
+		resultcount = len(allfound)
+		
+		if resultcount < int(session['maxresults']):
+			hitmax = 'false'
+		else:
+			hitmax = 'true'
+		
+		page = render_template('search.html', title=thesearch, found=allfound,
+		                       resultcount=resultcount, scope=str(len(authorandworklist)),
+		                       searchtime=str(searchtime), lookedfor=seeking, proximate=proximate,
+		                       thesearch=thesearch,
+		                       htmlsearch=htmlsearch, hitmax=hitmax, lang=session['corpora'],
+		                       sortedby=session['sortorder'],
+		                       dmin=dmin, dmax=dmax)
+	
+	else:
+		page = render_template('search.html', title=seeking, found=[], resultcount=0, searchtime='0', scope=0,
+		                       hitmax=0, lang=session['corpora'], sortedby=session['sortorder'],
+		                       dmin=dmin, dmax=dmax)
+	
+	return page
+

@@ -5,8 +5,177 @@ import psycopg2
 import re
 
 from flask import session
+from multiprocessing import Process, Manager, Value
+
 from server.formatting_helper_functions import tidyuplist, dropdupes
-from server.searching.searchformatting import aggregatelines, cleansearchterm, prunebydate, dbauthorandworkmaker, removespuria
+from server.searching.searchformatting import aggregatelines, cleansearchterm, prunebydate, dbauthorandworkmaker, \
+	removespuria, sortandunpackresults
+from server.dbsupport.dbfunctions import setconnection
+
+
+class MPCounter(object):
+	def __init__(self):
+		self.val = Value('i', 0)
+	
+	def increment(self, n=1):
+		with self.val.get_lock():
+			self.val.value += n
+	
+	@property
+	def value(self):
+		return self.val.value
+
+
+def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist):
+	"""
+	assign the search to multiprocessing workers
+	:param seeking:
+	:param indexedauthorandworklist:
+	:return:
+	"""
+	count = MPCounter()
+	manager = Manager()
+	hits = manager.dict()
+	searching = manager.list(indexedauthorandworklist)
+
+	# a class and/or decorator would be nice, but you have a lot of trouble getting the (mp aware) args into the function
+	# the must be a way, but this also works
+	if searchtype == 'simple':
+		jobs = [Process(target=workonsimplesearch, args=(count, hits, seeking, searching)) for i in range(4)]
+	elif searchtype == 'phrase':
+		jobs = [Process(target=workonphrasesearch, args=(hits, seeking, searching)) for i in range(4)]
+	elif searchtype == 'proximity':
+		jobs = [Process(target=workonproximitysearch, args=(count, hits, seeking, proximate, searching)) for i in range(4)]
+	else:
+		# impossible, but...
+		jobs = []
+		
+	for j in jobs: j.start()
+	for j in jobs: j.join()
+	
+	# what comes back is a dict: {sortedawindex: (wkid, [(result1), (result2), ...])}
+	# you need to sort by index and then unpack the results into a list
+	# this will restore the old order from sortauthorandworklists()
+	results = sortandunpackresults(hits)
+	
+	return results
+
+
+def workonsimplesearch(count, hits, seeking, searching):
+	"""
+	a multiprocessors aware function that hands off bits of a simple search to multiple searchers
+	you need to pick the right style of search for each work you search, though
+	:param count:
+	:param hits:
+	:param seeking:
+	:param searching:
+	:return: a collection of hits
+	"""
+	
+	dbconnection = setconnection('autocommit')
+	curs = dbconnection.cursor()
+	
+	while len(searching) > 0 and count.value <= int(session['maxresults']):
+		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
+		# the pop() will fail if somebody else grabbed the last available work before it could be registered
+		try: i = searching.pop()
+		except: i = (-1,'gr0000w000')
+		wkid = i[1]
+		index = i[0]
+		if '_AT_' in wkid:
+			hits[index] = (wkid, partialwordsearch(seeking, curs, wkid))
+		elif 'x' in wkid:
+			wkid = re.sub('x', 'w', wkid)
+			hits[index] = (wkid, simplesearchworkwithexclusion(seeking, curs, wkid))
+		else:
+			hits[index] = (wkid, concsearch(seeking, curs, wkid))
+		
+		if len(hits[index][1]) == 0:
+			del hits[index]
+		else:
+			count.increment(len(hits[index][1]))
+	
+	curs.close()
+	del dbconnection
+	
+	return hits
+
+
+def workonphrasesearch(hits, seeking, searching):
+	"""
+	a multiprocessors aware function that hands off bits of a phrase search to multiple searchers
+	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase hits the limit
+
+	:param hits:
+	:param seeking:
+	:param searching:
+	:return:
+	"""
+	tmp = session['maxresults']
+	session['maxresults'] = 19999
+	
+	dbconnection = setconnection('autocommit')
+	curs = dbconnection.cursor()
+	
+	while len(searching) > 0:
+		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
+		# the pop() will fail if somebody else grabbed the last available work before it could be registered
+		try: i = searching.pop()
+		except: i = (-1,'gr0000w000')
+		wkid = i[1]
+		index = i[0]
+		hits[index] = (wkid, phrasesearch(seeking, curs, wkid))
+		
+	session['maxresults'] = tmp
+	curs.close()
+	del dbconnection
+	
+	return hits
+
+
+def workonproximitysearch(count, hits, seeking, proximate, searching):
+	"""
+	a multiprocessors aware function that hands off bits of a proximity search to multiple searchers
+	note that exclusions are handled deeper down in withinxlines() and withinxwords()
+	:param count:
+	:param hits:
+	:param seeking:
+	:param proximate:
+	:param searching:
+	:return: a collection of hits
+	"""
+	
+	dbconnection = setconnection('autocommit')
+	curs = dbconnection.cursor()
+	
+	if len(proximate) > len(seeking) and session['nearornot'] != 'F' and ' ' not in seeking and ' ' not in proximate:
+		# look for the longest word first since that is probably the quicker route
+		# but you cant swap seeking and proximate this way in a 'is not near' search without yielding the wrong focus
+		tmp = proximate
+		proximate = seeking
+		seeking = tmp
+	
+	while len(searching) > 0 and count.value <= int(session['maxresults']):
+		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
+		# the pop() will fail if somebody else grabbed the last available work before it could be registered
+		try: i = searching.pop()
+		except: i = (-1,'gr0000w000')
+		wkid = i[1]
+		index = i[0]
+		if session['searchscope'] == 'L':
+			hits[index] = (wkid, withinxlines(int(session['proximity']), seeking, proximate, curs, wkid))
+		else:
+			hits[index] = (wkid, withinxwords(int(session['proximity']), seeking, proximate, curs, wkid))
+		
+		if len(hits[index][1]) == 0:
+			del hits[index]
+		else:
+			count.increment(len(hits[index][1]))
+	
+	curs.close()
+	del dbconnection
+	
+	return hits
 
 
 def compileauthorandworklist(cursor):
@@ -49,7 +218,7 @@ def compileauthorandworklist(cursor):
 			awks = cursor.fetchall()
 			for w in awks:
 				authorandworklist.append(w[0])
-
+		
 		authorandworklist = prunebydate(authorandworklist, cursor)
 		
 		# now we look at things explicitly chosen:
@@ -85,7 +254,7 @@ def compileauthorandworklist(cursor):
 		
 		if session['spuria'] == 'N':
 			authorandworklist = removespuria(authorandworklist, cursor)
-		
+	
 	else:
 		# you picked nothing and want everything. well, maybe everything...
 		authorandworklist = []
@@ -108,7 +277,7 @@ def compileauthorandworklist(cursor):
 		
 		if session['spuria'] == 'N':
 			authorandworklist = removespuria(authorandworklist, cursor)
-			
+	
 	# build the exclusion list
 	# note that we are not handling excluded individual passages yet
 	exclude = []
@@ -163,7 +332,7 @@ def authorsbygenre(genre, cursor):
 	authorlist = []
 	for author in authortuples:
 		authorlist.append(author[0])
-
+	
 	return authorlist
 
 
@@ -175,9 +344,9 @@ def authorsandworksbygenre(cursor, genre):
 	authorlist = cursor.fetchall()
 	# returns something like: ('gr0017',)
 	for author in authorlist:
-		authorobject = dbauthorandworkmaker(author[0],cursor)
-		for workcount in range(0,len(authorobject.listofworks)):
-			authorandworktuplelist.append((authorobject,workcount+1))
+		authorobject = dbauthorandworkmaker(author[0], cursor)
+		for workcount in range(0, len(authorobject.listofworks)):
+			authorandworktuplelist.append((authorobject, workcount + 1))
 	return authorandworktuplelist
 
 
@@ -194,7 +363,7 @@ def flagexclusions(authorandworklist):
 		if len(session['psgexclusions']) > 0:
 			for x in session['psgexclusions']:
 				if '_AT_' not in w and w in x:
-					w = re.sub('w','x',w)
+					w = re.sub('w', 'x', w)
 					modifiedauthorandworklist.append(w)
 				else:
 					modifiedauthorandworklist.append(w)
@@ -234,8 +403,8 @@ def whereclauses(uidwithatsign, operand, cursor):
 	index = -1
 	for l in locus:
 		index += 1
-		lvstr = 'level_0'+str(wklvls[index])+'_value'+operand+'%s '
-		whereclausetuples.append((lvstr,l))
+		lvstr = 'level_0' + str(wklvls[index]) + '_value' + operand + '%s '
+		whereclausetuples.append((lvstr, l))
 	
 	return whereclausetuples
 
@@ -247,18 +416,18 @@ def concsearch(seeking, cursor, workdbname):
 	:param seeking:
 	:param cursor:
 	:param workdbname:
-	:return:
+	:return: db lines that match the search criterion
 	"""
 	concdbname = workdbname + '_conc'
 	seeking = server.searching.searchformatting.cleansearchterm(seeking)
 	mylimit = 'LIMIT ' + str(session['maxresults'])
 	if session['accentsmatter'] == 'Y':
 		ccolumn = 'word'
-		# wcolumn = 'marked_up_line'
+	# wcolumn = 'marked_up_line'
 	else:
 		ccolumn = 'stripped_word'
-		# wcolumn = 'stripped_line'
-
+	# wcolumn = 'stripped_line'
+	
 	searchsyntax = ['=', 'LIKE', 'SIMILAR TO', '~*']
 	
 	# whitespace = whole word and that can be done more quickly
@@ -267,22 +436,22 @@ def concsearch(seeking, cursor, workdbname):
 		mysyntax = searchsyntax[0]
 	else:
 		if seeking[0] == ' ':
-			seeking = '^'+seeking[1:]
+			seeking = '^' + seeking[1:]
 		if seeking[-1] == ' ':
-			seeking = seeking[0:-1]+'$'
+			seeking = seeking[0:-1] + '$'
 		mysyntax = searchsyntax[3]
-		
+	
 	found = []
 	
-	query = 'SELECT loci FROM ' + concdbname + ' WHERE '+ccolumn+' ' + mysyntax + ' %s ' + mylimit
+	query = 'SELECT loci FROM ' + concdbname + ' WHERE ' + ccolumn + ' ' + mysyntax + ' %s ' + mylimit
 	data = (seeking,)
 	
 	try:
 		cursor.execute(query, data)
 		found = cursor.fetchall()
 	except psycopg2.DatabaseError as e:
-		print('could not execute',query)
-		print('Error:',e)
+		print('could not execute', query)
+		print('Error:', e)
 	
 	hits = []
 	for find in found:
@@ -299,7 +468,7 @@ def concsearch(seeking, cursor, workdbname):
 		except psycopg2.DatabaseError as e:
 			print('could not execute', query)
 			print('Error:', e)
-		
+	
 	return concfinds
 
 
@@ -333,7 +502,7 @@ def partialwordsearch(seeking, cursor, workdbname):
 		seeking = r'(^|\s)' + seeking[1:]
 	elif seeking[0:1] == '\s':
 		seeking = r'(^|\s)' + seeking[2:]
-		
+	
 	found = []
 	
 	if '_AT_' not in workdbname:
@@ -409,7 +578,8 @@ def simplesearchworkwithexclusion(seeking, cursor, workdbname):
 	# drop the trailing ') AND ('
 	qw = qw[0:-6]
 	
-	query = 'SELECT * FROM ' + db + ' WHERE (' + columns[0] + ' ' + mysyntax + ' %s OR ' + columns[1] + ' ' + mysyntax + ' %s) ' + qw + mylimit
+	query = 'SELECT * FROM ' + db + ' WHERE (' + columns[0] + ' ' + mysyntax + ' %s OR ' + columns[
+		1] + ' ' + mysyntax + ' %s) ' + qw + mylimit
 	data = tuple(d)
 	cursor.execute(query, data)
 	found = cursor.fetchall()
@@ -426,11 +596,11 @@ def phrasesearch(searchphrase, cursor, wkid):
 	:param cursor:
 	:param authorobject:
 	:param worknumber:
-	:return:
+	:return: db lines that match the search criterion
 	"""
-	searchphrase = server.searching.searchformatting.cleansearchterm(searchphrase)
+	searchphrase = cleansearchterm(searchphrase)
 	searchterms = searchphrase.split(' ')
-
+	
 	longestterm = searchterms[0]
 	for term in searchterms:
 		if len(term) > len(longestterm):
@@ -445,14 +615,14 @@ def phrasesearch(searchphrase, cursor, wkid):
 	
 	fullmatches = []
 	for hit in hits:
-		wordset = aggregatelines(hit[0]-1, hit[0]+1, cursor, wkid)
+		wordset = aggregatelines(hit[0] - 1, hit[0] + 1, cursor, wkid)
 		if session['nearornot'] == 'T' and re.search(searchphrase, wordset) is not None:
 			# note the syntax conflict here: a SIMILAR search will bork this
 			# should probably kill off session['searchsyntax']
 			fullmatches.append(hit)
 		elif session['nearornot'] == 'F' and re.search(searchphrase, wordset) is None:
 			fullmatches.append(hit)
-
+	
 	return fullmatches
 
 
@@ -483,7 +653,7 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname):
 			fullmatches.append(hit)
 		elif session['nearornot'] == 'F' and re.search(secondterm, wordset) is None:
 			fullmatches.append(hit)
-
+	
 	return fullmatches
 
 
@@ -497,7 +667,7 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname):
 	distanceinwords += 1
 	firstterm = cleansearchterm(firstterm)
 	secondterm = cleansearchterm(secondterm)
-		
+	
 	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
 		hits = concsearch(firstterm, cursor, workdbname)
 	elif 'x' in workdbname:
@@ -505,12 +675,12 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname):
 		hits = simplesearchworkwithexclusion(firstterm, cursor, workdbname)
 	else:
 		hits = partialwordsearch(firstterm, cursor, workdbname)
-
+	
 	fullmatches = []
 	for hit in hits:
 		linesrequired = 0
 		wordlist = []
-		while len(wordlist) < 2*distanceinwords+1:
+		while len(wordlist) < 2 * distanceinwords + 1:
 			wordset = aggregatelines(hit[0] - linesrequired, hit[0] + linesrequired, cursor, workdbname)
 			wordlist = wordset.split(' ')
 			try:
@@ -518,9 +688,9 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname):
 			except:
 				pass
 			linesrequired += 1
-			
+		
 		# the word is near the middle...
-		center = len(wordlist)//2
+		center = len(wordlist) // 2
 		prior = ''
 		next = ''
 		if firstterm in wordlist[center]:
@@ -530,8 +700,8 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname):
 			while firstterm not in prior and firstterm not in next:
 				distancefromcenter += 1
 				try:
-					next = wordlist[center+distancefromcenter]
-					prior = wordlist[center-distancefromcenter]
+					next = wordlist[center + distancefromcenter]
+					prior = wordlist[center - distancefromcenter]
 				except:
 					# print('failed to find next/prior:',authorobject.shortname,distancefromcenter,wordlist)
 					# to avoid the infinite loop...
@@ -541,13 +711,12 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname):
 			else:
 				startfrom = center + distancefromcenter
 		
-		searchszone = wordlist[startfrom-distanceinwords:startfrom+distanceinwords]
+		searchszone = wordlist[startfrom - distanceinwords:startfrom + distanceinwords]
 		searchszone = ' '.join(searchszone)
-
+		
 		if session['nearornot'] == 'T' and re.search(secondterm, searchszone) is not None:
 			fullmatches.append(hit)
 		elif session['nearornot'] == 'F' and re.search(secondterm, searchszone) is None:
 			fullmatches.append(hit)
 	
 	return fullmatches
-
