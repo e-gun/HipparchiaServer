@@ -15,6 +15,7 @@ def buildconcordance(work, mode, cursor):
 		0 - of this work
 		1 - of words unique to this work in this author
 		2 - of this author
+	at the moment supplenda like '⟪marcent⟫' will wind up at the end under '⟪⟫': is this a good or a bad thing?
 	:param work:
 	:param mode:
 	:param cursor:

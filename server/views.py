@@ -161,7 +161,7 @@ def concordance():
 	try:
 		work = re.sub('[\W]+', '', request.args.get('work', ''))
 	except:
-		pass
+		work = ''
 	
 	try:
 		mode = int(re.sub('[^\d]', '', request.args.get('mode', '')))
@@ -183,6 +183,7 @@ def concordance():
 		allworks.append(w.universalid[6:10] + ' ==> ' + w.title)
 		if w.universalid == work[0:10]:
 			thework = w
+	allworks.sort()
 	
 	if mode != 2:
 		title = thework.title
@@ -405,14 +406,14 @@ def dbofferauthorhints():
 	# print('len of avail',len(''.join(session['availableauthors'])))
 
 	if session['corpora'] == 'B':
-		query = 'SELECT language,cleanname,universalid from authors ORDER BY cleanname ASC'
+		query = 'SELECT language,cleanname,universalid from authors ORDER BY universalid ASC'
 		cursor.execute(query)
 	elif session['corpora'] == 'L':
-		query = 'SELECT language,cleanname,universalid from authors WHERE universalid LIKE %s ORDER BY cleanname ASC'
+		query = 'SELECT language,cleanname,universalid from authors WHERE universalid LIKE %s ORDER BY universalid ASC'
 		data = ('lt%',)
 		cursor.execute(query,data)
 	elif session['corpora'] == 'G':
-		query = 'SELECT language,cleanname,universalid from authors WHERE universalid LIKE %s ORDER BY cleanname ASC'
+		query = 'SELECT language,cleanname,universalid from authors WHERE universalid LIKE %s ORDER BY universalid ASC'
 		data = ('gr%',)
 		cursor.execute(query,data)
 
@@ -444,7 +445,7 @@ def offerworkhints():
 	# tell me the author, i'll return all the works to populate the hint box
 	strippedquery = re.sub('[\W_]+', '', request.args.get('auth', ''))
 	hint = []
-	query = 'SELECT * FROM works WHERE universalid LIKE %s'
+	query = 'SELECT * FROM works WHERE universalid LIKE %s ORDER BY universalid ASC'
 	# query = 'SELECT * FROM works'
 	data = (strippedquery+'%',)
 	cursor.execute(query, data)
