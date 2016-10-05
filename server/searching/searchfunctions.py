@@ -1,29 +1,18 @@
 # -*- coding: utf-8 -*-
 
-import server.searching
-import psycopg2
 import re
+from multiprocessing import Process, Manager
 
+import psycopg2
 from flask import session
-from multiprocessing import Process, Manager, Value
 
+import server.searching
+from server import hipparchia
+from server.dbsupport.dbfunctions import setconnection
 from server.formatting_helper_functions import tidyuplist, dropdupes
+from server.hipparchiaclasses import MPCounter
 from server.searching.searchformatting import aggregatelines, cleansearchterm, prunebydate, dbauthorandworkmaker, \
 	removespuria, sortandunpackresults
-from server.dbsupport.dbfunctions import setconnection
-from server import hipparchia
-
-class MPCounter(object):
-	def __init__(self):
-		self.val = Value('i', 0)
-	
-	def increment(self, n=1):
-		with self.val.get_lock():
-			self.val.value += n
-	
-	@property
-	def value(self):
-		return self.val.value
 
 
 def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist):
@@ -37,17 +26,20 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist):
 	manager = Manager()
 	hits = manager.dict()
 	searching = manager.list(indexedauthorandworklist)
+	# if you don't autocommit you will see: "Error: current transaction is aborted, commands ignored until end of transaction block"
+	# alternately you can commit every N transactions
+	commitcount = MPCounter()
 	
 	workers = hipparchia.config['WORKERS']
 	
 	# a class and/or decorator would be nice, but you have a lot of trouble getting the (mp aware) args into the function
 	# the must be a way, but this also works
 	if searchtype == 'simple':
-		jobs = [Process(target=workonsimplesearch, args=(count, hits, seeking, searching)) for i in range(workers)]
+		jobs = [Process(target=workonsimplesearch, args=(count, hits, seeking, searching, commitcount)) for i in range(workers)]
 	elif searchtype == 'phrase':
-		jobs = [Process(target=workonphrasesearch, args=(hits, seeking, searching)) for i in range(workers)]
+		jobs = [Process(target=workonphrasesearch, args=(hits, seeking, searching, commitcount)) for i in range(workers)]
 	elif searchtype == 'proximity':
-		jobs = [Process(target=workonproximitysearch, args=(count, hits, seeking, proximate, searching)) for i in range(workers)]
+		jobs = [Process(target=workonproximitysearch, args=(count, hits, seeking, proximate, searching, commitcount)) for i in range(workers)]
 	else:
 		# impossible, but...
 		jobs = []
@@ -63,7 +55,7 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist):
 	return results
 
 
-def workonsimplesearch(count, hits, seeking, searching):
+def workonsimplesearch(count, hits, seeking, searching, commitcount):
 	"""
 	a multiprocessors aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
@@ -74,7 +66,7 @@ def workonsimplesearch(count, hits, seeking, searching):
 	:return: a collection of hits
 	"""
 	
-	dbconnection = setconnection('autocommit')
+	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 	
 	while len(searching) > 0 and count.value <= int(session['maxresults']):
@@ -82,6 +74,9 @@ def workonsimplesearch(count, hits, seeking, searching):
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		try: i = searching.pop()
 		except: i = (-1,'gr0000w000')
+		commitcount.increment()
+		if commitcount.value % 750 == 0:
+			dbconnection.commit()
 		wkid = i[1]
 		index = i[0]
 		if '_AT_' in wkid:
@@ -97,13 +92,14 @@ def workonsimplesearch(count, hits, seeking, searching):
 		else:
 			count.increment(len(hits[index][1]))
 	
+	dbconnection.commit()
 	curs.close()
 	del dbconnection
 	
 	return hits
 
 
-def workonphrasesearch(hits, seeking, searching):
+def workonphrasesearch(hits, seeking, searching, commitcount):
 	"""
 	a multiprocessors aware function that hands off bits of a phrase search to multiple searchers
 	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase hits the limit
@@ -116,7 +112,7 @@ def workonphrasesearch(hits, seeking, searching):
 	tmp = session['maxresults']
 	session['maxresults'] = 19999
 	
-	dbconnection = setconnection('autocommit')
+	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 	
 	while len(searching) > 0:
@@ -124,18 +120,22 @@ def workonphrasesearch(hits, seeking, searching):
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		try: i = searching.pop()
 		except: i = (-1,'gr0000w000')
+		commitcount.increment()
+		if commitcount.value % 750 == 0:
+			dbconnection.commit()
 		wkid = i[1]
 		index = i[0]
 		hits[index] = (wkid, phrasesearch(seeking, curs, wkid))
 		
 	session['maxresults'] = tmp
+	dbconnection.commit()
 	curs.close()
 	del dbconnection
 	
 	return hits
 
 
-def workonproximitysearch(count, hits, seeking, proximate, searching):
+def workonproximitysearch(count, hits, seeking, proximate, searching, commitcount):
 	"""
 	a multiprocessors aware function that hands off bits of a proximity search to multiple searchers
 	note that exclusions are handled deeper down in withinxlines() and withinxwords()
@@ -147,7 +147,7 @@ def workonproximitysearch(count, hits, seeking, proximate, searching):
 	:return: a collection of hits
 	"""
 	
-	dbconnection = setconnection('autocommit')
+	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 	
 	if len(proximate) > len(seeking) and session['nearornot'] != 'F' and ' ' not in seeking and ' ' not in proximate:
@@ -162,6 +162,9 @@ def workonproximitysearch(count, hits, seeking, proximate, searching):
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		try: i = searching.pop()
 		except: i = (-1,'gr0000w000')
+		commitcount.increment()
+		if commitcount.value % 750 == 0:
+			dbconnection.commit()
 		wkid = i[1]
 		index = i[0]
 		if session['searchscope'] == 'L':
@@ -174,6 +177,7 @@ def workonproximitysearch(count, hits, seeking, proximate, searching):
 		else:
 			count.increment(len(hits[index][1]))
 	
+	dbconnection.commit()
 	curs.close()
 	del dbconnection
 	

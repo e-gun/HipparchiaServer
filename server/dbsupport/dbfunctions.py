@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # assuming py35 or higher
 import psycopg2
-from .dbobjects import *
+from server.hipparchiaclasses import dbAuthor, dbOpus
 from server import hipparchia
 
 def tablenamer(authorobject, thework):
