@@ -181,8 +181,6 @@ def mpauthorconcordancedispatch(wordset, unsortedwords):
 	for j in jobs: j.start()
 	for j in jobs: j.join()
 	
-	output
-	
 	return output
 
 
