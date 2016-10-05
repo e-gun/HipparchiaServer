@@ -65,7 +65,8 @@ def buildconcordance(work, mode, cursor):
 	
 	output = []
 	if len(concordancewords) > 0:
-		output = mpsingleworkconcordancedispatch(work, concordancewords)
+		unsortedoutput = mpsingleworkconcordancedispatch(work, concordancewords)
+		output = concordancesorter(unsortedoutput)
 	
 	# note that you should zip right here if mode==2 because in that case concordancewords = [] and output remains []
 	if mode == 2:
@@ -91,9 +92,8 @@ def buildconcordance(work, mode, cursor):
 					wordset[item[0]].append([w,item[1]])
 		
 		unsortedwords = list(wordset)
-		sortedwords = polytonicsort(unsortedwords)
-
-		output = mpauthorconcordancedispatch(wordset,sortedwords)
+		unsortedoutput = mpauthorconcordancedispatch(wordset,unsortedwords)
+		output = concordancesorter(unsortedoutput)
 		
 	return output
 
@@ -108,24 +108,25 @@ def mpsingleworkconcordancedispatch(work, concordancewords):
 	
 	manager = Manager()
 	output = manager.list()
+	memory = manager.dict()
 	concordancewords = manager.list(concordancewords)
 	commitcount = MPCounter()
 	
 	workers = hipparchia.config['WORKERS']
-	jobs = [Process(target=mpconcordanceworker, args=(work, concordancewords, output, commitcount)) for i in range(workers)]
+	jobs = [Process(target=mpconcordanceworker, args=(work, concordancewords, output, memory, commitcount)) for i in range(workers)]
 	for j in jobs: j.start()
 	for j in jobs: j.join()
 	
-	concordance = sorted(output)
-	
-	return concordance
+	return output
 
 
-def mpconcordanceworker(work, concordancewords, output, commitcount):
+def mpconcordanceworker(work, concordancewords, output, memory, commitcount):
 	"""
 	a multiprocessors aware function that hands off bits of a concordance search to multiple searchers
+	the memory function is supposed to save you the trouble of looking up the same line more than once
+	this offers a radical speedup in someone like thucydides
 	:param
-	:return:
+	:return: output is a list of items of the form [word, count, citations]
 	"""
 	
 	dbconnection = setconnection('not_autocommit')
@@ -133,7 +134,7 @@ def mpconcordanceworker(work, concordancewords, output, commitcount):
 	
 	while len(concordancewords) > 0:
 		try: result = concordancewords.pop()
-		except: result = ('null', '')
+		except: result = ('null', '-1')
 		# a work looks like 'gr0032w001_conc', hence work[:-5] below
 		# a result looks like ('ὥρμων', '5701 6830')
 		citations = []
@@ -141,13 +142,17 @@ def mpconcordanceworker(work, concordancewords, output, commitcount):
 		loci = result[1].split(' ')
 		count = str(len(loci))
 		for locus in loci:
-			citation = concordancelookup(work[:-5], locus, curs)
-			citations.append(citation)
-			commitcount.increment()
-			if commitcount.value % 5000 == 0:
-				dbconnection.commit()
+			if locus not in memory:
+				citation = concordancelookup(work[:-5], locus, curs)
+				citations.append(citation)
+				commitcount.increment()
+				if commitcount.value % 5000 == 0:
+					dbconnection.commit()
+				memory[locus] = citation
+			else:
+				citations.append(memory[locus])
 		citations = ', '.join(citations)
-		output.append([word, count, citations])
+		output.append((word, count, citations))
 
 	curs.close()
 	del dbconnection
@@ -155,7 +160,7 @@ def mpconcordanceworker(work, concordancewords, output, commitcount):
 	return output
 
 
-def mpauthorconcordancedispatch(wordset, sortedwords):
+def mpauthorconcordancedispatch(wordset, unsortedwords):
 	"""
 	a multiprocessor aware version of the concordance lookup routine designed for whole authors
 	:param wordset: itmes look like {word1: [[w001, 100], [w001,222], [w002,555]], word2: [[w005,666]]}
@@ -166,20 +171,21 @@ def mpauthorconcordancedispatch(wordset, sortedwords):
 	manager = Manager()
 	output = manager.list()
 	wordset = manager.dict(wordset)
-	sortedwords = manager.list(sortedwords)
+	unsortedwords = manager.list(unsortedwords)
+	memory = manager.dict()
 	commitcount = MPCounter()
 	
 	workers = hipparchia.config['WORKERS']
-	jobs = [Process(target=mpauthorconcordanceworker, args=(wordset, sortedwords, output, commitcount)) for i in range(workers)]
+	jobs = [Process(target=mpauthorconcordanceworker, args=(wordset, unsortedwords, output, memory, commitcount)) for i in range(workers)]
 	for j in jobs: j.start()
 	for j in jobs: j.join()
 	
-	concordance = sorted(output)
+	output
 	
-	return concordance
+	return output
 
 
-def mpauthorconcordanceworker(wordset, sortedwords, output, commitcount):
+def mpauthorconcordanceworker(wordset, unsortedwords, output, memory, commitcount):
 	"""
 	a multiprocessors aware function that hands off bits of a concordance search to multiple searchers
 	:param
@@ -189,11 +195,11 @@ def mpauthorconcordanceworker(wordset, sortedwords, output, commitcount):
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 	
-	while len(sortedwords) > 0:
-		try: word = sortedwords.pop()
-		except: word = 'poppedfromemptylist'
+	while len(unsortedwords) > 0:
+		try: word = unsortedwords.pop()
+		except: word = None
 		
-		if word != 'poppedfromemptylist':
+		if word is not None:
 			count = 0
 			citations = []
 			for hit in range(0,len(wordset[word])):
@@ -202,11 +208,15 @@ def mpauthorconcordanceworker(wordset, sortedwords, output, commitcount):
 				count += len(loci)
 				wcitations = []
 				for locus in loci:
-					citation = concordancelookup(work[:-5], locus, curs)
-					wcitations.append(citation)
-					commitcount.increment()
-					if commitcount.value % 5000 == 0:
-						dbconnection.commit()
+					if locus not in memory:
+						citation = concordancelookup(work[:-5], locus, curs)
+						wcitations.append(citation)
+						commitcount.increment()
+						if commitcount.value % 5000 == 0:
+							dbconnection.commit()
+						memory[locus] = citation
+					else:
+						wcitations.append(memory[locus])
 				wcitations = ', '.join(wcitations)
 				wcitations = work[6:10] + ': ' + wcitations
 				citations.append(wcitations)
@@ -218,6 +228,32 @@ def mpauthorconcordanceworker(wordset, sortedwords, output, commitcount):
 	
 	return output
 
+
+def concordancesorter(unsortedoutput):
+	"""
+	you can't sort the list and then send it to a mp function where it will get unsorted
+	so you have to jump through a hoop before you can jump through a hoop:
+	make keys -> polytonicsort keys -> use keys to sort the list
+	
+	:param unsortedoutput:
+	:return:
+	"""
+	
+	# now you sort
+	sortkeys = []
+	outputdict = {}
+	for o in unsortedoutput:
+		sortkeys.append(o[0])
+		outputdict[o[0]] = o
+	
+	sortkeys = polytonicsort(sortkeys)
+	del unsortedoutput
+	
+	sortedoutput = []
+	for k in sortkeys:
+		sortedoutput.append(outputdict[k])
+	
+	return sortedoutput
 
 #
 # slated for removal
