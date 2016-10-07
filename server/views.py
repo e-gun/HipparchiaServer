@@ -223,7 +223,7 @@ def workdump():
 	try:
 		work = re.sub('[\W]+', '', request.args.get('work', ''))
 	except:
-		pass
+		work = ''
 	
 	try:
 		linesevery = int(re.sub('[^\d]', '', request.args.get('linesevery', '')))
@@ -886,6 +886,8 @@ def reverselexiconsearch():
 	for match in matches:
 		m = match[0]
 		definition = searchdictionary(cursor, dict + '_dictionary', 'entry_name', m)
+		# returns (metrical_entry, entry_body, entry_type)
+		definition = definition[1]
 		a, s, q = entrysummary(definition, dict, translationlabel)
 		del a
 		del q

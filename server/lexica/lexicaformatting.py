@@ -32,6 +32,7 @@ def entrysummary(fullentry,lang, translationlabel):
 	:param fullentry:
 	:return:
 	"""
+	
 	soup = BeautifulSoup(fullentry, 'html.parser')
 	a = soup.find_all('author')
 	a = list(set(a))
