@@ -54,8 +54,7 @@ def entrysummary(fullentry,lang, translationlabel):
 
 	q = soup.find_all('quote')
 	q[:] = [value.string for value in q]
-	# json was choking on the list?
-	# q = set(q)
+
 	summary = (a,s,q)
 
 	return summary
@@ -205,3 +204,51 @@ def parsemorphologyentry(word, entrydata):
 	# looks kinda icky, buy you should fix this in the db entries themselves to get rid of all the lexica via tabs
 
 	return analysis
+
+
+def formatgloss(entrybody):
+	"""
+	glosses don't work the same as standard dictionary entries. deal with them
+	:param entrybody:
+	:return:
+	"""
+	glosshtml = ''
+	
+	soup = BeautifulSoup(entrybody, 'html.parser')
+	senses = soup.find_all('foreign')
+	sources = soup.find_all('author')
+	
+	senses[:] = [value.string for value in senses]
+	sources[:] = [value.string for value in sources]
+	
+	glosshtml += '<span class="highlight">Reported by:</span><br />\n'
+	for s in sources:
+		glosshtml += s + ', '
+	glosshtml = glosshtml[:-2]
+	
+	glosshtml += '<br /><br />\n<span class="highlight">Senses:</span><br />'
+	for s in senses:
+		glosshtml += s + '<br />'
+	
+	return glosshtml
+
+def formatmicroentry(entrybody):
+	"""
+	some entries work like glosses but are not labeled as glosses: no quote, authors, etc. just a synonym or synonyms listed
+	deal with it
+	:param entrybody:
+	:return:
+	"""
+	entryhtml = ''
+	
+	soup = BeautifulSoup(entrybody, 'html.parser')
+	senses = soup.find_all('foreign')
+	senses[:] = [value.string for value in senses]
+	
+	entryhtml += '<span class="highlight">Senses:</span><br />'
+	for s in senses:
+		entryhtml += s + '<br />'
+		
+	entryhtml = entrybody
+	
+	return entryhtml

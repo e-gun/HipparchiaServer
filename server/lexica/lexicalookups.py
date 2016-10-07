@@ -2,7 +2,9 @@ import re
 
 from flask import session
 
-from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses
+from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
+	formatgloss, formatmicroentry
+from server.formatting_helper_functions import polytonicsort
 
 
 def browserdictionarylookup(entry, dict, cursor):
@@ -25,24 +27,40 @@ def browserdictionarylookup(entry, dict, cursor):
 		entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
 	try:
-		definition = searchdictionary(cursor, dict+'_dictionary', 'entry_name', entry)
+		found = searchdictionary(cursor, dict+'_dictionary', 'entry_name', entry)
 	except:
-		definition = ''
+		found = ('','', '')
 
+	metrics = found[0]
+	definition = found[1]
+	type = found[2]
+	metrics = re.sub(r'\(\d{1,}\)',r'',metrics)
+	
 	cleanedentry = ''
-
-	if definition != '':
+	if definition != '' and type != 'gloss':
 		try:
-			cleanedentry += '<br />\n<p class="dictionaryheading">'+entry+'</p>\n'
+			cleanedentry += '<br />\n<p class="dictionaryheading">'+entry
+			if u'\u0304' in metrics or u'\u0306' in metrics:
+				cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
+			cleanedentry += '</p>\n'
 			a,s,q = entrysummary(definition, dict, translationlabel)
-			cleanedentry += formatdictionarysummary(a, s, q)
-			cleanedentry += grabheadmaterial(definition) + '<br />\n'
-			senses = grabsenses(definition)
-			for n in senses:
-				cleanedentry += '<br />\n' + n
+			if len(a) == 0 and len(s) == 0 and len(q) == 0:
+				# this is basically just a gloss entry
+				cleanedentry += formatmicroentry(definition)
+			else:
+				cleanedentry += formatdictionarysummary(a, s, q)
+				cleanedentry += grabheadmaterial(definition) + '<br />\n'
+				senses = grabsenses(definition)
+				for n in senses:
+					cleanedentry += '<br />\n' + n
 	
 		except:
 			print('dictionary entry trouble with',entry)
+	elif definition != '' and type == 'gloss':
+		cleanedentry += '<br />\n<p class="dictionaryheading">' + entry + '<span class="metrics">[gloss]</span></p>\n'
+		cleanedentry += formatgloss(definition)
+	else:
+		cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under '+entry+'</p>\n'
 
 	return cleanedentry
 
@@ -58,7 +76,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking):
 	:return:
 	"""
 		
-	query = 'SELECT entry_body FROM ' + dictionary + ' WHERE '+usecolumn+' = %s'
+	query = 'SELECT metrical_entry, entry_body, entry_type FROM ' + dictionary + ' WHERE '+usecolumn+' = %s'
 	data = (seeking,)
 	cursor.execute(query, data)
 
@@ -66,10 +84,18 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking):
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
 	found = cursor.fetchone()
 
-	return found[0]
+	return found
 
 
 def dictsearch(cursor, dictionary, usecolumn, seeking):
+	"""
+	fetchall vs fetchone
+	:param cursor:
+	:param dictionary:
+	:param usecolumn:
+	:param seeking:
+	:return:
+	"""
 	query = 'SELECT * FROM ' + dictionary + ' WHERE '+usecolumn+' LIKE %s'
 	data = (seeking,)
 	cursor.execute(query, data)
@@ -78,7 +104,18 @@ def dictsearch(cursor, dictionary, usecolumn, seeking):
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
 	found = cursor.fetchall()
 
-	return found
+	# the results should be given the polytonicsort() treatment
+	sortedfinds = []
+	finddict = {}
+	for f in found:
+		finddict[f[0]] = f
+	keys = finddict.keys()
+	keys = polytonicsort(keys)
+	
+	for k in keys:
+		sortedfinds.append(finddict[k])
+
+	return sortedfinds
 
 
 def findlemma(word, cursor):

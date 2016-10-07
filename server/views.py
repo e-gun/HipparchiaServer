@@ -827,9 +827,20 @@ def dictsearch():
 	
 	# note that the dictionary db has a problem with vowel lengths vs accents
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
-	entries = cursor.fetchall()
+	found = cursor.fetchall()
 	
-	for entry in entries:
+	# the results should be given the polytonicsort() treatment
+	sortedfinds = []
+	finddict = {}
+	for f in found:
+		finddict[f[0]] = f
+	keys = finddict.keys()
+	keys = polytonicsort(keys)
+	
+	for k in keys:
+		sortedfinds.append(finddict[k])
+	
+	for entry in sortedfinds:
 		returnarray.append(
 			{'value': browserdictionarylookup(entry[0], dict, cursor) + '<hr style="border: 1px solid;" />'})
 	
