@@ -4,7 +4,7 @@ from flask import session
 
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
 	formatgloss, formatmicroentry
-from server.formatting_helper_functions import polytonicsort
+from server.formatting_helper_functions import polytonicsort, stripaccents
 
 
 def browserdictionarylookup(entry, dict, cursor):
@@ -23,7 +23,8 @@ def browserdictionarylookup(entry, dict, cursor):
 
 	# mismatch between homonymns as per the lemmas and the dictionary: "λέγω1" vs "λέγω (1)"
 	# a potential moving target if things change with the builder
-	if re.search(r'\d',entry[-1]) is not None:
+	
+	if re.search(r'\d$',entry) is not None:
 		entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
 	try:
@@ -51,8 +52,11 @@ def browserdictionarylookup(entry, dict, cursor):
 				cleanedentry += formatdictionarysummary(a, s, q)
 				cleanedentry += grabheadmaterial(definition) + '<br />\n'
 				senses = grabsenses(definition)
-				for n in senses:
-					cleanedentry += '<br />\n' + n
+				if len(senses) > 0:
+					for n in senses:
+						cleanedentry += '<br />\n' + n
+				else:
+					cleanedentry += formatmicroentry(definition)
 	
 		except:
 			print('dictionary entry trouble with',entry)
@@ -61,7 +65,9 @@ def browserdictionarylookup(entry, dict, cursor):
 		cleanedentry += formatgloss(definition)
 	else:
 		cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under '+entry+'</p>\n'
-
+		cleanedentry += 'But parser can get fooled by enclitics, speling variations, and disagreement about the number of entries for a word:  [term] (1) and  [term] (2), for example<br />'
+		cleanedentry += 'Try looking this word yourself by using the proper search box: something is likely to turn up.'
+		
 	return cleanedentry
 
 
@@ -83,20 +89,24 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking):
 	# note that the dictionary db has a problem with vowel lengths vs accents
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
 	found = cursor.fetchone()
+	
+	if found is not None:
+		return found
+	else:
+		return ('','','')
 
-	return found
-
-
-def dictsearch(cursor, dictionary, usecolumn, seeking):
+def bulkddictsearch(cursor, dictionary, usecolumn, seeking):
 	"""
 	fetchall vs fetchone
+	only called by the lemma lookups; don't confuse this with the dictionary search up in views.py
 	:param cursor:
 	:param dictionary:
 	:param usecolumn:
 	:param seeking:
 	:return:
 	"""
-	query = 'SELECT * FROM ' + dictionary + ' WHERE '+usecolumn+' LIKE %s'
+	
+	query = 'SELECT * FROM ' + dictionary + ' WHERE '+usecolumn+' ~* %s'
 	data = (seeking,)
 	cursor.execute(query, data)
 
@@ -167,6 +177,6 @@ def definebylemma(lemmadict,corporatable,cursor):
 	# {'δείδω': 'δεῖϲαι (aor imperat mid 2nd sg) (aor inf act)', 'δεῖϲα': 'δεῖϲαι (fem nom/voc pl)'}
 	dictionaryentries = []
 	for key,value in lemmadict.items():
-		entry = dictsearch(cursor, corporatable + '_dictionary', 'entry_name', key)
+		entry = bulkddictsearch(cursor, corporatable + '_dictionary', 'entry_name', key)
 		dictionaryentries.append('<p class="lemma">'+value+'</p>\n<p class="dictionaryentry">'+entry+'</p>\n')
 	return dictionaryentries

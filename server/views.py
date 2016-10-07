@@ -745,7 +745,7 @@ def findbyform():
 	try:
 		matches = re.findall(possible, analysis[0])
 		for m in matches:
-			returnarray.append({'value': parsemorphologyentry(word, m)})
+			returnarray.append({'value': parsemorphologyentry(m)})
 			entriestocheck.append(m[2])
 
 		unsiftedentries = []
@@ -765,6 +765,10 @@ def findbyform():
 		returnarray = [{'value': '[not found]'}, {'entries': '[not found]'} ]
 
 	returnarray = [{'observed':word}] + returnarray
+	
+	if len(entriestocheck) > 0:
+		returnarray[0]['trylookingunder'] = entriestocheck[0]
+	
 	returnarray = json.dumps(returnarray)
 
 	return returnarray
@@ -818,11 +822,14 @@ def dictsearch():
 		dict = 'greek'
 		usecolumn = 'unaccented_entry'
 	
-	query = 'SELECT entry_name FROM ' + dict + '_dictionary' + ' WHERE ' + usecolumn + ' LIKE %s'
-	if seeking[0] == ' ':
-		data = (seeking + '%',)
+	seeking = stripaccents(seeking)
+	query = 'SELECT entry_name FROM ' + dict + '_dictionary' + ' WHERE ' + usecolumn + ' ~* %s'
+	if seeking[0] == ' ' and seeking[-1] != ' ':
+		data = ('^' + seeking[1:] + '.*?',)
+	elif seeking[0] == ' ' and seeking[-1] == ' ':
+		data = ('^' + seeking[1:-1] + '$',)
 	else:
-		data = ('%' + seeking + '%',)
+		data = ('.*?' + seeking + '.*?',)
 	cursor.execute(query, data)
 	
 	# note that the dictionary db has a problem with vowel lengths vs accents

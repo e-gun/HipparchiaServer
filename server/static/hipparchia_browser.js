@@ -62,6 +62,7 @@ function parsepassagereturned(passagereturned) {
         $('observed').click( function(e) {
             e.preventDefault();
             $.getJSON('/observed?word='+this.id, function (definitionreturned) {
+                $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
                 var windowWidth = $(window).width();
                 var windowHeight = $(window).height();
                 $( '#parserdialog' ).dialog({
