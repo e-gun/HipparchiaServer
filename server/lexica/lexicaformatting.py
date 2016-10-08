@@ -16,8 +16,20 @@ def grabsenses(fullentry):
 		i += 1
 		lvl = re.search(leveler,sense)
 		num = re.search(nummer,sense)
+		if re.search(r'[A-Z]',num.group(1)) is not None:
+			paragraphlevel = '1'
+		elif re.search(r'[0-9]',num.group(1)) is not None:
+			paragraphlevel = '3'
+		elif re.search(r'[ivx]',num.group(1)) is not None:
+			paragraphlevel = '4'
+		elif re.search(r'[a-hj-w]',num.group(1)) is not None:
+			paragraphlevel = '2'
+		else:
+			paragraphlevel = '1'
+		
+		
 		try:
-			rewritten = '<span class="level'+lvl.group(1)+'">'+num.group(1)+'</span>&nbsp;'+sense
+			rewritten = '<p class="level'+paragraphlevel+'"><span class="levelabel'+lvl.group(1)+'">'+num.group(1)+'</span>&nbsp;'+sense+'</p>\n'
 		except:
 			print('exception in grabsenses at sense number:',i)
 			rewritten = ''

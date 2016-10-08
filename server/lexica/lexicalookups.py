@@ -54,7 +54,7 @@ def browserdictionarylookup(entry, dict, cursor):
 				senses = grabsenses(definition)
 				if len(senses) > 0:
 					for n in senses:
-						cleanedentry += '<br />\n' + n
+						cleanedentry += n
 				else:
 					cleanedentry += formatmicroentry(definition)
 	

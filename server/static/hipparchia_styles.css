@@ -440,19 +440,31 @@ span.lat {
 	font-color: #253940;
 }
 
-.level1 {
+.levellabel1 {
 	font-weight: bold;
 	font-size: 120%;
 }
 
-.level2 {
+.levellabel2 {
 	font-weight: bold;
 	font-size: 100%;
 }
 
-.level3 {
+.levellabel3 {
 	font-weight: bold;
 }
+
+.levellabel4 {
+	font-style: italic;
+}
+
+p.level1 {}
+
+p.level2 { padding-left: 15px;}
+
+p.level3 { padding-left: 30px;}
+
+p.level4 { padding-left: 45;}
 
 .locus {
 	font-weight: normal;
