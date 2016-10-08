@@ -3,8 +3,8 @@ import re
 from flask import session
 
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
-	formatgloss, formatmicroentry
-from server.formatting_helper_functions import polytonicsort, stripaccents
+	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs
+from server.formatting_helper_functions import polytonicsort
 
 
 def browserdictionarylookup(entry, dict, cursor):
@@ -65,10 +65,15 @@ def browserdictionarylookup(entry, dict, cursor):
 		cleanedentry += formatgloss(definition)
 	else:
 		cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under '+entry+'</p>\n'
-		cleanedentry += 'But the parser can get fooled by enclitics, spelling variations, and disagreement about the number of entries for a word:  [term] (1) and  [term] (2), for example<br />'
+		cleanedentry += 'But the parser can get fooled by enclitics, spelling variations, and disagreement about the number of entries for a word.<br />'
 		cleanedentry += 'Try looking this word yourself by using the proper search box: something is likely to turn up.'
-		
-	return cleanedentry
+	
+	clickableentry = cleanedentry
+	# in progress
+	#clickableentry = insertbrowserlookups(cleanedentry, cursor)
+	#clickableentry = insertbrowserjs(clickableentry)
+	
+	return clickableentry
 
 
 def searchdictionary(cursor, dictionary, usecolumn, seeking):
@@ -94,6 +99,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking):
 		return found
 	else:
 		return ('','','')
+
 
 def bulkddictsearch(cursor, dictionary, usecolumn, seeking):
 	"""
@@ -180,3 +186,4 @@ def definebylemma(lemmadict,corporatable,cursor):
 		entry = bulkddictsearch(cursor, corporatable + '_dictionary', 'entry_name', key)
 		dictionaryentries.append('<p class="lemma">'+value+'</p>\n<p class="dictionaryentry">'+entry+'</p>\n')
 	return dictionaryentries
+

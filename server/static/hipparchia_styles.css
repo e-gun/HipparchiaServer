@@ -46,6 +46,11 @@ bibl {
 	color: #859900;
 }
 
+bibl:hover{
+	color: #393F94;
+	text-shadow: 1px 1px #aaa; 
+	}
+
 author {
 	color: #6c71c4;
 }
@@ -116,6 +121,8 @@ transl {
 analysis {
 	font-style: italic;
 }
+
+
 
 browser {
 	color: #393F94;

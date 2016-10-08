@@ -96,6 +96,37 @@ def dbauthorandworkmaker(authoruid, cursor):
 	return author
 
 
+def findtoplevelofwork(workuid, cursor):
+	"""
+	give me a db name and I will peek into it to see what its top level is
+	a way to get around generating an author object when the lexical passages are flowing freely
+	:param workuid:
+	:param cursor:
+	:return:
+	"""
+
+	query = 'SELECT levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05 from works where universalid = %s'
+	data = (workuid,)
+	try:
+		cursor.execute(query, data)
+		results = cursor.fetchone()
+		results = list(results)
+	except:
+		results = ['zero','','','','', '']
+	
+	label = ''
+	while label == '':
+		try:
+			label = results.pop()
+		except:
+			# pop from empty list
+			results = '[emptypop]'
+		
+	numberoflevels = len(results)+1
+	
+	return numberoflevels
+
+
 def loadallauthors(cursor):
 	"""
 	build a full set of author objects
@@ -149,7 +180,17 @@ def indexintocitationtuple(workdbname, indexvalue, cursor):
 	cursor.execute(query, data)
 	cit = cursor.fetchone()
 	
-	citationtuple = list(cit)
+	try:
+		citationtuple = list(cit)
+	except:
+		# oops, we did not get a line
+		# you likely ended up here because the lexcial lookup of a clickable xref failed to read things properly
+		print('did not find a valid index number for',workdbname,'. aborting and picking first line instead')
+		query = 'SELECT min(index) FROM  ' + workdbname
+		cursor.execute(query)
+		cit = cursor.fetchone()
+		citationtuple = list(cit)
+		
 	citationtuple = [x for x in citationtuple if (x != '-1') and (x != None)]
 	citationtuple = tuple(citationtuple)
 	
@@ -164,3 +205,61 @@ def setconnection(autocommit='n'):
 		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 	
 	return dbconnection
+
+
+def returnfirstlinenumber(workdb, cursor):
+	"""
+	return the lowest index value
+	used to handle exceptions
+	:param db:
+	:param cursor:
+	:return:
+	"""
+	
+	query = 'SELECT min(index) FROM  ' + workdb
+	cursor.execute(query)
+	found = cursor.fetchone()
+	found = found[0]
+	
+	return found
+
+
+def perseusidmismatch(badworkdbnumber,cursor):
+	"""
+	exception handling
+	Perseus says you can look something up in gr0006w16: but there is no such thing
+	go through the work list and pick the 16th: hope for the best
+	:param workdb:
+	:param cursor:
+	:return:
+	"""
+	
+	print('ick: perseus wants',badworkdbnumber,'but this does not exist')
+	
+	query = 'SELECT universalid FROM works WHERE universalid LIKE %s ORDER BY universalid ASC'
+	data = (badworkdbnumber[0:6]+'%',)
+	cursor.execute(query, data)
+	works = cursor.fetchall()
+	
+	oldnumber = int(badworkdbnumber[8:10])
+	newworkid = works[oldnumber][0]
+
+	return newworkid
+
+
+def returnfirstwork(authorid, cursor):
+	"""
+	more exception handling
+	this will produce bad results, but it will not kill the program
+	:param authorid:
+	:param cursor:
+	:return:
+	"""
+	print('panic and grab first work of',authorid)
+	query = 'SELECT min(universalid) FROM  works WHERE universalid is LIKE %s'
+	data = (authorid+'%',)
+	cursor.execute(query, data)
+	found = cursor.fetchone()
+	found = found[0]
+	
+	return found

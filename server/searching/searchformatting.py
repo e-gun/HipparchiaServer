@@ -246,9 +246,10 @@ def formattedcittationincontext(line, workdbname, linesofcontext, searchterm, cu
 		if w.universalid == workdbname:
 			workobject = w
 	citation = locusintocitation(workobject, locus['locus'])
+	# this next bit of info tags the find; 'newfind' + 'url' is turned into JS in the search.html '<script>' loop; this enables click-to-browse
+	# similarly the for-result-in-found loop of search.html generates the clickable elements: <browser id="{{ context['url'] }}">
 	citationincontext.append({'newfind': 1, 'author': authorobject.shortname,
 	                 'work': workobject.title, 'citation': citation, 'url': (workdbname+'_LN_'+str(locus['index']))})
-	# store this here because there will a problem when you grab lots of diff authors and works
 	environs = simplecontextgrabber(workobject, locus['index'], linesofcontext, cursor)
 	# if you search at the edge of a text you might ask for too much context
 	if len(environs) != linesofcontext+1:

@@ -5,7 +5,7 @@ import re
 from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import dbauthorandworkmaker, setconnection
+from server.dbsupport.dbfunctions import dbauthorandworkmaker, setconnection, perseusidmismatch
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
@@ -701,13 +701,17 @@ def grabtextforbrowsing():
 		for level in passage:
 			safepassage.append(re.sub('[\W_|]+', '',level))
 		safepassage = tuple(safepassage[:5])
-		for worktocheck in ao.listofworks:
-			if worktocheck.worknumber == int(workid):
-				workobject = worktocheck
-		passage = finddblinefromlocus(workobject, safepassage, cursor)
+		passage = finddblinefromlocus(workdb, safepassage, cursor)
 
 	# first line is info; remaining lines are html
-	browserdata = getandformatbrowsercontext(ao, int(workid), int(passage), ctx, numbersevery, cursor)
+	try:
+		browserdata = getandformatbrowsercontext(ao, int(workid), int(passage), ctx, numbersevery, cursor)
+	except:
+		# perseus lexical data had a bad author number?
+		workdb = perseusidmismatch(workdb, cursor)
+		workid = workdb[7:]
+		browserdata = getandformatbrowsercontext(ao, int(workid), int(passage), ctx, numbersevery, cursor)
+		
 	browserdata = json.dumps(browserdata)
 	
 	return browserdata

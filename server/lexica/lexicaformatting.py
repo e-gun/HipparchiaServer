@@ -1,7 +1,6 @@
 import re
-import pickle
 from bs4 import BeautifulSoup
-
+from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 
 def grabsenses(fullentry):
 	
@@ -272,3 +271,57 @@ def formatmicroentry(entrybody):
 	entryhtml = entrybody
 	
 	return entryhtml
+
+def insertbrowserlookups(htmlentry, cursor):
+	"""
+	transform the <bibl> items into things you can click on and see in the work browser
+		in: <bibl n="Perseus:abo:tlg,0527,004:36:11"...>
+		out: <bibl id="gr0527w004_LN_1111"...>
+	the big challenge is the incompleteness of the references: they go to level01 instead of level00 in many cases
+	similarly 67a instead of 67:a in the entry
+	this will require finding a '_LN_' reference with the info that is available...
+	:param htmlentry:
+	:return:
+	"""
+	
+	tlgfinder = re.compile(r'n="Perseus:abo:tlg,(\d\d\d\d),(\d\d\d):(.*?)"')
+	phifinder = re.compile(r'n="Perseus:abo:phi,(\d\d\d\d),(\d\d\d):(.*?)"')
+	
+	clickableentry = re.sub(tlgfinder, r'id="gr\1w\2_AT_\3"', htmlentry)
+	clickableentry = re.sub(phifinder, r'id="lt\1w\2_AT_\3"', clickableentry)
+	
+	dfbinder = re.compile(r'id="(..\d\d\d\dw\d\d\d_AT_.*?)"')
+	passages = re.findall(dfbinder,clickableentry)
+	
+	for passage in passages:
+		db = passage[:10]
+		citation = passage[14:].split(':')
+		citation.reverse()
+		dbline = finddblinefromincompletelocus(db, citation, cursor)
+		swap = db + '_LN_' + str(dbline)
+		clickableentry = re.sub(passage, swap, clickableentry)
+	
+	return clickableentry
+
+
+def insertbrowserjs(htmlentry):
+	"""
+	now: '<bibl id="gr0527w004_AT_36|11"...>
+	you have something that document.getElementById can click, but no JS to support the click
+	add the JS
+	:param htmlentry:
+	:return:
+	"""
+	
+	clickfinder = re.compile(r'<bibl id="(..\d\d\d\dw\d\d\d\_LN_.*?)"')
+	clicks = re.findall(clickfinder,htmlentry)
+	
+	if len(clicks) > 0:
+		clickableentry = htmlentry + '\n<script>'
+		for c in clicks:
+			clickableentry += 'document.getElementById(\''+c+'\').onclick = openbrowserfromclick;\n'
+		clickableentry += '</script>'
+	else:
+		clickableentry = htmlentry
+	
+	return clickableentry

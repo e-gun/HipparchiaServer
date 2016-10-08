@@ -407,7 +407,7 @@ def sessionselectionsinfo(cursor):
 				for w in ao.listofworks:
 					if w.universalid == s[0:10]:
 						wk = w
-				loc = citationfunctions.locusintosearchitem(wk, citationtuple)
+				loc = citationfunctions.prolixlocus(wk, citationtuple)
 				thehtml += '<span class="psg'+selectionorexclusion+'" id="searchselection_0' + str(selcount)+'" listval="' \
 				           +str(localval)+'">'+ ao.shortname + ', <span class="pickedwork">' + wk.title + \
 				           '</span>&nbsp;<span class="pickedsubsection">' + loc + '</span></span><br />'

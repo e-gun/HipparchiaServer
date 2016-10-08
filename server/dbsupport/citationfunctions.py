@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import re
+from server.dbsupport.dbfunctions import findtoplevelofwork, returnfirstlinenumber, perseusidmismatch, returnfirstwork
+
 
 def findvalidlevelvalues(workdb, workstructure, partialcitationtuple, cursor):
 	"""
@@ -76,9 +79,9 @@ def locusintocitation(workobject, citationtuple):
 	return citation
 
 
-def locusintosearchitem(workobject, citationtuple):
+def prolixlocus(workobject, citationtuple):
 	"""
-	transform something like ('9','109','8') into a citations like "Book 8, section 108, line 9"
+	transform something like ('9','109','8') into a citation like "Book 8, section 108, line 9"
 	differes from the preceding only by a range and a wklvls[level]
 	:param authorobject:
 	:param worknumber:
@@ -100,23 +103,22 @@ def locusintosearchitem(workobject, citationtuple):
 	return citation
 
 
-def finddblinefromlocus(workobject, citationtuple, cursor):
+def finddblinefromlocus(workdb, citationtuple, cursor):
 	# citationtuple ('9','109','8') to focus on line 9, section 109, book 8
 	# finddblinefromlocus(h, 1, ('130', '24')) ---> 15033
 
 	lmap = {0: 'level_00_value', 1: 'level_01_value', 2: 'level_02_value', 3: 'level_03_value', 4: 'level_04_value',
 	        5: 'level_05_value'}
+	
+	wklvs = findtoplevelofwork(workdb, cursor)
 
-	wklvs = list(workobject.structure.keys())
-	if len(wklvs) != len(citationtuple):
-		print('mismatch between shape of work and browsing request: impossible citation of,'
-		      +workobject.universalid+' '+workobject.title+'.')
-		print(wklvs,'vs',list(citationtuple))
+	if wklvs != len(citationtuple):
+		print('mismatch between shape of work and browsing request: impossible citation of'+workdb+'.')
+		print(str(wklvs),' levels vs',list(citationtuple))
 		print('safe to ignore if you requested the first line of a work')
 
-	workdbname = workobject.universalid
 	# step one: find the index number of the passage
-	query = 'SELECT index FROM ' + workdbname + ' WHERE '
+	query = 'SELECT index FROM ' + workdb + ' WHERE '
 	for level in range(0, len(citationtuple)):
 		query += lmap[level] + '=%s AND '
 	# drop the final 'AND '
@@ -125,16 +127,78 @@ def finddblinefromlocus(workobject, citationtuple, cursor):
 	cursor.execute(query, data)
 	try:
 		found = cursor.fetchone()
-	except:
-		# but maybe the last line is what we wanted...
-		# this is a total co-out since not every work even begins with '1'...
-		# handle me properly some day
-		print('requested locus returned nothing:',query, data)
-		indexvalue = 1
-	try:
 		indexvalue = found[0]
 	except:
-		print('sought an impossible locus:',query,'d:',data)
-		indexvalue = 1
-
+		print('requested locus returned nothing:', query, data)
+		indexvalue = returnfirstlinenumber(workdb, cursor)
+		print('newlocus:',indexvalue)
+		
 	return indexvalue
+
+
+def finddblinefromincompletelocus(workid, citationlist, cursor):
+	"""
+	need to deal with the perseus bibliographic references which often do not go all the way down to level zero
+	use what you have to find the first available db line so you can construck a '_LN_' browseto click
+	the citation list arrives in ascending order of levels: 00, 01, 02...
+	:param workid:
+	:param citationlist:
+	:param cursor:
+	:return:
+	"""
+	
+	lmap = {0: 'level_00_value', 1: 'level_01_value', 2: 'level_02_value', 3: 'level_03_value', 4: 'level_04_value',
+	        5: 'level_05_value'}
+	
+	try:
+		# perseus does not always agree with our ids...
+		returnfirstlinenumber(workid, cursor)
+		numberoflevels = findtoplevelofwork(workid, cursor)
+	except:
+		# perseus did not agree with our ids...: euripides, esp
+		# what follows is a 'hope for the best' approach
+		# notice that this bad id has been carved into the page html already
+		workid = perseusidmismatch(workid, cursor)
+		try:
+			numberoflevels = findtoplevelofwork(workid, cursor)
+		except:
+			workid = returnfirstwork(workid[0:6], cursor)
+			numberoflevels = findtoplevelofwork(workid, cursor)
+
+	if numberoflevels == len(citationlist):
+		# congratulations, you have a fully formed citation
+		dblinenumber = finddblinefromlocus(workid, citationlist, cursor)
+	else:
+		# problem of unsplit citations
+		# do this later rather than sooner because aristotle's 1000a should not be split, but plato's 100a should be...
+		newcitationlist = []
+		for item in citationlist:
+			try:
+				if item[-2].isdigit() and item[-1].islower():
+					parta = item[-1]
+					partb = item[:-1]
+					newcitationlist.append(parta)
+					newcitationlist.append(partb)
+				else:
+					newcitationlist.append(item)
+			except:
+				# item[-2] was impossible
+				newcitationlist.append(item)
+				
+		citationlist = newcitationlist
+		# you have an incomplete citation: assume that the top level is the last item, etc.
+		citationlist.reverse()
+		query = 'SELECT index FROM ' + workid + ' WHERE '
+		for level in range(numberoflevels-1, numberoflevels-len(citationlist)-1,-1):
+			query += lmap[level] + '=%s AND '
+		# drop the final 'AND '
+		query = query[:-4] + ' ORDER BY index ASC'
+		data = tuple(citationlist)
+		cursor.execute(query, data)
+		try:
+			found = cursor.fetchone()
+			dblinenumber = found[0]
+		except:
+			dblinenumber = 1
+		
+	return dblinenumber
