@@ -65,7 +65,7 @@ def browserdictionarylookup(entry, dict, cursor):
 		cleanedentry += formatgloss(definition)
 	else:
 		cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under '+entry+'</p>\n'
-		cleanedentry += 'But the parser can get fooled by enclitics, speling variations, and disagreement about the number of entries for a word:  [term] (1) and  [term] (2), for example<br />'
+		cleanedentry += 'But the parser can get fooled by enclitics, spelling variations, and disagreement about the number of entries for a word:  [term] (1) and  [term] (2), for example<br />'
 		cleanedentry += 'Try looking this word yourself by using the proper search box: something is likely to turn up.'
 		
 	return cleanedentry
