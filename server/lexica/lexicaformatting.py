@@ -16,6 +16,7 @@ def grabsenses(fullentry):
 		i += 1
 		lvl = re.search(leveler,sense)
 		num = re.search(nummer,sense)
+		# note that the two dictionaries do not necc aree with one another (or themselves) when it comes to nesting labels
 		if re.search(r'[A-Z]',num.group(1)) is not None:
 			paragraphlevel = '1'
 		elif re.search(r'[0-9]',num.group(1)) is not None:
@@ -76,11 +77,18 @@ def entrysummary(fullentry,lang, translationlabel):
 def grabheadmaterial(fullentry):
 	heading = re.compile(r'(.*?)\<sense')
 	head = re.search(heading,fullentry)
+	
+	orth = re.compile(r'<orth.*?>(.*?)</orth>')
+	ohead = re.search(orth,fullentry)
+	
 	try:
 		return head.group(0)
 	except:
-		print('failed to find head.group(0) in grabheadmaterial')
-		return ''
+		try:
+			return ''
+		except:
+			print('failed to grabheadmaterial()\n\t',fullentry)
+			return ''
 
 
 def deabbreviateauthors(authorabbr, lang):
