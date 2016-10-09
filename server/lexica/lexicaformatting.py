@@ -324,7 +324,15 @@ def insertbrowserlookups(htmlentry):
 	dfbinder = re.compile(r'id="(..\d\d\d\dw\d\d\d_AT_.*?)"')
 	loci = re.findall(dfbinder,clickableentry)
 	
-	substitutes = dispatchlookupwork(loci)
+	# dbquickfixes for euripides, etc to swap out work numbers
+	# should probably implement this inside the builder
+	substitutes = dbquickfixes(loci)
+	for sub in substitutes.keys():
+		clickableentry = re.sub(sub, substitutes[sub], clickableentry)
+	
+	fixedloci = re.findall(dfbinder,clickableentry)
+	
+	substitutes = dispatchlookupwork(fixedloci)
 	
 	for sub in substitutes.keys():
 		if '_LN_-9999' not in substitutes[sub]:
@@ -391,6 +399,7 @@ def mpbrowserlookupworker(passages, substitutes, commitcount):
 	
 	return substitutes
 
+
 def insertbrowserjs(htmlentry):
 	"""
 	now: '<bibl id="gr0527w004_AT_36|11"...>
@@ -412,3 +421,80 @@ def insertbrowserjs(htmlentry):
 		clickableentry = htmlentry
 	
 	return clickableentry
+
+
+def dbquickfixes(listofnames):
+	"""
+	persus' euripides work numbers are wrong
+	deal with that here
+	and anything else that pops up
+	build a lit of swaps
+	:param listofnames:
+	:return:
+	"""
+	
+	"""
+		"gr0006w030";"Fragmenta Oenei"
+		"gr0006w031";"Epigrammata"
+		"gr0006w032";"Fragmenta Phaethontis incertae sedis"
+		"gr0006w033";"Fragmenta"
+		"gr0006w034";"Cyclops"
+		"gr0006w035";"Alcestis"
+		"gr0006w036";"Medea"
+		"gr0006w037";"Heraclidae"
+		"gr0006w038";"Hippolytus"
+		"gr0006w039";"Andromacha"
+		"gr0006w040";"Hecuba"
+		"gr0006w041";"Supplices"
+		"gr0006w042";"Electra"
+		"gr0006w043";"Hercules"
+		"gr0006w044";"Troiades"
+		"gr0006w045";"Iphigenia Taurica"
+		"gr0006w046";"Ion"
+		"gr0006w047";"Helena"
+		"gr0006w048";"Phoenisae"
+		"gr0006w049";"Orestes"
+		"gr0006w050";"Bacchae"
+		"gr0006w051";"Iphigenia Aulidensis"
+		"gr0006w052";"Rhesus"
+		"gr0006w020";"Fragmenta"
+		"gr0006w021";"Fragmenta papyracea"
+		"gr0006w022";"Epinicium in Alcibiadem (fragmenta)"
+		"gr0006w023";"Fragmenta Phaethontis"
+		"gr0006w024";"Fragmenta Antiopes"
+		"gr0006w025";"Fragmenta Alexandri"
+		"gr0006w026";"Fragmenta Hypsipyles"
+		"gr0006w027";"Fragmenta Phrixei (P. Oxy. 34.2685)"
+		"gr0006w028";"Fragmenta fabulae incertae"
+		"gr0006w029";"Fragmenta"
+
+	"""
+	
+	substitutes = {}
+	dbfinder = re.compile(r'(..\d\d\d\dw\d\d\d)(.*)')
+	
+	fixer = {
+		# perseus : hipparchia
+		'gr0006w001': 'gr0006w034',
+		'gr0006w017': 'gr0006w050',
+		'gr0006w006': 'gr0006w049',
+		'gr0006w005': 'gr0006w038',
+		'gr0006w002': 'gr0006w035',
+		'gr0006w014': 'gr0006w047',
+		'gr0006w010': 'gr0006w044',
+		'gr0006w011': 'gr0006w046',
+		'gr0006w004': 'gr0006w037',
+		'gr0006w008': 'gr0006w041',
+		'gr0006w013': 'gr0006w045',
+		'gr0006w015': 'gr0006w048',
+		'gr0006w012': 'gr0006w042',
+		'gr0006w016': 'gr0006w036',
+		'gr0006w019': 'gr0006w052'
+	}
+	for item in listofnames:
+		db = re.search(dbfinder,item)
+		if db.group(1) in fixer.keys():
+			hipparchiadb = fixer[db.group(1)]
+			substitutes[item] = hipparchiadb+db.group(2)
+
+	return substitutes
