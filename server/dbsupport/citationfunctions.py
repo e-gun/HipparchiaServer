@@ -192,7 +192,7 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 				except:
 					# item[-2] was impossible
 					newcitationlist.append(item)
-		print('nc',newcitationlist)
+		
 		citationlist = newcitationlist
 		# you have an incomplete citation: assume that the top level is the last item, etc.
 		citationlist.reverse()
