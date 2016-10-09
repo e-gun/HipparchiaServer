@@ -889,7 +889,7 @@ def reverselexiconsearch():
 	# then go back and see if it is mentioned in the summary of senses
 	for match in matches:
 		m = match[0]
-		definition = searchdictionary(cursor, dict + '_dictionary', 'entry_name', m)
+		definition = searchdictionary(cursor, dict + '_dictionary', 'entry_name', m, syntax='LIKE')
 		# returns (metrical_entry, entry_body, entry_type)
 		definition = definition[1]
 		a, s, q = entrysummary(definition, dict, translationlabel)
