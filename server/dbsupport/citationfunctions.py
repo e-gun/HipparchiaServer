@@ -189,8 +189,12 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 		# you have an incomplete citation: assume that the top level is the last item, etc.
 		citationlist.reverse()
 		query = 'SELECT index FROM ' + workid + ' WHERE '
-		for level in range(numberoflevels-1, numberoflevels-len(citationlist)-1,-1):
-			query += lmap[level] + '=%s AND '
+		try:
+			for level in range(numberoflevels-1, numberoflevels-len(citationlist)-1,-1):
+				query += lmap[level] + '=%s AND '
+		except:
+			query += lmap[0] + '=%s AND '
+			
 		# drop the final 'AND '
 		query = query[:-4] + ' ORDER BY index ASC'
 		data = tuple(citationlist)

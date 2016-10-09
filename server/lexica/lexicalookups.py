@@ -28,13 +28,13 @@ def browserdictionarylookup(entry, dict, cursor):
 		entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
 	try:
-		found = searchdictionary(cursor, dict+'_dictionary', 'entry_name', entry)
+		found = searchdictionary(cursor, dict+'_dictionary', 'entry_name', entry, syntax='=')
 	except:
 		found = ('', '', '')
 		
 	if found == ('', '', ''):
 		try:
-			found = searchdictionary(cursor, dict + '_dictionary', 'entry_name', entry+' (1)')
+			found = searchdictionary(cursor, dict + '_dictionary', 'entry_name', entry+' %', syntax='LIKE')
 		except:
 			found = ('','', '')
 
@@ -83,7 +83,7 @@ def browserdictionarylookup(entry, dict, cursor):
 	return clickableentry
 
 
-def searchdictionary(cursor, dictionary, usecolumn, seeking):
+def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax):
 	"""
 	duplicates dbfunctions fnc, but that one was hurling exceptions if you tried to call it
 	could not even get to the first line of the fnc
@@ -94,10 +94,9 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking):
 	:return:
 	"""
 		
-	query = 'SELECT metrical_entry, entry_body, entry_type FROM ' + dictionary + ' WHERE '+usecolumn+' = %s'
+	query = 'SELECT metrical_entry, entry_body, entry_type FROM ' + dictionary + ' WHERE '+usecolumn+' '+syntax+' %s'
 	data = (seeking,)
 	cursor.execute(query, data)
-
 	# note that the dictionary db has a problem with vowel lengths vs accents
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
 	found = cursor.fetchone()
