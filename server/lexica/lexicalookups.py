@@ -38,7 +38,6 @@ def browserdictionarylookup(entry, dict, cursor):
 		except:
 			found = ('','', '')
 
-
 	metrics = found[0]
 	definition = found[1]
 	type = found[2]
@@ -52,6 +51,7 @@ def browserdictionarylookup(entry, dict, cursor):
 				cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
 			cleanedentry += '</p>\n'
 			a,s,q = entrysummary(definition, dict, translationlabel)
+			
 			if len(a) == 0 and len(s) == 0 and len(q) == 0:
 				# this is basically just a gloss entry
 				cleanedentry += formatmicroentry(definition)
@@ -64,7 +64,6 @@ def browserdictionarylookup(entry, dict, cursor):
 						cleanedentry += n
 				else:
 					cleanedentry += formatmicroentry(definition)
-	
 		except:
 			print('dictionary entry trouble with',entry)
 	elif definition != '' and type == 'gloss':

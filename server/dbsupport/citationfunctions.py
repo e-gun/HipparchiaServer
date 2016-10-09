@@ -157,6 +157,7 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 		# perseus did not agree with our ids...: euripides, esp
 		# what follows is a 'hope for the best' approach
 		# notice that this bad id has been carved into the page html already
+		
 		workid = perseusidmismatch(workid, cursor)
 		try:
 			numberoflevels = findtoplevelofwork(workid, cursor)
@@ -169,22 +170,29 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 		# congratulations, you have a fully formed citation
 		dblinenumber = finddblinefromlocus(workid, citationlist, cursor)
 	else:
-		# problem of unsplit citations
-		# do this later rather than sooner because aristotle's 1000a should not be split, but plato's 100a should be...
-		newcitationlist = []
-		for item in citationlist:
-			try:
-				if item[-2].isdigit() and item[-1].islower():
-					parta = item[-1]
-					partb = item[:-1]
-					newcitationlist.append(parta)
-					newcitationlist.append(partb)
-				else:
+		if numberoflevels < len(citationlist):
+			# something stupid like plautus' acts and scenes when you only want the line numbers
+			# truncate the 'too long' bits
+			newcitationlist = []
+			for i in range(0,numberoflevels):
+				newcitationlist.append(citationlist[i])
+		else:
+			# problem of unsplit citations
+			# do this later rather than sooner because aristotle's 1000a should not be split, but plato's 100a should be...
+			newcitationlist = []
+			for item in citationlist:
+				try:
+					if item[-2].isdigit() and item[-1].islower():
+						parta = item[-1]
+						partb = item[:-1]
+						newcitationlist.append(parta)
+						newcitationlist.append(partb)
+					else:
+						newcitationlist.append(item)
+				except:
+					# item[-2] was impossible
 					newcitationlist.append(item)
-			except:
-				# item[-2] was impossible
-				newcitationlist.append(item)
-				
+		print('nc',newcitationlist)
 		citationlist = newcitationlist
 		# you have an incomplete citation: assume that the top level is the last item, etc.
 		citationlist.reverse()
