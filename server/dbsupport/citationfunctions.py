@@ -167,34 +167,23 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 			numberoflevels = findtoplevelofwork(workid, cursor)
 
 	if numberoflevels == len(citationlist):
-		# congratulations, you have a fully formed citation
+		# congratulations, you have a fully formed citation (maybe...)
 		dblinenumber = finddblinefromlocus(workid, citationlist, cursor)
-	else:
-		if numberoflevels < len(citationlist):
-			# something stupid like plautus' acts and scenes when you only want the line numbers
-			# truncate the 'too long' bits
-			newcitationlist = []
-			for i in range(0,numberoflevels):
-				newcitationlist.append(citationlist[i])
-		else:
-			# problem of unsplit citations
-			# do this later rather than sooner because aristotle's 1000a should not be split, but plato's 100a should be...
-			newcitationlist = []
-			for item in citationlist:
-				try:
-					if item[-2].isdigit() and item[-1].islower():
-						parta = item[-1]
-						partb = item[:-1]
-						newcitationlist.append(parta)
-						newcitationlist.append(partb)
-					else:
-						newcitationlist.append(item)
-				except:
-					# item[-2] was impossible
-					newcitationlist.append(item)
+	elif numberoflevels < len(citationlist):
+		# something stupid like plautus' acts and scenes when you only want the line numbers
+		# option 1: truncate the 'too long' bits and hope for the best
+		# will definitely fail to pull up the right line in the case of plays
+		# unless you were looking at act 1 scene 1 anyway
+		# newcitationlist = []
+		# for i in range(0,numberoflevels):
+		#	newcitationlist.append(citationlist[i])
+		# citationlist = newcitationlist
 		
-		citationlist = newcitationlist
+		# option 2: just give up
+		dblinenumber = -9999
+	else:
 		# you have an incomplete citation: assume that the top level is the last item, etc.
+		citationlist = perseuscitationsintohipparchiacitations(citationlist)
 		citationlist.reverse()
 		query = 'SELECT index FROM ' + workid + ' WHERE '
 		try:
@@ -206,11 +195,50 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 		# drop the final 'AND '
 		query = query[:-4] + ' ORDER BY index ASC'
 		data = tuple(citationlist)
-		cursor.execute(query, data)
 		try:
+			cursor.execute(query, data)
 			found = cursor.fetchone()
 			dblinenumber = found[0]
 		except:
-			dblinenumber = 1
+			dblinenumber = -9999
 		
 	return dblinenumber
+
+def perseuscitationsintohipparchiacitations(citationlist):
+	"""
+	a collections of hopes and prayers that attempts to minimize the misfits between perseus citations and hipparchia citations
+	the perseus data is saturated with problems
+		euripides work numbers are always bad
+		plays are cited by act
+		222a and not 222 + a
+		plutarch looks like 'Plu.2.263f' and not just '263f'
+		sometimes you have '30(31)'
+		some citations are not tied to a tlg reference
+	:param citationlist:
+	:return:
+	"""
+	newcitationlist = []
+	
+	for item in citationlist:
+		if re.search(r'^p\.',item) is not None:
+			item = item[2:]
+		item = re.sub(r'\(.*?\)','',item)
+		newcitationlist.append(item)
+	
+	citationlist = newcitationlist
+	newcitationlist = []
+	
+	for item in citationlist:
+		try:
+			if item[-2].isdigit() and item[-1].islower():
+				parta = item[-1]
+				partb = item[:-1]
+				newcitationlist.append(parta)
+				newcitationlist.append(partb)
+			else:
+				newcitationlist.append(item)
+		except:
+			# item[-2] was impossible
+			newcitationlist.append(item)
+	
+	return newcitationlist

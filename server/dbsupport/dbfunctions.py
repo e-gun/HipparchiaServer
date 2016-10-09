@@ -215,13 +215,18 @@ def returnfirstlinenumber(workdb, cursor):
 	:param cursor:
 	:return:
 	"""
-	
-	query = 'SELECT min(index) FROM  ' + workdb
-	cursor.execute(query)
-	found = cursor.fetchone()
-	found = found[0]
-	
-	return found
+	firstline = -1
+	while firstline == -1:
+		query = 'SELECT min(index) FROM  ' + workdb
+		try:
+			cursor.execute(query)
+			found = cursor.fetchone()
+			firstline = found[0]
+		except:
+			workdb = perseusidmismatch(workdb,cursor)
+			firstline = returnfirstlinenumber(workdb, cursor)
+		
+	return firstline
 
 
 def perseusidmismatch(badworkdbnumber,cursor):
@@ -234,22 +239,24 @@ def perseusidmismatch(badworkdbnumber,cursor):
 	:return:
 	"""
 	
+	newworkid = '[na]'
 	# print('ick: perseus wants',badworkdbnumber,'but this does not exist')
 	
-	query = 'SELECT universalid FROM works WHERE universalid LIKE %s ORDER BY universalid ASC'
-	data = (badworkdbnumber[0:6]+'%',)
-	try:
-		cursor.execute(query, data)
-		works = cursor.fetchall()
-	except psycopg2.DatabaseError as e:
-		print('perseusidmismatch() - could not execute', query)
-		print('Error:', e)
-		
-	try:
-		oldnumber = int(badworkdbnumber[8:10])
-		newworkid = works[oldnumber][0]
-	except:
-		newworkid = returnfirstwork(badworkdbnumber[0:6], cursor)
+	while newworkid == '[na]':
+		query = 'SELECT universalid FROM works WHERE universalid LIKE %s ORDER BY universalid ASC'
+		data = (badworkdbnumber[0:6]+'%',)
+		try:
+			cursor.execute(query, data)
+			works = cursor.fetchall()
+			try:
+				oldnumber = int(badworkdbnumber[8:10])
+				newworkid = works[oldnumber][0]
+			except:
+				newworkid = returnfirstwork(badworkdbnumber[0:6], cursor)
+		except psycopg2.DatabaseError as e:
+			print('perseusidmismatch() - could not execute', query)
+			print('Error:', e)
+			newworkid = returnfirstwork(badworkdbnumber[0:6], cursor)
 
 	return newworkid
 

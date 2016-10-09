@@ -43,7 +43,11 @@ def browserdictionarylookup(entry, dict, cursor):
 	type = found[2]
 	metrics = re.sub(r'\(\d{1,}\)',r'',metrics)
 	
+	# can't have xml in our html
+	definition = re.sub(r'<title>(.*?)</title>', r'<worktitle>\1</worktitle>', definition)
+	
 	cleanedentry = ''
+	
 	if definition != '' and type != 'gloss':
 		try:
 			cleanedentry += '<br />\n<p class="dictionaryheading">'+entry
@@ -76,7 +80,7 @@ def browserdictionarylookup(entry, dict, cursor):
 	
 	clickableentry = cleanedentry
 	# in progress
-	clickableentry = insertbrowserlookups(cleanedentry, cursor)
+	clickableentry = insertbrowserlookups(cleanedentry)
 	clickableentry = insertbrowserjs(clickableentry)
 	
 	return clickableentry

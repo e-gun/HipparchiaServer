@@ -210,6 +210,10 @@ td.infocellx {
 	text-align: center;
 }
 
+worktitle {
+	font-style: italic;
+	}
+
 #languageradio, #modeeradio {
 	text-align: center;
 	margin: auto;

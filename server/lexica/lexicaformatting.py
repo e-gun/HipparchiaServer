@@ -1,6 +1,10 @@
 import re
+from multiprocessing import Process, Manager, Value
 from bs4 import BeautifulSoup
+from server import hipparchia
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
+from server.hipparchiaclasses import MPCounter
+from server.dbsupport.dbfunctions import setconnection
 
 def grabsenses(fullentry):
 	
@@ -59,10 +63,13 @@ def entrysummary(fullentry,lang, translationlabel):
 	a = newa
 
 	s = soup.find_all(translationlabel)
-	notin = ['ab','de', 'ex','ut', 'nihil', 'quam', 'quid']
-	s[:] = [value.string for value in s]
-	s[:] = [value for value in s if '.' not in value]
-	s[:] = [value for value in s if value not in notin]
+	notin = ['ab', 'de', 'ex', 'ut', 'nihil', 'quam', 'quid']
+	try:
+		s[:] = [value.string for value in s]
+		s[:] = [value for value in s if '.' not in value]
+		s[:] = [value for value in s if value not in notin]
+	except:
+		s = []
 	s = list(set(s))
 
 	q = soup.find_all('quote')
@@ -272,7 +279,7 @@ def formatmicroentry(entrybody):
 	
 	return entryhtml
 
-def insertbrowserlookups(htmlentry, cursor):
+def insertbrowserlookups(htmlentry):
 	"""
 	transform the <bibl> items into things you can click on and see in the work browser
 		in: <bibl n="Perseus:abo:tlg,0527,004:36:11"...>
@@ -280,9 +287,34 @@ def insertbrowserlookups(htmlentry, cursor):
 	the big challenge is the incompleteness of the references: they go to level01 instead of level00 in many cases
 	similarly 67a instead of 67:a in the entry
 	this will require finding a '_LN_' reference with the info that is available...
+	
+	it is tempting not to do this now but to wait for the click to make the transformation
+	but this lets you see all of the problems with the data
 	:param htmlentry:
 	:return:
 	"""
+	
+	# first retag the items that should not click-to-browse
+	
+	biblios = re.compile(r'(<bibl.*?)(.*?)(</bibl>)')
+	bibs = re.findall(biblios, htmlentry)
+	bdict = {}
+	
+	for bib in bibs:
+		if 'Perseus:abo' not in bib[1]:
+			print(bib[1])
+			head = '<unclickablebibl'
+			tail = '</unclickablebibl>'
+		else:
+			head = bib[0]
+			tail = bib[2]
+		bdict[('').join(bib)] = head+bib[1]+tail
+		
+	# print('here',bdict)
+	for key in bdict.keys():
+		htmlentry = re.sub(key,bdict[key],htmlentry)
+	
+	# now do the work of finding the lookups
 	
 	tlgfinder = re.compile(r'n="Perseus:abo:tlg,(\d\d\d\d),(\d\d\d):(.*?)"')
 	phifinder = re.compile(r'n="Perseus:abo:phi,(\d\d\d\d),(\d\d\d):(.*?)"')
@@ -291,18 +323,75 @@ def insertbrowserlookups(htmlentry, cursor):
 	clickableentry = re.sub(phifinder, r'id="lt\1w\2_AT_\3"', clickableentry)
 	
 	dfbinder = re.compile(r'id="(..\d\d\d\dw\d\d\d_AT_.*?)"')
-	passages = re.findall(dfbinder,clickableentry)
+	loci = re.findall(dfbinder,clickableentry)
 	
-	for passage in passages:
-		db = passage[:10]
-		citation = passage[14:].split(':')
-		citation.reverse()
-		dbline = finddblinefromincompletelocus(db, citation, cursor)
-		swap = db + '_LN_' + str(dbline)
-		clickableentry = re.sub(passage, swap, clickableentry)
+	substitutes = dispatchlookupwork(loci)
+	
+	for sub in substitutes.keys():
+		if '_LN_-9999' not in substitutes[sub]:
+			clickableentry = re.sub(sub, substitutes[sub], clickableentry)
+		else:
+			clickableentry = re.sub(sub, 'unclickable', clickableentry)
+	
+	# one last pass to add in the newly known unknowns
+	unclick = re.compile(r'(<bibl id="unclickable".*?>)(.*?)(</bibl>)')
+	clickableentry = re.sub(unclick,r'<unclickablebibl>\2</unclickablebibl>',clickableentry)
 	
 	return clickableentry
 
+
+def dispatchlookupwork(loci):
+	
+	manager = Manager()
+	passages = manager.list(loci)
+	substitutes = manager.dict()
+	commitcount = MPCounter()
+	
+	workers = hipparchia.config['WORKERS']
+	
+	jobs = [Process(target=mpbrowserlookupworker, args=(passages, substitutes, commitcount)) for i in
+	        range(workers)]
+	for j in jobs: j.start()
+	for j in jobs: j.join()
+		
+	return substitutes
+	
+
+def mpbrowserlookupworker(passages, substitutes, commitcount):
+	"""
+	mp aware citation lookups
+	if you try a reverse lookup of a common word like 'have', you'll know why we want to add some speed:
+	lots of entries with lots of citations
+	:param passages:
+	:param substitutes:
+	:param commitcount:
+	:return:
+	"""
+	
+	dbc = setconnection('autocommit') # because the huge number of exceptions will need dbc.rollback() otherwise and we don't want to pass dbc endlessly
+	curs = dbc.cursor()
+	
+	while passages:
+		try: passage = passages.pop()
+		except: passage = ''
+		if passage != '':
+			db = passage[:10]
+			citation = passage[14:].split(':')
+			citation.reverse()
+			dbline = finddblinefromincompletelocus(db, citation, curs)
+			commitcount.increment()
+			if commitcount.value % 100 == 0:
+				dbc.commit()
+			swap = db + '_LN_' + str(dbline)
+			# here's where you can see the horror: '_LN_1' represents failure
+			print('p/s',passage,swap)
+			substitutes[passage] = swap
+	
+	dbc.commit()
+	curs.close()
+	del dbc
+	
+	return substitutes
 
 def insertbrowserjs(htmlentry):
 	"""
