@@ -302,7 +302,6 @@ def insertbrowserlookups(htmlentry):
 	
 	for bib in bibs:
 		if 'Perseus:abo' not in bib[1]:
-			print(bib[1])
 			head = '<unclickablebibl'
 			tail = '</unclickablebibl>'
 		else:
@@ -384,7 +383,6 @@ def mpbrowserlookupworker(passages, substitutes, commitcount):
 				dbc.commit()
 			swap = db + '_LN_' + str(dbline)
 			# here's where you can see the horror: '_LN_1' represents failure
-			print('p/s',passage,swap)
 			substitutes[passage] = swap
 	
 	dbc.commit()

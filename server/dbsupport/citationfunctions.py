@@ -124,8 +124,8 @@ def finddblinefromlocus(workdb, citationtuple, cursor):
 	# drop the final 'AND '
 	query = query[:-4]
 	data = citationtuple
-	cursor.execute(query, data)
 	try:
+		cursor.execute(query, data)
 		found = cursor.fetchone()
 		indexvalue = found[0]
 	except:
