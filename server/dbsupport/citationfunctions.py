@@ -129,9 +129,8 @@ def finddblinefromlocus(workdb, citationtuple, cursor):
 		found = cursor.fetchone()
 		indexvalue = found[0]
 	except:
-		print('requested locus returned nothing:', query, data)
+		# print('requested locus returned nothing:', query, data)
 		indexvalue = returnfirstlinenumber(workdb, cursor)
-		print('newlocus:',indexvalue)
 		
 	return indexvalue
 
@@ -162,6 +161,7 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 		try:
 			numberoflevels = findtoplevelofwork(workid, cursor)
 		except:
+			print('failed 2x to find the work')
 			workid = returnfirstwork(workid[0:6], cursor)
 			numberoflevels = findtoplevelofwork(workid, cursor)
 

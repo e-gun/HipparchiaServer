@@ -30,7 +30,14 @@ def browserdictionarylookup(entry, dict, cursor):
 	try:
 		found = searchdictionary(cursor, dict+'_dictionary', 'entry_name', entry)
 	except:
-		found = ('','', '')
+		found = ('', '', '')
+		
+	if found == ('', '', ''):
+		try:
+			found = searchdictionary(cursor, dict + '_dictionary', 'entry_name', entry+' (1)')
+		except:
+			found = ('','', '')
+
 
 	metrics = found[0]
 	definition = found[1]
@@ -70,8 +77,8 @@ def browserdictionarylookup(entry, dict, cursor):
 	
 	clickableentry = cleanedentry
 	# in progress
-	#clickableentry = insertbrowserlookups(cleanedentry, cursor)
-	#clickableentry = insertbrowserjs(clickableentry)
+	clickableentry = insertbrowserlookups(cleanedentry, cursor)
+	clickableentry = insertbrowserjs(clickableentry)
 	
 	return clickableentry
 

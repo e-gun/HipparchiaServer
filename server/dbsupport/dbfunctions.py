@@ -234,15 +234,22 @@ def perseusidmismatch(badworkdbnumber,cursor):
 	:return:
 	"""
 	
-	print('ick: perseus wants',badworkdbnumber,'but this does not exist')
+	# print('ick: perseus wants',badworkdbnumber,'but this does not exist')
 	
 	query = 'SELECT universalid FROM works WHERE universalid LIKE %s ORDER BY universalid ASC'
 	data = (badworkdbnumber[0:6]+'%',)
-	cursor.execute(query, data)
-	works = cursor.fetchall()
-	
-	oldnumber = int(badworkdbnumber[8:10])
-	newworkid = works[oldnumber][0]
+	try:
+		cursor.execute(query, data)
+		works = cursor.fetchall()
+	except psycopg2.DatabaseError as e:
+		print('perseusidmismatch() - could not execute', query)
+		print('Error:', e)
+		
+	try:
+		oldnumber = int(badworkdbnumber[8:10])
+		newworkid = works[oldnumber][0]
+	except:
+		newworkid = returnfirstwork(badworkdbnumber[0:6], cursor)
 
 	return newworkid
 
@@ -255,11 +262,18 @@ def returnfirstwork(authorid, cursor):
 	:param cursor:
 	:return:
 	"""
-	print('panic and grab first work of',authorid)
-	query = 'SELECT min(universalid) FROM  works WHERE universalid is LIKE %s'
+
+	# print('panic and grab first work of',authorid)
+	query = 'SELECT universalid FROM  works WHERE universalid LIKE %s ORDER BY universalid'
 	data = (authorid+'%',)
 	cursor.execute(query, data)
 	found = cursor.fetchone()
-	found = found[0]
+	try:
+		found = found[0]
+	except:
+		# yikes: an author we don't know about
+		# perseus will send you gr1415, but he is not in the db
+		# homer...
+		found = returnfirstwork('gr0012w001', cursor)
 	
 	return found
