@@ -425,7 +425,7 @@ def concsearch(seeking, cursor, workdbname):
 	:return: db lines that match the search criterion
 	"""
 	concdbname = workdbname + '_conc'
-	seeking = server.searching.searchformatting.cleansearchterm(seeking)
+	seeking = cleansearchterm(seeking)
 	mylimit = 'LIMIT ' + str(session['maxresults'])
 	if session['accentsmatter'] == 'Y':
 		ccolumn = 'word'
@@ -499,7 +499,7 @@ def partialwordsearch(seeking, cursor, workdbname):
 	# workdbname = 'gr9999w999'
 	mylimit = 'LIMIT ' + str(session['maxresults'])
 	columns = ['stripped_line', 'hyphenated_words']
-	seeking = server.searching.searchformatting.cleansearchterm(seeking)
+	seeking = cleansearchterm(seeking)
 	hyphsearch = seeking
 	
 	mysyntax = '~*'
@@ -525,7 +525,7 @@ def partialwordsearch(seeking, cursor, workdbname):
 			d.append(w[i][1])
 		
 		query = 'SELECT * FROM ' + db + ' WHERE (' + columns[0] + ' ' + mysyntax + ' %s OR ' + columns[
-			1] + ' ' + mysyntax + ' %s) ' + qw + mylimit
+			1] + ' ' + mysyntax + ' %s) ' + qw + mylimit + ' ORDER BY index ASC'
 		data = tuple(d)
 	
 	try:
@@ -557,7 +557,7 @@ def simplesearchworkwithexclusion(seeking, cursor, workdbname):
 	
 	mylimit = ' LIMIT ' + str(session['maxresults'])
 	columns = ['stripped_line', 'hyphenated_words']
-	seeking = server.searching.searchformatting.cleansearchterm(seeking)
+	seeking = cleansearchterm(seeking)
 	hyphsearch = seeking
 	db = workdbname[0:10]
 	
@@ -585,7 +585,7 @@ def simplesearchworkwithexclusion(seeking, cursor, workdbname):
 	qw = qw[0:-6]
 	
 	query = 'SELECT * FROM ' + db + ' WHERE (' + columns[0] + ' ' + mysyntax + ' %s OR ' + columns[
-		1] + ' ' + mysyntax + ' %s) ' + qw + mylimit
+		1] + ' ' + mysyntax + ' %s) ' + qw + mylimit + ' ORDER BY index ASC'
 	data = tuple(d)
 	cursor.execute(query, data)
 	found = cursor.fetchall()
