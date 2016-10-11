@@ -50,8 +50,23 @@ def findvalidlevelvalues(workdb, workstructure, partialcitationtuple, cursor):
 		rng.append(val[0])
 	rng = list(set(rng))
 	rng.sort()
+	# but now 1, 11, 12... comes before 2, 3, 4
+	rangenumbers = {}
+	rangebottom = []
+	for item in rng:
+		try:
+			rangenumbers[int(item)] = item
+		except:
+			rangebottom.append(item)
+	rangekeys = sorted(rangenumbers.keys())
+	
+	sortedrange = []
+	for key in 	rangekeys:
+		sortedrange.append(rangenumbers[key])
+	sortedrange += rangebottom
 
-	lowandhigh = (availablelevels, atlevel-1, workstructure[atlevel - 1], low, high, rng)
+
+	lowandhigh = (availablelevels, atlevel-1, workstructure[atlevel - 1], low, high, sortedrange)
 
 	return lowandhigh
 
