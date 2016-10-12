@@ -167,6 +167,8 @@ hmu_greek_in_a_latin_text {
 
 hmu_roman_in_a_greek_text {
 	font-style: italic;
+	font-size: 85%;
+	color: #222;
 }
 
 observed:hover{
