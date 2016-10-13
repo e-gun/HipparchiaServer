@@ -146,17 +146,17 @@ def parsejscookie(cookiestring):
 	example cookies:
 		{%22searchsyntax%22:%22R%22%2C%22linesofcontext%22:6%2C%22agnselections%22:[%22Alchemistae%22%2C%22Biographi%22]%2C%22corpora%22:%22G%22%2C%22proximity%22:%221%22%2C%22sortorder%22:%22shortname%22%2C%22maxresults%22:%22250%22%2C%22auselections%22:[%22gr0116%22%2C%22gr0199%22]%2C%22xmission%22:%22Any%22%2C%22browsercontext%22:%2220%22%2C%22accentsmatter%22:%22N%22%2C%22latestdate%22:%221500%22%2C%22psgselections%22:[]%2C%22searchscope%22:%22L%22%2C%22wkselections%22:[%22gr1908w003%22%2C%22gr2612w001%22]%2C%22authenticity%22:%22Any%22%2C%22earliestdate%22:%22-850%22%2C%22wkgnselections%22:[%22Caten.%22%2C%22Doxogr.%22]}	:return:
 	"""
-	cookiestring = cookiestring[1:-1]
+	try:
+		cookiestring = cookiestring[1:-1]
+	except:
+		# must have tried to load a cookie that was not really there
+		cookiestring = ''
 	
 	selectioncategories = ['auselections', 'wkselections', 'agnselections', 'wkgnselections', 'psgselections', 'auexclusions', 'wkexclusions', 'agnexclusions', 'wkgnexclusions', 'psgexclusions']
 	selectiondictionary = {}
 	for sel in selectioncategories:
-		try:
-			selectiondictionary[sel] = re.search(r'%22' + sel + r'%22:\[(.*?)\]', cookiestring).group(1)
-		except:
-			# did not find anything in that category
-			selectiondictionary[sel] = ''
-		
+		selectiondictionary[sel] = re.search(r'%22' + sel + r'%22:\[(.*?)\]', cookiestring).group(1)
+
 		# found; but mangled entries still:
 	# {'agnselections': '%22Alchemistae%22%2C%22Biographi%22', 'wkselections': '%22gr1908w003%22%2C%22gr2612w001%22', 'psgselections': '', 'auselections': '%22gr0116%22%2C%22gr0199%22', 'wkgnselections': '%22Caten.%22%2C%22Doxogr.%22'}
 	
@@ -250,6 +250,7 @@ def sessionvariables(cursor):
 		session['workgenres'] = setsessionvarviadb('workgenre', 'works', cursor)
 
 	return
+
 
 def sessionselectionsashtml(cursor):
 	"""
