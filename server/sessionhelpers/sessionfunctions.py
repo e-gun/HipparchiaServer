@@ -157,7 +157,7 @@ def parsejscookie(cookiestring):
 	for sel in selectioncategories:
 		selectiondictionary[sel] = re.search(r'%22' + sel + r'%22:\[(.*?)\]', cookiestring).group(1)
 
-		# found; but mangled entries still:
+	# found; but mangled entries still:
 	# {'agnselections': '%22Alchemistae%22%2C%22Biographi%22', 'wkselections': '%22gr1908w003%22%2C%22gr2612w001%22', 'psgselections': '', 'auselections': '%22gr0116%22%2C%22gr0199%22', 'wkgnselections': '%22Caten.%22%2C%22Doxogr.%22'}
 	
 	for sel in selectiondictionary:
