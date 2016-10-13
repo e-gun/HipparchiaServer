@@ -28,8 +28,34 @@
 
 @font-face {
     font-family: DejaVu;
-    src: url(/static/ttf/DejaVuSansCondensed.ttf.ttf);
+    src: url(/static/ttf/DejaVuSans-BoldOblique.ttf);
+    font-style: italic;
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: DejaVu;
+    src: url(/static/ttf/DejaVuSansCondensed.ttf);
     font-stretch: condensed;
+}
+
+@font-face {
+    font-family: DejaVu;
+    src: url(/static/ttf/DejaVuSansCondensed.ttf);
+    font-stretch: condensed;
+}
+
+@font-face {
+    font-family: DejaVu;
+    src: url(/static/ttf/DejaVuSansCondensedOblique.ttf);
+    font-stretch: condensed;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: DejaVu;
+    src: url(/static/ttf/DejaVuSansExtraLight.ttf);
+    font-weight: 200;
 }
 
 
@@ -550,6 +576,7 @@ p.level4 { padding-left: 45;}
 
 .smlatcaps {
     font-variant: small-caps;
+    font-size: 110%;
 }
 
 .small {

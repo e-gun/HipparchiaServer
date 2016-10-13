@@ -371,7 +371,6 @@ def selectionmade():
 	# get three bundles to put in the table cells
 	# stored in a dict with three keys: timeexclusions, selections, exclusions, numberofselections
 	
-	
 	htmlbundles = sessionselectionsashtml(cursor)
 	htmlbundles = json.dumps(htmlbundles)
 	
