@@ -137,13 +137,17 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 		line = list(line)
 		line[1] = re.sub(r'<.*?>','',line[1])
 		line[1] = re.sub(r'\s$', '', line[1])
+
 		if session['accentsmatter'] != 'Y':
 			line[1] = re.sub(r'[^\w\s]', '', line[1])
 			hyphen = line[2].split(' ')
 			hyphen = hyphen[0]
 		else:
 			hyphen = line[2].split(' ')
-			hyphen = hyphen[1]
+			try:
+				hyphen = hyphen[1]
+			except:
+				hyphen = ''
 		wordsinline = line[1].split(' ')
 
 		if line[0] == linenumber-1:

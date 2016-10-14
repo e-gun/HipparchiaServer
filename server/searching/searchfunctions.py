@@ -498,7 +498,12 @@ def concordancelookup(worktosearch, indexlocation, cursor):
 def partialwordsearch(seeking, cursor, workdbname):
 	# workdbname = 'gr9999w999'
 	mylimit = 'LIMIT ' + str(session['maxresults'])
-	columns = ['stripped_line', 'hyphenated_words']
+	if session['accentsmatter'] == 'Y':
+		columna = 'marked_up_line'
+	else:
+		columna = 'stripped_line'
+	columnb = 'hyphenated_words'
+	
 	seeking = cleansearchterm(seeking)
 	hyphsearch = seeking
 	
@@ -512,8 +517,7 @@ def partialwordsearch(seeking, cursor, workdbname):
 	found = []
 	
 	if '_AT_' not in workdbname:
-		query = 'SELECT * FROM ' + workdbname + ' WHERE (' + columns[0] + ' ' + mysyntax + ' %s) OR (' + columns[
-			1] + ' ' + mysyntax + ' %s) ' + mylimit
+		query = 'SELECT * FROM ' + workdbname + ' WHERE (' + columna + ' ' + mysyntax + ' %s) OR (' + columnb + ' ' + mysyntax + ' %s) ' + mylimit
 		data = (seeking, hyphsearch)
 	else:
 		qw = ''
@@ -524,8 +528,7 @@ def partialwordsearch(seeking, cursor, workdbname):
 			qw += 'AND (' + w[i][0] + ') '
 			d.append(w[i][1])
 		
-		query = 'SELECT * FROM ' + db + ' WHERE (' + columns[0] + ' ' + mysyntax + ' %s OR ' + columns[
-			1] + ' ' + mysyntax + ' %s) ' + qw + mylimit + ' ORDER BY index ASC'
+		query = 'SELECT * FROM ' + db + ' WHERE (' + columna + ' ' + mysyntax + ' %s OR ' + columnb + ' ' + mysyntax + ' %s) ' + qw + mylimit + ' ORDER BY index ASC'
 		data = tuple(d)
 	
 	try:
@@ -611,10 +614,10 @@ def phrasesearch(searchphrase, cursor, wkid):
 	for term in searchterms:
 		if len(term) > len(longestterm):
 			longestterm = term
-	
-	# remember that concsearch() has a big newline/whitespace problem
+
 	if 'x' not in wkid:
 		hits = partialwordsearch(longestterm, cursor, wkid)
+		# hits = concsearch(longestterm, cursor, wkid)
 	else:
 		wkid = re.sub('x', 'w', wkid)
 		hits = simplesearchworkwithexclusion(longestterm, cursor, wkid)
