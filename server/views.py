@@ -708,11 +708,9 @@ def grabtextforbrowsing():
 	elif passage[0:4] == '_PE_':
 		# a nasty kludge: should build the fixes into the db
 		if 'gr0006' in workdb:
-			print('fixing',workdb)
 			remapper = dbquickfixes([workdb])
 			workdb = remapper[workdb]
 			workid = workdb[7:]
-			print('-->',workdb)
 		citation = passage[4:].split(':')
 		citation.reverse()
 		passage = finddblinefromincompletelocus(workdb, citation, cursor)
