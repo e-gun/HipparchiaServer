@@ -6,7 +6,7 @@ from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import dbauthorandworkmaker, setconnection, perseusidmismatch
-from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus
+from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formattedcittationincontext, formatauthinfo, formatworkinfo, formatauthorandworkinfo
@@ -678,9 +678,11 @@ def getgenrelistcontents():
 def grabtextforbrowsing():
 	"""
 	you want to browse something
-	there are two ways to get results here: tell me a line or tell me a citation
+	there are two standard ways to get results here: tell me a line or tell me a citation
 		sample input: '/browseto?locus=gr0059w030_LN_48203'
 		sample input: '/browseto?locus=gr0008w001_AT_23|3|3'
+	alternately you can sent me a perseus ref from a dictionary entry ('_PE_') and I will *try* to convert it into a '_LN_'
+	
 	:return:
 	"""
 	
@@ -703,6 +705,10 @@ def grabtextforbrowsing():
 			safepassage.append(re.sub('[\W_|]+', '',level))
 		safepassage = tuple(safepassage[:5])
 		passage = finddblinefromlocus(workdb, safepassage, cursor)
+	elif passage[0:4] == '_PE_':
+		citation = passage[4:].split(':')
+		citation.reverse()
+		passage = finddblinefromincompletelocus(workdb, citation, cursor)
 
 	# first line is info; remaining lines are html
 	try:
@@ -712,7 +718,10 @@ def grabtextforbrowsing():
 		workdb = perseusidmismatch(workdb, cursor)
 		workid = workdb[7:]
 		browserdata = getandformatbrowsercontext(ao, int(workid), int(passage), ctx, numbersevery, cursor)
-		
+	if passage == -9999:
+		browserdata.append('could not find a Perseus reference in the Hipparchia DB: '+request.args.get('locus', ''))
+
+	
 	browserdata = json.dumps(browserdata)
 	
 	return browserdata

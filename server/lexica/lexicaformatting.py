@@ -279,7 +279,47 @@ def formatmicroentry(entrybody):
 	
 	return entryhtml
 
+
 def insertbrowserlookups(htmlentry):
+	"""
+	there can be a big lag opening the entry for something like εχω: put off the click conversions until later...
+	but debugging is a lot easier via impatientinsertbrowserlookups()
+	
+	:param htmlentry:
+	:return:
+	"""
+	
+	# first retag the items that should not click-to-browse
+	
+	biblios = re.compile(r'(<bibl.*?)(.*?)(</bibl>)')
+	bibs = re.findall(biblios, htmlentry)
+	bdict = {}
+	
+	for bib in bibs:
+		if 'Perseus:abo' not in bib[1]:
+			head = '<unclickablebibl'
+			tail = '</unclickablebibl>'
+		else:
+			head = bib[0]
+			tail = bib[2]
+		bdict[('').join(bib)] = head + bib[1] + tail
+	
+	# print('here',bdict)
+	for key in bdict.keys():
+		htmlentry = re.sub(key, bdict[key], htmlentry)
+	
+	# now do the work of finding the lookups
+	
+	tlgfinder = re.compile(r'n="Perseus:abo:tlg,(\d\d\d\d),(\d\d\d):(.*?)"')
+	phifinder = re.compile(r'n="Perseus:abo:phi,(\d\d\d\d),(\d\d\d):(.*?)"')
+	
+	clickableentry = re.sub(tlgfinder, r'id="gr\1w\2_PE_\3"', htmlentry)
+	clickableentry = re.sub(phifinder, r'id="lt\1w\2_PE_\3"', clickableentry)
+	
+	return clickableentry
+	
+
+def impatientinsertbrowserlookups(htmlentry):
 	"""
 	transform the <bibl> items into things you can click on and see in the work browser
 		in: <bibl n="Perseus:abo:tlg,0527,004:36:11"...>
@@ -288,7 +328,7 @@ def insertbrowserlookups(htmlentry):
 	similarly 67a instead of 67:a in the entry
 	this will require finding a '_LN_' reference with the info that is available...
 	
-	it is tempting not to do this now but to wait for the click to make the transformation
+	it is tempting not to do this now but to wait for the click to make the transformation: quite slow...
 	but this lets you see all of the problems with the data
 	:param htmlentry:
 	:return:
@@ -409,7 +449,8 @@ def insertbrowserjs(htmlentry):
 	:return:
 	"""
 	
-	clickfinder = re.compile(r'<bibl id="(..\d\d\d\dw\d\d\d\_LN_.*?)"')
+	# clickfinder = re.compile(r'<bibl id="(..\d\d\d\dw\d\d\d\_LN_.*?)"')
+	clickfinder = re.compile(r'<bibl id="(..\d\d\d\dw\d\d\d\_PE_.*?)"')
 	clicks = re.findall(clickfinder,htmlentry)
 	
 	if len(clicks) > 0:
