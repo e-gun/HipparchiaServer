@@ -559,7 +559,12 @@ def simplesearchworkwithexclusion(seeking, cursor, workdbname):
 	"""
 	
 	mylimit = ' LIMIT ' + str(session['maxresults'])
-	columns = ['stripped_line', 'hyphenated_words']
+	if session['accentsmatter'] == 'Y':
+		columna = 'marked_up_line'
+	else:
+		columna = 'stripped_line'
+	columnb = 'hyphenated_words'
+	
 	seeking = cleansearchterm(seeking)
 	hyphsearch = seeking
 	db = workdbname[0:10]
@@ -587,8 +592,7 @@ def simplesearchworkwithexclusion(seeking, cursor, workdbname):
 	# drop the trailing ') AND ('
 	qw = qw[0:-6]
 	
-	query = 'SELECT * FROM ' + db + ' WHERE (' + columns[0] + ' ' + mysyntax + ' %s OR ' + columns[
-		1] + ' ' + mysyntax + ' %s) ' + qw + mylimit + ' ORDER BY index ASC'
+	query = 'SELECT * FROM ' + db + ' WHERE (' + columna + ' ' + mysyntax + ' %s OR ' + columnb + ' ' + mysyntax + ' %s) ' + qw + mylimit + ' ORDER BY index ASC'
 	data = tuple(d)
 	cursor.execute(query, data)
 	found = cursor.fetchall()
