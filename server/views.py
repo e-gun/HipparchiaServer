@@ -7,7 +7,7 @@ from flask import render_template, redirect, request, url_for, session
 from server import hipparchia
 from server.dbsupport.dbfunctions import dbauthorandworkmaker, setconnection, perseusidmismatch
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
-from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary
+from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formattedcittationincontext, formatauthinfo, formatworkinfo, formatauthorandworkinfo
 from server.searching.searchfunctions import compileauthorandworklist, phrasesearch, withinxlines, \
@@ -706,6 +706,13 @@ def grabtextforbrowsing():
 		safepassage = tuple(safepassage[:5])
 		passage = finddblinefromlocus(workdb, safepassage, cursor)
 	elif passage[0:4] == '_PE_':
+		# a nasty kludge: should build the fixes into the db
+		if 'gr0006' in workdb:
+			print('fixing',workdb)
+			remapper = dbquickfixes([workdb])
+			workdb = remapper[workdb]
+			workid = workdb[7:]
+			print('-->',workdb)
 		citation = passage[4:].split(':')
 		citation.reverse()
 		passage = finddblinefromincompletelocus(workdb, citation, cursor)
