@@ -34,7 +34,7 @@ def highlightsearchterm(line,searchterm):
 		'ε': '(ε|ἐ|ἑ|ἒ|ἓ|ἔ|ἕ|ὲ|έ|Ε|Ἐ|Ἑ|Ἒ|Ἓ|Ἔ|Ἕ)',
 		'φ': '(φ|Φ)',
 		'γ': '(γ|Γ)',
-		'η': '(η|ᾐ|ᾑ|ᾒ|ᾓ|ᾔ|ᾕ|ᾖ|ᾗ|ῂ|ῃ|ῄ|ῆ|ῇ|ἤ|ἢ|ἥ|ἣ|ὴ|\u1f75|ἡ|ἦ|Η|ᾘ|ᾙ|ᾚ|ᾛ|ᾜ|ᾝ|ᾞ|ᾟ|Ἠ|Ἡ|Ἢ|Ἣ|Ἤ|Ἥ|Ἦ|Ἧ)',
+		'η': '(η|ᾐ|ᾑ|ᾒ|ᾓ|ᾔ|ᾕ|ᾖ|ᾗ|ῂ|ῃ|ῄ|ῆ|ῇ|ἤ|ἢ|ἥ|ἣ|ὴ|ή|ἡ|ἦ|Η|ᾘ|ᾙ|ᾚ|ᾛ|ᾜ|ᾝ|ᾞ|ᾟ|Ἠ|Ἡ|Ἢ|Ἣ|Ἤ|Ἥ|Ἦ|Ἧ)',
 		'ι': '(ι|ἰ|ἱ|ἲ|ἳ|ἴ|ἵ|ἶ|ἷ|ὶ|ί|ῐ|ῑ|ῒ|ΐ|ῖ|ῗ|ΐ|Ἰ|Ἱ|Ἲ|Ἳ|Ἴ|Ἵ|Ἶ|Ἷ|Ι)',
 		'ξ': '(ξ|Ξ)',
 		'κ': '(κ|Κ)',
@@ -136,6 +136,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	for line in lines:
 		line = list(line)
 		line[1] = re.sub(r'<.*?>','',line[1])
+		line[1] = re.sub(r'\s$', '', line[1])
 		if session['accentsmatter'] != 'Y':
 			line[1] = re.sub(r'[^\w\s]', '', line[1])
 			hyphen = line[2].split(' ')
@@ -146,7 +147,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 		wordsinline = line[1].split(' ')
 
 		if line[0] == linenumber-1:
-			if line[2] == '':
+			if hyphen == '':
 				text = wordsinline[(numberofextrawords * -1):]
 			else:
 				wordsinline = wordsinline[:-1] + [hyphen]
@@ -154,7 +155,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 		elif line[0] == linenumber:
 			if hyphenmemory == True:
 				wordsinline = wordsinline[1:]
-			if line[2] == '':
+			if hyphen == '':
 				text += wordsinline
 			else:
 				text += wordsinline[:-1] + [hyphen]
