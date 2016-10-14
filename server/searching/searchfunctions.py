@@ -12,7 +12,7 @@ from server.dbsupport.dbfunctions import setconnection
 from server.formatting_helper_functions import tidyuplist, dropdupes
 from server.hipparchiaclasses import MPCounter
 from server.searching.searchformatting import aggregatelines, cleansearchterm, prunebydate, dbauthorandworkmaker, \
-	removespuria, sortandunpackresults
+	removespuria, sortandunpackresults, lookoutsideoftheline
 
 
 def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist):
@@ -73,7 +73,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		try: i = searching.pop()
-		except: i = (-1,'gr0000w000')
+		except: i = (-1,'gr0001w001')
 		commitcount.increment()
 		if commitcount.value % 750 == 0:
 			dbconnection.commit()
@@ -119,7 +119,7 @@ def workonphrasesearch(hits, seeking, searching, commitcount):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		try: i = searching.pop()
-		except: i = (-1,'gr0000w000')
+		except: i = (-1,'gr0001w001')
 		commitcount.increment()
 		if commitcount.value % 750 == 0:
 			dbconnection.commit()
@@ -621,10 +621,10 @@ def phrasesearch(searchphrase, cursor, wkid):
 	
 	fullmatches = []
 	for hit in hits:
-		wordset = aggregatelines(hit[0] - 1, hit[0] + 1, cursor, wkid)
+		# wordset = aggregatelines(hit[0] - 1, hit[0] + 1, cursor, wkid)
+		phraselen = len(searchphrase.split(' '))
+		wordset = lookoutsideoftheline(hit[0], phraselen-1, wkid, cursor)
 		if session['nearornot'] == 'T' and re.search(searchphrase, wordset) is not None:
-			# note the syntax conflict here: a SIMILAR search will bork this
-			# should probably kill off session['searchsyntax']
 			fullmatches.append(hit)
 		elif session['nearornot'] == 'F' and re.search(searchphrase, wordset) is None:
 			fullmatches.append(hit)

@@ -76,7 +76,7 @@ def highlightsearchterm(line,searchterm):
 	try:
 		newline = line[0:find.start()]+'<span class="match">'+find.group()+'</span>'+line[find.end():-1]
 	except:
-		# will barf if you 'find' and empty line, etc
+		# will barf if you 'find' an empty line, etc
 		# i.e., a bug in the search engine will turn into a problem here
 		pass
 
@@ -104,6 +104,71 @@ def resultformatter(raw, searchterm, highlight):
 
 	return formatteddict
 
+
+def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
+	"""
+	grab a line and add the N words at the tail and head of the previous and next lines
+	 this will let you search for phrases that fall along a line break "και δη | και"
+	:param linenumber:
+	:param numberofextrawords:
+	:param workdbname:
+	:param cursor:
+	:return:
+	"""
+	if '_AT_' in workdbname:
+		workdbname = workdbname[0:10]
+
+	if session['accentsmatter'] == 'Y':
+		# setting self up for big problems because you have both accents and markup in here
+		# will need to pass things through a stripper before searching
+		column = 'marked_up_line'
+	else:
+		column = 'stripped_line'
+		
+	query = 'SELECT index,'+column+',hyphenated_words FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
+	data = (linenumber-1, linenumber+1)
+	cursor.execute(query, data)
+	lines = cursor.fetchall()
+	
+	hyphenmemory = False
+	text = []
+
+	for line in lines:
+		line = list(line)
+		line[1] = re.sub(r'<.*?>','',line[1])
+		if session['accentsmatter'] != 'Y':
+			line[1] = re.sub(r'[^\w\s]', '', line[1])
+			hyphen = line[2].split(' ')
+			hyphen = hyphen[0]
+		else:
+			hyphen = line[2].split(' ')
+			hyphen = hyphen[1]
+		wordsinline = line[1].split(' ')
+
+		if line[0] == linenumber-1:
+			if line[2] == '':
+				text = wordsinline[(numberofextrawords * -1):]
+			else:
+				wordsinline = wordsinline[:-1] + [hyphen]
+				text = wordsinline[(numberofextrawords * -1):]
+		elif line[0] == linenumber:
+			if hyphenmemory == True:
+				wordsinline = wordsinline[1:]
+			if line[2] == '':
+				text += wordsinline
+			else:
+				text += wordsinline[:-1] + [hyphen]
+				hyphenmemory = True
+		elif line[0] == linenumber+1:
+			if hyphenmemory == True:
+				wordsinline = wordsinline[1:]
+			text += wordsinline[:numberofextrawords]
+			
+	aggregate = ' '.join(text)
+	aggregate = re.sub(r'\s\s',r' ', aggregate)
+	aggregate = ' ' + aggregate + ' '
+	
+	return aggregate
 
 def aggregatelines(firstline, lastline, cursor, workdbname):
 	"""
@@ -241,6 +306,7 @@ def formattedcittationincontext(line, workdbname, linesofcontext, searchterm, cu
 		
 	authorobject = dbauthorandworkmaker(workdbname[0:6], cursor)
 	citationincontext = []
+	highlightline = line[0]
 	locus = resultformatter(line, searchterm, False)
 	for w in authorobject.listofworks:
 		if w.universalid == workdbname:
@@ -250,19 +316,15 @@ def formattedcittationincontext(line, workdbname, linesofcontext, searchterm, cu
 	# similarly the for-result-in-found loop of search.html generates the clickable elements: <browser id="{{ context['url'] }}">
 	citationincontext.append({'newfind': 1, 'author': authorobject.shortname,
 	                 'work': workobject.title, 'citation': citation, 'url': (workdbname+'_LN_'+str(locus['index']))})
-	environs = simplecontextgrabber(workobject, locus['index'], linesofcontext, cursor)
-	# if you search at the edge of a text you might ask for too much context
-	if len(environs) != linesofcontext+1:
-		linesofcontext = len(environs) -1
-	count = 0
+	environs = simplecontextgrabber(workobject, highlightline, linesofcontext, cursor)
+
 	for found in environs:
-		count += 1
-		if divmod(linesofcontext, count) == (1,linesofcontext-count):
+		if found[0] == highlightline:
 			found = resultformatter(found, searchterm, True)
-			count = -99
 		else:
 			found = resultformatter(found, searchterm, False)
 		citationincontext.append(found)
+		
 	return citationincontext
 
 
