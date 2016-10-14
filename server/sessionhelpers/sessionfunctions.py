@@ -287,6 +287,13 @@ def sessiontimeexclusionsinfo():
 	"""
 	timerestrictions = ''
 	
+	# managing to get here without dates already set: KeyError: 'latestdate'
+	try:
+		session['latestdate']
+	except:
+		session['latestdate'] = '1500'
+		session['earliestdate'] = '-850'
+		
 	if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
 		if int(session['earliestdate']) < 0:
 			e = session['earliestdate'][1:] + ' B.C.E'

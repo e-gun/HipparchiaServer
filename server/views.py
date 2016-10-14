@@ -734,11 +734,14 @@ def grabtextforbrowsing():
 
 @hipparchia.route('/observed', methods=['GET'])
 def findbyform():
-	# this function sets of a chain of other functions
-	# find dictionary form
-	# find the other possible forms
-	# look up the dictionary form
-	# return a formatted set of info
+	"""
+	this function sets of a chain of other functions
+	find dictionary form
+	find the other possible forms
+	look up the dictionary form
+	return a formatted set of info
+	:return:
+	"""
 	word = request.args.get('word', '')
 	word = re.sub('[\W_|]+', '',word)
 	word = removegravity(word)
