@@ -23,6 +23,24 @@ class dbAuthor(object):
 		self.name = akaname
 		self.id = universalid
 
+	def earlier(self, other):
+		return float(self.floruit) < other
+	
+	def later(self, other):
+		return float(self.floruit) > other
+	
+	def atorearlier(self, other):
+		return float(self.floruit) <= other
+	
+	def atorlater(self, other):
+		return float(self.floruit) >= other
+	
+	def floruitis(self, other):
+		return float(self.floruit) == other
+	
+	def floruitisnot(self, other):
+		return float(self.floruit) != other
+
 	def addwork(self, work):
 		self.listofworks.append(work)
 
@@ -34,7 +52,7 @@ class dbOpus(object):
 	it is always going to be importnat to know exactly what kind of object you are handling
 	"""
 
-	def __init__(self, universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05):
+	def __init__(self, universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05, workgenre, transmission, worktype, wordcount, authentic):
 		self.universalid = universalid
 		self.title = title
 		self.language = language
@@ -45,6 +63,11 @@ class dbOpus(object):
 		self.levellabels_03 = levellabels_03
 		self.levellabels_04 = levellabels_04
 		self.levellabels_05 = levellabels_05
+		self.workgenre = workgenre
+		self.transmission = transmission
+		self.worktype = worktype
+		self.wordcount = wordcount
+		self.authentic = authentic
 		self.name = title
 		self.worknumber = int(universalid[7:])
 		self.structure = {}

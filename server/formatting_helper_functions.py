@@ -165,46 +165,39 @@ def stripaccents(texttostrip):
 	return texttostrip
 
 
-def sortauthorandworklists(authorandworklist, cursor):
+def aosortauthorandworklists(authorandworklist, authorsdict):
 	"""
 	send me a list of workuniversalids and i will resort it via the session sortorder
-	:param authorandworklist: (au, wk)
-	:param cursor:
+	:param authorandworklist:
+	:param authorsdict:
 	:return:
 	"""
-	so = session['sortorder']
+	sortby = session['sortorder']
 	templist = []
 	newlist = []
 	
-	# because there is no need to query plutarch 100 times
-	previous = ['', '']
-	
-	if so != 'universalid':
+	if sortby != 'universalid':
 		for a in authorandworklist:
-			if a[0:6] != previous[0]:
-				query = 'SELECT ' + so + ' FROM authors WHERE universalid = %s'
-				data = (a[0:6],)
-				cursor.execute(query, data)
-				found = cursor.fetchone()
-				if so == 'floruit':
-					try:
-						f = float(found[0])
-					except:
-						f = 9999
-				else:
-					f = found[0]
-			else:
-				f = previous[1]
-				
-			templist.append([f, a])
-			previous = [a[0:6], f]
+			auid = a[0:6]
+			crit = getattr(authorsdict[auid], sortby)
+			name = authorsdict[auid].shortname
+			if sortby == 'floruit':
+				try:
+					crit = float(crit)
+				except:
+					crit = 9999
 			
-		templist = sorted(templist, key=itemgetter(0))
+			templist.append([crit, a, name])
+		
+		# http://stackoverflow.com/questions/5212870/sorting-a-python-list-by-two-criteria#17109098
+		# sorted(list, key=lambda x: (x[0], -x[1]))
+		
+		templist = sorted(templist, key=lambda x: (x[0], x[2]))
 		for t in templist:
 			newlist.append(t[1])
 	else:
 		newlist = authorandworklist
-
+	
 	return newlist
 
 
@@ -271,3 +264,84 @@ def bcedating():
 		dmin = dmin + 'C.E.'
 		
 	return dmin, dmax
+
+
+def prunedict(originaldict, element, mustbein):
+	"""
+	trim a dict via a criterion
+	:param originaldict:
+	:param criterion:
+	:param mustbe:
+	:return:
+	"""
+	newdict = {}
+	
+	for item in originaldict:
+		if re.search(mustbein, getattr(originaldict[item], element)) is not None:
+			newdict[item] = originaldict[item]
+
+	return newdict
+
+
+def foundindict(dict, element, mustbein):
+	"""
+	search for an element in a dict
+	return a list of universalids
+	:param dict:
+	:param element:
+	:param mustbein:
+	:return:
+	"""
+	
+	finds = []
+	for item in dict:
+		if getattr(dict[item], element) is not None:
+			if re.search(mustbein, getattr(dict[item], element)) is not None:
+				finds.append(dict[item].universalid)
+	
+	return finds
+
+# slated for removal
+
+def sortauthorandworklists(authorandworklist, cursor):
+	"""
+	send me a list of workuniversalids and i will resort it via the session sortorder
+	:param authorandworklist: (au, wk)
+	:param cursor:
+	:return:
+	"""
+	so = session['sortorder']
+	templist = []
+	newlist = []
+	
+	# because there is no need to query plutarch 100 times
+	previous = ['', '']
+	
+	if so != 'universalid':
+		for a in authorandworklist:
+			if a[0:6] != previous[0]:
+				query = 'SELECT ' + so + ' FROM authors WHERE universalid = %s'
+				data = (a[0:6],)
+				cursor.execute(query, data)
+				found = cursor.fetchone()
+				if so == 'floruit':
+					try:
+						f = float(found[0])
+					except:
+						f = 9999
+				else:
+					f = found[0]
+			else:
+				f = previous[1]
+			
+			templist.append([f, a])
+			previous = [a[0:6], f]
+		
+		templist = sorted(templist, key=itemgetter(0))
+		for t in templist:
+			newlist.append(t[1])
+	else:
+		newlist = authorandworklist
+	
+	return newlist
+

@@ -227,9 +227,40 @@ def aggregatelines(firstline, lastline, cursor, workdbname):
 	return aggregate
 
 
+def aoprunebydate(authorandworklist, authorobjectdict):
+	"""
+	send me a list of authorsandworks and i will trim it via the session date limit variables
+	
+	:param authorandworklist:
+	:param authorobjectdict:
+	:return:
+	"""
+	trimmedlist = []
+	
+	if session['corpora']  == 'G' and (session['earliestdate'] != '-850' or session['latestdate'] != '1500'):
+		min = int(session['earliestdate'])
+		max = int(session['latestdate'])
+		if min > max:
+			min = max
+			session['earliestdate'] = session['latestdate']
+	
+		for aw in authorandworklist:
+			aid = aw[0:6]
+			if authorobjectdict[aid].earlier(min) or authorobjectdict[aid].later(max):
+				pass
+				# print('passing',aw ,authorobjectdict[aid].floruit)
+			else:
+				trimmedlist.append(aw)
+				# print('append', aw, authorobjectdict[aid].floruit)
+	else:
+		trimmedlist = authorandworklist
+
+	return trimmedlist
+
+
 def prunebydate(authorandworklist, cursor):
 	"""
-	send me a list of tuples and i will trim it via the session date limit variables
+	send me a list of authorsandworks and i will trim it via the session date limit variables
 	:param authorandworklist:
 	:param cursor:
 	:return:
@@ -269,6 +300,37 @@ def prunebydate(authorandworklist, cursor):
 	else:
 		trimmedlist = authorandworklist
 
+	return trimmedlist
+
+
+def aoremovespuria(authorandworklist, worksdict):
+	"""
+	at the moment pretty crude: just look for [Sp.] or [sp.] at the end of a title
+	toss it from the list if you find it
+	:param authorandworklist:
+	:param cursor:
+	:return:
+	"""
+	trimmedlist = []
+	
+	sp = re.compile(r'\[(S|s)p\.\]')
+	
+	for aw in authorandworklist:
+		wk = re.sub(r'x',r'w',aw[0:10])
+		title = worksdict[wk].title
+		try:
+			if re.search(sp,title) is not None:
+				for w in session['wkselections']:
+					if w in aw:
+						trimmedlist.append(aw)
+				for w in session['psgselections']:
+					if w in aw:
+						trimmedlist.append(aw)
+			else:
+				trimmedlist.append(aw)
+		except:
+			trimmedlist.append(aw)
+	
 	return trimmedlist
 
 

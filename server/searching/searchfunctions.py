@@ -6,13 +6,12 @@ from multiprocessing import Process, Manager
 import psycopg2
 from flask import session
 
-import server.searching
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
-from server.formatting_helper_functions import tidyuplist, dropdupes
+from server.formatting_helper_functions import tidyuplist, dropdupes, prunedict, foundindict
 from server.hipparchiaclasses import MPCounter
 from server.searching.searchformatting import aggregatelines, cleansearchterm, prunebydate, dbauthorandworkmaker, \
-	removespuria, sortandunpackresults, lookoutsideoftheline
+	removespuria, sortandunpackresults, lookoutsideoftheline, aoprunebydate, aoremovespuria
 
 
 def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist):
@@ -184,51 +183,48 @@ def workonproximitysearch(count, hits, seeking, proximate, searching, commitcoun
 	return hits
 
 
-def compileauthorandworklist(cursor):
+def aocompileauthorandworklist(authordict, workdict):
 	"""
-	helper for the search fncs
-	use session info
+	master author dict + session selctions into a list of dbs to search
+	:param authors:
 	:return:
 	"""
-	
 	searchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + session[
 		'psgselections'] + session['wkselections']
 	exclusionlist = session['auexclusions'] + session['wkexclusions'] + session['agnexclusions'] + session[
 		'wkgnexclusions'] + session['psgexclusions']
 	
+	if session['corpora'] == 'G':
+		authordict = prunedict(authordict, 'universalid', 'gr')
+		workdict = prunedict(workdict, 'universalid', 'gr')
+	elif session['corpora'] == 'L':
+		authordict = prunedict(authordict, 'universalid', 'lt')
+		workdict = prunedict(workdict, 'universalid', 'lt')
+	
 	# build the inclusion list
 	if len(searchlist) > 0:
 		# build lists up from specific items (passages) to more general classes (works, then authors)
-		
+			
+		authorandworklist = []
+		for g in session['wkgnselections']:
+			authorandworklist += foundindict(workdict, 'workgenre', g)
+	
+		authorlist = []
+		for g in session['agnselections']:
+			authorlist = foundindict(authordict, 'genres', g)
+		for a in authorlist:
+			for w in authordict[a].listofworks:
+				authorandworklist.append(w.universalid)
+		del authorlist
+	
 		# a tricky spot: when/how to apply prunebydate()
 		# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
 		# accordingly we will do classes and genres first, then trim by date, then add in individual choices
-		
-		authorandworklist = []
-		for g in session['wkgnselections']:
-			query = 'SELECT universalid FROM works WHERE workgenre LIKE %s'
-			data = (g,)
-			cursor.execute(query, data)
-			wgns = cursor.fetchall()
-			for w in wgns:
-				authorandworklist.append(w[0])
-		
-		authors = []
-		for g in session['agnselections']:
-			authors += authorsbygenre(g, cursor)
-		
-		for author in authors:
-			query = 'SELECT universalid FROM works WHERE universalid LIKE %s'
-			data = (author + 'w%',)
-			cursor.execute(query, data)
-			awks = cursor.fetchall()
-			for w in awks:
-				authorandworklist.append(w[0])
-		
-		authorandworklist = prunebydate(authorandworklist, cursor)
+		authorandworklist = aoprunebydate(authorandworklist, authordict)
 		
 		# now we look at things explicitly chosen:
 		# the passage checks are superfluous if rationalizeselections() got things right
+		
 		passages = session['psgselections']
 		works = session['wkselections']
 		works = tidyuplist(works)
@@ -236,6 +232,7 @@ def compileauthorandworklist(cursor):
 		
 		for w in works:
 			authorandworklist.append(w)
+		del works
 		
 		authors = []
 		for a in session['auselections']:
@@ -243,14 +240,10 @@ def compileauthorandworklist(cursor):
 		
 		tocheck = works + passages
 		authors = dropdupes(authors, tocheck)
-		
-		for author in authors:
-			query = 'SELECT universalid FROM works WHERE universalid LIKE %s'
-			data = (author + 'w%',)
-			cursor.execute(query, data)
-			awks = cursor.fetchall()
-			for w in awks:
-				authorandworklist.append(w[0])
+		for a in authors:
+			for w in authordict[a].listofworks:
+				authorandworklist.append(w.universalid)
+		del authors
 		
 		if len(session['psgselections']) > 0:
 			authorandworklist = dropdupes(authorandworklist, session['psgselections'])
@@ -259,101 +252,48 @@ def compileauthorandworklist(cursor):
 		authorandworklist = list(set(authorandworklist))
 		
 		if session['spuria'] == 'N':
-			authorandworklist = removespuria(authorandworklist, cursor)
-	
+			authorandworklist = aoremovespuria(authorandworklist, workdict)
+			
 	else:
 		# you picked nothing and want everything. well, maybe everything...
-		authorandworklist = []
-		
-		if session['corpora'] == 'B':
-			data = ('%',)
-		elif session['corpora'] == 'L':
-			data = ('lt%',)
-		else:
-			data = ('gr%',)
-		
-		query = 'SELECT universalid FROM works WHERE universalid like %s'
-		cursor.execute(query, data)
-		works = cursor.fetchall()
-		for w in works:
-			authorandworklist.append(w[0])
+		authorandworklist = workdict.keys()
 		
 		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
-			authorandworklist = prunebydate(authorandworklist, cursor)
+			authorandworklist = aoprunebydate(authorandworklist, authordict)
 		
 		if session['spuria'] == 'N':
-			authorandworklist = removespuria(authorandworklist, cursor)
-	
+			authorandworklist = aoremovespuria(authorandworklist, workdict)
+		
 	# build the exclusion list
 	# note that we are not handling excluded individual passages yet
-	exclude = []
+	excludedworks = []
+	
 	if len(exclusionlist) > 0:
-		works = []
-		authors = []
+		excludedworks = []
+		excludedauthors = []
 		
 		for g in session['agnexclusions']:
-			authors += authorsbygenre(g, cursor)
+			excludedauthors += foundindict(authordict, 'genres', g)
 		
 		for a in session['auexclusions']:
-			authors.append(a)
+			excludedauthors.append(a)
+			
+		excludedauthors = tidyuplist(excludedauthors)
 		
-		authors = tidyuplist(authors)
+		for a in excludedauthors:
+			for w in authordict[a].listofworks:
+				excludedworks.append(w.universalid)
+		del excludedauthors
 		
 		for g in session['wkgnexclusions']:
-			query = 'SELECT universalid FROM works WHERE workgenre LIKE %s'
-			data = (g,)
-			cursor.execute(query, data)
-			wgns = cursor.fetchall()
-			for w in wgns:
-				works.append(w[0])
-		
-		for author in authors:
-			query = 'SELECT universalid FROM works WHERE universalid LIKE %s'
-			data = (author + 'w%',)
-			cursor.execute(query, data)
-			awks = cursor.fetchall()
-			for w in awks:
-				exclude.append(w[0])
-		
-		for w in works:
-			exclude.append(w)
-		
-		exclude += session['wkexclusions']
-		
-		exclude = list(set(exclude))
+			excludedworks += foundindict(workdict, 'workgenre', g)
+			
+		excludedworks += session['wkexclusions']
+		excludedworks = list(set(excludedworks))
 	
-	authorandworklist = list(set(authorandworklist) - set(exclude))
+	authorandworklist = list(set(authorandworklist) - set(excludedworks))
 	
 	return authorandworklist
-
-
-def authorsbygenre(genre, cursor):
-	authorandworktuplelist = []
-	query = 'SELECT universalid FROM authors WHERE genres LIKE %s'
-	data = (genre,)
-	cursor.execute(query, data)
-	authortuples = cursor.fetchall()
-	# a collection of tuples: [('gr4329',), ('gr4331',)]
-	# but we want just a list
-	authorlist = []
-	for author in authortuples:
-		authorlist.append(author[0])
-	
-	return authorlist
-
-
-def authorsandworksbygenre(cursor, genre):
-	authorandworktuplelist = []
-	query = 'SELECT universalid FROM authors WHERE genres LIKE %s'
-	data = (genre,)
-	cursor.execute(query, data)
-	authorlist = cursor.fetchall()
-	# returns something like: ('gr0017',)
-	for author in authorlist:
-		authorobject = dbauthorandworkmaker(author[0], cursor)
-		for workcount in range(0, len(authorobject.listofworks)):
-			authorandworktuplelist.append((authorobject, workcount + 1))
-	return authorandworktuplelist
 
 
 def flagexclusions(authorandworklist):
@@ -733,3 +673,176 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname):
 			fullmatches.append(hit)
 	
 	return fullmatches
+
+# slated for removal
+
+def compileauthorandworklist(cursor):
+	"""
+	helper for the search fncs
+	use session info
+	:return:
+	"""
+	
+	searchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + session[
+		'psgselections'] + session['wkselections']
+	exclusionlist = session['auexclusions'] + session['wkexclusions'] + session['agnexclusions'] + session[
+		'wkgnexclusions'] + session['psgexclusions']
+	
+	# build the inclusion list
+	if len(searchlist) > 0:
+		# build lists up from specific items (passages) to more general classes (works, then authors)
+		
+		# a tricky spot: when/how to apply prunebydate()
+		# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
+		# accordingly we will do classes and genres first, then trim by date, then add in individual choices
+		
+		authorandworklist = []
+		for g in session['wkgnselections']:
+			query = 'SELECT universalid FROM works WHERE workgenre LIKE %s'
+			data = (g,)
+			cursor.execute(query, data)
+			wgns = cursor.fetchall()
+			for w in wgns:
+				authorandworklist.append(w[0])
+		
+		authors = []
+		for g in session['agnselections']:
+			authors += authorsbygenre(g, cursor)
+		
+		for author in authors:
+			query = 'SELECT universalid FROM works WHERE universalid LIKE %s'
+			data = (author + 'w%',)
+			cursor.execute(query, data)
+			awks = cursor.fetchall()
+			for w in awks:
+				authorandworklist.append(w[0])
+		
+		authorandworklist = prunebydate(authorandworklist, cursor)
+		
+		# now we look at things explicitly chosen:
+		# the passage checks are superfluous if rationalizeselections() got things right
+		passages = session['psgselections']
+		works = session['wkselections']
+		works = tidyuplist(works)
+		works = dropdupes(works, passages)
+		
+		for w in works:
+			authorandworklist.append(w)
+		
+		authors = []
+		for a in session['auselections']:
+			authors.append(a)
+		
+		tocheck = works + passages
+		authors = dropdupes(authors, tocheck)
+		
+		for author in authors:
+			query = 'SELECT universalid FROM works WHERE universalid LIKE %s'
+			data = (author + 'w%',)
+			cursor.execute(query, data)
+			awks = cursor.fetchall()
+			for w in awks:
+				authorandworklist.append(w[0])
+		
+		if len(session['psgselections']) > 0:
+			authorandworklist = dropdupes(authorandworklist, session['psgselections'])
+			authorandworklist = session['psgselections'] + authorandworklist
+		
+		authorandworklist = list(set(authorandworklist))
+		
+		if session['spuria'] == 'N':
+			authorandworklist = removespuria(authorandworklist, cursor)
+	
+	else:
+		# you picked nothing and want everything. well, maybe everything...
+		authorandworklist = []
+		
+		if session['corpora'] == 'B':
+			data = ('%',)
+		elif session['corpora'] == 'L':
+			data = ('lt%',)
+		else:
+			data = ('gr%',)
+		
+		query = 'SELECT universalid FROM works WHERE universalid like %s'
+		cursor.execute(query, data)
+		works = cursor.fetchall()
+		for w in works:
+			authorandworklist.append(w[0])
+		
+		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
+			authorandworklist = prunebydate(authorandworklist, cursor)
+		
+		if session['spuria'] == 'N':
+			authorandworklist = removespuria(authorandworklist, cursor)
+	
+	# build the exclusion list
+	# note that we are not handling excluded individual passages yet
+	exclude = []
+	if len(exclusionlist) > 0:
+		works = []
+		authors = []
+		
+		for g in session['agnexclusions']:
+			authors += authorsbygenre(g, cursor)
+		
+		for a in session['auexclusions']:
+			authors.append(a)
+		
+		authors = tidyuplist(authors)
+		
+		for g in session['wkgnexclusions']:
+			query = 'SELECT universalid FROM works WHERE workgenre LIKE %s'
+			data = (g,)
+			cursor.execute(query, data)
+			wgns = cursor.fetchall()
+			for w in wgns:
+				works.append(w[0])
+		
+		for author in authors:
+			query = 'SELECT universalid FROM works WHERE universalid LIKE %s'
+			data = (author + 'w%',)
+			cursor.execute(query, data)
+			awks = cursor.fetchall()
+			for w in awks:
+				exclude.append(w[0])
+		
+		for w in works:
+			exclude.append(w)
+		
+		exclude += session['wkexclusions']
+		
+		exclude = list(set(exclude))
+	
+	authorandworklist = list(set(authorandworklist) - set(exclude))
+	
+	return authorandworklist
+
+
+def authorsbygenre(genre, cursor):
+	authorandworktuplelist = []
+	query = 'SELECT universalid FROM authors WHERE genres LIKE %s'
+	data = (genre,)
+	cursor.execute(query, data)
+	authortuples = cursor.fetchall()
+	# a collection of tuples: [('gr4329',), ('gr4331',)]
+	# but we want just a list
+	authorlist = []
+	for author in authortuples:
+		authorlist.append(author[0])
+	
+	return authorlist
+
+
+def authorsandworksbygenre(cursor, genre):
+	authorandworktuplelist = []
+	query = 'SELECT universalid FROM authors WHERE genres LIKE %s'
+	data = (genre,)
+	cursor.execute(query, data)
+	authorlist = cursor.fetchall()
+	# returns something like: ('gr0017',)
+	for author in authorlist:
+		authorobject = dbauthorandworkmaker(author[0], cursor)
+		for workcount in range(0, len(authorobject.listofworks)):
+			authorandworktuplelist.append((authorobject, workcount + 1))
+	return authorandworktuplelist

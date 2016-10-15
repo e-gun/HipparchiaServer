@@ -5,30 +5,43 @@ import re
 from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import dbauthorandworkmaker, setconnection, perseusidmismatch
+from server.dbsupport.dbfunctions import dbauthorandworkmaker, setconnection, perseusidmismatch, loadallauthors
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formattedcittationincontext, formatauthinfo, formatworkinfo, formatauthorandworkinfo
 from server.searching.searchfunctions import compileauthorandworklist, phrasesearch, withinxlines, \
-	withinxwords, partialwordsearch, concsearch, flagexclusions, simplesearchworkwithexclusion, searchdispatcher
+	withinxwords, partialwordsearch, concsearch, flagexclusions, simplesearchworkwithexclusion, searchdispatcher, \
+	aocompileauthorandworklist
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordance
 from server.textsandconcordnaces.textbuilder import buildfulltext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, setsessionvarviadb, sessionselectionsashtml, rationalizeselections
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, sortauthorandworklists, \
-	dropdupes, bcedating
+	dropdupes, bcedating, aosortauthorandworklists
 from server.browsing.browserfunctions import getandformatbrowsercontext
 
 # all you need is read-only access
 # it is a terrible idea to connect with a user who can write
-dbconnection = setconnection('autocommit')
+dbconnection = setconnection('noautocommit')
 cursor = dbconnection.cursor()
 
+# ready some sets of objects that will be generally available: two seconds spent here will save you 2s over and over again later as you constantly regenerate author and work info
+print('loading authors and works...')
+authorobjects = loadallauthors(cursor)
+authors = {}
+for a in authorobjects:
+	authors[a.id] = a
+
+works = {}
+for a in authors.keys():
+	for w in authors[a].listofworks:
+		works[w.universalid] = w
 
 @hipparchia.route('/', methods=['GET', 'POST'])
 def search():
+	global authors
 	sessionvariables(cursor)
 	# need to sanitize input at least a bit...
 	try:
@@ -63,11 +76,13 @@ def search():
 	
 	if len(seeking) > 0:
 		starttime = time.time()
-		authorandworklist = compileauthorandworklist(cursor)
+		# authorandworklist = compileauthorandworklist(cursor)
+		authorandworklist = aocompileauthorandworklist(authors, works)
 		
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		authorandworklist = flagexclusions(authorandworklist)
-		authorandworklist = sortauthorandworklists(authorandworklist, cursor)
+		#authorandworklist = sortauthorandworklists(authorandworklist, cursor)
+		authorandworklist = aosortauthorandworklists(authorandworklist, authors)
 		
 		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
 		# so we slap on an index value
@@ -606,40 +621,31 @@ def getauthinfo():
 
 
 @hipparchia.route('/getsearchlistcontents')
-def getsearchlistcontents():
+def aogetsearchlistcontents():
+
+	authorandworklist = aocompileauthorandworklist(authors, works)
+	authorandworklist = aosortauthorandworklists(authorandworklist, authors)
 	
-	authorandworklist = compileauthorandworklist(cursor)
-	authorandworklist = sortauthorandworklists(authorandworklist, cursor)
+	searchlistinfo = '<br /><h3>Proposing to search the following works:</h3>\n'
+	searchlistinfo += '(Results will be arranged according to '+session['sortorder']+')<br /><br />\n'
 	
-	searchlistinfo = '<br /><h3>Proposing to search the following works:</h3>'
-	memory = ['','']
 	count = 0
 	wordstotal = 0
 	for work in authorandworklist:
-		count +=1
-		if work[0:6] == memory[0]:
-			a = memory[1]
-		else:
-			query = 'SELECT shortname FROM authors WHERE universalid = %s'
-			data = (work[0:6],)
-			cursor.execute(query, data)
-			a = cursor.fetchone()
-		query = 'SELECT universalid, title, workgenre, wordcount, publication_info FROM works WHERE universalid = %s'
-		data = (work,)
-		cursor.execute(query, data)
-		w = cursor.fetchone()
+		count += 1
+		w = (works[work].universalid, works[work].title, works[work].workgenre, works[work].wordcount, works[work].publication_info)
+		a = authors[work[0:6]].shortname
+		
 		try:
 			wordstotal += w[3]
 		except:
 			# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
 			pass
-		searchlistinfo += '\n['+str(count)+']&nbsp;'+formatauthorandworkinfo(a[0], w)
-		memory[0] = work[0:6]
-		memory[1] = a
+		searchlistinfo += '\n[' + str(count) + ']&nbsp;' + formatauthorandworkinfo(a, w)
 	
 	if wordstotal > 0:
-		searchlistinfo += '<br /><span class="emph">total words:</span> '+format(wordstotal, ',d')
-
+		searchlistinfo += '<br /><span class="emph">total words:</span> ' + format(wordstotal, ',d')
+	
 	searchlistinfo = json.dumps(searchlistinfo)
 	
 	return searchlistinfo
@@ -652,10 +658,7 @@ def getgenrelistcontents():
 	except:
 		setsessionvarviadb('workgenre', 'works', cursor)
 	
-	try:
-		ag = session['genres']
-	except:
-		setavalablegenrelist(cursor)
+	ag = session['genres']
 	
 	genrelists = ''
 	
@@ -1115,4 +1118,44 @@ def singlethreadedsearch():
 		                       dmin=dmin, dmax=dmax)
 	
 	return page
+
+# slated for removal
+
+@hipparchia.route('/oldgetsearchlistcontents')
+def getsearchlistcontents():
+	authorandworklist = compileauthorandworklist(cursor)
+	authorandworklist = sortauthorandworklists(authorandworklist, cursor)
+	
+	searchlistinfo = '<br /><h3>Proposing to search the following works:</h3>'
+	memory = ['', '']
+	count = 0
+	wordstotal = 0
+	for work in authorandworklist:
+		count += 1
+		if work[0:6] == memory[0]:
+			a = memory[1]
+		else:
+			query = 'SELECT shortname FROM authors WHERE universalid = %s'
+			data = (work[0:6],)
+			cursor.execute(query, data)
+			a = cursor.fetchone()
+		query = 'SELECT universalid, title, workgenre, wordcount, publication_info FROM works WHERE universalid = %s'
+		data = (work,)
+		cursor.execute(query, data)
+		w = cursor.fetchone()
+		try:
+			wordstotal += w[3]
+		except:
+			# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
+			pass
+		searchlistinfo += '\n[' + str(count) + ']&nbsp;' + formatauthorandworkinfo(a[0], w)
+		memory[0] = work[0:6]
+		memory[1] = a
+	
+	if wordstotal > 0:
+		searchlistinfo += '<br /><span class="emph">total words:</span> ' + format(wordstotal, ',d')
+	
+	searchlistinfo = json.dumps(searchlistinfo)
+	
+	return searchlistinfo
 
