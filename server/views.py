@@ -9,7 +9,8 @@ from server.dbsupport.dbfunctions import dbauthorandworkmaker, setconnection, pe
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
-from server.searching.searchformatting import formattedcittationincontext, formatauthinfo, formatworkinfo, formatauthorandworkinfo
+from server.searching.searchformatting import formattedcittationincontext, aoformatauthinfo, formatauthorandworkinfo, \
+	dbformatauthinfo, woformatworkinfo, dbformatworkinfo
 from server.searching.searchfunctions import compileauthorandworklist, phrasesearch, withinxlines, \
 	withinxwords, partialwordsearch, concsearch, flagexclusions, simplesearchworkwithexclusion, searchdispatcher, \
 	aocompileauthorandworklist
@@ -19,7 +20,7 @@ from server.textsandconcordnaces.textbuilder import buildfulltext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, setsessionvarviadb, sessionselectionsashtml, rationalizeselections
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, sortauthorandworklists, \
-	dropdupes, bcedating, aosortauthorandworklists
+	dropdupes, bcedating, aosortauthorandworklists, prunedict
 from server.browsing.browserfunctions import getandformatbrowsercontext
 
 # all you need is read-only access
@@ -30,18 +31,18 @@ cursor = dbconnection.cursor()
 # ready some sets of objects that will be generally available: two seconds spent here will save you 2s over and over again later as you constantly regenerate author and work info
 print('loading authors and works...')
 authorobjects = loadallauthors(cursor)
-authors = {}
+authordict = {}
 for a in authorobjects:
-	authors[a.id] = a
+	authordict[a.id] = a
 
-works = {}
-for a in authors.keys():
-	for w in authors[a].listofworks:
-		works[w.universalid] = w
+workdict = {}
+for a in authordict.keys():
+	for w in authordict[a].listofworks:
+		workdict[w.universalid] = w
 
 @hipparchia.route('/', methods=['GET', 'POST'])
 def search():
-	global authors
+	
 	sessionvariables(cursor)
 	# need to sanitize input at least a bit...
 	try:
@@ -77,12 +78,12 @@ def search():
 	if len(seeking) > 0:
 		starttime = time.time()
 		# authorandworklist = compileauthorandworklist(cursor)
-		authorandworklist = aocompileauthorandworklist(authors, works)
+		authorandworklist = aocompileauthorandworklist(authordict, workdict)
 		
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		authorandworklist = flagexclusions(authorandworklist)
 		#authorandworklist = sortauthorandworklists(authorandworklist, cursor)
-		authorandworklist = aosortauthorandworklists(authorandworklist, authors)
+		authorandworklist = aosortauthorandworklists(authorandworklist, authordict)
 		
 		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
 		# so we slap on an index value
@@ -190,7 +191,8 @@ def concordance():
 		print('failed to pick a text for the concordance builder:', work, str(len(work)))
 		work = 'lt0022w012_conc'
 	
-	author = dbauthorandworkmaker(work[0:6], cursor)
+	#author = dbauthorandworkmaker(work[0:6], cursor)
+	author = authordict[work[0:6]]
 	authorname = author.shortname
 	
 	allworks = []
@@ -253,7 +255,8 @@ def workdump():
 		mode = 0
 		
 	if len(work) == 10:
-		author = dbauthorandworkmaker(work[0:6], cursor)
+		# author = dbauthorandworkmaker(work[0:6], cursor)
+		author = authordict[work[0:6]]
 		authorname = author.shortname
 		
 		for w in author.listofworks:
@@ -287,9 +290,9 @@ def workdump():
 
 @hipparchia.route('/authors')
 def authorlist():
-	authors = loadallauthors(cursor)
+	# authors = loadallauthors(cursor)
+	authors = authorobjects
 	return render_template('lister.html', found=authors, numberfound=len(authors))
-
 
 #
 # helpers & routes you should not browse directly
@@ -408,39 +411,26 @@ def setsessionvariable():
 
 
 @hipparchia.route('/getauthorhint', methods=['GET'])
-def dbofferauthorhints():
+def aoofferauthorhints():
+	"""
+	fill the hint box with constantly updated values
+	:return:
+	"""
+	global authordict
 
-	# jquery sends: ImmutableMultiDict([('term', 'hero')])
-	# the 'q' is from the GET: xmlhttp.open("GET", "/gethint?q="+str, true);
-	# will return to the browser something like:  {"q": "ab"}
-	# z = request.args.get('term')
-	# print(z)
-	# but we need '[' for spuria
-	# strippedquery = re.sub('[\W_]+','',request.args.get('term', ''))
 	strippedquery = re.sub(r'[!@#$|%()*\'\"]','',request.args.get('term', ''))
-	# this returns what you typed: 'qaz', etc
-	# print('len of avail',len(''.join(session['availableauthors'])))
 
-	if session['corpora'] == 'B':
-		query = 'SELECT language,cleanname,universalid from authors ORDER BY universalid ASC'
-		cursor.execute(query)
+	if session['corpora'] == 'G':
+		authordict = prunedict(authordict, 'universalid', 'gr')
 	elif session['corpora'] == 'L':
-		query = 'SELECT language,cleanname,universalid from authors WHERE universalid LIKE %s ORDER BY universalid ASC'
-		data = ('lt%',)
-		cursor.execute(query,data)
-	elif session['corpora'] == 'G':
-		query = 'SELECT language,cleanname,universalid from authors WHERE universalid LIKE %s ORDER BY universalid ASC'
-		data = ('gr%',)
-		cursor.execute(query,data)
+		authordict = prunedict(authordict, 'universalid', 'lt')
 
-	result = cursor.fetchall()
 	authorlist = []
-	for r in result:
-		if r[0] == 'L':
-			authorlist.append(r[1]+' ['+r[2]+']')
-		else:
-			authorlist.append(r[1] + ' ['+r[2]+']')
-
+	for a in authordict:
+		authorlist.append(authordict[a].cleanname+' ['+authordict[a].universalid+']')
+		
+	authorlist.sort()
+	
 	hint = []
 
 	if strippedquery != '':
@@ -457,28 +447,39 @@ def dbofferauthorhints():
 
 
 @hipparchia.route('/getworkhint', methods=['GET'])
-def offerworkhints():
-	# tell me the author, i'll return all the works to populate the hint box
+def woofferworkhints():
+	"""
+	fill the hint box with constantly updated values
+	:return:
+	"""
+	# global authordict
+	
 	strippedquery = re.sub('[\W_]+', '', request.args.get('auth', ''))
+	
 	hint = []
-	query = 'SELECT * FROM works WHERE universalid LIKE %s ORDER BY universalid ASC'
-	# query = 'SELECT * FROM works'
-	data = (strippedquery+'%',)
-	cursor.execute(query, data)
-	worklist = cursor.fetchall()
-
-	for work in worklist:
-		hint.append({'value':work[1]+' ('+work[0][-4:]+')'})
-	if hint == []:
-		hint.append({'value': 'somehow failed to find any works'})
-
+	
+	try:
+		myauthor = authordict[strippedquery]
+	except:
+		myauthor = None
+	
+	if myauthor is not None:
+		worklist = myauthor.listofworks
+		for work in worklist:
+			hint.append({'value':work.title+' ('+work.universalid[-4:]+')'})
+		if hint == []:
+			hint.append({'value': 'somehow failed to find any works: try picking the author again'})
+	else:
+		hint.append({'value': 'author was not properly loaded: try again'})
+	
 	hint = json.dumps(hint)
 
 	return hint
 
 
 @hipparchia.route('/getgenrehint', methods=['GET'])
-def genrelist():
+def aogenrelist():
+	# this needs a lot of refactoring: genres should be removed from the session and put into a global
 	try:
 		session['genres']
 	except:
@@ -511,6 +512,7 @@ def genrelist():
 
 @hipparchia.route('/getworkgenrehint', methods=['GET'])
 def wkgenrelist():
+	# this needs a lot of refactoring: genres should be removed from the session and put into a global
 	try:
 		session['workgenres']
 	except:
@@ -557,7 +559,8 @@ def workstructure():
 		safepassage.append(re.sub('[!@#$%^&*()=]+', '',level))
 	safepassage = tuple(safepassage[:5])
 	workdb = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
-	ao = dbauthorandworkmaker(workdb[:6], cursor)
+	# ao = dbauthorandworkmaker(workdb[:6], cursor)
+	ao = authordict[workdb[:6]]
 	structure = {}
 	for work in ao.listofworks:
 		if work.universalid == workdb:
@@ -585,7 +588,7 @@ def getsessionvariables():
 
 
 @hipparchia.route('/getauthorinfo', methods=['GET'])
-def getauthinfo():
+def aogetauthinfo():
 	"""
 	show local info about the author one is considering in the selection box
 	:return:
@@ -593,10 +596,7 @@ def getauthinfo():
 	
 	authorid = re.sub('[\W_]+', '', request.args.get('au', ''))
 	
-	query = 'SELECT cleanname, universalid, genres, floruit, location, language FROM authors WHERE universalid=%s'
-	data = (authorid,)
-	cursor.execute(query, data)
-	a = cursor.fetchone()
+	theauthor = authordict[authorid]
 	
 	query = 'SELECT universalid, title, workgenre, wordcount, publication_info FROM works WHERE universalid LIKE %s'
 	data = (authorid+'%',)
@@ -605,15 +605,15 @@ def getauthinfo():
 	w.sort()
 	
 	authinfo = ''
-	authinfo += formatauthinfo(a)
+	authinfo += aoformatauthinfo(theauthor)
 	
-	if len(w) > 1:
+	if len(theauthor.listofworks) > 1:
 		authinfo +='<br /><br /><span class="italic">work numbers:</span><br />\n'
 	else:
 		authinfo +='<br /><span class="italic">work:</span><br />\n'
 	
-	for work in w:
-		authinfo += formatworkinfo(work)
+	for work in theauthor.listofworks:
+		authinfo += woformatworkinfo(work)
 		
 	authinfo = json.dumps(authinfo)
 
@@ -623,8 +623,8 @@ def getauthinfo():
 @hipparchia.route('/getsearchlistcontents')
 def aogetsearchlistcontents():
 
-	authorandworklist = aocompileauthorandworklist(authors, works)
-	authorandworklist = aosortauthorandworklists(authorandworklist, authors)
+	authorandworklist = aocompileauthorandworklist(authordict, workdict)
+	authorandworklist = aosortauthorandworklists(authorandworklist, authordict)
 	
 	searchlistinfo = '<br /><h3>Proposing to search the following works:</h3>\n'
 	searchlistinfo += '(Results will be arranged according to '+session['sortorder']+')<br /><br />\n'
@@ -633,8 +633,8 @@ def aogetsearchlistcontents():
 	wordstotal = 0
 	for work in authorandworklist:
 		count += 1
-		w = (works[work].universalid, works[work].title, works[work].workgenre, works[work].wordcount, works[work].publication_info)
-		a = authors[work[0:6]].shortname
+		w = (workdict[work].universalid, workdict[work].title, workdict[work].workgenre, workdict[work].wordcount, workdict[work].publication_info)
+		a = authordict[work[0:6]].shortname
 		
 		try:
 			wordstotal += w[3]
@@ -690,7 +690,8 @@ def grabtextforbrowsing():
 	"""
 	
 	workdb = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
-	ao = dbauthorandworkmaker(workdb[:6], cursor)
+	# ao = dbauthorandworkmaker(workdb[:6], cursor)
+	ao = authordict[workdb[:6]]
 	workid = workdb[7:]
 	
 	ctx = int(session['browsercontext'])
@@ -1159,3 +1160,140 @@ def getsearchlistcontents():
 	
 	return searchlistinfo
 
+
+@hipparchia.route('/oldgetauthorhint', methods=['GET'])
+def dbofferauthorhints():
+
+	# jquery sends: ImmutableMultiDict([('term', 'hero')])
+	# the 'q' is from the GET: xmlhttp.open("GET", "/gethint?q="+str, true);
+	# will return to the browser something like:  {"q": "ab"}
+	# z = request.args.get('term')
+	# print(z)
+	# but we need '[' for spuria
+	# strippedquery = re.sub('[\W_]+','',request.args.get('term', ''))
+	strippedquery = re.sub(r'[!@#$|%()*\'\"]','',request.args.get('term', ''))
+	# this returns what you typed: 'qaz', etc
+	# print('len of avail',len(''.join(session['availableauthors'])))
+
+	if session['corpora'] == 'B':
+		query = 'SELECT language,cleanname,universalid from authors ORDER BY universalid ASC'
+		cursor.execute(query)
+	elif session['corpora'] == 'L':
+		query = 'SELECT language,cleanname,universalid from authors WHERE universalid LIKE %s ORDER BY universalid ASC'
+		data = ('lt%',)
+		cursor.execute(query,data)
+	elif session['corpora'] == 'G':
+		query = 'SELECT language,cleanname,universalid from authors WHERE universalid LIKE %s ORDER BY universalid ASC'
+		data = ('gr%',)
+		cursor.execute(query,data)
+
+	result = cursor.fetchall()
+	authorlist = []
+	for r in result:
+		if r[0] == 'L':
+			authorlist.append(r[1]+' ['+r[2]+']')
+		else:
+			authorlist.append(r[1] + ' ['+r[2]+']')
+
+	hint = []
+
+	if strippedquery != '':
+		query = strippedquery.lower()
+		qlen = len(query)
+		for author in authorlist:
+			if query == author.lower()[0:qlen]:
+				# jquery will gobble up label and value
+				# another tag can be used for holding other info
+				# pass that to 'ui.item.OTHERTAG' to be evaluated
+				hint.append({'value':author})
+	hint = json.dumps(hint)
+	return hint
+
+
+@hipparchia.route('/oldgetworkhint', methods=['GET'])
+def dbofferworkhints():
+	# tell me the author, i'll return all the works to populate the hint box
+	strippedquery = re.sub('[\W_]+', '', request.args.get('auth', ''))
+	hint = []
+	query = 'SELECT * FROM works WHERE universalid LIKE %s ORDER BY universalid ASC'
+	# query = 'SELECT * FROM works'
+	data = (strippedquery+'%',)
+	cursor.execute(query, data)
+	worklist = cursor.fetchall()
+
+	for work in worklist:
+		hint.append({'value':work[1]+' ('+work[0][-4:]+')'})
+	if hint == []:
+		hint.append({'value': 'somehow failed to find any works'})
+
+	hint = json.dumps(hint)
+
+	return hint
+
+
+@hipparchia.route('/oldgetgenrehint', methods=['GET'])
+def dbgenrelist():
+	try:
+		session['genres']
+	except:
+		session['genres'] = setsessionvarviadb('genres', 'authors', cursor)
+
+	# the evil big cookie problem
+	availablegenres = session['genres']
+
+	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
+
+	hint = []
+	if session['corpora'] != 'L':
+		if strippedquery != '':
+			query = strippedquery.lower()
+			qlen = len(query)
+			for genre in availablegenres:
+				hintgenre = genre.lower()
+				if query == hintgenre[0:qlen]:
+					# jquery will gobble up label and value
+					# another tag can be used for holding other info
+					# pass that to 'ui.item.OTHERTAG' to be evaluated
+					hint.append({'value': genre})
+	else:
+		hint = ['(genre unsupported on the Latin data)']
+
+	hint = json.dumps(hint)
+
+	return hint
+
+
+@hipparchia.route('/oldgetauthorinfo', methods=['GET'])
+def dbgetauthinfo():
+	"""
+	show local info about the author one is considering in the selection box
+	:return:
+	"""
+	
+	authorid = re.sub('[\W_]+', '', request.args.get('au', ''))
+	
+	query = 'SELECT cleanname, universalid, genres, floruit, location, language FROM authors WHERE universalid=%s'
+	data = (authorid,)
+	cursor.execute(query, data)
+	a = cursor.fetchone()
+	
+	query = 'SELECT universalid, title, workgenre, wordcount, publication_info FROM works WHERE universalid LIKE %s'
+	data = (authorid + '%',)
+	cursor.execute(query, data)
+	w = cursor.fetchall()
+	w.sort()
+	
+	authinfo = ''
+	authinfo += dbformatauthinfo(a)
+	
+	if len(w) > 1:
+		authinfo += '<br /><br /><span class="italic">work numbers:</span><br />\n'
+	else:
+		authinfo += '<br /><span class="italic">work:</span><br />\n'
+	
+	for work in w:
+		authinfo += dbformatworkinfo(work)
+	
+	authinfo = json.dumps(authinfo)
+	
+	return authinfo

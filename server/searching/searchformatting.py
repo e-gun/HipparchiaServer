@@ -395,49 +395,39 @@ def formattedcittationincontext(line, workdbname, linesofcontext, searchterm, cu
 	return citationincontext
 
 
-def formatauthinfo(authinfo):
+def aoformatauthinfo(authorobject):
 	"""
-	db data into html
-	send me: cleanname, universalid, genres, floruit, location, language
-	
+	ao data into html
+	:param authorobject:
+	:return:
 	"""
-	
-	n = authinfo[0]
-	d = authinfo[1]
-	g = authinfo[2]
-	f = authinfo[3]
-	lc = authinfo[4]
-	lg = authinfo[5]
-	
-	n = '<span class="emph">'+n+'</span>'
-	d = '[id: ' + d[2:] + ']<br />'
-	
-	if g is not None and g != '':
-		g = 'classified among: ' + g + '; '
+	n = '<span class="emph">'+authorobject.shortname+'</span>'
+	d = '[id: ' + authorobject.universalid[2:] + ']<br />'
+	if authorobject.genres is not None and authorobject.genres != '':
+		g = 'classified among: ' + authorobject.genres + '; '
 	else:
 		g = ''
 	
-	if lg == 'G':
+	if authorobject.language == 'G':
 		try:
-			if int(f) == 1500:
+			if float(authorobject.floruit) == 1500:
 				fl = 'approx date is unknown (search for 1500 C.E.)'
-			elif int(f) > 0:
-				fl = 'assigned to approx date: '+ str(f)+' C.E.'
-			elif int(f) < 0:
-				fl = 'assigned to approx date: '+ str(f)[1:] +' B.C.E.'
+			elif float(authorobject.floruit) > 0:
+				fl = 'assigned to approx date: ' + str(authorobject.floruit) + ' C.E.'
+			elif float(authorobject.floruit) < 0:
+				fl = 'assigned to approx date: ' + str(authorobject.floruit)[1:] + ' B.C.E.'
 		except:
 			# there was no f and so no int(f)
 			fl = ''
 	else:
 		fl = ''
 	
-	authinfo = n+'&nbsp;'+d+'&nbsp;'+g+fl
+	authinfo = n + '&nbsp;' + d + '&nbsp;' + g + fl
+	
+	return authinfo
 	
 
-	return authinfo
-
-
-def formatworkinfo(workinfo):
+def woformatworkinfo(workobject):
 	"""
 	dbdata into html
 	send me: universalid, title, workgenre, wordcount
@@ -445,24 +435,18 @@ def formatworkinfo(workinfo):
 	:return:
 	"""
 	
-	n = workinfo[0][-3:]
-	t = workinfo[1]
-	g = workinfo[2]
-	c = workinfo[3]
-	p = workinfo[4]
+	p = formatpublicationinfo(workobject.publication_info)
 	
-	p = formatpublicationinfo(p)
+	n = '('+workobject.universalid[-3:]+')&nbsp;'
+	t = '<span class="title">'+workobject.title+'</span> '
 	
-	n = '('+n+')&nbsp;'
-	t = '<span class="title">'+t+'</span> '
-	
-	if g is not None:
-		g = '['+g+']&nbsp;'
+	if workobject.workgenre is not None:
+		g = '['+workobject.workgenre+']&nbsp;'
 	else:
 		g = ''
 	
-	if c is not None:
-		c = '['+format(c, ',d')+' wds]'
+	if workobject.wordcount is not None:
+		c = '['+format(workobject.wordcount, ',d')+' wds]'
 	else:
 		c = ''
 	
@@ -515,3 +499,81 @@ def sortandunpackresults(hits):
 			results.append((found[0],find))
 
 	return results
+
+
+# slated for removal
+
+def dbformatauthinfo(authinfo):
+	"""
+	db data into html
+	send me: cleanname, universalid, genres, floruit, location, language
+
+	"""
+	
+	n = authinfo[0]
+	d = authinfo[1]
+	g = authinfo[2]
+	f = authinfo[3]
+	lc = authinfo[4]
+	lg = authinfo[5]
+	
+	n = '<span class="emph">' + n + '</span>'
+	d = '[id: ' + d[2:] + ']<br />'
+	
+	if g is not None and g != '':
+		g = 'classified among: ' + g + '; '
+	else:
+		g = ''
+	
+	if lg == 'G':
+		try:
+			if int(f) == 1500:
+				fl = 'approx date is unknown (search for 1500 C.E.)'
+			elif int(f) > 0:
+				fl = 'assigned to approx date: ' + str(f) + ' C.E.'
+			elif int(f) < 0:
+				fl = 'assigned to approx date: ' + str(f)[1:] + ' B.C.E.'
+		except:
+			# there was no f and so no int(f)
+			fl = ''
+	else:
+		fl = ''
+	
+	authinfo = n + '&nbsp;' + d + '&nbsp;' + g + fl
+	
+	return authinfo
+
+
+def dbformatworkinfo(workinfo):
+	"""
+	dbdata into html
+	send me: universalid, title, workgenre, wordcount
+	:param workinfo:
+	:return:
+	"""
+	
+	n = workinfo[0][-3:]
+	t = workinfo[1]
+	g = workinfo[2]
+	c = workinfo[3]
+	p = workinfo[4]
+	
+	p = formatpublicationinfo(p)
+	
+	n = '(' + n + ')&nbsp;'
+	t = '<span class="title">' + t + '</span> '
+	
+	if g is not None:
+		g = '[' + g + ']&nbsp;'
+	else:
+		g = ''
+	
+	if c is not None:
+		c = '[' + format(c, ',d') + ' wds]'
+	else:
+		c = ''
+	
+	workinfo = n + t + g + c + '<br />' + p + '<br />'
+	
+	return workinfo
+

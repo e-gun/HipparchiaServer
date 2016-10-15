@@ -232,7 +232,6 @@ def aocompileauthorandworklist(authordict, workdict):
 		
 		for w in works:
 			authorandworklist.append(w)
-		del works
 		
 		authors = []
 		for a in session['auselections']:
@@ -244,6 +243,7 @@ def aocompileauthorandworklist(authordict, workdict):
 			for w in authordict[a].listofworks:
 				authorandworklist.append(w.universalid)
 		del authors
+		del works
 		
 		if len(session['psgselections']) > 0:
 			authorandworklist = dropdupes(authorandworklist, session['psgselections'])
