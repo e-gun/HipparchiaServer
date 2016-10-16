@@ -26,7 +26,8 @@ from server.browsing.browserfunctions import getandformatbrowsercontext
 
 # all you need is read-only access
 # it is a terrible idea to connect with a user who can write
-dbconnection = setconnection('noautocommit')
+# autocommit will save your bacon if there is a problem looking something up: subseqent requests will get blocked
+dbconnection = setconnection('autocommit')
 cursor = dbconnection.cursor()
 
 # ready some sets of objects that will be generally available: two seconds spent here will save you 2s over and over again later as you constantly regenerate author and work info
@@ -289,7 +290,9 @@ def workdump():
 @hipparchia.route('/authors')
 def authorlist():
 	# authors = loadallauthors(cursor)
-	authors = authorobjects
+	authors = []
+	for a in authordict:
+		authors.append(authordict[a])
 	return render_template('lister.html', found=authors, numberfound=len(authors))
 
 #
