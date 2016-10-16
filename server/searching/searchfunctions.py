@@ -195,11 +195,11 @@ def aocompileauthorandworklist(authordict, workdict):
 		'wkgnexclusions'] + session['psgexclusions']
 	
 	if session['corpora'] == 'G':
-		authordict = prunedict(authordict, 'universalid', 'gr')
-		workdict = prunedict(workdict, 'universalid', 'gr')
+		ad = prunedict(authordict, 'universalid', 'gr')
+		wd = prunedict(workdict, 'universalid', 'gr')
 	elif session['corpora'] == 'L':
-		authordict = prunedict(authordict, 'universalid', 'lt')
-		workdict = prunedict(workdict, 'universalid', 'lt')
+		ad = prunedict(authordict, 'universalid', 'lt')
+		wd = prunedict(workdict, 'universalid', 'lt')
 	
 	# build the inclusion list
 	if len(searchlist) > 0:
@@ -207,20 +207,20 @@ def aocompileauthorandworklist(authordict, workdict):
 			
 		authorandworklist = []
 		for g in session['wkgnselections']:
-			authorandworklist += foundindict(workdict, 'workgenre', g)
+			authorandworklist += foundindict(wd, 'workgenre', g)
 	
 		authorlist = []
 		for g in session['agnselections']:
-			authorlist = foundindict(authordict, 'genres', g)
+			authorlist = foundindict(ad, 'genres', g)
 		for a in authorlist:
-			for w in authordict[a].listofworks:
+			for w in ad[a].listofworks:
 				authorandworklist.append(w.universalid)
 		del authorlist
 	
 		# a tricky spot: when/how to apply prunebydate()
 		# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
 		# accordingly we will do classes and genres first, then trim by date, then add in individual choices
-		authorandworklist = aoprunebydate(authorandworklist, authordict)
+		authorandworklist = aoprunebydate(authorandworklist, ad)
 		
 		# now we look at things explicitly chosen:
 		# the passage checks are superfluous if rationalizeselections() got things right
@@ -240,7 +240,7 @@ def aocompileauthorandworklist(authordict, workdict):
 		tocheck = works + passages
 		authors = dropdupes(authors, tocheck)
 		for a in authors:
-			for w in authordict[a].listofworks:
+			for w in ad[a].listofworks:
 				authorandworklist.append(w.universalid)
 		del authors
 		del works
@@ -252,7 +252,7 @@ def aocompileauthorandworklist(authordict, workdict):
 		authorandworklist = list(set(authorandworklist))
 		
 		if session['spuria'] == 'N':
-			authorandworklist = aoremovespuria(authorandworklist, workdict)
+			authorandworklist = aoremovespuria(authorandworklist, wd)
 			
 	else:
 		# you picked nothing and want everything. well, maybe everything...
@@ -273,7 +273,7 @@ def aocompileauthorandworklist(authordict, workdict):
 		excludedauthors = []
 		
 		for g in session['agnexclusions']:
-			excludedauthors += foundindict(authordict, 'genres', g)
+			excludedauthors += foundindict(ad, 'genres', g)
 		
 		for a in session['auexclusions']:
 			excludedauthors.append(a)
@@ -281,17 +281,20 @@ def aocompileauthorandworklist(authordict, workdict):
 		excludedauthors = tidyuplist(excludedauthors)
 		
 		for a in excludedauthors:
-			for w in authordict[a].listofworks:
+			for w in ad[a].listofworks:
 				excludedworks.append(w.universalid)
 		del excludedauthors
 		
 		for g in session['wkgnexclusions']:
-			excludedworks += foundindict(workdict, 'workgenre', g)
+			excludedworks += foundindict(wd, 'workgenre', g)
 			
 		excludedworks += session['wkexclusions']
 		excludedworks = list(set(excludedworks))
 	
 	authorandworklist = list(set(authorandworklist) - set(excludedworks))
+	
+	del ad
+	del wd
 	
 	return authorandworklist
 

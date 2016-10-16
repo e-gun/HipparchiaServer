@@ -418,13 +418,13 @@ def aoofferauthorhints():
 	strippedquery = re.sub(r'[!@#$|%()*\'\"]','',request.args.get('term', ''))
 
 	if session['corpora'] == 'G':
-		authordict = prunedict(authordict, 'universalid', 'gr')
+		ad = prunedict(authordict, 'universalid', 'gr')
 	elif session['corpora'] == 'L':
-		authordict = prunedict(authordict, 'universalid', 'lt')
+		ad = prunedict(authordict, 'universalid', 'lt')
 
 	authorlist = []
-	for a in authordict:
-		authorlist.append(authordict[a].cleanname+' ['+authordict[a].universalid+']')
+	for a in ad:
+		authorlist.append(ad[a].cleanname+' ['+ad[a].universalid+']')
 		
 	authorlist.sort()
 	
