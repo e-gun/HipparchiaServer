@@ -10,8 +10,8 @@ from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
 from server.formatting_helper_functions import tidyuplist, dropdupes, prunedict, foundindict
 from server.hipparchiaclasses import MPCounter
-from server.searching.searchformatting import aggregatelines, cleansearchterm, prunebydate, dbauthorandworkmaker, \
-	removespuria, sortandunpackresults, lookoutsideoftheline, aoprunebydate, aoremovespuria
+from server.searching.searchformatting import aggregatelines, cleansearchterm, aoprunebydate, aoremovespuria, \
+	sortandunpackresults, lookoutsideoftheline,  dbprunebydate, dbauthorandworkmaker, dbremovespuria
 
 
 def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist):
@@ -194,12 +194,16 @@ def aocompileauthorandworklist(authordict, workdict):
 	exclusionlist = session['auexclusions'] + session['wkexclusions'] + session['agnexclusions'] + session[
 		'wkgnexclusions'] + session['psgexclusions']
 	
+	# trim by language
 	if session['corpora'] == 'G':
 		ad = prunedict(authordict, 'universalid', 'gr')
 		wd = prunedict(workdict, 'universalid', 'gr')
 	elif session['corpora'] == 'L':
 		ad = prunedict(authordict, 'universalid', 'lt')
 		wd = prunedict(workdict, 'universalid', 'lt')
+	else:
+		ad = authordict
+		wd = workdict
 	
 	# build the inclusion list
 	if len(searchlist) > 0:
@@ -256,13 +260,13 @@ def aocompileauthorandworklist(authordict, workdict):
 			
 	else:
 		# you picked nothing and want everything. well, maybe everything...
-		authorandworklist = workdict.keys()
+		authorandworklist = wd.keys()
 		
 		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
-			authorandworklist = aoprunebydate(authorandworklist, authordict)
+			authorandworklist = aoprunebydate(authorandworklist, ad)
 		
 		if session['spuria'] == 'N':
-			authorandworklist = aoremovespuria(authorandworklist, workdict)
+			authorandworklist = aoremovespuria(authorandworklist, wd)
 		
 	# build the exclusion list
 	# note that we are not handling excluded individual passages yet
@@ -720,7 +724,7 @@ def compileauthorandworklist(cursor):
 			for w in awks:
 				authorandworklist.append(w[0])
 		
-		authorandworklist = prunebydate(authorandworklist, cursor)
+		authorandworklist = dbprunebydate(authorandworklist, cursor)
 		
 		# now we look at things explicitly chosen:
 		# the passage checks are superfluous if rationalizeselections() got things right
@@ -774,10 +778,10 @@ def compileauthorandworklist(cursor):
 			authorandworklist.append(w[0])
 		
 		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
-			authorandworklist = prunebydate(authorandworklist, cursor)
+			authorandworklist = dbprunebydate(authorandworklist, cursor)
 		
 		if session['spuria'] == 'N':
-			authorandworklist = removespuria(authorandworklist, cursor)
+			authorandworklist = dbremovespuria(authorandworklist, cursor)
 	
 	# build the exclusion list
 	# note that we are not handling excluded individual passages yet

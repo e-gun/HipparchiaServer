@@ -9,8 +9,8 @@ from server.dbsupport.dbfunctions import dbauthorandworkmaker, setconnection, pe
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
-from server.searching.searchformatting import formattedcittationincontext, aoformatauthinfo, formatauthorandworkinfo, \
-	dbformatauthinfo, woformatworkinfo, dbformatworkinfo
+from server.searching.searchformatting import aoformattedcittationincontext, aoformatauthinfo, formatauthorandworkinfo, \
+	dbformatauthinfo, woformatworkinfo, dbformatworkinfo, dbformattedcittationincontext
 from server.searching.searchfunctions import compileauthorandworklist, phrasesearch, withinxlines, \
 	withinxwords, partialwordsearch, concsearch, flagexclusions, simplesearchworkwithexclusion, searchdispatcher, \
 	aocompileauthorandworklist
@@ -125,10 +125,11 @@ def search():
 				wkid = hit[0]
 				result = hit[1]
 				# print('item=', hit,'\n\tid:',wkid,'\n\tresult:',result)
+				authorobject = authordict[wkid[0:6]]
 				if '_AT_' in wkid:
-					citwithcontext = formattedcittationincontext(result, wkid[0:10], linesofcontext, seeking, cursor)
+					citwithcontext = aoformattedcittationincontext(result, wkid[0:10], authorobject, linesofcontext, seeking, cursor)
 				else:
-					citwithcontext = formattedcittationincontext(result, wkid, linesofcontext, seeking, cursor)
+					citwithcontext = aoformattedcittationincontext(result, wkid, authorobject, linesofcontext, seeking, cursor)
 				# add the hit count to line zero which contains the metadata for the lines
 				citwithcontext[0]['hitnumber'] = hitcount
 				allfound.append(citwithcontext)
@@ -1018,10 +1019,10 @@ def singlethreadedsearch():
 						if len(allfound) < int(session['maxresults']):
 							hitcount += 1
 							if '_AT_' in wkid:
-								citwithcontext = formattedcittationincontext(result, wkid[0:10], linesofcontext,
+								citwithcontext = dbformattedcittationincontext(result, wkid[0:10], linesofcontext,
 								                                             seeking, cursor)
 							else:
-								citwithcontext = formattedcittationincontext(result, wkid, linesofcontext, seeking,
+								citwithcontext = dbformattedcittationincontext(result, wkid, linesofcontext, seeking,
 								                                             cursor)
 							# add the hit count to line zero which contains the metadata for the lines
 							citwithcontext[0]['hitnumber'] = hitcount
@@ -1070,7 +1071,7 @@ def singlethreadedsearch():
 					for result in results:
 						if len(allfound) < int(session['maxresults']):
 							hitcount += 1
-							citwithcontext = formattedcittationincontext(result, wkid, linesofcontext, seeking, cursor)
+							citwithcontext = dbformattedcittationincontext(result, wkid, linesofcontext, seeking, cursor)
 							# add the hit count to line zero which contains the metadata for the lines
 							citwithcontext[0]['hitnumber'] = hitcount
 							allfound.append(citwithcontext)

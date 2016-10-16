@@ -4,7 +4,6 @@ import re
 
 from flask import session
 
-import server.searching
 from server.dbsupport.dbfunctions import dbauthorandworkmaker, simplecontextgrabber
 from server.dbsupport.citationfunctions import locusintocitation
 from server.formatting_helper_functions import formatpublicationinfo
@@ -92,7 +91,7 @@ def resultformatter(raw, searchterm, highlight):
 	formatteddict['index'] = raw[0]
 	if highlight is True:
 		# newline = raw[7]
-		newline = server.searching.searchformatting.highlightsearchterm(raw[7], searchterm)
+		newline = highlightsearchterm(raw[7], searchterm)
 		formatteddict['line'] = '<span class="highlight">'+newline+'</span>'
 	else:
 		formatteddict['line'] = raw[7]
@@ -174,6 +173,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	aggregate = ' ' + aggregate + ' '
 	
 	return aggregate
+
 
 def aggregatelines(firstline, lastline, cursor, workdbname):
 	"""
@@ -258,51 +258,6 @@ def aoprunebydate(authorandworklist, authorobjectdict):
 	return trimmedlist
 
 
-def prunebydate(authorandworklist, cursor):
-	"""
-	send me a list of authorsandworks and i will trim it via the session date limit variables
-	:param authorandworklist:
-	:param cursor:
-	:return:
-	"""
-	trimmedlist = []
-	
-	if session['corpora']  == 'G' and (session['earliestdate'] != '-850' or session['latestdate'] != '1500'):
-		min = int(session['earliestdate'])
-		max = int(session['latestdate'])
-		if min > max:
-			min = max
-			session['earliestdate'] = session['latestdate']
-
-		# because there is no need to query plutarch 100 times
-		previous = ['','']
-		for aw in authorandworklist:
-			if aw[0:6] != previous[0]:
-				query = 'SELECT floruit FROM authors WHERE universalid = %s'
-				data = (aw[0:6],)
-				cursor.execute(query, data)
-				found = cursor.fetchall()
-				try:
-					date = float(found[0][0])
-				except:
-					date = -9999
-			else:
-				date = previous[1]
-				
-			if date < min or date > max:
-				# print('dropped',aw[0].name,found[0][0])
-				pass
-			else:
-				trimmedlist.append(aw)
-					
-			previous = [aw[0:6],date]
-	
-	else:
-		trimmedlist = authorandworklist
-
-	return trimmedlist
-
-
 def aoremovespuria(authorandworklist, worksdict):
 	"""
 	at the moment pretty crude: just look for [Sp.] or [sp.] at the end of a title
@@ -334,44 +289,11 @@ def aoremovespuria(authorandworklist, worksdict):
 	return trimmedlist
 
 
-def removespuria(authorandworklist, cursor):
-	"""
-	at the moment pretty crude: just look for [Sp.] or [sp.] at the end of a title
-	toss it from the list if you find it
-	:param authorandworklist:
-	:param cursor:
-	:return:
-	"""
-	trimmedlist = []
-	sp = re.compile(r'\[(S|s)p\.\]')
-	
-	for aw in authorandworklist:
-		query = 'SELECT title FROM works WHERE universalid = %s'
-		data = (re.sub(r'x',r'w',aw[0:10]),)
-		cursor.execute(query, data)
-		found = cursor.fetchone()
-		try:
-			if re.search(sp,found[0]) is not None:
-				for w in session['wkselections']:
-					if w in aw:
-						trimmedlist.append(aw)
-				for w in session['psgselections']:
-					if w in aw:
-						trimmedlist.append(aw)
-			else:
-				trimmedlist.append(aw)
-		except:
-			trimmedlist.append(aw)
-	
-	return trimmedlist
-
-
-def formattedcittationincontext(line, workdbname, linesofcontext, searchterm, cursor):
+def aoformattedcittationincontext(line, workdbname, authorobject, linesofcontext, searchterm, cursor):
 	
 	if '_AT_' in workdbname:
 		workdbname = workdbname[0:10]
 		
-	authorobject = dbauthorandworkmaker(workdbname[0:6], cursor)
 	citationincontext = []
 	highlightline = line[0]
 	locus = resultformatter(line, searchterm, False)
@@ -576,4 +498,111 @@ def dbformatworkinfo(workinfo):
 	workinfo = n + t + g + c + '<br />' + p + '<br />'
 	
 	return workinfo
+
+
+def dbremovespuria(authorandworklist, cursor):
+	"""
+	at the moment pretty crude: just look for [Sp.] or [sp.] at the end of a title
+	toss it from the list if you find it
+	:param authorandworklist:
+	:param cursor:
+	:return:
+	"""
+	trimmedlist = []
+	sp = re.compile(r'\[(S|s)p\.\]')
+	
+	for aw in authorandworklist:
+		query = 'SELECT title FROM works WHERE universalid = %s'
+		data = (re.sub(r'x', r'w', aw[0:10]),)
+		cursor.execute(query, data)
+		found = cursor.fetchone()
+		try:
+			if re.search(sp, found[0]) is not None:
+				for w in session['wkselections']:
+					if w in aw:
+						trimmedlist.append(aw)
+				for w in session['psgselections']:
+					if w in aw:
+						trimmedlist.append(aw)
+			else:
+				trimmedlist.append(aw)
+		except:
+			trimmedlist.append(aw)
+	
+	return trimmedlist
+
+
+def dbprunebydate(authorandworklist, cursor):
+	"""
+	send me a list of authorsandworks and i will trim it via the session date limit variables
+	:param authorandworklist:
+	:param cursor:
+	:return:
+	"""
+	trimmedlist = []
+	
+	if session['corpora'] == 'G' and (session['earliestdate'] != '-850' or session['latestdate'] != '1500'):
+		min = int(session['earliestdate'])
+		max = int(session['latestdate'])
+		if min > max:
+			min = max
+			session['earliestdate'] = session['latestdate']
+		
+		# because there is no need to query plutarch 100 times
+		previous = ['', '']
+		for aw in authorandworklist:
+			if aw[0:6] != previous[0]:
+				query = 'SELECT floruit FROM authors WHERE universalid = %s'
+				data = (aw[0:6],)
+				cursor.execute(query, data)
+				found = cursor.fetchall()
+				try:
+					date = float(found[0][0])
+				except:
+					date = -9999
+			else:
+				date = previous[1]
+			
+			if date < min or date > max:
+				# print('dropped',aw[0].name,found[0][0])
+				pass
+			else:
+				trimmedlist.append(aw)
+			
+			previous = [aw[0:6], date]
+	
+	else:
+		trimmedlist = authorandworklist
+	
+	return trimmedlist
+
+
+def dbformattedcittationincontext(line, workdbname, linesofcontext, searchterm, cursor):
+	if '_AT_' in workdbname:
+		workdbname = workdbname[0:10]
+	
+	authorobject = dbauthorandworkmaker(workdbname[0:6], cursor)
+	citationincontext = []
+	highlightline = line[0]
+	locus = resultformatter(line, searchterm, False)
+	for w in authorobject.listofworks:
+		if w.universalid == workdbname:
+			workobject = w
+	citation = locusintocitation(workobject, locus['locus'])
+	# this next bit of info tags the find; 'newfind' + 'url' is turned into JS in the search.html '<script>' loop; this enables click-to-browse
+	# similarly the for-result-in-found loop of search.html generates the clickable elements: <browser id="{{ context['url'] }}">
+	citationincontext.append({'newfind': 1, 'author': authorobject.shortname,
+	                          'work': workobject.title, 'citation': citation,
+	                          'url': (workdbname + '_LN_' + str(locus['index']))})
+	environs = simplecontextgrabber(workobject, highlightline, linesofcontext, cursor)
+	
+	for found in environs:
+		if found[0] == highlightline:
+			found = resultformatter(found, searchterm, True)
+		else:
+			found = resultformatter(found, searchterm, False)
+		citationincontext.append(found)
+	
+	return citationincontext
+
 
