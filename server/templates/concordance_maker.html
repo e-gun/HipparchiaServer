@@ -1,26 +1,25 @@
 <!-- extend from base layout -->
 {% extends "base.html" %}
-
+{% include "concordancesearchfields.html" ignore missing %}
 {% block content %}
+<script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
+<script src="{{ url_for('static', filename='ui-clicks.js') }}"></script>
+<script>
+    $(document).ready( function () {
+        $('#worksautocomplete').hide();
+        $('#level05').hide();
+        $('#level04').hide();
+        $('#level03').hide();
+        $('#level02').hide();
+        $('#level01').hide();
+        $('#level00').hide();
+    });
+</script>
 <p class="small center">{{ time }}s</p>
 
 <p class="center">
     <a href ="/"><button id="back" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Back to the main page">
         <span class="ui-icon ui-icon-arrowreturnthick-1-w"></span><span class="ui-button-icon-space"> </span>&nbsp;</button></a>
-    {% if mode!=0 %}
-    <a href ="{{ url }}"><button id="workconc" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Concordance to {{ title }}">
-        <span class="ui-icon ui-icon-bullet"></span><span class="ui-button-icon-space"> </span>&nbsp;</button></a>
-    {% endif %}
-    {% if mode!=1 %}
-    <a href ="{{ url }}&mode=1"><button id="exclusiveconc" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Words in {{ title }} but not present in any other work of {{ author }}">
-        <span class="ui-icon ui-icon-radio-off"></span><span class="ui-button-icon-space"> </span>&nbsp;</button></a>
-    {% endif %}
-    {% if mode!=2 %}
-    <a href ="{{ url }}&mode=2"><button id="authorconc" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Full concordance for {{ author }}">
-        <span class="ui-icon ui-icon-person"></span><span class="ui-button-icon-space"> </span>&nbsp;</button></a>
-    {% endif %}
-    <a href ="{{ simpletexturl }}"><button id="readthework" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="View the full text of {{ title }}">
-        <span class="ui-icon ui-icon-note"></span><span class="ui-button-icon-space"> </span>&nbsp;</button></a>
 </p>
 
 {% if mode==0 %}
