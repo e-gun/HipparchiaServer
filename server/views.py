@@ -18,7 +18,8 @@ from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordance
 from server.textsandconcordnaces.textbuilder import buildfulltext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
-	sessionvariables, setsessionvarviadb, sessionselectionsashtml, rationalizeselections
+	sessionvariables, setsessionvarviadb, sessionselectionsashtml, rationalizeselections, buildauthordict, buildworkdict, \
+	buildaugenreslist, buildworkgenreslist
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, sortauthorandworklists, \
 	dropdupes, bcedating, aosortauthorandworklists, prunedict
 from server.browsing.browserfunctions import getandformatbrowsercontext
@@ -29,16 +30,12 @@ dbconnection = setconnection('noautocommit')
 cursor = dbconnection.cursor()
 
 # ready some sets of objects that will be generally available: two seconds spent here will save you 2s over and over again later as you constantly regenerate author and work info
-print('loading authors and works...')
-authorobjects = loadallauthors(cursor)
-authordict = {}
-for a in authorobjects:
-	authordict[a.id] = a
 
-workdict = {}
-for a in authordict.keys():
-	for w in authordict[a].listofworks:
-		workdict[w.universalid] = w
+authordict = buildauthordict(cursor)
+workdict = buildworkdict(authordict)
+authorgenreslist = buildaugenreslist(authordict)
+workgenreslist = buildworkgenreslist(workdict)
+
 
 @hipparchia.route('/', methods=['GET', 'POST'])
 def search():
@@ -479,14 +476,6 @@ def woofferworkhints():
 
 @hipparchia.route('/getgenrehint', methods=['GET'])
 def aogenrelist():
-	# this needs a lot of refactoring: genres should be removed from the session and put into a global
-	try:
-		session['genres']
-	except:
-		session['genres'] = setsessionvarviadb('genres', 'authors', cursor)
-
-	# the evil big cookie problem
-	availablegenres = session['genres']
 
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
@@ -495,7 +484,7 @@ def aogenrelist():
 		if strippedquery != '':
 			query = strippedquery.lower()
 			qlen = len(query)
-			for genre in availablegenres:
+			for genre in authorgenreslist:
 				hintgenre = genre.lower()
 				if query == hintgenre[0:qlen]:
 					# jquery will gobble up label and value
@@ -513,13 +502,7 @@ def aogenrelist():
 @hipparchia.route('/getworkgenrehint', methods=['GET'])
 def wkgenrelist():
 	# this needs a lot of refactoring: genres should be removed from the session and put into a global
-	try:
-		session['workgenres']
-	except:
-		setsessionvarviadb('workgenre', 'works', cursor)
-
 	# the evil big cookie problem
-	availablegenres = session['workgenres']
 
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
@@ -528,7 +511,7 @@ def wkgenrelist():
 		if strippedquery != '':
 			query = strippedquery.lower()
 			qlen = len(query)
-			for genre in availablegenres:
+			for genre in workgenreslist:
 				hintgenre = genre.lower()
 				if query == hintgenre[0:qlen]:
 					# jquery will gobble up label and value
@@ -653,22 +636,20 @@ def aogetsearchlistcontents():
 
 @hipparchia.route('/getgenrelistcontents')
 def getgenrelistcontents():
-	try:
-		wg = session['workgenres']
-	except:
-		setsessionvarviadb('workgenre', 'works', cursor)
-	
-	ag = session['genres']
-	
+	"""
+	return a basic list of what you can pick
+	:return:
+	"""
+
 	genrelists = ''
 	
 	genrelists += '<h3>Author Categories</h3>'
-	for g in ag:
+	for g in authorgenreslist:
 		genrelists += g + ', '
 	genrelists = genrelists[:-2]
 	
 	genrelists += '<h3>Work Categories</h3>'
-	for g in wg:
+	for g in workgenreslist:
 		genrelists += g + ', '
 	genrelists = genrelists[:-2]
 	
@@ -948,7 +929,7 @@ def cookieintosession():
 	for key,value in cookiedict.items():
 		modifysessionvar(key,value)
 
-	modifysessionselections(cookiedict, cursor)
+	modifysessionselections(cookiedict, authorgenreslist, workgenreslist)
 	
 	response = redirect(url_for('search'))
 	return response
@@ -1120,7 +1101,6 @@ def singlethreadedsearch():
 	
 	return page
 
-# slated for removal
 
 @hipparchia.route('/oldgetsearchlistcontents')
 def getsearchlistcontents():

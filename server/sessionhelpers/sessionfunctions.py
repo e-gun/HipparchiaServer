@@ -3,6 +3,7 @@ import re
 from flask import session
 from server import formatting_helper_functions
 from server.dbsupport import dbfunctions, citationfunctions
+from server.dbsupport.dbfunctions import loadallauthors
 
 def modifysessionvar(param,val):
 	"""
@@ -82,7 +83,7 @@ def modifysessionvar(param,val):
 	return
 
 
-def modifysessionselections(cookiedict, cursor):
+def modifysessionselections(cookiedict, authorgenreslist, workgenreslist):
 	"""
 	set session selections after checking them for validity
 	i'm not sure how many people will take the trouble to build evil cookies, but...
@@ -114,23 +115,15 @@ def modifysessionselections(cookiedict, cursor):
 			psg.remove(item)
 	session['psgselections'] = psg
 	
-	try:
-		# but how could we possibly get here without having this on hand...
-		session['genres']
-		session['workgenres']
-	except:
-		session['genres'] = setsessionvarviadb('genres', 'authors', cursor)
-		session['workgenres'] = setsessionvarviadb('workgenre', 'works', cursor)
-	
 	ags = cookiedict['agnselections']
 	for item in ags:
-		if item not in session['genres']:
+		if item not in authorgenreslist:
 			ags.remove(item)
 	session['agnselections'] = ags
 	
 	wgs = cookiedict['wkgnselections']
 	for item in wgs:
-		if item not in session['workgenres']:
+		if item not in workgenreslist:
 			wgs.remove(item)
 	session['wkgnselections'] = wgs
 	
@@ -169,8 +162,6 @@ def parsejscookie(cookiestring):
 	for sel in selectioncategories:
 		nonselections = re.sub(re.escape(re.search(r'%22' + sel + r'%22:\[(.*?)\]', nonselections).group(0)), '', nonselections)
 			
-	
-	allotheroptions = []
 	nonselections = re.sub(r'%22', '', nonselections)
 	allotheroptions = nonselections.split('%2C')
 	allotheroptions[:] = [x for x in allotheroptions if x != '']
@@ -246,8 +237,8 @@ def sessionvariables(cursor):
 
 		# if you try to store all of the authors in the session you will have problems: the cookie gets too big
 
-		session['genres'] = setsessionvarviadb('genres', 'authors', cursor)
-		session['workgenres'] = setsessionvarviadb('workgenre', 'works', cursor)
+		# session['genres'] = setsessionvarviadb('genres', 'authors', cursor)
+		# session['workgenres'] = setsessionvarviadb('workgenre', 'works', cursor)
 
 	return
 
@@ -506,3 +497,72 @@ def rationalizeselections(newselectionuid, selectorexclude):
 
 	return
 
+
+def buildauthordict(cursor):
+	"""
+	load up the dictionary of author objects: { 'uid1': aobject1, 'uid2': aobject2, ...}
+	this will see heavy use throughout the world of 'views.py'
+	:param cursor:
+	:return:
+	"""
+	print('loading authors and works...')
+	authorobjects = loadallauthors(cursor)
+	authordict = {}
+	for a in authorobjects:
+		authordict[a.id] = a
+		
+	return authordict
+
+
+def buildworkdict(authordict):
+	"""
+	load up the dictionary of work objects: { 'uid1': wobject1, 'uid2': wobject2, ...}
+	this will see heavy use throughout the world of 'views.py'
+	:param authordict:
+	:return:
+	"""
+	workdict = {}
+	for a in authordict.keys():
+		for w in authordict[a].listofworks:
+			workdict[w.universalid] = w
+	
+	return workdict
+
+def buildaugenreslist(authordict):
+	"""
+	load up the list of author genres: [ g1, g2, ...]
+	this will see heavy use throughout the world of 'views.py'
+	:param authordict:
+	:return:
+	"""
+	authorgenreslist = []
+	
+	for a in authordict:
+		if authordict[a].genres is not None and authordict[a].genres != '':
+			authorgenreslist += authordict[a].genres.split(',')
+	
+	authorgenreslist = list(set(authorgenreslist))
+	authorgenreslist = [re.sub(r'^\s|\s$','',x) for x in authorgenreslist]
+	authorgenreslist.sort()
+	
+	return authorgenreslist
+	
+
+def buildworkgenreslist(workdict):
+	"""
+	load up the list of work genres: [ g1, g2, ...]
+	this will see heavy use throughout the world of 'views.py'
+	:param authordict:
+	:return:
+	"""
+	workgenreslist = []
+	
+	for w in workdict:
+		if workdict[w].workgenre is not None and workdict[w].workgenre != '':
+			workgenreslist.append(workdict[w].workgenre)
+
+	workgenreslist = list(set(workgenreslist))
+	workgenreslist = [re.sub(r'^\s|\s$', '', x) for x in workgenreslist]
+	workgenreslist.sort()
+	
+	return workgenreslist
