@@ -291,8 +291,11 @@ def workdump():
 def authorlist():
 	# authors = loadallauthors(cursor)
 	authors = []
-	for a in authordict:
-		authors.append(authordict[a])
+	
+	keys = authordict.keys()
+	keys.sort()
+	for k in keys:
+		authors.append(authordict[k])
 	return render_template('lister.html', found=authors, numberfound=len(authors))
 
 #
