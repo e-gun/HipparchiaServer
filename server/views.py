@@ -292,7 +292,7 @@ def authorlist():
 	# authors = loadallauthors(cursor)
 	authors = []
 	
-	keys = authordict.keys()
+	keys = list(authordict.keys())
 	keys.sort()
 	for k in keys:
 		authors.append(authordict[k])
