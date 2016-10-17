@@ -614,6 +614,12 @@ def phrasesearch(searchphrase, cursor, wkid, authors):
 		# wordset = aggregatelines(hit[0] - 1, hit[0] + 1, cursor, wkid)
 		phraselen = len(searchphrase.split(' '))
 		wordset = lookoutsideoftheline(hit[0], phraselen-1, wkid, cursor)
+		if session['accentsmatter'] == 'N':
+			wordset = re.sub(r'[\.\?\!;:,·’]',r'', wordset)
+		else:
+			# the difference is in the apostrophe: δ vs δ’
+			wordset = re.sub(r'[\.\?\!;:,·]', r'', wordset)
+
 		if session['nearornot'] == 'T' and re.search(searchphrase, wordset) is not None:
 			fullmatches.append(hit)
 		elif session['nearornot'] == 'F' and re.search(searchphrase, wordset) is None:

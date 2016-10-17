@@ -109,8 +109,8 @@ class dbWorkLine(object):
 		self.l2 = level_02_value
 		self.l1 = level_01_value
 		self.l0 = level_00_value
-		self.contents = marked_up_line
-		self.strippedcontents = stripped_line
+		self.contents = re.sub(r'\s$', '', marked_up_line)
+		self.strippedcontents = re.sub(r'\s$', '', stripped_line)
 		self.annotations = annotations
 		self.universalid = wkuinversalid+'_LN_'+str(index)
 
@@ -191,6 +191,17 @@ class dbWorkLine(object):
 			
 		# should not need this, but...
 		return top
+	
+	
+	def unformattedline(self):
+		"""
+		remove markup from contents
+		:return:
+		"""
+
+		unformatted = re.sub(r'(\<.*?\>)',r'',self.contents)
+		
+		return unformatted
 
 		
 	

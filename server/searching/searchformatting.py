@@ -128,54 +128,48 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	else:
 		column = 'stripped_line'
 		
-	query = 'SELECT index,'+column+',hyphenated_words FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
+	# query = 'SELECT index,'+column+',hyphenated_words FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
+	query = 'SELECT * FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
 	data = (linenumber-1, linenumber+1)
 	cursor.execute(query, data)
-	lines = cursor.fetchall()
+	results = cursor.fetchall()
+	lines = []
+	for r in results:
+		lines.append(dblineintolineobject(workdbname, r))
 	
-	hyphenmemory = False
-	text = []
-
+	ldict = {}
 	for line in lines:
-		line = list(line)
-		line[1] = re.sub(r'<.*?>','',line[1])
-		line[1] = re.sub(r'\s$', '', line[1])
-
-		if session['accentsmatter'] != 'Y':
-			line[1] = re.sub(r'[^\w\s]', '', line[1])
-			hyphen = line[2].split(' ')
-			hyphen = hyphen[0]
+		ldict[line.index] = line
+	
+	text = []
+	for line in lines:
+		if session['accentsmatter'] == 'Y':
+			contents = line.unformattedline()
+			hyphenated = line.hyphenated['accented']
 		else:
-			hyphen = line[2].split(' ')
-			try:
-				hyphen = hyphen[1]
-			except:
-				hyphen = ''
-		wordsinline = line[1].split(' ')
-
-		if line[0] == linenumber-1:
-			if hyphen == '':
-				text = wordsinline[(numberofextrawords * -1):]
+			contents = line.strippedcontents
+			hyphenated = line.hyphenated['stripped']
+		
+		wordsinline = contents.split(' ')
+		if hyphenated != '':
+			wordsinline[-1] = hyphenated
+		
+		if line.index == linenumber-1:
+			text = wordsinline[(numberofextrawords * -1):]
+		elif line.index == linenumber:
+			# actually, null should be '', but is somehow coming back as something more than that
+			if len(ldict[linenumber-1].hyphenated) > 2:
+				text += wordsinline[1:]
 			else:
-				wordsinline = wordsinline[:-1] + [hyphen]
-				text = wordsinline[(numberofextrawords * -1):]
-		elif line[0] == linenumber:
-			if hyphenmemory == True:
-				wordsinline = wordsinline[1:]
-			if hyphen == '':
 				text += wordsinline
-			else:
-				text += wordsinline[:-1] + [hyphen]
-				hyphenmemory = True
-		elif line[0] == linenumber+1:
-			if hyphenmemory == True:
+		elif line.index == linenumber+1:
+			if len(ldict[linenumber].hyphenated) > 2:
 				wordsinline = wordsinline[1:]
 			text += wordsinline[:numberofextrawords]
 			
 	aggregate = ' '.join(text)
 	aggregate = re.sub(r'\s\s',r' ', aggregate)
 	aggregate = ' ' + aggregate + ' '
-	
 	return aggregate
 
 
@@ -644,3 +638,77 @@ def resultformatter(raw, searchterm, highlight):
 	formatteddict['locus']=tuple(loc)
 
 	return formatteddict
+
+
+# slated for removal
+
+def oldlookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
+	"""
+	grab a line and add the N words at the tail and head of the previous and next lines
+	 this will let you search for phrases that fall along a line break "και δη | και"
+	:param linenumber:
+	:param numberofextrawords:
+	:param workdbname:
+	:param cursor:
+	:return:
+	"""
+	if '_AT_' in workdbname:
+		workdbname = workdbname[0:10]
+	
+	if session['accentsmatter'] == 'Y':
+		# setting self up for big problems because you have both accents and markup in here
+		# will need to pass things through a stripper before searching
+		column = 'marked_up_line'
+	else:
+		column = 'stripped_line'
+	
+	query = 'SELECT index,' + column + ',hyphenated_words FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
+	data = (linenumber - 1, linenumber + 1)
+	cursor.execute(query, data)
+	lines = cursor.fetchall()
+	
+	hyphenmemory = False
+	text = []
+	
+	for line in lines:
+		line = list(line)
+		line[1] = re.sub(r'<.*?>', '', line[1])
+		line[1] = re.sub(r'\s$', '', line[1])
+		
+		if session['accentsmatter'] != 'Y':
+			line[1] = re.sub(r'[^\w\s]', '', line[1])
+			hyphen = line[2].split(' ')
+			hyphen = hyphen[0]
+		else:
+			hyphen = line[2].split(' ')
+			try:
+				hyphen = hyphen[1]
+			except:
+				hyphen = ''
+		wordsinline = line[1].split(' ')
+		
+		if line[0] == linenumber - 1:
+			if hyphen == '':
+				text = wordsinline[(numberofextrawords * -1):]
+			else:
+				wordsinline = wordsinline[:-1] + [hyphen]
+				text = wordsinline[(numberofextrawords * -1):]
+		elif line[0] == linenumber:
+			if hyphenmemory == True:
+				wordsinline = wordsinline[1:]
+			if hyphen == '':
+				text += wordsinline
+			else:
+				text += wordsinline[:-1] + [hyphen]
+				hyphenmemory = True
+		elif line[0] == linenumber + 1:
+			if hyphenmemory == True:
+				wordsinline = wordsinline[1:]
+			text += wordsinline[:numberofextrawords]
+	
+	aggregate = ' '.join(text)
+	aggregate = re.sub(r'\s\s', r' ', aggregate)
+	aggregate = ' ' + aggregate + ' '
+	
+	return aggregate
+
