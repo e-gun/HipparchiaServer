@@ -190,7 +190,6 @@ def concordance():
 		print('failed to pick a text for the concordance builder:', work, str(len(work)))
 		work = 'lt0022w012_conc'
 	
-	#author = dbauthorandworkmaker(work[0:6], cursor)
 	author = authordict[work[0:6]]
 	authorname = author.shortname
 	
@@ -281,7 +280,7 @@ def workdump():
 
 @hipparchia.route('/authors')
 def authorlist():
-	# authors = loadallauthors(cursor)
+
 	authors = []
 	
 	keys = list(authordict.keys())
@@ -385,7 +384,7 @@ def selectionmade():
 	# get three bundles to put in the table cells
 	# stored in a dict with three keys: timeexclusions, selections, exclusions, numberofselections
 	
-	htmlbundles = sessionselectionsashtml(cursor)
+	htmlbundles = sessionselectionsashtml(authordict, workdict)
 	htmlbundles = json.dumps(htmlbundles)
 	
 	return htmlbundles
@@ -803,7 +802,7 @@ def clearselections():
 	
 	session.modified = True
 
-	newselections = json.dumps(sessionselectionsashtml(cursor))
+	newselections = json.dumps(sessionselectionsashtml(authordict, workdict))
 	
 	return newselections
 

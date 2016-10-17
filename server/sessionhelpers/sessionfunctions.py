@@ -243,18 +243,18 @@ def sessionvariables(cursor):
 	return
 
 
-def sessionselectionsashtml(cursor):
+def sessionselectionsashtml(authordict, workdict):
 	"""
 	assemble the html to be fed into the json that goes to the js that fills #selectionstable
 	three chunks: time; selections; exclusions
-	:param cursor:
+	:param authordict, workdict:
 	:return:
 	"""
 
 	selectioninfo = {}
 	
 	selectioninfo['timeexclusions'] = sessiontimeexclusionsinfo()
-	sxhtml = sessionselectionsinfo(cursor)
+	sxhtml = sessionselectionsinfo(authordict, workdict)
 	
 	selectioninfo['selections'] = sxhtml['selections']
 	selectioninfo['exclusions'] = sxhtml['exclusions']
@@ -273,7 +273,6 @@ def sessionselectionsashtml(cursor):
 def sessiontimeexclusionsinfo():
 	"""
 	build time exlusion html for #selectionstable + #timerestrictions
-	:param cursor:
 	:return:
 	"""
 	timerestrictions = ''
@@ -300,7 +299,7 @@ def sessiontimeexclusionsinfo():
 	return timerestrictions
 
 
-def sessionselectionsinfo(cursor):
+def sessionselectionsinfo(authordict, workdict):
 	"""
 	build the selections html either for a or b:
 		#selectionstable + #selectioninfocell
@@ -311,12 +310,12 @@ def sessionselectionsinfo(cursor):
 		[c] author selections
 		[d] work selections
 		[e] passage selections
-		
+
 	id numbers need to be attached to the selections so that they can be clicked-and-dragged to the trash by id
 	this needs to be a sequential list and so we do both selections and exclusions in one go to keep one unified 'selcount'
 	the selcount is used to generate a collection of jQuery .droppable()s
-	
-	:param cursor:
+
+	:param authordict:
 	:return: dictionary of html: {'selections':selhtml, 'exclusions':exclhtml, 'numberofselections': selcount}
 	"""
 	
@@ -334,7 +333,8 @@ def sessionselectionsinfo(cursor):
 			thehtml += '<span class="picklabel">Authors</span><br />'
 			thehtml += '[Full corpus less exclusions]<br />\n'
 		
-		if selectionorexclusion == 'exclusions' and len(sessionsearchlist) == 0 and session['spuria'] == 'Y' and len(session['wkgnexclusions']) == 0 and len(session['agnexclusions']) == 0:
+		if selectionorexclusion == 'exclusions' and len(sessionsearchlist) == 0 and session['spuria'] == 'Y' and len(
+				session['wkgnexclusions']) == 0 and len(session['agnexclusions']) == 0:
 			thehtml += '<span class="picklabel">Authors</span><br />'
 			thehtml += '[No exclusions]<br />\n'
 		
@@ -346,8 +346,8 @@ def sessionselectionsinfo(cursor):
 				selcount += 1
 				localval += 1
 				thehtml += '<span class="agn' + selectionorexclusion + '" id="searchselection_0' + str(selcount) + \
-				                   '" listval="' + str(localval) + '">' + s + '</span><br />\n'
-	
+				           '" listval="' + str(localval) + '">' + s + '</span><br />\n'
+		
 		# [b] work genres
 		if len(session['wkgn' + selectionorexclusion]) > 0:
 			thehtml += '<span class="picklabel">Work genres</span><br />'
@@ -356,7 +356,7 @@ def sessionselectionsinfo(cursor):
 				selcount += 1
 				localval += 1
 				thehtml += '<span class="wkgn' + selectionorexclusion + '" id="searchselection_0' + str(selcount) + \
-					'" listval="' + str(localval) + '">' + s + '</span><br />\n'
+				           '" listval="' + str(localval) + '">' + s + '</span><br />\n'
 		
 		# [c] authors
 		if len(session['au' + selectionorexclusion]) > 0:
@@ -365,15 +365,14 @@ def sessionselectionsinfo(cursor):
 			for s in session['au' + selectionorexclusion]:
 				selcount += 1
 				localval += 1
-				query = 'SELECT akaname from authors WHERE universalid = %s'
-				data = (s,)
-				cursor.execute(query, data)
-				result = cursor.fetchone()
-				thehtml += '<span class="au' + selectionorexclusion + '" id="searchselection_0' + str(selcount) + '" listval="' + \
-				           str(localval) + '">' + result[0] + '</span><br />\n'
-	
+				ao = authordict[s]
+				thehtml += '<span class="au' + selectionorexclusion + '" id="searchselection_0' + str(
+					selcount) + '" listval="' + \
+				           str(localval) + '">' + ao.akaname + '</span><br />\n'
+		
 		# [d] works
-		if len(session['wk' + selectionorexclusion]) == 0 and selectionorexclusion == 'exclusions' and session['spuria'] == 'N':
+		if len(session['wk' + selectionorexclusion]) == 0 and selectionorexclusion == 'exclusions' and session[
+			'spuria'] == 'N':
 			thehtml += '<span class="picklabel">Works</span><br />'
 			thehtml += '[All non-selected spurious works]<br />'
 		
@@ -386,20 +385,18 @@ def sessionselectionsinfo(cursor):
 				selcount += 1
 				localval += 1
 				uid = s[:6]
-				ao = dbfunctions.dbauthorandworkmaker(uid, cursor)
-				query = 'SELECT title from works WHERE universalid = %s'
-				data = (s,)
-				cursor.execute(query, data)
-				result = cursor.fetchone()
-				thehtml += '<span class="wk'+selectionorexclusion+'" id="searchselection_0' + str(selcount)+'" listval="' \
-					+str(localval)+'">'+ ao.akaname + ', <span class="pickedwork">' + result[0] + '</span></span><br />'
+				ao = authordict[uid]
+				wk = workdict[s]
+				thehtml += '<span class="wk' + selectionorexclusion + '" id="searchselection_0' + str(
+					selcount) + '" listval="' \
+				           + str(localval) + '">' + ao.akaname + ', <span class="pickedwork">' + wk.title + '</span></span><br />'
 		
 		# [e] passages
-		if len(session['psg'+selectionorexclusion]) > 0:
+		if len(session['psg' + selectionorexclusion]) > 0:
 			# none of this should be on right now
 			thehtml += '<span class="picklabel">Passages</span><br />'
 			localval = -1
-			for s in session['psg'+selectionorexclusion]:
+			for s in session['psg' + selectionorexclusion]:
 				selcount += 1
 				localval += 1
 				locus = s[14:].split('|')
@@ -407,15 +404,16 @@ def sessionselectionsinfo(cursor):
 				locus.reverse()
 				citationtuple = tuple(locus)
 				uid = s[:6]
-				ao = dbfunctions.dbauthorandworkmaker(uid, cursor)
+				ao = authordict[uid]
 				for w in ao.listofworks:
 					if w.universalid == s[0:10]:
 						wk = w
 				loc = citationfunctions.prolixlocus(wk, citationtuple)
-				thehtml += '<span class="psg'+selectionorexclusion+'" id="searchselection_0' + str(selcount)+'" listval="' \
-				           +str(localval)+'">'+ ao.shortname + ', <span class="pickedwork">' + wk.title + \
+				thehtml += '<span class="psg' + selectionorexclusion + '" id="searchselection_0' + str(
+					selcount) + '" listval="' \
+				           + str(localval) + '">' + ao.shortname + ', <span class="pickedwork">' + wk.title + \
 				           '</span>&nbsp;<span class="pickedsubsection">' + loc + '</span></span><br />'
-
+		
 		returndict[selectionorexclusion] = thehtml
 	
 	returndict['numberofselections'] = selcount
@@ -566,3 +564,134 @@ def buildworkgenreslist(workdict):
 	workgenreslist.sort()
 	
 	return workgenreslist
+
+
+# slated for removal
+
+def dbsessionselectionsinfo(cursor):
+	"""
+	build the selections html either for a or b:
+		#selectionstable + #selectioninfocell
+		#selectionstable + #exclusioninfocell
+	there are five headings to populate
+		[a] author classes
+		[b] work genres
+		[c] author selections
+		[d] work selections
+		[e] passage selections
+
+	id numbers need to be attached to the selections so that they can be clicked-and-dragged to the trash by id
+	this needs to be a sequential list and so we do both selections and exclusions in one go to keep one unified 'selcount'
+	the selcount is used to generate a collection of jQuery .droppable()s
+
+	:param cursor:
+	:return: dictionary of html: {'selections':selhtml, 'exclusions':exclhtml, 'numberofselections': selcount}
+	"""
+	
+	returndict = {}
+	selcount = -1
+	
+	sessionsearchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + \
+	                    session['psgselections'] + session['wkselections']
+	
+	for selectionorexclusion in ['selections', 'exclusions']:
+		thehtml = ''
+		
+		# if there are no explicit selections, then
+		if len(sessionsearchlist) == 0 and selectionorexclusion == 'selections':
+			thehtml += '<span class="picklabel">Authors</span><br />'
+			thehtml += '[Full corpus less exclusions]<br />\n'
+		
+		if selectionorexclusion == 'exclusions' and len(sessionsearchlist) == 0 and session['spuria'] == 'Y' and len(
+				session['wkgnexclusions']) == 0 and len(session['agnexclusions']) == 0:
+			thehtml += '<span class="picklabel">Authors</span><br />'
+			thehtml += '[No exclusions]<br />\n'
+		
+		# [a] author classes
+		if len(session['agn' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Author categories</span><br />'
+			localval = -1
+			for s in session['agn' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				thehtml += '<span class="agn' + selectionorexclusion + '" id="searchselection_0' + str(selcount) + \
+				           '" listval="' + str(localval) + '">' + s + '</span><br />\n'
+		
+		# [b] work genres
+		if len(session['wkgn' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Work genres</span><br />'
+			localval = -1
+			for s in session['wkgn' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				thehtml += '<span class="wkgn' + selectionorexclusion + '" id="searchselection_0' + str(selcount) + \
+				           '" listval="' + str(localval) + '">' + s + '</span><br />\n'
+		
+		# [c] authors
+		if len(session['au' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Authors</span><br />'
+			localval = -1
+			for s in session['au' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				query = 'SELECT akaname from authors WHERE universalid = %s'
+				data = (s,)
+				cursor.execute(query, data)
+				result = cursor.fetchone()
+				thehtml += '<span class="au' + selectionorexclusion + '" id="searchselection_0' + str(
+					selcount) + '" listval="' + \
+				           str(localval) + '">' + result[0] + '</span><br />\n'
+		
+		# [d] works
+		if len(session['wk' + selectionorexclusion]) == 0 and selectionorexclusion == 'exclusions' and session[
+			'spuria'] == 'N':
+			thehtml += '<span class="picklabel">Works</span><br />'
+			thehtml += '[All non-selected spurious works]<br />'
+		
+		if len(session['wk' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Works</span><br />'
+			if selectionorexclusion == 'exclusions' and session['spuria'] == 'N':
+				thehtml += '[Non-selected spurious works]<br />'
+			localval = -1
+			for s in session['wk' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				uid = s[:6]
+				ao = dbfunctions.dbauthorandworkmaker(uid, cursor)
+				query = 'SELECT title from works WHERE universalid = %s'
+				data = (s,)
+				cursor.execute(query, data)
+				result = cursor.fetchone()
+				thehtml += '<span class="wk' + selectionorexclusion + '" id="searchselection_0' + str(
+					selcount) + '" listval="' \
+				           + str(localval) + '">' + ao.akaname + ', <span class="pickedwork">' + result[
+					           0] + '</span></span><br />'
+		
+		# [e] passages
+		if len(session['psg' + selectionorexclusion]) > 0:
+			# none of this should be on right now
+			thehtml += '<span class="picklabel">Passages</span><br />'
+			localval = -1
+			for s in session['psg' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				locus = s[14:].split('|')
+				# print('l', s, s[:6], s[7:10], s[14:], locus)
+				locus.reverse()
+				citationtuple = tuple(locus)
+				uid = s[:6]
+				ao = dbfunctions.dbauthorandworkmaker(uid, cursor)
+				for w in ao.listofworks:
+					if w.universalid == s[0:10]:
+						wk = w
+				loc = citationfunctions.prolixlocus(wk, citationtuple)
+				thehtml += '<span class="psg' + selectionorexclusion + '" id="searchselection_0' + str(
+					selcount) + '" listval="' \
+				           + str(localval) + '">' + ao.shortname + ', <span class="pickedwork">' + wk.title + \
+				           '</span>&nbsp;<span class="pickedsubsection">' + loc + '</span></span><br />'
+		
+		returndict[selectionorexclusion] = thehtml
+	
+	returndict['numberofselections'] = selcount
+	
+	return returndict
