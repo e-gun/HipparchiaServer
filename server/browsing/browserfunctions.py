@@ -1,7 +1,7 @@
 import re
 
 from server.dbsupport.citationfunctions import locusintocitation
-from server.dbsupport.dbfunctions import simplecontextgrabber, indexintocitationtuple
+from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
 from server.formatting_helper_functions import getpublicationinfo
 
 
@@ -39,6 +39,7 @@ def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, lineso
 	else:
 		last = locusindexvalue + linesofcontext
 	
+	# for the <-- and --> buttons on the browser
 	first = table + '_LN_' + str(first)
 	last = table + '_LN_' + str(last)
 	
@@ -46,49 +47,56 @@ def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, lineso
 	formattedpassage.append({'forwardsandback': [last,first]})
 
 	rawpassage = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
+	
+	lines = []
+	for r in rawpassage:
+		lines.append(dblineintolineobject(workobject.universalid, r))
+
+	focusline = lines[0]
+	for line in lines:
+		if line.index == locusindexvalue:
+			focusline = line
+	
 	biblio = getpublicationinfo(workobject, cursor)
 	
-	# ripe for refactoring?
-	citationtuple = indexintocitationtuple(workobject.universalid, locusindexvalue, cursor)
-	cv = locusintocitation(workobject, citationtuple)
-	cv = '<span class="author">'+authorobject.shortname+'</span>, <span class="work">'+title+'</span>, '+cv
+	# citation = focusline.locus()
+	citation = locusintocitation(workobject, focusline.locustuple())
+
+	cv = '<span class="author">'+authorobject.shortname+'</span>, <span class="work">'+title+'</span>, '+ citation
 	cv = cv + '<br />' + biblio
 	formattedpassage.append({'value':'<currentlyviewing>'+cv+'</currentlyviewing>'})
 	
 	linecount = 0
 	# insert something to highlight the citationtuple line
-	for line in rawpassage:
+	previousline = lines[0]
+	
+	for line in lines:
 		linecount += 1
-		linecore = line[7]
-		linecore = insertparserids(linecore)
-		if (linecount % numbersevery != 0) and divmod(linesofcontext,linecount) != (1,linecount-1) and divmod(linesofcontext,linecount) != (1,linecount-2):
-			# nothing special: neither the focus line nor a numbered line
-			linehtml = '<p class="browsedline">'+linecore+'</p>'
-		elif (linecount % numbersevery == 0) and (divmod(linesofcontext,linecount) == (1,linecount-1) or divmod(linesofcontext,linecount) == (1,linecount-2)):
-			# a numbered line and a focus line
-			linehtml = '<p class="focusline">' + linecore +'&nbsp;&nbsp;<span class="browsercite">('
-			for level in range(len(citationtuple) - 1, -1, -1):
-				linehtml += line[6 - level] + '.'
-			linehtml = linehtml[:-1] + ')</span></p>'
-		elif divmod(linesofcontext,linecount) == (1,linecount-1) or divmod(linesofcontext,linecount) == (1,linecount-2):
-			# a focusline
-			linehtml = '<p class="focusline">' + linecore +'</p>'
+		linecore = insertparserids(line)
+		if line.index == focusline.index:
+			linecount = numbersevery + 1
+			linehtml = '<p class="focusline">' + linecore + '&nbsp;&nbsp;(' + line.locus() + ')</p>'
 		else:
-			# a numbered line
-			linehtml = '<p class="browsedline">'+linecore+'&nbsp;&nbsp;<span class="browsercite">('
-			for level in range(len(citationtuple)-1,-1,-1):
-				linehtml += line[6-level]+'.'
-			linehtml = linehtml[:-1]+')</span></p>'
+			if line.samelevelas(previousline) is not True:
+				linecount = numbersevery + 1
+				linehtml = '<p class="browsedline">' + linecore + '&nbsp;&nbsp;<span class="browsercite">(' + line.locus() + ')</span></p>'
+			elif linecount % numbersevery == 0:
+				linehtml = '<p class="browsedline">' + linecore + '&nbsp;&nbsp;<span class="browsercite">(' + line.locus() + ')</span></p>'
+			else:
+				linehtml = '<p class="browsedline">' + linecore + '</p>'
+		
 		formattedpassage.append({'value':linehtml})
+		previousline = line
 		
 	return formattedpassage
 
 
-def insertparserids(onelineoftext):
+def insertparserids(lineobject):
 	# set up the clickable thing for the browser
 	# this is tricky because there is html in here and you don't want to tag it
-
-	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',onelineoftext)
+	
+	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',lineobject.contents)
+	hyphenated = lineobject.hyphenated['accented']
 	segments = theline.split('*snip*')
 	newline = ''
 	
@@ -99,6 +107,7 @@ def insertparserids(onelineoftext):
 				newline += seg
 			else:
 				words = seg.split(' ')
+				lastword = words[-1]
 				for word in words:
 					try:
 						if word[-1] in [',', ';', '.', '?', '!', ')', '′', '“', '·']:
@@ -107,6 +116,8 @@ def insertparserids(onelineoftext):
 									word = '<observed id="' + word[:-1] + '">' + word[:-1] + '</observed>' + word[-1] + ' '
 							except:
 								word = '<observed id="' + word[:-1] + '">' + word[:-1] + '</observed>' + word[-1] + ' '
+						elif word[-1] == '-' and word == lastword:
+							word = '<observed id="' + hyphenated + '">' + word + '</observed> '
 						elif word[0] in ['(', '‵', '„', '\'']:
 							word = word[0] + '<observed id="' + word[1:] + '">' + word[1:] + '</observed> '
 						else:

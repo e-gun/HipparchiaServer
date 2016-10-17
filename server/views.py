@@ -705,7 +705,8 @@ def grabtextforbrowsing():
 		# perseus lexical data had a bad author number?
 		workdb = perseusidmismatch(workdb, cursor)
 		workid = workdb[7:]
-		browserdata = getandformatbrowsercontext(ao, int(workid), int(passage), ctx, numbersevery, cursor)
+		browserdata = ''
+		#browserdata = getandformatbrowsercontext(ao, int(workid), int(passage), ctx, numbersevery, cursor)
 	if passage == -9999:
 		browserdata.append('could not find a Perseus reference in the Hipparchia DB: '+request.args.get('locus', ''))
 

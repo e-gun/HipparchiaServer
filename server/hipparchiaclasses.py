@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 from multiprocessing import Value
 
 
@@ -99,7 +100,7 @@ class dbWorkLine(object):
 	an object that corresponds to a db line
 	"""
 	
-	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, annotations):
+	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, hyphenated_words, annotations):
 		self.wkuinversalid = wkuinversalid
 		self.index = index
 		self.l5 = level_05_value
@@ -116,7 +117,12 @@ class dbWorkLine(object):
 		if self.contents is None:
 			self.contents = ''
 			self.strippedcontents = ''
-	
+		
+		hyph = hyphenated_words.split(' ')
+		if len(hyph) != 2:
+			self.hyphenated = {'accented': '', 'stripped': ''}
+		else:
+			self.hyphenated = {'accented': hyph[0], 'stripped': hyph[1]}
 	
 	def locus(self):
 		"""
@@ -132,6 +138,7 @@ class dbWorkLine(object):
 		citation = '.'.join(loc)
 		return citation
 	
+	
 	def locustuple(self):
 		"""
 		call me to get a citation tuple in 0-to-5 order
@@ -144,6 +151,7 @@ class dbWorkLine(object):
 		citationtuple = tuple(cit)
 	
 		return citationtuple
+	
 	
 	def samelevelas(self, other):
 		"""
@@ -158,6 +166,7 @@ class dbWorkLine(object):
 		else:
 			return False
 	
+	
 	def equivalentlevelas(self, other):
 		"""
 		are two loci at the same level or have we shifted books, sections, etc?
@@ -171,6 +180,7 @@ class dbWorkLine(object):
 		else:
 			return False
 	
+	
 	def toplevel(self):
 		top = 0
 		for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]:
@@ -181,6 +191,8 @@ class dbWorkLine(object):
 			
 		# should not need this, but...
 		return top
+
+		
 	
 class MPCounter(object):
 	def __init__(self):

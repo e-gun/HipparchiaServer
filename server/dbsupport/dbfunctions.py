@@ -291,11 +291,11 @@ def dblineintolineobject(work, dbline):
 	"""
 	convert a db result into a db object
 	they query had to be for all columns and in order:
-		query = 'SELECT index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, annotations FROM ' + work + ' ORDER BY index ASC'
+		query = 'SELECT index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, hypenated_words, annotations FROM ' + work + ' ORDER BY index ASC'
 	:param dbline:
 	:return:
 	"""
 	
-	lineobject = dbWorkLine(work, dbline[0], dbline[1], dbline[2], dbline[3], dbline[4], dbline[5], dbline[6], dbline[7], dbline[8], dbline[9])
+	lineobject = dbWorkLine(work, dbline[0], dbline[1], dbline[2], dbline[3], dbline[4], dbline[5], dbline[6], dbline[7], dbline[8], dbline[9], dbline[10])
 	
 	return lineobject

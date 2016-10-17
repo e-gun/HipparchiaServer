@@ -13,7 +13,7 @@ def buildfulltext(work, linesevery, cursor):
 	:param cursor:
 	:return:
 	"""
-	query = 'SELECT index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, annotations FROM ' + work + ' ORDER BY index ASC'
+	query = 'SELECT index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, hypenated_words, annotations FROM ' + work + ' ORDER BY index ASC'
 	cursor.execute(query)
 	results = cursor.fetchall()
 	
