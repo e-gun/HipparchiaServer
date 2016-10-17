@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from server.hipparchiaclasses import dbWorkLine
 from server.dbsupport.dbfunctions import dblineintolineobject
 
 def buildfulltext(work, linesevery, cursor):
@@ -25,7 +24,7 @@ def buildfulltext(work, linesevery, cursor):
 	for line in results:
 		linecount += 1
 		thisline = dblineintolineobject(work,line)
-		linecore = thisline.marked_up_line
+		linecore = thisline.contents
 		if thisline.samelevelas(previousline) is not True:
 			linecount = linesevery + 1
 			linehtml = linecore + '&nbsp;&nbsp;<span class="browsercite">(' + thisline.locus() + ')</span>'

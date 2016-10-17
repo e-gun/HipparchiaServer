@@ -9,12 +9,12 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
 from server.formatting_helper_functions import tidyuplist, dropdupes, prunedict, foundindict
-from server.hipparchiaclasses import MPCounter
+from server.hipparchiaclasses import MPCounter, dbWorkLine
 from server.searching.searchformatting import aggregatelines, cleansearchterm, aoprunebydate, aoremovespuria, \
 	sortandunpackresults, lookoutsideoftheline,  dbprunebydate, dbauthorandworkmaker, dbremovespuria
 
 
-def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist):
+def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, authordict):
 	"""
 	assign the search to multiprocessing workers
 	:param seeking:
@@ -24,6 +24,7 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist):
 	count = MPCounter()
 	manager = Manager()
 	hits = manager.dict()
+	authors = manager.dict(authordict)
 	searching = manager.list(indexedauthorandworklist)
 	# if you don't autocommit you will see: "Error: current transaction is aborted, commands ignored until end of transaction block"
 	# alternately you can commit every N transactions
@@ -34,11 +35,11 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist):
 	# a class and/or decorator would be nice, but you have a lot of trouble getting the (mp aware) args into the function
 	# the must be a way, but this also works
 	if searchtype == 'simple':
-		jobs = [Process(target=workonsimplesearch, args=(count, hits, seeking, searching, commitcount)) for i in range(workers)]
+		jobs = [Process(target=workonsimplesearch, args=(count, hits, seeking, searching, commitcount, authors)) for i in range(workers)]
 	elif searchtype == 'phrase':
-		jobs = [Process(target=workonphrasesearch, args=(hits, seeking, searching, commitcount)) for i in range(workers)]
+		jobs = [Process(target=workonphrasesearch, args=(hits, seeking, searching, commitcount, authors)) for i in range(workers)]
 	elif searchtype == 'proximity':
-		jobs = [Process(target=workonproximitysearch, args=(count, hits, seeking, proximate, searching, commitcount)) for i in range(workers)]
+		jobs = [Process(target=workonproximitysearch, args=(count, hits, seeking, proximate, searching, commitcount, authors)) for i in range(workers)]
 	else:
 		# impossible, but...
 		jobs = []
@@ -54,7 +55,7 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist):
 	return results
 
 
-def workonsimplesearch(count, hits, seeking, searching, commitcount):
+def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 	"""
 	a multiprocessors aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
@@ -79,7 +80,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount):
 		wkid = i[1]
 		index = i[0]
 		if '_AT_' in wkid:
-			hits[index] = (wkid, partialwordsearch(seeking, curs, wkid))
+			hits[index] = (wkid, partialwordsearch(seeking, curs, wkid, authors))
 		elif 'x' in wkid:
 			wkid = re.sub('x', 'w', wkid)
 			hits[index] = (wkid, simplesearchworkwithexclusion(seeking, curs, wkid))
@@ -98,7 +99,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount):
 	return hits
 
 
-def workonphrasesearch(hits, seeking, searching, commitcount):
+def workonphrasesearch(hits, seeking, searching, commitcount, authors):
 	"""
 	a multiprocessors aware function that hands off bits of a phrase search to multiple searchers
 	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase hits the limit
@@ -124,7 +125,7 @@ def workonphrasesearch(hits, seeking, searching, commitcount):
 			dbconnection.commit()
 		wkid = i[1]
 		index = i[0]
-		hits[index] = (wkid, phrasesearch(seeking, curs, wkid))
+		hits[index] = (wkid, phrasesearch(seeking, curs, wkid, authors))
 		
 	session['maxresults'] = tmp
 	dbconnection.commit()
@@ -134,7 +135,7 @@ def workonphrasesearch(hits, seeking, searching, commitcount):
 	return hits
 
 
-def workonproximitysearch(count, hits, seeking, proximate, searching, commitcount):
+def workonproximitysearch(count, hits, seeking, proximate, searching, commitcount, authors):
 	"""
 	a multiprocessors aware function that hands off bits of a proximity search to multiple searchers
 	note that exclusions are handled deeper down in withinxlines() and withinxwords()
@@ -160,16 +161,16 @@ def workonproximitysearch(count, hits, seeking, proximate, searching, commitcoun
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		try: i = searching.pop()
-		except: i = (-1,'gr0000w000')
+		except: i = (-1,'gr0001w001')
 		commitcount.increment()
 		if commitcount.value % 750 == 0:
 			dbconnection.commit()
 		wkid = i[1]
 		index = i[0]
 		if session['searchscope'] == 'L':
-			hits[index] = (wkid, withinxlines(int(session['proximity']), seeking, proximate, curs, wkid))
+			hits[index] = (wkid, withinxlines(int(session['proximity']), seeking, proximate, curs, wkid, authors))
 		else:
-			hits[index] = (wkid, withinxwords(int(session['proximity']), seeking, proximate, curs, wkid))
+			hits[index] = (wkid, withinxwords(int(session['proximity']), seeking, proximate, curs, wkid, authors))
 		
 		if len(hits[index][1]) == 0:
 			del hits[index]
@@ -329,11 +330,13 @@ def flagexclusions(authorandworklist):
 	return modifiedauthorandworklist
 
 
-def whereclauses(uidwithatsign, operand, cursor):
+def dbwhereclauses(uidwithatsign, operand, cursor):
 	"""
 	in order to restrict a search to a portion of a work, you will need a where clause
 	this builds it out of something like 'gr0003w001_AT_3|12' (Thuc., Bk 3, Ch 12)
 	note the clash with concsearching: it is possible to search the whole conc and then toss the bad lines, but...
+
+	tempting to do this with object, but the mp workers hate being passed stuff like that...
 	
 	:param uidwithatsign:
 	:param operand: this should be either '=' or '!='
@@ -346,6 +349,39 @@ def whereclauses(uidwithatsign, operand, cursor):
 	locus = uidwithatsign[14:].split('|')
 	
 	ao = dbauthorandworkmaker(a, cursor)
+	for w in ao.listofworks:
+		if w.universalid == uidwithatsign[0:10]:
+			wk = w
+	
+	wklvls = list(wk.structure.keys())
+	wklvls.reverse()
+	
+	index = -1
+	for l in locus:
+		index += 1
+		lvstr = 'level_0' + str(wklvls[index]) + '_value' + operand + '%s '
+		whereclausetuples.append((lvstr, l))
+	
+	return whereclausetuples
+
+
+def whereclauses(uidwithatsign, operand, authors):
+	"""
+	in order to restrict a search to a portion of a work, you will need a where clause
+	this builds it out of something like 'gr0003w001_AT_3|12' (Thuc., Bk 3, Ch 12)
+	note the clash with concsearching: it is possible to search the whole conc and then toss the bad lines, but...
+
+	:param uidwithatsign:
+	:param operand: this should be either '=' or '!='
+	:return: a tuple consisting of the SQL string and the value to be passed via %s
+	"""
+	
+	whereclausetuples = []
+	
+	a = uidwithatsign[:6]
+	locus = uidwithatsign[14:].split('|')
+	
+	ao = authors[a]
 	for w in ao.listofworks:
 		if w.universalid == uidwithatsign[0:10]:
 			wk = w
@@ -442,7 +478,7 @@ def concordancelookup(worktosearch, indexlocation, cursor):
 	return citation
 
 
-def partialwordsearch(seeking, cursor, workdbname):
+def partialwordsearch(seeking, cursor, workdbname, authors):
 	# workdbname = 'gr9999w999'
 	mylimit = 'LIMIT ' + str(session['maxresults'])
 	if session['accentsmatter'] == 'Y':
@@ -470,7 +506,7 @@ def partialwordsearch(seeking, cursor, workdbname):
 		qw = ''
 		db = workdbname[0:10]
 		d = [seeking, hyphsearch]
-		w = whereclauses(workdbname, '=', cursor)
+		w = whereclauses(workdbname, '=', authors)
 		for i in range(0, len(w)):
 			qw += 'AND (' + w[i][0] + ') '
 			d.append(w[i][1])
@@ -547,7 +583,7 @@ def simplesearchworkwithexclusion(seeking, cursor, workdbname):
 	return found
 
 
-def phrasesearch(searchphrase, cursor, wkid):
+def phrasesearch(searchphrase, cursor, wkid, authors):
 	"""
 	a whitespace might mean things are on a new line
 	note how horrible something like και δη και is: you will search και first and then...
@@ -567,7 +603,7 @@ def phrasesearch(searchphrase, cursor, wkid):
 			longestterm = term
 
 	if 'x' not in wkid:
-		hits = partialwordsearch(longestterm, cursor, wkid)
+		hits = partialwordsearch(longestterm, cursor, wkid, authors)
 		# hits = concsearch(longestterm, cursor, wkid)
 	else:
 		wkid = re.sub('x', 'w', wkid)
@@ -586,7 +622,7 @@ def phrasesearch(searchphrase, cursor, wkid):
 	return fullmatches
 
 
-def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname):
+def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, authors):
 	"""
 	after finding x, look for y within n lines of x
 	people who send phrases to both halves and/or a lot of regex will not always get what they want
@@ -604,7 +640,7 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname):
 		workdbname = re.sub('x', 'w', workdbname)
 		hits = simplesearchworkwithexclusion(firstterm, cursor, workdbname)
 	else:
-		hits = partialwordsearch(firstterm, cursor, workdbname)
+		hits = partialwordsearch(firstterm, cursor, workdbname, authors)
 	
 	fullmatches = []
 	for hit in hits:
@@ -617,7 +653,7 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname):
 	return fullmatches
 
 
-def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname):
+def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, authors):
 	"""
 	after finding x, look for y within n words of x
 	:param distanceinlines:
@@ -634,7 +670,7 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname):
 		workdbname = re.sub('x', 'w', workdbname)
 		hits = simplesearchworkwithexclusion(firstterm, cursor, workdbname)
 	else:
-		hits = partialwordsearch(firstterm, cursor, workdbname)
+		hits = partialwordsearch(firstterm, cursor, workdbname, authors)
 	
 	fullmatches = []
 	for hit in hits:
@@ -680,6 +716,7 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname):
 			fullmatches.append(hit)
 	
 	return fullmatches
+
 
 # slated for removal
 
@@ -853,3 +890,5 @@ def authorsandworksbygenre(cursor, genre):
 		for workcount in range(0, len(authorobject.listofworks)):
 			authorandworktuplelist.append((authorobject, workcount + 1))
 	return authorandworktuplelist
+
+

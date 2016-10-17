@@ -4,7 +4,7 @@ import re
 
 from flask import session
 
-from server.dbsupport.dbfunctions import dbauthorandworkmaker, simplecontextgrabber
+from server.dbsupport.dbfunctions import dbauthorandworkmaker, simplecontextgrabber, dblineintolineobject
 from server.dbsupport.citationfunctions import locusintocitation
 from server.formatting_helper_functions import formatpublicationinfo
 
@@ -82,24 +82,28 @@ def highlightsearchterm(line,searchterm):
 	return newline
 
 
-def resultformatter(raw, searchterm, highlight):
-	# in:
-	# (1728, None, '-1', '-1', '-1', '3', '237', "Κάϲτορά θ' ἱππόδαμον καὶ πὺξ ἀγαθὸν Πολυδεύκεα ", "Καϲτορα θ' ιπποδαμον και πυξ αγαθον Πολυδευκεα ", '', '')
-	# out:
-	# {'index': 1728, 'locus': ('237','3'), 'line':"<span class="highlight">Κάϲτορά θ' ἱππόδαμον καὶ πὺξ <span class="match">ἀγαθὸν</span> Πολυδεύκεα </span>"}
+def lineobjectresultformatter(lineobject, searchterm, highlight):
+	"""
+	turn a lineobject into a pretty result
+		 out:
+		{'index': 1728, 'locus': ('237','3'), 'line':"<span class="highlight">Κάϲτορά θ' ἱππόδαμον καὶ πὺξ <span class="match">ἀγαθὸν</span> Πολυδεύκεα </span>"}
+		
+	:param lineobject:
+	:param searchterm:
+	:param highlight:
+	:return:
+	"""
+	
 	formatteddict = {}
-	formatteddict['index'] = raw[0]
+	formatteddict['index'] = lineobject.index
+
 	if highlight is True:
-		# newline = raw[7]
-		newline = highlightsearchterm(raw[7], searchterm)
+		newline = highlightsearchterm(lineobject.contents, searchterm)
 		formatteddict['line'] = '<span class="highlight">'+newline+'</span>'
 	else:
-		formatteddict['line'] = raw[7]
-	loc = []
-	for i in range(6, 1, -1):
-		if (raw[i] != '-1') and (raw[i] is not None):
-			loc.append(raw[i])
-	formatteddict['locus']=tuple(loc)
+		formatteddict['line'] = lineobject.contents
+	
+	formatteddict['locus'] = lineobject.locustuple()
 
 	return formatteddict
 
@@ -290,28 +294,42 @@ def aoremovespuria(authorandworklist, worksdict):
 
 
 def aoformattedcittationincontext(line, workdbname, authorobject, linesofcontext, searchterm, cursor):
+	"""
+	take a hit
+		turn it into a focus line
+		turround it by some context
+	:param line:
+	:param workdbname:
+	:param authorobject:
+	:param linesofcontext:
+	:param searchterm:
+	:param cursor:
+	:return:
+	"""
 	
 	if '_AT_' in workdbname:
 		workdbname = workdbname[0:10]
-		
+	
+	lineobject = dblineintolineobject(workdbname, line)
+	
 	citationincontext = []
-	highlightline = line[0]
-	locus = resultformatter(line, searchterm, False)
+	highlightline = lineobject.index
 	for w in authorobject.listofworks:
 		if w.universalid == workdbname:
 			workobject = w
-	citation = locusintocitation(workobject, locus['locus'])
+	citation = locusintocitation(workobject, lineobject.locustuple())
 	# this next bit of info tags the find; 'newfind' + 'url' is turned into JS in the search.html '<script>' loop; this enables click-to-browse
 	# similarly the for-result-in-found loop of search.html generates the clickable elements: <browser id="{{ context['url'] }}">
 	citationincontext.append({'newfind': 1, 'author': authorobject.shortname,
-	                 'work': workobject.title, 'citation': citation, 'url': (workdbname+'_LN_'+str(locus['index']))})
+	                 'work': workobject.title, 'citation': citation, 'url': (lineobject.universalid)})
 	environs = simplecontextgrabber(workobject, highlightline, linesofcontext, cursor)
 
 	for found in environs:
-		if found[0] == highlightline:
-			found = resultformatter(found, searchterm, True)
+		found = dblineintolineobject(workdbname, found)
+		if found.index == highlightline:
+			found = lineobjectresultformatter(found, searchterm, True)
 		else:
-			found = resultformatter(found, searchterm, False)
+			found = lineobjectresultformatter(found, searchterm, False)
 		citationincontext.append(found)
 		
 	return citationincontext
@@ -606,3 +624,23 @@ def dbformattedcittationincontext(line, workdbname, linesofcontext, searchterm, 
 	return citationincontext
 
 
+def resultformatter(raw, searchterm, highlight):
+	# in:
+	# (1728, None, '-1', '-1', '-1', '3', '237', "Κάϲτορά θ' ἱππόδαμον καὶ πὺξ ἀγαθὸν Πολυδεύκεα ", "Καϲτορα θ' ιπποδαμον και πυξ αγαθον Πολυδευκεα ", '', '')
+	# out:
+	# {'index': 1728, 'locus': ('237','3'), 'line':"<span class="highlight">Κάϲτορά θ' ἱππόδαμον καὶ πὺξ <span class="match">ἀγαθὸν</span> Πολυδεύκεα </span>"}
+	formatteddict = {}
+	formatteddict['index'] = raw[0]
+	if highlight is True:
+		# newline = raw[7]
+		newline = highlightsearchterm(raw[7], searchterm)
+		formatteddict['line'] = '<span class="highlight">'+newline+'</span>'
+	else:
+		formatteddict['line'] = raw[7]
+	loc = []
+	for i in range(6, 1, -1):
+		if (raw[i] != '-1') and (raw[i] is not None):
+			loc.append(raw[i])
+	formatteddict['locus']=tuple(loc)
+
+	return formatteddict

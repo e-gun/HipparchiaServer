@@ -100,7 +100,7 @@ class dbWorkLine(object):
 	"""
 	
 	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, annotations):
-		self.wkuinversalid = wkuinversalid,
+		self.wkuinversalid = wkuinversalid
 		self.index = index
 		self.l5 = level_05_value
 		self.l4 = level_04_value
@@ -108,15 +108,19 @@ class dbWorkLine(object):
 		self.l2 = level_02_value
 		self.l1 = level_01_value
 		self.l0 = level_00_value
-		self.marked_up_line = marked_up_line
-		self.stripped_lines = stripped_line
+		self.contents = marked_up_line
+		self.strippedcontents = stripped_line
 		self.annotations = annotations
-		self.uinversalid = wkuinversalid+'_LN_'+str(index)
+		self.universalid = wkuinversalid+'_LN_'+str(index)
 
-		
+		if self.contents is None:
+			self.contents = ''
+			self.strippedcontents = ''
+	
+	
 	def locus(self):
 		"""
-		call me to get a citation
+		call me to get a formatted citation
 		:param self:
 		:return:
 		"""
@@ -128,6 +132,18 @@ class dbWorkLine(object):
 		citation = '.'.join(loc)
 		return citation
 	
+	def locustuple(self):
+		"""
+		call me to get a citation tuple in 0-to-5 order
+		:return:
+		"""
+		cit = []
+		for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]:
+			if str(lvl) != '-1':
+				cit.append(lvl)
+		citationtuple = tuple(cit)
+	
+		return citationtuple
 	
 	def samelevelas(self, other):
 		"""

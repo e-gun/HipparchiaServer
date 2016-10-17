@@ -96,12 +96,12 @@ def search():
 			# a simple search
 			thesearch = seeking
 			htmlsearch = '<span class="emph">' + seeking + '</span>'
-			hits = searchdispatcher('simple', seeking, proximate, indexedworklist)
+			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, authordict)
 		elif re.search(phrasefinder, seeking) is not None:
 			# a phrase search
 			thesearch = seeking
 			htmlsearch = '<span class="emph">' + seeking + '</span>'
-			hits = searchdispatcher('phrase', seeking, proximate, indexedworklist)
+			hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict)
 		else:
 			# proximity search
 			if session['searchscope'] == 'W':
@@ -116,7 +116,7 @@ def search():
 			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
 			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
 			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
-			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist)
+			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict)
 		
 		allfound = []
 		hitcount = 0
