@@ -204,7 +204,6 @@ class dbWorkLine(object):
 		return unformatted
 
 		
-	
 class MPCounter(object):
 	def __init__(self):
 		self.val = Value('i', 0)

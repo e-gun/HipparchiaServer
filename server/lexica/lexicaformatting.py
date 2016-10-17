@@ -258,6 +258,7 @@ def formatgloss(entrybody):
 	
 	return glosshtml
 
+
 def formatmicroentry(entrybody):
 	"""
 	some entries work like glosses but are not labeled as glosses: no quote, authors, etc. just a synonym or synonyms listed
@@ -421,129 +422,5 @@ def dbquickfixes(listofnames):
 			hipparchiadb = fixer[db.group(1)]
 			substitutes[item] = hipparchiadb+db.group(2)
 
-	return substitutes
-
-
-# currently uncalled code
-
-def impatientinsertbrowserlookups(htmlentry):
-	"""
-	transform the <bibl> items into things you can click on and see in the work browser
-		in: <bibl n="Perseus:abo:tlg,0527,004:36:11"...>
-		out: <bibl id="gr0527w004_LN_1111"...>
-	the big challenge is the incompleteness of the references: they go to level01 instead of level00 in many cases
-	similarly 67a instead of 67:a in the entry
-	this will require finding a '_LN_' reference with the info that is available...
-
-	it is tempting not to do this now but to wait for the click to make the transformation: quite slow...
-	but this lets you see all of the problems with the data
-	:param htmlentry:
-	:return:
-	"""
-	
-	# first retag the items that should not click-to-browse
-	
-	biblios = re.compile(r'(<bibl.*?)(.*?)(</bibl>)')
-	bibs = re.findall(biblios, htmlentry)
-	bdict = {}
-	
-	for bib in bibs:
-		if 'Perseus:abo' not in bib[1]:
-			head = '<unclickablebibl'
-			tail = '</unclickablebibl>'
-		else:
-			head = bib[0]
-			tail = bib[2]
-		bdict[('').join(bib)] = head + bib[1] + tail
-	
-	# print('here',bdict)
-	for key in bdict.keys():
-		htmlentry = re.sub(key, bdict[key], htmlentry)
-	
-	# now do the work of finding the lookups
-	
-	tlgfinder = re.compile(r'n="Perseus:abo:tlg,(\d\d\d\d),(\d\d\d):(.*?)"')
-	phifinder = re.compile(r'n="Perseus:abo:phi,(\d\d\d\d),(\d\d\d):(.*?)"')
-	
-	clickableentry = re.sub(tlgfinder, r'id="gr\1w\2_AT_\3"', htmlentry)
-	clickableentry = re.sub(phifinder, r'id="lt\1w\2_AT_\3"', clickableentry)
-	
-	dfbinder = re.compile(r'id="(..\d\d\d\dw\d\d\d_AT_.*?)"')
-	loci = re.findall(dfbinder, clickableentry)
-	
-	# dbquickfixes for euripides, etc to swap out work numbers
-	# should probably implement this inside the builder
-	substitutes = dbquickfixes(loci)
-	for sub in substitutes.keys():
-		clickableentry = re.sub(sub, substitutes[sub], clickableentry)
-	
-	fixedloci = re.findall(dfbinder, clickableentry)
-	
-	substitutes = dispatchlookupwork(fixedloci)
-	
-	for sub in substitutes.keys():
-		if '_LN_-9999' not in substitutes[sub]:
-			clickableentry = re.sub(sub, substitutes[sub], clickableentry)
-		else:
-			clickableentry = re.sub(sub, 'unclickable', clickableentry)
-	
-	# one last pass to add in the newly known unknowns
-	unclick = re.compile(r'(<bibl id="unclickable".*?>)(.*?)(</bibl>)')
-	clickableentry = re.sub(unclick, r'<unclickablebibl>\2</unclickablebibl>', clickableentry)
-	
-	return clickableentry
-
-
-def dispatchlookupwork(loci):
-	manager = Manager()
-	passages = manager.list(loci)
-	substitutes = manager.dict()
-	commitcount = MPCounter()
-	
-	workers = hipparchia.config['WORKERS']
-	
-	jobs = [Process(target=mpbrowserlookupworker, args=(passages, substitutes, commitcount)) for i in
-	        range(workers)]
-	for j in jobs: j.start()
-	for j in jobs: j.join()
-	
-	return substitutes
-
-
-def mpbrowserlookupworker(passages, substitutes, commitcount):
-	"""
-	mp aware citation lookups
-	if you try a reverse lookup of a common word like 'have', you'll know why we want to add some speed:
-	lots of entries with lots of citations
-	:param passages:
-	:param substitutes:
-	:param commitcount:
-	:return:
-	"""
-	
-	dbc = setconnection('autocommit')  # because the huge number of exceptions will need dbc.rollback() otherwise and we don't want to pass dbc endlessly
-	curs = dbc.cursor()
-	
-	while passages:
-		try:
-			passage = passages.pop()
-		except:
-			passage = ''
-		if passage != '':
-			db = passage[:10]
-			citation = passage[14:].split(':')
-			citation.reverse()
-			dbline = finddblinefromincompletelocus(db, citation, curs)
-			commitcount.increment()
-			if commitcount.value % 100 == 0:
-				dbc.commit()
-			swap = db + '_LN_' + str(dbline)
-			# here's where you can see the horror: '_LN_1' represents failure
-			substitutes[passage] = swap
-	
-	dbc.commit()
-	curs.close()
-	del dbc
-	
 	return substitutes
 

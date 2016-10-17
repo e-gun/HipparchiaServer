@@ -47,6 +47,26 @@ def labelmaker(workuid, cursor):
 	return results
 
 
+def loadallauthors(cursor):
+	"""
+	build a full set of author objects
+	be careful about how much you really need this: a source of lag
+	currently called by:
+		setavalablegenrelist
+	:param cursor:
+	:return:
+	"""
+	query = 'SELECT * from authors ORDER BY shortname ASC'
+	cursor.execute(query)
+	authorlist = cursor.fetchall()
+
+	authorobjects = []
+	for author in authorlist:
+		authorobjects.append(dbauthorandworkmaker(author[0],cursor))
+
+	return authorobjects
+
+
 def dbauthormakersubroutine(uid, cursor):
 	# only call this AFTER you have built all of the work objects so that they can be placed into it
 
@@ -97,6 +117,21 @@ def dbauthorandworkmaker(authoruid, cursor):
 	return author
 
 
+def dblineintolineobject(work, dbline):
+	"""
+	convert a db result into a db object
+	they query had to be for all columns and in order:
+		query = 'SELECT index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, hypenated_words, annotations FROM ' + work + ' ORDER BY index ASC'
+	:param dbline:
+	:return:
+	"""
+	
+	lineobject = dbWorkLine(work, dbline[0], dbline[1], dbline[2], dbline[3], dbline[4], dbline[5], dbline[6],
+	                        dbline[7], dbline[8], dbline[9], dbline[10])
+	
+	return lineobject
+
+
 def findtoplevelofwork(workuid, cursor):
 	"""
 	give me a db name and I will peek into it to see what its top level is
@@ -126,26 +161,6 @@ def findtoplevelofwork(workuid, cursor):
 	numberoflevels = len(results)+1
 	
 	return numberoflevels
-
-
-def loadallauthors(cursor):
-	"""
-	build a full set of author objects
-	be careful about how much you really need this: a source of lag
-	currently called by:
-		setavalablegenrelist
-	:param cursor:
-	:return:
-	"""
-	query = 'SELECT * from authors ORDER BY shortname ASC'
-	cursor.execute(query)
-	authorlist = cursor.fetchall()
-
-	authorobjects = []
-	for author in authorlist:
-		authorobjects.append(dbauthorandworkmaker(author[0],cursor))
-
-	return authorobjects
 
 
 def simplecontextgrabber(workobject, focusline, linesofcontext, cursor):
@@ -287,15 +302,3 @@ def returnfirstwork(authorid, cursor):
 	return found
 
 
-def dblineintolineobject(work, dbline):
-	"""
-	convert a db result into a db object
-	they query had to be for all columns and in order:
-		query = 'SELECT index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, hypenated_words, annotations FROM ' + work + ' ORDER BY index ASC'
-	:param dbline:
-	:return:
-	"""
-	
-	lineobject = dbWorkLine(work, dbline[0], dbline[1], dbline[2], dbline[3], dbline[4], dbline[5], dbline[6], dbline[7], dbline[8], dbline[9], dbline[10])
-	
-	return lineobject

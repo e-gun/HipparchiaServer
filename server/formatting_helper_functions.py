@@ -5,7 +5,6 @@ from operator import itemgetter
 import re
 
 
-
 def tidyuplist(untidylist):
 	"""
 	sort and remove duplicates
@@ -301,49 +300,4 @@ def foundindict(dict, element, mustbein):
 	
 	return finds
 	
-	
-# slated for removal
-
-
-def sortauthorandworklists(authorandworklist, cursor):
-	"""
-	send me a list of workuniversalids and i will resort it via the session sortorder
-	:param authorandworklist: (au, wk)
-	:param cursor:
-	:return:
-	"""
-	so = session['sortorder']
-	templist = []
-	newlist = []
-	
-	# because there is no need to query plutarch 100 times
-	previous = ['', '']
-	
-	if so != 'universalid':
-		for a in authorandworklist:
-			if a[0:6] != previous[0]:
-				query = 'SELECT ' + so + ' FROM authors WHERE universalid = %s'
-				data = (a[0:6],)
-				cursor.execute(query, data)
-				found = cursor.fetchone()
-				if so == 'floruit':
-					try:
-						f = float(found[0])
-					except:
-						f = 9999
-				else:
-					f = found[0]
-			else:
-				f = previous[1]
-			
-			templist.append([f, a])
-			previous = [a[0:6], f]
-		
-		templist = sorted(templist, key=itemgetter(0))
-		for t in templist:
-			newlist.append(t[1])
-	else:
-		newlist = authorandworklist
-	
-	return newlist
 

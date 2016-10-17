@@ -219,6 +219,7 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 		
 	return dblinenumber
 
+
 def perseuscitationsintohipparchiacitations(citationlist):
 	"""
 	a collections of hopes and prayers that attempts to minimize the misfits between perseus citations and hipparchia citations
