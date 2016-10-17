@@ -69,7 +69,6 @@ def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, lineso
 	linecount = 0
 	# insert something to highlight the citationtuple line
 	previousline = lines[0]
-	
 	for line in lines:
 		linecount += 1
 		linecore = insertparserids(line)

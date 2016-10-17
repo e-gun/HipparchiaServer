@@ -933,13 +933,3 @@ def cookieintosession():
 	response = redirect(url_for('search'))
 	return response
 
-
-#
-# testing
-#
-
-
-#
-# slated for removal
-#
-

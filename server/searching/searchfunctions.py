@@ -401,7 +401,7 @@ def whereclauses(uidwithatsign, operand, authors):
 def concsearch(seeking, cursor, workdbname):
 	"""
 	search for a word by looking it up in the concordance to that work
-	
+	returns the lines from the work that contain the word
 	:param seeking:
 	:param cursor:
 	:param workdbname:
@@ -412,10 +412,8 @@ def concsearch(seeking, cursor, workdbname):
 	mylimit = 'LIMIT ' + str(session['maxresults'])
 	if session['accentsmatter'] == 'Y':
 		ccolumn = 'word'
-	# wcolumn = 'marked_up_line'
 	else:
 		ccolumn = 'stripped_word'
-	# wcolumn = 'stripped_line'
 	
 	searchsyntax = ['=', 'LIKE', 'SIMILAR TO', '~*']
 	
@@ -479,7 +477,15 @@ def concordancelookup(worktosearch, indexlocation, cursor):
 
 
 def partialwordsearch(seeking, cursor, workdbname, authors):
-	# workdbname = 'gr9999w999'
+	"""
+	actually one of the most basic search types: look for a string/substring
+	this is brute force: you wade through the full text of the work
+	:param seeking:
+	:param cursor:
+	:param workdbname:
+	:param authors:
+	:return:
+	"""
 	mylimit = 'LIMIT ' + str(session['maxresults'])
 	if session['accentsmatter'] == 'Y':
 		columna = 'marked_up_line'
@@ -611,7 +617,6 @@ def phrasesearch(searchphrase, cursor, wkid, authors):
 	
 	fullmatches = []
 	for hit in hits:
-		# wordset = aggregatelines(hit[0] - 1, hit[0] + 1, cursor, wkid)
 		phraselen = len(searchphrase.split(' '))
 		wordset = lookoutsideoftheline(hit[0], phraselen-1, wkid, cursor)
 		if session['accentsmatter'] == 'N':

@@ -7,7 +7,11 @@ from server.hipparchiaclasses import MPCounter
 from server.dbsupport.dbfunctions import setconnection
 
 def grabsenses(fullentry):
-	
+	"""
+	look for all of the senses of a work in its dictionary entry
+	:param fullentry:
+	:return:
+	"""
 	sensing = re.compile(r'<sense.*?/sense>')
 	senses = re.findall(sensing, fullentry)
 	leveler = re.compile(r'<sense\s.*?level="(.*?)".*?>')
@@ -81,6 +85,11 @@ def entrysummary(fullentry,lang, translationlabel):
 
 
 def grabheadmaterial(fullentry):
+	"""
+	find the information at the top of a dictionary entry: used to get the basic info about the word
+	:param fullentry:
+	:return:
+	"""
 	heading = re.compile(r'(.*?)\<sense')
 	head = re.search(heading,fullentry)
 	
@@ -98,7 +107,12 @@ def grabheadmaterial(fullentry):
 
 
 def deabbreviateauthors(authorabbr, lang):
-	
+	"""
+	try to turn an author abbreviation into an author name
+	:param authorabbr:
+	:param lang:
+	:return:
+	"""
 	if lang == 'latin':
 		decoder = { 'Caes.':'Caesar',
 		        'Cat.':'Catullus',
@@ -189,10 +203,18 @@ def deabbreviateauthors(authorabbr, lang):
 		author = decoder[authorabbr]
 	else:
 		author = authorabbr
+		
 	return author
 
 
 def formatdictionarysummary(authors,senses,quotes):
+	"""
+	turn three lists into html formatting for the summary material that will be inserted at the top of a dictionary entry
+	:param authors:
+	:param senses:
+	:param quotes:
+	:return:
+	"""
 	summary = ''
 	if len(authors) > 0:
 		summary += '<br \>\n<div class="authorsummary"><span class="highlight">Used by:</span><br \>\n'
