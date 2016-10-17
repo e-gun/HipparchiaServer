@@ -161,7 +161,7 @@ def search():
 		                       dmin=dmin, dmax=dmax)
 	
 	cur.close()
-	del dbconnection
+	del dbc
 	
 	return page
 
@@ -717,7 +717,7 @@ def grabtextforbrowsing():
 	browserdata = json.dumps(browserdata)
 	
 	cur.close()
-	del dbconnection
+	del dbc
 	
 	return browserdata
 
