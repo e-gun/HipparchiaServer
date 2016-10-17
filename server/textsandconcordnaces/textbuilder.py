@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+from server.hipparchiaclasses import dbWorkLine
+from server.dbsupport.dbfunctions import dblineintolineobject
 
-def buildfulltext(work, levelcount, higherlevels, linesevery, cursor):
+def buildfulltext(work, linesevery, cursor):
 	"""
 	make a readable/printable version of a work and send it to its own page
 	huge works will overwhelm the ability of most/all browsers to parse that much html
@@ -12,32 +14,28 @@ def buildfulltext(work, levelcount, higherlevels, linesevery, cursor):
 	:param cursor:
 	:return:
 	"""
-	query = 'SELECT * FROM ' + work + ' ORDER BY index ASC'
+	query = 'SELECT index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, annotations FROM ' + work + ' ORDER BY index ASC'
 	cursor.execute(query)
 	results = cursor.fetchall()
 	
-	# will mark/reset every time you get to a major level shift
+	previousline = dblineintolineobject(work, results[0])
+
 	output = []
-	memory = []
-	for m in range(0, len(higherlevels)):
-		memory.append(0)
 	linecount = 0
 	for line in results:
 		linecount += 1
-		linecore = line[7]
-		currlevels = []
-		for c in range(5, 5 - len(higherlevels), -1):
-			currlevels.append(line[c])
-		if currlevels != memory:
-			linecount = linesevery
-			memory = currlevels
-		if linecount % linesevery == 0:
-			linehtml = linecore + '&nbsp;&nbsp;<span class="browsercite">('
-			for level in range(7 - levelcount, 7):
-				linehtml += str(line[level]) + '.'
-			linehtml = linehtml[:-1] + ')</span>'
+		thisline = dblineintolineobject(work,line)
+		linecore = thisline.marked_up_line
+		if thisline.samelevelas(previousline) is not True:
+			linecount = linesevery + 1
+			linehtml = linecore + '&nbsp;&nbsp;<span class="browsercite">(' + thisline.locus() + ')</span>'
 		else:
 			linehtml = linecore
-		output.append(linehtml)
+			
+		if linecount % linesevery == 0:
+			linehtml = linecore + '&nbsp;&nbsp;<span class="browsercite">(' + thisline.locus() + ')</span>'
 
+		output.append(linehtml)
+		previousline = thisline
+	
 	return output

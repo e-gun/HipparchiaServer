@@ -44,6 +44,7 @@ class dbAuthor(object):
 	def addwork(self, work):
 		self.listofworks.append(work)
 
+
 class dbOpus(object):
 	"""
 	Created out of the DB info, not the IDT vel sim
@@ -76,8 +77,95 @@ class dbOpus(object):
 			idx += 1
 			if label != '':
 				self.structure[idx] = label
+		
+		availablelevels = 1
+		for level in [self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04, self.levellabels_05]:
+			if level != '' and level is not None:
+				availablelevels += 1
+		self.availablelevels = availablelevels
+		
+	def citation(self):
+		cit = []
+		levels = [self.levellabels_00, self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04, self.levellabels_05]
+		for l in range(0,self.availablelevels):
+			cit.append(levels[l])
+		cit.reverse()
+		
+		return cit
+			
 
+class dbWorkLine(object):
+	"""
+	an object that corresponds to a db line
+	"""
+	
+	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, annotations):
+		self.wkuinversalid = wkuinversalid,
+		self.index = index
+		self.l5 = level_05_value
+		self.l4 = level_04_value
+		self.l3 = level_03_value
+		self.l2 = level_02_value
+		self.l1 = level_01_value
+		self.l0 = level_00_value
+		self.marked_up_line = marked_up_line
+		self.stripped_lines = stripped_line
+		self.annotations = annotations
+		self.uinversalid = wkuinversalid+'_LN_'+str(index)
 
+		
+	def locus(self):
+		"""
+		call me to get a citation
+		:param self:
+		:return:
+		"""
+		loc = []
+		for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]:
+			if str(lvl) != '-1':
+				loc.append(lvl)
+		loc.reverse()
+		citation = '.'.join(loc)
+		return citation
+	
+	
+	def samelevelas(self, other):
+		"""
+		are two loci at the same level or have we shifted books, sections, etc?
+		the two loci have to be from the same work
+		:param self:
+		:param other:
+		:return:
+		"""
+		if self.wkuinversalid == other.wkuinversalid and self.l5 == other.l5 and self.l4 == other.l4 and self.l3 == other.l3 and self.l2 == other.l2 and self.l1 == other.l1:
+			return True
+		else:
+			return False
+	
+	def equivalentlevelas(self, other):
+		"""
+		are two loci at the same level or have we shifted books, sections, etc?
+		the two loci do not have to be from the same work
+		:param self:
+		:param other:
+		:return:
+		"""
+		if self.l5 == other.l5 and self.l4 == other.l4 and self.l3 == other.l3 and self.l2 == other.l2 and self.l1 == other.l1:
+			return True
+		else:
+			return False
+	
+	def toplevel(self):
+		top = 0
+		for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]:
+			if str(lvl) != '-1':
+				top += 1
+			else:
+				return top
+			
+		# should not need this, but...
+		return top
+	
 class MPCounter(object):
 	def __init__(self):
 		self.val = Value('i', 0)

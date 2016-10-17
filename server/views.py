@@ -254,7 +254,6 @@ def workdump():
 		mode = 0
 		
 	if len(work) == 10:
-		# author = dbauthorandworkmaker(work[0:6], cursor)
 		author = authordict[work[0:6]]
 		authorname = author.shortname
 		
@@ -263,18 +262,11 @@ def workdump():
 				thework = w
 				title = thework.title
 		
-		ws = thework.structure
-		levelcount = len(ws)
-		higherlevels=list(ws)
-		higherlevels.remove(0)
+		cit = thework.citation()
+		structure = ', '.join(cit)
 		
-		structure = []
-		for s in range(5, -1, -1):
-			if s in ws:
-				structure.append(ws[s])
-		structure = ', '.join(structure)
-		
-		output = buildfulltext(work, levelcount, higherlevels, linesevery, cursor)
+		output = buildfulltext(work, linesevery, cursor)
+
 	else:
 		output = []
 
