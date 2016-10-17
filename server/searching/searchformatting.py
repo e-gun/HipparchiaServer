@@ -4,7 +4,7 @@ import re
 
 from flask import session
 
-from server.dbsupport.dbfunctions import dbauthorandworkmaker, simplecontextgrabber, dblineintolineobject
+from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
 from server.dbsupport.citationfunctions import locusintocitation
 from server.formatting_helper_functions import formatpublicationinfo
 
@@ -22,8 +22,9 @@ def cleansearchterm(seeking):
 	return seeking
 
 
-def highlightsearchterm(line,searchterm):
+def highlightsearchterm(lineobject,searchterm, spanname):
 
+	line = lineobject.contents
 
 	equivalents = {
 		'α': '(α|ἀ|ἁ|ἂ|ἃ|ἄ|ἅ|ἆ|ἇ|ᾀ|ᾁ|ᾂ|ᾃ|ᾄ|ᾅ|ᾆ|ᾇ|ᾲ|ᾳ|ᾴ|ᾶ|ᾷ|ᾰ|ᾱ|ὰ|ά|ᾈ|ᾉ|ᾊ|ᾋ|ᾌ|ᾍ|ᾎ|ᾏ|Ἀ|Ἁ|Ἂ|Ἃ|Ἄ|Ἅ|Ἆ|Ἇ|Α)',
@@ -73,16 +74,21 @@ def highlightsearchterm(line,searchterm):
 	accentedsearch = '('+accentedsearch+')'
 	find = re.search(accentedsearch,line)
 	try:
-		newline = line[0:find.start()]+'<span class="match">'+find.group()+'</span>'+line[find.end():-1]
+		newline = line[0:find.start()]+'<span class="'+spanname+'">'+find.group()+'</span>'+line[find.end():]
 	except:
-		# will barf if you 'find' an empty line, etc
-		# i.e., a bug in the search engine will turn into a problem here
-		pass
+		# the find was almost certainly a hyphenated last word: 'pro-' instead of 'profuit'
+		hyph = lineobject.hyphenated['accented']
+		find = re.search(accentedsearch, hyph)
+		try:
+			newline = line + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;'+hyph[0:find.start()]+'<span class="'+spanname+'">'+find.group()+'</span>'+hyph[find.end():]+'&nbsp;)'
+		except:
+			pass
+			# print('nofind',accentedsearch, line, lineobject.lastword('contents'))
 
 	return newline
 
 
-def lineobjectresultformatter(lineobject, searchterm, highlight):
+def lineobjectresultformatter(lineobject, searchterm, proximate, searchtype, highlight):
 	"""
 	turn a lineobject into a pretty result
 		 out:
@@ -98,11 +104,15 @@ def lineobjectresultformatter(lineobject, searchterm, highlight):
 	formatteddict['index'] = lineobject.index
 
 	if highlight is True:
-		newline = highlightsearchterm(lineobject.contents, searchterm)
-		formatteddict['line'] = '<span class="highlight">'+newline+'</span>'
-	else:
-		formatteddict['line'] = lineobject.contents
+		lineobject.contents = highlightsearchterm(lineobject, searchterm, 'match')
+		lineobject.contents = '<span class="highlight">'+lineobject.contents+'</span>'
+		
+	if proximate != '' and searchtype == 'proximity':
+		# negative proximity ('not near') does not need anything special here: you simply never meet the condition
+		if re.search(cleansearchterm(proximate),lineobject.contents) is not None or re.search(cleansearchterm(proximate),lineobject.strippedcontents) is not None:
+			lineobject.contents = highlightsearchterm(lineobject, proximate, 'proximate')
 	
+	formatteddict['line'] = lineobject.contents
 	formatteddict['locus'] = lineobject.locustuple()
 
 	return formatteddict
@@ -287,7 +297,7 @@ def aoremovespuria(authorandworklist, worksdict):
 	return trimmedlist
 
 
-def aoformattedcittationincontext(line, workdbname, authorobject, linesofcontext, searchterm, cursor):
+def formattedcittationincontext(line, workdbname, authorobject, linesofcontext, searchterm, proximate, searchtype, cursor):
 	"""
 	take a hit
 		turn it into a focus line
@@ -321,9 +331,9 @@ def aoformattedcittationincontext(line, workdbname, authorobject, linesofcontext
 	for found in environs:
 		found = dblineintolineobject(workdbname, found)
 		if found.index == highlightline:
-			found = lineobjectresultformatter(found, searchterm, True)
+			found = lineobjectresultformatter(found, searchterm, proximate, searchtype, True)
 		else:
-			found = lineobjectresultformatter(found, searchterm, False)
+			found = lineobjectresultformatter(found, searchterm, proximate, searchtype, False)
 		citationincontext.append(found)
 		
 	return citationincontext

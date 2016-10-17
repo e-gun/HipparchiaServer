@@ -11,7 +11,7 @@ from server.dbsupport.dbfunctions import setconnection
 from server.formatting_helper_functions import tidyuplist, dropdupes, prunedict, foundindict
 from server.hipparchiaclasses import MPCounter
 from server.searching.searchformatting import aggregatelines, cleansearchterm, aoprunebydate, aoremovespuria, \
-	sortandunpackresults, lookoutsideoftheline, dbauthorandworkmaker
+	sortandunpackresults, lookoutsideoftheline
 
 
 def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, authordict):

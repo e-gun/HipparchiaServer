@@ -2,7 +2,7 @@
 import re
 from flask import session
 from server import formatting_helper_functions
-from server.dbsupport import dbfunctions, citationfunctions
+from server.dbsupport import citationfunctions
 from server.dbsupport.dbfunctions import loadallauthors
 
 def modifysessionvar(param,val):
@@ -205,7 +205,7 @@ def setsessionvarviadb(column, table, cursor):
 	return sv
 
 
-def sessionvariables(cursor):
+def sessionvariables():
 
 	try:
 		session['corpora']
@@ -226,19 +226,14 @@ def sessionvariables(cursor):
 		session['proximity'] = '1'
 		session['nearornot'] = 'T'
 		session['searchscope'] = 'L'
-		session['linesofcontext'] = 6
-		session['browsercontext'] = '20'
+		session['linesofcontext'] = 4
+		session['browsercontext'] = '25'
 		session['maxresults'] = '250'
 		session['sortorder'] = 'shortname'
 		session['earliestdate'] = '-850'
 		session['latestdate'] = '1500'
 		session['xmission'] = 'Any'
 		session['spuria'] = 'Y'
-
-		# if you try to store all of the authors in the session you will have problems: the cookie gets too big
-
-		# session['genres'] = setsessionvarviadb('genres', 'authors', cursor)
-		# session['workgenres'] = setsessionvarviadb('workgenre', 'works', cursor)
 
 	return
 

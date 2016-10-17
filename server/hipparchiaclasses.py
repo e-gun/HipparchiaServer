@@ -203,7 +203,21 @@ class dbWorkLine(object):
 		
 		return unformatted
 
+
+	def lastword(self, version):
+		"""
+		return the last word of the line:
+			lineobject.lastword('contents')
+		"""
+		lastword = ''
+		if version in ['contents', 'strippedcontents']:
+			line = getattr(self, version)
+			line = line.split(' ')
+			lastword = line[-1]
 		
+		return lastword
+
+
 class MPCounter(object):
 	def __init__(self):
 		self.val = Value('i', 0)

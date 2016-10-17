@@ -9,7 +9,7 @@ from server.dbsupport.dbfunctions import setconnection, perseusidmismatch
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
-from server.searching.searchformatting import aoformattedcittationincontext, aoformatauthinfo, formatauthorandworkinfo, \
+from server.searching.searchformatting import formattedcittationincontext, aoformatauthinfo, formatauthorandworkinfo, \
 	woformatworkinfo
 from server.searching.searchfunctions import phrasesearch, withinxlines, \
 	withinxwords, partialwordsearch, concsearch, flagexclusions, simplesearchworkwithexclusion, searchdispatcher, \
@@ -18,7 +18,7 @@ from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordance
 from server.textsandconcordnaces.textbuilder import buildfulltext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
-	sessionvariables, setsessionvarviadb, sessionselectionsashtml, rationalizeselections, buildauthordict, buildworkdict, \
+	sessionvariables, sessionselectionsashtml, rationalizeselections, buildauthordict, buildworkdict, \
 	buildaugenreslist, buildworkgenreslist
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
 	dropdupes, bcedating, aosortauthorandworklists, prunedict
@@ -41,7 +41,7 @@ workgenreslist = buildworkgenreslist(workdict)
 @hipparchia.route('/', methods=['GET', 'POST'])
 def search():
 	
-	sessionvariables(cursor)
+	sessionvariables()
 	# need to sanitize input at least a bit...
 	try:
 		seeking = re.sub(r'[\'"`!;&]', '', request.args.get('seeking', ''))
@@ -93,17 +93,17 @@ def search():
 		del authorandworklist
 		
 		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
-			# a simple search
+			searchtype = 'simple'
 			thesearch = seeking
 			htmlsearch = '<span class="emph">' + seeking + '</span>'
 			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, authordict)
 		elif re.search(phrasefinder, seeking) is not None:
-			# a phrase search
+			searchtype = 'phrase'
 			thesearch = seeking
 			htmlsearch = '<span class="emph">' + seeking + '</span>'
 			hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict)
 		else:
-			# proximity search
+			searchtype = 'proximity'
 			if session['searchscope'] == 'W':
 				scope = 'words'
 			else:
@@ -128,9 +128,9 @@ def search():
 				# print('item=', hit,'\n\tid:',wkid,'\n\tresult:',result)
 				authorobject = authordict[wkid[0:6]]
 				if '_AT_' in wkid:
-					citwithcontext = aoformattedcittationincontext(result, wkid[0:10], authorobject, linesofcontext, seeking, cursor)
+					citwithcontext = formattedcittationincontext(result, wkid[0:10], authorobject, linesofcontext, seeking, proximate, searchtype, cursor)
 				else:
-					citwithcontext = aoformattedcittationincontext(result, wkid, authorobject, linesofcontext, seeking, cursor)
+					citwithcontext = formattedcittationincontext(result, wkid, authorobject, linesofcontext, seeking, proximate, searchtype, cursor)
 				# add the hit count to line zero which contains the metadata for the lines
 				citwithcontext[0]['hitnumber'] = hitcount
 				allfound.append(citwithcontext)
@@ -674,7 +674,7 @@ def grabtextforbrowsing():
 	workid = workdb[7:]
 	
 	ctx = int(session['browsercontext'])
-	numbersevery = 5
+	numbersevery = 10
 	passage = request.args.get('locus', '')[10:]
 
 	if passage[0:4] == '_LN_':
