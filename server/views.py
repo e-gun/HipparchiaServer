@@ -668,8 +668,12 @@ def grabtextforbrowsing():
 	:return:
 	"""
 	
+	dbc = setconnection('autocommit')
+	cur = dbc.cursor()
+	
+	
 	workdb = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
-	# ao = dbauthorandworkmaker(workdb[:6], cursor)
+	
 	ao = authordict[workdb[:6]]
 	workid = workdb[7:]
 	
@@ -687,7 +691,7 @@ def grabtextforbrowsing():
 		for level in passage:
 			safepassage.append(re.sub('[\W_|]+', '',level))
 		safepassage = tuple(safepassage[:5])
-		passage = finddblinefromlocus(workdb, safepassage, cursor)
+		passage = finddblinefromlocus(workdb, safepassage, cur)
 	elif passage[0:4] == '_PE_':
 		# a nasty kludge: should build the fixes into the db
 		if 'gr0006' in workdb:
@@ -696,17 +700,13 @@ def grabtextforbrowsing():
 			workid = workdb[7:]
 		citation = passage[4:].split(':')
 		citation.reverse()
-		passage = finddblinefromincompletelocus(workdb, citation, cursor)
+		passage = finddblinefromincompletelocus(workdb, citation, cur)
 
 	# first line is info; remaining lines are html
 	try:
-		browserdata = getandformatbrowsercontext(ao, int(workid), int(passage), ctx, numbersevery, cursor)
+		browserdata = getandformatbrowsercontext(ao, int(workid), int(passage), ctx, numbersevery, cur)
 	except:
-		# perseus lexical data had a bad author number?
-		workdb = perseusidmismatch(workdb, cursor)
-		workid = workdb[7:]
 		browserdata = ''
-		#browserdata = getandformatbrowsercontext(ao, int(workid), int(passage), ctx, numbersevery, cursor)
 	if passage == -9999:
 		browserdata.append('could not find a Perseus reference in the Hipparchia DB: '+request.args.get('locus', ''))
 
