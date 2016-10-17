@@ -41,6 +41,9 @@ workgenreslist = buildworkgenreslist(workdict)
 @hipparchia.route('/', methods=['GET', 'POST'])
 def search():
 	
+	dbc = setconnection('autocommit')
+	cur = dbc.cursor()
+	
 	sessionvariables()
 	# need to sanitize input at least a bit...
 	try:
@@ -75,12 +78,10 @@ def search():
 	
 	if len(seeking) > 0:
 		starttime = time.time()
-		# authorandworklist = compileauthorandworklist(cursor)
+				
 		authorandworklist = aocompileauthorandworklist(authordict, workdict)
-		
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		authorandworklist = flagexclusions(authorandworklist)
-		#authorandworklist = sortauthorandworklists(authorandworklist, cursor)
 		authorandworklist = aosortauthorandworklists(authorandworklist, authordict)
 		
 		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
@@ -128,9 +129,9 @@ def search():
 				# print('item=', hit,'\n\tid:',wkid,'\n\tresult:',result)
 				authorobject = authordict[wkid[0:6]]
 				if '_AT_' in wkid:
-					citwithcontext = formattedcittationincontext(result, wkid[0:10], authorobject, linesofcontext, seeking, proximate, searchtype, cursor)
+					citwithcontext = formattedcittationincontext(result, wkid[0:10], authorobject, linesofcontext, seeking, proximate, searchtype, cur)
 				else:
-					citwithcontext = formattedcittationincontext(result, wkid, authorobject, linesofcontext, seeking, proximate, searchtype, cursor)
+					citwithcontext = formattedcittationincontext(result, wkid, authorobject, linesofcontext, seeking, proximate, searchtype, cur)
 				# add the hit count to line zero which contains the metadata for the lines
 				citwithcontext[0]['hitnumber'] = hitcount
 				allfound.append(citwithcontext)
@@ -158,6 +159,9 @@ def search():
 		page = render_template('search.html', title=seeking, found=[], resultcount=0, searchtime='0', scope=0,
 		                       hitmax=0, lang=session['corpora'], sortedby=session['sortorder'],
 		                       dmin=dmin, dmax=dmax)
+	
+	cur.close()
+	del dbconnection
 	
 	return page
 
@@ -671,7 +675,6 @@ def grabtextforbrowsing():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 	
-	
 	workdb = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
 	
 	ao = authordict[workdb[:6]]
@@ -712,6 +715,9 @@ def grabtextforbrowsing():
 
 	
 	browserdata = json.dumps(browserdata)
+	
+	cur.close()
+	del dbconnection
 	
 	return browserdata
 
