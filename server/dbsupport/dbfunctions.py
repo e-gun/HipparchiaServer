@@ -302,3 +302,14 @@ def returnfirstwork(authorid, cursor):
 	return found
 
 
+def makeablankline(work, fakelinenumber):
+	"""
+	sometimes (like in lookoutsidetheline()) you need a dummy line
+	this will build one
+	:param work:
+	:return:
+	"""
+	
+	lineobject = dbWorkLine(work, fakelinenumber, '-1', '-1', '-1', '-1', '-1', '-1', '', '', '', '')
+	
+	return lineobject

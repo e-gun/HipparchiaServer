@@ -4,7 +4,7 @@ import re
 
 from flask import session
 
-from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
+from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, makeablankline
 from server.dbsupport.citationfunctions import locusintocitation
 from server.formatting_helper_functions import formatpublicationinfo
 
@@ -146,6 +146,16 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	lines = []
 	for r in results:
 		lines.append(dblineintolineobject(workdbname, r))
+
+	# will get key errors if there is no linenumber+/-1
+	if len(lines) == 2:
+		if lines[0].index == linenumber:
+			lines = [makeablankline(workdbname, linenumber-1)] + lines
+		else:
+			lines.append(makeablankline(workdbname, linenumber+1))
+	if len(lines) == 1:
+		lines = [makeablankline(workdbname, linenumber-1)] + lines
+		lines.append(makeablankline(workdbname, linenumber+1))
 	
 	ldict = {}
 	for line in lines:
