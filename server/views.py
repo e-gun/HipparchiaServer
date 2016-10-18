@@ -5,15 +5,13 @@ import re
 from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection, perseusidmismatch
+from server.dbsupport.dbfunctions import setconnection
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formattedcittationincontext, aoformatauthinfo, formatauthorandworkinfo, \
 	woformatworkinfo
-from server.searching.searchfunctions import phrasesearch, withinxlines, \
-	withinxwords, partialwordsearch, concsearch, flagexclusions, simplesearchworkwithexclusion, searchdispatcher, \
-	aocompileauthorandworklist
+from server.searching.searchfunctions import flagexclusions, searchdispatcher, aocompileauthorandworklist
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordance
 from server.textsandconcordnaces.textbuilder import buildfulltext
@@ -176,6 +174,10 @@ def concordance():
 		2 - of this author
 	:return:
 	"""
+	
+	dbc = setconnection('autocommit')
+	cur = dbc.cursor()
+	
 	starttime = time.time()
 	try:
 		work = re.sub('[\W]+', '', request.args.get('work', ''))
@@ -215,7 +217,7 @@ def concordance():
 			structure.append(ws[s])
 	structure = ', '.join(structure)
 	
-	output = buildconcordance(work, mode, cursor)
+	output = buildconcordance(work, mode, cur)
 	
 	count = len(output)
 	url = '/concordance?work=' + work
@@ -230,6 +232,9 @@ def concordance():
 	                       structure=structure, count=count, allworks=allworks, url=url, simpletexturl=simpletexturl,
 	                       time=buildtime)
 	
+	cur.close()
+	del dbc
+	
 	return page
 
 
@@ -239,6 +244,10 @@ def concordance():
 
 @hipparchia.route('/simpletext', methods=['GET', 'POST'])
 def workdump():
+	
+	dbc = setconnection('autocommit')
+	cur = dbc.cursor()
+	
 	try:
 		work = re.sub('[\W]+', '', request.args.get('work', ''))
 	except:
@@ -268,7 +277,7 @@ def workdump():
 		cit = thework.citation()
 		structure = ', '.join(cit)
 		
-		output = buildfulltext(work, linesevery, cursor)
+		output = buildfulltext(work, linesevery, cur)
 
 	else:
 		output = []
@@ -278,6 +287,9 @@ def workdump():
 		                       structure=structure)
 	except:
 		page = render_template('workdumper.html')
+	
+	cur.close()
+	del dbc
 	
 	return page
 
@@ -537,7 +549,9 @@ def workstructure():
 	sample input: '/getstructure?locus=gr0008w001_AT_-1'; '/getstructure?locus=gr0008w001_AT_13|22'
 	:return:
 	"""
-	# auth + work + chunks of a citation
+	dbc = setconnection('autocommit')
+	cur = dbc.cursor()
+	
 	passage = request.args.get('locus', '')[14:].split('|')
 	safepassage = []
 	for level in passage:
@@ -550,13 +564,15 @@ def workstructure():
 	for work in ao.listofworks:
 		if work.universalid == workdb:
 			structure = work.structure
-	lowandhigh = findvalidlevelvalues(workdb, structure, safepassage, cursor)
-	# this should be a (level, label, low, high) [int, int, str, str]
-	# results = [{'totallevels':lowandhigh[0]},{'level':lowandhigh[1]},{'label': lowandhigh[2]}, {'low': lowandhigh[3]}, {'high': lowandhigh[4]}, {'range': lowandhigh[5]}]
+	lowandhigh = findvalidlevelvalues(workdb, structure, safepassage, cur)
 	results = [{'totallevels': lowandhigh[0]}, {'level': lowandhigh[1]}, {'label': lowandhigh[2]},
 	           {'low': lowandhigh[3]}, {'high': lowandhigh[4]}, {'rng': lowandhigh[5]}]
 
 	results = json.dumps(results)
+	
+	cur.close()
+	del dbc
+	
 	return results
 
 
@@ -578,6 +594,8 @@ def aogetauthinfo():
 	show local info about the author one is considering in the selection box
 	:return:
 	"""
+	dbc = setconnection('autocommit')
+	cur = dbc.cursor()
 	
 	authorid = re.sub('[\W_]+', '', request.args.get('au', ''))
 	
@@ -585,8 +603,8 @@ def aogetauthinfo():
 	
 	query = 'SELECT universalid, title, workgenre, wordcount, publication_info FROM works WHERE universalid LIKE %s'
 	data = (authorid+'%',)
-	cursor.execute(query, data)
-	w = cursor.fetchall()
+	cur.execute(query, data)
+	w = cur.fetchall()
 	w.sort()
 	
 	authinfo = ''
@@ -601,7 +619,10 @@ def aogetauthinfo():
 		authinfo += woformatworkinfo(work)
 		
 	authinfo = json.dumps(authinfo)
-
+	
+	cur.close()
+	del dbc
+	
 	return authinfo
 
 
@@ -732,6 +753,10 @@ def findbyform():
 	return a formatted set of info
 	:return:
 	"""
+	
+	dbc = setconnection('autocommit')
+	cur = dbc.cursor()
+	
 	word = request.args.get('word', '')
 	word = re.sub('[\W_|]+', '',word)
 	word = removegravity(word)
@@ -746,9 +771,9 @@ def findbyform():
 
 	query = 'SELECT possible_dictionary_forms FROM ' + dict + '_morphology WHERE observed_form LIKE %s'
 	data = (word,)
-	cursor.execute(query, data)
+	cur.execute(query, data)
 
-	analysis = cursor.fetchone()
+	analysis = cur.fetchone()
 	possible = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value>(.*?)</possibility_\d{1,2}>')
 	# 1 = #, 2 = word, 4 = body, 3 = xref
 
@@ -771,7 +796,7 @@ def findbyform():
 		siftedentries = tidyuplist(unsiftedentries)
 
 		for entry in siftedentries:
-			returnarray.append({'value': browserdictionarylookup(entry, dict, cursor)})
+			returnarray.append({'value': browserdictionarylookup(entry, dict, cur)})
 
 	except:
 		returnarray = [{'value': '[not found]'}, {'entries': '[not found]'} ]
@@ -782,6 +807,9 @@ def findbyform():
 		returnarray[0]['trylookingunder'] = entriestocheck[0]
 	
 	returnarray = json.dumps(returnarray)
+
+	cur.close()
+	del dbc
 
 	return returnarray
 
@@ -821,6 +849,10 @@ def dictsearch():
 	needs to be merged with the main project page, though
 	:return:
 	"""
+	
+	dbc = setconnection('autocommit')
+	cur = dbc.cursor()
+	
 	seeking = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('term', ''))
 	seeking = seeking.lower()
 	seeking = re.sub('σ|ς', 'ϲ', seeking)
@@ -842,11 +874,11 @@ def dictsearch():
 		data = ('^' + seeking[1:-1] + '$',)
 	else:
 		data = ('.*?' + seeking + '.*?',)
-	cursor.execute(query, data)
+		cur.execute(query, data)
 	
 	# note that the dictionary db has a problem with vowel lengths vs accents
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
-	found = cursor.fetchall()
+	found = cur.fetchall()
 	
 	# the results should be given the polytonicsort() treatment
 	sortedfinds = []
@@ -861,9 +893,12 @@ def dictsearch():
 	
 	for entry in sortedfinds:
 		returnarray.append(
-			{'value': browserdictionarylookup(entry[0], dict, cursor) + '<hr style="border: 1px solid;" />'})
+			{'value': browserdictionarylookup(entry[0], dict, cur) + '<hr style="border: 1px solid;" />'})
 	
 	returnarray = json.dumps(returnarray)
+	
+	cur.close()
+	del dbc
 	
 	return returnarray
 
@@ -874,6 +909,8 @@ def reverselexiconsearch():
 	attempt to find all of the greek/latin dictionary entries that might go with the english search term
 	:return:
 	"""
+	dbc = setconnection('autocommit')
+	cur = dbc.cursor()
 	
 	returnarray = []
 	seeking = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('word', ''))
@@ -889,15 +926,15 @@ def reverselexiconsearch():
 	# first see if your term is mentioned at all
 	query = 'SELECT entry_name FROM ' + dict + '_dictionary' + ' WHERE ' + usecolumn + ' LIKE %s'
 	data = ('%' + seeking + '%',)
-	cursor.execute(query, data)
+	cur.execute(query, data)
 	
-	matches = cursor.fetchall()
+	matches = cur.fetchall()
 	entries = []
 	
 	# then go back and see if it is mentioned in the summary of senses
 	for match in matches:
 		m = match[0]
-		definition = searchdictionary(cursor, dict + '_dictionary', 'entry_name', m, syntax='LIKE')
+		definition = searchdictionary(cur, dict + '_dictionary', 'entry_name', m, syntax='LIKE')
 		# returns (metrical_entry, entry_body, entry_type)
 		definition = definition[1]
 		a, s, q = entrysummary(definition, dict, translationlabel)
@@ -914,9 +951,12 @@ def reverselexiconsearch():
 	# in which case we should retrieve and format this entry
 	for entry in entries:
 		returnarray.append(
-			{'value': browserdictionarylookup(entry, dict, cursor) + '<hr style="border: 1px solid;" />'})
+			{'value': browserdictionarylookup(entry, dict, cur) + '<hr style="border: 1px solid;" />'})
 	
 	returnarray = json.dumps(returnarray)
+	
+	cur.close()
+	del dbc
 	
 	return returnarray
 	
