@@ -99,7 +99,7 @@ def dbauthorandworkmaker(authoruid, cursor):
 	author = dbauthormakersubroutine(authoruid, cursor)
 
 	query = 'SELECT universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03, ' \
-	        ' levellabels_04, levellabels_05, workgenre, transmission, worktype, wordcount, authentic FROM works WHERE universalid LIKE %s'
+	        ' levellabels_04, levellabels_05, workgenre, transmission, worktype, wordcount, firstline, lastline, authentic FROM works WHERE universalid LIKE %s'
 	data = (authoruid + '%',)
 	cursor.execute(query, data)
 	try:
@@ -111,7 +111,7 @@ def dbauthorandworkmaker(authoruid, cursor):
 
 	for match in results:
 		work = dbOpus(match[0], match[1], match[2], match[3], match[4], match[5], match[6], match[7], match[8],
-		              match[9], match[10], match[11], match[12], match[13], match[14])
+		              match[9], match[10], match[11], match[12], match[13], match[14], match[15], match[16])
 		author.addwork(work)
 
 	return author

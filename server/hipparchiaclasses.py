@@ -54,7 +54,7 @@ class dbOpus(object):
 	it is always going to be importnat to know exactly what kind of object you are handling
 	"""
 
-	def __init__(self, universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05, workgenre, transmission, worktype, wordcount, authentic):
+	def __init__(self, universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05, workgenre, transmission, worktype, wordcount, firstline, lastline, authentic):
 		self.universalid = universalid
 		self.title = title
 		self.language = language
@@ -69,8 +69,14 @@ class dbOpus(object):
 		self.transmission = transmission
 		self.worktype = worktype
 		self.wordcount = wordcount
+		self.starts = firstline
+		self.ends = lastline
 		self.authentic = authentic
 		self.name = title
+		try:
+			self.length = lastline - firstline
+		except:
+			self.length = -1
 		self.worknumber = int(universalid[7:])
 		self.structure = {}
 		idx = -1
@@ -91,8 +97,10 @@ class dbOpus(object):
 		for l in range(0,self.availablelevels):
 			cit.append(levels[l])
 		cit.reverse()
+		cit = ', '.join(cit)
 		
 		return cit
+	
 			
 
 class dbWorkLine(object):

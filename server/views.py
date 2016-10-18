@@ -730,9 +730,26 @@ def grabtextforbrowsing():
 	try:
 		browserdata = getandformatbrowsercontext(ao, int(workid), int(passage), ctx, numbersevery, cur)
 	except:
-		browserdata = ''
+		browserdata = [{'forwardsandback': [0,0]}]
+		browserdata.append({'value': 'error in fetching the data to browse for '+ao.shortname+', '+workid +'<br /><br />'})
 	if passage == -9999:
-		browserdata.append('could not find a Perseus reference in the Hipparchia DB: '+request.args.get('locus', ''))
+		browserdata = [{'forwardsandback': [0, 0]}]
+		browserdata.append({'value': 'could not find a Perseus locus in the Hipparchia DB:<br />'+request.args.get('locus', '')+'<br /><br />'})
+		try:
+			browserdata.append({'value': 'author: '+ao.shortname})
+		except:
+			pass
+		try:
+			w = workdict[workdb]
+			browserdata.append({'value': '<br />work: '+w.title})
+			browserdata.append({'value': '<br /><br />Hipparchia citation structure: ' + w.citation()})
+			passage = request.args.get('locus', '')[10:]
+			pe = passage[4:].split(':')
+			pe = ', '.join(pe)
+			browserdata.append({'value': '<br />Perseus citation structure: ' + pe})
+			browserdata.append({'value': '<br /><br />'})
+		except:
+			pass
 
 	
 	browserdata = json.dumps(browserdata)

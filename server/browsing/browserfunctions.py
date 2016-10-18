@@ -26,16 +26,14 @@ def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, lineso
 			table = workobject.universalid
 			title = workobject.title
 
-	# enable a check to see if you tried to bite more than you can chew
-	workstarts, workstops = findfirstandlastlineofwork(workobject.universalid, cursor)
 	
-	if locusindexvalue - linesofcontext < workstarts[0]:
-		first = workstarts[0]
+	if locusindexvalue - linesofcontext < workobject.starts:
+		first = workobject.starts
 	else:
 		first = locusindexvalue - linesofcontext
 	
-	if locusindexvalue + linesofcontext > workstops[0]:
-		last = workstops[0]
+	if locusindexvalue + linesofcontext > workobject.ends:
+		last = workobject.ends
 	else:
 		last = locusindexvalue + linesofcontext
 	
@@ -131,6 +129,8 @@ def insertparserids(lineobject):
 		
 	return newline
 
+
+# slated for removal
 
 def findfirstandlastlineofwork(workdbname, cursor):
 	"""
