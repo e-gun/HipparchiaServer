@@ -81,7 +81,6 @@ def locusintocitation(workobject, citationtuple):
 	"""
 	wklvls = list(workobject.structure.keys())
 	cite = list(citationtuple)
-	# cite.reverse()
 	wklvls.reverse()
 	citation = ''
 	for level in wklvls:

@@ -639,11 +639,11 @@ def aogetsearchlistcontents():
 	wordstotal = 0
 	for work in authorandworklist:
 		count += 1
-		w = (workdict[work].universalid, workdict[work].title, workdict[work].workgenre, workdict[work].wordcount, workdict[work].publication_info)
+		w = workdict[work]
 		a = authordict[work[0:6]].shortname
 		
 		try:
-			wordstotal += w[3]
+			wordstotal += workdict[work].wordcount
 		except:
 			# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
 			pass

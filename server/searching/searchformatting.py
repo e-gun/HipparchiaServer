@@ -399,7 +399,7 @@ def woformatworkinfo(workobject):
 	return workinfo
 
 
-def formatauthorandworkinfo(authorname,workinfo):
+def formatauthorandworkinfo(authorname,workobject):
 	"""
 	dbdata into html
 	send me: authorname + universalid, title, workgenre, wordcount
@@ -407,11 +407,10 @@ def formatauthorandworkinfo(authorname,workinfo):
 	:return:
 	"""
 	
-	t = workinfo[1]
-	c = workinfo[3]
-	
 	a = authorname
-	t = '<span class="italic">' + t + '</span> '
+	t = '<span class="italic">' + workobject.title + '</span> '
+	
+	c = workobject.wordcount
 	
 	if c is not None:
 		c = '[' + format(c, ',d') + ' wds]'
