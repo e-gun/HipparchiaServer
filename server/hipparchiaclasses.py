@@ -102,7 +102,6 @@ class dbOpus(object):
 		return cit
 	
 			
-
 class dbWorkLine(object):
 	"""
 	an object that corresponds to a db line
@@ -144,8 +143,27 @@ class dbWorkLine(object):
 				loc.append(lvl)
 		loc.reverse()
 		citation = '.'.join(loc)
+		
 		return citation
 	
+	def shortlocus(self):
+		"""
+		try to get a short citation that drops the lvl0 info
+		useful for tagging level shifts without constantly seeling 'line 1'
+		:return:
+		"""
+		loc = []
+		for lvl in [self.l1, self.l2, self.l3, self.l4, self.l5]:
+			if str(lvl) != '-1':
+				loc.append(lvl)
+		loc.reverse()
+		if loc == []:
+			citation = self.locus()
+		else:
+			citation = '.'.join(loc)
+					
+		return citation
+		
 	
 	def locustuple(self):
 		"""

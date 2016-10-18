@@ -57,7 +57,6 @@ def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, lineso
 	
 	biblio = getpublicationinfo(workobject, cursor)
 	
-	# citation = focusline.locus()
 	citation = locusintocitation(workobject, focusline.locustuple())
 
 	cv = '<span class="author">'+authorobject.shortname+'</span>, <span class="work">'+title+'</span>, '+ citation
@@ -76,7 +75,7 @@ def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, lineso
 		else:
 			if line.samelevelas(previousline) is not True:
 				linecount = numbersevery + 1
-				linehtml = '<p class="browsedline">' + linecore + '&nbsp;&nbsp;<span class="browsercite">(' + line.locus() + ')</span></p>'
+				linehtml = '<p class="browsedline">' + linecore + '&nbsp;&nbsp;<span class="browsercite">(' + line.shortlocus() + ')</span></p>'
 			elif linecount % numbersevery == 0:
 				linehtml = '<p class="browsedline">' + linecore + '&nbsp;&nbsp;<span class="browsercite">(' + line.locus() + ')</span></p>'
 			else:
