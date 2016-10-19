@@ -14,6 +14,299 @@ from server.searching.searchformatting import aggregatelines, cleansearchterm, a
 	sortandunpackresults, lookoutsideoftheline
 
 
+def aocompileauthorandworklist(authordict, workdict):
+	"""
+	master author dict + session selctions into a list of dbs to search
+	:param authors:
+	:return:
+	"""
+	searchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + session[
+		'psgselections'] + session['wkselections']
+	exclusionlist = session['auexclusions'] + session['wkexclusions'] + session['agnexclusions'] + session[
+		'wkgnexclusions'] + session['psgexclusions']
+	
+	# trim by language
+	if session['corpora'] == 'G':
+		ad = prunedict(authordict, 'universalid', 'gr')
+		wd = prunedict(workdict, 'universalid', 'gr')
+	elif session['corpora'] == 'L':
+		ad = prunedict(authordict, 'universalid', 'lt')
+		wd = prunedict(workdict, 'universalid', 'lt')
+	else:
+		ad = authordict
+		wd = workdict
+	
+	# build the inclusion list
+	if len(searchlist) > 0:
+		# build lists up from specific items (passages) to more general classes (works, then authors)
+		
+		authorandworklist = []
+		for g in session['wkgnselections']:
+			authorandworklist += foundindict(wd, 'workgenre', g)
+		
+		authorlist = []
+		for g in session['agnselections']:
+			authorlist = foundindict(ad, 'genres', g)
+		for a in authorlist:
+			for w in ad[a].listofworks:
+				authorandworklist.append(w.universalid)
+		del authorlist
+		
+		# a tricky spot: when/how to apply prunebydate()
+		# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
+		# accordingly we will do classes and genres first, then trim by date, then add in individual choices
+		authorandworklist = aoprunebydate(authorandworklist, ad)
+		
+		# now we look at things explicitly chosen:
+		# the passage checks are superfluous if rationalizeselections() got things right
+		
+		passages = session['psgselections']
+		works = session['wkselections']
+		works = tidyuplist(works)
+		works = dropdupes(works, passages)
+		
+		for w in works:
+			authorandworklist.append(w)
+		
+		authors = []
+		for a in session['auselections']:
+			authors.append(a)
+		
+		tocheck = works + passages
+		authors = dropdupes(authors, tocheck)
+		for a in authors:
+			for w in ad[a].listofworks:
+				authorandworklist.append(w.universalid)
+		del authors
+		del works
+		
+		if len(session['psgselections']) > 0:
+			authorandworklist = dropdupes(authorandworklist, session['psgselections'])
+			authorandworklist = session['psgselections'] + authorandworklist
+		
+		authorandworklist = list(set(authorandworklist))
+		
+		if session['spuria'] == 'N':
+			authorandworklist = aoremovespuria(authorandworklist, wd)
+	
+	else:
+		# you picked nothing and want everything. well, maybe everything...
+		authorandworklist = wd.keys()
+		
+		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
+			authorandworklist = aoprunebydate(authorandworklist, ad)
+		
+		if session['spuria'] == 'N':
+			authorandworklist = aoremovespuria(authorandworklist, wd)
+	
+	# build the exclusion list
+	# note that we are not handling excluded individual passages yet
+	excludedworks = []
+	
+	if len(exclusionlist) > 0:
+		excludedworks = []
+		excludedauthors = []
+		
+		for g in session['agnexclusions']:
+			excludedauthors += foundindict(ad, 'genres', g)
+		
+		for a in session['auexclusions']:
+			excludedauthors.append(a)
+		
+		excludedauthors = tidyuplist(excludedauthors)
+		
+		for a in excludedauthors:
+			for w in ad[a].listofworks:
+				excludedworks.append(w.universalid)
+		del excludedauthors
+		
+		for g in session['wkgnexclusions']:
+			excludedworks += foundindict(wd, 'workgenre', g)
+		
+		excludedworks += session['wkexclusions']
+		excludedworks = list(set(excludedworks))
+	
+	authorandworklist = list(set(authorandworklist) - set(excludedworks))
+	
+	del ad
+	del wd
+	
+	return authorandworklist
+
+
+def flagexclusions(authorandworklist):
+	"""
+	some works whould only be searched partially
+	this flags those items on the authorandworklist by changing their workname format
+	gr0001w001 becomes gr0001x001 if session['wkexclusions'] mentions gr0001w001
+	:param authorandworklist:
+	:return:
+	"""
+	modifiedauthorandworklist = []
+	for w in authorandworklist:
+		if len(session['psgexclusions']) > 0:
+			for x in session['psgexclusions']:
+				if '_AT_' not in w and w in x:
+					w = re.sub('w', 'x', w)
+					modifiedauthorandworklist.append(w)
+				else:
+					modifiedauthorandworklist.append(w)
+		else:
+			modifiedauthorandworklist.append(w)
+	
+	# if you apply 3 restrictions you will now have 3 copies of gr0001x001
+	modifiedauthorandworklist = tidyuplist(modifiedauthorandworklist)
+	
+	return modifiedauthorandworklist
+
+
+def whereclauses(uidwithatsign, operand, authors):
+	"""
+	in order to restrict a search to a portion of a work, you will need a where clause
+	this builds it out of something like 'gr0003w001_AT_3|12' (Thuc., Bk 3, Ch 12)
+	note the clash with concsearching: it is possible to search the whole conc and then toss the bad lines, but...
+
+	:param uidwithatsign:
+	:param operand: this should be either '=' or '!='
+	:return: a tuple consisting of the SQL string and the value to be passed via %s
+	"""
+	
+	whereclausetuples = []
+	
+	a = uidwithatsign[:6]
+	locus = uidwithatsign[14:].split('|')
+	
+	ao = authors[a]
+	for w in ao.listofworks:
+		if w.universalid == uidwithatsign[0:10]:
+			wk = w
+	
+	wklvls = list(wk.structure.keys())
+	wklvls.reverse()
+	
+	index = -1
+	for l in locus:
+		index += 1
+		lvstr = 'level_0' + str(wklvls[index]) + '_value' + operand + '%s '
+		whereclausetuples.append((lvstr, l))
+	
+	return whereclausetuples
+
+
+def concsearch(seeking, cursor, workdbname):
+	"""
+	search for a word by looking it up in the concordance to that work
+	returns the lines from the work that contain the word
+	:param seeking:
+	:param cursor:
+	:param workdbname:
+	:return: db lines that match the search criterion
+	"""
+	concdbname = workdbname + '_conc'
+	seeking = cleansearchterm(seeking)
+	mylimit = 'LIMIT ' + str(session['maxresults'])
+	if session['accentsmatter'] == 'Y':
+		ccolumn = 'word'
+	else:
+		ccolumn = 'stripped_word'
+	
+	searchsyntax = ['=', 'LIKE', 'SIMILAR TO', '~*']
+	
+	# whitespace = whole word and that can be done more quickly
+	if seeking[0] == ' ' and seeking[-1] == ' ':
+		seeking = seeking[1:-1]
+		mysyntax = searchsyntax[0]
+	else:
+		if seeking[0] == ' ':
+			seeking = '^' + seeking[1:]
+		if seeking[-1] == ' ':
+			seeking = seeking[0:-1] + '$'
+		mysyntax = searchsyntax[3]
+	
+	found = []
+	
+	query = 'SELECT loci FROM ' + concdbname + ' WHERE ' + ccolumn + ' ' + mysyntax + ' %s ' + mylimit
+	data = (seeking,)
+	
+	try:
+		cursor.execute(query, data)
+		found = cursor.fetchall()
+	except psycopg2.DatabaseError as e:
+		print('could not execute', query)
+		print('Error:', e)
+	
+	hits = []
+	for find in found:
+		hits += find[0].split(' ')
+	
+	concfinds = []
+	for hit in hits:
+		query = 'SELECT * FROM ' + workdbname + ' WHERE index = %s'
+		data = (hit,)
+		try:
+			cursor.execute(query, data)
+			found = cursor.fetchone()
+			concfinds.append(found)
+		except psycopg2.DatabaseError as e:
+			print('could not execute', query)
+			print('Error:', e)
+	
+	return concfinds
+
+
+def partialwordsearch(seeking, cursor, workdbname, authors):
+	"""
+	actually one of the most basic search types: look for a string/substring
+	this is brute force: you wade through the full text of the work
+	:param seeking:
+	:param cursor:
+	:param workdbname:
+	:param authors:
+	:return:
+	"""
+	mylimit = 'LIMIT ' + str(session['maxresults'])
+	if session['accentsmatter'] == 'Y':
+		columna = 'marked_up_line'
+	else:
+		columna = 'stripped_line'
+	columnb = 'hyphenated_words'
+	
+	seeking = cleansearchterm(seeking)
+	hyphsearch = seeking
+	
+	mysyntax = '~*'
+	if seeking[0] == ' ':
+		# otherwise you will miss words that start lines because they do not have a leading whitespace
+		seeking = r'(^|\s)' + seeking[1:]
+	elif seeking[0:1] == '\s':
+		seeking = r'(^|\s)' + seeking[2:]
+	
+	found = []
+	
+	if '_AT_' not in workdbname:
+		query = 'SELECT * FROM ' + workdbname + ' WHERE (' + columna + ' ' + mysyntax + ' %s) OR (' + columnb + ' ' + mysyntax + ' %s) ' + mylimit
+		data = (seeking, hyphsearch)
+	else:
+		qw = ''
+		db = workdbname[0:10]
+		d = [seeking, hyphsearch]
+		w = whereclauses(workdbname, '=', authors)
+		for i in range(0, len(w)):
+			qw += 'AND (' + w[i][0] + ') '
+			d.append(w[i][1])
+		
+		query = 'SELECT * FROM ' + db + ' WHERE (' + columna + ' ' + mysyntax + ' %s OR ' + columnb + ' ' + mysyntax + ' %s) ' + qw + mylimit + ' ORDER BY index ASC'
+		data = tuple(d)
+	
+	try:
+		cursor.execute(query, data)
+		found = cursor.fetchall()
+	except:
+		print('could not execute', query, data)
+	
+	return found
+
+
 def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, authordict):
 	"""
 	assign the search to multiprocessing workers
@@ -182,316 +475,6 @@ def workonproximitysearch(count, hits, seeking, proximate, searching, commitcoun
 	del dbconnection
 	
 	return hits
-
-
-def aocompileauthorandworklist(authordict, workdict):
-	"""
-	master author dict + session selctions into a list of dbs to search
-	:param authors:
-	:return:
-	"""
-	searchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + session[
-		'psgselections'] + session['wkselections']
-	exclusionlist = session['auexclusions'] + session['wkexclusions'] + session['agnexclusions'] + session[
-		'wkgnexclusions'] + session['psgexclusions']
-	
-	# trim by language
-	if session['corpora'] == 'G':
-		ad = prunedict(authordict, 'universalid', 'gr')
-		wd = prunedict(workdict, 'universalid', 'gr')
-	elif session['corpora'] == 'L':
-		ad = prunedict(authordict, 'universalid', 'lt')
-		wd = prunedict(workdict, 'universalid', 'lt')
-	else:
-		ad = authordict
-		wd = workdict
-	
-	# build the inclusion list
-	if len(searchlist) > 0:
-		# build lists up from specific items (passages) to more general classes (works, then authors)
-			
-		authorandworklist = []
-		for g in session['wkgnselections']:
-			authorandworklist += foundindict(wd, 'workgenre', g)
-	
-		authorlist = []
-		for g in session['agnselections']:
-			authorlist = foundindict(ad, 'genres', g)
-		for a in authorlist:
-			for w in ad[a].listofworks:
-				authorandworklist.append(w.universalid)
-		del authorlist
-	
-		# a tricky spot: when/how to apply prunebydate()
-		# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
-		# accordingly we will do classes and genres first, then trim by date, then add in individual choices
-		authorandworklist = aoprunebydate(authorandworklist, ad)
-		
-		# now we look at things explicitly chosen:
-		# the passage checks are superfluous if rationalizeselections() got things right
-		
-		passages = session['psgselections']
-		works = session['wkselections']
-		works = tidyuplist(works)
-		works = dropdupes(works, passages)
-		
-		for w in works:
-			authorandworklist.append(w)
-		
-		authors = []
-		for a in session['auselections']:
-			authors.append(a)
-		
-		tocheck = works + passages
-		authors = dropdupes(authors, tocheck)
-		for a in authors:
-			for w in ad[a].listofworks:
-				authorandworklist.append(w.universalid)
-		del authors
-		del works
-		
-		if len(session['psgselections']) > 0:
-			authorandworklist = dropdupes(authorandworklist, session['psgselections'])
-			authorandworklist = session['psgselections'] + authorandworklist
-		
-		authorandworklist = list(set(authorandworklist))
-		
-		if session['spuria'] == 'N':
-			authorandworklist = aoremovespuria(authorandworklist, wd)
-			
-	else:
-		# you picked nothing and want everything. well, maybe everything...
-		authorandworklist = wd.keys()
-		
-		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
-			authorandworklist = aoprunebydate(authorandworklist, ad)
-		
-		if session['spuria'] == 'N':
-			authorandworklist = aoremovespuria(authorandworklist, wd)
-		
-	# build the exclusion list
-	# note that we are not handling excluded individual passages yet
-	excludedworks = []
-	
-	if len(exclusionlist) > 0:
-		excludedworks = []
-		excludedauthors = []
-		
-		for g in session['agnexclusions']:
-			excludedauthors += foundindict(ad, 'genres', g)
-		
-		for a in session['auexclusions']:
-			excludedauthors.append(a)
-			
-		excludedauthors = tidyuplist(excludedauthors)
-		
-		for a in excludedauthors:
-			for w in ad[a].listofworks:
-				excludedworks.append(w.universalid)
-		del excludedauthors
-		
-		for g in session['wkgnexclusions']:
-			excludedworks += foundindict(wd, 'workgenre', g)
-			
-		excludedworks += session['wkexclusions']
-		excludedworks = list(set(excludedworks))
-	
-	authorandworklist = list(set(authorandworklist) - set(excludedworks))
-	
-	del ad
-	del wd
-	
-	return authorandworklist
-
-
-def flagexclusions(authorandworklist):
-	"""
-	some works whould only be searched partially
-	this flags those items on the authorandworklist by changing their workname format
-	gr0001w001 becomes gr0001x001 if session['wkexclusions'] mentions gr0001w001
-	:param authorandworklist:
-	:return:
-	"""
-	modifiedauthorandworklist = []
-	for w in authorandworklist:
-		if len(session['psgexclusions']) > 0:
-			for x in session['psgexclusions']:
-				if '_AT_' not in w and w in x:
-					w = re.sub('w', 'x', w)
-					modifiedauthorandworklist.append(w)
-				else:
-					modifiedauthorandworklist.append(w)
-		else:
-			modifiedauthorandworklist.append(w)
-	
-	# if you apply 3 restrictions you will now have 3 copies of gr0001x001
-	modifiedauthorandworklist = tidyuplist(modifiedauthorandworklist)
-	
-	return modifiedauthorandworklist
-
-
-def whereclauses(uidwithatsign, operand, authors):
-	"""
-	in order to restrict a search to a portion of a work, you will need a where clause
-	this builds it out of something like 'gr0003w001_AT_3|12' (Thuc., Bk 3, Ch 12)
-	note the clash with concsearching: it is possible to search the whole conc and then toss the bad lines, but...
-
-	:param uidwithatsign:
-	:param operand: this should be either '=' or '!='
-	:return: a tuple consisting of the SQL string and the value to be passed via %s
-	"""
-	
-	whereclausetuples = []
-	
-	a = uidwithatsign[:6]
-	locus = uidwithatsign[14:].split('|')
-	
-	ao = authors[a]
-	for w in ao.listofworks:
-		if w.universalid == uidwithatsign[0:10]:
-			wk = w
-	
-	wklvls = list(wk.structure.keys())
-	wklvls.reverse()
-	
-	index = -1
-	for l in locus:
-		index += 1
-		lvstr = 'level_0' + str(wklvls[index]) + '_value' + operand + '%s '
-		whereclausetuples.append((lvstr, l))
-	
-	return whereclausetuples
-
-
-def concsearch(seeking, cursor, workdbname):
-	"""
-	search for a word by looking it up in the concordance to that work
-	returns the lines from the work that contain the word
-	:param seeking:
-	:param cursor:
-	:param workdbname:
-	:return: db lines that match the search criterion
-	"""
-	concdbname = workdbname + '_conc'
-	seeking = cleansearchterm(seeking)
-	mylimit = 'LIMIT ' + str(session['maxresults'])
-	if session['accentsmatter'] == 'Y':
-		ccolumn = 'word'
-	else:
-		ccolumn = 'stripped_word'
-	
-	searchsyntax = ['=', 'LIKE', 'SIMILAR TO', '~*']
-	
-	# whitespace = whole word and that can be done more quickly
-	if seeking[0] == ' ' and seeking[-1] == ' ':
-		seeking = seeking[1:-1]
-		mysyntax = searchsyntax[0]
-	else:
-		if seeking[0] == ' ':
-			seeking = '^' + seeking[1:]
-		if seeking[-1] == ' ':
-			seeking = seeking[0:-1] + '$'
-		mysyntax = searchsyntax[3]
-	
-	found = []
-	
-	query = 'SELECT loci FROM ' + concdbname + ' WHERE ' + ccolumn + ' ' + mysyntax + ' %s ' + mylimit
-	data = (seeking,)
-	
-	try:
-		cursor.execute(query, data)
-		found = cursor.fetchall()
-	except psycopg2.DatabaseError as e:
-		print('could not execute', query)
-		print('Error:', e)
-	
-	hits = []
-	for find in found:
-		hits += find[0].split(' ')
-	
-	concfinds = []
-	for hit in hits:
-		query = 'SELECT * FROM ' + workdbname + ' WHERE index = %s'
-		data = (hit,)
-		try:
-			cursor.execute(query, data)
-			found = cursor.fetchone()
-			concfinds.append(found)
-		except psycopg2.DatabaseError as e:
-			print('could not execute', query)
-			print('Error:', e)
-	
-	return concfinds
-
-
-def concordancelookup(worktosearch, indexlocation, cursor):
-	"""
-	take an index value and convert it into a citation: 12345 into '3.1.111'
-	"""
-	query = 'SELECT level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value FROM ' + worktosearch + ' WHERE index = %s'
-	data = (indexlocation,)
-	cursor.execute(query, data)
-	line = cursor.fetchone()
-	citation = ''
-	for i in range(0, len(line)):
-		if line[i] != '-1':
-			citation += line[i] + '.'
-	citation = citation[:-1]
-	
-	return citation
-
-
-def partialwordsearch(seeking, cursor, workdbname, authors):
-	"""
-	actually one of the most basic search types: look for a string/substring
-	this is brute force: you wade through the full text of the work
-	:param seeking:
-	:param cursor:
-	:param workdbname:
-	:param authors:
-	:return:
-	"""
-	mylimit = 'LIMIT ' + str(session['maxresults'])
-	if session['accentsmatter'] == 'Y':
-		columna = 'marked_up_line'
-	else:
-		columna = 'stripped_line'
-	columnb = 'hyphenated_words'
-	
-	seeking = cleansearchterm(seeking)
-	hyphsearch = seeking
-	
-	mysyntax = '~*'
-	if seeking[0] == ' ':
-		# otherwise you will miss words that start lines because they do not have a leading whitespace
-		seeking = r'(^|\s)' + seeking[1:]
-	elif seeking[0:1] == '\s':
-		seeking = r'(^|\s)' + seeking[2:]
-	
-	found = []
-	
-	if '_AT_' not in workdbname:
-		query = 'SELECT * FROM ' + workdbname + ' WHERE (' + columna + ' ' + mysyntax + ' %s) OR (' + columnb + ' ' + mysyntax + ' %s) ' + mylimit
-		data = (seeking, hyphsearch)
-	else:
-		qw = ''
-		db = workdbname[0:10]
-		d = [seeking, hyphsearch]
-		w = whereclauses(workdbname, '=', authors)
-		for i in range(0, len(w)):
-			qw += 'AND (' + w[i][0] + ') '
-			d.append(w[i][1])
-		
-		query = 'SELECT * FROM ' + db + ' WHERE (' + columna + ' ' + mysyntax + ' %s OR ' + columnb + ' ' + mysyntax + ' %s) ' + qw + mylimit + ' ORDER BY index ASC'
-		data = tuple(d)
-	
-	try:
-		cursor.execute(query, data)
-		found = cursor.fetchall()
-	except:
-		print('could not execute', query, data)
-	
-	return found
 
 
 def simplesearchworkwithexclusion(seeking, cursor, workdbname):
@@ -692,4 +675,21 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 			fullmatches.append(hit)
 	
 	return fullmatches
+
+
+def concordancelookup(worktosearch, indexlocation, cursor):
+	"""
+	take an index value and convert it into a citation: 12345 into '3.1.111'
+	"""
+	query = 'SELECT level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value FROM ' + worktosearch + ' WHERE index = %s'
+	data = (indexlocation,)
+	cursor.execute(query, data)
+	line = cursor.fetchone()
+	citation = ''
+	for i in range(0, len(line)):
+		if line[i] != '-1':
+			citation += line[i] + '.'
+	citation = citation[:-1]
+	
+	return citation
 
