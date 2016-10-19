@@ -2,7 +2,7 @@
 
 {% block content %}
 <!-- extend from base layout -->
-{% include "concordancesearchfields.html" ignore missing %}
+{% include "textandconcordancesearchfields.html" ignore missing %}
 {% include "notreadyandnotincluded_concordanceoptions.html" ignore missing %}
 
 <script src="{{ url_for('static', filename='autocomplete.js') }}"></script>

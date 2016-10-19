@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from server.dbsupport.dbfunctions import dblineintolineobject
 
-def buildfulltext(work, linesevery, cursor):
+def buildtext(work, firstline, lastline, linesevery, cursor):
 	"""
 	make a readable/printable version of a work and send it to its own page
 	huge works will overwhelm the ability of most/all browsers to parse that much html
@@ -13,28 +13,30 @@ def buildfulltext(work, linesevery, cursor):
 	:param cursor:
 	:return:
 	"""
-	query = 'SELECT index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, hypenated_words, annotations FROM ' + work + ' ORDER BY index ASC'
-	cursor.execute(query)
+	query = 'SELECT index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, hyphenated_words, annotations FROM ' + work + \
+	        ' WHERE (index >= %s and index <= %s) ORDER BY index ASC'
+	data = (firstline, lastline)
+	cursor.execute(query, data)
 	results = cursor.fetchall()
 	
-	previousline = dblineintolineobject(work, results[0])
-
 	output = []
-	linecount = 0
-	for line in results:
-		linecount += 1
-		thisline = dblineintolineobject(work,line)
-		linecore = thisline.contents
-		if thisline.samelevelas(previousline) is not True:
-			linecount = linesevery + 1
-			linehtml = linecore + '&nbsp;&nbsp;<span class="browsercite">(' + thisline.locus() + ')</span>'
-		else:
-			linehtml = linecore
-			
-		if linecount % linesevery == 0:
-			linehtml = linecore + '&nbsp;&nbsp;<span class="browsercite">(' + thisline.locus() + ')</span>'
-
-		output.append(linehtml)
-		previousline = thisline
+	if len(results) > 0:
+		previousline = dblineintolineobject(work, results[0])
+		linecount = 0
+		for line in results:
+			linecount += 1
+			thisline = dblineintolineobject(work,line)
+			linecore = thisline.contents
+			if thisline.samelevelas(previousline) is not True:
+				linecount = linesevery + 1
+				linehtml = linecore + '&nbsp;&nbsp;<span class="browsercite">(' + thisline.shortlocus() + ')</span>'
+			else:
+				linehtml = linecore
+				
+			if linecount % linesevery == 0:
+				linehtml = linecore + '&nbsp;&nbsp;<span class="browsercite">(' + thisline.locus() + ')</span>'
+	
+			output.append(linehtml)
+			previousline = thisline
 	
 	return output

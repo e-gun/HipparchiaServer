@@ -379,3 +379,24 @@ $('#concordancemaker').click( function() {
              }
         }
 });
+
+
+$('#textofthis').click( function() {
+        var authorid = $('#authorsautocomplete').val().slice(-7, -1);
+        var name = $('#authorsautocomplete').val();
+        var locus = locusdataloader();
+        $('#authorsautocomplete').val('');
+        var wrk = $('#worksautocomplete').val().slice(-4, -1);
+        $('#worksautocomplete').val('');
+        resetworksautocomplete();
+        if (authorid != '') {
+            $('#clearpick').show();
+            if (wrk == '') {
+                // just an author is not enough...
+             } else if (locus == '') {
+                window.location = '/text?auth=' + authorid + '&work=' + wrk;
+             } else {
+                window.location = '/text?auth=' + authorid + '&work=' + wrk + '&locus=' + locus;
+             }
+        }
+});

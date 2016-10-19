@@ -15,7 +15,7 @@ from server.searching.searchfunctions import flagexclusions, searchdispatcher, a
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordance, multipleworkwordlist, mpmultipleworkcordancedispatch, \
 	concordancesorter
-from server.textsandconcordnaces.textbuilder import buildfulltext
+from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, buildauthordict, buildworkdict, \
 	buildaugenreslist, buildworkgenreslist
@@ -169,6 +169,7 @@ def search():
 def concordance():
 	"""
 	build a concordance
+	modes should go away later
 	modes:
 		0 - of this work
 		1 - of words unique to this work in this author
@@ -232,7 +233,7 @@ def concordance():
 			passage = finddblinefromincompletelocus(workdb, safepassage, cur)
 			line = grabonelinefromwork(workdb, passage, cur)
 			lo = dblineintolineobject(workdb, line)
-			print('myindex',lo.index, lo.contents)
+			
 			# let's say you looked for 'book 2' of something that has 'book, chapter, line'
 			# that means that you want everything that has the same level2 value as the lineobject
 			# build a where clause
@@ -246,7 +247,6 @@ def concordance():
 			qw = qw[4:]
 			query = 'SELECT index FROM '+workdb+' WHERE '+qw+' ORDER BY index DESC LIMIT 1'
 			data = tuple(d)
-			print('q/d',query,data)
 			cursor.execute(query, data)
 			found = cursor.fetchone()
 			startline = lo.index
@@ -308,6 +308,120 @@ def concordance():
 	return page
 
 
+@hipparchia.route('/text', methods=['GET'])
+def textmaker():
+	"""
+	build a text
+	:return:
+	"""
+	dbc = setconnection('autocommit')
+	cur = dbc.cursor()
+	
+	try:
+		linesevery = int(re.sub('[^\d]', '', request.args.get('linesevery', '')))
+	except:
+		linesevery = 10
+	
+	try:
+		workid = re.sub('[\W_]+', '', request.args.get('work', ''))
+	except:
+		workid = ''
+
+	try:
+		uid = re.sub('[\W_]+', '', request.args.get('auth', ''))
+	except:
+		uid = ''
+
+	try:
+		locus = re.sub('[!@#$%^&*()=]+', '', request.args.get('locus', ''))
+	except:
+		locus = ''
+		
+	workdb = uid + 'w' + workid
+	selection = uid + 'w' + workid + '_AT_' + locus
+	
+	if uid != '':
+		try:
+			ao = authordict[uid]
+			if len(workdb) == 10:
+				try:
+					wo = workdict[workdb]
+				except:
+					uid = 'lt0022'
+					ao = authordict['lt0022']
+					wo = workdict['lt0022w012']
+		except:
+			# cato
+			uid = 'lt0022'
+			ao = authordict['lt0022']
+			wo = workdict['lt0022w012']
+		
+		passage = locus.split('|')
+	
+	if uid != '' and len(workdb) == 10:
+		# we have both an author and a work, maybe we also have a subset of the work
+		if passage == ['']:
+			# whole work
+			startline = wo.starts
+			endline = wo.ends
+		else:
+			# portion of the work: need to find start and end points for the concordance
+			safepassage = []
+			for level in passage:
+				safepassage.append(re.sub('[\W_|]+', '', level))
+			safepassage.reverse()
+			safepassage = tuple(safepassage)
+			passage = finddblinefromincompletelocus(workdb, safepassage, cur)
+			line = grabonelinefromwork(workdb, passage, cur)
+			lo = dblineintolineobject(workdb, line)
+			
+			# let's say you looked for 'book 2' of something that has 'book, chapter, line'
+			# that means that you want everything that has the same level2 value as the lineobject
+			# build a where clause
+			w = whereclauses(selection, '=', {uid: ao})
+			d = []
+			qw = ''
+			for i in range(0, len(w)):
+				qw += 'AND (' + w[i][0] + ') '
+				d.append(w[i][1])
+			# remove the leading AND
+			qw = qw[4:]
+			query = 'SELECT index FROM ' + workdb + ' WHERE ' + qw + ' ORDER BY index DESC LIMIT 1'
+			data = tuple(d)
+			cursor.execute(query, data)
+			found = cursor.fetchone()
+			startline = lo.index
+			endline = found[0]
+		
+		output = buildtext(wo.universalid, startline, endline, linesevery, cur)
+		authorname = ao.shortname
+		title = wo.title
+		structure = wo.citation()
+	
+	else:
+		# we do not have a valid selection
+		mode = 99
+		unsortedoutput = []
+		allworks = []
+		output = []
+		authorname = ''
+		title = ''
+		structure = ''
+	
+	if locus != '':
+		segment = list(safepassage)
+		segment.reverse()
+		segment = '.'.join(segment)
+	else:
+		segment = ''
+	
+	page = render_template('workdumper.html', results=output, author=authorname, title=title,
+	                       structure=structure, segment=segment)
+	
+	cur.close()
+	del dbc
+	
+	return page
 #
 # unadorned views for quickly peeking at the data
 #
@@ -347,7 +461,7 @@ def workdump():
 		cit = thework.citation()
 		structure = ', '.join(cit)
 		
-		output = buildfulltext(work, linesevery, cur)
+		output = buildtext(work, thework.starts, thework.ends, linesevery, cur)
 
 	else:
 		output = []

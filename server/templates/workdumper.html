@@ -1,7 +1,29 @@
-<!-- extend from base layout -->
 {% extends "base.html" %}
 
 {% block content %}
+<!-- extend from base layout -->
+{% include "textandconcordancesearchfields.html" ignore missing %}
+{% include "notreadyandnotincluded_concordanceoptions.html" ignore missing %}
+<script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
+<script src="{{ url_for('static', filename='ui-clicks.js') }}"></script>
+<script src="{{ url_for('static', filename='lexical.js') }}"></script>
+<script>
+    $(document).ready( function () {
+        document.title = 'Text and Concordance Maker'
+        $('#worksautocomplete').hide();
+        $('#browserdialog').hide();
+        $('#lexicadialog').hide();
+        $('#dictdialog').hide();
+        $('#level05').hide();
+        $('#level04').hide();
+        $('#level03').hide();
+        $('#level02').hide();
+        $('#level01').hide();
+        $('#level00').hide();
+
+    });
+
+</script>
 <p class="center">
     <a href ="/"><button id="back" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Back to the main page">
         <span class="ui-icon ui-icon-arrowreturnthick-1-w"></span><span class="ui-button-icon-space"> </span>&nbsp;</button></a>
@@ -10,7 +32,9 @@
 {% autoescape false %}
 
 <h1>{{ author }},&nbsp;
-<span class="title">{{ title }}</span></h1>
+<span class="title">{{ title }}</span>
+&nbsp;{{ segment }}
+</h1>
 <br />
 {% if results|length > 0 %}
     citation format: {{ structure }}
