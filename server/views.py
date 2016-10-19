@@ -603,12 +603,6 @@ def aogetauthinfo():
 	
 	theauthor = authordict[authorid]
 	
-	query = 'SELECT universalid, title, workgenre, wordcount, publication_info FROM works WHERE universalid LIKE %s'
-	data = (authorid+'%',)
-	cur.execute(query, data)
-	w = cur.fetchall()
-	w.sort()
-	
 	authinfo = ''
 	authinfo += aoformatauthinfo(theauthor)
 	
