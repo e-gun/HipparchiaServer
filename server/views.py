@@ -181,84 +181,29 @@ def concordance():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 	
-	try:
-		workid = re.sub('[\W_]+', '', request.args.get('work', ''))
-	except:
-		workid = ''
-
-	try:
-		uid = re.sub('[\W_]+', '', request.args.get('auth', ''))
-	except:
-		uid = ''
-
-	try:
-		locus = re.sub('[!@#$%^&*()=]+', '', request.args.get('locus', ''))
-	except:
-		locus = ''
+	req = tcparserequest(request, authordict, workdict)
+	ao = req['authorobject']
+	wo = req['workobject']
+	psg = req['passagelist']
 	
-	workdb = uid + 'w' + workid
-	selection = uid + 'w' + workid + '_AT_' + locus
 	
-	if uid != '':
-		try:
-			ao = authordict[uid]
-			if len(workdb) == 10:
-				try:
-					wo = workdict[workdb]
-				except:
-					uid = 'lt0022'
-					ao = authordict['lt0022']
-					wo = workdict['lt0022w012']
-		except:
-			# cato
-			uid = 'lt0022'
-			ao = authordict['lt0022']
-			wo = workdict['lt0022w012']
-		
-		passage = locus.split('|')
-	
-	if uid != '' and len(workdb) == 10:
+	if ao.universalid != 'gr0000' and wo.universalid != 'gr0000w000':
 		# we have both an author and a work, maybe we also have a subset of the work
 		mode = 0
-		if passage == ['']:
+		if psg == ['']:
 			# whole work
 			startline = wo.starts
 			endline = wo.ends
 		else:
-			# portion of the work: need to find start and end points for the concordance
-			safepassage = []
-			for level in passage:
-				safepassage.append(re.sub('[\W_|]+', '', level))
-			safepassage.reverse()
-			safepassage = tuple(safepassage)
-			passage = finddblinefromincompletelocus(workdb, safepassage, cur)
-			line = grabonelinefromwork(workdb, passage, cur)
-			lo = dblineintolineobject(workdb, line)
-			
-			# let's say you looked for 'book 2' of something that has 'book, chapter, line'
-			# that means that you want everything that has the same level2 value as the lineobject
-			# build a where clause
-			w = whereclauses(selection, '=', {uid: ao})
-			d = []
-			qw = ''
-			for i in range(0, len(w)):
-				qw += 'AND (' + w[i][0] + ') '
-				d.append(w[i][1])
-			# remove the leading AND
-			qw = qw[4:]
-			query = 'SELECT index FROM '+workdb+' WHERE '+qw+' ORDER BY index DESC LIMIT 1'
-			data = tuple(d)
-			cursor.execute(query, data)
-			found = cursor.fetchone()
-			startline = lo.index
-			endline = found[0]
+			startandstop = tcfindstartandstop(ao, wo, psg, cur)
+			startline = startandstop['startline']
+			endline = startandstop['endline']
 		
 		allworks = []
 		
 		unsortedoutput = buildconcordance(wo.universalid, startline, endline, cur)
 		
-		
-	elif uid != '' and len(workdb) != 10:
+	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
 		# we have only an author
 		mode = 2
 		allworks = []
@@ -268,7 +213,6 @@ def concordance():
 		workstocompile = ao.listworkids()
 		wordset = multipleworkwordlist(workstocompile, cur)
 		unsortedoutput = mpmultipleworkcordancedispatch(wordset)
-		title = ''
 		
 	else:
 		# we do not have a valid selection
@@ -279,17 +223,10 @@ def concordance():
 	# get ready to send stuff to the page
 	output = concordancesorter(unsortedoutput)
 	count = len(output)
-				
-	if locus != '':
-		segment = '.'.join(safepassage)
-	else:
-		segment = ''
 	
-	try:
-		authorname = ao.shortname
-	except:
-		authorname = ''
-	
+	worksegment = '.'.join(psg)
+	authorname = ao.shortname
+
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)
 	
@@ -300,7 +237,7 @@ def concordance():
 		title = ''
 		structure = ''
 		
-	page = render_template('concordance_maker.html', results=output, mode=mode, author=authorname, title=title, segment=segment,
+	page = render_template('concordance_maker.html', results=output, mode=mode, author=authorname, title=title, segment=worksegment,
 	                       structure=structure, count=count, allworks=allworks, time=buildtime)
 	
 	cur.close()
