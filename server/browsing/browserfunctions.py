@@ -63,7 +63,6 @@ def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, lineso
 	cv = cv + '<br />' + biblio
 	formattedpassage.append({'value':'<currentlyviewing>'+cv+'</currentlyviewing><br /><br />'})
 	
-	print('here')
 	formattedpassage.append({'value': '<table>\n'})
 	
 	linecount = numbersevery - 3
