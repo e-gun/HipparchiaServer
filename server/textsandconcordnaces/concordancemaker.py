@@ -3,12 +3,39 @@ from multiprocessing import Process, Manager
 from server import formatting_helper_functions
 from server.searching.searchfunctions import concordancelookup
 from server.formatting_helper_functions import polytonicsort
-from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dbfunctions import setconnection, grabonelinefromwork, dblineintolineobject
 from server.hipparchiaclasses import MPCounter
 from server import hipparchia
 
 
-def buildconcordance(work, mode, cursor):
+def multipleworkwordlist(listofworks, cursor):
+	"""
+	give me an author, i will give you all the words he uses
+	:param authorobject:
+	:param cursor:
+	:return: {'word1': ['workN', lineN], 'word2': ['workM', lineM], 'word3': ['workN', lineN], ...}
+	"""
+
+	works = []
+	for w in listofworks:
+		works.append(w+'_conc')
+	
+	# gather vocab lists
+	wordset = {}
+	for w in works:
+		query = 'SELECT word, loci FROM ' + w
+		cursor.execute(query)
+		results = cursor.fetchall()
+		for item in results:
+			if item[0] not in wordset:
+				wordset[item[0]] = [[w, item[1]]]
+			else:
+				wordset[item[0]].append([w, item[1]])
+				
+	return wordset
+	
+	
+def buildconcordance(work, startline, endline, cursor):
 	"""
 	build a concordance; mp aware, but the bottleneck is the db itself: you can go 2x faster here but 3-4x faster in a search
 	modes:
@@ -22,84 +49,23 @@ def buildconcordance(work, mode, cursor):
 	:return:
 	"""
 	
-	concordancewords = []
+
+	concdb = work+'_conc'
 	
-	if mode == 0:
-		query = 'SELECT word, loci FROM ' + work
-		cursor.execute(query)
-		results = cursor.fetchall()
-		concordancewords = results
-	if mode == 1:
-		# find all works
-		query = 'SELECT universalid FROM works WHERE universalid LIKE %s'
-		data = (work[0:7]+'%',)
-		cursor.execute(query,data)
-		results = cursor.fetchall()
-		otherworks = []
-		for r in results:
-			if r[0]+'_conc' != work:
-				otherworks.append(r[0]+'_conc')
-
-		# gather their vocab lists
-		otherwords = []
-		for other in otherworks:
-			query = 'SELECT word FROM '+other
-			cursor.execute(query)
-			results = cursor.fetchall()
-			for r in results:
-				otherwords.append(r[0])
-		otherwords = list(set(otherwords))
-
-		# collect this work
-		query = 'SELECT word, loci FROM ' + work
-		cursor.execute(query)
-		results = cursor.fetchall()
+	query = 'SELECT word, loci FROM ' + concdb
+	cursor.execute(query)
+	results = cursor.fetchall()
+	concordancewords = results
 		
-		# drop dupes
-		uniquewords = []
-		for word in results:
-			if word[0] in otherwords:
-				pass
-			else:
-				uniquewords.append(word)
-		concordancewords = uniquewords
-	
 	output = []
 	if len(concordancewords) > 0:
-		unsortedoutput = mpsingleworkconcordancedispatch(work, concordancewords)
+		unsortedoutput = mpsingleworkconcordancedispatch(work, concordancewords, startline, endline)
 		output = concordancesorter(unsortedoutput)
 	
-	# note that you should zip right here if mode==2 because in that case concordancewords = [] and output remains []
-	if mode == 2:
-		# find all works
-		query = 'SELECT universalid FROM works WHERE universalid LIKE %s'
-		data = (work[0:7]+'%',)
-		cursor.execute(query,data)
-		results = cursor.fetchall()
-		works = []
-		for r in results:
-			works.append(r[0] + '_conc')
-		
-		# gather vocab lists
-		wordset = {}
-		for w in works:
-			query = 'SELECT word, loci FROM ' + w
-			cursor.execute(query)
-			results = cursor.fetchall()
-			for item in results:
-				if item[0] not in wordset:
-					wordset[item[0]] = [[w,item[1]]]
-				else:
-					wordset[item[0]].append([w,item[1]])
-		
-		unsortedwords = list(wordset)
-		unsortedoutput = mpauthorconcordancedispatch(wordset,unsortedwords)
-		output = concordancesorter(unsortedoutput)
-		
 	return output
 
 
-def mpsingleworkconcordancedispatch(work, concordancewords):
+def mpsingleworkconcordancedispatch(work, concordancewords, startline, endline):
 	"""
 	a multiprocessor aware version of the concordance lookup routine
 	:param work: a work looks like 'gr0032w001_conc'
@@ -109,19 +75,20 @@ def mpsingleworkconcordancedispatch(work, concordancewords):
 	
 	manager = Manager()
 	output = manager.list()
+	startandstop = manager.list([startline, endline])
 	memory = manager.dict()
 	concordancewords = manager.list(concordancewords)
 	commitcount = MPCounter()
 	
 	workers = hipparchia.config['WORKERS']
-	jobs = [Process(target=mpconcordanceworker, args=(work, concordancewords, output, memory, commitcount)) for i in range(workers)]
+	jobs = [Process(target=mpconcordanceworker, args=(work, concordancewords, output, memory, commitcount, startandstop)) for i in range(workers)]
 	for j in jobs: j.start()
 	for j in jobs: j.join()
 	
 	return output
 
 
-def mpconcordanceworker(work, concordancewords, output, memory, commitcount):
+def mpconcordanceworker(work, concordancewords, output, memory, commitcount, startandstop):
 	"""
 	a multiprocessors aware function that hands off bits of a concordance search to multiple searchers
 	the memory function is supposed to save you the trouble of looking up the same line more than once
@@ -136,24 +103,26 @@ def mpconcordanceworker(work, concordancewords, output, memory, commitcount):
 	while len(concordancewords) > 0:
 		try: result = concordancewords.pop()
 		except: result = ('null', '-1')
-		# a work looks like 'gr0032w001_conc', hence work[:-5] below
-		# a result looks like ('ὥρμων', '5701 6830')
 		citations = []
 		word = result[0]
 		loci = result[1].split(' ')
-		count = str(len(loci))
-		for locus in loci:
-			if locus not in memory:
-				citation = concordancelookup(work[:-5], locus, curs)
-				citations.append(citation)
-				commitcount.increment()
-				if commitcount.value % 5000 == 0:
-					dbconnection.commit()
-				memory[locus] = citation
-			else:
-				citations.append(memory[locus])
-		citations = ', '.join(citations)
-		output.append((word, count, citations))
+		count = 0
+		for linenumber in loci:
+			if int(linenumber) >= startandstop[0] and int(linenumber) <= startandstop[1]:
+				count += 1
+				if linenumber not in memory:
+					line = grabonelinefromwork(work, linenumber, curs)
+					lo = dblineintolineobject(work, line)
+					citations.append(lo.locus())
+					commitcount.increment()
+					if commitcount.value % 5000 == 0:
+						dbconnection.commit()
+					memory[linenumber] = lo.locus()
+				else:
+					citations.append(memory[linenumber])
+		if len(citations) > 0:
+			citations = ', '.join(citations)
+			output.append((word, str(count), citations))
 
 	curs.close()
 	del dbconnection
@@ -161,14 +130,16 @@ def mpconcordanceworker(work, concordancewords, output, memory, commitcount):
 	return output
 
 
-def mpauthorconcordancedispatch(wordset, unsortedwords):
+def mpmultipleworkcordancedispatch(wordset):
 	"""
-	a multiprocessor aware version of the concordance lookup routine designed for whole authors
+	a multiprocessor aware version of the concordance lookup routine designed for whole authors, but could be used
+	with lists derived from multiple authors or segments within authors since you have univesalids here
 	:param wordset: itmes look like {word1: [[w001, 100], [w001,222], [w002,555]], word2: [[w005,666]]}
 	:param sortedwords: [word1, word2, ...]
 	:return:
 	"""
 	
+	unsortedwords = list(wordset)
 	manager = Manager()
 	output = manager.list()
 	wordset = manager.dict(wordset)
@@ -177,14 +148,14 @@ def mpauthorconcordancedispatch(wordset, unsortedwords):
 	commitcount = MPCounter()
 	
 	workers = hipparchia.config['WORKERS']
-	jobs = [Process(target=mpauthorconcordanceworker, args=(wordset, unsortedwords, output, memory, commitcount)) for i in range(workers)]
+	jobs = [Process(target=mpmultipleworkconcordanceworker, args=(wordset, unsortedwords, output, memory, commitcount)) for i in range(workers)]
 	for j in jobs: j.start()
 	for j in jobs: j.join()
 	
 	return output
 
 
-def mpauthorconcordanceworker(wordset, unsortedwords, output, memory, commitcount):
+def mpmultipleworkconcordanceworker(wordset, unsortedwords, output, memory, commitcount):
 	"""
 	a multiprocessors aware function that hands off bits of a concordance search to multiple searchers
 	:param

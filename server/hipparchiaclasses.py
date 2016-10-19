@@ -44,6 +44,13 @@ class dbAuthor(object):
 
 	def addwork(self, work):
 		self.listofworks.append(work)
+		
+	def listworkids(self):
+		workids = []
+		for w in self.listofworks:
+			workids.append(w.universalid)
+			
+		return workids
 
 
 class dbOpus(object):

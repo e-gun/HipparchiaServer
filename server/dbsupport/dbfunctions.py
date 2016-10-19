@@ -183,6 +183,18 @@ def simplecontextgrabber(workobject, focusline, linesofcontext, cursor):
 	return foundlines
 
 
+def grabonelinefromwork(workdbname, lineindex, cursor):
+	"""
+	grab a line and return its contents
+	"""
+	
+	query = 'SELECT * FROM ' + workdbname + ' WHERE index = %s'
+	data = (lineindex,)
+	cursor.execute(query, data)
+	foundline = cursor.fetchone()
+	
+	return foundline
+
 def indexintocitationtuple(workdbname, indexvalue, cursor):
 	"""
 	tell me a line number inthe db and i will get you the citation associated with it

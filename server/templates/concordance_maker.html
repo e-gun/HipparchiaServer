@@ -1,20 +1,31 @@
 <!-- extend from base layout -->
 {% extends "base.html" %}
 {% include "concordancesearchfields.html" ignore missing %}
+{% include "notreadyandnotincluded_concordanceoptions.html" ignore missing %}
 {% block content %}
 <script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
 <script src="{{ url_for('static', filename='ui-clicks.js') }}"></script>
+<script src="{{ url_for('static', filename='lexical.js') }}"></script>
 <script>
     $(document).ready( function () {
         $('#worksautocomplete').hide();
+        $('#browserdialog').hide();
+        $('#lexicadialog').hide();
+        $('#dictdialog').hide();
         $('#level05').hide();
         $('#level04').hide();
         $('#level03').hide();
         $('#level02').hide();
         $('#level01').hide();
         $('#level00').hide();
+
     });
+
+
+
+
 </script>
+
 <p class="small center">{{ time }}s</p>
 
 <p class="center">
@@ -23,7 +34,7 @@
 </p>
 
 {% if mode==0 %}
-  <h1 class="center">Concordance for {{ author }},&nbsp;<span class="title">{{ title }}</span></h1>
+  <h1 class="center">Concordance for {{ author }},&nbsp;<span class="title">{{ title }}</span>&nbsp;{{ segment }}</h1>
     <p class="center">{{ count }} words found</p>
 {% elif mode==1 %}
     <h1 class="center">Words unique to <span class="title">{{ title }}</span> within the corpus of {{ author }}</h1>
@@ -53,7 +64,7 @@
     </tr>
 {% for result in results %}
     <tr>
-	    <td class="word">{{ result[0] }}</td>
+	    <td class="word"><observed id="{{ result[0] }}">{{ result[0] }}</observed></td>
         <td class="count">{{ result[1] }}</td>
         <td class="passages">{{ result[2] }}</td>
     </tr>

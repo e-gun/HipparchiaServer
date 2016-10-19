@@ -342,3 +342,23 @@ $('#concordance').click( function() {
         if (conc.length == 15) { window.location = '/concordance?work='+conc; }
 });
 
+
+$('#concordanceofthis').click( function() {
+        var authorid = $('#authorsautocomplete').val().slice(-7, -1);
+        var name = $('#authorsautocomplete').val();
+        var locus = locusdataloader();
+        $('#authorsautocomplete').val('');
+        var wrk = $('#worksautocomplete').val().slice(-4, -1);
+        $('#worksautocomplete').val('');
+        resetworksautocomplete();
+        if (authorid != '') {
+            $('#clearpick').show();
+            if (wrk == '') {
+                window.location = '/concordance?auth=' + authorid;
+             } else if (locus == '') {
+                window.location = '/concordance?auth=' + authorid + '&work=' + wrk;
+             } else {
+                window.location = '/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus;
+             }
+        }
+});

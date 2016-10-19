@@ -5,15 +5,16 @@ import re
 from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dbfunctions import setconnection, grabonelinefromwork, dblineintolineobject
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formattedcittationincontext, aoformatauthinfo, formatauthorandworkinfo, \
 	woformatworkinfo
-from server.searching.searchfunctions import flagexclusions, searchdispatcher, aocompileauthorandworklist
+from server.searching.searchfunctions import flagexclusions, searchdispatcher, aocompileauthorandworklist, whereclauses
 from server.searching.betacodetounicode import replacegreekbetacode
-from server.textsandconcordnaces.concordancemaker import buildconcordance
+from server.textsandconcordnaces.concordancemaker import buildconcordance, multipleworkwordlist, mpmultipleworkcordancedispatch, \
+	concordancesorter
 from server.textsandconcordnaces.textbuilder import buildfulltext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, buildauthordict, buildworkdict, \
@@ -174,63 +175,128 @@ def concordance():
 		2 - of this author
 	:return:
 	"""
-	
+	starttime = time.time()
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 	
-	starttime = time.time()
 	try:
-		work = re.sub('[\W]+', '', request.args.get('work', ''))
+		workid = re.sub('[\W_]+', '', request.args.get('work', ''))
 	except:
-		work = ''
+		workid = ''
+
+	try:
+		uid = re.sub('[\W_]+', '', request.args.get('auth', ''))
+	except:
+		uid = ''
+
+	try:
+		locus = re.sub('[!@#$%^&*()=]+', '', request.args.get('locus', ''))
+	except:
+		locus = ''
+	
+	workdb = uid + 'w' + workid
+	selection = uid + 'w' + workid + '_AT_' + locus
 	
 	try:
-		mode = int(re.sub('[^\d]', '', request.args.get('mode', '')))
+		ao = authordict[uid]
+		if len(workdb) == 10:
+			try:
+				wo = workdict[workdb]
+			except:
+				uid = 'lt0022'
+				ao = authordict['lt0022']
+				wo = workdict['lt0022w012']
 	except:
+		# cato
+		uid = 'lt0022'
+		ao = authordict['lt0022']
+		wo = workdict['lt0022w012']
+	
+	passage = locus.split('|')
+	
+	if uid != '' and len(workdb) == 10:
+		# we have both an author and a work, maybe we also have a subset of the work
 		mode = 0
-	
-	if mode > 2:
-		mode = 0
-	
-	if work == '' or len(work) != 15:
-		print('failed to pick a text for the concordance builder:', work, str(len(work)))
-		work = 'lt0022w012_conc'
-	
-	author = authordict[work[0:6]]
-	authorname = author.shortname
-	
-	allworks = []
-	for w in author.listofworks:
-		allworks.append(w.universalid[6:10] + ' ==> ' + w.title)
-		if w.universalid == work[0:10]:
-			thework = w
-	allworks.sort()
-	
-	if mode != 2:
-		title = thework.title
+		if passage == ['']:
+			# whole work
+			startline = wo.starts
+			endline = wo.ends
+		else:
+			# portion of the work: need to find start and end points for the concordance
+			safepassage = []
+			for level in passage:
+				safepassage.append(re.sub('[\W_|]+', '', level))
+			safepassage.reverse()
+			safepassage = tuple(safepassage)
+			passage = finddblinefromincompletelocus(workdb, safepassage, cur)
+			line = grabonelinefromwork(workdb, passage, cur)
+			lo = dblineintolineobject(workdb, line)
+			print('myindex',lo.index, lo.contents)
+			# let's say you looked for 'book 2' of something that has 'book, chapter, line'
+			# that means that you want everything that has the same level2 value as the lineobject
+			# build a where clause
+			w = whereclauses(selection, '=', {uid: ao})
+			d = []
+			qw = ''
+			for i in range(0, len(w)):
+				qw += 'AND (' + w[i][0] + ') '
+				d.append(w[i][1])
+			# remove the leading AND
+			qw = qw[4:]
+			query = 'SELECT index FROM '+workdb+' WHERE '+qw+' ORDER BY index DESC LIMIT 1'
+			data = tuple(d)
+			print('q/d',query,data)
+			cursor.execute(query, data)
+			found = cursor.fetchone()
+			startline = lo.index
+			endline = found[0]
+		
+		allworks = []
+		
+		unsortedoutput = buildconcordance(wo.universalid, startline, endline, cur)
+		
+		
+	elif uid != '' and len(workdb) != 10:
+		# we have only an author
+		mode = 2
+		allworks = []
+		for w in ao.listofworks:
+			allworks.append(w.universalid[6:10] + ' ==> ' + w.title)
+		allworks.sort()
+		workstocompile = ao.listworkids()
+		wordset = multipleworkwordlist(workstocompile, cur)
+		unsortedoutput = mpmultipleworkcordancedispatch(wordset)
+		title = ''
+		
 	else:
-		title = author.shortname
-	ws = thework.structure
-	structure = []
-	for s in range(5, -1, -1):
-		if s in ws:
-			structure.append(ws[s])
-	structure = ', '.join(structure)
+		# we do not have a valid selection
+		unsortedoutput = []
+		allworks = []
+		title = ''
 	
-	output = buildconcordance(work, mode, cur)
-	
+	# get ready to send stuff to the page
+	output = concordancesorter(unsortedoutput)
 	count = len(output)
-	url = '/concordance?work=' + work
+				
+	if locus != '':
+		segment = '.'.join(safepassage)
+	else:
+		segment = ''
 	
-	linesevery = 10
-	simpletexturl = '/simpletext?work=' + thework.universalid + '&linesevery=' + str(linesevery) + '&mode=0'
+	authorname = ao.shortname
 	
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)
 	
-	page = render_template('concordance_maker.html', results=output, mode=mode, author=authorname, title=title,
-	                       structure=structure, count=count, allworks=allworks, url=url, simpletexturl=simpletexturl,
-	                       time=buildtime)
+	try:
+		title = wo.title
+		structure = wo.citation()
+	except:
+		title = ''
+		structure = ''
+		
+	page = render_template('concordance_maker.html', results=output, mode=mode, author=authorname, title=title, segment=segment,
+	                       structure=structure, count=count, allworks=allworks, time=buildtime)
 	
 	cur.close()
 	del dbc
