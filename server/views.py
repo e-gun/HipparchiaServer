@@ -197,22 +197,23 @@ def concordance():
 	workdb = uid + 'w' + workid
 	selection = uid + 'w' + workid + '_AT_' + locus
 	
-	try:
-		ao = authordict[uid]
-		if len(workdb) == 10:
-			try:
-				wo = workdict[workdb]
-			except:
-				uid = 'lt0022'
-				ao = authordict['lt0022']
-				wo = workdict['lt0022w012']
-	except:
-		# cato
-		uid = 'lt0022'
-		ao = authordict['lt0022']
-		wo = workdict['lt0022w012']
-	
-	passage = locus.split('|')
+	if uid != '':
+		try:
+			ao = authordict[uid]
+			if len(workdb) == 10:
+				try:
+					wo = workdict[workdb]
+				except:
+					uid = 'lt0022'
+					ao = authordict['lt0022']
+					wo = workdict['lt0022w012']
+		except:
+			# cato
+			uid = 'lt0022'
+			ao = authordict['lt0022']
+			wo = workdict['lt0022w012']
+		
+		passage = locus.split('|')
 	
 	if uid != '' and len(workdb) == 10:
 		# we have both an author and a work, maybe we also have a subset of the work
@@ -270,9 +271,9 @@ def concordance():
 		
 	else:
 		# we do not have a valid selection
+		mode = 99
 		unsortedoutput = []
 		allworks = []
-		title = ''
 	
 	# get ready to send stuff to the page
 	output = concordancesorter(unsortedoutput)
@@ -283,7 +284,10 @@ def concordance():
 	else:
 		segment = ''
 	
-	authorname = ao.shortname
+	try:
+		authorname = ao.shortname
+	except:
+		authorname = ''
 	
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)

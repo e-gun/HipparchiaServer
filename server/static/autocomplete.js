@@ -335,15 +335,32 @@ $('#excludegenre').click( function() {
 // CONCORDANCE
 //
 
+// the first version is selectively visible on the search page
+// the second version is always visible on the concordance page
+// the only difference should be the element id name
+
 $('#concordance').click( function() {
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
+        var name = $('#authorsautocomplete').val();
+        var locus = locusdataloader();
+        $('#authorsautocomplete').val('');
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
-        var conc = authorid +'w'+wrk+'_conc';
-        if (conc.length == 15) { window.location = '/concordance?work='+conc; }
+        $('#worksautocomplete').val('');
+        resetworksautocomplete();
+        if (authorid != '') {
+            $('#clearpick').show();
+            if (wrk == '') {
+                window.location = '/concordance?auth=' + authorid;
+             } else if (locus == '') {
+                window.location = '/concordance?auth=' + authorid + '&work=' + wrk;
+             } else {
+                window.location = '/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus;
+             }
+        }
 });
 
 
-$('#concordanceofthis').click( function() {
+$('#concordancemaker').click( function() {
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         var name = $('#authorsautocomplete').val();
         var locus = locusdataloader();

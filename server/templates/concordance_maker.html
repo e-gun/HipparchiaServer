@@ -1,13 +1,16 @@
-<!-- extend from base layout -->
 {% extends "base.html" %}
+
+{% block content %}
+<!-- extend from base layout -->
 {% include "concordancesearchfields.html" ignore missing %}
 {% include "notreadyandnotincluded_concordanceoptions.html" ignore missing %}
-{% block content %}
+
 <script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
 <script src="{{ url_for('static', filename='ui-clicks.js') }}"></script>
 <script src="{{ url_for('static', filename='lexical.js') }}"></script>
 <script>
     $(document).ready( function () {
+        document.title = 'Text and Concordance Maker'
         $('#worksautocomplete').hide();
         $('#browserdialog').hide();
         $('#lexicadialog').hide();
@@ -20,9 +23,6 @@
         $('#level00').hide();
 
     });
-
-
-
 
 </script>
 
@@ -52,25 +52,27 @@
 {%endif%}
 
 
-<table>
-    {% if mode!=2 %}
-    <caption>citation format: {{ structure }}</caption>
-    {%endif%}
-{% autoescape false %}
-    <tr>
-        <th>word</th>
-        <th>count</th>
-        <th>passages</th>
-    </tr>
-{% for result in results %}
-    <tr>
-	    <td class="word"><observed id="{{ result[0] }}">{{ result[0] }}</observed></td>
-        <td class="count">{{ result[1] }}</td>
-        <td class="passages">{{ result[2] }}</td>
-    </tr>
-{% endfor %}
-</table>
+{% if mode != 99 %}
+    <table>
+        {% if mode != 2 %}
+        <caption>citation format: {{ structure }}</caption>
+        {%endif%}
+    {% autoescape false %}
+        <tr>
+            <th>word</th>
+            <th>count</th>
+            <th>passages</th>
+        </tr>
+    {% for result in results %}
+        <tr>
+            <td class="word"><observed id="{{ result[0] }}">{{ result[0] }}</observed></td>
+            <td class="count">{{ result[1] }}</td>
+            <td class="passages">{{ result[2] }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+    {% endautoescape %}
+{% endif %}
 
-{% endautoescape %}
 
 {% endblock %}
