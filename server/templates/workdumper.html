@@ -31,12 +31,12 @@
 
 {% autoescape false %}
 
+{% if results|length > 0 %}
 <h1>{{ author }},&nbsp;
 <span class="title">{{ title }}</span>
 &nbsp;{{ segment }}
 </h1>
 <br />
-{% if results|length > 0 %}
     citation format: {{ structure }}
 {% endif %}
 <br />

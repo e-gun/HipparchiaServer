@@ -325,3 +325,29 @@ def makeablankline(work, fakelinenumber):
 	lineobject = dbWorkLine(work, fakelinenumber, '-1', '-1', '-1', '-1', '-1', '-1', '', '', '', '')
 	
 	return lineobject
+
+def makeanemptyauthor(universalid):
+	"""
+	avoiding an exception by evoking an empty author object temporarily
+	:param universalid:
+	:return:
+	"""
+	
+	# (universalid, language, idxname, akaname, shortname, cleanname, genres, floruit, location)
+	aobject = dbAuthor(universalid, '', '', '', '', '', '', '', '')
+	
+	return aobject
+
+
+def makeanemptywork(universalid):
+	"""
+	avoiding an exception by evoking an empty work object temporarily
+	:param universalid:
+	:return:
+	"""
+	
+	# universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03,
+	# levellabels_04, levellabels_05, workgenre, transmission, worktype, wordcount, firstline, lastline, authentic
+	wkobject = dbOpus(universalid, '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '')
+	
+	return wkobject

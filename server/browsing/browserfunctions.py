@@ -135,22 +135,3 @@ def insertparserids(lineobject):
 			pass
 		
 	return newline
-
-
-# slated for removal
-
-def findfirstandlastlineofwork(workdbname, cursor):
-	"""
-	used to keep the browser from attempting to browse beyond the end of the text
-	:param worknumber:
-	:return:
-	"""
-	query = 'SELECT * FROM ' + workdbname + ' ORDER BY index ASC'
-	cursor.execute(query)
-	firstline = cursor.fetchone()
-	
-	query = 'SELECT * FROM ' + workdbname + ' ORDER BY index DESC'
-	cursor.execute(query)
-	lastline = cursor.fetchone()
-	
-	return firstline,lastline
