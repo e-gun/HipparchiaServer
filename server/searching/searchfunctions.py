@@ -693,38 +693,3 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 	
 	return fullmatches
 
-
-# slated for removal
-def dbwhereclauses(uidwithatsign, operand, cursor):
-	"""
-	in order to restrict a search to a portion of a work, you will need a where clause
-	this builds it out of something like 'gr0003w001_AT_3|12' (Thuc., Bk 3, Ch 12)
-	note the clash with concsearching: it is possible to search the whole conc and then toss the bad lines, but...
-
-	tempting to do this with object, but the mp workers hate being passed stuff like that...
-
-	:param uidwithatsign:
-	:param operand: this should be either '=' or '!='
-	:return: a tuple consisting of the SQL string and the value to be passed via %s
-	"""
-	
-	whereclausetuples = []
-	
-	a = uidwithatsign[:6]
-	locus = uidwithatsign[14:].split('|')
-	
-	ao = dbauthorandworkmaker(a, cursor)
-	for w in ao.listofworks:
-		if w.universalid == uidwithatsign[0:10]:
-			wk = w
-	
-	wklvls = list(wk.structure.keys())
-	wklvls.reverse()
-	
-	index = -1
-	for l in locus:
-		index += 1
-		lvstr = 'level_0' + str(wklvls[index]) + '_value' + operand + '%s '
-		whereclausetuples.append((lvstr, l))
-	
-	return whereclausetuples
