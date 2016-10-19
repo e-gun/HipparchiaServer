@@ -213,6 +213,17 @@ th {
 }
 
 
+td.browsercite {
+	padding-right: 10px;
+	padding-left: 10px;
+}
+
+td.browsedline {
+	padding-right: 10px;
+	padding-left: 10px;
+	padding-bottom: 8px;
+}
+
 td.word { 
 	font-weight: bold;
 }
@@ -237,6 +248,7 @@ td.infocellx {
 	/* background-color: hsl(0, 0%, 90%); */
 	text-align: center;
 }
+
 
 worktitle {
 	font-style: italic;
@@ -354,11 +366,7 @@ worktitle {
 
 .browsercite {
 	color: #556970;
-}
-
-.browsercite {
-	color: #556970;
-	font-weight: bold;
+	font-weight: normal;
 }
 
 .center { display: block; text-align: center; }

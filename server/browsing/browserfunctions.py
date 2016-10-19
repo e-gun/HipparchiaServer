@@ -61,29 +61,40 @@ def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, lineso
 
 	cv = '<span class="author">'+authorobject.shortname+'</span>, <span class="work">'+title+'</span>, '+ citation
 	cv = cv + '<br />' + biblio
-	formattedpassage.append({'value':'<currentlyviewing>'+cv+'</currentlyviewing>'})
+	formattedpassage.append({'value':'<currentlyviewing>'+cv+'</currentlyviewing><br /><br />'})
+	
+	print('here')
+	formattedpassage.append({'value': '<table>\n'})
 	
 	linecount = numbersevery - 3
 	# insert something to highlight the citationtuple line
 	previousline = lines[0]
 	for line in lines:
 		linecount += 1
-		linecore = insertparserids(line)
+		columnb = insertparserids(line)
 		if line.index == focusline.index:
 			# linecount = numbersevery + 1
-			linehtml = '<p class="focusline">' + linecore + '&nbsp;&nbsp;(' + line.locus() + ')</p>'
+			columna = line.locus()
+			columnb = '<span class="focusline">' + columnb + '</span>'
 		else:
 			if line.samelevelas(previousline) is not True:
 				linecount = numbersevery + 1
-				linehtml = '<p class="browsedline">' + linecore + '&nbsp;&nbsp;<span class="browsercite">(' + line.shortlocus() + ')</span></p>'
+				columna = line.shortlocus()
 			elif linecount % numbersevery == 0:
-				linehtml = '<p class="browsedline">' + linecore + '&nbsp;&nbsp;<span class="browsercite">(' + line.locus() + ')</span></p>'
+				columna = line.locus()
 			else:
-				linehtml = '<p class="browsedline">' + linecore + '</p>'
+				columna = ''
+		
+		linehtml = '<tr class="browser"><td class="browsedline">' + columnb + '</td>'
+		linehtml += '<td class="browsercite">' + columna + '</td></tr>\n'
 		
 		formattedpassage.append({'value':linehtml})
 		previousline = line
-		
+	
+	formattedpassage.append({'value': '</table>\n'})
+	
+	print('fp',formattedpassage)
+	
 	return formattedpassage
 
 

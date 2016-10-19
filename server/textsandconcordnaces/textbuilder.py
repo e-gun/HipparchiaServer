@@ -26,17 +26,17 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 		for line in results:
 			linecount += 1
 			thisline = dblineintolineobject(work,line)
-			rightcolumn = thisline.contents
+			columnb = thisline.contents
 			if thisline.samelevelas(previousline) is not True:
 				linecount = linesevery + 1
-				leftcolumn = thisline.shortlocus()
+				columna = thisline.shortlocus()
 			else:
-				leftcolumn = ''
+				columna = ''
 			if linecount % linesevery == 0:
-				leftcolumn = thisline.locus()
+				columna = thisline.locus()
 			
-			linehtml = '<tr><td class="browsercite">'+leftcolumn+'</td>'
-			linehtml += '<td class="lineoftext">'+rightcolumn+'</td></tr>\n'
+			linehtml = '<tr><td class="browsercite">'+columna+'</td>'
+			linehtml += '<td class="lineoftext">'+columnb+'</td></tr>\n'
 	
 			output.append(linehtml)
 			previousline = thisline
