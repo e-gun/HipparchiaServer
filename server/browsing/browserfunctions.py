@@ -93,8 +93,6 @@ def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, lineso
 	
 	formattedpassage.append({'value': '</table>\n'})
 	
-	print('fp',formattedpassage)
-	
 	return formattedpassage
 
 
