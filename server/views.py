@@ -426,58 +426,6 @@ def textmaker():
 # unadorned views for quickly peeking at the data
 #
 
-@hipparchia.route('/simpletext', methods=['GET', 'POST'])
-def workdump():
-	
-	dbc = setconnection('autocommit')
-	cur = dbc.cursor()
-	
-	try:
-		work = re.sub('[\W]+', '', request.args.get('work', ''))
-	except:
-		work = ''
-	
-	try:
-		linesevery = int(re.sub('[^\d]', '', request.args.get('linesevery', '')))
-	except:
-		linesevery = 10
-	
-	try:
-		# hook for future possibility of PDF output
-		# super slow, but maybe it can solve the problem with too much HTML spat at a browser?
-		mode = int(re.sub('[^\d]', '', request.args.get('mode', '')))
-	except:
-		mode = 0
-		
-	if len(work) == 10:
-		author = authordict[work[0:6]]
-		authorname = author.shortname
-		
-		for w in author.listofworks:
-			if w.universalid == work:
-				thework = w
-				title = thework.title
-		
-		cit = thework.citation()
-		structure = ', '.join(cit)
-		
-		output = buildtext(work, thework.starts, thework.ends, linesevery, cur)
-
-	else:
-		output = []
-
-	try:
-		page = render_template('workdumper.html',results=output, author=authorname, title=title,
-		                       structure=structure)
-	except:
-		page = render_template('workdumper.html')
-	
-	cur.close()
-	del dbc
-	
-	return page
-
-
 @hipparchia.route('/authors')
 def authorlist():
 

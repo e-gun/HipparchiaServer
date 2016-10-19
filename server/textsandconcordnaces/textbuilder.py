@@ -19,24 +19,28 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	cursor.execute(query, data)
 	results = cursor.fetchall()
 	
-	output = []
+	output = ['<table>\n']
 	if len(results) > 0:
 		previousline = dblineintolineobject(work, results[0])
 		linecount = 0
 		for line in results:
 			linecount += 1
 			thisline = dblineintolineobject(work,line)
-			linecore = thisline.contents
+			rightcolumn = thisline.contents
 			if thisline.samelevelas(previousline) is not True:
 				linecount = linesevery + 1
-				linehtml = linecore + '&nbsp;&nbsp;<span class="browsercite">(' + thisline.shortlocus() + ')</span>'
+				leftcolumn = thisline.shortlocus()
 			else:
-				linehtml = linecore
-				
+				leftcolumn = ''
 			if linecount % linesevery == 0:
-				linehtml = linecore + '&nbsp;&nbsp;<span class="browsercite">(' + thisline.locus() + ')</span>'
+				leftcolumn = thisline.locus()
+			
+			linehtml = '<tr><td class="browsercite">'+leftcolumn+'</td>'
+			linehtml += '<td class="lineoftext">'+rightcolumn+'</td></tr>\n'
 	
 			output.append(linehtml)
 			previousline = thisline
+	
+	output.append('</table>\n')
 	
 	return output
