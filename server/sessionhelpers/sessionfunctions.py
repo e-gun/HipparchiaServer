@@ -329,7 +329,7 @@ def sessionselectionsinfo(authordict, workdict):
 			thehtml += '[Full corpus less exclusions]<br />\n'
 		
 		if selectionorexclusion == 'exclusions' and len(sessionsearchlist) == 0 and session['spuria'] == 'Y' and len(
-				session['wkgnexclusions']) == 0 and len(session['agnexclusions']) == 0:
+				session['wkgnexclusions']) == 0 and len(session['agnexclusions']) == 0 and len(session['auexclusions']) == 0:
 			thehtml += '<span class="picklabel">Authors</span><br />'
 			thehtml += '[No exclusions]<br />\n'
 		
