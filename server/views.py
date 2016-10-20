@@ -5,13 +5,13 @@ import re
 from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection, grabonelinefromwork, dblineintolineobject
+from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formattedcittationincontext, aoformatauthinfo, formatauthorandworkinfo, \
 	woformatworkinfo
-from server.searching.searchfunctions import flagexclusions, searchdispatcher, aocompileauthorandworklist, whereclauses
+from server.searching.searchfunctions import flagexclusions, searchdispatcher, aocompileauthorandworklist
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordance, multipleworkwordlist, mpmultipleworkcordancedispatch, \
 	concordancesorter
@@ -237,8 +237,7 @@ def concordance():
 		title = ''
 		structure = ''
 		
-	page = render_template('concordance_maker.html', results=output, mode=mode, author=authorname, title=title, segment=worksegment,
-	                       structure=structure, count=count, allworks=allworks, time=buildtime)
+	page = render_template('concordance_maker.html', results=output, mode=mode, author=authorname, title=title, segment=worksegment, structure=structure, count=count, allworks=allworks, time=buildtime)
 	
 	cur.close()
 	del dbc
@@ -279,19 +278,22 @@ def textmaker():
 		output = buildtext(wo.universalid, startline, endline, linesevery, cur)
 	else:
 		output = []
-		
-	authorname = ao.shortname
-	title = wo.title
-	structure = wo.citation()
-	worksegment = '.'.join(psg)
 	
-	page = render_template('workdumper.html', results=output, author=authorname, title=title,
-	                       structure=structure, segment=worksegment)
+	results = {}
+	results['authorname'] = ao.shortname
+	results['title'] = wo.title
+	results['structure'] = wo.citation()
+	results['worksegment'] = '.'.join(psg)
+	results['lines'] = output
+	
+	results = json.dumps(results)
+
+	# page = render_template('workdumper.html', results=output, author=authorname, title=title, structure=structure, segment=worksegment)
 	
 	cur.close()
 	del dbc
 	
-	return page
+	return results
 #
 # unadorned views for quickly peeking at the data
 #
@@ -694,8 +696,11 @@ def grabtextforbrowsing():
 	
 	workdb = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
 	
-	ao = authordict[workdb[:6]]
-	workid = workdb[7:]
+	try: ao = authordict[workdb[:6]]
+	except: ao = makeanemptyauthor('gr0000')
+	
+	try: wo = workdict[workdb]
+	except: wo = makeanemptywork('gr0000w000')
 	
 	ctx = int(session['browsercontext'])
 	numbersevery = 10
@@ -711,7 +716,10 @@ def grabtextforbrowsing():
 		for level in passage:
 			safepassage.append(re.sub('[\W_|]+', '',level))
 		safepassage = tuple(safepassage[:5])
-		passage = finddblinefromlocus(workdb, safepassage, cur)
+		if len(safepassage) == wo.availablelevels:
+			passage = finddblinefromlocus(wo.universalid, safepassage, cur)
+		else:
+			passage = finddblinefromincompletelocus(wo.universalid, safepassage, cur)
 	elif passage[0:4] == '_PE_':
 		# a nasty kludge: should build the fixes into the db
 		if 'gr0006' in workdb:
@@ -724,7 +732,7 @@ def grabtextforbrowsing():
 
 	# first line is info; remaining lines are html
 	try:
-		browserdata = getandformatbrowsercontext(ao, int(workid), int(passage), ctx, numbersevery, cur)
+		browserdata = getandformatbrowsercontext(ao, wo, int(passage), ctx, numbersevery, cur)
 	except:
 		browserdata = [{'forwardsandback': [0,0]}]
 		browserdata.append({'value': 'error in fetching the data to browse for '+ao.shortname+', '+workid +'<br /><br />'})

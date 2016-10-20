@@ -50,6 +50,7 @@ function reloadAuthorlist(){
         $('#level00').hide();
         $('#browseto').hide();
         $('#concordance').hide();
+        $('#textofthis').hide();
         $('#fewerchoices').hide();
         $('#genresautocomplete').hide();
         $('#genreinfo').hide();
@@ -95,6 +96,7 @@ $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
     source: "/getauthorhint",
     select: function (event, ui) {
+        $('#worksautocomplete').hide();
         $('#worksautocomplete').val('');
         resetworksautocomplete();
         loadWorklist($('#authorsautocomplete').val().slice(-7, -1));
@@ -185,14 +187,14 @@ function loadWorklist(authornumber){
 $('#worksautocomplete').autocomplete({
     focus: function (event, ui) {
         $('#concordance').show();
+        $('#textofthis').show();
+        $('#browseto').show();
         resetworksautocomplete();
         var auth = $("#authorsautocomplete").val().slice(-7, -1);
         var wrk = ui.item.value.slice(-4, -1);
         loadLevellist(auth+'w'+wrk,'-1');
         }
 });
-
-
 
 
 //
@@ -231,14 +233,6 @@ function loadLevellist(workid,pariallocus){
         var low = selectiondata[3]['low'];
         var high = selectiondata[4]['high'];
 
-        // note that this will not work for string values; should really let the sql populate this
-        // but it needs to work  even poorly before that...
-
-        //var possibilities = [];
-        //for (i = low; i<high; i++) {
-        //    possibilities.push(String(i));
-        //}
-
         var possibilities = selectiondata[5]['rng'];
 
         var generateme = '#level0'+String(atlevel);
@@ -252,7 +246,8 @@ function loadLevellist(workid,pariallocus){
                     var loc = locusdataloader();
                     loadLevellist(auth+'w'+wrk,loc);
                     }
-                if (atlevel <= 1) { $('#browseto').show(); }
+                // if we do partialloc browsing then this can be off
+                // if (atlevel <= 1) { $('#browseto').show(); }
                 },
             source: possibilities,
             select: function (event, ui) {
@@ -263,23 +258,10 @@ function loadLevellist(workid,pariallocus){
 
                 loadLevellist(auth+'w'+wrk,String(loc));
 
-                // $('#debug').text(loc);
-                // if you leave this on every descent into a new level will add that a/w/l to the search list...
-                // this should all be handled via the '+' button once it gets implemented
-                // $.getJSON('/makeselection?auth=' + auth + '&work=' + wrk + '&locus='+String(loc), function (selectiondata) {
-                //    loadLevellist(auth+'w'+wrk,String(loc));
-                //    var dLen = selectiondata.length;
-                //    
-                //    reloadselections(selectiondata);
-                //    });
             }});
     });
 }
 
-
-//
-// formatting: http://stackoverflow.com/questions/2435964/jqueryui-how-can-i-custom-format-the-autocomplete-plug-in-results
-//
 
 //
 // GENRES
@@ -385,18 +367,39 @@ $('#textofthis').click( function() {
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         var name = $('#authorsautocomplete').val();
         var locus = locusdataloader();
-        $('#authorsautocomplete').val('');
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
-        $('#worksautocomplete').val('');
-        resetworksautocomplete();
         if (authorid != '') {
             $('#clearpick').show();
             if (wrk == '') {
                 // just an author is not enough...
              } else if (locus == '') {
-                window.location = '/text?auth=' + authorid + '&work=' + wrk;
+                $.getJSON('/text?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
+                    loadtextintodisplayresults(selectiondata);
+                });
              } else {
-                window.location = '/text?auth=' + authorid + '&work=' + wrk + '&locus=' + locus;
+                $.getJSON('/text?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (selectiondata) {
+                    loadtextintodisplayresults(selectiondata);
+                });
              }
         }
 });
+
+function loadtextintodisplayresults(selectiondata) {
+        var dLen = selectiondata['lines'].length;
+        var linesreturned = '';
+        linesreturned += 'Text of ' + selectiondata['authorname']
+        linesreturned += ',&nbsp;<span class="foundwork">'+selectiondata['title']+'</span>';
+        if (selectiondata['worksegment'] == '') {
+            linesreturned += '<br /><br />';
+            } else {
+            linesreturned += '&nbsp;'+selectiondata['worksegment']+'<br /><br />';
+            }
+        linesreturned += 'citation format:&nbsp;'+selectiondata['structure']+'<br />';
+
+        document.getElementById('searchsummary').innerHTML = linesreturned;
+        var linesreturned = '';
+        for (i = 0; i < dLen; i++) {
+            linesreturned += selectiondata['lines'][i];
+            }
+        document.getElementById('displayresults').innerHTML = linesreturned;
+    }

@@ -212,6 +212,7 @@ $(document).ready( function () {
         <br />[Search suspended: result cap reached.]
         {% endif %}
     </div>
+    <div id="displayresults">
     {% for result in found %}
     	{% for context in result %}
 	    	{% if context['newfind'] %}
@@ -236,7 +237,7 @@ $(document).ready( function () {
     		{% endif %}
     	{% endfor %}
     {% endfor %}
-
+    </div>
     {% endautoescape %}
 
 

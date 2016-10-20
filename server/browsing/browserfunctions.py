@@ -5,7 +5,7 @@ from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobj
 from server.formatting_helper_functions import getpublicationinfo
 
 
-def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, linesofcontext, numbersevery, cursor):
+def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
 	"""
 	this function does a lot of work via a number of subfunctions
 	lots of refactoring required if you change anything...
@@ -18,15 +18,9 @@ def getandformatbrowsercontext(authorobject, worknumber, locusindexvalue, lineso
 	:return:
 	"""
 	
-	# work ID va work position on list of works problem: Euripides' work list starts at "gr0006w020";"Fragmenta"
-	# so you need to match the wk # to the right object early
-	for worktocheck in authorobject.listofworks:
-		if worktocheck.worknumber == worknumber:
-			workobject = worktocheck
-			table = workobject.universalid
-			title = workobject.title
+	table = workobject.universalid
+	title = workobject.title
 
-	
 	if locusindexvalue - linesofcontext < workobject.starts:
 		first = workobject.starts
 	else:

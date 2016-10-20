@@ -14,14 +14,14 @@ def tcparserequest(request, authordict, workdict):
 	"""
 	
 	try:
-		workid = re.sub('[\W_]+', '', request.args.get('work', ''))
-	except:
-		workid = ''
-
-	try:
 		uid = re.sub('[\W_]+', '', request.args.get('auth', ''))
 	except:
 		uid = ''
+		
+	try:
+		workid = re.sub('[\W_]+', '', request.args.get('work', ''))
+	except:
+		workid = ''
 
 	try:
 		locus = re.sub('[!@#$%^&*()=]+', '', request.args.get('locus', ''))
@@ -37,10 +37,15 @@ def tcparserequest(request, authordict, workdict):
 				try:
 					wo = workdict[workdb]
 				except:
-					ao = makeanemptyauthor('gr0000')
 					wo = makeanemptywork('gr0000w000')
 			else:
-				wo = makeanemptywork('gr0000w000')
+				# grab the first work
+				try:
+					print('here')
+					print('low',ao.listofworks)
+					wo = ao.listofworks[0]
+				except:
+					wo = makeanemptywork('gr0000w000')
 		except:
 			ao = makeanemptyauthor('gr0000')
 			wo = makeanemptywork('gr0000w000')
