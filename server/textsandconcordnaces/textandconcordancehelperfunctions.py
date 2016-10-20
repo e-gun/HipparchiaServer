@@ -3,6 +3,7 @@ import re
 
 from server.dbsupport.dbfunctions import grabonelinefromwork, dblineintolineobject, makeanemptyauthor, makeanemptywork
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
+from server.formatting_helper_functions import polytonicsort
 from server.searching.searchfunctions import whereclauses
 
 def tcparserequest(request, authordict, workdict):
@@ -29,7 +30,7 @@ def tcparserequest(request, authordict, workdict):
 		locus = ''
 	
 	workdb = uid + 'w' + workid
-		
+	
 	if uid != '':
 		try:
 			ao = authordict[uid]
@@ -39,12 +40,6 @@ def tcparserequest(request, authordict, workdict):
 				except:
 					wo = makeanemptywork('gr0000w000')
 			else:
-				# grab the first work
-				try:
-					print('here')
-					print('low',ao.listofworks)
-					wo = ao.listofworks[0]
-				except:
 					wo = makeanemptywork('gr0000w000')
 		except:
 			ao = makeanemptyauthor('gr0000')
@@ -105,3 +100,51 @@ def tcfindstartandstop(authorobject, workobject, passageaslist, cursor):
 	
 	
 	return startandstop
+
+
+def conctohtmltable(concordanceoutput):
+	"""
+	pre-pack the concordance output into an html table so that the page JS can just iterate through a set of lines when the time comes
+	each result in the list is itself a list: [word, count, lociwherefound]
+	:param concordanceoutput:
+	:return:
+	"""
+
+	outputlines = []
+	outputlines.append('<table><tr><th>word</th><th>count</th><th>passages</th></tr>\n')
+	for c in concordanceoutput:
+		outputlines.append('<tr>')
+		outputlines.append('<td class="word"><observed id="'+c[0]+'">'+c[0]+'</observed></td>')
+		outputlines.append('<td class="count">'+c[1]+'</td>')
+		outputlines.append('<td class="passages">' + c[2] + '</td>')
+		outputlines.append('</tr>')
+	outputlines.append('</table>')
+	
+	return outputlines
+	
+
+def concordancesorter(unsortedoutput):
+	"""
+	you can't sort the list and then send it to a mp function where it will get unsorted
+	so you have to jump through a hoop before you can jump through a hoop:
+	make keys -> polytonicsort keys -> use keys to sort the list
+	
+	:param unsortedoutput:
+	:return:
+	"""
+	
+	# now you sort
+	sortkeys = []
+	outputdict = {}
+	for o in unsortedoutput:
+		sortkeys.append(o[0])
+		outputdict[o[0]] = o
+	
+	sortkeys = polytonicsort(sortkeys)
+	del unsortedoutput
+	
+	sortedoutput = []
+	for k in sortkeys:
+		sortedoutput.append(outputdict[k])
+	
+	return sortedoutput

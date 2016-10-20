@@ -15,7 +15,8 @@ from server.searching.searchfunctions import flagexclusions, searchdispatcher, a
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordance, multipleworkwordlist, mpmultipleworkcordancedispatch, \
 	concordancesorter
-from server.textsandconcordnaces.textandconcordancehelperfunctions import tcparserequest, tcfindstartandstop
+from server.textsandconcordnaces.textandconcordancehelperfunctions import tcparserequest, tcfindstartandstop, conctohtmltable, \
+	concordancesorter
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, buildauthordict, buildworkdict, \
@@ -186,6 +187,7 @@ def concordance():
 	wo = req['workobject']
 	psg = req['passagelist']
 	
+	print('a/w',ao.universalid,wo.universalid)
 	
 	if ao.universalid != 'gr0000' and wo.universalid != 'gr0000w000':
 		# we have both an author and a work, maybe we also have a subset of the work
@@ -205,44 +207,46 @@ def concordance():
 		
 	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
 		# we have only an author
-		mode = 2
-		allworks = []
-		for w in ao.listofworks:
-			allworks.append(w.universalid[6:10] + ' ==> ' + w.title)
-		allworks.sort()
 		workstocompile = ao.listworkids()
 		wordset = multipleworkwordlist(workstocompile, cur)
 		unsortedoutput = mpmultipleworkcordancedispatch(wordset)
 		
+		allworks = []
+		for w in ao.listofworks:
+			allworks.append(w.universalid[6:10] + ' ==> ' + w.title)
+		allworks.sort()
+		
 	else:
 		# we do not have a valid selection
-		mode = 99
 		unsortedoutput = []
 		allworks = []
 	
 	# get ready to send stuff to the page
 	output = concordancesorter(unsortedoutput)
+	output = conctohtmltable(output)
 	count = len(output)
 	
-	worksegment = '.'.join(psg)
-	authorname = ao.shortname
-
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)
 	
-	try:
-		title = wo.title
-		structure = wo.citation()
-	except:
-		title = ''
-		structure = ''
-		
-	page = render_template('concordance_maker.html', results=output, mode=mode, author=authorname, title=title, segment=worksegment, structure=structure, count=count, allworks=allworks, time=buildtime)
+	results = {}
+	results['authorname'] = ao.shortname
+	results['title'] = wo.title
+	results['structure'] = wo.citation()
+	results['worksegment'] = '.'.join(psg)
+	results['elapsed'] = buildtime
+	results['wordsfound'] = count
+	results['lines'] = output
+	results['keytoworks'] = allworks
+	print('ktw',results['keytoworks'])
+	results = json.dumps(results)
+	
+	# page = render_template('concordance_maker.html', results=output, mode=mode, author=authorname, title=title, segment=worksegment, structure=structure, count=count, allworks=allworks, time=buildtime)
 	
 	cur.close()
 	del dbc
 	
-	return page
+	return results
 
 
 @hipparchia.route('/text', methods=['GET'])
@@ -263,6 +267,10 @@ def textmaker():
 	ao = req['authorobject']
 	wo = req['workobject']
 	psg = req['passagelist']
+	
+	if ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
+		# default to first work
+		wo = ao.listofworks[0]
 
 	if ao.universalid != 'gr0000' and wo.universalid != 'gr0000w000':
 		# we have both an author and a work, maybe we also have a subset of the work
@@ -699,28 +707,42 @@ def grabtextforbrowsing():
 	try: ao = authordict[workdb[:6]]
 	except: ao = makeanemptyauthor('gr0000')
 	
-	try: wo = workdict[workdb]
-	except: wo = makeanemptywork('gr0000w000')
+	try:
+		wo = workdict[workdb]
+		bokenwkref = False
+	except:
+		bokenwkref = True
+		if ao.universalid == 'gr0000':
+			wo = makeanemptywork('gr0000w000')
+		else:
+			wo = ao.listofworks[0]
 	
 	ctx = int(session['browsercontext'])
 	numbersevery = 10
-	passage = request.args.get('locus', '')[10:]
+	
+	if bokenwkref == True:
+		passage = '_LN_'+str(wo.starts)
+	else:
+		passage = request.args.get('locus', '')[10:]
 
 	if passage[0:4] == '_LN_':
 		# you were sent here either by the hit list or a forward/back button in the passage browser
 		passage = re.sub('[\D]', '', passage[4:])
 	elif passage[0:4] == '_AT_':
 		# you were sent here by the citation builder autofill boxes
-		passage = request.args.get('locus', '')[14:].split('|')
-		safepassage = []
-		for level in passage:
-			safepassage.append(re.sub('[\W_|]+', '',level))
-		safepassage = tuple(safepassage[:5])
-		if len(safepassage) == wo.availablelevels:
-			passage = finddblinefromlocus(wo.universalid, safepassage, cur)
+		p = request.args.get('locus', '')[14:].split('|')
+		cleanedp = []
+		for level in p:
+			cleanedp.append(re.sub('[\W_|]+', '',level))
+			cleanedp = tuple(cleanedp[:5])
+		if len(cleanedp) == wo.availablelevels:
+			passage = finddblinefromlocus(wo.universalid, cleanedp, cur)
+		elif p[0] == '-1': # cleanedp will strip the '-'
+			passage = wo.starts
 		else:
-			passage = finddblinefromincompletelocus(wo.universalid, safepassage, cur)
+			passage = finddblinefromincompletelocus(wo.universalid, cleanedp, cur)
 	elif passage[0:4] == '_PE_':
+		# you came here via a perseus dictionary xref: all sorts of crazy ensues
 		# a nasty kludge: should build the fixes into the db
 		if 'gr0006' in workdb:
 			remapper = dbquickfixes([workdb])
@@ -735,7 +757,7 @@ def grabtextforbrowsing():
 		browserdata = getandformatbrowsercontext(ao, wo, int(passage), ctx, numbersevery, cur)
 	except:
 		browserdata = [{'forwardsandback': [0,0]}]
-		browserdata.append({'value': 'error in fetching the data to browse for '+ao.shortname+', '+workid +'<br /><br />'})
+		browserdata.append({'value': 'error in fetching the data to browse for '+ao.shortname+', '+wo.universalid +'<br /><br />'})
 	if passage == -9999:
 		browserdata = [{'forwardsandback': [0, 0]}]
 		browserdata.append({'value': 'could not find a Perseus locus in the Hipparchia DB:<br />'+request.args.get('locus', '')+'<br /><br />'})
@@ -755,7 +777,6 @@ def grabtextforbrowsing():
 		except:
 			pass
 
-	
 	browserdata = json.dumps(browserdata)
 	
 	cur.close()

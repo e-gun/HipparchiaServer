@@ -96,6 +96,9 @@ $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
     source: "/getauthorhint",
     select: function (event, ui) {
+        $('#concordance').show();
+        $('#textofthis').show();
+        $('#browseto').show();
         $('#worksautocomplete').hide();
         $('#worksautocomplete').val('');
         resetworksautocomplete();
@@ -186,9 +189,6 @@ function loadWorklist(authornumber){
 
 $('#worksautocomplete').autocomplete({
     focus: function (event, ui) {
-        $('#concordance').show();
-        $('#textofthis').show();
-        $('#browseto').show();
         resetworksautocomplete();
         var auth = $("#authorsautocomplete").val().slice(-7, -1);
         var wrk = ui.item.value.slice(-4, -1);
@@ -251,7 +251,8 @@ function loadLevellist(workid,pariallocus){
                 },
             source: possibilities,
             select: function (event, ui) {
-                if (atlevel <= 1) { $('#browseto').show(); }
+                // if we do partialloc browsing then this can be off
+                // if (atlevel <= 1) { $('#browseto').show(); }
                 var auth = workid.slice(0,6);
                 var wrk = workid.slice(7,10);
                 var loc = locusdataloader();
@@ -317,51 +318,70 @@ $('#excludegenre').click( function() {
 // CONCORDANCE
 //
 
-// the first version is selectively visible on the search page
-// the second version is always visible on the concordance page
-// the only difference should be the element id name
 
 $('#concordance').click( function() {
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         var name = $('#authorsautocomplete').val();
         var locus = locusdataloader();
-        $('#authorsautocomplete').val('');
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
-        $('#worksautocomplete').val('');
         resetworksautocomplete();
         if (authorid != '') {
             $('#clearpick').show();
             if (wrk == '') {
-                window.location = '/concordance?auth=' + authorid;
+                $.getJSON('/concordance?auth=' + authorid, function (concordancedata) {
+                    loadconcordanceintodisplayresults(concordancedata);
+                });
              } else if (locus == '') {
-                window.location = '/concordance?auth=' + authorid + '&work=' + wrk;
+                $.getJSON('/concordance?auth=' + authorid + '&work=' + wrk, function (concordancedata) {
+                    loadconcordanceintodisplayresults(concordancedata);
+                });
              } else {
-                window.location = '/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus;
+                $.getJSON('/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (concordancedata) {
+                    loadconcordanceintodisplayresults(concordancedata);
+                });
              }
         }
 });
 
 
-$('#concordancemaker').click( function() {
-        var authorid = $('#authorsautocomplete').val().slice(-7, -1);
-        var name = $('#authorsautocomplete').val();
-        var locus = locusdataloader();
-        $('#authorsautocomplete').val('');
-        var wrk = $('#worksautocomplete').val().slice(-4, -1);
-        $('#worksautocomplete').val('');
-        resetworksautocomplete();
-        if (authorid != '') {
-            $('#clearpick').show();
-            if (wrk == '') {
-                window.location = '/concordance?auth=' + authorid;
-             } else if (locus == '') {
-                window.location = '/concordance?auth=' + authorid + '&work=' + wrk;
-             } else {
-                window.location = '/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus;
-             }
-        }
-});
+function loadconcordanceintodisplayresults(concordancedata) {
+        var linesreturned = '';
+        linesreturned += 'Concordance to ' + concordancedata['authorname']
+        if (concordancedata['title'] != '') { linesreturned += ',&nbsp;<span class="foundwork">'+concordancedata['title']+'</span>'; }
+        if (concordancedata['worksegment'] == '') {
+            linesreturned += '<br /><br />';
+            } else {
+            linesreturned += '&nbsp;'+concordancedata['worksegment']+'<br /><br />';
+            }
+        if (concordancedata['title'] != '') { linesreturned += 'citation format:&nbsp;'+concordancedata['structure']+'<br /><br />'; }
+        linesreturned += concordancedata['wordsfound']+' words found<br />';
 
+        var dLen = concordancedata['keytoworks'].length;
+        if (dLen > 0) {
+            linesreturned += '<br />Key to works:<br />'
+            for (i = 0; i < dLen; i++) {
+                linesreturned += concordancedata['keytoworks'][i]+'<br />';
+            }
+        }
+
+        linesreturned += '<span class="small">('+concordancedata['elapsed']+'s)</span><br />';
+
+
+
+        document.getElementById('searchsummary').innerHTML = linesreturned;
+
+        var linesreturned = '';
+        var dLen = concordancedata['lines'].length;
+        for (i = 0; i < dLen; i++) {
+            linesreturned += concordancedata['lines'][i];
+            }
+        document.getElementById('displayresults').innerHTML = linesreturned;
+}
+
+
+//
+// TEXTMAKER
+//
 
 $('#textofthis').click( function() {
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
@@ -371,35 +391,39 @@ $('#textofthis').click( function() {
         if (authorid != '') {
             $('#clearpick').show();
             if (wrk == '') {
-                // just an author is not enough...
+                // just an author is not enough... but we will give a bad work number to trigger the exception handling that will give us the 1st work
+                $.getJSON('/text?auth=' + authorid + '&work=999', function (returnedtext) {
+                    loadtextintodisplayresults(returnedtext);
+                });
              } else if (locus == '') {
-                $.getJSON('/text?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
-                    loadtextintodisplayresults(selectiondata);
+                $.getJSON('/text?auth=' + authorid + '&work=' + wrk, function (returnedtext) {
+                    loadtextintodisplayresults(returnedtext);
                 });
              } else {
-                $.getJSON('/text?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (selectiondata) {
-                    loadtextintodisplayresults(selectiondata);
+                $.getJSON('/text?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (returnedtext) {
+                    loadtextintodisplayresults(returnedtext);
                 });
              }
         }
 });
 
-function loadtextintodisplayresults(selectiondata) {
-        var dLen = selectiondata['lines'].length;
+
+function loadtextintodisplayresults(returnedtext) {
         var linesreturned = '';
-        linesreturned += 'Text of ' + selectiondata['authorname']
-        linesreturned += ',&nbsp;<span class="foundwork">'+selectiondata['title']+'</span>';
-        if (selectiondata['worksegment'] == '') {
+        linesreturned += 'Text of ' + returnedtext['authorname']
+        linesreturned += ',&nbsp;<span class="foundwork">'+returnedtext['title']+'</span>';
+        if (returnedtext['worksegment'] == '') {
             linesreturned += '<br /><br />';
             } else {
-            linesreturned += '&nbsp;'+selectiondata['worksegment']+'<br /><br />';
+            linesreturned += '&nbsp;'+returnedtext['worksegment']+'<br /><br />';
             }
-        linesreturned += 'citation format:&nbsp;'+selectiondata['structure']+'<br />';
-
+        linesreturned += 'citation format:&nbsp;'+returnedtext['structure']+'<br />';
         document.getElementById('searchsummary').innerHTML = linesreturned;
+
         var linesreturned = '';
+        var dLen = returnedtext['lines'].length;
         for (i = 0; i < dLen; i++) {
-            linesreturned += selectiondata['lines'][i];
+            linesreturned += returnedtext['lines'][i];
             }
         document.getElementById('displayresults').innerHTML = linesreturned;
     }

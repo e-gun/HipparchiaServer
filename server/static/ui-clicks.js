@@ -15,11 +15,12 @@ function browsetopassage() {
             loc += lvls[i]+'|';
         } else {
             if (i == 5) {
-                loc += '1|';
+                loc += '-1|';
                 }
             }
         }
 
+    if (wrk.length != 3) { wrk == '999'}
     loc = auth+'w'+wrk+'_AT_'+loc.slice(0,(loc.length)-1);
     browseuponclick(loc);
 }
