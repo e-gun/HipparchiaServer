@@ -187,8 +187,6 @@ def concordance():
 	wo = req['workobject']
 	psg = req['passagelist']
 	
-	print('a/w',ao.universalid,wo.universalid)
-	
 	if ao.universalid != 'gr0000' and wo.universalid != 'gr0000w000':
 		# we have both an author and a work, maybe we also have a subset of the work
 		mode = 0
@@ -238,7 +236,7 @@ def concordance():
 	results['wordsfound'] = count
 	results['lines'] = output
 	results['keytoworks'] = allworks
-	print('ktw',results['keytoworks'])
+	
 	results = json.dumps(results)
 	
 	# page = render_template('concordance_maker.html', results=output, mode=mode, author=authorname, title=title, segment=worksegment, structure=structure, count=count, allworks=allworks, time=buildtime)
