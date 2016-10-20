@@ -325,6 +325,8 @@ $('#concordance').click( function() {
         var locus = locusdataloader();
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
         document.getElementById('searchsummary').innerHTML = 'Compiling the concordance. Patience can be a virtue.';
+        document.getElementById('displayresults').innerHTML = ''
+
         if (authorid != '') {
             $('#clearpick').show();
             if (wrk == '') {
