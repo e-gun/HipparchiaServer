@@ -732,7 +732,7 @@ def grabtextforbrowsing():
 		cleanedp = []
 		for level in p:
 			cleanedp.append(re.sub('[\W_|]+', '',level))
-			cleanedp = tuple(cleanedp[:5])
+		cleanedp = tuple(cleanedp[:5])
 		if len(cleanedp) == wo.availablelevels:
 			passage = finddblinefromlocus(wo.universalid, cleanedp, cur)
 		elif p[0] == '-1': # cleanedp will strip the '-'
