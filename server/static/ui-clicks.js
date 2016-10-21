@@ -112,13 +112,32 @@ $('#lexicalsearch').click( function() {
     if (dictterm.slice(-1) == ' ') { dictterm = dictterm.slice(0,-1) + '%20'; }
     var parseterm = $('#parser').val();
     var reverseterm = $('#reverselexicon').val();
-    $('#lexicon').val('[Working on it...]');
     var windowWidth = $(window).width();
     var windowHeight = $(window).height();
-    if ( dictterm.length > 0) { searchterm = dictterm; url = '/dictsearch?term='; var dialogtitle = restoreme;
-        } else if ( parseterm.length > 0 ) { searchterm = parseterm; url = '/observed?word='; var dialogtitle = searchterm;
-        } else if ( reverseterm.length > 0 ) { searchterm = reverseterm; url = '/reverselookup?word='; var dialogtitle = searchterm;
-        } else { searchterm = 'nihil'; url = '/dictsearch?term='; var dialogtitle = searchterm; }
+    if ( dictterm.length > 0) {
+        searchterm = dictterm;
+        url = '/dictsearch?term=';
+        var dialogtitle = restoreme;
+        var mydictfield = '#lexicon';
+    } else if ( parseterm.length > 0 ) {
+        searchterm = parseterm;
+        url = '/observed?word=';
+        var dialogtitle = searchterm;
+        var mydictfield = '#parser';
+        restoreme = searchterm;
+    } else if ( reverseterm.length > 0 ) {
+        searchterm = reverseterm;
+        url = '/reverselookup?word=';
+        var dialogtitle = searchterm;
+        var mydictfield = '#reverselexicon';
+        restoreme = searchterm;
+    } else {
+        searchterm = 'nihil';
+        url = '/dictsearch?term=';
+        var dialogtitle = searchterm;
+    }
+
+    $(mydictfield).val('[Working on it...]');
     $.getJSON(url + searchterm, function (definitionreturned) {
            $( '#dictdialog' ).dialog({
                 autoOpen: false,
@@ -138,7 +157,7 @@ $('#lexicalsearch').click( function() {
                 linesreturned.push(definitionreturned[i]['value']);
                 }
             $( '#dictdialog' ).html(linesreturned);
-            $('#lexicon').val(restoreme);
+            $(mydictfield).val(restoreme);
         });
 
     });
