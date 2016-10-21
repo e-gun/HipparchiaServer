@@ -11,10 +11,9 @@ from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, d
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formattedcittationincontext, aoformatauthinfo, formatauthorandworkinfo, \
 	woformatworkinfo
-from server.searching.searchfunctions import flagexclusions, searchdispatcher, aocompileauthorandworklist
+from server.searching.searchfunctions import flagexclusions, searchdispatcher, compileauthorandworklist
 from server.searching.betacodetounicode import replacegreekbetacode
-from server.textsandconcordnaces.concordancemaker import buildconcordancefromconcordance, buildconcordancefromwork, \
-	multipleworkwordlist, mpmultipleworkcordancedispatch
+from server.textsandconcordnaces.concordancemaker import buildconcordancefromwork
 from server.textsandconcordnaces.textandconcordancehelperfunctions import tcparserequest, tcfindstartandstop, conctohtmltable, \
 	concordancesorter
 from server.textsandconcordnaces.textbuilder import buildtext
@@ -80,7 +79,7 @@ def search():
 	if len(seeking) > 0:
 		starttime = time.time()
 				
-		authorandworklist = aocompileauthorandworklist(authordict, workdict)
+		authorandworklist = compileauthorandworklist(authordict, workdict)
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		authorandworklist = flagexclusions(authorandworklist)
 		authorandworklist = aosortauthorandworklists(authorandworklist, authordict)
@@ -189,27 +188,22 @@ def concordance():
 	
 	if ao.universalid != 'gr0000' and wo.universalid != 'gr0000w000':
 		# we have both an author and a work, maybe we also have a subset of the work
-		mode = 0
 		if psg == ['']:
 			# whole work
 			startline = wo.starts
 			endline = wo.ends
 		else:
+			# partial work
 			startandstop = tcfindstartandstop(ao, wo, psg, cur)
 			startline = startandstop['startline']
 			endline = startandstop['endline']
-				
-		# unsortedoutput = buildconcordancefromconcordance(wo.universalid, startline, endline, cur)
-		
+
 		cdict = {wo.universalid: (startline, endline)}
 		unsortedoutput = buildconcordancefromwork(cdict, cur)
 		allworks = []
 		
 	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
-		# we have only an author
-		# wordset = multipleworkwordlist(workstocompile, cur)
-		# unsortedoutput = mpmultipleworkcordancedispatch(wordset)
-		
+		# whole author
 		cdict = {}
 		for wkid in ao.listworkids():
 			cdict[wkid] = (workdict[wkid].starts, workdict[wkid].ends)
@@ -447,6 +441,8 @@ def aoofferauthorhints():
 		ad = prunedict(authordict, 'universalid', 'gr')
 	elif session['corpora'] == 'L':
 		ad = prunedict(authordict, 'universalid', 'lt')
+	else:
+		ad = authordict
 
 	authorlist = []
 	for a in ad:
@@ -635,7 +631,7 @@ def aogetauthinfo():
 @hipparchia.route('/getsearchlistcontents')
 def aogetsearchlistcontents():
 
-	authorandworklist = aocompileauthorandworklist(authordict, workdict)
+	authorandworklist = compileauthorandworklist(authordict, workdict)
 	authorandworklist = aosortauthorandworklists(authorandworklist, authordict)
 	
 	searchlistinfo = '<br /><h3>Proposing to search the following works:</h3>\n'

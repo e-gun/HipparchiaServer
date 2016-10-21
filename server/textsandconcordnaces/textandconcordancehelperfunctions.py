@@ -168,7 +168,8 @@ def cleanwords(word):
 	:param word:
 	:return:
 	"""
-	punct = re.compile('[%s]' % re.escape(punctuation + '’‘·“”—†(«»⸐„⸏⸎⸑–⏑–⏓⏔⌐∙'))
+	punct = re.compile('[%s]' % re.escape(punctuation + '\′‵’‘·“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'))
+	# hard to know whether or not to do the editorial insertions stuff: ⟫⟪⌈⌋⌊
 	# word = re.sub(r'\[.*?\]','', word) # '[o]missa' should be 'missa'
 	word = re.sub(r'[0-9]', '', word)
 	word = re.sub(punct, '', word)

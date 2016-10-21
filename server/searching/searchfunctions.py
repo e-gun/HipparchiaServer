@@ -14,7 +14,7 @@ from server.searching.searchformatting import aggregatelines, cleansearchterm, a
 	sortandunpackresults, lookoutsideoftheline
 
 
-def aocompileauthorandworklist(authordict, workdict):
+def compileauthorandworklist(authordict, workdict):
 	"""
 	master author dict + session selctions into a list of dbs to search
 	:param authors:
