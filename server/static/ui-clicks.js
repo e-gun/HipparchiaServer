@@ -107,14 +107,18 @@ $('#moretools').click( function() { $('#lexica').toggle(); });
 
 $('#lexicalsearch').click( function() {
     var dictterm = $('#lexicon').val();
+    var restoreme = dictterm;
+    // trailing space will be lost unless you do this: ' gladiator ' --> ' gladiator' and so you can't spearch for only that word...
+    if (dictterm.slice(-1) == ' ') { dictterm = dictterm.slice(0,-1) + '%20'; }
     var parseterm = $('#parser').val();
     var reverseterm = $('#reverselexicon').val();
+    $('#lexicon').val('[Working on it...]');
     var windowWidth = $(window).width();
     var windowHeight = $(window).height();
-    if ( dictterm.length > 0) { searchterm = dictterm; url = '/dictsearch?term=';
-        } else if ( parseterm.length > 0 ) { searchterm = parseterm; url = '/observed?word=';
-        } else if ( reverseterm.length > 0 ) { searchterm = reverseterm; url = '/reverselookup?word=';
-        } else { searchterm = 'nihil'; url = '/dictsearch?term='; }
+    if ( dictterm.length > 0) { searchterm = dictterm; url = '/dictsearch?term='; var dialogtitle = restoreme;
+        } else if ( parseterm.length > 0 ) { searchterm = parseterm; url = '/observed?word='; var dialogtitle = searchterm;
+        } else if ( reverseterm.length > 0 ) { searchterm = reverseterm; url = '/reverselookup?word='; var dialogtitle = searchterm;
+        } else { searchterm = 'nihil'; url = '/dictsearch?term='; var dialogtitle = searchterm; }
     $.getJSON(url + searchterm, function (definitionreturned) {
            $( '#dictdialog' ).dialog({
                 autoOpen: false,
@@ -122,7 +126,7 @@ $('#lexicalsearch').click( function() {
                 maxWidth: windowHeight*.9,
                 minWidth: windowHeight*.33,
                 position: { my: "left top", at: "left top", of: window },
-                title: searchterm,
+                title: dialogtitle,
                 draggable: true,
                 icons: { primary: 'ui-icon-close' },
                 click: function() { $( this ).dialog( 'close' ); }
@@ -134,7 +138,9 @@ $('#lexicalsearch').click( function() {
                 linesreturned.push(definitionreturned[i]['value']);
                 }
             $( '#dictdialog' ).html(linesreturned);
+            $('#lexicon').val(restoreme);
         });
+
     });
 
 

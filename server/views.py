@@ -887,8 +887,9 @@ def clearselections():
 @hipparchia.route('/dictsearch', methods=['GET'])
 def dictsearch():
 	"""
-	basic, functionsl place to look up greek dictionary entries
-	needs to be merged with the main project page, though
+	look up words
+	return dictionary entries
+	json packing
 	:return:
 	"""
 	
@@ -901,7 +902,7 @@ def dictsearch():
 	seeking = re.sub('v', 'u', seeking)
 	returnarray = []
 	
-	if re.search(r'[a-z]', seeking[0]) is not None:
+	if re.search(r'[a-z]', seeking) is not None:
 		dict = 'latin'
 		usecolumn = 'entry_name'
 	else:
@@ -910,32 +911,39 @@ def dictsearch():
 	
 	seeking = stripaccents(seeking)
 	query = 'SELECT entry_name FROM ' + dict + '_dictionary' + ' WHERE ' + usecolumn + ' ~* %s'
-	if seeking[0] == ' ' and seeking[-1] != ' ':
-		data = ('^' + seeking[1:] + '.*?',)
-	elif seeking[0] == ' ' and seeking[-1] == ' ':
+	if seeking[0] == ' ' and seeking[-1] == ' ':
 		data = ('^' + seeking[1:-1] + '$',)
+	elif seeking[0] == ' ' and seeking[-1] != ' ':
+		data = ('^' + seeking[1:] + '.*?',)
 	else:
 		data = ('.*?' + seeking + '.*?',)
-		cur.execute(query, data)
-	
+	print('q/d',query, data, 's-1',seeking[-1])
+	cur.execute(query, data)
+			
 	# note that the dictionary db has a problem with vowel lengths vs accents
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
-	found = cur.fetchall()
+	try:
+		found = cur.fetchall()
+	except:
+		found = []
 	
 	# the results should be given the polytonicsort() treatment
-	sortedfinds = []
-	finddict = {}
-	for f in found:
-		finddict[f[0]] = f
-	keys = finddict.keys()
-	keys = polytonicsort(keys)
-	
-	for k in keys:
-		sortedfinds.append(finddict[k])
-	
-	for entry in sortedfinds:
-		returnarray.append(
-			{'value': browserdictionarylookup(entry[0], dict, cur) + '<hr style="border: 1px solid;" />'})
+	if len(found) > 0:
+		sortedfinds = []
+		finddict = {}
+		for f in found:
+			finddict[f[0]] = f
+		keys = finddict.keys()
+		keys = polytonicsort(keys)
+		
+		for k in keys:
+			sortedfinds.append(finddict[k])
+		
+		for entry in sortedfinds:
+			returnarray.append(
+				{'value': browserdictionarylookup(entry[0], dict, cur) + '<hr style="border: 1px solid;" />'})
+	else:
+		returnarray.append({'value':'[nothing found]'})
 	
 	returnarray = json.dumps(returnarray)
 	
