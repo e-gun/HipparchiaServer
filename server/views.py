@@ -13,8 +13,8 @@ from server.searching.searchformatting import formattedcittationincontext, aofor
 	woformatworkinfo
 from server.searching.searchfunctions import flagexclusions, searchdispatcher, aocompileauthorandworklist
 from server.searching.betacodetounicode import replacegreekbetacode
-from server.textsandconcordnaces.concordancemaker import buildconcordance, multipleworkwordlist, mpmultipleworkcordancedispatch, \
-	concordancesorter
+from server.textsandconcordnaces.concordancemaker import buildconcordancefromconcordance, buildconcordancefromwork, \
+	multipleworkwordlist, mpmultipleworkcordancedispatch
 from server.textsandconcordnaces.textandconcordancehelperfunctions import tcparserequest, tcfindstartandstop, conctohtmltable, \
 	concordancesorter
 from server.textsandconcordnaces.textbuilder import buildtext
@@ -201,7 +201,8 @@ def concordance():
 		
 		allworks = []
 		
-		unsortedoutput = buildconcordance(wo.universalid, startline, endline, cur)
+		# unsortedoutput = buildconcordancefromconcordance(wo.universalid, startline, endline, cur)
+		unsortedoutput = buildconcordancefromwork(wo.universalid, startline, endline, cur)
 		
 	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
 		# we have only an author
@@ -221,8 +222,8 @@ def concordance():
 	
 	# get ready to send stuff to the page
 	output = concordancesorter(unsortedoutput)
-	output = conctohtmltable(output)
 	count = len(output)
+	output = conctohtmltable(output)
 	
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)
@@ -238,9 +239,7 @@ def concordance():
 	results['keytoworks'] = allworks
 	
 	results = json.dumps(results)
-	
-	# page = render_template('concordance_maker.html', results=output, mode=mode, author=authorname, title=title, segment=worksegment, structure=structure, count=count, allworks=allworks, time=buildtime)
-	
+		
 	cur.close()
 	del dbc
 	
@@ -293,8 +292,6 @@ def textmaker():
 	results['lines'] = output
 	
 	results = json.dumps(results)
-
-	# page = render_template('workdumper.html', results=output, author=authorname, title=title, structure=structure, segment=worksegment)
 	
 	cur.close()
 	del dbc

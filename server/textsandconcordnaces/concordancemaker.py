@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from multiprocessing import Process, Manager
 
-from server import formatting_helper_functions
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection, grabonelinefromwork, dblineintolineobject
+from server.dbsupport.dbfunctions import setconnection, grabonelinefromwork, dblineintolineobject, makeablankline
 from server.hipparchiaclasses import MPCounter
 from server.searching.searchfunctions import concordancelookup
-from server.textsandconcordnaces.textandconcordancehelperfunctions import concordancesorter
+from server.textsandconcordnaces.textandconcordancehelperfunctions import concordancesorter, findwordsinaline
 
 
 def multipleworkwordlist(listofworks, cursor):
@@ -36,57 +35,29 @@ def multipleworkwordlist(listofworks, cursor):
 	return wordset
 	
 	
-def buildconcordance(work, startline, endline, cursor):
+def buildconcordancefromconcordance(work, startline, endline, cursor):
 	"""
 	build a concordance; mp aware, but the bottleneck is the db itself: you can go 2x faster here but 3-4x faster in a search
-	modes:
-		0 - of this work
-		1 - of words unique to this work in this author
-		2 - of this author
 	at the moment supplenda like '⟪marcent⟫' will wind up at the end under '⟪⟫': is this a good or a bad thing?
+	and yet buildconcordancefromwork() is way faster than this version: it seems DB calls are very costly indeed
 	:param work:
 	:param mode:
 	:param cursor:
 	:return:
 	"""
 	
-
 	concdb = work+'_conc'
 	
 	query = 'SELECT word, loci FROM ' + concdb
 	cursor.execute(query)
 	results = cursor.fetchall()
 	concordancewords = results
-		
-	output = []
+	
+	unsortedoutput = []
 	if len(concordancewords) > 0:
 		unsortedoutput = mpsingleworkconcordancedispatch(work, concordancewords, startline, endline)
-		output = concordancesorter(unsortedoutput)
 	
-	return output
-
-
-def mpsingleworkconcordancedispatch(work, concordancewords, startline, endline):
-	"""
-	a multiprocessor aware version of the concordance lookup routine
-	:param work: a work looks like 'gr0032w001_conc'
-	:param concordancewords: for a mere work it is word + locations; looks like ('ὥρμων', '5701 6830')
-	:return:
-	"""
-	
-	manager = Manager()
-	output = manager.list()
-	startandstop = manager.list([startline, endline])
-	memory = manager.dict()
-	concordancewords = manager.list(concordancewords)
-	commitcount = MPCounter()
-	
-	workers = hipparchia.config['WORKERS']
-	jobs = [Process(target=mpconcordanceworker, args=(work, concordancewords, output, memory, commitcount, startandstop)) for i in range(workers)]
-	for j in jobs: j.start()
-	for j in jobs: j.join()
-	
-	return output
+	return unsortedoutput
 
 
 def mpconcordanceworker(work, concordancewords, output, memory, commitcount, startandstop):
@@ -198,4 +169,190 @@ def mpmultipleworkconcordanceworker(wordset, unsortedwords, output, memory, comm
 	del dbconnection
 	
 	return output
+
+
+# plan b: don't use the concordances
+
+
+def buildconcordancefromwork(work, startline, endline, cursor):
+	"""
+	speed notes
+		buildconcordancefromconcordance() seemed ineffecient for small chunks: it was; but it is also a lot slower for whole works...
+		single threaded buildconcordancefromwork() is 3-4x faster than mp buildconcordancefromconcordance()
+		a mp version of buildconcordancefromwork() is 50% *slower* than mp buildconcordancefromconcordance()
+	top speed seems to be a single thread diving into a work and building the concordance line by line
+	
+	the ultimate output needs to look like
+		(word, count, citations)
+	:param work:
+	:param startline:
+	:param endline:
+	:param cursor:
+	:return:
+	"""
+	
+	
+	query = 'SELECT * FROM ' + work + ' WHERE (index >= %s AND index <= %s)'
+	data = (startline, endline)
+	cursor.execute(query, data)
+	lines = cursor.fetchall()
+	
+	lineobjects = []
+	for l in lines:
+		lineobjects.append(dblineintolineobject(work, l))
+	
+	#concordancedict = mpsingleworkfromworkconcordancedispatch(work, lineobjects)
+	concordancedict = spconcorfromworkdanceworker(work, lineobjects)
+	
+	unsortedoutput = []
+
+	for c in concordancedict.keys():
+		hits = concordancedict[c]
+		hits = sorted(hits)
+		hits = [h[1] for h in hits]
+		count = str(len(hits))
+		loci = ', '.join(hits)
+		unsortedoutput.append((c, count, loci))
+	
+	output = concordancesorter(unsortedoutput)
+	
+	return output
+
+
+def spconcorfromworkdanceworker(work, lines):
+	"""
+	generate the condordance dictionary:
+		{ wordA: [(index1, locus1), (index2, locus2),..., wordB: ...]}
+
+	:return:
+	"""
+	
+	concordance = {}
+	previous = makeablankline(work, lines[0].index - 1)
+	
+	while len(lines) > 0:
+		try:
+			line = lines.pop()
+		except:
+			line = makeablankline(work, -1)
+		
+		if line.index != -1:
+			# find all of the words in the line
+			words = findwordsinaline(line.contents)
+			# deal with the hyphens issue
+			if previous.hyphenated['accented'] != '':
+				words = words[1:]
+			if line.hyphenated['accented'] != '':
+				words = words[:-1] + [line.hyphenated['accented']]
+			words = list(set(words))
+			words[:] = [x.lower() for x in words]
+			for w in words:
+				try:
+					# to forestall the problem of sorting the citation values later, include the index now
+					# sp variant:
+					concordance[w].append((line.index, line.locus()))
+					# concordance[w].append() seems to have race condition problems in mp land: you will end up with 1 copy of each word
+					# mp variant:
+					# concordance[w] = concordance[w] + [(line.index, line.locus())]
+				except:
+					concordance[w] = [(line.index, line.locus())]
+		previous = line
+	
+	return concordance
+
+
+
+# slated for removal
+
+def mpsingleworkconcordancedispatch(work, concordancewords, startline, endline):
+	"""
+	a multiprocessor aware version of the concordance lookup routine
+	:param work: a work looks like 'gr0032w001_conc'
+	:param concordancewords: for a mere work it is word + locations; looks like ('ὥρμων', '5701 6830')
+	:return:
+	"""
+	
+	manager = Manager()
+	output = manager.list()
+	startandstop = manager.list([startline, endline])
+	memory = manager.dict()
+	concordancewords = manager.list(concordancewords)
+	commitcount = MPCounter()
+	
+	workers = hipparchia.config['WORKERS']
+	jobs = [
+		Process(target=mpconcordanceworker, args=(work, concordancewords, output, memory, commitcount, startandstop))
+		for i in range(workers)]
+	for j in jobs: j.start()
+	for j in jobs: j.join()
+	
+	return output
+
+
+def mpsingleworkfromworkconcordancedispatch(work, lineobjects):
+	"""
+	buildconcordancefromwork() will send a collection of lines: dispatch them
+	the ultimate output needs to look like
+		(word, count, citations)
+	the intermediate output that this will generate is:
+		concordance = { wordA: [(index1, locus1), (index2, locus2),..., wordB: ...]}
+	:param collectionoflines:
+	:return:
+	"""
+	
+	manager = Manager()
+	concordance = manager.dict()
+	lines = manager.list(lineobjects)
+	
+	previousfinder = {}
+	previousfinder[lineobjects[0].index - 1] = makeablankline(work, lineobjects[0].index - 1)
+	for l in lineobjects:
+		previousfinder[l.index] = l
+	previouslines = manager.dict(previousfinder)
+	
+	workers = hipparchia.config['WORKERS']
+	jobs = [
+		Process(target=mpconcorfromworkdanceworker, args=(work, lines, previouslines, concordance))
+		for i in range(workers)]
+	for j in jobs: j.start()
+	for j in jobs: j.join()
+	
+	return concordance
+
+
+def mpconcorfromworkdanceworker(work, lines, previouslines, concordance):
+	"""
+	generate the condordance dictionary:
+		{ wordA: [(index1, locus1), (index2, locus2),..., wordB: ...]}
+
+	:return:
+	"""
+	
+	while len(lines) > 0:
+		try:
+			line = lines.pop()
+		except:
+			line = makeablankline(work, -1)
+		
+		if line.index != -1:
+			# find all of the words in the line
+			words = findwordsinaline(line.contents)
+			# deal with the hyphens issue
+			previous = previouslines[line.index - 1]
+			if previous.hyphenated['accented'] != '':
+				words = words[1:]
+			if line.hyphenated['accented'] != '':
+				words = words[:-1] + [line.hyphenated['accented']]
+			words = list(set(words))
+			words[:] = [x.lower() for x in words]
+			
+			for w in words:
+				try:
+					# to forestall the problem of sorting the citation values later, include the index now
+					# concordance[w].append() seems to have race condition problems in mp land: you will end up with 1 copy of each word
+					concordance[w] = concordance[w] + [(line.index, line.locus())]
+				except:
+					concordance[w] = [(line.index, line.locus())]
+	
+	return concordance
 

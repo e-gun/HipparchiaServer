@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+from string import punctuation
 
 from server.dbsupport.dbfunctions import grabonelinefromwork, dblineintolineobject, makeanemptyauthor, makeanemptywork
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
@@ -148,3 +149,35 @@ def concordancesorter(unsortedoutput):
 		sortedoutput.append(outputdict[k])
 	
 	return sortedoutput
+
+
+def findwordsinaline(line):
+	theline = re.sub(r'&nbsp;', '', line)
+	theline = re.sub(r'(\<.*?\>)', r'', theline)
+
+	wordlist = theline.split(' ')
+	wordlist = [w for w in wordlist if w]
+	wordlist = [cleanwords(w) for w in wordlist]
+	
+	return wordlist
+
+
+def cleanwords(word):
+	"""
+	remove gunk that should not be in a concordance
+	:param word:
+	:return:
+	"""
+	punct = re.compile('[%s]' % re.escape(punctuation + '’‘·“”—†(«»⸐„'))
+	# word = re.sub(r'\[.*?\]','', word) # '[o]missa' should be 'missa'
+	word = re.sub(r'[0-9]', '', word)
+	word = re.sub(punct, '', word)
+	# best do punct before this next one...
+	try:
+		if re.search(r'[a-zA-z]', word[0]) is None:
+			word = re.sub(r'[a-zA-z]', '', word)
+	except:
+		# must have been ''
+		pass
+	
+	return word
