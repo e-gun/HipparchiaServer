@@ -198,18 +198,23 @@ def concordance():
 			startandstop = tcfindstartandstop(ao, wo, psg, cur)
 			startline = startandstop['startline']
 			endline = startandstop['endline']
-		
-		allworks = []
-		
+				
 		# unsortedoutput = buildconcordancefromconcordance(wo.universalid, startline, endline, cur)
-		unsortedoutput = buildconcordancefromwork(wo.universalid, startline, endline, cur)
+		
+		cdict = {wo.universalid: (startline, endline)}
+		unsortedoutput = buildconcordancefromwork(cdict, cur)
+		allworks = []
 		
 	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
 		# we have only an author
-		workstocompile = ao.listworkids()
-		wordset = multipleworkwordlist(workstocompile, cur)
-		unsortedoutput = mpmultipleworkcordancedispatch(wordset)
+		# wordset = multipleworkwordlist(workstocompile, cur)
+		# unsortedoutput = mpmultipleworkcordancedispatch(wordset)
 		
+		cdict = {}
+		for wkid in ao.listworkids():
+			cdict[wkid] = (workdict[wkid].starts, workdict[wkid].ends)
+		unsortedoutput = buildconcordancefromwork(cdict, cur)
+			
 		allworks = []
 		for w in ao.listofworks:
 			allworks.append(w.universalid[6:10] + ' ==> ' + w.title)
