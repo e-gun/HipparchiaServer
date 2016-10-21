@@ -917,7 +917,7 @@ def dictsearch():
 		data = ('^' + seeking[1:] + '.*?',)
 	else:
 		data = ('.*?' + seeking + '.*?',)
-	print('q/d',query, data, 's-1',seeking[-1])
+
 	cur.execute(query, data)
 			
 	# note that the dictionary db has a problem with vowel lengths vs accents
