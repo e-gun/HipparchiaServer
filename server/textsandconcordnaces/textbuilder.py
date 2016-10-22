@@ -26,7 +26,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 		for line in results:
 			linecount += 1
 			thisline = dblineintolineobject(work,line)
-			columnb = thisline.contents
+			columnb = thisline.accented
 			if thisline.samelevelas(previousline) is not True:
 				linecount = linesevery + 1
 				columna = thisline.shortlocus()

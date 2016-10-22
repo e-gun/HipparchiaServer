@@ -123,14 +123,14 @@ class dbWorkLine(object):
 		self.l2 = level_02_value
 		self.l1 = level_01_value
 		self.l0 = level_00_value
-		self.contents = re.sub(r'\s$', '', marked_up_line)
-		self.strippedcontents = re.sub(r'\s$', '', stripped_line)
+		self.accented = re.sub(r'\s$', '', marked_up_line)
+		self.stripped = re.sub(r'\s$', '', stripped_line)
 		self.annotations = annotations
 		self.universalid = wkuinversalid+'_LN_'+str(index)
 
-		if self.contents is None:
-			self.contents = ''
-			self.strippedcontents = ''
+		if self.accented is None:
+			self.accented = ''
+			self.stripped = ''
 		
 		hyph = hyphenated_words.split(' ')
 		if len(hyph) != 2:
@@ -235,14 +235,39 @@ class dbWorkLine(object):
 		unformatted = re.sub(r'(\<.*?\>)',r'',self.contents)
 		
 		return unformatted
+	
+	def wordcount(self):
+		"""
+		return a wordcount
+		"""
+		
+		line = self.strippedcontents
+		words = line.split(' ')
+		
+		return len(words)
 
+
+	def wordlist(self, version):
+		"""
+		return a list of words in the line; will include the full version of a hyphenated last word
+		:param version:
+		:return:
+		"""
+		if version in ['accented', 'stripped']:
+			line = getattr(self, version)
+			if version == 'accented':
+				line = re.sub(r'(\<.*?\>)', r'', line)
+			wordlist = line.split(' ')
+		
+		return wordlist
+		
 
 	def allbutlastword(self, version):
 		"""
 		return the line less its final word
 		"""
 		allbutlastword = ''
-		if version in ['contents', 'strippedcontents']:
+		if version in ['accented', 'stripped']:
 			line = getattr(self, version)
 			line = line.split(' ')
 			allbutlast= line[:-1]
@@ -255,9 +280,9 @@ class dbWorkLine(object):
 		return the line less its first word
 		"""
 		allbutfirstword = ''
-		if version in ['contents', 'strippedcontents']:
+		if version in ['accented', 'stripped']:
 			line = getattr(self, version)
-			if version == 'contents':
+			if version == 'accented':
 				line = re.sub(r'(\<.*?\>)', r'', line)
 			line = line.split(' ')
 			allbutfirst = line[1:]
@@ -273,9 +298,9 @@ class dbWorkLine(object):
 		:return:
 		"""
 		allbutfirstandlastword = ''
-		if version in ['contents', 'strippedcontents']:
+		if version in ['accented', 'stripped']:
 			line = getattr(self, version)
-			if version == 'contents':
+			if version == 'accented':
 				line = re.sub(r'(\<.*?\>)', r'', line)
 			line = line.split(' ')
 			middle = line[1:-1]

@@ -109,7 +109,7 @@ def lineobjectresultformatter(lineobject, searchterm, proximate, searchtype, hig
 		
 	if proximate != '' and searchtype == 'proximity':
 		# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-		if re.search(cleansearchterm(proximate),lineobject.contents) is not None or re.search(cleansearchterm(proximate),lineobject.strippedcontents) is not None:
+		if re.search(cleansearchterm(proximate),lineobject.contents) is not None or re.search(cleansearchterm(proximate),lineobject.stripped) is not None:
 			lineobject.contents = highlightsearchterm(lineobject, proximate, 'proximate')
 	
 	formatteddict['line'] = lineobject.contents
@@ -167,7 +167,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 			contents = line.unformattedline()
 			hyphenated = line.hyphenated['accented']
 		else:
-			contents = line.strippedcontents
+			contents = line.stripped
 			hyphenated = line.hyphenated['stripped']
 		
 		wordsinline = contents.split(' ')
@@ -221,14 +221,14 @@ def aggregatelines(firstline, lastline, cursor, workdbname):
 		c = 'contents'
 	else:
 		h = 'stripped'
-		c = 'strippedcontents'
+		c = 'stripped'
 		
 	for line in lineobjects:
 		if previous.hyphenated[h] == '' and line.hyphenated[h] == '':
 			if session['accentsmatter'] == 'Y':
 				wds = line.unformattedline() + ' '
 			else:
-				wds = line.strippedcontents
+				wds = line.stripped
 		elif previous.hyphenated[h] != '' and line.hyphenated[h] == '':
 			wds = line.allbutfirstword(c) + ' '
 		elif previous.hyphenated[h] == '' and line.hyphenated[h] != '':

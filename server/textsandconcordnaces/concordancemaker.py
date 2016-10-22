@@ -114,7 +114,7 @@ def linesintoconcordance(lineobjects):
 		
 		if line.index != -1:
 			# find all of the words in the line
-			words = findwordsinaline(line.contents)
+			words = findwordsinaline(line.accented)
 			# deal with the hyphens issue
 			if previous.hyphenated['accented'] != '':
 				words = words[1:]
