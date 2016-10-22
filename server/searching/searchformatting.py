@@ -209,39 +209,43 @@ def aggregatelines(firstline, lastline, cursor, workdbname):
 
 	aggregate = ''
 
-	if session['accentsmatter'] == 'Y':
-		# setting self up for big problems because you have both accents and markup in here
-		# will need to pass things through a stripper before searching
-		column = 'marked_up_line'
-	else:
-		column = 'stripped_line'
-
-	query = 'SELECT '+column+' FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
+	query = 'SELECT * FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
 	data = (firstline, lastline)
 	cursor.execute(query, data)
 	lines = cursor.fetchall()
 
-	text = []
-	if session['accentsmatter'] == 'Y':
-		for line in lines:
-			# note that we just killed a bunch of supplenda
-			text.append(re.sub(r'<.*?>','',line[0]))
-	else:
-		for line in lines:
-			cleaned = re.sub(r'[^\w\s]','', line[0])
-			cleaned = re.sub(r'\d', '', cleaned)
-			text.append(cleaned)
+	previous = makeablankline(workdbname, firstline-1)
+	lineobjects = []
+	for dbline in lines:
+		lineobjects.append(dblineintolineobject(workdbname, dbline))
 
-	for t in text:
-		# dies on empty lines (even though we are not supposed to have those...
-		try:
-			if t[-1] == '-':
-				aggregate += t[:-1]
+	if session['accentsmatter'] == 'Y':
+		for line in lineobjects:
+			if previous.hyphenated['accented'] == '' and line.hyphenated['accented'] == '':
+				wds = line.unformattedline() + ' '
+			elif previous.hyphenated['accented'] != '' and line.hyphenated['accented'] == '':
+				wds = line.allbutfirstword('contents') + ' '
+			elif previous.hyphenated['accented'] == '' and line.hyphenated['accented'] != '':
+				wds = line.allbutlastword('contents') + ' ' + line.hyphenated['accented']
 			else:
-				aggregate += t
-		except:
-			pass
+				wds = line.allbutfirstandlastword('contents') + ' ' + line.hyphenated['accented']
+			aggregate += wds
+			previous = line
+	else:
+		for line in lineobjects:
+			if previous.hyphenated['stripped'] == '' and line.hyphenated['stripped'] == '':
+				wds = line.strippedcontents + ' '
+			elif previous.hyphenated['stripped'] != '' and line.hyphenated['stripped'] == '':
+				wds = line.allbutfirstword('strippedcontents') + ' '
+			elif previous.hyphenated['stripped'] == '' and line.hyphenated['stripped'] != '':
+				wds = line.allbutlastword('strippedcontents') + ' ' + line.hyphenated['stripped']
+			else:
+				wds = line.allbutfirstandlastword('contents') + ' ' + line.hyphenated['stripped']
+			aggregate += wds
+			previous = line
 		
+	aggregate = re.sub(r'\s\s', r' ', aggregate)
+	
 	return aggregate
 
 

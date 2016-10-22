@@ -237,18 +237,51 @@ class dbWorkLine(object):
 		return unformatted
 
 
-	def lastword(self, version):
+	def allbutlastword(self, version):
 		"""
-		return the last word of the line:
-			lineobject.lastword('contents')
+		return the line less its final word
 		"""
-		lastword = ''
+		allbutlastword = ''
 		if version in ['contents', 'strippedcontents']:
 			line = getattr(self, version)
 			line = line.split(' ')
-			lastword = line[-1]
+			allbutlast= line[:-1]
+			allbutlastword = ' '.join(allbutlast)
 		
-		return lastword
+		return allbutlastword
+	
+	def allbutfirstword(self, version):
+		"""
+		return the line less its first word
+		"""
+		allbutfirstword = ''
+		if version in ['contents', 'strippedcontents']:
+			line = getattr(self, version)
+			if version == 'contents':
+				line = re.sub(r'(\<.*?\>)', r'', line)
+			line = line.split(' ')
+			allbutfirst = line[1:]
+			allbutfirstword = ' '.join(allbutfirst)
+		
+		return allbutfirstword
+	
+	
+	def allbutfirstandlastword(self, version):
+		"""
+		terun the line lest the first and last words (presumably both are hypenated)
+		:param version:
+		:return:
+		"""
+		allbutfirstandlastword = ''
+		if version in ['contents', 'strippedcontents']:
+			line = getattr(self, version)
+			if version == 'contents':
+				line = re.sub(r'(\<.*?\>)', r'', line)
+			line = line.split(' ')
+			middle = line[1:-1]
+			allbutfirstword = ' '.join(middle)
+
+		return allbutfirstandlastword
 
 
 class MPCounter(object):
