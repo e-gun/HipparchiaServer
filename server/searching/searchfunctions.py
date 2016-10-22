@@ -7,7 +7,7 @@ import psycopg2
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection, dbauthorandworkmaker
+from server.dbsupport.dbfunctions import setconnection, grabonelinefromwork, dblineintolineobject
 from server.formatting_helper_functions import tidyuplist, dropdupes, prunedict, foundindict
 from server.hipparchiaclasses import MPCounter
 from server.searching.searchformatting import aggregatelines, cleansearchterm, aoprunebydate, aoremovespuria, \
@@ -557,8 +557,8 @@ def phrasesearch(searchphrase, cursor, wkid, authors):
 			longestterm = term
 
 	if 'x' not in wkid:
-		hits = partialwordsearch(longestterm, cursor, wkid, authors)
-		# hits = concsearch(longestterm, cursor, wkid)
+		# hits = partialwordsearch(longestterm, cursor, wkid, authors)
+		hits = concsearch(longestterm, cursor, wkid)
 	else:
 		wkid = re.sub('x', 'w', wkid)
 		hits = simplesearchworkwithexclusion(longestterm, cursor, wkid)
@@ -677,19 +677,4 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 	return fullmatches
 
 
-def concordancelookup(worktosearch, indexlocation, cursor):
-	"""
-	take an index value and convert it into a citation: 12345 into '3.1.111'
-	"""
-	query = 'SELECT level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value FROM ' + worktosearch + ' WHERE index = %s'
-	data = (indexlocation,)
-	cursor.execute(query, data)
-	line = cursor.fetchone()
-	citation = ''
-	for i in range(0, len(line)):
-		if line[i] != '-1':
-			citation += line[i] + '.'
-	citation = citation[:-1]
-	
-	return citation
 

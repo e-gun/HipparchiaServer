@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
-from multiprocessing import Process, Manager
 
-from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection, grabonelinefromwork, dblineintolineobject, makeablankline
-from server.hipparchiaclasses import MPCounter
-from server.searching.searchfunctions import concordancelookup
+from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
 from server.textsandconcordnaces.textandconcordancehelperfunctions import concordancesorter, findwordsinaline
 
 
@@ -59,7 +55,6 @@ def buildconcordancefromwork(cdict, cursor):
 	
 	lineobjects = compilewordlists(cdict, cursor)
 	
-	#concordancedict = mpsingleworkfromworkconcordancedispatch(work, lineobjects)
 	concordancedict = linesintoconcordance(lineobjects)
 	# now you are looking at: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
 	

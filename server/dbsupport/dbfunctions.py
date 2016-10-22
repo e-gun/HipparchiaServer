@@ -195,35 +195,6 @@ def grabonelinefromwork(workdbname, lineindex, cursor):
 	
 	return foundline
 
-def indexintocitationtuple(workdbname, indexvalue, cursor):
-	"""
-	tell me a line number inthe db and i will get you the citation associated with it
-	:param workuid:
-	:param indexvalue:
-	:return:
-	"""
-
-	query = 'SELECT level_00_value, level_01_value, level_02_value, level_03_value, level_04_value, level_05_value FROM ' + workdbname + ' WHERE index = %s'
-	data = (indexvalue,)
-	cursor.execute(query, data)
-	cit = cursor.fetchone()
-	
-	try:
-		citationtuple = list(cit)
-	except:
-		# oops, we did not get a line
-		# you likely ended up here because the lexcial lookup of a clickable xref failed to read things properly
-		print('did not find a valid index number for',workdbname,'. aborting and picking first line instead')
-		query = 'SELECT min(index) FROM  ' + workdbname
-		cursor.execute(query)
-		cit = cursor.fetchone()
-		citationtuple = list(cit)
-		
-	citationtuple = [x for x in citationtuple if (x != '-1') and (x != None)]
-	citationtuple = tuple(citationtuple)
-	
-	return citationtuple
-
 
 def setconnection(autocommit='n'):
 	dbconnection = psycopg2.connect(user=hipparchia.config['DBUSER'], host=hipparchia.config['DBHOST'],
