@@ -11,7 +11,7 @@ from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, d
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formattedcittationincontext, aoformatauthinfo, formatauthorandworkinfo, \
 	woformatworkinfo
-from server.searching.searchfunctions import flagexclusions, searchdispatcher, compileauthorandworklist, shortphrasesearch
+from server.searching.searchfunctions import flagexclusions, searchdispatcher, compileauthorandworklist, dispatchshortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordancefromwork
 from server.textsandconcordnaces.textandconcordancehelperfunctions import tcparserequest, tcfindstartandstop, conctohtmltable, \
@@ -107,7 +107,15 @@ def search():
 				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict)
 			else:
 				# you are looking for a set of little words: και δη και, etc.
-				hits = shortphrasesearch(seeking, cursor, indexedworklist)
+				#   16s to find και δη και via a std phrase search; 1.6s to do it this way
+				# not immediately obvious what the best number for minimum max term len is:
+				# consider what happens if you send a '4' this way:
+				#   εἶναι τὸ κατὰ τὴν (Searched between 850 B.C.E. and 200 B.C.E.)
+				# this takes 13.7s with a std phrase search; it takes 14.6s if sent to shortphrasesearch()
+				#   οἷον κἀν τοῖϲ (Searched between 850 B.C.E. and 200 B.C.E.)
+				#   5.57 std; 17.54s 'short'
+				# so '3' looks like the right answer
+				hits = dispatchshortphrasesearch(seeking, indexedworklist)
 		else:
 			searchtype = 'proximity'
 			if session['searchscope'] == 'W':
@@ -376,7 +384,6 @@ def selectionmade():
 	else:
 		suffix = 'exclusions'
 		other = 'selections'
-	
 					
 	if (uid != '') and (workid != '') and (locus != ''):
 		# a specific passage
@@ -744,12 +751,12 @@ def grabtextforbrowsing():
 		if 'gr0006' in workdb:
 			remapper = dbquickfixes([workdb])
 			workdb = remapper[workdb]
-			workid = workdb[7:]
 		citation = passage[4:].split(':')
 		citation.reverse()
 		passage = finddblinefromincompletelocus(workdb, citation, cur)
 
 	# first line is info; remaining lines are html
+
 	try:
 		browserdata = getandformatbrowsercontext(ao, wo, int(passage), ctx, numbersevery, cur)
 	except:

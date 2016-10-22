@@ -93,7 +93,7 @@ def insertparserids(lineobject):
 	# set up the clickable thing for the browser
 	# this is tricky because there is html in here and you don't want to tag it
 	
-	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',lineobject.contents)
+	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',lineobject.accented)
 	hyphenated = lineobject.hyphenated['accented']
 	segments = theline.split('*snip*')
 	newline = ''

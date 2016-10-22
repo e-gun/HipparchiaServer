@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from multiprocessing import Process, Manager
+from multiprocessing import Process, Manager, Pool
 
 import psycopg2
 from flask import session
@@ -542,7 +542,7 @@ def simplesearchworkwithexclusion(seeking, cursor, workdbname):
 	return found
 
 
-def shortphrasesearch(searchphrase, cursor, indexedworklist):
+def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist):
 	"""
 	brute force a search for something horrid like και δη και
 	a set of short words should send you here, otherwise you will look up all the words that look like και and then...
@@ -551,78 +551,122 @@ def shortphrasesearch(searchphrase, cursor, indexedworklist):
 	:param wkid:
 	:return:
 	"""
-	matchobjects = []
-	for w in indexedworklist:
-		wkid = w[1]
-		query = 'SELECT * FROM ' + wkid
-		cursor.execute(query)
-		fulltext = cursor.fetchall()
-		
-		previous = makeablankline(wkid, -1)
-		lineobjects = []
-		for dbline in fulltext:
-			lineobjects.append(dblineintolineobject(wkid, dbline))
-		lineobjects.append(makeablankline(wkid, -9999))
-		del fulltext
-		
-		if session['accentsmatter'] == 'N':
-			acc = 'stripped'
-		else:
-			acc = 'accented'
-		
-		searchphrase = cleansearchterm(searchphrase)
-		searchterms = searchphrase.split(' ')
-		searchterms = [x for x in searchterms if x]
-		contextneeded = len(searchterms)-1
-		
-		
-		for i in range(0,len(lineobjects)-1):
-			if previous.hashyphenated == True and lineobjects[i].hashyphenated == True:
-				core = lineobjects[i].allbutfirstandlastword(acc)
-				try:
-					supplement = lineobjects[i+1].wordlist(acc)[1:contextneeded+1]
-				except:
-					supplement = lineobjects[i+1].wordlist(acc)
-			elif previous.hashyphenated == False and lineobjects[i].hashyphenated == True:
-				core = lineobjects[i].allbutlastword(acc)
-				try:
-					supplement = lineobjects[i+1].wordlist(acc)[0:contextneeded]
-				except:
-					supplement = lineobjects[i+1].wordlist(acc)
-			elif previous.hashyphenated == True and lineobjects[i].hashyphenated == False:
-				core = lineobjects[i].allbutfirstword(acc)
-				try:
-					supplement = lineobjects[i+1].wordlist(acc)[0:contextneeded]
-				except:
-					supplement = lineobjects[i+1].wordlist(acc)
-			else:
-				# previous.hashyphenated == False and lineobjects[i].hashyphenated == False
-				if session['accentsmatter'] == 'N':
-					core = lineobjects[i].stripped
-				else:
-					core = lineobjects[i].unformattedline
-				try:
-					supplement = lineobjects[i+1].wordlist(acc)[0:contextneeded]
-				except:
-					supplement = lineobjects[i+1].wordlist(acc)
+	
+	count = MPCounter()
+	manager = Manager()
+	hits = manager.dict()
+	workstosearch = manager.list(indexedauthorandworklist)
+	# if you don't autocommit you will see: "Error: current transaction is aborted, commands ignored until end of transaction block"
+	# alternately you can commit every N transactions
+	commitcount = MPCounter()
+	
+	workers = hipparchia.config['WORKERS']
+	
+	jobs = [Process(target=shortphrasesearch, args=(count, hits, searchphrase, workstosearch)) for i in range(workers)]
+	
+	for j in jobs: j.start()
+	for j in jobs: j.join()
 			
-			try:
-				prepend = previous.wordlist(acc)[-1 * contextneeded:]
-			except:
-				prepend = previous.wordlist(acc)
-				
-			prepend = ' '.join(prepend)
-			supplement = ' '.join(supplement)
-			searchzone = prepend + ' ' + core + ' ' + supplement
-			searchzone = re.sub(r'\s\s', r' ', searchzone)
-			
-			if re.search(searchphrase, searchzone) is not None:
-				print(lineobjects[i].index,'sz=',searchzone)
-				matchobjects.append(lineobjects[i])
-			previous = lineobjects[i]
-			
-	return matchobjects
+	hits = sortandunpackresults(hits)
+	# hits = [('gr0059w002', <server.hipparchiaclasses.dbWorkLine object at 0x10b0bb358>), ...]
 
+	lineobjects = []
+	for h in hits:
+		lineobjects.append(h[1])
+	
+	return lineobjects
+
+
+def shortphrasesearch(count, hits, searchphrase, workstosearch):
+	"""
+	mp aware search for runs of short words
+	:return:
+	"""
+	dbconnection = setconnection('autocommit')
+	curs = dbconnection.cursor()
+
+	while len(workstosearch) > 0:
+		try: w = workstosearch.pop()
+		except: w = (-1, 'gr0000w000')
+		index = w[0]
+		
+		if index != -1:
+			matchobjects = []
+			wkid = w[1]
+			query = 'SELECT * FROM ' + wkid
+			curs.execute(query)
+			fulltext = curs.fetchall()
+			
+			previous = makeablankline(wkid, -1)
+			lineobjects = []
+			for dbline in fulltext:
+				lineobjects.append(dblineintolineobject(wkid, dbline))
+			lineobjects.append(makeablankline(wkid, -9999))
+			del fulltext
+			
+			if session['accentsmatter'] == 'N':
+				acc = 'stripped'
+			else:
+				acc = 'accented'
+			
+			searchphrase = cleansearchterm(searchphrase)
+			searchterms = searchphrase.split(' ')
+			searchterms = [x for x in searchterms if x]
+			contextneeded = len(searchterms) - 1
+			
+			for i in range(0, len(lineobjects) - 1):
+				if count.value <= int(session['maxresults']):
+					if previous.hashyphenated == True and lineobjects[i].hashyphenated == True:
+						core = lineobjects[i].allbutfirstandlastword(acc)
+						try:
+							supplement = lineobjects[i + 1].wordlist(acc)[1:contextneeded + 1]
+						except:
+							supplement = lineobjects[i + 1].wordlist(acc)
+					elif previous.hashyphenated == False and lineobjects[i].hashyphenated == True:
+						core = lineobjects[i].allbutlastword(acc)
+						try:
+							supplement = lineobjects[i + 1].wordlist(acc)[0:contextneeded]
+						except:
+							supplement = lineobjects[i + 1].wordlist(acc)
+					elif previous.hashyphenated == True and lineobjects[i].hashyphenated == False:
+						core = lineobjects[i].allbutfirstword(acc)
+						try:
+							supplement = lineobjects[i + 1].wordlist(acc)[0:contextneeded]
+						except:
+							supplement = lineobjects[i + 1].wordlist(acc)
+					else:
+						# previous.hashyphenated == False and lineobjects[i].hashyphenated == False
+						if session['accentsmatter'] == 'N':
+							core = lineobjects[i].stripped
+						else:
+							core = lineobjects[i].unformattedline()
+						try:
+							supplement = lineobjects[i + 1].wordlist(acc)[0:contextneeded]
+						except:
+							supplement = lineobjects[i + 1].wordlist(acc)
+					
+					try:
+						prepend = previous.wordlist(acc)[-1 * contextneeded:]
+					except:
+						prepend = previous.wordlist(acc)
+					
+					prepend = ' '.join(prepend)
+					supplement = ' '.join(supplement)
+					searchzone = prepend + ' ' + core + ' ' + supplement
+					searchzone = re.sub(r'\s\s', r' ', searchzone)
+					
+					if re.search(searchphrase, searchzone) is not None:
+						count.increment(1)
+						matchobjects.append(lineobjects[i])
+					previous = lineobjects[i]
+					
+		# note that each work generates one set of matchobjects (but they are internally sorted)
+			hits[index] = (wkid, matchobjects)
+	
+	curs.close()
+	del dbconnection
+	
+	return hits
 
 def phrasesearch(searchphrase, cursor, wkid, authors):
 	"""
