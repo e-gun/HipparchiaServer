@@ -279,7 +279,7 @@ class dbWorkLine(object):
 				line = re.sub(r'(\<.*?\>)', r'', line)
 			line = line.split(' ')
 			middle = line[1:-1]
-			allbutfirstword = ' '.join(middle)
+			allbutfirstandlastword = ' '.join(middle)
 
 		return allbutfirstandlastword
 

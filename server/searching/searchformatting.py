@@ -220,29 +220,26 @@ def aggregatelines(firstline, lastline, cursor, workdbname):
 		lineobjects.append(dblineintolineobject(workdbname, dbline))
 
 	if session['accentsmatter'] == 'Y':
-		for line in lineobjects:
-			if previous.hyphenated['accented'] == '' and line.hyphenated['accented'] == '':
-				wds = line.unformattedline() + ' '
-			elif previous.hyphenated['accented'] != '' and line.hyphenated['accented'] == '':
-				wds = line.allbutfirstword('contents') + ' '
-			elif previous.hyphenated['accented'] == '' and line.hyphenated['accented'] != '':
-				wds = line.allbutlastword('contents') + ' ' + line.hyphenated['accented']
-			else:
-				wds = line.allbutfirstandlastword('contents') + ' ' + line.hyphenated['accented']
-			aggregate += wds
-			previous = line
+		h = 'accented'
+		c = 'contents'
 	else:
-		for line in lineobjects:
-			if previous.hyphenated['stripped'] == '' and line.hyphenated['stripped'] == '':
-				wds = line.strippedcontents + ' '
-			elif previous.hyphenated['stripped'] != '' and line.hyphenated['stripped'] == '':
-				wds = line.allbutfirstword('strippedcontents') + ' '
-			elif previous.hyphenated['stripped'] == '' and line.hyphenated['stripped'] != '':
-				wds = line.allbutlastword('strippedcontents') + ' ' + line.hyphenated['stripped']
+		h = 'stripped'
+		c = 'strippedcontents'
+		
+	for line in lineobjects:
+		if previous.hyphenated[h] == '' and line.hyphenated[h] == '':
+			if session['accentsmatter'] == 'Y':
+				wds = line.unformattedline() + ' '
 			else:
-				wds = line.allbutfirstandlastword('contents') + ' ' + line.hyphenated['stripped']
-			aggregate += wds
-			previous = line
+				wds = line.strippedcontents
+		elif previous.hyphenated[h] != '' and line.hyphenated[h] == '':
+			wds = line.allbutfirstword(c) + ' '
+		elif previous.hyphenated[h] == '' and line.hyphenated[h] != '':
+			wds = line.allbutlastword(c) + ' ' + line.hyphenated[h]
+		else:
+			wds = line.allbutfirstandlastword(c) + ' ' + line.hyphenated[h]
+		aggregate += wds
+		previous = line
 		
 	aggregate = re.sub(r'\s\s', r' ', aggregate)
 	
