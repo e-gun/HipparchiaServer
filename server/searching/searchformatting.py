@@ -204,9 +204,6 @@ def aggregatelines(firstline, lastline, cursor, workdbname):
 	:return:
 	"""
 
-	if '_AT_' in workdbname:
-		workdbname = workdbname[0:10]
-
 	aggregate = ''
 
 	query = 'SELECT * FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
