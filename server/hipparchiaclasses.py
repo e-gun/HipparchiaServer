@@ -253,14 +253,22 @@ class dbWorkLine(object):
 		:param version:
 		:return:
 		"""
+		wordlist = []
+		markup = re.compile(r'(\<.*?\>)')
+		nbsp = re.compile(r'&nbsp;')
+		
 		if version in ['accented', 'stripped']:
 			line = getattr(self, version)
 			if version == 'accented':
-				line = re.sub(r'(\<.*?\>)', r'', line)
+				line = re.sub(markup, r'', line)
+				line = re.sub(nbsp, r'', line)
 			wordlist = line.split(' ')
+			wordlist = [w for w in wordlist if w]
+			if self.hyphenated[version] != '':
+				wordlist = wordlist[:-1] + [self.hyphenated[version]]
 		
 		return wordlist
-		
+	
 
 	def allbutlastword(self, version):
 		"""

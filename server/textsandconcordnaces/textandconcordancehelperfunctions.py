@@ -151,17 +151,6 @@ def concordancesorter(unsortedoutput):
 	return sortedoutput
 
 
-def findwordsinaline(line):
-	theline = re.sub(r'&nbsp;', '', line)
-	theline = re.sub(r'(\<.*?\>)', r'', theline)
-
-	wordlist = theline.split(' ')
-	wordlist = [w for w in wordlist if w]
-	wordlist = [cleanwords(w) for w in wordlist]
-	
-	return wordlist
-
-
 def cleanwords(word):
 	"""
 	remove gunk that should not be in a concordance
@@ -182,3 +171,16 @@ def cleanwords(word):
 		pass
 	
 	return word
+
+
+# slated for removal
+
+def findwordsinaline(line):
+	theline = re.sub(r'&nbsp;', '', line)
+	theline = re.sub(r'(\<.*?\>)', r'', theline)
+	
+	wordlist = theline.split(' ')
+	wordlist = [w for w in wordlist if w]
+	wordlist = [cleanwords(w) for w in wordlist]
+	
+	return wordlist

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
-from server.textsandconcordnaces.textandconcordancehelperfunctions import concordancesorter, findwordsinaline
+from server.textsandconcordnaces.textandconcordancehelperfunctions import concordancesorter, findwordsinaline, cleanwords
 
 
 def compilewordlists(worksandboundaries, cursor):
@@ -113,13 +113,11 @@ def linesintoconcordance(lineobjects):
 			line = makeablankline(defaultwork, -1)
 		
 		if line.index != -1:
-			# find all of the words in the line
-			words = findwordsinaline(line.accented)
-			# deal with the hyphens issue
+			words = line.wordlist('accented')
+			# deal with the hyphens issue: first 'word' might be only the second half of a word
 			if previous.hyphenated['accented'] != '':
 				words = words[1:]
-			if line.hyphenated['accented'] != '':
-				words = words[:-1] + [line.hyphenated['accented']]
+			words = [cleanwords(w) for w in words]
 			words = list(set(words))
 			words[:] = [x.lower() for x in words]
 			for w in words:
