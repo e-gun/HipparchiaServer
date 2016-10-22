@@ -11,7 +11,7 @@ from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, d
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formattedcittationincontext, aoformatauthinfo, formatauthorandworkinfo, \
 	woformatworkinfo
-from server.searching.searchfunctions import flagexclusions, searchdispatcher, compileauthorandworklist
+from server.searching.searchfunctions import flagexclusions, searchdispatcher, compileauthorandworklist, shortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordancefromwork
 from server.textsandconcordnaces.textandconcordancehelperfunctions import tcparserequest, tcfindstartandstop, conctohtmltable, \
@@ -102,7 +102,12 @@ def search():
 			searchtype = 'phrase'
 			thesearch = seeking
 			htmlsearch = '<span class="emph">' + seeking + '</span>'
-			hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict)
+			terms = seeking.split(' ')
+			if len(max(terms, key=len)) > 3:
+				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict)
+			else:
+				# you are looking for a set of little words: και δη και, etc.
+				hits = shortphrasesearch(seeking, cursor, indexedworklist)
 		else:
 			searchtype = 'proximity'
 			if session['searchscope'] == 'W':
@@ -121,17 +126,13 @@ def search():
 		
 		allfound = []
 		hitcount = 0
-		for hit in hits:
+		for lineobject in hits:
 			if hitcount < int(session['maxresults']):
 				hitcount += 1
-				wkid = hit[0]
-				result = hit[1]
 				# print('item=', hit,'\n\tid:',wkid,'\n\tresult:',result)
-				authorobject = authordict[wkid[0:6]]
-				if '_AT_' in wkid:
-					citwithcontext = formattedcittationincontext(result, wkid[0:10], authorobject, linesofcontext, seeking, proximate, searchtype, cur)
-				else:
-					citwithcontext = formattedcittationincontext(result, wkid, authorobject, linesofcontext, seeking, proximate, searchtype, cur)
+				authorobject = authordict[lineobject.wkuinversalid[0:6]]
+				workobject = workdict[lineobject.wkuinversalid]
+				citwithcontext = formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext, seeking, proximate, searchtype, cur)
 				# add the hit count to line zero which contains the metadata for the lines
 				citwithcontext[0]['hitnumber'] = hitcount
 				allfound.append(citwithcontext)

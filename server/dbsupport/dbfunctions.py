@@ -297,6 +297,7 @@ def makeablankline(work, fakelinenumber):
 	
 	return lineobject
 
+
 def makeanemptyauthor(universalid):
 	"""
 	avoiding an exception by evoking an empty author object temporarily

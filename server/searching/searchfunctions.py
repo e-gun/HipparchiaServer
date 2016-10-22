@@ -7,7 +7,7 @@ import psycopg2
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection, grabonelinefromwork, dblineintolineobject
+from server.dbsupport.dbfunctions import setconnection, dblineintolineobject, makeablankline
 from server.formatting_helper_functions import tidyuplist, dropdupes, prunedict, foundindict
 from server.hipparchiaclasses import MPCounter
 from server.searching.searchformatting import aggregatelines, cleansearchterm, aoprunebydate, aoremovespuria, \
@@ -343,9 +343,13 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	# what comes back is a dict: {sortedawindex: (wkid, [(result1), (result2), ...])}
 	# you need to sort by index and then unpack the results into a list
 	# this will restore the old order from sortauthorandworklists()
-	results = sortandunpackresults(hits)
+	hits = sortandunpackresults(hits)
+	lineobjects = []
+	for h in hits:
+		# hit= ('gr0199w012', (842, '-1', '-1', '-1', '-1', '5', '41', 'Πυθῶνί τ’ ἐν ἀγαθέᾳ· ', 'πυθωνι τ εν αγαθεα ', '', ''))
+		lineobjects.append(dblineintolineobject(h[0],h[1]))
 	
-	return results
+	return lineobjects
 
 
 def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
@@ -366,24 +370,25 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		try: i = searching.pop()
-		except: i = (-1,'gr0001w001')
+		except: i = (-1,'gr0000w000')
 		commitcount.increment()
 		if commitcount.value % 750 == 0:
 			dbconnection.commit()
 		wkid = i[1]
 		index = i[0]
-		if '_AT_' in wkid:
-			hits[index] = (wkid, partialwordsearch(seeking, curs, wkid, authors))
-		elif 'x' in wkid:
-			wkid = re.sub('x', 'w', wkid)
-			hits[index] = (wkid, simplesearchworkwithexclusion(seeking, curs, wkid))
-		else:
-			hits[index] = (wkid, concsearch(seeking, curs, wkid))
-		
-		if len(hits[index][1]) == 0:
-			del hits[index]
-		else:
-			count.increment(len(hits[index][1]))
+		if index != -1:
+			if '_AT_' in wkid:
+				hits[index] = (wkid, partialwordsearch(seeking, curs, wkid, authors))
+			elif 'x' in wkid:
+				wkid = re.sub('x', 'w', wkid)
+				hits[index] = (wkid, simplesearchworkwithexclusion(seeking, curs, wkid))
+			else:
+				hits[index] = (wkid, concsearch(seeking, curs, wkid))
+			
+			if len(hits[index][1]) == 0:
+				del hits[index]
+			else:
+				count.increment(len(hits[index][1]))
 	
 	dbconnection.commit()
 	curs.close()
@@ -537,6 +542,88 @@ def simplesearchworkwithexclusion(seeking, cursor, workdbname):
 	return found
 
 
+def shortphrasesearch(searchphrase, cursor, indexedworklist):
+	"""
+	brute force a search for something horrid like και δη και
+	a set of short words should send you here, otherwise you will look up all the words that look like και and then...
+	:param searchphrase:
+	:param cursor:
+	:param wkid:
+	:return:
+	"""
+	matchobjects = []
+	for w in indexedworklist:
+		wkid = w[1]
+		query = 'SELECT * FROM ' + wkid
+		cursor.execute(query)
+		fulltext = cursor.fetchall()
+		
+		previous = makeablankline(wkid, -1)
+		lineobjects = []
+		for dbline in fulltext:
+			lineobjects.append(dblineintolineobject(wkid, dbline))
+		lineobjects.append(makeablankline(wkid, -9999))
+		del fulltext
+		
+		if session['accentsmatter'] == 'N':
+			acc = 'stripped'
+		else:
+			acc = 'accented'
+		
+		searchphrase = cleansearchterm(searchphrase)
+		searchterms = searchphrase.split(' ')
+		searchterms = [x for x in searchterms if x]
+		contextneeded = len(searchterms)-1
+		
+		
+		for i in range(0,len(lineobjects)-1):
+			if previous.hashyphenated == True and lineobjects[i].hashyphenated == True:
+				core = lineobjects[i].allbutfirstandlastword(acc)
+				try:
+					supplement = lineobjects[i+1].wordlist(acc)[1:contextneeded+1]
+				except:
+					supplement = lineobjects[i+1].wordlist(acc)
+			elif previous.hashyphenated == False and lineobjects[i].hashyphenated == True:
+				core = lineobjects[i].allbutlastword(acc)
+				try:
+					supplement = lineobjects[i+1].wordlist(acc)[0:contextneeded]
+				except:
+					supplement = lineobjects[i+1].wordlist(acc)
+			elif previous.hashyphenated == True and lineobjects[i].hashyphenated == False:
+				core = lineobjects[i].allbutfirstword(acc)
+				try:
+					supplement = lineobjects[i+1].wordlist(acc)[0:contextneeded]
+				except:
+					supplement = lineobjects[i+1].wordlist(acc)
+			else:
+				# previous.hashyphenated == False and lineobjects[i].hashyphenated == False
+				if session['accentsmatter'] == 'N':
+					core = lineobjects[i].stripped
+				else:
+					core = lineobjects[i].unformattedline
+				try:
+					supplement = lineobjects[i+1].wordlist(acc)[0:contextneeded]
+				except:
+					supplement = lineobjects[i+1].wordlist(acc)
+			
+			try:
+				prepend = previous.wordlist(acc)[-1 * contextneeded:]
+			except:
+				prepend = previous.wordlist(acc)
+				
+			prepend = ' '.join(prepend)
+			supplement = ' '.join(supplement)
+			searchzone = prepend + ' ' + core + ' ' + supplement
+			searchzone = re.sub(r'\s\s', r' ', searchzone)
+			
+			if re.search(searchphrase, searchzone) is not None:
+				print(lineobjects[i].index,'sz=',searchzone)
+				matchobjects.append(lineobjects[i])
+			previous = lineobjects[i]
+			
+	return matchobjects
+
+
 def phrasesearch(searchphrase, cursor, wkid, authors):
 	"""
 	a whitespace might mean things are on a new line
@@ -550,6 +637,7 @@ def phrasesearch(searchphrase, cursor, wkid, authors):
 	"""
 	searchphrase = cleansearchterm(searchphrase)
 	searchterms = searchphrase.split(' ')
+	searchterms = [x for x in searchterms if x]
 	
 	longestterm = searchterms[0]
 	for term in searchterms:

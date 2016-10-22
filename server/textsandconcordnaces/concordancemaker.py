@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
-from server.textsandconcordnaces.textandconcordancehelperfunctions import concordancesorter, findwordsinaline, cleanwords
+from server.textsandconcordnaces.textandconcordancehelperfunctions import concordancesorter, cleanwords
 
 
 def compilewordlists(worksandboundaries, cursor):

@@ -24,7 +24,7 @@ def cleansearchterm(seeking):
 
 def highlightsearchterm(lineobject,searchterm, spanname):
 
-	line = lineobject.contents
+	line = lineobject.accented
 
 	equivalents = {
 		'α': '(α|ἀ|ἁ|ἂ|ἃ|ἄ|ἅ|ἆ|ἇ|ᾀ|ᾁ|ᾂ|ᾃ|ᾄ|ᾅ|ᾆ|ᾇ|ᾲ|ᾳ|ᾴ|ᾶ|ᾷ|ᾰ|ᾱ|ὰ|ά|ᾈ|ᾉ|ᾊ|ᾋ|ᾌ|ᾍ|ᾎ|ᾏ|Ἀ|Ἁ|Ἂ|Ἃ|Ἄ|Ἅ|Ἆ|Ἇ|Α)',
@@ -104,15 +104,15 @@ def lineobjectresultformatter(lineobject, searchterm, proximate, searchtype, hig
 	formatteddict['index'] = lineobject.index
 
 	if highlight is True:
-		lineobject.contents = highlightsearchterm(lineobject, searchterm, 'match')
-		lineobject.contents = '<span class="highlight">'+lineobject.contents+'</span>'
+		lineobject.accented = highlightsearchterm(lineobject, searchterm, 'match')
+		lineobject.accented = '<span class="highlight">'+lineobject.accented+'</span>'
 		
 	if proximate != '' and searchtype == 'proximity':
 		# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-		if re.search(cleansearchterm(proximate),lineobject.contents) is not None or re.search(cleansearchterm(proximate),lineobject.stripped) is not None:
-			lineobject.contents = highlightsearchterm(lineobject, proximate, 'proximate')
+		if re.search(cleansearchterm(proximate),lineobject.accented) is not None or re.search(cleansearchterm(proximate),lineobject.stripped) is not None:
+			lineobject.accented = highlightsearchterm(lineobject, proximate, 'proximate')
 	
-	formatteddict['line'] = lineobject.contents
+	formatteddict['line'] = lineobject.accented
 	formatteddict['locus'] = lineobject.locustuple()
 
 	return formatteddict
@@ -131,14 +131,6 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	if '_AT_' in workdbname:
 		workdbname = workdbname[0:10]
 
-	if session['accentsmatter'] == 'Y':
-		# setting self up for big problems because you have both accents and markup in here
-		# will need to pass things through a stripper before searching
-		column = 'marked_up_line'
-	else:
-		column = 'stripped_line'
-		
-	# query = 'SELECT index,'+column+',hyphenated_words FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
 	query = 'SELECT * FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
 	data = (linenumber-1, linenumber+1)
 	cursor.execute(query, data)
@@ -164,32 +156,24 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	text = []
 	for line in lines:
 		if session['accentsmatter'] == 'Y':
-			contents = line.unformattedline()
-			hyphenated = line.hyphenated['accented']
+			wordsinline = line.wordlist('accented')
 		else:
-			contents = line.stripped
-			hyphenated = line.hyphenated['stripped']
-		
-		wordsinline = contents.split(' ')
-		if hyphenated != '':
-			wordsinline[-1] = hyphenated
+			wordsinline = line.wordlist('stripped')
 		
 		if line.index == linenumber-1:
 			text = wordsinline[(numberofextrawords * -1):]
 		elif line.index == linenumber:
 			# actually, null should be '', but is somehow coming back as something more than that
-			if len(ldict[linenumber-1].hyphenated) > 2:
-				text += wordsinline[1:]
-			else:
-				text += wordsinline
+			text += wordsinline
 		elif line.index == linenumber+1:
-			if len(ldict[linenumber].hyphenated) > 2:
+			if ldict[linenumber].hashyphenated == True:
 				wordsinline = wordsinline[1:]
 			text += wordsinline[:numberofextrawords]
 			
 	aggregate = ' '.join(text)
 	aggregate = re.sub(r'\s\s',r' ', aggregate)
 	aggregate = ' ' + aggregate + ' '
+	
 	return aggregate
 
 
@@ -217,24 +201,22 @@ def aggregatelines(firstline, lastline, cursor, workdbname):
 		lineobjects.append(dblineintolineobject(workdbname, dbline))
 
 	if session['accentsmatter'] == 'Y':
-		h = 'accented'
-		c = 'contents'
+		acc = 'accented'
 	else:
-		h = 'stripped'
-		c = 'stripped'
+		acc = 'stripped'
 		
 	for line in lineobjects:
-		if previous.hyphenated[h] == '' and line.hyphenated[h] == '':
+		if previous.hyphenated[acc] == '' and line.hyphenated[acc] == '':
 			if session['accentsmatter'] == 'Y':
 				wds = line.unformattedline() + ' '
 			else:
 				wds = line.stripped
-		elif previous.hyphenated[h] != '' and line.hyphenated[h] == '':
-			wds = line.allbutfirstword(c) + ' '
-		elif previous.hyphenated[h] == '' and line.hyphenated[h] != '':
-			wds = line.allbutlastword(c) + ' ' + line.hyphenated[h]
+		elif previous.hyphenated[acc] != '' and line.hyphenated[acc] == '':
+			wds = line.allbutfirstword(acc) + ' '
+		elif previous.hyphenated[acc] == '' and line.hyphenated[acc] != '':
+			wds = line.allbutlastword(acc) + ' ' + line.hyphenated[acc]
 		else:
-			wds = line.allbutfirstandlastword(c) + ' ' + line.hyphenated[h]
+			wds = line.allbutfirstandlastword(acc) + ' ' + line.hyphenated[acc]
 		aggregate += wds
 		previous = line
 		
@@ -305,7 +287,8 @@ def aoremovespuria(authorandworklist, worksdict):
 	return trimmedlist
 
 
-def formattedcittationincontext(line, workdbname, authorobject, linesofcontext, searchterm, proximate, searchtype, cursor):
+def formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext, searchterm, proximate, searchtype,
+                                cursor):
 	"""
 	take a hit
 		turn it into a focus line
@@ -319,31 +302,23 @@ def formattedcittationincontext(line, workdbname, authorobject, linesofcontext, 
 	:return:
 	"""
 	
-	if '_AT_' in workdbname:
-		workdbname = workdbname[0:10]
-	
-	lineobject = dblineintolineobject(workdbname, line)
-	
 	citationincontext = []
 	highlightline = lineobject.index
-	for w in authorobject.listofworks:
-		if w.universalid == workdbname:
-			workobject = w
 	citation = locusintocitation(workobject, lineobject.locustuple())
 	# this next bit of info tags the find; 'newfind' + 'url' is turned into JS in the search.html '<script>' loop; this enables click-to-browse
 	# similarly the for-result-in-found loop of search.html generates the clickable elements: <browser id="{{ context['url'] }}">
 	citationincontext.append({'newfind': 1, 'author': authorobject.shortname,
-	                 'work': workobject.title, 'citation': citation, 'url': (lineobject.universalid)})
+	                          'work': workobject.title, 'citation': citation, 'url': (lineobject.universalid)})
 	environs = simplecontextgrabber(workobject, highlightline, linesofcontext, cursor)
-
+	
 	for found in environs:
-		found = dblineintolineobject(workdbname, found)
+		found = dblineintolineobject(lineobject.wkuinversalid, found)
 		if found.index == highlightline:
 			found = lineobjectresultformatter(found, searchterm, proximate, searchtype, True)
 		else:
 			found = lineobjectresultformatter(found, searchterm, proximate, searchtype, False)
 		citationincontext.append(found)
-		
+	
 	return citationincontext
 
 

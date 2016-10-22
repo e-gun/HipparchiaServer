@@ -135,8 +135,10 @@ class dbWorkLine(object):
 		hyph = hyphenated_words.split(' ')
 		if len(hyph) != 2:
 			self.hyphenated = {'accented': '', 'stripped': ''}
+			self.hashyphenated = False
 		else:
 			self.hyphenated = {'accented': hyph[0], 'stripped': hyph[1]}
+			self.hashyphenated = True
 	
 	def locus(self):
 		"""
@@ -232,16 +234,21 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		unformatted = re.sub(r'(\<.*?\>)',r'',self.contents)
+		markup = re.compile(r'(\<.*?\>)')
+		nbsp = re.compile(r'&nbsp;')
+		
+		unformatted = re.sub(markup, r'', self.accented)
+		unformatted = re.sub(nbsp, r'', unformatted)
 		
 		return unformatted
+	
 	
 	def wordcount(self):
 		"""
 		return a wordcount
 		"""
 		
-		line = self.strippedcontents
+		line = self.stripped
 		words = line.split(' ')
 		
 		return len(words)
