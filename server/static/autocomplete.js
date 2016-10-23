@@ -67,6 +67,7 @@ function reloadAuthorlist(){
     );
 }
 
+
 function resetworksautocomplete() {
         $('#level05').hide(); $('#level05').val('');
         $('#level04').hide(); $('#level04').val('');
@@ -75,6 +76,7 @@ function resetworksautocomplete() {
         $('#level01').hide(); $('#level01').val('');
         $('#level00').hide(); $('#level00').val('');
 }
+
 
 function checklocus() {
     var locusval = '';
@@ -92,6 +94,7 @@ function checklocus() {
     return locusval;
 }
 
+
 $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
     source: "/getauthorhint",
@@ -108,6 +111,7 @@ $('#authorsautocomplete').autocomplete({
         $('#worksautocomplete').prop('placeholder', '(Pick a work)');
         }
     });
+
 
 $('#pickauthor').click( function() {
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
@@ -186,6 +190,7 @@ function loadWorklist(authornumber){
         // $('#worksautocomplete').val(worksfound[0]);
     });
 }
+
 
 $('#worksautocomplete').autocomplete({
     focus: function (event, ui) {

@@ -22,7 +22,7 @@ from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessi
 	sessionvariables, sessionselectionsashtml, rationalizeselections, buildauthordict, buildworkdict, \
 	buildaugenreslist, buildworkgenreslist
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
-	dropdupes, bcedating, aosortauthorandworklists, prunedict
+	dropdupes, bcedating, aosortauthorandworklists, prunedict, htmlifysearchfinds
 from server.browsing.browserfunctions import getandformatbrowsercontext
 
 # all you need is read-only access
@@ -143,11 +143,16 @@ def search():
 				authorobject = authordict[lineobject.wkuinversalid[0:6]]
 				workobject = workdict[lineobject.wkuinversalid]
 				citwithcontext = formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext, seeking, proximate, searchtype, cur)
-				# add the hit count to line zero which contains the metadata for the lines
+				# add the hit count which contains the metadata for the lines
 				citwithcontext[0]['hitnumber'] = hitcount
 				allfound.append(citwithcontext)
 			else:
 				pass
+		
+		"""
+		what a find looks like:
+		[{'url': 'gr2333w003_LN_7', 'hitnumber': 1, 'author': 'Possis', 'citation': 'Fragment 1, line 4', 'newfind': 1, 'work': 'Fragmenta'}, {'line': 'Μαγνητικῶν τὸν Θεμιϲτοκλέα φηϲὶν, ἐν Μαγνηϲίᾳ τὴν', 'index': 5, 'locus': ('2', '1')}, {'line': 'ϲτεφανηφόρον ἀρχὴν ἀναλαβόντα, θῦϲαι Ἀθηνᾷ, καὶ', 'index': 6, 'locus': ('3', '1')}, {'line': '<span class="highlight">τὴν ἑορτὴν <span class="match">Παναθ</span>ήναια ὀνομάϲαι, καὶ Διονύϲῳ Χοο-</span>', 'index': 7, 'locus': ('4', '1')}, {'line': 'πότῃ θυϲιάϲαντα καὶ τὴν Χοῶν ἑορτὴν αὐτόθι κατα-', 'index': 8, 'locus': ('5', '1')}, {'line': 'δεῖξαι.', 'index': 9, 'locus': ('6', '1')}]
+		"""
 		
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
@@ -1061,7 +1066,7 @@ def progressreport():
 	return progress
 
 
-@hipparchia.route('/test', methods=['GET', 'POST'])
+@hipparchia.route('/test', methods=['GET'])
 def jsexecutesearch():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
@@ -1170,8 +1175,13 @@ def jsexecutesearch():
 			else:
 				pass
 		
+		allfound = htmlifysearchfinds(allfound)
+		
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
+		if len(allfound) > int(session['maxresults']):
+			allfound = allfound[0:int(session['maxresults'])]
+			
 		resultcount = len(allfound)
 		
 		if resultcount < int(session['maxresults']):

@@ -303,7 +303,6 @@ $( "#earliestdate" ).spinner({
 // cookies + options
 //
 
-
 function javascriptsessionintocookie(cookienumberstr){
     $.getJSON('/getsessionvariables', function (data) {
 		    Cookies.set('session'+cookienumberstr, data, { expires: 1000 });

@@ -44,6 +44,7 @@ var openbrowserfromclick = function() {
         });
 }
 
+
 function parsepassagereturned(passagereturned) {
 		$('#browserdialogtext').text('');
         // the first item is info
