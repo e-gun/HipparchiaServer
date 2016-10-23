@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
 from server.textsandconcordnaces.textandconcordancehelperfunctions import concordancesorter, cleanwords
-
+from server import pollingdata
 
 def compilewordlists(worksandboundaries, cursor):
 	"""
@@ -20,6 +19,7 @@ def compilewordlists(worksandboundaries, cursor):
 	:param cursor:
 	:return:
 	"""
+
 	lineobjects = []
 	
 	for w in worksandboundaries:
@@ -28,6 +28,8 @@ def compilewordlists(worksandboundaries, cursor):
 		cursor.execute(query, data)
 		lines = cursor.fetchall()
 		
+		pollingdata.pdpoolofwork = len(lines)
+		pollingdata.pdremaining = len(lines)
 		for l in lines:
 			lineobjects.append(dblineintolineobject(w, l))
 	
@@ -52,9 +54,12 @@ def buildconcordancefromwork(cdict, cursor):
 	:param cursor:
 	:return:
 	"""
-	
+
+	pollingdata.pdpoolofwork = -1
+	pollingdata.pdstatusmessage = 'Gathering the data'
 	lineobjects = compilewordlists(cdict, cursor)
 	
+	pollingdata.pdstatusmessage = 'Compiling the concordance'
 	concordancedict = linesintoconcordance(lineobjects)
 	# now you are looking at: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
 	
@@ -65,6 +70,10 @@ def buildconcordancefromwork(cdict, cursor):
 	testlist = [x[0][0] for x in concordancedict.values()]
 	if len(set(testlist)) != 1:
 		onework = False
+	
+	
+	pollingdata.pdstatusmessage = 'Sifting the concordance'
+	pollingdata.pdpoolofwork = -1
 	
 	for c in concordancedict.keys():
 		hits = concordancedict[c]
@@ -101,6 +110,9 @@ def linesintoconcordance(lineobjects):
 	:return:
 	"""
 	
+	pollingdata.pdpoolofwork = len(lineobjects)
+	pollingdata.pdremaining = len(lineobjects)
+	
 	defaultwork = lineobjects[0].wkuinversalid
 	
 	concordance = {}
@@ -109,6 +121,7 @@ def linesintoconcordance(lineobjects):
 	while len(lineobjects) > 0:
 		try:
 			line = lineobjects.pop()
+			pollingdata.pdremaining = pollingdata.pdremaining - 1
 		except:
 			line = makeablankline(defaultwork, -1)
 		

@@ -318,29 +318,25 @@ $('#excludegenre').click( function() {
 // CONCORDANCE
 //
 
-
 $('#concordance').click( function() {
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         var name = $('#authorsautocomplete').val();
         var locus = locusdataloader();
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
-        document.getElementById('searchsummary').innerHTML = 'Compiling the concordance. Patience can be a virtue.';
+        document.getElementById('searchsummary').innerHTML = '';
         document.getElementById('displayresults').innerHTML = ''
 
         if (authorid != '') {
             $('#clearpick').show();
             if (wrk == '') {
-                $.getJSON('/concordance?auth=' + authorid, function (concordancedata) {
-                    loadconcordanceintodisplayresults(concordancedata);
-                });
+                $.getJSON('/concordance?auth=' + authorid, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
+                var i = setInterval(function(){ $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } }); }, 500);
              } else if (locus == '') {
-                $.getJSON('/concordance?auth=' + authorid + '&work=' + wrk, function (concordancedata) {
-                    loadconcordanceintodisplayresults(concordancedata);
-                });
+                $.getJSON('/concordance?auth=' + authorid + '&work=' + wrk, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
+                var i = setInterval(function(){ $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } }); }, 500);
              } else {
-                $.getJSON('/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (concordancedata) {
-                    loadconcordanceintodisplayresults(concordancedata);
-                });
+                $.getJSON('/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
+                var i = setInterval(function(){ $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } }); }, 500);
              }
         }
 });
@@ -367,8 +363,6 @@ function loadconcordanceintodisplayresults(concordancedata) {
         }
 
         linesreturned += '<span class="small">('+concordancedata['elapsed']+'s)</span><br />';
-
-
 
         document.getElementById('searchsummary').innerHTML = linesreturned;
 
@@ -429,3 +423,26 @@ function loadtextintodisplayresults(returnedtext) {
             }
         document.getElementById('displayresults').innerHTML = linesreturned;
     }
+
+
+//
+// PROGRESS
+//
+
+function displayprogress(progress){
+    var r = progress['remaining'];
+    var t = progress['total'];
+    var h = progress['hits'];
+    var pct = Math.round((t-r) / t * 100);
+    var done = t - r;
+    var m = progress['message']
+
+    var thehtml = ''
+    if (t != -1) {
+        thehtml += m + ': ' + pct+'% completed';
+    } else {
+        thehtml += m;
+        }
+    document.getElementById('pollingdata').innerHTML = thehtml;
+}
+

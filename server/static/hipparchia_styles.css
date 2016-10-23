@@ -271,7 +271,7 @@ worktitle {
 	transform: translateX(-50%);
     }
 
-#searchsummary {
+#searchsummary, #pollingdata {
 	padding: 10px;
 	text-align: left;
 	color: #AE5727;

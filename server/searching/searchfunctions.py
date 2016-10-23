@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from multiprocessing import Process, Manager, Pool
+from multiprocessing import Process, Manager
 
 import psycopg2
 from flask import session
@@ -319,7 +319,8 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	hits = manager.dict()
 	authors = manager.dict(authordict)
 	searching = manager.list(indexedauthorandworklist)
-	# if you don't autocommit you will see: "Error: current transaction is aborted, commands ignored until end of transaction block"
+	
+	# if you don't autocommit you will soon see: "Error: current transaction is aborted, commands ignored until end of transaction block"
 	# alternately you can commit every N transactions
 	commitcount = MPCounter()
 	
@@ -389,7 +390,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 				del hits[index]
 			else:
 				count.increment(len(hits[index][1]))
-	
+				
 	dbconnection.commit()
 	curs.close()
 	del dbconnection
@@ -667,6 +668,7 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch):
 	del dbconnection
 	
 	return hits
+
 
 def phrasesearch(searchphrase, cursor, wkid, authors):
 	"""

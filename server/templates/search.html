@@ -141,8 +141,6 @@ $(document).ready( function () {
 		);
 	});
 
-
-
 </script>
 
 {% include "moreinfo.html" ignore missing %}
@@ -212,6 +210,7 @@ $(document).ready( function () {
         <br />[Search suspended: result cap reached.]
         {% endif %}
     </div>
+    <div id="pollingdata"></div>
     <div id="displayresults">
     {% for result in found %}
     	{% for context in result %}

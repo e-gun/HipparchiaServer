@@ -5,6 +5,7 @@ import re
 from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
+from server import pollingdata
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
@@ -37,6 +38,7 @@ workdict = buildworkdict(authordict)
 authorgenreslist = buildaugenreslist(authordict)
 workgenreslist = buildworkgenreslist(workdict)
 
+pollingdata.initializeglobals()
 
 @hipparchia.route('/', methods=['GET', 'POST'])
 def search():
@@ -187,6 +189,8 @@ def concordance():
 	:return:
 	"""
 	starttime = time.time()
+	pollingdata.pdactive = True
+	
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 	
@@ -229,12 +233,14 @@ def concordance():
 		allworks = []
 	
 	# get ready to send stuff to the page
+	pollingdata.pdstatusmessage = 'Preparing the concordance HTML'
 	output = concordancesorter(unsortedoutput)
 	count = len(output)
 	output = conctohtmltable(output)
 	
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)
+	pollingdata.pdactive = False
 	
 	results = {}
 	results['authorname'] = ao.shortname
@@ -308,6 +314,7 @@ def textmaker():
 #
 # unadorned views for quickly peeking at the data
 #
+
 
 @hipparchia.route('/authors')
 def authorlist():
@@ -1033,3 +1040,183 @@ def cookieintosession():
 	response = redirect(url_for('search'))
 	return response
 
+
+@hipparchia.route('/progress')
+def progressreport():
+	"""
+	allow js to poll the progress of a long operation
+	this code is itself in progress and will remain so until the passing of globals between funcitons gets sorted
+	:return:
+	"""
+
+	progress = {}
+	progress['total'] = pollingdata.pdpoolofwork
+	progress['remaining'] = pollingdata.pdremaining
+	progress['hits'] = pollingdata.pdhits
+	progress['message'] = pollingdata.pdstatusmessage
+	progress['active'] = pollingdata.pdactive
+	
+	progress = json.dumps(progress)
+	
+	return progress
+
+
+@hipparchia.route('/test', methods=['GET', 'POST'])
+def jsexecutesearch():
+	dbc = setconnection('autocommit')
+	cur = dbc.cursor()
+	
+	sessionvariables()
+	# need to sanitize input at least a bit...
+	try:
+		seeking = re.sub(r'[\'"`!;&]', '', request.args.get('seeking', ''))
+	except:
+		seeking = ''
+	
+	try:
+		proximate = re.sub(r'[\'"`!;&]', '', request.args.get('proximate', ''))
+	except:
+		proximate = ''
+	
+	if len(seeking) < 1 and len(proximate) > 0:
+		seeking = proximate
+		proximate = ''
+	
+	linesofcontext = int(session['linesofcontext'])
+	searchtime = 0
+	
+	dmin, dmax = bcedating()
+	
+	if session['corpora'] == 'G' and re.search('[a-zA-Z]', seeking) is not None:
+		# searching greek, but not typing in unicode greek: autoconvert
+		seeking = seeking.upper()
+		seeking = replacegreekbetacode(seeking)
+	
+	if session['corpora'] == 'G' and re.search('[a-zA-Z]', proximate) is not None:
+		proximate = proximate.upper()
+		proximate = replacegreekbetacode(proximate)
+	
+	phrasefinder = re.compile('[^\s]\s[^\s]')
+	
+	if len(seeking) > 0:
+		starttime = time.time()
+		
+		authorandworklist = compileauthorandworklist(authordict, workdict)
+		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
+		authorandworklist = flagexclusions(authorandworklist)
+		authorandworklist = aosortauthorandworklists(authorandworklist, authordict)
+		
+		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
+		# so we slap on an index value
+		indexedworklist = []
+		index = -1
+		for w in authorandworklist:
+			index += 1
+			indexedworklist.append((index, w))
+		del authorandworklist
+		
+		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
+			searchtype = 'simple'
+			thesearch = seeking
+			htmlsearch = '<span class="emph">' + seeking + '</span>'
+			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, authordict)
+		elif re.search(phrasefinder, seeking) is not None:
+			searchtype = 'phrase'
+			thesearch = seeking
+			htmlsearch = '<span class="emph">' + seeking + '</span>'
+			terms = seeking.split(' ')
+			if len(max(terms, key=len)) > 3:
+				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict)
+			else:
+				# you are looking for a set of little words: και δη και, etc.
+				#   16s to find και δη και via a std phrase search; 1.6s to do it this way
+				# not immediately obvious what the best number for minimum max term len is:
+				# consider what happens if you send a '4' this way:
+				#   εἶναι τὸ κατὰ τὴν (Searched between 850 B.C.E. and 200 B.C.E.)
+				# this takes 13.7s with a std phrase search; it takes 14.6s if sent to shortphrasesearch()
+				#   οἷον κἀν τοῖϲ (Searched between 850 B.C.E. and 200 B.C.E.)
+				#   5.57 std; 17.54s 'short'
+				# so '3' looks like the right answer
+				hits = dispatchshortphrasesearch(seeking, indexedworklist)
+		else:
+			searchtype = 'proximity'
+			if session['searchscope'] == 'W':
+				scope = 'words'
+			else:
+				scope = 'lines'
+			
+			if session['nearornot'] == 'T':
+				nearstr = ''
+			else:
+				nearstr = ' not'
+			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
+			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
+			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
+			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict)
+		
+		allfound = []
+		hitcount = 0
+		for lineobject in hits:
+			if hitcount < int(session['maxresults']):
+				hitcount += 1
+				# print('item=', hit,'\n\tid:',wkid,'\n\tresult:',result)
+				authorobject = authordict[lineobject.wkuinversalid[0:6]]
+				workobject = workdict[lineobject.wkuinversalid]
+				citwithcontext = formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext,
+				                                             seeking, proximate, searchtype, cur)
+				# add the hit count to line zero which contains the metadata for the lines
+				citwithcontext[0]['hitnumber'] = hitcount
+				allfound.append(citwithcontext)
+			else:
+				pass
+		
+		searchtime = time.time() - starttime
+		searchtime = round(searchtime, 2)
+		resultcount = len(allfound)
+		
+		if resultcount < int(session['maxresults']):
+			hitmax = 'false'
+		else:
+			hitmax = 'true'
+		
+		# prepare the output
+		
+		output = {}
+		output['title'] = thesearch
+		output['found'] = allfound
+		output['resultcount'] = resultcount
+		output['scope'] = str(len(indexedworklist))
+		output['searchtime'] = str(searchtime)
+		output['lookedfor'] = seeking
+		output['proximate'] = proximate
+		output['thesearch'] = thesearch
+		output['htmlsearch'] = htmlsearch
+		output['hitmax'] = hitmax
+		output['lang'] = session['corpora']
+		output['sortby'] = session['sortorder']
+		output['dmin'] = dmin
+		output['dmax'] = dmax
+		
+	else:
+		output = {}
+		output['title'] = seeking
+		output['found'] = []
+		output['resultcount'] = 0
+		output['scope'] = 0
+		output['searchtime'] = '0.00'
+		output['lookedfor'] = seeking
+		output['proximate'] = proximate
+		output['thesearch'] = ''
+		output['htmlsearch'] = ''
+		output['hitmax'] = 0
+		output['lang'] = session['corpora']
+		output['sortby'] = session['sortorder']
+		output['dmin'] = dmin
+		output['dmax'] = dmax
+		
+	output = json.dumps(output)
+	
+	cur.close()
+	del dbc
+	
+	return output
