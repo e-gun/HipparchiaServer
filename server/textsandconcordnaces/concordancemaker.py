@@ -28,8 +28,8 @@ def compilewordlists(worksandboundaries, cursor):
 		cursor.execute(query, data)
 		lines = cursor.fetchall()
 		
-		pollingdata.pdpoolofwork = len(lines)
-		pollingdata.pdremaining = len(lines)
+		pollingdata.pdpoolofwork.value = len(lines)
+		pollingdata.pdremaining.value = len(lines)
 		for l in lines:
 			lineobjects.append(dblineintolineobject(w, l))
 	
@@ -55,7 +55,7 @@ def buildconcordancefromwork(cdict, cursor):
 	:return:
 	"""
 
-	pollingdata.pdpoolofwork = -1
+	pollingdata.pdpoolofwork.value = -1
 	pollingdata.pdstatusmessage = 'Gathering the data'
 	lineobjects = compilewordlists(cdict, cursor)
 	
@@ -73,7 +73,7 @@ def buildconcordancefromwork(cdict, cursor):
 	
 	
 	pollingdata.pdstatusmessage = 'Sifting the concordance'
-	pollingdata.pdpoolofwork = -1
+	pollingdata.pdpoolofwork.value = -1
 	
 	for c in concordancedict.keys():
 		hits = concordancedict[c]
@@ -110,8 +110,8 @@ def linesintoconcordance(lineobjects):
 	:return:
 	"""
 	
-	pollingdata.pdpoolofwork = len(lineobjects)
-	pollingdata.pdremaining = len(lineobjects)
+	pollingdata.pdpoolofwork.value = len(lineobjects)
+	pollingdata.pdremaining.value = len(lineobjects)
 	
 	defaultwork = lineobjects[0].wkuinversalid
 	
@@ -121,7 +121,7 @@ def linesintoconcordance(lineobjects):
 	while len(lineobjects) > 0:
 		try:
 			line = lineobjects.pop()
-			pollingdata.pdremaining = pollingdata.pdremaining - 1
+			pollingdata.pdremaining.value = pollingdata.pdremaining.value - 1
 		except:
 			line = makeablankline(defaultwork, -1)
 		
