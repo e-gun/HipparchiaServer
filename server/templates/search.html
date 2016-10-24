@@ -112,7 +112,7 @@ $(document).ready( function () {
             $.getJSON('/progress?id='+searchid, function(progress) {
                 displayprogress(progress);
                 if (progress['active'] == false && progress['id'] == searchid ) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; }
-                else { trialnumber = 1; }
+                else { donothing = 1; }
                 });
             }, 333);
         });

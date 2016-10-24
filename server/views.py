@@ -42,143 +42,24 @@ pollingdata.initializeglobals()
 
 
 @hipparchia.route('/', methods=['GET', 'POST'])
-def search():
+def frontpate():
+	"""
+	the front page
+	it used to do stuff
+	now it just loads the JS which then calls all of the routes below
 	
-	dbc = setconnection('autocommit')
-	cur = dbc.cursor()
-	
+	:return:
+	"""
 	sessionvariables()
-	# need to sanitize input at least a bit...
-	try:
-		seeking = re.sub(r'[\'"`!;&]', '', request.args.get('seeking', ''))
-	except:
-		seeking = ''
 	
-	try:
-		proximate = re.sub(r'[\'"`!;&]', '', request.args.get('proximate', ''))
-	except:
-		proximate = ''
-	
-	if len(seeking) < 1 and len(proximate) > 0:
-		seeking = proximate
-		proximate = ''
-	
-	linesofcontext = int(session['linesofcontext'])
-	searchtime = 0
-	
+	seeking = ''
+	proximate = ''
+
 	dmin, dmax = bcedating()
 	
-	if session['corpora'] == 'G' and re.search('[a-zA-Z]', seeking) is not None:
-		# searching greek, but not typing in unicode greek: autoconvert
-		seeking = seeking.upper()
-		seeking = replacegreekbetacode(seeking)
-	
-	if session['corpora'] == 'G' and re.search('[a-zA-Z]', proximate) is not None:
-		proximate = proximate.upper()
-		proximate = replacegreekbetacode(proximate)
-	
-	phrasefinder = re.compile('[^\s]\s[^\s]')
-	
-	if len(seeking) > 0:
-		starttime = time.time()
-				
-		authorandworklist = compileauthorandworklist(authordict, workdict)
-		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
-		authorandworklist = flagexclusions(authorandworklist)
-		authorandworklist = aosortauthorandworklists(authorandworklist, authordict)
-		
-		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
-		# so we slap on an index value
-		indexedworklist = []
-		index = -1
-		for w in authorandworklist:
-			index += 1
-			indexedworklist.append((index, w))
-		del authorandworklist
-		
-		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
-			searchtype = 'simple'
-			thesearch = seeking
-			htmlsearch = '<span class="emph">' + seeking + '</span>'
-			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, authordict)
-		elif re.search(phrasefinder, seeking) is not None:
-			searchtype = 'phrase'
-			thesearch = seeking
-			htmlsearch = '<span class="emph">' + seeking + '</span>'
-			terms = seeking.split(' ')
-			if len(max(terms, key=len)) > 3:
-				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict)
-			else:
-				# you are looking for a set of little words: και δη και, etc.
-				#   16s to find και δη και via a std phrase search; 1.6s to do it this way
-				# not immediately obvious what the best number for minimum max term len is:
-				# consider what happens if you send a '4' this way:
-				#   εἶναι τὸ κατὰ τὴν (Searched between 850 B.C.E. and 200 B.C.E.)
-				# this takes 13.7s with a std phrase search; it takes 14.6s if sent to shortphrasesearch()
-				#   οἷον κἀν τοῖϲ (Searched between 850 B.C.E. and 200 B.C.E.)
-				#   5.57 std; 17.54s 'short'
-				# so '3' looks like the right answer
-				hits = dispatchshortphrasesearch(seeking, indexedworklist)
-		else:
-			searchtype = 'proximity'
-			if session['searchscope'] == 'W':
-				scope = 'words'
-			else:
-				scope = 'lines'
-			
-			if session['nearornot'] == 'T':
-				nearstr = ''
-			else:
-				nearstr = ' not'
-			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
-			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
-			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
-			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict)
-		
-		allfound = []
-		hitcount = 0
-		for lineobject in hits:
-			if hitcount < int(session['maxresults']):
-				hitcount += 1
-				# print('item=', hit,'\n\tid:',wkid,'\n\tresult:',result)
-				authorobject = authordict[lineobject.wkuinversalid[0:6]]
-				workobject = workdict[lineobject.wkuinversalid]
-				citwithcontext = formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext, seeking, proximate, searchtype, cur)
-				# add the hit count which contains the metadata for the lines
-				citwithcontext[0]['hitnumber'] = hitcount
-				allfound.append(citwithcontext)
-			else:
-				pass
-		
-		"""
-		what a find looks like:
-		[{'url': 'gr2333w003_LN_7', 'hitnumber': 1, 'author': 'Possis', 'citation': 'Fragment 1, line 4', 'newfind': 1, 'work': 'Fragmenta'}, {'line': 'Μαγνητικῶν τὸν Θεμιϲτοκλέα φηϲὶν, ἐν Μαγνηϲίᾳ τὴν', 'index': 5, 'locus': ('2', '1')}, {'line': 'ϲτεφανηφόρον ἀρχὴν ἀναλαβόντα, θῦϲαι Ἀθηνᾷ, καὶ', 'index': 6, 'locus': ('3', '1')}, {'line': '<span class="highlight">τὴν ἑορτὴν <span class="match">Παναθ</span>ήναια ὀνομάϲαι, καὶ Διονύϲῳ Χοο-</span>', 'index': 7, 'locus': ('4', '1')}, {'line': 'πότῃ θυϲιάϲαντα καὶ τὴν Χοῶν ἑορτὴν αὐτόθι κατα-', 'index': 8, 'locus': ('5', '1')}, {'line': 'δεῖξαι.', 'index': 9, 'locus': ('6', '1')}]
-		"""
-		
-		searchtime = time.time() - starttime
-		searchtime = round(searchtime, 2)
-		resultcount = len(allfound)
-		
-		if resultcount < int(session['maxresults']):
-			hitmax = 'false'
-		else:
-			hitmax = 'true'
-		
-		page = render_template('search.html', title=thesearch, found=allfound,
-		                       resultcount=resultcount, scope=str(len(indexedworklist)),
-		                       searchtime=str(searchtime), lookedfor=seeking, proximate=proximate,
-		                       thesearch=thesearch,
-		                       htmlsearch=htmlsearch, hitmax=hitmax, lang=session['corpora'],
-		                       sortedby=session['sortorder'],
-		                       dmin=dmin, dmax=dmax)
-	
-	else:
-		page = render_template('search.html', title=seeking, found=[], resultcount=0, searchtime='0', scope=0,
+	page = render_template('search.html', title=seeking, found=[], resultcount=0, searchtime='0', scope=0,
 		                       hitmax=0, lang=session['corpora'], sortedby=session['sortorder'],
 		                       dmin=dmin, dmax=dmax)
-	
-	cur.close()
-	del dbc
 	
 	return page
 
@@ -1060,9 +941,6 @@ def progressreport():
 	except:
 		searchid = -1
 	
-	if searchid != pollingdata.pdsearchid.value:
-		print('id mismatch', searchid, pollingdata.pdsearchid.value)
-	
 	progress = {}
 	progress['total'] = pollingdata.pdpoolofwork.value
 	progress['remaining'] = pollingdata.pdremaining.value
@@ -1108,8 +986,6 @@ def jsexecutesearch():
 	pollingdata.pdremaining.value = -1
 	pollingdata.pdpoolofwork.value = -1
 	pollingdata.pdsearchid.value = searchid
-	
-	print('si', searchid, pollingdata.pdsearchid.value)
 	
 	linesofcontext = int(session['linesofcontext'])
 	searchtime = 0
