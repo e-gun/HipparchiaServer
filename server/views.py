@@ -950,7 +950,6 @@ def progressreport():
 	progress['hits'] = pollingdata.pdhits.value
 	progress['message'] = pollingdata.pdstatusmessage
 	progress['active'] = pollingdata.pdactive
-	progress['id'] = pollingdata.pdsearchid.value
 	
 	progress = json.dumps(progress)
 	
@@ -978,17 +977,9 @@ def jsexecutesearch():
 		seeking = proximate
 		proximate = ''
 	
-	try:
-		searchid = int(request.args.get('id', ''))
-	except:
-		searchid = -1
-	
-	
-	
 	pollingdata.pdactive = True
 	pollingdata.pdremaining.value = -1
 	pollingdata.pdpoolofwork.value = -1
-	pollingdata.pdsearchid.value = searchid
 	
 	linesofcontext = int(session['linesofcontext'])
 	searchtime = 0
