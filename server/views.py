@@ -1055,13 +1055,15 @@ def jsexecutesearch():
 			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict)
 		
 		pollingdata.pdstatusmessage = 'Formatting the results'
-		pollingdata.pdpoolofwork.value = -1
+		pollingdata.pdpoolofwork.value = len(hits)
+		pollingdata.pdremaining.value = len(hits)
 		
 		allfound = []
 		hitcount = 0
 		
 		for lineobject in hits:
 			if hitcount < int(session['maxresults']):
+				pollingdata.pdremaining.value = pollingdata.pdremaining.value - 1
 				hitcount += 1
 				# print('item=', hit,'\n\tid:',wkid,'\n\tresult:',result)
 				authorobject = authordict[lineobject.wkuinversalid[0:6]]
