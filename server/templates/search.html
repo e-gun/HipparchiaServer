@@ -101,25 +101,20 @@ $(document).ready( function () {
         document.getElementById('displayresults').innerHTML = '';
         document.getElementById('searchsummary').innerHTML = '';
 
-        if (proximate == '') {
-            $.getJSON('/executesearch?seeking='+seeking, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
-            var trialnumber = 0;
-            var i = setInterval(function(){ $.getJSON('/progress', function(progress) {
+        var trialnumber = 0;
+
+        if (proximate == '') { var url = '/executesearch?seeking='+seeking; }
+        // window.location = url;
+
+        $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
+        var i = setInterval(function(){
+            // Date.now() to avoid caching of '/progress' if you don't run on port 5000
+            $.getJSON('/progress?ts='+Date.now(), function(progress) {
                 displayprogress(progress);
                 if (progress['active'] == false && trialnumber != 0) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; }
                 else { trialnumber = 1; }
-                }); }, 400);
-            // window.location = '/?seeking='+seeking;
-        } else {
-            $.getJSON('/executesearch?seeking='+seeking+'&proximate='+proximate, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
-            var trialnumber = 0;
-            var i = setInterval(function(){ $.getJSON('/progress', function(progress) {
-                displayprogress(progress);
-                if (progress['active'] == false && trialnumber != 0) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; }
-                else { trialnumber = 1; }
-                }); }, 400);
-            //window.location = '/?seeking='+seeking+'&proximate='+proximate;
-            }
+                });
+            }, 400);
         });
 
     function setoptions(sessionvar,value){
