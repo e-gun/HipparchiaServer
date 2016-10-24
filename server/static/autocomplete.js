@@ -448,6 +448,9 @@ function displayprogress(progress){
     } else {
         thehtml += m;
         }
+
+   if ( h > 0) { thehtml += '<br />('+h+' found)'; }
+
     document.getElementById('pollingdata').innerHTML = thehtml;
 }
 

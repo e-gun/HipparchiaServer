@@ -328,15 +328,18 @@ def htmlifysearchfinds(listoffinds):
 	"""
 	
 	resultsashtml = []
+	listofurls = []
 
 	for find in listoffinds:
 		htmlforthefind = ''
 		metadata = find[0]
 		lines = find[1:]
 		
+		listofurls.append(metadata['url'])
+		
 		htmlforthefind += '<locus>\n'
 		htmlforthefind += '\t<span class="findnumber">[' + str(metadata['hitnumber']) + ']</span>&nbsp;&nbsp;'
-		htmlforthefind += '<span class="foundauthor">' + metadata['author'] + '</span>,'
+		htmlforthefind += '<span class="foundauthor">' + metadata['author'] + '</span>,&nbsp;'
 		htmlforthefind += '<span class="foundwork">' + metadata['work'] + '</span>:\n'
 		htmlforthefind += '\t<browser id="' + metadata['url'] + '">'
 		htmlforthefind += '<span class="foundlocus">' + metadata['citation'] + '</span><br />'
@@ -349,7 +352,32 @@ def htmlifysearchfinds(listoffinds):
 			htmlforthefind += '<span class="locus">'+l+'</span>&nbsp;\n'
 			htmlforthefind += '<span class="foundtext">'+ln['line']+'</span><br />\n'
 		
-		print('ht=\n',htmlforthefind)
 		resultsashtml.append(htmlforthefind)
+	
+	htmlandjs = {}
+	htmlandjs['hits'] = resultsashtml
+	
+	if len(listoffinds) > 0:
+		htmlandjs['hitsjs'] = injectbrowserjavascript(listofurls)
+	else:
+		htmlandjs['hitsjs'] = ''
+	
+	return htmlandjs
 
-	return resultsashtml
+
+def injectbrowserjavascript(listofurls):
+	"""
+	the clickable urls don't work without inserting new js into the page to catch the clicks
+	need to match the what we used to get via the flask template
+	:return:
+	"""
+	jsoutput = ''
+	# jsoutput = '<script>'
+	
+	for url in listofurls:
+		jsoutput += '\n\tdocument.getElementById("'+url+'").onclick = openbrowserfromclick;'
+	
+	#jsoutput += '\n</script>'
+	
+	return jsoutput
+	

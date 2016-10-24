@@ -98,14 +98,17 @@ $(document).ready( function () {
         // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
         if (seeking.slice(-1) == ' ') { seeking = seeking.slice(0,-1) + '%20'; }
         if (proximate.slice(-1) == ' ') { proximate = proximate.slice(0,-1) + '%20'; }
+        document.getElementById('displayresults').innerHTML = '';
+        document.getElementById('searchsummary').innerHTML = '';
 
         if (proximate == '') {
-            $.getJSON('/test?seeking='+seeking, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
+            $.getJSON('/executesearch?seeking='+seeking, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
             var i = setInterval(function(){ $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } }); }, 500);
             // window.location = '/?seeking='+seeking;
         } else {
+            $.getJSON('/executesearch?seeking='+seeking+'&proximate='+proximate, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
             var i = setInterval(function(){ $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } }); }, 500);
-            window.location = '/?seeking='+seeking+'&proximate='+proximate;
+            //window.location = '/?seeking='+seeking+'&proximate='+proximate;
              }
         });
 
@@ -120,7 +123,8 @@ $(document).ready( function () {
         //  THE DATA YOU RECEIVE
         //
         //		output['title'] = thesearch
-        //		output['found'] = allfound
+        //		output['found'] = finds
+		//      output['js'] = findsjs
         //		output['resultcount'] = resultcount
         //		output['scope'] = str(len(indexedworklist))
         //		output['searchtime'] = str(searchtime)
@@ -142,7 +146,7 @@ $(document).ready( function () {
 
         var summaryhtml = '';
 
-        summaryhtml += 'Sought '+output['lookedfor']+'<br />\n';
+        summaryhtml += 'Sought '+output['htmlsearch']+'<br />\n';
         if ( output['scope'] != '1') { summaryhtml += 'Searched '+output['scope']+' works '; } else { summaryhtml += 'Searched 1 work '; }
         summaryhtml += 'and found '+output['resultcount']+' passages';
         summaryhtml += ' ('+output['searchtime']+'s)';
@@ -161,6 +165,14 @@ $(document).ready( function () {
         for (i = 0; i < dLen; i++) { passagesreturned += output['found'][i]; }
 
         document.getElementById('displayresults').innerHTML = passagesreturned;
+
+        //
+        // JS UPDATE
+        // [http://stackoverflow.com/questions/9413737/how-to-append-script-script-in-javascript#9413803]
+        //
+        var browserclickscript = document.createElement("script");
+        browserclickscript.innerHTML = output['js'];
+        document.body.appendChild(browserclickscript);
 
     }
 

@@ -7,6 +7,7 @@ import psycopg2
 from flask import session
 
 from server import hipparchia
+from server import pollingdata
 from server.dbsupport.dbfunctions import setconnection, dblineintolineobject, makeablankline
 from server.formatting_helper_functions import tidyuplist, dropdupes, prunedict, foundindict
 from server.hipparchiaclasses import MPCounter
@@ -314,6 +315,11 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	:param indexedauthorandworklist:
 	:return:
 	"""
+	
+	pollingdata.pdpoolofwork.value = len(indexedauthorandworklist)
+	pollingdata.pdremaining.value = len(indexedauthorandworklist)
+	pollingdata.pdhits.val.value = 0
+	
 	count = MPCounter()
 	manager = Manager()
 	hits = manager.dict()
@@ -329,10 +335,13 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	# a class and/or decorator would be nice, but you have a lot of trouble getting the (mp aware) args into the function
 	# the must be a way, but this also works
 	if searchtype == 'simple':
+		pollingdata.pdstatusmessage = 'Executing a simple word search...'
 		jobs = [Process(target=workonsimplesearch, args=(count, hits, seeking, searching, commitcount, authors)) for i in range(workers)]
 	elif searchtype == 'phrase':
+		pollingdata.pdstatusmessage = 'Executing a phrase search...'
 		jobs = [Process(target=workonphrasesearch, args=(hits, seeking, searching, commitcount, authors)) for i in range(workers)]
 	elif searchtype == 'proximity':
+		pollingdata.pdstatusmessage = 'Executing a proximity search...'
 		jobs = [Process(target=workonproximitysearch, args=(count, hits, seeking, proximate, searching, commitcount, authors)) for i in range(workers)]
 	else:
 		# impossible, but...
@@ -370,7 +379,9 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 	while len(searching) > 0 and count.value <= int(session['maxresults']):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
-		try: i = searching.pop()
+		try:
+			i = searching.pop()
+			pollingdata.pdremaining.value = len(searching)
 		except: i = (-1,'gr0000w000')
 		commitcount.increment()
 		if commitcount.value % 750 == 0:
@@ -390,6 +401,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 				del hits[index]
 			else:
 				count.increment(len(hits[index][1]))
+				pollingdata.pdhits.increment(len(hits[index][1]))
 				
 	dbconnection.commit()
 	curs.close()
@@ -417,7 +429,9 @@ def workonphrasesearch(hits, seeking, searching, commitcount, authors):
 	while len(searching) > 0:
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
-		try: i = searching.pop()
+		try:
+			i = searching.pop()
+			pollingdata.pdremaining.value = len(searching)
 		except: i = (-1,'gr0001w001')
 		commitcount.increment()
 		if commitcount.value % 750 == 0:
@@ -459,7 +473,9 @@ def workonproximitysearch(count, hits, seeking, proximate, searching, commitcoun
 	while len(searching) > 0 and count.value <= int(session['maxresults']):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
-		try: i = searching.pop()
+		try:
+			i = searching.pop()
+			pollingdata.pdremaining.value = len(searching)
 		except: i = (-1,'gr0001w001')
 		commitcount.increment()
 		if commitcount.value % 750 == 0:
@@ -475,6 +491,7 @@ def workonproximitysearch(count, hits, seeking, proximate, searching, commitcoun
 			del hits[index]
 		else:
 			count.increment(len(hits[index][1]))
+			pollingdata.pdhits.increment(len(hits[index][1]))
 	
 	dbconnection.commit()
 	curs.close()
@@ -553,6 +570,12 @@ def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist):
 	:return:
 	"""
 	
+	pollingdata.pdpoolofwork.value = len(indexedauthorandworklist)
+	pollingdata.pdremaining.value = len(indexedauthorandworklist)
+	pollingdata.pdhits.val.value = 0
+	pollingdata.pdstatusmessage = 'Executing a short-phrase search...'
+	
+	
 	count = MPCounter()
 	manager = Manager()
 	hits = manager.dict()
@@ -586,11 +609,13 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch):
 	dbconnection = setconnection('autocommit')
 	curs = dbconnection.cursor()
 
+	
 	while len(workstosearch) > 0:
-		try: w = workstosearch.pop()
+		try:
+			w = workstosearch.pop()
+			pollingdata.pdremaining.value = len(workstosearch)
 		except: w = (-1, 'gr0000w000')
 		index = w[0]
-		
 		if index != -1:
 			matchobjects = []
 			wkid = w[1]
@@ -658,6 +683,7 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch):
 					
 					if re.search(searchphrase, searchzone) is not None:
 						count.increment(1)
+						pollingdata.pdhits.val.value = count.value
 						matchobjects.append(lineobjects[i])
 					previous = lineobjects[i]
 					
@@ -709,8 +735,10 @@ def phrasesearch(searchphrase, cursor, wkid, authors):
 
 		if session['nearornot'] == 'T' and re.search(searchphrase, wordset) is not None:
 			fullmatches.append(hit)
+			pollingdata.pdhits.increment(1)
 		elif session['nearornot'] == 'F' and re.search(searchphrase, wordset) is None:
 			fullmatches.append(hit)
+			pollingdata.pdhits.increment(1)
 	
 	return fullmatches
 

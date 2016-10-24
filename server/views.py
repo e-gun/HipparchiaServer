@@ -1055,9 +1055,9 @@ def progressreport():
 	"""
 
 	progress = {}
-	progress['total'] = pollingdata.pdpoolofwork
-	progress['remaining'] = pollingdata.pdremaining
-	progress['hits'] = pollingdata.pdhits
+	progress['total'] = pollingdata.pdpoolofwork.value
+	progress['remaining'] = pollingdata.pdremaining.value
+	progress['hits'] = pollingdata.pdhits.value
 	progress['message'] = pollingdata.pdstatusmessage
 	progress['active'] = pollingdata.pdactive
 	
@@ -1066,10 +1066,13 @@ def progressreport():
 	return progress
 
 
-@hipparchia.route('/test', methods=['GET'])
+@hipparchia.route('/executesearch', methods=['GET'])
 def jsexecutesearch():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
+	
+	pollingdata.pdremaining.value = -1
+	pollingdata.pdpoolofwork.value = -1
 	
 	sessionvariables()
 	# need to sanitize input at least a bit...
@@ -1105,6 +1108,8 @@ def jsexecutesearch():
 	
 	if len(seeking) > 0:
 		starttime = time.time()
+		pollingdata.pdactive = True
+		pollingdata.pdstatusmessage = 'Compiling the list of works to search'
 		
 		authorandworklist = compileauthorandworklist(authordict, workdict)
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
@@ -1159,8 +1164,12 @@ def jsexecutesearch():
 			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
 			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict)
 		
+		pollingdata.pdstatusmessage = 'Formatting the results'
+		pollingdata.pdpoolofwork.value = -1
+		
 		allfound = []
 		hitcount = 0
+		
 		for lineobject in hits:
 			if hitcount < int(session['maxresults']):
 				hitcount += 1
@@ -1175,13 +1184,15 @@ def jsexecutesearch():
 			else:
 				pass
 		
-		allfound = htmlifysearchfinds(allfound)
-		
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
 		if len(allfound) > int(session['maxresults']):
 			allfound = allfound[0:int(session['maxresults'])]
-			
+		
+		htmlandjs = htmlifysearchfinds(allfound)
+		finds = htmlandjs['hits']
+		findsjs = htmlandjs['hitsjs']
+		
 		resultcount = len(allfound)
 		
 		if resultcount < int(session['maxresults']):
@@ -1193,7 +1204,8 @@ def jsexecutesearch():
 		
 		output = {}
 		output['title'] = thesearch
-		output['found'] = allfound
+		output['found'] = finds
+		output['js'] = findsjs
 		output['resultcount'] = resultcount
 		output['scope'] = str(len(indexedworklist))
 		output['searchtime'] = str(searchtime)
@@ -1223,10 +1235,11 @@ def jsexecutesearch():
 		output['sortby'] = session['sortorder']
 		output['dmin'] = dmin
 		output['dmax'] = dmax
-		
+				
 	output = json.dumps(output)
 	
 	cur.close()
 	del dbc
+	pollingdata.pdactive = False
 	
 	return output

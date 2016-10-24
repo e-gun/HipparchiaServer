@@ -1,14 +1,21 @@
 # -*- coding: utf-8 -*-
+from multiprocessing import Value
+from server.hipparchiaclasses import MPCounter
 
 def initializeglobals():
 	global pdactive
 	global pdremaining
 	global pdpoolofwork
-	global pdhits
 	global pdstatusmessage
 	
 	pdactive = False
-	pdremaining = -1
-	pdpoolofwork = -1
-	pdhits = -1
+	pdremaining = Value('i',-1)
+	pdpoolofwork = Value('i',-1)
 	pdstatusmessage = ''
+	
+	# mp functions need lockable items
+	
+	global pdhits
+	
+	pdhits = MPCounter()
+	pdhits.increment(-1)
