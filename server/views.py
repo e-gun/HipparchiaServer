@@ -42,7 +42,7 @@ pollingdata.initializeglobals()
 
 
 @hipparchia.route('/', methods=['GET', 'POST'])
-def frontpate():
+def frontpage():
 	"""
 	the front page
 	it used to do stuff
@@ -602,6 +602,7 @@ def workstructure():
 		ao = authordict[workdb[:6]]
 	except:
 		ao = makeanemptyauthor('gr0000')
+		
 	structure = {}
 	for work in ao.listofworks:
 		if work.universalid == workdb:
@@ -1154,4 +1155,4 @@ def clearsession():
 	# Clear the session
     session.clear()
 	# Redirect the user to the main page
-    return redirect(url_for('frontpate'))
+    return redirect(url_for('frontpage'))
