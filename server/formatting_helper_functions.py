@@ -371,13 +371,11 @@ def injectbrowserjavascript(listofurls):
 	need to match the what we used to get via the flask template
 	:return:
 	"""
+	
 	jsoutput = ''
-	# jsoutput = '<script>'
 	
 	for url in listofurls:
 		jsoutput += '\n\tdocument.getElementById("'+url+'").onclick = openbrowserfromclick;'
-	
-	#jsoutput += '\n</script>'
 	
 	return jsoutput
 	

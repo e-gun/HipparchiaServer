@@ -1071,6 +1071,7 @@ def jsexecutesearch():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 	
+	pollingdata.pdactive = True
 	pollingdata.pdremaining.value = -1
 	pollingdata.pdpoolofwork.value = -1
 	
@@ -1108,7 +1109,6 @@ def jsexecutesearch():
 	
 	if len(seeking) > 0:
 		starttime = time.time()
-		pollingdata.pdactive = True
 		pollingdata.pdstatusmessage = 'Compiling the list of works to search'
 		
 		authorandworklist = compileauthorandworklist(authordict, workdict)
@@ -1240,6 +1240,8 @@ def jsexecutesearch():
 	
 	cur.close()
 	del dbc
+	
+	pollingdata.pdhits.val.value = -1
 	pollingdata.pdactive = False
 	
 	return output
