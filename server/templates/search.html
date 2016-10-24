@@ -212,7 +212,6 @@ $(document).ready( function () {
 
 {% include "moreinfo.html" ignore missing %}
 
-
 <div id="wordsearchfields" class="center">
 <button id="executesearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Execute the search"><span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
     {% if lookedfor == '' %}
@@ -255,70 +254,9 @@ $(document).ready( function () {
         <div id="dictdialog">&nbsp;</div>
     </div>
 
-    {% autoescape false %}
-    <div id="searchsummary">
-    {% if searchtime != '0' %}
-        Sought {{ htmlsearch }} <br/>
-        {% if scope != '1' %}
-            Searched {{ scope }} works
-         {% else %}
-            Searched in 1 work
-         {% endif %}
-        and found {{ resultcount }} passages
-        &nbsp;({{ searchtime }}s)
-        {% if lang == 'G' %}
-            {% if dmin != '850 B.C.E.' or dmax != '1500 C.E.' %}
-                <br>Searched between {{ dmin }} and {{ dmax }}
-            {% endif %}
-        {% endif %}
-        <br />Sorted by {{ sortedby }}
-    {% endif %}
-        {% if hitmax == 'true' %}
-        <br />[Search suspended: result cap reached.]
-        {% endif %}
-    </div>
+    <div id="searchsummary"></div>
     <div id="pollingdata"></div>
-    <div id="displayresults">
-    {% for result in found %}
-    	{% for context in result %}
-	    	{% if context['newfind'] %}
-                <locus>
-                <span class="findnumber">[{{ context['hitnumber'] }}]</span>&nbsp;&nbsp;
-	    		<span class="foundauthor">{{ context['author'] }}</span>,
-	    		<span class="foundwork">{{ context['work'] }}</span>:
-                <browser id="{{ context['url'] }}">
-	    		<span class="foundlocus">{{ context['citation'] }}</span><br />
-                </browser>
-                </locus>
-	    	{% else %}
-	    		<span class="locus">
-	    		{% for i in range(context['locus']|length -1,-1,-1) %}
-	    			{{ context['locus'][i] }}.
-	    		{% endfor %}&nbsp;
-                </span>
-	    		<span class="foundtext">
-                    {{ context['line'] }}
-                </span>
-                <br />
-    		{% endif %}
-    	{% endfor %}
-    {% endfor %}
-    </div>
-    {% endautoescape %}
-
-
-
-<script>
-
-{% for result in found %}
-    {% for context in result %}
-	    {% if context['newfind'] %}
-            document.getElementById('{{ context['url'] }}').onclick = openbrowserfromclick;
-	    {% endif %}
-    {% endfor %}
-{% endfor %}
-
-</script>
+    <div id="displayresults"></div>
 
 <div id="moreinfo">
      <button id="clickformoreinfo" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Help"><span class="ui-icon ui-icon-help"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
