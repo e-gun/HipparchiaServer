@@ -40,6 +40,7 @@ workgenreslist = buildworkgenreslist(workdict)
 
 pollingdata.initializeglobals()
 
+
 @hipparchia.route('/', methods=['GET', 'POST'])
 def search():
 	

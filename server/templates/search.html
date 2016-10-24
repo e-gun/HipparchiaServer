@@ -104,17 +104,17 @@ $(document).ready( function () {
         var trialnumber = 0;
 
         if (proximate == '') { var url = '/executesearch?seeking='+seeking; }
+        else { var url = '/executesearch?seeking='+seeking+'&proximate='+proximate; }
         // window.location = url;
 
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
         var i = setInterval(function(){
-            // Date.now() to avoid caching of '/progress' if you don't run on port 5000
             $.getJSON('/progress?ts='+Date.now(), function(progress) {
                 displayprogress(progress);
-                if (progress['active'] == false && trialnumber != 0) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; }
+                if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; }
                 else { trialnumber = 1; }
                 });
-            }, 400);
+            }, 333);
         });
 
     function setoptions(sessionvar,value){
