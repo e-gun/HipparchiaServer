@@ -103,11 +103,11 @@ $(document).ready( function () {
 
         if (proximate == '') {
             $.getJSON('/executesearch?seeking='+seeking, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
-            var i = setInterval(function(){ $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } }); }, 333);
+            var i = setInterval(function(){ $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } }); }, 400);
             // window.location = '/?seeking='+seeking;
         } else {
             $.getJSON('/executesearch?seeking='+seeking+'&proximate='+proximate, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
-            var i = setInterval(function(){ $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } }); }, 333);
+            var i = setInterval(function(){ $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } }); }, 400);
             //window.location = '/?seeking='+seeking+'&proximate='+proximate;
              }
         });
