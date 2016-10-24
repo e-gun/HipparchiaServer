@@ -64,6 +64,189 @@ def frontpate():
 	return page
 
 
+@hipparchia.route('/executesearch', methods=['GET'])
+def jsexecutesearch():
+	dbc = setconnection('autocommit')
+	cur = dbc.cursor()
+	
+	sessionvariables()
+	# need to sanitize input at least a bit...
+	try:
+		seeking = re.sub(r'[\'"`!;&]', '', request.args.get('seeking', ''))
+	except:
+		seeking = ''
+	
+	try:
+		proximate = re.sub(r'[\'"`!;&]', '', request.args.get('proximate', ''))
+	except:
+		proximate = ''
+	
+	if len(seeking) < 1 and len(proximate) > 0:
+		seeking = proximate
+		proximate = ''
+	
+	pollingdata.pdactive = True
+	pollingdata.pdremaining.value = -1
+	pollingdata.pdpoolofwork.value = -1
+	
+	linesofcontext = int(session['linesofcontext'])
+	searchtime = 0
+	
+	dmin, dmax = bcedating()
+	
+	if session['corpora'] == 'G' and re.search('[a-zA-Z]', seeking) is not None:
+		# searching greek, but not typing in unicode greek: autoconvert
+		seeking = seeking.upper()
+		seeking = replacegreekbetacode(seeking)
+	
+	if session['corpora'] == 'G' and re.search('[a-zA-Z]', proximate) is not None:
+		proximate = proximate.upper()
+		proximate = replacegreekbetacode(proximate)
+	
+	phrasefinder = re.compile('[^\s]\s[^\s]')
+	
+	if len(seeking) > 0:
+		starttime = time.time()
+		pollingdata.pdstatusmessage = 'Compiling the list of works to search'
+		
+		authorandworklist = compileauthorandworklist(authordict, workdict)
+		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
+		authorandworklist = flagexclusions(authorandworklist)
+		authorandworklist = aosortauthorandworklists(authorandworklist, authordict)
+		
+		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
+		# so we slap on an index value
+		indexedworklist = []
+		index = -1
+		for w in authorandworklist:
+			index += 1
+			indexedworklist.append((index, w))
+		del authorandworklist
+		
+		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
+			searchtype = 'simple'
+			thesearch = seeking
+			htmlsearch = '<span class="emph">' + seeking + '</span>'
+			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, authordict)
+		elif re.search(phrasefinder, seeking) is not None:
+			searchtype = 'phrase'
+			thesearch = seeking
+			htmlsearch = '<span class="emph">' + seeking + '</span>'
+			terms = seeking.split(' ')
+			if len(max(terms, key=len)) > 3:
+				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict)
+			else:
+				# you are looking for a set of little words: και δη και, etc.
+				#   16s to find και δη και via a std phrase search; 1.6s to do it this way
+				# not immediately obvious what the best number for minimum max term len is:
+				# consider what happens if you send a '4' this way:
+				#   εἶναι τὸ κατὰ τὴν (Searched between 850 B.C.E. and 200 B.C.E.)
+				# this takes 13.7s with a std phrase search; it takes 14.6s if sent to shortphrasesearch()
+				#   οἷον κἀν τοῖϲ (Searched between 850 B.C.E. and 200 B.C.E.)
+				#   5.57 std; 17.54s 'short'
+				# so '3' looks like the right answer
+				hits = dispatchshortphrasesearch(seeking, indexedworklist)
+		else:
+			searchtype = 'proximity'
+			if session['searchscope'] == 'W':
+				scope = 'words'
+			else:
+				scope = 'lines'
+			
+			if session['nearornot'] == 'T':
+				nearstr = ''
+			else:
+				nearstr = ' not'
+			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
+			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
+			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
+			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict)
+		
+		pollingdata.pdstatusmessage = 'Formatting the results'
+		pollingdata.pdpoolofwork.value = len(hits)
+		pollingdata.pdremaining.value = len(hits)
+		
+		allfound = []
+		hitcount = 0
+		
+		for lineobject in hits:
+			if hitcount < int(session['maxresults']):
+				pollingdata.pdremaining.value = pollingdata.pdremaining.value - 1
+				hitcount += 1
+				# print('item=', hit,'\n\tid:',wkid,'\n\tresult:',result)
+				authorobject = authordict[lineobject.wkuinversalid[0:6]]
+				workobject = workdict[lineobject.wkuinversalid]
+				citwithcontext = formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext,
+				                                             seeking, proximate, searchtype, cur)
+				# add the hit count to line zero which contains the metadata for the lines
+				citwithcontext[0]['hitnumber'] = hitcount
+				allfound.append(citwithcontext)
+			else:
+				pass
+		
+		searchtime = time.time() - starttime
+		searchtime = round(searchtime, 2)
+		if len(allfound) > int(session['maxresults']):
+			allfound = allfound[0:int(session['maxresults'])]
+		
+		htmlandjs = htmlifysearchfinds(allfound)
+		finds = htmlandjs['hits']
+		findsjs = htmlandjs['hitsjs']
+		
+		resultcount = len(allfound)
+		
+		if resultcount < int(session['maxresults']):
+			hitmax = 'false'
+		else:
+			hitmax = 'true'
+		
+		# prepare the output
+		
+		output = {}
+		output['title'] = thesearch
+		output['found'] = finds
+		output['js'] = findsjs
+		output['resultcount'] = resultcount
+		output['scope'] = str(len(indexedworklist))
+		output['searchtime'] = str(searchtime)
+		output['lookedfor'] = seeking
+		output['proximate'] = proximate
+		output['thesearch'] = thesearch
+		output['htmlsearch'] = htmlsearch
+		output['hitmax'] = hitmax
+		output['lang'] = session['corpora']
+		output['sortby'] = session['sortorder']
+		output['dmin'] = dmin
+		output['dmax'] = dmax
+	
+	else:
+		output = {}
+		output['title'] = seeking
+		output['found'] = []
+		output['resultcount'] = 0
+		output['scope'] = 0
+		output['searchtime'] = '0.00'
+		output['lookedfor'] = seeking
+		output['proximate'] = proximate
+		output['thesearch'] = ''
+		output['htmlsearch'] = ''
+		output['hitmax'] = 0
+		output['lang'] = session['corpora']
+		output['sortby'] = session['sortorder']
+		output['dmin'] = dmin
+		output['dmax'] = dmax
+	
+	output = json.dumps(output)
+	
+	cur.close()
+	del dbc
+	
+	pollingdata.pdhits.val.value = -1
+	pollingdata.pdactive = False
+	
+	return output
+
+
 @hipparchia.route('/concordance', methods=['GET'])
 def concordance():
 	"""
@@ -150,7 +333,7 @@ def concordance():
 @hipparchia.route('/text', methods=['GET'])
 def textmaker():
 	"""
-	build a text
+	build a text suitable for display
 	:return:
 	"""
 	dbc = setconnection('autocommit')
@@ -198,6 +381,45 @@ def textmaker():
 	del dbc
 	
 	return results
+
+
+@hipparchia.route('/progress', methods=['GET'])
+def progressreport():
+	"""
+	allow js to poll the progress of a long operation
+	this code is itself in progress and will remain so until the passing of globals between funcitons gets sorted
+
+	note that if you run through uWSGI the GET sent to '/executesearch' will block/lock the IO
+	this will prevent anything GET being sent to '/progress' until after jsexecutesearch() finishes
+	not quite the async dreamland you had imagined
+
+	searches will work, but the progress statements will be broken
+
+	something like gevent needs to be integrated so you can handle async requests, I guess.
+
+	:return:
+	"""
+	
+	try:
+		searchid = int(request.args.get('id', ''))
+	except:
+		searchid = -1
+	
+	if pollingdata.pdactive == False:
+		time.sleep(.3)
+	
+	progress = {}
+	progress['total'] = pollingdata.pdpoolofwork.value
+	progress['remaining'] = pollingdata.pdremaining.value
+	progress['hits'] = pollingdata.pdhits.value
+	progress['message'] = pollingdata.pdstatusmessage
+	progress['active'] = pollingdata.pdactive
+	
+	progress = json.dumps(progress)
+	
+	return progress
+
+
 #
 # unadorned views for quickly peeking at the data
 #
@@ -218,115 +440,22 @@ def authorlist():
 # helpers & routes you should not browse directly
 #
 
-@hipparchia.route('/clear')
-def clearsession():
-	# Clear the session
-    session.clear()
-	# Redirect the user to the main page
-    return redirect(url_for('frontpate'))
-
-
-@hipparchia.route('/makeselection', methods=['GET'])
-def selectionmade():
-	"""
-	once a choice is made, parse and register it inside session['selections']
-	then return the human readable version of the same for display on the page
-
-	this is also called without arguments to return the searchlist contents by
-	skipping ahead to sessionselectionsashtml()
+@hipparchia.route('/getcookie', methods=['GET'])
+def cookieintosession():
+	cookienum = request.args.get('cookie', '')
+	cookienum = cookienum[0:2]
 	
-	sample input: '/makeselection?auth=gr0008&work=001&locus=3|4|23'
-
-	:return:
-	"""
+	thecookie = request.cookies.get('session' + cookienum)
+	# comes back as a string that needs parsing
+	cookiedict = parsejscookie(thecookie)
+	# session.clear()
+	for key, value in cookiedict.items():
+		modifysessionvar(key, value)
 	
-	try:
-		genre = re.sub('[\W_]+', '', request.args.get('genre', ''))
-	except:
-		genre = ''
-
-	try:
-		# need periods (for now): just remove some obvious problem cases
-		wkgenre = re.sub('[\[\]\'\\&\*\%\^_]+', '', request.args.get('wkgenre', ''))
-	except:
-		wkgenre = ''
-
-	try:
-		workid = re.sub('[\W_]+', '', request.args.get('work', ''))
-	except:
-		workid = ''
-
-	try:
-		uid = re.sub('[\W_]+', '', request.args.get('auth', ''))
-	except:
-		uid = ''
-
-	try:
-		locus = re.sub('[!@#$%^&*()=]+', '', request.args.get('locus', ''))
-	except:
-		locus = ''
-		
-	try:
-		exclude = re.sub('[^tf]', '', request.args.get('exclude', ''))
-	except:
-		exclude = ''
-
+	modifysessionselections(cookiedict, authorgenreslist, workgenreslist)
 	
-	if exclude != 't':
-		suffix = 'selections'
-		other = 'exclusions'
-	else:
-		suffix = 'exclusions'
-		other = 'selections'
-					
-	if (uid != '') and (workid != '') and (locus != ''):
-		# a specific passage
-		session['psg'+suffix].append(uid+'w'+workid+'_AT_'+locus)
-		session['psg'+suffix] = tidyuplist(session['psg'+suffix])
-		rationalizeselections(uid+'w'+workid+'_AT_'+locus, suffix)
-	elif (uid != '') and (workid != ''):
-		# a specific work
-		session['wk'+suffix].append(uid+'w'+workid)
-		session['wk'+suffix] = tidyuplist(session['wk'+suffix])
-		rationalizeselections(uid+'w'+workid, suffix)
-	elif (uid != '') and (workid == ''):
-		# a specific author
-		session['au'+suffix].append(uid)
-		session['au'+suffix] = tidyuplist(session['au'+suffix])
-		rationalizeselections(uid, suffix)
-	elif genre != '':
-		# add to the +/- genre list and then subtract from the -/+ list
-		session['agn'+suffix].append(genre)
-		session['agn'+suffix] = tidyuplist(session['agn'+suffix])
-		session['agn'+other] = dropdupes(session['agn' + other], session['agn' + suffix])
-	elif wkgenre != '':
-		# add to the +/- genre list and then subtract from the -/+ list
-		session['wkgn'+suffix].append(wkgenre)
-		session['wkgn'+suffix] = tidyuplist(session['wkgn'+suffix])
-		session['wkgn' + other] = dropdupes(session['wkgn' + other], session['wkgn' + suffix])
-	
-	# get three bundles to put in the table cells
-	# stored in a dict with three keys: timeexclusions, selections, exclusions, numberofselections
-	
-	htmlbundles = sessionselectionsashtml(authordict, workdict)
-	htmlbundles = json.dumps(htmlbundles)
-	
-	return htmlbundles
-
-
-@hipparchia.route('/setsessionvariable', methods=['GET'])
-def setsessionvariable():
-	param = re.search(r'(.*?)=.*?', request.query_string.decode('utf-8'))
-	param = param.group(1)
-	val = request.args.get(param)
-	# need to accept '-' because of the date spinner
-	val = re.sub('[!@#$%^&*()\[\]=;`+\\\'\"]+', '', val)
-	
-	success = modifysessionvar(param, val)
-	
-	result = json.dumps([{param: val}])
-	
-	return result
+	response = redirect(url_for('search'))
+	return response
 
 
 @hipparchia.route('/getauthorhint', methods=['GET'])
@@ -469,14 +598,23 @@ def workstructure():
 	safepassage = tuple(safepassage[:5])
 	workdb = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
 	# ao = dbauthorandworkmaker(workdb[:6], cursor)
-	ao = authordict[workdb[:6]]
+	try:
+		ao = authordict[workdb[:6]]
+	except:
+		ao = makeanemptyauthor('gr0000')
 	structure = {}
 	for work in ao.listofworks:
 		if work.universalid == workdb:
 			structure = work.structure
-	lowandhigh = findvalidlevelvalues(workdb, structure, safepassage, cur)
-	results = [{'totallevels': lowandhigh[0]}, {'level': lowandhigh[1]}, {'label': lowandhigh[2]},
-	           {'low': lowandhigh[3]}, {'high': lowandhigh[4]}, {'rng': lowandhigh[5]}]
+	if structure != {}:
+		lowandhigh = findvalidlevelvalues(workdb, structure, safepassage, cur)
+		# example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
+		results = [{'totallevels': lowandhigh[0]}, {'level': lowandhigh[1]}, {'label': lowandhigh[2]},
+		           {'low': lowandhigh[3]}, {'high': lowandhigh[4]}, {'rng': lowandhigh[5]}]
+	else:
+		# (2, 0, 'verse', '1', '100')
+		results = [{'totallevels': 1}, {'level': 0}, {'label': 'Error: repick the work'},
+		           {'low': 'Error:'}, {'high': 'again'}, {'rng': ['error', 'select', 'the', 'work', 'again']}]
 
 	results = json.dumps(results)
 	
@@ -754,34 +892,6 @@ def findbyform():
 	return returnarray
 
 
-@hipparchia.route('/clearselections', methods=['GET'])
-def clearselections():
-	"""
-	a selection gets thrown into the trash
-	:return:
-	"""
-	category = request.args.get('cat', '')
-	selectiontypes = ['auselections', 'wkselections', 'psgselections', 'agnselections', 'wkgnselections',
-	                  'auexclusions', 'wkexclusions', 'psgexclusions', 'agnexclusions', 'wkgnexclusions']
-	if category not in selectiontypes:
-		category = ''
-	
-	item = request.args.get('id', '')
-	item = int(item)
-	
-	try:
-		session[category].pop(item)
-	except:
-		print('failed to pop',category,str(item))
-		pass
-	
-	session.modified = True
-
-	newselections = json.dumps(sessionselectionsashtml(authordict, workdict))
-	
-	return newselections
-
-
 @hipparchia.route('/dictsearch', methods=['GET'])
 def dictsearch():
 	"""
@@ -907,242 +1017,141 @@ def reverselexiconsearch():
 	del dbc
 	
 	return returnarray
+
+
+@hipparchia.route('/setsessionvariable', methods=['GET'])
+def setsessionvariable():
+	param = re.search(r'(.*?)=.*?', request.query_string.decode('utf-8'))
+	param = param.group(1)
+	val = request.args.get(param)
+	# need to accept '-' because of the date spinner
+	val = re.sub('[!@#$%^&*()\[\]=;`+\\\'\"]+', '', val)
 	
-
-@hipparchia.route('/getcookie', methods=['GET'])
-def cookieintosession():
-
-	cookienum = request.args.get('cookie', '')
-	cookienum = cookienum[0:2]
+	success = modifysessionvar(param, val)
 	
-	thecookie = request.cookies.get('session'+cookienum)
-	# comes back as a string that needs parsing
-	cookiedict = parsejscookie(thecookie)
-	# session.clear()
-	for key,value in cookiedict.items():
-		modifysessionvar(key,value)
-
-	modifysessionselections(cookiedict, authorgenreslist, workgenreslist)
+	result = json.dumps([{param: val}])
 	
-	response = redirect(url_for('search'))
-	return response
+	return result
 
 
-@hipparchia.route('/progress', methods=['GET'])
-def progressreport():
+@hipparchia.route('/makeselection', methods=['GET'])
+def selectionmade():
 	"""
-	allow js to poll the progress of a long operation
-	this code is itself in progress and will remain so until the passing of globals between funcitons gets sorted
-	
-	note that if you run through uWSGI the GET sent to '/executesearch' will block/lock the IO
-	this will prevent anything GET being sent to '/progress' until after jsexecutesearch() finishes
-	not quite the async dreamland you had imagined
-	
-	searches will work, but the progress statements will be broken
-	
-	something like gevent needs to be integrated so you can handle async requests, I guess.
-	
+	once a choice is made, parse and register it inside session['selections']
+	then return the human readable version of the same for display on the page
+
+	this is also called without arguments to return the searchlist contents by
+	skipping ahead to sessionselectionsashtml()
+
+	sample input: '/makeselection?auth=gr0008&work=001&locus=3|4|23'
+
 	:return:
 	"""
-
-	try:
-		searchid = int(request.args.get('id', ''))
-	except:
-		searchid = -1
-	
-	if pollingdata.pdactive == False:
-		time.sleep(.3)
-	
-	progress = {}
-	progress['total'] = pollingdata.pdpoolofwork.value
-	progress['remaining'] = pollingdata.pdremaining.value
-	progress['hits'] = pollingdata.pdhits.value
-	progress['message'] = pollingdata.pdstatusmessage
-	progress['active'] = pollingdata.pdactive
-	
-	progress = json.dumps(progress)
-	
-	return progress
-
-
-@hipparchia.route('/executesearch', methods=['GET'])
-def jsexecutesearch():
-	dbc = setconnection('autocommit')
-	cur = dbc.cursor()
-		
-	sessionvariables()
-	# need to sanitize input at least a bit...
-	try:
-		seeking = re.sub(r'[\'"`!;&]', '', request.args.get('seeking', ''))
-	except:
-		seeking = ''
 	
 	try:
-		proximate = re.sub(r'[\'"`!;&]', '', request.args.get('proximate', ''))
+		genre = re.sub('[\W_]+', '', request.args.get('genre', ''))
 	except:
-		proximate = ''
+		genre = ''
 	
-	if len(seeking) < 1 and len(proximate) > 0:
-		seeking = proximate
-		proximate = ''
+	try:
+		# need periods (for now): just remove some obvious problem cases
+		wkgenre = re.sub('[\[\]\'\\&\*\%\^_]+', '', request.args.get('wkgenre', ''))
+	except:
+		wkgenre = ''
 	
-	pollingdata.pdactive = True
-	pollingdata.pdremaining.value = -1
-	pollingdata.pdpoolofwork.value = -1
+	try:
+		workid = re.sub('[\W_]+', '', request.args.get('work', ''))
+	except:
+		workid = ''
 	
-	linesofcontext = int(session['linesofcontext'])
-	searchtime = 0
+	try:
+		uid = re.sub('[\W_]+', '', request.args.get('auth', ''))
+	except:
+		uid = ''
 	
-	dmin, dmax = bcedating()
+	try:
+		locus = re.sub('[!@#$%^&*()=]+', '', request.args.get('locus', ''))
+	except:
+		locus = ''
 	
-	if session['corpora'] == 'G' and re.search('[a-zA-Z]', seeking) is not None:
-		# searching greek, but not typing in unicode greek: autoconvert
-		seeking = seeking.upper()
-		seeking = replacegreekbetacode(seeking)
+	try:
+		exclude = re.sub('[^tf]', '', request.args.get('exclude', ''))
+	except:
+		exclude = ''
 	
-	if session['corpora'] == 'G' and re.search('[a-zA-Z]', proximate) is not None:
-		proximate = proximate.upper()
-		proximate = replacegreekbetacode(proximate)
-	
-	phrasefinder = re.compile('[^\s]\s[^\s]')
-	
-	if len(seeking) > 0:
-		starttime = time.time()
-		pollingdata.pdstatusmessage = 'Compiling the list of works to search'
-		
-		authorandworklist = compileauthorandworklist(authordict, workdict)
-		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
-		authorandworklist = flagexclusions(authorandworklist)
-		authorandworklist = aosortauthorandworklists(authorandworklist, authordict)
-		
-		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
-		# so we slap on an index value
-		indexedworklist = []
-		index = -1
-		for w in authorandworklist:
-			index += 1
-			indexedworklist.append((index, w))
-		del authorandworklist
-		
-		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
-			searchtype = 'simple'
-			thesearch = seeking
-			htmlsearch = '<span class="emph">' + seeking + '</span>'
-			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, authordict)
-		elif re.search(phrasefinder, seeking) is not None:
-			searchtype = 'phrase'
-			thesearch = seeking
-			htmlsearch = '<span class="emph">' + seeking + '</span>'
-			terms = seeking.split(' ')
-			if len(max(terms, key=len)) > 3:
-				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict)
-			else:
-				# you are looking for a set of little words: και δη και, etc.
-				#   16s to find και δη και via a std phrase search; 1.6s to do it this way
-				# not immediately obvious what the best number for minimum max term len is:
-				# consider what happens if you send a '4' this way:
-				#   εἶναι τὸ κατὰ τὴν (Searched between 850 B.C.E. and 200 B.C.E.)
-				# this takes 13.7s with a std phrase search; it takes 14.6s if sent to shortphrasesearch()
-				#   οἷον κἀν τοῖϲ (Searched between 850 B.C.E. and 200 B.C.E.)
-				#   5.57 std; 17.54s 'short'
-				# so '3' looks like the right answer
-				hits = dispatchshortphrasesearch(seeking, indexedworklist)
-		else:
-			searchtype = 'proximity'
-			if session['searchscope'] == 'W':
-				scope = 'words'
-			else:
-				scope = 'lines'
-			
-			if session['nearornot'] == 'T':
-				nearstr = ''
-			else:
-				nearstr = ' not'
-			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
-			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
-			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
-			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict)
-		
-		pollingdata.pdstatusmessage = 'Formatting the results'
-		pollingdata.pdpoolofwork.value = len(hits)
-		pollingdata.pdremaining.value = len(hits)
-		
-		allfound = []
-		hitcount = 0
-		
-		for lineobject in hits:
-			if hitcount < int(session['maxresults']):
-				pollingdata.pdremaining.value = pollingdata.pdremaining.value - 1
-				hitcount += 1
-				# print('item=', hit,'\n\tid:',wkid,'\n\tresult:',result)
-				authorobject = authordict[lineobject.wkuinversalid[0:6]]
-				workobject = workdict[lineobject.wkuinversalid]
-				citwithcontext = formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext,
-				                                             seeking, proximate, searchtype, cur)
-				# add the hit count to line zero which contains the metadata for the lines
-				citwithcontext[0]['hitnumber'] = hitcount
-				allfound.append(citwithcontext)
-			else:
-				pass
-		
-		searchtime = time.time() - starttime
-		searchtime = round(searchtime, 2)
-		if len(allfound) > int(session['maxresults']):
-			allfound = allfound[0:int(session['maxresults'])]
-		
-		htmlandjs = htmlifysearchfinds(allfound)
-		finds = htmlandjs['hits']
-		findsjs = htmlandjs['hitsjs']
-		
-		resultcount = len(allfound)
-		
-		if resultcount < int(session['maxresults']):
-			hitmax = 'false'
-		else:
-			hitmax = 'true'
-		
-		# prepare the output
-		
-		output = {}
-		output['title'] = thesearch
-		output['found'] = finds
-		output['js'] = findsjs
-		output['resultcount'] = resultcount
-		output['scope'] = str(len(indexedworklist))
-		output['searchtime'] = str(searchtime)
-		output['lookedfor'] = seeking
-		output['proximate'] = proximate
-		output['thesearch'] = thesearch
-		output['htmlsearch'] = htmlsearch
-		output['hitmax'] = hitmax
-		output['lang'] = session['corpora']
-		output['sortby'] = session['sortorder']
-		output['dmin'] = dmin
-		output['dmax'] = dmax
-		
+	if exclude != 't':
+		suffix = 'selections'
+		other = 'exclusions'
 	else:
-		output = {}
-		output['title'] = seeking
-		output['found'] = []
-		output['resultcount'] = 0
-		output['scope'] = 0
-		output['searchtime'] = '0.00'
-		output['lookedfor'] = seeking
-		output['proximate'] = proximate
-		output['thesearch'] = ''
-		output['htmlsearch'] = ''
-		output['hitmax'] = 0
-		output['lang'] = session['corpora']
-		output['sortby'] = session['sortorder']
-		output['dmin'] = dmin
-		output['dmax'] = dmax
-				
-	output = json.dumps(output)
+		suffix = 'exclusions'
+		other = 'selections'
 	
-	cur.close()
-	del dbc
+	if (uid != '') and (workid != '') and (locus != ''):
+		# a specific passage
+		session['psg' + suffix].append(uid + 'w' + workid + '_AT_' + locus)
+		session['psg' + suffix] = tidyuplist(session['psg' + suffix])
+		rationalizeselections(uid + 'w' + workid + '_AT_' + locus, suffix)
+	elif (uid != '') and (workid != ''):
+		# a specific work
+		session['wk' + suffix].append(uid + 'w' + workid)
+		session['wk' + suffix] = tidyuplist(session['wk' + suffix])
+		rationalizeselections(uid + 'w' + workid, suffix)
+	elif (uid != '') and (workid == ''):
+		# a specific author
+		session['au' + suffix].append(uid)
+		session['au' + suffix] = tidyuplist(session['au' + suffix])
+		rationalizeselections(uid, suffix)
+	elif genre != '':
+		# add to the +/- genre list and then subtract from the -/+ list
+		session['agn' + suffix].append(genre)
+		session['agn' + suffix] = tidyuplist(session['agn' + suffix])
+		session['agn' + other] = dropdupes(session['agn' + other], session['agn' + suffix])
+	elif wkgenre != '':
+		# add to the +/- genre list and then subtract from the -/+ list
+		session['wkgn' + suffix].append(wkgenre)
+		session['wkgn' + suffix] = tidyuplist(session['wkgn' + suffix])
+		session['wkgn' + other] = dropdupes(session['wkgn' + other], session['wkgn' + suffix])
 	
-	pollingdata.pdhits.val.value = -1
-	pollingdata.pdactive = False
+	# get three bundles to put in the table cells
+	# stored in a dict with three keys: timeexclusions, selections, exclusions, numberofselections
 	
-	return output
+	htmlbundles = sessionselectionsashtml(authordict, workdict)
+	htmlbundles = json.dumps(htmlbundles)
+	
+	return htmlbundles
+
+
+@hipparchia.route('/clearselections', methods=['GET'])
+def clearselections():
+	"""
+	a selection gets thrown into the trash
+	:return:
+	"""
+	category = request.args.get('cat', '')
+	selectiontypes = ['auselections', 'wkselections', 'psgselections', 'agnselections', 'wkgnselections',
+	                  'auexclusions', 'wkexclusions', 'psgexclusions', 'agnexclusions', 'wkgnexclusions']
+	if category not in selectiontypes:
+		category = ''
+	
+	item = request.args.get('id', '')
+	item = int(item)
+	
+	try:
+		session[category].pop(item)
+	except:
+		print('failed to pop', category, str(item))
+		pass
+	
+	session.modified = True
+	
+	newselections = json.dumps(sessionselectionsashtml(authordict, workdict))
+	
+	return newselections
+
+
+@hipparchia.route('/clear')
+def clearsession():
+	# Clear the session
+    session.clear()
+	# Redirect the user to the main page
+    return redirect(url_for('frontpate'))

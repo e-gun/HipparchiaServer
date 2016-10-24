@@ -10,7 +10,8 @@ def findvalidlevelvalues(workdb, workstructure, partialcitationtuple, cursor):
 	note that you should not send me a full citation because i will look at lowestlevel-1
 	:param workdb:
 	:param atlevel:
-	:return: a tuple with the available levels, current level, level label, low and high value: (2, 0, 'verse', '1', '100'), e.g.
+	:return: a tuple with the available levels, current level, level label, low and high value, and a list of valid values:
+		example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
 	"""
 	availablelevels = len(workstructure)
 	atlevel = availablelevels-len(partialcitationtuple)
