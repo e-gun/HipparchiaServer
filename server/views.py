@@ -223,7 +223,7 @@ def clearsession():
 	# Clear the session
     session.clear()
 	# Redirect the user to the main page
-    return redirect(url_for('search'))
+    return redirect(url_for('frontpate'))
 
 
 @hipparchia.route('/makeselection', methods=['GET'])
