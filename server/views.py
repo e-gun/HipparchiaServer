@@ -933,6 +933,15 @@ def progressreport():
 	"""
 	allow js to poll the progress of a long operation
 	this code is itself in progress and will remain so until the passing of globals between funcitons gets sorted
+	
+	note that if you run through uWSGI the GET sent to '/executesearch' will block/lock the IO
+	this will prevent anything GET being sent to '/progress' until after jsexecutesearch() finishes
+	not quite the async dreamland you had imagined
+	
+	searches will work, but the progress statements will be broken
+	
+	something like gevent needs to be integrated so you can handle async requests, I guess.
+	
 	:return:
 	"""
 
