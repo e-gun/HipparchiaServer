@@ -1054,6 +1054,7 @@ def progressreport():
 	:return:
 	"""
 
+	time.sleep(.25)
 	progress = {}
 	progress['total'] = pollingdata.pdpoolofwork.value
 	progress['remaining'] = pollingdata.pdremaining.value
