@@ -101,17 +101,17 @@ $(document).ready( function () {
         document.getElementById('displayresults').innerHTML = '';
         document.getElementById('searchsummary').innerHTML = '';
 
-        var trialnumber = 0;
+        var searchid = Date.now();
 
-        if (proximate == '') { var url = '/executesearch?seeking='+seeking; }
-        else { var url = '/executesearch?seeking='+seeking+'&proximate='+proximate; }
+        if (proximate == '') { var url = '/executesearch?seeking='+seeking+'&id='+searchid; }
+        else { var url = '/executesearch?seeking='+seeking+'&proximate='+proximate+'&id='+searchid; }
         // window.location = url;
 
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
         var i = setInterval(function(){
-            $.getJSON('/progress?ts='+Date.now(), function(progress) {
+            $.getJSON('/progress?id='+searchid, function(progress) {
                 displayprogress(progress);
-                if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; }
+                if (progress['active'] == false && progress['id'] == searchid ) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; }
                 else { trialnumber = 1; }
                 });
             }, 333);

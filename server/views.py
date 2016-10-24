@@ -1047,7 +1047,7 @@ def cookieintosession():
 	return response
 
 
-@hipparchia.route('/progress')
+@hipparchia.route('/progress', methods=['GET'])
 def progressreport():
 	"""
 	allow js to poll the progress of a long operation
@@ -1055,12 +1055,21 @@ def progressreport():
 	:return:
 	"""
 
+	try:
+		searchid = int(request.args.get('id', ''))
+	except:
+		searchid = -1
+	
+	if searchid != pollingdata.pdsearchid.value:
+		print('id mismatch', searchid, pollingdata.pdsearchid.value)
+	
 	progress = {}
 	progress['total'] = pollingdata.pdpoolofwork.value
 	progress['remaining'] = pollingdata.pdremaining.value
 	progress['hits'] = pollingdata.pdhits.value
 	progress['message'] = pollingdata.pdstatusmessage
 	progress['active'] = pollingdata.pdactive
+	progress['id'] = pollingdata.pdsearchid.value
 	
 	progress = json.dumps(progress)
 	
@@ -1071,11 +1080,7 @@ def progressreport():
 def jsexecutesearch():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
-	
-	pollingdata.pdactive = True
-	pollingdata.pdremaining.value = -1
-	pollingdata.pdpoolofwork.value = -1
-	
+		
 	sessionvariables()
 	# need to sanitize input at least a bit...
 	try:
@@ -1091,6 +1096,20 @@ def jsexecutesearch():
 	if len(seeking) < 1 and len(proximate) > 0:
 		seeking = proximate
 		proximate = ''
+	
+	try:
+		searchid = int(request.args.get('id', ''))
+	except:
+		searchid = -1
+	
+	
+	
+	pollingdata.pdactive = True
+	pollingdata.pdremaining.value = -1
+	pollingdata.pdpoolofwork.value = -1
+	pollingdata.pdsearchid.value = searchid
+	
+	print('si', searchid, pollingdata.pdsearchid.value)
 	
 	linesofcontext = int(session['linesofcontext'])
 	searchtime = 0
