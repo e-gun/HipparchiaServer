@@ -941,6 +941,9 @@ def progressreport():
 	except:
 		searchid = -1
 	
+	if pollingdata.pdactive == False:
+		time.sleep(.3)
+	
 	progress = {}
 	progress['total'] = pollingdata.pdpoolofwork.value
 	progress['remaining'] = pollingdata.pdremaining.value
