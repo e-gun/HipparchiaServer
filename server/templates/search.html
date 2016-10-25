@@ -116,9 +116,8 @@ $(document).ready( function () {
             $.getJSON('/progress?id='+searchid, function(progress) {
                 displayprogress(progress);
                 if (progress['active'] == false ) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; }
-                else { donothing = 1; }
                 });
-            }, 333);
+            }, 400);
         });
 
     function setoptions(sessionvar,value){

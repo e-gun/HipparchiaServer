@@ -560,6 +560,10 @@ p.level4 { padding-left: 45;}
 	font-style: italic;
 }
 
+.progress {
+	font-weight: bold;
+}
+
 .pubvolumename {
 	font-size: 70%;
 	font-style: italic;

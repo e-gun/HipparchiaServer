@@ -124,17 +124,17 @@ $('#pickauthor').click( function() {
         if (authorid != '') {
             $('#clearpick').show();
             if (wrk == '') {
-              $.getJSON('/makeselection?auth=' + authorid, function (selectiondata) {                 
+              $.getJSON('/makeselection?auth=' + authorid, function (selectiondata) {
                    reloadselections(selectiondata);
                    loadWorklist(authorid);
                   $('#worksautocomplete').prop('placeholder', '(Pick a work)');
                   });
              } else if (locus == '') {
-                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk, function (selectiondata) {                   
+                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
                     reloadselections(selectiondata);
                 });
              } else {
-                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (selectiondata) {                   
+                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (selectiondata) {
                     reloadselections(selectiondata);
                 });
              }
@@ -154,17 +154,17 @@ $('#excludeauthor').click( function() {
         if (authorid != '') {
             $('#clearpick').show();
             if (wrk == '') {
-              $.getJSON('/makeselection?auth=' + authorid+'&exclude=t', function (selectiondata) {                  
+              $.getJSON('/makeselection?auth=' + authorid+'&exclude=t', function (selectiondata) {
                    reloadselections(selectiondata);
                    loadWorklist(authorid);
                   $('#worksautocomplete').prop('placeholder', '(Pick a work)');
                   });
              } else if (locus == '') {
-                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk+'&exclude=t', function (selectiondata) {                    
+                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk+'&exclude=t', function (selectiondata) {
                     reloadselections(selectiondata);
                 });
              } else {
-                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus+'&exclude=t', function (selectiondata) {                   
+                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus+'&exclude=t', function (selectiondata) {
                     reloadselections(selectiondata);
                 });
              }
@@ -286,7 +286,7 @@ $('#workgenresautocomplete').autocomplete({
 $('#pickgenre').click( function() {
         var genre = $('#genresautocomplete').val();
         var wkgenre = $('#workgenresautocomplete').val();
-        console.log('g='+genre);
+
         if (genre != '') {
             $.getJSON('/makeselection?genre=' + genre, function (selectiondata) {
                 reloadselections(selectiondata);
@@ -305,7 +305,7 @@ $('#pickgenre').click( function() {
 $('#excludegenre').click( function() {
         var genre = $('#genresautocomplete').val();
         var wkgenre = $('#workgenresautocomplete').val();
-        console.log('g='+genre);
+
         if (genre != '') {
             $.getJSON('/makeselection?genre=' + genre+'&exclude=t', function (selectiondata) {
                 reloadselections(selectiondata);
@@ -340,7 +340,7 @@ $('#concordance').click( function() {
             $.getJSON( url, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
             var i = setInterval(function(){
                 $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } });
-                }, 500);
+                }, 400);
         }
 });
 
@@ -433,13 +433,12 @@ function displayprogress(progress){
 
     var thehtml = ''
     if (t != -1) {
-        thehtml += m + ': ' + pct+'% completed';
+        thehtml += m + ': <span class="progress">' + pct+'%</span> completed';
     } else {
         thehtml += m;
         }
 
-   if ( h > 0) { thehtml += '<br />('+h+' found)'; }
+   if ( h > 0) { thehtml += '<br />(<span class="progress">'+h+'</span> found)'; }
 
     document.getElementById('pollingdata').innerHTML = thehtml;
 }
-
