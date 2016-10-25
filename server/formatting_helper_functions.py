@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from flask import session
-from operator import itemgetter
 import re
 
 

@@ -184,7 +184,7 @@ def jsexecutesearch():
 			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
 			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict)
 		
-		pollingdata.pdstatusmessage = 'Formatting the results'
+		pollingdata.pdstatusmessage = 'Putting the results in context'
 		pollingdata.pdpoolofwork.value = len(hits)
 		pollingdata.pdremaining.value = len(hits)
 		
@@ -211,6 +211,7 @@ def jsexecutesearch():
 		if len(allfound) > int(session['maxresults']):
 			allfound = allfound[0:int(session['maxresults'])]
 		
+		pollingdata.pdstatusmessage = 'Converting results to HTML'
 		htmlandjs = htmlifysearchfinds(allfound)
 		finds = htmlandjs['hits']
 		findsjs = htmlandjs['hitsjs']
