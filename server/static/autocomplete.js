@@ -333,16 +333,14 @@ $('#concordance').click( function() {
 
         if (authorid != '') {
             $('#clearpick').show();
-            if (wrk == '') {
-                $.getJSON('/concordance?auth=' + authorid, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
-                var i = setInterval(function(){ $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } }); }, 500);
-             } else if (locus == '') {
-                $.getJSON('/concordance?auth=' + authorid + '&work=' + wrk, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
-                var i = setInterval(function(){ $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } }); }, 500);
-             } else {
-                $.getJSON('/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
-                var i = setInterval(function(){ $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } }); }, 500);
-             }
+            if (wrk == '') { var url = '/concordance?auth=' + authorid; }
+            else if (locus == '') { var url = '/concordance?auth=' + authorid + '&work=' + wrk; }
+            else { var url = '/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus; }
+
+            $.getJSON( url, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
+            var i = setInterval(function(){
+                $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } });
+                }, 500);
         }
 });
 
