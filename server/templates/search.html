@@ -101,6 +101,10 @@ $(document).ready( function () {
         document.getElementById('displayresults').innerHTML = '';
         document.getElementById('searchsummary').innerHTML = '';
 
+        // the script additions can pile up: so first kill off any scripts we have already added
+        var bcsh = document.getElementById("browserclickscriptholder");
+        if (bcsh.hasChildNodes()) { bcsh.removeChild(bcsh.firstChild); }
+
         var searchid = Date.now();
 
         if (proximate == '') { var url = '/executesearch?seeking='+seeking+'&id='+searchid; }
@@ -175,10 +179,10 @@ $(document).ready( function () {
         // JS UPDATE
         // [http://stackoverflow.com/questions/9413737/how-to-append-script-script-in-javascript#9413803]
         //
+
         var browserclickscript = document.createElement("script");
         browserclickscript.innerHTML = output['js'];
-        document.body.appendChild(browserclickscript);
-
+        document.getElementById('browserclickscriptholder').appendChild(browserclickscript);
     }
 
     $('#searchlines').click( function(){ setoptions('searchscope', 'L'); });
@@ -262,5 +266,8 @@ $(document).ready( function () {
      <button id="clickformoreinfo" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Help"><span class="ui-icon ui-icon-help"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
 </div>
 
+<div id="browserclickscriptholder">
+
+</div>
 
 {% endblock %}

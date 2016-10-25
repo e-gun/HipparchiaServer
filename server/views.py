@@ -64,6 +64,28 @@ def frontpage():
 	return page
 
 
+#
+# unadorned views for quickly peeking at the data
+#
+
+
+@hipparchia.route('/authors')
+def authorlist():
+
+	authors = []
+	
+	keys = list(authordict.keys())
+	keys.sort()
+	for k in keys:
+		authors.append(authordict[k])
+	return render_template('lister.html', found=authors, numberfound=len(authors))
+	
+
+#
+# helpers & routes you should not browse directly
+#
+
+
 @hipparchia.route('/executesearch', methods=['GET'])
 def jsexecutesearch():
 	dbc = setconnection('autocommit')
@@ -241,6 +263,7 @@ def jsexecutesearch():
 	cur.close()
 	del dbc
 	
+	pollingdata.pdstatusmessage = ''
 	pollingdata.pdhits.val.value = -1
 	pollingdata.pdactive = False
 	
@@ -400,11 +423,6 @@ def progressreport():
 	:return:
 	"""
 	
-	try:
-		searchid = int(request.args.get('id', ''))
-	except:
-		searchid = -1
-	
 	if pollingdata.pdactive == False:
 		time.sleep(.3)
 	
@@ -419,26 +437,6 @@ def progressreport():
 	
 	return progress
 
-
-#
-# unadorned views for quickly peeking at the data
-#
-
-
-@hipparchia.route('/authors')
-def authorlist():
-
-	authors = []
-	
-	keys = list(authordict.keys())
-	keys.sort()
-	for k in keys:
-		authors.append(authordict[k])
-	return render_template('lister.html', found=authors, numberfound=len(authors))
-
-#
-# helpers & routes you should not browse directly
-#
 
 @hipparchia.route('/getcookie', methods=['GET'])
 def cookieintosession():

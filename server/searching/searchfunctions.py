@@ -448,6 +448,53 @@ def workonphrasesearch(hits, seeking, searching, commitcount, authors):
 	return hits
 
 
+def phrasesearch(searchphrase, cursor, wkid, authors):
+	"""
+	a whitespace might mean things are on a new line
+	note how horrible something like και δη και is: you will search και first and then...
+
+	:param searchphrase:
+	:param cursor:
+	:param authorobject:
+	:param worknumber:
+	:return: db lines that match the search criterion
+	"""
+	searchphrase = cleansearchterm(searchphrase)
+	searchterms = searchphrase.split(' ')
+	searchterms = [x for x in searchterms if x]
+	
+	longestterm = searchterms[0]
+	for term in searchterms:
+		if len(term) > len(longestterm):
+			longestterm = term
+	
+	if 'x' not in wkid:
+		# hits = partialwordsearch(longestterm, cursor, wkid, authors)
+		hits = concsearch(longestterm, cursor, wkid)
+	else:
+		wkid = re.sub('x', 'w', wkid)
+		hits = simplesearchworkwithexclusion(longestterm, cursor, wkid)
+	
+	fullmatches = []
+	for hit in hits:
+		phraselen = len(searchphrase.split(' '))
+		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, cursor)
+		if session['accentsmatter'] == 'N':
+			wordset = re.sub(r'[\.\?\!;:,·’]', r'', wordset)
+		else:
+			# the difference is in the apostrophe: δ vs δ’
+			wordset = re.sub(r'[\.\?\!;:,·]', r'', wordset)
+		
+		if session['nearornot'] == 'T' and re.search(searchphrase, wordset) is not None:
+			fullmatches.append(hit)
+			pollingdata.pdhits.increment(1)
+		elif session['nearornot'] == 'F' and re.search(searchphrase, wordset) is None:
+			fullmatches.append(hit)
+			pollingdata.pdhits.increment(1)
+	
+	return fullmatches
+
+
 def workonproximitysearch(count, hits, seeking, proximate, searching, commitcount, authors):
 	"""
 	a multiprocessors aware function that hands off bits of a proximity search to multiple searchers
@@ -694,53 +741,6 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch):
 	del dbconnection
 	
 	return hits
-
-
-def phrasesearch(searchphrase, cursor, wkid, authors):
-	"""
-	a whitespace might mean things are on a new line
-	note how horrible something like και δη και is: you will search και first and then...
-
-	:param searchphrase:
-	:param cursor:
-	:param authorobject:
-	:param worknumber:
-	:return: db lines that match the search criterion
-	"""
-	searchphrase = cleansearchterm(searchphrase)
-	searchterms = searchphrase.split(' ')
-	searchterms = [x for x in searchterms if x]
-	
-	longestterm = searchterms[0]
-	for term in searchterms:
-		if len(term) > len(longestterm):
-			longestterm = term
-
-	if 'x' not in wkid:
-		# hits = partialwordsearch(longestterm, cursor, wkid, authors)
-		hits = concsearch(longestterm, cursor, wkid)
-	else:
-		wkid = re.sub('x', 'w', wkid)
-		hits = simplesearchworkwithexclusion(longestterm, cursor, wkid)
-	
-	fullmatches = []
-	for hit in hits:
-		phraselen = len(searchphrase.split(' '))
-		wordset = lookoutsideoftheline(hit[0], phraselen-1, wkid, cursor)
-		if session['accentsmatter'] == 'N':
-			wordset = re.sub(r'[\.\?\!;:,·’]',r'', wordset)
-		else:
-			# the difference is in the apostrophe: δ vs δ’
-			wordset = re.sub(r'[\.\?\!;:,·]', r'', wordset)
-
-		if session['nearornot'] == 'T' and re.search(searchphrase, wordset) is not None:
-			fullmatches.append(hit)
-			pollingdata.pdhits.increment(1)
-		elif session['nearornot'] == 'F' and re.search(searchphrase, wordset) is None:
-			fullmatches.append(hit)
-			pollingdata.pdhits.increment(1)
-	
-	return fullmatches
 
 
 def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, authors):
