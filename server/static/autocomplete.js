@@ -391,20 +391,11 @@ $('#textofthis').click( function() {
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
         if (authorid != '') {
             $('#clearpick').show();
-            if (wrk == '') {
-                // just an author is not enough... but we will give a bad work number to trigger the exception handling that will give us the 1st work
-                $.getJSON('/text?auth=' + authorid + '&work=999', function (returnedtext) {
-                    loadtextintodisplayresults(returnedtext);
-                });
-             } else if (locus == '') {
-                $.getJSON('/text?auth=' + authorid + '&work=' + wrk, function (returnedtext) {
-                    loadtextintodisplayresults(returnedtext);
-                });
-             } else {
-                $.getJSON('/text?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (returnedtext) {
-                    loadtextintodisplayresults(returnedtext);
-                });
-             }
+            if (wrk == '') { var url = '/text?auth=' + authorid + '&work=999'; }
+            else if (locus == '') { var url = '/text?auth=' + authorid + '&work=' + wrk; }
+            else { var url = '/text?auth=' + authorid + '&work=' + wrk + '&locus=' + locus; }
+
+            $.getJSON( url, function (returnedtext) { loadtextintodisplayresults(returnedtext); });
         }
 });
 
