@@ -107,13 +107,6 @@ def jsexecutesearch():
 		seeking = proximate
 		proximate = ''
 	
-	pollingdata.pdactive = True
-	pollingdata.pdremaining.value = -1
-	pollingdata.pdpoolofwork.value = -1
-	
-	linesofcontext = int(session['linesofcontext'])
-	searchtime = 0
-	
 	dmin, dmax = bcedating()
 	
 	if session['corpora'] == 'G' and re.search('[a-zA-Z]', seeking) is not None:
@@ -126,6 +119,19 @@ def jsexecutesearch():
 		proximate = replacegreekbetacode(proximate)
 	
 	phrasefinder = re.compile('[^\s]\s[^\s]')
+	
+	if pollingdata.pdactive == True:
+		seeking = ''
+	else:
+		abortmessage = ['no search term selected']
+		pollingdata.pdactive = True
+		
+	pollingdata.pdremaining.value = -1
+	pollingdata.pdpoolofwork.value = -1
+	
+	linesofcontext = int(session['linesofcontext'])
+	searchtime = 0
+	
 	
 	if len(seeking) > 0:
 		starttime = time.time()
@@ -241,15 +247,16 @@ def jsexecutesearch():
 		output['sortby'] = session['sortorder']
 		output['dmin'] = dmin
 		output['dmax'] = dmax
+		pollingdata.pdactive = False
 	
 	else:
 		output = {}
 		output['title'] = seeking
-		output['found'] = []
+		output['found'] = abortmessage
 		output['resultcount'] = 0
 		output['scope'] = 0
 		output['searchtime'] = '0.00'
-		output['lookedfor'] = seeking
+		output['lookedfor'] = '[no search executed]'
 		output['proximate'] = proximate
 		output['thesearch'] = ''
 		output['htmlsearch'] = ''
@@ -266,7 +273,6 @@ def jsexecutesearch():
 	
 	pollingdata.pdstatusmessage = ''
 	pollingdata.pdhits.val.value = -1
-	pollingdata.pdactive = False
 	
 	return output
 
