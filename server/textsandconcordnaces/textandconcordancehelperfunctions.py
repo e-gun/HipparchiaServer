@@ -107,6 +107,11 @@ def conctohtmltable(concordanceoutput):
 	"""
 	pre-pack the concordance output into an html table so that the page JS can just iterate through a set of lines when the time comes
 	each result in the list is itself a list: [word, count, lociwherefound]
+	
+	input:
+		('καλεῖϲθαι', '1', '1.2')
+		('καλεῖται', '1', '1.4')
+		...
 	:param concordanceoutput:
 	:return:
 	"""
@@ -130,6 +135,11 @@ def concordancesorter(unsortedoutput):
 	so you have to jump through a hoop before you can jump through a hoop:
 	make keys -> polytonicsort keys -> use keys to sort the list
 	
+	input:
+		('καλεῖται', '1', '1.4'),
+		('ἀθηναίοιϲ', '1', '1.3'),
+		...
+		
 	:param unsortedoutput:
 	:return:
 	"""

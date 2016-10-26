@@ -225,7 +225,7 @@ def aggregatelines(firstline, lastline, cursor, workdbname):
 	return aggregate
 
 
-def aoprunebydate(authorandworklist, authorobjectdict):
+def prunebydate(authorandworklist, authorobjectdict):
 	"""
 	send me a list of authorsandworks and i will trim it via the session date limit variables
 	
@@ -256,7 +256,7 @@ def aoprunebydate(authorandworklist, authorobjectdict):
 	return trimmedlist
 
 
-def aoremovespuria(authorandworklist, worksdict):
+def removespuria(authorandworklist, worksdict):
 	"""
 	at the moment pretty crude: just look for [Sp.] or [sp.] at the end of a title
 	toss it from the list if you find it
@@ -322,7 +322,7 @@ def formattedcittationincontext(lineobject, workobject, authorobject, linesofcon
 	return citationincontext
 
 
-def aoformatauthinfo(authorobject):
+def formatauthinfo(authorobject):
 	"""
 	ao data into html
 	:param authorobject:

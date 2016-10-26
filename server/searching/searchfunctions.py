@@ -11,7 +11,7 @@ from server import pollingdata
 from server.dbsupport.dbfunctions import setconnection, dblineintolineobject, makeablankline
 from server.formatting_helper_functions import tidyuplist, dropdupes, prunedict, foundindict
 from server.hipparchiaclasses import MPCounter
-from server.searching.searchformatting import aggregatelines, cleansearchterm, aoprunebydate, aoremovespuria, \
+from server.searching.searchformatting import aggregatelines, cleansearchterm, prunebydate, removespuria, \
 	sortandunpackresults, lookoutsideoftheline
 
 
@@ -56,7 +56,7 @@ def compileauthorandworklist(authordict, workdict):
 		# a tricky spot: when/how to apply prunebydate()
 		# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
 		# accordingly we will do classes and genres first, then trim by date, then add in individual choices
-		authorandworklist = aoprunebydate(authorandworklist, ad)
+		authorandworklist = prunebydate(authorandworklist, ad)
 		
 		# now we look at things explicitly chosen:
 		# the passage checks are superfluous if rationalizeselections() got things right
@@ -88,17 +88,17 @@ def compileauthorandworklist(authordict, workdict):
 		authorandworklist = list(set(authorandworklist))
 		
 		if session['spuria'] == 'N':
-			authorandworklist = aoremovespuria(authorandworklist, wd)
+			authorandworklist = removespuria(authorandworklist, wd)
 	
 	else:
 		# you picked nothing and want everything. well, maybe everything...
 		authorandworklist = wd.keys()
 		
 		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
-			authorandworklist = aoprunebydate(authorandworklist, ad)
+			authorandworklist = prunebydate(authorandworklist, ad)
 		
 		if session['spuria'] == 'N':
-			authorandworklist = aoremovespuria(authorandworklist, wd)
+			authorandworklist = removespuria(authorandworklist, wd)
 	
 	# build the exclusion list
 	# note that we are not handling excluded individual passages yet
@@ -203,6 +203,7 @@ def concsearch(seeking, cursor, workdbname):
 	:param workdbname:
 	:return: db lines that match the search criterion
 	"""
+	
 	concdbname = workdbname + '_conc'
 	seeking = cleansearchterm(seeking)
 	mylimit = 'LIMIT ' + str(session['maxresults'])
@@ -265,6 +266,7 @@ def partialwordsearch(seeking, cursor, workdbname, authors):
 	:param authors:
 	:return:
 	"""
+	
 	mylimit = 'LIMIT ' + str(session['maxresults'])
 	if session['accentsmatter'] == 'Y':
 		columna = 'marked_up_line'
@@ -296,7 +298,7 @@ def partialwordsearch(seeking, cursor, workdbname, authors):
 			qw += 'AND (' + w[i][0] + ') '
 			d.append(w[i][1])
 		
-		query = 'SELECT * FROM ' + db + ' WHERE (' + columna + ' ' + mysyntax + ' %s OR ' + columnb + ' ' + mysyntax + ' %s) ' + qw + mylimit + ' ORDER BY index ASC'
+		query = 'SELECT * FROM ' + db + ' WHERE (' + columna + ' ' + mysyntax + ' %s OR ' + columnb + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC '+ mylimit
 		data = tuple(d)
 	
 	try:

@@ -10,7 +10,7 @@ from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makea
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
-from server.searching.searchformatting import formattedcittationincontext, aoformatauthinfo, formatauthorandworkinfo, \
+from server.searching.searchformatting import formattedcittationincontext, formatauthinfo, formatauthorandworkinfo, \
 	woformatworkinfo
 from server.searching.searchfunctions import flagexclusions, searchdispatcher, compileauthorandworklist, dispatchshortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
@@ -22,7 +22,7 @@ from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessi
 	sessionvariables, sessionselectionsashtml, rationalizeselections, buildauthordict, buildworkdict, \
 	buildaugenreslist, buildworkgenreslist
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
-	dropdupes, bcedating, aosortauthorandworklists, prunedict, htmlifysearchfinds
+	dropdupes, bcedating, sortauthorandworklists, prunedict, htmlifysearchfinds
 from server.browsing.browserfunctions import getandformatbrowsercontext
 
 # all you need is read-only access
@@ -140,7 +140,7 @@ def jsexecutesearch():
 		authorandworklist = compileauthorandworklist(authordict, workdict)
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		authorandworklist = flagexclusions(authorandworklist)
-		authorandworklist = aosortauthorandworklists(authorandworklist, authordict)
+		authorandworklist = sortauthorandworklists(authorandworklist, authordict)
 		
 		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
 		# so we slap on an index value
@@ -602,7 +602,7 @@ def workstructure():
 		safepassage.append(re.sub('[!@#$%^&*()=]+', '',level))
 	safepassage = tuple(safepassage[:5])
 	workdb = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
-	# ao = dbauthorandworkmaker(workdb[:6], cursor)
+
 	try:
 		ao = authordict[workdb[:6]]
 	except:
@@ -643,7 +643,7 @@ def getsessionvariables():
 
 
 @hipparchia.route('/getauthorinfo', methods=['GET'])
-def aogetauthinfo():
+def getauthinfo():
 	"""
 	show local info about the author one is considering in the selection box
 	:return:
@@ -656,7 +656,7 @@ def aogetauthinfo():
 	theauthor = authordict[authorid]
 	
 	authinfo = ''
-	authinfo += aoformatauthinfo(theauthor)
+	authinfo += formatauthinfo(theauthor)
 	
 	if len(theauthor.listofworks) > 1:
 		authinfo +='<br /><br /><span class="italic">work numbers:</span><br />\n'
@@ -675,10 +675,10 @@ def aogetauthinfo():
 
 
 @hipparchia.route('/getsearchlistcontents')
-def aogetsearchlistcontents():
+def getsearchlistcontents():
 
 	authorandworklist = compileauthorandworklist(authordict, workdict)
-	authorandworklist = aosortauthorandworklists(authorandworklist, authordict)
+	authorandworklist = sortauthorandworklists(authorandworklist, authordict)
 	
 	searchlistinfo = '<br /><h3>Proposing to search the following works:</h3>\n'
 	searchlistinfo += '(Results will be arranged according to '+session['sortorder']+')<br /><br />\n'
@@ -686,6 +686,7 @@ def aogetsearchlistcontents():
 	count = 0
 	wordstotal = 0
 	for work in authorandworklist:
+		work = work[:10]
 		count += 1
 		w = workdict[work]
 		a = authordict[work[0:6]].shortname

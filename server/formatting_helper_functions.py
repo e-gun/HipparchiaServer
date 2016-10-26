@@ -163,7 +163,7 @@ def stripaccents(texttostrip):
 	return texttostrip
 
 
-def aosortauthorandworklists(authorandworklist, authorsdict):
+def sortauthorandworklists(authorandworklist, authorsdict):
 	"""
 	send me a list of workuniversalids and i will resort it via the session sortorder
 	:param authorandworklist:
@@ -219,7 +219,16 @@ def getpublicationinfo(workobject, cursor):
 
 
 def formatpublicationinfo(pubinfo):
-	# tag: lead-in, exit
+	"""
+	in:
+		<volumename>FHG </volumename>4 <press>Didot </press><city>Paris </city><year>1841–1870</year><pages>371 </pages><pagesintocitations>Frr. 1–2</pagesintocitations><editor>Müller, K. </editor>
+	out:
+		<span class="pubvolumename">FHG <br /></span><span class="pubpress">Didot , </span><span class="pubcity">Paris , </span><span class="pubyear">1841–1870. </span><span class="pubeditor"> (Müller, K. )</span>
+	
+	:param pubinfo:
+	:return:
+	"""
+
 	tags = [
 		{'volumename': ['', '<br />']},
 		{'press': ['', ', ']},
