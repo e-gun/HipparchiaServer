@@ -670,6 +670,7 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors):
 		if index != -1:
 			matchobjects = []
 			wkid = w[1]
+			# echeck for exclusions
 			if re.search(r'x', wkid) is not None:
 				wkid = re.sub(r'x', 'w', wkid)
 				restrictions = []
@@ -690,11 +691,11 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors):
 			
 				query = 'SELECT * FROM ' + wkid + ' WHERE ('+ whr + ' ORDER BY index ASC'
 				curs.execute(query, tuple(data))
-				print('q/d',query, tuple(data))
 			else:
 				wkid = re.sub(r'x', 'w', wkid)
 				query = 'SELECT * FROM ' + wkid + ' ORDER BY index'
 				curs.execute(query)
+				
 			fulltext = curs.fetchall()
 			
 			previous = makeablankline(wkid, -1)
