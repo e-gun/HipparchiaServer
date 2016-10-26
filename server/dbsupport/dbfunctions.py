@@ -175,7 +175,7 @@ def simplecontextgrabber(workobject, focusline, linesofcontext, cursor):
 
 	workdbname = workobject.universalid
 	# step two use the index value to grab the environs
-	query = 'SELECT * FROM ' + workdbname + ' WHERE index BETWEEN %s AND %s'
+	query = 'SELECT * FROM ' + workdbname + ' WHERE index BETWEEN %s AND %s ORDER BY index'
 	data = (focusline - (linesofcontext / 2), focusline + (linesofcontext / 2))
 	cursor.execute(query, data)
 	foundlines = cursor.fetchall()

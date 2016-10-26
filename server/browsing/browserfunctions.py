@@ -76,6 +76,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			elif linecount % numbersevery == 0:
 				columna = line.locus()
 			else:
+				# do not insert a line number or special formatting
 				columna = ''
 		
 		linehtml = '<tr class="browser"><td class="browsedline">' + columnb + '</td>'
