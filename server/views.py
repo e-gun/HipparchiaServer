@@ -173,7 +173,7 @@ def jsexecutesearch():
 				#   οἷον κἀν τοῖϲ (Searched between 850 B.C.E. and 200 B.C.E.)
 				#   5.57 std; 17.54s 'short'
 				# so '3' looks like the right answer
-				hits = dispatchshortphrasesearch(seeking, indexedworklist)
+				hits = dispatchshortphrasesearch(seeking, indexedworklist, authordict)
 		else:
 			searchtype = 'proximity'
 			if session['searchscope'] == 'W':

@@ -611,7 +611,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 	return found
 
 
-def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist):
+def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authors):
 	"""
 	brute force a search for something horrid like και δη και
 	a set of short words should send you here, otherwise you will look up all the words that look like και and then...
@@ -637,7 +637,7 @@ def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist):
 	
 	workers = hipparchia.config['WORKERS']
 	
-	jobs = [Process(target=shortphrasesearch, args=(count, hits, searchphrase, workstosearch)) for i in range(workers)]
+	jobs = [Process(target=shortphrasesearch, args=(count, hits, searchphrase, workstosearch, authors)) for i in range(workers)]
 	
 	for j in jobs: j.start()
 	for j in jobs: j.join()
@@ -652,7 +652,7 @@ def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist):
 	return lineobjects
 
 
-def shortphrasesearch(count, hits, searchphrase, workstosearch):
+def shortphrasesearch(count, hits, searchphrase, workstosearch, authors):
 	"""
 	mp aware search for runs of short words
 	:return:
@@ -670,8 +670,31 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch):
 		if index != -1:
 			matchobjects = []
 			wkid = w[1]
-			query = 'SELECT * FROM ' + wkid
-			curs.execute(query)
+			if re.search(r'x', wkid) is not None:
+				wkid = re.sub(r'x', 'w', wkid)
+				restrictions = []
+				for p in session['psgexclusions']:
+					if wkid in p:
+						restrictions.append(whereclauses(p, '<>', authors))
+			
+				whr = ''
+				data = []
+				for r in restrictions:
+					for i in range(0, len(r)):
+						whr += r[i][0] + 'OR '
+						data.append(r[i][1])
+					# drop the trailing ' OR'
+					whr = whr[0:-4] + ') AND ('
+				# drop the trailing ') AND ('
+				whr = whr[0:-6]
+			
+				query = 'SELECT * FROM ' + wkid + ' WHERE ('+ whr + ' ORDER BY index ASC'
+				curs.execute(query, tuple(data))
+				print('q/d',query, tuple(data))
+			else:
+				wkid = re.sub(r'x', 'w', wkid)
+				query = 'SELECT * FROM ' + wkid + ' ORDER BY index'
+				curs.execute(query)
 			fulltext = curs.fetchall()
 			
 			previous = makeablankline(wkid, -1)
