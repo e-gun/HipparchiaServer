@@ -395,7 +395,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 				hits[index] = (wkid, partialwordsearch(seeking, curs, wkid, authors))
 			elif 'x' in wkid:
 				wkid = re.sub('x', 'w', wkid)
-				hits[index] = (wkid, simplesearchworkwithexclusion(seeking, curs, wkid))
+				hits[index] = (wkid, simplesearchworkwithexclusion(seeking, wkid, authors, curs))
 			else:
 				hits[index] = (wkid, concsearch(seeking, curs, wkid))
 			
@@ -475,7 +475,7 @@ def phrasesearch(searchphrase, cursor, wkid, authors):
 		hits = concsearch(longestterm, cursor, wkid)
 	else:
 		wkid = re.sub('x', 'w', wkid)
-		hits = simplesearchworkwithexclusion(longestterm, cursor, wkid)
+		hits = simplesearchworkwithexclusion(longestterm, wkid, authors, cursor)
 	
 	fullmatches = []
 	for hit in hits:
@@ -549,11 +549,14 @@ def workonproximitysearch(count, hits, seeking, proximate, searching, commitcoun
 	return hits
 
 
-def simplesearchworkwithexclusion(seeking, cursor, workdbname):
+def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 	"""
 	special issues arise if you want to search Iliad less books 1 and 24
 	the standard search apparatus can't do this, but this can
 	a modified version of partialwordsearch()
+
+	possible to use finddblinefromincompletelocus() to get a set of line numbers to search the main db or the conc
+	but is that at all faster? it likely means more queries in the end, not fewer
 
 	problem: l2<>1 AND l1<>10 inside an SQL query will kill ALL 10s at l1, not just in the one segment
 	so you cant just string together the where clauses as one giant collection of ANDs
@@ -566,7 +569,6 @@ def simplesearchworkwithexclusion(seeking, cursor, workdbname):
 		LIMIT 250
 
 	"""
-	
 	mylimit = ' LIMIT ' + str(session['maxresults'])
 	if session['accentsmatter'] == 'Y':
 		columna = 'marked_up_line'
@@ -588,7 +590,7 @@ def simplesearchworkwithexclusion(seeking, cursor, workdbname):
 	restrictions = []
 	for p in session['psgexclusions']:
 		if workdbname in p:
-			restrictions.append(whereclauses(p, '<>', cursor))
+			restrictions.append(whereclauses(p, '<>', authors))
 	
 	d = [seeking, hyphsearch]
 	qw = 'AND ('
@@ -601,7 +603,7 @@ def simplesearchworkwithexclusion(seeking, cursor, workdbname):
 	# drop the trailing ') AND ('
 	qw = qw[0:-6]
 	
-	query = 'SELECT * FROM ' + db + ' WHERE (' + columna + ' ' + mysyntax + ' %s OR ' + columnb + ' ' + mysyntax + ' %s) ' + qw + mylimit + ' ORDER BY index ASC'
+	query = 'SELECT * FROM ' + db + ' WHERE (' + columna + ' ' + mysyntax + ' %s OR ' + columnb + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC '+mylimit
 	data = tuple(d)
 	cursor.execute(query, data)
 	found = cursor.fetchall()
@@ -761,7 +763,7 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, aut
 		hits = concsearch(firstterm, cursor, workdbname)
 	elif 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(firstterm, cursor, workdbname)
+		hits = simplesearchworkwithexclusion(firstterm, workdbname, authors, cursor)
 	else:
 		hits = partialwordsearch(firstterm, cursor, workdbname, authors)
 	
@@ -791,7 +793,7 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 		hits = concsearch(firstterm, cursor, workdbname)
 	elif 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(firstterm, cursor, workdbname)
+		hits = simplesearchworkwithexclusion(firstterm, workdbname, authors, cursor)
 	else:
 		hits = partialwordsearch(firstterm, cursor, workdbname, authors)
 	
