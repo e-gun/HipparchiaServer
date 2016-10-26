@@ -203,7 +203,8 @@ def jsexecutesearch():
 				hitcount += 1
 				# print('item=', hit,'\n\tid:',wkid,'\n\tresult:',result)
 				authorobject = authordict[lineobject.wkuinversalid[0:6]]
-				workobject = workdict[lineobject.wkuinversalid]
+				wid = re.sub(r'x','w',lineobject.wkuinversalid)
+				workobject = workdict[wid]
 				citwithcontext = formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext,
 				                                             seeking, proximate, searchtype, cur)
 				# add the hit count to line zero which contains the metadata for the lines
