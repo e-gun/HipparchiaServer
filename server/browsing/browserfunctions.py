@@ -53,7 +53,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	
 	citation = locusintocitation(workobject, focusline.locustuple())
 
-	cv = '<span class="author">'+authorobject.shortname+'</span>, <span class="work">'+title+'</span>, '+ citation
+	cv = '<span class="author">'+authorobject.shortname+'</span>, <span class="work">'+title+'</span><br />'+ citation
 	cv = cv + '<br />' + biblio
 	formattedpassage.append({'value':'<currentlyviewing>'+cv+'</currentlyviewing><br /><br />'})
 	
