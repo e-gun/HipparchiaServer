@@ -115,7 +115,7 @@ class dbWorkLine(object):
 	"""
 	
 	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, hyphenated_words, annotations):
-		self.wkuinversalid = wkuinversalid
+		self.wkuinversalid = wkuinversalid[:10]
 		self.index = index
 		self.l5 = level_05_value
 		self.l4 = level_04_value
