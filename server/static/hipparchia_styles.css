@@ -282,6 +282,10 @@ worktitle {
 	margin: auto;
 }
 
+#selectionstable tbody td {
+	font-size: 85%;
+	}
+
 #moreinfo {
 	position: fixed;
 	bottom: 10px;
