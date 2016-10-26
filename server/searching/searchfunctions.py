@@ -659,7 +659,7 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch):
 	curs = dbconnection.cursor()
 
 	
-	while len(workstosearch) > 0:
+	while len(workstosearch) > 0 and count.value <= int(session['maxresults']):
 		try:
 			w = workstosearch.pop()
 			pollingdata.pdremaining.value = len(workstosearch)
