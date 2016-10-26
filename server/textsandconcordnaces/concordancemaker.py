@@ -42,7 +42,7 @@ def buildconcordancefromwork(cdict, cursor):
 		buildconcordancefromconcordance() seemed ineffecient for small chunks: it was; but it is also a lot slower for whole works...
 		single threaded buildconcordancefromwork() is 3-4x faster than mp buildconcordancefromconcordance()
 		a mp version of buildconcordancefromwork() is 50% *slower* than mp buildconcordancefromconcordance()
-	top speed seems to be a single thread diving into a work and building the concordance line by line
+	top speed seems to be a single thread diving into a work and building the concordance line by line: endless lock/unlock on the shared dictionary is too costly
 	
 	cdict = {wo.universalid: (startline, endline)}
 	
@@ -146,6 +146,5 @@ def linesintoconcordance(lineobjects):
 		previous = line
 	
 	return concordance
-
 
 

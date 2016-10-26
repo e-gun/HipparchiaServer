@@ -338,7 +338,7 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 		pollingdata.pdstatusmessage = 'Executing a simple word search...'
 		jobs = [Process(target=workonsimplesearch, args=(count, hits, seeking, searching, commitcount, authors)) for i in range(workers)]
 	elif searchtype == 'phrase':
-		pollingdata.pdstatusmessage = 'Executing a phrase search...'
+		pollingdata.pdstatusmessage = 'Executing a phrase search. Checking longest term first...'
 		jobs = [Process(target=workonphrasesearch, args=(hits, seeking, searching, commitcount, authors)) for i in range(workers)]
 	elif searchtype == 'proximity':
 		pollingdata.pdstatusmessage = 'Executing a proximity search...'
@@ -752,7 +752,7 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, aut
 	:return:
 	"""
 	firstterm = cleansearchterm(firstterm)
-	secondterm = cleansearchterm(secondterm)
+	secondterm = re.compile(cleansearchterm(secondterm))
 	
 	# hits = partialwordsearch(longestterm, cursor, authorobject, worknumber)
 	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
