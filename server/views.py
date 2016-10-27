@@ -52,14 +52,7 @@ def frontpage():
 	"""
 	sessionvariables()
 	
-	seeking = ''
-	proximate = ''
-
-	dmin, dmax = bcedating()
-	
-	page = render_template('search.html', title=seeking, found=[], resultcount=0, searchtime='0', scope=0,
-		                       hitmax=0, lang=session['corpora'], sortedby=session['sortorder'],
-		                       dmin=dmin, dmax=dmax)
+	page = render_template('search.html')
 	
 	return page
 
@@ -418,15 +411,18 @@ def textmaker():
 def progressreport():
 	"""
 	allow js to poll the progress of a long operation
-	this code is itself in progress and will remain so until the passing of globals between funcitons gets sorted
+	this code is itself in progress and will remain so for a while
 
 	note that if you run through uWSGI the GET sent to '/executesearch' will block/lock the IO
 	this will prevent anything GET being sent to '/progress' until after jsexecutesearch() finishes
 	not quite the async dreamland you had imagined
 
 	searches will work, but the progress statements will be broken
+	
+	also multiple clients will confuse hipparchia
 
 	something like gevent needs to be integrated so you can handle async requests, I guess.
+	websockets: but that's plenty of extra imports for what is generally a one-user model
 
 	:return:
 	"""
@@ -739,7 +735,9 @@ def grabtextforbrowsing():
 		sample input: '/browseto?locus=gr0059w030_LN_48203'
 		sample input: '/browseto?locus=gr0008w001_AT_23|3|3'
 	alternately you can sent me a perseus ref from a dictionary entry ('_PE_') and I will *try* to convert it into a '_LN_'
-	
+	sample output: [could probably use retooling...]
+		[{'forwardsandback': ['gr0199w010_LN_55', 'gr0199w010_LN_5']}, {'value': '<currentlyviewing><span class="author">Bacchylides</span>, <span class="work">Dithyrambi</span><br />Dithyramb 1, line 42<br /><span class="pubvolumename">Bacchylide. Dithyrambes, épinicies, fragments<br /></span><span class="pubpress">Les Belles Lettres , </span><span class="pubcity">Paris , </span><span class="pubyear">1993. </span><span class="pubeditor"> (Irigoin, J. )</span></currentlyviewing><br /><br />'}, {'value': '<table>\n'}, {'value': '<tr class="browser"><td class="browsedline"><observed id="[–⏑–––⏑–––⏑–]δ̣ουϲ">[–⏑–––⏑–––⏑–]δ̣ουϲ</observed> </td><td class="browsercite"></td></tr>\n'}, ...]
+		
 	:return:
 	"""
 	
@@ -820,7 +818,7 @@ def grabtextforbrowsing():
 			browserdata.append({'value': '<br /><br />'})
 		except:
 			pass
-
+	
 	browserdata = json.dumps(browserdata)
 	
 	cur.close()
@@ -1029,6 +1027,15 @@ def reverselexiconsearch():
 
 @hipparchia.route('/setsessionvariable', methods=['GET'])
 def setsessionvariable():
+	"""
+	accept a variable name and value: hand it off to the parser/setter
+	returns:
+		[{"latestdate": "1"}]
+		[{"spuria": "N"}]
+		etc.
+		
+	:return:
+	"""
 	param = re.search(r'(.*?)=.*?', request.query_string.decode('utf-8'))
 	param = param.group(1)
 	val = request.args.get(param)
@@ -1051,8 +1058,12 @@ def selectionmade():
 	this is also called without arguments to return the searchlist contents by
 	skipping ahead to sessionselectionsashtml()
 
-	sample input: '/makeselection?auth=gr0008&work=001&locus=3|4|23'
+	sample input:
+		'/makeselection?auth=gr0008&work=001&locus=3|4|23'
 
+	sample output (pre-json):
+		{'numberofselections': 2, 'timeexclusions': '', 'exclusions': '<span class="picklabel">Works</span><br /><span class="wkexclusions" id="searchselection_02" listval="0">Bacchylides, <span class="pickedwork">Dithyrambi</span></span><br />', 'selections': '<span class="picklabel">Author categories</span><br /><span class="agnselections" id="searchselection_00" listval="0">Lyrici</span><br />\n<span class="picklabel">Authors</span><br /><span class="auselections" id="searchselection_01" listval="0">AG</span><br />\n'}
+		
 	:return:
 	"""
 	
