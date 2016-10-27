@@ -117,9 +117,9 @@ $('#pickauthor').click( function() {
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         var name = $('#authorsautocomplete').val();
         var locus = locusdataloader();
-        $('#authorsautocomplete').val('');
+        // $('#authorsautocomplete').val('');
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
-        $('#worksautocomplete').val('');
+        // $('#worksautocomplete').val('');
         resetworksautocomplete();
         if (authorid != '') {
             $('#clearpick').show();
@@ -147,9 +147,9 @@ $('#excludeauthor').click( function() {
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         var name = $('#authorsautocomplete').val();
         var locus = locusdataloader();
-        $('#authorsautocomplete').val('');
+        // $('#authorsautocomplete').val('');
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
-        $('#worksautocomplete').val('');
+        // $('#worksautocomplete').val('');
         resetworksautocomplete();
         if (authorid != '') {
             $('#clearpick').show();

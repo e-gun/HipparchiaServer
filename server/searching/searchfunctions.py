@@ -253,6 +253,8 @@ def concsearch(seeking, cursor, workdbname):
 			print('could not execute', query)
 			print('Error:', e)
 	
+	concfinds = sorted(concfinds)
+	
 	return concfinds
 
 
