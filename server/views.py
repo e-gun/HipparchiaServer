@@ -460,7 +460,7 @@ def cookieintosession():
 	
 	modifysessionselections(cookiedict, authorgenreslist, workgenreslist)
 	
-	response = redirect(url_for('search'))
+	response = redirect(url_for('frontpage'))
 	return response
 
 
