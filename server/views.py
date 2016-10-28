@@ -11,7 +11,7 @@ from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinef
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formattedcittationincontext, formatauthinfo, formatauthorandworkinfo, \
-	woformatworkinfo
+	woformatworkinfo, mpresultformatter
 from server.searching.searchfunctions import flagexclusions, searchdispatcher, compileauthorandworklist, dispatchshortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordancefromwork
@@ -78,11 +78,173 @@ def authorlist():
 # helpers & routes you should not browse directly
 #
 
+@hipparchia.route('/newexecutesearch', methods=['GET'])
+def executesearch():
+	sessionvariables()
+	# need to sanitize input at least a bit...
+	try:
+		seeking = re.sub(r'[\'"`!;&]', '', request.args.get('seeking', ''))
+	except:
+		seeking = ''
+	
+	try:
+		proximate = re.sub(r'[\'"`!;&]', '', request.args.get('proximate', ''))
+	except:
+		proximate = ''
+	
+	if len(seeking) < 1 and len(proximate) > 0:
+		seeking = proximate
+		proximate = ''
+	
+	dmin, dmax = bcedating()
+	
+	if session['corpora'] == 'G' and re.search('[a-zA-Z]', seeking) is not None:
+		# searching greek, but not typing in unicode greek: autoconvert
+		seeking = seeking.upper()
+		seeking = replacegreekbetacode(seeking)
+	
+	if session['corpora'] == 'G' and re.search('[a-zA-Z]', proximate) is not None:
+		proximate = proximate.upper()
+		proximate = replacegreekbetacode(proximate)
+	
+	phrasefinder = re.compile('[^\s]\s[^\s]')
+	
+	if pollingdata.pdactive == True:
+		seeking = ''
+	else:
+		abortmessage = ['no search term selected']
+		pollingdata.pdactive = True
+	
+	pollingdata.pdremaining.value = -1
+	pollingdata.pdpoolofwork.value = -1
+	
+	linesofcontext = int(session['linesofcontext'])
+	searchtime = 0
+	
+	if len(seeking) > 0:
+		starttime = time.time()
+		pollingdata.pdstatusmessage = 'Compiling the list of works to search'
+		
+		authorandworklist = compileauthorandworklist(authordict, workdict)
+		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
+		authorandworklist = flagexclusions(authorandworklist)
+		authorandworklist = sortauthorandworklists(authorandworklist, authordict)
+		
+		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
+		# so we slap on an index value
+		indexedworklist = []
+		index = -1
+		for w in authorandworklist:
+			index += 1
+			indexedworklist.append((index, w))
+		del authorandworklist
+		
+		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
+			searchtype = 'simple'
+			thesearch = seeking
+			htmlsearch = '<span class="emph">' + seeking + '</span>'
+			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, authordict)
+		elif re.search(phrasefinder, seeking) is not None:
+			searchtype = 'phrase'
+			thesearch = seeking
+			htmlsearch = '<span class="emph">' + seeking + '</span>'
+			terms = seeking.split(' ')
+			if len(max(terms, key=len)) > 3:
+				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict)
+			else:
+				# you are looking for a set of little words: και δη και, etc.
+				#   16s to find και δη και via a std phrase search; 1.6s to do it this way
+				# not immediately obvious what the best number for minimum max term len is:
+				# consider what happens if you send a '4' this way:
+				#   εἶναι τὸ κατὰ τὴν (Searched between 850 B.C.E. and 200 B.C.E.)
+				# this takes 13.7s with a std phrase search; it takes 14.6s if sent to shortphrasesearch()
+				#   οἷον κἀν τοῖϲ (Searched between 850 B.C.E. and 200 B.C.E.)
+				#   5.57 std; 17.54s 'short'
+				# so '3' looks like the right answer
+				hits = dispatchshortphrasesearch(seeking, indexedworklist, authordict)
+		else:
+			searchtype = 'proximity'
+			if session['searchscope'] == 'W':
+				scope = 'words'
+			else:
+				scope = 'lines'
+			
+			if session['nearornot'] == 'T':
+				nearstr = ''
+			else:
+				nearstr = ' not'
+			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
+			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
+			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
+			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict)
+		
+		pollingdata.pdstatusmessage = 'Putting the results in context'
+		
+		allfound = mpresultformatter(hits, authordict, workdict, seeking, proximate, searchtype)
+		
+		searchtime = time.time() - starttime
+		searchtime = round(searchtime, 2)
+		if len(allfound) > int(session['maxresults']):
+			allfound = allfound[0:int(session['maxresults'])]
+		
+		pollingdata.pdstatusmessage = 'Converting results to HTML'
+		htmlandjs = htmlifysearchfinds(allfound)
+		finds = htmlandjs['hits']
+		findsjs = htmlandjs['hitsjs']
+		
+		resultcount = len(allfound)
+		
+		if resultcount < int(session['maxresults']):
+			hitmax = 'false'
+		else:
+			hitmax = 'true'
+		
+		# prepare the output
+		
+		output = {}
+		output['title'] = thesearch
+		output['found'] = finds
+		output['js'] = findsjs
+		output['resultcount'] = resultcount
+		output['scope'] = str(len(indexedworklist))
+		output['searchtime'] = str(searchtime)
+		output['lookedfor'] = seeking
+		output['proximate'] = proximate
+		output['thesearch'] = thesearch
+		output['htmlsearch'] = htmlsearch
+		output['hitmax'] = hitmax
+		output['lang'] = session['corpora']
+		output['sortby'] = session['sortorder']
+		output['dmin'] = dmin
+		output['dmax'] = dmax
+		pollingdata.pdactive = False
+	
+	else:
+		output = {}
+		output['title'] = seeking
+		output['found'] = abortmessage
+		output['resultcount'] = 0
+		output['scope'] = 0
+		output['searchtime'] = '0.00'
+		output['lookedfor'] = '[no search executed]'
+		output['proximate'] = proximate
+		output['thesearch'] = ''
+		output['htmlsearch'] = ''
+		output['hitmax'] = 0
+		output['lang'] = session['corpora']
+		output['sortby'] = session['sortorder']
+		output['dmin'] = dmin
+		output['dmax'] = dmax
+	
+	output = json.dumps(output)
+	
+	pollingdata.pdstatusmessage = ''
+	pollingdata.pdhits.val.value = -1
+	
+	return output
 
 @hipparchia.route('/executesearch', methods=['GET'])
 def jsexecutesearch():
-	dbc = setconnection('autocommit')
-	cur = dbc.cursor()
 	
 	sessionvariables()
 	# need to sanitize input at least a bit...
@@ -199,7 +361,7 @@ def jsexecutesearch():
 				wid = re.sub(r'x','w',lineobject.wkuinversalid)
 				workobject = workdict[wid]
 				citwithcontext = formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext,
-				                                             seeking, proximate, searchtype, cur)
+				                                             seeking, proximate, searchtype)
 				# add the hit count to line zero which contains the metadata for the lines
 				citwithcontext[0]['hitnumber'] = hitcount
 				allfound.append(citwithcontext)
@@ -261,9 +423,6 @@ def jsexecutesearch():
 		output['dmax'] = dmax
 	
 	output = json.dumps(output)
-	
-	cur.close()
-	del dbc
 	
 	pollingdata.pdstatusmessage = ''
 	pollingdata.pdhits.val.value = -1
@@ -1174,3 +1333,5 @@ def clearsession():
     session.clear()
 	# Redirect the user to the main page
     return redirect(url_for('frontpage'))
+
+

@@ -3,8 +3,11 @@
 import re
 
 from flask import session
+from multiprocessing import Pool
+from server import pollingdata
+from server import hipparchia
 
-from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, makeablankline
+from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, makeablankline, setconnection
 from server.dbsupport.citationfunctions import locusintocitation
 from server.formatting_helper_functions import formatpublicationinfo
 
@@ -287,41 +290,6 @@ def removespuria(authorandworklist, worksdict):
 	return trimmedlist
 
 
-def formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext, searchterm, proximate, searchtype,
-                                cursor):
-	"""
-	take a hit
-		turn it into a focus line
-		turround it by some context
-	:param line:
-	:param workdbname:
-	:param authorobject:
-	:param linesofcontext:
-	:param searchterm:
-	:param cursor:
-	:return:
-	"""
-	
-	citationincontext = []
-	highlightline = lineobject.index
-	citation = locusintocitation(workobject, lineobject.locustuple())
-	# this next bit of info tags the find; 'newfind' + 'url' is turned into JS in the search.html '<script>' loop; this enables click-to-browse
-	# similarly the for-result-in-found loop of search.html generates the clickable elements: <browser id="{{ context['url'] }}">
-	citationincontext.append({'newfind': 1, 'author': authorobject.shortname,
-	                          'work': workobject.title, 'citation': citation, 'url': (lineobject.universalid)})
-	environs = simplecontextgrabber(workobject, highlightline, linesofcontext, cursor)
-	
-	for found in environs:
-		found = dblineintolineobject(lineobject.wkuinversalid, found)
-		if found.index == highlightline:
-			found = lineobjectresultformatter(found, searchterm, proximate, searchtype, True)
-		else:
-			found = lineobjectresultformatter(found, searchterm, proximate, searchtype, False)
-		citationincontext.append(found)
-	
-	return citationincontext
-
-
 def formatauthinfo(authorobject):
 	"""
 	ao data into html
@@ -427,5 +395,92 @@ def sortandunpackresults(hits):
 	return results
 
 
+def mpresultformatter(hits, authordict, workdict, seeking, proximate, searchtype):
+	"""
+	if you have lots of results, they don't get formatted as fast as they could:
+	single threaded is fine if all from same author, but something like 1500 hits of αξιολ will bounce you around a lot
+		22s single threaded to do search + format
+		12s multi-threaded to do search + format
+	:return:
+	"""
+	pollingdata.pdpoolofwork.value = len(hits)
+	pollingdata.pdremaining.value = len(hits)
+	
+	linesofcontext = session['linesofcontext']
+	
+	workbundles = []
+	if len(hits) > int(session['maxresults']):
+		limit = int(session['maxresults'])
+	else:
+		limit = len(hits)
+		
+	for i in range(0,limit):
+		lineobject = hits[i]
+		authorobject = authordict[lineobject.wkuinversalid[0:6]]
+		wid = re.sub(r'x', 'w', lineobject.wkuinversalid)
+		workobject = workdict[wid]
+		workbundles.append({'hitnumber': i+1, 'lo': lineobject, 'wo': workobject, 'ao': authorobject, 'ctx': linesofcontext, 'seek': seeking, 'prox': proximate, 'type': searchtype })
+	
+	workers = hipparchia.config['WORKERS']
+	pool = Pool(processes=workers)
+	allfound = pool.map(formattingworkpile, workbundles)
+	
+	return allfound
 
+
+def formattingworkpile(bundledwork):
+	"""
+	the work for the workers to send to formattedcittationincontext()
+	:param workbundles:
+	:return:
+	"""
+	
+	citwithcontext = formattedcittationincontext(bundledwork['lo'], bundledwork['wo'], bundledwork['ao'], bundledwork['ctx'], bundledwork['seek'],
+	                                             bundledwork['prox'], bundledwork['type'])
+	citwithcontext[0]['hitnumber'] = bundledwork['hitnumber']
+	pollingdata.pdremaining.value = pollingdata.pdremaining.value - 1
+	
+	return citwithcontext
+
+
+def formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext, searchterm, proximate,
+                                searchtype):
+	"""
+	take a hit
+		turn it into a focus line
+		turround it by some context
+	:param line:
+	:param workdbname:
+	:param authorobject:
+	:param linesofcontext:
+	:param searchterm:
+	:param cursor:
+	:return:
+	"""
+	
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
+	
+	citationincontext = []
+	highlightline = lineobject.index
+	citation = locusintocitation(workobject, lineobject.locustuple())
+	# this next bit of info tags the find; 'newfind' + 'url' is turned into JS in the search.html '<script>' loop; this enables click-to-browse
+	# similarly the for-result-in-found loop of search.html generates the clickable elements: <browser id="{{ context['url'] }}">
+	citationincontext.append({'newfind': 1, 'author': authorobject.shortname,
+	                          'work': workobject.title, 'citation': citation, 'url': (lineobject.universalid)})
+	environs = simplecontextgrabber(workobject, highlightline, linesofcontext, curs)
+	
+	for found in environs:
+		found = dblineintolineobject(lineobject.wkuinversalid, found)
+		if found.index == highlightline:
+			found = lineobjectresultformatter(found, searchterm, proximate, searchtype, True)
+		else:
+			found = lineobjectresultformatter(found, searchterm, proximate, searchtype, False)
+		citationincontext.append(found)
+	
+	dbconnection.commit()
+	curs.close()
+	del dbconnection
+	
+	return citationincontext
 

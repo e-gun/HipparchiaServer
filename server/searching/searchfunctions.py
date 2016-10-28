@@ -383,6 +383,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 	while len(searching) > 0 and count.value <= int(session['maxresults']):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
+		# that's not supposed to happen with the pool, but somehow it does
 		try:
 			i = searching.pop()
 			pollingdata.pdremaining.value = len(searching)
@@ -867,6 +868,4 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 			fullmatches.append(hit)
 	
 	return fullmatches
-
-
 
