@@ -127,18 +127,15 @@ class dbWorkLine(object):
 		self.stripped = re.sub(r'\s$', '', stripped_line)
 		self.annotations = annotations
 		self.universalid = wkuinversalid+'_LN_'+str(index)
-
+		self.hyphenated = hyphenated_words
+		if len(self.hyphenated) > 1:
+			self.hashyphenated = True
+		else:
+			self.hashyphenated = False
+		
 		if self.accented is None:
 			self.accented = ''
 			self.stripped = ''
-		
-		hyph = hyphenated_words.split(' ')
-		if len(hyph) != 2:
-			self.hyphenated = {'accented': '', 'stripped': ''}
-			self.hashyphenated = False
-		else:
-			self.hyphenated = {'accented': hyph[0], 'stripped': hyph[1]}
-			self.hashyphenated = True
 	
 	def locus(self):
 		"""
@@ -271,8 +268,9 @@ class dbWorkLine(object):
 				line = re.sub(nbsp, r'', line)
 			wordlist = line.split(' ')
 			wordlist = [w for w in wordlist if w]
-			if self.hyphenated[version] != '':
-				wordlist = wordlist[:-1] + [self.hyphenated[version]]
+			if version == 'accented':
+				if self.hyphenated != '':
+					wordlist = wordlist[:-1] + [self.hyphenated]
 		
 		return wordlist
 	

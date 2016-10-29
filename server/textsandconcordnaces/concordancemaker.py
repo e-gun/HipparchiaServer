@@ -128,7 +128,7 @@ def linesintoconcordance(lineobjects):
 		if line.index != -1:
 			words = line.wordlist('accented')
 			# deal with the hyphens issue: first 'word' might be only the second half of a word
-			if previous.hyphenated['accented'] != '':
+			if previous.hyphenated != '':
 				words = words[1:]
 			words = [cleanwords(w) for w in words]
 			words = list(set(words))

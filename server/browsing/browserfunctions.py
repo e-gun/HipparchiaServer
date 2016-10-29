@@ -34,7 +34,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	# for the <-- and --> buttons on the browser
 	first = table + '_LN_' + str(first)
 	last = table + '_LN_' + str(last)
-	
+
 	formattedpassage = []
 	formattedpassage.append({'forwardsandback': [last,first]})
 
@@ -95,7 +95,7 @@ def insertparserids(lineobject):
 	# this is tricky because there is html in here and you don't want to tag it
 	
 	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',lineobject.accented)
-	hyphenated = lineobject.hyphenated['accented']
+	hyphenated = lineobject.hyphenated
 	segments = theline.split('*snip*')
 	newline = ''
 	

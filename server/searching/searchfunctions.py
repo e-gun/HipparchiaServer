@@ -401,7 +401,8 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 				hits[index] = (wkid, simplesearchworkwithexclusion(seeking, wkid, authors, curs))
 			else:
 				hits[index] = (wkid, concsearch(seeking, curs, wkid))
-			
+				# hits[index] = (wkid, partialwordsearch(seeking, curs, wkid, authors))
+				
 			if len(hits[index][1]) == 0:
 				del hits[index]
 			else:
