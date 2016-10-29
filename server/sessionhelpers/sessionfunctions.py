@@ -228,7 +228,7 @@ def sessionvariables():
 		session['searchscope'] = 'L'
 		session['linesofcontext'] = 4
 		session['browsercontext'] = '25'
-		session['maxresults'] = '250'
+		session['maxresults'] = '200'
 		session['sortorder'] = 'shortname'
 		session['earliestdate'] = '-850'
 		session['latestdate'] = '1500'
