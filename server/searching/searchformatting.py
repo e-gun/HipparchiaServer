@@ -131,6 +131,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	:param cursor:
 	:return:
 	"""
+	
 	if '_AT_' in workdbname:
 		workdbname = workdbname[0:10]
 
@@ -159,7 +160,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	text = []
 	for line in lines:
 		if session['accentsmatter'] == 'Y':
-			wordsinline = line.wordlist('accented')
+			wordsinline = line.wordlist('polytonic')
 		else:
 			wordsinline = line.wordlist('stripped')
 		
@@ -181,6 +182,39 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 
 
 def aggregatelines(firstline, lastline, cursor, workdbname):
+	"""
+	build searchable clumps of words spread over various lines
+	:param firstline:
+	:param lastline:
+	:param cursor:
+	:param authorobject:
+	:param worknumber:
+	:return:
+	"""
+	
+	query = 'SELECT * FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
+	data = (firstline, lastline)
+	cursor.execute(query, data)
+	lines = cursor.fetchall()
+	
+	lineobjects = []
+	for dbline in lines:
+		lineobjects.append(dblineintolineobject(workdbname, dbline))
+	
+	aggregate = ''
+	if session['accentsmatter'] == 'Y':
+		for line in lineobjects:
+			aggregate += line.polytonic + ' '
+	else:
+		for line in lineobjects:
+			aggregate += line.stripped + ' '
+	
+	aggregate = re.sub(r'\s\s', r' ', aggregate)
+	
+	return aggregate
+
+
+def oldaggregatelines(firstline, lastline, cursor, workdbname):
 	"""
 	build searchable clumps of words spread over various lines
 	:param firstline:

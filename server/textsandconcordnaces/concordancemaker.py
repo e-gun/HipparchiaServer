@@ -48,6 +48,7 @@ def buildconcordancefromwork(cdict, cursor):
 	
 	the ultimate output needs to look like
 		(word, count, citations)
+		
 	:param work:
 	:param startline:
 	:param endline:
@@ -116,7 +117,6 @@ def linesintoconcordance(lineobjects):
 	defaultwork = lineobjects[0].wkuinversalid
 	
 	concordance = {}
-	previous = makeablankline(defaultwork, lineobjects[0].index - 1)
 	
 	while len(lineobjects) > 0:
 		try:
@@ -126,10 +126,7 @@ def linesintoconcordance(lineobjects):
 			line = makeablankline(defaultwork, -1)
 		
 		if line.index != -1:
-			words = line.wordlist('accented')
-			# deal with the hyphens issue: first 'word' might be only the second half of a word
-			if previous.hyphenated != '':
-				words = words[1:]
+			words = line.wordlist('polytonic')
 			words = [cleanwords(w) for w in words]
 			words = list(set(words))
 			words[:] = [x.lower() for x in words]
@@ -143,7 +140,6 @@ def linesintoconcordance(lineobjects):
 					# concordance[w] = concordance[w] + [(line.wkuinversalid, line.index, line.locus())]
 				except:
 					concordance[w] = [(line.wkuinversalid, line.index, line.locus())]
-		previous = line
 	
 	return concordance
 

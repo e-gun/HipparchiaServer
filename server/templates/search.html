@@ -207,6 +207,8 @@ $(document).ready( function () {
 
     $('#browserclose').bind("click", function(){
     		$("#browserdialog").hide();
+    		$('#browseback').unbind('click');
+    		$('#browseforward').unbind('click');
     		}
 		);
 	});

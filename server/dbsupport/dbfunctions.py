@@ -125,9 +125,9 @@ def dblineintolineobject(work, dbline):
 	:param dbline:
 	:return:
 	"""
-	
+
 	lineobject = dbWorkLine(work, dbline[0], dbline[1], dbline[2], dbline[3], dbline[4], dbline[5], dbline[6],
-	                        dbline[7], dbline[8], dbline[9], dbline[10])
+	                        dbline[7], dbline[8], dbline[9], dbline[10], dbline[11])
 	
 	return lineobject
 
@@ -293,7 +293,7 @@ def makeablankline(work, fakelinenumber):
 	:return:
 	"""
 	
-	lineobject = dbWorkLine(work, fakelinenumber, '-1', '-1', '-1', '-1', '-1', '-1', '', '', '', '')
+	lineobject = dbWorkLine(work, fakelinenumber, '-1', '-1', '-1', '-1', '-1', '-1', '', '', '', '', '')
 	
 	return lineobject
 

@@ -114,7 +114,7 @@ class dbWorkLine(object):
 	an object that corresponds to a db line
 	"""
 	
-	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, hyphenated_words, annotations):
+	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations):
 		self.wkuinversalid = wkuinversalid[:10]
 		self.index = index
 		self.l5 = level_05_value
@@ -124,6 +124,7 @@ class dbWorkLine(object):
 		self.l1 = level_01_value
 		self.l0 = level_00_value
 		self.accented = re.sub(r'\s$', '', marked_up_line)
+		self.polytonic = re.sub(r'\s$', '', accented_line)
 		self.stripped = re.sub(r'\s$', '', stripped_line)
 		self.annotations = annotations
 		self.universalid = wkuinversalid+'_LN_'+str(index)
@@ -258,19 +259,11 @@ class dbWorkLine(object):
 		:return:
 		"""
 		wordlist = []
-		markup = re.compile(r'(\<.*?\>)')
-		nbsp = re.compile(r'&nbsp;')
 		
-		if version in ['accented', 'stripped']:
+		if version in ['polytonic', 'stripped']:
 			line = getattr(self, version)
-			if version == 'accented':
-				line = re.sub(markup, r'', line)
-				line = re.sub(nbsp, r'', line)
 			wordlist = line.split(' ')
 			wordlist = [w for w in wordlist if w]
-			if version == 'accented':
-				if self.hyphenated != '':
-					wordlist = wordlist[:-1] + [self.hyphenated]
 		
 		return wordlist
 	

@@ -194,70 +194,6 @@ def whereclauses(uidwithatsign, operand, authors):
 	return whereclausetuples
 
 
-def concsearch(seeking, cursor, workdbname):
-	"""
-	search for a word by looking it up in the concordance to that work
-	returns the lines from the work that contain the word
-	:param seeking:
-	:param cursor:
-	:param workdbname:
-	:return: db lines that match the search criterion
-	"""
-	
-	concdbname = workdbname + '_conc'
-	seeking = cleansearchterm(seeking)
-	mylimit = 'LIMIT ' + str(session['maxresults'])
-	if session['accentsmatter'] == 'Y':
-		ccolumn = 'word'
-	else:
-		ccolumn = 'stripped_word'
-	
-	searchsyntax = ['=', 'LIKE', 'SIMILAR TO', '~*']
-	
-	# whitespace = whole word and that can be done more quickly
-	if seeking[0] == ' ' and seeking[-1] == ' ':
-		seeking = seeking[1:-1]
-		mysyntax = searchsyntax[0]
-	else:
-		if seeking[0] == ' ':
-			seeking = '^' + seeking[1:]
-		if seeking[-1] == ' ':
-			seeking = seeking[0:-1] + '$'
-		mysyntax = searchsyntax[3]
-	
-	found = []
-	
-	query = 'SELECT loci FROM ' + concdbname + ' WHERE ' + ccolumn + ' ' + mysyntax + ' %s ' + mylimit
-	data = (seeking,)
-	
-	try:
-		cursor.execute(query, data)
-		found = cursor.fetchall()
-	except psycopg2.DatabaseError as e:
-		print('could not execute', query)
-		print('Error:', e)
-	
-	hits = []
-	for find in found:
-		hits += find[0].split(' ')
-	
-	concfinds = []
-	for hit in hits:
-		query = 'SELECT * FROM ' + workdbname + ' WHERE index = %s'
-		data = (hit,)
-		try:
-			cursor.execute(query, data)
-			found = cursor.fetchone()
-			concfinds.append(found)
-		except psycopg2.DatabaseError as e:
-			print('could not execute', query)
-			print('Error:', e)
-	
-	concfinds = sorted(concfinds)
-	
-	return concfinds
-
-
 def partialwordsearch(seeking, cursor, workdbname, authors):
 	"""
 	actually one of the most basic search types: look for a string/substring
@@ -271,9 +207,10 @@ def partialwordsearch(seeking, cursor, workdbname, authors):
 	
 	mylimit = 'LIMIT ' + str(session['maxresults'])
 	if session['accentsmatter'] == 'Y':
-		columna = 'marked_up_line'
+		# columna = 'marked_up_line'
+		column = 'accented_line'
 	else:
-		columna = 'stripped_line'
+		column = 'stripped_line'
 	columnb = 'hyphenated_words'
 	
 	seeking = cleansearchterm(seeking)
@@ -289,18 +226,19 @@ def partialwordsearch(seeking, cursor, workdbname, authors):
 	found = []
 	
 	if '_AT_' not in workdbname:
-		query = 'SELECT * FROM ' + workdbname + ' WHERE (' + columna + ' ' + mysyntax + ' %s) OR (' + columnb + ' ' + mysyntax + ' %s) ' + mylimit
-		data = (seeking, hyphsearch)
+		query = 'SELECT * FROM ' + workdbname + ' WHERE ' + column + ' ' + mysyntax + ' %s '+ mylimit
+		data = (seeking,)
+
 	else:
 		qw = ''
 		db = workdbname[0:10]
-		d = [seeking, hyphsearch]
+		d = [seeking]
 		w = whereclauses(workdbname, '=', authors)
 		for i in range(0, len(w)):
 			qw += 'AND (' + w[i][0] + ') '
 			d.append(w[i][1])
 		
-		query = 'SELECT * FROM ' + db + ' WHERE (' + columna + ' ' + mysyntax + ' %s OR ' + columnb + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC '+ mylimit
+		query = 'SELECT * FROM ' + db + ' WHERE (' + column + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC '+ mylimit
 		data = tuple(d)
 	
 	try:
@@ -400,8 +338,8 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 				wkid = re.sub('x', 'w', wkid)
 				hits[index] = (wkid, simplesearchworkwithexclusion(seeking, wkid, authors, curs))
 			else:
-				hits[index] = (wkid, concsearch(seeking, curs, wkid))
-				# hits[index] = (wkid, partialwordsearch(seeking, curs, wkid, authors))
+				# hits[index] = (wkid, concsearch(seeking, curs, wkid))
+				hits[index] = (wkid, partialwordsearch(seeking, curs, wkid, authors))
 				
 			if len(hits[index][1]) == 0:
 				del hits[index]
@@ -475,8 +413,8 @@ def phrasesearch(searchphrase, cursor, wkid, authors):
 			longestterm = term
 	
 	if 'x' not in wkid:
-		# hits = partialwordsearch(longestterm, cursor, wkid, authors)
-		hits = concsearch(longestterm, cursor, wkid)
+		hits = partialwordsearch(longestterm, cursor, wkid, authors)
+		# hits = concsearch(longestterm, cursor, wkid)
 	else:
 		wkid = re.sub('x', 'w', wkid)
 		hits = simplesearchworkwithexclusion(longestterm, wkid, authors, cursor)
@@ -786,9 +724,10 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, aut
 	firstterm = cleansearchterm(firstterm)
 	secondterm = re.compile(cleansearchterm(secondterm))
 	
-	# hits = partialwordsearch(longestterm, cursor, authorobject, worknumber)
+	
 	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
-		hits = concsearch(firstterm, cursor, workdbname)
+		# hits = concsearch(firstterm, cursor, workdbname)
+		hits = partialwordsearch(firstterm, cursor, workdbname, authors)
 	elif 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
 		hits = simplesearchworkwithexclusion(firstterm, workdbname, authors, cursor)
@@ -818,7 +757,8 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 	secondterm = cleansearchterm(secondterm)
 	
 	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
-		hits = concsearch(firstterm, cursor, workdbname)
+		# hits = concsearch(firstterm, cursor, workdbname)
+		hits = partialwordsearch(firstterm, cursor, workdbname, authors)
 	elif 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
 		hits = simplesearchworkwithexclusion(firstterm, workdbname, authors, cursor)
@@ -870,3 +810,69 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 	
 	return fullmatches
 
+
+
+# slated for removal
+
+def concsearch(seeking, cursor, workdbname):
+	"""
+	search for a word by looking it up in the concordance to that work
+	returns the lines from the work that contain the word
+	:param seeking:
+	:param cursor:
+	:param workdbname:
+	:return: db lines that match the search criterion
+	"""
+	
+	concdbname = workdbname + '_conc'
+	seeking = cleansearchterm(seeking)
+	mylimit = 'LIMIT ' + str(session['maxresults'])
+	if session['accentsmatter'] == 'Y':
+		ccolumn = 'word'
+	else:
+		ccolumn = 'stripped_word'
+	
+	searchsyntax = ['=', 'LIKE', 'SIMILAR TO', '~*']
+	
+	# whitespace = whole word and that can be done more quickly
+	if seeking[0] == ' ' and seeking[-1] == ' ':
+		seeking = seeking[1:-1]
+		mysyntax = searchsyntax[0]
+	else:
+		if seeking[0] == ' ':
+			seeking = '^' + seeking[1:]
+		if seeking[-1] == ' ':
+			seeking = seeking[0:-1] + '$'
+		mysyntax = searchsyntax[3]
+	
+	found = []
+	
+	query = 'SELECT loci FROM ' + concdbname + ' WHERE ' + ccolumn + ' ' + mysyntax + ' %s ' + mylimit
+	data = (seeking,)
+	
+	try:
+		cursor.execute(query, data)
+		found = cursor.fetchall()
+	except psycopg2.DatabaseError as e:
+		print('could not execute', query)
+		print('Error:', e)
+	
+	hits = []
+	for find in found:
+		hits += find[0].split(' ')
+	
+	concfinds = []
+	for hit in hits:
+		query = 'SELECT * FROM ' + workdbname + ' WHERE index = %s'
+		data = (hit,)
+		try:
+			cursor.execute(query, data)
+			found = cursor.fetchone()
+			concfinds.append(found)
+		except psycopg2.DatabaseError as e:
+			print('could not execute', query)
+			print('Error:', e)
+	
+	concfinds = sorted(concfinds)
+	
+	return concfinds

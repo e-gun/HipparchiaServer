@@ -13,7 +13,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	:param cursor:
 	:return:
 	"""
-	query = 'SELECT index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, hyphenated_words, annotations FROM ' + work + \
+	query = 'SELECT index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations FROM ' + work + \
 	        ' WHERE (index >= %s and index <= %s) ORDER BY index ASC'
 	data = (firstline, lastline)
 	cursor.execute(query, data)
