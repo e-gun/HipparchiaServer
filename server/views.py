@@ -122,6 +122,7 @@ def executesearch():
 	searchtime = 0
 	
 	if len(seeking) > 0:
+		seeking = seeking.lower()
 		starttime = time.time()
 		pollingdata.pdstatusmessage = 'Compiling the list of works to search'
 		

@@ -230,7 +230,7 @@ def sessionvariables():
 		session['linesofcontext'] = 4
 		session['browsercontext'] = '25'
 		session['maxresults'] = '200'
-		session['sortorder'] = 'shortname'
+		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
 		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
 		session['latestdate'] = hipparchia.config['DEFAULTLATESTDATE']
 		session['xmission'] = 'Any'
