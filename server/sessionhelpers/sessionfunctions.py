@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from flask import session
+from server import hipparchia
 from server import formatting_helper_functions
 from server.dbsupport import citationfunctions
 from server.dbsupport.dbfunctions import loadallauthors
@@ -230,8 +231,8 @@ def sessionvariables():
 		session['browsercontext'] = '25'
 		session['maxresults'] = '200'
 		session['sortorder'] = 'shortname'
-		session['earliestdate'] = '-850'
-		session['latestdate'] = '1500'
+		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
+		session['latestdate'] = hipparchia.config['DEFAULTLATESTDATE']
 		session['xmission'] = 'Any'
 		session['spuria'] = 'Y'
 

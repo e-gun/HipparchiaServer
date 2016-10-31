@@ -211,7 +211,6 @@ def partialwordsearch(seeking, cursor, workdbname, authors):
 		column = 'accented_line'
 	else:
 		column = 'stripped_line'
-	columnb = 'hyphenated_words'
 	
 	seeking = cleansearchterm(seeking)
 	hyphsearch = seeking
