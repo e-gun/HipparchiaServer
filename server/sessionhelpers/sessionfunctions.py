@@ -222,7 +222,7 @@ def sessionvariables():
 		session['agnexclusions'] = []
 		session['wkgnexclusions'] = []
 		session['psgexclusions'] = []
-		session['corpora'] = 'G'
+		session['corpora'] = hipparchia.config['DEFAULTCORPUS']
 		session['accentsmatter'] = 'N'
 		session['proximity'] = '1'
 		session['nearornot'] = 'T'
