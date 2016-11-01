@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+	HipparchiaServer: an interface to a database of Greek and Latin texts
+	Copyright: E Gunderson 2016
+	License: GPL 3 (see LICENSE in the top level directory of the distribution)
+"""
+
 import re
 
 from flask import session
@@ -5,7 +12,6 @@ from flask import session
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs
 from server.formatting_helper_functions import polytonicsort
-
 
 def browserdictionarylookup(entry, dict, cursor):
 	"""

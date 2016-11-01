@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-# assuming py35 or higher
+"""
+	HipparchiaServer: an interface to a database of Greek and Latin texts
+	Copyright: E Gunderson 2016
+	License: GPL 3 (see LICENSE in the top level directory of the distribution)
+"""
+
 import psycopg2
 from server.hipparchiaclasses import dbAuthor, dbOpus, dbWorkLine
 from server import hipparchia

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import re
 from flask import session
 from server import hipparchia

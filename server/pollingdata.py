@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+"""
+	HipparchiaServer: an interface to a database of Greek and Latin texts
+	Copyright: E Gunderson 2016
+	License: GPL 3 (see LICENSE in the top level directory of the distribution)
+"""
+
 from multiprocessing import Value
 from server.hipparchiaclasses import MPCounter
 
