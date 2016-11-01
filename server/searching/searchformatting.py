@@ -445,7 +445,7 @@ def mpresultformatter(hits, authordict, workdict, seeking, proximate, searchtype
 	pollingdata.pdpoolofwork.value = len(hits)
 	pollingdata.pdremaining.value = len(hits)
 	
-	linesofcontext = session['linesofcontext']
+	linesofcontext = int(session['linesofcontext'])
 	
 	workbundles = []
 	if len(hits) > int(session['maxresults']):
