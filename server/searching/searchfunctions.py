@@ -170,7 +170,6 @@ def whereclauses(uidwithatsign, operand, authors):
 	"""
 	in order to restrict a search to a portion of a work, you will need a where clause
 	this builds it out of something like 'gr0003w001_AT_3|12' (Thuc., Bk 3, Ch 12)
-	note the clash with concsearching: it is possible to search the whole conc and then toss the bad lines, but...
 
 	:param uidwithatsign:
 	:param operand: this should be either '=' or '!='
@@ -342,7 +341,6 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 				wkid = re.sub('x', 'w', wkid)
 				hits[index] = (wkid, simplesearchworkwithexclusion(seeking, wkid, authors, curs))
 			else:
-				# hits[index] = (wkid, concsearch(seeking, curs, wkid))
 				hits[index] = (wkid, partialwordsearch(seeking, curs, wkid, authors))
 				
 			if len(hits[index][1]) == 0:
@@ -418,7 +416,6 @@ def phrasesearch(searchphrase, cursor, wkid, authors):
 	
 	if 'x' not in wkid:
 		hits = partialwordsearch(longestterm, cursor, wkid, authors)
-		# hits = concsearch(longestterm, cursor, wkid)
 	else:
 		wkid = re.sub('x', 'w', wkid)
 		hits = simplesearchworkwithexclusion(longestterm, wkid, authors, cursor)
@@ -501,7 +498,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 	the standard search apparatus can't do this, but this can
 	a modified version of partialwordsearch()
 
-	possible to use finddblinefromincompletelocus() to get a set of line numbers to search the main db or the conc
+	possible to use finddblinefromincompletelocus() to get a set of line numbers to search
 	but is that at all faster? it likely means more queries in the end, not fewer
 
 	problem: l2<>1 AND l1<>10 inside an SQL query will kill ALL 10s at l1, not just in the one segment
@@ -730,7 +727,6 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, aut
 	
 	
 	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
-		# hits = concsearch(firstterm, cursor, workdbname)
 		hits = partialwordsearch(firstterm, cursor, workdbname, authors)
 	elif 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
@@ -761,7 +757,6 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 	secondterm = cleansearchterm(secondterm)
 	
 	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
-		# hits = concsearch(firstterm, cursor, workdbname)
 		hits = partialwordsearch(firstterm, cursor, workdbname, authors)
 	elif 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
@@ -813,70 +808,3 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 			fullmatches.append(hit)
 	
 	return fullmatches
-
-
-
-# slated for removal
-
-def concsearch(seeking, cursor, workdbname):
-	"""
-	search for a word by looking it up in the concordance to that work
-	returns the lines from the work that contain the word
-	:param seeking:
-	:param cursor:
-	:param workdbname:
-	:return: db lines that match the search criterion
-	"""
-	
-	concdbname = workdbname + '_conc'
-	seeking = cleansearchterm(seeking)
-	mylimit = 'LIMIT ' + str(session['maxresults'])
-	if session['accentsmatter'] == 'Y':
-		ccolumn = 'word'
-	else:
-		ccolumn = 'stripped_word'
-	
-	searchsyntax = ['=', 'LIKE', 'SIMILAR TO', '~*']
-	
-	# whitespace = whole word and that can be done more quickly
-	if seeking[0] == ' ' and seeking[-1] == ' ':
-		seeking = seeking[1:-1]
-		mysyntax = searchsyntax[0]
-	else:
-		if seeking[0] == ' ':
-			seeking = '^' + seeking[1:]
-		if seeking[-1] == ' ':
-			seeking = seeking[0:-1] + '$'
-		mysyntax = searchsyntax[3]
-	
-	found = []
-	
-	query = 'SELECT loci FROM ' + concdbname + ' WHERE ' + ccolumn + ' ' + mysyntax + ' %s ' + mylimit
-	data = (seeking,)
-	
-	try:
-		cursor.execute(query, data)
-		found = cursor.fetchall()
-	except psycopg2.DatabaseError as e:
-		print('could not execute', query)
-		print('Error:', e)
-	
-	hits = []
-	for find in found:
-		hits += find[0].split(' ')
-	
-	concfinds = []
-	for hit in hits:
-		query = 'SELECT * FROM ' + workdbname + ' WHERE index = %s'
-		data = (hit,)
-		try:
-			cursor.execute(query, data)
-			found = cursor.fetchone()
-			concfinds.append(found)
-		except psycopg2.DatabaseError as e:
-			print('could not execute', query)
-			print('Error:', e)
-	
-	concfinds = sorted(concfinds)
-	
-	return concfinds
