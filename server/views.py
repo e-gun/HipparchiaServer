@@ -70,6 +70,11 @@ def frontpage():
 
 @hipparchia.route('/authors')
 def authorlist():
+	"""
+	a simple dump of the authors available in the db
+	
+	:return:
+	"""
 
 	authors = []
 	
@@ -86,6 +91,14 @@ def authorlist():
 
 @hipparchia.route('/executesearch', methods=['GET'])
 def executesearch():
+	"""
+	the interface to all of the other search functions
+	tell me what you are looking for and i'll try to find it
+	
+	the results are returned in a json bundle that will be used to update the html on the page
+	
+	:return:
+	"""
 	sessionvariables()
 	# need to sanitize input at least a bit...
 	try:
@@ -424,6 +437,11 @@ def progressreport():
 
 @hipparchia.route('/getcookie', methods=['GET'])
 def cookieintosession():
+	"""
+	take a stored cookie and convert its values into the current session settings
+	
+	:return:
+	"""
 	cookienum = request.args.get('cookie', '')
 	cookienum = cookienum[0:2]
 	
@@ -511,6 +529,10 @@ def offerworkhints():
 
 @hipparchia.route('/getgenrehint', methods=['GET'])
 def augenrelist():
+	"""
+	populate the author genres autocomplete box with constantly updated values
+	:return:
+	"""
 
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
@@ -536,8 +558,10 @@ def augenrelist():
 
 @hipparchia.route('/getworkgenrehint', methods=['GET'])
 def wkgenrelist():
-	# this needs a lot of refactoring: genres should be removed from the session and put into a global
-	# the evil big cookie problem
+	"""
+	populate the work genres autocomplete box with constantly updated values
+	:return:
+	"""
 
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
@@ -618,6 +642,11 @@ def workstructure():
 
 @hipparchia.route('/getsessionvariables')
 def getsessionvariables():
+	"""
+	a simple retch and report: JS wants to know what Python knows
+	
+	:return:
+	"""
 	returndict = {}
 	for k in session.keys():
 		if k != 'csrf_token':
@@ -633,6 +662,7 @@ def getauthinfo():
 	show local info about the author one is considering in the selection box
 	:return:
 	"""
+	
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 	
@@ -661,6 +691,11 @@ def getauthinfo():
 
 @hipparchia.route('/getsearchlistcontents')
 def getsearchlistcontents():
+	"""
+	return a formatted list of what a search would look like if executed with the current selections
+	
+	:return:
+	"""
 
 	authorandworklist = compileauthorandworklist(authordict, workdict)
 	authorandworklist = sortauthorandworklists(authorandworklist, authordict)
@@ -961,6 +996,7 @@ def reverselexiconsearch():
 	attempt to find all of the greek/latin dictionary entries that might go with the english search term
 	:return:
 	"""
+	
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 	
@@ -1024,6 +1060,7 @@ def setsessionvariable():
 		
 	:return:
 	"""
+	
 	param = re.search(r'(.*?)=.*?', request.query_string.decode('utf-8'))
 	param = param.group(1)
 	val = request.args.get(param)
@@ -1158,9 +1195,15 @@ def clearselections():
 
 @hipparchia.route('/clear')
 def clearsession():
-	# Clear the session
-    session.clear()
-	# Redirect the user to the main page
-    return redirect(url_for('frontpage'))
+	"""
+	clear the session
+	this will reset all settings and reload the front page
+	:return:
+	"""
+	
+	session.clear()
+	return redirect(url_for('frontpage'))
+	
+
 
 
