@@ -589,17 +589,27 @@ def workstructure():
 	for work in ao.listofworks:
 		if work.universalid == workdb:
 			structure = work.structure
+	
+	ws = {}
 	if structure != {}:
 		lowandhigh = findvalidlevelvalues(workdb, structure, safepassage, cur)
 		# example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
-		results = [{'totallevels': lowandhigh[0]}, {'level': lowandhigh[1]}, {'label': lowandhigh[2]},
-		           {'low': lowandhigh[3]}, {'high': lowandhigh[4]}, {'rng': lowandhigh[5]}]
+		ws['totallevels'] = lowandhigh[0]
+		ws['level'] = lowandhigh[1]
+		ws['label'] = lowandhigh[2]
+		ws['low'] = lowandhigh[3]
+		ws['high'] = lowandhigh[4]
+		ws['range'] = lowandhigh[5]
+		
 	else:
 		# (2, 0, 'verse', '1', '100')
-		results = [{'totallevels': 1}, {'level': 0}, {'label': 'Error: repick the work'},
-		           {'low': 'Error:'}, {'high': 'again'}, {'rng': ['error', 'select', 'the', 'work', 'again']}]
-
-	results = json.dumps(results)
+		ws['totallevels'] = 1
+		ws['level'] = 0
+		ws['label'] = 'Error: repick the work'
+		ws['low'] = 'Error:'
+		ws['high'] = 'again'
+		ws['range'] = ['error', 'select', 'the', 'work', 'again']
+	results = json.dumps(ws)
 	
 	cur.close()
 	del dbc
