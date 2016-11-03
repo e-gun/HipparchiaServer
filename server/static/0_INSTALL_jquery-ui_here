@@ -1,1 +1,4 @@
 http://jqueryui.com/download/
+
+Note that you are being asked to install rather than to link to jquery: this is not an accident.
+Hipparchia is supposed to be able to run even if you are not connected to the internet.

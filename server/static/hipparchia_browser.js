@@ -70,6 +70,9 @@ function parsepassagereturned(passagereturned) {
         $('#worksautocomplete').show();
         loadWorklist(passagereturned['authornumber']);
         loadLevellist(passagereturned['workid'],'-1');
+        $('#concordance').show();
+        $('#textofthis').show();
+        $('#browseto').show();
 
         $('#browserdialogtext').html(linesreturned);
         $('#browserdialog').show();
