@@ -27,6 +27,94 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	
 	table = workobject.universalid
 	title = workobject.title
+	
+	if locusindexvalue - linesofcontext < workobject.starts:
+		first = workobject.starts
+	else:
+		first = locusindexvalue - linesofcontext
+	
+	if locusindexvalue + linesofcontext > workobject.ends:
+		last = workobject.ends
+	else:
+		last = locusindexvalue + linesofcontext
+	
+	# for the <-- and --> buttons on the browser
+	first = table + '_LN_' + str(first)
+	last = table + '_LN_' + str(last)
+	
+	passage = {}
+	passage['browseforwards'] = last
+	passage['browseback'] = first
+	
+	rawpassage = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
+	
+	lines = []
+	for r in rawpassage:
+		lines.append(dblineintolineobject(workobject.universalid, r))
+	
+	focusline = lines[0]
+	for line in lines:
+		if line.index == locusindexvalue:
+			focusline = line
+	
+	biblio = getpublicationinfo(workobject, cursor)
+	
+	citation = locusintocitation(workobject, focusline.locustuple())
+	
+	cv = '<span class="author">' + authorobject.shortname + '</span>, <span class="work">' + title + '</span><br />' + citation
+	cv = cv + '<br />' + biblio
+	
+	passage['currentlyviewing'] = '<currentlyviewing>' + cv + '</currentlyviewing>'
+	passage['ouputtable'] = []
+	
+	passage['ouputtable'].append('<table>\n')
+	
+	linecount = numbersevery - 3
+	# insert something to highlight the citationtuple line
+	previousline = lines[0]
+	for line in lines:
+		linecount += 1
+		columnb = insertparserids(line)
+		if line.index == focusline.index:
+			# linecount = numbersevery + 1
+			columna = line.locus()
+			columnb = '<span class="focusline">' + columnb + '</span>'
+		else:
+			if line.samelevelas(previousline) is not True:
+				linecount = numbersevery + 1
+				columna = line.shortlocus()
+			elif linecount % numbersevery == 0:
+				columna = line.locus()
+			else:
+				# do not insert a line number or special formatting
+				columna = ''
+		
+		linehtml = '<tr class="browser"><td class="browsedline">' + columnb + '</td>'
+		linehtml += '<td class="browsercite">' + columna + '</td></tr>\n'
+		
+		passage['ouputtable'].append(linehtml)
+		previousline = line
+		
+	passage['ouputtable'].append('</table>\n')
+	
+	return passage
+
+
+def oldgetandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
+	"""
+	this function does a lot of work via a number of subfunctions
+	lots of refactoring required if you change anything...
+	:param authorobject:
+	:param worknumber:
+	:param citationtuple:
+	:param linesofcontext:
+	:param numbersevery:
+	:param cursor:
+	:return:
+	"""
+	
+	table = workobject.universalid
+	title = workobject.title
 
 	if locusindexvalue - linesofcontext < workobject.starts:
 		first = workobject.starts

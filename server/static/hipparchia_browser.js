@@ -48,18 +48,17 @@ var openbrowserfromclick = function() {
         });
 }
 
-
 function parsepassagereturned(passagereturned) {
 		$('#browserdialogtext').text('');
         // the first item is info
         // {'forwardsandback': ['/browseto?locus=lt1254w001_AT_2|2|3|6', '/browseto?locus=lt1254w001_AT_6|9|2|6']}
-        var fwdurl = passagereturned[0]['forwardsandback'][0]
-        var bkdurl = passagereturned[0]['forwardsandback'][1]
+        var fwdurl = passagereturned['browseback'];
+        var bkdurl = passagereturned['browseforwards'];
+        var linesreturned = passagereturned['currentlyviewing'];
         // the remaining lines are the lines of the passage
-        var dLen = passagereturned.length;
-        var linesreturned = []
+        var dLen = passagereturned['ouputtable'].length;
         for (i = 0; i < dLen; i++) {
-            linesreturned.push(passagereturned[i]['value']);
+            linesreturned += passagereturned['ouputtable'][i];
         }
 
         $('#browserdialogtext').html(linesreturned);
@@ -93,5 +92,3 @@ function parsepassagereturned(passagereturned) {
         });
 	return [fwdurl, bkdurl]
 }
-
-
