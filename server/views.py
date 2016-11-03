@@ -600,7 +600,6 @@ def workstructure():
 		ws['low'] = lowandhigh[3]
 		ws['high'] = lowandhigh[4]
 		ws['range'] = lowandhigh[5]
-		
 	else:
 		# (2, 0, 'verse', '1', '100')
 		ws['totallevels'] = 1

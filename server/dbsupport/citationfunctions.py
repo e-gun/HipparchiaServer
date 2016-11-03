@@ -50,6 +50,9 @@ def findvalidlevelvalues(workdb, workstructure, partialcitationtuple, cursor):
 	data = tuple(datalist)
 	cursor.execute(query, data)
 	values = cursor.fetchall()
+
+	if len(values) < 1:
+		values = [('-9999',)]
 	low = values[0][0]
 	high = values[-1][0]
 	rng = []

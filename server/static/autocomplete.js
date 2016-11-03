@@ -246,7 +246,8 @@ function loadLevellist(workid,pariallocus){
         var possibilities = selectiondata['range'];
 
         var generateme = '#level0'+String(atlevel);
-        $(generateme).prop('placeholder', '('+label+' '+String(low)+' to '+String(high)+')');
+        if ( low != '-9999') { $(generateme).prop('placeholder', '('+label+' '+String(low)+' to '+String(high)+')'); }
+        else { $(generateme).prop('placeholder', '(awaiting a valid selection...)'); }
         $(generateme).show();
         $(generateme).autocomplete ({
             focus: function (event, ui) {
