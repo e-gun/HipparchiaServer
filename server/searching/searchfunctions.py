@@ -705,7 +705,7 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors):
 						matchobjects.append(lineobjects[i])
 					previous = lineobjects[i]
 					
-		# note that each work generates one set of matchobjects (but they are internally sorted)
+			# note that each work generates one set of matchobjects (but they are internally sorted)
 			hits[index] = (wkid, matchobjects)
 	
 	curs.close()
