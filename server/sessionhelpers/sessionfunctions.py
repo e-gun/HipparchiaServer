@@ -155,7 +155,10 @@ def parsejscookie(cookiestring):
 	selectioncategories = ['auselections', 'wkselections', 'agnselections', 'wkgnselections', 'psgselections', 'auexclusions', 'wkexclusions', 'agnexclusions', 'wkgnexclusions', 'psgexclusions']
 	selectiondictionary = {}
 	for sel in selectioncategories:
-		selectiondictionary[sel] = re.search(r'%22' + sel + r'%22:\[(.*?)\]', cookiestring).group(1)
+		try:
+			selectiondictionary[sel] = re.search(r'%22' + sel + r'%22:\[(.*?)\]', cookiestring).group(1)
+		except:
+			selectiondictionary[sel] = ''
 
 	# found; but mangled entries still:
 	# {'agnselections': '%22Alchemistae%22%2C%22Biographi%22', 'wkselections': '%22gr1908w003%22%2C%22gr2612w001%22', 'psgselections': '', 'auselections': '%22gr0116%22%2C%22gr0199%22', 'wkgnselections': '%22Caten.%22%2C%22Doxogr.%22'}
@@ -167,7 +170,10 @@ def parsejscookie(cookiestring):
 	
 	nonselections = cookiestring
 	for sel in selectioncategories:
-		nonselections = re.sub(re.escape(re.search(r'%22' + sel + r'%22:\[(.*?)\]', nonselections).group(0)), '', nonselections)
+		try:
+			nonselections = re.sub(re.escape(re.search(r'%22' + sel + r'%22:\[(.*?)\]', nonselections).group(0)), '', nonselections)
+		except:
+			nonselections = ''
 			
 	nonselections = re.sub(r'%22', '', nonselections)
 	allotheroptions = nonselections.split('%2C')
