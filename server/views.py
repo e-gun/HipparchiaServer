@@ -620,8 +620,7 @@ def workstructure():
 def getsessionvariables():
 	returndict = {}
 	for k in session.keys():
-		if k != 'genres' and k != 'workgenres' and k != 'csrf_token':
-			# print(k, session[k])
+		if k != 'csrf_token':
 			returndict[k] = session[k]
 	returndict = json.dumps(returndict)
 	
