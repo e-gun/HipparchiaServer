@@ -48,6 +48,7 @@ var openbrowserfromclick = function() {
         });
 }
 
+
 function parsepassagereturned(passagereturned) {
 		$('#browserdialogtext').text('');
         // the first item is info
@@ -60,6 +61,15 @@ function parsepassagereturned(passagereturned) {
         for (i = 0; i < dLen; i++) {
             linesreturned += passagereturned['ouputtable'][i];
         }
+
+        resetworksautocomplete();
+        $('#authorsautocomplete').val(passagereturned['authorboxcontents']);
+        $('#authorsautocomplete').prop('placeholder', '');
+        $('#worksautocomplete').val(passagereturned['workboxcontents']);
+        $('#worksautocomplete').prop('placeholder', '');
+        $('#worksautocomplete').show();
+        loadWorklist(passagereturned['authornumber']);
+        loadLevellist(passagereturned['workid'],'-1');
 
         $('#browserdialogtext').html(linesreturned);
         $('#browserdialog').show();

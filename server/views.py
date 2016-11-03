@@ -441,7 +441,7 @@ def cookieintosession():
 
 
 @hipparchia.route('/getauthorhint', methods=['GET'])
-def aoofferauthorhints():
+def offerauthorhints():
 	"""
 	fill the hint box with constantly updated values
 	:return:
@@ -479,7 +479,7 @@ def aoofferauthorhints():
 
 
 @hipparchia.route('/getworkhint', methods=['GET'])
-def woofferworkhints():
+def offerworkhints():
 	"""
 	fill the hint box with constantly updated values
 	:return:
@@ -510,7 +510,7 @@ def woofferworkhints():
 
 
 @hipparchia.route('/getgenrehint', methods=['GET'])
-def aogenrelist():
+def augenrelist():
 
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 

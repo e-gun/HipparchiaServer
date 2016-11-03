@@ -43,8 +43,17 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	last = table + '_LN_' + str(last)
 	
 	passage = {}
+	# will be used with the browse forwards and back buttons
 	passage['browseforwards'] = last
 	passage['browseback'] = first
+	
+	# will be used to fill the autocomplete boxes
+	passage['authornumber'] = authorobject.universalid
+	passage['workid'] = workobject.universalid
+	# as per offerauthorhints() in views.py
+	passage['authorboxcontents'] = authorobject.cleanname+' ['+authorobject.universalid+']'
+	# offerworkhints()
+	passage['workboxcontents'] = workobject.title+' ('+workobject.universalid[-4:]+')'
 	
 	rawpassage = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
 	
