@@ -53,8 +53,8 @@ function parsepassagereturned(passagereturned) {
 		$('#browserdialogtext').text('');
         // the first item is info
         // {'forwardsandback': ['/browseto?locus=lt1254w001_AT_2|2|3|6', '/browseto?locus=lt1254w001_AT_6|9|2|6']}
-        var fwdurl = passagereturned['browseback'];
-        var bkdurl = passagereturned['browseforwards'];
+        var fwdurl = passagereturned['browseforwards'];
+        var bkdurl = passagereturned['browseback'];
         var linesreturned = passagereturned['currentlyviewing'];
         // the remaining lines are the lines of the passage
         var dLen = passagereturned['ouputtable'].length;
