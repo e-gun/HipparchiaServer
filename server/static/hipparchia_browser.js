@@ -73,6 +73,7 @@ function parsepassagereturned(passagereturned) {
         $('#concordance').show();
         $('#textofthis').show();
         $('#browseto').show();
+        $('#authinfo').show();
 
         $('#browserdialogtext').html(linesreturned);
         $('#browserdialog').show();

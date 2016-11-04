@@ -11,13 +11,12 @@ import re
 from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
-from server import pollingdata
+from server.hipparchiaclasses import ProgressPoll
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
-from server.searching.searchformatting import formattedcittationincontext, formatauthinfo, formatauthorandworkinfo, \
-	woformatworkinfo, mpresultformatter
+from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
 from server.searching.searchfunctions import flagexclusions, searchdispatcher, compileauthorandworklist, dispatchshortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordancefromwork
@@ -44,7 +43,9 @@ workdict = buildworkdict(authordict)
 authorgenreslist = buildaugenreslist(authordict)
 workgenreslist = buildworkgenreslist(workdict)
 
-pollingdata.initializeglobals()
+# empty dict in which to store progress polls
+# note that more than one poll can be running
+poll = {}
 
 
 @hipparchia.route('/', methods=['GET', 'POST'])
@@ -111,6 +112,11 @@ def executesearch():
 	except:
 		proximate = ''
 	
+	try:
+		ts = str(int(request.args.get('id', '')))
+	except:
+		ts = str(int(time.time()))
+	
 	if len(seeking) < 1 and len(proximate) > 0:
 		seeking = proximate
 		proximate = ''
@@ -128,14 +134,9 @@ def executesearch():
 	
 	phrasefinder = re.compile('[^\s]\s[^\s]')
 	
-	if pollingdata.pdactive == True:
-		seeking = ''
-	else:
-		abortmessage = ['no search term selected']
-		pollingdata.pdactive = True
-	
-	pollingdata.pdremaining.value = -1
-	pollingdata.pdpoolofwork.value = -1
+	poll[ts] = ProgressPoll(ts)
+	poll[ts].activate()
+	poll[ts].statusis('Compiling the list of works to search')
 	
 	linesofcontext = int(session['linesofcontext'])
 	searchtime = 0
@@ -143,7 +144,7 @@ def executesearch():
 	if len(seeking) > 0:
 		seeking = seeking.lower()
 		starttime = time.time()
-		pollingdata.pdstatusmessage = 'Compiling the list of works to search'
+		poll[ts].statusis('Compiling the list of works to search')
 		
 		authorandworklist = compileauthorandworklist(authordict, workdict)
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
@@ -163,14 +164,14 @@ def executesearch():
 			searchtype = 'simple'
 			thesearch = seeking
 			htmlsearch = '<span class="emph">' + seeking + '</span>'
-			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, authordict)
+			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, authordict, poll[ts])
 		elif re.search(phrasefinder, seeking) is not None:
 			searchtype = 'phrase'
 			thesearch = seeking
 			htmlsearch = '<span class="emph">' + seeking + '</span>'
 			terms = seeking.split(' ')
 			if len(max(terms, key=len)) > 3:
-				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict)
+				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict, poll[ts])
 			else:
 				# you are looking for a set of little words: και δη και, etc.
 				#   16s to find και δη και via a std phrase search; 1.6s to do it this way
@@ -181,7 +182,7 @@ def executesearch():
 				#   οἷον κἀν τοῖϲ (Searched between 850 B.C.E. and 200 B.C.E.)
 				#   5.57 std; 17.54s 'short'
 				# so '3' looks like the right answer
-				hits = dispatchshortphrasesearch(seeking, indexedworklist, authordict)
+				hits = dispatchshortphrasesearch(seeking, indexedworklist, authordict, poll[ts])
 		else:
 			searchtype = 'proximity'
 			if session['searchscope'] == 'W':
@@ -196,18 +197,18 @@ def executesearch():
 			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
 			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
 			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
-			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict)
+			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict, poll[ts])
 		
-		pollingdata.pdstatusmessage = 'Putting the results in context'
+		poll[ts].statusis('Putting the results in context')
 		
-		allfound = mpresultformatter(hits, authordict, workdict, seeking, proximate, searchtype)
+		allfound = mpresultformatter(hits, authordict, workdict, seeking, proximate, searchtype, poll[ts])
 		
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
 		if len(allfound) > int(session['maxresults']):
 			allfound = allfound[0:int(session['maxresults'])]
 		
-		pollingdata.pdstatusmessage = 'Converting results to HTML'
+		poll[ts].statusis('Converting results to HTML')
 		htmlandjs = htmlifysearchfinds(allfound)
 		finds = htmlandjs['hits']
 		findsjs = htmlandjs['hitsjs']
@@ -237,8 +238,8 @@ def executesearch():
 		output['sortby'] = session['sortorder']
 		output['dmin'] = dmin
 		output['dmax'] = dmax
-		pollingdata.pdactive = False
-	
+		poll[ts].deactivate()
+		
 	else:
 		output = {}
 		output['title'] = seeking
@@ -258,8 +259,7 @@ def executesearch():
 	
 	output = json.dumps(output)
 	
-	pollingdata.pdstatusmessage = ''
-	pollingdata.pdhits.val.value = -1
+	del poll[ts]
 	
 	return output
 
@@ -275,8 +275,16 @@ def concordance():
 		2 - of this author
 	:return:
 	"""
+	
+	try:
+		ts = str(int(request.args.get('id', '')))
+	except:
+		ts = str(int(time.time()))
+		
 	starttime = time.time()
-	pollingdata.pdactive = True
+
+	poll[ts] = ProgressPoll(ts)
+	poll[ts].activate()
 	
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
@@ -299,7 +307,7 @@ def concordance():
 			endline = startandstop['endline']
 
 		cdict = {wo.universalid: (startline, endline)}
-		unsortedoutput = buildconcordancefromwork(cdict, cur)
+		unsortedoutput = buildconcordancefromwork(cdict, poll[ts], cur)
 		allworks = []
 		
 	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
@@ -307,7 +315,7 @@ def concordance():
 		cdict = {}
 		for wkid in ao.listworkids():
 			cdict[wkid] = (workdict[wkid].starts, workdict[wkid].ends)
-		unsortedoutput = buildconcordancefromwork(cdict, cur)
+		unsortedoutput = buildconcordancefromwork(cdict, poll[ts], cur)
 			
 		allworks = []
 		for w in ao.listofworks:
@@ -320,14 +328,14 @@ def concordance():
 		allworks = []
 	
 	# get ready to send stuff to the page
-	pollingdata.pdstatusmessage = 'Preparing the concordance HTML'
+	poll[ts].statusis('Preparing the concordance HTML')
 	output = concordancesorter(unsortedoutput)
 	count = len(output)
 	output = conctohtmltable(output)
 	
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)
-	pollingdata.pdactive = False
+	poll[ts].deactivate()
 	
 	results = {}
 	results['authorname'] = ao.shortname
@@ -343,6 +351,8 @@ def concordance():
 		
 	cur.close()
 	del dbc
+	
+	del poll[ts]
 	
 	return results
 
@@ -420,16 +430,29 @@ def progressreport():
 	:return:
 	"""
 	
-	if pollingdata.pdactive == False:
-		time.sleep(.3)
+	try:
+		ts = str(int(request.args.get('id', '')))
+	except:
+		ts = str(int(time.time()))
 	
 	progress = {}
-	progress['total'] = pollingdata.pdpoolofwork.value
-	progress['remaining'] = pollingdata.pdremaining.value
-	progress['hits'] = pollingdata.pdhits.value
-	progress['message'] = pollingdata.pdstatusmessage
-	progress['active'] = pollingdata.pdactive
-	
+	try:
+		progress['active'] = poll[ts].getactivity()
+		progress['total'] = poll[ts].worktotal()
+		progress['remaining'] = poll[ts].getremaining()
+		progress['hits'] = poll[ts].gethits()
+		progress['message'] = poll[ts].getstatus()
+	except:
+		time.sleep(.2)
+		try:
+			progress['active'] = poll[ts].getactivity()
+			progress['total'] = poll[ts].worktotal()
+			progress['remaining'] = poll[ts].getremaining()
+			progress['hits'] = poll[ts].gethits()
+			progress['message'] = poll[ts].getstatus()
+		except:
+			progress = {'active': 0}
+
 	progress = json.dumps(progress)
 	
 	return progress

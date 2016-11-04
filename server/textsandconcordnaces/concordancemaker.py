@@ -7,9 +7,8 @@
 
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
 from server.textsandconcordnaces.textandconcordancehelperfunctions import concordancesorter, cleanwords
-from server import pollingdata
 
-def compilewordlists(worksandboundaries, cursor):
+def compilewordlists(worksandboundaries, activepoll, cursor):
 	"""
 	grab and return lots of lines
 	this is very generic
@@ -34,15 +33,16 @@ def compilewordlists(worksandboundaries, cursor):
 		cursor.execute(query, data)
 		lines = cursor.fetchall()
 		
-		pollingdata.pdpoolofwork.value = len(lines)
-		pollingdata.pdremaining.value = len(lines)
+		activepoll.allworkis(len(lines))
+		activepoll.remain(len(lines))
+		
 		for l in lines:
 			lineobjects.append(dblineintolineobject(w, l))
 	
 	return lineobjects
 
 
-def buildconcordancefromwork(cdict, cursor):
+def buildconcordancefromwork(cdict, activepoll, cursor):
 	"""
 	speed notes
 		buildconcordancefromconcordance() seemed ineffecient for small chunks: it was; but it is also a lot slower for whole works...
@@ -62,12 +62,12 @@ def buildconcordancefromwork(cdict, cursor):
 	:return:
 	"""
 
-	pollingdata.pdpoolofwork.value = -1
-	pollingdata.pdstatusmessage = 'Gathering the data'
-	lineobjects = compilewordlists(cdict, cursor)
+	activepoll.statusis('Gathering the data')
+	activepoll.allworkis(-1)
+	lineobjects = compilewordlists(cdict, activepoll, cursor)
 	
-	pollingdata.pdstatusmessage = 'Compiling the concordance'
-	concordancedict = linesintoconcordance(lineobjects)
+	activepoll.statusis('Compiling the concordance')
+	concordancedict = linesintoconcordance(lineobjects, activepoll)
 	# now you are looking at: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
 	
 	unsortedoutput = []
@@ -78,9 +78,8 @@ def buildconcordancefromwork(cdict, cursor):
 	if len(set(testlist)) != 1:
 		onework = False
 	
-	
-	pollingdata.pdstatusmessage = 'Sifting the concordance'
-	pollingdata.pdpoolofwork.value = -1
+	activepoll.statusis('Sifting the concordance')
+	activepoll.allworkis(-1)
 	
 	for c in concordancedict.keys():
 		hits = concordancedict[c]
@@ -109,7 +108,7 @@ def buildconcordancefromwork(cdict, cursor):
 	return output
 
 
-def linesintoconcordance(lineobjects):
+def linesintoconcordance(lineobjects, activepoll):
 	"""
 	generate the condordance dictionary:
 		{ wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
@@ -117,8 +116,8 @@ def linesintoconcordance(lineobjects):
 	:return:
 	"""
 	
-	pollingdata.pdpoolofwork.value = len(lineobjects)
-	pollingdata.pdremaining.value = len(lineobjects)
+	activepoll.allworkis(len(lineobjects))
+	activepoll.remain(len(lineobjects))
 	
 	defaultwork = lineobjects[0].wkuinversalid
 	
@@ -127,7 +126,7 @@ def linesintoconcordance(lineobjects):
 	while len(lineobjects) > 0:
 		try:
 			line = lineobjects.pop()
-			pollingdata.pdremaining.value = pollingdata.pdremaining.value - 1
+			activepoll.remain(len(lineobjects))
 		except:
 			line = makeablankline(defaultwork, -1)
 		

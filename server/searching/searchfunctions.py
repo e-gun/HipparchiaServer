@@ -8,11 +8,9 @@
 import re
 from multiprocessing import Process, Manager
 
-import psycopg2
 from flask import session
 
 from server import hipparchia
-from server import pollingdata
 from server.dbsupport.dbfunctions import setconnection, dblineintolineobject, makeablankline
 from server.formatting_helper_functions import tidyuplist, dropdupes, prunedict, foundindict
 from server.hipparchiaclasses import MPCounter
@@ -253,7 +251,7 @@ def partialwordsearch(seeking, cursor, workdbname, authors):
 	return found
 
 
-def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, authordict):
+def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, authordict, activepoll):
 	"""
 	assign the search to multiprocessing workers
 	:param seeking:
@@ -261,9 +259,9 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	:return:
 	"""
 	
-	pollingdata.pdpoolofwork.value = len(indexedauthorandworklist)
-	pollingdata.pdremaining.value = len(indexedauthorandworklist)
-	pollingdata.pdhits.val.value = 0
+	activepoll.allworkis(len(indexedauthorandworklist))
+	activepoll.remain(len(indexedauthorandworklist))
+	activepoll.sethits(0)
 	
 	count = MPCounter()
 	manager = Manager()
@@ -280,14 +278,14 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	# a class and/or decorator would be nice, but you have a lot of trouble getting the (mp aware) args into the function
 	# the must be a way, but this also works
 	if searchtype == 'simple':
-		pollingdata.pdstatusmessage = 'Executing a simple word search...'
-		jobs = [Process(target=workonsimplesearch, args=(count, hits, seeking, searching, commitcount, authors)) for i in range(workers)]
+		activepoll.statusis('Executing a simple word search...')
+		jobs = [Process(target=workonsimplesearch, args=(count, hits, seeking, searching, commitcount, authors, activepoll)) for i in range(workers)]
 	elif searchtype == 'phrase':
-		pollingdata.pdstatusmessage = 'Executing a phrase search. Checking longest term first...'
-		jobs = [Process(target=workonphrasesearch, args=(hits, seeking, searching, commitcount, authors)) for i in range(workers)]
+		activepoll.statusis('Executing a phrase search. Checking longest term first...')
+		jobs = [Process(target=workonphrasesearch, args=(hits, seeking, searching, commitcount, authors, activepoll)) for i in range(workers)]
 	elif searchtype == 'proximity':
-		pollingdata.pdstatusmessage = 'Executing a proximity search...'
-		jobs = [Process(target=workonproximitysearch, args=(count, hits, seeking, proximate, searching, commitcount, authors)) for i in range(workers)]
+		activepoll.statusis('Executing a proximity search...')
+		jobs = [Process(target=workonproximitysearch, args=(count, hits, seeking, proximate, searching, commitcount, authors, activepoll)) for i in range(workers)]
 	else:
 		# impossible, but...
 		jobs = []
@@ -307,7 +305,7 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	return lineobjects
 
 
-def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
+def workonsimplesearch(count, hits, seeking, searching, commitcount, authors, activepoll):
 	"""
 	a multiprocessors aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
@@ -327,7 +325,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 		# that's not supposed to happen with the pool, but somehow it does
 		try:
 			i = searching.pop()
-			pollingdata.pdremaining.value = len(searching)
+			activepoll.remain(len(searching))
 		except: i = (-1,'gr0000w000')
 		commitcount.increment()
 		if commitcount.value % 750 == 0:
@@ -347,7 +345,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 				del hits[index]
 			else:
 				count.increment(len(hits[index][1]))
-				pollingdata.pdhits.increment(len(hits[index][1]))
+				activepoll.addhits(len(hits[index][1]))
 				
 	dbconnection.commit()
 	curs.close()
@@ -356,7 +354,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors):
 	return hits
 
 
-def workonphrasesearch(hits, seeking, searching, commitcount, authors):
+def workonphrasesearch(hits, seeking, searching, commitcount, authors, activepoll):
 	"""
 	a multiprocessors aware function that hands off bits of a phrase search to multiple searchers
 	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase hits the limit
@@ -377,14 +375,14 @@ def workonphrasesearch(hits, seeking, searching, commitcount, authors):
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		try:
 			i = searching.pop()
-			pollingdata.pdremaining.value = len(searching)
+			activepoll.remain(len(searching))
 		except: i = (-1,'gr0001w001')
 		commitcount.increment()
 		if commitcount.value % 750 == 0:
 			dbconnection.commit()
 		wkid = i[1]
 		index = i[0]
-		hits[index] = (wkid, phrasesearch(seeking, curs, wkid, authors))
+		hits[index] = (wkid, phrasesearch(seeking, curs, wkid, authors, activepoll))
 		
 	session['maxresults'] = tmp
 	dbconnection.commit()
@@ -394,7 +392,7 @@ def workonphrasesearch(hits, seeking, searching, commitcount, authors):
 	return hits
 
 
-def phrasesearch(searchphrase, cursor, wkid, authors):
+def phrasesearch(searchphrase, cursor, wkid, authors, activepoll):
 	"""
 	a whitespace might mean things are on a new line
 	note how horrible something like και δη και is: you will search και first and then...
@@ -432,15 +430,15 @@ def phrasesearch(searchphrase, cursor, wkid, authors):
 		
 		if session['nearornot'] == 'T' and re.search(searchphrase, wordset) is not None:
 			fullmatches.append(hit)
-			pollingdata.pdhits.increment(1)
+			activepoll.addhits(1)
 		elif session['nearornot'] == 'F' and re.search(searchphrase, wordset) is None:
 			fullmatches.append(hit)
-			pollingdata.pdhits.increment(1)
+			activepoll.addhits(1)
 	
 	return fullmatches
 
 
-def workonproximitysearch(count, hits, seeking, proximate, searching, commitcount, authors):
+def workonproximitysearch(count, hits, seeking, proximate, searching, commitcount, authors, activepoll):
 	"""
 	a multiprocessors aware function that hands off bits of a proximity search to multiple searchers
 	note that exclusions are handled deeper down in withinxlines() and withinxwords()
@@ -467,7 +465,7 @@ def workonproximitysearch(count, hits, seeking, proximate, searching, commitcoun
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		try:
 			i = searching.pop()
-			pollingdata.pdremaining.value = len(searching)
+			activepoll.remain(len(searching))
 		except: i = (-1,'gr0001w001')
 		commitcount.increment()
 		if commitcount.value % 750 == 0:
@@ -483,7 +481,7 @@ def workonproximitysearch(count, hits, seeking, proximate, searching, commitcoun
 			del hits[index]
 		else:
 			count.increment(len(hits[index][1]))
-			pollingdata.pdhits.increment(len(hits[index][1]))
+			activepoll.addhits(len(hits[index][1]))
 	
 	dbconnection.commit()
 	curs.close()
@@ -554,7 +552,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 	return found
 
 
-def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authors):
+def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authors, activepoll):
 	"""
 	brute force a search for something horrid like και δη και
 	a set of short words should send you here, otherwise you will look up all the words that look like και and then...
@@ -564,12 +562,11 @@ def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authors):
 	:return:
 	"""
 	
-	pollingdata.pdpoolofwork.value = len(indexedauthorandworklist)
-	pollingdata.pdremaining.value = len(indexedauthorandworklist)
-	pollingdata.pdhits.val.value = 0
-	pollingdata.pdstatusmessage = 'Executing a short-phrase search...'
-	
-	
+	activepoll.allworkis(len(indexedauthorandworklist))
+	activepoll.remain(len(indexedauthorandworklist))
+	activepoll.sethits(0)
+	activepoll.statusis('Executing a short-phrase search...')
+		
 	count = MPCounter()
 	manager = Manager()
 	hits = manager.dict()
@@ -580,7 +577,7 @@ def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authors):
 	
 	workers = hipparchia.config['WORKERS']
 	
-	jobs = [Process(target=shortphrasesearch, args=(count, hits, searchphrase, workstosearch, authors)) for i in range(workers)]
+	jobs = [Process(target=shortphrasesearch, args=(count, hits, searchphrase, workstosearch, authors, activepoll)) for i in range(workers)]
 	
 	for j in jobs: j.start()
 	for j in jobs: j.join()
@@ -595,7 +592,7 @@ def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authors):
 	return lineobjects
 
 
-def shortphrasesearch(count, hits, searchphrase, workstosearch, authors):
+def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activepoll):
 	"""
 	mp aware search for runs of short words
 	:return:
@@ -607,7 +604,7 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors):
 	while len(workstosearch) > 0 and count.value <= int(session['maxresults']):
 		try:
 			w = workstosearch.pop()
-			pollingdata.pdremaining.value = len(workstosearch)
+			activepoll.remain(len(workstosearch))
 		except: w = (-1, 'gr0000w000')
 		index = w[0]
 		if index != -1:
@@ -701,7 +698,7 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors):
 					
 					if re.search(searchphrase, searchzone) is not None:
 						count.increment(1)
-						pollingdata.pdhits.val.value = count.value
+						activepoll.sethits(count.value)
 						matchobjects.append(lineobjects[i])
 					previous = lineobjects[i]
 					

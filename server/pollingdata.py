@@ -28,4 +28,8 @@ def initializeglobals():
 	
 	pdhits = MPCounter()
 	pdhits.increment(-1)
+	
+
+	
+	
 

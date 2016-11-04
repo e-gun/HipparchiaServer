@@ -6,7 +6,8 @@
 """
 
 import re
-from multiprocessing import Value
+import socket
+from multiprocessing import Value, Array
 
 
 class dbAuthor(object):
@@ -332,3 +333,68 @@ class MPCounter(object):
 	@property
 	def value(self):
 		return self.val.value
+	
+	
+class ProgressPoll(object):
+	"""
+	
+	a dictionary of Values that can be shared between processes
+	the items and their methods build a polling package for progress reporting
+	
+	general scheme:
+		create the object
+		set up some shareable variables
+		hand them to the search functions
+		report on their fate
+		delete when done
+	
+	locking checks mostly unimportant: not esp worried about race conditions; most of this is simple fyi
+	"""
+	def __init__(self, timestamp):
+		self.pd = {}
+		self.searchid = str(timestamp)
+		self.socket = 0
+		
+		self.pd['active'] = Value('b', False)
+		self.pd['remaining'] = Value('i', -1)
+		self.pd['poolofwork'] = Value('i', -1)
+		self.pd['statusmessage'] = Array('c', b'')
+		self.pd['hits'] = MPCounter()
+		self.pd['hits'].increment(-1)
+		
+	def getstatus(self):
+		return self.pd['statusmessage'].decode('utf-8')
+	
+	def getremaining(self):
+		return self.pd['remaining'].value
+	
+	def gethits(self):
+		return self.pd['hits'].value
+	
+	def worktotal(self):
+		return self.pd['poolofwork'].value
+	
+	def statusis(self, statusmessage):
+		self.pd['statusmessage'] = bytes(statusmessage, encoding='UTF-8')
+	
+	def allworkis(self, amount):
+		self.pd['poolofwork'].value = amount
+	
+	def remain(self, remaining):
+		with self.pd['remaining'].get_lock():
+			self.pd['remaining'].value = remaining
+		
+	def sethits(self, found):
+		self.pd['hits'].val.value = found
+		
+	def addhits(self, hits):
+		self.pd['hits'].increment(hits)
+
+	def activate(self):
+		self.pd['active'] = True
+	
+	def deactivate(self):
+		self.pd['active'] = False
+	
+	def getactivity(self):
+		return self.pd['active']

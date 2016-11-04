@@ -109,7 +109,6 @@ $(document).ready( function () {
 
         if (proximate == '') { var url = '/executesearch?seeking='+seeking+'&id='+searchid; }
         else { var url = '/executesearch?seeking='+seeking+'&proximate='+proximate+'&id='+searchid; }
-        // window.location = url;
 
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
         var i = setInterval(function(){

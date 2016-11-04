@@ -339,13 +339,15 @@ $('#concordance').click( function() {
 
         if (authorid != '') {
             $('#clearpick').show();
+            var searchid = Date.now();
+
             if (wrk == '') { var url = '/concordance?auth=' + authorid; }
-            else if (locus == '') { var url = '/concordance?auth=' + authorid + '&work=' + wrk; }
-            else { var url = '/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus; }
+            else if (locus == '') { var url = '/concordance?auth=' + authorid + '&work=' + wrk +'&id='+searchid; }
+            else { var url = '/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus +'&id='+searchid; }
 
             $.getJSON( url, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
             var i = setInterval(function(){
-                $.getJSON('/progress', function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } });
+                $.getJSON('/progress'+'?id='+searchid, function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } });
                 }, 400);
         }
 });
