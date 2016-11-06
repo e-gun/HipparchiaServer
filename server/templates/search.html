@@ -111,7 +111,12 @@ $(document).ready( function () {
         else { var url = '/executesearch?seeking='+seeking+'&proximate='+proximate+'&id='+searchid; }
 
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
-        var i = setInterval(function(){
+        // ws additions start
+        // $.getJSON('/progress?id='+searchid);
+        // var s = new WebSocket("ws://localhost:9876/");
+        // s.onmessage = function(e){ alert("got: " + e.data); }
+        // ws additions end
+         var i = setInterval(function(){
             $.getJSON('/progress?id='+searchid, function(progress) {
                 displayprogress(progress);
                 if (progress['active'] == false ) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; }

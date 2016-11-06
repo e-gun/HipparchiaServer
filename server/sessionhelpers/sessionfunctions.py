@@ -35,6 +35,19 @@ def modifysessionvar(param,val):
 		'corpora']
 
 	# note that 'selections' remains unhandled
+	
+	# need to kill off old selections from the 'other' language
+	if param == 'corpora' and val != 'B':
+		session['auselections'] = []
+		session['wkselections'] = []
+		session['agnselections'] = []
+		session['wkgnselections'] = []
+		session['psgselections'] = []
+		session['auexclusions'] = []
+		session['wkexclusions'] = []
+		session['agnexclusions'] = []
+		session['wkgnexclusions'] = []
+		session['psgexclusions'] = []
 
 	if param in availableoptions:
 		session[param] = val

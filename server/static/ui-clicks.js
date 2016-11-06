@@ -202,9 +202,25 @@ $('#spuriaexcluded').click( function(){
         });
     $('#searchlistcontents').hide();
     });
-$('#bothcorpora').click( function(){ setoptions('corpora', 'B'); document.getElementById('authoroutputcontent').innerHTML = '<p class="label">Searching within:</p><p><b>all Greek and Latin authors</b></p>'; });
-$('#greekcorpus').click( function(){ setoptions('corpora', 'G'); document.getElementById('authoroutputcontent').innerHTML = '<p class="label">Searching within:</p><p><b>all Greek authors</b></p>'; });
-$('#latincorpus').click( function(){ setoptions('corpora', 'L'); document.getElementById('authoroutputcontent').innerHTML = '<p class="label">Searching within:</p><p><b>all Latin authors</b></p>'; });
+
+$('#bothcorpora').click( function(){
+    setoptions('corpora', 'B');
+    document.getElementById('authoroutputcontent').innerHTML = '<p class="label">Searching all Greek and Latin authors</p>';
+    });
+
+$('#greekcorpus').click( function(){
+    setoptions('corpora', 'G');
+    // because any latin items on your list just got purged
+    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    document.getElementById('authoroutputcontent').innerHTML = '<p class="label">Searching all Greek authors</p>';
+    });
+
+$('#latincorpus').click( function(){
+    setoptions('corpora', 'L');
+     // because any greek items on your list just got purged
+    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    document.getElementById('authoroutputcontent').innerHTML = '<p class="label">Searching all Latin authors</p>';
+    });
 
 
 //

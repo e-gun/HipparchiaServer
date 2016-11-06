@@ -16,6 +16,10 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	"""
 	this function does a lot of work via a number of subfunctions
 	lots of refactoring required if you change anything...
+	
+	sample output:
+		{'workid': 'gr7000w001', 'browseback': 'gr7000w001_LN_1089', 'authorboxcontents': 'AG - Anthologia Graeca [gr7000]', 'workboxcontents': 'Anthologia Graeca (w001)', 'ouputtable': ['<table>\n', '<tr class="browser"><td class="browsedline"><observed id="Ἀλκιμέδη">Ἀλκιμέδη</observed> <observed id="ξύνευνον">ξύνευνον</observed> <observed id="Ἀμύντορα">Ἀμύντορα</observed> <observed id="παιδὸϲ">παιδὸϲ</observed> <observed id="ἐρύκει">ἐρύκει</observed>, </td><td class="browsercite"></td></tr>\n', '<tr class="browser"><td class="browsedline">&nbsp;&nbsp;&nbsp;&nbsp;<observed id="Φοίνικοϲ">Φοίνικοϲ</observed> <observed id="δ’">δ’</observed> <observed id="ἐθέλει">ἐθέλει</observed> <observed id="παῦϲαι">παῦϲαι</observed> <observed id="χόλον">χόλον</observed> <observed id="γενέτου">γενέτου</observed>, </td><td class="browsercite"></td></tr>\n', '<tr class="browser"><td class="browsedline"><span class="focusline"><observed id="ὅττι">ὅττι</observed> <observed id="περ">περ</observed> <observed id="ἤχθετο">ἤχθετο</observed> <observed id="πατρὶ">πατρὶ</observed> <observed id="ϲαόφρονοϲ">ϲαόφρονοϲ</observed> <observed id="εἵνεκα">εἵνεκα</observed> <observed id="ματρόϲ">ματρόϲ</observed>, </span></td><td class="browsercite">3.3.3</td></tr>\n', '<tr class="browser"><td class="browsedline">&nbsp;&nbsp;&nbsp;&nbsp;<observed id="παλλακίδοϲ">παλλακίδοϲ</observed> <observed id="δούληϲ">δούληϲ</observed> <observed id="λέκτρα">λέκτρα</observed> <observed id="προϲιεμένῳ">προϲιεμένῳ</observed>· </td><td class="browsercite"></td></tr>\n', '<tr class="browser"><td class="browsedline"><observed id="κεῖνοϲ">κεῖνοϲ</observed> <observed id="δ’">δ’</observed> <observed id="αὖ">αὖ</observed> <observed id="δολίοιϲ">δολίοιϲ</observed> <observed id="ψιθυρίϲμαϲιν">ψιθυρίϲμαϲιν</observed> <observed id="ἤχθετο">ἤχθετο</observed> <observed id="κούρῳ">κούρῳ</observed>, </td><td class="browsercite"></td></tr>\n', '</table>\n'], 'authornumber': 'gr7000', 'currentlyviewing': '<currentlyviewing><span class="author">AG</span>, <span class="work">Anthologia Graeca</span><br />Book 3, epigram 3, line 3<br /><span class="pubvolumename">Anthologia Graeca, <br /></span><span class="pubpress">Heimeran , </span><span class="pubcity">Munich , </span><span class="pubyear">1–2:1965;. </span><span class="pubeditor"> (Beckby, H. )</span></currentlyviewing>', 'browseforwards': 'gr7000w001_LN_1099'}
+	
 	:param authorobject:
 	:param worknumber:
 	:param citationtuple:
@@ -107,91 +111,6 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	passage['ouputtable'].append('</table>\n')
 	
 	return passage
-
-
-def oldgetandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
-	"""
-	this function does a lot of work via a number of subfunctions
-	lots of refactoring required if you change anything...
-	:param authorobject:
-	:param worknumber:
-	:param citationtuple:
-	:param linesofcontext:
-	:param numbersevery:
-	:param cursor:
-	:return:
-	"""
-	
-	table = workobject.universalid
-	title = workobject.title
-
-	if locusindexvalue - linesofcontext < workobject.starts:
-		first = workobject.starts
-	else:
-		first = locusindexvalue - linesofcontext
-	
-	if locusindexvalue + linesofcontext > workobject.ends:
-		last = workobject.ends
-	else:
-		last = locusindexvalue + linesofcontext
-	
-	# for the <-- and --> buttons on the browser
-	first = table + '_LN_' + str(first)
-	last = table + '_LN_' + str(last)
-
-	formattedpassage = []
-	formattedpassage.append({'forwardsandback': [last,first]})
-
-	rawpassage = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
-	
-	lines = []
-	for r in rawpassage:
-		lines.append(dblineintolineobject(workobject.universalid, r))
-
-	focusline = lines[0]
-	for line in lines:
-		if line.index == locusindexvalue:
-			focusline = line
-	
-	biblio = getpublicationinfo(workobject, cursor)
-	
-	citation = locusintocitation(workobject, focusline.locustuple())
-
-	cv = '<span class="author">'+authorobject.shortname+'</span>, <span class="work">'+title+'</span><br />'+ citation
-	cv = cv + '<br />' + biblio
-	formattedpassage.append({'value':'<currentlyviewing>'+cv+'</currentlyviewing><br /><br />'})
-	
-	formattedpassage.append({'value': '<table>\n'})
-	
-	linecount = numbersevery - 3
-	# insert something to highlight the citationtuple line
-	previousline = lines[0]
-	for line in lines:
-		linecount += 1
-		columnb = insertparserids(line)
-		if line.index == focusline.index:
-			# linecount = numbersevery + 1
-			columna = line.locus()
-			columnb = '<span class="focusline">' + columnb + '</span>'
-		else:
-			if line.samelevelas(previousline) is not True:
-				linecount = numbersevery + 1
-				columna = line.shortlocus()
-			elif linecount % numbersevery == 0:
-				columna = line.locus()
-			else:
-				# do not insert a line number or special formatting
-				columna = ''
-		
-		linehtml = '<tr class="browser"><td class="browsedline">' + columnb + '</td>'
-		linehtml += '<td class="browsercite">' + columna + '</td></tr>\n'
-		
-		formattedpassage.append({'value':linehtml})
-		previousline = line
-	
-	formattedpassage.append({'value': '</table>\n'})
-	
-	return formattedpassage
 
 
 def insertparserids(lineobject):
