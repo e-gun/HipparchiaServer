@@ -6,7 +6,6 @@
 """
 
 import re
-import socket
 from multiprocessing import Value, Array
 
 
@@ -160,6 +159,7 @@ class dbWorkLine(object):
 		
 		return citation
 	
+	
 	def shortlocus(self):
 		"""
 		try to get a short citation that drops the lvl0 info
@@ -288,6 +288,7 @@ class dbWorkLine(object):
 		
 		return allbutlastword
 	
+	
 	def allbutfirstword(self, version):
 		"""
 		return the line less its first word
@@ -323,6 +324,9 @@ class dbWorkLine(object):
 
 
 class MPCounter(object):
+	"""
+	a counter that is mp safe
+	"""
 	def __init__(self):
 		self.val = Value('i', 0)
 	
@@ -365,36 +369,48 @@ class ProgressPoll(object):
 	def getstatus(self):
 		return self.pd['statusmessage'].decode('utf-8')
 	
+	
 	def getremaining(self):
 		return self.pd['remaining'].value
+	
 	
 	def gethits(self):
 		return self.pd['hits'].value
 	
+	
 	def worktotal(self):
 		return self.pd['poolofwork'].value
+	
 	
 	def statusis(self, statusmessage):
 		self.pd['statusmessage'] = bytes(statusmessage, encoding='UTF-8')
 	
+	
 	def allworkis(self, amount):
 		self.pd['poolofwork'].value = amount
+	
 	
 	def remain(self, remaining):
 		with self.pd['remaining'].get_lock():
 			self.pd['remaining'].value = remaining
-		
+	
+			
 	def sethits(self, found):
 		self.pd['hits'].val.value = found
+		
 		
 	def addhits(self, hits):
 		self.pd['hits'].increment(hits)
 
+
 	def activate(self):
 		self.pd['active'] = True
+
 	
 	def deactivate(self):
 		self.pd['active'] = False
 	
+
 	def getactivity(self):
 		return self.pd['active']
+	
