@@ -341,7 +341,7 @@ $('#concordance').click( function() {
             $('#clearpick').show();
             var searchid = Date.now();
 
-            if (wrk == '') { var url = '/concordance?auth=' + authorid; }
+            if (wrk == '') { var url = '/concordance?auth=' + authorid+'&id='+searchid; }
             else if (locus == '') { var url = '/concordance?auth=' + authorid + '&work=' + wrk +'&id='+searchid; }
             else { var url = '/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus +'&id='+searchid; }
 

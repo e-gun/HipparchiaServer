@@ -5,10 +5,11 @@
 	License: GPL 3 (see LICENSE in the top level directory of the distribution)
 """
 
+from collections import deque
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
 from server.textsandconcordnaces.textandconcordancehelperfunctions import concordancesorter, cleanwords
 
-def compilewordlists(worksandboundaries, activepoll, cursor):
+def compilewordlists(worksandboundaries, cursor):
 	"""
 	grab and return lots of lines
 	this is very generic
@@ -24,17 +25,14 @@ def compilewordlists(worksandboundaries, activepoll, cursor):
 	:param cursor:
 	:return:
 	"""
-
-	lineobjects = []
+	
+	lineobjects = deque()
 	
 	for w in worksandboundaries:
 		query = 'SELECT * FROM ' + w + ' WHERE (index >= %s AND index <= %s)'
 		data = (worksandboundaries[w][0], worksandboundaries[w][1])
 		cursor.execute(query, data)
 		lines = cursor.fetchall()
-		
-		activepoll.allworkis(len(lines))
-		activepoll.remain(len(lines))
 		
 		for l in lines:
 			lineobjects.append(dblineintolineobject(w, l))
@@ -62,10 +60,10 @@ def buildconcordancefromwork(cdict, activepoll, cursor):
 	:return:
 	"""
 
-	activepoll.statusis('Gathering the data')
 	activepoll.allworkis(-1)
-	lineobjects = compilewordlists(cdict, activepoll, cursor)
 	
+	lineobjects = compilewordlists(cdict, cursor)
+
 	activepoll.statusis('Compiling the concordance')
 	concordancedict = linesintoconcordance(lineobjects, activepoll)
 	# now you are looking at: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
@@ -103,9 +101,7 @@ def buildconcordancefromwork(cdict, activepoll, cursor):
 		
 		unsortedoutput.append((c, count, loci))
 	
-	output = concordancesorter(unsortedoutput)
-	
-	return output
+	return unsortedoutput
 
 
 def linesintoconcordance(lineobjects, activepoll):

@@ -5,6 +5,7 @@
 	License: GPL 3 (see LICENSE in the top level directory of the distribution)
 """
 
+from collections import deque
 from flask import session
 import re
 
@@ -91,20 +92,25 @@ def polytonicsort(unsortedwords):
 	# stripping diacriticals can help this, but then you get words that collide
 	# gotta jump through some extra hoops
 	
-	stripped = []
+	# deque() is faster than list when you append
+	
+	snipper = re.compile(r'(.*?)(-snip-)(.*?)')
+	
+	stripped = deque()
 	for word in unsortedwords:
 		if len(word) > 0:
 			strippedword = stripaccents(word)
 			# one modification to stripaccents(): σ for ϲ in order to get the right values
 			strippedword = re.sub(r'ϲ', r'σ', strippedword)
 			stripped.append(strippedword + '-snip-' + word)
-	stripped.sort()
-	sorted = []
+	stripped = sorted(stripped)
+
+	sortedversion = deque()
 	for word in stripped:
-		cleaned = re.sub(r'(.*?)(-snip-)(.*?)', r'\3', word)
-		sorted.append(cleaned)
+		cleaned = re.sub(snipper, r'\3', word)
+		sortedversion.append(cleaned)
 	
-	return sorted
+	return sortedversion
 
 
 def stripaccents(texttostrip):

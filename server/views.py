@@ -243,7 +243,7 @@ def executesearch():
 	else:
 		output = {}
 		output['title'] = seeking
-		output['found'] = abortmessage
+		output['found'] = ''
 		output['resultcount'] = 0
 		output['scope'] = 0
 		output['searchtime'] = '0.00'
@@ -298,10 +298,12 @@ def concordance():
 		# we have both an author and a work, maybe we also have a subset of the work
 		if psg == ['']:
 			# whole work
+			poll[ts].statusis('Preparing a concordance to '+wo.title)
 			startline = wo.starts
 			endline = wo.ends
 		else:
 			# partial work
+			poll[ts].statusis('Preparing a partial concordance to ' + wo.title)
 			startandstop = tcfindstartandstop(ao, wo, psg, cur)
 			startline = startandstop['startline']
 			endline = startandstop['endline']
@@ -311,6 +313,7 @@ def concordance():
 		allworks = []
 		
 	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
+		poll[ts].statusis('Preparing a concordance to the works of '+ao.shortname)
 		# whole author
 		cdict = {}
 		for wkid in ao.listworkids():
@@ -328,9 +331,10 @@ def concordance():
 		allworks = []
 	
 	# get ready to send stuff to the page
-	poll[ts].statusis('Preparing the concordance HTML')
+	poll[ts].statusis('Sorting the concordance items')
 	output = concordancesorter(unsortedoutput)
 	count = len(output)
+	poll[ts].statusis('Preparing the concordance HTML')
 	output = conctohtmltable(output)
 	
 	buildtime = time.time() - starttime
@@ -454,7 +458,7 @@ def progressreport():
 			progress = {'active': 0}
 
 	progress = json.dumps(progress)
-	
+
 	return progress
 
 
@@ -839,8 +843,6 @@ def grabtextforbrowsing():
 		citation.reverse()
 		passage = finddblinefromincompletelocus(workdb, citation, cur)
 
-	# first line is info; remaining lines are html
-
 	try:
 		browserdata = getandformatbrowsercontext(ao, wo, int(passage), ctx, numbersevery, cur)
 	except:
@@ -1114,6 +1116,8 @@ def selectionmade():
 		
 	:return:
 	"""
+	
+	# lingering bug that should be handled: if you swap languages and leave lt on a gr list, you will have trouble compiling the searchlist
 	
 	try:
 		genre = re.sub('[\W_]+', '', request.args.get('genre', ''))

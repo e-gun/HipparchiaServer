@@ -7,6 +7,7 @@
 
 import re
 from string import punctuation
+from collections import deque
 
 from server.dbsupport.dbfunctions import grabonelinefromwork, dblineintolineobject, makeanemptyauthor, makeanemptywork
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
@@ -122,7 +123,7 @@ def conctohtmltable(concordanceoutput):
 	:return:
 	"""
 
-	outputlines = []
+	outputlines = deque()
 	outputlines.append('<table><tr><th>word</th><th>count</th><th>passages</th></tr>\n')
 	for c in concordanceoutput:
 		outputlines.append('<tr>')
@@ -132,7 +133,7 @@ def conctohtmltable(concordanceoutput):
 		outputlines.append('</tr>')
 	outputlines.append('</table>')
 	
-	return outputlines
+	return list(outputlines)
 	
 
 def concordancesorter(unsortedoutput):
