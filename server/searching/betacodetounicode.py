@@ -10,282 +10,1054 @@ import re
 # lifted from HipparchiaBuilder
 
 def replacegreekbetacode(texttoclean):
-	textualmarkuptuples = []
-	betacodetuples = (
-		# capitals with breathings
-		# did not implement subscripts (yet)
-		(r'[*]\(\=A', u'\u1f0f'),
-		(r'[*]\)\=A', u'\u1f0e'),
-		(r'[*]\(\/A', u'\u1f0d'),
-		(r'[*]\)\/A', u'\u1f0c'),
-		(r'[*]\(\\A', u'\u1f08'),
-		(r'[*]\)\\A', u'\u1f0a'),
-		(r'[*]\(A', u'\u1f09'),
-		(r'[*]\)A', u'\u1f08'),
-		(r'[*]\(\/E', u'\u1f1d'),
-		(r'[*]\)\/E', u'\u1f1c'),
-		(r'[*]\(\\E', u'\u1f1b'),
-		(r'[*]\)\\E', u'\u1f1a'),
-		(r'[*]\(E', u'\u1f19'),
-		(r'[*]\)E', u'\u1f18'),
-		(r'[*]\(\=I', u'\u1f3f'),
-		(r'[*]\)\=I', u'\u1f3e'),
-		(r'[*]\(\/I', u'\u1f3d'),
-		(r'[*]\)\/I', u'\u1f3c'),
-		(r'[*]\(\\I', u'\u1f3b'),
-		(r'[*]\)\\I', u'\u1f3a'),
-		(r'[*]\(I', u'\u1f39'),
-		(r'[*]\)I', u'\u1f38'),
-		(r'[*]\(\/O', u'\u1f4d'),
-		(r'[*]\)\/O', u'\u1f4c'),
-		(r'[*]\(\\O', u'\u1f4b'),
-		(r'[*]\)\\O', u'\u1f4a'),
-		(r'[*]\(O', u'\u1f49'),
-		(r'[*]\)O', u'\u1f48'),
-		(r'[*]\(\=U', u'\u1f5f'),
-		(r'[*]\(\/U', u'\u1f5d'),
-		(r'[*]\(\\U', u'\u1f5b'),
-		(r'[*]\(U', u'\u1f59'),
-		(r'[*]\(\=W', u'\u1f6f'),
-		(r'[*]\)\=W', u'\u1f6e'),
-		(r'[*]\(\/W', u'\u1f6d'),
-		(r'[*]\)\/W', u'\u1f6c'),
-		(r'[*]\(\\W', u'\u1f68'),
-		(r'[*]\)\\W', u'\u1f6a'),
-		(r'[*]\(W', u'\u1f69'),
-		(r'[*]\)W', u'\u1f68'),
-		(r'[*]\)\\H\|', u'\u1f9a'),
-		(r'[*]\(\\H\|', u'\u1f9b'),
-		(r'[*]\)\/H\|', u'\u1f9c'),
-		(r'[*]\(\/H\|', u'\u1f9d'),
-		(r'[*]\)\=H\|', u'\u1f9e'),
-		(r'[*]\(\=H\|', u'\u1f9f'),
-		(r'[*]\(\=H', u'\u1f2f'),
-		(r'[*]\)\=H', u'\u1f2e'),
-		(r'[*]\(\/H', u'\u1f2d'),
-		(r'[*]\)\/H', u'\u1f2c'),
-		(r'[*]\(\\H', u'\u1f28'),
-		(r'[*]\)\\H', u'\u1f2a'),
-		(r'[*]\(H', u'\u1f29'),
-		(r'[*]\)H', u'\u1f28'),
-		(r'[*]H\|', u'\u1fcc'),
-		(r'[*]\(R', u'\u1fec'),
-		# plain capitals
-		(r'[*]A', u'\u0391'),
-		(r'[*]B', u'\u0392'),
-		(r'[*]C', u'\u039e'),
-		(r'[*]D', u'\u0394'),
-		(r'[*]E', u'\u0395'),
-		(r'[*]F', u'\u03a6'),
-		(r'[*]G', u'\u0393'),
-		(r'[*]H', u'\u0397'),
-		(r'[*]I', u'\u0399'),
-		(r'[*]K', u'\u039a'),
-		(r'[*]L', u'\u039b'),
-		(r'[*]M', u'\u039c'),
-		(r'[*]N', u'\u039d'),
-		(r'[*]O', u'\u039f'),
-		(r'[*]P', u'\u03a0'),
-		(r'[*]Q', u'\u0398'),
-		(r'[*]R', u'\u03a1'),
-		# turn all sigmas into lunates
-		(r'[*]S[3]{0,1}', u'\u03f9'),
-		(r'[*]T', u'\u03a4'),
-		(r'[*]U', u'\u03a5'),
-		(r'[*]V', u'\u03dc'),
-		(r'[*]W', u'\u03a9'),
-		(r'[*]X', u'\u03a7'),
-		(r'[*]Y', u'\u03a8'),
-		(r'[*]Z', u'\u0396'),
-		# lowercase non-vowels
-		(r'B', u'\u03b2'),
-		(r'C', u'\u03be'),
-		(r'D', u'\u03b4'),
-		(r'F', u'\u03c6'),
-		(r'G', u'\u03b3'),
-		(r'K', u'\u03ba'),
-		(r'L', u'\u03bb'),
-		(r'M', u'\u03bc'),
-		(r'N', u'\u03bd'),
-		(r'P', u'\u03c0'),
-		(r'Q', u'\u03b8'),
-		(r'R\(', u'\u1fe5'),
-		(r'R\)', u'\u1fe4'),
-		(r'R', u'\u03c1'),
-		# turn all sigmas into lunates
-		(r'S[1-3]{0,1}', u'\u03f2'),
-		(r'T', u'\u03c4'),
-		(r'V', u'\u03dd'),
-		(r'X', u'\u03c7'),
-		(r'Y', u'\u03c8'),
-		(r'Z', u'\u03b6'),
-		# lowecase vowels with diacritical marks
-		# alphas: start with the subscript versions
-		(r'A\)\\\|', u'\u1f82'),
-		(r'A\)\=\|', u'\u1f86'),
-		(r'A\)\/\|', u'\u1f84'),
-		(r'A\)\|', u'\u1f80'),
-		(r'A\(\\\|', u'\u1f83'),
-		(r'A\(\=\|', u'\u1f87'),
-		(r'A\(\/\|', u'\u1f85'),
-		(r'A\(\|', u'\u1f81'),
-		(r'A\/\|', u'\u1fb4'),
-		(r'A\=\|', u'\u1fb7'),
-		(r'A\\\|', u'\u1fb2'),
-		# r'A\+\|': u'\u1f70',
-		(r'A\|\|', u'\u1fb3'),
-		(r'A\)\\', u'\u1f02'),
-		(r'A\)\=', u'\u1f06'),
-		(r'A\)\/', u'\u1f04'),
-		(r'A\)', u'\u1f00'),
-		(r'A\(\\', u'\u1f03'),
-		(r'A\(\=', u'\u1f07'),
-		(r'A\(\/', u'\u1f05'),
-		(r'A\(', u'\u1f01'),
-		(r'A\/', u'\u03ac'),
-		(r'A\=', u'\u1fb6'),
-		(r'A\\', u'\u1f70'),
-		# r'A\+': u'\u1f70',
-		(r'A\|', u'\u1fb3'),
-		# sublinear dot is...?
-		# r'A\?': u'\u1f70',
-		# epsilons
-		(r'E\(\/', u'\u1f15'),
-		(r'E\)\/', u'\u1f14'),
-		(r'E\(\\', u'\u1f13'),
-		(r'E\)\\', u'\u1f12'),
-		# re.compile('[E]\/'): u'\u03ad',
-		(r'E\/', u'\u03ad'),
-		(r'E\)', u'\u1f10'),
-		(r'E\(', u'\u1f11'),
-		(r'E\\', u'\u1f72'),
-		# iotas
-		(r'I\)\\', u'\u1f32'),
-		(r'I\(\\', u'\u1f33'),
-		(r'I\)\/', u'\u1f34'),
-		(r'I\(\/', u'\u1f35'),
-		(r'I\)\=', u'\u1f36'),
-		(r'I\(\=', u'\u1f37'),
-		(r'I\\\+', u'\u1fd2'),
-		(r'I\/\+', u'\u0390'),
-		(r'I\/', u'\u03af'),
-		(r'I\)', u'\u1f30'), # roman numeral problem: (XI) will wind up as (Xἰ; very had to fix because a lookahead of (?!\s) will ruin εἰ
-		(r'I\(', u'\u1f31'),
-		(r'I\\', u'\u1f76'),
-		(r'I\=', u'\u1fd6'),
-		(r'I\+', u'\u03ca'),
-		# omicrons
-		(r'O\)\\', u'\u1f42'),
-		(r'O\(\\', u'\u1f43'),
-		(r'O\)\/', u'\u1f44'),
-		(r'O\(\/', u'\u1f45'),
-		(r'O\/', u'\u03cc'),
-		(r'O\)', u'\u1f40'),
-		(r'O\(', u'\u1f41'),
-		(r'O\\', u'\u1f78'),
-		# upsilons
-		(r'U\)\\', u'\u1f52'),
-		(r'U\(\\', u'\u1f53'),
-		(r'U\)\/', u'\u1f54'),
-		(r'U\(\/', u'\u1f55'),
-		(r'U\)\=', u'\u1f56'),
-		(r'U\(\=', u'\u1f57'),
-		(r'U\\\+', u'\u1fe2'),
-		(r'U\/\+', u'\u03b0'),
-		(r'U\=\+', u'\u1fe7'),
-		(r'U\/', u'\u03cd'),
-		(r'U\)', u'\u1f50'),
-		(r'U\(', u'\u1f51'),
-		(r'U\\', u'\u1f7a'),
-		(r'U\=', u'\u1fe6'),
-		(r'U\+', u'\u03cb'),
-		# etas (missing any subscript versions?)
-		(r'H\)\=\|', u'\u1f96'),
-		(r'H\(\=\|', u'\u1f97'),
-		(r'H\)\/\|', u'\u1f94'),
-		(r'H\)\\', u'\u1f22'),
-		(r'H\(\\', u'\u1f23'),
-		(r'H\)\/', u'\u1f24'),
-		(r'H\(\/', u'\u1f25'),
-		(r'H\)\=', u'\u1f26'),
-		(r'H\(\=', u'\u1f27'),
-		(r'H\=\|', u'\u1fc7'),
-		(r'H\/\|', u'\u1fc4'),
-		(r'H\\\|', u'\u1fc2'),
-		(r'H\)\|', u'\u1f90'),
-		(r'H\(\|', u'\u1f91'),
-		(r'H\)', u'\u1f20'),
-		(r'H\(', u'\u1f21'),
-		(r'H\\', u'\u1f74'),
-		(r'H\/', u'\u1f75'),
-		(r'H\=', u'\u1fc6'),
-		(r'H\|', u'\u1fc3'),
-		# omegas
-		(r'W\(\=\|', u'\u1fa7'),
-		(r'W\)\=\|', u'\u1fa6'),
-		(r'W\(\/\|', u'\u1fa5'),
-		(r'W\)\/\|', u'\u1fa4'),
-		(r'W\(\\\|', u'\u1fa3'),
-		(r'W\)\\\|', u'\u1fa2'),
-		(r'W\=\|', u'\u1ff7'),
-		(r'W\/\|', u'\u1ff4'),
-		(r'W\\\|', u'\u1ff2'),
-		(r'W\(\|', u'\u1fa1'),
-		(r'W\)\|', u'\u1fa0'),
-		(r'W\(\=', u'\u1f67'),
-		(r'W\)\=', u'\u1f66'),
-		(r'W\(\/', u'\u1f65'),
-		(r'W\)\/', u'\u1f64'),
-		(r'W\(\\', u'\u1f63'),
-		(r'W\)\\', u'\u1f62'),
-		(r'W\|', u'\u1ff3'),
-		(r'W\=', u'\u1ff6'),
-		(r'W\\', u'\u1f7c'),
-		(r'W\(', u'\u1f61'),
-		(r'W\)', u'\u1f60'),
-		(r'W\/', u'\u03ce'),
-		# here comes something that did not crop up until using perseus' LSJ: vowel+_ for long-vowel and vowel+^ for short
-		# if you use these converters you will get two new problems: [1] not every vowellen + accent is available in your charset;
-		# [2] now you will have trouble matching found words with dictionary entries
-		# this should be handled separately with an additional check: send some items through each route; ugh.
-		# this is the 'right version'
-		# (r'A_', u'\u1fb1'),
-		# (r'I_', u'\u1fd1'),
-		# (r'U_', u'\u1fe1'),
-		# (r'A\^', u'\u1fb0'),
-		# (r'I\^', u'\u1fd0'),
-		# (r'U\^', u'\u1fe0'),
-		# this is the 'cheat version' (accents w/out lengths)
-		# lowercase unaccented vowels
-		(r'A_', u'\u03b1'),
-		(r'I_', u'\u03b9'),
-		(r'U_', u'\u03c5'),
-		(r'A\^', u'\u03b1'),
-		(r'I\^', u'\u03b9'),
-		(r'U\^', u'\u03c5'),
-		(r'A', u'\u03b1'),
-		(r'E', u'\u03b5'),
-		(r'I', u'\u03b9'),
-		(r'O', u'\u03bf'),
-		(r'U', u'\u03c5'),
-		(r'H', u'\u03b7'),
-		(r'W', u'\u03c9'),
-		# punctuation + combining diacriticals (which typically don't combine...)
-		# note that the colon is already used in the comments
-		(r'(?<!\d)\:', u'\u00b7'),
-		## combining dot is \u0323 [try \u0325?]: but see the note. The Unicode Standard 5.0 does not have a non-combining clone for Combining Dot Below. Currently, 002E Period represents a ‘best fit’ solution.
-		(r'\?', u'\u002e'),
-		## exclmation point not properly documented
-		(r'\!', u'\u2219')
-	)
-
-	for i in range(0, len(betacodetuples)):
-		textualmarkuptuples.append((betacodetuples[i][0], betacodetuples[i][1]))
-
-	for reg in textualmarkuptuples:
-		texttoclean = re.sub(reg[0], reg[1], texttoclean)
-
-	# handy way to see if the greek char matches the betacode that searches for it
-	# for tup in textualmarkuptuples:
-	#   print(tup[0]+" "+tup[1])
+	"""
+	swap betacode for unicode values
+	:param texttoclean:
+	:return:
+	"""
+	
+	texttoclean = capitalletters(texttoclean)
+	texttoclean = lowercaseletters(texttoclean)
+	# combining dot
+	texttoclean = re.sub(r'\?', u'\u0323', texttoclean)
+	# exclmation point not properly documented
+	texttoclean = re.sub(r'\!', u'\u2219', texttoclean)
+	
 	return texttoclean
+
+
+def capitalletters(betacode):
+	# needs to be done in order of length of regex string
+	# capital + breathing + accent + adscript
+	csga = re.compile(r'[*]\)\\\|([AHW])')
+	crga = re.compile(r'[*]\(\\\|([AHW])')
+	csaa = re.compile(r'[*]\)\/\|([AHW])')
+	craa = re.compile(r'[*]\(\/\|([AHW])')
+	csca = re.compile(r'[*]\(\=\|([AHW])')
+	crca = re.compile(r'[*]\(\=\|([AHW])')
+	
+	unicode = re.sub(csga, capitalsmoothgraveadscript, betacode)
+	unicode = re.sub(crga, capitalroughgraveadscript, unicode)
+	unicode = re.sub(csaa, capitalsmoothacuteadscript, unicode)
+	unicode = re.sub(craa, capitalroughacuteadscript, unicode)
+	unicode = re.sub(csca, capitalsmoothcircumflexadscript, unicode)
+	unicode = re.sub(crca, capitalroughcircumflexadscript, unicode)
+	
+	# capital + breathing + accent
+	csg = re.compile(r'[*]\)\\([AEIOUHW])')
+	crg = re.compile(r'[*]\(\\([AEIOUHW])')
+	csa = re.compile(r'[*]\)\/([AEIOUHW])')
+	cra = re.compile(r'[*]\(\/([AEIOUHW])')
+	csc = re.compile(r'[*]\)\=([AEIOUHW])')
+	crc = re.compile(r'[*]\(\=([AEIOUHW])')
+	
+	unicode = re.sub(csg, capitalsmoothgrave, unicode)
+	unicode = re.sub(crg, capitalroughgrave, unicode)
+	unicode = re.sub(csa, capitalsmoothacute, unicode)
+	unicode = re.sub(cra, capitalroughacute, unicode)
+	unicode = re.sub(csc, capitalsmoothcircumflex, unicode)
+	unicode = re.sub(crc, capitalroughcircumflex, unicode)
+	
+	# capital + breathing
+	cs = re.compile(r'[*]\)([AEIOUHWR])')
+	cr = re.compile(r'[*]\(([AEIOUHWR])')
+	
+	unicode = re.sub(cs, capitalsmooth, unicode)
+	unicode = re.sub(cr, capitalrough, unicode)
+	
+	# capital + accent
+	cg = re.compile(r'[*]\\([AEIOUHW])')
+	ca = re.compile(r'[*]\/([AEIOUHW])')
+	
+	unicode = re.sub(cg, capitalgrave, unicode)
+	unicode = re.sub(ca, capitalacute, unicode)
+	
+	# capital + adscript
+	cad = re.compile(r'[*]\|([AHW])')
+	
+	unicode = re.sub(cad, capitaladscript, unicode)
+	
+	# sigmas: all lunates
+	sig = re.compile(r'[*]S[1-3]{0,1}')
+	unicode = re.sub(sig, u'\u03f9', unicode)
+	
+	# capitals
+	cap = re.compile(r'[*]([A-Z])')
+	unicode = re.sub(cap, capitals, unicode)
+	
+	return unicode
+
+
+# capital + breathing + accent + adscript
+def capitalsmoothgraveadscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾊ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ᾚ',
+		'W': u'ᾪ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitalroughgraveadscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾋ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ᾛ',
+		'W': u'ᾫ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitalsmoothacuteadscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾌ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ᾜ',
+		'W': u'ᾬ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitalroughacuteadscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾍ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ᾝ',
+		'W': u'ᾭ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitalsmoothcircumflexadscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾎ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ᾞ',
+		'W': u'ᾮ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitalroughcircumflexadscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾏ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ᾟ',
+		'W': u'ᾯ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+# capital + breathing + accent
+def capitalsmoothgrave(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'Ἂ',
+		'E': u'Ἒ',
+		'I': u'Ἲ',
+		'O': u'Ὂ',
+		'U': u'',
+		'H': u'Ἢ',
+		'W': u'Ὢ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitalroughgrave(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'Ἃ',
+		'E': u'Ἓ',
+		'I': u'Ἳ',
+		'O': u'Ὃ',
+		'U': u'Ὓ',
+		'H': u'Ἣ',
+		'W': u'Ὣ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitalsmoothacute(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'Ἄ',
+		'E': u'Ἔ',
+		'I': u'Ἴ',
+		'O': u'Ὄ',
+		'U': u'',
+		'H': u'Ἤ',
+		'W': u'Ὤ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitalroughacute(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'Ἅ',
+		'E': u'Ἕ',
+		'I': u'Ἵ',
+		'O': u'Ὅ',
+		'U': u'Ὕ',
+		'H': u'Ἥ',
+		'W': u'Ὥ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitalsmoothcircumflex(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'Ἆ',
+		'E': u'',
+		'I': u'Ἶ',
+		'O': u'',
+		'U': u'',
+		'H': u'Ἦ',
+		'W': u'Ὦ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitalroughcircumflex(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'Ἇ',
+		'E': u'',
+		'I': u'Ἷ',
+		'O': u'',
+		'U': u'Ὗ',
+		'H': u'Ἧ',
+		'W': u'Ὧ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+# capital + breathing
+def capitalsmooth(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'Ἀ',
+		'E': u'Ἐ',
+		'I': u'Ἰ',
+		'O': u'Ὀ',
+		'U': u'',
+		'H': u'Ἠ',
+		'W': u'Ὠ',
+		'R': u'Ρ'
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitalrough(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'Ἁ',
+		'E': u'Ἑ',
+		'I': u'Ἱ',
+		'O': u'Ὁ',
+		'U': u'Ὑ',
+		'H': u'Ἡ',
+		'W': u'Ὡ',
+		'R': u'Ῥ'
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+# capital + accent
+def capitalgrave(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'Ὰ',
+		'E': u'Ὲ',
+		'I': u'Ὶ',
+		'O': u'Ὸ',
+		'U': u'Ὺ',
+		'H': u'Ὴ',
+		'W': u'Ὼ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitalacute(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'Ά',
+		'E': u'Έ',
+		'I': u'Ί',
+		'O': u'Ό',
+		'U': u'Ύ',
+		'H': u'Ή',
+		'W': u'Ώ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitaladscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾼ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ῌ',
+		'W': u'ῼ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def capitals(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'Α',
+		'B': u'Β',
+		'C': u'Ξ',
+		'D': u'Δ',
+		'E': u'Ε',
+		'F': u'Φ',
+		'G': u'Γ',
+		'H': u'Η',
+		'I': u'Ι',
+		'J': u'J',  # need the unused J because Roman characters are present
+		'K': u'Κ',
+		'L': u'Λ',
+		'M': u'Μ',
+		'N': u'Ν',
+		'O': u'Ο',
+		'P': u'Π',
+		'Q': u'Θ',
+		'R': u'Ρ',
+		'S': u'Ϲ',
+		'T': u'Τ',
+		'U': u'Υ',
+		'V': u'Ϝ',
+		'W': u'Ω',
+		'X': u'Χ',
+		'Y': u'Ψ',
+		'Z': u'Ζ'
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercaseletters(betacode):
+	"""
+	swap betacode for unicode values
+	:param betacode:
+	:return:
+	"""
+	# needs to be done in order of length of regex string
+	# otherwise 4-element items will disappear in the wake of doing all of the 3s, etc.
+	
+	# roman numeral problem: (XI) will wind up as (Xἰ
+	# very had to fix because a lookahead of (?!\s) will ruin εἰ
+	
+	# lowercase + breathing + accent + subscript
+	lsga = re.compile(r'([AHW])\)\\\|')
+	lrga = re.compile(r'([AHW])\(\\\|')
+	lsaa = re.compile(r'([AHW])\)\/\|')
+	lraa = re.compile(r'([AHW])\(\/\|')
+	lsca = re.compile(r'([AHW])\)\=\|')
+	lrca = re.compile(r'([AHW])\(\=\|')
+	
+	unicode = re.sub(lsga, lowercasesmoothgravesubscript, betacode)
+	unicode = re.sub(lrga, lowercaseroughgravesubscript, unicode)
+	unicode = re.sub(lsaa, lowercasesmoothacutesubscript, unicode)
+	unicode = re.sub(lraa, lowercaseroughacutesubscript, unicode)
+	unicode = re.sub(lsca, lowercasesmoothcircumflexsubscript, unicode)
+	unicode = re.sub(lrca, lowercaseroughcircumflexsubscript, unicode)
+	
+	# lowercase + breathing + accent
+	lsg = re.compile(r'([AEIOUHW])\)\\')
+	lrg = re.compile(r'([AEIOUHW])\(\\')
+	lsa = re.compile(r'([AEIOUHW])\)\/')
+	lra = re.compile(r'([AEIOUHW])\(\/')
+	lsc = re.compile(r'([AEIOUHW])\)\=')
+	lrc = re.compile(r'([AEIOUHW])\(\=')
+	
+	unicode = re.sub(lsg, lowercasesmoothgrave, unicode)
+	unicode = re.sub(lrg, lowercaseroughgrave, unicode)
+	unicode = re.sub(lsa, lowercasesmoothacute, unicode)
+	unicode = re.sub(lra, lowercaseroughacute, unicode)
+	unicode = re.sub(lsc, lowercasesmoothcircumflex, unicode)
+	unicode = re.sub(lrc, lowercaseroughcircumflex, unicode)
+	
+	# lowercase + accent + subscript
+	lga = re.compile(r'([AHW])\\\|')
+	laa = re.compile(r'([AHW])\/\|')
+	lca = re.compile(r'([AHW])\=\|')
+	
+	unicode = re.sub(lga, lowercasegravesub, unicode)
+	unicode = re.sub(laa, lowercaseacutedsub, unicode)
+	unicode = re.sub(lca, lowercasesircumflexsub, unicode)
+	
+	# lowercase + breathing + subscript
+	lss = re.compile(r'([AHW])\)\|')
+	lrs = re.compile(r'([AHW])\(\|')
+	
+	unicode = re.sub(lss, lowercasesmoothsub, unicode)
+	unicode = re.sub(lrs, lowercaseroughsub, unicode)
+	
+	# lowercase + accent + diaresis
+	lgd = re.compile(r'([IU])\\\+')
+	lad = re.compile(r'([IU])\/\+')
+	lcd = re.compile(r'([U])\=\+')
+	
+	unicode = re.sub(lgd, lowercasegravediaresis, unicode)
+	unicode = re.sub(lad, lowercaseacutediaresis, unicode)
+	unicode = re.sub(lcd, lowercasesircumflexdiaresis, unicode)
+	
+	# lowercase + breathing
+	ls = re.compile(r'([AEIOUHWR])\)')
+	lr = re.compile(r'([AEIOUHWR])\(')
+	
+	unicode = re.sub(ls, lowercasesmooth, unicode)
+	unicode = re.sub(lr, lowercaserough, unicode)
+	
+	# lowercase + accent
+	lg = re.compile(r'([AEIOUHW])\\')
+	la = re.compile(r'([AEIOUHW])\/')
+	lc = re.compile(r'([AEIOUHW])\=')
+	
+	unicode = re.sub(lg, lowercasegrave, unicode)
+	unicode = re.sub(la, lowercaseacute, unicode)
+	unicode = re.sub(lc, lowercascircumflex, unicode)
+	
+	# lowercase + diaresis
+	ld = re.compile(r'([IU])\+')
+	
+	unicode = re.sub(ld, lowercasediaresis, unicode)
+	
+	# lowercase + subscript
+	lad = re.compile(r'([AHW])\|')
+	
+	unicode = re.sub(lad, lowercasesubscript, unicode)
+	
+	# lowercase + vowel length
+	# perseus' LSJ: vowel+_ for long-vowel and vowel+^ for short
+	# short = re.compile(r'[AIU]\^')
+	# long = re.compile(r'[AIU]_')
+	
+	# sigmas: all lunates
+	sig = re.compile(r'S[1-3]{0,1}')
+	unicode = re.sub(sig, u'ϲ', unicode)
+	
+	# lowercases
+	lap = re.compile(r'([A-Z])')
+	unicode = re.sub(lap, lowercases, unicode)
+	
+	return unicode
+
+
+# lowercase + breathing + accent + subscript
+def lowercasesmoothgravesubscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾂ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ᾒ',
+		'W': u'ᾢ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercaseroughgravesubscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾃ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ᾓ',
+		'W': u'ᾣ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercasesmoothacutesubscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾄ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ᾔ',
+		'W': u'ᾤ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercaseroughacutesubscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾅ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ᾕ',
+		'W': u'ᾥ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercasesmoothcircumflexsubscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾆ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ᾖ',
+		'W': u'ᾦ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercaseroughcircumflexsubscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾇ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ᾗ',
+		'W': u'ᾧ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+# lowercase + breathing + accent
+def lowercasesmoothgrave(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ἂ',
+		'E': u'ἒ',
+		'I': u'ἲ',
+		'O': u'ὂ',
+		'U': u'ὒ',
+		'H': u'ἢ',
+		'W': u'ὢ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercaseroughgrave(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ἃ',
+		'E': u'ἓ',
+		'I': u'ἳ',
+		'O': u'ὃ',
+		'U': u'ὓ',
+		'H': u'ἣ',
+		'W': u'ὣ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercasesmoothacute(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ἄ',
+		'E': u'ἔ',
+		'I': u'ἴ',
+		'O': u'ὄ',
+		'U': u'ὔ',
+		'H': u'ἤ',
+		'W': u'ὤ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercaseroughacute(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ἅ',
+		'E': u'ἕ',
+		'I': u'ἵ',
+		'O': u'ὅ',
+		'U': u'ὕ',
+		'H': u'ἥ',
+		'W': u'ὥ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercasesmoothcircumflex(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ἆ',
+		'E': u'',
+		'I': u'ἶ',
+		'O': u'',
+		'U': u'ὖ',
+		'H': u'ἦ',
+		'W': u'ὦ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercaseroughcircumflex(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ἇ',
+		'E': u'',
+		'I': u'ἷ',
+		'O': u'',
+		'U': u'ὗ',
+		'H': u'ἧ',
+		'W': u'ὧ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+# lowercase + accent + subscript
+def lowercasegravesub(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾲ',
+		'H': u'ῂ',
+		'W': u'ῲ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercaseacutedsub(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾴ',
+		'H': u'ῄ',
+		'W': u'ῴ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercasesircumflexsub(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾷ',
+		'H': u'ῇ',
+		'W': u'ῷ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+# lowercase + breathing + subscript
+
+def lowercasesmoothsub(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾀ',
+		'H': u'ᾐ',
+		'W': u'ᾠ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercaseroughsub(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾁ',
+		'H': u'ᾑ',
+		'W': u'ᾡ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+# lowercase + accent + diaresis
+def lowercasegravediaresis(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'',
+		'E': u'',
+		'I': u'ῒ',
+		'O': u'',
+		'U': u'ῢ',
+		'H': u'',
+		'W': u'',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercaseacutediaresis(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'',
+		'E': u'',
+		'I': u'ΐ',
+		'O': u'',
+		'U': u'',
+		'H': u'ΰ',
+		'W': u'',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercasesircumflexdiaresis(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'ῧ',
+		'H': u'',
+		'W': u'',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+# lowercase + breathing
+def lowercasesmooth(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ἀ',
+		'E': u'ἐ',
+		'I': u'ἰ',
+		'O': u'ὀ',
+		'U': u'ὐ',
+		'H': u'ἠ',
+		'W': u'ὠ',
+		'R': u'ῤ'
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercaserough(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ἁ',
+		'E': u'ἑ',
+		'I': u'ἱ',
+		'O': u'ὁ',
+		'U': u'ὑ',
+		'H': u'ἡ',
+		'W': u'ὡ',
+		'R': u'ῥ'
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+# lowercase + accent
+def lowercasegrave(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ὰ',
+		'E': u'ὲ',
+		'I': u'ὶ',
+		'O': u'ὸ',
+		'U': u'ὺ',
+		'H': u'ὴ',
+		'W': u'ὼ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercaseacute(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ά',
+		'E': u'έ',
+		'I': u'ί',
+		'O': u'ό',
+		'U': u'ύ',
+		'H': u'ή',
+		'W': u'ώ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+def lowercascircumflex(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾶ',
+		'E': u'',
+		'I': u'ῖ',
+		'O': u'',
+		'U': u'ῦ',
+		'H': u'ῆ',
+		'W': u'ῶ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+# lowercase + diaresis
+def lowercasediaresis(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'',
+		'E': u'',
+		'I': u'ϊ',
+		'O': u'',
+		'U': u'ϋ',
+		'H': u'',
+		'W': u'',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+# lowercase + subscript
+def lowercasesubscript(match):
+	val = match.group(1)
+	
+	substitutions = {
+		'A': u'ᾳ',
+		'E': u'',
+		'I': u'',
+		'O': u'',
+		'U': u'',
+		'H': u'ῃ',
+		'W': u'ῳ',
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
+
+# lowercases
+def lowercases(match):
+	val = match.group(0)
+	
+	substitutions = {
+		'A': u'α',
+		'B': u'β',
+		'C': u'ξ',
+		'D': u'δ',
+		'E': u'ε',
+		'F': u'φ',
+		'G': u'γ',
+		'H': u'η',
+		'I': u'ι',
+		'J': u'J',
+		'K': u'κ',
+		'L': u'λ',
+		'M': u'μ',
+		'N': u'ν',
+		'O': u'ο',
+		'P': u'π',
+		'Q': u'θ',
+		'R': u'ρ',
+		'S': u'ϲ',
+		'T': u'τ',
+		'U': u'υ',
+		'V': u'ϝ',
+		'W': u'ω',
+		'X': u'χ',
+		'Y': u'ψ',
+		'Z': u'ζ'
+	}
+	
+	substitute = substitutions[val]
+	
+	return substitute
+
