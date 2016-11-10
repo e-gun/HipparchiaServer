@@ -17,7 +17,8 @@ from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinef
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
-from server.searching.searchfunctions import flagexclusions, searchdispatcher, compileauthorandworklist, dispatchshortphrasesearch
+from server.searching.searchfunctions import flagexclusions, compileauthorandworklist
+from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordancefromwork
 from server.textsandconcordnaces.textandconcordancehelperfunctions import tcparserequest, tcfindstartandstop, conctohtmltable, \

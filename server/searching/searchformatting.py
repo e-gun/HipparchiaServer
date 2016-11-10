@@ -6,14 +6,13 @@
 """
 
 import re
-
-from flask import session
 from multiprocessing import Process, Manager
 
+from flask import session
+
 from server import hipparchia
-from server.hipparchiaclasses import MPCounter
-from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, makeablankline, setconnection
 from server.dbsupport.citationfunctions import locusintocitation
+from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, setconnection
 from server.formatting_helper_functions import formatpublicationinfo
 
 
@@ -141,71 +140,10 @@ def lineobjectresultformatter(lineobject, searchterm, proximate, searchtype, hig
 	return formatteddict
 
 
-def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
-	"""
-	grab a line and add the N words at the tail and head of the previous and next lines
-	this will let you search for phrases that fall along a line break "και δη | και"
-	
-	:param linenumber:
-	:param numberofextrawords:
-	:param workdbname:
-	:param cursor:
-	:return:
-	"""
-	
-	if '_AT_' in workdbname:
-		workdbname = workdbname[0:10]
-
-	query = 'SELECT * FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
-	data = (linenumber-1, linenumber+1)
-	cursor.execute(query, data)
-	results = cursor.fetchall()
-	lines = []
-	for r in results:
-		lines.append(dblineintolineobject(workdbname, r))
-
-	# will get key errors if there is no linenumber+/-1
-	if len(lines) == 2:
-		if lines[0].index == linenumber:
-			lines = [makeablankline(workdbname, linenumber-1)] + lines
-		else:
-			lines.append(makeablankline(workdbname, linenumber+1))
-	if len(lines) == 1:
-		lines = [makeablankline(workdbname, linenumber-1)] + lines
-		lines.append(makeablankline(workdbname, linenumber+1))
-	
-	ldict = {}
-	for line in lines:
-		ldict[line.index] = line
-	
-	text = []
-	for line in lines:
-		if session['accentsmatter'] == 'Y':
-			wordsinline = line.wordlist('polytonic')
-		else:
-			wordsinline = line.wordlist('stripped')
-		
-		if line.index == linenumber-1:
-			text = wordsinline[(numberofextrawords * -1):]
-		elif line.index == linenumber:
-			# actually, null should be '', but is somehow coming back as something more than that
-			text += wordsinline
-		elif line.index == linenumber+1:
-			if ldict[linenumber].hashyphenated == True:
-				wordsinline = wordsinline[1:]
-			text += wordsinline[:numberofextrawords]
-			
-	aggregate = ' '.join(text)
-	aggregate = re.sub(r'\s\s',r' ', aggregate)
-	aggregate = ' ' + aggregate + ' '
-	
-	print('ag',aggregate)
-	return aggregate
-
-
 def aggregatelines(firstline, lastline, cursor, workdbname):
 	"""
 	build searchable clumps of words spread over various lines
+	
 	:param firstline:
 	:param lastline:
 	:param cursor:
