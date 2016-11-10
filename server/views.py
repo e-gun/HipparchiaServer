@@ -89,7 +89,6 @@ def authorlist():
 #
 # helpers & routes you should not browse directly
 #
-
 @hipparchia.route('/executesearch', methods=['GET'])
 def executesearch():
 	"""
@@ -334,6 +333,7 @@ def concordance():
 	poll[ts].statusis('Sorting the concordance items')
 	output = concordancesorter(unsortedoutput)
 	count = len(output)
+
 	poll[ts].statusis('Preparing the concordance HTML')
 	output = conctohtmltable(output)
 	
@@ -355,7 +355,6 @@ def concordance():
 		
 	cur.close()
 	del dbc
-	
 	del poll[ts]
 	
 	return results
@@ -447,7 +446,7 @@ def progressreport():
 		progress['hits'] = poll[ts].gethits()
 		progress['message'] = poll[ts].getstatus()
 	except:
-		time.sleep(.2)
+		time.sleep(.1)
 		try:
 			progress['active'] = poll[ts].getactivity()
 			progress['total'] = poll[ts].worktotal()

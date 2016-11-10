@@ -7,7 +7,7 @@
 
 from collections import deque
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
-from server.textsandconcordnaces.textandconcordancehelperfunctions import concordancesorter, cleanwords
+from server.textsandconcordnaces.textandconcordancehelperfunctions import cleanwords
 
 def compilewordlists(worksandboundaries, cursor):
 	"""

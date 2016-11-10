@@ -73,13 +73,16 @@ def highlightsearchterm(lineobject,searchterm, spanname):
 
 	line = newline
 	accentedsearch = ''
+	searchterm = re.sub(r'(^\s|\s$)', '', searchterm)
 	for c in searchterm:
 		try:
 			c = equivalents[c]
 		except:
 			pass
 		accentedsearch += c
-	accentedsearch = '('+accentedsearch+')'
+	#accentedsearch = '(^|)('+accentedsearch+')($|)'
+	accentedsearch = '(' + accentedsearch + ')'
+	print(accentedsearch)
 	find = re.search(accentedsearch,line)
 	try:
 		newline = line[0:find.start()]+'<span class="'+spanname+'">'+find.group()+'</span>'+line[find.end():]

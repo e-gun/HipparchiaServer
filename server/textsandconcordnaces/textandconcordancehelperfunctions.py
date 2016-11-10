@@ -6,6 +6,7 @@
 """
 
 import re
+import time
 from string import punctuation
 from collections import deque
 
@@ -122,7 +123,7 @@ def conctohtmltable(concordanceoutput):
 	:param concordanceoutput:
 	:return:
 	"""
-
+	t = time.time()
 	outputlines = deque()
 	outputlines.append('<table><tr><th>word</th><th>count</th><th>passages</th></tr>\n')
 	for c in concordanceoutput:
@@ -132,6 +133,8 @@ def conctohtmltable(concordanceoutput):
 		outputlines.append('<td class="passages">' + c[2] + '</td>')
 		outputlines.append('</tr>')
 	outputlines.append('</table>')
+	st = time.time() - t
+	print(st)
 	
 	return list(outputlines)
 	
@@ -157,14 +160,13 @@ def concordancesorter(unsortedoutput):
 	for o in unsortedoutput:
 		sortkeys.append(o[0])
 		outputdict[o[0]] = o
-	
+		
 	sortkeys = polytonicsort(sortkeys)
 	del unsortedoutput
-	
-	sortedoutput = []
+
+	sortedoutput = deque()
 	for k in sortkeys:
 		sortedoutput.append(outputdict[k])
-	
 	return sortedoutput
 
 

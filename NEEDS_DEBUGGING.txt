@@ -1,0 +1,46 @@
+[A] issue: during the formatting call a hang:
+
+    Traceback (most recent call last):
+      File "/usr/local/Cellar/python3/3.5.2_3/Frameworks/Python.framework/Versions/3.5/lib/python3.5/multiprocessing/managers.py", line 709, in _callmethod
+    Traceback (most recent call last):
+    AttributeError: 'ForkAwareLocal' object has no attribute 'connection'
+
+    During handling of the above exception, another exception occurred:
+
+      File "/usr/local/Cellar/python3/3.5.2_3/Frameworks/Python.framework/Versions/3.5/lib/python3.5/multiprocessing/process.py", line 249, in _bootstrap
+    Traceback (most recent call last):
+      File "/usr/local/Cellar/python3/3.5.2_3/Frameworks/Python.framework/Versions/3.5/lib/python3.5/multiprocessing/process.py", line 93, in run
+      File "/Users/erik/hipparchia_venv/HipparchiaServer/server/searching/searchfunctions.py", line 321, in workonsimplesearch
+      File "/Users/erik/hipparchia_venv/HipparchiaServer/server/dbsupport/dbfunctions.py", line 207, in setconnection
+      File "/Users/erik/hipparchia_venv/lib/python3.5/site-packages/psycopg2/__init__.py", line 164, in connect
+      File "/usr/local/Cellar/python3/3.5.2_3/Frameworks/Python.framework/Versions/3.5/lib/python3.5/multiprocessing/process.py", line 249, in _bootstrap
+      File "/usr/local/Cellar/python3/3.5.2_3/Frameworks/Python.framework/Versions/3.5/lib/python3.5/multiprocessing/process.py", line 93, in run
+      File "/Users/erik/hipparchia_venv/HipparchiaServer/server/searching/searchfunctions.py", line 324, in workonsimplesearch
+      File "<string>", line 2, in __len__
+      File "/usr/local/Cellar/python3/3.5.2_3/Frameworks/Python.framework/Versions/3.5/lib/python3.5/multiprocessing/managers.py", line 713, in _callmethod
+      File "/usr/local/Cellar/python3/3.5.2_3/Frameworks/Python.framework/Versions/3.5/lib/python3.5/multiprocessing/managers.py", line 700, in _connect
+      File "/usr/local/Cellar/python3/3.5.2_3/Frameworks/Python.framework/Versions/3.5/lib/python3.5/multiprocessing/connection.py", line 487, in Client
+      File "/usr/local/Cellar/python3/3.5.2_3/Frameworks/Python.framework/Versions/3.5/lib/python3.5/multiprocessing/connection.py", line 612, in SocketClient
+      File "/usr/local/Cellar/python3/3.5.2_3/Frameworks/Python.framework/Versions/3.5/lib/python3.5/socket.py", line 134, in __init__
+    OSError: [Errno 24] Too many open files
+    psycopg2.OperationalError: could not create socket: Too many open files
+
+
+$ ulimit -a
+core file size          (blocks, -c) 0
+data seg size           (kbytes, -d) unlimited
+file size               (blocks, -f) unlimited
+max locked memory       (kbytes, -l) unlimited
+max memory size         (kbytes, -m) unlimited
+open files                      (-n) 256
+pipe size            (512 bytes, -p) 1
+stack size              (kbytes, -s) 8192
+cpu time               (seconds, -t) unlimited
+max user processes              (-u) 709
+virtual memory          (kbytes, -v) unlimited
+
+[A] trial fix: modify the applescript
+
+    ulimit -n 1024 && ~/hipparchia_venv/bin/python3 ~/hipparchia_venv/HipparchiaServer/run.py
+
+    
