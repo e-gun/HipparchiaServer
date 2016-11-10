@@ -6,16 +6,12 @@
 """
 
 import re
-from multiprocessing import Process, Manager
 
 from flask import session
 
-from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection, dblineintolineobject, makeablankline
+from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
 from server.formatting_helper_functions import tidyuplist, dropdupes, prunedict, foundindict
-from server.hipparchiaclasses import MPCounter
-from server.searching.searchformatting import aggregatelines, cleansearchterm, prunebydate, removespuria, \
-	sortandunpackresults, lookoutsideoftheline
+from server.searching.searchformatting import cleansearchterm, prunebydate, removespuria
 
 
 def compileauthorandworklist(authordict, workdict):
@@ -196,304 +192,11 @@ def whereclauses(uidwithatsign, operand, authors):
 	return whereclausetuples
 
 
-def partialwordsearch(seeking, cursor, workdbname, authors):
-	"""
-	actually one of the most basic search types: look for a string/substring
-	this is brute force: you wade through the full text of the work
-	:param seeking:
-	:param cursor:
-	:param workdbname:
-	:param authors:
-	:return:
-	"""
-	
-	mylimit = 'LIMIT ' + str(session['maxresults'])
-	if session['accentsmatter'] == 'Y':
-		# columna = 'marked_up_line'
-		column = 'accented_line'
-	else:
-		column = 'stripped_line'
-	
-	seeking = cleansearchterm(seeking)
-	
-	mysyntax = '~*'
-	if seeking[0] == ' ':
-		# otherwise you will miss words that start lines because they do not have a leading whitespace
-		seeking = r'(^|\s)' + seeking[1:]
-	elif seeking[0:1] == '\s':
-		seeking = r'(^|\s)' + seeking[2:]
-	
-	found = []
-	
-	if '_AT_' not in workdbname:
-		query = 'SELECT * FROM ' + workdbname + ' WHERE ' + column + ' ' + mysyntax + ' %s '+ mylimit
-		data = (seeking,)
-
-	else:
-		qw = ''
-		db = workdbname[0:10]
-		d = [seeking]
-		w = whereclauses(workdbname, '=', authors)
-		for i in range(0, len(w)):
-			qw += 'AND (' + w[i][0] + ') '
-			d.append(w[i][1])
-		
-		query = 'SELECT * FROM ' + db + ' WHERE (' + column + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC '+ mylimit
-		data = tuple(d)
-	
-	try:
-		cursor.execute(query, data)
-		found = cursor.fetchall()
-	except:
-		print('could not execute', query, data)
-	
-	return found
-
-
-def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, authordict, activepoll):
-	"""
-	assign the search to multiprocessing workers
-	:param seeking:
-	:param indexedauthorandworklist:
-	:return:
-	"""
-	
-	activepoll.allworkis(len(indexedauthorandworklist))
-	activepoll.remain(len(indexedauthorandworklist))
-	activepoll.sethits(0)
-	
-	count = MPCounter()
-	manager = Manager()
-	hits = manager.dict()
-	authors = manager.dict(authordict)
-	searching = manager.list(indexedauthorandworklist)
-	
-	# if you don't autocommit you will soon see: "Error: current transaction is aborted, commands ignored until end of transaction block"
-	# alternately you can commit every N transactions
-	commitcount = MPCounter()
-	
-	workers = hipparchia.config['WORKERS']
-	
-	# a class and/or decorator would be nice, but you have a lot of trouble getting the (mp aware) args into the function
-	# the must be a way, but this also works
-	if searchtype == 'simple':
-		activepoll.statusis('Executing a simple word search...')
-		jobs = [Process(target=workonsimplesearch, args=(count, hits, seeking, searching, commitcount, authors, activepoll)) for i in range(workers)]
-	elif searchtype == 'phrase':
-		activepoll.statusis('Executing a phrase search. Checking longest term first...')
-		jobs = [Process(target=workonphrasesearch, args=(hits, seeking, searching, commitcount, authors, activepoll)) for i in range(workers)]
-	elif searchtype == 'proximity':
-		activepoll.statusis('Executing a proximity search...')
-		jobs = [Process(target=workonproximitysearch, args=(count, hits, seeking, proximate, searching, commitcount, authors, activepoll)) for i in range(workers)]
-	else:
-		# impossible, but...
-		jobs = []
-		
-	for j in jobs: j.start()
-	for j in jobs: j.join()
-	
-	# what comes back is a dict: {sortedawindex: (wkid, [(result1), (result2), ...])}
-	# you need to sort by index and then unpack the results into a list
-	# this will restore the old order from sortauthorandworklists()
-	hits = sortandunpackresults(hits)
-	lineobjects = []
-	for h in hits:
-		# hit= ('gr0199w012', (842, '-1', '-1', '-1', '-1', '5', '41', 'Πυθῶνί τ’ ἐν ἀγαθέᾳ· ', 'πυθωνι τ εν αγαθεα ', '', ''))
-		lineobjects.append(dblineintolineobject(h[0],h[1]))
-	
-	return lineobjects
-
-
-def workonsimplesearch(count, hits, seeking, searching, commitcount, authors, activepoll):
-	"""
-	a multiprocessors aware function that hands off bits of a simple search to multiple searchers
-	you need to pick the right style of search for each work you search, though
-	:param count:
-	:param hits:
-	:param seeking:
-	:param searching:
-	:return: a collection of hits
-	"""
-	
-	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
-	
-	while len(searching) > 0 and count.value <= int(session['maxresults']):
-		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
-		# the pop() will fail if somebody else grabbed the last available work before it could be registered
-		# that's not supposed to happen with the pool, but somehow it does
-		try:
-			i = searching.pop()
-			activepoll.remain(len(searching))
-		except: i = (-1,'gr0000w000')
-		commitcount.increment()
-		if commitcount.value % 750 == 0:
-			dbconnection.commit()
-		wkid = i[1]
-		index = i[0]
-		if index != -1:
-			if '_AT_' in wkid:
-				hits[index] = (wkid, partialwordsearch(seeking, curs, wkid, authors))
-			elif 'x' in wkid:
-				wkid = re.sub('x', 'w', wkid)
-				hits[index] = (wkid, simplesearchworkwithexclusion(seeking, wkid, authors, curs))
-			else:
-				hits[index] = (wkid, partialwordsearch(seeking, curs, wkid, authors))
-				
-			if len(hits[index][1]) == 0:
-				del hits[index]
-			else:
-				count.increment(len(hits[index][1]))
-				activepoll.addhits(len(hits[index][1]))
-				
-	dbconnection.commit()
-	curs.close()
-	del dbconnection
-	
-	return hits
-
-
-def workonphrasesearch(hits, seeking, searching, commitcount, authors, activepoll):
-	"""
-	a multiprocessors aware function that hands off bits of a phrase search to multiple searchers
-	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase hits the limit
-
-	:param hits:
-	:param seeking:
-	:param searching:
-	:return:
-	"""
-	tmp = session['maxresults']
-	session['maxresults'] = 19999
-	
-	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
-	
-	while len(searching) > 0:
-		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
-		# the pop() will fail if somebody else grabbed the last available work before it could be registered
-		try:
-			i = searching.pop()
-			activepoll.remain(len(searching))
-		except: i = (-1,'gr0001w001')
-		commitcount.increment()
-		if commitcount.value % 750 == 0:
-			dbconnection.commit()
-		wkid = i[1]
-		index = i[0]
-		hits[index] = (wkid, phrasesearch(seeking, curs, wkid, authors, activepoll))
-		
-	session['maxresults'] = tmp
-	dbconnection.commit()
-	curs.close()
-	del dbconnection
-	
-	return hits
-
-
-def phrasesearch(searchphrase, cursor, wkid, authors, activepoll):
-	"""
-	a whitespace might mean things are on a new line
-	note how horrible something like και δη και is: you will search και first and then...
-
-	:param searchphrase:
-	:param cursor:
-	:param authorobject:
-	:param worknumber:
-	:return: db lines that match the search criterion
-	"""
-	searchphrase = cleansearchterm(searchphrase)
-	searchterms = searchphrase.split(' ')
-	searchterms = [x for x in searchterms if x]
-	
-	longestterm = searchterms[0]
-	for term in searchterms:
-		if len(term) > len(longestterm):
-			longestterm = term
-	
-	if 'x' not in wkid:
-		hits = partialwordsearch(longestterm, cursor, wkid, authors)
-	else:
-		wkid = re.sub('x', 'w', wkid)
-		hits = simplesearchworkwithexclusion(longestterm, wkid, authors, cursor)
-	
-	fullmatches = []
-	for hit in hits:
-		phraselen = len(searchphrase.split(' '))
-		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, cursor)
-		if session['accentsmatter'] == 'N':
-			wordset = re.sub(r'[\.\?\!;:,·’]', r'', wordset)
-		else:
-			# the difference is in the apostrophe: δ vs δ’
-			wordset = re.sub(r'[\.\?\!;:,·]', r'', wordset)
-		
-		if session['nearornot'] == 'T' and re.search(searchphrase, wordset) is not None:
-			fullmatches.append(hit)
-			activepoll.addhits(1)
-		elif session['nearornot'] == 'F' and re.search(searchphrase, wordset) is None:
-			fullmatches.append(hit)
-			activepoll.addhits(1)
-	
-	return fullmatches
-
-
-def workonproximitysearch(count, hits, seeking, proximate, searching, commitcount, authors, activepoll):
-	"""
-	a multiprocessors aware function that hands off bits of a proximity search to multiple searchers
-	note that exclusions are handled deeper down in withinxlines() and withinxwords()
-	:param count:
-	:param hits:
-	:param seeking:
-	:param proximate:
-	:param searching:
-	:return: a collection of hits
-	"""
-	
-	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
-	
-	if len(proximate) > len(seeking) and session['nearornot'] != 'F' and ' ' not in seeking and ' ' not in proximate:
-		# look for the longest word first since that is probably the quicker route
-		# but you cant swap seeking and proximate this way in a 'is not near' search without yielding the wrong focus
-		tmp = proximate
-		proximate = seeking
-		seeking = tmp
-	
-	while len(searching) > 0 and count.value <= int(session['maxresults']):
-		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
-		# the pop() will fail if somebody else grabbed the last available work before it could be registered
-		try:
-			i = searching.pop()
-			activepoll.remain(len(searching))
-		except: i = (-1,'gr0001w001')
-		commitcount.increment()
-		if commitcount.value % 750 == 0:
-			dbconnection.commit()
-		wkid = i[1]
-		index = i[0]
-		if session['searchscope'] == 'L':
-			hits[index] = (wkid, withinxlines(int(session['proximity']), seeking, proximate, curs, wkid, authors))
-		else:
-			hits[index] = (wkid, withinxwords(int(session['proximity']), seeking, proximate, curs, wkid, authors))
-		
-		if len(hits[index][1]) == 0:
-			del hits[index]
-		else:
-			count.increment(len(hits[index][1]))
-			activepoll.addhits(len(hits[index][1]))
-	
-	dbconnection.commit()
-	curs.close()
-	del dbconnection
-	
-	return hits
-
-
 def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 	"""
 	special issues arise if you want to search Iliad less books 1 and 24
 	the standard search apparatus can't do this, but this can
-	a modified version of partialwordsearch()
+	a modified version of substringsearch()
 
 	possible to use finddblinefromincompletelocus() to get a set of line numbers to search
 	but is that at all faster? it likely means more queries in the end, not fewer
@@ -551,269 +254,122 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 	return found
 
 
-def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authors, activepoll):
+def substringsearch(seeking, cursor, workdbname, authors):
 	"""
-	brute force a search for something horrid like και δη και
-	a set of short words should send you here, otherwise you will look up all the words that look like και and then...
-	:param searchphrase:
+	actually one of the most basic search types: look for a string/substring
+	this is brute force: you wade through the full text of the work
+	:param seeking:
 	:param cursor:
-	:param wkid:
+	:param workdbname:
+	:param authors:
 	:return:
 	"""
 	
-	activepoll.allworkis(len(indexedauthorandworklist))
-	activepoll.remain(len(indexedauthorandworklist))
-	activepoll.sethits(0)
-	activepoll.statusis('Executing a short-phrase search...')
-		
-	count = MPCounter()
-	manager = Manager()
-	hits = manager.dict()
-	workstosearch = manager.list(indexedauthorandworklist)
-	# if you don't autocommit you will see: "Error: current transaction is aborted, commands ignored until end of transaction block"
-	# alternately you can commit every N transactions
-	commitcount = MPCounter()
-	
-	workers = hipparchia.config['WORKERS']
-	
-	jobs = [Process(target=shortphrasesearch, args=(count, hits, searchphrase, workstosearch, authors, activepoll)) for i in range(workers)]
-	
-	for j in jobs: j.start()
-	for j in jobs: j.join()
-			
-	hits = sortandunpackresults(hits)
-	# hits = [('gr0059w002', <server.hipparchiaclasses.dbWorkLine object at 0x10b0bb358>), ...]
-
-	lineobjects = []
-	for h in hits:
-		lineobjects.append(h[1])
-	
-	return lineobjects
-
-
-def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activepoll):
-	"""
-	mp aware search for runs of short words
-	:return:
-	"""
-	dbconnection = setconnection('autocommit')
-	curs = dbconnection.cursor()
-
-	
-	while len(workstosearch) > 0 and count.value <= int(session['maxresults']):
-		try:
-			w = workstosearch.pop()
-			activepoll.remain(len(workstosearch))
-		except: w = (-1, 'gr0000w000')
-		index = w[0]
-		if index != -1:
-			matchobjects = []
-			wkid = w[1]
-			# echeck for exclusions
-			if re.search(r'x', wkid) is not None:
-				wkid = re.sub(r'x', 'w', wkid)
-				restrictions = []
-				for p in session['psgexclusions']:
-					if wkid in p:
-						restrictions.append(whereclauses(p, '<>', authors))
-			
-				whr = ''
-				data = []
-				for r in restrictions:
-					for i in range(0, len(r)):
-						whr += r[i][0] + 'OR '
-						data.append(r[i][1])
-					# drop the trailing ' OR'
-					whr = whr[0:-4] + ') AND ('
-				# drop the trailing ') AND ('
-				whr = whr[0:-6]
-			
-				query = 'SELECT * FROM ' + wkid[0:10] + ' WHERE ('+ whr + ' ORDER BY index ASC'
-				curs.execute(query, tuple(data))
-			else:
-				if '_AT_' not in wkid:
-					wkid = re.sub(r'x', 'w', wkid)
-					query = 'SELECT * FROM ' + wkid + ' ORDER BY index'
-					curs.execute(query)
-				else:
-					whr = ''
-					data = []
-					w = whereclauses(wkid, '=', authors)
-					for i in range(0, len(w)):
-						whr += 'AND (' + w[i][0] + ') '
-						data.append(w[i][1])
-					# strip extra ANDs
-					whr = whr[4:]
-					wkid = re.sub(r'x', 'w', wkid)
-					query = 'SELECT * FROM ' + wkid[0:10] + ' WHERE '+whr+' ORDER BY index'
-					curs.execute(query, data)
-					
-			fulltext = curs.fetchall()
-			
-			previous = makeablankline(wkid, -1)
-			lineobjects = []
-			for dbline in fulltext:
-				lineobjects.append(dblineintolineobject(wkid, dbline))
-			lineobjects.append(makeablankline(wkid, -9999))
-			del fulltext
-			
-			if session['accentsmatter'] == 'N':
-				acc = 'stripped'
-			else:
-				acc = 'accented'
-			
-			searchphrase = cleansearchterm(searchphrase)
-			searchterms = searchphrase.split(' ')
-			searchterms = [x for x in searchterms if x]
-			contextneeded = len(searchterms) - 1
-			
-			for i in range(0, len(lineobjects) - 1):
-				if count.value <= int(session['maxresults']):
-					if previous.hashyphenated == True and lineobjects[i].hashyphenated == True:
-						core = lineobjects[i].allbutfirstandlastword(acc)
-						try:
-							supplement = lineobjects[i + 1].wordlist(acc)[1:contextneeded + 1]
-						except:
-							supplement = lineobjects[i + 1].wordlist(acc)
-					elif previous.hashyphenated == False and lineobjects[i].hashyphenated == True:
-						core = lineobjects[i].allbutlastword(acc)
-						try:
-							supplement = lineobjects[i + 1].wordlist(acc)[0:contextneeded]
-						except:
-							supplement = lineobjects[i + 1].wordlist(acc)
-					elif previous.hashyphenated == True and lineobjects[i].hashyphenated == False:
-						core = lineobjects[i].allbutfirstword(acc)
-						try:
-							supplement = lineobjects[i + 1].wordlist(acc)[0:contextneeded]
-						except:
-							supplement = lineobjects[i + 1].wordlist(acc)
-					else:
-						# previous.hashyphenated == False and lineobjects[i].hashyphenated == False
-						if session['accentsmatter'] == 'N':
-							core = lineobjects[i].stripped
-						else:
-							core = lineobjects[i].unformattedline()
-						try:
-							supplement = lineobjects[i + 1].wordlist(acc)[0:contextneeded]
-						except:
-							supplement = lineobjects[i + 1].wordlist(acc)
-					
-					try:
-						prepend = previous.wordlist(acc)[-1 * contextneeded:]
-					except:
-						prepend = previous.wordlist(acc)
-					
-					prepend = ' '.join(prepend)
-					supplement = ' '.join(supplement)
-					searchzone = prepend + ' ' + core + ' ' + supplement
-					searchzone = re.sub(r'\s\s', r' ', searchzone)
-					
-					if re.search(searchphrase, searchzone) is not None:
-						count.increment(1)
-						activepoll.sethits(count.value)
-						matchobjects.append(lineobjects[i])
-					previous = lineobjects[i]
-					
-			# note that each work generates one set of matchobjects (but they are internally sorted)
-			hits[index] = (wkid, matchobjects)
-	
-	curs.close()
-	del dbconnection
-	
-	return hits
-
-
-def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, authors):
-	"""
-	after finding x, look for y within n lines of x
-	people who send phrases to both halves and/or a lot of regex will not always get what they want
-	:param distanceinlines:
-	:param additionalterm:
-	:return:
-	"""
-	firstterm = cleansearchterm(firstterm)
-	secondterm = re.compile(cleansearchterm(secondterm))
-	
-	
-	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
-		hits = partialwordsearch(firstterm, cursor, workdbname, authors)
-	elif 'x' in workdbname:
-		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(firstterm, workdbname, authors, cursor)
+	mylimit = 'LIMIT ' + str(session['maxresults'])
+	if session['accentsmatter'] == 'Y':
+		# columna = 'marked_up_line'
+		column = 'accented_line'
 	else:
-		hits = partialwordsearch(firstterm, cursor, workdbname, authors)
+		column = 'stripped_line'
 	
-	fullmatches = []
-	for hit in hits:
-		wordset = aggregatelines(hit[0] - distanceinlines, hit[0] + distanceinlines, cursor, workdbname)
-		if session['nearornot'] == 'T' and re.search(secondterm, wordset) is not None:
-			fullmatches.append(hit)
-		elif session['nearornot'] == 'F' and re.search(secondterm, wordset) is None:
-			fullmatches.append(hit)
+	seeking = cleansearchterm(seeking)
 	
-	return fullmatches
+	mysyntax = '~*'
+	if seeking[0] == ' ':
+		# otherwise you will miss words that start lines because they do not have a leading whitespace
+		seeking = r'(^|\s)' + seeking[1:]
+	elif seeking[0:1] == '\s':
+		seeking = r'(^|\s)' + seeking[2:]
+	
+	found = []
+	
+	if '_AT_' not in workdbname:
+		query = 'SELECT * FROM ' + workdbname + ' WHERE ' + column + ' ' + mysyntax + ' %s ' + mylimit
+		data = (seeking,)
+	
+	else:
+		qw = ''
+		db = workdbname[0:10]
+		d = [seeking]
+		w = whereclauses(workdbname, '=', authors)
+		for i in range(0, len(w)):
+			qw += 'AND (' + w[i][0] + ') '
+			d.append(w[i][1])
+		
+		query = 'SELECT * FROM ' + db + ' WHERE (' + column + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC ' + mylimit
+		data = tuple(d)
+	
+	try:
+		cursor.execute(query, data)
+		found = cursor.fetchall()
+	except:
+		print('could not execute', query, data)
+	
+	return found
 
 
-def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, authors):
+def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	"""
-	after finding x, look for y within n words of x
-	:param distanceinlines:
-	:param additionalterm:
+	grab a line and add the N words at the tail and head of the previous and next lines
+	this will let you search for phrases that fall along a line break "και δη | και"
+	
+	if you wanted to look for 'ἀείδων Ϲπάρτηϲ'
+	you need this individual line:
+		2.1.374  δεξιτερὴν γὰρ ἀνέϲχε μετάρϲιον, ὡϲ πρὶν ἀείδων
+	to turn extend out to:
+		ὑφαίνων δεξιτερὴν γὰρ ἀνέϲχε μετάρϲιον ὡϲ πρὶν ἀείδων ϲπάρτηϲ
+		
+	:param linenumber:
+	:param numberofextrawords:
+	:param workdbname:
+	:param cursor:
 	:return:
 	"""
-	distanceinwords += 1
-	firstterm = cleansearchterm(firstterm)
-	secondterm = cleansearchterm(secondterm)
 	
-	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
-		hits = partialwordsearch(firstterm, cursor, workdbname, authors)
-	elif 'x' in workdbname:
-		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(firstterm, workdbname, authors, cursor)
-	else:
-		hits = partialwordsearch(firstterm, cursor, workdbname, authors)
-	
-	fullmatches = []
-	for hit in hits:
-		linesrequired = 0
-		wordlist = []
-		while len(wordlist) < 2 * distanceinwords + 1:
-			wordset = aggregatelines(hit[0] - linesrequired, hit[0] + linesrequired, cursor, workdbname)
-			wordlist = wordset.split(' ')
-			try:
-				wordlist.remove('')
-			except:
-				pass
-			linesrequired += 1
-		
-		# the word is near the middle...
-		center = len(wordlist) // 2
-		prior = ''
-		next = ''
-		if firstterm in wordlist[center]:
-			startfrom = center
+	if '_AT_' in workdbname:
+		workdbname = workdbname[0:10]
+
+	query = 'SELECT * FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
+	data = (linenumber-1, linenumber+1)
+	cursor.execute(query, data)
+	results = cursor.fetchall()
+	lines = []
+	for r in results:
+		lines.append(dblineintolineobject(workdbname, r))
+
+	# will get key errors if there is no linenumber+/-1
+	if len(lines) == 2:
+		if lines[0].index == linenumber:
+			lines = [makeablankline(workdbname, linenumber-1)] + lines
 		else:
-			distancefromcenter = 0
-			while firstterm not in prior and firstterm not in next:
-				distancefromcenter += 1
-				try:
-					next = wordlist[center + distancefromcenter]
-					prior = wordlist[center - distancefromcenter]
-				except:
-					# print('failed to find next/prior:',authorobject.shortname,distancefromcenter,wordlist)
-					# to avoid the infinite loop...
-					firstterm = prior
-			if firstterm in prior:
-				startfrom = center - distancefromcenter
-			else:
-				startfrom = center + distancefromcenter
-		
-		searchszone = wordlist[startfrom - distanceinwords:startfrom + distanceinwords]
-		searchszone = ' '.join(searchszone)
-		
-		if session['nearornot'] == 'T' and re.search(secondterm, searchszone) is not None:
-			fullmatches.append(hit)
-		elif session['nearornot'] == 'F' and re.search(secondterm, searchszone) is None:
-			fullmatches.append(hit)
+			lines.append(makeablankline(workdbname, linenumber+1))
+	if len(lines) == 1:
+		lines = [makeablankline(workdbname, linenumber-1)] + lines
+		lines.append(makeablankline(workdbname, linenumber+1))
 	
-	return fullmatches
+	ldict = {}
+	for line in lines:
+		ldict[line.index] = line
+	
+	text = []
+	for line in lines:
+		print('l',line.wordlist('polytonic'))
+		if session['accentsmatter'] == 'Y':
+			wordsinline = line.wordlist('polytonic')
+		else:
+			wordsinline = line.wordlist('stripped')
+		
+		if line.index == linenumber-1:
+			text = wordsinline[(numberofextrawords * -1):]
+		elif line.index == linenumber:
+			# actually, null should be '', but is somehow coming back as something more than that
+			text += wordsinline
+		elif line.index == linenumber+1:
+			text += wordsinline[0:numberofextrawords]
+			
+	aggregate = ' '.join(text)
+	aggregate = re.sub(r'\s\s',r' ', aggregate)
+	aggregate = ' ' + aggregate + ' '
+	
+	print('ag',aggregate)
+	return aggregate
