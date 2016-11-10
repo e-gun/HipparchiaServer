@@ -353,7 +353,6 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	
 	text = []
 	for line in lines:
-		print('l',line.wordlist('polytonic'))
 		if session['accentsmatter'] == 'Y':
 			wordsinline = line.wordlist('polytonic')
 		else:
@@ -362,7 +361,6 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 		if line.index == linenumber-1:
 			text = wordsinline[(numberofextrawords * -1):]
 		elif line.index == linenumber:
-			# actually, null should be '', but is somehow coming back as something more than that
 			text += wordsinline
 		elif line.index == linenumber+1:
 			text += wordsinline[0:numberofextrawords]
@@ -371,5 +369,4 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	aggregate = re.sub(r'\s\s',r' ', aggregate)
 	aggregate = ' ' + aggregate + ' '
 	
-	print('ag',aggregate)
 	return aggregate
