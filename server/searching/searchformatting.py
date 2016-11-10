@@ -31,6 +31,18 @@ def cleansearchterm(seeking):
 
 
 def highlightsearchterm(lineobject,searchterm, spanname):
+	"""
+	html markup for the search term in the line
+	in order to highlight a polytonic word that you found via a unaccented search you need to convert:
+		ποταμον
+	into:
+		((π|Π)(ο|ὀ|ὁ|ὂ|ὃ|ὄ|ὅ|ό|ὸ|Ο|Ὀ|Ὁ|Ὂ|Ὃ|Ὄ|Ὅ)(τ|Τ)(α|ἀ|ἁ|ἂ|ἃ|ἄ|ἅ|ἆ|ἇ|ᾀ|ᾁ|ᾂ|ᾃ|ᾄ|ᾅ|ᾆ|ᾇ|ᾲ|ᾳ|ᾴ|ᾶ|ᾷ|ᾰ|ᾱ|ὰ|ά|ᾈ|ᾉ|ᾊ|ᾋ|ᾌ|ᾍ|ᾎ|ᾏ|Ἀ|Ἁ|Ἂ|Ἃ|Ἄ|Ἅ|Ἆ|Ἇ|Α)(μ|Μ)ό(ν|Ν))
+	
+	:param lineobject:
+	:param searchterm:
+	:param spanname:
+	:return:
+	"""
 
 	line = lineobject.accented
 
@@ -132,7 +144,8 @@ def lineobjectresultformatter(lineobject, searchterm, proximate, searchtype, hig
 def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	"""
 	grab a line and add the N words at the tail and head of the previous and next lines
-	 this will let you search for phrases that fall along a line break "και δη | και"
+	this will let you search for phrases that fall along a line break "και δη | και"
+	
 	:param linenumber:
 	:param numberofextrawords:
 	:param workdbname:
@@ -186,6 +199,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	aggregate = re.sub(r'\s\s',r' ', aggregate)
 	aggregate = ' ' + aggregate + ' '
 	
+	print('ag',aggregate)
 	return aggregate
 
 

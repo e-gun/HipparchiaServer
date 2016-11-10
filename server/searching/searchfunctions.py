@@ -215,7 +215,6 @@ def partialwordsearch(seeking, cursor, workdbname, authors):
 		column = 'stripped_line'
 	
 	seeking = cleansearchterm(seeking)
-	hyphsearch = seeking
 	
 	mysyntax = '~*'
 	if seeking[0] == ' ':
@@ -629,13 +628,26 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activep
 				# drop the trailing ') AND ('
 				whr = whr[0:-6]
 			
-				query = 'SELECT * FROM ' + wkid + ' WHERE ('+ whr + ' ORDER BY index ASC'
+				query = 'SELECT * FROM ' + wkid[0:10] + ' WHERE ('+ whr + ' ORDER BY index ASC'
 				curs.execute(query, tuple(data))
 			else:
-				wkid = re.sub(r'x', 'w', wkid)
-				query = 'SELECT * FROM ' + wkid + ' ORDER BY index'
-				curs.execute(query)
-				
+				if '_AT_' not in wkid:
+					wkid = re.sub(r'x', 'w', wkid)
+					query = 'SELECT * FROM ' + wkid + ' ORDER BY index'
+					curs.execute(query)
+				else:
+					whr = ''
+					data = []
+					w = whereclauses(wkid, '=', authors)
+					for i in range(0, len(w)):
+						whr += 'AND (' + w[i][0] + ') '
+						data.append(w[i][1])
+					# strip extra ANDs
+					whr = whr[4:]
+					wkid = re.sub(r'x', 'w', wkid)
+					query = 'SELECT * FROM ' + wkid[0:10] + ' WHERE '+whr+' ORDER BY index'
+					curs.execute(query, data)
+					
 			fulltext = curs.fetchall()
 			
 			previous = makeablankline(wkid, -1)
