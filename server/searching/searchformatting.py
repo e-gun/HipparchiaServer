@@ -82,7 +82,7 @@ def highlightsearchterm(lineobject,searchterm, spanname):
 		accentedsearch += c
 	#accentedsearch = '(^|)('+accentedsearch+')($|)'
 	accentedsearch = '(' + accentedsearch + ')'
-	print(accentedsearch)
+	
 	find = re.search(accentedsearch,line)
 	try:
 		newline = line[0:find.start()]+'<span class="'+spanname+'">'+find.group()+'</span>'+line[find.end():]
