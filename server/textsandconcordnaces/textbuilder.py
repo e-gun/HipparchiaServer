@@ -4,7 +4,7 @@
 	Copyright: E Gunderson 2016
 	License: GPL 3 (see LICENSE in the top level directory of the distribution)
 """
-from server.formatting_helper_functions import insertcrossreferencerow
+import re
 from server.dbsupport.dbfunctions import dblineintolineobject
 
 def buildtext(work, firstline, lastline, linesevery, cursor):
@@ -25,6 +25,8 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	cursor.execute(query, data)
 	results = cursor.fetchall()
 	
+	finder = re.compile(r'<hmu_metadata_date value="(.*?)" />')
+	
 	output = ['<table>\n']
 	if len(results) > 0:
 		previousline = dblineintolineobject(work, results[0])
@@ -40,6 +42,13 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 					xref = '<tr><td class="browsercite">' + columna + '</td>'
 					xref += '<td class="textcrossreference">' + columnb + '</td></tr>\n'
 					output.append(xref)
+			date = re.search(finder, thisline.accented)
+			if date is not None:
+				columna = ''
+				columnb = '<span class="textdate">Date:&nbsp;' + date.group(1) + '</span>'
+				datehtml = '<tr><td class="browsercite">' + columna + '</td>'
+				datehtml += '<td class="textdate">' + columnb + '</td></tr>\n'
+				output.append(datehtml)
 			
 			columnb = thisline.accented
 			if thisline.samelevelas(previousline) is not True:

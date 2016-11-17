@@ -9,7 +9,7 @@ import re
 
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
-from server.formatting_helper_functions import getpublicationinfo, insertcrossreferencerow
+from server.formatting_helper_functions import getpublicationinfo, insertcrossreferencerow, insertdaterow
 
 
 def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
@@ -85,13 +85,19 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	linecount = numbersevery - 3
 	# insert something to highlight the citationtuple line
 	previousline = lines[0]
+	
+	finder = re.compile(r'<hmu_metadata_date value="(.*?)" />')
+	
 	for line in lines:
 		linecount += 1
 		if workobject.universalid[0:2] in ['in', 'dp']:
 			if line.annotations != '':
 				xref = insertcrossreferencerow(line)
 				passage['ouputtable'].append(xref)
-				
+			date = re.search(finder, line.accented)
+			if date is not None:
+				datehtml = insertdaterow(date.group(1))
+				passage['ouputtable'].append(datehtml)
 		columnb = insertparserids(line)
 		if line.index == focusline.index:
 			# linecount = numbersevery + 1

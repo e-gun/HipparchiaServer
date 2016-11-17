@@ -238,6 +238,12 @@ td.textcrossreference {
 	text-align: left;
 }
 
+td.textdate {
+	padding-right: 10px;
+	padding-left: 10px;
+	text-align: left;
+}
+
 td.word { 
 	font-weight: bold;
 }
@@ -395,6 +401,12 @@ worktitle {
     text-align: center;
 }
 
+.textdate {
+    font-size: 85%;
+    color: #895b3f;
+    text-align: center;
+}
+
 .dictionaryform {
 	color: #556970;
 }
@@ -509,6 +521,11 @@ worktitle {
 span.lat {
 	font-style: italic;
 	font-color: #253940;
+}
+
+.letterbox {
+	border-style: solid;
+	border-width: 1px;
 }
 
 .levellabel1 {
