@@ -4,7 +4,7 @@
 	Copyright: E Gunderson 2016
 	License: GPL 3 (see LICENSE in the top level directory of the distribution)
 """
-
+from server.formatting_helper_functions import insertcrossreferencerow
 from server.dbsupport.dbfunctions import dblineintolineobject
 
 def buildtext(work, firstline, lastline, linesevery, cursor):
@@ -32,6 +32,15 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 		for line in results:
 			linecount += 1
 			thisline = dblineintolineobject(work,line)
+			
+			if work[0:2] in ['in', 'dp']:
+				if thisline.annotations != '':
+					columna = ''
+					columnb = '<span class="crossreference">' + thisline.annotations + '</span>'
+					xref = '<tr><td class="browsercite">' + columna + '</td>'
+					xref += '<td class="textcrossreference">' + columnb + '</td></tr>\n'
+					output.append(xref)
+			
 			columnb = thisline.accented
 			if thisline.samelevelas(previousline) is not True:
 				linecount = linesevery + 1

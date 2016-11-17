@@ -224,6 +224,20 @@ td.browsedline {
 	padding-bottom: 8px;
 }
 
+td.crossreference {
+	padding-right: 10px;
+	padding-left: 10px;
+	padding-bottom: 16px;
+}
+
+td.textcrossreference {
+	padding-right: 10px;
+	padding-left: 10px;
+	padding-top: 16px;
+	padding-bottom: 16px;
+	text-align: left;
+}
+
 td.word { 
 	font-weight: bold;
 }
@@ -375,6 +389,12 @@ worktitle {
 
 .center { display: block; text-align: center; }
 
+.crossreference {
+    font-style: italic;
+    color: #895b3f;
+    text-align: center;
+}
+
 .dictionaryform {
 	color: #556970;
 }
@@ -516,6 +536,15 @@ p.level2 { padding-left: 15px;}
 p.level3 { padding-left: 30px;}
 
 p.level4 { padding-left: 45;}
+
+
+.lineover { 
+	text-decoration: overline;
+}
+
+.erasedepiographicaltext {
+	text-decoration: line-through;
+}
 
 .locus {
 	font-weight: normal;

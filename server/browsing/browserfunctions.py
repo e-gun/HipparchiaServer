@@ -9,7 +9,7 @@ import re
 
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
-from server.formatting_helper_functions import getpublicationinfo
+from server.formatting_helper_functions import getpublicationinfo, insertcrossreferencerow
 
 
 def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
@@ -87,6 +87,11 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	previousline = lines[0]
 	for line in lines:
 		linecount += 1
+		if workobject.universalid[0:2] in ['in', 'dp']:
+			if line.annotations != '':
+				xref = insertcrossreferencerow(line)
+				passage['ouputtable'].append(xref)
+				
 		columnb = insertparserids(line)
 		if line.index == focusline.index:
 			# linecount = numbersevery + 1

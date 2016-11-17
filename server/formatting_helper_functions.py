@@ -397,4 +397,20 @@ def injectbrowserjavascript(listofurls):
 		jsoutput += '\n\tdocument.getElementById("'+url+'").onclick = openbrowserfromclick;'
 	
 	return jsoutput
+
+
+def insertcrossreferencerow(lineobject):
+	"""
+	inscriptions and papyri have relevant pibliographic information that needs to be displayed
+	:param lineobject:
+	:return:
+	"""
+	linehtml = ''
 	
+	columna = ''
+	columnb = '<span class="crossreference">' + lineobject.annotations + '</span>'
+	
+	linehtml = '<tr class="browser"><td class="crossreference">' + columnb + '</td>'
+	linehtml += '<td class="crossreference">' + columna + '</td></tr>\n'
+	
+	return linehtml
