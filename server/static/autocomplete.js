@@ -110,7 +110,19 @@ $('#authorsautocomplete').autocomplete({
         $('#worksautocomplete').hide();
         $('#worksautocomplete').val('');
         resetworksautocomplete();
-        loadWorklist($('#authorsautocomplete').val().slice(-7, -1));
+        // stupid timing issue if you select with mouse instead of keyboard: nothing happens
+        // see: http://stackoverflow.com/questions/9809013/jqueryui-autocomplete-select-does-not-work-on-mouse-click-but-works-on-key-eve
+        var origEvent = event;
+        while (origEvent.originalEvent !== undefined){
+            origEvent = origEvent.originalEvent;
+        }
+        if (origEvent.type == 'click'){
+            document.getElementById('authorsautocomplete').value = ui.item.value;
+            var auid = $('#authorsautocomplete').val().slice(-7, -1);
+        } else {
+            var auid = $('#authorsautocomplete').val().slice(-7, -1);
+        }
+        loadWorklist(auid);
         $('#worksautocomplete').show();
         $('#authinfo').show();
         $('#worksautocomplete').prop('placeholder', '(Pick a work)');
