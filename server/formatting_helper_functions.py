@@ -416,7 +416,7 @@ def insertcrossreferencerow(lineobject):
 	return linehtml
 
 
-def insertdaterow(founddate):
+def insertdatarow(label, css, founddate):
 	"""
 	inscriptions and papyri have relevant pibliographic information that needs to be displayed
 	:param lineobject:
@@ -426,9 +426,9 @@ def insertdaterow(founddate):
 	linehtml = ''
 		
 	columna = ''
-	columnb = '<span class="textdate">Date:&nbsp;' + founddate + '</span>'
+	columnb = '<span class="textdate">'+label+':&nbsp;' + founddate + '</span>'
 	
-	linehtml = '<tr class="browser"><td class="textdate">' + columnb + '</td>'
+	linehtml = '<tr class="browser"><td class="'+css+'">' + columnb + '</td>'
 	linehtml += '<td class="crossreference">' + columna + '</td></tr>\n'
 	
 	return linehtml

@@ -238,7 +238,7 @@ td.textcrossreference {
 	text-align: left;
 }
 
-td.textdate {
+td.textdate, td.regioninfo, td.cityinfo, td.pubinfo {
 	padding-right: 10px;
 	padding-left: 10px;
 	text-align: left;

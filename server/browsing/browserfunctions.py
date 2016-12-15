@@ -9,7 +9,7 @@ import re
 
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
-from server.formatting_helper_functions import getpublicationinfo, insertcrossreferencerow, insertdaterow
+from server.formatting_helper_functions import getpublicationinfo, insertcrossreferencerow, insertdatarow
 
 
 def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
@@ -86,18 +86,34 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	# insert something to highlight the citationtuple line
 	previousline = lines[0]
 	
-	finder = re.compile(r'<hmu_metadata_date value="(.*?)" />')
-	
+	datefinder = re.compile(r'<hmu_metadata_date value="(.*?)" />')
+	regionfinder = re.compile(r'<hmu_metadata_region value="(.*?)" />')
+	cityfinder = re.compile(r'<hmu_metadata_city value="(.*?)" />')
+	pubfinder = re.compile(r'<hmu_metadata_publicationinfovalue="(.*?)" />')
+
 	for line in lines:
 		linecount += 1
 		if workobject.universalid[0:2] in ['in', 'dp']:
 			if line.annotations != '':
 				xref = insertcrossreferencerow(line)
 				passage['ouputtable'].append(xref)
-			date = re.search(finder, line.accented)
+			date = re.search(datefinder, line.accented)
+			region = re.search(regionfinder, line.accented)
+			city = re.search(cityfinder, line.accented)
+			pub = re.search(pubfinder, line.accented)
+			if region is not None:
+				html = insertdatarow('Region', 'regioninfo', region.group(1))
+				passage['ouputtable'].append(html)
+			if city is not None:
+				html = insertdatarow('City', 'cityinfo', city.group(1))
+				passage['ouputtable'].append(html)
+			if pub is not None:
+				html = insertdatarow('Publication', 'pubinfo', pub.group(1))
+				passage['ouputtable'].append(html)
 			if date is not None:
-				datehtml = insertdaterow(date.group(1))
-				passage['ouputtable'].append(datehtml)
+				html = insertdatarow('Date', 'textdate', date.group(1))
+				passage['ouputtable'].append(html)
+
 		columnb = insertparserids(line)
 		if line.index == focusline.index:
 			# linecount = numbersevery + 1
