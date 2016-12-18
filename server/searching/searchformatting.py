@@ -195,10 +195,10 @@ def prunebydate(authorandworklist, authorobjectdict):
 			aid = aw[0:6]
 			if authorobjectdict[aid].earlier(min) or authorobjectdict[aid].later(max):
 				pass
-				# print('passing',aw ,authorobjectdict[aid].floruit)
+				# print('passing',aw ,authorobjectdict[aid].converted_date)
 			else:
 				trimmedlist.append(aw)
-				# print('append', aw, authorobjectdict[aid].floruit)
+				# print('append', aw, authorobjectdict[aid].converted_date)
 	else:
 		trimmedlist = authorandworklist
 
@@ -249,14 +249,15 @@ def formatauthinfo(authorobject):
 	else:
 		g = ''
 	
-	if authorobject.language == 'G':
+	if authorobject.universalid[0:2] in ['gr', 'in', 'dp']:
 		try:
-			if float(authorobject.floruit) == 1500:
+			if float(authorobject.converted_date) == 1500:
 				fl = 'approx date is unknown (search for 1500 C.E.)'
-			elif float(authorobject.floruit) > 0:
-				fl = 'assigned to approx date: ' + str(authorobject.floruit) + ' C.E.'
-			elif float(authorobject.floruit) < 0:
-				fl = 'assigned to approx date: ' + str(authorobject.floruit)[1:] + ' B.C.E.'
+			elif float(authorobject.converted_date) > 0:
+				fl = 'assigned to approx date: ' + str(authorobject.converted_date) + ' C.E.'
+			elif float(authorobject.converted_date) < 0:
+				fl = 'assigned to approx date: ' + str(authorobject.converted_date)[1:] + ' B.C.E.'
+			fl += ' (derived from "'+authorobject.recorded_date+'")'
 		except:
 			# there was no f and so no int(f)
 			fl = ''

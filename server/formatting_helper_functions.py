@@ -190,7 +190,7 @@ def sortauthorandworklists(authorandworklist, authorsdict):
 			auid = a[0:6]
 			crit = getattr(authorsdict[auid], sortby)
 			name = authorsdict[auid].shortname
-			if sortby == 'floruit':
+			if sortby == 'converted_date':
 				try:
 					crit = float(crit)
 				except:

@@ -89,7 +89,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	datefinder = re.compile(r'<hmu_metadata_date value="(.*?)" />')
 	regionfinder = re.compile(r'<hmu_metadata_region value="(.*?)" />')
 	cityfinder = re.compile(r'<hmu_metadata_city value="(.*?)" />')
-	pubfinder = re.compile(r'<hmu_metadata_publicationinfovalue="(.*?)" />')
+	pubfinder = re.compile(r'<hmu_metadata_publicationinfo value="(.*?)" />')
 
 	for line in lines:
 		linecount += 1

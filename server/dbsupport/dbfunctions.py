@@ -88,10 +88,10 @@ def dbauthormakersubroutine(uid, cursor):
 		print('failed to find the requested author:', query, data)
 		# note that there is no graceful way out of this: you have to have an authorobject in the end
 		
-	# (universalid, language, idxname, akaname, shortname, cleanname, genres, floruit, location)
+	# (universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date, converted_date, location)
 	# supposed to fit the dbAuthor class exactly
 	author = dbAuthor(results[0], results[1], results[2], results[3], results[4], results[5], results[6], results[7],
-	                  results[8])
+	                  results[8], results[9])
 
 	return author
 
@@ -104,7 +104,8 @@ def dbauthorandworkmaker(authoruid, cursor):
 	author = dbauthormakersubroutine(authoruid, cursor)
 
 	query = 'SELECT universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03, ' \
-	        ' levellabels_04, levellabels_05, workgenre, transmission, worktype, wordcount, firstline, lastline, authentic FROM works WHERE universalid LIKE %s'
+	        'levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance, recorded_date, converted_date, wordcount, ' \
+			'firstline, lastline, authentic FROM works WHERE universalid LIKE %s'
 	data = (authoruid + '%',)
 	cursor.execute(query, data)
 	try:
@@ -116,7 +117,8 @@ def dbauthorandworkmaker(authoruid, cursor):
 
 	for match in results:
 		work = dbOpus(match[0], match[1], match[2], match[3], match[4], match[5], match[6], match[7], match[8],
-		              match[9], match[10], match[11], match[12], match[13], match[14], match[15], match[16])
+		              match[9], match[10], match[11], match[12], match[13], match[14], match[15], match[16],
+					  match[17], match[18], match[19])
 		author.addwork(work)
 
 	return author
@@ -310,8 +312,8 @@ def makeanemptyauthor(universalid):
 	:return:
 	"""
 	
-	# (universalid, language, idxname, akaname, shortname, cleanname, genres, floruit, location)
-	aobject = dbAuthor(universalid, '', '', '', '', '', '', '', '')
+	# (universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date, converted_date, location)
+	aobject = dbAuthor(universalid, '', '', '', '', '', '', '', '', '')
 	
 	return aobject
 
@@ -324,7 +326,8 @@ def makeanemptywork(universalid):
 	"""
 	
 	# universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03,
-	# levellabels_04, levellabels_05, workgenre, transmission, worktype, wordcount, firstline, lastline, authentic
-	wkobject = dbOpus(universalid, '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '')
+	# levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance, recorded_date, converted_date, wordcount,
+	# firstline, lastline, authentic
+	wkobject = dbOpus(universalid, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '')
 	
 	return wkobject

@@ -15,7 +15,7 @@ class dbAuthor(object):
 	Initialized straight out of a DB read
 	"""
 
-	def __init__(self, universalid, language, idxname, akaname, shortname, cleanname, genres, floruit, location):
+	def __init__(self, universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date, converted_date, location):
 		self.universalid = universalid
 		self.language = language
 		self.idxname = idxname
@@ -23,7 +23,8 @@ class dbAuthor(object):
 		self.shortname = shortname
 		self.cleanname = cleanname
 		self.genres = genres
-		self.floruit = floruit
+		self.recorded_date = recorded_date
+		self.converted_date = converted_date
 		self.location = location
 		self.authornumber = universalid[2:]
 		self.listofworks = []
@@ -31,31 +32,31 @@ class dbAuthor(object):
 		self.id = universalid
 
 	def earlier(self, other):
-		return float(self.floruit) < other
-	
+		return float(self.converted_date) < other
+
 	def later(self, other):
-		return float(self.floruit) > other
-	
+		return float(self.converted_date) > other
+
 	def atorearlier(self, other):
-		return float(self.floruit) <= other
-	
+		return float(self.converted_date) <= other
+
 	def atorlater(self, other):
-		return float(self.floruit) >= other
-	
+		return float(self.converted_date) >= other
+
 	def floruitis(self, other):
-		return float(self.floruit) == other
-	
+		return float(self.converted_date) == other
+
 	def floruitisnot(self, other):
-		return float(self.floruit) != other
+		return float(self.converted_date) != other
 
 	def addwork(self, work):
 		self.listofworks.append(work)
-		
+
 	def listworkids(self):
 		workids = []
 		for w in self.listofworks:
 			workids.append(w.universalid)
-			
+
 		return workids
 
 
@@ -64,10 +65,12 @@ class dbOpus(object):
 	Created out of the DB info, not the IDT vel sim
 	Initialized straight out of a DB read
 	note the efforts to match a simple Opus, but the fit is potentially untidy
-	it is always going to be importnat to know exactly what kind of object you are handling
+	it is always going to be important to know exactly what kind of object you are handling
 	"""
 
-	def __init__(self, universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05, workgenre, transmission, worktype, wordcount, firstline, lastline, authentic):
+	def __init__(self, universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02,
+				 levellabels_03, levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance,
+				 recorded_date, converted_date, wordcount, firstline, lastline, authentic):
 		self.universalid = universalid
 		self.title = title
 		self.language = language
@@ -81,6 +84,9 @@ class dbOpus(object):
 		self.workgenre = workgenre
 		self.transmission = transmission
 		self.worktype = worktype
+		self.provenance = provenance
+		self.recorded_date = recorded_date
+		self.converted_date = converted_date
 		self.wordcount = wordcount
 		self.starts = firstline
 		self.ends = lastline
