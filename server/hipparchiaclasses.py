@@ -96,7 +96,9 @@ class dbOpus(object):
 			self.length = lastline - firstline
 		except:
 			self.length = -1
-		self.worknumber = int(universalid[7:])
+		#self.worknumber = int(universalid[7:])
+		# con't use int() any longer because ins and ddp numbers count via hex
+		self.worknumber = universalid[7:]
 		self.structure = {}
 		idx = -1
 		for label in [levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05]:

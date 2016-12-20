@@ -17,13 +17,6 @@ def tablenamer(authorobject, thework):
 	nm = authorobject.authornumber
 	wn = wk.worknumber
 
-	if wn < 10:
-		nn = '00' + str(wn)
-	elif wn < 100:
-		nn = '0' + str(wn)
-	else:
-		nn = str(wn)
-
 	lg = wk.language
 	# how many bilingual authors are there again?
 	if lg == 'G':
@@ -34,7 +27,7 @@ def tablenamer(authorobject, thework):
 		pr = ''
 		print('oh, I do not speak', lg, 'and I will be unable to access a DB')
 
-	workdbname = pr + nm + 'w' + nn
+	workdbname = pr + nm + 'w' + wn
 
 	return workdbname
 

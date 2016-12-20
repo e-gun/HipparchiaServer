@@ -83,12 +83,14 @@ def findvalidlevelvalues(workdb, workstructure, partialcitationtuple, cursor):
 
 def locusintocitation(workobject, citationtuple):
 	"""
+
 	transform something like ('9','109','8') into a citations like "Book 8, section 108, line 9"
-	:param authorobject:
-	:param worknumber:
+
+	:param workobject:
 	:param citationtuple:
 	:return:
 	"""
+
 	wklvls = list(workobject.structure.keys())
 	cite = list(citationtuple)
 	wklvls.reverse()
@@ -107,11 +109,12 @@ def prolixlocus(workobject, citationtuple):
 	"""
 	transform something like ('9','109','8') into a citation like "Book 8, section 108, line 9"
 	differes from the preceding only by a range and a wklvls[level]
-	:param authorobject:
-	:param worknumber:
+
+	:param workobject:
 	:param citationtuple:
 	:return:
 	"""
+
 	wklvls = list(workobject.structure.keys())
 	wklvls.reverse()
 	cite = list(citationtuple)

@@ -143,12 +143,11 @@ def lineobjectresultformatter(lineobject, searchterm, proximate, searchtype, hig
 def aggregatelines(firstline, lastline, cursor, workdbname):
 	"""
 	build searchable clumps of words spread over various lines
-	
+
 	:param firstline:
 	:param lastline:
 	:param cursor:
-	:param authorobject:
-	:param worknumber:
+	:param workdbname:
 	:return:
 	"""
 	

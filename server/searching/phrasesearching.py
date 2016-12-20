@@ -22,10 +22,12 @@ def phrasesearch(searchphrase, cursor, wkid, authors, activepoll):
 
 	:param searchphrase:
 	:param cursor:
-	:param authorobject:
-	:param worknumber:
-	:return: db lines that match the search criterion
+	:param wkid:
+	:param authors:
+	:param activepoll:
+	:return:
 	"""
+
 	searchphrase = cleansearchterm(searchphrase)
 	searchterms = searchphrase.split(' ')
 	searchterms = [x for x in searchterms if x]
