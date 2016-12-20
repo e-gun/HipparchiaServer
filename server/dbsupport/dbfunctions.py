@@ -149,7 +149,7 @@ def findtoplevelofwork(workuid, cursor):
 		results = list(results)
 	except:
 		results = ['zero','','','','', '']
-	
+
 	label = ''
 	while label == '':
 		try:

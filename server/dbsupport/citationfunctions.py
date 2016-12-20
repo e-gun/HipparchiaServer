@@ -207,7 +207,7 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 		# citationlist = newcitationlist
 		
 		# option 2: just give up
-		dblinenumber = -9999
+		dblinenumber = -8888
 	else:
 		# you have an incomplete citation: assume that the top level is the last item, etc.
 		citationlist = perseuscitationsintohipparchiacitations(citationlist)
@@ -227,7 +227,9 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 			found = cursor.fetchone()
 			dblinenumber = found[0]
 		except:
-			dblinenumber = -9999
+			# print('nothing found: returning first line')
+			dblinenumber = returnfirstlinenumber(workid, cursor)
+			# dblinenumber = -9999
 		
 	return dblinenumber
 

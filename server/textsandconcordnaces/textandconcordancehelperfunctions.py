@@ -123,7 +123,7 @@ def conctohtmltable(concordanceoutput):
 	:param concordanceoutput:
 	:return:
 	"""
-	t = time.time()
+
 	outputlines = deque()
 	outputlines.append('<table><tr><th>word</th><th>count</th><th>passages</th></tr>\n')
 	for c in concordanceoutput:
@@ -133,8 +133,6 @@ def conctohtmltable(concordanceoutput):
 		outputlines.append('<td class="passages">' + c[2] + '</td>')
 		outputlines.append('</tr>')
 	outputlines.append('</table>')
-	st = time.time() - t
-	print(st)
 	
 	return list(outputlines)
 	
