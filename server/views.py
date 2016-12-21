@@ -200,7 +200,7 @@ def executesearch():
 			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict, poll[ts])
 		
 		poll[ts].statusis('Putting the results in context')
-		
+
 		allfound = mpresultformatter(hits, authordict, workdict, seeking, proximate, searchtype, poll[ts])
 		
 		searchtime = time.time() - starttime

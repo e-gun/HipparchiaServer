@@ -367,7 +367,11 @@ def htmlifysearchfinds(listoffinds):
 		for ln in lines:
 			l = list(ln['locus'])
 			l.reverse()
-			l = '.'.join(l)
+			if metadata['url'][0:2] in ['in', 'dp'] and len(l) == 2 and l[0] == 'recto':
+				# another dreary kludge to prevent you from seeing 'recto' endlessly when looking at inscriptions
+				l = l[1]
+			else:
+				l = '.'.join(l)
 			htmlforthefind += '<span class="locus">'+l+'</span>&nbsp;\n'
 			htmlforthefind += '<span class="foundtext">'+ln['line']+'</span><br />\n'
 		

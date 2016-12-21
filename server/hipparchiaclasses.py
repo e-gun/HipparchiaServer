@@ -158,7 +158,7 @@ class dbWorkLine(object):
 	
 	def locus(self):
 		"""
-		call me to get a formatted citation
+		call me to get a formatted citation: "3.2.1"
 		:param self:
 		:return:
 		"""
@@ -174,7 +174,7 @@ class dbWorkLine(object):
 	
 	def shortlocus(self):
 		"""
-		try to get a short citation that drops the lvl0 info
+		try to get a short citation that drops the lvl0 info: "3.2"
 		useful for tagging level shifts without constantly seeling 'line 1'
 		:return:
 		"""
