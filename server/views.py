@@ -26,7 +26,7 @@ from server.textsandconcordnaces.textandconcordancehelperfunctions import tcpars
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, buildauthordict, buildworkdict, \
-	buildaugenreslist, buildworkgenreslist
+	buildaugenreslist, buildworkgenreslist, buildauthorlocationlist, buildworkprovenancelist
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
 	dropdupes, bcedating, sortauthorandworklists, prunedict, htmlifysearchfinds
 from server.browsing.browserfunctions import getandformatbrowsercontext
@@ -39,10 +39,13 @@ cursor = dbconnection.cursor()
 
 # ready some sets of objects that will be generally available: two seconds spent here will save you 2s over and over again later as you constantly regenerate author and work info
 
+print('populating global variables')
 authordict = buildauthordict(cursor)
 workdict = buildworkdict(authordict)
 authorgenreslist = buildaugenreslist(authordict)
+authorlocationlist = buildauthorlocationlist(authordict)
 workgenreslist = buildworkgenreslist(workdict)
+workprovenancelist = buildworkprovenancelist(workdict)
 
 # empty dict in which to store progress polls
 # note that more than one poll can be running
@@ -609,6 +612,48 @@ def wkgenrelist():
 
 	hint = json.dumps(hint)
 
+	return hint
+
+
+@hipparchia.route('/getaulocationhint', methods=['GET'])
+def offeraulocationhints():
+	"""
+	fill the hint box with constantly updated values
+	:return:
+	"""
+
+	strippedquery = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('term', ''))
+
+	hint = []
+
+	if strippedquery != '':
+		query = strippedquery.lower()
+		qlen = len(query)
+		for location in authorlocationlist:
+			if query == location.lower()[0:qlen]:
+				hint.append({'value': location})
+	hint = json.dumps(hint)
+	return hint
+
+
+@hipparchia.route('/getwkprovenancehint', methods=['GET'])
+def offerprovenancehints():
+	"""
+	fill the hint box with constantly updated values
+	:return:
+	"""
+
+	strippedquery = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('term', ''))
+
+	hint = []
+
+	if strippedquery != '':
+		query = strippedquery.lower()
+		qlen = len(query)
+		for location in workprovenancelist:
+			if query == location.lower()[0:qlen]:
+				hint.append({'value': location})
+	hint = json.dumps(hint)
 	return hint
 
 

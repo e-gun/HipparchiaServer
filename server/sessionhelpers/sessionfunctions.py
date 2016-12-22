@@ -588,3 +588,45 @@ def buildworkgenreslist(workdict):
 	return workgenreslist
 
 
+def buildauthorlocationlist(authordict):
+	"""
+	load up the list of author locations
+	used in offeraulocationhints()
+
+	:param authordict:
+	:return:
+	"""
+
+	locationlist = []
+
+	for a in authordict:
+		if authordict[a].location is not None and authordict[a].location != '':
+			locationlist.append(authordict[a].location)
+
+	locationlist = list(set(locationlist))
+	locationlist = [re.sub(r'^\s|\s$', '', x) for x in locationlist]
+	locationlist.sort()
+
+	return locationlist
+
+
+def buildworkprovenancelist(workdict):
+	"""
+	load up the list of work provenances
+	used in offerprovenancehints()
+
+	:param workdict:
+	:return:
+	"""
+
+	locationlist = []
+
+	for w in workdict:
+		if workdict[w].provenance is not None and workdict[w].provenance != '':
+			locationlist.append(workdict[w].provenance)
+
+	locationlist = list(set(locationlist))
+	locationlist = [re.sub(r'^\s|\s$', '', x) for x in locationlist]
+	locationlist.sort()
+
+	return locationlist
