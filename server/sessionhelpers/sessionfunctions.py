@@ -205,32 +205,6 @@ def parsejscookie(cookiestring):
 	return optiondict
 
 
-def setsessionvarviadb(column, table, cursor):
-	"""
-	generate a list of values to feed to a session variable
-	:param column:
-	:param cursor:
-	:return:
-	"""
-	
-	query = 'SELECT '+column+' FROM '+table+' WHERE '+column+' != %s'
-	data = ('',)
-	cursor.execute(query, data)
-	results = cursor.fetchall()
-	tuples = set(results)
-	found = []
-	for f in tuples:
-		found.append(f[0])
-	sv = []
-	for s in found:
-		ss = s.split(',')
-		for item in ss:
-			sv.append(item)
-	sv = formatting_helper_functions.tidyuplist(sv)
-	
-	return sv
-
-
 def sessionvariables():
 
 	try:
@@ -543,6 +517,11 @@ def rationalizeselections(newselectionuid, selectorexclude):
 
 	return
 
+
+# simple loaders called when HipparchiaServer launches
+# these lists will contained (more or less...) globally available lists
+# the main point is to avoid constant calls to the DB
+# for commonly used info
 
 def buildauthordict(cursor):
 	"""
