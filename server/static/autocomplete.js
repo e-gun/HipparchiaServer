@@ -61,6 +61,8 @@ function reloadAuthorlist(){
         $('#genreinfo').hide();
         $('#genrelistcontents').hide();
         $('#workgenresautocomplete').hide();
+        $('#locationsautocomplete').hide();
+        $('#provenanceautocomplete').hide();
         $('#pickgenre').hide();
         $('#excludegenre').hide();
         $('#setoptions').hide();
@@ -300,10 +302,19 @@ $('#workgenresautocomplete').autocomplete({
     source: '/getworkgenrehint'
     });
 
+$('#locationsautocomplete').autocomplete({
+    source: '/getaulocationhint'
+    });
+
+$('#provenanceautocomplete').autocomplete({
+    source: '/getwkprovenancehint'
+    });
 
 $('#pickgenre').click( function() {
         var genre = $('#genresautocomplete').val();
         var wkgenre = $('#workgenresautocomplete').val();
+        var loc = $('#locationsautocomplete').val();
+        var prov = $('#provenanceautocomplete').val();
 
         if (genre != '') {
             $.getJSON('/makeselection?genre=' + genre, function (selectiondata) {
@@ -315,6 +326,17 @@ $('#pickgenre').click( function() {
                 reloadselections(selectiondata);
              });
         }
+        if (loc != '') {
+            $.getJSON('/makeselection?auloc=' + loc, function (selectiondata) {
+                reloadselections(selectiondata);
+             });
+        }
+        if (prov != '') {
+            $.getJSON('/makeselection?wkprov=' + prov, function (selectiondata) {
+                reloadselections(selectiondata);
+             });
+        }
+
         $('#searchlistcontents').hide();
     });
 
@@ -323,17 +345,31 @@ $('#pickgenre').click( function() {
 $('#excludegenre').click( function() {
         var genre = $('#genresautocomplete').val();
         var wkgenre = $('#workgenresautocomplete').val();
+        var loc = $('#locationsautocomplete').val();
+        var prov = $('#provenanceautocomplete').val();
 
         if (genre != '') {
-            $.getJSON('/makeselection?genre=' + genre+'&exclude=t', function (selectiondata) {
+            $.getJSON('/makeselection?genre=' + genre +'&exclude=t', function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
         if (wkgenre != '') {
-            $.getJSON('/makeselection?wkgenre=' + wkgenre+'&exclude=t', function (selectiondata) {
+            $.getJSON('/makeselection?wkgenre=' + wkgenre +'&exclude=t', function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
+
+        if (loc != '') {
+            $.getJSON('/makeselection?auloc=' + loc +'&exclude=t', function (selectiondata) {
+                reloadselections(selectiondata);
+             });
+        }
+        if (prov != '') {
+            $.getJSON('/makeselection?wkprov=' + prov +'&exclude=t', function (selectiondata) {
+                reloadselections(selectiondata);
+             });
+        }
+
         $('#searchlistcontents').hide();
     });
 

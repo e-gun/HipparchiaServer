@@ -81,6 +81,8 @@ $('#fewerchoices').click( function() {
     $('#fewerchoices').hide();
     $('#genresautocomplete').hide();
     $('#workgenresautocomplete').hide();
+    $('#locationsautocomplete').hide();
+    $('#provenanceautocomplete').hide();
     $('#pickgenre').hide();
     $('#excludegenre').hide();
     $('#genreinfo').hide();
@@ -96,6 +98,8 @@ $('#morechoices').click( function() {
     $('#morechoices').hide();
     $('#genresautocomplete').show();
     $('#workgenresautocomplete').show();
+    $('#locationsautocomplete').show();
+    $('#provenanceautocomplete').show();
     $('#pickgenre').show();
     $('#excludegenre').show();
     $('#genreinfo').show();
