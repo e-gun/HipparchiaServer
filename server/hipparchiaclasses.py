@@ -163,11 +163,20 @@ class dbWorkLine(object):
 		:return:
 		"""
 		loc = []
-		for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]:
-			if str(lvl) != '-1' and (self.wkuinversalid[0:2] not in ['in','dp'] and lvl != 'recto'):
-				loc.append(lvl)
-		loc.reverse()
-		citation = '.'.join(loc)
+
+		if self.wkuinversalid[0:2] not in ['in','dp']:
+			for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]:
+				if str(lvl) != '-1':
+					loc.append(lvl)
+			loc.reverse()
+			citation = '.'.join(loc)
+		else:
+			# papyrus and inscriptions are wonky: usually they have just a recto, but sometimes they have something else
+			# only mark the 'something else' version
+			if self.l1 != 'recto':
+				citation = self.l1 + ' ' + self.l0
+			else:
+				citation = self.l0
 		
 		return citation
 	

@@ -135,6 +135,7 @@ def linesintoconcordance(lineobjects, activepoll):
 				try:
 					# to forestall the problem of sorting the citation values later, include the index now
 					# sp variant:
+					print('ll',line.locus())
 					concordance[w].append((line.wkuinversalid, line.index, line.locus()))
 					# concordance[w].append() seems to have race condition problems in mp land: you will end up with 1 copy of each word
 					# mp variant:
