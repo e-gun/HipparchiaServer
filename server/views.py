@@ -619,6 +619,9 @@ def wkgenrelist():
 def offeraulocationhints():
 	"""
 	fill the hint box with constantly updated values
+	TODO: these should be pruned so as to exclude locations that are meaningless relative to the currently active DBs
+		e.g., if you have only Latin active, location is meaningless; and many TLG places do not match INS locations
+
 	:return:
 	"""
 
@@ -640,6 +643,9 @@ def offeraulocationhints():
 def offerprovenancehints():
 	"""
 	fill the hint box with constantly updated values
+	TODO: these should be pruned so as to exclude locations that are meaningless relative to the currently active DBs
+		e.g., if you have only Latin active, location is meaningless; and many TLG places do not match INS locations
+
 	:return:
 	"""
 
@@ -1163,18 +1169,8 @@ def selectionmade():
 	"""
 	
 	# lingering bug that should be handled: if you swap languages and leave lt on a gr list, you will have trouble compiling the searchlist
-	
-	try:
-		genre = re.sub('[\W_]+', '', request.args.get('genre', ''))
-	except:
-		genre = ''
-	
-	try:
-		# need periods (for now): just remove some obvious problem cases
-		wkgenre = re.sub('[\[\]\'\\&\*\%\^_]+', '', request.args.get('wkgenre', ''))
-	except:
-		wkgenre = ''
-	
+
+	# you clicked #pickauthor or #excludeauthor
 	try:
 		workid = re.sub('[\W_]+', '', request.args.get('work', ''))
 	except:
@@ -1194,7 +1190,29 @@ def selectionmade():
 		exclude = re.sub('[^tf]', '', request.args.get('exclude', ''))
 	except:
 		exclude = ''
-	
+
+	# you clicked #pickgenre or #excludegenre
+	try:
+		auloc = re.sub('[\W_]+', '', request.args.get('auloc', ''))
+	except:
+		auloc = ''
+
+	try:
+		wkprov = re.sub('[\W_]+', '', request.args.get('wkprov', ''))
+	except:
+		wkprov = ''
+
+	try:
+		genre = re.sub('[\W_]+', '', request.args.get('genre', ''))
+	except:
+		genre = ''
+
+	try:
+		# need periods (for now): just remove some obvious problem cases
+		wkgenre = re.sub('[\[\]\'\\&\*\%\^_]+', '', request.args.get('wkgenre', ''))
+	except:
+		wkgenre = ''
+
 	if exclude != 't':
 		suffix = 'selections'
 		other = 'exclusions'

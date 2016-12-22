@@ -601,7 +601,7 @@ def buildauthorlocationlist(authordict):
 
 	for a in authordict:
 		if authordict[a].location is not None and authordict[a].location != '':
-			locationlist.append(authordict[a].location)
+			locationlist += authordict[a].location.split(',')
 
 	locationlist = list(set(locationlist))
 	locationlist = [re.sub(r'^\s|\s$', '', x) for x in locationlist]
