@@ -1235,17 +1235,29 @@ def selectionmade():
 		session['au' + suffix].append(uid)
 		session['au' + suffix] = tidyuplist(session['au' + suffix])
 		rationalizeselections(uid, suffix)
-	elif genre != '':
+
+	# if vs elif: allow multiple simultaneous settings
+	if genre != '':
 		# add to the +/- genre list and then subtract from the -/+ list
 		session['agn' + suffix].append(genre)
 		session['agn' + suffix] = tidyuplist(session['agn' + suffix])
 		session['agn' + other] = dropdupes(session['agn' + other], session['agn' + suffix])
-	elif wkgenre != '':
+	if wkgenre != '':
 		# add to the +/- genre list and then subtract from the -/+ list
 		session['wkgn' + suffix].append(wkgenre)
 		session['wkgn' + suffix] = tidyuplist(session['wkgn' + suffix])
 		session['wkgn' + other] = dropdupes(session['wkgn' + other], session['wkgn' + suffix])
-	
+	if auloc != '':
+		# add to the +/- locations list and then subtract from the -/+ list
+		session['aloc' + suffix].append(auloc)
+		session['aloc' + suffix] = tidyuplist(session['aloc' + suffix])
+		session['aloc' + other] = dropdupes(session['aloc' + other], session['aloc' + suffix])
+	if wkprov != '':
+		# add to the +/- locations list and then subtract from the -/+ list
+		session['wloc' + suffix].append(wkprov)
+		session['wloc' + suffix] = tidyuplist(session['wloc' + suffix])
+		session['wloc' + other] = dropdupes(session['wloc' + other], session['wloc' + suffix])
+
 	# get three bundles to put in the table cells
 	# stored in a dict with three keys: timeexclusions, selections, exclusions, numberofselections
 	
@@ -1262,8 +1274,8 @@ def clearselections():
 	:return:
 	"""
 	category = request.args.get('cat', '')
-	selectiontypes = ['auselections', 'wkselections', 'psgselections', 'agnselections', 'wkgnselections',
-	                  'auexclusions', 'wkexclusions', 'psgexclusions', 'agnexclusions', 'wkgnexclusions']
+	selectiontypes = ['auselections', 'wkselections', 'psgselections', 'agnselections', 'wkgnselections', 'alocselections', 'wlocselections',
+	                  'auexclusions', 'wkexclusions', 'psgexclusions', 'agnexclusions', 'wkgnexclusions', 'alocexclusions', 'wlocexclusions']
 	if category not in selectiontypes:
 		category = ''
 	

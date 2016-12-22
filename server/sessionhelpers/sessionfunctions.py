@@ -247,6 +247,10 @@ def sessionvariables():
 		session['agnexclusions'] = []
 		session['wkgnexclusions'] = []
 		session['psgexclusions'] = []
+		session['alocselections'] = []
+		session['alocexclusions'] = []
+		session['wlocselections'] = []
+		session['wlocexclusions'] = []
 		session['corpora'] = hipparchia.config['DEFAULTCORPUS']
 		session['accentsmatter'] = 'N'
 		session['proximity'] = '1'
@@ -325,12 +329,14 @@ def sessionselectionsinfo(authordict, workdict):
 	build the selections html either for a or b:
 		#selectionstable + #selectioninfocell
 		#selectionstable + #exclusioninfocell
-	there are five headings to populate
+	there are seven headings to populate
 		[a] author classes
 		[b] work genres
-		[c] author selections
-		[d] work selections
-		[e] passage selections
+		[c] author location
+		[d] work provenance
+		[e] author selections
+		[f] work selections
+		[g] passage selections
 
 	id numbers need to be attached to the selections so that they can be clicked-and-dragged to the trash by id
 	this needs to be a sequential list and so we do both selections and exclusions in one go to keep one unified 'selcount'
@@ -344,7 +350,8 @@ def sessionselectionsinfo(authordict, workdict):
 	selcount = -1
 	
 	sessionsearchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + \
-	                    session['psgselections'] + session['wkselections']
+	                    session['psgselections'] + session['wkselections'] + session['alocselections'] + \
+						session['wlocselections']
 	
 	for selectionorexclusion in ['selections', 'exclusions']:
 		thehtml = ''
@@ -378,8 +385,28 @@ def sessionselectionsinfo(authordict, workdict):
 				localval += 1
 				thehtml += '<span class="wkgn' + selectionorexclusion + '" id="searchselection_0' + str(selcount) + \
 				           '" listval="' + str(localval) + '">' + s + '</span><br />\n'
-		
-		# [c] authors
+
+		# [c] author location
+		if len(session['aloc' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Author location</span><br />'
+			localval = -1
+			for s in session['aloc' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				thehtml += '<span class="aloc' + selectionorexclusion + '" id="searchselection_0' + str(selcount) + \
+				           '" listval="' + str(localval) + '">' + s + '</span><br />\n'
+
+		# [d] work provenance
+		if len(session['wloc' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Work provenance</span><br />'
+			localval = -1
+			for s in session['wloc' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				thehtml += '<span class="wloc' + selectionorexclusion + '" id="searchselection_0' + str(selcount) + \
+				           '" listval="' + str(localval) + '">' + s + '</span><br />\n'
+
+		# [e] authors
 		if len(session['au' + selectionorexclusion]) > 0:
 			thehtml += '<span class="picklabel">Authors</span><br />'
 			localval = -1
@@ -391,7 +418,7 @@ def sessionselectionsinfo(authordict, workdict):
 					selcount) + '" listval="' + \
 				           str(localval) + '">' + ao.akaname + '</span><br />\n'
 		
-		# [d] works
+		# [f] works
 		if len(session['wk' + selectionorexclusion]) == 0 and selectionorexclusion == 'exclusions' and session[
 			'spuria'] == 'N':
 			thehtml += '<span class="picklabel">Works</span><br />'
@@ -412,7 +439,7 @@ def sessionselectionsinfo(authordict, workdict):
 					selcount) + '" listval="' \
 				           + str(localval) + '">' + ao.akaname + ', <span class="pickedwork">' + wk.title + '</span></span><br />'
 		
-		# [e] passages
+		# [g] passages
 		if len(session['psg' + selectionorexclusion]) > 0:
 			# none of this should be on right now
 			thehtml += '<span class="picklabel">Passages</span><br />'
