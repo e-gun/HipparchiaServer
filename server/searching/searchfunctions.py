@@ -21,11 +21,12 @@ def compileauthorandworklist(authordict, workdict):
 	:return:
 	"""
 	searchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + session[
-		'psgselections'] + session['wkselections']
+		'psgselections'] + session['wkselections'] + session['alocselections'] + session['wlocselections']
 	exclusionlist = session['auexclusions'] + session['wkexclusions'] + session['agnexclusions'] + session[
-		'wkgnexclusions'] + session['psgexclusions']
+		'wkgnexclusions'] + session['psgexclusions'] + session['alocexclusions'] + session['wlocexclusions']
 	
 	# trim by language
+	# this language specific code will need refactoring soon since we are up to 4 major corpora instead of 2
 	if session['corpora'] == 'G':
 		ad = prunedict(authordict, 'universalid', 'gr')
 		wd = prunedict(workdict, 'universalid', 'gr')
@@ -51,7 +52,18 @@ def compileauthorandworklist(authordict, workdict):
 			for w in ad[a].listofworks:
 				authorandworklist.append(w.universalid)
 		del authorlist
-		
+
+		for l in session['wlocselections']:
+			authorandworklist += foundindict(wd, 'provenance', l)
+
+		authorlist = []
+		for l in session['alocselections']:
+			authorlist = foundindict(ad, 'location', l)
+		for a in authorlist:
+			for w in ad[a].listofworks:
+				authorandworklist.append(w.universalid)
+		del authorlist
+
 		# a tricky spot: when/how to apply prunebydate()
 		# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
 		# accordingly we will do classes and genres first, then trim by date, then add in individual choices
@@ -109,6 +121,9 @@ def compileauthorandworklist(authordict, workdict):
 		
 		for g in session['agnexclusions']:
 			excludedauthors += foundindict(ad, 'genres', g)
+
+		for l in session['alocexclusions']:
+			excludedauthors += foundindict(ad, 'location', l)
 		
 		for a in session['auexclusions']:
 			excludedauthors.append(a)
@@ -122,6 +137,9 @@ def compileauthorandworklist(authordict, workdict):
 		
 		for g in session['wkgnexclusions']:
 			excludedworks += foundindict(wd, 'workgenre', g)
+
+		for l in session['wlocexclusions']:
+			excludedworks += foundindict(wd, 'provenance', l)
 		
 		excludedworks += session['wkexclusions']
 		excludedworks = list(set(excludedworks))

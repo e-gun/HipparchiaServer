@@ -5,12 +5,14 @@
 	License: GPL 3 (see LICENSE in the top level directory of the distribution)
 """
 
+
 import re
 from flask import session
 from server import hipparchia
 from server import formatting_helper_functions
 from server.dbsupport import citationfunctions
 from server.dbsupport.dbfunctions import loadallauthors
+
 
 def modifysessionvar(param,val):
 	"""
@@ -518,10 +520,12 @@ def rationalizeselections(newselectionuid, selectorexclude):
 	return
 
 
-# simple loaders called when HipparchiaServer launches
-# these lists will contained (more or less...) globally available lists
-# the main point is to avoid constant calls to the DB
-# for commonly used info
+"""
+simple loaders called when HipparchiaServer launches
+these lists will contain (more or less...) globally available values
+the main point is to avoid constant calls to the DB
+for commonly used info
+"""
 
 def buildauthordict(cursor):
 	"""

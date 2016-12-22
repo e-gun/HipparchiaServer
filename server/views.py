@@ -1193,12 +1193,12 @@ def selectionmade():
 
 	# you clicked #pickgenre or #excludegenre
 	try:
-		auloc = re.sub('[\W_]+', '', request.args.get('auloc', ''))
+		auloc = re.sub('[!@#$%^&*()=]+', '', request.args.get('auloc', ''))
 	except:
 		auloc = ''
 
 	try:
-		wkprov = re.sub('[\W_]+', '', request.args.get('wkprov', ''))
+		wkprov = re.sub('[!@#$%^&*()=]+', '', request.args.get('wkprov', ''))
 	except:
 		wkprov = ''
 
