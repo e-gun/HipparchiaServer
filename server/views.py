@@ -26,7 +26,8 @@ from server.textsandconcordnaces.textandconcordancehelperfunctions import tcpars
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, buildaugenreslist, buildworkgenreslist, \
-	buildauthorlocationlist, buildworkprovenancelist
+	buildauthorlocationlist, buildworkprovenancelist, justgreek, justlatin, justtlg, justpapyri, justinscriptions, \
+	reducetosessionselections
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
 	dropdupes, bcedating, sortauthorandworklists, prunedict, htmlifysearchfinds
 from server.browsing.browserfunctions import getandformatbrowsercontext
@@ -126,12 +127,12 @@ def executesearch():
 	
 	dmin, dmax = bcedating()
 	
-	if session['corpora'] == 'G' and re.search('[a-zA-Z]', seeking) is not None:
+	if justgreek() and re.search('[a-zA-Z]', seeking) is not None:
 		# searching greek, but not typing in unicode greek: autoconvert
 		seeking = seeking.upper()
 		seeking = replacegreekbetacode(seeking)
 	
-	if session['corpora'] == 'G' and re.search('[a-zA-Z]', proximate) is not None:
+	if justgreek() and re.search('[a-zA-Z]', proximate) is not None:
 		proximate = proximate.upper()
 		proximate = replacegreekbetacode(proximate)
 	
@@ -237,10 +238,13 @@ def executesearch():
 		output['thesearch'] = thesearch
 		output['htmlsearch'] = htmlsearch
 		output['hitmax'] = hitmax
-		output['lang'] = session['corpora']
 		output['sortby'] = session['sortorder']
 		output['dmin'] = dmin
 		output['dmax'] = dmax
+		if justlatin() == False:
+			output['icandodates'] = 'yes'
+		else:
+			output['icandodates'] = 'no'
 		poll[ts].deactivate()
 		
 	else:
@@ -255,10 +259,13 @@ def executesearch():
 		output['thesearch'] = ''
 		output['htmlsearch'] = ''
 		output['hitmax'] = 0
-		output['lang'] = session['corpora']
-		output['sortby'] = session['sortorder']
 		output['dmin'] = dmin
 		output['dmax'] = dmax
+		if justlatin() == False:
+			output['icandodates'] = 'yes'
+		else:
+			output['icandodates'] = 'no'
+		output['sortby'] = session['sortorder']
 	
 	output = json.dumps(output)
 	
@@ -498,12 +505,7 @@ def offerauthorhints():
 
 	strippedquery = re.sub(r'[!@#$|%()*\'\"]','',request.args.get('term', ''))
 
-	if session['corpora'] == 'G':
-		ad = prunedict(authordict, 'universalid', 'gr')
-	elif session['corpora'] == 'L':
-		ad = prunedict(authordict, 'universalid', 'lt')
-	else:
-		ad = authordict
+	ad = reducetosessionselections(authordict)
 
 	authorlist = []
 	for a in ad:
@@ -567,7 +569,7 @@ def augenrelist():
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
 	hint = []
-	if session['corpora'] != 'L':
+	if justlatin() == False:
 		if strippedquery != '':
 			query = strippedquery.lower()
 			qlen = len(query)
@@ -596,7 +598,7 @@ def wkgenrelist():
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
 	hint = []
-	if session['corpora'] != 'L':
+	if justlatin() == False:
 		if strippedquery != '':
 			query = strippedquery.lower()
 			qlen = len(query)
@@ -721,7 +723,7 @@ def workstructure():
 @hipparchia.route('/getsessionvariables')
 def getsessionvariables():
 	"""
-	a simple retch and report: JS wants to know what Python knows
+	a simple fetch and report: JS wants to know what Python knows
 	
 	:return:
 	"""
@@ -729,8 +731,10 @@ def getsessionvariables():
 	for k in session.keys():
 		if k != 'csrf_token':
 			returndict[k] = session[k]
+
+	# print('rd',returndict)
 	returndict = json.dumps(returndict)
-	
+
 	return returndict
 
 
@@ -1078,7 +1082,7 @@ def reverselexiconsearch():
 	
 	returnarray = []
 	seeking = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('word', ''))
-	if session['corpora'] == 'L':
+	if justlatin():
 		dict = 'latin'
 		translationlabel = 'hi'
 	else:

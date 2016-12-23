@@ -80,9 +80,10 @@ def modifysessionvar(param,val):
 
 	if param in availableoptions:
 		session[param] = val
+		print('param = val',param,session[param])
 
 	for corpus in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus']:
-		if corpus not in ['yes', 'no']:
+		if session[corpus] not in ['yes', 'no']:
 			session[corpus] = 'no'
 
 	# may need to kill off old selections from the 'other' language

@@ -286,7 +286,8 @@ def bcedating():
 
 def prunedict(originaldict, element, mustbein):
 	"""
-	trim a dict via a criterion
+	trim a dict via a criterion: mustbein must be in it to survive the check
+
 	:param originaldict:
 	:param criterion:
 	:param mustbe:
