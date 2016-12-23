@@ -719,6 +719,27 @@ def reducetosessionselections(listmapper, criterion):
 	return d
 
 
+def returnactivedbs():
+	"""
+
+	what dbs are currently active?
+	return a list of keys to a target dict
+
+	:return:
+	"""
+
+	keys = []
+	if session['latincorpus'] == 'yes':
+		keys.append('lt')
+	if session['greekcorpus'] == 'yes':
+		keys.append('gr')
+	if session['inscriptioncorpus'] == 'yes':
+		keys.append('in')
+	if session['papyruscorpus'] == 'yes':
+		keys.append('dp')
+
+	return keys
+
 """
 simple loaders called when HipparchiaServer launches
 these lists will contain (more or less...) globally available values
@@ -726,25 +747,38 @@ the main point is to avoid constant calls to the DB
 for commonly used info
 """
 
-def buildaugenreslist(authordict):
+def buildaugenresdict(authordict):
 	"""
-	load up the list of author genres: [ g1, g2, ...]
-	this will see heavy use throughout the world of 'views.py'
+	build lists of author genres: [ g1, g2, ...]
+
+	by corpus and tag it accourdingly
+
+
 	:param authordict:
 	:return:
 	"""
+
 	print('\tassigning genres')
-	authorgenreslist = []
-	
+
+	gklist = []
+	ltlist = []
+	inlist = []
+	dplist = []
+
+	genresdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
+
 	for a in authordict:
 		if authordict[a].genres is not None and authordict[a].genres != '':
-			authorgenreslist += authordict[a].genres.split(',')
-	
-	authorgenreslist = list(set(authorgenreslist))
-	authorgenreslist = [re.sub(r'^\s|\s$','',x) for x in authorgenreslist]
-	authorgenreslist.sort()
-	
-	return authorgenreslist
+			g = authordict[a].genres.split(',')
+			l = authordict[a].universalid[0:2]
+			genresdict[l] += g
+
+	for l in ['gr', 'lt', 'in', 'dp']:
+		genresdict[l] = list(set(genresdict[l]))
+		genresdict[l] = [re.sub(r'^\s|\s$','',x) for x in genresdict[l]]
+		genresdict[l].sort()
+
+	return genresdict
 	
 
 def buildworkgenreslist(workdict):

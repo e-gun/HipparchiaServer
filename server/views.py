@@ -25,8 +25,8 @@ from server.textsandconcordnaces.textandconcordancehelperfunctions import tcpars
 	concordancesorter
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
-	sessionvariables, sessionselectionsashtml, rationalizeselections, buildaugenreslist, buildworkgenreslist, \
-	buildauthorlocationlist, buildworkprovenancelist, justgreek, justlatin, reducetosessionselections
+	sessionvariables, sessionselectionsashtml, rationalizeselections, buildaugenresdict, buildworkgenreslist, \
+	buildauthorlocationlist, buildworkprovenancelist, justgreek, justlatin, reducetosessionselections, returnactivedbs
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
 	dropdupes, bcedating, sortauthorandworklists, prunedict, htmlifysearchfinds
 from server.browsing.browserfunctions import getandformatbrowsercontext
@@ -43,7 +43,7 @@ authordict = loadallauthorsasobjects()
 workdict = loadallworksasobjects()
 authordict = loadallworksintoallauthors(authordict, workdict)
 
-authorgenreslist = buildaugenreslist(authordict)
+authorgenresdict = buildaugenresdict(authordict)
 authorlocationlist = buildauthorlocationlist(authordict)
 workgenreslist = buildworkgenreslist(workdict)
 workprovenancelist = buildworkprovenancelist(workdict)
@@ -516,7 +516,11 @@ def cookieintosession():
 	# session.clear()
 	for key, value in cookiedict.items():
 		modifysessionvar(key, value)
-	
+
+	# TODO
+	# this will break: you need build a master list out of authorgenresdict = { 'gk': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
+	# same story with the works
+
 	modifysessionselections(cookiedict, authorgenreslist, workgenreslist)
 	
 	response = redirect(url_for('frontpage'))
@@ -597,11 +601,21 @@ def augenrelist():
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
 	hint = []
-	if justlatin() == False:
+
+	activedbs = returnactivedbs()
+	activegenres = []
+	for key in activedbs:
+		print('key',key)
+		activegenres += authorgenresdict[key]
+
+	print('activegenres',activegenres)
+	activegenres = list(set(activegenres))
+
+	if len(activegenres) > 0:
 		if strippedquery != '':
 			query = strippedquery.lower()
 			qlen = len(query)
-			for genre in authorgenreslist:
+			for genre in activegenres:
 				hintgenre = genre.lower()
 				if query == hintgenre[0:qlen]:
 					# jquery will gobble up label and value
@@ -609,7 +623,7 @@ def augenrelist():
 					# pass that to 'ui.item.OTHERTAG' to be evaluated
 					hint.append({'value': genre})
 	else:
-		hint = ['(genre unsupported on the Latin data)']
+		hint = ['(no author genre data available inside of your active database(s))']
 
 	hint = json.dumps(hint)
 
@@ -626,7 +640,7 @@ def wkgenrelist():
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
 	hint = []
-	if justlatin() == False:
+	if session['greekcorpus'] == 'yes':
 		if strippedquery != '':
 			query = strippedquery.lower()
 			qlen = len(query)
@@ -638,7 +652,7 @@ def wkgenrelist():
 					# pass that to 'ui.item.OTHERTAG' to be evaluated
 					hint.append({'value': genre})
 	else:
-		hint = ['(genre unsupported on the Latin data)']
+		hint = ['(no work genre data available inside of your active database(s))']
 
 	hint = json.dumps(hint)
 
@@ -659,12 +673,16 @@ def offeraulocationhints():
 
 	hint = []
 
-	if strippedquery != '':
-		query = strippedquery.lower()
-		qlen = len(query)
-		for location in authorlocationlist:
-			if query == location.lower()[0:qlen]:
-				hint.append({'value': location})
+	if justlatin() == False:
+		if strippedquery != '':
+			query = strippedquery.lower()
+			qlen = len(query)
+			for location in authorlocationlist:
+				if query == location.lower()[0:qlen]:
+					hint.append({'value': location})
+		else:
+			hint = ['(no work author location data available inside of your active database(s))']
+
 	hint = json.dumps(hint)
 	return hint
 
@@ -683,12 +701,16 @@ def offerprovenancehints():
 
 	hint = []
 
-	if strippedquery != '':
-		query = strippedquery.lower()
-		qlen = len(query)
-		for location in workprovenancelist:
-			if query == location.lower()[0:qlen]:
-				hint.append({'value': location})
+	if session['inscriptioncorpus'] == 'no' and session['papyruscorpus'] == 'no':
+		hint = ['(no provenance data available inside of your active database(s))']
+	else:
+		if strippedquery != '':
+			query = strippedquery.lower()
+			qlen = len(query)
+			for location in workprovenancelist:
+				if query == location.lower()[0:qlen]:
+					hint.append({'value': location})
+
 	hint = json.dumps(hint)
 	return hint
 
