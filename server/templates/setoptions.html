@@ -24,19 +24,22 @@
       <legend>Sort results by</legend>
         <select name="sortresults" id="sortresults">
             <option value="shortname">Name</option>
-            <option value="floruit">Floruit</option>
-            <option value="authgenre">Genre</option>
-            <option value="location">Geography</option>
+            <option value="converted_date">Author Date</option>
+            <option value="authgenre">Author Genre</option>
+            <option value="location">Author Location</option>
+            <option value="provenance">Work Provenance</option>
         </select>
     </fieldset>
       <fieldset>
-          <legend>Authors to search</legend>
-          <label for="greekcorpus">Greek
-          <input type="radio" name="whatlang" id="greekcorpus" value="G"></label><br />
-          <label for="latincorpus">Latin
-          <input type="radio" name="whatlang" id="latincorpus" value="L"></label>
-          <label for="bothcorpora">Both
-          <input type="radio" name="whatlang" id="bothcorpora" value="B"></label><br />
+          <legend>Coprora to search</legend>
+          Greek authors <input type="checkbox" name="greekcorpus" value="yes" checked="checked">
+          <br />
+          Latin authors <input type="checkbox" name="latincorpus" value="no" >
+          <br />
+          Inscriptions <input type="checkbox" name="inscriptionscorpus" value="yes" checked="checked">
+          <br />
+          Papyri <input type="checkbox" name="papyrusscorpus" value="no" >
+          <br />
       </fieldset>
         <br />
         <div id="savedprofiles">
