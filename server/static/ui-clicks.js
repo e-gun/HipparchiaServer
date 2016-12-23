@@ -53,12 +53,25 @@ function loadoptions() {
             $('#spuriaincluded').prop('checked', true);
             $('#spuriaexcluded').prop('checked', false);
             }
-        if (data.corpora == 'B') {
-            $('#bothcorpora').prop('checked', true);
-            } else if (data.corpora == 'G') {
+        if (data.greekcorpus == 'yes') {
             $('#greekcorpus').prop('checked', true);
             } else {
+            $('#greekcorpus').prop('checked', false);
+            }
+        if (data.latincorpus == 'yes') {
             $('#latincorpus').prop('checked', true);
+            } else {
+            $('#latincorpus').prop('checked', false);
+            }
+        if (data.inscriptioncorpus == 'yes') {
+            $('#inscriptioncorpus').prop('checked', true);
+            } else {
+            $('#inscriptioncorpus').prop('checked', false);
+            }
+        if (data.papyruscorpus == 'yes') {
+            $('#papyruscorpus').prop('checked', true);
+            } else {
+            $('#papyruscorpus').prop('checked', false);
             }
         });
 }
@@ -200,6 +213,7 @@ $('#spuriaincluded').click( function(){
         });
     $('#searchlistcontents').hide();
     });
+
 $('#spuriaexcluded').click( function(){
     setoptions('spuria', 'N');
     $.getJSON({ url: '/makeselection', async: false, success: function (selectiondata) { reloadselections(selectiondata); }
@@ -207,25 +221,46 @@ $('#spuriaexcluded').click( function(){
     $('#searchlistcontents').hide();
     });
 
-$('#bothcorpora').click( function(){
-    setoptions('corpora', 'B');
-    document.getElementById('authoroutputcontent').innerHTML = '<p class="label">Searching all Greek and Latin authors</p>';
-    });
-
-$('#greekcorpus').click( function(){
-    setoptions('corpora', 'G');
-    // because any latin items on your list just got purged
+$('#greekcorpus').change(function () {
+    if(this.checked) {
+        setoptions('greekcorpus', 'yes');
+    } else {
+        setoptions('greekcorpus', 'no');
+    }
+    // because some items on your list just got purged?
     $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
-    document.getElementById('authoroutputcontent').innerHTML = '<p class="label">Searching all Greek authors</p>';
+    // document.getElementById('authoroutputcontent').innerHTML = '<p class="label">Searching all Greek authors</p>';
     });
 
-$('#latincorpus').click( function(){
-    setoptions('corpora', 'L');
-     // because any greek items on your list just got purged
+$('#latincorpus').change(function () {
+    if(this.checked) {
+        setoptions('latincorpus', 'yes');
+    } else {
+        setoptions('latincorpus', 'no');
+    }
+    // because some items on your list just got purged?
     $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
-    document.getElementById('authoroutputcontent').innerHTML = '<p class="label">Searching all Latin authors</p>';
     });
 
+$('#inscriptionscorpus').change(function () {
+    if(this.checked) {
+        setoptions('inscriptioncorpus', 'yes');
+    } else {
+        setoptions('inscriptioncorpus', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    });
+
+$('#papyruscorpus').change(function () {
+    if(this.checked) {
+        setoptions('papyruscorpus', 'yes');
+    } else {
+        setoptions('papyruscorpus', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    });
 
 //
 // spinners
