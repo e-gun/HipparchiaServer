@@ -794,10 +794,10 @@ def buildworkgenresdict(workdict):
 
 	genresdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
 
-	for a in workdict:
-		if workdict[a].workgenre is not None and workdict[a].workgenre != '':
-			g = workdict[a].workgenre.split(',')
-			l = workdict[a].universalid[0:2]
+	for w in workdict:
+		if workdict[w].workgenre is not None and workdict[w].workgenre != '':
+			g = workdict[w].workgenre.split(',')
+			l = workdict[w].universalid[0:2]
 			genresdict[l] += g
 
 	for l in ['gr', 'lt', 'in', 'dp']:
@@ -840,7 +840,7 @@ def buildauthorlocationdict(authordict):
 	return locationdict
 
 
-def buildworkprovenancelist(workdict):
+def buildworkprovenancedict(workdict):
 	"""
 	load up the list of work provenances
 	used in offerprovenancehints()
@@ -849,14 +849,22 @@ def buildworkprovenancelist(workdict):
 	:return:
 	"""
 
-	locationlist = []
+	gklist = []
+	ltlist = []
+	inlist = []
+	dplist = []
+
+	locationdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
 
 	for w in workdict:
 		if workdict[w].provenance is not None and workdict[w].provenance != '':
-			locationlist.append(workdict[w].provenance)
+			loc = workdict[w].provenance.split(',')
+			l = workdict[w].universalid[0:2]
+			locationdict[l] += loc
 
-	locationlist = list(set(locationlist))
-	locationlist = [re.sub(r'^\s|\s$', '', x) for x in locationlist]
-	locationlist.sort()
+	for l in ['gr', 'lt', 'in', 'dp']:
+		locationdict[l] = list(set(locationdict[l]))
+		locationdict[l] = [re.sub(r'^\s|\s$','',x) for x in locationdict[l]]
+		locationdict[l].sort()
 
-	return locationlist
+	return locationdict

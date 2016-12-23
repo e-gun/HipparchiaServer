@@ -26,7 +26,7 @@ from server.textsandconcordnaces.textandconcordancehelperfunctions import tcpars
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, buildaugenresdict, buildworkgenresdict, \
-	buildauthorlocationdict, buildworkprovenancelist, justgreek, justlatin, reducetosessionselections, returnactivedbs
+	buildauthorlocationdict, buildworkprovenancedict, justgreek, justlatin, reducetosessionselections, returnactivedbs
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
 	dropdupes, bcedating, sortauthorandworklists, prunedict, htmlifysearchfinds
 from server.browsing.browserfunctions import getandformatbrowsercontext
@@ -46,7 +46,7 @@ authordict = loadallworksintoallauthors(authordict, workdict)
 authorgenresdict = buildaugenresdict(authordict)
 authorlocationdict = buildauthorlocationdict(authordict)
 workgenresdict = buildworkgenresdict(workdict)
-workprovenancelist = buildworkprovenancelist(workdict)
+workprovenancedict = buildworkprovenancedict(workdict)
 
 print('building specilized sublists')
 tlgauthors = prunedict(authordict, 'universalid', 'gr')
@@ -605,7 +605,6 @@ def augenrelist():
 	activedbs = returnactivedbs()
 	activegenres = []
 	for key in activedbs:
-		print('key',key)
 		activegenres += authorgenresdict[key]
 
 	activegenres = list(set(activegenres))
@@ -643,7 +642,6 @@ def wkgenrelist():
 	activedbs = returnactivedbs()
 	activegenres = []
 	for key in activedbs:
-		print('key',key)
 		activegenres += workgenresdict[key]
 
 	activegenres = list(set(activegenres))
@@ -660,7 +658,7 @@ def wkgenrelist():
 					# pass that to 'ui.item.OTHERTAG' to be evaluated
 					hint.append({'value': genre})
 	else:
-		hint = ['(no author genre data available inside of your active database(s))']
+		hint = ['(no work genre data available inside of your active database(s))']
 
 	hint = json.dumps(hint)
 
@@ -682,22 +680,22 @@ def offeraulocationhints():
 	hint = []
 
 	activedbs = returnactivedbs()
-	activeglocations = []
+	activelocations = []
 
 	for key in activedbs:
-		activeglocations += authorlocationdict[key]
+		activelocations += authorlocationdict[key]
 
-	activeglocations = list(set(activeglocations))
+	activelocations = list(set(activelocations))
 
-	if len(activeglocations) > 0:
+	if len(activelocations) > 0:
 		if strippedquery != '':
 			query = strippedquery.lower()
 			qlen = len(query)
-			for location in activeglocations:
+			for location in activelocations:
 				if query == location.lower()[0:qlen]:
 					hint.append({'value': location})
 		else:
-			hint = ['(no work author location data available inside of your active database(s))']
+			hint = ['(no author location data available inside of your active database(s))']
 
 	hint = json.dumps(hint)
 	return hint
@@ -717,15 +715,23 @@ def offerprovenancehints():
 
 	hint = []
 
-	if session['inscriptioncorpus'] == 'no' and session['papyruscorpus'] == 'no':
-		hint = ['(no provenance data available inside of your active database(s))']
-	else:
+	activedbs = returnactivedbs()
+	activelocations = []
+
+	for key in activedbs:
+		activelocations += workprovenancedict[key]
+
+	activelocations = list(set(activelocations))
+
+	if len(activelocations) > 0:
 		if strippedquery != '':
 			query = strippedquery.lower()
 			qlen = len(query)
-			for location in workprovenancelist:
+			for location in activelocations:
 				if query == location.lower()[0:qlen]:
 					hint.append({'value': location})
+		else:
+			hint = ['(no work provenance data available inside of your active database(s))']
 
 	hint = json.dumps(hint)
 	return hint
@@ -872,30 +878,6 @@ def getsearchlistcontents():
 	searchlistinfo = json.dumps(searchlistinfo)
 	
 	return searchlistinfo
-
-
-@hipparchia.route('/getgenrelistcontents')
-def getgenrelistcontents():
-	"""
-	return a basic list of what you can pick
-	:return:
-	"""
-
-	genrelists = ''
-	
-	genrelists += '<h3>Author Categories</h3>'
-	for g in authorgenreslist:
-		genrelists += g + ', '
-	genrelists = genrelists[:-2]
-	
-	genrelists += '<h3>Work Categories</h3>'
-	for g in workgenreslist:
-		genrelists += g + ', '
-	genrelists = genrelists[:-2]
-	
-	genrelists = json.dumps(genrelists)
-	
-	return genrelists
 
 
 @hipparchia.route('/browseto', methods=['GET'])
