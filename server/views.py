@@ -26,8 +26,7 @@ from server.textsandconcordnaces.textandconcordancehelperfunctions import tcpars
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, buildaugenreslist, buildworkgenreslist, \
-	buildauthorlocationlist, buildworkprovenancelist, justgreek, justlatin, justtlg, justpapyri, justinscriptions, \
-	reducetosessionselections
+	buildauthorlocationlist, buildworkprovenancelist, justgreek, justlatin, reducetosessionselections
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
 	dropdupes, bcedating, sortauthorandworklists, prunedict, htmlifysearchfinds
 from server.browsing.browserfunctions import getandformatbrowsercontext
@@ -38,15 +37,34 @@ from server.browsing.browserfunctions import getandformatbrowsercontext
 dbconnection = setconnection('autocommit')
 cursor = dbconnection.cursor()
 
-# ready some sets of objects that will be generally available: two seconds spent here will save you 2s over and over again later as you constantly regenerate author and work info
+# ready some sets of objects that will be generally available: a few seconds spent here will save you the same over and over again later as you constantly regenerate author and work info
 
 authordict = loadallauthorsasobjects()
 workdict = loadallworksasobjects()
 authordict = loadallworksintoallauthors(authordict, workdict)
+
 authorgenreslist = buildaugenreslist(authordict)
 authorlocationlist = buildauthorlocationlist(authordict)
 workgenreslist = buildworkgenreslist(workdict)
 workprovenancelist = buildworkprovenancelist(workdict)
+
+print('building specilized sublists')
+tlgauthors = prunedict(authordict, 'universalid', 'gr')
+tlgworks = prunedict(workdict, 'universalid', 'gr')
+latauthors = prunedict(authordict, 'universalid', 'lt')
+latworks = prunedict(workdict, 'universalid', 'lt')
+insauthors = prunedict(authordict, 'universalid', 'in')
+insworks = prunedict(workdict, 'universalid', 'in')
+ddpauthors = prunedict(authordict, 'universalid', 'dp')
+ddpworks = prunedict(workdict, 'universalid', 'dp')
+
+listmapper = {
+	'gr': {'a': tlgauthors, 'w': tlgworks},
+	'lt': {'a': latauthors, 'w': latworks},
+	'in': {'a': insauthors, 'w': insworks},
+	'dp': {'a': ddpauthors, 'w': ddpworks},
+}
+
 
 # empty dict in which to store progress polls
 # note that more than one poll can be running
@@ -140,7 +158,7 @@ def executesearch():
 	
 	poll[ts] = ProgressPoll(ts)
 	poll[ts].activate()
-	poll[ts].statusis('Compiling the list of works to search')
+	poll[ts].statusis('Preparing to search')
 	
 	linesofcontext = int(session['linesofcontext'])
 	searchtime = 0
@@ -150,11 +168,21 @@ def executesearch():
 		starttime = time.time()
 		poll[ts].statusis('Compiling the list of works to search')
 		
-		authorandworklist = compileauthorandworklist(authordict, workdict)
+		authorandworklist = compileauthorandworklist(listmapper)
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
+		poll[ts].statusis('Marking exclusions from the list of works to search')
 		authorandworklist = flagexclusions(authorandworklist)
+		poll[ts].statusis('Sorting the list of works to search')
 		authorandworklist = sortauthorandworklists(authorandworklist, authordict)
-		
+
+		# assemble a subset of authordict that will be relevant to our actual search
+		ad = {}
+		for a in authorandworklist:
+			try:
+				ad[a[0:6]]
+			except:
+				ad[a[0:6]] = authordict[a[0:6]]
+
 		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
 		# so we slap on an index value
 		indexedworklist = []
@@ -163,19 +191,19 @@ def executesearch():
 			index += 1
 			indexedworklist.append((index, w))
 		del authorandworklist
-		
+
 		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
 			searchtype = 'simple'
 			thesearch = seeking
 			htmlsearch = '<span class="emph">' + seeking + '</span>'
-			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, authordict, poll[ts])
+			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, ad, poll[ts])
 		elif re.search(phrasefinder, seeking) is not None:
 			searchtype = 'phrase'
 			thesearch = seeking
 			htmlsearch = '<span class="emph">' + seeking + '</span>'
 			terms = seeking.split(' ')
 			if len(max(terms, key=len)) > 3:
-				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authordict, poll[ts])
+				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, ad, poll[ts])
 			else:
 				# you are looking for a set of little words: και δη και, etc.
 				#   16s to find και δη και via a std phrase search; 1.6s to do it this way
@@ -186,7 +214,7 @@ def executesearch():
 				#   οἷον κἀν τοῖϲ (Searched between 850 B.C.E. and 200 B.C.E.)
 				#   5.57 std; 17.54s 'short'
 				# so '3' looks like the right answer
-				hits = dispatchshortphrasesearch(seeking, indexedworklist, authordict, poll[ts])
+				hits = dispatchshortphrasesearch(seeking, indexedworklist, ad, poll[ts])
 		else:
 			searchtype = 'proximity'
 			if session['searchscope'] == 'W':
@@ -201,11 +229,11 @@ def executesearch():
 			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
 			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
 			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
-			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authordict, poll[ts])
+			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, ad, poll[ts])
 		
 		poll[ts].statusis('Putting the results in context')
 
-		allfound = mpresultformatter(hits, authordict, workdict, seeking, proximate, searchtype, poll[ts])
+		allfound = mpresultformatter(hits, ad, workdict, seeking, proximate, searchtype, poll[ts])
 		
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
@@ -505,7 +533,7 @@ def offerauthorhints():
 
 	strippedquery = re.sub(r'[!@#$|%()*\'\"]','',request.args.get('term', ''))
 
-	ad = reducetosessionselections(authordict)
+	ad = reducetosessionselections(listmapper, 'a')
 
 	authorlist = []
 	for a in ad:
@@ -779,7 +807,7 @@ def getsearchlistcontents():
 	:return:
 	"""
 
-	authorandworklist = compileauthorandworklist(authordict, workdict)
+	authorandworklist = compileauthorandworklist(listmapper)
 	authorandworklist = sortauthorandworklists(authorandworklist, authordict)
 	
 	searchlistinfo = '<br /><h3>Proposing to search the following works:</h3>\n'
@@ -1264,7 +1292,8 @@ def selectionmade():
 
 	# get three bundles to put in the table cells
 	# stored in a dict with three keys: timeexclusions, selections, exclusions, numberofselections
-	
+	print('session',session)
+
 	htmlbundles = sessionselectionsashtml(authordict, workdict)
 	htmlbundles = json.dumps(htmlbundles)
 	
