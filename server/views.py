@@ -25,8 +25,9 @@ from server.textsandconcordnaces.textandconcordancehelperfunctions import tcpars
 	concordancesorter
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
-	sessionvariables, sessionselectionsashtml, rationalizeselections, buildaugenresdict, buildworkgenresdict, \
-	buildauthorlocationdict, buildworkprovenancedict, justgreek, justlatin, reducetosessionselections, returnactivedbs
+	sessionvariables, sessionselectionsashtml, rationalizeselections, justgreek, justlatin, reducetosessionselections, returnactivedbs
+from server.sessionhelpers.sessiondicts import buildaugenresdict, buildworkgenresdict, buildauthorlocationdict, \
+	buildworkprovenancedict
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
 	dropdupes, bcedating, sortauthorandworklists, prunedict, htmlifysearchfinds
 from server.browsing.browserfunctions import getandformatbrowsercontext
