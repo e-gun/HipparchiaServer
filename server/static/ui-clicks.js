@@ -242,7 +242,7 @@ $('#latincorpus').change(function () {
     $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
     });
 
-$('#inscriptionscorpus').change(function () {
+$('#inscriptioncorpus').change(function () {
     if(this.checked) {
         setoptions('inscriptioncorpus', 'yes');
     } else {
