@@ -294,7 +294,9 @@ def prunedict(originaldict, element, mustbein):
 	:return:
 	"""
 	newdict = {}
-	
+
+	mustbein = re.compile(mustbein)
+
 	for item in originaldict:
 		if re.search(mustbein, getattr(originaldict[item], element)) is not None:
 			newdict[item] = originaldict[item]
