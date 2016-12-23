@@ -121,7 +121,13 @@ class dbOpus(object):
 		cit = ', '.join(cit)
 		
 		return cit
-	
+
+	def earlier(self, other):
+		return float(self.converted_date) < other
+
+	def later(self, other):
+		return float(self.converted_date) > other
+
 			
 class dbWorkLine(object):
 	"""

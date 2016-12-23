@@ -67,7 +67,7 @@ def compileauthorandworklist(authordict, workdict):
 		# a tricky spot: when/how to apply prunebydate()
 		# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
 		# accordingly we will do classes and genres first, then trim by date, then add in individual choices
-		authorandworklist = prunebydate(authorandworklist, ad)
+		authorandworklist = prunebydate(authorandworklist, ad, wd)
 		
 		# now we look at things explicitly chosen:
 		# the passage checks are superfluous if rationalizeselections() got things right
@@ -106,7 +106,7 @@ def compileauthorandworklist(authordict, workdict):
 		authorandworklist = wd.keys()
 		
 		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
-			authorandworklist = prunebydate(authorandworklist, ad)
+			authorandworklist = prunebydate(authorandworklist, ad, wd)
 		
 		if session['spuria'] == 'N':
 			authorandworklist = removespuria(authorandworklist, wd)

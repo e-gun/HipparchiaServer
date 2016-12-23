@@ -388,6 +388,10 @@ worktitle {
 	text-align: center;
 }
 
+.assigneddate {
+    font-size: 85%;
+}
+
 .browsercite {
 	color: #556970;
 	font-weight: normal;

@@ -173,7 +173,7 @@ def aggregatelines(firstline, lastline, cursor, workdbname):
 	return aggregate
 
 
-def prunebydate(authorandworklist, authorobjectdict):
+def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 	"""
 	send me a list of authorsandworks and i will trim it via the session date limit variables
 	
@@ -182,8 +182,8 @@ def prunebydate(authorandworklist, authorobjectdict):
 	:return:
 	"""
 	trimmedlist = []
-	
-	if session['corpora']  == 'G' and (session['earliestdate'] != '-850' or session['latestdate'] != '1500'):
+
+	if session['corpora']  != 'L' and (session['earliestdate'] != '-850' or session['latestdate'] != '1500'):
 		min = int(session['earliestdate'])
 		max = int(session['latestdate'])
 		if min > max:
@@ -191,13 +191,23 @@ def prunebydate(authorandworklist, authorobjectdict):
 			session['earliestdate'] = session['latestdate']
 	
 		for aw in authorandworklist:
-			aid = aw[0:6]
-			if authorobjectdict[aid].earlier(min) or authorobjectdict[aid].later(max):
-				pass
-				# print('passing',aw ,authorobjectdict[aid].converted_date)
-			else:
-				trimmedlist.append(aw)
-				# print('append', aw, authorobjectdict[aid].converted_date)
+			w = workobjectdict[aw]
+			try:
+				# does the work have a date?
+				int(w.converted_date)
+				if w.earlier(min) or w.later(max):
+					pass
+				else:
+					trimmedlist.append(aw)
+			except:
+				# then we will look inside the author for the date
+				aid = aw[0:6]
+				if authorobjectdict[aid].earlier(min) or authorobjectdict[aid].later(max):
+					pass
+					# print('passing',aw ,authorobjectdict[aid].converted_date)
+				else:
+					trimmedlist.append(aw)
+					# print('append', aw, authorobjectdict[aid].converted_date)
 	else:
 		trimmedlist = authorandworklist
 

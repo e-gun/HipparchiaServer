@@ -310,11 +310,11 @@ def foundindict(dict, element, mustbein):
 	:param mustbein:
 	:return:
 	"""
-	
+
 	finds = []
 	for item in dict:
 		if getattr(dict[item], element) is not None:
-			if re.search(mustbein, getattr(dict[item], element)) is not None:
+			if re.search(re.escape(mustbein), getattr(dict[item], element)) is not None:
 				finds.append(dict[item].universalid)
 	
 	return finds
@@ -410,12 +410,13 @@ def insertcrossreferencerow(lineobject):
 	:return:
 	"""
 	linehtml = ''
-	
-	columna = ''
-	columnb = '<span class="crossreference">' + lineobject.annotations + '</span>'
-	
-	linehtml = '<tr class="browser"><td class="crossreference">' + columnb + '</td>'
-	linehtml += '<td class="crossreference">' + columna + '</td></tr>\n'
+
+	if re.search(r'documentnumber',lineobject.annotations) is None:
+		columna = ''
+		columnb = '<span class="crossreference">' + lineobject.annotations + '</span>'
+
+		linehtml = '<tr class="browser"><td class="crossreference">' + columnb + '</td>'
+		linehtml += '<td class="crossreference">' + columna + '</td></tr>\n'
 	
 	return linehtml
 

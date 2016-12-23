@@ -1182,7 +1182,7 @@ def selectionmade():
 		uid = ''
 	
 	try:
-		locus = re.sub('[!@#$%^&*()=]+', '', request.args.get('locus', ''))
+		locus = re.sub('[!@#$%^&*()=;]+', '', request.args.get('locus', ''))
 	except:
 		locus = ''
 	
@@ -1193,12 +1193,12 @@ def selectionmade():
 
 	# you clicked #pickgenre or #excludegenre
 	try:
-		auloc = re.sub('[!@#$%^&*()=]+', '', request.args.get('auloc', ''))
+		auloc = re.sub('[!@#$%^&*=;]+', '', request.args.get('auloc', ''))
 	except:
 		auloc = ''
 
 	try:
-		wkprov = re.sub('[!@#$%^&*()=]+', '', request.args.get('wkprov', ''))
+		wkprov = re.sub('[!@#$%^&*=;]+', '', request.args.get('wkprov', ''))
 	except:
 		wkprov = ''
 
@@ -1209,7 +1209,7 @@ def selectionmade():
 
 	try:
 		# need periods (for now): just remove some obvious problem cases
-		wkgenre = re.sub('[\[\]\'\\&\*\%\^_]+', '', request.args.get('wkgenre', ''))
+		wkgenre = re.sub('[\[\]\'\\&\*\%\^_;]+', '', request.args.get('wkgenre', ''))
 	except:
 		wkgenre = ''
 
