@@ -11,11 +11,10 @@ from server import hipparchia
 from server.dbsupport import citationfunctions
 from server.formatting_helper_functions import prunedict
 
-
 def sessionvariables():
 
 	try:
-		session['corpora']
+		session['greekcorpus']
 	except:
 		# print('resetting session variables')
 		session['auselections'] = []
@@ -80,7 +79,7 @@ def modifysessionvar(param,val):
 
 	if param in availableoptions:
 		session[param] = val
-		print('param = val',param,session[param])
+		# print('param = val:',param,session[param])
 
 	for corpus in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus']:
 		if session[corpus] not in ['yes', 'no']:
@@ -465,6 +464,9 @@ def rationalizeselections(newselectionuid, selectorexclude):
 	etc
 	
 	selectorexclude should be either 'selections' or 'exclusions'
+
+	TODO: locations are not in here yet
+
 	"""
 	
 	suffix = selectorexclude
@@ -638,59 +640,81 @@ def justdoc():
 		return False
 
 
-def reducetosessionselections(startdict):
+def reducetosessionselections(listmapper, criterion):
 	"""
 
 	drop the full universe of possibilities and include only those that meet the active session criteria
 
-	:param authordict:
-	:return:
+	listmapper = {
+		'gr': {'a': tlgauthors, 'w': tlgworks},
+		'lt': {'a': latauthors, 'w': latworks},
+		'in': {'a': insauthors, 'w': insworks},
+		'dp': {'a': ddpauthors, 'w': ddpworks},
+	}
+
+	criterion: 'a' or 'w'
+
+	:param:
+	:return: a relevant dictionary
 	"""
 
+	print('corpora flags (l,g,i,p)',session['latincorpus'], session['greekcorpus'], session['inscriptioncorpus'], session['papyruscorpus'])
+
 	if justtlg():
-		d = prunedict(startdict, 'universalid', 'gr')
+		d = listmapper['gr'][criterion]
 	elif justlatin():
-		d = prunedict(startdict, 'universalid', 'lt')
+		d = listmapper['lt'][criterion]
 	elif justpapyri():
-		d = prunedict(startdict, 'universalid', 'dp')
+		d = listmapper['dp'][criterion]
 	elif justinscriptions():
-		d = prunedict(startdict, 'universalid', 'in')
+		print('justinscriptions()')
+		d = listmapper['in'][criterion]
+		print('len(d)',len(d))
 	elif justlit():
-		x = prunedict(startdict, 'universalid', 'lt')
-		y = prunedict(startdict, 'universalid', 'gr')
+		x = listmapper['gr'][criterion]
+		y = listmapper['lt'][criterion]
 		# http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression#26853961
 		d = {**x, **y}
 	elif justdoc():
-		x = prunedict(startdict, 'universalid', 'dp')
-		y = prunedict(startdict, 'universalid', 'in')
+		x = listmapper['dp'][criterion]
+		y = listmapper['in'][criterion]
+		d = {**x, **y}
+	elif session['latincorpus'] == 'no' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'yes' and \
+			 session['papyruscorpus'] == 'no':
+		x = listmapper['gr'][criterion]
+		y = listmapper['in'][criterion]
 		d = {**x, **y}
 	# and now for the other combinations which are a bit less likely
 	elif session['latincorpus'] == 'yes' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'yes' and \
 					session['papyruscorpus'] == 'no':
-		x = prunedict(startdict, 'universalid', 'lt')
-		y = prunedict(startdict, 'universalid', 'gr')
-		z = prunedict(startdict, 'universalid', 'in')
+		x = listmapper['lt'][criterion]
+		y = listmapper['gr'][criterion]
+		z = listmapper['in'][criterion]
 		d = {**x, **y, **z}
 	elif session['latincorpus'] == 'yes' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'no' and \
 					session['papyruscorpus'] == 'yes':
-		x = prunedict(startdict, 'universalid', 'lt')
-		y = prunedict(startdict, 'universalid', 'gr')
-		z = prunedict(startdict, 'universalid', 'dp')
+		x = listmapper['lt'][criterion]
+		y = listmapper['gr'][criterion]
+		z = listmapper['dp'][criterion]
 		d = {**x, **y, **z}
 	elif session['latincorpus'] == 'yes' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'yes' and \
 					session['papyruscorpus'] == 'yes':
-		x = prunedict(startdict, 'universalid', 'lt')
-		y = prunedict(startdict, 'universalid', 'in')
-		z = prunedict(startdict, 'universalid', 'dp')
+		x = listmapper['lt'][criterion]
+		y = listmapper['in'][criterion]
+		z = listmapper['dp'][criterion]
 		d = {**x, **y, **z}
 	elif session['latincorpus'] == 'no' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'yes' and \
 					session['papyruscorpus'] == 'yes':
-		x = prunedict(startdict, 'universalid', 'gr')
-		y = prunedict(startdict, 'universalid', 'in')
-		z = prunedict(startdict, 'universalid', 'dp')
+		x = listmapper['gr'][criterion]
+		y = listmapper['in'][criterion]
+		z = listmapper['dp'][criterion]
 		d = {**x, **y, **z}
 	else:
-		d = startdict
+		w = listmapper['lt'][criterion]
+		x = listmapper['gr'][criterion]
+		y = listmapper['in'][criterion]
+		z = listmapper['dp'][criterion]
+		d = {**x, **y, **z}
 
 	return d
 
