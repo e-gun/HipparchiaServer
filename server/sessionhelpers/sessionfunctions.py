@@ -779,24 +779,33 @@ def buildaugenresdict(authordict):
 	return genresdict
 	
 
-def buildworkgenreslist(workdict):
+def buildworkgenresdict(workdict):
 	"""
 	load up the list of work genres: [ g1, g2, ...]
 	this will see heavy use throughout the world of 'views.py'
 	:param authordict:
 	:return:
 	"""
-	workgenreslist = []
-	
-	for w in workdict:
-		if workdict[w].workgenre is not None and workdict[w].workgenre != '':
-			workgenreslist.append(workdict[w].workgenre)
 
-	workgenreslist = list(set(workgenreslist))
-	workgenreslist = [re.sub(r'^\s|\s$', '', x) for x in workgenreslist]
-	workgenreslist.sort()
-	
-	return workgenreslist
+	gklist = []
+	ltlist = []
+	inlist = []
+	dplist = []
+
+	genresdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
+
+	for a in workdict:
+		if workdict[a].workgenre is not None and workdict[a].workgenre != '':
+			g = workdict[a].workgenre.split(',')
+			l = workdict[a].universalid[0:2]
+			genresdict[l] += g
+
+	for l in ['gr', 'lt', 'in', 'dp']:
+		genresdict[l] = list(set(genresdict[l]))
+		genresdict[l] = [re.sub(r'^\s|\s$','',x) for x in genresdict[l]]
+		genresdict[l].sort()
+
+	return genresdict
 
 
 def buildauthorlocationdict(authordict):

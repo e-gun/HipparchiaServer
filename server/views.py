@@ -25,7 +25,7 @@ from server.textsandconcordnaces.textandconcordancehelperfunctions import tcpars
 	concordancesorter
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
-	sessionvariables, sessionselectionsashtml, rationalizeselections, buildaugenresdict, buildworkgenreslist, \
+	sessionvariables, sessionselectionsashtml, rationalizeselections, buildaugenresdict, buildworkgenresdict, \
 	buildauthorlocationdict, buildworkprovenancelist, justgreek, justlatin, reducetosessionselections, returnactivedbs
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
 	dropdupes, bcedating, sortauthorandworklists, prunedict, htmlifysearchfinds
@@ -45,7 +45,7 @@ authordict = loadallworksintoallauthors(authordict, workdict)
 
 authorgenresdict = buildaugenresdict(authordict)
 authorlocationdict = buildauthorlocationdict(authordict)
-workgenreslist = buildworkgenreslist(workdict)
+workgenresdict = buildworkgenresdict(workdict)
 workprovenancelist = buildworkprovenancelist(workdict)
 
 print('building specilized sublists')
@@ -608,7 +608,6 @@ def augenrelist():
 		print('key',key)
 		activegenres += authorgenresdict[key]
 
-	print('activegenres',activegenres)
 	activegenres = list(set(activegenres))
 
 	if len(activegenres) > 0:
@@ -640,11 +639,20 @@ def wkgenrelist():
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
 	hint = []
-	if session['greekcorpus'] == 'yes':
+
+	activedbs = returnactivedbs()
+	activegenres = []
+	for key in activedbs:
+		print('key',key)
+		activegenres += workgenresdict[key]
+
+	activegenres = list(set(activegenres))
+
+	if len(activegenres) > 0:
 		if strippedquery != '':
 			query = strippedquery.lower()
 			qlen = len(query)
-			for genre in workgenreslist:
+			for genre in activegenres:
 				hintgenre = genre.lower()
 				if query == hintgenre[0:qlen]:
 					# jquery will gobble up label and value
@@ -652,7 +660,7 @@ def wkgenrelist():
 					# pass that to 'ui.item.OTHERTAG' to be evaluated
 					hint.append({'value': genre})
 	else:
-		hint = ['(no work genre data available inside of your active database(s))']
+		hint = ['(no author genre data available inside of your active database(s))']
 
 	hint = json.dumps(hint)
 
