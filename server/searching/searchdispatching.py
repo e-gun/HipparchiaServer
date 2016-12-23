@@ -21,10 +21,6 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	:param indexedauthorandworklist:
 	:return:
 	"""
-	
-	activepoll.allworkis(len(indexedauthorandworklist))
-	activepoll.remain(len(indexedauthorandworklist))
-	activepoll.sethits(0)
 
 	activepoll.statusis('Preparing to dispatch the search...')
 	# several seconds might elapse before you actually execute: loading the full authordict into the manager is a killer
@@ -41,7 +37,11 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	commitcount = MPCounter()
 	
 	workers = hipparchia.config['WORKERS']
-	
+
+	activepoll.allworkis(len(indexedauthorandworklist))
+	activepoll.remain(len(indexedauthorandworklist))
+	activepoll.sethits(0)
+
 	# a class and/or decorator would be nice, but you have a lot of trouble getting the (mp aware) args into the function
 	# the must be a way, but this also works
 	if searchtype == 'simple':

@@ -37,7 +37,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors, ac
 			activepoll.remain(len(searching))
 		except: i = (-1,'gr0000w000')
 		commitcount.increment()
-		if commitcount.value % 600 == 0:
+		if commitcount.value % 500 == 0:
 			dbconnection.commit()
 		wkid = i[1]
 		index = i[0]
@@ -87,7 +87,7 @@ def workonphrasesearch(hits, seeking, searching, commitcount, authors, activepol
 			activepoll.remain(len(searching))
 		except: i = (-1,'gr0001w001')
 		commitcount.increment()
-		if commitcount.value % 600 == 0:
+		if commitcount.value % 500 == 0:
 			dbconnection.commit()
 		wkid = i[1]
 		index = i[0]
@@ -131,7 +131,7 @@ def workonproximitysearch(count, hits, seeking, proximate, searching, commitcoun
 			activepoll.remain(len(searching))
 		except: i = (-1,'gr0001w001')
 		commitcount.increment()
-		if commitcount.value % 600 == 0:
+		if commitcount.value % 500 == 0:
 			dbconnection.commit()
 		wkid = i[1]
 		index = i[0]
