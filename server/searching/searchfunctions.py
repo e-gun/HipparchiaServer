@@ -12,97 +12,138 @@ from flask import session
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
 from server.formatting_helper_functions import tidyuplist, dropdupes, prunedict, foundindict
 from server.searching.searchformatting import cleansearchterm, prunebydate, removespuria
+from server.sessionhelpers.sessionfunctions import reducetosessionselections
 
 
-def compileauthorandworklist(authordict, workdict):
+def compileauthorandworklist(listmapper):
 	"""
 	master author dict + session selctions into a list of dbs to search
 	:param authors:
 	:return:
 	"""
+	print('session', session)
+
 	searchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + session[
 		'psgselections'] + session['wkselections'] + session['alocselections'] + session['wlocselections']
 	exclusionlist = session['auexclusions'] + session['wkexclusions'] + session['agnexclusions'] + session[
 		'wkgnexclusions'] + session['psgexclusions'] + session['alocexclusions'] + session['wlocexclusions']
-	
-	# trim by language
-	# this language specific code will need refactoring soon since we are up to 4 major corpora instead of 2
-	if session['corpora'] == 'G':
-		ad = prunedict(authordict, 'universalid', 'gr')
-		wd = prunedict(workdict, 'universalid', 'gr')
-	elif session['corpora'] == 'L':
-		ad = prunedict(authordict, 'universalid', 'lt')
-		wd = prunedict(workdict, 'universalid', 'lt')
-	else:
-		ad = authordict
-		wd = workdict
-	
+
+	print('searchlist',searchlist)
+	print('len(searchlist)', len(searchlist))
+
+	# trim by active corpora
+	ad = reducetosessionselections(listmapper, 'a')
+	wd = reducetosessionselections(listmapper, 'w')
+
+	authorandworklist = []
+
 	# build the inclusion list
 	if len(searchlist) > 0:
-		# build lists up from specific items (passages) to more general classes (works, then authors)
-		
-		authorandworklist = []
-		for g in session['wkgnselections']:
-			authorandworklist += foundindict(wd, 'workgenre', g)
-		
-		authorlist = []
-		for g in session['agnselections']:
-			authorlist = foundindict(ad, 'genres', g)
-		for a in authorlist:
-			for w in ad[a].listofworks:
-				authorandworklist.append(w.universalid)
-		del authorlist
+		if len(session['agnselections'] + session['wkgnselections'] + session['alocselections'] + session['wlocselections']) == 0:
+			# you have only asked for specific passages and there are no genre constraints
+			# 	eg: just Aeschylus + Aristophanes, Frogs
+			# for the sake of speed we will handle this separately from the more complex case
+			# the code at the end of the 'else' section ought to match the code that follows
+			# the passage checks are superfluous if rationalizeselections() got things right
 
-		for l in session['wlocselections']:
-			authorandworklist += foundindict(wd, 'provenance', l)
+			passages = session['psgselections']
+			works = session['wkselections']
+			works = tidyuplist(works)
+			works = dropdupes(works, passages)
 
-		authorlist = []
-		for l in session['alocselections']:
-			authorlist = foundindict(ad, 'location', l)
-		for a in authorlist:
-			for w in ad[a].listofworks:
-				authorandworklist.append(w.universalid)
-		del authorlist
+			for w in works:
+				authorandworklist.append(w)
 
-		# a tricky spot: when/how to apply prunebydate()
-		# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
-		# accordingly we will do classes and genres first, then trim by date, then add in individual choices
-		authorandworklist = prunebydate(authorandworklist, ad, wd)
-		
-		# now we look at things explicitly chosen:
-		# the passage checks are superfluous if rationalizeselections() got things right
-		
-		passages = session['psgselections']
-		works = session['wkselections']
-		works = tidyuplist(works)
-		works = dropdupes(works, passages)
-		
-		for w in works:
-			authorandworklist.append(w)
-		
-		authors = []
-		for a in session['auselections']:
-			authors.append(a)
-		
-		tocheck = works + passages
-		authors = dropdupes(authors, tocheck)
-		for a in authors:
-			for w in ad[a].listofworks:
-				authorandworklist.append(w.universalid)
-		del authors
-		del works
-		
-		if len(session['psgselections']) > 0:
-			authorandworklist = dropdupes(authorandworklist, session['psgselections'])
-			authorandworklist = session['psgselections'] + authorandworklist
-		
-		authorandworklist = list(set(authorandworklist))
-		
-		if session['spuria'] == 'N':
-			authorandworklist = removespuria(authorandworklist, wd)
+			authors = []
+			for a in session['auselections']:
+				authors.append(a)
+
+			tocheck = works + passages
+			authors = dropdupes(authors, tocheck)
+			for a in authors:
+				for w in ad[a].listofworks:
+					authorandworklist.append(w.universalid)
+			del authors
+			del works
+
+			if len(session['psgselections']) > 0:
+				authorandworklist = dropdupes(authorandworklist, session['psgselections'])
+				authorandworklist = session['psgselections'] + authorandworklist
+
+			authorandworklist = list(set(authorandworklist))
+
+			if session['spuria'] == 'N':
+				authorandworklist = removespuria(authorandworklist, wd)
+		else:
+			print('there are constraints')
+			# build lists up from specific items (passages) to more general classes (works, then authors)
+
+			authorandworklist = []
+			for g in session['wkgnselections']:
+				authorandworklist += foundindict(wd, 'workgenre', g)
+
+			authorlist = []
+			for g in session['agnselections']:
+				authorlist = foundindict(ad, 'genres', g)
+			for a in authorlist:
+				for w in ad[a].listofworks:
+					authorandworklist.append(w.universalid)
+			del authorlist
+
+			for l in session['wlocselections']:
+				authorandworklist += foundindict(wd, 'provenance', l)
+
+			authorlist = []
+			for l in session['alocselections']:
+				authorlist = foundindict(ad, 'location', l)
+			for a in authorlist:
+				for w in ad[a].listofworks:
+					authorandworklist.append(w.universalid)
+			del authorlist
+
+			# a tricky spot: when/how to apply prunebydate()
+			# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
+			# accordingly we will do classes and genres first, then trim by date, then add in individual choices
+			authorandworklist = prunebydate(authorandworklist, ad, wd)
+
+			# now we look at things explicitly chosen:
+			# the passage checks are superfluous if rationalizeselections() got things right
+
+			passages = session['psgselections']
+			works = session['wkselections']
+			works = tidyuplist(works)
+			works = dropdupes(works, passages)
+
+			for w in works:
+				authorandworklist.append(w)
+
+			authors = []
+			for a in session['auselections']:
+				authors.append(a)
+
+			tocheck = works + passages
+			authors = dropdupes(authors, tocheck)
+			for a in authors:
+				for w in ad[a].listofworks:
+					authorandworklist.append(w.universalid)
+			del authors
+			del works
+
+			if len(session['psgselections']) > 0:
+				authorandworklist = dropdupes(authorandworklist, session['psgselections'])
+				authorandworklist = session['psgselections'] + authorandworklist
+
+			authorandworklist = list(set(authorandworklist))
+
+			if session['spuria'] == 'N':
+				authorandworklist = removespuria(authorandworklist, wd)
 	
 	else:
 		# you picked nothing and want everything. well, maybe everything...
+
+		# trim by active corpora
+		wd = reducetosessionselections(listmapper, 'w')
+
 		authorandworklist = wd.keys()
 		
 		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
@@ -148,7 +189,8 @@ def compileauthorandworklist(authordict, workdict):
 	
 	del ad
 	del wd
-	
+
+	print('compiled a list with N items:',len(authorandworklist))
 	return authorandworklist
 
 
