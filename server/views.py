@@ -26,7 +26,7 @@ from server.textsandconcordnaces.textandconcordancehelperfunctions import tcpars
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, buildaugenresdict, buildworkgenreslist, \
-	buildauthorlocationlist, buildworkprovenancelist, justgreek, justlatin, reducetosessionselections, returnactivedbs
+	buildauthorlocationdict, buildworkprovenancelist, justgreek, justlatin, reducetosessionselections, returnactivedbs
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
 	dropdupes, bcedating, sortauthorandworklists, prunedict, htmlifysearchfinds
 from server.browsing.browserfunctions import getandformatbrowsercontext
@@ -44,7 +44,7 @@ workdict = loadallworksasobjects()
 authordict = loadallworksintoallauthors(authordict, workdict)
 
 authorgenresdict = buildaugenresdict(authordict)
-authorlocationlist = buildauthorlocationlist(authordict)
+authorlocationdict = buildauthorlocationdict(authordict)
 workgenreslist = buildworkgenreslist(workdict)
 workprovenancelist = buildworkprovenancelist(workdict)
 
@@ -673,11 +673,19 @@ def offeraulocationhints():
 
 	hint = []
 
-	if justlatin() == False:
+	activedbs = returnactivedbs()
+	activeglocations = []
+
+	for key in activedbs:
+		activeglocations += authorlocationdict[key]
+
+	activeglocations = list(set(activeglocations))
+
+	if len(activeglocations) > 0:
 		if strippedquery != '':
 			query = strippedquery.lower()
 			qlen = len(query)
-			for location in authorlocationlist:
+			for location in activeglocations:
 				if query == location.lower()[0:qlen]:
 					hint.append({'value': location})
 		else:

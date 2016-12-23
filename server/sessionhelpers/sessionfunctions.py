@@ -751,14 +751,12 @@ def buildaugenresdict(authordict):
 	"""
 	build lists of author genres: [ g1, g2, ...]
 
-	by corpus and tag it accourdingly
+	do this by corpus and tag it accordingly
 
 
 	:param authordict:
 	:return:
 	"""
-
-	print('\tassigning genres')
 
 	gklist = []
 	ltlist = []
@@ -801,26 +799,36 @@ def buildworkgenreslist(workdict):
 	return workgenreslist
 
 
-def buildauthorlocationlist(authordict):
+def buildauthorlocationdict(authordict):
 	"""
-	load up the list of author locations
-	used in offeraulocationhints()
+	build lists of author locations: [ g1, g2, ...]
+
+	do this by corpus and tag it accordingly
+
 
 	:param authordict:
 	:return:
 	"""
-	print('\tassigning locations')
-	locationlist = []
+
+	gklist = []
+	ltlist = []
+	inlist = []
+	dplist = []
+
+	locationdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
 
 	for a in authordict:
 		if authordict[a].location is not None and authordict[a].location != '':
-			locationlist += authordict[a].location.split(',')
+			loc = authordict[a].location.split(',')
+			l = authordict[a].universalid[0:2]
+			locationdict[l] += loc
 
-	locationlist = list(set(locationlist))
-	locationlist = [re.sub(r'^\s|\s$', '', x) for x in locationlist]
-	locationlist.sort()
+	for l in ['gr', 'lt', 'in', 'dp']:
+		locationdict[l] = list(set(locationdict[l]))
+		locationdict[l] = [re.sub(r'^\s|\s$','',x) for x in locationdict[l]]
+		locationdict[l].sort()
 
-	return locationlist
+	return locationdict
 
 
 def buildworkprovenancelist(workdict):
