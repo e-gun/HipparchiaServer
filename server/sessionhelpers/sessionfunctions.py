@@ -11,6 +11,47 @@ from server import hipparchia
 from server.dbsupport import citationfunctions
 from server.formatting_helper_functions import prunedict
 
+
+def sessionvariables():
+
+	try:
+		session['corpora']
+	except:
+		# print('resetting session variables')
+		session['auselections'] = []
+		session['wkselections'] = []
+		session['agnselections'] = []
+		session['wkgnselections'] = []
+		session['psgselections'] = []
+		session['auexclusions'] = []
+		session['wkexclusions'] = []
+		session['agnexclusions'] = []
+		session['wkgnexclusions'] = []
+		session['psgexclusions'] = []
+		session['alocselections'] = []
+		session['alocexclusions'] = []
+		session['wlocselections'] = []
+		session['wlocexclusions'] = []
+		session['greekcorpus'] = hipparchia.config['DEFAULTGREEKCORPUSVALUE']
+		session['latincorpus'] = hipparchia.config['DEFAULTLATINCORPUSVALUE']
+		session['inscriptioncorpus'] = hipparchia.config['DEFAULTINSCRIPTIONCORPUSVALUE']
+		session['papyruscorpus'] = hipparchia.config['DEFAULTPAPYRUSCORPUSVALUE']
+		session['accentsmatter'] = 'N'
+		session['proximity'] = '1'
+		session['nearornot'] = 'T'
+		session['searchscope'] = 'L'
+		session['linesofcontext'] = 4
+		session['browsercontext'] = '25'
+		session['maxresults'] = '200'
+		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
+		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
+		session['latestdate'] = hipparchia.config['DEFAULTLATESTDATE']
+		session['xmission'] = 'Any'
+		session['spuria'] = 'Y'
+
+	return
+
+
 def modifysessionvar(param,val):
 	"""
 	set session varaibles after checking them for validity
@@ -31,12 +72,22 @@ def modifysessionvar(param,val):
 		'earliestdate',
 		'latestdate',
 		'spuria',
-		'corpora']
+		'greekcorpus',
+		'latincorpus',
+		'inscriptioncorpus',
+		'papyruscorpus'
+		]
 
-	# note that 'selections' remains unhandled
-	
-	# need to kill off old selections from the 'other' language
-	if param == 'corpora' and val != 'B':
+	if param in availableoptions:
+		session[param] = val
+
+	for corpus in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus']:
+		if corpus not in ['yes', 'no']:
+			session[corpus] = 'no'
+
+	# may need to kill off old selections from the 'other' language
+	# do this after sorting out corpus shifts
+	if justlatin():
 		session['auselections'] = []
 		session['wkselections'] = []
 		session['agnselections'] = []
@@ -48,12 +99,6 @@ def modifysessionvar(param,val):
 		session['wkgnexclusions'] = []
 		session['psgexclusions'] = []
 
-	if param in availableoptions:
-		session[param] = val
-
-	if session['corpora'] not in ['B', 'L', 'G']:
-		session['corpora'] = 'B'
-		
 	if session['nearornot'] not in ['T', 'F']:
 		session['nearornot'] = 'T'
 	
@@ -67,10 +112,13 @@ def modifysessionvar(param,val):
 
 	if session['accentsmatter'] not in ['Y','N']:
 		session['accentsmatter'] = 'N'
+
 	if int(session['proximity']) > 10:
 		session['proximity'] = '9'
+
 	if int(session['linesofcontext']) > 20:
 		session['linesofcontext'] = '20'
+
 	try:
 		# if you edit the box you can easily generate a null which will turn into an error
 		if int(session['earliestdate']) < -850 or int(session['earliestdate']) > 1500:
@@ -88,13 +136,15 @@ def modifysessionvar(param,val):
 	# 	session['earliestdate'] = session['latestdate']
 	if int(session['maxresults']) < 1:
 		session['maxresults'] = '1'
+
 	if session['sortorder'] not in ['shortname','genres', 'converted_date', 'location']:
 		session['sortorder'] = 'shortname'
+
 	if session['searchscope'] not in ['L','W']:
 		session['searchscope'] = 'L'
+
 	if int(session['browsercontext']) < 5 or int(session['browsercontext']) > 100:
 		session['browsercontext'] = '20'
-
 
 	# print('set',param,'to',session[param])
 	session.modified = True
@@ -202,46 +252,6 @@ def parsejscookie(cookiestring):
 	optiondict.update(selectiondictionary)
 	
 	return optiondict
-
-
-def sessionvariables():
-
-	try:
-		session['corpora']
-	except:
-		# print('resetting session variables')
-		session['auselections'] = []
-		session['wkselections'] = []
-		session['agnselections'] = []
-		session['wkgnselections'] = []
-		session['psgselections'] = []
-		session['auexclusions'] = []
-		session['wkexclusions'] = []
-		session['agnexclusions'] = []
-		session['wkgnexclusions'] = []
-		session['psgexclusions'] = []
-		session['alocselections'] = []
-		session['alocexclusions'] = []
-		session['wlocselections'] = []
-		session['wlocexclusions'] = []
-		session['greekcorpus'] = hipparchia.config['DEFAULTGREEKCORPUSVALUE']
-		session['latincorpus'] = hipparchia.config['DEFAULTLATINCORPUSVALUE']
-		session['inscriptioncorpus'] = hipparchia.config['DEFAULTINSCRIPTIONCORPUSVALUE']
-		session['papyruscorpus'] = hipparchia.config['DEFAULTPAPYRUSCORPUSVALUE']
-		session['accentsmatter'] = 'N'
-		session['proximity'] = '1'
-		session['nearornot'] = 'T'
-		session['searchscope'] = 'L'
-		session['linesofcontext'] = 4
-		session['browsercontext'] = '25'
-		session['maxresults'] = '200'
-		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
-		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
-		session['latestdate'] = hipparchia.config['DEFAULTLATESTDATE']
-		session['xmission'] = 'Any'
-		session['spuria'] = 'Y'
-
-	return
 
 
 def sessionselectionsashtml(authordict, workdict):
