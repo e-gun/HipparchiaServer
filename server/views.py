@@ -12,7 +12,7 @@ from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
 from server.hipparchiaclasses import ProgressPoll
-from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork
+from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
@@ -25,8 +25,8 @@ from server.textsandconcordnaces.textandconcordancehelperfunctions import tcpars
 	concordancesorter
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
-	sessionvariables, sessionselectionsashtml, rationalizeselections, buildauthordict, buildworkdict, \
-	buildaugenreslist, buildworkgenreslist, buildauthorlocationlist, buildworkprovenancelist
+	sessionvariables, sessionselectionsashtml, rationalizeselections, buildaugenreslist, buildworkgenreslist, \
+	buildauthorlocationlist, buildworkprovenancelist
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
 	dropdupes, bcedating, sortauthorandworklists, prunedict, htmlifysearchfinds
 from server.browsing.browserfunctions import getandformatbrowsercontext
@@ -39,9 +39,9 @@ cursor = dbconnection.cursor()
 
 # ready some sets of objects that will be generally available: two seconds spent here will save you 2s over and over again later as you constantly regenerate author and work info
 
-print('populating global variables')
-authordict = buildauthordict(cursor)
-workdict = buildworkdict(authordict)
+authordict = loadallauthorsasobjects()
+workdict = loadallworksasobjects()
+authordict = loadallworksintoallauthors(authordict, workdict)
 authorgenreslist = buildaugenreslist(authordict)
 authorlocationlist = buildauthorlocationlist(authordict)
 workgenreslist = buildworkgenreslist(workdict)

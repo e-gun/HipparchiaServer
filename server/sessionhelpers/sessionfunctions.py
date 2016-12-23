@@ -5,13 +5,10 @@
 	License: GPL 3 (see LICENSE in the top level directory of the distribution)
 """
 
-
 import re
 from flask import session
 from server import hipparchia
-from server import formatting_helper_functions
 from server.dbsupport import citationfunctions
-from server.dbsupport.dbfunctions import loadallauthors
 
 
 def modifysessionvar(param,val):
@@ -527,37 +524,6 @@ the main point is to avoid constant calls to the DB
 for commonly used info
 """
 
-def buildauthordict(cursor):
-	"""
-	load up the dictionary of author objects: { 'uid1': aobject1, 'uid2': aobject2, ...}
-	this will see heavy use throughout the world of 'views.py'
-	:param cursor:
-	:return:
-	"""
-	print('loading authors and works...')
-	authorobjects = loadallauthors(cursor)
-	authordict = {}
-	for a in authorobjects:
-		authordict[a.id] = a
-		
-	return authordict
-
-
-def buildworkdict(authordict):
-	"""
-	load up the dictionary of work objects: { 'uid1': wobject1, 'uid2': wobject2, ...}
-	this will see heavy use throughout the world of 'views.py'
-	:param authordict:
-	:return:
-	"""
-	workdict = {}
-	for a in authordict.keys():
-		for w in authordict[a].listofworks:
-			workdict[w.universalid] = w
-	
-	return workdict
-
-
 def buildaugenreslist(authordict):
 	"""
 	load up the list of author genres: [ g1, g2, ...]
@@ -565,6 +531,7 @@ def buildaugenreslist(authordict):
 	:param authordict:
 	:return:
 	"""
+	print('\tassigning genres')
 	authorgenreslist = []
 	
 	for a in authordict:
@@ -606,7 +573,7 @@ def buildauthorlocationlist(authordict):
 	:param authordict:
 	:return:
 	"""
-
+	print('\tassigning locations')
 	locationlist = []
 
 	for a in authordict:

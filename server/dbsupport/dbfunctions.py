@@ -6,8 +6,15 @@
 """
 
 import psycopg2
-from server.hipparchiaclasses import dbAuthor, dbOpus, dbWorkLine
+import configparser
+from multiprocessing import Manager, Process
+
+from server.hipparchiaclasses import dbAuthor, dbOpus, dbWorkLine, MPCounter
 from server import hipparchia
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+
 
 def tablenamer(authorobject, thework):
 	# tell me the name of your table
@@ -45,76 +52,86 @@ def labelmaker(workuid, cursor):
 	return results
 
 
-def loadallauthors(cursor):
+def loadallauthorsasobjects():
 	"""
-	build a full set of author objects
-	be careful about how much you really need this: a source of lag
-	currently called by:
-		setavalablegenrelist
-	:param cursor:
+
+	return a dict of all possible author objects
+
 	:return:
 	"""
-	query = 'SELECT * from authors ORDER BY shortname ASC'
-	cursor.execute(query)
-	authorlist = cursor.fetchall()
 
-	authorobjects = []
-	for author in authorlist:
-		authorobjects.append(dbauthorandworkmaker(author[0],cursor))
+	print('loading all authors...')
 
-	return authorobjects
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
 
+	authorsdict = {}
 
-def dbauthormakersubroutine(uid, cursor):
-	# only call this AFTER you have built all of the work objects so that they can be placed into it
+	q = 'SELECT * FROM authors'
 
-	query = 'SELECT * from authors where universalid = %s'
-	data = (uid,)
-	cursor.execute(query, data)
-	try:
-		results = cursor.fetchone()
-	except:
-		# browser forward was producing random errors:
-		# 'failed to find the requested author: SELECT * from authors where universalid = %s ('gr1194',)'
-		# but this is the author being browsed and another click will browse him further
-		# a timing issue: the solution seems to be 'hipparchia.run(threaded=False, host="0.0.0.0")'
-		print('failed to find the requested author:', query, data)
-		# note that there is no graceful way out of this: you have to have an authorobject in the end
-		
-	# (universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date, converted_date, location)
-	# supposed to fit the dbAuthor class exactly
-	author = dbAuthor(results[0], results[1], results[2], results[3], results[4], results[5], results[6], results[7],
-	                  results[8], results[9])
+	curs.execute(q)
+	results = curs.fetchall()
 
-	return author
+	for r in results:
+		# (universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date, converted_date, location)
+		newauthor = dbAuthor(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9])
+		authorsdict[newauthor.universalid] = newauthor
+
+	print('\t',len(authorsdict),'authors loaded')
+
+	return authorsdict
 
 
-def dbauthorandworkmaker(authoruid, cursor):
-	# note that this will return an AUTHOR filled with WORKS
-	# the original Opus objects only exist at the end of HD reads
-	# rebuild them from the DB instead: note that this object is simpler than the earlier version, but the stuff you need should all be there...
-		
-	author = dbauthormakersubroutine(authoruid, cursor)
+def loadallworksasobjects():
+	"""
 
-	query = 'SELECT universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03, ' \
+	return a dict of all possible work objects
+
+	:return:
+	"""
+
+	print('loading all works...')
+
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
+
+	worksdict = {}
+
+	q = 'SELECT universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03, ' \
 	        'levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance, recorded_date, converted_date, wordcount, ' \
-			'firstline, lastline, authentic FROM works WHERE universalid LIKE %s'
-	data = (authoruid + '%',)
-	cursor.execute(query, data)
-	try:
-		results = cursor.fetchall()
-	except:
-		# see the notes on the exception to dbauthormakersubroutine: you can get here and then die for the same reason
-		print('failed to find the requested work:', query, data)
-		results = []
+			'firstline, lastline, authentic FROM works'
+	curs.execute(q)
+	results = curs.fetchall()
 
-	for match in results:
-		work = dbOpus(match[0], match[1], match[2], match[3], match[4], match[5], match[6], match[7], match[8],
-		              match[9], match[10], match[11], match[12], match[13], match[14], match[15], match[16],
-					  match[17], match[18], match[19])
-		author.addwork(work)
+	for r in results:
+		newwork = dbOpus(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8],
+						 r[9], r[10], r[11], r[12], r[13], r[14], r[15], r[16],
+						 r[17], r[18], r[19])
+		worksdict[newwork.universalid] = newwork
 
-	return author
+	dbconnection.commit()
+	curs.close()
+
+	print('\t', len(worksdict), 'works loaded')
+
+	return worksdict
+
+
+def loadallworksintoallauthors(authorsdict, worksdict):
+	"""
+
+	add the right work objects to the proper author objects
+
+	:param authorsdict:
+	:param worksdict:
+	:return:
+	"""
+
+	for wkid in worksdict.keys():
+		auid = wkid[0:6]
+		authorsdict[auid].addwork(worksdict[wkid])
+
+	return authorsdict
 
 
 def dblineintolineobject(work, dbline):
@@ -324,3 +341,4 @@ def makeanemptywork(universalid):
 	wkobject = dbOpus(universalid, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '')
 	
 	return wkobject
+
