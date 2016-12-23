@@ -25,7 +25,11 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	activepoll.allworkis(len(indexedauthorandworklist))
 	activepoll.remain(len(indexedauthorandworklist))
 	activepoll.sethits(0)
-	
+
+	activepoll.statusis('Preparing to dispatch the search...')
+	# several seconds might elapse before you actually execute: loading the full authordict into the manager is a killer
+	# prune the full list in executesearch() via a check against authorandworklist
+
 	count = MPCounter()
 	manager = Manager()
 	hits = manager.dict()
