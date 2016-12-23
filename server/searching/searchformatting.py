@@ -14,6 +14,7 @@ from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, setconnection
 from server.formatting_helper_functions import formatpublicationinfo
+from server.sessionhelpers.sessionfunctions import justlatin
 
 
 def cleansearchterm(seeking):
@@ -183,7 +184,7 @@ def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 	"""
 	trimmedlist = []
 
-	if session['corpora']  != 'L' and (session['earliestdate'] != '-850' or session['latestdate'] != '1500'):
+	if justlatin() == False and (session['earliestdate'] != '-850' or session['latestdate'] != '1500'):
 		min = int(session['earliestdate'])
 		max = int(session['latestdate'])
 		if min > max:
