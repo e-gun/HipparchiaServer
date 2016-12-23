@@ -9,7 +9,7 @@ import re
 from flask import session
 from server import hipparchia
 from server.dbsupport import citationfunctions
-
+from server.formatting_helper_functions import prunedict
 
 def modifysessionvar(param,val):
 	"""
@@ -224,7 +224,10 @@ def sessionvariables():
 		session['alocexclusions'] = []
 		session['wlocselections'] = []
 		session['wlocexclusions'] = []
-		session['corpora'] = hipparchia.config['DEFAULTCORPUS']
+		session['greekcorpus'] = hipparchia.config['DEFAULTGREEKCORPUSVALUE']
+		session['latincorpus'] = hipparchia.config['DEFAULTLATINCORPUSVALUE']
+		session['inscriptioncorpus'] = hipparchia.config['DEFAULTINSCRIPTIONCORPUSVALUE']
+		session['papyruscorpus'] = hipparchia.config['DEFAULTPAPYRUSCORPUSVALUE']
 		session['accentsmatter'] = 'N'
 		session['proximity'] = '1'
 		session['nearornot'] = 'T'
@@ -515,6 +518,170 @@ def rationalizeselections(newselectionuid, selectorexclude):
 	session.modified = True
 
 	return
+
+
+def justlatin():
+	"""
+
+	probe the session to see if we are working in a latin-only environment
+
+	:return: True or False
+	"""
+
+	if session['latincorpus'] == 'yes' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'no' and \
+					session['papyruscorpus'] == 'no':
+		return True
+	else:
+		return False
+
+
+def justgreek():
+	"""
+
+	probe the session to see if we are working in a greek-only environment
+	[nb: some of the inscriptions are latin; but they are not yet flagged as such]
+
+	:return: True or False
+	"""
+
+	if session['latincorpus'] == 'no' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'no' and \
+					session['papyruscorpus'] == 'yes':
+		return True
+	else:
+		return False
+
+
+def justtlg():
+	"""
+
+	probe the session to see if we are working in a tlg authors only environment
+
+	:return: True or False
+	"""
+
+	if session['latincorpus'] == 'no' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'no' and \
+					session['papyruscorpus'] == 'no':
+		return True
+	else:
+		return False
+
+
+def justpapyri():
+	"""
+
+	probe the session to see if we are working in a papyrus-only environment
+	useful in as much as the papyrus data leaves certain columns empty every time
+
+	:return: True or False
+	"""
+
+	if session['latincorpus'] == 'no' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'no' and \
+					session['papyruscorpus'] == 'yes':
+		return True
+	else:
+		return False
+
+
+def justinscriptions():
+	"""
+
+	probe the session to see if we are working in a papyrus-only environment
+	useful in as much as the inscriptions data leaves certain columns empty every time
+
+	:return: True or False
+	"""
+
+	if session['latincorpus'] == 'no' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'yes' and \
+					session['papyruscorpus'] == 'no':
+		return True
+	else:
+		return False
+
+def justlit():
+	"""
+
+	probe the session to see if we are working in a TLG + LAT environment
+
+	:return: True or False
+	"""
+
+	if session['latincorpus'] == 'yes' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'no' and \
+					session['papyruscorpus'] == 'no':
+		return True
+	else:
+		return False
+
+
+def justdoc():
+	"""
+
+	probe the session to see if we are working in a DDP + INS environment
+
+	:return: True or False
+	"""
+
+	if session['latincorpus'] == 'no' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'yes' and \
+					session['papyruscorpus'] == 'yes':
+		return True
+	else:
+		return False
+
+
+def reducetosessionselections(startdict):
+	"""
+
+	drop the full universe of possibilities and include only those that meet the active session criteria
+
+	:param authordict:
+	:return:
+	"""
+
+	if justtlg():
+		d = prunedict(startdict, 'universalid', 'gr')
+	elif justlatin():
+		d = prunedict(startdict, 'universalid', 'lt')
+	elif justpapyri():
+		d = prunedict(startdict, 'universalid', 'dp')
+	elif justinscriptions():
+		d = prunedict(startdict, 'universalid', 'in')
+	elif justlit():
+		x = prunedict(startdict, 'universalid', 'lt')
+		y = prunedict(startdict, 'universalid', 'gr')
+		# http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression#26853961
+		d = {**x, **y}
+	elif justdoc():
+		x = prunedict(startdict, 'universalid', 'dp')
+		y = prunedict(startdict, 'universalid', 'in')
+		d = {**x, **y}
+	# and now for the other combinations which are a bit less likely
+	elif session['latincorpus'] == 'yes' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'yes' and \
+					session['papyruscorpus'] == 'no':
+		x = prunedict(startdict, 'universalid', 'lt')
+		y = prunedict(startdict, 'universalid', 'gr')
+		z = prunedict(startdict, 'universalid', 'in')
+		d = {**x, **y, **z}
+	elif session['latincorpus'] == 'yes' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'no' and \
+					session['papyruscorpus'] == 'yes':
+		x = prunedict(startdict, 'universalid', 'lt')
+		y = prunedict(startdict, 'universalid', 'gr')
+		z = prunedict(startdict, 'universalid', 'dp')
+		d = {**x, **y, **z}
+	elif session['latincorpus'] == 'yes' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'yes' and \
+					session['papyruscorpus'] == 'yes':
+		x = prunedict(startdict, 'universalid', 'lt')
+		y = prunedict(startdict, 'universalid', 'in')
+		z = prunedict(startdict, 'universalid', 'dp')
+		d = {**x, **y, **z}
+	elif session['latincorpus'] == 'no' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'yes' and \
+					session['papyruscorpus'] == 'yes':
+		x = prunedict(startdict, 'universalid', 'gr')
+		y = prunedict(startdict, 'universalid', 'in')
+		z = prunedict(startdict, 'universalid', 'dp')
+		d = {**x, **y, **z}
+	else:
+		d = startdict
+
+	return d
 
 
 """
