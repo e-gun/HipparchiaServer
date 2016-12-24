@@ -302,12 +302,13 @@ def woformatworkinfo(workobject):
 	else:
 		c = ''
 
-	if int(workobject.converted_date) > 1499:
+	if int(workobject.converted_date) < 1500:
 		if int(workobject.converted_date) > 0:
 			suffix = 'CE'
+			d = '(assigned to ' + str(workobject.converted_date) + ' ' + suffix + ')'
 		else:
 			suffix = 'BCE'
-		d = '(assigned to '+str(workobject.converted_date)+' '+suffix
+			d = '(assigned to ' + str(workobject.converted_date[1:]) + ' ' + suffix + ')'
 	else:
 		d = ''
 
