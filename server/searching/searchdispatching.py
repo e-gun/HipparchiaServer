@@ -24,7 +24,15 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 
 	activepoll.statusis('Loading the the dispatcher...')
 	# several seconds might elapse before you actually execute: loading the full authordict into the manager is a killer
+	# 	the complexity of the objects + their embedded objects x 190k...
 	# prune the full list in executesearch() via a check against authorandworklist
+	#
+	# why are we passing authors anyway?
+	# 	whereclauses() will use the info
+	#	whereclauses() also needs the embedded workobjects
+	#	whereclauses() relevant all too often
+	#
+	# the net result is that we are stuck with the manager.dict(authordict) conundrum
 
 	count = MPCounter()
 	manager = Manager()

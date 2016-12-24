@@ -186,7 +186,6 @@ def compileauthorandworklist(listmapper):
 	del ad
 	del wd
 
-	print('compiled a list with N items:',len(authorandworklist))
 	return authorandworklist
 
 

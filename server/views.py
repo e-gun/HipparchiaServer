@@ -12,7 +12,7 @@ from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
 from server.hipparchiaclasses import ProgressPoll
-from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors
+from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
@@ -26,46 +26,13 @@ from server.textsandconcordnaces.textandconcordancehelperfunctions import tcpars
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, justgreek, justlatin, reducetosessionselections, returnactivedbs
-from server.sessionhelpers.sessiondicts import buildaugenresdict, buildworkgenresdict, buildauthorlocationdict, \
-	buildworkprovenancedict
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
-	dropdupes, bcedating, sortauthorandworklists, prunedict, htmlifysearchfinds
+	dropdupes, bcedating, sortauthorandworklists, htmlifysearchfinds
 from server.browsing.browserfunctions import getandformatbrowsercontext
 
-# all you need is read-only access
-# it is a terrible idea to connect with a user who can write
-# autocommit will save your bacon if there is a problem looking something up: subseqent requests will get blocked
-dbconnection = setconnection('autocommit')
-cursor = dbconnection.cursor()
-
 # ready some sets of objects that will be generally available: a few seconds spent here will save you the same over and over again later as you constantly regenerate author and work info
-
-authordict = loadallauthorsasobjects()
-workdict = loadallworksasobjects()
-authordict = loadallworksintoallauthors(authordict, workdict)
-
-authorgenresdict = buildaugenresdict(authordict)
-authorlocationdict = buildauthorlocationdict(authordict)
-workgenresdict = buildworkgenresdict(workdict)
-workprovenancedict = buildworkprovenancedict(workdict)
-
-print('building specilized sublists')
-tlgauthors = prunedict(authordict, 'universalid', 'gr')
-tlgworks = prunedict(workdict, 'universalid', 'gr')
-latauthors = prunedict(authordict, 'universalid', 'lt')
-latworks = prunedict(workdict, 'universalid', 'lt')
-insauthors = prunedict(authordict, 'universalid', 'in')
-insworks = prunedict(workdict, 'universalid', 'in')
-ddpauthors = prunedict(authordict, 'universalid', 'dp')
-ddpworks = prunedict(workdict, 'universalid', 'dp')
-
-listmapper = {
-	'gr': {'a': tlgauthors, 'w': tlgworks},
-	'lt': {'a': latauthors, 'w': latworks},
-	'in': {'a': insauthors, 'w': insworks},
-	'dp': {'a': ddpauthors, 'w': ddpworks},
-}
-
+# this will give you listmapper{}, authordict{}, etc.
+from server.loadglobaldicts import *
 
 # empty dict in which to store progress polls
 # note that more than one poll can be running
@@ -1313,7 +1280,6 @@ def selectionmade():
 
 	# get three bundles to put in the table cells
 	# stored in a dict with three keys: timeexclusions, selections, exclusions, numberofselections
-	print('session',session)
 
 	htmlbundles = sessionselectionsashtml(authordict, workdict)
 	htmlbundles = json.dumps(htmlbundles)

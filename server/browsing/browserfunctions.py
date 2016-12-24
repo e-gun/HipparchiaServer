@@ -122,8 +122,10 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			if pub is not None:
 				html = insertdatarow('Publication', 'pubinfo', pub.group(1))
 				passage['ouputtable'].append(html)
-			if date is not None:
-				html = insertdatarow('Date', 'textdate', date.group(1))
+			if date is not None and line.index == workobject.starts:
+				# otherwise you will resee date info in the middle of some documents because
+				# it gets reasserted with a CD block reinitialization
+				html = insertdatarow('Editor\'s date', 'textdate', date.group(1))
 				passage['ouputtable'].append(html)
 
 		columnb = insertparserids(line)
