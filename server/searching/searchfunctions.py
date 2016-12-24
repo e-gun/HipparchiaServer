@@ -21,15 +21,11 @@ def compileauthorandworklist(listmapper):
 	:param authors:
 	:return:
 	"""
-	print('session', session)
 
 	searchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + session[
 		'psgselections'] + session['wkselections'] + session['alocselections'] + session['wlocselections']
 	exclusionlist = session['auexclusions'] + session['wkexclusions'] + session['agnexclusions'] + session[
 		'wkgnexclusions'] + session['psgexclusions'] + session['alocexclusions'] + session['wlocexclusions']
-
-	print('searchlist',searchlist)
-	print('len(searchlist)', len(searchlist))
 
 	# trim by active corpora
 	ad = reducetosessionselections(listmapper, 'a')

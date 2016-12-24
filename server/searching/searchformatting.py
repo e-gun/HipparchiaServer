@@ -301,9 +301,21 @@ def woformatworkinfo(workobject):
 		c = '['+format(workobject.wordcount, ',d')+' wds]'
 	else:
 		c = ''
-	
-	workinfo = n+t+g+c+'<br />'+p+'<br />'
-	
+
+	if int(workobject.converted_date) > 1499:
+		if int(workobject.converted_date) > 0:
+			suffix = 'CE'
+		else:
+			suffix = 'BCE'
+		d = '(assigned to '+str(workobject.converted_date)+' '+suffix
+	else:
+		d = ''
+
+	if len(p) > 0:
+		workinfo = n+t+g+c+d+'<br />'+p+'<br />'
+	else:
+		workinfo = n + t + g + c + d+'<br />'
+
 	return workinfo
 
 

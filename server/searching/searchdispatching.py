@@ -22,7 +22,7 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	:return:
 	"""
 
-	activepoll.statusis('Preparing to dispatch the search...')
+	activepoll.statusis('Loading the the dispatcher...')
 	# several seconds might elapse before you actually execute: loading the full authordict into the manager is a killer
 	# prune the full list in executesearch() via a check against authorandworklist
 
