@@ -25,7 +25,7 @@ authorlocationdict = buildauthorlocationdict(authordict)
 workgenresdict = buildworkgenresdict(workdict)
 workprovenancedict = buildworkprovenancedict(workdict)
 
-print('building specilized sublists')
+print('building specialized sublists')
 tlgauthors = prunedict(authordict, 'universalid', 'gr')
 tlgworks = prunedict(workdict, 'universalid', 'gr')
 latauthors = prunedict(authordict, 'universalid', 'lt')

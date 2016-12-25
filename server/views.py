@@ -510,7 +510,17 @@ def cookieintosession():
 		workgenreslist += workgenresdict[db]
 	workgenreslist = list(set(workgenreslist))
 
-	modifysessionselections(cookiedict, authorgenreslist, workgenreslist)
+	authorlocationlist = []
+	for db in authorlocationdict:
+		authorlocationlist += authorlocationdict[db]
+	authorlocationlist = list(set(authorlocationlist))
+
+	workprovenancelist = []
+	for db in workprovenancedict:
+		workprovenancelist += workprovenancedict[db]
+	workprovenancelist = list(set(workprovenancelist))
+
+	modifysessionselections(cookiedict, authorgenreslist, workgenreslist, authorlocationlist, workprovenancelist)
 	
 	response = redirect(url_for('frontpage'))
 	return response

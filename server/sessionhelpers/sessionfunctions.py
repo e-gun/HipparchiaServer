@@ -425,7 +425,6 @@ def sessionselectionsinfo(authordict, workdict):
 		
 		# [g] passages
 		if len(session['psg' + selectionorexclusion]) > 0:
-			# none of this should be on right now
 			thehtml += '<span class="picklabel">Passages</span><br />'
 			localval = -1
 			for s in session['psg' + selectionorexclusion]:
