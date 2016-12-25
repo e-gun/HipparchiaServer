@@ -113,18 +113,19 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			region = re.search(regionfinder, line.accented)
 			city = re.search(cityfinder, line.accented)
 			pub = re.search(pubfinder, line.accented)
-			if region is not None:
+			# line.index == workobject.starts added as a check because
+			# otherwise you will re-see date info in the middle of some documents
+			# it gets reasserted with a CD block reinitialization
+			if region is not None and line.index == workobject.starts:
 				html = insertdatarow('Region', 'regioninfo', region.group(1))
 				passage['ouputtable'].append(html)
-			if city is not None:
+			if city is not None and line.index == workobject.starts:
 				html = insertdatarow('City', 'cityinfo', city.group(1))
 				passage['ouputtable'].append(html)
-			if pub is not None:
+			if pub is not None and line.index == workobject.starts:
 				html = insertdatarow('Publication', 'pubinfo', pub.group(1))
 				passage['ouputtable'].append(html)
 			if date is not None and line.index == workobject.starts:
-				# otherwise you will resee date info in the middle of some documents because
-				# it gets reasserted with a CD block reinitialization
 				html = insertdatarow('Editor\'s date', 'textdate', date.group(1))
 				passage['ouputtable'].append(html)
 

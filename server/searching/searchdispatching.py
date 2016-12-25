@@ -14,7 +14,7 @@ from server.searching.searchformatting import sortandunpackresults
 from server.searching.phrasesearching import shortphrasesearch
 from server.searching.workonsearch import workonsimplesearch, workonphrasesearch, workonproximitysearch
 
-def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, authordict, activepoll):
+def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, authorswheredict, activepoll):
 	"""
 	assign the search to multiprocessing workers
 	:param seeking:
@@ -26,26 +26,17 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	# several seconds might elapse before you actually execute: loading the full authordict into the manager is a killer
 	# 	the complexity of the objects + their embedded objects x 190k...
 	#
-	# band-aide:
-	# prune the full list in executesearch() via a check against authorandworklist and you can gain a lot of speed
-	# but if you want to search all of the inscriptions and papyri, you will pay a steep penalty
-	#
 	# why are we passing authors anyway?
 	# 	whereclauses() will use the author info
 	#	whereclauses() also needs the embedded workobjects
 	#	whereclauses() relevant any time you have an _AT_
 	#
-	# the net result is that we are stuck with the manager.dict(authordict) conundrum
-	# it would be possible to have a managed version of authordict available to send here, but that would also mean
-	# that you would have to send the manager here too: making new problems to solve old ones...
-	#
-	# a possible solution: build all where-clauses early / before we get here
-	# this should not be too hard, and it has a certain elegance to it
+	# accordingly we no longer receive the full authordict but instead a pre-pruned dict: authorswheredict{}
 
 	count = MPCounter()
 	manager = Manager()
 	hits = manager.dict()
-	authors = manager.dict(authordict)
+	authors = manager.dict(authorswheredict)
 	searching = manager.list(indexedauthorandworklist)
 	
 	# if you don't autocommit you will soon see: "Error: current transaction is aborted, commands ignored until end of transaction block"

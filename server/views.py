@@ -143,40 +143,41 @@ def executesearch():
 		poll[ts].statusis('Sorting the list of works to search')
 		authorandworklist = sortauthorandworklists(authorandworklist, authordict)
 
-		# assemble a subset of authordict that will be relevant to our actual search
-		# can skip this if you don't pass the dict further? i.e if you get the where clauses right
-		ad = {}
-		for a in authorandworklist:
-			try:
-				ad[a[0:6]]
-			except:
-				ad[a[0:6]] = authordict[a[0:6]]
-
 		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
 		# so we slap on an index value
 
 		indexedworklist = []
 		index = -1
 		for w in authorandworklist:
-			# this is also the moment you could append the WHERE clause to each work (if necessary)
-			# it might save needing to pass any authordict at all to searchdispatcher()
-			# see the notes about why that is a time-killer
 			index += 1
 			indexedworklist.append((index, w))
 		del authorandworklist
+
+		# assemble a subset of authordict that will be relevant to our actual search and send it to searchdispatcher()
+		# it turns out that we only need to pass authors that are part of psgselections or psgexclusions
+		# whereclauses() is selectively invoked and it needs to check the information in those and only those authors and works
+		# formerly all authors were sent through searchdispatcher(), but loading them into the manager produced
+		# a massive slowdown (as 200k objects got pickled into a mpshareable dict)
+
+		authorswheredict = {}
+
+		for w in session['psgselections']:
+			authorswheredict[w[0:6]] = authordict[w[0:6]]
+		for w in session['psgexclusions']:
+			authorswheredict[w[0:6]] = authordict[w[0:6]]
 
 		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
 			searchtype = 'simple'
 			thesearch = seeking
 			htmlsearch = '<span class="emph">' + seeking + '</span>'
-			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, ad, poll[ts])
+			hits = searchdispatcher('simple', seeking, proximate, indexedworklist, authorswheredict, poll[ts])
 		elif re.search(phrasefinder, seeking) is not None:
 			searchtype = 'phrase'
 			thesearch = seeking
 			htmlsearch = '<span class="emph">' + seeking + '</span>'
 			terms = seeking.split(' ')
 			if len(max(terms, key=len)) > 3:
-				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, ad, poll[ts])
+				hits = searchdispatcher('phrase', seeking, proximate, indexedworklist, authorswheredict, poll[ts])
 			else:
 				# you are looking for a set of little words: και δη και, etc.
 				#   16s to find και δη και via a std phrase search; 1.6s to do it this way
@@ -187,7 +188,7 @@ def executesearch():
 				#   οἷον κἀν τοῖϲ (Searched between 850 B.C.E. and 200 B.C.E.)
 				#   5.57 std; 17.54s 'short'
 				# so '3' looks like the right answer
-				hits = dispatchshortphrasesearch(seeking, indexedworklist, ad, poll[ts])
+				hits = dispatchshortphrasesearch(seeking, indexedworklist, authorswheredict, poll[ts])
 		else:
 			searchtype = 'proximity'
 			if session['searchscope'] == 'W':
@@ -202,11 +203,14 @@ def executesearch():
 			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
 			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
 			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
-			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, ad, poll[ts])
+			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authorswheredict, poll[ts])
 		
 		poll[ts].statusis('Putting the results in context')
 
-		allfound = mpresultformatter(hits, ad, workdict, seeking, proximate, searchtype, poll[ts])
+		# safe to send authordict and workdict to mpresultformatter() because only the objects relevant to hits
+		# will get sent to the manager (thus avoiding the problem you see with loading them all into searchdispacher()
+
+		allfound = mpresultformatter(hits, authordict, workdict, seeking, proximate, searchtype, poll[ts])
 		
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
@@ -442,6 +446,9 @@ def progressreport():
 	something like gevent needs to be integrated so you can handle async requests, I guess.
 	websockets: but that's plenty of extra imports for what is generally a one-user model
 
+	New in Python 3.6: PEP 525: Asynchronous Generator
+	This probably makes a websockets poll a lot easier to write
+
 	:return:
 	"""
 	
@@ -490,9 +497,18 @@ def cookieintosession():
 	for key, value in cookiedict.items():
 		modifysessionvar(key, value)
 
-	# TODO
-	# this will break: you need build a master list out of authorgenresdict = { 'gk': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
-	# same story with the works
+
+	# you need a master list out of authorgenresdict = { 'gk': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
+
+	authorgenreslist = []
+	for db in authorgenresdict:
+		authorgenreslist += authorgenresdict[db]
+	authorgenreslist = list(set(authorgenreslist))
+
+	workgenreslist = []
+	for db in workgenresdict:
+		workgenreslist += workgenresdict[db]
+	workgenreslist = list(set(workgenreslist))
 
 	modifysessionselections(cookiedict, authorgenreslist, workgenreslist)
 	

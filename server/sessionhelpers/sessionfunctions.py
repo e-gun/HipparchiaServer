@@ -707,6 +707,9 @@ def reducetosessionselections(listmapper, criterion):
 		y = listmapper['in'][criterion]
 		z = listmapper['dp'][criterion]
 		d = {**x, **y, **z}
+	elif session['latincorpus'] == 'no' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'no' and \
+		session['papyruscorpus'] == 'no':
+		d = {}
 	else:
 		w = listmapper['lt'][criterion]
 		x = listmapper['gr'][criterion]
