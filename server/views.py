@@ -153,9 +153,13 @@ def executesearch():
 
 		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
 		# so we slap on an index value
+
 		indexedworklist = []
 		index = -1
 		for w in authorandworklist:
+			# this is also the moment you could append the WHERE clause to each work (if necessary)
+			# it might save needing to pass any authordict at all to searchdispatcher()
+			# see the notes about why that is a time-killer
 			index += 1
 			indexedworklist.append((index, w))
 		del authorandworklist

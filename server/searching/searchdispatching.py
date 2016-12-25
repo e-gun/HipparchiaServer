@@ -25,14 +25,22 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	activepoll.statusis('Loading the the dispatcher...')
 	# several seconds might elapse before you actually execute: loading the full authordict into the manager is a killer
 	# 	the complexity of the objects + their embedded objects x 190k...
-	# prune the full list in executesearch() via a check against authorandworklist
+	#
+	# band-aide:
+	# prune the full list in executesearch() via a check against authorandworklist and you can gain a lot of speed
+	# but if you want to search all of the inscriptions and papyri, you will pay a steep penalty
 	#
 	# why are we passing authors anyway?
-	# 	whereclauses() will use the info
+	# 	whereclauses() will use the author info
 	#	whereclauses() also needs the embedded workobjects
-	#	whereclauses() relevant all too often
+	#	whereclauses() relevant any time you have an _AT_
 	#
 	# the net result is that we are stuck with the manager.dict(authordict) conundrum
+	# it would be possible to have a managed version of authordict available to send here, but that would also mean
+	# that you would have to send the manager here too: making new problems to solve old ones...
+	#
+	# a possible solution: build all where-clauses early / before we get here
+	# this should not be too hard, and it has a certain elegance to it
 
 	count = MPCounter()
 	manager = Manager()
@@ -41,7 +49,9 @@ def searchdispatcher(searchtype, seeking, proximate, indexedauthorandworklist, a
 	searching = manager.list(indexedauthorandworklist)
 	
 	# if you don't autocommit you will soon see: "Error: current transaction is aborted, commands ignored until end of transaction block"
-	# alternately you can commit every N transactions
+	# alternately you can commit every N transactions; the small db sizes for INS and DDP works means there can be some real pounding
+	# of the server: the commitcount had to drop from 600 to 400 (with 4 workers) in order to avoid 'could not execute SELECT *...' errors
+
 	commitcount = MPCounter()
 	
 	workers = hipparchia.config['WORKERS']
