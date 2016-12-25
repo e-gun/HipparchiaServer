@@ -49,8 +49,14 @@ def frontpage():
 	:return:
 	"""
 	sessionvariables()
-	
-	page = render_template('search.html')
+
+	# check to see which dbs we actually own
+	activelists = []
+	for list in listmapper:
+		if len(listmapper[list]['a']) > 0:
+			activelists.append(list)
+
+	page = render_template('search.html',activelists=activelists)
 	
 	return page
 
