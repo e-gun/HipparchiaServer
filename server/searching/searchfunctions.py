@@ -220,6 +220,9 @@ def whereclauses(uidwithatsign, operand, authors):
 	in order to restrict a search to a portion of a work, you will need a where clause
 	this builds it out of something like 'gr0003w001_AT_3|12' (Thuc., Bk 3, Ch 12)
 
+	sample output:
+		[('level_02_value=%s ', '1'), ('level_01_value=%s ', '3')]
+
 	:param uidwithatsign:
 	:param operand: this should be either '=' or '!='
 	:return: a tuple consisting of the SQL string and the value to be passed via %s
@@ -243,7 +246,9 @@ def whereclauses(uidwithatsign, operand, authors):
 		index += 1
 		lvstr = 'level_0' + str(wklvls[index]) + '_value' + operand + '%s '
 		whereclausetuples.append((lvstr, l))
-	
+
+	# print('whereclausetuples',whereclausetuples)
+
 	return whereclausetuples
 
 

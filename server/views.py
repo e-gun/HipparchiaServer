@@ -144,6 +144,7 @@ def executesearch():
 		authorandworklist = sortauthorandworklists(authorandworklist, authordict)
 
 		# assemble a subset of authordict that will be relevant to our actual search
+		# can skip this if you don't pass the dict further? i.e if you get the where clauses right
 		ad = {}
 		for a in authorandworklist:
 			try:
