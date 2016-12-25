@@ -154,51 +154,44 @@ def modifysessionvar(param,val):
 	return
 
 
-def modifysessionselections(cookiedict, authorgenreslist, workgenreslist):
+def modifysessionselections(cookiedict, authorgenreslist, workgenreslist, authorlocationlist, workprovenancelist):
 	"""
 	set session selections after checking them for validity
 	i'm not sure how many people will take the trouble to build evil cookies, but...
 	:param cookiedict:
 	:return:
 	"""
-	
-	# selectioncategories = ['auselections', 'wkselections', 'agnselections', 'wkgnselections', 'psgselections']
-	
-	validauth = re.compile(r'(lt|gr)\d\d\d\d')
-	aus = cookiedict['auselections']
-	for item in aus:
-		if re.search(validauth,item) is None:
-			aus.remove(item)
-	session['auselections'] = aus
-	
-	validwk = re.compile(r'(lt|gr)\d\d\d\dw\d\d\d')
-	wks = cookiedict['wkselections']
-	for item in wks:
-		if re.search(validwk,item) is None:
-			wks.remove(item)
-	session['wkselections'] = wks
-	
-	validpsg = re.compile(r'(lt|gr)\d\d\d\dw\d\d\d_AT_')
-	badchars = re.compile(r'[!@#$|%()*\'\"]')
-	psg = cookiedict['psgselections']
-	for item in psg:
-		if (re.search(validpsg, item) is None) or re.search(badchars, item):
-			psg.remove(item)
-	session['psgselections'] = psg
-	
-	ags = cookiedict['agnselections']
-	for item in ags:
-		if item not in authorgenreslist:
-			ags.remove(item)
-	session['agnselections'] = ags
-	
-	wgs = cookiedict['wkgnselections']
-	for item in wgs:
-		if item not in workgenreslist:
-			wgs.remove(item)
-	session['wkgnselections'] = wgs
-	
+
+	categories = {
+		'au': {'validformat': re.compile(r'(lt|gr|in|dp)\w\w\w\w'), 'unacceptable': r'[!@#$|%()*\'\"]', 'checkagainst': None},
+		'wk': {'validformat': re.compile(r'(lt|gr|in|dp)\w\w\w\ww\w\w\w'), 'unacceptable': r'[!@#$|%()*\'\"]', 'checkagainst': None},
+		'psg': {'validformat': re.compile(r'(lt|gr|in|dp)\w\w\w\ww\w\w\w_AT_'), 'unacceptable': r'[!@#$%()*\'\"]', 'checkagainst': None},
+		'agn': {'validformat': None, 'unacceptable': r'[!@#$%*\'\"]', 'checkagainst': authorgenreslist},
+		'wkgn': {'validformat': None, 'unacceptable': r'[!@#$%*\'\"]', 'checkagainst': workgenreslist},
+		'aloc': {'validformat': None, 'unacceptable': r'[!@#$%*\'\"]', 'checkagainst': authorlocationlist},
+		'wloc': {'validformat': None, 'unacceptable': r'[!@#$%*\'\"]', 'checkagainst': workprovenancelist}
+	}
+
+	for option in ['selections', 'exclusions']:
+		for cat in categories:
+			cookievals = cookiedict[cat+option]
+			for item in cookievals:
+				if len(item) == 0:
+					cookievals.remove(item)
+				elif categories[cat]['validformat'] is not None:
+					if re.search(categories[cat]['validformat'],item) is None:
+						cookievals.remove(item)
+				elif categories[cat]['unacceptable'] is not None:
+					if re.search(categories[cat]['unacceptable'], item) is not None:
+						cookievals.remove(item)
+				elif categories[cat]['checkagainst'] is not None:
+					if item not in categories[cat]['checkagainst']:
+						cookievals.remove(item)
+
+			session[cat+option] = cookievals
+
 	session.modified = True
+
 	return
 
 
@@ -216,7 +209,10 @@ def parsejscookie(cookiestring):
 		# must have tried to load a cookie that was not really there
 		cookiestring = ''
 	
-	selectioncategories = ['auselections', 'wkselections', 'agnselections', 'wkgnselections', 'psgselections', 'auexclusions', 'wkexclusions', 'agnexclusions', 'wkgnexclusions', 'psgexclusions']
+	selectioncategories = ['auselections', 'wkselections', 'agnselections', 'wkgnselections', 'psgselections',
+						   'auexclusions', 'wkexclusions', 'agnexclusions', 'wkgnexclusions', 'psgexclusions',
+						   'alocselections', 'alocexclusions', 'wlocselections', 'wlocexclusions' ]
+
 	selectiondictionary = {}
 	for sel in selectioncategories:
 		try:
@@ -611,6 +607,7 @@ def justinscriptions():
 		return True
 	else:
 		return False
+
 
 def justlit():
 	"""
