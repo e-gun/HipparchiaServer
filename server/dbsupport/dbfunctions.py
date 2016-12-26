@@ -226,7 +226,7 @@ def setconnection(autocommit='n'):
 	return dbconnection
 
 
-def returnfirstlinenumber(workdb, cursor):
+def returnfirstlinenumber(workid, cursor):
 	"""
 	return the lowest index value
 	used to handle exceptions
@@ -234,16 +234,20 @@ def returnfirstlinenumber(workdb, cursor):
 	:param cursor:
 	:return:
 	"""
+
+	db = workid[0:6]
+
 	firstline = -1
 	while firstline == -1:
-		query = 'SELECT min(index) FROM  ' + workdb
+		query = 'SELECT min(index) FROM ' + db + ' WHERE wkuniversalid=%s'
+		data = (workid,)
 		try:
-			cursor.execute(query)
+			cursor.execute(query, data)
 			found = cursor.fetchone()
 			firstline = found[0]
 		except:
-			workdb = perseusidmismatch(workdb,cursor)
-			firstline = returnfirstlinenumber(workdb, cursor)
+			workdb = perseusidmismatch(workid,cursor)
+			firstline = returnfirstlinenumber(workid, cursor)
 		
 	return firstline
 

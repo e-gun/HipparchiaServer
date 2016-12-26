@@ -176,12 +176,19 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 	need to deal with the perseus bibliographic references which often do not go all the way down to level zero
 	use what you have to find the first available db line so you can construck a '_LN_' browseto click
 	the citation list arrives in ascending order of levels: 00, 01, 02...
+
+	sent something like:
+		lt1002w001
+		['28', '7', '1']
+
+	= 'Quintilian IO 1.7.28'
+
 	:param workid:
 	:param citationlist:
 	:param cursor:
 	:return:
 	"""
-	
+
 	lmap = {0: 'level_00_value', 1: 'level_01_value', 2: 'level_02_value', 3: 'level_03_value', 4: 'level_04_value',
 	        5: 'level_05_value'}
 	
@@ -221,7 +228,8 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 		# you have an incomplete citation: assume that the top level is the last item, etc.
 		citationlist = perseuscitationsintohipparchiacitations(citationlist)
 		citationlist.reverse()
-		query = 'SELECT index FROM ' + workid + ' WHERE '
+		auid = workid[0:6]
+		query = 'SELECT index FROM ' + auid + ' WHERE wkuniversalid=%s AND '
 		try:
 			for level in range(numberoflevels-1, numberoflevels-len(citationlist)-1,-1):
 				query += lmap[level] + '=%s AND '
@@ -230,7 +238,7 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 			
 		# drop the final 'AND '
 		query = query[:-4] + ' ORDER BY index ASC'
-		data = tuple(citationlist)
+		data = tuple([workid]+citationlist)
 		try:
 			cursor.execute(query, data)
 			found = cursor.fetchone()
