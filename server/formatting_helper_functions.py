@@ -457,3 +457,50 @@ def insertdatarow(label, css, founddate):
 	linehtml += '<td class="crossreference">' + columna + '</td></tr>\n'
 	
 	return linehtml
+
+
+def calculatewholeauthorsearches(authorandworklist, authordict):
+	"""
+
+	we have applied all of our inclusions and exclusions by this point
+	we might well be sitting on a pile of authorsandworks that is really a pile of full author dbs
+	i.e, we have not excluded anything from 'Cicero'
+	there is no reasons to search that DB work by work since it just means doing a series of "WHERE" searches
+	instead of a single, faster search of the whole thing
+
+	this function will figure out if the list of work uids contains all of the works for an author and can accordingly be collapsed
+
+	:param authorandworklist:
+	:param authordict:
+	:return:
+	"""
+
+	authorspresent = []
+	for a in authorandworklist:
+		authorspresent.append(a[0:6])
+	authorspresent = list(set(authorspresent))
+
+	theoreticalpoolofworks = {}
+	for a in authorspresent:
+		for w in authordict[a].listofworks:
+			theoreticalpoolofworks[w.universalid] = a
+
+	for a in authorandworklist:
+		if a in theoreticalpoolofworks:
+			del theoreticalpoolofworks[a]
+
+	# any remaining works in this dict correspond to authors that we are not searching completely
+	incomplete = [x for x in theoreticalpoolofworks.values()]
+	incomplete = list(set(incomplete))
+
+	complete = list(set(authorspresent) - set(incomplete))
+
+	newsortedlist = []
+	for a in authorandworklist:
+		if a[0:6] in complete:
+			newsortedlist.append(a[0:6])
+		else:
+			newsortedlist.append(a)
+	newsortedlist = list(set(newsortedlist))
+
+	return newsortedlist

@@ -27,7 +27,7 @@ from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, justgreek, justlatin, reducetosessionselections, returnactivedbs
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
-	dropdupes, bcedating, sortauthorandworklists, htmlifysearchfinds
+	dropdupes, bcedating, sortauthorandworklists, htmlifysearchfinds, calculatewholeauthorsearches
 from server.browsing.browserfunctions import getandformatbrowsercontext
 
 # ready some sets of objects that will be generally available: a few seconds spent here will save you the same over and over again later as you constantly regenerate author and work info
@@ -148,6 +148,8 @@ def executesearch():
 		authorandworklist = flagexclusions(authorandworklist)
 		poll[ts].statusis('Sorting the list of works to search')
 		authorandworklist = sortauthorandworklists(authorandworklist, authordict)
+		authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
+		print('authorandworklist',authorandworklist)
 
 		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
 		# so we slap on an index value

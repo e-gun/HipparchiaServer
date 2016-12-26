@@ -143,10 +143,10 @@ def dblineintolineobject(work, dbline):
 	:return:
 	"""
 
-	# work = dbline[1], necessarily
-	# but we are passing it instead
+	# actualwork = dbline[1]
+	# we now need that because 'work' might only be 'lt0472' if we searched the whole author and not a subset
 
-	lineobject = dbWorkLine(work, dbline[0], dbline[2], dbline[3], dbline[4], dbline[5], dbline[6], dbline[7],
+	lineobject = dbWorkLine(dbline[1], dbline[0], dbline[2], dbline[3], dbline[4], dbline[5], dbline[6], dbline[7],
 	                        dbline[8], dbline[9], dbline[10], dbline[11], dbline[12])
 
 	return lineobject

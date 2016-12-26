@@ -345,19 +345,25 @@ def substringsearch(seeking, cursor, workdbname, authors):
 	
 	found = []
 	
-	if '_AT_' not in workdbname:
+	if len(workdbname) == 10:
+		# e.g., 'lt1002w003'
 		query = 'SELECT * FROM ' + audbname + ' WHERE ( wkuniversalid=%s ) AND ( ' + column + ' ' + mysyntax + ' %s ) ' + mylimit
 		data = (workdbname, seeking)
-	
+	elif len(workdbname) == 6:
+		# e.g., 'lt0025'
+		query = 'SELECT * FROM ' + audbname + ' WHERE ( ' + column + ' ' + mysyntax + ' %s ) ' + mylimit
+		data = (seeking,)
 	else:
+		# e.g., 'lt0914w001_AT_3'
 		qw = ''
 		db = workdbname[0:6]
-		d = [workdbname, seeking]
+		wid = workdbname[0:10]
+		d = [wid, seeking]
 		w = whereclauses(workdbname, '=', authors)
 		for i in range(0, len(w)):
 			qw += 'AND (' + w[i][0] + ') '
 			d.append(w[i][1])
-		
+
 		query = 'SELECT * FROM ' + db + ' WHERE ( wkuniversalid=%s ) AND (' + column + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC ' + mylimit
 		data = tuple(d)
 	

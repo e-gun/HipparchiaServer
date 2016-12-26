@@ -48,6 +48,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors, ac
 				wkid = re.sub('x', 'w', wkid)
 				hits[index] = (wkid, simplesearchworkwithexclusion(seeking, wkid, authors, curs))
 			else:
+				# used to have more options, so this 'else' seems illogical/redundant right now
 				hits[index] = (wkid, substringsearch(seeking, curs, wkid, authors))
 				
 			if len(hits[index][1]) == 0:

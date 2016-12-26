@@ -393,7 +393,7 @@ def mpresultformatter(hits, authordict, workdict, seeking, proximate, searchtype
 	for i in range(0,limit):
 		lineobject = hits[i]
 		authorobject = authordict[lineobject.wkuinversalid[0:6]]
-		wid = re.sub(r'x', 'w', lineobject.wkuinversalid)
+		wid = lineobject.wkuinversalid
 		workobject = workdict[wid]
 		workbundles.append({'hitnumber': i+1, 'lo': lineobject, 'wo': workobject, 'ao': authorobject})
 	
