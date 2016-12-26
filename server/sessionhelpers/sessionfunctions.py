@@ -656,6 +656,8 @@ def reducetosessionselections(listmapper, criterion):
 	:return: a relevant dictionary
 	"""
 
+	# print('l/g/i/p',session['latincorpus'], session['greekcorpus'], session['inscriptioncorpus'], session['papyruscorpus'])
+
 	if justtlg():
 		d = listmapper['gr'][criterion]
 	elif justlatin():

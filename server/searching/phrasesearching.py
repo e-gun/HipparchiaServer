@@ -78,9 +78,11 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activep
 			activepoll.remain(len(workstosearch))
 		except: w = (-1, 'gr0000w000')
 		index = w[0]
+
 		if index != -1:
 			matchobjects = []
 			wkid = w[1]
+			db = wkid[0:6]
 			# echeck for exclusions
 			if re.search(r'x', wkid) is not None:
 				wkid = re.sub(r'x', 'w', wkid)
@@ -90,7 +92,7 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activep
 						restrictions.append(whereclauses(p, '<>', authors))
 			
 				whr = ''
-				data = []
+				data = [wkid[0:10]]
 				for r in restrictions:
 					for i in range(0, len(r)):
 						whr += r[i][0] + 'OR '
@@ -100,16 +102,17 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activep
 				# drop the trailing ') AND ('
 				whr = whr[0:-6]
 			
-				query = 'SELECT * FROM ' + wkid[0:10] + ' WHERE ('+ whr + ' ORDER BY index ASC'
+				query = 'SELECT * FROM ' + db + ' WHERE ( wkuniversalid = %s) AND ('+ whr + ' ORDER BY index ASC'
 				curs.execute(query, tuple(data))
 			else:
 				if '_AT_' not in wkid:
 					wkid = re.sub(r'x', 'w', wkid)
-					query = 'SELECT * FROM ' + wkid + ' ORDER BY index'
-					curs.execute(query)
+					query = 'SELECT * FROM ' + db + ' WHERE ( wkuniversalid = %s) ORDER BY index'
+					data = (wkid[0:10],)
+					curs.execute(query, data)
 				else:
 					whr = ''
-					data = []
+					data = [wkid[0:10]]
 					w = whereclauses(wkid, '=', authors)
 					for i in range(0, len(w)):
 						whr += 'AND (' + w[i][0] + ') '
@@ -117,7 +120,7 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activep
 					# strip extra ANDs
 					whr = whr[4:]
 					wkid = re.sub(r'x', 'w', wkid)
-					query = 'SELECT * FROM ' + wkid[0:10] + ' WHERE '+whr+' ORDER BY index'
+					query = 'SELECT * FROM ' + db + ' WHERE ( wkuniversalid = %s) AND ( '+whr+' ORDER BY index'
 					curs.execute(query, data)
 					
 			fulltext = curs.fetchall()

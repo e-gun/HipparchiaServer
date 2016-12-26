@@ -59,7 +59,7 @@ def workonsimplesearch(count, hits, seeking, searching, commitcount, authors, ac
 	dbconnection.commit()
 	curs.close()
 	del dbconnection
-	
+
 	return hits
 
 

@@ -141,7 +141,7 @@ def lineobjectresultformatter(lineobject, searchterm, proximate, searchtype, hig
 	return formatteddict
 
 
-def aggregatelines(firstline, lastline, cursor, workdbname):
+def aggregatelines(firstline, lastline, cursor, audbname):
 	"""
 	build searchable clumps of words spread over various lines
 
@@ -151,15 +151,18 @@ def aggregatelines(firstline, lastline, cursor, workdbname):
 	:param workdbname:
 	:return:
 	"""
-	
-	query = 'SELECT * FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
+
+	# transitional until all code is 'monolithic'
+	audbname = audbname[0:6]
+
+	query = 'SELECT * FROM ' + audbname + ' WHERE index >= %s AND index <= %s'
 	data = (firstline, lastline)
 	cursor.execute(query, data)
 	lines = cursor.fetchall()
 	
 	lineobjects = []
 	for dbline in lines:
-		lineobjects.append(dblineintolineobject(workdbname, dbline))
+		lineobjects.append(dblineintolineobject(audbname, dbline))
 	
 	aggregate = ''
 	if session['accentsmatter'] == 'Y':

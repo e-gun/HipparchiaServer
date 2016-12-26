@@ -71,7 +71,6 @@ def compileauthorandworklist(listmapper):
 			if session['spuria'] == 'N':
 				authorandworklist = removespuria(authorandworklist, wd)
 		else:
-			print('there are constraints')
 			# build lists up from specific items (passages) to more general classes (works, then authors)
 
 			authorandworklist = []
@@ -281,7 +280,8 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 	
 	seeking = cleansearchterm(seeking)
 	hyphsearch = seeking
-	db = workdbname[0:10]
+	db = workdbname[0:6]
+	wkid = workdbname[0:10]
 	
 	mysyntax = '~*'
 	if seeking[0] == ' ':
@@ -295,7 +295,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 		if workdbname in p:
 			restrictions.append(whereclauses(p, '<>', authors))
 	
-	d = [seeking, hyphsearch]
+	d = [wkid, seeking, hyphsearch]
 	qw = 'AND ('
 	for r in restrictions:
 		for i in range(0, len(r)):
@@ -306,7 +306,8 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 	# drop the trailing ') AND ('
 	qw = qw[0:-6]
 	
-	query = 'SELECT * FROM ' + db + ' WHERE (' + columna + ' ' + mysyntax + ' %s OR ' + columnb + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC '+mylimit
+	query = 'SELECT * FROM ' + db + ' WHERE ( wkuniversalid=%s ) AND ('  \
+			+ columna + ' ' + mysyntax + ' %s OR ' + columnb + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC '+mylimit
 	data = tuple(d)
 	cursor.execute(query, data)
 	found = cursor.fetchall()
@@ -331,7 +332,8 @@ def substringsearch(seeking, cursor, workdbname, authors):
 		column = 'accented_line'
 	else:
 		column = 'stripped_line'
-	
+
+	audbname = workdbname[0:6]
 	seeking = cleansearchterm(seeking)
 	
 	mysyntax = '~*'
@@ -344,19 +346,19 @@ def substringsearch(seeking, cursor, workdbname, authors):
 	found = []
 	
 	if '_AT_' not in workdbname:
-		query = 'SELECT * FROM ' + workdbname + ' WHERE ' + column + ' ' + mysyntax + ' %s ' + mylimit
-		data = (seeking,)
+		query = 'SELECT * FROM ' + audbname + ' WHERE ( wkuniversalid=%s ) AND ( ' + column + ' ' + mysyntax + ' %s ) ' + mylimit
+		data = (workdbname, seeking)
 	
 	else:
 		qw = ''
-		db = workdbname[0:10]
-		d = [seeking]
+		db = workdbname[0:6]
+		d = [workdbname, seeking]
 		w = whereclauses(workdbname, '=', authors)
 		for i in range(0, len(w)):
 			qw += 'AND (' + w[i][0] + ') '
 			d.append(w[i][1])
 		
-		query = 'SELECT * FROM ' + db + ' WHERE (' + column + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC ' + mylimit
+		query = 'SELECT * FROM ' + db + ' WHERE ( wkuniversalid=%s ) AND (' + column + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC ' + mylimit
 		data = tuple(d)
 	
 	try:
@@ -364,11 +366,11 @@ def substringsearch(seeking, cursor, workdbname, authors):
 		found = cursor.fetchall()
 	except:
 		print('could not execute', query, data)
-	
+
 	return found
 
 
-def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
+def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 	"""
 	grab a line and add the N words at the tail and head of the previous and next lines
 	this will let you search for phrases that fall along a line break "και δη | και"
@@ -385,9 +387,8 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workdbname, cursor):
 	:param cursor:
 	:return:
 	"""
-	
-	if '_AT_' in workdbname:
-		workdbname = workdbname[0:10]
+
+	workdbname = workid[0:6]
 
 	query = 'SELECT * FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
 	data = (linenumber-1, linenumber+1)

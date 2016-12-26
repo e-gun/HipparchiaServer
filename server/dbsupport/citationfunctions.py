@@ -9,7 +9,7 @@ import re
 from server.dbsupport.dbfunctions import findtoplevelofwork, returnfirstlinenumber, perseusidmismatch, returnfirstwork
 
 
-def findvalidlevelvalues(workdb, workstructure, partialcitationtuple, cursor):
+def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 	"""
 	tell me some of a citation and i can tell you what is a valid choice at the next step
 	i expect the lowest level to be stored at position 0 in the tuple
@@ -37,11 +37,13 @@ def findvalidlevelvalues(workdb, workstructure, partialcitationtuple, cursor):
 			partialcitationtuple.pop()
 		except:
 			atlevel = availablelevels
-		
+
+	audb = workid[0:6]
+
 	# select level_00_value from gr0565w001 where level_03_value='3' AND level_02_value='2' AND level_01_value='1' AND level_00_value NOT IN ('t') ORDER BY index ASC;
 	# select level_01_value from gr0565w001 where level_03_value='2' AND level_02_value='1' AND level_01_value NOT IN ('t') ORDER BY index ASC;
-	query = 'SELECT level_0' + str(atlevel-1) + '_value FROM ' + workdb + ' WHERE '
-	datalist = []
+	query = 'SELECT level_0' + str(atlevel-1) + '_value FROM ' + audb + ' WHERE ( wkuniversalid=%s ) AND  '
+	datalist = [workid]
 	for level in range(availablelevels - 1, atlevel - 1, -1):
 		query += ' level_0' + str(level) + '_value=%s AND '
 		datalist.append(partialcitationtuple[availablelevels-level-1])
@@ -49,6 +51,7 @@ def findvalidlevelvalues(workdb, workstructure, partialcitationtuple, cursor):
 	datalist.append('t')
 	data = tuple(datalist)
 	cursor.execute(query, data)
+
 	values = cursor.fetchall()
 
 	if len(values) < 1:
@@ -60,6 +63,8 @@ def findvalidlevelvalues(workdb, workstructure, partialcitationtuple, cursor):
 		rng.append(val[0])
 	rng = list(set(rng))
 	rng.sort()
+
+	# print('rng',rng)
 	# but now 1, 11, 12... comes before 2, 3, 4
 	rangenumbers = {}
 	rangebottom = []
@@ -74,7 +79,6 @@ def findvalidlevelvalues(workdb, workstructure, partialcitationtuple, cursor):
 	for key in 	rangekeys:
 		sortedrange.append(rangenumbers[key])
 	sortedrange += rangebottom
-
 
 	lowandhigh = (availablelevels, atlevel-1, workstructure[atlevel - 1], low, high, sortedrange)
 

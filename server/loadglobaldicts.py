@@ -7,7 +7,7 @@
 
 
 from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors
-from server.formatting_helper_functions import prunedict
+from server.formatting_helper_functions import dictitemstartswith
 from server.sessionhelpers.sessiondicts import buildaugenresdict, buildworkgenresdict, buildauthorlocationdict, \
 	buildworkprovenancedict
 
@@ -26,14 +26,14 @@ workgenresdict = buildworkgenresdict(workdict)
 workprovenancedict = buildworkprovenancedict(workdict)
 
 print('building specialized sublists')
-tlgauthors = prunedict(authordict, 'universalid', 'gr')
-tlgworks = prunedict(workdict, 'universalid', 'gr')
-latauthors = prunedict(authordict, 'universalid', 'lt')
-latworks = prunedict(workdict, 'universalid', 'lt')
-insauthors = prunedict(authordict, 'universalid', 'in')
-insworks = prunedict(workdict, 'universalid', 'in')
-ddpauthors = prunedict(authordict, 'universalid', 'dp')
-ddpworks = prunedict(workdict, 'universalid', 'dp')
+tlgauthors = dictitemstartswith(authordict, 'universalid', 'gr')
+tlgworks = dictitemstartswith(workdict, 'universalid', 'gr')
+latauthors = dictitemstartswith(authordict, 'universalid', 'lt')
+latworks = dictitemstartswith(workdict, 'universalid', 'lt')
+insauthors = dictitemstartswith(authordict, 'universalid', 'in')
+insworks = dictitemstartswith(workdict, 'universalid', 'in')
+ddpauthors = dictitemstartswith(authordict, 'universalid', 'dp')
+ddpworks = dictitemstartswith(workdict, 'universalid', 'dp')
 
 listmapper = {
 	'gr': {'a': tlgauthors, 'w': tlgworks},

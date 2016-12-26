@@ -52,7 +52,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	# for the <-- and --> buttons on the browser
 	first = table + '_LN_' + str(first)
 	last = table + '_LN_' + str(last)
-	
+
 	passage = {}
 	# will be used with the browse forwards and back buttons
 	passage['browseforwards'] = last
@@ -67,7 +67,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	passage['workboxcontents'] = workobject.title+' ('+workobject.universalid[-4:]+')'
 	
 	rawpassage = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
-	
+
 	lines = []
 	for r in rawpassage:
 		lines.append(dblineintolineobject(workobject.universalid, r))

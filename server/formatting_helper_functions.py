@@ -284,6 +284,23 @@ def bcedating():
 	return dmin, dmax
 
 
+def dictitemstartswith(originaldict, element, muststartwith):
+	"""
+
+	trim a dict via a criterion: muststartwith must begin the item to survive the check
+
+	:param originaldict:
+	:param element:
+	:param muststartwith:
+	:return:
+	"""
+
+	muststartwith = '^'+muststartwith
+	newdict = prunedict(originaldict, element, muststartwith)
+
+	return newdict
+
+
 def prunedict(originaldict, element, mustbein):
 	"""
 	trim a dict via a criterion: mustbein must be in it to survive the check
