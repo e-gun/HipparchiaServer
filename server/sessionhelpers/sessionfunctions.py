@@ -139,7 +139,7 @@ def modifysessionvar(param,val):
 	if int(session['maxresults']) < 1:
 		session['maxresults'] = '1'
 
-	if session['sortorder'] not in ['shortname','genres', 'converted_date', 'location']:
+	if session['sortorder'] not in ['universalid', 'shortname', 'genres', 'converted_date', 'location']:
 		session['sortorder'] = 'shortname'
 
 	if session['searchscope'] not in ['L','W']:

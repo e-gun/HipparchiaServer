@@ -148,11 +148,12 @@ def executesearch():
 		authorandworklist = flagexclusions(authorandworklist)
 		workssearched = len(authorandworklist)
 		poll[ts].statusis('Calculating full authors to search')
+		# this next seems slow if you apply it to all 196k works: but it is *much* faster than searching via 196K WHERE clauses
+		# nevertheless, try to speed it up
 		authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
-		# print('authorandworklist',authorandworklist)
 
-		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
-		# so we slap on an index value
+		# worklist is unsorted, and the index is only semi-useful right now, but it is hard to rip it out
+		# since it is also used to allow the manager to manage a dict and its keys
 
 		indexedworklist = []
 		index = -1
@@ -239,7 +240,11 @@ def executesearch():
 			hitmax = 'true'
 		
 		# prepare the output
-		
+
+		sortorderdecoder = {
+			'universalid': 'ID', 'shortname': 'name', 'genres': 'author genre', 'converted_date': 'date', 'location': 'location'
+		}
+
 		output = {}
 		output['title'] = thesearch
 		output['found'] = finds
@@ -252,7 +257,7 @@ def executesearch():
 		output['thesearch'] = thesearch
 		output['htmlsearch'] = htmlsearch
 		output['hitmax'] = hitmax
-		output['sortby'] = session['sortorder']
+		output['sortby'] = sortorderdecoder[session['sortorder']]
 		output['dmin'] = dmin
 		output['dmax'] = dmax
 		if justlatin() == False:
