@@ -389,6 +389,6 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 				print('\nWARNING\n\t VERSION MISMATCH')
 				print('\n\t',labeldecoder[db],'has a build version of',str(corpora[db][0]),'( and the data was compiled',corpora[db][1],')')
 				print('\n\t But the server expects the build version to be',str(expectedsqltemplateversion))
-				print('\n\t EXPECT FOR THE WORST IF YOU TRY TO EXECUTE ANY SEARCHES\nWARNING\n')
+				print('\n\t EXPECT THE WORST IF YOU TRY TO EXECUTE ANY SEARCHES\nWARNING\n')
 
 	return
