@@ -305,8 +305,13 @@ def woformatworkinfo(workobject):
 	else:
 		c = ''
 
-	if int(workobject.converted_date) < 1500:
-		if int(workobject.converted_date) > 0:
+	try:
+		dateval = int(workobject.converted_date)
+	except:
+		dateval = 9999
+
+	if dateval < 1500:
+		if dateval > 0:
 			suffix = 'CE'
 			d = '(assigned to ' + str(workobject.converted_date) + ' ' + suffix + ')'
 		else:

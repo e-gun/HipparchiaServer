@@ -839,9 +839,16 @@ def getauthinfo():
 		authinfo +='<br /><br /><span class="italic">work numbers:</span><br />\n'
 	else:
 		authinfo +='<br /><span class="italic">work:</span><br />\n'
-	
+
+	sortedworks = {}
 	for work in theauthor.listofworks:
-		authinfo += woformatworkinfo(work)
+		sortedworks[work.universalid] = work
+
+	keys = sortedworks.keys()
+	keys = sorted(keys)
+
+	for work in keys:
+		authinfo += woformatworkinfo(sortedworks[work])
 		
 	authinfo = json.dumps(authinfo)
 	
