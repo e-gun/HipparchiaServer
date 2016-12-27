@@ -83,7 +83,7 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activep
 			matchobjects = []
 			wkid = w[1]
 			db = wkid[0:6]
-			# echeck for exclusions
+			# check for exclusions
 			if re.search(r'x', wkid) is not None:
 				wkid = re.sub(r'x', 'w', wkid)
 				restrictions = []
