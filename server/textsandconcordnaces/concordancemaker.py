@@ -29,7 +29,8 @@ def compilewordlists(worksandboundaries, cursor):
 	lineobjects = deque()
 	
 	for w in worksandboundaries:
-		query = 'SELECT * FROM ' + w + ' WHERE (index >= %s AND index <= %s)'
+		db = w[0:6]
+		query = 'SELECT * FROM ' + db + ' WHERE (index >= %s AND index <= %s)'
 		data = (worksandboundaries[w][0], worksandboundaries[w][1])
 		cursor.execute(query, data)
 		lines = cursor.fetchall()
@@ -134,8 +135,6 @@ def linesintoconcordance(lineobjects, activepoll):
 			for w in words:
 				try:
 					# to forestall the problem of sorting the citation values later, include the index now
-					# sp variant:
-					print('ll',line.locus())
 					concordance[w].append((line.wkuinversalid, line.index, line.locus()))
 					# concordance[w].append() seems to have race condition problems in mp land: you will end up with 1 copy of each word
 					# mp variant:
