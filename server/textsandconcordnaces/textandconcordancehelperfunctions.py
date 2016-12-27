@@ -80,7 +80,7 @@ def tcfindstartandstop(authorobject, workobject, passageaslist, cursor):
 	
 	p = tuple(passageaslist)
 	passage = finddblinefromincompletelocus(workobject.universalid, p, cursor)
-	line = grabonelinefromwork(workobject.universalid, passage, cursor)
+	line = grabonelinefromwork(authorobject.universalid, passage, cursor)
 	lo = dblineintolineobject(workobject.universalid, line)
 	
 	# let's say you looked for 'book 2' of something that has 'book, chapter, line'
@@ -91,15 +91,15 @@ def tcfindstartandstop(authorobject, workobject, passageaslist, cursor):
 	selection = workobject.universalid + '_AT_' + atloc
 	
 	w = whereclauses(selection, '=', {authorobject.universalid: authorobject})
-	d = []
+	d = [workobject.universalid]
 	qw = ''
 	for i in range(0, len(w)):
 		qw += 'AND (' + w[i][0] + ') '
 		d.append(w[i][1])
-	# remove the leading AND
-	qw = qw[4:]
-	query = 'SELECT index FROM ' + workobject.universalid + ' WHERE ' + qw + ' ORDER BY index DESC LIMIT 1'
+
+	query = 'SELECT index FROM ' + authorobject.universalid + ' WHERE wkuniversalid=%s ' + qw + ' ORDER BY index DESC LIMIT 1'
 	data = tuple(d)
+
 	cursor.execute(query, data)
 	found = cursor.fetchone()
 	
