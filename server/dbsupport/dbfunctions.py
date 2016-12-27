@@ -349,3 +349,46 @@ def makeanemptywork(universalid):
 	
 	return wkobject
 
+
+def versionchecking(activedbs, expectedsqltemplateversion):
+	"""
+
+	send a warning if the corpora were built from a different template than the one active on the server
+
+	:param activedbs:
+	:param expectedsqltemplateversion:
+	:return:
+	"""
+
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
+
+	activedbs += ['lx', 'lm']
+	labeldecoder = {
+		'lt': 'The corpus of Latin authors',
+		'gk': 'The corpus of Greek authors',
+		'in': 'The corpus of inscriptions',
+		'dp': 'The corpus of papyri',
+		'lx': 'The lexical database',
+		'ln': 'The parsing database'
+	}
+
+	q = 'SELECT corpusname, templateversion, corpusbuilddate FROM builderversion'
+	curs.execute(q)
+	results = curs.fetchall()
+
+	corpora = {}
+	for r in results:
+		corpora[r[0]] = (r[1],r[2])
+
+	print('corpora',corpora)
+
+	for db in activedbs:
+		if db in corpora:
+			if int(corpora[db][0]) != expectedsqltemplateversion:
+				print('\nWARNING\n\t VERSION MISMATCH')
+				print('\n\t',labeldecoder[db],'has a build version of',str(corpora[db][0]),'( and the data was compiled',corpora[db][1],')')
+				print('\n\t But the server expects the build version to be',str(expectedsqltemplateversion))
+				print('\n\t EXPECT FOR THE WORST IF YOU TRY TO EXECUTE ANY SEARCHES\nWARNING\n')
+
+	return

@@ -12,7 +12,7 @@ from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
 from server.hipparchiaclasses import ProgressPoll
-from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork
+from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
@@ -48,6 +48,9 @@ def frontpage():
 	
 	:return:
 	"""
+
+	expectedsqltemplateversion = 12272016
+
 	sessionvariables()
 
 	# check to see which dbs we actually own
@@ -55,6 +58,8 @@ def frontpage():
 	for list in listmapper:
 		if len(listmapper[list]['a']) > 0:
 			activelists.append(list)
+
+	versionchecking(activelists, expectedsqltemplateversion)
 
 	page = render_template('search.html',activelists=activelists)
 	
