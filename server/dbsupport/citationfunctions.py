@@ -111,6 +111,7 @@ def locusintocitation(workobject, citationtuple):
 			# did you send me a partial citation like "book 2"?
 			pass
 	citation = citation[:-2]
+
 	return citation
 
 

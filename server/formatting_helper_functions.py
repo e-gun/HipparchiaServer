@@ -210,6 +210,62 @@ def sortauthorandworklists(authorandworklist, authorsdict):
 	return newlist
 
 
+def sortresultslist(hits, authorsdict, worksdict):
+	"""
+
+	take a list of hits (which is a list of line objects)
+	sort it by the session sort criterion
+	mark the list with index numbers (because an mp function will grab this next)
+
+	:param hits:
+	:param authorsdict:
+	:return:
+	"""
+
+
+	sortby = session['sortorder']
+	templist = []
+	hitsdict = {}
+
+	for hit in hits:
+		auid = hit.wkuinversalid[0:6]
+		wkid = hit.wkuinversalid
+		sortablestring = authorsdict[auid].shortname + worksdict[wkid].title
+		if sortby == 'converted_date':
+			try:
+				crit = int(worksdict[wkid].converted_date)
+				if crit > 2000:
+					try:
+						crit = int(authorsdict[auid].converted_date)
+					except:
+						crit = 9999
+			except:
+				try:
+					crit = int(authorsdict[auid].converted_date)
+				except:
+					crit = 9999
+		elif sortby == 'provenance':
+			crit = getattr(worksdict[wkid], sortby)
+		elif sortby == 'location' or sortby == 'shortname' or sortby == 'authgenre':
+			crit = getattr(authorsdict[auid], sortby)
+		else:
+			crit = hit.wkuinversalid+str(hit.index)
+
+		templist.append([crit, sortablestring, hit])
+
+	# http://stackoverflow.com/questions/5212870/sorting-a-python-list-by-two-criteria#17109098
+	# sorted(list, key=lambda x: (x[0], -x[1]))
+
+	templist = sorted(templist, key=lambda x: (x[0], x[1]))
+
+	index = -1
+	for t in templist:
+		index += 1
+		hitsdict[index] = t[2]
+
+	return hitsdict
+
+
 def getpublicationinfo(workobject, cursor):
 	"""
 	what's in a name?
@@ -464,9 +520,11 @@ def calculatewholeauthorsearches(authorandworklist, authordict):
 
 	we have applied all of our inclusions and exclusions by this point
 	we might well be sitting on a pile of authorsandworks that is really a pile of full author dbs
-	i.e, we have not excluded anything from 'Cicero'
-	there is no reasons to search that DB work by work since it just means doing a series of "WHERE" searches
-	instead of a single, faster search of the whole thing
+	for example, we have not excluded anything from 'Cicero'
+
+	there is no reason to search that DB work by work since that just means doing a series of "WHERE" searches
+	instead of a single, faster search of the whole thing: hits are turned into full citations via the info contained in the
+	hit itself and there is no need to derive the work from the item name sent to the dispatcher
 
 	this function will figure out if the list of work uids contains all of the works for an author and can accordingly be collapsed
 

@@ -27,7 +27,7 @@ from server.textsandconcordnaces.textbuilder import buildtext
 from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, justgreek, justlatin, reducetosessionselections, returnactivedbs
 from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
-	dropdupes, bcedating, sortauthorandworklists, htmlifysearchfinds, calculatewholeauthorsearches
+	dropdupes, bcedating, sortauthorandworklists, htmlifysearchfinds, calculatewholeauthorsearches, sortresultslist
 from server.browsing.browserfunctions import getandformatbrowsercontext
 
 # ready some sets of objects that will be generally available: a few seconds spent here will save you the same over and over again later as you constantly regenerate author and work info
@@ -146,10 +146,10 @@ def executesearch():
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		poll[ts].statusis('Marking exclusions from the list of works to search')
 		authorandworklist = flagexclusions(authorandworklist)
-		poll[ts].statusis('Sorting the list of works to search')
-		authorandworklist = sortauthorandworklists(authorandworklist, authordict)
+		workssearched = len(authorandworklist)
+		poll[ts].statusis('Calculating full authors to search')
 		authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
-		print('authorandworklist',authorandworklist)
+		# print('authorandworklist',authorandworklist)
 
 		# worklist is sorted, and you need to be able to retain that ordering even though mp execution is coming
 		# so we slap on an index value
@@ -218,7 +218,8 @@ def executesearch():
 		# safe to send authordict and workdict to mpresultformatter() because only the objects relevant to hits
 		# will get sent to the manager (thus avoiding the problem you see with loading them all into searchdispacher()
 
-		allfound = mpresultformatter(hits, authordict, workdict, seeking, proximate, searchtype, poll[ts])
+		hitdict = sortresultslist(hits, authordict, workdict)
+		allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, poll[ts])
 		
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
@@ -244,7 +245,7 @@ def executesearch():
 		output['found'] = finds
 		output['js'] = findsjs
 		output['resultcount'] = resultcount
-		output['scope'] = str(len(indexedworklist))
+		output['scope'] = str(workssearched)
 		output['searchtime'] = str(searchtime)
 		output['lookedfor'] = seeking
 		output['proximate'] = proximate
@@ -877,8 +878,16 @@ def getsearchlistcontents():
 		except:
 			# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
 			pass
-		searchlistinfo += '\n[' + str(count) + ']&nbsp;' + formatauthorandworkinfo(a, w)
-	
+		searchlistinfo += '\n[' + str(count) + ']&nbsp;'
+
+		if int(w.converted_date) < 2000:
+			if int(w.converted_date) < 1:
+				searchlistinfo += '('+w.converted_date[1:]+ ' BCE)&nbsp;'
+			else:
+				searchlistinfo += '(' + w.converted_date + ' CE)&nbsp;'
+
+		searchlistinfo += formatauthorandworkinfo(a, w)
+
 	if wordstotal > 0:
 		searchlistinfo += '<br /><span class="emph">total words:</span> ' + format(wordstotal, ',d')
 	

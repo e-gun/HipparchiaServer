@@ -368,30 +368,37 @@ def sortandunpackresults(hits):
 	return results
 
 
-def mpresultformatter(hits, authordict, workdict, seeking, proximate, searchtype, activepoll):
+def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, activepoll):
 	"""
 	if you have lots of results, they don't get formatted as fast as they could:
 	single threaded is fine if all from same author, but something like 1500 hits of αξιολ will bounce you around a lot
 		22s single threaded to do search + format
 		12s multi-threaded to do search + format
+
+	the hitdict is a collection of line objects where the key is the proper sort order for the results
+		hitdict {0: <server.hipparchiaclasses.dbWorkLine object at 0x103dd17b8>, 1: <server.hipparchiaclasses.dbWorkLine object at 0x103dd1780>}
+
 	:return:
 	"""
-	
+
+	# for h in hitdict.keys():
+	# 	print(h,hitdict[h].universalid, hitdict[h].accented)
+
 	linesofcontext = int(session['linesofcontext'])
 	
-	activepoll.allworkis(len(hits))
-	activepoll.remain(len(hits))
+	activepoll.allworkis(len(hitdict))
+	activepoll.remain(len(hitdict))
 		
 	workbundles = []
-	if len(hits) > int(session['maxresults']):
+	if len(hitdict) > int(session['maxresults']):
 		limit = int(session['maxresults'])
 	else:
-		limit = len(hits)
+		limit = len(hitdict)
 	
 	criteria = {'ctx': linesofcontext, 'seek': seeking, 'prox': proximate, 'type': searchtype}
 	
 	for i in range(0,limit):
-		lineobject = hits[i]
+		lineobject = hitdict[i]
 		authorobject = authordict[lineobject.wkuinversalid[0:6]]
 		wid = lineobject.wkuinversalid
 		workobject = workdict[wid]
@@ -409,7 +416,7 @@ def mpresultformatter(hits, authordict, workdict, seeking, proximate, searchtype
 	
 	for j in jobs: j.start()
 	for j in jobs: j.join()
-	
+
 	# allfound{} looks like:
 	# {1: [{'author': 'Aratus', 'newfind': 1, 'hitnumber': 1, 'citation': 'Book 1, line 249', 'work': 'Phaenomena', 'url': 'gr0653w001_LN_249'}, {'locus': ('247', '1'), 'line': 'ϲῆμα βορειοτέρου· μάλα γάρ νύ οἱ ἐγγύθεν ἐϲτίν.', 'index': 247}, {'locus': ('248', '1'), 'line': '&nbsp;&nbsp;&nbsp;&nbsp; Ἀμφότεροι δὲ πόδεϲ γαμβροῦ ἐπιϲημαίνοιεν', 'index': 248}, {'locus': ('249', '1'), 'line': '<span class="highlight"><span class="expanded">Περϲέοϲ</span>,<span class="match"> οἵ ῥά οἱ</span> αἰὲν ἐπωμάδιοι φορέονται.</span>', 'index': 249}, {'locus': ('250', '1'), 'line': 'Αὐτὰρ ὅγ’ ἐν βορέω φέρεται περιμήκετοϲ ἄλλων.', 'index': 250}, {'locus': ('251', '1'), 'line': 'Καί οἱ δεξιτερὴ μὲν ἐπὶ κλιϲμὸν τετάνυϲται', 'index': 251}] }
 	keys = sorted(allfound.keys())
@@ -495,6 +502,6 @@ def formattedcittationincontext(lineobject, workobject, authorobject, linesofcon
 	dbconnection.commit()
 	curs.close()
 	del dbconnection
-	
+
 	return citationincontext
 
