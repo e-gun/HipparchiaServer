@@ -113,12 +113,15 @@ class dbOpus(object):
 		self.availablelevels = availablelevels
 		
 	def citation(self):
-		cit = []
-		levels = [self.levellabels_00, self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04, self.levellabels_05]
-		for l in range(0,self.availablelevels):
-			cit.append(levels[l])
-		cit.reverse()
-		cit = ', '.join(cit)
+		if self.universalid[0:2] not in ['in', 'dp']:
+			cit = []
+			levels = [self.levellabels_00, self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04, self.levellabels_05]
+			for l in range(0,self.availablelevels):
+				cit.append(levels[l])
+			cit.reverse()
+			cit = ', '.join(cit)
+		else:
+			cit = '(face,) line'
 		
 		return cit
 
