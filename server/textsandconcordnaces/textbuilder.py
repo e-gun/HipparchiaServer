@@ -40,7 +40,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 			thisline = dblineintolineobject(work,line)
 			
 			if work[0:2] in ['in', 'dp']:
-				if thisline.annotations != '':
+				if thisline.annotations != '' and re.search(r'documentnumber',thisline.annotations) is None:
 					columna = ''
 					columnb = '<span class="crossreference">' + thisline.annotations + '</span>'
 					xref = '<tr><td class="browsercite">' + columna + '</td>'

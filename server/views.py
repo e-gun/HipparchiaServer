@@ -148,8 +148,6 @@ def executesearch():
 		authorandworklist = flagexclusions(authorandworklist)
 		workssearched = len(authorandworklist)
 		poll[ts].statusis('Calculating full authors to search')
-		# this next seems slow if you apply it to all 196k works: but it is *much* faster than searching via 196K WHERE clauses
-		# nevertheless, try to speed it up
 		authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
 
 		# worklist is unsorted, and the index is only semi-useful right now, but it is hard to rip it out

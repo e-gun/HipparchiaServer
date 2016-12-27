@@ -518,9 +518,8 @@ def insertdatarow(label, css, founddate):
 def calculatewholeauthorsearches(authorandworklist, authordict):
 	"""
 
-	we have applied all of our inclusions and exclusions by this point
-	we might well be sitting on a pile of authorsandworks that is really a pile of full author dbs
-	for example, we have not excluded anything from 'Cicero'
+	we have applied all of our inclusions and exclusions by this point and we might well be sitting on a pile of authorsandworks
+	that is really a pile of full author dbs. for example, imagine we have not excluded anything from 'Cicero'
 
 	there is no reason to search that DB work by work since that just means doing a series of "WHERE" searches
 	instead of a single, faster search of the whole thing: hits are turned into full citations via the info contained in the
@@ -528,14 +527,15 @@ def calculatewholeauthorsearches(authorandworklist, authordict):
 
 	this function will figure out if the list of work uids contains all of the works for an author and can accordingly be collapsed
 
+	this function seems slow if you apply it to all 196k works: but it is *much* faster (50x?) than searching via 196K WHERE clauses
+	nevertheless, try to speed it up, if such is possible
+
 	:param authorandworklist:
 	:param authordict:
 	:return:
 	"""
 
-	authorspresent = []
-	for a in authorandworklist:
-		authorspresent.append(a[0:6])
+	authorspresent = [x[0:6] for x in authorandworklist]
 	authorspresent = list(set(authorspresent))
 
 	theoreticalpoolofworks = {}
