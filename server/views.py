@@ -17,7 +17,6 @@ from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinef
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
-from server.searching.searchfunctions import flagexclusions, compileauthorandworklist, calculatewholeauthorsearches
 from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordancefromwork
@@ -28,7 +27,7 @@ from server.listsandsession.sessionfunctions import modifysessionvar, modifysess
 	sessionvariables, sessionselectionsashtml, rationalizeselections, justgreek, justlatin, reducetosessionselections, returnactivedbs
 from server.formatting_helper_functions import removegravity, stripaccents, bcedating, htmlifysearchfinds
 from server.listsandsession.listmanagement import dropdupes, polytonicsort, sortauthorandworklists, sortresultslist, \
-	tidyuplist
+	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions
 from server.browsing.browserfunctions import getandformatbrowsercontext
 
 # ready some sets of objects that will be generally available: a few seconds spent here will save you the same over and over again later as you constantly regenerate author and work info

@@ -5,13 +5,12 @@
 	License: GPL 3 (see LICENSE in the top level directory of the distribution)
 """
 
-
 import re
 from collections import deque
-
 from flask import session
-
 from server.formatting_helper_functions import stripaccents
+from server.listsandsession.sessionfunctions import reducetosessionselections
+from server.searching.searchformatting import removespuria, prunebydate
 
 
 def dropdupes(checklist, matchlist):
@@ -219,3 +218,251 @@ def tidyuplist(untidylist):
 		tidylist = []
 
 	return tidylist
+
+
+def calculatewholeauthorsearches(authorandworklist, authordict):
+	"""
+
+	we have applied all of our inclusions and exclusions by this point and we might well be sitting on a pile of authorsandworks
+	that is really a pile of full author dbs. for example, imagine we have not excluded anything from 'Cicero'
+
+	there is no reason to search that DB work by work since that just means doing a series of "WHERE" searches
+	instead of a single, faster search of the whole thing: hits are turned into full citations via the info contained in the
+	hit itself and there is no need to derive the work from the item name sent to the dispatcher
+
+	this function will figure out if the list of work uids contains all of the works for an author and can accordingly be collapsed
+
+	this function seems slow if you apply it to all 196k works: but it is *much* faster (50x?) than searching via 196K WHERE clauses
+	nevertheless, try to speed it up, if such is possible
+
+	:param authorandworklist:
+	:param authordict:
+	:return:
+	"""
+
+	authorspresent = [x[0:6] for x in authorandworklist]
+	authorspresent = list(set(authorspresent))
+
+	theoreticalpoolofworks = {}
+	for a in authorspresent:
+		for w in authordict[a].listofworks:
+			theoreticalpoolofworks[w.universalid] = a
+
+	for a in authorandworklist:
+		if a in theoreticalpoolofworks:
+			del theoreticalpoolofworks[a]
+
+	# any remaining works in this dict correspond to authors that we are not searching completely
+	incomplete = [x for x in theoreticalpoolofworks.values()]
+	incomplete = list(set(incomplete))
+
+	complete = list(set(authorspresent) - set(incomplete))
+
+	newsortedlist = []
+	for a in authorandworklist:
+		if a[0:6] in complete:
+			newsortedlist.append(a[0:6])
+		else:
+			newsortedlist.append(a)
+	newsortedlist = list(set(newsortedlist))
+
+	return newsortedlist
+
+
+def compileauthorandworklist(listmapper):
+	"""
+	master author dict + session selctions into a list of dbs to search
+	:param authors:
+	:return:
+	"""
+
+	searchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + session[
+		'psgselections'] + session['wkselections'] + session['alocselections'] + session['wlocselections']
+	exclusionlist = session['auexclusions'] + session['wkexclusions'] + session['agnexclusions'] + session[
+		'wkgnexclusions'] + session['psgexclusions'] + session['alocexclusions'] + session['wlocexclusions']
+
+	# trim by active corpora
+	ad = reducetosessionselections(listmapper, 'a')
+	wd = reducetosessionselections(listmapper, 'w')
+
+	authorandworklist = []
+
+	# build the inclusion list
+	if len(searchlist) > 0:
+		if len(session['agnselections'] + session['wkgnselections'] + session['alocselections'] + session['wlocselections']) == 0:
+			# you have only asked for specific passages and there are no genre constraints
+			# 	eg: just Aeschylus + Aristophanes, Frogs
+			# for the sake of speed we will handle this separately from the more complex case
+			# the code at the end of the 'else' section ought to match the code that follows
+			# the passage checks are superfluous if rationalizeselections() got things right
+
+			passages = session['psgselections']
+			works = session['wkselections']
+			works = tidyuplist(works)
+			works = dropdupes(works, passages)
+
+			for w in works:
+				authorandworklist.append(w)
+
+			authors = []
+			for a in session['auselections']:
+				authors.append(a)
+
+			tocheck = works + passages
+			authors = dropdupes(authors, tocheck)
+			for a in authors:
+				for w in ad[a].listofworks:
+					authorandworklist.append(w.universalid)
+			del authors
+			del works
+
+			if len(session['psgselections']) > 0:
+				authorandworklist = dropdupes(authorandworklist, session['psgselections'])
+				authorandworklist = session['psgselections'] + authorandworklist
+
+			authorandworklist = list(set(authorandworklist))
+
+			if session['spuria'] == 'N':
+				authorandworklist = removespuria(authorandworklist, wd)
+		else:
+			# build lists up from specific items (passages) to more general classes (works, then authors)
+
+			authorandworklist = []
+			for g in session['wkgnselections']:
+				authorandworklist += foundindict(wd, 'workgenre', g)
+
+			authorlist = []
+			for g in session['agnselections']:
+				authorlist = foundindict(ad, 'genres', g)
+			for a in authorlist:
+				for w in ad[a].listofworks:
+					authorandworklist.append(w.universalid)
+			del authorlist
+
+			for l in session['wlocselections']:
+				authorandworklist += foundindict(wd, 'provenance', l)
+
+			authorlist = []
+			for l in session['alocselections']:
+				authorlist = foundindict(ad, 'location', l)
+			for a in authorlist:
+				for w in ad[a].listofworks:
+					authorandworklist.append(w.universalid)
+			del authorlist
+
+			# a tricky spot: when/how to apply prunebydate()
+			# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
+			# accordingly we will do classes and genres first, then trim by date, then add in individual choices
+			authorandworklist = prunebydate(authorandworklist, ad, wd)
+
+			# now we look at things explicitly chosen:
+			# the passage checks are superfluous if rationalizeselections() got things right
+
+			passages = session['psgselections']
+			works = session['wkselections']
+			works = tidyuplist(works)
+			works = dropdupes(works, passages)
+
+			for w in works:
+				authorandworklist.append(w)
+
+			authors = []
+			for a in session['auselections']:
+				authors.append(a)
+
+			tocheck = works + passages
+			authors = dropdupes(authors, tocheck)
+			for a in authors:
+				for w in ad[a].listofworks:
+					authorandworklist.append(w.universalid)
+			del authors
+			del works
+
+			if len(session['psgselections']) > 0:
+				authorandworklist = dropdupes(authorandworklist, session['psgselections'])
+				authorandworklist = session['psgselections'] + authorandworklist
+
+			authorandworklist = list(set(authorandworklist))
+
+			if session['spuria'] == 'N':
+				authorandworklist = removespuria(authorandworklist, wd)
+
+	else:
+		# you picked nothing and want everything. well, maybe everything...
+
+		# trim by active corpora
+		wd = reducetosessionselections(listmapper, 'w')
+
+		authorandworklist = wd.keys()
+
+		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
+			authorandworklist = prunebydate(authorandworklist, ad, wd)
+
+		if session['spuria'] == 'N':
+			authorandworklist = removespuria(authorandworklist, wd)
+
+	# build the exclusion list
+	# note that we are not handling excluded individual passages yet
+	excludedworks = []
+
+	if len(exclusionlist) > 0:
+		excludedworks = []
+		excludedauthors = []
+
+		for g in session['agnexclusions']:
+			excludedauthors += foundindict(ad, 'genres', g)
+
+		for l in session['alocexclusions']:
+			excludedauthors += foundindict(ad, 'location', l)
+
+		for a in session['auexclusions']:
+			excludedauthors.append(a)
+
+		excludedauthors = tidyuplist(excludedauthors)
+
+		for a in excludedauthors:
+			for w in ad[a].listofworks:
+				excludedworks.append(w.universalid)
+		del excludedauthors
+
+		for g in session['wkgnexclusions']:
+			excludedworks += foundindict(wd, 'workgenre', g)
+
+		for l in session['wlocexclusions']:
+			excludedworks += foundindict(wd, 'provenance', l)
+
+		excludedworks += session['wkexclusions']
+		excludedworks = list(set(excludedworks))
+
+	authorandworklist = list(set(authorandworklist) - set(excludedworks))
+
+	del ad
+	del wd
+
+	return authorandworklist
+
+
+def flagexclusions(authorandworklist):
+	"""
+	some works whould only be searched partially
+	this flags those items on the authorandworklist by changing their workname format
+	gr0001w001 becomes gr0001x001 if session['wkexclusions'] mentions gr0001w001
+	:param authorandworklist:
+	:return:
+	"""
+	modifiedauthorandworklist = []
+	for w in authorandworklist:
+		if len(session['psgexclusions']) > 0:
+			for x in session['psgexclusions']:
+				if '_AT_' not in w and w in x:
+					w = re.sub('w', 'x', w)
+					modifiedauthorandworklist.append(w)
+				else:
+					modifiedauthorandworklist.append(w)
+		else:
+			modifiedauthorandworklist.append(w)
+
+	# if you apply 3 restrictions you will now have 3 copies of gr0001x001
+	modifiedauthorandworklist = tidyuplist(modifiedauthorandworklist)
+
+	return modifiedauthorandworklist
