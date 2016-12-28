@@ -14,7 +14,7 @@ from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, setconnection
 from server.formatting_helper_functions import formatpublicationinfo
-from server.sessionhelpers.sessionfunctions import justlatin
+from server.listsandsession.sessionfunctions import justlatin
 
 
 def cleansearchterm(seeking):

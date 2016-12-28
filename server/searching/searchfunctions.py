@@ -10,9 +10,9 @@ import re
 from flask import session
 
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
-from server.formatting_helper_functions import tidyuplist, dropdupes, prunedict, foundindict
+from server.listsandsession.listmanagement import dropdupes, foundindict, tidyuplist
 from server.searching.searchformatting import cleansearchterm, prunebydate, removespuria
-from server.sessionhelpers.sessionfunctions import reducetosessionselections
+from server.listsandsession.sessionfunctions import reducetosessionselections
 
 
 def compileauthorandworklist(listmapper):
@@ -437,3 +437,52 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 	aggregate = ' ' + aggregate + ' '
 	
 	return aggregate
+
+
+def calculatewholeauthorsearches(authorandworklist, authordict):
+	"""
+
+	we have applied all of our inclusions and exclusions by this point and we might well be sitting on a pile of authorsandworks
+	that is really a pile of full author dbs. for example, imagine we have not excluded anything from 'Cicero'
+
+	there is no reason to search that DB work by work since that just means doing a series of "WHERE" searches
+	instead of a single, faster search of the whole thing: hits are turned into full citations via the info contained in the
+	hit itself and there is no need to derive the work from the item name sent to the dispatcher
+
+	this function will figure out if the list of work uids contains all of the works for an author and can accordingly be collapsed
+
+	this function seems slow if you apply it to all 196k works: but it is *much* faster (50x?) than searching via 196K WHERE clauses
+	nevertheless, try to speed it up, if such is possible
+
+	:param authorandworklist:
+	:param authordict:
+	:return:
+	"""
+
+	authorspresent = [x[0:6] for x in authorandworklist]
+	authorspresent = list(set(authorspresent))
+
+	theoreticalpoolofworks = {}
+	for a in authorspresent:
+		for w in authordict[a].listofworks:
+			theoreticalpoolofworks[w.universalid] = a
+
+	for a in authorandworklist:
+		if a in theoreticalpoolofworks:
+			del theoreticalpoolofworks[a]
+
+	# any remaining works in this dict correspond to authors that we are not searching completely
+	incomplete = [x for x in theoreticalpoolofworks.values()]
+	incomplete = list(set(incomplete))
+
+	complete = list(set(authorspresent) - set(incomplete))
+
+	newsortedlist = []
+	for a in authorandworklist:
+		if a[0:6] in complete:
+			newsortedlist.append(a[0:6])
+		else:
+			newsortedlist.append(a)
+	newsortedlist = list(set(newsortedlist))
+
+	return newsortedlist

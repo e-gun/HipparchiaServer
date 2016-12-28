@@ -17,17 +17,18 @@ from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinef
 from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
-from server.searching.searchfunctions import flagexclusions, compileauthorandworklist
+from server.searching.searchfunctions import flagexclusions, compileauthorandworklist, calculatewholeauthorsearches
 from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.textsandconcordnaces.concordancemaker import buildconcordancefromwork
 from server.textsandconcordnaces.textandconcordancehelperfunctions import tcparserequest, tcfindstartandstop, conctohtmltable, \
 	concordancesorter
 from server.textsandconcordnaces.textbuilder import buildtext
-from server.sessionhelpers.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
+from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, justgreek, justlatin, reducetosessionselections, returnactivedbs
-from server.formatting_helper_functions import removegravity, stripaccents, tidyuplist, polytonicsort, \
-	dropdupes, bcedating, sortauthorandworklists, htmlifysearchfinds, calculatewholeauthorsearches, sortresultslist
+from server.formatting_helper_functions import removegravity, stripaccents, bcedating, htmlifysearchfinds
+from server.listsandsession.listmanagement import dropdupes, polytonicsort, sortauthorandworklists, sortresultslist, \
+	tidyuplist
 from server.browsing.browserfunctions import getandformatbrowsercontext
 
 # ready some sets of objects that will be generally available: a few seconds spent here will save you the same over and over again later as you constantly regenerate author and work info

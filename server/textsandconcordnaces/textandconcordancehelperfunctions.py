@@ -12,7 +12,7 @@ from collections import deque
 
 from server.dbsupport.dbfunctions import grabonelinefromwork, dblineintolineobject, makeanemptyauthor, makeanemptywork
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
-from server.formatting_helper_functions import polytonicsort
+from server.listsandsession.listmanagement import polytonicsort
 from server.searching.searchfunctions import whereclauses
 
 def tcparserequest(request, authordict, workdict):

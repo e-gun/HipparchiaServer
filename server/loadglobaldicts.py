@@ -7,8 +7,8 @@
 
 
 from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors
-from server.formatting_helper_functions import dictitemstartswith
-from server.sessionhelpers.sessiondicts import buildaugenresdict, buildworkgenresdict, buildauthorlocationdict, \
+from server.listsandsession.listmanagement import dictitemstartswith
+from server.listsandsession.sessiondicts import buildaugenresdict, buildworkgenresdict, buildauthorlocationdict, \
 	buildworkprovenancedict
 
 """

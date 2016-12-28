@@ -11,7 +11,8 @@ from flask import session
 
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs
-from server.formatting_helper_functions import polytonicsort
+from server.listsandsession.listmanagement import polytonicsort
+
 
 def browserdictionarylookup(entry, dict, cursor):
 	"""

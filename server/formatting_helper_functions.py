@@ -5,42 +5,9 @@
 	License: GPL 3 (see LICENSE in the top level directory of the distribution)
 """
 
-from collections import deque
-from flask import session
 import re
 
-
-def tidyuplist(untidylist):
-	"""
-	sort and remove duplicates
-	:param untidylist:
-	:return:
-	"""
-	# not supposed to get 0 lists here, but...
-	if len(untidylist) > 0:
-		untidylist[:] = [x for x in untidylist if x]
-		tidylist = list(set(untidylist))
-		tidylist.sort()
-	else:
-		tidylist = []
-
-	return tidylist
-
-
-def dropdupes(checklist, matchlist):
-	"""
-	clean up a list
-	drop anything that already has something else like it chosen
-	:param uidlist:
-	:return:
-	"""
-	
-	for c in checklist:
-		for m in matchlist:
-			if c in m:
-				checklist.remove(c)
-	
-	return checklist
+from flask import session
 
 
 def removegravity(accentedword):
@@ -85,32 +52,6 @@ def removegravity(accentedword):
 		accentedword = re.sub(accenttuples[i][0], accenttuples[i][1], accentedword)
 
 	return accentedword
-
-
-def polytonicsort(unsortedwords):
-	# sort() looks at your numeric value, but α and ά and ᾶ need not have neighboring numerical values
-	# stripping diacriticals can help this, but then you get words that collide
-	# gotta jump through some extra hoops
-	
-	# deque() is faster than list when you append
-	
-	snipper = re.compile(r'(.*?)(-snip-)(.*?)')
-	
-	stripped = deque()
-	for word in unsortedwords:
-		if len(word) > 0:
-			strippedword = stripaccents(word)
-			# one modification to stripaccents(): σ for ϲ in order to get the right values
-			strippedword = re.sub(r'ϲ', r'σ', strippedword)
-			stripped.append(strippedword + '-snip-' + word)
-	stripped = sorted(stripped)
-
-	sortedversion = deque()
-	for word in stripped:
-		cleaned = re.sub(snipper, r'\3', word)
-		sortedversion.append(cleaned)
-	
-	return sortedversion
 
 
 def stripaccents(texttostrip):
@@ -172,98 +113,6 @@ def stripaccents(texttostrip):
 		texttostrip = re.sub(substitutes[swap][0], substitutes[swap][1], texttostrip)
 	
 	return texttostrip
-
-
-def sortauthorandworklists(authorandworklist, authorsdict):
-	"""
-	send me a list of workuniversalids and i will resort it via the session sortorder
-	:param authorandworklist:
-	:param authorsdict:
-	:return:
-	"""
-	sortby = session['sortorder']
-	templist = []
-	newlist = []
-	
-	if sortby != 'universalid':
-		for a in authorandworklist:
-			auid = a[0:6]
-			crit = getattr(authorsdict[auid], sortby)
-			name = authorsdict[auid].shortname
-			if sortby == 'converted_date':
-				try:
-					crit = float(crit)
-				except:
-					crit = 9999
-			
-			templist.append([crit, a, name])
-		
-		# http://stackoverflow.com/questions/5212870/sorting-a-python-list-by-two-criteria#17109098
-		# sorted(list, key=lambda x: (x[0], -x[1]))
-		
-		templist = sorted(templist, key=lambda x: (x[0], x[2]))
-		for t in templist:
-			newlist.append(t[1])
-	else:
-		newlist = authorandworklist
-	
-	return newlist
-
-
-def sortresultslist(hits, authorsdict, worksdict):
-	"""
-
-	take a list of hits (which is a list of line objects)
-	sort it by the session sort criterion
-	mark the list with index numbers (because an mp function will grab this next)
-
-	:param hits:
-	:param authorsdict:
-	:return:
-	"""
-
-
-	sortby = session['sortorder']
-	templist = []
-	hitsdict = {}
-
-	for hit in hits:
-		auid = hit.wkuinversalid[0:6]
-		wkid = hit.wkuinversalid
-		sortablestring = authorsdict[auid].shortname + worksdict[wkid].title
-		if sortby == 'converted_date':
-			try:
-				crit = int(worksdict[wkid].converted_date)
-				if crit > 2000:
-					try:
-						crit = int(authorsdict[auid].converted_date)
-					except:
-						crit = 9999
-			except:
-				try:
-					crit = int(authorsdict[auid].converted_date)
-				except:
-					crit = 9999
-		elif sortby == 'provenance':
-			crit = getattr(worksdict[wkid], sortby)
-		elif sortby == 'location' or sortby == 'shortname' or sortby == 'authgenre':
-			crit = getattr(authorsdict[auid], sortby)
-		else:
-			crit = hit.wkuinversalid+str(hit.index)
-
-		templist.append([crit, sortablestring, hit])
-
-	# http://stackoverflow.com/questions/5212870/sorting-a-python-list-by-two-criteria#17109098
-	# sorted(list, key=lambda x: (x[0], -x[1]))
-
-	templist = sorted(templist, key=lambda x: (x[0], x[1]))
-
-	index = -1
-	for t in templist:
-		index += 1
-		hitsdict[index] = t[2]
-
-	return hitsdict
 
 
 def getpublicationinfo(workobject, cursor):
@@ -338,62 +187,6 @@ def bcedating():
 		dmin = dmin + 'C.E.'
 		
 	return dmin, dmax
-
-
-def dictitemstartswith(originaldict, element, muststartwith):
-	"""
-
-	trim a dict via a criterion: muststartwith must begin the item to survive the check
-
-	:param originaldict:
-	:param element:
-	:param muststartwith:
-	:return:
-	"""
-
-	muststartwith = '^'+muststartwith
-	newdict = prunedict(originaldict, element, muststartwith)
-
-	return newdict
-
-
-def prunedict(originaldict, element, mustbein):
-	"""
-	trim a dict via a criterion: mustbein must be in it to survive the check
-
-	:param originaldict:
-	:param criterion:
-	:param mustbe:
-	:return:
-	"""
-	newdict = {}
-
-	mustbein = re.compile(mustbein)
-
-	for item in originaldict:
-		if re.search(mustbein, getattr(originaldict[item], element)) is not None:
-			newdict[item] = originaldict[item]
-
-	return newdict
-
-
-def foundindict(dict, element, mustbein):
-	"""
-	search for an element in a dict
-	return a list of universalids
-	:param dict:
-	:param element:
-	:param mustbein:
-	:return:
-	"""
-
-	finds = []
-	for item in dict:
-		if getattr(dict[item], element) is not None:
-			if re.search(re.escape(mustbein), getattr(dict[item], element)) is not None:
-				finds.append(dict[item].universalid)
-	
-	return finds
 
 
 def htmlifysearchfinds(listoffinds):
@@ -514,51 +307,3 @@ def insertdatarow(label, css, founddate):
 	
 	return linehtml
 
-
-def calculatewholeauthorsearches(authorandworklist, authordict):
-	"""
-
-	we have applied all of our inclusions and exclusions by this point and we might well be sitting on a pile of authorsandworks
-	that is really a pile of full author dbs. for example, imagine we have not excluded anything from 'Cicero'
-
-	there is no reason to search that DB work by work since that just means doing a series of "WHERE" searches
-	instead of a single, faster search of the whole thing: hits are turned into full citations via the info contained in the
-	hit itself and there is no need to derive the work from the item name sent to the dispatcher
-
-	this function will figure out if the list of work uids contains all of the works for an author and can accordingly be collapsed
-
-	this function seems slow if you apply it to all 196k works: but it is *much* faster (50x?) than searching via 196K WHERE clauses
-	nevertheless, try to speed it up, if such is possible
-
-	:param authorandworklist:
-	:param authordict:
-	:return:
-	"""
-
-	authorspresent = [x[0:6] for x in authorandworklist]
-	authorspresent = list(set(authorspresent))
-
-	theoreticalpoolofworks = {}
-	for a in authorspresent:
-		for w in authordict[a].listofworks:
-			theoreticalpoolofworks[w.universalid] = a
-
-	for a in authorandworklist:
-		if a in theoreticalpoolofworks:
-			del theoreticalpoolofworks[a]
-
-	# any remaining works in this dict correspond to authors that we are not searching completely
-	incomplete = [x for x in theoreticalpoolofworks.values()]
-	incomplete = list(set(incomplete))
-
-	complete = list(set(authorspresent) - set(incomplete))
-
-	newsortedlist = []
-	for a in authorandworklist:
-		if a[0:6] in complete:
-			newsortedlist.append(a[0:6])
-		else:
-			newsortedlist.append(a)
-	newsortedlist = list(set(newsortedlist))
-
-	return newsortedlist
