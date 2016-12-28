@@ -140,33 +140,33 @@ def prolixlocus(workobject, citationtuple):
 	return citation
 
 
-def finddblinefromlocus(workdb, citationtuple, cursor):
+def finddblinefromlocus(workid, citationtuple, cursor):
 	# citationtuple ('9','109','8') to focus on line 9, section 109, book 8
 	# finddblinefromlocus(h, 1, ('130', '24')) ---> 15033
 
 	lmap = {0: 'level_00_value', 1: 'level_01_value', 2: 'level_02_value', 3: 'level_03_value', 4: 'level_04_value',
 	        5: 'level_05_value'}
-	
-	wklvs = findtoplevelofwork(workdb, cursor)
+
+	workdb = workid[0:6]
+	wklvs = findtoplevelofwork(workid, cursor)
 
 	if wklvs != len(citationtuple):
-		print('mismatch between shape of work and browsing request: impossible citation of'+workdb+'.')
+		print('mismatch between shape of work and browsing request: impossible citation of'+workid+'.')
 		print(str(wklvs),' levels vs',list(citationtuple))
 		print('safe to ignore if you requested the first line of a work')
 
 	# step one: find the index number of the passage
-	query = 'SELECT index FROM ' + workdb + ' WHERE '
+	query = 'SELECT index FROM ' + workdb + ' WHERE ( wkuniversalid=%s ) AND '
 	for level in range(0, len(citationtuple)):
 		query += lmap[level] + '=%s AND '
 	# drop the final 'AND '
 	query = query[:-4]
-	data = citationtuple
+	data = tuple([workid] + list(citationtuple))
 	try:
 		cursor.execute(query, data)
 		found = cursor.fetchone()
 		indexvalue = found[0]
 	except:
-		# print('requested locus returned nothing:', query, data)
 		indexvalue = returnfirstlinenumber(workdb, cursor)
 		
 	return indexvalue
@@ -189,6 +189,8 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 	:param cursor:
 	:return:
 	"""
+
+	print('finddblinefromincompletelocus(workid, citationlist)',workid, citationlist)
 
 	lmap = {0: 'level_00_value', 1: 'level_01_value', 2: 'level_02_value', 3: 'level_03_value', 4: 'level_04_value',
 	        5: 'level_05_value'}

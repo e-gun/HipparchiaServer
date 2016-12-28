@@ -771,21 +771,21 @@ def workstructure():
 	for level in passage:
 		safepassage.append(re.sub('[!@#$%^&*()=]+', '',level))
 	safepassage = tuple(safepassage[:5])
-	workdb = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
+	workid = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
 
 	try:
-		ao = authordict[workdb[:6]]
+		ao = authordict[workid[:6]]
 	except:
 		ao = makeanemptyauthor('gr0000')
 		
 	structure = {}
 	for work in ao.listofworks:
-		if work.universalid == workdb:
+		if work.universalid == workid:
 			structure = work.structure
 	
 	ws = {}
 	if structure != {}:
-		lowandhigh = findvalidlevelvalues(workdb, structure, safepassage, cur)
+		lowandhigh = findvalidlevelvalues(workid, structure, safepassage, cur)
 		# example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
 		ws['totallevels'] = lowandhigh[0]
 		ws['level'] = lowandhigh[1]
