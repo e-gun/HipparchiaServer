@@ -471,7 +471,7 @@ def compileauthorandworklist(listmapper):
 			excludedworks += foundindict(wd, 'provenance', l)
 
 		excludedworks += session['wkexclusions']
-		excludedworks = list(set(excludedworks))
+		excludedworks = set(excludedworks)
 
 	authorandworklist = list(set(authorandworklist) - set(excludedworks))
 

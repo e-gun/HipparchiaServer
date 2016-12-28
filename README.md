@@ -9,16 +9,17 @@ then you point your browser at http://localhost:5000
 alternately you can hook HipparchiaServer to something like nginx via uwsgi. that would create a different url
 
 it would be rather unwise to expose this server to the whole internet. there are many elements to this unwisdom.
+
 let us only mention one: there are security checks inside Hipparchia, but many queries can be generated that would
-consume vast computational resources. this tool will allow you to construct individual queries that can take over 10m to execute.
-what would happen if 1000 people tried to do that to your machine at once? your inability to execute these queries on the tlg web site is partially a function of their choice to
+consume vast computational resources. what would happen if 1000 people tried to do that to your machine at once?
+your inability to execute these queries on the tlg web site is partially a function of their choice to
 adopt a one server and many clients model.
 
 of course, most queries take <2s to execute. but servers live in the worst of all possible worlds.
 
 instructions on how to use Hipparchia can be found by clicking on the '?' button if you can make it to the front page.
 
-other things you will need:
+other things you will need to install that are not available here:
 
 jquery:
     http://jquery.com/download/
