@@ -188,7 +188,7 @@ def workonphrasesearch(hits, seeking, searching, commitcount, authors, activepol
 	:return:
 	"""
 	tmp = session['maxresults']
-	session['maxresults'] = 19999
+	session['maxresults'] = 4999
 
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()

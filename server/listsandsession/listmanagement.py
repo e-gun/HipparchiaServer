@@ -278,7 +278,16 @@ def calculatewholeauthorsearches(authorandworklist, authordict):
 	# E
 	wholes = [x[0:6] for x in authorandworklist if x[0:6] in complete]
 	parts = [x for x in authorandworklist if x[0:6] not in complete]
-	prunedlist = wholes + parts
+	prunedlist = list(set(wholes)) + list(set(parts))
+
+	# prunedlist = []
+	#
+	# for a in authorandworklist:
+	# 	if a[0:6] in complete:
+	# 		prunedlist.append(a[0:6])
+	# 	else:
+	# 		prunedlist.append(a)
+	# prunedlist = list(set(prunedlist))
 
 	return prunedlist
 
