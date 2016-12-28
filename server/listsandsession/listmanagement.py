@@ -232,41 +232,80 @@ def calculatewholeauthorsearches(authorandworklist, authordict):
 
 	this function will figure out if the list of work uids contains all of the works for an author and can accordingly be collapsed
 
-	this function seems slow if you apply it to all 196k works: but it is *much* faster (50x?) than searching via 196K WHERE clauses
-	nevertheless, try to speed it up, if such is possible
+	this function is *much* faster (50x?) than searching via 196K WHERE clauses
+
+	timing sample shows that E is the bit you need to get right: [all gk, in, dp from -850 to 200 (97836 works)]
+
+		compiletimeA = 0.02765798568725586
+		compiletimeB = 0.02765798568725586
+		compiletimeC = 0.021197080612182617
+		compiletimeD = 0.00425410270690918
+		compiletimeE = 3.2394540309906006
+
+	[all gk, in, dp from -850 to 1500 (195825 works)]
+		compiletimeE = 6.753650903701782
+
+	50x faster if you make sure that complete is a set and not a list when you hand it to part E
+		compiletimeE = 0.1252439022064209
 
 	:param authorandworklist:
 	:param authordict:
 	:return:
 	"""
 
+	# A
 	authorspresent = [x[0:6] for x in authorandworklist]
-	authorspresent = list(set(authorspresent))
+	authorspresent = set(authorspresent)
 
+	# B
 	theoreticalpoolofworks = {}
 	for a in authorspresent:
 		for w in authordict[a].listofworks:
 			theoreticalpoolofworks[w.universalid] = a
 
+	# C
 	for a in authorandworklist:
 		if a in theoreticalpoolofworks:
 			del theoreticalpoolofworks[a]
 
+	# D
 	# any remaining works in this dict correspond to authors that we are not searching completely
 	incomplete = [x for x in theoreticalpoolofworks.values()]
-	incomplete = list(set(incomplete))
+	incomplete = set(incomplete)
+	complete = authorspresent - incomplete
 
-	complete = list(set(authorspresent) - set(incomplete))
+	# E
+	wholes = [x[0:6] for x in authorandworklist if x[0:6] in complete]
+	parts = [x for x in authorandworklist if x[0:6] not in complete]
+	prunedlist = wholes + parts
 
-	newsortedlist = []
-	for a in authorandworklist:
-		if a[0:6] in complete:
-			newsortedlist.append(a[0:6])
+	return prunedlist
+
+
+def flagexclusions(authorandworklist):
+	"""
+	some works whould only be searched partially
+	this flags those items on the authorandworklist by changing their workname format
+	gr0001w001 becomes gr0001x001 if session['wkexclusions'] mentions gr0001w001
+	:param authorandworklist:
+	:return:
+	"""
+	modifiedauthorandworklist = []
+	for w in authorandworklist:
+		if len(session['psgexclusions']) > 0:
+			for x in session['psgexclusions']:
+				if '_AT_' not in w and w in x:
+					w = re.sub('w', 'x', w)
+					modifiedauthorandworklist.append(w)
+				else:
+					modifiedauthorandworklist.append(w)
 		else:
-			newsortedlist.append(a)
-	newsortedlist = list(set(newsortedlist))
+			modifiedauthorandworklist.append(w)
 
-	return newsortedlist
+	# if you apply 3 restrictions you will now have 3 copies of gr0001x001
+	modifiedauthorandworklist = tidyuplist(modifiedauthorandworklist)
+
+	return modifiedauthorandworklist
 
 
 def compileauthorandworklist(listmapper):
@@ -440,29 +479,3 @@ def compileauthorandworklist(listmapper):
 	del wd
 
 	return authorandworklist
-
-
-def flagexclusions(authorandworklist):
-	"""
-	some works whould only be searched partially
-	this flags those items on the authorandworklist by changing their workname format
-	gr0001w001 becomes gr0001x001 if session['wkexclusions'] mentions gr0001w001
-	:param authorandworklist:
-	:return:
-	"""
-	modifiedauthorandworklist = []
-	for w in authorandworklist:
-		if len(session['psgexclusions']) > 0:
-			for x in session['psgexclusions']:
-				if '_AT_' not in w and w in x:
-					w = re.sub('w', 'x', w)
-					modifiedauthorandworklist.append(w)
-				else:
-					modifiedauthorandworklist.append(w)
-		else:
-			modifiedauthorandworklist.append(w)
-
-	# if you apply 3 restrictions you will now have 3 copies of gr0001x001
-	modifiedauthorandworklist = tidyuplist(modifiedauthorandworklist)
-
-	return modifiedauthorandworklist
