@@ -238,7 +238,7 @@ def htmlifysearchfinds(listoffinds):
 		for ln in lines:
 			l = list(ln['locus'])
 			l.reverse()
-			if metadata['url'][0:2] in ['in', 'dp'] and len(l) == 2 and l[0] == 'recto':
+			if metadata['url'][0:2] in ['in', 'dp', 'ch'] and len(l) == 2 and l[0] == 'recto':
 				# another dreary kludge to prevent you from seeing 'recto' endlessly when looking at inscriptions
 				l = l[1]
 			else:

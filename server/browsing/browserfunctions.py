@@ -106,7 +106,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 	for line in lines:
 		linecount += 1
-		if workobject.universalid[0:2] in ['in', 'dp']:
+		if workobject.universalid[0:2] in ['in', 'dp', 'ch']:
 			if line.annotations != '':
 				xref = insertcrossreferencerow(line)
 				passage['ouputtable'].append(xref)

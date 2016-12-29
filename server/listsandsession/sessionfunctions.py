@@ -705,7 +705,7 @@ def reducetosessionselections(listmapper, criterion):
 
 	toactivate = []
 	position = -1
-	print('active',active)
+
 	for a in active:
 		# example: 11001 = lt + gr - in - dp + ch
 		position += 1
@@ -714,7 +714,6 @@ def reducetosessionselections(listmapper, criterion):
 
 	d = {}
 
-	print('toactivate',toactivate)
 	for a in toactivate:
 		d.update(listmapper[a][criterion])
 

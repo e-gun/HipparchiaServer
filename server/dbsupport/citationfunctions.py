@@ -102,7 +102,7 @@ def locusintocitation(workobject, citationtuple):
 	citation = ''
 	for level in wklvls:
 		try:
-			if workobject.universalid[0:2] in ['in', 'dp'] and workobject.structure[level] == ' ' and cite[level] == 'recto':
+			if workobject.universalid[0:2] in ['in', 'dp', 'ch'] and workobject.structure[level] == ' ' and cite[level] == 'recto':
 				# ' ' ==> 'face' which is likely 'recto'
 				# this check will make it so you don't see 'recto' over and over again when looking at inscriptions
 				pass
