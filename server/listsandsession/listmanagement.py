@@ -31,11 +31,16 @@ def dropdupes(checklist, matchlist):
 
 
 def polytonicsort(unsortedwords):
-	# sort() looks at your numeric value, but α and ά and ᾶ need not have neighboring numerical values
-	# stripping diacriticals can help this, but then you get words that collide
-	# gotta jump through some extra hoops
+	"""
+	sort() looks at your numeric value, but α and ά and ᾶ need not have neighboring numerical values
+	stripping diacriticals can help this, but then you get words that collide
+	gotta jump through some extra hoops
 
-	# deque() is faster than list when you append
+	deque() is faster than list when you append
+
+	:param unsortedwords:
+	:return:
+	"""
 
 	snipper = re.compile(r'(.*?)(-snip-)(.*?)')
 

@@ -137,36 +137,34 @@ def conctohtmltable(concordanceoutput):
 	outputlines.append('</table>')
 	
 	return list(outputlines)
-	
+
 
 def concordancesorter(unsortedoutput):
 	"""
 	you can't sort the list and then send it to a mp function where it will get unsorted
 	so you have to jump through a hoop before you can jump through a hoop:
 	make keys -> polytonicsort keys -> use keys to sort the list
-	
+
 	input:
 		('καλεῖται', '1', '1.4'),
 		('ἀθηναίοιϲ', '1', '1.3'),
 		...
-		
+
 	:param unsortedoutput:
 	:return:
 	"""
-	
-	# now you sort
-	sortkeys = []
-	outputdict = {}
-	for o in unsortedoutput:
-		sortkeys.append(o[0])
-		outputdict[o[0]] = o
-		
+
+	sortkeys = [x[0] for x in unsortedoutput]
+	outputdict = {x[0]: x for x in unsortedoutput}
+
 	sortkeys = polytonicsort(sortkeys)
 	del unsortedoutput
 
 	sortedoutput = deque()
+
 	for k in sortkeys:
 		sortedoutput.append(outputdict[k])
+
 	return sortedoutput
 
 
