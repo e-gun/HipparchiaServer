@@ -10,8 +10,7 @@ import re
 from collections import deque
 from flask import session
 from server.formatting_helper_functions import stripaccents
-from server.listsandsession.sessionfunctions import reducetosessionselections
-from server.searching.searchformatting import removespuria, prunebydate
+from server.listsandsession.sessionfunctions import reducetosessionselections, justlatin
 
 
 def dropdupes(checklist, matchlist):
@@ -494,3 +493,80 @@ def compileauthorandworklist(listmapper):
 	del wd
 
 	return authorandworklist
+
+
+def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
+	"""
+	send me a list of authorsandworks and i will trim it via the session date limit variables
+
+	:param authorandworklist:
+	:param authorobjectdict:
+	:return:
+	"""
+	trimmedlist = []
+
+	if justlatin() == False and (session['earliestdate'] != '-850' or session['latestdate'] != '1500'):
+		min = int(session['earliestdate'])
+		max = int(session['latestdate'])
+		if min > max:
+			min = max
+			session['earliestdate'] = session['latestdate']
+
+		for aw in authorandworklist:
+			w = workobjectdict[aw]
+			try:
+				# does the work have a date?
+				int(w.converted_date)
+				if w.earlier(min) or w.later(max):
+					pass
+				else:
+					trimmedlist.append(aw)
+			except:
+				# then we will look inside the author for the date
+				aid = aw[0:6]
+				try:
+					if authorobjectdict[aid].earlier(min) or authorobjectdict[aid].later(max):
+						pass
+						# print('passing',aw ,authorobjectdict[aid].converted_date)
+					else:
+						trimmedlist.append(aw)
+					# print('append', aw, authorobjectdict[aid].converted_date)
+				except:
+					# the author can't tell you his date; you must be building a list with both latin authors and something else
+					trimmedlist.append(aw)
+
+	else:
+		trimmedlist = authorandworklist
+
+	return trimmedlist
+
+
+def removespuria(authorandworklist, worksdict):
+	"""
+	at the moment pretty crude: just look for [Sp.] or [sp.] at the end of a title
+	toss it from the list if you find it
+	:param authorandworklist:
+	:param cursor:
+	:return:
+	"""
+	trimmedlist = []
+
+	sp = re.compile(r'\[(S|s)p\.\]')
+
+	for aw in authorandworklist:
+		wk = re.sub(r'x',r'w',aw[0:10])
+		title = worksdict[wk].title
+		try:
+			if re.search(sp,title) is not None:
+				for w in session['wkselections']:
+					if w in aw:
+						trimmedlist.append(aw)
+				for w in session['psgselections']:
+					if w in aw:
+						trimmedlist.append(aw)
+			else:
+				trimmedlist.append(aw)
+		except:
+			trimmedlist.append(aw)
+
+	return trimmedlist
