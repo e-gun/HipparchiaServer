@@ -45,9 +45,9 @@ key features:
 			include/exclude spuria
 			sort by date range
 			include/exclude undateable works
-			search lists can be inspected before execution
 			remove items from the list by "dragging to trash"
 			store and load search lists between sessions
+			reset sessions to configurable defaults
 		search syntax
 			search with or without polytonic accents
 			wildcard searching via regular expressions
@@ -76,4 +76,15 @@ key features:
 		concordance maker
 			build a concordance for a whole author, work or subsection of a work
 			for example see a concordance to all of Vergil or just the Aeneid or just Book 1 of the Aeneid
+
+	local/contextual information
+	    searches give progress updates
+	    concordance builds give progress updates
+	    search lists can be inspected/hidden before execution
+	    local info on current author can be shown/hidden
+	    local info on genre lists can be shown/hidden
+	    show/hide the settings pane
+	    show/hide the complex criteria setter
+	    show/hid the complex search dialog boxes
+	    hover over interface items to get tooltips
 ```
