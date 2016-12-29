@@ -913,6 +913,40 @@ def getsearchlistcontents():
 	return searchlistinfo
 
 
+@hipparchia.route('/getgenrelistcontents')
+def getgenrelistcontents():
+	"""
+	return a basic list of what you can pick
+	:return:
+	"""
+
+	sessionmapper = { 'greekcorpus': 'gk', 'inscriptioncorpus': 'in', 'papyruscorpus': 'dp', 'latincorpus': 'lt'}
+	genres = ''
+	glist = []
+
+	genres += '<h3>Author Categories</h3>'
+	for sessionvar in ['greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'latincorpus']:
+		if session[sessionvar] == 'yes':
+			print()
+			for g in authorgenresdict[sessionmapper[sessionvar]]:
+				glist.append(g)
+
+	genres += ', '.join(glist)
+
+	glist = []
+	genres += '\n<h3>Work Categories</h3>'
+	for sessionvar in ['greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'latincorpus']:
+		if session[sessionvar] == 'yes':
+			for g in workgenresdict[sessionmapper[sessionvar]]:
+				glist.append(g)
+
+	genres += ', '.join(glist)
+
+	genres = json.dumps(genres)
+
+	return genres
+
+
 @hipparchia.route('/browseto', methods=['GET'])
 def grabtextforbrowsing():
 	"""
