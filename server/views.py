@@ -920,14 +920,13 @@ def getgenrelistcontents():
 	:return:
 	"""
 
-	sessionmapper = { 'greekcorpus': 'gk', 'inscriptioncorpus': 'in', 'papyruscorpus': 'dp', 'latincorpus': 'lt'}
+	sessionmapper = { 'greekcorpus': 'gr', 'inscriptioncorpus': 'in', 'papyruscorpus': 'dp', 'latincorpus': 'lt'}
 	genres = ''
 	glist = []
 
 	genres += '<h3>Author Categories</h3>'
 	for sessionvar in ['greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'latincorpus']:
 		if session[sessionvar] == 'yes':
-			print()
 			for g in authorgenresdict[sessionmapper[sessionvar]]:
 				glist.append(g)
 
