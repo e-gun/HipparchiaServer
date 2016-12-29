@@ -33,22 +33,26 @@
       <fieldset>
           <legend>Coprora to search</legend>
           {% for list in activelists %}
-          {% if list == 'gr' %}
-          Greek authors <input type="checkbox" id="greekcorpus" value="no">
-          <br />
-          {% endif %}
-          {% if list == 'lt' %}
-          Latin authors <input type="checkbox" id="latincorpus" value="no" >
-          <br />
-          {% endif %}
-          {% if list == 'in' %}
-          Inscriptions <input type="checkbox" id="inscriptioncorpus" value="no">
-          <br />
-          {% endif %}
-          {% if list == 'dp' %}
-          Papyri <input type="checkbox" id="papyruscorpus" value="no" >
-          <br />
-          {% endif %}
+              {% if list == 'gr' %}
+              Greek authors <input type="checkbox" id="greekcorpus" value="no">
+              <br />
+              {% endif %}
+              {% if list == 'lt' %}
+              Latin authors <input type="checkbox" id="latincorpus" value="no" >
+              <br />
+              {% endif %}
+              {% if list == 'in' %}
+              Inscriptions <input type="checkbox" id="inscriptioncorpus" value="no">
+              <br />
+              {% endif %}
+              {% if list == 'dp' %}
+              Papyri <input type="checkbox" id="papyruscorpus" value="no" >
+              <br />
+              {% endif %}
+              {% if list == 'ch' %}
+              Christians <input type="checkbox" id="christiancorpus" value="no" >
+              <br />
+              {% endif %}
           {% endfor %}
       </fieldset>
         <br />

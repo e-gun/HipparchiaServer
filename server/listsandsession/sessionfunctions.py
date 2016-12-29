@@ -38,6 +38,7 @@ def sessionvariables():
 		session['latincorpus'] = hipparchia.config['DEFAULTLATINCORPUSVALUE']
 		session['inscriptioncorpus'] = hipparchia.config['DEFAULTINSCRIPTIONCORPUSVALUE']
 		session['papyruscorpus'] = hipparchia.config['DEFAULTPAPYRUSCORPUSVALUE']
+		session['christiancorpus'] = hipparchia.config['DEFAULTCHRISTIANCORPUSVALUE']
 		session['accentsmatter'] = 'N'
 		session['proximity'] = '1'
 		session['nearornot'] = 'T'
@@ -57,6 +58,7 @@ def sessionvariables():
 def modifysessionvar(param,val):
 	"""
 	set session varaibles after checking them for validity
+
 	:param param:
 	:param val:
 	:return:
@@ -77,14 +79,15 @@ def modifysessionvar(param,val):
 		'greekcorpus',
 		'latincorpus',
 		'inscriptioncorpus',
-		'papyruscorpus'
+		'papyruscorpus',
+		'christiancorpus'
 		]
 
 	if param in availableoptions:
 		session[param] = val
 		# print('param = val:',param,session[param])
 
-	for corpus in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus']:
+	for corpus in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']:
 		if session[corpus] not in ['yes', 'no']:
 			session[corpus] = 'no'
 
@@ -531,16 +534,59 @@ def rationalizeselections(newselectionuid, selectorexclude):
 	return
 
 
+def corpusselectionsasavalue():
+	"""
+
+	represent the active corpora as a pseudo-binary value: '10101' for ON/OFF/ON/OFF/ON
+
+		l g i p c
+		1 2 3 4 5
+
+	:return: 24, etc
+	"""
+	binarystring = '0b'
+
+	for s in ['latincorpus', 'greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']:
+		if session[s] == 'yes':
+			binarystring += '1'
+		else:
+			binarystring += '0'
+
+	binaryvalue = int(binarystring,2)
+
+	return binaryvalue
+
+
+def corpusselectionsaspseudobinarystring():
+	"""
+
+	represent the active corpora as a pseudo-binary value: '10101' for ON/OFF/ON/OFF/ON
+
+		l g i p c
+		1 2 3 4 5
+
+	:return: '11100', etc
+	"""
+	binarystring = ''
+
+	for s in ['latincorpus', 'greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']:
+		if session[s] == 'yes':
+			binarystring += '1'
+		else:
+			binarystring += '0'
+
+	return binarystring
+
+
 def justlatin():
 	"""
 
-	probe the session to see if we are working in a latin-only environment
+	probe the session to see if we are working in a latin-only environment: '10000' = 16
 
 	:return: True or False
 	"""
 
-	if session['latincorpus'] == 'yes' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'no' and \
-					session['papyruscorpus'] == 'no':
+	if corpusselectionsasavalue() == 16:
 		return True
 	else:
 		return False
@@ -549,14 +595,13 @@ def justlatin():
 def justgreek():
 	"""
 
-	probe the session to see if we are working in a greek-only environment
-	[nb: some of the inscriptions are latin; but they are not yet flagged as such]
+	probe the session to see if we are working in a greek-only environment: '01111' = 15
+	[nb: some of the inscriptions and christian works are latin...]
 
 	:return: True or False
 	"""
 
-	if session['latincorpus'] == 'no' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'no' and \
-					session['papyruscorpus'] == 'yes':
+	if corpusselectionsasavalue() == 15:
 		return True
 	else:
 		return False
@@ -565,29 +610,12 @@ def justgreek():
 def justtlg():
 	"""
 
-	probe the session to see if we are working in a tlg authors only environment
+	probe the session to see if we are working in a tlg authors only environment: '01000' = 8
 
 	:return: True or False
 	"""
 
-	if session['latincorpus'] == 'no' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'no' and \
-					session['papyruscorpus'] == 'no':
-		return True
-	else:
-		return False
-
-
-def justpapyri():
-	"""
-
-	probe the session to see if we are working in a papyrus-only environment
-	useful in as much as the papyrus data leaves certain columns empty every time
-
-	:return: True or False
-	"""
-
-	if session['latincorpus'] == 'no' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'no' and \
-					session['papyruscorpus'] == 'yes':
+	if corpusselectionsasavalue() == 8:
 		return True
 	else:
 		return False
@@ -596,14 +624,28 @@ def justpapyri():
 def justinscriptions():
 	"""
 
-	probe the session to see if we are working in a papyrus-only environment
+	probe the session to see if we are working in a inscriptions-only environment: '00100' = 2
 	useful in as much as the inscriptions data leaves certain columns empty every time
 
 	:return: True or False
 	"""
 
-	if session['latincorpus'] == 'no' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'yes' and \
-					session['papyruscorpus'] == 'no':
+	if corpusselectionsasavalue() == 4:
+		return True
+	else:
+		return False
+
+
+def justpapyri():
+	"""
+
+	probe the session to see if we are working in a papyrus-only environment: '00010' = 2
+	useful in as much as the papyrus data leaves certain columns empty every time
+
+	:return: True or False
+	"""
+
+	if corpusselectionsasavalue() == 2:
 		return True
 	else:
 		return False
@@ -612,13 +654,12 @@ def justinscriptions():
 def justlit():
 	"""
 
-	probe the session to see if we are working in a TLG + LAT environment
+	probe the session to see if we are working in a TLG + LAT environment: '11000' = 24
 
 	:return: True or False
 	"""
 
-	if session['latincorpus'] == 'yes' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'no' and \
-					session['papyruscorpus'] == 'no':
+	if corpusselectionsasavalue() == 24:
 		return True
 	else:
 		return False
@@ -627,13 +668,12 @@ def justlit():
 def justdoc():
 	"""
 
-	probe the session to see if we are working in a DDP + INS environment
+	probe the session to see if we are working in a DDP + INS environment: '00110' = 6
 
 	:return: True or False
 	"""
 
-	if session['latincorpus'] == 'no' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'yes' and \
-					session['papyruscorpus'] == 'yes':
+	if corpusselectionsasavalue() == 6:
 		return True
 	else:
 		return False
@@ -649,6 +689,7 @@ def reducetosessionselections(listmapper, criterion):
 		'lt': {'a': latauthors, 'w': latworks},
 		'in': {'a': insauthors, 'w': insworks},
 		'dp': {'a': ddpauthors, 'w': ddpworks},
+		'ch': {'a': chrauthors, 'w': chrworks}
 	}
 
 	criterion: 'a' or 'w'
@@ -657,64 +698,25 @@ def reducetosessionselections(listmapper, criterion):
 	:return: a relevant dictionary
 	"""
 
-	# print('l/g/i/p',session['latincorpus'], session['greekcorpus'], session['inscriptioncorpus'], session['papyruscorpus'])
+	# the order here has to match the order in corpusselectionsasavalue()
+	corpora = ('lt', 'gr', 'in', 'dp', 'ch')
+	
+	active = corpusselectionsaspseudobinarystring()
 
-	if justtlg():
-		d = listmapper['gr'][criterion]
-	elif justlatin():
-		d = listmapper['lt'][criterion]
-	elif justpapyri():
-		d = listmapper['dp'][criterion]
-	elif justinscriptions():
-		d = listmapper['in'][criterion]
-	elif justlit():
-		x = listmapper['gr'][criterion]
-		y = listmapper['lt'][criterion]
-		# http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression#26853961
-		d = {**x, **y}
-	elif justdoc():
-		x = listmapper['dp'][criterion]
-		y = listmapper['in'][criterion]
-		d = {**x, **y}
-	elif session['latincorpus'] == 'no' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'yes' and \
-			 session['papyruscorpus'] == 'no':
-		x = listmapper['gr'][criterion]
-		y = listmapper['in'][criterion]
-		d = {**x, **y}
-	# and now for the other combinations which are a bit less likely
-	elif session['latincorpus'] == 'yes' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'yes' and \
-					session['papyruscorpus'] == 'no':
-		x = listmapper['lt'][criterion]
-		y = listmapper['gr'][criterion]
-		z = listmapper['in'][criterion]
-		d = {**x, **y, **z}
-	elif session['latincorpus'] == 'yes' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'no' and \
-					session['papyruscorpus'] == 'yes':
-		x = listmapper['lt'][criterion]
-		y = listmapper['gr'][criterion]
-		z = listmapper['dp'][criterion]
-		d = {**x, **y, **z}
-	elif session['latincorpus'] == 'yes' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'yes' and \
-					session['papyruscorpus'] == 'yes':
-		x = listmapper['lt'][criterion]
-		y = listmapper['in'][criterion]
-		z = listmapper['dp'][criterion]
-		d = {**x, **y, **z}
-	elif session['latincorpus'] == 'no' and session['greekcorpus'] == 'yes' and session['inscriptioncorpus'] == 'yes' and \
-					session['papyruscorpus'] == 'yes':
-		x = listmapper['gr'][criterion]
-		y = listmapper['in'][criterion]
-		z = listmapper['dp'][criterion]
-		d = {**x, **y, **z}
-	elif session['latincorpus'] == 'no' and session['greekcorpus'] == 'no' and session['inscriptioncorpus'] == 'no' and \
-		session['papyruscorpus'] == 'no':
-		d = {}
-	else:
-		w = listmapper['lt'][criterion]
-		x = listmapper['gr'][criterion]
-		y = listmapper['in'][criterion]
-		z = listmapper['dp'][criterion]
-		d = {**x, **y, **z}
+	toactivate = []
+	position = -1
+	print('active',active)
+	for a in active:
+		# example: 11001 = lt + gr - in - dp + ch
+		position += 1
+		if a == '1':
+			toactivate.append(corpora[position])
+
+	d = {}
+
+	print('toactivate',toactivate)
+	for a in toactivate:
+		d.update(listmapper[a][criterion])
 
 	return d
 

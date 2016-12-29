@@ -154,16 +154,16 @@ def concordancesorter(unsortedoutput):
 	:return:
 	"""
 
+	# unsortedoutput: [('καλεῖται', '1', '1.4'), ('ἀθηναίοιϲ', '1', '1.3')]
+	# sortkeys: ['καλεῖται', 'ἀθηναίοιϲ']
+	# outputdict: {'καλεῖται': ('καλεῖται', '1', '1.4'), 'ἀθηναίοιϲ': ('ἀθηναίοιϲ', '1', '1.3')}
+
 	sortkeys = [x[0] for x in unsortedoutput]
 	outputdict = {x[0]: x for x in unsortedoutput}
 
 	sortkeys = polytonicsort(sortkeys)
-	del unsortedoutput
 
-	sortedoutput = deque()
-
-	for k in sortkeys:
-		sortedoutput.append(outputdict[k])
+	sortedoutput = [outputdict[x] for x in sortkeys]
 
 	return sortedoutput
 

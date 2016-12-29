@@ -31,8 +31,9 @@ def buildaugenresdict(authordict):
 	ltlist = []
 	inlist = []
 	dplist = []
+	chlist = []
 
-	genresdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
+	genresdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
 
 	for a in authordict:
 		if authordict[a].genres is not None and authordict[a].genres != '':
@@ -40,7 +41,7 @@ def buildaugenresdict(authordict):
 			l = authordict[a].universalid[0:2]
 			genresdict[l] += g
 
-	for l in ['gr', 'lt', 'in', 'dp']:
+	for l in ['gr', 'lt', 'in', 'dp', 'ch']:
 		genresdict[l] = list(set(genresdict[l]))
 		genresdict[l] = [re.sub(r'^\s|\s$','',x) for x in genresdict[l]]
 		genresdict[l].sort()
@@ -60,8 +61,9 @@ def buildworkgenresdict(workdict):
 	ltlist = []
 	inlist = []
 	dplist = []
+	chlist = []
 
-	genresdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
+	genresdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
 
 	for w in workdict:
 		if workdict[w].workgenre is not None and workdict[w].workgenre != '':
@@ -69,7 +71,7 @@ def buildworkgenresdict(workdict):
 			l = workdict[w].universalid[0:2]
 			genresdict[l] += g
 
-	for l in ['gr', 'lt', 'in', 'dp']:
+	for l in ['gr', 'lt', 'in', 'dp', 'ch']:
 		genresdict[l] = list(set(genresdict[l]))
 		genresdict[l] = [re.sub(r'^\s|\s$','',x) for x in genresdict[l]]
 		genresdict[l].sort()
@@ -92,8 +94,9 @@ def buildauthorlocationdict(authordict):
 	ltlist = []
 	inlist = []
 	dplist = []
+	chlist = []
 
-	locationdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
+	locationdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
 
 	for a in authordict:
 		if authordict[a].location is not None and authordict[a].location != '':
@@ -101,7 +104,7 @@ def buildauthorlocationdict(authordict):
 			l = authordict[a].universalid[0:2]
 			locationdict[l] += loc
 
-	for l in ['gr', 'lt', 'in', 'dp']:
+	for l in ['gr', 'lt', 'in', 'dp', 'ch']:
 		locationdict[l] = list(set(locationdict[l]))
 		locationdict[l] = [re.sub(r'^\s|\s$','',x) for x in locationdict[l]]
 		locationdict[l].sort()
@@ -122,8 +125,9 @@ def buildworkprovenancedict(workdict):
 	ltlist = []
 	inlist = []
 	dplist = []
+	chlist = []
 
-	locationdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
+	locationdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
 
 	for w in workdict:
 		if workdict[w].provenance is not None and workdict[w].provenance != '':
@@ -131,7 +135,7 @@ def buildworkprovenancedict(workdict):
 			l = workdict[w].universalid[0:2]
 			locationdict[l] += loc
 
-	for l in ['gr', 'lt', 'in', 'dp']:
+	for l in ['gr', 'lt', 'in', 'dp', 'ch']:
 		locationdict[l] = list(set(locationdict[l]))
 		locationdict[l] = [re.sub(r'^\s|\s$','',x) for x in locationdict[l]]
 		locationdict[l].sort()

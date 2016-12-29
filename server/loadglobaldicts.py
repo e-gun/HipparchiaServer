@@ -35,11 +35,14 @@ insauthors = dictitemstartswith(authordict, 'universalid', 'in')
 insworks = dictitemstartswith(workdict, 'universalid', 'in')
 ddpauthors = dictitemstartswith(authordict, 'universalid', 'dp')
 ddpworks = dictitemstartswith(workdict, 'universalid', 'dp')
+chrauthors = dictitemstartswith(authordict, 'universalid', 'ch')
+chrworks = dictitemstartswith(workdict, 'universalid', 'ch')
 
 listmapper = {
 	'gr': {'a': tlgauthors, 'w': tlgworks},
 	'lt': {'a': latauthors, 'w': latworks},
 	'in': {'a': insauthors, 'w': insworks},
 	'dp': {'a': ddpauthors, 'w': ddpworks},
+	'ch': {'a': chrauthors, 'w': chrworks},
 }
 

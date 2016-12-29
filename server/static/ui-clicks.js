@@ -75,6 +75,11 @@ function loadoptions() {
             } else {
             $('#papyruscorpus').prop('checked', false);
             }
+        if (data.christiancorpus == 'yes') {
+            $('#christiancorpus').prop('checked', true);
+            } else {
+            $('#christiancorpus').prop('checked', false);
+            }
         });
 }
 
@@ -259,6 +264,16 @@ $('#papyruscorpus').change(function () {
         setoptions('papyruscorpus', 'yes');
     } else {
         setoptions('papyruscorpus', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    });
+
+$('#christiancorpus').change(function () {
+    if(this.checked) {
+        setoptions('christiancorpus', 'yes');
+    } else {
+        setoptions('christiancorpus', 'no');
     }
     // because some items on your list just got purged?
     $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
