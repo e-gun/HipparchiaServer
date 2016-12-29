@@ -35,6 +35,7 @@ key features:
 	searching
 		search multiple corpora simultaneously
 		build search lists with according to a variety of criteria
+		    search by date range
 			add/exclude individual authors
 			add/exclude individual author genres
 			add/exclude individual works
@@ -43,7 +44,6 @@ key features:
 			add/exclude individual author locations
 			add/exclude individual work provenances
 			include/exclude spuria
-			sort by date range
 			include/exclude undateable works
 			remove items from the list by "dragging to trash"
 			store and load search lists between sessions

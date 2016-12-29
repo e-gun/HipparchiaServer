@@ -687,8 +687,6 @@ def wkgenrelist():
 def offeraulocationhints():
 	"""
 	fill the hint box with constantly updated values
-	TODO: these should be pruned so as to exclude locations that are meaningless relative to the currently active DBs
-		e.g., if you have only Latin active, location is meaningless; and many TLG places do not match INS locations
 
 	:return:
 	"""
@@ -930,7 +928,10 @@ def getgenrelistcontents():
 			for g in authorgenresdict[sessionmapper[sessionvar]]:
 				glist.append(g)
 
-	genres += ', '.join(glist)
+	if len(glist) > 0:
+		genres += ', '.join(glist)
+	else:
+		genres += '[no author genres in your currently selected database(s)]'
 
 	glist = []
 	genres += '\n<h3>Work Categories</h3>'
@@ -939,7 +940,10 @@ def getgenrelistcontents():
 			for g in workgenresdict[sessionmapper[sessionvar]]:
 				glist.append(g)
 
-	genres += ', '.join(glist)
+	if len(glist) > 0:
+		genres += ', '.join(glist)
+	else:
+		genres += '[no work genres in your currently selected database(s)]'
 
 	genres = json.dumps(genres)
 
