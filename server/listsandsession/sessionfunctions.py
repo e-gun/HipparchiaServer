@@ -738,6 +738,8 @@ def returnactivedbs():
 		keys.append('in')
 	if session['papyruscorpus'] == 'yes':
 		keys.append('dp')
+	if session['christiancorpus'] == 'yes':
+		keys.append('ch')
 
 	return keys
 
