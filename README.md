@@ -30,7 +30,7 @@ jquery-ui:
 dejavu fonts:
     http://dejavu-fonts.org/wiki/Download
 
-
+```
 key features:
 	searching
 		search multiple corpora simultaneously
@@ -76,3 +76,4 @@ key features:
 		concordance maker
 			build a concordance for a whole author, work or subsection of a work
 			for example see a concordance to all of Vergil or just the Aeneid or just Book 1 of the Aeneid
+```
