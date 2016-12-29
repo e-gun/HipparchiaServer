@@ -30,3 +30,50 @@ jquery-ui:
 dejavu fonts:
     http://dejavu-fonts.org/wiki/Download
 
+
+key features:
+    searching
+        search multiple corpora simultaneously
+        build search lists with according to a variety of criteria
+            add/exclude individual authors
+            add/exclude individual author genres
+            add/exclude individual works
+            add/exclude individual work genres
+            add/exclude individual passages
+            add/exclude individual author locations
+            add/exclude individual work provenances
+            include/exclude spuria
+            sort by date range
+            include/exclude undateable works
+            search lists can be inspected before execution
+            remove items from the list by "dragging to trash"
+            store and load search lists between sessions
+        search syntax
+            search with or without polytonic accents
+            wildcard searching via regular expressions
+            phrase searching: "κατὰ τὸ ψήφιϲμα", etc.
+            proximity searching:
+                within N lines or words
+                not within N lines or words
+        results
+            results can be limited to a maximum number of hits
+            results can be sorted by name, date, etc
+            can set amount of context to accompany results
+    tools
+        browser
+            browse to any passage of your choice
+            browse to any passage that occurs as a search result
+            skim forwards or backwards in the browser
+            click on words to acquire parsing and dictionary info for them
+        dictionaries
+            look up individual words in Greek or Latin
+            get a morphological analysis of a Greek or Latin word
+            reverse lookup: 'unexpected' returns ἀδευκήϲ, ἀδόκητοϲ, ἀδόξαϲτοϲ, ἀελπτία, ...
+            browse to passages cited in the lexical entries
+        text maker
+            build a text of a whole work or subsection of a work
+            for example see Xenophon, Hellenica as a whole or just book 3 or just book 3, chapter 4
+        concordance maker
+            build a concordance for a whole author, work or subsection of a work
+            for example see a concordance to all of Vergil or just the Aeneid or just Book 1 of the Aeneid
+
