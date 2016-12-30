@@ -699,7 +699,9 @@ def reducetosessionselections(listmapper, criterion):
 	"""
 
 	# the order here has to match the order in corpusselectionsasavalue()
-	corpora = ('lt', 'gr', 'in', 'dp', 'ch')
+	# a nice source of bugs if you try to refactor elsewhere
+
+	corpora = ('lt', 'gr', 'dp', 'in', 'ch')
 	
 	active = corpusselectionsaspseudobinarystring()
 

@@ -28,6 +28,7 @@
             <option value="authgenre">Author Genre</option>
             <option value="location">Author Location</option>
             <option value="provenance">Work Provenance</option>
+            <option value="universalid">Hipparchia ID Value</option>
         </select>
     </fieldset>
       <fieldset>
@@ -41,16 +42,16 @@
               Latin authors <input type="checkbox" id="latincorpus" value="no" >
               <br />
               {% endif %}
-              {% if list == 'in' %}
-              Inscriptions <input type="checkbox" id="inscriptioncorpus" value="no">
-              <br />
-              {% endif %}
               {% if list == 'dp' %}
               Papyri <input type="checkbox" id="papyruscorpus" value="no" >
               <br />
               {% endif %}
+              {% if list == 'in' %}
+              Inscriptions I: IG, SEG, etc. <input type="checkbox" id="inscriptioncorpus" value="no">
+              <br />
+              {% endif %}
               {% if list == 'ch' %}
-              Christian era inscriptions <input type="checkbox" id="christiancorpus" value="no" >
+              Inscriptions II: Cla., Lt. Antiq., Med.; Christian <input type="checkbox" id="christiancorpus" value="no" >
               <br />
               {% endif %}
           {% endfor %}

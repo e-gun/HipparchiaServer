@@ -49,7 +49,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 					xref += '<td class="textcrossreference">' + columnb + '</td></tr>\n'
 					output.append(xref)
 			date = re.search(finder, thisline.accented)
-			if date is not None:
+			if date is not None and thisline.index == firstline:
 				columna = ''
 				columnb = '<span class="textdate">Date:&nbsp;' + date.group(1) + '</span>'
 				datehtml = '<tr><td class="browsercite">' + columna + '</td>'

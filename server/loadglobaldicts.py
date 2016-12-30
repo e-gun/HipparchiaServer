@@ -41,8 +41,8 @@ chrworks = dictitemstartswith(workdict, 'universalid', 'ch')
 listmapper = {
 	'gr': {'a': tlgauthors, 'w': tlgworks},
 	'lt': {'a': latauthors, 'w': latworks},
-	'in': {'a': insauthors, 'w': insworks},
-	'dp': {'a': ddpauthors, 'w': ddpworks},
+	'dp': {'a': insauthors, 'w': insworks},
+	'in': {'a': ddpauthors, 'w': ddpworks},
 	'ch': {'a': chrauthors, 'w': chrworks},
 }
 
