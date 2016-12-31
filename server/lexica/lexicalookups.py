@@ -15,6 +15,80 @@ from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary
 from server.listsandsession.listmanagement import polytonicsort
 
 
+"""
+[probably not] TODO: clickable INS or DDP xrefs in dictionary entries
+
+it looks like we are now in a position where we have the data to make *some* of these papyrus xrefs work
+
+but you will end up with too many dead ends? a test case eventuated in more sorrow than joy
+
+example:
+
+	κύριοϲ
+
+	3  of gods, esp. in the East, Ϲεκνεβτῦνιϲ ὁ κ. θεόϲ PTeb.284.6 (i B.C.);
+	Κρόνοϲ κ. CIG4521 (Abila, i A.D.); Ζεὺϲ κ. Supp.Epigr.2.830 (Damascus,
+	iii A.D.); κ. Ϲάραπιϲ POxy.110.2 (ii A.D); ἡ κ. Ἄρτεμιϲ IG 4.1124
+	(Tibur, ii A.D.); of deified rulers, τοῦ κ. βαϲιλέοϲ θεοῦ OGI86.8
+	(Egypt, i B.C.); οἱ κ. θεοὶ μέγιϲτοι, of Ptolemy XIV and Cleopatra,
+	Berl.Sitzb.1902.1096: hence, of rulers in general, βαϲιλεὺϲ Ἡρώδηϲ κ.
+	OGI415 (Judaea, i B.C.); of Roman Emperors, BGU1200.11 (Augustus),
+	POxy.37 i 6 (Claudius), etc.
+
+
+[success] PTeb.284.6
+	select universalid,title from works where title like '%PTeb%284'
+		"dp8801w056";"PTebt (Vol 1) - 284"
+
+	select marked_up_line from dp8801 where wkuniversalid='dp8801w056' and level_00_value='6'
+		"ὁ κύριοϲ θεὸϲ καταβή-"
+
+
+[success] BGU1200.11 can be had by:
+
+	select universalid,title from works where title like '%BGU%1200%'
+		"dp0004w057"; "BGU (Vol 4) - 1200"
+
+	select marked_up_line from dp0004 where wkuniversalid='dp0004w057' and level_00_value='11'
+		"ὑπὲρ τοῦ θε̣[οῦ] καὶ κυρίου Αὐτοκράτοροϲ Κ̣α̣[ίϲαροϲ καθηκούϲαϲ]"
+
+
+[fail] Supp.Epigr.2.830
+
+	select universalid,title from works where title like '%Supp%Epigr%830%'
+		"in001aw1en";"Attica (Suppl. Epigr. Gr. 1-41 [SEG]) - 21:830"
+		[not v2, not damascus, not ii AD, ...]
+
+
+[fail] CIG4521:
+
+	select universalid,title from works where title like '%CIG%45%'
+		"ch0201w01v";"Constantinople [Chr.] (CIG IV [part]) - 9445"
+		"ch0305w02z";"Greece [Chr.] (Attica [various sources]) - CIG 9345"
+
+[fail] Berl.Sitzb.1902.1096:
+	select universalid,title from works where title like '%Berl%Sitzb%'
+		[nothing returned]
+
+
+[fail] POxy.37 i 6:
+	select universalid,title from works where title like '%POxy% 37'
+		"dp6f01w035";"POxy (Vol 1) - 37"
+	you'll get stuck in the end:
+		"<hmu_roman_in_a_greek_text>POxy 1,37=CPapGr 1,19</hmu_roman_in_a_greek_text>"
+
+
+[fail (but mabe LSJ failed?)] POxy.110.2:
+	select universalid,title from works where title like '%POxy% 102'
+		"dp6f01w003";"POxy (Vol 1) - 102"
+
+	select * from dp6f01 where wkuniversalid='dp6f01w003' and stripped_line like '%κυρ%'
+		three hits; none of them about Sarapis...
+		"<hmu_metadata_provenance value="Oxy" /><hmu_metadata_date value="AD 306" /><hmu_metadata_documentnumber value="65" />ἐπὶ ὑπάτων τ[ῶν] κ[υ]ρίων ἡ[μ]ῶν Αὐτοκρατόρων"
+
+
+"""
+
 def browserdictionarylookup(entry, dict, cursor):
 	"""
 	look up a word and return an htlm version of its dictionary entry
