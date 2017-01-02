@@ -592,21 +592,6 @@ def justlatin():
 		return False
 
 
-def justgreek():
-	"""
-
-	probe the session to see if we are working in a greek-only environment: '01111' = 15
-	[nb: some of the inscriptions and christian works are latin...]
-
-	:return: True or False
-	"""
-
-	if corpusselectionsasavalue() == 15:
-		return True
-	else:
-		return False
-
-
 def justtlg():
 	"""
 

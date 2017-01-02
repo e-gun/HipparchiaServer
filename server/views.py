@@ -26,7 +26,7 @@ from server.textsandconcordnaces.textandconcordancehelperfunctions import tcpars
 	concordancesorter
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
-	sessionvariables, sessionselectionsashtml, rationalizeselections, justgreek, justlatin, reducetosessionselections, returnactivedbs
+	sessionvariables, sessionselectionsashtml, rationalizeselections, justlatin, justtlg, reducetosessionselections, returnactivedbs
 from server.formatting_helper_functions import removegravity, stripaccents, bcedating, htmlifysearchfinds
 from server.listsandsession.listmanagement import dropdupes, polytonicsort, sortauthorandworklists, sortresultslist, \
 	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions
@@ -125,13 +125,14 @@ def executesearch():
 		proximate = ''
 	
 	dmin, dmax = bcedating()
-	
-	if justgreek() and re.search('[a-zA-Z]', seeking) is not None:
+
+	if justtlg() and re.search('[a-zA-Z]', seeking) is not None:
 		# searching greek, but not typing in unicode greek: autoconvert
+		# papyri, inscriptions, and christian texts all contain multiple languages
 		seeking = seeking.upper()
 		seeking = replacegreekbetacode(seeking)
-	
-	if justgreek() and re.search('[a-zA-Z]', proximate) is not None:
+
+	if justtlg() and re.search('[a-zA-Z]', proximate) is not None:
 		proximate = proximate.upper()
 		proximate = replacegreekbetacode(proximate)
 	

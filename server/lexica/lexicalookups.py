@@ -66,6 +66,7 @@ example:
 		"ch0201w01v";"Constantinople [Chr.] (CIG IV [part]) - 9445"
 		"ch0305w02z";"Greece [Chr.] (Attica [various sources]) - CIG 9345"
 
+
 [fail] Berl.Sitzb.1902.1096:
 	select universalid,title from works where title like '%Berl%Sitzb%'
 		[nothing returned]
@@ -88,6 +89,7 @@ example:
 
 
 """
+
 
 def browserdictionarylookup(entry, dict, cursor):
 	"""
