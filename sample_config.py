@@ -16,6 +16,7 @@ GDICT = 'greek_dictionary'
 # your mileage will indeed vary, but N > cores*(.5) is probably not going to do much good.
 WORKERS = 3
 
+# the default settings for various values
 DEFAULTEARLIESTDATE = '-850'
 DEFAULTLATESTDATE = '1500'
 DEFAULTSORTORDER = 'shortname'
@@ -24,3 +25,7 @@ DEFAULTLATINCORPUSVALUE = 'no'
 DEFAULTINSCRIPTIONCORPUSVALUE = 'no'
 DEFAULTPAPYRUSCORPUSVALUE = 'no'
 DEFAULTCHRISTIANCORPUSVALUE = 'no'
+
+DEFAULTLINESOFCONTEXT = 4
+DEFAULTBROWSERLINES = 20
+DEFAULTMAXRESULTS = 200

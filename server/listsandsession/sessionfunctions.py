@@ -43,9 +43,9 @@ def sessionvariables():
 		session['proximity'] = '1'
 		session['nearornot'] = 'T'
 		session['searchscope'] = 'L'
-		session['linesofcontext'] = 4
-		session['browsercontext'] = '25'
-		session['maxresults'] = '200'
+		session['linesofcontext'] = int(hipparchia.config['DEFAULTLINESOFCONTEXT'])
+		session['browsercontext'] = str(int(hipparchia.config['DEFAULTBROWSERLINES']))
+		session['maxresults'] = str(int(hipparchia.config['DEFAULTMAXRESULTS']))
 		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
 		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
 		session['latestdate'] = hipparchia.config['DEFAULTLATESTDATE']
