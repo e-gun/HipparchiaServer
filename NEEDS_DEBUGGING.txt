@@ -7,13 +7,3 @@
 
     ulimit -n 1024 && ~/hipparchia_venv/bin/python3 ~/hipparchia_venv/HipparchiaServer/run.py
 
-[B] serious performance issues with the INS and DDP databases
-
-the huge number of tables results in serious slowdowns
-
-refactor to store all works inside a single author seems like the solution: 3164 tables vs 196661 tables
-
-naturally this means changing plenty of code; also what will the penalty be for old fashioned TLG and LAT searching?
-
-
-

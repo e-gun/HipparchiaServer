@@ -19,6 +19,7 @@ WORKERS = 3
 # the default settings for various values
 DEFAULTEARLIESTDATE = '-850'
 DEFAULTLATESTDATE = '1500'
+# valid options are: shortname, authgenre, location, provenance, universalid
 DEFAULTSORTORDER = 'shortname'
 DEFAULTGREEKCORPUSVALUE = 'yes'
 DEFAULTLATINCORPUSVALUE = 'no'

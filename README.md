@@ -85,6 +85,14 @@ key features:
 	    local info on genre lists can be shown/hidden
 	    show/hide the settings pane
 	    show/hide the complex criteria setter
-	    show/hid the complex search dialog boxes
+	    show/hide the complex search dialog boxes
 	    hover over interface items to get tooltips
+
+	misc
+	    unicode support of technical, rare, and exotic characters (that you can also search for: 𐆂,𐄒, 🜚)
+	    forward-compatible unicode: attempt to properly code characters which are not yet available in most fonts
+	    text layout in results/browser/text maker sensitive to shifts in font face and size
+	    text layout via CSS: possible to modify the style sheet to suit your own tastes
+	    configurable defaults for most options
+
 ```
