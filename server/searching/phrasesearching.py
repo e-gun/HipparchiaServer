@@ -16,15 +16,16 @@ from server.searching.searchfunctions import substringsearch, simplesearchworkwi
 	lookoutsideoftheline
 
 
-def phrasesearch(searchphrase, cursor, wkid, authors, activepoll):
+def phrasesearch(searchphrase, cursor, wkid, authorswheredict, activepoll):
 	"""
 	a whitespace might mean things are on a new line
 	note how horrible something like και δη και is: you will search και first and then...
+	that's why we have shortphrasesearch() which is mighty slow too
 
 	:param searchphrase:
 	:param cursor:
 	:param wkid:
-	:param authors:
+	:param authorswheredict:
 	:param activepoll:
 	:return:
 	"""
@@ -39,10 +40,10 @@ def phrasesearch(searchphrase, cursor, wkid, authors, activepoll):
 			longestterm = term
 	
 	if 'x' not in wkid:
-		hits = substringsearch(longestterm, cursor, wkid, authors)
+		hits = substringsearch(longestterm, cursor, wkid, authorswheredict)
 	else:
 		wkid = re.sub('x', 'w', wkid)
-		hits = simplesearchworkwithexclusion(longestterm, wkid, authors, cursor)
+		hits = simplesearchworkwithexclusion(longestterm, wkid, authorswheredict, cursor)
 	
 	fullmatches = []
 	for hit in hits:
@@ -64,25 +65,33 @@ def phrasesearch(searchphrase, cursor, wkid, authors, activepoll):
 	return fullmatches
 
 
-def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activepoll):
+def shortphrasesearch(count, foundlineobjects, searchphrase, workstosearch, authorswheredict, activepoll):
 	"""
 	mp aware search for runs of short words
+
+	workstosearch:
+		['lt0400', 'lt0022', 'lt0914w001_AT_1', 'lt0474w001']
+
+	authorswheredict: [every author that needs to have a where-clause built because you asked for an '_AT_']
+		{'lt0914': <server.hipparchiaclasses.dbAuthor object at 0x108b5d8d0>}
+
+	seeking:
+		'si tu non'
+
 	:return:
 	"""
 	dbconnection = setconnection('autocommit')
 	curs = dbconnection.cursor()
 
-	
 	while len(workstosearch) > 0 and count.value <= int(session['maxresults']):
 		try:
-			w = workstosearch.pop()
+			wkid = workstosearch.pop()
 			activepoll.remain(len(workstosearch))
-		except: w = (-1, 'gr0000w000')
-		index = w[0]
+		except:
+			wkid = 'gr0000w000'
 
-		if index != -1:
+		if wkid != 'gr0000w000':
 			matchobjects = []
-			wkid = w[1]
 			db = wkid[0:6]
 			# check for exclusions
 			if re.search(r'x', wkid) is not None:
@@ -90,10 +99,11 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activep
 				restrictions = []
 				for p in session['psgexclusions']:
 					if wkid in p:
-						restrictions.append(whereclauses(p, '<>', authors))
+						restrictions.append(whereclauses(p, '<>', authorswheredict))
 			
 				whr = ''
 				data = [wkid[0:10]]
+
 				for r in restrictions:
 					for i in range(0, len(r)):
 						whr += r[i][0] + 'OR '
@@ -108,13 +118,18 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activep
 			else:
 				if '_AT_' not in wkid:
 					wkid = re.sub(r'x', 'w', wkid)
-					query = 'SELECT * FROM ' + db + ' WHERE ( wkuniversalid = %s) ORDER BY index'
-					data = (wkid[0:10],)
+					if len(wkid) == 6:
+						# we are searching the whole author
+						data = (wkid+'%',)
+					else:
+						# we are searching an individual work
+						data = (wkid[0:10],)
+					query = 'SELECT * FROM ' + db + ' WHERE ( wkuniversalid LIKE %s) ORDER BY index'
 					curs.execute(query, data)
 				else:
 					whr = ''
 					data = [wkid[0:10]]
-					w = whereclauses(wkid, '=', authors)
+					w = whereclauses(wkid, '=', authorswheredict)
 					for i in range(0, len(w)):
 						whr += 'AND (' + w[i][0] + ') '
 						data.append(w[i][1])
@@ -123,13 +138,11 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activep
 					wkid = re.sub(r'x', 'w', wkid)
 					query = 'SELECT * FROM ' + db + ' WHERE ( wkuniversalid = %s) AND ( '+whr+' ORDER BY index'
 					curs.execute(query, data)
-					
+
 			fulltext = curs.fetchall()
 			
 			previous = makeablankline(wkid, -1)
-			lineobjects = []
-			for dbline in fulltext:
-				lineobjects.append(dblineintolineobject(wkid, dbline))
+			lineobjects = [dblineintolineobject(f) for f in fulltext]
 			lineobjects.append(makeablankline(wkid, -9999))
 			del fulltext
 			
@@ -142,7 +155,7 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activep
 			searchterms = searchphrase.split(' ')
 			searchterms = [x for x in searchterms if x]
 			contextneeded = len(searchterms) - 1
-			
+
 			for i in range(0, len(lineobjects) - 1):
 				if count.value <= int(session['maxresults']):
 					if previous.hashyphenated == True and lineobjects[i].hashyphenated == True:
@@ -189,11 +202,11 @@ def shortphrasesearch(count, hits, searchphrase, workstosearch, authors, activep
 						activepoll.sethits(count.value)
 						matchobjects.append(lineobjects[i])
 					previous = lineobjects[i]
-					
-			# note that each work generates one set of matchobjects (but they are internally sorted)
-			hits[index] = (wkid, matchobjects)
-	
+
+			foundlineobjects += matchobjects
+
+
 	curs.close()
 	del dbconnection
 	
-	return hits
+	return foundlineobjects

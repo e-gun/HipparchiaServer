@@ -375,17 +375,19 @@ def formattingworkpile(bundles, criteria, activepoll, allfound):
 	"""
 	
 	while len(bundles) > 0:
+		try:
+			bundle = bundles.pop()
+		except:
+			# IndexError: pop from empty list
+			bundle = None
 
-		bundle = bundles.pop()
-		citwithcontext = formattedcittationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'], criteria['seek'], criteria['prox'], criteria['type'])
-		citwithcontext[0]['hitnumber'] = bundle['hitnumber']
-		activepoll.remain(activepoll.getremaining() - 1)
-		#except:
-		#	citwithcontext = []
-			
-		if citwithcontext != []:
-			allfound[bundle['hitnumber']] = citwithcontext
+		if bundle is not None:
+			citwithcontext = formattedcittationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'], criteria['seek'], criteria['prox'], criteria['type'])
+			citwithcontext[0]['hitnumber'] = bundle['hitnumber']
+			activepoll.remain(activepoll.getremaining() - 1)
 
+			if citwithcontext != []:
+				allfound[bundle['hitnumber']] = citwithcontext
 
 	return allfound
 

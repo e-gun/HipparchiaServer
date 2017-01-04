@@ -15,7 +15,6 @@ from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, setconnection
 from server.hipparchiaclasses import MPCounter
 from server.searching.proximitysearching import withinxlines, withinxwords
-from server.searching.searchformatting import sortandunpackresults
 from server.searching.phrasesearching import shortphrasesearch, phrasesearch
 from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion
 
@@ -85,10 +84,25 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 	return foundlineobjects
 
 
-def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authors, activepoll):
+def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authorswheredict, activepoll):
 	"""
 	brute force a search for something horrid like και δη και
 	a set of short words should send you here, otherwise you will look up all the words that look like και and then...
+
+	sample paramaters:
+	searchtype:
+		'simple'
+	seeking:
+		'te tu me'
+	proximate:
+		''
+	authorandworklist:
+		['lt0400', 'lt0022', 'lt0914w001_AT_1', 'lt0474w001']
+	authorswheredict: [every author that needs to have a where-clause built because you asked for an '_AT_']
+		{'lt0914': <server.hipparchiaclasses.dbAuthor object at 0x108b5d8d0>}
+	activepoll:
+		 <server.hipparchiaclasses.ProgressPoll object at 0x1102c15f8>
+
 	:param searchphrase:
 	:param cursor:
 	:param wkid:
@@ -102,7 +116,7 @@ def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authors, a
 
 	count = MPCounter()
 	manager = Manager()
-	hits = manager.dict()
+	foundlineobjects = manager.list()
 	workstosearch = manager.list(indexedauthorandworklist)
 	# if you don't autocommit you will see: "Error: current transaction is aborted, commands ignored until end of transaction block"
 	# alternately you can commit every N transactions
@@ -110,19 +124,13 @@ def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authors, a
 
 	workers = hipparchia.config['WORKERS']
 
-	jobs = [Process(target=shortphrasesearch, args=(count, hits, searchphrase, workstosearch, authors, activepoll)) for i in range(workers)]
+	jobs = [Process(target=shortphrasesearch, args=(count, foundlineobjects, searchphrase, workstosearch, authorswheredict, activepoll)) for i in range(workers)]
 
 	for j in jobs: j.start()
 	for j in jobs: j.join()
 
-	hits = sortandunpackresults(hits)
-	# hits = [('gr0059w002', <server.hipparchiaclasses.dbWorkLine object at 0x10b0bb358>), ...]
 
-	lineobjects = []
-	for h in hits:
-		lineobjects.append(h[1])
-
-	return lineobjects
+	return foundlineobjects
 
 
 def workonsimplesearch(count, foundlineobjects, seeking, searchinginside, commitcount, whereclauseinfo, activepoll):
@@ -134,10 +142,10 @@ def workonsimplesearch(count, foundlineobjects, seeking, searchinginside, commit
 		['lt0400', 'lt0022', 'lt0914w001_AT_1', 'lt0474w001']
 
 	whereclauseinfo: [every author that needs to have a where-clause built because you asked for an '_AT_']
-			{'lt0914': <server.hipparchiaclasses.dbAuthor object at 0x108b5d8d0>}
+		{'lt0914': <server.hipparchiaclasses.dbAuthor object at 0x108b5d8d0>}
 
 	seeking:
-			'rex'
+		'rex'
 
 	:param count:
 	:param hits:
@@ -193,10 +201,10 @@ def workonphrasesearch(foundlineobjects, seeking, searchinginside, commitcount, 
 		['lt0400', 'lt0022', 'lt0914w001_AT_1', 'lt0474w001']
 
 	whereclauseinfo: [every author that needs to have a where-clause built because you asked for an '_AT_']
-			{'lt0914': <server.hipparchiaclasses.dbAuthor object at 0x108b5d8d0>}
+		{'lt0914': <server.hipparchiaclasses.dbAuthor object at 0x108b5d8d0>}
 
 	seeking:
-			'Romulus rex'
+		'Romulus rex'
 
 	:param hits:
 	:param seeking:

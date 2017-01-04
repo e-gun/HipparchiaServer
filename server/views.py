@@ -883,11 +883,12 @@ def getsearchlistcontents():
 			pass
 		searchlistinfo += '\n[' + str(count) + ']&nbsp;'
 
-		if int(w.converted_date) < 2000:
-			if int(w.converted_date) < 1:
-				searchlistinfo += '('+w.converted_date[1:]+ ' BCE)&nbsp;'
-			else:
-				searchlistinfo += '(' + w.converted_date + ' CE)&nbsp;'
+		if w.converted_date is not None:
+			if int(w.converted_date) < 2000:
+				if int(w.converted_date) < 1:
+					searchlistinfo += '('+w.converted_date[1:]+ ' BCE)&nbsp;'
+				else:
+					searchlistinfo += '(' + w.converted_date + ' CE)&nbsp;'
 
 		searchlistinfo += formatauthorandworkinfo(a, w)
 
