@@ -35,11 +35,11 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	
 	output = ['<table>\n']
 	if len(results) > 0:
-		previousline = dblineintolineobject(work, results[0])
+		previousline = dblineintolineobject(results[0])
 		linecount = 0
 		for line in results:
 			linecount += 1
-			thisline = dblineintolineobject(work,line)
+			thisline = dblineintolineobject(line)
 			
 			if work[0:2] in ['in', 'dp', 'ch']:
 				if thisline.annotations != '' and re.search(r'documentnumber',thisline.annotations) is None:

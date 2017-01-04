@@ -47,7 +47,7 @@ def frontpage():
 	the front page
 	it used to do stuff
 	now it just loads the JS which then calls all of the routes below
-	
+
 	:return:
 	"""
 
@@ -64,7 +64,7 @@ def frontpage():
 	versionchecking(activelists, expectedsqltemplateversion)
 
 	page = render_template('search.html',activelists=activelists)
-	
+
 	return page
 
 
@@ -77,18 +77,18 @@ def frontpage():
 def authorlist():
 	"""
 	a simple dump of the authors available in the db
-	
+
 	:return:
 	"""
 
 	authors = []
-	
+
 	keys = list(authordict.keys())
 	keys.sort()
 	for k in keys:
 		authors.append(authordict[k])
 	return render_template('lister.html', found=authors, numberfound=len(authors))
-	
+
 
 #
 # helpers & routes you should not browse directly
@@ -98,9 +98,9 @@ def executesearch():
 	"""
 	the interface to all of the other search functions
 	tell me what you are looking for and i'll try to find it
-	
+
 	the results are returned in a json bundle that will be used to update the html on the page
-	
+
 	:return:
 	"""
 	sessionvariables()
@@ -109,21 +109,21 @@ def executesearch():
 		seeking = re.sub(r'[\'"`!;&]', '', request.args.get('seeking', ''))
 	except:
 		seeking = ''
-	
+
 	try:
 		proximate = re.sub(r'[\'"`!;&]', '', request.args.get('proximate', ''))
 	except:
 		proximate = ''
-	
+
 	try:
 		ts = str(int(request.args.get('id', '')))
 	except:
 		ts = str(int(time.time()))
-	
+
 	if len(seeking) < 1 and len(proximate) > 0:
 		seeking = proximate
 		proximate = ''
-	
+
 	dmin, dmax = bcedating()
 
 	if justtlg() and re.search('[a-zA-Z]', seeking) is not None:
@@ -135,21 +135,213 @@ def executesearch():
 	if justtlg() and re.search('[a-zA-Z]', proximate) is not None:
 		proximate = proximate.upper()
 		proximate = replacegreekbetacode(proximate)
-	
+
 	phrasefinder = re.compile('[^\s]\s[^\s]')
-	
+
 	poll[ts] = ProgressPoll(ts)
 	poll[ts].activate()
 	poll[ts].statusis('Preparing to search')
-	
+
 	linesofcontext = int(session['linesofcontext'])
 	searchtime = 0
-	
+
 	if len(seeking) > 0:
 		seeking = seeking.lower()
 		starttime = time.time()
 		poll[ts].statusis('Compiling the list of works to search')
-		
+
+		authorandworklist = compileauthorandworklist(listmapper)
+		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
+		poll[ts].statusis('Marking exclusions from the list of works to search')
+		authorandworklist = flagexclusions(authorandworklist)
+		workssearched = len(authorandworklist)
+		poll[ts].statusis('Calculating full authors to search')
+		authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
+
+		# assemble a subset of authordict that will be relevant to our actual search and send it to searchdispatcher()
+		# it turns out that we only need to pass authors that are part of psgselections or psgexclusions
+		# whereclauses() is selectively invoked and it needs to check the information in those and only those authors and works
+		# formerly all authors were sent through searchdispatcher(), but loading them into the manager produced
+		# a massive slowdown (as 200k objects got pickled into a mpshareable dict)
+
+		authorswheredict = {}
+
+		for w in session['psgselections']:
+			authorswheredict[w[0:6]] = authordict[w[0:6]]
+		for w in session['psgexclusions']:
+			authorswheredict[w[0:6]] = authordict[w[0:6]]
+
+		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
+			searchtype = 'simple'
+			thesearch = seeking
+			htmlsearch = '<span class="emph">' + seeking + '</span>'
+			hits = searchdispatcher('simple', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
+		elif re.search(phrasefinder, seeking) is not None:
+			searchtype = 'phrase'
+			thesearch = seeking
+			htmlsearch = '<span class="emph">' + seeking + '</span>'
+			terms = seeking.split(' ')
+			if len(max(terms, key=len)) > 3:
+				hits = searchdispatcher('phrase', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
+			else:
+				# you are looking for a set of little words: και δη και, etc.
+				#   16s to find και δη και via a std phrase search; 1.6s to do it this way
+				# not immediately obvious what the best number for minimum max term len is:
+				# consider what happens if you send a '4' this way:
+				#   εἶναι τὸ κατὰ τὴν (Searched between 850 B.C.E. and 200 B.C.E.)
+				# this takes 13.7s with a std phrase search; it takes 14.6s if sent to shortphrasesearch()
+				#   οἷον κἀν τοῖϲ (Searched between 850 B.C.E. and 200 B.C.E.)
+				#   5.57 std; 17.54s 'short'
+				# so '3' looks like the right answer
+				hits = dispatchshortphrasesearch(seeking, authorandworklist, authorswheredict, poll[ts])
+		else:
+			searchtype = 'proximity'
+			if session['searchscope'] == 'W':
+				scope = 'words'
+			else:
+				scope = 'lines'
+
+			if session['nearornot'] == 'T':
+				nearstr = ''
+			else:
+				nearstr = ' not'
+			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
+			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
+			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
+			hits = searchdispatcher('proximity', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
+
+		poll[ts].statusis('Putting the results in context')
+
+		hitdict = sortresultslist(hits, authordict, workdict)
+		allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, poll[ts])
+
+		searchtime = time.time() - starttime
+		searchtime = round(searchtime, 2)
+		if len(allfound) > int(session['maxresults']):
+			allfound = allfound[0:int(session['maxresults'])]
+
+		poll[ts].statusis('Converting results to HTML')
+		htmlandjs = htmlifysearchfinds(allfound)
+		finds = htmlandjs['hits']
+		findsjs = htmlandjs['hitsjs']
+
+		resultcount = len(allfound)
+
+		if resultcount < int(session['maxresults']):
+			hitmax = 'false'
+		else:
+			hitmax = 'true'
+
+		# prepare the output
+
+		sortorderdecoder = {
+			'universalid': 'ID', 'shortname': 'name', 'genres': 'author genre', 'converted_date': 'date', 'location': 'location'
+		}
+
+		output = {}
+		output['title'] = thesearch
+		output['found'] = finds
+		output['js'] = findsjs
+		output['resultcount'] = resultcount
+		output['scope'] = str(workssearched)
+		output['searchtime'] = str(searchtime)
+		output['lookedfor'] = seeking
+		output['proximate'] = proximate
+		output['thesearch'] = thesearch
+		output['htmlsearch'] = htmlsearch
+		output['hitmax'] = hitmax
+		output['sortby'] = sortorderdecoder[session['sortorder']]
+		output['dmin'] = dmin
+		output['dmax'] = dmax
+		if justlatin() == False:
+			output['icandodates'] = 'yes'
+		else:
+			output['icandodates'] = 'no'
+		poll[ts].deactivate()
+
+	else:
+		output = {}
+		output['title'] = seeking
+		output['found'] = ''
+		output['resultcount'] = 0
+		output['scope'] = 0
+		output['searchtime'] = '0.00'
+		output['lookedfor'] = '[no search executed]'
+		output['proximate'] = proximate
+		output['thesearch'] = ''
+		output['htmlsearch'] = ''
+		output['hitmax'] = 0
+		output['dmin'] = dmin
+		output['dmax'] = dmax
+		if justlatin() == False:
+			output['icandodates'] = 'yes'
+		else:
+			output['icandodates'] = 'no'
+		output['sortby'] = session['sortorder']
+
+	output = json.dumps(output)
+
+	del poll[ts]
+
+	return output
+
+
+def oldexecutesearch():
+	"""
+	the interface to all of the other search functions
+	tell me what you are looking for and i'll try to find it
+
+	the results are returned in a json bundle that will be used to update the html on the page
+
+	:return:
+	"""
+	sessionvariables()
+	# need to sanitize input at least a bit...
+	try:
+		seeking = re.sub(r'[\'"`!;&]', '', request.args.get('seeking', ''))
+	except:
+		seeking = ''
+
+	try:
+		proximate = re.sub(r'[\'"`!;&]', '', request.args.get('proximate', ''))
+	except:
+		proximate = ''
+
+	try:
+		ts = str(int(request.args.get('id', '')))
+	except:
+		ts = str(int(time.time()))
+
+	if len(seeking) < 1 and len(proximate) > 0:
+		seeking = proximate
+		proximate = ''
+
+	dmin, dmax = bcedating()
+
+	if justtlg() and re.search('[a-zA-Z]', seeking) is not None:
+		# searching greek, but not typing in unicode greek: autoconvert
+		# papyri, inscriptions, and christian texts all contain multiple languages
+		seeking = seeking.upper()
+		seeking = replacegreekbetacode(seeking)
+
+	if justtlg() and re.search('[a-zA-Z]', proximate) is not None:
+		proximate = proximate.upper()
+		proximate = replacegreekbetacode(proximate)
+
+	phrasefinder = re.compile('[^\s]\s[^\s]')
+
+	poll[ts] = ProgressPoll(ts)
+	poll[ts].activate()
+	poll[ts].statusis('Preparing to search')
+
+	linesofcontext = int(session['linesofcontext'])
+	searchtime = 0
+
+	if len(seeking) > 0:
+		seeking = seeking.lower()
+		starttime = time.time()
+		poll[ts].statusis('Compiling the list of works to search')
+
 		authorandworklist = compileauthorandworklist(listmapper)
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		poll[ts].statusis('Marking exclusions from the list of works to search')
@@ -210,7 +402,7 @@ def executesearch():
 				scope = 'words'
 			else:
 				scope = 'lines'
-			
+
 			if session['nearornot'] == 'T':
 				nearstr = ''
 			else:
@@ -219,7 +411,7 @@ def executesearch():
 			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
 			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
 			hits = searchdispatcher('proximity', seeking, proximate, indexedworklist, authorswheredict, poll[ts])
-		
+
 		poll[ts].statusis('Putting the results in context')
 
 		# safe to send authordict and workdict to mpresultformatter() because only the objects relevant to hits
@@ -227,24 +419,24 @@ def executesearch():
 
 		hitdict = sortresultslist(hits, authordict, workdict)
 		allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, poll[ts])
-		
+
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
 		if len(allfound) > int(session['maxresults']):
 			allfound = allfound[0:int(session['maxresults'])]
-		
+
 		poll[ts].statusis('Converting results to HTML')
 		htmlandjs = htmlifysearchfinds(allfound)
 		finds = htmlandjs['hits']
 		findsjs = htmlandjs['hitsjs']
-		
+
 		resultcount = len(allfound)
-		
+
 		if resultcount < int(session['maxresults']):
 			hitmax = 'false'
 		else:
 			hitmax = 'true'
-		
+
 		# prepare the output
 
 		sortorderdecoder = {
@@ -271,7 +463,7 @@ def executesearch():
 		else:
 			output['icandodates'] = 'no'
 		poll[ts].deactivate()
-		
+
 	else:
 		output = {}
 		output['title'] = seeking
@@ -291,11 +483,11 @@ def executesearch():
 		else:
 			output['icandodates'] = 'no'
 		output['sortby'] = session['sortorder']
-	
+
 	output = json.dumps(output)
-	
+
 	del poll[ts]
-	
+
 	return output
 
 
@@ -310,25 +502,25 @@ def concordance():
 		2 - of this author
 	:return:
 	"""
-	
+
 	try:
 		ts = str(int(request.args.get('id', '')))
 	except:
 		ts = str(int(time.time()))
-		
+
 	starttime = time.time()
 
 	poll[ts] = ProgressPoll(ts)
 	poll[ts].activate()
-	
+
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
-	
+
 	req = tcparserequest(request, authordict, workdict)
 	ao = req['authorobject']
 	wo = req['workobject']
 	psg = req['passagelist']
-	
+
 	if ao.universalid != 'gr0000' and wo.universalid != 'gr0000w000':
 		# we have both an author and a work, maybe we also have a subset of the work
 		if psg == ['']:
@@ -346,7 +538,7 @@ def concordance():
 		cdict = {wo.universalid: (startline, endline)}
 		unsortedoutput = buildconcordancefromwork(cdict, poll[ts], cur)
 		allworks = []
-		
+
 	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
 		poll[ts].statusis('Preparing a concordance to the works of '+ao.shortname)
 		# whole author
@@ -354,17 +546,17 @@ def concordance():
 		for wkid in ao.listworkids():
 			cdict[wkid] = (workdict[wkid].starts, workdict[wkid].ends)
 		unsortedoutput = buildconcordancefromwork(cdict, poll[ts], cur)
-			
+
 		allworks = []
 		for w in ao.listofworks:
 			allworks.append(w.universalid[6:10] + ' ==> ' + w.title)
 		allworks.sort()
-		
+
 	else:
 		# we do not have a valid selection
 		unsortedoutput = []
 		allworks = []
-	
+
 	# get ready to send stuff to the page
 	poll[ts].statusis('Sorting the concordance items')
 	output = concordancesorter(unsortedoutput)
@@ -372,11 +564,11 @@ def concordance():
 
 	poll[ts].statusis('Preparing the concordance HTML')
 	output = conctohtmltable(output)
-	
+
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)
 	poll[ts].deactivate()
-	
+
 	results = {}
 	results['authorname'] = ao.shortname
 	results['title'] = wo.title
@@ -386,13 +578,13 @@ def concordance():
 	results['wordsfound'] = count
 	results['lines'] = output
 	results['keytoworks'] = allworks
-	
+
 	results = json.dumps(results)
-		
+
 	cur.close()
 	del dbc
 	del poll[ts]
-	
+
 	return results
 
 
@@ -404,17 +596,17 @@ def textmaker():
 	"""
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
-	
+
 	try:
 		linesevery = int(re.sub('[^\d]', '', request.args.get('linesevery', '')))
 	except:
 		linesevery = 10
-	
+
 	req = tcparserequest(request, authordict, workdict)
 	ao = req['authorobject']
 	wo = req['workobject']
 	psg = req['passagelist']
-	
+
 	if ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
 		# default to first work
 		wo = ao.listofworks[0]
@@ -429,23 +621,23 @@ def textmaker():
 			startandstop = tcfindstartandstop(ao, wo, psg, cur)
 			startline = startandstop['startline']
 			endline = startandstop['endline']
-		
+
 		output = buildtext(wo.universalid, startline, endline, linesevery, cur)
 	else:
 		output = []
-	
+
 	results = {}
 	results['authorname'] = ao.shortname
 	results['title'] = wo.title
 	results['structure'] = wo.citation()
 	results['worksegment'] = '.'.join(psg)
 	results['lines'] = output
-	
+
 	results = json.dumps(results)
-	
+
 	cur.close()
 	del dbc
-	
+
 	return results
 
 
@@ -460,7 +652,7 @@ def progressreport():
 	not quite the async dreamland you had imagined
 
 	searches will work, but the progress statements will be broken
-	
+
 	also multiple clients will confuse hipparchia
 
 	something like gevent needs to be integrated so you can handle async requests, I guess.
@@ -471,12 +663,12 @@ def progressreport():
 
 	:return:
 	"""
-	
+
 	try:
 		ts = str(int(request.args.get('id', '')))
 	except:
 		ts = str(int(time.time()))
-	
+
 	progress = {}
 	try:
 		progress['active'] = poll[ts].getactivity()
@@ -504,12 +696,12 @@ def progressreport():
 def cookieintosession():
 	"""
 	take a stored cookie and convert its values into the current session settings
-	
+
 	:return:
 	"""
 	cookienum = request.args.get('cookie', '')
 	cookienum = cookienum[0:2]
-	
+
 	thecookie = request.cookies.get('session' + cookienum)
 	# comes back as a string that needs parsing
 	cookiedict = parsejscookie(thecookie)
@@ -541,7 +733,7 @@ def cookieintosession():
 	workprovenancelist = list(set(workprovenancelist))
 
 	modifysessionselections(cookiedict, authorgenreslist, workgenreslist, authorlocationlist, workprovenancelist)
-	
+
 	response = redirect(url_for('frontpage'))
 	return response
 
@@ -561,9 +753,9 @@ def offerauthorhints():
 	authorlist = []
 	for a in ad:
 		authorlist.append(ad[a].cleanname+' ['+ad[a].universalid+']')
-		
+
 	authorlist.sort()
-	
+
 	hint = []
 
 	if strippedquery != '':
@@ -586,16 +778,16 @@ def offerworkhints():
 	:return:
 	"""
 	# global authordict
-	
+
 	strippedquery = re.sub('[\W_]+', '', request.args.get('auth', ''))
-	
+
 	hint = []
-	
+
 	try:
 		myauthor = authordict[strippedquery]
 	except:
 		myauthor = None
-	
+
 	if myauthor is not None:
 		worklist = myauthor.listofworks
 		for work in worklist:
@@ -604,7 +796,7 @@ def offerworkhints():
 			hint.append({'value': 'somehow failed to find any works: try picking the author again'})
 	else:
 		hint.append({'value': 'author was not properly loaded: try again'})
-	
+
 	hint = json.dumps(hint)
 
 	return hint
@@ -765,7 +957,7 @@ def workstructure():
 	"""
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
-	
+
 	passage = request.args.get('locus', '')[14:].split('|')
 	safepassage = []
 	for level in passage:
@@ -777,12 +969,12 @@ def workstructure():
 		ao = authordict[workid[:6]]
 	except:
 		ao = makeanemptyauthor('gr0000')
-		
+
 	structure = {}
 	for work in ao.listofworks:
 		if work.universalid == workid:
 			structure = work.structure
-	
+
 	ws = {}
 	if structure != {}:
 		lowandhigh = findvalidlevelvalues(workid, structure, safepassage, cur)
@@ -802,10 +994,10 @@ def workstructure():
 		ws['high'] = 'again'
 		ws['range'] = ['error', 'select', 'the', 'work', 'again']
 	results = json.dumps(ws)
-	
+
 	cur.close()
 	del dbc
-	
+
 	return results
 
 
@@ -813,7 +1005,7 @@ def workstructure():
 def getsessionvariables():
 	"""
 	a simple fetch and report: JS wants to know what Python knows
-	
+
 	:return:
 	"""
 	returndict = {}
@@ -833,17 +1025,17 @@ def getauthinfo():
 	show local info about the author one is considering in the selection box
 	:return:
 	"""
-	
+
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
-	
+
 	authorid = re.sub('[\W_]+', '', request.args.get('au', ''))
-	
+
 	theauthor = authordict[authorid]
-	
+
 	authinfo = ''
 	authinfo += formatauthinfo(theauthor)
-	
+
 	if len(theauthor.listofworks) > 1:
 		authinfo +='<br /><br /><span class="italic">work numbers:</span><br />\n'
 	else:
@@ -858,12 +1050,12 @@ def getauthinfo():
 
 	for work in keys:
 		authinfo += woformatworkinfo(sortedworks[work])
-		
+
 	authinfo = json.dumps(authinfo)
-	
+
 	cur.close()
 	del dbc
-	
+
 	return authinfo
 
 
@@ -871,16 +1063,16 @@ def getauthinfo():
 def getsearchlistcontents():
 	"""
 	return a formatted list of what a search would look like if executed with the current selections
-	
+
 	:return:
 	"""
 
 	authorandworklist = compileauthorandworklist(listmapper)
 	authorandworklist = sortauthorandworklists(authorandworklist, authordict)
-	
+
 	searchlistinfo = '<br /><h3>Proposing to search the following works:</h3>\n'
 	searchlistinfo += '(Results will be arranged according to '+session['sortorder']+')<br /><br />\n'
-	
+
 	count = 0
 	wordstotal = 0
 	for work in authorandworklist:
@@ -888,7 +1080,7 @@ def getsearchlistcontents():
 		count += 1
 		w = workdict[work]
 		a = authordict[work[0:6]].shortname
-		
+
 		try:
 			wordstotal += workdict[work].wordcount
 		except:
@@ -906,9 +1098,9 @@ def getsearchlistcontents():
 
 	if wordstotal > 0:
 		searchlistinfo += '<br /><span class="emph">total words:</span> ' + format(wordstotal, ',d')
-	
+
 	searchlistinfo = json.dumps(searchlistinfo)
-	
+
 	return searchlistinfo
 
 
@@ -961,18 +1153,18 @@ def grabtextforbrowsing():
 	alternately you can sent me a perseus ref from a dictionary entry ('_PE_') and I will *try* to convert it into a '_LN_'
 	sample output: [could probably use retooling...]
 		[{'forwardsandback': ['gr0199w010_LN_55', 'gr0199w010_LN_5']}, {'value': '<currentlyviewing><span class="author">Bacchylides</span>, <span class="work">Dithyrambi</span><br />Dithyramb 1, line 42<br /><span class="pubvolumename">Bacchylide. Dithyrambes, épinicies, fragments<br /></span><span class="pubpress">Les Belles Lettres , </span><span class="pubcity">Paris , </span><span class="pubyear">1993. </span><span class="pubeditor"> (Irigoin, J. )</span></currentlyviewing><br /><br />'}, {'value': '<table>\n'}, {'value': '<tr class="browser"><td class="browsedline"><observed id="[–⏑–––⏑–––⏑–]δ̣ουϲ">[–⏑–––⏑–––⏑–]δ̣ουϲ</observed> </td><td class="browsercite"></td></tr>\n'}, ...]
-		
+
 	:return:
 	"""
-	
+
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
-	
+
 	workdb = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
-	
+
 	try: ao = authordict[workdb[:6]]
 	except: ao = makeanemptyauthor('gr0000')
-	
+
 	try:
 		wo = workdict[workdb]
 		bokenwkref = False
@@ -982,10 +1174,10 @@ def grabtextforbrowsing():
 			wo = makeanemptywork('gr0000w000')
 		else:
 			wo = ao.listofworks[0]
-	
+
 	ctx = int(session['browsercontext'])
 	numbersevery = 10
-	
+
 	if bokenwkref == True:
 		passage = '_LN_'+str(wo.starts)
 	else:
@@ -1040,12 +1232,12 @@ def grabtextforbrowsing():
 			browserdata.append({'value': '<br /><br />'})
 		except:
 			pass
-	
+
 	browserdata = json.dumps(browserdata)
-	
+
 	cur.close()
 	del dbc
-	
+
 	return browserdata
 
 
@@ -1059,16 +1251,16 @@ def findbyform():
 	return a formatted set of info
 	:return:
 	"""
-	
+
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
-	
+
 	word = request.args.get('word', '')
 	word = re.sub('[\W_|]+', '',word)
 	word = removegravity(word)
 	# python seems to know how to do this with greek...
 	word = word.lower()
-	
+
 	if re.search(r'[a-z]', word[0]) is not None:
 		word = stripaccents(word)
 		dict = 'latin'
@@ -1108,10 +1300,10 @@ def findbyform():
 		returnarray = [{'value': '[not found]'}, {'entries': '[not found]'} ]
 
 	returnarray = [{'observed':word}] + returnarray
-	
+
 	if len(entriestocheck) > 0:
 		returnarray[0]['trylookingunder'] = entriestocheck[0]
-	
+
 	returnarray = json.dumps(returnarray)
 
 	cur.close()
@@ -1128,23 +1320,23 @@ def dictsearch():
 	json packing
 	:return:
 	"""
-	
+
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
-	
+
 	seeking = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('term', ''))
 	seeking = seeking.lower()
 	seeking = re.sub('σ|ς', 'ϲ', seeking)
 	seeking = re.sub('v', 'u', seeking)
 	returnarray = []
-	
+
 	if re.search(r'[a-z]', seeking) is not None:
 		dict = 'latin'
 		usecolumn = 'entry_name'
 	else:
 		dict = 'greek'
 		usecolumn = 'unaccented_entry'
-	
+
 	seeking = stripaccents(seeking)
 	query = 'SELECT entry_name FROM ' + dict + '_dictionary' + ' WHERE ' + usecolumn + ' ~* %s'
 	if seeking[0] == ' ' and seeking[-1] == ' ':
@@ -1155,14 +1347,14 @@ def dictsearch():
 		data = ('.*?' + seeking + '.*?',)
 
 	cur.execute(query, data)
-			
+
 	# note that the dictionary db has a problem with vowel lengths vs accents
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
 	try:
 		found = cur.fetchall()
 	except:
 		found = []
-	
+
 	# the results should be given the polytonicsort() treatment
 	if len(found) > 0:
 		sortedfinds = []
@@ -1171,21 +1363,21 @@ def dictsearch():
 			finddict[f[0]] = f
 		keys = finddict.keys()
 		keys = polytonicsort(keys)
-		
+
 		for k in keys:
 			sortedfinds.append(finddict[k])
-		
+
 		for entry in sortedfinds:
 			returnarray.append(
 				{'value': browserdictionarylookup(entry[0], dict, cur) + '<hr style="border: 1px solid;" />'})
 	else:
 		returnarray.append({'value':'[nothing found]'})
-	
+
 	returnarray = json.dumps(returnarray)
-	
+
 	cur.close()
 	del dbc
-	
+
 	return returnarray
 
 
@@ -1195,10 +1387,10 @@ def reverselexiconsearch():
 	attempt to find all of the greek/latin dictionary entries that might go with the english search term
 	:return:
 	"""
-	
+
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
-	
+
 	returnarray = []
 	seeking = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('word', ''))
 	if justlatin():
@@ -1207,17 +1399,17 @@ def reverselexiconsearch():
 	else:
 		dict = 'greek'
 		translationlabel = 'tr'
-	
+
 	usecolumn = 'entry_body'
-	
+
 	# first see if your term is mentioned at all
 	query = 'SELECT entry_name FROM ' + dict + '_dictionary' + ' WHERE ' + usecolumn + ' LIKE %s'
 	data = ('%' + seeking + '%',)
 	cur.execute(query, data)
-	
+
 	matches = cur.fetchall()
 	entries = []
-	
+
 	# then go back and see if it is mentioned in the summary of senses
 	for match in matches:
 		m = match[0]
@@ -1227,24 +1419,24 @@ def reverselexiconsearch():
 		a, s, q = entrysummary(definition, dict, translationlabel)
 		del a
 		del q
-		
+
 		for sense in s:
 			if re.search(r'^'+seeking,sense) is not None:
 				entries.append(m)
-				
+
 	entries = list(set(entries))
 	entries = polytonicsort(entries)
-	
+
 	# in which case we should retrieve and format this entry
 	for entry in entries:
 		returnarray.append(
 			{'value': browserdictionarylookup(entry, dict, cur) + '<hr style="border: 1px solid;" />'})
-	
+
 	returnarray = json.dumps(returnarray)
-	
+
 	cur.close()
 	del dbc
-	
+
 	return returnarray
 
 
@@ -1256,20 +1448,20 @@ def setsessionvariable():
 		[{"latestdate": "1"}]
 		[{"spuria": "N"}]
 		etc.
-		
+
 	:return:
 	"""
-	
+
 	param = re.search(r'(.*?)=.*?', request.query_string.decode('utf-8'))
 	param = param.group(1)
 	val = request.args.get(param)
 	# need to accept '-' because of the date spinner
 	val = re.sub('[!@#$%^&*()\[\]=;`+\\\'\"]+', '', val)
-	
+
 	success = modifysessionvar(param, val)
-	
+
 	result = json.dumps([{param: val}])
-	
+
 	return result
 
 
@@ -1287,10 +1479,10 @@ def selectionmade():
 
 	sample output (pre-json):
 		{'numberofselections': 2, 'timeexclusions': '', 'exclusions': '<span class="picklabel">Works</span><br /><span class="wkexclusions" id="searchselection_02" listval="0">Bacchylides, <span class="pickedwork">Dithyrambi</span></span><br />', 'selections': '<span class="picklabel">Author categories</span><br /><span class="agnselections" id="searchselection_00" listval="0">Lyrici</span><br />\n<span class="picklabel">Authors</span><br /><span class="auselections" id="searchselection_01" listval="0">AG</span><br />\n'}
-		
+
 	:return:
 	"""
-	
+
 	# lingering bug that should be handled: if you swap languages and leave lt on a gr list, you will have trouble compiling the searchlist
 
 	# you clicked #pickauthor or #excludeauthor
@@ -1298,17 +1490,17 @@ def selectionmade():
 		workid = re.sub('[\W_]+', '', request.args.get('work', ''))
 	except:
 		workid = ''
-	
+
 	try:
 		uid = re.sub('[\W_]+', '', request.args.get('auth', ''))
 	except:
 		uid = ''
-	
+
 	try:
 		locus = re.sub('[!@#$%^&*()=;]+', '', request.args.get('locus', ''))
 	except:
 		locus = ''
-	
+
 	try:
 		exclude = re.sub('[^tf]', '', request.args.get('exclude', ''))
 	except:
@@ -1342,7 +1534,7 @@ def selectionmade():
 	else:
 		suffix = 'exclusions'
 		other = 'selections'
-	
+
 	if (uid != '') and (workid != '') and (locus != ''):
 		# a specific passage
 		session['psg' + suffix].append(uid + 'w' + workid + '_AT_' + locus)
@@ -1386,7 +1578,7 @@ def selectionmade():
 
 	htmlbundles = sessionselectionsashtml(authordict, workdict)
 	htmlbundles = json.dumps(htmlbundles)
-	
+
 	return htmlbundles
 
 
@@ -1401,20 +1593,20 @@ def clearselections():
 	                  'auexclusions', 'wkexclusions', 'psgexclusions', 'agnexclusions', 'wkgnexclusions', 'alocexclusions', 'wlocexclusions']
 	if category not in selectiontypes:
 		category = ''
-	
+
 	item = request.args.get('id', '')
 	item = int(item)
-	
+
 	try:
 		session[category].pop(item)
 	except:
 		print('failed to pop', category, str(item))
 		pass
-	
+
 	session.modified = True
-	
+
 	newselections = json.dumps(sessionselectionsashtml(authordict, workdict))
-	
+
 	return newselections
 
 
@@ -1425,10 +1617,10 @@ def clearsession():
 	this will reset all settings and reload the front page
 	:return:
 	"""
-	
+
 	session.clear()
 	return redirect(url_for('frontpage'))
-	
+
 
 
 

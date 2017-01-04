@@ -229,11 +229,16 @@ def sortresultslist(hits, authorsdict, worksdict):
 	sort it by the session sort criterion
 	mark the list with index numbers (because an mp function will grab this next)
 
+	in:
+		[<server.hipparchiaclasses.dbWorkLine object at 0x10d6625f8>, <server.hipparchiaclasses.dbWorkLine object at 0x10d662470>,...]
+
+	out:
+		{0: <server.hipparchiaclasses.dbWorkLine object at 0x108981780>, 1: <server.hipparchiaclasses.dbWorkLine object at 0x108981a20>, 2: <server.hipparchiaclasses.dbWorkLine object at 0x108981b70>, ...}
+
 	:param hits:
 	:param authorsdict:
 	:return:
 	"""
-
 
 	sortby = session['sortorder']
 	templist = []

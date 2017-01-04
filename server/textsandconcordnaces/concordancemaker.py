@@ -38,7 +38,7 @@ def compilewordlists(worksandboundaries, cursor):
 		lines = cursor.fetchall()
 		
 		for l in lines:
-			lineobjects.append(dblineintolineobject(w, l))
+			lineobjects.append(dblineintolineobject(l))
 	
 	return lineobjects
 

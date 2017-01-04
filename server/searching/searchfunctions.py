@@ -202,7 +202,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 	results = cursor.fetchall()
 	lines = []
 	for r in results:
-		lines.append(dblineintolineobject(workdbname, r))
+		lines.append(dblineintolineobject(r))
 
 	# will get key errors if there is no linenumber+/-1
 	if len(lines) == 2:

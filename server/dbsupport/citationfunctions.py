@@ -191,8 +191,6 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 	:return:
 	"""
 
-	print('finddblinefromincompletelocus(workid, citationlist)',workid, citationlist)
-
 	lmap = {0: 'level_00_value', 1: 'level_01_value', 2: 'level_02_value', 3: 'level_03_value', 4: 'level_04_value',
 	        5: 'level_05_value'}
 	

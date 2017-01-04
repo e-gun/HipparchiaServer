@@ -83,7 +83,7 @@ def tcfindstartandstop(authorobject, workobject, passageaslist, cursor):
 	p = tuple(passageaslist)
 	passage = finddblinefromincompletelocus(workobject.universalid, p, cursor)
 	line = grabonelinefromwork(authorobject.universalid, passage, cursor)
-	lo = dblineintolineobject(workobject.universalid, line)
+	lo = dblineintolineobject(line)
 	
 	# let's say you looked for 'book 2' of something that has 'book, chapter, line'
 	# that means that you want everything that has the same level2 value as the lineobject

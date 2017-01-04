@@ -135,17 +135,17 @@ def loadallworksintoallauthors(authorsdict, worksdict):
 	return authorsdict
 
 
-def dblineintolineobject(work, dbline):
+def dblineintolineobject(dbline):
 	"""
 	convert a db result into a db object
-	they query needs the columns to be in the right order (which is all and in order of creation):
-		query = 'SELECT index, wkuniversalid, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, stripped_line, hypenated_words, annotations FROM ' + work + ' ORDER BY index ASC'
+
+	basically all columns pushed straight into the object with one twist: 1, 0, 2, 3, ...
+
 	:param dbline:
 	:return:
 	"""
 
-	# actualwork = dbline[1]
-	# we now need that because 'work' might only be 'lt0472' if we searched the whole author and not a subset
+	# note the [1], [0], [2], order: wkuinversalid, index, level_05_value, ...
 
 	lineobject = dbWorkLine(dbline[1], dbline[0], dbline[2], dbline[3], dbline[4], dbline[5], dbline[6], dbline[7],
 	                        dbline[8], dbline[9], dbline[10], dbline[11], dbline[12])

@@ -162,7 +162,7 @@ def aggregatelines(firstline, lastline, cursor, audbname):
 	
 	lineobjects = []
 	for dbline in lines:
-		lineobjects.append(dblineintolineobject(audbname, dbline))
+		lineobjects.append(dblineintolineobject(dbline))
 	
 	aggregate = ''
 	if session['accentsmatter'] == 'Y':
@@ -314,8 +314,8 @@ def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searcht
 	:return:
 	"""
 
-	# for h in hitdict.keys():
-	# 	print(h,hitdict[h].universalid, hitdict[h].accented)
+	#for h in hitdict.keys():
+	#	print(h,hitdict[h].universalid, hitdict[h].accented)
 
 	linesofcontext = int(session['linesofcontext'])
 	
@@ -336,7 +336,7 @@ def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searcht
 		wid = lineobject.wkuinversalid
 		workobject = workdict[wid]
 		workbundles.append({'hitnumber': i+1, 'lo': lineobject, 'wo': workobject, 'ao': authorobject})
-	
+
 	manager = Manager()
 	allfound = manager.dict()
 	bundles = manager.list(workbundles)
@@ -375,17 +375,18 @@ def formattingworkpile(bundles, criteria, activepoll, allfound):
 	"""
 	
 	while len(bundles) > 0:
-		try:
-			bundle = bundles.pop()
-			citwithcontext = formattedcittationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'], criteria['seek'], criteria['prox'], criteria['type'])
-			citwithcontext[0]['hitnumber'] = bundle['hitnumber']
-			activepoll.remain(activepoll.getremaining() - 1)
-		except:
-			citwithcontext = []
+
+		bundle = bundles.pop()
+		citwithcontext = formattedcittationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'], criteria['seek'], criteria['prox'], criteria['type'])
+		citwithcontext[0]['hitnumber'] = bundle['hitnumber']
+		activepoll.remain(activepoll.getremaining() - 1)
+		#except:
+		#	citwithcontext = []
 			
 		if citwithcontext != []:
 			allfound[bundle['hitnumber']] = citwithcontext
-	
+
+
 	return allfound
 
 
@@ -425,7 +426,7 @@ def formattedcittationincontext(lineobject, workobject, authorobject, linesofcon
 	environs = simplecontextgrabber(workobject, highlightline, linesofcontext, curs)
 	
 	for found in environs:
-		found = dblineintolineobject(lineobject.wkuinversalid, found)
+		found = dblineintolineobject(found)
 		if found.index == highlightline:
 			found = lineobjectresultformatter(found, searchterm, proximate, searchtype, True)
 		else:

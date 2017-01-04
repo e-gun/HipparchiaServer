@@ -563,7 +563,7 @@ p.level4 { padding-left: 45;}
 	text-decoration: overline;
 }
 
-.erasedepiographicaltext {
+.erasedepiographicaltext, .strikethrough {
 	text-decoration: line-through;
 }
 

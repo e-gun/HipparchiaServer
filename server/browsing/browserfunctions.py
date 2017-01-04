@@ -71,7 +71,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 	lines = []
 	for r in rawpassage:
-		lines.append(dblineintolineobject(workobject.universalid, r))
+		lines.append(dblineintolineobject(r))
 	
 	focusline = lines[0]
 	for line in lines:
