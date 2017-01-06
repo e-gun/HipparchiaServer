@@ -764,7 +764,7 @@ def workstructure():
 	for work in ao.listofworks:
 		if work.universalid == workid:
 			structure = work.structure
-			print('structure',structure)
+
 	ws = {}
 	if structure != {}:
 		lowandhigh = findvalidlevelvalues(workid, structure, safepassage, cur)
