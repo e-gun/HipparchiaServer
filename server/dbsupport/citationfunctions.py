@@ -21,6 +21,7 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 		example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
 	"""
 	availablelevels = len(workstructure)
+
 	atlevel = availablelevels-len(partialcitationtuple)
 	# cheat in the case where you want to find the top by sending a 'noncitation': '-1'
 	# e.g.: /getstructure?locus=gr0003w001_AT_-1
