@@ -184,6 +184,10 @@ def executesearch():
 			if len(max(terms, key=len)) > 3:
 				hits = searchdispatcher('phrase', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
 			else:
+				# SPEED NOTES
+				# should this be a UNION search instead?
+				# c. 110s to search 'si tu non' in the full latin corpus no matter which path you choose
+				# but 'και δη και' is still much faster this way
 				# you are looking for a set of little words: και δη και, etc.
 				#   16s to find και δη και via a std phrase search; 1.6s to do it this way
 				# not immediately obvious what the best number for minimum max term len is:
@@ -558,9 +562,6 @@ def offerauthorhints():
 		qlen = len(query)
 		for author in authorlist:
 			if query == author.lower()[0:qlen]:
-				# jquery will gobble up label and value
-				# another tag can be used for holding other info
-				# pass that to 'ui.item.OTHERTAG' to be evaluated
 				hint.append({'value':author})
 	hint = json.dumps(hint)
 	return hint
@@ -622,9 +623,6 @@ def augenrelist():
 			for genre in activegenres:
 				hintgenre = genre.lower()
 				if query == hintgenre[0:qlen]:
-					# jquery will gobble up label and value
-					# another tag can be used for holding other info
-					# pass that to 'ui.item.OTHERTAG' to be evaluated
 					hint.append({'value': genre})
 	else:
 		hint = ['(no author genre data available inside of your active database(s))']
@@ -659,9 +657,6 @@ def wkgenrelist():
 			for genre in activegenres:
 				hintgenre = genre.lower()
 				if query == hintgenre[0:qlen]:
-					# jquery will gobble up label and value
-					# another tag can be used for holding other info
-					# pass that to 'ui.item.OTHERTAG' to be evaluated
 					hint.append({'value': genre})
 	else:
 		hint = ['(no work genre data available inside of your active database(s))']

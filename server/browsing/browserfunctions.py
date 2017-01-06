@@ -124,7 +124,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 				html = insertdatarow('City', 'cityinfo', city.group(1))
 				passage['ouputtable'].append(html)
 			if pub is not None and line.index == workobject.starts:
-				html = insertdatarow('Publication', 'pubinfo', pub.group(1))
+				html = insertdatarow('Additional publication info', 'pubinfo', pub.group(1))
 				passage['ouputtable'].append(html)
 			if date is not None and line.index == workobject.starts:
 				html = insertdatarow('Editor\'s date', 'textdate', date.group(1))
