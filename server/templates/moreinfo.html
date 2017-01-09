@@ -6,7 +6,9 @@
 <li><a href="#MakingSearchLists"><span>Searching: Building search lists</span></a></li>
 <li><a href="#RegexSearching"><span>Searching: REGEX</span></a></li>
 <li><a href="#Technology"><span>Technology</span></a></li>
+<li><a href="#Oddities"><span>Peculiarities and Gotchas</span></a></li>
 </ul>
+
 <div id="Interface">
 <p class="interfacetips">
 <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Help">
@@ -89,94 +91,115 @@
     <span class="label">Build a concordance</span></p>
     <p class="explanation">A concordance for the current work will be built in a new window. The time required increases dramatically as works get longer.
     And it will take a very long time indeed to compile a concordance for something like Cassius Dio's <span class="italic">Historiae Romanae</span>.
-    Then again, how long would it take to do this by hand?
-
-<p class="interfacetips"><button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Show/Hide local info about the works of this author"><span class="ui-icon ui-icon-person"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-<span class="label">Show/Hide local info about the works of this author</span></p>
-<p class="explanation">Take a peek at the database info attached to this author: genre classification of the author and the individual works;
-date assigned; works of the author; editions from which the works are taken.
-</p>
+        Then again, how long would it take to do this by hand?</p>
 
 <p class="interfacetips">
-<button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Show/Hide list of available categories"><span class="ui-icon ui-icon-clipboard"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-<span class="label">Show/Hide list of available categories</span></p>
-<p class="explanation">View the list of categories into which authors and works have been sorted.
-This option is only visible inside of 'further selection criteria' (<span class="ui-icon ui-icon-arrowreturnthick-1-s"></span>)</p>
-</p>
-<p>
-<button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Complicate the search"><span class="ui-button-icon ui-icon ui-icon-arrow-1-e"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-<span class="label">Open complex searching options</span></p>
-<p class="explanation">Search for X near Y and within N words/lines</p>
+    <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Show/Hide local info about the works of this author">
+    <span class="ui-icon ui-icon-person"></span>
+    <span class="ui-button-icon-space"> </span>&nbsp;</button>
+    <span class="label">Show/Hide local info about the works of this author</span></p>
+    <p class="explanation">Take a peek at the database info attached to this author: genre classification of the author and the individual works;
+        date assigned; works of the author; editions from which the works are taken.</p>
+
+<p class="interfacetips">
+    <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Show/Hide list of available categories">
+    <span class="ui-icon ui-icon-clipboard"></span>
+    <span class="ui-button-icon-space"> </span>&nbsp;</button>
+    <span class="label">Show/Hide list of available categories</span></p>
+    <p class="explanation">View the list of categories into which authors and works have been sorted.
+    This option is only visible inside of 'further selection criteria' (<span class="ui-icon ui-icon-arrowreturnthick-1-s"></span>)</p>
+<p class="interfacetips">
+    <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Complicate the search">
+    <span class="ui-button-icon ui-icon ui-icon-arrow-1-e"></span>
+    <span class="ui-button-icon-space"> </span>&nbsp;</button>
+    <span class="label">Open complex searching options</span></p>
+    <p class="explanation">Search for X near Y and within N words/lines</p>
 </div>
+
 <div id="Browsing">
 <p class="interfacetips">
-<button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse backwards (click or press the &#8592; key)"><span class="ui-icon ui-icon-arrowthick-1-w">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-<span class="label">Browse backwards (click or press the &#8592; key)</span></p>
+<button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse backwards (click or press the &#8592; key)">
+    <span class="ui-icon ui-icon-arrowthick-1-w">&nbsp;</span>
+    <span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="label">Browse backwards (click or press the &#8592; key)</span></p>
+
 <p class="interfacetips">
-<button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Close the browser"><span class="ui-icon ui-icon-close">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-<span class="label">Close the browser</span></p>
+    <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Close the browser">
+    <span class="ui-icon ui-icon-close">&nbsp;</span>
+    <span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="label">Close the browser</span></p>
+
 <p class="interfacetips">
-<button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse forwards (click or press the &#8594; key)"><span class="ui-icon ui-icon-arrowthick-1-e">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-<span class="label">Browse forwards (click or press the &#8594; key)</span></p></p>
+    <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse forwards (click or press the &#8594; key)">
+    <span class="ui-icon ui-icon-arrowthick-1-e">&nbsp;</span>
+    <span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="label">Browse forwards (click or press the &#8594; key)</span></p></p>
 </div>
 
 <div id="MakingSearchLists">
-<button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Include this category and/or genre"><span class="ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-<span class="label">Add an item to the search list</span><br />
-<p class="explanation">Use the information in the box or boxes to the left of this button to append an item to the list of things one is searching for.
-These can be whole authors, whole works, parts of works, whole classes of authors, and whole classes of work.</p>
-<p class="explanation">For example: adding the author <span class="emph">Plato</span> and the class <span class="emph">Tragici</span>, you could compare Plato and tragedians.
-Similarly the author <span class="emph">Plato</span> and the work genre <span class="emph">Satyr.</span> would let you compare Plato and satyr plays.
-Likewise the work <span class="emph">Thucydides, <span class="italic">Historiae</span></span> could be combined with <span class="emph">Herodotus, <span class="italic">Historiae</span></span>.
-This could be further refined down to <span class="emph">Thucydides, <span class="italic">Historiae</span> Book 1</span> and <span class="emph">Herodotus, <span class="italic">Historiae</span> Book 1</span>.
-In fact absurd levels of specificity can be chosen: <span class="emph">Thucydides , <span class="italic">Historiae</span> Book 1, chapter 114, section 2, line 2</span> is a perfectly valid selection.
-</p>
-<button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Exclude this category and/or genre"><span class="ui-icon ui-icon-minus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-<span class="label">Add an item to the exclusion list</span><br />
-<p class="explanation">Use the information in the box or boxes to the left of this button to append an item to the list of things one is not going to search for.
-These can be whole authors, whole works, parts of works, whole classes of authors, and whole classes of work.</p>
-<p class="explanation">For example: adding the author <span class="emph">Plato</span> and the class <span class="emph">Tragici</span> to the exclusion list, you could search for the use of a term outside of Plato and Tragedy.
-Mixing inclusions and exclusions can produce interesting possibilities: the author <span class="emph">Plutarch</span> as a selection and the work genre <span class="emph">Biogr.</span> as an exclusion yields all of Plutarch but for the <span class="italic">Lives</span>.
-Similarly adding <span class="emph">Homer</span> and <span class="emph">Epici</span> and excluding <span class="emph"><span class="italic">Ilias</span></span> and then setting the time restriction to 850BCE to 500 CE will give you non-Iliadic early epic. Consider tossing in some <span class="emph">Hymn.</span> for good measure...
-It is also possible to search something like <span class="emph">Herodotus, <span class="italic">Histories</span></span> less books 1 and 2 by adding the former to the selection list and the latter to the exclusion list.
-But excluding a subsection within a section is not supported: Book 1 less section 1 has not been implemented and probably never will be.
-</p>
+<button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Include this category and/or genre">
+    <span class="ui-icon ui-icon-plus"></span>
+    <span class="ui-button-icon-space"> </span>&nbsp;</button>
+    <span class="label">Add an item to the search list</span><br />
+    <p class="explanation">Use the information in the box or boxes to the left of this button to append an item to the list of things one is searching for.
+    These can be whole authors, whole works, parts of works, whole classes of authors, and whole classes of work.</p>
+
+    <p class="explanation">For example: adding the author <span class="emph">Plato</span> and the class <span class="emph">Tragici</span>, you could compare Plato and tragedians.
+    Similarly the author <span class="emph">Plato</span> and the work genre <span class="emph">Satyr.</span> would let you compare Plato and satyr plays.
+    Likewise the work <span class="emph">Thucydides, <span class="italic">Historiae</span></span> could be combined with <span class="emph">Herodotus, <span class="italic">Historiae</span></span>.
+    This could be further refined down to <span class="emph">Thucydides, <span class="italic">Historiae</span> Book 1</span> and <span class="emph">Herodotus, <span class="italic">Historiae</span> Book 1</span>.
+    In fact absurd levels of specificity can be chosen: <span class="emph">Thucydides , <span class="italic">Historiae</span> Book 1, chapter 114, section 2, line 2</span> is a perfectly valid selection.
+    </p>
+
+<button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Exclude this category and/or genre">
+    <span class="ui-icon ui-icon-minus"></span>
+    <span class="ui-button-icon-space"> </span>&nbsp;</button>
+    <span class="label">Add an item to the exclusion list</span><br />
+    <p class="explanation">Use the information in the box or boxes to the left of this button to append an item to the list of things one is not going to search for.
+    These can be whole authors, whole works, parts of works, whole classes of authors, and whole classes of work.</p>
+    <p class="explanation">For example: adding the author <span class="emph">Plato</span> and the class <span class="emph">Tragici</span> to the exclusion list, you could search for the use of a term outside of Plato and Tragedy.
+    Mixing inclusions and exclusions can produce interesting possibilities: the author <span class="emph">Plutarch</span> as a selection and the work genre <span class="emph">Biogr.</span> as an exclusion yields all of Plutarch but for the <span class="italic">Lives</span>.
+    Similarly adding <span class="emph">Homer</span> and <span class="emph">Epici</span> and excluding <span class="emph"><span class="italic">Ilias</span></span> and then setting the time restriction to 850BCE to 500 CE will give you non-Iliadic early epic. Consider tossing in some <span class="emph">Hymn.</span> for good measure...
+    It is also possible to search something like <span class="emph">Herodotus, <span class="italic">Histories</span></span> less books 1 and 2 by adding the former to the selection list and the latter to the exclusion list.
+    But excluding a subsection within a section is not supported: Book 1 less section 1 has not been implemented and probably never will be.
+    </p>
 
 <p><span class="ui-button-icon ui-icon ui-icon-trash" title="Drag here to remove item from list">&nbsp;</span>
-<span class="label">Remove item from list</span></p>
-<p class="explanation"><span class="emph">Click and drag</span> items from the include/exclude list here. Release the mouse button. Boom: the item is gone.
-</p>
+    <span class="label">Remove item from list</span></p>
+    <p class="explanation"><span class="emph">Click and drag</span> items from the include/exclude list here. Release the mouse button. Boom: the item is gone.
+    </p>
 
 
 <p><span class="ui-button-icon ui-icon ui-icon-info" title="Show/hide details of the current search list">&nbsp;</span>
-<span class="label">Check the contents of your current search list</span></p>
-<p class="explanation">If you searched now for <span class="emph">Tragici</span> what text would you in fact search? Click on the <span class="emph">info</span> button to find out.
-This should give you a list of <span class="emph">works</span> that have all of the inclusions and exclusions currently in effect.
-</p>
+    <span class="label">Check the contents of your current search list</span></p>
+    <p class="explanation">If you searched now for <span class="emph">Tragici</span> what text would you in fact search? Click on the <span class="emph">info</span> button to find out.
+    This should give you a list of <span class="emph">works</span> that have all of the inclusions and exclusions currently in effect.
+    </p>
 
-<fieldset><legend>Earliest date to search</legend><input type="text" value="-850" width="25px;"></fieldset>
-<fieldset><legend>Latest date to search</legend><input  type="text" value="1500" width="25px;"></fieldset>
-<p class="explanation">Choose a chronological span within which to limit the search. Note that the dates assigned to authors are very approximate
-and derived from original data that can look like <span class="emph">i-iii A.D.</span>. Such an author would be assigned to <span class="emph">200 C.E.</span>. <span class="emph">iv B.C</span> becomes <span class="emph">350 BCE</span>. A variety of quirks in the
-original data has become a variety of quirks here. Similarly many authors have no date at all and some works
-have a variety of dates because they are composite. Works such as these are assigned to <span class="emph">1500 C.E.</span>, even if that is ridiculous. That number should be considered
-equivalent to <span class="emph">unknown</span>. Check your search lists (<span class="ui-button-icon ui-icon ui-icon-info" title="Show/hide details of the current search list">&nbsp;</span>)
-to make sure you are getting what you want. Searching within a date range that is smaller than one century is likely to yield some measure of disappointment.
-Users are quite free to update authors with their own superior dates, but that requires learning SQL.<br />
+    <fieldset><legend>Earliest date to search</legend><input type="text" value="-850" width="25px;"></fieldset>
+    <fieldset><legend>Latest date to search</legend><input  type="text" value="1500" width="25px;"></fieldset>
+    <p class="explanation">Choose a chronological span within which to limit the search. Note that the dates assigned to authors are very approximate
+    and derived from original data that can look like <span class="emph">i-iii A.D.</span>. Such an author would be assigned to <span class="emph">200 C.E.</span>. <span class="emph">iv B.C</span> becomes <span class="emph">350 BCE</span>. A variety of quirks in the
+    original data has become a variety of quirks here. Similarly many authors have no date at all and some works
+    have a variety of dates because they are composite. Works such as these are assigned to <span class="emph">1500 C.E.</span>, even if that is ridiculous. That number should be considered
+    equivalent to <span class="emph">unknown</span>. Check your search lists (<span class="ui-button-icon ui-icon ui-icon-info" title="Show/hide details of the current search list">&nbsp;</span>)
+    to make sure you are getting what you want. Searching within a date range that is smaller than one century is likely to yield some measure of disappointment.
+    Users are quite free to update authors with their own superior dates, but that requires learning SQL.<br />
 
-Note that there is a conflict between time as an exclusion principle and the selection list. Which should take priority? This question has been resolved as follows: individual selections
-trump generic chronological exclusions. And so:
-<ul class="forexample">
-    <li>zero selections + no date restriction (-850 to 1500): search the <span class="emph">whole corpus</span></li>
-    <li>zero selections + a date restriction: search for everybody within that date range; e.g., <span class="emph">5th century BCE Greek authors</span></li>
-    <li>zero selections + a class or classes + a date restriction: search for all members of the class(es) within that date range; e.g. <span class="emph">epic before 1 C.E.</span></li>
-    <li>an author/work/passage + a class or classes + a date restriction: search for the specific item(s) and search for all members of the class(es) within that date range;
-        e.g. <span class="emph">Plutarch's <span class="italic">Solon</span></span> and <span class="emph">4th century BCE Greek orators</span></li>
-</ul>
-</p>
+    Note that there is a conflict between time as an exclusion principle and the selection list. Which should take priority? This question has been resolved as follows: individual selections
+    trump generic chronological exclusions. And so:
+    <ul class="forexample">
+        <li>zero selections + no date restriction (-850 to 1500): search the <span class="emph">whole corpus</span></li>
+        <li>zero selections + a date restriction: search for everybody within that date range; e.g., <span class="emph">5th century BCE Greek authors</span></li>
+        <li>zero selections + a class or classes + a date restriction: search for all members of the class(es) within that date range; e.g. <span class="emph">epic before 1 C.E.</span></li>
+        <li>an author/work/passage + a class or classes + a date restriction: search for the specific item(s) and search for all members of the class(es) within that date range;
+            e.g. <span class="emph">Plutarch's <span class="italic">Solon</span></span> and <span class="emph">4th century BCE Greek orators</span></li>
+    </ul>
+    </p>
 </div>
+
 <div id="RegexSearching">
-Check your settings (<span class="ui-icon ui-icon-gear"></span>) for the kind of search you are running. Different searches use a different syntax.
+
 Regex is a dark art unto itself. Consult the <a href="https://www.postgresql.org/docs/8.3/static/functions-matching.html#POSIX-EMBEDDED-OPTIONS-TABLE">manual directly</a>.
 <br /><br />
 The more salient things to know/use:
@@ -197,10 +220,142 @@ via regex that one might do in a flat text file will fail.
 
 
 </div>
+
 <div id="Technology">
 Python 3.5<br/>
 PostgreSQL<br/>
 Javascript<br/>
 jQuery<br />
 </div>
+
+<div id="Oddities">
+    The original data was not really designed to be aggregated. It was also not meant to be sliced up after this fashion.
+    Various oddities and peculiarities ensue.
+
+    <br />
+    <p><span class="label">Missing in action</span></p>
+    <ul class="forexample">
+        <li>The Latin authors data is missing:
+            <ul>
+                <li>Dates</li>
+                <li>Author Genres</li>
+                <li>Author Locations</li>
+                <li>Work Genres</li>
+                <li>Work Locations</li>
+            </ul>
+        </li>
+        <li>The Greek authors data is missing:
+            <ul>
+                <li>Work Genres</li>
+            </ul>
+        </li>
+        <li>The papyrus data is missing:
+            <ul>
+                <li>Author Genres</li>
+                <li>Author Locations</li>
+                <li>Work Genres</li>
+            </ul>
+        </li>
+        <li>The inscriptions data (I & II) is missing:
+            <ul>
+                <li>Author Genres</li>
+            </ul>
+        </li>
+    </ul>
+
+    <p><span class="label">Internal heterogeneity</span></p>
+        <ul class="forexample">Dates
+        <li>The dates recorded with the Greek authors are not of the same sort as those recorded with the papyri and inscriptions.
+            The Greek authors data is derived from LSJ and it originally looks like <span class="emph">'A.D. 2–3?'</span>. Some
+            items are listed as <span class="emph">'Varia'</span> or <span class="emph">'Incerta'</span>.
+
+            In short, these dates are approximate and inexact.
+            Everything gets converted to the center of any available century or range of centuries.
+            All questions are ignored.
+
+            <ul>
+                <li>4 BC ==> 350 BCE</li>
+                <li>A.D. 2–3? ==> 200 CE</li>
+            </ul>
+
+            The net result is that it is very easy to exclude authors by being over-refined in your search. The margin of error is huge.
+
+        </li>
+        <li>
+            The dates recorded with the papyri and the inscriptions vary from '?' to something very precise like 212 CE. Hipparchia has
+            parsed the dates that the editors have assigned to these items as best as it can. Please note that there are
+            21584 distinct recorded_date values in the works table. Some of these are in German, some use Roman numerals, some use 'a' and 'p',
+            some 'BC' and 'AD', some ordinal numbers, some cardinal numbers. Some are 'the age of X'. It's not easy to get all of these right
+            (even if the editorial date is itself accurate...). It is not even easy to check that they are right.
+            As above, all questions are dropped and all spans are turned into a single number representing the midpoint.
+            'Ages' have had dates assigned to them. Claudius will be the middle of the reign, approximately: 50 CE.
+            'Byzantine' is a bit trickier... 700 CE has been chosen for lack of some other solution.
+            Rough/round numbers have been chosen where something specific is not available. Avoid over-refined searches
+            unless you know that you do not care about items that have not been dated with some precision.
+
+        </li>
+        </ul>
+        <ul class="forexample">Author Locations
+            <li>
+                The locations recorded with the Greek authors are not of the same sort as those recorded with the papyri and inscriptions.
+                The Greek authors data is derived from LSJ and it originally looks like <span class="emph">'Athenae'</span>,
+                <span class="emph">'Ilium [vel Troja]'</span>, and <span class="emph">'Sinope'</span>. Many authors have no location
+                recorded. Be careful not to throw out more authors than you mean to by putting too much confidence in this data.
+            </li>
+            <li>
+                The locations for inscription 'authors' is inferential. If the name of the corpus contains something that
+                looks like a location, it has been grabbed: 'Attica' for example. Note that 'Attica' is not 'Athenae': you would need
+                to ask for both locations to get IG's Attica + LSJ's Attic authors. Some sets of inscriptions come from more than one
+                place: 'Cos and Calymna', for example, and not just 'Cos'
+                Furthermore many corpora do not have any (pseudo-)locations that can be inferred from their name: for example,
+                'Late Antique Latin' is not a place, at least not a literal one.
+            </li>
+        </ul>
+        <ul class="forexample">Work Locations
+            <li>
+                There are 14001 distinct locations on offer. That's a painfully large number. It is not at all easy to
+                pare these down in an automated fashion. 110 start with 'Alex'. Some of these could be folded into one
+                another, but the data has many shapes, and no decision has been reached yet about where/how to make the unkind cuts.
+            </li>
+        </ul>
+        <ul class="forexample">Missing characters and display quirks
+            <li>
+                There are various unprintable characters in the original data. These fall under various headings
+            </li>
+                <ul class="numbered">
+                    <li>
+                        Idiosyncratic characters that have no unicode representation. You will see ◦ in the text. If you look at
+                        the database and/or HTML output you will see a code number: 'hmu_idiosyncratic_char value="1122"', e.g.
+                        This can be decoded via the Betacode manual.
+                        It is possible to know what was in the text, but it is not possible to display it, at least not yet.
+                    </li>
+                    <li>
+                        Undocumented characters are all rendered as ⊚. If you look at
+                        the database and/or HTML output you will see a code number: hmu_undocumented_poundsign value="1069", e.g.
+                        The original data has either been misparsed or it yielded a value that is not present in the Betacode manual.
+                        Further documentation ought to make it possible to put the proper character in here.
+                    </li>
+                    <li>
+                        Some characters will not display becuase they have been properly encoded but they are missing from your fonts.
+                        They will display properly if/when you get a font that supports them.
+                    </li>
+                </ul>
+            <li>
+                Formatting instructions have typically been followed: make the font bigger, superscript, cross out... But not
+                all of the codes found have been documented. And some are too painful to implement: start multi-column display,
+                reverse text direction, writing perpendicular to main text, ... Probing the database will usually let you know what was found.
+                But it is up to you to implement the proper method of displaying this material.
+            </li>
+            <li>
+                Brackets that converge with HTML or other markup have typically been replaced with a near equivalent: &lt;
+                signals markup instructions to a page renderer. Left and right angled bracket were swapped out. They are present in the database with
+                other characters instead: ⟪ and ⟫. A similar logic governed the choice of ⦅ and ⦆ since ( and ) are special
+                characters in betacode. There are other (hopefully) inconsequential items that fall under this heading.
+            </li>
+
+        </ul>
+
+
+</div>
+
 </div>

@@ -107,7 +107,14 @@ ul {
 ul.forexample {
 	list-style-type: lower-latin;
 	padding-left: 100px;
+	padding-bottom: 5px;
 	}
+
+ul.numbered {
+    list-style-type: decimal;
+    padding-left: 25px;
+    padding-bottom: 5px;
+}
 
 input {
 	text-align: center;
