@@ -223,7 +223,9 @@ def setconnection(autocommit='n'):
 	                                password=hipparchia.config['DBPASS'])
 	if autocommit == 'autocommit':
 		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-	
+
+	dbconnection.set_session(readonly=True)
+
 	return dbconnection
 
 
