@@ -222,10 +222,14 @@ via regex that one might do in a flat text file will fail.
 </div>
 
 <div id="Technology">
-Python 3.5<br/>
-PostgreSQL<br/>
-Javascript<br/>
-jQuery<br />
+    The following are required. Version numbers should be considered to be the minimum acceptable values.
+    <ul>
+        <li>Python 3.6</li>
+        <li>PostgreSQL 9.6</li>
+        <li>Javascript</li>
+        <li>jQuery 3.1</li>
+    </ul>
+
 </div>
 
 <div id="Oddities">
@@ -264,97 +268,117 @@ jQuery<br />
     </ul>
 
     <p><span class="label">Internal heterogeneity</span></p>
-        <ul class="forexample">Dates
-        <li>The dates recorded with the Greek authors are not of the same sort as those recorded with the papyri and inscriptions.
-            The Greek authors data is derived from LSJ and it originally looks like <span class="emph">'A.D. 2–3?'</span>. Some
-            items are listed as <span class="emph">'Varia'</span> or <span class="emph">'Incerta'</span>.
+        <ul class="forexample">
+            <li><span class="emph">Dates</span>
+                <ul class="numbered">
+                    <li>The dates recorded with the <span class="emph">Greek authors</span> are not of the same sort as those recorded with the papyri and inscriptions.
+                        The Greek authors data is derived from LSJ and it originally looks like <code>A.D. 2–3?</code>. Some
+                        items are listed as <code>Varia</code> or <code>Incerta</code>.
 
-            In short, these dates are approximate and inexact.
-            Everything gets converted to the center of any available century or range of centuries.
-            All questions are ignored.
+                            In short, these dates are approximate and inexact.
+                            Everything gets converted to the center of any available century or range of centuries.
+                            All questions are ignored.
 
-            <ul>
-                <li>4 BC ==> 350 BCE</li>
-                <li>A.D. 2–3? ==> 200 CE</li>
-            </ul>
+                            <ul class="roman">
+                                <li><code>4 BC ==> 350 BCE</code></li>
+                                <li><code>A.D. 2–3? ==> 200 CE</code></li>
+                            </ul>
 
-            The net result is that it is very easy to exclude authors by being over-refined in your search. The margin of error is huge.
+                        The net result is that it is very easy to exclude authors by being over-refined in your search. <span class="emph">The margin of error is at least 50 years</span>.
 
-        </li>
-        <li>
-            The dates recorded with the papyri and the inscriptions vary from '?' to something very precise like 212 CE. Hipparchia has
-            parsed the dates that the editors have assigned to these items as best as it can. Please note that there are
-            21584 distinct recorded_date values in the works table. Some of these are in German, some use Roman numerals, some use 'a' and 'p',
-            some 'BC' and 'AD', some ordinal numbers, some cardinal numbers. Some are 'the age of X'. It's not easy to get all of these right
-            (even if the editorial date is itself accurate...). It is not even easy to check that they are right.
-            As above, all questions are dropped and all spans are turned into a single number representing the midpoint.
-            'Ages' have had dates assigned to them. Claudius will be the middle of the reign, approximately: 50 CE.
-            'Byzantine' is a bit trickier... 700 CE has been chosen for lack of some other solution.
-            Rough/round numbers have been chosen where something specific is not available. Avoid over-refined searches
-            unless you know that you do not care about items that have not been dated with some precision.
+                        </li>
+                        <li>
+                            The dates recorded with the <span class="emph">papyri</span> and the <span class="emph">inscriptions</span> vary from <code>?</code> to something very precise like <code>212 CE</code>. Hipparchia has
+                            parsed the dates that the editors have assigned to these items as best as it can. Please note that there are
+                            21584 distinct <code>recorded_date</code> values in the works table. Some of these are in German, some use Roman numerals, some use 'a' and 'p',
+                            some 'BC' and 'AD', some ordinal numbers, some cardinal numbers. Some are 'the age of X'. It's not easy to get all of these right
+                            (even if the editorial date is itself accurate...). It is not even easy to check that they are right.
+                            As above, all questions are dropped and all spans are turned into a single number representing the midpoint.
+                            'Ages' have had dates assigned to them. Claudius will be the middle of the reign, approximately: 50 CE.
+                            'Byzantine' is a bit trickier... 700 CE has been chosen for lack of some other solution.
+                            Rough/round numbers have been chosen where something specific is not available. Many items are dated precisely,
+                            many to within a decade, others are lucky to be assigned to the right century. Check the editor's date
+                            (if available...) at the top of any inscription to see where the <code>assigned_date</code> came from.
+                            <span class="emph">Avoid over-refined searches</span>
+                            unless you know that you do not care about items that have not been dated with some precision.
 
-        </li>
-        </ul>
-        <ul class="forexample">Author Locations
-            <li>
-                The locations recorded with the Greek authors are not of the same sort as those recorded with the papyri and inscriptions.
-                The Greek authors data is derived from LSJ and it originally looks like <span class="emph">'Athenae'</span>,
-                <span class="emph">'Ilium [vel Troja]'</span>, and <span class="emph">'Sinope'</span>. Many authors have no location
-                recorded. Be careful not to throw out more authors than you mean to by putting too much confidence in this data.
+                        </li>
+                </ul>
             </li>
-            <li>
-                The locations for inscription 'authors' is inferential. If the name of the corpus contains something that
-                looks like a location, it has been grabbed: 'Attica' for example. Note that 'Attica' is not 'Athenae': you would need
-                to ask for both locations to get IG's Attica + LSJ's Attic authors. Some sets of inscriptions come from more than one
-                place: 'Cos and Calymna', for example, and not just 'Cos'
-                Furthermore many corpora do not have any (pseudo-)locations that can be inferred from their name: for example,
-                'Late Antique Latin' is not a place, at least not a literal one.
-            </li>
-        </ul>
-        <ul class="forexample">Work Locations
-            <li>
-                There are 14001 distinct locations on offer. That's a painfully large number. It is not at all easy to
-                pare these down in an automated fashion. 110 start with 'Alex'. Some of these could be folded into one
-                another, but the data has many shapes, and no decision has been reached yet about where/how to make the unkind cuts.
-            </li>
-        </ul>
-        <ul class="forexample">Missing characters and display quirks
-            <li>
-                There are various unprintable characters in the original data. These fall under various headings
-            </li>
+            <li><span class="emph">Author Locations</span>
                 <ul class="numbered">
                     <li>
-                        Idiosyncratic characters that have no unicode representation. You will see ◦ in the text. If you look at
-                        the database and/or HTML output you will see a code number: 'hmu_idiosyncratic_char value="1122"', e.g.
-                        This can be decoded via the Betacode manual.
-                        It is possible to know what was in the text, but it is not possible to display it, at least not yet.
+                        The locations recorded with the <span class="emph">Greek authors</span> are not of the same sort as those recorded with the papyri and inscriptions.
+                        The Greek authors data is derived from LSJ and it originally looks like <code>Athenae</code>,
+                        <code>Ilium [vel Troja]</code>, and <code>Sinope</code>. <span class="emph">Many authors have no location
+                        recorded</span>. Be careful not to throw out more authors than you mean to by putting too much confidence in this data.
                     </li>
                     <li>
-                        Undocumented characters are all rendered as ⊚. If you look at
-                        the database and/or HTML output you will see a code number: hmu_undocumented_poundsign value="1069", e.g.
-                        The original data has either been misparsed or it yielded a value that is not present in the Betacode manual.
-                        Further documentation ought to make it possible to put the proper character in here.
-                    </li>
-                    <li>
-                        Some characters will not display becuase they have been properly encoded but they are missing from your fonts.
-                        They will display properly if/when you get a font that supports them.
+                        The locations for <span class="emph">inscription</span> 'authors' is inferential. If the name of the corpus contains something that
+                        looks like a location, it has been grabbed: <code>Attica</code> for example. Note that <code>Attica</code> is not <code>Athenae</code>: you would need
+                        to ask for both locations to get IG's Attica + LSJ's Attic authors. Some sets of inscriptions come from more than one
+                        place: <code>Cos and Calymna</code>, for example, and not just <code>Cos</code>.
+                        Furthermore many corpora do not have any (pseudo-)locations that can be inferred from their name: for example,
+                        <code>Late Antique Latin</code> is not a place, at least not a literal one.
                     </li>
                 </ul>
-            <li>
-                Formatting instructions have typically been followed: make the font bigger, superscript, cross out... But not
-                all of the codes found have been documented. And some are too painful to implement: start multi-column display,
-                reverse text direction, writing perpendicular to main text, ... Probing the database will usually let you know what was found.
-                But it is up to you to implement the proper method of displaying this material.
             </li>
-            <li>
-                Brackets that converge with HTML or other markup have typically been replaced with a near equivalent: &lt;
-                signals markup instructions to a page renderer. Left and right angled bracket were swapped out. They are present in the database with
-                other characters instead: ⟪ and ⟫. A similar logic governed the choice of ⦅ and ⦆ since ( and ) are special
-                characters in betacode. There are other (hopefully) inconsequential items that fall under this heading.
+            <li><span class="emph">Work Locations</span>
+              <ul class="numbered">
+        <li>
+            There are 14001 distinct locations on offer. That's a painfully large number. It is not at all easy to
+            pare these down in an automated fashion. 110 start with 'Alex'. Some of these could be folded into one
+            another, but the data has many shapes, and no decision has been made yet about where/how to make the unkind cuts.
+        </li>
+        <li>
+            Some items have both a region and a city recorded. Only the city is searchable for now. The uneven distribution
+            of regional assignments means that searching by region would be misleading.
+        </li>
+    </ul>
             </li>
+            <li><span class="emph">Missing characters and display quirks</span>
+                <ul class="numbered">
+                    <li>
+                        There are various unprintable characters in the original data. These fall under various headings
+                    </li>
+                        <ul class="roman">
+                            <li>
+                                Idiosyncratic characters that have no unicode representation. You will see <span class="emph">◦</span> in the text. If you look at
+                                the database and/or HTML output you will see a code number:
+                                <code>hmu_idiosyncratic_char value="1122"</code>, e.g.
+                                This can be decoded via the Betacode manual.
+                                It is possible to know what was in the text, but it is not possible to display it, at least not yet.
+                            </li>
+                            <li>
+                                Undocumented characters are all rendered as <span class="emph">⊚</span>. If you look at
+                                the database and/or HTML output you will see a code number:
+                                <code>hmu_undocumented_poundsign value="1069"</code>, e.g.
+                                The original data has either been misparsed or it yielded a value that is not present in the Betacode manual.
+                                Further documentation ought to make it possible to put the proper character in here.
+                            </li>
+                            <li>
+                                Some characters will not display becuase they have been properly encoded but they are missing from your fonts.
+                                They will display properly if/when you get a font that supports them.
+                            </li>
+                        </ul>
+                    <li>
+                        Formatting instructions have typically been followed: make the font bigger, superscript, cross out... But not
+                        all of the codes found have been documented. And some are too painful to implement: start multi-column display,
+                        reverse text direction, writing perpendicular to main text, ... Probing the database will usually let you know what was found.
+                        But it is up to you to implement the proper method of displaying this material.
+                    </li>
+                    <li>
+                        Brackets that converge with HTML or other markup have typically been replaced with a near equivalent: <code>&lt;</code>
+                        signals markup instructions to a page renderer. Left and right angled bracket were swapped out.
+                        They are present in the database with other characters instead: <span class="emph">⟪</span> and <span class="emph">⟫</span>.
+                        A similar logic governed the choice of <span class="emph">⦅</span> and <span class="emph">⦆</span>
+                        since <code>(</code> and <code>)</code> are special characters in betacode.
+                        There are other (hopefully) inconsequential items that fall under this heading.
+                    </li>
 
-        </ul>
-
+                </ul>
+            </li>
+            </ul>
 
 </div>
 
