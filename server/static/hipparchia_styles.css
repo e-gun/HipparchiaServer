@@ -116,6 +116,12 @@ ul.numbered {
     padding-bottom: 5px;
 }
 
+ul.roman {
+    list-style-type: lower-roman;
+    padding-left: 25px;
+    padding-bottom: 5px;
+}
+
 input {
 	text-align: center;
 	padding: 5px;
@@ -245,7 +251,7 @@ td.textcrossreference {
 	text-align: left;
 }
 
-td.textdate, td.regioninfo, td.cityinfo, td.pubinfo {
+td.textdate, td.regioninfo, td.cityinfo, td.pubinfo, td.provenance {
 	padding-right: 10px;
 	padding-left: 10px;
 	text-align: left;
