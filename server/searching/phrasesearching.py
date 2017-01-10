@@ -49,7 +49,7 @@ def phrasesearch(searchphrase, cursor, wkid, authorswheredict, activepoll):
 	for hit in hits:
 		phraselen = len(searchphrase.split(' '))
 		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, cursor)
-		if session['accentsmatter'] == 'N':
+		if session['accentsmatter'] == 'no':
 			wordset = re.sub(r'[\.\?\!;:,·’]', r'', wordset)
 		else:
 			# the difference is in the apostrophe: δ vs δ’
@@ -146,7 +146,7 @@ def shortphrasesearch(count, foundlineobjects, searchphrase, workstosearch, auth
 			lineobjects.append(makeablankline(wkid, -9999))
 			del fulltext
 			
-			if session['accentsmatter'] == 'N':
+			if session['accentsmatter'] == 'no':
 				acc = 'stripped'
 			else:
 				acc = 'accented'
@@ -178,7 +178,7 @@ def shortphrasesearch(count, foundlineobjects, searchphrase, workstosearch, auth
 							supplement = lineobjects[i + 1].wordlist(acc)
 					else:
 						# previous.hashyphenated == False and lineobjects[i].hashyphenated == False
-						if session['accentsmatter'] == 'N':
+						if session['accentsmatter'] == 'no':
 							core = lineobjects[i].stripped
 						else:
 							core = lineobjects[i].unformattedline()

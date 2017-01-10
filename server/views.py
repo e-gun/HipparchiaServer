@@ -1237,7 +1237,7 @@ def setsessionvariable():
 	accept a variable name and value: hand it off to the parser/setter
 	returns:
 		[{"latestdate": "1"}]
-		[{"spuria": "N"}]
+		[{"spuria": "no"}]
 		etc.
 
 	:return:

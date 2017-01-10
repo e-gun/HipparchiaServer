@@ -41,14 +41,14 @@ function loadoptions() {
         $('#browserspinner').spinner('value', data.browsercontext);
         $('#sortresults').val(data.sortorder);
         $('#sortresults').selectmenu('refresh');
-        if (data.accentsmatter == 'N') {
+        if (data.accentsmatter == 'no') {
             $('#accentsmatter_y').prop('checked', false);
             $('#accentsmatter_n').prop('checked', true);
             } else {
             $('#accentsmatter_y').prop('checked', true);
             $('#accentsmatter_n').prop('checked', false);
             }
-        if (data.spuria == 'N') {
+        if (data.spuria == 'no') {
             $('#spuriaincluded').prop('checked', false);
             $('#spuriaexcluded').prop('checked', true);
             } else {
@@ -212,17 +212,17 @@ $('#accentsmatter_y').prop('checked', true);
 $('#searchforwords').prop('checked', true);
 $('#similarto').prop('checked', true);
 
-$('#accentsmatter_y').click( function(){ setoptions('accentsmatter', 'Y'); });
-$('#accentsmatter_n').click( function(){ setoptions('accentsmatter', 'N'); });
+$('#accentsmatter_y').click( function(){ setoptions('accentsmatter', 'yes'); });
+$('#accentsmatter_n').click( function(){ setoptions('accentsmatter', 'no'); });
 $('#spuriaincluded').click( function(){
-    setoptions('spuria', 'Y');
+    setoptions('spuria', 'yes');
     $.getJSON({ url: '/makeselection', async: false, success: function (selectiondata) { reloadselections(selectiondata); }
         });
     $('#searchlistcontents').hide();
     });
 
 $('#spuriaexcluded').click( function(){
-    setoptions('spuria', 'N');
+    setoptions('spuria', 'no');
     $.getJSON({ url: '/makeselection', async: false, success: function (selectiondata) { reloadselections(selectiondata); }
         });
     $('#searchlistcontents').hide();

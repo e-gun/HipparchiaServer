@@ -39,7 +39,7 @@ def sessionvariables():
 		session['inscriptioncorpus'] = hipparchia.config['DEFAULTINSCRIPTIONCORPUSVALUE']
 		session['papyruscorpus'] = hipparchia.config['DEFAULTPAPYRUSCORPUSVALUE']
 		session['christiancorpus'] = hipparchia.config['DEFAULTCHRISTIANCORPUSVALUE']
-		session['accentsmatter'] = 'N'
+		session['accentsmatter'] = hipparchia.config['DEFAULTACCENTSMATTER']
 		session['proximity'] = '1'
 		session['nearornot'] = 'T'
 		session['searchscope'] = 'L'
@@ -50,7 +50,9 @@ def sessionvariables():
 		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
 		session['latestdate'] = hipparchia.config['DEFAULTLATESTDATE']
 		session['xmission'] = 'Any'
-		session['spuria'] = 'Y'
+		session['spuria'] = hipparchia.config['DEFAULTSPURIA']
+		session['varia'] = hipparchia.config['DEFAULTVARIA']
+		session['incerta'] = hipparchia.config['DEFAULTINCERTA']
 
 	return
 
@@ -80,16 +82,19 @@ def modifysessionvar(param,val):
 		'latincorpus',
 		'inscriptioncorpus',
 		'papyruscorpus',
-		'christiancorpus'
+		'christiancorpus',
+		'varia',
+		'incerta'
 		]
 
 	if param in availableoptions:
 		session[param] = val
 		# print('param = val:',param,session[param])
 
-	for corpus in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']:
-		if session[corpus] not in ['yes', 'no']:
-			session[corpus] = 'no'
+	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
+				   'varia', 'incerta', 'spuria', 'accentsmatter']:
+		if session[variable] not in ['yes', 'no']:
+			session[variable] = 'no'
 
 	# may need to kill off old selections from the 'other' language
 	# do this after sorting out corpus shifts
@@ -107,17 +112,11 @@ def modifysessionvar(param,val):
 
 	if session['nearornot'] not in ['T', 'F']:
 		session['nearornot'] = 'T'
-	
-	if session['spuria'] not in ['Y', 'N']:
-		session['spuria'] = 'Y'
-		
+
 	try:
 		int(session['maxresults'])
 	except:
 		session['maxresults'] = '500'
-
-	if session['accentsmatter'] not in ['Y','N']:
-		session['accentsmatter'] = 'N'
 
 	if int(session['proximity']) > 10:
 		session['proximity'] = '9'
@@ -275,7 +274,7 @@ def sessionselectionsashtml(authordict, workdict):
 	# numberofselections is -1 if there were no selections
 	# and this will hide the selections table; but it should not be hidden if there are time restrictions or spuria restrictions
 	# so say '0' instead
-	if sxhtml['numberofselections'] == -1 and (selectioninfo['timeexclusions'] != '' or session['spuria'] == 'N'):
+	if sxhtml['numberofselections'] == -1 and (selectioninfo['timeexclusions'] != '' or session['spuria'] == 'no'):
 		selectioninfo['numberofselections'] = 0
 	else:
 		selectioninfo['numberofselections'] = sxhtml['numberofselections']

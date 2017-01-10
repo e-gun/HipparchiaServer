@@ -72,7 +72,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 
 	"""
 	mylimit = ' LIMIT ' + str(session['maxresults'])
-	if session['accentsmatter'] == 'Y':
+	if session['accentsmatter'] == 'yes':
 		columna = 'marked_up_line'
 	else:
 		columna = 'stripped_line'
@@ -127,7 +127,7 @@ def substringsearch(seeking, cursor, workdbname, authors):
 	"""
 	
 	mylimit = 'LIMIT ' + str(session['maxresults'])
-	if session['accentsmatter'] == 'Y':
+	if session['accentsmatter'] == 'yes':
 		# columna = 'marked_up_line'
 		column = 'accented_line'
 	else:
@@ -220,7 +220,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 	
 	text = []
 	for line in lines:
-		if session['accentsmatter'] == 'Y':
+		if session['accentsmatter'] == 'yes':
 			wordsinline = line.wordlist('polytonic')
 		else:
 			wordsinline = line.wordlist('stripped')

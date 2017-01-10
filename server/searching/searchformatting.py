@@ -165,7 +165,7 @@ def aggregatelines(firstline, lastline, cursor, audbname):
 		lineobjects.append(dblineintolineobject(dbline))
 	
 	aggregate = ''
-	if session['accentsmatter'] == 'Y':
+	if session['accentsmatter'] == 'yes':
 		for line in lineobjects:
 			aggregate += line.polytonic + ' '
 	else:

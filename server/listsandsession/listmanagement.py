@@ -66,8 +66,6 @@ def compileauthorandworklist(listmapper):
 
 			authorandworklist = list(set(authorandworklist))
 
-			if session['spuria'] == 'N':
-				authorandworklist = removespuria(authorandworklist, wd)
 		else:
 			# build lists up from specific items (passages) to more general classes (works, then authors)
 
@@ -128,9 +126,6 @@ def compileauthorandworklist(listmapper):
 
 			authorandworklist = list(set(authorandworklist))
 
-			if session['spuria'] == 'N':
-				authorandworklist = removespuria(authorandworklist, wd)
-
 	else:
 		# you picked nothing and want everything. well, maybe everything...
 
@@ -142,8 +137,8 @@ def compileauthorandworklist(listmapper):
 		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
 			authorandworklist = prunebydate(authorandworklist, ad, wd)
 
-		if session['spuria'] == 'N':
-			authorandworklist = removespuria(authorandworklist, wd)
+	if session['spuria'] == 'no':
+		authorandworklist = removespuria(authorandworklist, wd)
 
 	# build the exclusion list
 	# note that we are not handling excluded individual passages yet
@@ -342,15 +337,6 @@ def calculatewholeauthorsearches(authorandworklist, authordict):
 	parts = [x for x in authorandworklist if x[0:6] not in complete]
 	prunedlist = list(set(wholes)) + list(set(parts))
 
-	# prunedlist = []
-	#
-	# for a in authorandworklist:
-	# 	if a[0:6] in complete:
-	# 		prunedlist.append(a[0:6])
-	# 	else:
-	# 		prunedlist.append(a)
-	# prunedlist = list(set(prunedlist))
-
 	return prunedlist
 
 
@@ -384,6 +370,11 @@ def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 	"""
 	send me a list of authorsandworks and i will trim it via the session date limit variables
 
+	note that 'varia' and 'incerta' need to be handled here since they have special dates:
+		incerta = 2500
+		varia = 2000
+		[failedtoparse = 9999]
+
 	:param authorandworklist:
 	:param authorobjectdict:
 	:return:
@@ -391,6 +382,7 @@ def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 	trimmedlist = []
 
 	if justlatin() == False and (session['earliestdate'] != '-850' or session['latestdate'] != '1500'):
+		# [a] first prune the bad dates
 		min = int(session['earliestdate'])
 		max = int(session['latestdate'])
 		if min > max:
@@ -400,14 +392,14 @@ def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 		for aw in authorandworklist:
 			w = workobjectdict[aw]
 			try:
-				# does the work have a date?
+				# does the work have a date? if not, we will throw an exception
 				int(w.converted_date)
 				if w.earlier(min) or w.later(max):
 					pass
 				else:
 					trimmedlist.append(aw)
 			except:
-				# then we will look inside the author for the date
+				# no work date? then we will look inside the author for the date
 				aid = aw[0:6]
 				try:
 					if authorobjectdict[aid].earlier(min) or authorobjectdict[aid].later(max):
@@ -419,11 +411,58 @@ def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 				except:
 					# the author can't tell you his date; you must be building a list with both latin authors and something else
 					trimmedlist.append(aw)
+		# [b] then add back in any varia and/or incerta as needed
+		if session['varia'] == 'yes':
+			varia = findspecificdate(authorandworklist, authorobjectdict, workobjectdict, 2000)
+			trimmedlist += varia
+		if session['incerta'] == 'yes':
+			incerta = findspecificdate(authorandworklist, authorobjectdict, workobjectdict, 2500)
+			trimmedlist += incerta
+			unparsable = findspecificdate(authorandworklist, authorobjectdict, workobjectdict, 9999)
+			trimmedlist += unparsable
 
 	else:
 		trimmedlist = authorandworklist
 
 	return trimmedlist
+
+
+def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
+	"""
+
+	tell me which items on the authorandworklist have unknown dates
+
+		incerta = 2500
+		varia = 2000
+		[failedtoparse = 9999]
+
+
+	:param authorandworklist:
+	:param authorobjectdict:
+	:param worksdict:
+	:return:
+	"""
+	datematches = []
+
+	for aw in authorandworklist:
+		w = workobjectdict[aw]
+		try:
+			# does the work have a date? if not, we will throw an exception
+			cd = int(w.converted_date)
+			if cd == specificdate:
+				datematches.append(aw)
+		except:
+			# no work date? then we will look inside the author for the date
+			aid = aw[0:6]
+			try:
+				cd = int(authorobjectdict[aid].converted_date)
+				if cd == specificdate:
+					datematches.append(aw)
+			except:
+				# the author can't tell you his date; i guess it is incerta by definition
+				datematches.append(aw)
+
+	return datematches
 
 
 def removespuria(authorandworklist, worksdict):
