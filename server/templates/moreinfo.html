@@ -179,18 +179,19 @@
     <fieldset><legend>Earliest date to search</legend><input type="text" value="-850" width="25px;"></fieldset>
     <fieldset><legend>Latest date to search</legend><input  type="text" value="1500" width="25px;"></fieldset>
     <p class="explanation">Choose a chronological span within which to limit the search. Note that the dates assigned to authors are very approximate
-    and derived from original data that can look like <span class="emph">i-iii A.D.</span>. Such an author would be assigned to <span class="emph">200 C.E.</span>. <span class="emph">iv B.C</span> becomes <span class="emph">350 BCE</span>. A variety of quirks in the
+    and derived from original data that can look like <code>i-iii A.D.</code>. Such an author would be assigned to <code>200 CE</code>. <code>iv B.C</code> becomes <code>350 BCE</code>. A variety of quirks in the
     original data has become a variety of quirks here. Similarly many authors have no date at all and some works
-    have a variety of dates because they are composite. Works such as these are assigned to <span class="emph">1500 C.E.</span>, even if that is ridiculous. That number should be considered
-    equivalent to <span class="emph">unknown</span>. Check your search lists (<span class="ui-button-icon ui-icon ui-icon-info" title="Show/hide details of the current search list">&nbsp;</span>)
+        have a variety of dates because they are composite. You enable searches for <code>Varia</code> and/or <code>Incerta</code>
+        if you have a time restriction on your search. A search with no restriction will include such texts automatically. <span class="emph">Otherwise they are excluded</span>.
+        Check your search lists (<span class="ui-button-icon ui-icon ui-icon-info" title="Show/hide details of the current search list">&nbsp;</span>)
     to make sure you are getting what you want. Searching within a date range that is smaller than one century is likely to yield some measure of disappointment.
-    Users are quite free to update authors with their own superior dates, but that requires learning SQL.<br />
-
-    Note that there is a conflict between time as an exclusion principle and the selection list. Which should take priority? This question has been resolved as follows: individual selections
-    trump generic chronological exclusions. And so:
+    Users are quite free to update authors with their own superior dates, but that requires learning SQL. Please consider sharing with others any/all improvements that you make to the original data.<br />
+    <br />
+    Note that there is a conflict between time as an exclusion principle and the selection list. Which should take priority? This question has been resolved as follows:
+        <span class="emph">specific selections take priority over more general chronological exclusions</span>. And so:
     <ul class="forexample">
-        <li>zero selections + no date restriction (-850 to 1500): search the <span class="emph">whole corpus</span></li>
-        <li>zero selections + a date restriction: search for everybody within that date range; e.g., <span class="emph">5th century BCE Greek authors</span></li>
+        <li>zero selections + no date restriction (-850 to 1500): search <span class="emph">all active corpora</span></li>
+        <li>zero selections + a date restriction: search for everybody within that date range; e.g., <span class="emph">5th century BCE Greek authors</span> (if this is your only active corpus)</li>
         <li>zero selections + a class or classes + a date restriction: search for all members of the class(es) within that date range; e.g. <span class="emph">epic before 1 C.E.</span></li>
         <li>an author/work/passage + a class or classes + a date restriction: search for the specific item(s) and search for all members of the class(es) within that date range;
             e.g. <span class="emph">Plutarch's <span class="italic">Solon</span></span> and <span class="emph">4th century BCE Greek orators</span></li>
@@ -290,8 +291,8 @@ via regex that one might do in a flat text file will fail.
                         <li>
                             The dates recorded with the <span class="emph">papyri</span> and the <span class="emph">inscriptions</span> vary from <code>?</code> to something very precise like <code>212 CE</code>. Hipparchia has
                             parsed the dates that the editors have assigned to these items as best as it can. Please note that there are
-                            21584 distinct <code>recorded_date</code> values in the works table. Some of these are in German, some use Roman numerals, some use 'a' and 'p',
-                            some 'BC' and 'AD', some ordinal numbers, some cardinal numbers. Some are 'the age of X'. It's not easy to get all of these right
+                            <span class="emph">21584</span> distinct <code>recorded_date</code> values in the works table. Some of these are in German, some use Roman numerals, some use 'a' and 'p',
+                            some 'BC' and 'AD', some ordinal numbers, some cardinal numbers. Some merely say 'the age of X'. It's not easy to get all of these right
                             (even if the editorial date is itself accurate...). It is not even easy to check that they are right.
                             As above, all questions are dropped and all spans are turned into a single number representing the midpoint.
                             'Ages' have had dates assigned to them. Claudius will be the middle of the reign, approximately: 50 CE.
