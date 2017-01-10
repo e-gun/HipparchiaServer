@@ -3,9 +3,9 @@
       <fieldset>
           <legend>Accents and diacriticals matter</legend>
           <label for="accentsmatter_y">yes
-          <input type="radio" name="accents" id="accentsmatter_y" value="Y"></label>
+          <input type="radio" name="accents" id="accentsmatter_y" value="yes"></label>
           <label for="accentsmatter_n">no</label>
-          <input type="radio" name="accents" id="accentsmatter_n" value="N"></label>
+          <input type="radio" name="accents" id="accentsmatter_n" value="no"></label>
       </fieldset>
     <fieldset>
         <legend>Lines of context to accompany search results</legend>
@@ -19,7 +19,6 @@
         <legend>Maximum number of search results to return</legend>
         <input id="hitlimitspinner" type="text" value="500" width="25px;">
     </fieldset>
-    <br />
     <fieldset>
       <legend>Sort results by</legend>
         <select name="sortresults" id="sortresults">
@@ -31,8 +30,8 @@
             <option value="universalid">ID Number</option>
         </select>
     </fieldset>
-      <fieldset>
-          <legend>Coprora to search</legend>
+          <fieldset>
+          <legend>Corpora to search</legend>
           {% for list in activelists %}
               {% if list == 'gr' %}
               Greek authors <input type="checkbox" id="greekcorpus" value="no">
@@ -56,6 +55,14 @@
               {% endif %}
           {% endfor %}
       </fieldset>
+    <fieldset>
+        <legend>Include...</legend>
+        <br />
+        Spuria <input type="checkbox" id="includespuria" value="no"><br />
+        Composite works with various dates (e.g., Anth. Gr., Scholia, etc.)<input type="checkbox" id="includevaria" value="no"><br />
+        Works of uncertain date <input type="checkbox" id="includeincerta" value="no"><br />
+        (NB: Varia and Incerta are always included if no time restriction is set.)
+    </fieldset>
         <br />
         <div id="savedprofiles">
            <br />

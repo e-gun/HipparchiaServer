@@ -49,11 +49,19 @@ function loadoptions() {
             $('#accentsmatter_n').prop('checked', false);
             }
         if (data.spuria == 'no') {
-            $('#spuriaincluded').prop('checked', false);
-            $('#spuriaexcluded').prop('checked', true);
+            $('#includespuria').prop('checked', false);
             } else {
-            $('#spuriaincluded').prop('checked', true);
-            $('#spuriaexcluded').prop('checked', false);
+            $('#includespuria').prop('checked', true);
+            }
+        if (data.varia == 'no') {
+            $('#includevaria').prop('checked', false);
+            } else {
+            $('#includevaria').prop('checked', true);
+            }
+        if (data.incerta == 'no') {
+            $('#includeincerta').prop('checked', false);
+            } else {
+            $('#includeincerta').prop('checked', true);
             }
         if (data.greekcorpus == 'yes') {
             $('#greekcorpus').prop('checked', true);
@@ -214,18 +222,35 @@ $('#similarto').prop('checked', true);
 
 $('#accentsmatter_y').click( function(){ setoptions('accentsmatter', 'yes'); });
 $('#accentsmatter_n').click( function(){ setoptions('accentsmatter', 'no'); });
-$('#spuriaincluded').click( function(){
-    setoptions('spuria', 'yes');
-    $.getJSON({ url: '/makeselection', async: false, success: function (selectiondata) { reloadselections(selectiondata); }
-        });
-    $('#searchlistcontents').hide();
+
+$('#includespuria').change(function () {
+    if(this.checked) {
+        setoptions('spuria', 'yes');
+    } else {
+        setoptions('spuria', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
     });
 
-$('#spuriaexcluded').click( function(){
-    setoptions('spuria', 'no');
-    $.getJSON({ url: '/makeselection', async: false, success: function (selectiondata) { reloadselections(selectiondata); }
-        });
-    $('#searchlistcontents').hide();
+$('#includevaria').change(function () {
+    if(this.checked) {
+        setoptions('varia', 'yes');
+    } else {
+        setoptions('varia', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    });
+
+$('#includeincerta').change(function () {
+    if(this.checked) {
+        setoptions('incerta', 'yes');
+    } else {
+        setoptions('incerta', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
     });
 
 $('#greekcorpus').change(function () {
