@@ -216,10 +216,23 @@ Here are some examples that give you an idea of the sort of things that are poss
     <ul class="forexample">
         <li><code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each.</li>
         <li><code>[aeiou]m[aeiou]m[aeiou]m</code> will find words that have 'vowel + m + vowel + m + vowel + m' (i.e., amomum, cardamomum, cinnamomum, pantomimum) </li>
-        <li><code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where <span class="lat">non solum... sed etiam...</span> bracket just a single word.</li>
+        <li><span class="emph">[warning: see below]</span> <code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where <span class="lat">non solum... sed etiam...</span> bracket just a single word.</li>
     </ul>
-Unfortunately a lot of swanky heavy duty regex searches do not make sense: the DB is organized as a collection of 'lines', and the sort of multi-line searching
-via regex that one might do in a flat text file will fail.
+
+Unfortunately a lot of swanky heavy duty regex searches do not make sense: the DB is organized as a collection of 'lines'.
+<span class="emph">Your regex cannot look outside of a single database line</span>, and the sort of multi-line searching via
+regex that one might do in a flat text file will fail to find all occurrences of the expression. Consider again
+    <code>\snon solum\s(\w*?)\ssed etiam</code>. If the <code>non solum</code> is not on the same line as the <code>sed etiam</code>, then
+    you will not have a match. If your search includes a whitespace, then it will move through
+    Hipparchia as a "phrase". This will explore multi-line search zones. But you will lose a certain amount of speed and
+    fine-grained control over the details as well.
+
+    If you have to have the sort of search that has full access to lookaheads and what not, then you should consider migrating
+    to <a href="https://community.dur.ac.uk/p.j.heslin/Software/Diogenes/index.php">Diogenes</a>.
+
+    Hipparchia's internal data model will never be a good fit for that sort of thing. Even if various workarounds are possible,
+    there is no reason to settle for the wrong tool for the job.
+
 
 
 </div>
