@@ -181,6 +181,7 @@ legend {
 fieldset {
 	display: inline-block;
 	border-width: 1px;
+	font-size: 85%;
 }
 
 form {

@@ -204,18 +204,20 @@
 Regex is a dark art unto itself. Consult the <a href="https://www.postgresql.org/docs/9.6/static/functions-matching.html">manual directly</a>.
 <br /><br />
 The more salient things to know/use:
-<ul>
-<li><code>[abc]</code> brackets a set of acceptable characters to look for in the next position: a, or b, or c. <code>lauda[st]</code> will find laudas or laudat but not laudare. </li>
-<li><code>[^abc]</code> brackets a set of characters to exclude in the next position: not a, nor b, nor c. <code>lauda[^t]</code> is a search that refuses to find laudat, but it will find laudant.</li>
-<li><code>(a|b|abc)</code> brackets a set of strings to look for: a, or b, or abc. <code>laud(o|as|at)</code> is a search for the present singular indicative forms of laudare. It will also find conlaudat. Note how you could use <code>co(n|l)laud</code> to make sure you got alternate spellings of conlaudare.</li>
-<li><code>.</code> any character: <code>laud.nt</code> will find laudant, laudent, and, theoretically, laudZnt</li>
-<li><code>\s</code> whitespace: \ssed\setiam\s is a search for ' sed etiam '. Please use the 'within 1 word' function instead of /s unless you know why you are not doing so.
-</ul>
+    <ul class="forexample">>
+        <li><code>[abc]</code> brackets a set of acceptable characters to look for in the next position: a, or b, or c. <code>lauda[st]</code> will find laudas or laudat but not laudare. </li>
+        <li><code>[^abc]</code> brackets a set of characters to exclude in the next position: not a, nor b, nor c. <code>lauda[^t]</code> is a search that refuses to find laudat, but it will find laudant.</li>
+        <li><code>(a|b|abc)</code> brackets a set of strings to look for: a, or b, or abc. <code>laud(o|as|at)</code> is a search for the present singular indicative forms of laudare. It will also find conlaudat. Note how you could use <code>co(n|l)laud</code> to make sure you got alternate spellings of conlaudare.</li>
+        <li><code>.</code> any character: <code>laud.nt</code> will find laudant, laudent, and, theoretically, laudZnt</li>
+        <li><code>\s</code> whitespace: \ssed\setiam\s is a search for ' sed etiam '. Please use the 'within 1 word' function instead of /s unless you know why you are not doing so.
+    </ul>
 <br />
-Here are some examples that give you an idea of the sort of things that are possible:<br /><br />
-<code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each.<br />
-<code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where <span class="lat">non solum... sed etiam...</span> bracket just a single word.
-<br />
+Here are some examples that give you an idea of the sort of things that are possible:
+    <ul class="forexample">
+        <li><code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each.</li>
+        <li><code>[aeiou]m[aeiou]m[aeiou]m</code> will find words that have 'vowel + m + vowel + m + vowel + m' (i.e., amomum, cardamomum, cinnamomum, pantomimum) </li>
+        <li><code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where <span class="lat">non solum... sed etiam...</span> bracket just a single word.</li>
+    </ul>
 Unfortunately a lot of swanky heavy duty regex searches do not make sense: the DB is organized as a collection of 'lines', and the sort of multi-line searching
 via regex that one might do in a flat text file will fail.
 
@@ -366,7 +368,7 @@ via regex that one might do in a flat text file will fail.
                         Formatting instructions have typically been followed: make the font bigger, superscript, cross out... But not
                         all of the codes found have been documented. And some are too painful to implement: start multi-column display,
                         reverse text direction, writing perpendicular to main text, ... Probing the database will usually let you know what was found.
-                        But it is up to you to implement the proper method of displaying this material.
+                        But it most of these items are unlikely to ever be supported.
                     </li>
                     <li>
                         Brackets that converge with HTML or other markup have typically been replaced with a near equivalent: <code>&lt;</code>
