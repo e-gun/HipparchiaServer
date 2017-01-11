@@ -25,8 +25,12 @@ def cleansearchterm(seeking):
 	"""
 	
 	seeking = re.sub('σ|ς', 'ϲ', seeking)
-	seeking = re.sub('v', 'u', seeking)
-	
+	if session['accentsmatter'] == 'no':
+		seeking = re.sub('v', 'u', seeking)
+
+	# possible, but not esp. desirable:
+	# seeking = re.sub('VvUu', '(u|v|U|v)', seeking)
+
 	return seeking
 
 
