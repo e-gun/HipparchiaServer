@@ -88,7 +88,29 @@ of course, most queries take <2s to execute. but servers live in the worst of al
 
 instructions on how to use Hipparchia can be found by clicking on the '?' button if you can make it to the front page.
 
-other things you will need to install that are not available here:
+```
+
+minimum software requirements:
+
+    to launch HipparchiaServer
+        python 3.6
+            pip
+            flask
+            psycopg2
+            bs4
+        postgresql9.5
+
+    to properly interact with HipparchiaServer via a browser
+        jquery
+        jquery-ui
+        js-cookie
+        dejavu fonts [strongly recommended, not a hard requirement]
+
+```
+
+please see HipparchiaBSD about setting up python and postgresql9.
+
+the project pages for the other dependencies:
 
 jquery:
     http://jquery.com/download/
@@ -96,6 +118,12 @@ jquery:
 jquery-ui:
     http://jqueryui.com/download/
 
+js-cookie:
+    https://github.com/js-cookie/js-cookie/releases
+
 dejavu fonts:
-    http://dejavu-fonts.org/wiki/Download
+    https://github.com/dejavu-fonts/dejavu-fonts/releases
+
+see HipparchiaBSD for details on how to acquire and to install these items.
+[details in 00_FreeBSD_initial_setup.txt or 01_macOS_hipparchia_installation.txt]
 
