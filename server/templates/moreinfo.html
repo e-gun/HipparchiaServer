@@ -5,7 +5,7 @@
 <li><a href="#Browsing"><span>Browsing</span></a></li>
 <li><a href="#MakingSearchLists"><span>Searching: Building search lists</span></a></li>
 <li><a href="#RegexSearching"><span>Searching: REGEX</span></a></li>
-<li><a href="#Technology"><span>Technology</span></a></li>
+<li><a href="#HitsAndMisses"><span>Searching: Hits and Misses</span></a></li>
 <li><a href="#Oddities"><span>Peculiarities and Gotchas</span></a></li>
 </ul>
 
@@ -202,9 +202,9 @@
 <div id="RegexSearching">
 
 Regex is a dark art unto itself. Consult the <a href="https://www.postgresql.org/docs/9.6/static/functions-matching.html">manual directly</a>.
-<br /><br />
+<br />
 The more salient things to know/use:
-    <ul class="forexample">>
+    <ul class="forexample">
         <li><code>[abc]</code> brackets a set of acceptable characters to look for in the next position: a, or b, or c. <code>lauda[st]</code> will find laudas or laudat but not laudare. </li>
         <li><code>[^abc]</code> brackets a set of characters to exclude in the next position: not a, nor b, nor c. <code>lauda[^t]</code> is a search that refuses to find laudat, but it will find laudant.</li>
         <li><code>(a|b|abc)</code> brackets a set of strings to look for: a, or b, or abc. <code>laud(o|as|at)</code> is a search for the present singular indicative forms of laudare. It will also find conlaudat. Note how you could use <code>co(n|l)laud</code> to make sure you got alternate spellings of conlaudare.</li>
@@ -224,14 +224,75 @@ via regex that one might do in a flat text file will fail.
 
 </div>
 
-<div id="Technology">
-    The following are required. Version numbers should be considered to be the minimum acceptable values.
-    <ul>
-        <li>Python 3.6</li>
-        <li>PostgreSQL 9.6</li>
-        <li>Javascript</li>
-        <li>jQuery 3.1</li>
+<div id="HitsAndMisses">
+
+    Hipparchia stores three versions of every line: a formatted version (which includes information about font display, etc.),
+    a version with accented words only, and a version of accentless words only.
+    The actual searches are executed on the words only versions.
+
+    <ul class="forexample">
+        <li>formatted: <code>Μῆνιν ἄειδε θεὰ Πηληϊάδεω Ἀχιλῆοϲ</code></li>
+        <li>accents only: <code>μῆνιν ἄειδε θεὰ πηληϊάδεω ἀχιλῆοϲ</code></li>
+        <li>unaccented: <code>μηνιν αειδε θεα πηληιαδεω αχιληοϲ</code></li>
     </ul>
+
+    <p><span class="label">Case sensitivity</span></p>
+
+    It is important to note that <span class="emph">you cannot search for capital letters</span> vs lower-case letters.
+    Accordingly in an accent-aware search ἀχαιούϲ will find Ἀχαιούϲ and ἀχιλῆοϲ will find Ἀχιλῆοϲ. It is less
+    surprising that αχιληοϲ finds Ἀχιλῆοϲ in an unaccented search. But it is worth noting that all searches are themselves made
+    lower case: ΑΧΙΛΗΟΣ will also find Ἀχιλῆοϲ.
+
+    <p><span class="label">Latin vs "accents matter"</span></p>
+
+    You almost certainly want to avoid accented searches in the Latin authors unless you are willing to deal with the
+    <code>v</code> vs <code>u</code> problem. Every v is a u in the unaccented data. And that means that the extremely
+    inconsistent practice of various editors can be unified. Only do accented searches of texts whose editorial habits you
+    understand. Then it will be safe to look for <code>íntro</code> and <code>hóc</code> specifically. Also keep your
+    regex cheat sheet handy.
+
+    <p><span class="label">Automatic betacode</span></p>
+
+    If you are searching the Greek authors and only Greek authors, then anything you type in Roman characters will be
+    converted into betacode: <code>beta</code> becomes <code>βετα</code>, <code>udwr</code> becomes <code>υδωρ</code>
+    and <code>u(/dwr</code> will be <code>ὕδωρ</code>. This means you can't search for the
+    Latin inside of these texts unless you turn on some other corpus as well. Note that this bit of magic is not available
+    for the other corpora because the texts inside them are bilingual.
+
+    <p><span class="label">Iota subscript and adscript</span></p>
+
+    Hipparchia distinguishes between ἀ, ᾀ, ᾶ, ᾷ, and so forth in the searches wehre accents matter. But it has no way of
+    figuring out the difference between a subscript and an adscript. If a text prints ᾶι instead of ᾷ, a search for ᾷ
+    will not yield the results you wanted.
+    <br />
+    <br />
+    If you say that accents do not matter, then all iota subscripts become meaningless: ᾷ is α. This also means that
+    the Doric genitive singular and the Attic dative singular and the duals of many nouns will all match: τῶ and τῷ are now τω.
+    But how often will this be a problem for you?
+    <br />
+    <br />
+    If a text prints ᾶι instead of ᾷ, one has to search for αι to get a match if accents are turned off.
+    Hands-on work with a text you really care about will let you quickly determine what, if any, efforts you should
+    make to deal with this issue.
+
+    <p><span class="label">Lunate sigma</span></p>
+
+    Internally <span class="emph">all sigmas are lunate</span> unless that sigma is part of some special case.
+    You can type any sort of sigma you want,
+    but there is no way to 'find' a σ vs an ς since your query will turn into ϲ. Note that this means that any ς that
+    is present cannot be found. But were you really going to search for &#x03b6;&#x0337;&#x03c2;&#x0300;? Try to take
+    comfort in the fact that a search just for &#x03b6;&#x0337; will turn up what you were after. A capital sigma for stater
+    is a problem, though: you will see it (&#x03a3;), but, unlike almost all other special symbols, you can't search for it.
+
+    <p><span class="label">"Search suspended: cap reached"</span></p>
+
+    The list of items to search is not sorted. <span class="emph">Only results are sorted</span>. This means that
+    if you want 200 hits in chronological order, you will get 200 hits in chronological order, but you will not get
+    the 200 earliest possible hits (because the full search did not take place). The way the search lists are built and
+    dispatched means that some corpora will be searched before others and then with a higher chance of certain internal ID
+    numbers being checked before others. Do not try to figure out the rules of the game, either raise the cap or refine
+    your search instead.
+
 
 </div>
 
@@ -271,7 +332,7 @@ via regex that one might do in a flat text file will fail.
     </ul>
 
     <p><span class="label">Internal heterogeneity</span></p>
-        <ul class="forexample">
+    <ul class="forexample">
             <li><span class="emph">Dates</span>
                 <ul class="numbered">
                     <li>The dates recorded with the <span class="emph">Greek authors</span> are not of the same sort as those recorded with the papyri and inscriptions.
@@ -380,6 +441,36 @@ via regex that one might do in a flat text file will fail.
                     </li>
 
                 </ul>
+            </li>
+            <li><span class="emph">Dictionary entries: click to define, etc.</span>
+                <ul class="numbered">
+                    <li>
+                        The dictionary data is being asked to do more than it was orignally designed to do. The "senses" and "phrases"
+                        that have been extracted are interpretations of the data. Any irregularities (and there are many...) will
+                        produce surprises. Read the full entry rather than the summary if there is any confusion.
+                    </li>
+                    <li>
+                        Clicking on any word in a browser passage is supposed to parse it and open a dictionary window that defines
+                        that word. This often works, but not always. The parser has to know the word. And then the dictionary entry
+                        has to match the parser's idea of what the dictionary should be. The hand-off between various sets of data
+                        is not always smooth. You can always look up any word manually by opening up the lexical tools panel:
+                            <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Lexical tools">
+                            <span class="ui-icon ui-icon-wrench"></span>
+                            <span class="ui-button-icon-space"> </span>&nbsp;</button>
+                    </li>
+                    <li>
+                        Citations within the dictionaries are <span class="emph">often clickable</span>. The emphasis falls on the word often.
+                        If you click on <code>D.10.74</code> you will be taken to Demosthenes, Philippica 4 [Sp.], Section 74, line 1.
+                        But there will be sorrow as well as joy. The citation format in the dictionary references does not match
+                        the data that Hipparchia is working from and interconversion will often fail. For example, Plautus is cited by
+                        "act" and "scene" in the dictionary entries. <code>Plaut. Merc. 1, 2, 76</code> is meaningless to Hipparchia since "Play"
+                        and "line" are the only valid ways of retrieving anything. The number assigned to each of Euripides' plays in the
+                        dictionary is not the same as in the dictionary data as that assigned in the TLG-E data. Papyri that are
+                        available are cited, but so seldom in a useful manner that I did not code anything to try to retrieve them.
+                        Nevertheless most of the key texts of key authors will pop right up.
+                    </li>
+                </ul>
+
             </li>
             </ul>
 
