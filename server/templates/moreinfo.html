@@ -33,7 +33,7 @@
 
     <span class="label">Add to search list.</span></p>
     <p class="explanation">Whatever you see in the selection boxes will be added to the 'searching within' list. See the tab
-    <span class="italic">Searching: Building search lists for details.</span></p>
+    <span class="italic">Searching: Building search lists</span> for details.</p>
 
 <p class="interfacetips">
 <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Exclude this category and/or genre">
@@ -42,7 +42,7 @@
 
 	<span class="label">Add to exclusion list.</span></p>
 	<p class="explanation">Whatever you see in the selection boxes will be added to the list of things that will not be searched.
-    See the tab <span class="italic">Searching: Building search lists for details.</span></p>
+    See the tab <span class="italic">Searching: Building search lists</span> for details.</p>
 
 <p class="interfacetips">
 <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="More search choices">
@@ -81,17 +81,42 @@
     <span class="ui-button-icon-space"> </span>&nbsp;</button>
 
     <span class="label">Open/Close settings panel</span></p>
-    <p class="explanation">Changes your preferences here.</p>
+    <p class="explanation">Change your preferences here.</p>
 
 <p class="interfacetips">
-    <button id="concordance" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Build a concordance for this work">
-    <span class="ui-icon ui-icon-newwin"></span>
+    <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse this location">
+    <span class="ui-icon ui-icon-note"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+    <span class="label">Browse this location</span></p>
+    <p class="explanation">
+    Open a text browser window to explore the work and location that is presently showing in the selection
+        fields. Incomplete selections will send you to the first valid possibility:
+        the first line of the first work of an author;
+        the first line of a selected work; the first chapter of that book of that work; ...
+    </p>
+
+<p class="interfacetips">
+    <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Generate a simple text of this selection">
+    <span class="ui-icon ui-icon-bookmark"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+     <span class="label">Generate a simple text of this selection</span></p>
+    <p class="explanation">
+        Generate a simple text of the work and location that is presently showing in the selection fields.
+        Incomplete selections will give you to the first valid possibility:
+        the whole of the first work of an author; the whole of the first book of a selected work; ...
+        This is less useful for works like plays that are broken up only by lines: either the whole play will be shown
+        or just an individual line.
+</p>
+
+<p class="interfacetips">
+    <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Build a concordance for this work">
+    <span class="ui-icon ui-icon-calculator"></span>
     <span class="ui-button-icon-space"> </span>&nbsp;</button>
 
     <span class="label">Build a concordance</span></p>
-    <p class="explanation">A concordance for the current work will be built in a new window. The time required increases dramatically as works get longer.
+    <p class="explanation">A concordance for the current selection will be built in a new window. The time required increases dramatically as works get longer.
     And it will take a very long time indeed to compile a concordance for something like Cassius Dio's <span class="italic">Historiae Romanae</span>.
-        Then again, how long would it take to do this by hand?</p>
+        Then again, how long would it take to do this by hand? As with the browser and text maker, the concordance
+    maker is sensitive to the details of your selections: it will make a concordance of a whole author; a whole work; or
+    any arbitrary subdivision of a work all the way down (somewhat comically) to an individual line. </p>
 
 <p class="interfacetips">
     <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Show/Hide local info about the works of this author">
@@ -114,6 +139,22 @@
     <span class="ui-button-icon-space"> </span>&nbsp;</button>
     <span class="label">Open complex searching options</span></p>
     <p class="explanation">Search for X near Y and within N words/lines</p>
+
+  <p class="interfacetips">
+    <span class="ui-icon ui-icon-disk"></span>
+        <span class="label">Pick a save slot into which to save your current session</span></p>
+    <p class="explanation">Five little buttons will appear (➊, ➋, ...). Click on one of them to store your current settings.
+    Active corpora, search lists, sorting preferences, etc. will all be stored. Query terms and actual search results
+        will not be stored.
+    </p>
+
+      <p class="interfacetips">
+    <span class="ui-icon ui-icon-folder-open"></span>
+        <span class="label">Pick a save slot from which to load stored session</span></p>
+    <p class="explanation">Five little buttons will appear (➀, ➁, ...). Click on one of them to restore saved settings.
+    Active corpora, search lists, sorting preferences, etc. will all be fetched. Query terms and actual search results
+        will not be fetched.</p>
+
 </div>
 
 <div id="Browsing">
