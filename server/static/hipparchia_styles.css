@@ -184,7 +184,6 @@ fieldset {
 	font-size: 85%;
 }
 
-#spur { padding-top: 10px; }
 
 form {
 	display: inline;
@@ -376,7 +375,7 @@ worktitle {
 	box-shadow: 5px 5px 2px #999;
 	padding: 10px;
 	background-color: #fafafa;
-	font-size: 115%;
+	font-size: 100%;
 	line-height: 1.2;
 }
 
