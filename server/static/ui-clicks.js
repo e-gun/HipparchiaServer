@@ -404,6 +404,9 @@ $( "#earliestdate" ).spinner({
 // cookies + options
 //
 
+$('#togglesaveslots').click( function(){ $('#saveslots').toggle()});
+$('#toggleloadslots').click( function(){ $('#loadslots').toggle()});
+
 function javascriptsessionintocookie(cookienumberstr){
     $.getJSON('/getsessionvariables', function (data) {
 		    Cookies.set('session'+cookienumberstr, data, { expires: 1000 });
@@ -414,19 +417,19 @@ function javascriptsessionintocookie(cookienumberstr){
 // switched over to a hybrid js and python solution
 // an async timing issue
 
-$('#save01').click( function(){ javascriptsessionintocookie('01'); $('#setoptions').hide()});
-$('#save02').click( function(){ javascriptsessionintocookie('02'); $('#setoptions').hide()});
-$('#save03').click( function(){ javascriptsessionintocookie('03'); $('#setoptions').hide()});
-$('#save04').click( function(){ javascriptsessionintocookie('04'); $('#setoptions').hide()});
-$('#save05').click( function(){ javascriptsessionintocookie('05'); $('#setoptions').hide()});
+$('#save01').click( function(){ javascriptsessionintocookie('01'); $('#setoptions').hide(); $('#saveslots').hide(); });
+$('#save02').click( function(){ javascriptsessionintocookie('02'); $('#setoptions').hide(); $('#saveslots').hide(); });
+$('#save03').click( function(){ javascriptsessionintocookie('03'); $('#setoptions').hide(); $('#saveslots').hide(); });
+$('#save04').click( function(){ javascriptsessionintocookie('04'); $('#setoptions').hide(); $('#saveslots').hide(); });
+$('#save05').click( function(){ javascriptsessionintocookie('05'); $('#setoptions').hide(); $('#saveslots').hide(); });
 
 // timing issues: you will get the cookie properly, but the selections will not show up right unless you use the misleadingly named .always()
 //  'the .always() method replaces the deprecated .complete() method.'
-$('#load01').click( function(){ $.getJSON('/getcookie?cookie=01').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); });
-$('#load02').click( function(){ $.getJSON('/getcookie?cookie=02').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); });
-$('#load03').click( function(){ $.getJSON('/getcookie?cookie=03').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); });
-$('#load04').click( function(){ $.getJSON('/getcookie?cookie=04').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); });
-$('#load05').click( function(){ $.getJSON('/getcookie?cookie=05').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); });
+$('#load01').click( function(){ $.getJSON('/getcookie?cookie=01').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
+$('#load02').click( function(){ $.getJSON('/getcookie?cookie=02').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
+$('#load03').click( function(){ $.getJSON('/getcookie?cookie=03').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
+$('#load04').click( function(){ $.getJSON('/getcookie?cookie=04').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
+$('#load05').click( function(){ $.getJSON('/getcookie?cookie=05').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
 
 
 ///

@@ -45,6 +45,8 @@
         <div id="searchlistcontents">(this might take a second...)</div>
     </div>
 
+    {% include "saveslots.html" ignore missing %}
+
 <script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
 <script src="{{ url_for('static', filename='ui-clicks.js') }}"></script>
 <script src="{{ url_for('static', filename='lexical.js') }}"></script>
@@ -222,57 +224,57 @@ $(document).ready( function () {
 {% include "moreinfo.html" ignore missing %}
 
 <div id="wordsearchfields" class="center">
-<button id="executesearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Execute the search"><span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-    {% if lookedfor == '' %}
-    <input id="wordsearchform" type="text" action="" method="" name="seeking" placeholder="(looking for...)" size=25>
-    {% else %}
-    <input id="wordsearchform" type="text" action="" method="" name="seeking" placeholder="(looking for...)" value="{{ lookedfor }}" size=25>
-    {% endif %}
-<button id="extendsearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Complicate the search"><span class="ui-button-icon ui-icon ui-icon-arrow-1-e"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-<br />
-    <div id="complexsearching">
-      <label for="wordisnear">near
-      <input type="radio" name="near" id="wordisnear" value="T"></label>
-      <label for="wordisnotnear">not near
-      <input type="radio" name="near" id="wordisnotnear" value="F"></label>
-        {% if proximate == '' %}
-        <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" size=25>
+    <button id="executesearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Execute the search"><span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+        {% if lookedfor == '' %}
+        <input id="wordsearchform" type="text" action="" method="" name="seeking" placeholder="(looking for...)" size=25>
         {% else %}
-        <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" value="{{ proximate }}" size=25>
+        <input id="wordsearchform" type="text" action="" method="" name="seeking" placeholder="(looking for...)" value="{{ lookedfor }}" size=25>
         {% endif %}
-      <input id="proximityspinner" type="text" value="1" width="25px;">
-      <label for="searchlines">lines
-      <input type="radio" name="searchfor" id="searchlines" value="L"></label>
-      <label for="searchwords">words
-      <input type="radio" name="searchfor" id="searchwords" value="W"></label>
-    </div>
-</div>
- <br />
-
-    <div id="lexicadialog">
-        <div id="lexicadialogtext"></div>
-    </div>
-    <div id="browserdialog">
-        <div id="browserdialogtext"></div>
-        <div class="center">
-            <button id="browseback" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse backwards (click or press the &#8592; key)"><span class="ui-icon ui-icon-arrowthick-1-w">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-            <button id="browserclose" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Close the browser"><span class="ui-icon ui-icon-close">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-            <button id="browseforward" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse forwards (click or press the &#8594; key)"><span class="ui-icon ui-icon-arrowthick-1-e">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+    <button id="extendsearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Complicate the search"><span class="ui-button-icon ui-icon ui-icon-arrow-1-e"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+    <br />
+    <div id="complexsearching">
+          <label for="wordisnear">near
+          <input type="radio" name="near" id="wordisnear" value="T"></label>
+          <label for="wordisnotnear">not near
+          <input type="radio" name="near" id="wordisnotnear" value="F"></label>
+            {% if proximate == '' %}
+            <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" size=25>
+            {% else %}
+            <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" value="{{ proximate }}" size=25>
+            {% endif %}
+          <input id="proximityspinner" type="text" value="1" width="25px;">
+          <label for="searchlines">lines
+          <input type="radio" name="searchfor" id="searchlines" value="L"></label>
+          <label for="searchwords">words
+          <input type="radio" name="searchfor" id="searchwords" value="W"></label>
         </div>
-        <div id="parserdialog">&nbsp;</div>
-        <div id="dictdialog">&nbsp;</div>
-    </div>
+</div>
+<br />
 
-    <div id="searchsummary"></div>
-    <div id="pollingdata"></div>
-    <div id="displayresults"></div>
+<div id="lexicadialog">
+    <div id="lexicadialogtext"></div>
+</div>
+<div id="browserdialog">
+    <div id="browserdialogtext"></div>
+    <div class="center">
+        <button id="browseback" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse backwards (click or press the &#8592; key)"><span class="ui-icon ui-icon-arrowthick-1-w">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <button id="browserclose" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Close the browser"><span class="ui-icon ui-icon-close">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <button id="browseforward" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse forwards (click or press the &#8594; key)"><span class="ui-icon ui-icon-arrowthick-1-e">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+    </div>
+    <div id="parserdialog">&nbsp;</div>
+    <div id="dictdialog">&nbsp;</div>
+</div>
+
+<div id="searchsummary"></div>
+<div id="pollingdata"></div>
+<div id="displayresults"></div>
 
 <div id="clickformoreinfo">
      <button id="helpbutton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Help"><span class="ui-icon ui-icon-help"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
 </div>
 
-<div id="browserclickscriptholder">
 
+<div id="browserclickscriptholder">
 </div>
 
 {% endblock %}

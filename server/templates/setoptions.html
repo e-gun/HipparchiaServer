@@ -30,49 +30,32 @@
             <option value="universalid">ID Number</option>
         </select>
     </fieldset>
-          <fieldset>
+    <fieldset>
           <legend>Corpora to search</legend>
           {% for list in activelists %}
-              {% if list == 'gr' %}
-              Greek authors <input type="checkbox" id="greekcorpus" value="no">
-              <br />
-              {% endif %}
-              {% if list == 'lt' %}
-              Latin authors <input type="checkbox" id="latincorpus" value="no" >
-              <br />
-              {% endif %}
-              {% if list == 'dp' %}
-              Papyri <input type="checkbox" id="papyruscorpus" value="no" >
-              <br />
-              {% endif %}
-              {% if list == 'in' %}
-              Inscriptions I: IG, SEG, etc. <input type="checkbox" id="inscriptioncorpus" value="no">
-              <br />
-              {% endif %}
-              {% if list == 'ch' %}
-              Inscriptions II: Cla., Lt. Antiq., Med.; Christian <input type="checkbox" id="christiancorpus" value="no" >
-              <br />
-              {% endif %}
+            {% if list == 'gr' %}
+                Greek authors <input type="checkbox" id="greekcorpus" value="no">
+                &nbsp;&middot;&nbsp;
+            {% endif %}
+            {% if list == 'lt' %}
+                Latin authors <input type="checkbox" id="latincorpus" value="no" >
+                &nbsp;&middot;&nbsp;
+            {% endif %}
+            {% if list == 'dp' %}
+                Papyri <input type="checkbox" id="papyruscorpus" value="no" >
+                &nbsp;&middot;&nbsp;
+            {% endif %}
+            {% if list == 'in' %}
+        Inscriptions I <span class="small">(<span class="italic">IG</span>, <span class="italic">SEG</span>, etc.)</span>
+                <input type="checkbox" id="inscriptioncorpus" value="no">
+                &nbsp;&middot;&nbsp;
+            {% endif %}
+            {% if list == 'ch' %}
+                Inscriptions II <span class="small">(Cla., Lt. Antiq., Med.; Christ.)</span> <input type="checkbox" id="christiancorpus" value="no" >
+
+            {% endif %}
           {% endfor %}
       </fieldset>
         <br />
-        <div id="savedprofiles">
-           <br />
-            <span class="ui-icon ui-icon-disk"></span>
-            &nbsp;<button id="save01" class="ui-button ui-corner-all ui-widget" title="Save session in slot #1"><span class="saveoptions">➊</span></button>
-            &nbsp;<button id="save02" class="ui-button ui-corner-all ui-widget" title="Save session in slot #2"><span class="saveoptions">➋</span></button>
-            &nbsp;<button id="save03" class="ui-button ui-corner-all ui-widget" title="Save session in slot #3"><span class="saveoptions">➌</span></button>
-            &nbsp;<button id="save04" class="ui-button ui-corner-all ui-widget" title="Save session in slot #4"><span class="saveoptions">➍</span></button>
-            &nbsp;<button id="save05" class="ui-button ui-corner-all ui-widget" title="Save session in slot #5"><span class="saveoptions">➎</span></button>
-            <br />
-            <span class="ui-icon ui-icon-folder-open"></span>
-            &nbsp;<button id="load01" class="ui-button ui-corner-all ui-widget" title="Load session from slot #1"><span class="loadoptions">➀</span></button>
-            &nbsp;<button id="load02" class="ui-button ui-corner-all ui-widget" title="Load session from slot #2"><span class="loadoptions">➁</span></button>
-            &nbsp;<button id="load03" class="ui-button ui-corner-all ui-widget" title="Load session from slot #3"><span class="loadoptions">➂</span></button>
-            &nbsp;<button id="load04" class="ui-button ui-corner-all ui-widget" title="Load session from slot #4"><span class="loadoptions">➃</span></button>
-            &nbsp;<button id="load05" class="ui-button ui-corner-all ui-widget" title="Load session from slot #5"><span class="loadoptions">➄</span></button>
-            <br />
-        </div>
-    <br />
 
 </div>

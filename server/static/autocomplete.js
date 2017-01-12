@@ -71,6 +71,8 @@ function reloadAuthorlist(){
         $('#authinfo').hide();
         $('#authorholdings').hide();
         $('#searchlistcontents').hide();
+        $('#loadslots').hide();
+        $('#saveslots').hide();
     }
     );
 }

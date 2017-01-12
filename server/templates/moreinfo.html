@@ -215,8 +215,13 @@ The more salient things to know/use:
 Here are some examples that give you an idea of the sort of things that are possible:
     <ul class="forexample">
         <li><code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each.</li>
-        <li><code>[aeiou]m[aeiou]m[aeiou]m</code> will find words that have 'vowel + m + vowel + m + vowel + m' (i.e., amomum, cardamomum, cinnamomum, pantomimum) </li>
-        <li><span class="emph">[warning: see below]</span> <code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where <span class="lat">non solum... sed etiam...</span> bracket just a single word.</li>
+        <li><code>t.t.t.t.t.</code> will find places where you have 't + anything' five times in a row.
+            (<span class="lat">heres ei extitit Titius</span>; and <span class="lat">nec diu restitit: tota...</span>)</li>
+        <li><code>[aeiou]m[aeiou]m[aeiou]m</code> will find words that have 'vowel + m + vowel + m + vowel + m'
+            (i.e., <span class="lat">amomum, cardamomum, cinnamomum, pantomimum</span>) </li>
+        <li><span class="emph">[warning: see below]</span> <code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where
+            <span class="lat">non solum... sed etiam...</span> bracket just a single word.</li>
+        <li><code> ..$</code> could find all verses of Homer that end with a two letter word.</li>
     </ul>
 
 Unfortunately a lot of swanky heavy duty regex searches do not make sense: the DB is organized as a collection of 'lines'.
@@ -224,15 +229,14 @@ Unfortunately a lot of swanky heavy duty regex searches do not make sense: the D
 regex that one might do in a flat text file will fail to find all occurrences of the expression. Consider again
     <code>\snon solum\s(\w*?)\ssed etiam</code>. If the <code>non solum</code> is not on the same line as the <code>sed etiam</code>, then
     you will not have a match. If your search includes a whitespace, then it will move through
-    Hipparchia as a "phrase". This will explore multi-line search zones. But you will lose a certain amount of speed and
-    fine-grained control over the details as well.
+    Hipparchia as a "phrase" (where what matters most is the longest term). This will explore multi-line search zones.
+    But you will lose a certain amount of speed and fine-grained control over the details as well.
 
     If you have to have the sort of search that has full access to lookaheads and what not, then you should consider migrating
     to <a href="https://community.dur.ac.uk/p.j.heslin/Software/Diogenes/index.php">Diogenes</a>.
 
     Hipparchia's internal data model will never be a good fit for that sort of thing. Even if various workarounds are possible,
     there is no reason to settle for the wrong tool for the job.
-
 
 
 </div>
@@ -270,11 +274,13 @@ regex that one might do in a flat text file will fail to find all occurrences of
     converted into betacode: <code>beta</code> becomes <code>βετα</code>, <code>udwr</code> becomes <code>υδωρ</code>
     and <code>u(/dwr</code> will be <code>ὕδωρ</code>. This means you can't search for the
     Latin inside of these texts unless you turn on some other corpus as well. Note that this bit of magic is not available
-    for the other corpora because the texts inside them are bilingual.
+    for the other corpora because the texts inside them are bilingual. Enter unicode Greek into the search box instead.
+    If you don't already have a unicode keyboard, consider looking into
+    <a href="https://classicalstudies.org/publications-and-research/about-greekkeys-2015">GreekKeys</a>.
 
     <p><span class="label">Iota subscript and adscript</span></p>
 
-    Hipparchia distinguishes between ἀ, ᾀ, ᾶ, ᾷ, and so forth in the searches wehre accents matter. But it has no way of
+    Hipparchia distinguishes between ἀ, ᾀ, ᾶ, ᾷ, ᾳ, and so forth in the searches wehre accents matter. But it has no way of
     figuring out the difference between a subscript and an adscript. If a text prints ᾶι instead of ᾷ, a search for ᾷ
     will not yield the results you wanted.
     <br />
@@ -287,6 +293,11 @@ regex that one might do in a flat text file will fail to find all occurrences of
     If a text prints ᾶι instead of ᾷ, one has to search for αι to get a match if accents are turned off.
     Hands-on work with a text you really care about will let you quickly determine what, if any, efforts you should
     make to deal with this issue.
+    <br />
+    <br />
+    People obsessed about accents will note that Θρᾷξ appears in the corpus as Θρᾷξ, Θρᾶξ, Θρᾲξ, and Θράξ. So maybe it is ok to turn
+    accents off from time to time if you want to find everything that is out there. Check my work: search for
+    <code>\sθρ[^ᾷίὶ]ξ\s</code>
 
     <p><span class="label">Lunate sigma</span></p>
 
