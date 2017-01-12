@@ -306,7 +306,7 @@ def sessiontimeexclusionsinfo():
 		else:
 			l = session['latestdate'] + ' C.E'
 			
-		timerestrictions ='Unless specifically listed, authors/works must come from</br />' + e + '&nbspto&nbsp;' + l + ''
+		timerestrictions ='Unless specifically listed, authors/works must come from ' + e + '&nbspto&nbsp;' + l + ''
 
 	return timerestrictions
 
@@ -346,7 +346,7 @@ def sessionselectionsinfo(authordict, workdict):
 		# if there are no explicit selections, then
 		if len(sessionsearchlist) == 0 and selectionorexclusion == 'selections':
 			thehtml += '<span class="picklabel">Authors</span><br />'
-			thehtml += '[Full corpus less exclusions]<br />\n'
+			thehtml += '[All in active corpora less exclusions]<br />\n'
 		
 		if selectionorexclusion == 'exclusions' and len(sessionsearchlist) == 0 and session['spuria'] == 'Y' and len(
 				session['wkgnexclusions']) == 0 and len(session['agnexclusions']) == 0 and len(session['auexclusions']) == 0:

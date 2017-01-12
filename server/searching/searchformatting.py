@@ -196,13 +196,16 @@ def formatauthinfo(authorobject):
 	
 	if authorobject.universalid[0:2] in ['gr', 'in', 'dp']:
 		try:
-			if float(authorobject.converted_date) == 1500:
-				fl = 'approx date is unknown (search for 1500 C.E.)'
+			if float(authorobject.converted_date) == 2000:
+				fl = '"Varia" are not assigned to a date'
+			elif float(authorobject.converted_date) == 2500:
+				fl = '"Incerta" are not assigned to a date'
 			elif float(authorobject.converted_date) > 0:
 				fl = 'assigned to approx date: ' + str(authorobject.converted_date) + ' C.E.'
+				fl += ' (derived from "' + authorobject.recorded_date + '")'
 			elif float(authorobject.converted_date) < 0:
 				fl = 'assigned to approx date: ' + str(authorobject.converted_date)[1:] + ' B.C.E.'
-			fl += ' (derived from "'+authorobject.recorded_date+'")'
+				fl += ' (derived from "'+authorobject.recorded_date+'")'
 		except:
 			# there was no f and so no int(f)
 			fl = ''
