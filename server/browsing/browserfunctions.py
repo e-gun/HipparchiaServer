@@ -82,7 +82,8 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	
 	citation = locusintocitation(workobject, focusline.locustuple())
 	
-	cv = '<span class="author">' + authorobject.shortname + '</span>, <span class="work">' + title + '</span><br />' + citation
+	cv = '<span class="author">' + authorobject.shortname + '</span>, <span class="work">' + title + '</span><br />'
+	cv += '<span class="citation">'+citation+'</span>'
 	if date != '':
 		if int(date) > 1:
 			cv += '<br /><span class="assigneddate">(Assigned date of '+date+' CE)</span>'
@@ -90,7 +91,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			cv += '<br /><span class="assigneddate">(Assigned date of ' + date[1:] + ' BCE)</span>'
 	cv = cv + '<br />' + biblio
 	
-	passage['currentlyviewing'] = '<currentlyviewing>' + cv + '</currentlyviewing>'
+	passage['currentlyviewing'] = '<p class="currentlyviewing">' + cv + '</p>'
 	passage['ouputtable'] = []
 	
 	passage['ouputtable'].append('<table>\n')
