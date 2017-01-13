@@ -104,6 +104,10 @@ ul {
 	list-style-type: none;
 }
 
+li {
+    padding-top: 1px;
+}
+
 ul.forexample {
 	list-style-type: lower-latin;
 	padding-left: 100px;
@@ -114,6 +118,7 @@ ul.numbered {
     list-style-type: decimal;
     padding-left: 25px;
     padding-bottom: 5px;
+    padding-top: 5px;
 }
 
 ul.roman {
