@@ -140,6 +140,28 @@ $('#morechoices').click( function() {
 
 $('#moretools').click( function() { $('#lexica').toggle(); });
 
+// not working as expected
+//$('#parser').on('focus', function () {
+//    var $rl = $('#reverselexicon');
+//    var $lx = $('#lexicon');
+//    $rl.val(''); $rl.removeAttr("value"); $rl.attr('placeholder', '(English to Greek or Latin)');
+//    $lx.val(''); $lx.removeAttr("value"); $lx.attr('placeholder', '(Dictionary Search)');
+//    });
+//
+//$('#reverselexicon').on('focus', function () {
+//    var $pp = $('#parser');
+//    var $lx = $('#lexicon');
+//    $pp.val(''); $pp.removeAttr("value"); $pp.attr('placeholder', '(Morphology Search)');
+//    $lx.val(''); $lx.removeAttr("value"); $lx.attr('placeholder', '(Dictionary Search)');
+//    });
+//
+//$('#lexicon').on('focus', function () {
+//    var $rl = $('#reverselexicon');
+//    var $lx = $('#lexicon');
+//    $rl.val(''); $rl.removeAttr("value"); $rl.attr('placeholder', '(English to Greek or Latin)');
+//    $lx.val(''); $lx.removeAttr("value"); $lx.attr('placeholder', '(Dictionary Search)');
+//    });
+
 
 $('#lexicalsearch').click( function() {
     var dictterm = $('#lexicon').val();
