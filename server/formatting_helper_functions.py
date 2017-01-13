@@ -165,7 +165,8 @@ def formatpublicationinfo(pubinfo):
 		seek = re.compile('<' + tag + '>(.*?)</' + tag + '>')
 		if re.search(seek, pubinfo) is not None:
 			found = re.search(seek, pubinfo)
-			publicationhtml += '<span class="pub' + tag + '">' + val[0] + found.group(1) + val[1] + '</span>'
+			foundinfo = avoidlonglines(found.group(1), 120, '<br />', [])
+			publicationhtml += '<span class="pub' + tag + '">' + val[0] + foundinfo + val[1] + '</span>'
 	
 	return publicationhtml
 
@@ -309,3 +310,35 @@ def insertdatarow(label, css, founddate):
 	
 	return linehtml
 
+
+def avoidlonglines(string, maxlen, splitval, stringlist=[]):
+	"""
+
+	Authors like Livy can swallow the browser window by sending 351 characters worth of editors to one of the lines
+
+	break up a long line into multiple lines by splitting every N characters
+
+	splitval will be something like '<br />' or '\n'
+
+	:param string:
+	:param maxlen:
+	:return:
+	"""
+
+	if len(string) < maxlen:
+		stringlist.append(string)
+		newstringhtml = splitval.join(stringlist)
+	else:
+		searchzone = string[0:maxlen]
+		stop = False
+		stopval = len(string)
+
+		for c in range(maxlen-1,-1,-1):
+			if searchzone[c] == ' ' and stop == False:
+				stop = True
+				stringlist.append(string[0:c])
+				print(string[0:c])
+				stopval = c
+		newstringhtml = avoidlonglines(string[stopval+1:], maxlen, splitval, stringlist)
+
+	return newstringhtml
