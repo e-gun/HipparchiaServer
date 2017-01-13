@@ -76,9 +76,9 @@ def compileauthorandworklist(listmapper):
 			authorlist = []
 			for g in session['agnselections']:
 				authorlist = foundindict(ad, 'genres', g)
-			for a in authorlist:
-				for w in ad[a].listofworks:
-					authorandworklist.append(w.universalid)
+				for a in authorlist:
+					for w in ad[a].listofworks:
+						authorandworklist.append(w.universalid)
 			del authorlist
 
 			for l in session['wlocselections']:
@@ -87,9 +87,9 @@ def compileauthorandworklist(listmapper):
 			authorlist = []
 			for l in session['alocselections']:
 				authorlist = foundindict(ad, 'location', l)
-			for a in authorlist:
-				for w in ad[a].listofworks:
-					authorandworklist.append(w.universalid)
+				for a in authorlist:
+					for w in ad[a].listofworks:
+						authorandworklist.append(w.universalid)
 			del authorlist
 
 			# a tricky spot: when/how to apply prunebydate()
