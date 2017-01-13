@@ -447,8 +447,12 @@ worktitle {
 }
 
 .emph {
-	font-weight: bold;
-	font-color: #AE5727;
+	font-weight: 600;
+	color: #0f1b76;
+}
+
+.colorhighlight {
+    color: #760f27;
 }
 
 .emphatic {

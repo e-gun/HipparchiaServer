@@ -378,27 +378,26 @@
 
     <ul class="forexample">
         <li>Consider the following <span class="emph">simple searches</span>. Both searches are across all five databases. There are no restrictions applied at all.
-    <ul class="numbered">
-        <li>Sought προκατέλαβον; Searched 236840 texts and found 22 passages (4.19s)</li>
-        <li>Sought δεδιότεϲ; Searched 236840 texts and found 589 passages (9.46s)</li>
-    </ul>
-
-    The first search is quite fast: a long word and an uncommon word.
-    The second search is really about the same speed: most of the extra time was spent on formatting the 589 results not on
-    generating the hits themselves. <span class="emph">Searches for individual words will always be fast</span>. Common words will
-    slow things down somewhat, but the slowdown is trivial relative to the amount of time it will take you to sift through
-    1000+ results.
+        <ul class="numbered">
+            <li>Sought προκατέλαβον; Searched 236840 texts and found 22 passages (<span class="colorhighlight">4.19s</span>)</li>
+            <li>Sought δεδιότεϲ; Searched 236840 texts and found 589 passages (<span class="colorhighlight">9.46s</span>)</li>
+        </ul>
+        The first search is quite fast: a long word and an uncommon word.
+        The second search is really about the same speed: most of the extra time was spent on formatting the 589 results not on
+        generating the hits themselves. <span class="emph">Unrestricted searches for individual words will always be fastest</span>.
+        Common words will slow things down somewhat, but the slowdown is trivial relative to the amount of time it will take
+        you to sift through 1000+ results.
     </li>
     <li>Now let's look at some searches just inside 'Inscriptions I'.
     <ul class="numbered">
-        <li>Sought πολιτεια; Searched 139970 texts and found 992 passages (15.63s)</li>
-        <li>Sought πολιτεια; Searched 112493 texts and found 895 passages (12.76s)</li>
-        <li>Sought πολιτεια; Searched 57627 texts and found 631 passages (23.56s); Searched between 600 B.C.E. and 200 B.C.E.</li>
+        <li>Sought πολιτεια; Searched 139970 texts and found 992 passages (<span class="colorhighlight">15.63s</span>)</li>
+        <li>Sought πολιτεια; Searched 112493 texts and found 895 passages (<span class="colorhighlight">12.76s</span>)</li>
+        <li>Sought πολιτεια; Searched 57627 texts and found 631 passages (<span class="colorhighlight">23.56s</span>); Searched between 600 B.C.E. and 200 B.C.E.</li>
     </ul>
 
     There were no restrictions on the first search. The results for the were nearly instant. The formatting took >12s.<br  />
     The second search was restricted by 'Not Attica' for the author locations. The results for the were nearly instant. The formatting took most of the time.<br  />
-    The third search was 'Not Attica' and it also had a time restriction. The search itself took a lot longer.
+        The third search was 'Not Attica' and <span class="emph">it also had a time restriction</span>. The search itself took a lot longer.
     <br />
     <br />
     Every 'author' is stored in a 'table'.  <span class="emph">Searching a whole table is much faster</span> than searching now one bit and now another bit.
@@ -414,17 +413,18 @@
     <li>
     Here are some searches just inside 'Greek Authors'.
         <ul class="numbered">
-            <li>Sought κεκωλυκατε within 2 lines of ιδιωταϲ; Searched 6625 texts and found 1 passages (0.97s)</li>
-            <li>Sought πραγμοϲυν within 2 lines of ιδιωταϲ; Searched 6625 texts and found 2 passages (8.71s)</li>
-            <li>Sought καλοϲ within 5 words of αγαθοϲ; Searched 6625 texts and found 74 passages (38.78s)</li>
-            <li>Sought καλοσ within 5 words of αγαθος; Searched 3008 texts and found 75 passages (5.76s); Searched between 850 B.C.E. and 1 C.E.</li>
+            <li>Sought κεκωλυκατε within 2 lines of ιδιωταϲ; Searched 6625 texts and found 1 passages (<span class="colorhighlight">0.97s</span>)</li>
+            <li>Sought πραγμοϲυν within 2 lines of ιδιωταϲ; Searched 6625 texts and found 2 passages (<span class="colorhighlight">8.71s</span>)</li>
+            <li>Sought καλοϲ within 5 words of αγαθοϲ; Searched 6625 texts and found 74 passages (<span class="colorhighlight">38.78s</span>)</li>
+            <li>Sought καλοσ within 5 words of αγαθος; Searched 3008 texts and found 75 passages (<span class="colorhighlight">5.76s</span>); Searched between 850 B.C.E. and 1 C.E.</li>
         </ul>
     <span class="emph">A proximity search is really two searches</span>. Hipparchia looks for the <span class="emph">longest term first</span>.
     It is possible that the long term is more common than the short term, but if you have to guess blindly, then you pick the
     long one every time.
     After searching for the first term Hipparchia looks for places
-    where the second term is near the first term. [If you say a short term not near a long term, then the search will be for
-    the short term and then the long term.] This two-step process explains the results you see above.
+    where the second term is near the first term. [NB: If you say a short term not near a long term, then the search will be for
+    the short term and then the long term. That's what you really wanted.] This two-step process explains the results you see above.
+    Let's walk through what happened when the search executed.
     <ul class="roman">
     <li>
     There are only
@@ -432,7 +432,7 @@
     less than a hundredth of a second.</li>
     <li>
     A search for πραγμοϲυν will turn up 585 passages. It does not take much time to find them. And it does not take
-    all that much time to check those findings to see if they have ιδιωταϲ near them. Just finding the 585 hits for
+    all that much time to check those findings to see if they have ιδιωταϲ near them. A simple search that generates the 585 hits for
     πραγμοϲυν takes 9.33 seconds, but a lot of that is spent formatting the results. So the proximity penalty is
     effectively a non-issue.
     </li>
@@ -444,18 +444,19 @@
     immediately speeds up the search considerably. Confidence in the ugliness of later Greek is all you need.
     </li>
     <li>
-    In sum, <span class="emph">full corpus searches for two common words will be slow.</span>
+    In sum, <span class="emph">full corpus searches for two common words will be slow.</span> <a href="https://community.dur.ac.uk/p.j.heslin/Software/Diogenes/index.php">Diogenes</a>
+        can do this sort of thing much faster if you decide that this sort of query is vital to your reasearch.
         </ul>
     </li>
     <li>
     <span class="emph">Phrase searches are special cases of proximity searches</span>: A near B and in that order. Strategies and results will be
     very similiar.
         <ul class="numbered">
-            <li>Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 6625 texts and found 3 passages (29.27s)</li>
-            <li>Sought μεγάλην δύναμιν; Searched 6625 texts and found 84 passages (42.78s)</li>
-            <li>Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 3008 texts and found 2 passages (2.15s); Searched between 850 B.C.E. and 1 C.E.</li>
-            <li>Sought μεγάλην δύναμιν; Searched 3008 texts and found 32 passages (4.25s); Searched between 850 B.C.E. and 1 C.E.</li>
-            <li>Sought ου μην αλλ; Searched 180 texts and found 110 passages (2.06s). Searched between 850 B.C.E. and 1 C.E. [+ Author categories limited to 'Oratores']</li>
+            <li>Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 6625 texts and found 3 passages (<span class="colorhighlight">29.27s</span>)</li>
+            <li>Sought μεγάλην δύναμιν; Searched 6625 texts and found 84 passages (<span class="colorhighlight">42.78s</span>)</li>
+            <li>Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 3008 texts and found 2 passages (<span class="colorhighlight">2.15s</span>); Searched between 850 B.C.E. and 1 C.E.</li>
+            <li>Sought μεγάλην δύναμιν; Searched 3008 texts and found 32 passages (<span class="colorhighlight">4.25s</span>); Searched between 850 B.C.E. and 1 C.E.</li>
+            <li>Sought ου μην αλλ; Searched 180 texts and found 110 passages (<span class="colorhighlight">2.06s</span>). Searched between 850 B.C.E. and 1 C.E. [+ Author categories limited to 'Oratores']</li>
         </ul>
     As above, a common word sought across the whole corpus will slow you down.
     Most phrase searches are likely to contain common words. So you will need strategies to make the haystack smaller
