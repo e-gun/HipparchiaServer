@@ -26,7 +26,8 @@
         <span class="ui-button-icon-space"> </span>&nbsp;</button>
 
         <span class="label">Clear session</span></p>
-        <p class="explanation">This will reset all session variables. Strong stuff. Search criteria, etc. will all be cleared.</p>
+        <p class="explanation">This will reset all session variables. Strong stuff. Search criteria, etc. will all be cleared.
+        All values will be restored to their defaults. Many of these defaults can be set in <code>config.py</code>.</p>
 
     <p class="interfacetips">
     <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Include this category and/or genre">
@@ -254,23 +255,28 @@
         <li><code>\s</code> whitespace: \ssed\setiam\s is a search for ' sed etiam '. Please use the 'within 1 word' function instead of /s unless you know why you are not doing so.
     </ul>
     <br />
-    Here are some examples that give you an idea of the sort of things that are possible:
+    Here are some examples that give you an idea of the sort of things that are possible. But some major caveats follow.
     <ul class="forexample">
         <li><code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each.</li>
         <li><code>t.t.t.t.t.</code> will find places where you have 't + anything' five times in a row.
             (<span class="lat">heres ei extitit Titius</span>; and <span class="lat">nec diu restitit: tota...</span>)</li>
         <li><code>[aeiou]m[aeiou]m[aeiou]m</code> will find words that have 'vowel + m + vowel + m + vowel + m'
             (i.e., <span class="lat">amomum, cardamomum, cinnamomum, pantomimum</span>) </li>
+        <li><code>\s..$</code> could find all verses of Homer that end with a two letter word.</li>
         <li><span class="emph">[warning: see below]</span> <code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where
             <span class="lat">non solum... sed etiam...</span> bracket just a single word.</li>
-        <li><code>\s..$</code> could find all verses of Homer that end with a two letter word.</li>
     </ul>
 
     Unfortunately a lot of swanky heavy duty regex searches do not make sense: the DB is organized as a collection of 'lines'.
-    <span class="emph">Your regex cannot look outside of a single database line</span>, and the sort of multi-line searching via
-    regex that one might do in a flat text file will fail to find all occurrences of the expression. Consider again
+    A search like
+    <code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> probably only makes sense in the context of verse authors. This is because
+    <span class="emph">your regex cannot look outside of a single database line</span>. The sort of multi-line searching via
+    regex that one might do in a flat text file will fail to find all occurrences of the expression.
+    <br />
+    <br />
+    Consider again
     <code>\snon solum\s(\w*?)\ssed etiam</code>. If the <code>non solum</code> is not on the same line as the <code>sed etiam</code>, then
-    you will not have a match. If your search includes a whitespace, then it will move through
+    you will not have a match. If your first search term includes a whitespace, then the search will move through
     Hipparchia as a "phrase" (where what matters most is the longest term). This will explore multi-line search zones.
     But you will lose a certain amount of speed and fine-grained control over the details as well.
 
@@ -311,10 +317,15 @@
 
     <p><span class="label">How to execute a phrase search combined with a proximity search</span></p>
 
-    <span class="emph">You must put the right thing in the right box</span>. If you type a phrase into
-    the first box and a single word into the second box, then <span class="emph">Hipparchia will ignore the second box</span>.
-    If you type a single word into the first box and a phrase into the second box, Hipparchia will search for WordA near PhraseB.
-    You cannot search for two phrases.
+    <span class="emph">You must put a word in the first box and a phrase in the second box</span>. You cannot search for two phrases.
+    If you type a phrase into the first box and a single word into the second box, then Hipparchia will ignore the second box.
+    But if you type a single word (or part of a word) into the first box and a phrase into the second box, Hipparchia
+    will search for WordA near PhraseB. For example:
+    <span class="sampleoutput">Sought αξιολογ within 2 lines of μεϲημβρια ετυγχαν; Searched 6625 texts and found 2 passages (<span class="colorhighlight">23.05s</span>)</span>
+    <br />
+    <br />
+    Please note that you can also use regular expressions here. The previous search can be rewritten as follows:
+    <span class="sampleoutput">Sought αξιολ.γ within 2 lines of μεϲ.μβρια ετ.γχαν; Searched 146595 texts and found 2 passages (<span class="colorhighlight">23.01s</span>)</span>
 
     <p><span class="label">Latin vs "accents matter"</span></p>
 
@@ -322,7 +333,8 @@
     <code>v</code> vs <code>u</code> problem. Every v is a u in the unaccented data. And that means that the extremely
     inconsistent practice of various editors can be unified. Only do accented searches of texts whose editorial habits you
     understand. Then it will be safe to look for <code>íntro</code> and <code>hóc</code> specifically. Also keep your
-    regex cheat sheet handy.
+    regex cheat sheet handy: either <code>(v|u)</code> or <code>[uv]</code> will ignore the difference between
+    u and v.
 
     <p><span class="label">Automatic betacode</span></p>
 
@@ -387,8 +399,8 @@
     <ul class="forexample">
         <li>Consider the following <span class="emph">simple searches</span>. Both searches are across all five databases. There are no restrictions applied at all.
         <ul class="numbered">
-            <li>Sought προκατέλαβον; Searched 236840 texts and found 22 passages (<span class="colorhighlight">4.19s</span>)</li>
-            <li>Sought δεδιότεϲ; Searched 236840 texts and found 589 passages (<span class="colorhighlight">9.46s</span>)</li>
+            <li><span class="sampleoutput">Sought προκατέλαβον; Searched 236840 texts and found 22 passages (<span class="colorhighlight">4.19s</span>)</span></li>
+            <li><span class="sampleoutput">Sought δεδιότεϲ; Searched 236840 texts and found 589 passages (<span class="colorhighlight">6.89s</span>)</span></li>
         </ul>
         The first search is quite fast: a long word and an uncommon word.
         The second search is really about the same speed: most of the extra time was spent on formatting the 589 results not on
@@ -397,22 +409,22 @@
         you to sift through 1000+ results.
     </li>
     <li>Now let's look at some searches just inside 'Inscriptions I'.
-    <ul class="numbered">
-        <li>Sought πολιτεια; Searched 139970 texts and found 992 passages (<span class="colorhighlight">15.63s</span>)</li>
-        <li>Sought πολιτεια; Searched 112493 texts and found 895 passages (<span class="colorhighlight">12.76s</span>)</li>
-        <li>Sought πολιτεια; Searched 57627 texts and found 631 passages (<span class="colorhighlight">23.56s</span>); Searched between 600 B.C.E. and 200 B.C.E.</li>
-    </ul>
+        <ul class="numbered">
+            <li><span class="sampleoutput">Sought πολιτεια; Searched 139970 texts and found 992 passages (<span class="colorhighlight">13.63s</span>)</span></li>
+            <li><span class="sampleoutput">Sought πολιτεια; Searched 112493 texts and found 895 passages (<span class="colorhighlight">11.34s</span>)</span></li>
+            <li><span class="sampleoutput">Sought πολιτεια; Searched 57627 texts and found 631 passages (<span class="colorhighlight">22.61s</span>); Searched between 600 B.C.E. and 200 B.C.E.</span></li>
+        </ul>
 
-    There were no restrictions on the first search. The results for the were nearly instant. The formatting took >12s.<br  />
-    The second search was restricted by 'Not Attica' for the author locations. The results for the were nearly instant. The formatting took most of the time.<br  />
+        There were no restrictions on the first search. The searching part took about one second. The formatting took the other 12s.<br  />
+        The second search was restricted by 'Not Attica' for the author locations. The searching part took about one second. The formatting took most of the time.<br  />
         The third search was 'Not Attica' and <span class="emph">it also had a time restriction</span>. The search itself took a lot longer.
-    <br />
-    <br />
-    Every 'author' is stored in a 'table'.  <span class="emph">Searching a whole table is much faster</span> than searching now one bit and now another bit.
-    Delos (IG XI,4 [510-1349]) contains 841 works. 315 of them fall between 600 B.C.E. and 200 B.C.E. Once you restrict the time,
-    the search of this 'author' turns into 315 mini searches. This is a lot slower than a single pass through that table.
-    It is really when searching papyri and the inscriptions where you feel this: the Greek and Roman authors usually have
-    fewer than 10 embedded works.
+        <br />
+        <br />
+        Every 'author' is stored in a 'table'.  <span class="emph">Searching a whole table is much faster</span> than searching now one bit and now another bit.
+        Delos (IG XI,4 [510-1349]) contains 841 works. 315 of them fall between 600 B.C.E. and 200 B.C.E. Once you restrict the time,
+        the search of this 'author' turns into 315 mini searches. This is a lot slower than a single pass through that table.
+        It is really when searching papyri and the inscriptions where you feel this: the Greek and Roman authors usually have
+        fewer than 10 embedded works.
     </li>
     Obviously we will go a lot faster if we either add or subtract restrictions: the more a table is broken up into bits,
     the slower you will go. But more restrictions might mean you only needed to look at 10 items inside of the table: that's
@@ -421,38 +433,38 @@
     <li>
     Here are some searches just inside 'Greek Authors'.
         <ul class="numbered">
-            <li>Sought κεκωλυκατε within 2 lines of ιδιωταϲ; Searched 6625 texts and found 1 passages (<span class="colorhighlight">0.97s</span>)</li>
-            <li>Sought πραγμοϲυν within 2 lines of ιδιωταϲ; Searched 6625 texts and found 2 passages (<span class="colorhighlight">8.71s</span>)</li>
-            <li>Sought καλοϲ within 5 words of αγαθοϲ; Searched 6625 texts and found 74 passages (<span class="colorhighlight">38.78s</span>)</li>
-            <li>Sought καλοσ within 5 words of αγαθος; Searched 3008 texts and found 75 passages (<span class="colorhighlight">5.76s</span>); Searched between 850 B.C.E. and 1 C.E.</li>
+            <li><span class="sampleoutput">Sought κεκωλυκατε within 2 lines of ιδιωταϲ; Searched 6625 texts and found 1 passages (<span class="colorhighlight">0.97s</span>)</span></li>
+            <li><span class="sampleoutput">Sought πραγμοϲυν within 2 lines of ιδιωταϲ; Searched 6625 texts and found 2 passages (<span class="colorhighlight">8.08s</span>)</span></li>
+            <li><span class="sampleoutput">Sought καλοϲ within 5 words of αγαθοϲ; Searched 6625 texts and found 74 passages (<span class="colorhighlight">38.78s</span>)</span></li>
+            <li><span class="sampleoutput">Sought καλοσ within 5 words of αγαθος; Searched 3008 texts and found 75 passages (<span class="colorhighlight">5.76s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
         </ul>
     <span class="emph">A proximity search is really two searches</span>. Hipparchia looks for the <span class="emph">longest term first</span>.
-    It is possible that the long term is more common than the short term, but if you have to guess blindly, then you pick the
-    long one every time.
+    It is possible that the long term is more common than the short term, but if, like Hipparchia, you have to guess blindly, then you pick the
+    longer term every time.
     After searching for the first term Hipparchia looks for places
     where the second term is near the first term. [NB: If you say a short term not near a long term, then the search will be for
     the short term and then the long term. That's what you really wanted.] This two-step process explains the results you see above.
     Let's walk through what happened when the search executed.
     <ul class="roman">
     <li>
-    There are only
-    two places where κεκωλύκατε appears. Finding them takes less than a second. Checking each location for ἰδιώταϲ takes
-    less than a hundredth of a second.</li>
+        There are only
+        two places where κεκωλύκατε appears. Finding them takes less than a second. Checking each location for ἰδιώταϲ takes
+        less than a hundredth of a second.</li>
     <li>
-    A search for πραγμοϲυν will turn up 585 passages. It does not take much time to find them. And it does not take
-    all that much time to check those findings to see if they have ιδιωταϲ near them. A simple search that generates the 585 hits for
-    πραγμοϲυν takes 9.33 seconds, but a lot of that is spent formatting the results. So the proximity penalty is
-    effectively a non-issue.
+        A search for πραγμοϲυν will turn up 585 passages. It does not take much time to find them. And it does not take
+        all that much time to check those findings to see if they have ιδιωταϲ near them. A simple single-term search that generates 585 hits for
+        πραγμοϲυν takes 5.58s seconds, but a lot of that is spent formatting the results. So the proximity penalty is for looking for
+        πραγμοϲυν near ιδιωταϲ really quite low.
     </li>
     <li>
-    καλοϲ within 5 words of αγαθοϲ is a different story. Hipparchia is first going to look for every αγαθοϲ in extant
-    Greek literature. Then those passages will be checked for καλοϲ. The first pass generates a huge number of hits
-    and so the second pass takes plenty of time to complete.
-    But lest ye be scared off from your search for the good and the beautiful, note that adding a time restriction
-    immediately speeds up the search considerably. Confidence in the ugliness of later Greek is all you need.
+        καλοϲ within 5 words of αγαθοϲ is a different story. Hipparchia is first going to look for every αγαθοϲ in extant
+        Greek literature. Then those passages will be checked for καλοϲ. The first pass generates a huge number of hits
+        and so the second pass takes plenty of time to complete.
+        But lest ye be scared off from your search for the good and the beautiful, note that adding a time restriction
+        immediately speeds up the search considerably. Confidence in the ugliness of later Greek is all you need.
     </li>
     <li>
-    In sum, <span class="emph">full corpus searches for two common words will be slow.</span> <a href="https://community.dur.ac.uk/p.j.heslin/Software/Diogenes/index.php">Diogenes</a>
+        In sum, <span class="emph">full corpus searches for two common words will be slow.</span> <a href="https://community.dur.ac.uk/p.j.heslin/Software/Diogenes/index.php">Diogenes</a>
         can do this sort of thing much faster if you decide that this sort of query is vital to your reasearch. It would
         be possible to build a version of Hipparchia that is better at this kind of search, but that would mean
         building a method to generate pseudo-texts and then to search them with regex, i.e., to insert a little parody
@@ -463,11 +475,11 @@
     <span class="emph">Phrase searches are special cases of proximity searches</span>: A near B and in that order. Strategies and results will be
     very similiar.
         <ul class="numbered">
-            <li>Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 6625 texts and found 3 passages (<span class="colorhighlight">29.27s</span>)</li>
-            <li>Sought μεγάλην δύναμιν; Searched 6625 texts and found 84 passages (<span class="colorhighlight">42.78s</span>)</li>
-            <li>Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 3008 texts and found 2 passages (<span class="colorhighlight">2.15s</span>); Searched between 850 B.C.E. and 1 C.E.</li>
-            <li>Sought μεγάλην δύναμιν; Searched 3008 texts and found 32 passages (<span class="colorhighlight">4.25s</span>); Searched between 850 B.C.E. and 1 C.E.</li>
-            <li>Sought ου μην αλλ; Searched 180 texts and found 110 passages (<span class="colorhighlight">2.06s</span>). Searched between 850 B.C.E. and 1 C.E. [+ Author categories limited to 'Oratores']</li>
+            <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 6625 texts and found 3 passages (<span class="colorhighlight">29.27s</span>)</span></li>
+            <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 6625 texts and found 84 passages (<span class="colorhighlight">42.78s</span>)</span></li>
+            <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 3008 texts and found 2 passages (<span class="colorhighlight">2.15s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
+            <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 3008 texts and found 32 passages (<span class="colorhighlight">4.25s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
+            <li><span class="sampleoutput">Sought ου μην αλλ; Searched 180 texts and found 110 passages (<span class="colorhighlight">2.06s</span>). Searched between 850 B.C.E. and 1 C.E. [+ Author categories limited to 'Oratores']</span></li>
         </ul>
     As above, a common word sought across the whole corpus will slow you down.
     Most phrase searches are likely to contain common words. So you will need strategies to make the haystack smaller
