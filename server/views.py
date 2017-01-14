@@ -218,7 +218,6 @@ def executesearch():
 
 		hitdict = sortresultslist(hits, authordict, workdict)
 		allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, poll[ts])
-		# print('allfound\n',allfound)
 
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
@@ -227,6 +226,7 @@ def executesearch():
 
 		poll[ts].statusis('Converting results to HTML')
 		htmlandjs = htmlifysearchfinds(allfound)
+		# print('htmlandjs',htmlandjs)
 		finds = htmlandjs['hits']
 		findsjs = htmlandjs['hitsjs']
 

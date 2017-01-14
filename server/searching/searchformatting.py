@@ -15,6 +15,7 @@ from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, setconnection
 from server.formatting_helper_functions import formatpublicationinfo
+from server.hipparchiaclasses import FormattedSearchResult
 
 
 def cleansearchterm(seeking):
@@ -115,20 +116,16 @@ def highlightsearchterm(lineobject,searchterm, spanname):
 	return newline
 
 
-def lineobjectresultformatter(lineobject, searchterm, proximate, searchtype, highlight):
+def lineobjectresulthighlighter(lineobject, searchterm, proximate, searchtype, highlight):
 	"""
 	turn a lineobject into a pretty result
-		 out:
-		{'index': 1728, 'locus': ('237','3'), 'line':"<span class="highlight">Κάϲτορά θ' ἱππόδαμον καὶ πὺξ <span class="match">ἀγαθὸν</span> Πολυδεύκεα </span>"}
-		
+	reformat a line object to highlight what needs highlighting
+
 	:param lineobject:
 	:param searchterm:
 	:param highlight:
 	:return:
 	"""
-	
-	formatteddict = {}
-	formatteddict['index'] = lineobject.index
 
 	if highlight is True:
 		lineobject.accented = highlightsearchterm(lineobject, searchterm, 'match')
@@ -138,11 +135,8 @@ def lineobjectresultformatter(lineobject, searchterm, proximate, searchtype, hig
 		# negative proximity ('not near') does not need anything special here: you simply never meet the condition
 		if re.search(cleansearchterm(proximate),lineobject.accented) is not None or re.search(cleansearchterm(proximate),lineobject.stripped) is not None:
 			lineobject.accented = highlightsearchterm(lineobject, proximate, 'proximate')
-	
-	formatteddict['line'] = lineobject.accented
-	formatteddict['locus'] = lineobject.locustuple()
 
-	return formatteddict
+	return lineobject
 
 
 def aggregatelines(firstline, lastline, cursor, audbname):
@@ -318,6 +312,8 @@ def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searcht
 	the hitdict is a collection of line objects where the key is the proper sort order for the results
 		hitdict {0: <server.hipparchiaclasses.dbWorkLine object at 0x103dd17b8>, 1: <server.hipparchiaclasses.dbWorkLine object at 0x103dd1780>}
 
+	returns a sorted list of FormattedSearchResult objects
+
 	:return:
 	"""
 
@@ -357,8 +353,7 @@ def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searcht
 	for j in jobs: j.start()
 	for j in jobs: j.join()
 
-	# allfound{} looks like:
-	# {1: [{'author': 'Aratus', 'newfind': 1, 'hitnumber': 1, 'citation': 'Book 1, line 249', 'work': 'Phaenomena', 'url': 'gr0653w001_LN_249'}, {'locus': ('247', '1'), 'line': 'ϲῆμα βορειοτέρου· μάλα γάρ νύ οἱ ἐγγύθεν ἐϲτίν.', 'index': 247}, {'locus': ('248', '1'), 'line': '&nbsp;&nbsp;&nbsp;&nbsp; Ἀμφότεροι δὲ πόδεϲ γαμβροῦ ἐπιϲημαίνοιεν', 'index': 248}, {'locus': ('249', '1'), 'line': '<span class="highlight"><span class="expanded">Περϲέοϲ</span>,<span class="match"> οἵ ῥά οἱ</span> αἰὲν ἐπωμάδιοι φορέονται.</span>', 'index': 249}, {'locus': ('250', '1'), 'line': 'Αὐτὰρ ὅγ’ ἐν βορέω φέρεται περιμήκετοϲ ἄλλων.', 'index': 250}, {'locus': ('251', '1'), 'line': 'Καί οἱ δεξιτερὴ μὲν ἐπὶ κλιϲμὸν τετάνυϲται', 'index': 251}] }
+	# allfound = { 1: <server.hipparchiaclasses.FormattedSearchResult object at 0x111e73160>, 2: ... }
 	keys = sorted(allfound.keys())
 	finds = []
 	for k in keys:
@@ -380,7 +375,9 @@ def formattingworkpile(bundles, criteria, activepoll, allfound):
 	:param workbundles:
 	:return:
 	"""
-	
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
+
 	while len(bundles) > 0:
 		try:
 			bundle = bundles.pop()
@@ -389,18 +386,25 @@ def formattingworkpile(bundles, criteria, activepoll, allfound):
 			bundle = None
 
 		if bundle is not None:
-			citwithcontext = formattedcittationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'], criteria['seek'], criteria['prox'], criteria['type'])
-			citwithcontext[0]['hitnumber'] = bundle['hitnumber']
-			activepoll.remain(activepoll.getremaining() - 1)
+			citwithcontext = formattedcittationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'], criteria['seek'],
+														 criteria['prox'], criteria['type'], curs)
+			citwithcontext.hitnumber = bundle['hitnumber']
+			activepoll.remain(bundle['hitnumber'])
 
-			if citwithcontext != []:
+			if bundle['hitnumber'] % 100 == 0:
+				dbconnection.commit()
+
+			if citwithcontext.formattedlines != []:
 				allfound[bundle['hitnumber']] = citwithcontext
+
+	dbconnection.commit()
+	curs.close()
 
 	return allfound
 
 
 def formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext, searchterm, proximate,
-                                searchtype):
+                                searchtype, curs):
 	"""
 	take a hit
 		turn it into a focus line
@@ -420,20 +424,96 @@ def formattedcittationincontext(lineobject, workobject, authorobject, linesofcon
 	:param cursor:
 	:return:
 	"""
+
+	highlightline = lineobject.index
+	citation = locusintocitation(workobject, lineobject.locustuple())
+
+	citationincontext = FormattedSearchResult(-1,authorobject.shortname, workobject.title, citation, lineobject.universalid, [])
+	environs = simplecontextgrabber(workobject, highlightline, linesofcontext, curs)
 	
+	for found in environs:
+		found = dblineintolineobject(found)
+		if found.index == highlightline:
+			found = lineobjectresulthighlighter(found, searchterm, proximate, searchtype, True)
+		else:
+			found = lineobjectresulthighlighter(found, searchterm, proximate, searchtype, False)
+		citationincontext.formattedlines.append(found)
+
+	return citationincontext
+
+
+
+
+# slated for removal
+
+def oldformattingworkpile(bundles, criteria, activepoll, allfound):
+	"""
+	the work for the workers to send to formattedcittationincontext()
+
+	a bundle:
+		{'hitnumber': 3, 'wo': <server.hipparchiaclasses.dbOpus object at 0x1109ad240>, 'ao': <server.hipparchiaclasses.dbAuthor object at 0x1109ad0f0>, 'lo': <server.hipparchiaclasses.dbWorkLine object at 0x11099d9e8>}
+
+	criteria:
+		{'seek': 'οἵ ῥά οἱ', 'type': 'phrase', 'ctx': 4, 'prox': ''}
+
+	:param workbundles:
+	:return:
+	"""
+
+	while len(bundles) > 0:
+		try:
+			bundle = bundles.pop()
+		except:
+			# IndexError: pop from empty list
+			bundle = None
+
+		if bundle is not None:
+			citwithcontext = formattedcittationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'],
+														 criteria['seek'], criteria['prox'], criteria['type'])
+			citwithcontext[0]['hitnumber'] = bundle['hitnumber']
+			activepoll.remain(activepoll.getremaining() - 1)
+
+			if citwithcontext != []:
+				allfound[bundle['hitnumber']] = citwithcontext
+
+	return allfound
+
+
+def oldformattedcittationincontext(lineobject, workobject, authorobject, linesofcontext, searchterm, proximate,
+								searchtype):
+	"""
+	take a hit
+		turn it into a focus line
+		surround it by some context
+
+	citationincontext[0]:
+		{'citation': 'Book 3, line 291', 'author': 'Quintus', 'work': 'Posthomerica', 'newfind': 1, 'url': 'gr2046w001_LN_1796'}
+
+	a line deeper inside citationincontext[]:
+		{'line': '<span class="highlight"><span class="expanded">Περϲέοϲ</span>, <span class="match">οἵ ῥά οἱ</span> αἰὲν ἐπωμάδιοι φορέονται.</span>', 'index': 249, 'locus': ('249', '1')}
+
+	:param line:
+	:param workdbname:
+	:param authorobject:
+	:param linesofcontext:
+	:param searchterm:
+	:param cursor:
+	:return:
+	"""
+
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
-	
+
 	citationincontext = []
 	highlightline = lineobject.index
 	citation = locusintocitation(workobject, lineobject.locustuple())
 	# this next bit of info tags the find; 'newfind' + 'url' is turned into JS in the search.html '<script>' loop; this enables click-to-browse
 	# similarly the for-result-in-found loop of search.html generates the clickable elements: <browser id="{{ context['url'] }}">
 	citationincontext.append({'newfind': 1, 'author': authorobject.shortname,
-	                          'work': workobject.title, 'citation': citation, 'url': (lineobject.universalid)})
-	
+							  'work': workobject.title, 'citation': citation, 'url': (lineobject.universalid)})
+
 	environs = simplecontextgrabber(workobject, highlightline, linesofcontext, curs)
-	
+
 	for found in environs:
 		found = dblineintolineobject(found)
 		if found.index == highlightline:
@@ -441,10 +521,40 @@ def formattedcittationincontext(lineobject, workobject, authorobject, linesofcon
 		else:
 			found = lineobjectresultformatter(found, searchterm, proximate, searchtype, False)
 		citationincontext.append(found)
-	
+
 	dbconnection.commit()
 	curs.close()
 	del dbconnection
 
 	return citationincontext
 
+
+def lineobjectresultformatter(lineobject, searchterm, proximate, searchtype, highlight):
+	"""
+	turn a lineobject into a pretty result
+		 out:
+		{'index': 1728, 'locus': ('237','3'), 'line':"<span class="highlight">Κάϲτορά θ' ἱππόδαμον καὶ πὺξ <span class="match">ἀγαθὸν</span> Πολυδεύκεα </span>"}
+
+	:param lineobject:
+	:param searchterm:
+	:param highlight:
+	:return:
+	"""
+
+	formatteddict = {}
+	formatteddict['index'] = lineobject.index
+
+	if highlight is True:
+		lineobject.accented = highlightsearchterm(lineobject, searchterm, 'match')
+		lineobject.accented = '<span class="highlight">' + lineobject.accented + '</span>'
+
+	if proximate != '' and searchtype == 'proximity':
+		# negative proximity ('not near') does not need anything special here: you simply never meet the condition
+		if re.search(cleansearchterm(proximate), lineobject.accented) is not None or re.search(
+				cleansearchterm(proximate), lineobject.stripped) is not None:
+			lineobject.accented = highlightsearchterm(lineobject, proximate, 'proximate')
+
+	formatteddict['line'] = lineobject.accented
+	formatteddict['locus'] = lineobject.locustuple()
+
+	return formatteddict
