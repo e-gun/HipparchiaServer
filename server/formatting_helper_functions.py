@@ -337,7 +337,6 @@ def avoidlonglines(string, maxlen, splitval, stringlist=[]):
 			if searchzone[c] == ' ' and stop == False:
 				stop = True
 				stringlist.append(string[0:c])
-				print(string[0:c])
 				stopval = c
 		newstringhtml = avoidlonglines(string[stopval+1:], maxlen, splitval, stringlist)
 

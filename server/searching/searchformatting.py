@@ -404,7 +404,7 @@ def formattedcittationincontext(lineobject, workobject, authorobject, linesofcon
 	"""
 	take a hit
 		turn it into a focus line
-		turround it by some context
+		surround it by some context
 	
 	citationincontext[0]:
 		{'citation': 'Book 3, line 291', 'author': 'Quintus', 'work': 'Posthomerica', 'newfind': 1, 'url': 'gr2046w001_LN_1796'}
