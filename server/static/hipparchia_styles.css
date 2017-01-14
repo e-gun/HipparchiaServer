@@ -390,6 +390,11 @@ worktitle {
 }
 
 
+.sampleoutput {
+    color: #455f56;
+    font-style: italic;
+}
+
 #authorholdings, #searchlistcontents {
 	background-color: #fcfcfc;
 	border: 1px dotted black;

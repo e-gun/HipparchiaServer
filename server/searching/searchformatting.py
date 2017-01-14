@@ -287,7 +287,7 @@ def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searcht
 		12s multi-threaded to do search + format
 
 	the hitdict is a collection of line objects where the key is the proper sort order for the results
-		hitdict {0: <server.hipparchiaclasses.dbWorkLine object at 0x103dd17b8>, 1: <server.hipparchiaclasses.dbWorkLine object at 0x103dd1780>}
+		hitdict {0: <server.hipparchiaclasses.dbWorkLine object at 0x103dd17b8>, 1: <server.hipparchiaclasses.dbWorkLine object at 0x103dd1780>, 3: ...}
 
 	returns a sorted list of FormattedSearchResult objects
 
