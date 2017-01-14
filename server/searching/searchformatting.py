@@ -116,29 +116,6 @@ def highlightsearchterm(lineobject,searchterm, spanname):
 	return newline
 
 
-def lineobjectresulthighlighter(lineobject, searchterm, proximate, searchtype, highlight):
-	"""
-	turn a lineobject into a pretty result
-	reformat a line object to highlight what needs highlighting
-
-	:param lineobject:
-	:param searchterm:
-	:param highlight:
-	:return:
-	"""
-
-	if highlight is True:
-		lineobject.accented = highlightsearchterm(lineobject, searchterm, 'match')
-		lineobject.accented = '<span class="highlight">'+lineobject.accented+'</span>'
-		
-	if proximate != '' and searchtype == 'proximity':
-		# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-		if re.search(cleansearchterm(proximate),lineobject.accented) is not None or re.search(cleansearchterm(proximate),lineobject.stripped) is not None:
-			lineobject.accented = highlightsearchterm(lineobject, proximate, 'proximate')
-
-	return lineobject
-
-
 def aggregatelines(firstline, lastline, cursor, audbname):
 	"""
 	build searchable clumps of words spread over various lines
@@ -386,8 +363,8 @@ def formattingworkpile(bundles, criteria, activepoll, allfound):
 			bundle = None
 
 		if bundle is not None:
-			citwithcontext = formattedcittationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'], criteria['seek'],
-														 criteria['prox'], criteria['type'], curs)
+			citwithcontext = formattedcitationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'], criteria['seek'],
+														criteria['prox'], criteria['type'], curs)
 			citwithcontext.hitnumber = bundle['hitnumber']
 			activepoll.remain(bundle['hitnumber'])
 
@@ -403,19 +380,19 @@ def formattingworkpile(bundles, criteria, activepoll, allfound):
 	return allfound
 
 
-def formattedcittationincontext(lineobject, workobject, authorobject, linesofcontext, searchterm, proximate,
-                                searchtype, curs):
+def formattedcitationincontext(lineobject, workobject, authorobject, linesofcontext, searchterm, proximate,
+							   searchtype, curs):
 	"""
 	take a hit
 		turn it into a focus line
 		surround it by some context
 	
-	citationincontext[0]:
-		{'citation': 'Book 3, line 291', 'author': 'Quintus', 'work': 'Posthomerica', 'newfind': 1, 'url': 'gr2046w001_LN_1796'}
-				
-	a line deeper inside citationincontext[]:
-		{'line': '<span class="highlight"><span class="expanded">Περϲέοϲ</span>, <span class="match">οἵ ῥά οἱ</span> αἰὲν ἐπωμάδιοι φορέονται.</span>', 'index': 249, 'locus': ('249', '1')}
-		
+	in:
+		lineobject
+
+	out:
+		FormattedSearchResult object
+
 	:param line:
 	:param workdbname:
 	:param authorobject:
@@ -431,13 +408,16 @@ def formattedcittationincontext(lineobject, workobject, authorobject, linesofcon
 	citationincontext = FormattedSearchResult(-1,authorobject.shortname, workobject.title, citation, lineobject.universalid, [])
 	environs = simplecontextgrabber(workobject, highlightline, linesofcontext, curs)
 	
-	for found in environs:
-		found = dblineintolineobject(found)
-		if found.index == highlightline:
-			found = lineobjectresulthighlighter(found, searchterm, proximate, searchtype, True)
-		else:
-			found = lineobjectresulthighlighter(found, searchterm, proximate, searchtype, False)
-		citationincontext.formattedlines.append(found)
+	for foundline in environs:
+		foundline = dblineintolineobject(foundline)
+		if foundline.index == highlightline:
+			foundline.accented = highlightsearchterm(foundline, searchterm, 'match')
+			foundline.accented = '<span class="highlight">' + foundline.accented + '</span>'
+		if proximate != '' and searchtype == 'proximity':
+			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
+			if re.search(cleansearchterm(proximate), foundline.accented) is not None or re.search(cleansearchterm(proximate), foundline.stripped) is not None:
+				foundline.accented = highlightsearchterm(foundline, proximate, 'proximate')
+		citationincontext.formattedlines.append(foundline)
 
 	return citationincontext
 
