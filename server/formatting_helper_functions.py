@@ -8,9 +8,12 @@
 
 
 import re
-
+import configparser
 from flask import session
+from server import hipparchia
 
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 def removegravity(accentedword):
 	"""
@@ -221,7 +224,10 @@ def htmlifysearchfinds(listoffinds):
 		htmlforthefind += '</browser>\n</locus>\n'
 
 		for ln in lines:
-			htmlforthefind += '<span class="locus">' + ln.locus() + '</span>&nbsp;\n'
+			if hipparchia.config['DEBUGMODE'] == 'no':
+				htmlforthefind += '<span class="locus">' + ln.locus() + '</span>&nbsp;\n'
+			else:
+				htmlforthefind += '<code>'+ln.universalid+'</code>&nbsp;<span class="locus">' + ln.locus() + '</span>&nbsp;\n'
 			htmlforthefind += '<span class="foundtext">' + ln.accented + '</span><br />\n'
 
 		resultsashtml.append(htmlforthefind)
@@ -254,7 +260,7 @@ def injectbrowserjavascript(listofurls):
 
 def insertcrossreferencerow(lineobject):
 	"""
-	inscriptions and papyri have relevant pibliographic information that needs to be displayed
+	inscriptions and papyri have relevant bibliographic information that needs to be displayed
 	:param lineobject:
 	:return:
 	"""
@@ -272,7 +278,7 @@ def insertcrossreferencerow(lineobject):
 
 def insertdatarow(label, css, founddate):
 	"""
-	inscriptions and papyri have relevant pibliographic information that needs to be displayed
+	inscriptions and papyri have relevant bibliographic information that needs to be displayed
 	:param lineobject:
 	:return:
 	"""

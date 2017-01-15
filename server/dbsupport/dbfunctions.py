@@ -8,9 +8,8 @@
 
 import psycopg2
 import configparser
-from multiprocessing import Manager, Process
 
-from server.hipparchiaclasses import dbAuthor, dbOpus, dbWorkLine, MPCounter
+from server.hipparchiaclasses import dbAuthor, dbOpus, dbWorkLine
 from server import hipparchia
 
 config = configparser.ConfigParser()

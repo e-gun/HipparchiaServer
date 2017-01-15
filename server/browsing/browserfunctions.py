@@ -7,11 +7,18 @@
 """
 
 import re
+import configparser
+
+
+
 
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
 from server.formatting_helper_functions import getpublicationinfo, insertcrossreferencerow, insertdatarow
+from server import hipparchia
 
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
 	"""
@@ -148,8 +155,10 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			else:
 				# do not insert a line number or special formatting
 				columna = ''
-		
-		linehtml = '<tr class="browser"><td class="browsedline">' + columnb + '</td>'
+		if hipparchia.config['DEBUGMODE'] == 'no':
+			linehtml = '<tr class="browser"><td class="browsedline">' + columnb + '</td>'
+		else:
+			linehtml = '<tr class="browser"><td class="browsedline"><code>' + line.universalid + '&nbsp;&nbsp;&nbsp;</code>&nbsp;'+ columnb + '</td>'
 		linehtml += '<td class="browsercite">' + columna + '</td></tr>\n'
 		
 		passage['ouputtable'].append(linehtml)
