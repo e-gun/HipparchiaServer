@@ -395,6 +395,10 @@
     changing your queries and/or the restrictions placed upon them. <span class="emph">Everything hinges on what you ask for</span>.
     Slowdowns obey an exponential logic: things get 2x worse, then 4x worse, then...
     This means that little shifts in your search can lead to huge improvements.
+    <br />
+    <br />
+    As noted below, hardware is a factor, but since you are unlikely to change your hardware much, let's start by spending some
+    time looking at the software side of things.
 
     <ul class="forexample">
         <li>Consider the following <span class="emph">simple searches</span>. Both searches are across all five databases. There are no restrictions applied at all.
@@ -465,7 +469,7 @@
     </li>
     <li>
         In sum, <span class="emph">full corpus searches for two common words will be slow.</span> <a href="https://community.dur.ac.uk/p.j.heslin/Software/Diogenes/index.php">Diogenes</a>
-        can do this sort of thing much faster if you decide that this sort of query is vital to your reasearch. It would
+        can do this sort of thing much faster if you decide that this sort of query is vital to your research. It would
         be possible to build a version of Hipparchia that is better at this kind of search, but that would mean
         building a method to generate pseudo-texts and then to search them with regex, i.e., to insert a little parody
         of Diogenes into Hipparchia.
@@ -473,7 +477,7 @@
     </li>
     <li>
     <span class="emph">Phrase searches are special cases of proximity searches</span>: A near B and in that order. Strategies and results will be
-    very similiar.
+    very similiar to what we saw in the previous case.
         <ul class="numbered">
             <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 6625 texts and found 3 passages (<span class="colorhighlight">29.27s</span>)</span></li>
             <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 6625 texts and found 84 passages (<span class="colorhighlight">42.78s</span>)</span></li>
@@ -486,10 +490,20 @@
     unless you have 45s to spare. It is totally safe to try to double-check Dennison on οὐ μὴν ἀλλὰ, but you should
     throw some restrictions in there to avoid a long search (that yields more results than you want anyway).
     </li>
-
 </ul>
-
-
+    <span class="emph">Hardware also matters</span>: προκατέλαβον (the first example above)
+    takes 4.19s with 5 workers on macOS 10.11 with a SSD and an 8 core CPU running at 3.5GHz.
+    With one worker the search executes in 11.32s. The search takes 4.85 seconds on a mac mini with a SSD and 2 cores running at 2.6GHz. But then
+    the search will take
+    23.4s when executed inside a virtual machine running on the same higher-end computer,
+    a virtual machine that has been assigned 4 cores and is running FreeBSD 11.
+    The κεκωλυκατε example yields a difference between 0.97s unemulated and 12.79s when inside a virtual machine. In short, emulation is costly. And
+    the main culprit is the emulated filesystem. Just see what happens if you pick ZFS instead of UFS...
+    Beyond running natively, fast hard drives and then more CPUs and then faster CPUs would be the order in which to seek to make speed gains.
+    <span class="emph">Access time to the data and not processing time of the data is far and away the most important factor.</span>
+    At a certain point a faster machine will end up just doing more waiting
+    for data to come to the processor. 2 or 3 workers on a moderately powerful machine with a fast drive is 85% as fast as a high end machine that theoretically
+    can do 600% more work per second.
 
 </div>
 
