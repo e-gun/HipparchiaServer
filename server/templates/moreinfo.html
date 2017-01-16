@@ -248,18 +248,27 @@
     <br />
     The more salient things to know/use:
     <ul class="forexample">
-        <li><code>[abc]</code> brackets a set of acceptable characters to look for in the next position: a, or b, or c. <code>lauda[st]</code> will find laudas or laudat but not laudare. </li>
-        <li><code>[^abc]</code> brackets a set of characters to exclude in the next position: not a, nor b, nor c. <code>lauda[^t]</code> is a search that refuses to find laudat, but it will find laudant.</li>
-        <li><code>(a|b|abc)</code> brackets a set of strings to look for: a, or b, or abc. <code>laud(o|as|at)</code> is a search for the present singular indicative forms of laudare. It will also find conlaudat. Note how you could use <code>co(n|l)laud</code> to make sure you got alternate spellings of conlaudare.</li>
-        <li><code>.</code> any character: <code>laud.nt</code> will find laudant, laudent, and, theoretically, laudZnt</li>
-        <li><code>\s</code> whitespace: \ssed\setiam\s is a search for ' sed etiam '. Please use the 'within 1 word' function instead of /s unless you know why you are not doing so.
+        <li><code>[abc]</code> brackets a set of acceptable characters to look for in the next position: a, or b, or c.
+            <code>lauda[st]</code> will find <span class="lat">laudas</span> or <span class="lat">laudat</span> but not <span class="lat">laudare</span>. </li>
+        <li><code>[^abc]</code> brackets a set of characters to exclude in the next position: not a, nor b, nor c.
+            <code>lauda[^t]</code> is a search that refuses to find <span class="lat">laudat</span>, but it will find <span class="lat">laudant</span>,
+            <span class="lat">laudandum</span>, and <span class="lat">laudasti</span>.</li>
+        <li><code>(a|b|abc)</code> brackets a set of strings to look for: a, or b, or abc. <code>laud(o|as|at)</code>
+            is a search for the present singular indicative forms of <span class="lat">laudare</span>. It will also find
+            <span class="lat">conlaudat</span>. Note how you could use <code>co(n|l)laud</code> to make sure you got alternate
+            spellings of <span class="lat">conlaudare</span>.</li>
+        <li><code>.</code> any character: <code>laud.nt</code> will find <span class="lat">laudant</span>, <span class="lat">laudent</span>,
+            and, theoretically, <span class="lat">laudZnt</span></li>
+        <li><code>\s</code> whitespace: <code>\ssed\setiam\s</code> is a search for <code>' sed etiam '</code>.
+            Please use the 'within 1 word' function instead of <code>\s</code> unless you know why you are not doing so.
     </ul>
-    <br />
     Here are some examples that give you an idea of the sort of things that are possible. But some major caveats follow.
     <ul class="forexample">
         <li><code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each.</li>
         <li><code>t.t.t.t.t.</code> will find places where you have 't + anything' five times in a row.
-            (<span class="lat">heres ei extitit Titius</span>; and <span class="lat">nec diu restitit: tota...</span>)</li>
+            Your results will be <span class="lat">heres ei extitit Titius</span>; and <span class="lat">nec diu restitit: tota...</span>
+            Note that the whitespace between <span class="lat">extitit</span> and <span class="lat">Titius</span> qualified
+            as 'anything' in the first match. But you might have composed the search with something else in mind.</li>
         <li><code>[aeiou]m[aeiou]m[aeiou]m</code> will find words that have 'vowel + m + vowel + m + vowel + m'
             (i.e., <span class="lat">amomum, cardamomum, cinnamomum, pantomimum</span>) </li>
         <li><code>\s..$</code> could find all verses of Homer that end with a two letter word.</li>
@@ -379,7 +388,8 @@
     <p><span class="label">"Search suspended: cap reached"</span></p>
 
     The list of items to search is not sorted. <span class="emph">Only results are sorted</span>. This means that
-    if you want 200 hits in chronological order, you will get 200 hits in chronological order, but you will not get
+    if you want 200 hits in chronological order, you will get 200 hits in chronological order, but, unless you experience
+    a bit of odd luck, you will not get
     the 200 earliest possible hits (because the full search did not take place). The way the search lists are built and
     dispatched means that some corpora will be searched before others and then with a higher chance of certain internal ID
     numbers being checked before others. Do not try to figure out the rules of the game, either raise the cap or refine
@@ -501,8 +511,8 @@
     the main culprit is the emulated filesystem. Just see what happens if you pick ZFS instead of UFS...
     Beyond running natively, fast hard drives and then more CPUs and then faster CPUs would be the order in which to seek to make speed gains.
     <span class="emph">Access time to the data and not processing time of the data is far and away the most important factor.</span>
-    At a certain point a faster machine will end up just doing more waiting
-    for data to come to the processor. 2 or 3 workers on a moderately powerful machine with a fast drive is 85% as fast as a high end machine that theoretically
+    Get Hipparchia's DB onto a solid state drive if possible. At a certain point a faster machine will end up just doing more waiting
+    for data to come to the processor. 2 or 3 workers on a moderately powerful machine with a fast drive is 85% as fast as a high end machine that in theory
     can do 600% more work per second.
 
 </div>
