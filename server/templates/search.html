@@ -2,264 +2,43 @@
 
 {% block content %}
 <!-- extend from base layout -->
-    <div id="uiclickfield" class="center">
-        <button id="clear_button" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Reset session/Clear search"><span class="ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        &nbsp;&nbsp;&nbsp;&nbsp;
-        <button id="morechoices" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="More search choices"><span class="ui-icon ui-icon-arrowreturnthick-1-s"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="fewerchoices" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Fewer search choices"><span class="ui-icon ui-icon-arrowreturnthick-1-n"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="moretools" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Lexical tools"><span class="ui-icon ui-icon-wrench"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="openoptions" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Configuration options"><span class="ui-icon ui-icon-gear"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-    </div>
+
+    {% include "uiclickfield.html" ignore missing %}
+
     {% include "searchfield.html" ignore missing %}
-    <div id="lexica">
-        <br />
-        <input type="text" name="lexicon" class="lexica" id="lexicon" placeholder="(Dictionary Search)">
-        <input type="text" name="parser" class="lexica" id="parser" placeholder="(Morphology Search)">
-        <input type="text" name="reverselexicon" class="lexica" id="reverselexicon" placeholder="(English to Greek or Latin)">
-        <button id="lexicalsearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Search dictionary or parser"><span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-    </div>
+
+    {% include "lexica.html" ignore missing %}
+
     {% include "setoptions.html" ignore missing %}
-    <div id="outputbox">
-        <table id="selectionstable">
-            <tbody>
-                <tr>
-                    <th colspan="5" id="timerestrictions"></th>
-                </tr>
-                <tr>
-                    <td class="infocells" id="selectioninfocell" width="47%" title="Selection list">
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    </td>
-                    <td style="text-align: center;" id="jscriptwigetcell" width="6%">
-                        <p id="searchinfo"><span class="ui-button-icon ui-icon ui-icon-info" title="Show/hide details of the current search list">&nbsp;</span></p>
-                        <br />
-                        <br />
-                        <p id="droptodelete"><span class="ui-button-icon ui-icon ui-icon-trash" title="Drag here to remove item from list">&nbsp;</span></p>
-                    </td>
-                    <td class="infocellx" id="exclusioninfocell" width="47%" title="Exclusion list">
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <p id="authoroutputcontent"></p>
-        <div id="searchlistcontents">(this might take a second...)</div>
-    </div>
+
+    {% include "outputbox.html" ignore missing %}
 
     {% include "saveslots.html" ignore missing %}
+
+    {% include "activecorpora.html" ignore missing %}
 
 <script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
 <script src="{{ url_for('static', filename='ui-clicks.js') }}"></script>
 <script src="{{ url_for('static', filename='lexical.js') }}"></script>
-<script>
-
-$(document).ready( function () {
-
-    $(document).keydown(function(e) {
-        // forward and back arrow; but the click does not exist until you open a passage browser
-        switch(e.which) {
-            case 37:  $('#browseback').click(); break;
-            case 39: $('#browseforward').click(); break;
-            }
-        });
-
-    $('#clear_button').click(
-        function() {
-            window.location.href = '/clear';
-        	}
-    	);
-    $('#clearpick').hide();
-    $('#moreinfotabs').hide();
-    $('#moreinfotabs').tabs();
-    $('#edts').hide();
-    $('#ldts').hide();
-    $('#spur').hide();
-    $('#helpbutton').click( function() { $('#moreinfotabs').toggle(); $('#executesearch').toggle(); $('#extendsearch').toggle(); });
-
-    $('#browserdialog').hide();
-    $('#complexsearching').hide();
-    $('#extendsearch').click( function() {
-        $.getJSON('/getsessionvariables', function (data) {
-                $( "#proximityspinner" ).spinner('value', data.proximity);
-                if (data.searchscope == 'L') {
-                    $('#searchlines').prop('checked', true); $('#searchwords').prop('checked', false);
-                } else {
-                    $('#searchlines').prop('checked', false); $('#searchwords').prop('checked', true);
-                }
-                if (data.nearornot == 'T') {
-                    $('#wordisnear').prop('checked', true); $('#wordisnotnear').prop('checked', false);
-                } else {
-                    $('#wordisnear').prop('checked', false); $('#wordisnotnear').prop('checked', true);
-                }
-                });
-        $('#complexsearching').toggle();
-        });
-
-    $('#executesearch').click( function(){
-        var seeking = $('#wordsearchform').val();
-        var proximate = $("#proximatesearchform").val();
-        // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
-        if (seeking.slice(-1) == ' ') { seeking = seeking.slice(0,-1) + '%20'; }
-        if (proximate.slice(-1) == ' ') { proximate = proximate.slice(0,-1) + '%20'; }
-        document.getElementById('displayresults').innerHTML = '';
-        document.getElementById('searchsummary').innerHTML = '';
-
-        // the script additions can pile up: so first kill off any scripts we have already added
-        var bcsh = document.getElementById("browserclickscriptholder");
-        if (bcsh.hasChildNodes()) { bcsh.removeChild(bcsh.firstChild); }
-
-        var searchid = Date.now();
-
-        if (proximate == '') { var url = '/executesearch?seeking='+seeking+'&id='+searchid; }
-        else { var url = '/executesearch?seeking='+seeking+'&proximate='+proximate+'&id='+searchid; }
-
-        $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
-        // ws additions start
-        // $.getJSON('/progress?id='+searchid);
-        // var s = new WebSocket("ws://localhost:9876/");
-        // s.onmessage = function(e){ alert("got: " + e.data); }
-        // ws additions end
-         var i = setInterval(function(){
-            $.getJSON('/progress?id='+searchid, function(progress) {
-                displayprogress(progress);
-                if (progress['active'] == false ) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; }
-                });
-            }, 400);
-        });
-
-    function setoptions(sessionvar,value){
-	    $.getJSON('/setsessionvariable?'+sessionvar+'='+value, function (resultdata) {
-		 // do nothing special: the return exists but is not relevant
-		 // [{"searchsyntax": "R"}]
-	    });
-        }
-
-    function loadsearchresultsintodisplayresults(output) {
-        //  THE DATA YOU RECEIVE
-        //
-        //		output['title'] = thesearch
-        //		output['found'] = finds
-		//      output['js'] = findsjs
-        //		output['resultcount'] = resultcount
-        //		output['scope'] = str(len(indexedworklist))
-        //		output['searchtime'] = str(searchtime)
-        //		output['lookedfor'] = seeking
-        //		output['proximate'] = proximate
-        //		output['thesearch'] = thesearch
-        //		output['htmlsearch'] = htmlsearch
-        //		output['hitmax'] = hitmax
-        //		output['icandodates'] = yes/no
-        //		output['sortby'] = session['sortorder']
-        //		output['dmin'] = dmin
-        //		output['dmax'] = dmax
-
-        document.title = output['title'];
-
-        //
-        // THE SUMMARY INFORMATION
-        //
-
-        var summaryhtml = '';
-
-        summaryhtml += 'Sought '+output['htmlsearch']+'<br />\n';
-        if ( output['scope'] != '1') { summaryhtml += 'Searched '+output['scope']+' texts '; } else { summaryhtml += 'Searched 1 text '; }
-        summaryhtml += 'and found '+output['resultcount']+' passages';
-        summaryhtml += ' ('+output['searchtime']+'s)';
-        if (output['icandodates'] == 'yes' ) { if (output['dmin'] != '850 B.C.E.' || output['dmax'] != '1500 C.E.') { summaryhtml += '<br>Searched between '+output['dmin']+' and '+output['dmax']; } }
-        summaryhtml += '<br />Sorted by '+output['sortby'];
-        if (output['hitmax'] == 'true') { summaryhtml += '<br />[Search suspended: result cap reached.]';}
-
-        document.getElementById('searchsummary').innerHTML = summaryhtml;
-
-        //
-        // THE FINDS: each find should come as a lump of HTML formated by htmlifysearchfinds()
-        //
-
-        var dLen = output['found'].length;
-        var passagesreturned = '';
-        for (i = 0; i < dLen; i++) { passagesreturned += output['found'][i]; }
-
-        document.getElementById('displayresults').innerHTML = passagesreturned;
-
-        //
-        // JS UPDATE
-        // [http://stackoverflow.com/questions/9413737/how-to-append-script-script-in-javascript#9413803]
-        //
-
-        var browserclickscript = document.createElement("script");
-        browserclickscript.innerHTML = output['js'];
-        document.getElementById('browserclickscriptholder').appendChild(browserclickscript);
-    }
-
-    $('#searchlines').click( function(){ setoptions('searchscope', 'L'); });
-    $('#searchwords').click( function(){ setoptions('searchscope', 'W'); });
-
-    $('#wordisnear').click( function(){ setoptions('nearornot', 'T'); });
-    $('#wordisnotnear').click( function(){ setoptions('nearornot', 'F'); });
-
-    $( "#proximityspinner" ).spinner({
-        min: 1,
-        value: 1,
-        step: 1,
-        stop: function( event, ui ) {
-            var result = $('#proximityspinner').spinner('value');
-            setoptions('proximity', String(result));
-            },
-        spin: function( event, ui ) {
-            var result = $('#proximityspinner').spinner('value');
-            setoptions('proximity', String(result));
-            }
-        });
-
-
-    $('#browserclose').bind("click", function(){
-    		$("#browserdialog").hide();
-    		$('#browseback').unbind('click');
-    		$('#browseforward').unbind('click');
-    		}
-		);
-	});
-
-</script>
+<script src="{{ url_for('static', filename='documentready.js') }}"></script>
 
 {% include "moreinfo.html" ignore missing %}
 
-<div id="wordsearchfields" class="center">
-    <button id="executesearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Execute the search"><span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        {% if lookedfor == '' %}
-        <input id="wordsearchform" type="text" action="" method="" name="seeking" placeholder="(looking for...)" size=25>
-        {% else %}
-        <input id="wordsearchform" type="text" action="" method="" name="seeking" placeholder="(looking for...)" value="{{ lookedfor }}" size=25>
-        {% endif %}
-    <button id="extendsearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Complicate the search"><span class="ui-button-icon ui-icon ui-icon-arrow-1-e"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-    <br />
-    <div id="complexsearching">
-          <label for="wordisnear">near
-          <input type="radio" name="near" id="wordisnear" value="T"></label>
-          <label for="wordisnotnear">not near
-          <input type="radio" name="near" id="wordisnotnear" value="F"></label>
-            {% if proximate == '' %}
-            <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" size=25>
-            {% else %}
-            <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" value="{{ proximate }}" size=25>
-            {% endif %}
-          <input id="proximityspinner" type="text" value="1" width="25px;">
-          <label for="searchlines">lines
-          <input type="radio" name="searchfor" id="searchlines" value="L"></label>
-          <label for="searchwords">words
-          <input type="radio" name="searchfor" id="searchwords" value="W"></label>
-        </div>
-</div>
-<br />
+{% include "wordsearchfields.html" ignore missing %}
 
 <div id="lexicadialog">
     <div id="lexicadialogtext"></div>
 </div>
+
 <div id="browserdialog">
     <div id="browserdialogtext"></div>
     <div class="center">
-        <button id="browseback" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse backwards (click or press the &#8592; key)"><span class="ui-icon ui-icon-arrowthick-1-w">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-        <button id="browserclose" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Close the browser"><span class="ui-icon ui-icon-close">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-        <button id="browseforward" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse forwards (click or press the &#8594; key)"><span class="ui-icon ui-icon-arrowthick-1-e">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <button id="browseback" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse backwards (click or press the &#8592; key)">
+            <span class="ui-icon ui-icon-arrowthick-1-w">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <button id="browserclose" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Close the browser">
+            <span class="ui-icon ui-icon-close">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <button id="browseforward" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse forwards (click or press the &#8594; key)">
+            <span class="ui-icon ui-icon-arrowthick-1-e">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
     </div>
     <div id="parserdialog">&nbsp;</div>
     <div id="dictdialog">&nbsp;</div>
@@ -270,7 +49,9 @@ $(document).ready( function () {
 <div id="displayresults"></div>
 
 <div id="clickformoreinfo">
-     <button id="helpbutton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Help"><span class="ui-icon ui-icon-help"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+     <button id="helpbutton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Help">
+         <span class="ui-icon ui-icon-help"></span>
+         <span class="ui-button-icon-space"> </span>&nbsp;</button>
 </div>
 
 

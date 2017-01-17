@@ -339,6 +339,13 @@ worktitle {
 	font-size: 80%;
 }
 
+#activecorpora {
+	position: fixed;
+	top: 15px;
+	right: 15px;
+	font-size: 80%;
+}
+
 #moreinfotabs {
 	position: fixed;
 	top: 125px;
@@ -368,10 +375,6 @@ worktitle {
     padding: 10px;
     background-color: #fafafa; */
 }
-
-#savedprofiles {
-	font-size: 130%;
-	}
 
 #browserdialog {
 	position: fixed;

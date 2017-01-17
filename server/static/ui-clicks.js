@@ -65,28 +65,38 @@ function loadoptions() {
             }
         if (data.greekcorpus == 'yes') {
             $('#greekcorpus').prop('checked', true);
+            $('#grkisactive').show();
             } else {
             $('#greekcorpus').prop('checked', false);
+            $('#grkisactive').hide();
             }
         if (data.latincorpus == 'yes') {
             $('#latincorpus').prop('checked', true);
+            $('#latisactive').show();
             } else {
             $('#latincorpus').prop('checked', false);
+            $('#latisactive').hide();
             }
         if (data.inscriptioncorpus == 'yes') {
             $('#inscriptioncorpus').prop('checked', true);
+            $('#insisactive').show();
             } else {
             $('#inscriptioncorpus').prop('checked', false);
+            $('#insisactive').hide();
             }
         if (data.papyruscorpus == 'yes') {
             $('#papyruscorpus').prop('checked', true);
+            $('#ddpisactive').show();
             } else {
             $('#papyruscorpus').prop('checked', false);
+            $('#ddpisactive').hide();
             }
         if (data.christiancorpus == 'yes') {
             $('#christiancorpus').prop('checked', true);
+            $('#chrisactive').show();
             } else {
             $('#christiancorpus').prop('checked', false);
+            $('#chrisactive').hide();
             }
         });
 }
@@ -141,6 +151,8 @@ $('#morechoices').click( function() {
 $('#moretools').click( function() { $('#lexica').toggle(); });
 
 // not working as expected
+// supposed to clear out the other boxes and restore the placeholder; only clears the boxes
+
 //$('#parser').on('focus', function () {
 //    var $rl = $('#reverselexicon');
 //    var $lx = $('#lexicon');
@@ -278,8 +290,10 @@ $('#includeincerta').change(function () {
 $('#greekcorpus').change(function () {
     if(this.checked) {
         setoptions('greekcorpus', 'yes');
+        $('#grkisactive').show();
     } else {
         setoptions('greekcorpus', 'no');
+        $('#grkisactive').hide();
     }
     // because some items on your list just got purged?
     $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
@@ -289,8 +303,10 @@ $('#greekcorpus').change(function () {
 $('#latincorpus').change(function () {
     if(this.checked) {
         setoptions('latincorpus', 'yes');
+        $('#latisactive').show();
     } else {
         setoptions('latincorpus', 'no');
+        $('#latisactive').hide();
     }
     // because some items on your list just got purged?
     $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
@@ -299,8 +315,10 @@ $('#latincorpus').change(function () {
 $('#inscriptioncorpus').change(function () {
     if(this.checked) {
         setoptions('inscriptioncorpus', 'yes');
+        $('#insisactive').show();
     } else {
         setoptions('inscriptioncorpus', 'no');
+        $('#insisactive').hide();
     }
     // because some items on your list just got purged?
     $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
@@ -309,8 +327,10 @@ $('#inscriptioncorpus').change(function () {
 $('#papyruscorpus').change(function () {
     if(this.checked) {
         setoptions('papyruscorpus', 'yes');
+        $('#ddpisactive').show();
     } else {
         setoptions('papyruscorpus', 'no');
+        $('#ddpisactive').hide();
     }
     // because some items on your list just got purged?
     $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
@@ -319,8 +339,10 @@ $('#papyruscorpus').change(function () {
 $('#christiancorpus').change(function () {
     if(this.checked) {
         setoptions('christiancorpus', 'yes');
+        $('#chrisactive').show();
     } else {
         setoptions('christiancorpus', 'no');
+        $('#chrisactive').hide();
     }
     // because some items on your list just got purged?
     $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });

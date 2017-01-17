@@ -1,0 +1,32 @@
+<div id="activecorpora">
+    <div id="grkisactive">Ⓖ</div>
+    <div id="latisactive">Ⓛ</div>
+    <div id="ddpisactive">Ⓓ</div>
+    <div id="insisactive">Ⓘ</div>
+    <div id="chrisactive">Ⓒ</div>
+</div>
+
+<script>
+    $('#grkisactive').hide();
+    $('#latisactive').hide();
+    $('#ddpisactive').hide();
+    $('#insisactive').hide();
+    $('#chrisactive').hide();
+    {% for corpus in activecorpora %}
+        {% if corpus == 'greekcorpus' %}
+            $('#grkisactive').show();
+        {% endif %}
+        {% if corpus == 'latincorpus' %}
+            $('#latisactive').show();
+        {% endif %}
+        {% if corpus == 'papyruscorpus' %}
+            $('#ddpisactive').show();
+        {% endif %}
+        {% if corpus == 'inscriptioncorpus' %}
+            $('#insisactive').show();
+        {% endif %}
+        {% if corpus == 'christiancorpus' %}
+            $('#chrisactive').show();
+        {% endif %}
+    {% endfor %}
+</script>

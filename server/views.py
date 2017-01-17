@@ -63,7 +63,13 @@ def frontpage():
 
 	versionchecking(activelists, expectedsqltemplateversion)
 
-	page = render_template('search.html',activelists=activelists)
+	# check to see which dbs we search by default
+	activecorpora = []
+	for corpus in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']:
+		if session[corpus] == 'yes':
+			activecorpora.append(corpus)
+
+	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora)
 
 	return page
 
