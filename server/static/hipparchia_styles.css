@@ -339,11 +339,17 @@ worktitle {
 	font-size: 80%;
 }
 
-#activecorpora {
+#activeoptions {
 	position: fixed;
 	top: 15px;
 	right: 15px;
 	font-size: 80%;
+}
+
+#accentsactive, #accentsnotactive {
+    padding-left: 0px;
+    font-size: 120%;
+    font-weight: bold;
 }
 
 #moreinfotabs {

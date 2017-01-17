@@ -69,7 +69,7 @@ def frontpage():
 		if session[corpus] == 'yes':
 			activecorpora.append(corpus)
 
-	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora)
+	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora, accents=session['accentsmatter'])
 
 	return page
 

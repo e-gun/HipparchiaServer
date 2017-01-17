@@ -44,9 +44,13 @@ function loadoptions() {
         if (data.accentsmatter == 'no') {
             $('#accentsmatter_y').prop('checked', false);
             $('#accentsmatter_n').prop('checked', true);
+            $('#accentsnotactive').show();
+            $('#accentsactive').hide();
             } else {
             $('#accentsmatter_y').prop('checked', true);
             $('#accentsmatter_n').prop('checked', false);
+            $('#accentsactive').show();
+            $('#accentsnotactive').hide();
             }
         if (data.spuria == 'no') {
             $('#includespuria').prop('checked', false);
@@ -247,15 +251,8 @@ function setoptions(sessionvar,value){
 	    });
 }
 
-
-// artificial / misleading defaults
-$('#eitherlang').prop('checked', true);
-$('#accentsmatter_y').prop('checked', true);
-$('#searchforwords').prop('checked', true);
-$('#similarto').prop('checked', true);
-
-$('#accentsmatter_y').click( function(){ setoptions('accentsmatter', 'yes'); });
-$('#accentsmatter_n').click( function(){ setoptions('accentsmatter', 'no'); });
+$('#accentsmatter_y').click( function(){ setoptions('accentsmatter', 'yes'); $('#accentsactive').show(); $('#accentsnotactive').hide(); });
+$('#accentsmatter_n').click( function(){ setoptions('accentsmatter', 'no'); $('#accentsnotactive').show(); $('#accentsactive').hide(); });
 
 $('#includespuria').change(function () {
     if(this.checked) {
