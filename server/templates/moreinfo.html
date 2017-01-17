@@ -262,20 +262,34 @@
         <li><code>\s</code> whitespace: <code>\ssed\setiam\s</code> is a search for <code>' sed etiam '</code>.
             Please use the 'within 1 word' function instead of <code>\s</code> unless you know why you are not doing so.
     </ul>
-    Here are some examples that give you an idea of the sort of things that are possible. But some major caveats follow.
+    Here are some examples that give you an idea of the sort of things that are possible. But major caveats follow.
     <ul class="forexample">
         <li><code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each.</li>
         <li><code>t.t.t.t.t.</code> will find places where you have 't + anything' five times in a row.
             Your results will be <span class="lat">heres ei extitit Titius</span>; and <span class="lat">nec diu restitit: tota...</span>
             Note that the whitespace between <span class="lat">extitit</span> and <span class="lat">Titius</span> qualified
             as 'anything' in the first match. But you might have composed the search with something else in mind.</li>
+        <li><code>\s..$</code> could find all verses of Homer that end with a two letter word.<span class="emph">[*]</span></li>
+        <li><code>^[^αειουηω].\s</code> could find all verses of Homer that begin with a two letter word that does not itself start with
+            a vowel.<span class="emph">[*]</span>
+            Matches include: βῆ, μή, ϲῷ, τῇ, and τῷ.
+        </li>
         <li><code>[aeiou]m[aeiou]m[aeiou]m</code> will find words that have 'vowel + m + vowel + m + vowel + m'
             (i.e., <span class="lat">amomum, cardamomum, cinnamomum, pantomimum</span>) </li>
-        <li><code>\s..$</code> could find all verses of Homer that end with a two letter word.</li>
+        <li><code>(i.o.a.){2,}</code> will find 'i + anything + o + anything + a + anything' where this sequence can be found
+            two or more times in a row. Three phrases that have this structure are <span class="lat">Punico acido arido</span>,
+            <span class="lat">sollicito animo an</span> and <span class="lat">aequissimo animo ad</span>
+        </li>
+        <li><code>\sζ[^\s]*?ζ[^\s]*?ουσ</code> will find all words that start with a ζ and then have another ζ internally and
+            then have ουσ still later on. ζυμίζουϲα, ζιζανιώδουϲ, and Ζήζουϲ are all matches.<span class="emph">[*]</span>
+        </li>
         <li><span class="emph">[warning: see below]</span> <code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where
             <span class="lat">non solum... sed etiam...</span> bracket just a single word.</li>
     </ul>
-
+    <span class="emph">[*]</span>[Note: the automatic betacode feature will turn <code>\s</code> into <code>\ϲ</code>. so You can only execute
+            this search on the Greek authors if you have some other corpus turned on too.]
+    <br />
+    <br />
     Unfortunately a lot of swanky heavy duty regex searches do not make sense: the DB is organized as a collection of 'lines'.
     A search like
     <code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> probably only makes sense in the context of verse authors. This is because

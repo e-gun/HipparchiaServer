@@ -336,7 +336,12 @@ worktitle {
 	position: fixed;
 	bottom: 50px;
 	right: 15px;
-	font-size: 80%;
+	font-size: 100%;
+}
+
+#loadslots, #saveslots {
+    padding-left: 3px;
+    padding-bottom: 3px;
 }
 
 #activeoptions {
