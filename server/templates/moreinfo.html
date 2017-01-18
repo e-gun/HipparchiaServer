@@ -270,9 +270,13 @@
             Note that the whitespace between <span class="lat">extitit</span> and <span class="lat">Titius</span> qualified
             as 'anything' in the first match. But you might have composed the search with something else in mind.</li>
         <li><code>\s..$</code> could find all verses of Homer that end with a two letter word.<span class="emph">[*]</span></li>
-        <li><code>^[^αειουηω].\s</code> could find all verses of Homer that begin with a two letter word that does not itself start with
+        <li><code>^[^αειουηω][^\s]\s</code> could find all verses of Homer that begin with a two letter word that does not itself start with
             a vowel.<span class="emph">[*]</span>
-            Matches include: βῆ, μή, ϲῷ, τῇ, and τῷ.
+            Matches include: βῆ, μή, ϲῷ, τῇ, and τῷ. Unfortunately matches also include —※. That is, the editorial marks count as part
+            of the start of the line. 
+            The same search is a problem in dramatists for a similar reason. Punctuation is stripped out of
+            the searchable columns and that means that speakers like 'ΚΗ.' and 'ΔΙ.' become 'κη' and 'δι'. They will match the pattern. 
+            And, obviously, speaker attribution in dramas will be able to produce all sorts of possible matches with other searches too. 
         </li>
         <li><code>[aeiou]m[aeiou]m[aeiou]m</code> will find words that have 'vowel + m + vowel + m + vowel + m'
             (i.e., <span class="lat">amomum, cardamomum, cinnamomum, pantomimum</span>) </li>
