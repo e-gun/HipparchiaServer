@@ -308,6 +308,8 @@ def avoidlonglines(string, maxlen, splitval, stringlist=[]):
 	:return:
 	"""
 
+	breakcomeswithinamarkupseries = re.compile(r'^\s[^\s]{1,}>')
+
 	if len(string) < maxlen:
 		stringlist.append(string)
 		newstringhtml = splitval.join(stringlist)
@@ -317,7 +319,7 @@ def avoidlonglines(string, maxlen, splitval, stringlist=[]):
 		stopval = len(string)
 
 		for c in range(maxlen-1,-1,-1):
-			if searchzone[c] == ' ' and stop == False:
+			if searchzone[c] == ' ' and stop == False and re.search(breakcomeswithinamarkupseries, string[c:]) is None:
 				stop = True
 				stringlist.append(string[0:c])
 				stopval = c

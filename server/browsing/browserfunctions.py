@@ -14,7 +14,7 @@ import configparser
 
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
-from server.formatting_helper_functions import getpublicationinfo, insertcrossreferencerow, insertdatarow
+from server.formatting_helper_functions import getpublicationinfo, insertcrossreferencerow, insertdatarow, avoidlonglines
 from server import hipparchia
 
 config = configparser.ConfigParser()
@@ -88,8 +88,10 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	biblio = getpublicationinfo(workobject, cursor)
 	
 	citation = locusintocitation(workobject, focusline.locustuple())
-	
+
 	cv = '<span class="author">' + authorobject.shortname + '</span>, <span class="work">' + title + '</span><br />'
+	# author + title can get pretty long
+	cv = avoidlonglines(cv, 100, '<br />', [])
 	cv += '<span class="citation">'+citation+'</span>'
 	if date != '':
 		if int(date) > 1:
