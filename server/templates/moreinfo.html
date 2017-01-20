@@ -426,7 +426,8 @@
     <br />
     <br />
     As noted below, hardware is a factor, but since you are unlikely to change your hardware much, let's start by spending some
-    time looking at the software side of things.
+    time looking at the software side of things. But if your searches are about 50-100x slower than these examples, you should
+    read about hardware.
 
     <ul class="forexample">
         <li>Consider the following <span class="emph">simple searches</span>. Both searches are across all five databases. There are no restrictions applied at all.
@@ -527,9 +528,14 @@
     a virtual machine that has been assigned 4 cores and is running FreeBSD 11.
     The κεκωλυκατε example yields a difference between 0.97s unemulated and 12.79s when inside a virtual machine. In short, emulation is costly. And
     the main culprit is the emulated filesystem. Just see what happens if you pick ZFS instead of UFS...
-    Beyond running natively, fast hard drives and then more CPUs and then faster CPUs would be the order in which to seek to make speed gains.
+    A single word inside of just "Greek authors" takes 154s on a low end machine with a very slow 5400rpm 2.5" laptop
+    drive.
+    The processor load remains very low throughout: the culprit is the cheap hard drive. The same word can be found in 2.16s on the speedier machine:
+    Hipparchia is <span class="emph">50x-75x faster</span> with a faster drive.
+    A solid state drive makes a huge difference here (and just about everywhere else in your computing life). Consider investing in one.
+    In sum, fast drives and then more CPUs and then faster CPUs would be the order in which to seek to make speed gains.
     <span class="emph">Access time to the data and not processing time of the data is far and away the most important factor.</span>
-    Get Hipparchia's DB onto a solid state drive if possible. At a certain point a faster machine will end up just doing more waiting
+    Get Hipparchia's DB onto a solid state drive if at all possible. But at a certain point a faster machine will end up just doing more waiting
     for data to come to the processor. 2 or 3 workers on a moderately powerful machine with a fast drive is 85% as fast as a high end machine that in theory
     can do 600% more work per second.
 
