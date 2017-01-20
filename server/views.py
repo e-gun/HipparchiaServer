@@ -1122,7 +1122,7 @@ def dictsearch():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	seeking = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('term', ''))
+	seeking = re.sub(r'[!@#$|%()*\'\"\[\]]', '', request.args.get('term', ''))
 	seeking = seeking.lower()
 	seeking = re.sub('σ|ς', 'ϲ', seeking)
 	seeking = re.sub('v', 'u', seeking)
