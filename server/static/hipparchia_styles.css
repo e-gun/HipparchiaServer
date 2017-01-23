@@ -60,7 +60,7 @@
 
 .expanded {
 	letter-spacing: 0.14em;
-	 font-weight: 600;
+    font-weight: 600;
 	}
 
 .explanation {
@@ -335,54 +335,10 @@
 @blue: #288DD5;
 	
 @cyan: #15968D;
-	
-@font-face {
-	font-family: DejaVu;
-	src: url(/static/ttf/DejaVuSans-Bold.ttf);
-	font-weight: bold;
-	}
-
-@font-face {
-	font-family: DejaVu;
-	src: url(/static/ttf/DejaVuSans-BoldOblique.ttf);
-	font-style: italic;
-	font-weight: bold;
-	}
-
-@font-face {
-	font-family: DejaVu;
-	src: url(/static/ttf/DejaVuSans-Oblique.ttf);
-	font-style: italic;
-	}
 
 @font-face {
 	font-family: DejaVu;
 	src: url(/static/ttf/DejaVuSans.ttf);
-	}
-
-@font-face {
-	font-family: DejaVu;
-	src: url(/static/ttf/DejaVuSansCondensed.ttf);
-	font-stretch: condensed;
-	}
-
-@font-face {
-	font-family: DejaVu;
-	src: url(/static/ttf/DejaVuSansCondensed.ttf);
-	font-stretch: condensed;
-	}
-
-@font-face {
-	font-family: DejaVu;
-	src: url(/static/ttf/DejaVuSansCondensedOblique.ttf);
-	font-stretch: condensed;
-	font-style: italic;
-	}
-
-@font-face {
-	font-family: DejaVu;
-	src: url(/static/ttf/DejaVuSansExtraLight.ttf);
-	font-weight: 200;
 	}
 
 @green: #629655;

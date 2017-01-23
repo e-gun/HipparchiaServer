@@ -1102,15 +1102,20 @@ def findbyform():
 			count += 1
 			# {'50817064': [('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem dat pl</analysis>')], '50839960': [('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]}
 			theentry = differentwordsfound[w]
-			theword = theentry[0][0]
+			wordandform = theentry[0][0]
+			wordandform = wordandform.split(',')
+			form = wordandform[0]
+			try:
+				word = wordandform[1]
+			except:
+				word = form
 			thetransl = re.search(transfinder,theentry[0][1])
 			thetransl = thetransl.group(1)
 			analyses = [re.search(analysisfinder,x[1]) for x in theentry]
 			analysislist = [x.group(1) for x in analyses]
-			consolidatedentry = (count, theword, thetransl, analysislist)
+			consolidatedentry = {'count': count, 'form': form, 'word': word, 'transl': thetransl, 'anal': analysislist}
 			returnarray.append({'value': formateconsolidatedentry(consolidatedentry)})
 			entriestocheck.append(m[2])
-
 
 		unsiftedentries = []
 		for e in entriestocheck:

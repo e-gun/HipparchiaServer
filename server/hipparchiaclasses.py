@@ -17,7 +17,9 @@ class dbAuthor(object):
 	Initialized straight out of a DB read
 	"""
 
-	def __init__(self, universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date, converted_date, location):
+	def __init__(self, universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date,
+				 converted_date, location):
+
 		self.universalid = universalid
 		self.language = language
 		self.idxname = idxname
@@ -117,7 +119,8 @@ class dbOpus(object):
 	def citation(self):
 		if self.universalid[0:2] not in ['in', 'dp', 'ch']:
 			cit = []
-			levels = [self.levellabels_00, self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04, self.levellabels_05]
+			levels = [self.levellabels_00, self.levellabels_01, self.levellabels_02, self.levellabels_03,
+					  self.levellabels_04, self.levellabels_05]
 			for l in range(0,self.availablelevels):
 				cit.append(levels[l])
 			cit.reverse()
@@ -139,7 +142,10 @@ class dbWorkLine(object):
 	an object that corresponds to a db line
 	"""
 	
-	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations):
+	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value,
+				 level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words,
+				 annotations):
+
 		self.wkuinversalid = wkuinversalid[:10]
 		self.index = index
 		self.l5 = level_05_value
@@ -278,7 +284,8 @@ class dbWorkLine(object):
 		unformatted = re.sub(nbsp, r'', unformatted)
 		
 		return unformatted
-	
+
+
 	def showlinehtml(self):
 		"""
 

@@ -4,7 +4,7 @@ SECRET_KEY = 'yourkeyhereitshouldbelongandlooklikecryptographicgobbledygook'
 
 
 # Hipparchia debug variables: show DB locations of hits and/or the raw HTML markup inside the DB
-# there are no security implications here
+# there are no security implications here; these can only be set at launch; any changes require restarting HipparchiaServer
 DBDEBUGMODE = 'no'
 HTMLDEBUGMODE = 'no'
 

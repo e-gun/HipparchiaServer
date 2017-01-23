@@ -242,31 +242,31 @@ def formateconsolidatedentry(consolidatedentry):
 	"""
 	send me hit from findbyform() in the results browser
 
-	consolidatedentry = (count,theword, thetransl, analysislist)
+	consolidatedentry = {'count': count, 'form': wordandform[0], 'word': wordandform[1], 'transl': thetransl, 'anal': analysislist}
 
 	example:
-		(1, 'nūbibus,nubes', 'a cloud', ['fem abl pl', 'fem dat pl'])
-
+		{'count': 1, 'form': 'nūbibus', 'word': 'nubes', 'transl': 'a cloud', 'anal': ['fem abl pl', 'fem dat pl']}
 
 	:param entrydata:
 	:return:
 	"""
 
-	analysislist = consolidatedentry[3]
+	analysislist = consolidatedentry['anal']
 
-	analysis = '<p class="obsv">(' + str(consolidatedentry[0]) + ')&nbsp;'
-	analysis += '<span class="dictionaryform">' + consolidatedentry[1] + '</span>: &nbsp;'
+	analysis = '<p class="obsv">(' + str(consolidatedentry['count']) + ')&nbsp;'
+	wordandtranslation = '<span class="dictionaryform">'+consolidatedentry['word'] + '</span>'
+	if len(consolidatedentry['transl']) > 1:
+		wordandtranslation += ', '  + consolidatedentry['transl']
+
+	analysis += '<span class="dictionaryform">' + consolidatedentry['form'] + '</span> (from '+wordandtranslation+'): &nbsp;'
 	if len(analysislist) == 1:
-		analysis += '<span class="possibility">' + analysislist[0] + '</span>&nbsp;'
+		analysis += '\n<br /><span class="possibility">' + analysislist[0] + '</span>&nbsp;'
 	else:
 		count = 0
 		for a in analysislist:
 			count += 1
-			analysis += '[' + chr(count+96) + ']&nbsp;<span class="possibility">' + a + '</span>; '
-		analysis = analysis[:-2]
+			analysis += '\n<br />[' + chr(count+96) + ']&nbsp;<span class="possibility">' + a + '</span>'
 		analysis += '&nbsp;'
-	if len(consolidatedentry[2]) > 1:
-		analysis += '<span class="translation">('  + consolidatedentry[2] + ')</span>'
 
 	return analysis
 
