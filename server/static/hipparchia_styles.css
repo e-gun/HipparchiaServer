@@ -38,8 +38,9 @@
 	}
 
 .dictionaryform {
-	color: #556970;
+	color: #334750;
 	font-style: italic;
+	font-weight: bold;
 	}
 
 .dictionaryheading {
@@ -507,7 +508,7 @@ body {
 	margin: 10px 10px 10px 10px;
 	font-family: sans-serif;
 	color: #101010;
-	font-size: 80%;
+	font-size: 90%;
 	line-height: 1.4;
 	}
 

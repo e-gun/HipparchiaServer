@@ -18,7 +18,7 @@ from server.listsandsession import validateconfig
 from server.hipparchiaclasses import ProgressPoll
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
-from server.lexica.lexicaformatting import formateconsolidatedentry, entrysummary, dbquickfixes
+from server.lexica.lexicaformatting import formateconsolidatedgrammarentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
 from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
@@ -1114,7 +1114,7 @@ def findbyform():
 			analyses = [re.search(analysisfinder,x[1]) for x in theentry]
 			analysislist = [x.group(1) for x in analyses]
 			consolidatedentry = {'count': count, 'form': form, 'word': word, 'transl': thetransl, 'anal': analysislist}
-			returnarray.append({'value': formateconsolidatedentry(consolidatedentry)})
+			returnarray.append({'value': formateconsolidatedgrammarentry(consolidatedentry)})
 			entriestocheck[w] = word
 
 		# look up and format the dictionary entries
@@ -1126,7 +1126,6 @@ def findbyform():
 		else:
 			count = 0
 			for entry in entriestocheck:
-				print('entry',entry, entriestocheck[entry])
 				count += 1
 				entryashtml = browserdictionarylookup(count, entriestocheck[entry], dict, cur)
 				returnarray.append({'value': entryashtml})
@@ -1199,9 +1198,16 @@ def dictsearch():
 		for k in keys:
 			sortedfinds.append(finddict[k])
 
+		if len(sortedfinds) == 1:
+			# sending '0' to browserdictionarylookup() will hide the count number
+			count = -1
+		else:
+			count = 0
+
 		for entry in sortedfinds:
+			count += 1
 			returnarray.append(
-				{'value': browserdictionarylookup(entry[0], dict, cur) + '<hr style="border: 1px solid;" />'})
+				{'value': browserdictionarylookup(count, entry[0], dict, cur)})
 	else:
 		returnarray.append({'value':'[nothing found]'})
 

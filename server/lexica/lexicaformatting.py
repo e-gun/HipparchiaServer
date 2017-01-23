@@ -253,7 +253,7 @@ def formatdictionarysummary(summarydict):
 	return summary
 
 
-def formateconsolidatedentry(consolidatedentry):
+def formateconsolidatedgrammarentry(consolidatedentry):
 	"""
 	send me hit from findbyform() in the results browser
 
