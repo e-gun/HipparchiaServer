@@ -224,11 +224,14 @@ def htmlifysearchfinds(listoffinds):
 		htmlforthefind += '</browser>\n</locus>\n'
 
 		for ln in lines:
-			if hipparchia.config['DEBUGMODE'] == 'no':
-				htmlforthefind += '<span class="locus">' + ln.locus() + '</span>&nbsp;\n'
+			prefix = ''
+			if hipparchia.config['DBDEBUGMODE'] == 'yes':
+				prefix = '<smallcode>'+ln.universalid+'</smallcode>&nbsp;'
+			htmlforthefind += prefix+'<span class="locus">' + ln.locus() + '</span>&nbsp;\n'
+			if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
+				htmlforthefind += '<span class="foundtext">' + ln.showlinehtml() + '</span><br />\n'
 			else:
-				htmlforthefind += '<code>'+ln.universalid+'</code>&nbsp;<span class="locus">' + ln.locus() + '</span>&nbsp;\n'
-			htmlforthefind += '<span class="foundtext">' + ln.accented + '</span><br />\n'
+				htmlforthefind += '<span class="foundtext">' + ln.accented + '</span><br />\n'
 
 		resultsashtml.append(htmlforthefind)
 

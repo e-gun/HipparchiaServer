@@ -143,7 +143,11 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 				html = insertdatarow('Editor\'s date', 'textdate', date.group(1))
 				passage['ouputtable'].append(html)
 
-		columnb = insertparserids(line)
+		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
+			columnb = line.showlinehtml()
+		else:
+			columnb = insertparserids(line)
+
 		if line.index == focusline.index:
 			# linecount = numbersevery + 1
 			columna = line.locus()
@@ -157,16 +161,23 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			else:
 				# do not insert a line number or special formatting
 				columna = ''
-		if hipparchia.config['DEBUGMODE'] == 'no':
-			linehtml = '<tr class="browser"><td class="browsedline">' + columnb + '</td>'
-		else:
-			linehtml = '<tr class="browser"><td class="browsedline"><code>' + line.universalid + '&nbsp;&nbsp;&nbsp;</code>&nbsp;'+ columnb + '</td>'
+
+		prefix = ''
+		if hipparchia.config['DBDEBUGMODE'] == 'yes':
+			prefix = '<smallcode>' + line.universalid + '&nbsp;&nbsp;&nbsp;</smallcode>&nbsp;'
+		columnb = prefix+columnb
+
+		linehtml = '<tr class="browser"><td class="browsedline">' + columnb + '</td>'
 		linehtml += '<td class="browsercite">' + columna + '</td></tr>\n'
 		
 		passage['ouputtable'].append(linehtml)
 		previousline = line
-		
-	passage['ouputtable'].append('</table>\n')
+
+	if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
+		passage['ouputtable'].append('</table>\n<span class="emph">(NB: click-to-parse is off if HTMLDEBUGMODE is set)</span>')
+	else:
+		passage['ouputtable'].append('</table>\n')
+
 	
 	return passage
 

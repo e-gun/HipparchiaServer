@@ -279,7 +279,22 @@ class dbWorkLine(object):
 		
 		return unformatted
 	
-	
+	def showlinehtml(self):
+		"""
+
+		make HTML of marked up line visible
+
+		:return:
+		"""
+
+		markup = re.compile(r'(\<)(.*?)(\>)')
+		left = '<smallcode>&lt;'
+		right = '&gt;</smallcode>'
+
+		visiblehtml = re.sub(markup,left+r'\2'+right,self.accented)
+
+		return visiblehtml
+
 	def wordcount(self):
 		"""
 		return a wordcount

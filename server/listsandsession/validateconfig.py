@@ -66,14 +66,15 @@ def compareconfigs(template, model):
 
 	return differencedict
 
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 relativeshift='/../..'
 testresults = compareconfigs(dir_path + relativeshift + '/sample_config.py', dir_path + relativeshift + '/config.py')
 
 if len(testresults['missing']) > 0:
 	print('\n\nWARNING -- WARNING -- WARNING\n')
-	print('Hipparchia is almost certain to crash.')
-	print('Your active configuration needs to assign a value to the following:\n')
+	print('Hipparchia is almost certain to crash. If you are lucky it will merely spew error messages.')
+	print('Your configuration file ("config.py") needs to assign a value to the following:\n')
 	for m in testresults['missing']:
 		print('\t', m)
 	print('\nSee "sample_config.py" in the HipparchiaServer directory.\n\n')

@@ -664,6 +664,13 @@ sense {
 	margin-top: 20px;
 	}
 
+smallcode {
+	font-size: 85%;
+	color: #086db5;
+	font-family: DejaVuSansMono;
+	src: url(/static/ttf/DejaVuSansMono.ttf);
+	}
+
 span.lat {
 	font-style: italic;
 	font-color: #253940;
