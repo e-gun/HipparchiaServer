@@ -13,6 +13,8 @@ import re
 from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
+# this next validates when imported: it is not called later
+from server.listsandsession import validateconfig
 from server.hipparchiaclasses import ProgressPoll
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
