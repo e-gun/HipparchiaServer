@@ -138,13 +138,13 @@ def browserdictionarylookup(entry, dict, cursor):
 			if u'\u0304' in metrics or u'\u0306' in metrics:
 				cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
 			cleanedentry += '</p>\n'
-			a,s,q = entrysummary(definition, dict, translationlabel)
-			
-			if len(a) == 0 and len(s) == 0 and len(q) == 0:
+			summarydict = entrysummary(definition, dict, translationlabel)
+
+			if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
 				# this is basically just a gloss entry
 				cleanedentry += formatmicroentry(definition)
 			else:
-				cleanedentry += formatdictionarysummary(a, s, q)
+				cleanedentry += formatdictionarysummary(summarydict)
 				cleanedentry += grabheadmaterial(definition) + '<br />\n'
 				senses = grabsenses(definition)
 				if len(senses) > 0:

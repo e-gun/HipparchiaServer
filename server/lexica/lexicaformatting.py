@@ -87,9 +87,9 @@ def entrysummary(fullentry,lang, translationlabel):
 	q = soup.find_all('quote')
 	q[:] = [value.string for value in q]
 
-	summary = (a,s,q)
+	summarydict = {'authors':a, 'senses': s, 'quotes':q}
 
-	return summary
+	return summarydict
 
 
 def grabheadmaterial(fullentry):
@@ -212,7 +212,7 @@ def deabbreviateauthors(authorabbr, lang):
 	return author
 
 
-def formatdictionarysummary(authors,senses,quotes):
+def formatdictionarysummary(summarydict):
 	"""
 	turn three lists into html formatting for the summary material that will be inserted at the top of a dictionary entry
 	:param authors:
@@ -220,19 +220,24 @@ def formatdictionarysummary(authors,senses,quotes):
 	:param quotes:
 	:return:
 	"""
+
+	authors = summarydict['authors']
+	senses = summarydict['senses']
+	quotes = summarydict['quotes']
+
 	summary = ''
 	if len(authors) > 0:
 		summary += '<br \>\n<div class="authorsummary"><span class="highlight">Used by:</span><br \>\n'
 		for a in authors:
-			summary += '<span class="author">'+a+'</span><br \>\n'
+			summary += '<span class="authorsum">'+a+'</span><br \>\n'
 	if len(senses) > 0:
 		summary += '</div>\n<br \><div class="sensesummary"><span class="highlight">Senses:</span><br \>\n'
 		for s in senses:
-			summary += '<span class="sense">' + s + '</span><br \>\n'
+			summary += '<span class="sensesum">' + s + '</span><br \>\n'
 	if len(quotes) > 0:
 		summary += '</div>\n<br \><div class="quotesummary"><span class="highlight">Phrases:</span><br \>\n'
 		for q in quotes:
-			summary += '<span class="quote">' + q + '</span><br \>\n'
+			summary += '<span class="quotesum">' + q + '</span><br \>\n'
 	summary += '</div><br \><br \>\n<span class="highlight">Full entry:</span><br \>'
 
 	return summary

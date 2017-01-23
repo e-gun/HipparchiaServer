@@ -2,6 +2,10 @@
 	font-size: 85%;
 	}
 
+.authorsum, .quotesum, .sensesum {
+    padding-left: 5px;
+    }
+
 .browsercite {
 	color: #556970;
 	font-weight: normal;
