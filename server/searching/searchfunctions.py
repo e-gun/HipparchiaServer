@@ -71,7 +71,12 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 		LIMIT 250
 
 	"""
-	mylimit = ' LIMIT ' + str(session['maxresults'])
+
+	if session['onehit'] == 'no':
+		mylimit = ' LIMIT ' + str(session['maxresults'])
+	else:
+		mylimit = ' LIMIT 1'
+
 	if session['accentsmatter'] == 'yes':
 		columna = 'marked_up_line'
 	else:
@@ -126,7 +131,11 @@ def substringsearch(seeking, cursor, workdbname, authors):
 	:return:
 	"""
 	
-	mylimit = 'LIMIT ' + str(session['maxresults'])
+	if session['onehit'] == 'no':
+		mylimit = ' LIMIT ' + str(session['maxresults'])
+	else:
+		mylimit = ' LIMIT 1'
+
 	if session['accentsmatter'] == 'yes':
 		# columna = 'marked_up_line'
 		column = 'accented_line'

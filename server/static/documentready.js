@@ -100,6 +100,7 @@ $(document).ready( function () {
         //		output['thesearch'] = thesearch
         //		output['htmlsearch'] = htmlsearch
         //		output['hitmax'] = hitmax
+        //      output['onehit'] = session['onehit']
         //		output['icandodates'] = yes/no
         //		output['sortby'] = session['sortorder']
         //		output['dmin'] = dmin
@@ -117,7 +118,8 @@ $(document).ready( function () {
         if ( output['scope'] != '1') { summaryhtml += 'Searched '+output['scope']+' texts '; } else { summaryhtml += 'Searched 1 text '; }
         summaryhtml += 'and found '+output['resultcount']+' passages';
         summaryhtml += ' ('+output['searchtime']+'s)';
-        if (output['icandodates'] == 'yes' ) { if (output['dmin'] != '850 B.C.E.' || output['dmax'] != '1500 C.E.') { summaryhtml += '<br>Searched between '+output['dmin']+' and '+output['dmax']; } }
+        if (output['icandodates'] == 'yes' ) { if (output['dmin'] != '850 B.C.E.' || output['dmax'] != '1500 C.E.') { summaryhtml += '<br />Searched between '+output['dmin']+' and '+output['dmax']; } }
+        if (output['onehit'] == 'yes') { summaryhtml += '<br />Only allowing one match per author or work'; }
         summaryhtml += '<br />Sorted by '+output['sortby'];
         if (output['hitmax'] == 'true') { summaryhtml += '<br />[Search suspended: result cap reached.]';}
 

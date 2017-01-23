@@ -53,6 +53,7 @@ def sessionvariables():
 		session['spuria'] = hipparchia.config['DEFAULTSPURIA']
 		session['varia'] = hipparchia.config['DEFAULTVARIA']
 		session['incerta'] = hipparchia.config['DEFAULTINCERTA']
+		session['onehit'] = hipparchia.config['DEFAULTONEHIT']
 
 	return
 
@@ -84,7 +85,8 @@ def modifysessionvar(param,val):
 		'papyruscorpus',
 		'christiancorpus',
 		'varia',
-		'incerta'
+		'incerta',
+		'onehit'
 		]
 
 	if param in availableoptions:
@@ -92,7 +94,7 @@ def modifysessionvar(param,val):
 		# print('param = val:',param,session[param])
 
 	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
-				   'varia', 'incerta', 'spuria', 'accentsmatter']:
+				   'varia', 'incerta', 'spuria', 'accentsmatter', 'onehit']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 

@@ -261,6 +261,7 @@ def executesearch():
 		output['thesearch'] = thesearch
 		output['htmlsearch'] = htmlsearch
 		output['hitmax'] = hitmax
+		output['onehit'] = session['onehit']
 		output['sortby'] = sortorderdecoder[session['sortorder']]
 		output['dmin'] = dmin
 		output['dmax'] = dmax
@@ -289,6 +290,7 @@ def executesearch():
 		else:
 			output['icandodates'] = 'no'
 		output['sortby'] = session['sortorder']
+		output['onehit'] = session['onehit']
 
 	output = json.dumps(output)
 
