@@ -119,7 +119,7 @@ $(document).ready( function () {
         summaryhtml += 'and found '+output['resultcount']+' passages';
         summaryhtml += ' ('+output['searchtime']+'s)';
         if (output['icandodates'] == 'yes' ) { if (output['dmin'] != '850 B.C.E.' || output['dmax'] != '1500 C.E.') { summaryhtml += '<br />Searched between '+output['dmin']+' and '+output['dmax']; } }
-        if (output['onehit'] == 'yes') { summaryhtml += '<br />Only allowing one match per author or work'; }
+        if (output['onehit'] == 'yes') { summaryhtml += '<br />Only allowing one match per item searched (either a whole author or a specified work)'; }
         summaryhtml += '<br />Sorted by '+output['sortby'];
         if (output['hitmax'] == 'true') { summaryhtml += '<br />[Search suspended: result cap reached.]';}
 
