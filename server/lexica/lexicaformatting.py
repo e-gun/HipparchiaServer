@@ -100,10 +100,7 @@ def grabheadmaterial(fullentry):
 	"""
 	heading = re.compile(r'(.*?)\<sense')
 	head = re.search(heading,fullentry)
-	
-	orth = re.compile(r'<orth.*?>(.*?)</orth>')
-	ohead = re.search(orth,fullentry)
-	
+
 	try:
 		return head.group(0)
 	except:

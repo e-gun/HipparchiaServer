@@ -1077,6 +1077,12 @@ def findbyform():
 	entriestocheck = []
 	try:
 		matches = re.findall(possible, analysis[0])
+	except:
+		matches = None
+		returnarray = [{'value': '<br />[nothing found]'}, {'entries': '[not found]'}]
+
+	if matches:
+		# prepare the results of the morphological search
 		differentwordsfound = {}
 		for m in matches:
 			if m[3] not in differentwordsfound:
@@ -1096,7 +1102,7 @@ def findbyform():
 			thetransl = thetransl.group(1)
 			analyses = [re.search(analysisfinder,x[1]) for x in theentry]
 			analysislist = [x.group(1) for x in analyses]
-			consolidatedentry = (count,theword, thetransl, analysislist)
+			consolidatedentry = (count, theword, thetransl, analysislist)
 			returnarray.append({'value': formateconsolidatedentry(consolidatedentry)})
 			entriestocheck.append(m[2])
 
@@ -1111,11 +1117,9 @@ def findbyform():
 			unsiftedentries.append(e)
 		siftedentries = tidyuplist(unsiftedentries)
 
+		# look up and format the dictionary entries
 		for entry in siftedentries:
 			returnarray.append({'value': browserdictionarylookup(entry, dict, cur)})
-
-	except:
-		returnarray = [{'value': '[not found]'}, {'entries': '[not found]'} ]
 
 	returnarray = [{'observed':word}] + returnarray
 
