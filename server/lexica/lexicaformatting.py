@@ -225,19 +225,29 @@ def formatdictionarysummary(summarydict):
 	senses = summarydict['senses']
 	quotes = summarydict['quotes']
 
+	sections = { 'authors': { 'items': authors, 'classone': 'authorsummary', 'classtwo': 'authorsum', 'label': 'Used by'},
+				 'quotes': {'items': quotes, 'classone': 'quotessummary', 'classtwo': 'quotesum', 'label': 'Quotes'},
+				 'senses': {'items': senses, 'classone': 'sensesummary', 'classtwo': 'sensesum', 'label': 'Senses'}
+				 }
+
 	summary = ''
-	if len(authors) > 0:
-		summary += '<br \>\n<div class="authorsummary"><span class="highlight">Used by:</span><br \>\n'
-		for a in authors:
-			summary += '<span class="authorsum">'+a+'</span><br \>\n'
-	if len(senses) > 0:
-		summary += '</div>\n<br \><div class="sensesummary"><span class="highlight">Senses:</span><br \>\n'
-		for s in senses:
-			summary += '<span class="sensesum">' + s + '</span><br \>\n'
-	if len(quotes) > 0:
-		summary += '</div>\n<br \><div class="quotesummary"><span class="highlight">Phrases:</span><br \>\n'
-		for q in quotes:
-			summary += '<span class="quotesum">' + q + '</span><br \>\n'
+
+	for section in ['authors', 'senses', 'quotes']:
+		sec = sections[section]
+		items = sec['items']
+		classone = sec['classone']
+		classtwo = sec['classtwo']
+		label = sec['label']
+		if len(items) > 0:
+			summary += '<div class="'+classone+'"><span class="highlight">'+label+'</span><br \>\n'
+		if len(items) == 1:
+			summary += '<span class="'+classtwo+'">' + items[0] + '</span><br \>\n'
+		else:
+			count = 0
+			for i in items:
+				count += 1
+				summary += '<span class="'+classtwo+'">('+str(count)+')&nbsp;' + i + '</span><br \>\n'
+
 	summary += '</div><br \><br \>\n<span class="highlight">Full entry:</span><br \>'
 
 	return summary

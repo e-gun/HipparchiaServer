@@ -91,7 +91,7 @@ example:
 """
 
 
-def browserdictionarylookup(entry, dict, cursor):
+def browserdictionarylookup(count, entry, dict, cursor):
 	"""
 	look up a word and return an htlm version of its dictionary entry
 	:param entry:
@@ -133,27 +133,27 @@ def browserdictionarylookup(entry, dict, cursor):
 	cleanedentry = ''
 	
 	if definition != '' and type != 'gloss':
-		try:
-			cleanedentry += '<br />\n<p class="dictionaryheading">'+entry
-			if u'\u0304' in metrics or u'\u0306' in metrics:
-				cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
-			cleanedentry += '</p>\n'
-			summarydict = entrysummary(definition, dict, translationlabel)
+		if count == 0:
+			cleanedentry += '<hr /><p class="dictionaryheading">'+entry
+		else:
+			cleanedentry += '<hr /><p class="dictionaryheading">(' + str(count) + ')&nbsp;' + entry
+		if u'\u0304' in metrics or u'\u0306' in metrics:
+			cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
+		cleanedentry += '</p>\n'
+		summarydict = entrysummary(definition, dict, translationlabel)
 
-			if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
-				# this is basically just a gloss entry
-				cleanedentry += formatmicroentry(definition)
+		if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
+			# this is basically just a gloss entry
+			cleanedentry += formatmicroentry(definition)
+		else:
+			cleanedentry += formatdictionarysummary(summarydict)
+			cleanedentry += grabheadmaterial(definition) + '<br />\n'
+			senses = grabsenses(definition)
+			if len(senses) > 0:
+				for n in senses:
+					cleanedentry += n
 			else:
-				cleanedentry += formatdictionarysummary(summarydict)
-				cleanedentry += grabheadmaterial(definition) + '<br />\n'
-				senses = grabsenses(definition)
-				if len(senses) > 0:
-					for n in senses:
-						cleanedentry += n
-				else:
-					cleanedentry += formatmicroentry(definition)
-		except:
-			print('dictionary entry trouble with',entry)
+				cleanedentry += formatmicroentry(definition)
 	elif definition != '' and type == 'gloss':
 		cleanedentry += '<br />\n<p class="dictionaryheading">' + entry + '<span class="metrics">[gloss]</span></p>\n'
 		cleanedentry += formatgloss(definition)

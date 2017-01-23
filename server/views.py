@@ -1079,7 +1079,7 @@ def findbyform():
 	# 1 = #, 2 = word, 4 = body, 3 = xref
 
 	returnarray = []
-	entriestocheck = []
+	entriestocheck = {}
 	try:
 		matches = re.findall(possible, analysis[0])
 	except:
@@ -1115,26 +1115,26 @@ def findbyform():
 			analysislist = [x.group(1) for x in analyses]
 			consolidatedentry = {'count': count, 'form': form, 'word': word, 'transl': thetransl, 'anal': analysislist}
 			returnarray.append({'value': formateconsolidatedentry(consolidatedentry)})
-			entriestocheck.append(m[2])
-
-		unsiftedentries = []
-		for e in entriestocheck:
-			# print('entry:',entry)
-			# entry: χώρᾱϲ,χώρα
-			e = e.split(',')
-			e = e[-1]
-			e = re.sub(r'#(\d{1,})',r' (\1)',e)
-			unsiftedentries.append(e)
-		siftedentries = tidyuplist(unsiftedentries)
+			entriestocheck[w] = word
 
 		# look up and format the dictionary entries
-		for entry in siftedentries:
-			returnarray.append({'value': browserdictionarylookup(entry, dict, cur)})
+
+		if len(entriestocheck) == 1:
+			entry = entriestocheck.popitem()
+			entryashtml = browserdictionarylookup(0, entry[1], dict, cur)
+			returnarray.append({'value': entryashtml})
+		else:
+			count = 0
+			for entry in entriestocheck:
+				print('entry',entry, entriestocheck[entry])
+				count += 1
+				entryashtml = browserdictionarylookup(count, entriestocheck[entry], dict, cur)
+				returnarray.append({'value': entryashtml})
 
 	returnarray = [{'observed':word}] + returnarray
 
-	if len(entriestocheck) > 0:
-		returnarray[0]['trylookingunder'] = entriestocheck[0]
+	# if len(entriestocheck) > 0:
+	# 	returnarray[0]['trylookingunder'] = entriestocheck[0]
 
 	returnarray = json.dumps(returnarray)
 
