@@ -16,7 +16,7 @@ from server import hipparchia
 from server.hipparchiaclasses import ProgressPoll
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
-from server.lexica.lexicaformatting import parsemorphologyentry, entrysummary, dbquickfixes
+from server.lexica.lexicaformatting import formateconsolidatedentry, entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
 from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
@@ -1077,9 +1077,29 @@ def findbyform():
 	entriestocheck = []
 	try:
 		matches = re.findall(possible, analysis[0])
+		differentwordsfound = {}
 		for m in matches:
-			returnarray.append({'value': parsemorphologyentry(m)})
+			if m[3] not in differentwordsfound:
+				differentwordsfound[m[3]] = [(m[2],m[4])]
+			else:
+				differentwordsfound[m[3]].append((m[2],m[4]))
+		# the top part: just the analyses
+		transfinder = re.compile(r'<transl>(.*?)</transl>')
+		analysisfinder = re.compile(r'<analysis>(.*?)</analysis>')
+		count = 0
+		for w in differentwordsfound:
+			count += 1
+			# {'50817064': [('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem dat pl</analysis>')], '50839960': [('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]}
+			theentry = differentwordsfound[w]
+			theword = theentry[0][0]
+			thetransl = re.search(transfinder,theentry[0][1])
+			thetransl = thetransl.group(1)
+			analyses = [re.search(analysisfinder,x[1]) for x in theentry]
+			analysislist = [x.group(1) for x in analyses]
+			consolidatedentry = (count,theword, thetransl, analysislist)
+			returnarray.append({'value': formateconsolidatedentry(consolidatedentry)})
 			entriestocheck.append(m[2])
+
 
 		unsiftedentries = []
 		for e in entriestocheck:

@@ -241,23 +241,35 @@ def formatdictionarysummary(authors,senses,quotes):
 	return summary
 
 
-def parsemorphologyentry(entrydata):
+def formateconsolidatedentry(consolidatedentry):
 	"""
 	send me hit from findbyform() in the results browser
 
-	possible = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value>(.*?)</possibility_\d{1,2}>')
-	1 = #, 2 = word, 4 = body, 3 = xref
+	consolidatedentry = (count,theword, thetransl, analysislist)
 
-	this will look like: '<possibility_1>ἔπαλξιϲ<xref_value>39591208</xref_value><transl>means of defence</transl><analysis>fem nom/voc pl (attic epic)</analysis></possibility_1>\n<possibility_2>ἔπαλξιϲ<xref_value>39591208</xref_value><transl>means of defence</transl><analysis>fem nom/acc pl (attic)</analysis></possibility_2>\n'
-	I will break it up into its components
+	example:
+		(1, 'nūbibus,nubes', 'a cloud', ['fem abl pl', 'fem dat pl'])
+
 
 	:param entrydata:
 	:return:
 	"""
 
-	analysis = '<p class="obsv">('+entrydata[1]+')&nbsp;<span class="dictionaryform" id="' + entrydata[2] + '">' + entrydata[2] + '</span>'
-	analysis +=	'<br /><possibility id="possibility_' + entrydata[1] + '">'+ entrydata[4]+'<br /></possibility></p>\n'
-	# looks kinda icky, buy you should fix this in the db entries themselves to get rid of all the lexica via tabs
+	analysislist = consolidatedentry[3]
+
+	analysis = '<p class="obsv">(' + str(consolidatedentry[0]) + ')&nbsp;'
+	analysis += '<span class="dictionaryform">' + consolidatedentry[1] + '</span>: &nbsp;'
+	if len(analysislist) == 1:
+		analysis += '<span class="possibility">' + analysislist[0] + '</span>&nbsp;'
+	else:
+		count = 0
+		for a in analysislist:
+			count += 1
+			analysis += '[' + chr(count+96) + ']&nbsp;<span class="possibility">' + a + '</span>; '
+		analysis = analysis[:-2]
+		analysis += '&nbsp;'
+	if len(consolidatedentry[2]) > 1:
+		analysis += '<span class="translation">('  + consolidatedentry[2] + ')</span>'
 
 	return analysis
 

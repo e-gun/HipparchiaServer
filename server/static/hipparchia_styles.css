@@ -35,6 +35,7 @@
 
 .dictionaryform {
 	color: #556970;
+	font-style: italic;
 	}
 
 .dictionaryheading {
@@ -185,7 +186,8 @@
 	}
 
 .obsv {
-	text-indent: -5px;
+	text-indent: -10px;
+	padding-right: -10px;
 	}
 
 .overline {
@@ -212,6 +214,9 @@
 	font-weight: bold;
 	font-style: italic;
 	}
+
+.possibility {
+    }
 
 .progress {
 	font-weight: bold;
@@ -296,6 +301,11 @@
 	text-style: italic;
 	text-color: 000088;
 	}
+
+.translation {
+    font-size: 85%;
+    text-style: italic;
+    }
 
 .ui-button {
 	margin-bottom: 3px;
