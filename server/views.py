@@ -1058,8 +1058,8 @@ def findbyform():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	word = request.args.get('word', '')
-	word = re.sub('[\W_|]+', '',word)
+	observed = request.args.get('word', '')
+	word = re.sub('[\W_|]+', '',observed)
 	word = removegravity(word)
 	# python seems to know how to do this with greek...
 	word = word.lower()
@@ -1103,6 +1103,7 @@ def findbyform():
 			# {'50817064': [('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem dat pl</analysis>')], '50839960': [('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]}
 			theentry = differentwordsfound[w]
 			wordandform = theentry[0][0]
+			print('wordandform',wordandform)
 			wordandform = wordandform.split(',')
 			form = wordandform[0]
 			try:
@@ -1113,7 +1114,7 @@ def findbyform():
 			thetransl = thetransl.group(1)
 			analyses = [re.search(analysisfinder,x[1]) for x in theentry]
 			analysislist = [x.group(1) for x in analyses]
-			consolidatedentry = {'count': count, 'form': form, 'word': word, 'transl': thetransl, 'anal': analysislist}
+			consolidatedentry = {'count': count, 'form': observed, 'word': word, 'transl': thetransl, 'anal': analysislist}
 			returnarray.append({'value': formateconsolidatedgrammarentry(consolidatedentry)})
 			entriestocheck[w] = word
 
@@ -1458,7 +1459,3 @@ def clearsession():
 
 	session.clear()
 	return redirect(url_for('frontpage'))
-
-
-
-
