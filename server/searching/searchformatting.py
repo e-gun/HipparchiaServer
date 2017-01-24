@@ -24,7 +24,7 @@ def cleansearchterm(seeking):
 	:param searchterm:
 	:return:
 	"""
-	
+
 	seeking = re.sub('σ|ς', 'ϲ', seeking)
 	if session['accentsmatter'] == 'no':
 		seeking = re.sub('v', 'u', seeking)
@@ -35,14 +35,14 @@ def cleansearchterm(seeking):
 	return seeking
 
 
-def highlightsearchterm(lineobject,searchterm, spanname):
+def highlightsearchterm(lineobject, searchterm, spanname):
 	"""
 	html markup for the search term in the line
 	in order to highlight a polytonic word that you found via a unaccented search you need to convert:
 		ποταμον
 	into:
 		((π|Π)(ο|ὀ|ὁ|ὂ|ὃ|ὄ|ὅ|ό|ὸ|Ο|Ὀ|Ὁ|Ὂ|Ὃ|Ὄ|Ὅ)(τ|Τ)(α|ἀ|ἁ|ἂ|ἃ|ἄ|ἅ|ἆ|ἇ|ᾀ|ᾁ|ᾂ|ᾃ|ᾄ|ᾅ|ᾆ|ᾇ|ᾲ|ᾳ|ᾴ|ᾶ|ᾷ|ᾰ|ᾱ|ὰ|ά|ᾈ|ᾉ|ᾊ|ᾋ|ᾌ|ᾍ|ᾎ|ᾏ|Ἀ|Ἁ|Ἂ|Ἃ|Ἄ|Ἅ|Ἆ|Ἇ|Α)(μ|Μ)ό(ν|Ν))
-	
+
 	:param lineobject:
 	:param searchterm:
 	:param spanname:
@@ -97,21 +97,24 @@ def highlightsearchterm(lineobject,searchterm, spanname):
 		except:
 			pass
 		accentedsearch += c
-	#accentedsearch = '(^|)('+accentedsearch+')($|)'
+	# accentedsearch = '(^|)('+accentedsearch+')($|)'
 	accentedsearch = '(' + accentedsearch + ')'
-	
-	find = re.search(accentedsearch,line)
+
+	find = re.search(accentedsearch, line)
 	try:
-		newline = line[0:find.start()]+'<span class="'+spanname+'">'+find.group()+'</span>'+line[find.end():]
+		newline = line[0:find.start()] + '<span class="' + spanname + '">' + find.group() + '</span>' + line[
+																										find.end():]
 	except:
 		# the find was almost certainly a hyphenated last word: 'pro-' instead of 'profuit'
 		hyph = lineobject.hyphenated
 		find = re.search(accentedsearch, hyph)
 		try:
-			newline = line + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;'+hyph[0:find.start()]+'<span class="'+spanname+'">'+find.group()+'</span>'+hyph[find.end():]+'&nbsp;)'
+			newline = line + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;' + hyph[
+																				   0:find.start()] + '<span class="' + spanname + '">' + find.group() + '</span>' + hyph[
+																																									find.end():] + '&nbsp;)'
 		except:
 			pass
-			# print('nofind',accentedsearch, line, lineobject.lastword('contents'))
+		# print('nofind',accentedsearch, line, lineobject.lastword('contents'))
 
 	return newline
 
@@ -134,11 +137,11 @@ def aggregatelines(firstline, lastline, cursor, audbname):
 	data = (firstline, lastline)
 	cursor.execute(query, data)
 	lines = cursor.fetchall()
-	
+
 	lineobjects = []
 	for dbline in lines:
 		lineobjects.append(dblineintolineobject(dbline))
-	
+
 	aggregate = ''
 	if session['accentsmatter'] == 'yes':
 		for line in lineobjects:
@@ -146,9 +149,9 @@ def aggregatelines(firstline, lastline, cursor, audbname):
 	else:
 		for line in lineobjects:
 			aggregate += line.stripped + ' '
-	
+
 	aggregate = re.sub(r'\s\s', r' ', aggregate)
-	
+
 	return aggregate
 
 
@@ -158,13 +161,13 @@ def formatauthinfo(authorobject):
 	:param authorobject:
 	:return:
 	"""
-	n = '<span class="emph">'+authorobject.shortname+'</span>'
+	n = '<span class="emph">' + authorobject.shortname + '</span>'
 	d = '[id: ' + authorobject.universalid[2:] + ']<br />'
 	if authorobject.genres is not None and authorobject.genres != '':
 		g = 'classified among: ' + authorobject.genres + '; '
 	else:
 		g = ''
-	
+
 	if authorobject.universalid[0:2] in ['gr', 'in', 'dp']:
 		try:
 			if float(authorobject.converted_date) == 2000:
@@ -176,17 +179,17 @@ def formatauthinfo(authorobject):
 				fl += ' (derived from "' + authorobject.recorded_date + '")'
 			elif float(authorobject.converted_date) < 0:
 				fl = 'assigned to approx date: ' + str(authorobject.converted_date)[1:] + ' B.C.E.'
-				fl += ' (derived from "'+authorobject.recorded_date+'")'
+				fl += ' (derived from "' + authorobject.recorded_date + '")'
 		except:
 			# there was no f and so no int(f)
 			fl = ''
 	else:
 		fl = ''
-	
+
 	authinfo = n + '&nbsp;' + d + '&nbsp;' + g + fl
-	
+
 	return authinfo
-	
+
 
 def woformatworkinfo(workobject):
 	"""
@@ -195,19 +198,19 @@ def woformatworkinfo(workobject):
 	:param workinfo:
 	:return:
 	"""
-	
+
 	p = formatpublicationinfo(workobject.publication_info)
-	
-	n = '('+workobject.universalid[-3:]+')&nbsp;'
-	t = '<span class="title">'+workobject.title+'</span> '
-	
+
+	n = '(' + workobject.universalid[-3:] + ')&nbsp;'
+	t = '<span class="title">' + workobject.title + '</span> '
+
 	if workobject.workgenre is not None:
-		g = '['+workobject.workgenre+']&nbsp;'
+		g = '[' + workobject.workgenre + ']&nbsp;'
 	else:
 		g = ''
-	
+
 	if workobject.wordcount is not None:
-		c = '['+format(workobject.wordcount, ',d')+' wds]'
+		c = '[' + format(workobject.wordcount, ',d') + ' wds]'
 	else:
 		c = ''
 
@@ -227,33 +230,33 @@ def woformatworkinfo(workobject):
 		d = ''
 
 	if len(p) > 0:
-		workinfo = n+t+g+c+d+'<br />'+p+'<br />'
+		workinfo = n + t + g + c + d + '<br />' + p + '<br />'
 	else:
-		workinfo = n + t + g + c + d+'<br />'
+		workinfo = n + t + g + c + d + '<br />'
 
 	return workinfo
 
 
-def formatauthorandworkinfo(authorname,workobject):
+def formatauthorandworkinfo(authorname, workobject):
 	"""
 	dbdata into html
 	send me: authorname + universalid, title, workgenre, wordcount
 	:param workinfo:
 	:return:
 	"""
-	
+
 	a = authorname
 	t = '<span class="italic">' + workobject.title + '</span> '
-	
+
 	c = workobject.wordcount
-	
+
 	if c is not None:
 		c = '[' + format(c, ',d') + ' wds]'
 	else:
 		c = ''
-		
-	authorandworkinfo = a + ', '+ t + c + '<br />\n'
-		
+
+	authorandworkinfo = a + ', ' + t + c + '<br />\n'
+
 	return authorandworkinfo
 
 
@@ -267,14 +270,14 @@ def sortandunpackresults(hits):
 	:param hits:
 	:return: an ordered set of tuples [(wkid1, result1), (wkid1,result2), (wkid2, result1), ...]
 	"""
-	
+
 	results = []
 	listpositions = sorted(hits.keys())
-	
+
 	for position in listpositions:
 		found = hits[position]
 		for find in found[1]:
-			results.append((found[0],find))
+			results.append((found[0], find))
 
 	return results
 
@@ -294,39 +297,39 @@ def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searcht
 	:return:
 	"""
 
-	#for h in hitdict.keys():
+	# for h in hitdict.keys():
 	#	print(h,hitdict[h].universalid, hitdict[h].accented)
 
 	linesofcontext = int(session['linesofcontext'])
-	
+
 	activepoll.allworkis(len(hitdict))
 	activepoll.remain(len(hitdict))
-		
+
 	workbundles = []
 	if len(hitdict) > int(session['maxresults']):
 		limit = int(session['maxresults'])
 	else:
 		limit = len(hitdict)
-	
+
 	criteria = {'ctx': linesofcontext, 'seek': seeking, 'prox': proximate, 'type': searchtype}
-	
-	for i in range(0,limit):
+
+	for i in range(0, limit):
 		lineobject = hitdict[i]
 		authorobject = authordict[lineobject.wkuinversalid[0:6]]
 		wid = lineobject.wkuinversalid
 		workobject = workdict[wid]
-		workbundles.append({'hitnumber': i+1, 'lo': lineobject, 'wo': workobject, 'ao': authorobject})
+		workbundles.append({'hitnumber': i + 1, 'lo': lineobject, 'wo': workobject, 'ao': authorobject})
 
 	manager = Manager()
 	allfound = manager.dict()
 	bundles = manager.list(workbundles)
 	criteria = manager.dict(criteria)
-	
+
 	workers = hipparchia.config['WORKERS']
-	
+
 	jobs = [Process(target=formattingworkpile, args=(bundles, criteria, activepoll, allfound))
-	        for i in range(workers)]
-	
+			for i in range(workers)]
+
 	for j in jobs: j.start()
 	for j in jobs: j.join()
 
@@ -342,7 +345,7 @@ def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searcht
 def formattingworkpile(bundles, criteria, activepoll, allfound):
 	"""
 	the work for the workers to send to formattedcittationincontext()
-	
+
 	a bundle:
 		{'hitnumber': 3, 'wo': <server.hipparchiaclasses.dbOpus object at 0x1109ad240>, 'ao': <server.hipparchiaclasses.dbAuthor object at 0x1109ad0f0>, 'lo': <server.hipparchiaclasses.dbWorkLine object at 0x11099d9e8>}
 
@@ -363,7 +366,8 @@ def formattingworkpile(bundles, criteria, activepoll, allfound):
 			bundle = None
 
 		if bundle is not None:
-			citwithcontext = formattedcitationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'], criteria['seek'],
+			citwithcontext = formattedcitationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'],
+														criteria['seek'],
 														criteria['prox'], criteria['type'], curs)
 			citwithcontext.hitnumber = bundle['hitnumber']
 			activepoll.remain(bundle['hitnumber'])
@@ -386,7 +390,7 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 	take a hit
 		turn it into a focus line
 		surround it by some context
-	
+
 	in:
 		lineobject
 
@@ -405,9 +409,10 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 	highlightline = lineobject.index
 	citation = locusintocitation(workobject, lineobject.locustuple())
 
-	citationincontext = FormattedSearchResult(-1,authorobject.shortname, workobject.title, citation, lineobject.universalid, [])
+	citationincontext = FormattedSearchResult(-1, authorobject.shortname, workobject.title, citation,
+											  lineobject.universalid, [])
 	environs = simplecontextgrabber(workobject, highlightline, linesofcontext, curs)
-	
+
 	for foundline in environs:
 		foundline = dblineintolineobject(foundline)
 		if foundline.index == highlightline:
@@ -415,9 +420,9 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 			foundline.accented = '<span class="highlight">' + foundline.accented + '</span>'
 		if proximate != '' and searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(cleansearchterm(proximate), foundline.accented) is not None or re.search(cleansearchterm(proximate), foundline.stripped) is not None:
+			if re.search(cleansearchterm(proximate), foundline.accented) is not None or re.search(
+					cleansearchterm(proximate), foundline.stripped) is not None:
 				foundline.accented = highlightsearchterm(foundline, proximate, 'proximate')
 		citationincontext.formattedlines.append(foundline)
 
 	return citationincontext
-

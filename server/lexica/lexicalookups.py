@@ -230,7 +230,9 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 
 	# mismatch between homonymns as per the lemmas and the dictionary: "λέγω1" vs "λέγω (1)"
 	# a potential moving target if things change with the builder
-	
+
+	entry = re.sub(r'#','',entry)
+
 	if re.search(r'\d$',entry) is not None:
 		entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
