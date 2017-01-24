@@ -315,6 +315,14 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 		cleanedentry += formatgloss(definition)
 	else:
 		if '-' in entry:
+			parts = entry.split('-')
+			partone = parts[0]
+			parttwo = parts[1]
+			# ά --> α, etc.
+			tail = stripaccents(partone[-1])
+			head = stripaccents(parttwo[0])
+			guessone = partone[:-1] + tail + parttwo[1:]
+			guesstwo = partone[:-1] + head + parttwo[1:]
 			if guessone != guesstwo:
 				searched = entry + ' (both '+guessone+' and '+guesstwo+' were searched)'
 			else:
@@ -333,17 +341,33 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 	return clickableentry
 
 
-def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax):
+def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber=0):
 	"""
-	duplicates dbfunctions fnc, but that one was hurling exceptions if you tried to call it
-	could not even get to the first line of the fnc
+
+	this will make several stabs at finding a word in the dictionary
+
+	we need to do this because sometimes a find in the morphology dictionary does not point to something
+	you can find in the dictionary of meanings
+
+	sample values:
+		dictionary:	'greek_dictionary'
+		usecolumn: 'entry_name'
+		seeking: 'προχοΐδιον'
+		syntax: '=' or 'LIKE'
+
 	:param cursor:
 	:param dictionary:
 	:param usecolumn:
 	:param seeking:
 	:return:
 	"""
-		
+
+	trialnumber += 1
+	accenteddiaresis = re.compile(r'αί|εί|οί|υί|ηί|ωί')
+	unaccenteddiaresis = re.compile(r'αι|ει|οι|υι|ηι|ωι')
+
+	nothingfound = {'metrics': '', 'definition': '', 'type': ''}
+
 	query = 'SELECT metrical_entry, entry_body, entry_type FROM ' + dictionary + ' WHERE '+usecolumn+' '+syntax+' %s'
 	data = (seeking,)
 	cursor.execute(query, data)
@@ -351,12 +375,53 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax):
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
 	found = cursor.fetchone()
 
-	founddict = { 'metrics': '', 'definition': '', 'type': '' }
+	# we might be at trial 2+ and so we need to strip the supplement we used at trial #1
+	seeking = re.sub(r'\s%$','',seeking)
+
+	founddict = nothingfound
 
 	if found is not None:
+		# success!
 		founddict['metrics'] = found[0]
 		founddict['definition'] = found[1]
 		founddict['type'] = found[2]
+	elif trialnumber == 1:
+		# failure...
+		# the word is probably there, we have just been given the wrong search term; try some other solutions
+		# [1] first guess: there were multiple possible entries, not just one; change your syntax
+		# this lets you find 'WORD (1)' and 'WORD (2)' if you failed to find WORD
+		founddict = searchdictionary(cursor, dictionary, usecolumn, seeking+ ' %', 'LIKE', trialnumber)
+	elif trialnumber < 4 and '-' in seeking:
+		# [2] next guess: sometimes you get sent things like κατά-ἀράζω & κατά-ἐρέω
+		# these will fail; hence the retry structure
+		parts = seeking.split('-')
+		partone = parts[0]
+		parttwo = parts[1]
+		# ά --> α, etc.
+		tail = stripaccents(partone[-1])
+		head = stripaccents(parttwo[0])
+		guessone = partone[:-1] + tail + parttwo[1:]
+		guesstwo = partone[:-1] + head + parttwo[1:]
+		founddict = searchdictionary(cursor, dictionary, usecolumn, guessone, '=',trialnumber)
+		if founddict == nothingfound:
+			founddict = searchdictionary(cursor, dictionary, usecolumn, guesstwo, '=',trialnumber)
+	elif trialnumber < 4 and re.search(accenteddiaresis,seeking) is not None:
+		# false positives very easy here, but we are getting desperate and have nothing to lose
+		diaresis = re.search(accenteddiaresis, seeking)
+		head = seeking[:diaresis.start()]
+		tail = seeking[diaresis.end():]
+		vowels = diaresis.group(0)
+		vowels = vowels[0] + 'ΐ'
+		newword = head + vowels + tail
+		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+	elif trialnumber < 4 and re.search(unaccenteddiaresis,seeking) is not None:
+		diaresis = re.search(unaccenteddiaresis, seeking)
+		head = seeking[:diaresis.start()]
+		tail = seeking[diaresis.end():]
+		vowels = diaresis.group(0)
+		vowels = vowels[0] + 'ϊ'
+		newword = head + vowels + tail
+		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 
 	return founddict
 
