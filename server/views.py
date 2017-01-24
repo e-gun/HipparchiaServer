@@ -1078,6 +1078,7 @@ def findbyform():
 	possible = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value>(.*?)</possibility_\d{1,2}>')
 	# 1 = #, 2 = word, 4 = body, 3 = xref
 
+	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
 	returnarray = []
 	entriestocheck = {}
 	try:
@@ -1106,16 +1107,16 @@ def findbyform():
 			wordandform = wordandform.split(',')
 			form = wordandform[0]
 			try:
-				word = wordandform[1]
+				theword = wordandform[1]
 			except:
-				word = form
+				theword = form
 			thetransl = re.search(transfinder,theentry[0][1])
 			thetransl = thetransl.group(1)
 			analyses = [re.search(analysisfinder,x[1]) for x in theentry]
 			analysislist = [x.group(1) for x in analyses]
-			consolidatedentry = {'count': count, 'form': observed, 'word': word, 'transl': thetransl, 'anal': analysislist}
+			consolidatedentry = {'count': count, 'form': observed, 'word': theword, 'transl': thetransl, 'anal': analysislist}
 			returnarray.append({'value': formateconsolidatedgrammarentry(consolidatedentry)})
-			entriestocheck[w] = word
+			entriestocheck[w] = theword
 
 		# look up and format the dictionary entries
 
@@ -1130,11 +1131,7 @@ def findbyform():
 				entryashtml = browserdictionarylookup(count, entriestocheck[entry], dict, cur)
 				returnarray.append({'value': entryashtml})
 
-	returnarray = [{'observed':word}] + returnarray
-
-	# if len(entriestocheck) > 0:
-	# 	returnarray[0]['trylookingunder'] = entriestocheck[0]
-
+	returnarray = [{'observed':observed}] + returnarray
 	returnarray = json.dumps(returnarray)
 
 	cur.close()
