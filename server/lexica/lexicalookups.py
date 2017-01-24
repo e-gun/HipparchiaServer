@@ -236,48 +236,6 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 
 	founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
 
-	if founddict == nothingfound:
-		# first guess: there were multiple possible entries, not just one; change your syntax
-		# this lets you find 'WORD (1)' and 'WORD (2)' if you failed to find WORD
-		founddict = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', entry+' %', syntax='LIKE')
-		if founddict == nothingfound:
-			accenteddiaresis = re.compile(r'αί|εί|οί|υί|ηί|ωί')
-			unaccenteddiaresis = re.compile(r'αι|ει|οι|υι|ηι|ωι')
-			# second guess: the term that the morphology dictionary sent you is merely similar to what you have to search for in the real dictionary
-			if '-' in entry:
-				# sometimes you get sent things like κατά-ἀράζω & κατά-ἐρέω
-				# these will fail; hence the retry structure
-				parts = entry.split('-')
-				partone = parts[0]
-				parttwo = parts[1]
-				# ά --> α, etc.
-				tail = stripaccents(partone[-1])
-				head = stripaccents(parttwo[0])
-				guessone = partone[:-1]+tail+parttwo[1:]
-				guesstwo = partone[:-1]+head+parttwo[1:]
-				founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', guessone, syntax='=')
-				if founddict == nothingfound:
-					founddict = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', guesstwo, syntax='=')
-			elif re.search(accenteddiaresis,entry) is not None:
-				# false positives very easy here, but we are getting desperate and have nothing to lose
-				diaresis = re.search(accenteddiaresis,entry)
-				head = entry[:diaresis.start()]
-				tail = entry[diaresis.end():]
-				vowels = diaresis.group(0)
-				vowels = vowels[0]+'ΐ'
-				newword = head+vowels+tail
-				print('newword',newword)
-				founddict = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', newword, syntax='=')
-			elif re.search(unaccenteddiaresis, entry) is not None:
-				# false positives very easy here, but we are getting desperate and have nothing to lose
-				diaresis = re.search(accenteddiaresis,entry)
-				head = entry[:diaresis.start()]
-				tail = entry[diaresis.end():]
-				vowels = diaresis.group(0)
-				vowels = vowels[0]+'ΐ'
-				newword = head+vowels+tail
-				print('newword',newword)
-				founddict = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', newword, syntax='=')
 	metrics = founddict['metrics']
 	definition = founddict['definition']
 	type = founddict['type']
