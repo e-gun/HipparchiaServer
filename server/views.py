@@ -13,13 +13,13 @@ import re
 from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
-# this next validates when imported: it is not called later
+# this next validates when imported: it is not called later; the IDE will pretend you are not using it
 from server.listsandsession import validateconfig
 from server.hipparchiaclasses import ProgressPoll
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
-from server.lexica.lexicaformatting import formateconsolidatedgrammarentry, entrysummary, dbquickfixes
-from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary
+from server.lexica.lexicaformatting import entrysummary, dbquickfixes
+from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
 from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
@@ -1066,11 +1066,11 @@ def findbyform():
 
 	if re.search(r'[a-z]', word[0]) is not None:
 		word = stripaccents(word)
-		dict = 'latin'
+		usedictionary = 'latin'
 	else:
-		dict = 'greek'
+		usedictionary = 'greek'
 
-	query = 'SELECT possible_dictionary_forms FROM ' + dict + '_morphology WHERE observed_form LIKE %s'
+	query = 'SELECT possible_dictionary_forms FROM ' + usedictionary + '_morphology WHERE observed_form LIKE %s'
 	data = (word,)
 	cur.execute(query, data)
 
@@ -1080,7 +1080,7 @@ def findbyform():
 
 	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
 	returnarray = []
-	entriestocheck = {}
+
 	try:
 		matches = re.findall(possible, analysis[0])
 	except:
@@ -1088,48 +1088,7 @@ def findbyform():
 		returnarray = [{'value': '<br />[nothing found]'}, {'entries': '[not found]'}]
 
 	if matches:
-		# prepare the results of the morphological search
-		differentwordsfound = {}
-		for m in matches:
-			if m[3] not in differentwordsfound:
-				differentwordsfound[m[3]] = [(m[2],m[4])]
-			else:
-				differentwordsfound[m[3]].append((m[2],m[4]))
-		# the top part: just the analyses
-		transfinder = re.compile(r'<transl>(.*?)</transl>')
-		analysisfinder = re.compile(r'<analysis>(.*?)</analysis>')
-		count = 0
-		for w in differentwordsfound:
-			count += 1
-			# {'50817064': [('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem dat pl</analysis>')], '50839960': [('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]}
-			theentry = differentwordsfound[w]
-			wordandform = theentry[0][0]
-			wordandform = wordandform.split(',')
-			form = wordandform[0]
-			try:
-				theword = wordandform[1]
-			except:
-				theword = form
-			thetransl = re.search(transfinder,theentry[0][1])
-			thetransl = thetransl.group(1)
-			analyses = [re.search(analysisfinder,x[1]) for x in theentry]
-			analysislist = [x.group(1) for x in analyses]
-			consolidatedentry = {'count': count, 'form': observed, 'word': theword, 'transl': thetransl, 'anal': analysislist}
-			returnarray.append({'value': formateconsolidatedgrammarentry(consolidatedentry)})
-			entriestocheck[w] = theword
-
-		# look up and format the dictionary entries
-
-		if len(entriestocheck) == 1:
-			entry = entriestocheck.popitem()
-			entryashtml = browserdictionarylookup(0, entry[1], dict, cur)
-			returnarray.append({'value': entryashtml})
-		else:
-			count = 0
-			for entry in entriestocheck:
-				count += 1
-				entryashtml = browserdictionarylookup(count, entriestocheck[entry], dict, cur)
-				returnarray.append({'value': entryashtml})
+		returnarray = lexicalmatchesintohtml(observed, matches, usedictionary, cur)
 
 	returnarray = [{'observed':observed}] + returnarray
 	returnarray = json.dumps(returnarray)

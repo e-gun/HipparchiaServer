@@ -11,7 +11,7 @@ import re
 from flask import session
 
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
-	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs
+	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
 
 
@@ -89,6 +89,77 @@ example:
 
 
 """
+
+def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
+	"""
+
+	you have found the word(s), now generate a collection of HTML lines to hand to the JS
+	this is a sort of pseudo-page
+
+	first do the parsing results; then do the dictionary results
+
+	observedform:
+		nubibus
+
+	matcheslist:
+		[('<possibility_1>', '1', 'nūbibus,nubes', '50817064', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('<possibility_2>', '2', 'nūbibus,nubes', '50817064', '<transl>a cloud</transl><analysis>fem dat pl</analysis>'), ('<possibility_3>', '3', 'nūbibus,nubis', '50839960', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('<possibility_4>', '4', 'nūbibus,nubis', '50839960', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]
+
+	usedictionary:
+		latin
+
+	:param observedform:
+	:param matcheslist:
+	:param usedictionary:
+	:param cursor:
+	:return:
+	"""
+
+	returnarray = []
+	differentwordsfound = {}
+	entriestocheck = {}
+	for m in matcheslist:
+		if m[3] not in differentwordsfound:
+			differentwordsfound[m[3]] = [(m[2], m[4])]
+		else:
+			differentwordsfound[m[3]].append((m[2], m[4]))
+	# the top part: just the analyses
+	transfinder = re.compile(r'<transl>(.*?)</transl>')
+	analysisfinder = re.compile(r'<analysis>(.*?)</analysis>')
+	count = 0
+	for w in differentwordsfound:
+		count += 1
+		# {'50817064': [('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem dat pl</analysis>')], '50839960': [('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]}
+		theentry = differentwordsfound[w]
+		wordandform = theentry[0][0]
+		wordandform = wordandform.split(',')
+		form = wordandform[0]
+		try:
+			theword = wordandform[1]
+		except:
+			theword = form
+		thetransl = re.search(transfinder, theentry[0][1])
+		thetransl = thetransl.group(1)
+		analyses = [re.search(analysisfinder, x[1]) for x in theentry]
+		analysislist = [x.group(1) for x in analyses]
+		consolidatedentry = {'count': count, 'form': observedform, 'word': theword, 'transl': thetransl,
+							 'anal': analysislist}
+		returnarray.append({'value': formateconsolidatedgrammarentry(consolidatedentry)})
+		entriestocheck[w] = theword
+
+	# look up and format the dictionary entries
+
+	if len(entriestocheck) == 1:
+		entry = entriestocheck.popitem()
+		entryashtml = browserdictionarylookup(0, entry[1], usedictionary, cursor)
+		returnarray.append({'value': entryashtml})
+	else:
+		count = 0
+		for entry in entriestocheck:
+			count += 1
+			entryashtml = browserdictionarylookup(count, entriestocheck[entry], usedictionary, cursor)
+			returnarray.append({'value': entryashtml})
+
+	return returnarray
 
 
 def browserdictionarylookup(count, entry, dict, cursor):

@@ -7,12 +7,8 @@
 """
 
 import re
-from multiprocessing import Process, Manager, Value
 from bs4 import BeautifulSoup
-from server import hipparchia
-from server.dbsupport.citationfunctions import finddblinefromincompletelocus
-from server.hipparchiaclasses import MPCounter
-from server.dbsupport.dbfunctions import setconnection
+
 
 def grabsenses(fullentry):
 	"""
