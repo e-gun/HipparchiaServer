@@ -19,7 +19,7 @@ from server.hipparchiaclasses import ProgressPoll
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import entrysummary, dbquickfixes
-from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml
+from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, lookformorphologymatches
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
 from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
@@ -1070,25 +1070,16 @@ def findbyform():
 	else:
 		usedictionary = 'greek'
 
-	query = 'SELECT possible_dictionary_forms FROM ' + usedictionary + '_morphology WHERE observed_form LIKE %s'
-	data = (word,)
-	cur.execute(query, data)
-
-	analysis = cur.fetchone()
-	possible = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value>(.*?)</possibility_\d{1,2}>')
-	# 1 = #, 2 = word, 4 = body, 3 = xref
-
 	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
 	returnarray = []
 
-	try:
-		matches = re.findall(possible, analysis[0])
-	except:
-		matches = None
-		returnarray = [{'value': '<br />[nothing found]'}, {'entries': '[not found]'}]
+	morphologymatches = lookformorphologymatches(word, usedictionary, cur)
+	# matches is a matchgroup: 1 = matchnumber, 2 = word, 3 = xrefnumber, 4 = body
 
-	if matches:
-		returnarray = lexicalmatchesintohtml(observed, matches, usedictionary, cur)
+	if morphologymatches:
+		returnarray = lexicalmatchesintohtml(observed, morphologymatches, usedictionary, cur)
+	else:
+		returnarray = [{'value': '<br />[could not find a match for'+observed+'in the morphology table]'}, {'entries': '[not found]'}]
 
 	returnarray = [{'observed':observed}] + returnarray
 	returnarray = json.dumps(returnarray)

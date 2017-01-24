@@ -92,6 +92,53 @@ example:
 """
 
 
+def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
+	"""
+
+	:param word:
+	:param usedictionary:
+	:return:
+	"""
+
+	trialnumber += 1
+
+	possible = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value>(.*?)</possibility_\d{1,2}>')
+	# the things that can confuse me
+	terminalacute = re.compile(r'[άέίόύήώ]')
+
+	matches = None
+
+	query = 'SELECT possible_dictionary_forms FROM ' + usedictionary + '_morphology WHERE observed_form LIKE %s'
+	data = (word,)
+	cursor.execute(query, data)
+
+	analysis = cursor.fetchone()
+
+	if analysis:
+		matches = re.findall(possible, analysis[0])
+		# 1 = #, 2 = word, 4 = body, 3 = xref
+	else:
+		# this code lets you make multiple stabs at an answer if you have already failed once
+		# [a] something like πλακουντάριόν τι will fail because of the enclitic (greek_morphology can find πλακουντάριον and πλακουντάριοϲ)
+		# [b] something like προχοίδιόν τι will fail twice over because of the enclitic and the diaresis
+		# item [b] cannot be fully addressed here; this correction gives you an analysis, but the term can't yet be found in the dictionary
+		# greek_morphology has προχοίδιον; the greek_dictionary has προχοΐδιον
+		try:
+			# have to 'try' because there might not be a word[-2]
+			if re.search(terminalacute,word[-1]) is not None and trialnumber < 3:
+				sub = stripaccents(word[-1])
+				newword = word[:-1]+sub
+				matches = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
+			elif re.search(terminalacute,word[-2]) is not None and trialnumber < 3:
+				sub = stripaccents(word[-2])
+				newword = word[:-2] + sub + word[-1]
+				matches = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
+		except:
+			matches = None
+
+	return matches
+
+
 def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 	"""
 
@@ -124,9 +171,11 @@ def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 			differentwordsfound[m[3]] = [(m[2], m[4])]
 		else:
 			differentwordsfound[m[3]].append((m[2], m[4]))
-	# the top part: just the analyses
+
 	transfinder = re.compile(r'<transl>(.*?)</transl>')
 	analysisfinder = re.compile(r'<analysis>(.*?)</analysis>')
+
+	# the top part of the HTML: just the analyses
 	count = 0
 	for w in differentwordsfound:
 		count += 1
@@ -149,7 +198,6 @@ def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 		entriestocheck[w] = theword
 
 	# look up and format the dictionary entries
-
 	if len(entriestocheck) == 1:
 		entry = entriestocheck.popitem()
 		entryashtml = browserdictionarylookup(0, entry[1], usedictionary, cursor)
@@ -178,6 +226,8 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 	else:
 		translationlabel = 'hi'
 
+	nothingfound = { 'metrics': '', 'definition': '', 'type': '' }
+
 	# mismatch between homonymns as per the lemmas and the dictionary: "λέγω1" vs "λέγω (1)"
 	# a potential moving target if things change with the builder
 	
@@ -186,22 +236,48 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 
 	founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
 
-	if founddict == { 'metrics': '', 'definition': '', 'type': '' }:
-		if '-' in entry:
-			# sometimes you get sent things like κατά-ἀράζω & κατά-ἐρέω
-			# these will fail; hence the retry structure
-			parts = entry.split('-')
-			partone = parts[0]
-			parttwo = parts[1]
-			# ά --> α, etc.
-			tail = stripaccents(partone[-1])
-			head = stripaccents(parttwo[0])
-			guessone = partone[:-1]+tail+parttwo[1:]
-			guesstwo = partone[:-1]+head+parttwo[1:]
-			founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', guessone, syntax='=')
-			if founddict == {'metrics': '', 'definition': '', 'type': ''}:
-				founddict = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', guesstwo, syntax='=')
-
+	if founddict == nothingfound:
+		# first guess: there were multiple possible entries, not just one; change your syntax
+		# this lets you find 'WORD (1)' and 'WORD (2)' if you failed to find WORD
+		founddict = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', entry+' %', syntax='LIKE')
+		if founddict == nothingfound:
+			accenteddiaresis = re.compile(r'αί|εί|οί|υί|ηί|ωί')
+			unaccenteddiaresis = re.compile(r'αι|ει|οι|υι|ηι|ωι')
+			# second guess: the term that the morphology dictionary sent you is merely similar to what you have to search for in the real dictionary
+			if '-' in entry:
+				# sometimes you get sent things like κατά-ἀράζω & κατά-ἐρέω
+				# these will fail; hence the retry structure
+				parts = entry.split('-')
+				partone = parts[0]
+				parttwo = parts[1]
+				# ά --> α, etc.
+				tail = stripaccents(partone[-1])
+				head = stripaccents(parttwo[0])
+				guessone = partone[:-1]+tail+parttwo[1:]
+				guesstwo = partone[:-1]+head+parttwo[1:]
+				founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', guessone, syntax='=')
+				if founddict == nothingfound:
+					founddict = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', guesstwo, syntax='=')
+			elif re.search(accenteddiaresis,entry) is not None:
+				# false positives very easy here, but we are getting desperate and have nothing to lose
+				diaresis = re.search(accenteddiaresis,entry)
+				head = entry[:diaresis.start()]
+				tail = entry[diaresis.end():]
+				vowels = diaresis.group(0)
+				vowels = vowels[0]+'ΐ'
+				newword = head+vowels+tail
+				print('newword',newword)
+				founddict = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', newword, syntax='=')
+			elif re.search(unaccenteddiaresis, entry) is not None:
+				# false positives very easy here, but we are getting desperate and have nothing to lose
+				diaresis = re.search(accenteddiaresis,entry)
+				head = entry[:diaresis.start()]
+				tail = entry[diaresis.end():]
+				vowels = diaresis.group(0)
+				vowels = vowels[0]+'ΐ'
+				newword = head+vowels+tail
+				print('newword',newword)
+				founddict = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', newword, syntax='=')
 	metrics = founddict['metrics']
 	definition = founddict['definition']
 	type = founddict['type']
