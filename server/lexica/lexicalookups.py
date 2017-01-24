@@ -13,6 +13,7 @@ from flask import session
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
+from server.searching.betacodetounicode import stripaccents
 
 
 """
@@ -90,6 +91,7 @@ example:
 
 """
 
+
 def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 	"""
 
@@ -162,7 +164,7 @@ def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 	return returnarray
 
 
-def browserdictionarylookup(count, entry, dict, cursor):
+def browserdictionarylookup(count, entry, usedictionary, cursor):
 	"""
 	look up a word and return an htlm version of its dictionary entry
 	:param entry:
@@ -171,7 +173,7 @@ def browserdictionarylookup(count, entry, dict, cursor):
 	:return:
 	"""
 
-	if dict == 'greek':
+	if usedictionary == 'greek':
 		translationlabel = 'tr'
 	else:
 		translationlabel = 'hi'
@@ -182,20 +184,27 @@ def browserdictionarylookup(count, entry, dict, cursor):
 	if re.search(r'\d$',entry) is not None:
 		entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
-	try:
-		found = searchdictionary(cursor, dict+'_dictionary', 'entry_name', entry, syntax='=')
-	except:
-		found = ('', '', '')
-		
-	if found == ('', '', ''):
-		try:
-			found = searchdictionary(cursor, dict + '_dictionary', 'entry_name', entry+' %', syntax='LIKE')
-		except:
-			found = ('','', '')
+	founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
 
-	metrics = found[0]
-	definition = found[1]
-	type = found[2]
+	if founddict == { 'metrics': '', 'definition': '', 'type': '' }:
+		if '-' in entry:
+			# sometimes you get sent things like κατά-ἀράζω & κατά-ἐρέω
+			# these will fail; hence the retry structure
+			parts = entry.split('-')
+			partone = parts[0]
+			parttwo = parts[1]
+			# ά --> α, etc.
+			tail = stripaccents(partone[-1])
+			head = stripaccents(parttwo[0])
+			guessone = partone[:-1]+tail+parttwo[1:]
+			guesstwo = partone[:-1]+head+parttwo[1:]
+			founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', guessone, syntax='=')
+			if founddict == {'metrics': '', 'definition': '', 'type': ''}:
+				founddict = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', guesstwo, syntax='=')
+
+	metrics = founddict['metrics']
+	definition = founddict['definition']
+	type = founddict['type']
 	metrics = re.sub(r'\(\d{1,}\)',r'',metrics)
 	
 	# can't have xml in our html
@@ -211,7 +220,7 @@ def browserdictionarylookup(count, entry, dict, cursor):
 		if u'\u0304' in metrics or u'\u0306' in metrics:
 			cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
 		cleanedentry += '</p>\n'
-		summarydict = entrysummary(definition, dict, translationlabel)
+		summarydict = entrysummary(definition, usedictionary, translationlabel)
 
 		if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
 			# this is basically just a gloss entry
@@ -229,9 +238,16 @@ def browserdictionarylookup(count, entry, dict, cursor):
 		cleanedentry += '<br />\n<p class="dictionaryheading">' + entry + '<span class="metrics">[gloss]</span></p>\n'
 		cleanedentry += formatgloss(definition)
 	else:
-		cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under '+entry+'</p>\n'
-		cleanedentry += 'But the parser can get fooled by enclitics, spelling variations, and disagreement about the number of entries for a word.<br />'
-		cleanedentry += 'Try looking this word yourself by using the proper search box: something is likely to turn up.'
+		if '-' in entry:
+			if guessone != guesstwo:
+				searched = entry + ' (both '+guessone+' and '+guesstwo+' were searched)'
+			else:
+				searched = entry + ' ('+guessone+' was searched)'
+		else:
+			searched = entry
+		cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under '+searched+'</p>\n'
+		cleanedentry += 'But the parser can get fooled by enclitics (which will alter the accent), spelling variations, and disagreement about the number of entries for a word.<br />'
+		cleanedentry += '<br />Try looking for this word yourself by using the proper search box: something is likely to turn up. Remember that partial word searching is acceptable and that accents do not matter.'
 	
 	clickableentry = cleanedentry
 	# in progress
@@ -258,11 +274,15 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax):
 	# note that the dictionary db has a problem with vowel lengths vs accents
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
 	found = cursor.fetchone()
-	
+
+	founddict = { 'metrics': '', 'definition': '', 'type': '' }
+
 	if found is not None:
-		return found
-	else:
-		return ('','','')
+		founddict['metrics'] = found[0]
+		founddict['definition'] = found[1]
+		founddict['type'] = found[2]
+
+	return founddict
 
 
 def bulkddictsearch(cursor, dictionary, usecolumn, seeking):
