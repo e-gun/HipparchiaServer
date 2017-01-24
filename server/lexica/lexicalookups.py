@@ -183,7 +183,6 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax):
 		
 	query = 'SELECT metrical_entry, entry_body, entry_type FROM ' + dictionary + ' WHERE '+usecolumn+' '+syntax+' %s'
 	data = (seeking,)
-	print('searchdictionary q/d',query, data)
 	cursor.execute(query, data)
 	# note that the dictionary db has a problem with vowel lengths vs accents
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
