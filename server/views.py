@@ -1103,7 +1103,6 @@ def findbyform():
 			# {'50817064': [('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem dat pl</analysis>')], '50839960': [('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]}
 			theentry = differentwordsfound[w]
 			wordandform = theentry[0][0]
-			print('wordandform',wordandform)
 			wordandform = wordandform.split(',')
 			form = wordandform[0]
 			try:
