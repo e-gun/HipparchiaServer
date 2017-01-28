@@ -1039,7 +1039,6 @@ def grabtextforbrowsing():
 	browserdata = json.dumps(browserdata)
 
 	cur.close()
-	del dbc
 
 	return browserdata
 

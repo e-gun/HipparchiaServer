@@ -1,1 +1,1 @@
-__all__ = ['searchformatting', 'searchfunctions', 'betacodetounicode']
+__all__ = ['searchformatting', 'searchfunctions', 'searchdispatching', 'phrasesearching', 'betacodetounicode']

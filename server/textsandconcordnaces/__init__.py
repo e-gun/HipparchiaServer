@@ -1,1 +1,1 @@
-__all__ = ['concordancemaker', 'textbuilder']
+__all__ = ['concordancemaker', 'textbuilder', 'textandconcordancehelperfunctions']
