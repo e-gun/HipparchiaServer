@@ -872,8 +872,11 @@ def getsearchlistcontents():
 	authorandworklist = compileauthorandworklist(listmapper)
 	authorandworklist = sortauthorandworklists(authorandworklist, authordict)
 
-	searchlistinfo = '<br /><h3>Proposing to search the following works:</h3>\n'
-	searchlistinfo += '(Results will be arranged according to '+session['sortorder']+')<br /><br />\n'
+	if len(authorandworklist) > 1:
+		searchlistinfo = '<br /><h3>Proposing to search the following '+str(len(authorandworklist))+' works:</h3>\n'
+		searchlistinfo += '(Results will be arranged according to '+session['sortorder']+')<br /><br />\n'
+	else:
+		searchlistinfo = '<br /><h3>Proposing to search the following work:</h3>\n'
 
 	count = 0
 	wordstotal = 0

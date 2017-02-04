@@ -38,7 +38,7 @@ function deleteondrop(event, ui) {
     var cla = todelete.attr('class').split(' ');
     var listposition = todelete.attr('listval');
     $.getJSON('/clearselections?cat='+cla[0]+'&id='+listposition, function (selectiondata) { reloadselections(selectiondata); });
-    document.getElementById('searchlistcontents').innerHTML = '';
+    $('#searchlistcontents').html('');
     $('#searchlistcontents').hide();
     // alert( 'delete '+todelete.attr('id')+' cl:'+cla[0]+' lv:'+todelete.attr('listval'))
 }
@@ -385,8 +385,8 @@ $('#concordance').click( function() {
         var name = $('#authorsautocomplete').val();
         var locus = locusdataloader();
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
-        document.getElementById('searchsummary').innerHTML = '';
-        document.getElementById('displayresults').innerHTML = ''
+        $('#searchsummary').html('');
+        $('#displayresults').html('');
 
         if (authorid != '') {
             $('#clearpick').show();
@@ -426,14 +426,14 @@ function loadconcordanceintodisplayresults(concordancedata) {
 
         linesreturned += '<span class="small">('+concordancedata['elapsed']+'s)</span><br />';
 
-        document.getElementById('searchsummary').innerHTML = linesreturned;
+        $('#searchsummary').html(linesreturned);
 
         var linesreturned = '';
         var dLen = concordancedata['lines'].length;
         for (i = 0; i < dLen; i++) {
             linesreturned += concordancedata['lines'][i];
             }
-        document.getElementById('displayresults').innerHTML = linesreturned;
+        $('#displayresults').html(linesreturned);
 }
 
 
@@ -467,14 +467,14 @@ function loadtextintodisplayresults(returnedtext) {
             linesreturned += '&nbsp;'+returnedtext['worksegment']+'<br /><br />';
             }
         linesreturned += 'citation format:&nbsp;'+returnedtext['structure']+'<br />';
-        document.getElementById('searchsummary').innerHTML = linesreturned;
+        $('#searchsummary').html(linesreturned);
 
         var linesreturned = '';
         var dLen = returnedtext['lines'].length;
         for (i = 0; i < dLen; i++) {
             linesreturned += returnedtext['lines'][i];
             }
-        document.getElementById('displayresults').innerHTML = linesreturned;
+        $('#displayresults').html(linesreturned);
     }
 
 
@@ -499,5 +499,5 @@ function displayprogress(progress){
 
    if ( h > 0) { thehtml += '<br />(<span class="progress">'+h+'</span> found)'; }
 
-    document.getElementById('pollingdata').innerHTML = thehtml;
+   $('#pollingdata').html(thehtml);
 }

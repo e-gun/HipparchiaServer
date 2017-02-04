@@ -53,8 +53,8 @@ $(document).ready( function () {
         // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
         if (seeking.slice(-1) == ' ') { seeking = seeking.slice(0,-1) + '%20'; }
         if (proximate.slice(-1) == ' ') { proximate = proximate.slice(0,-1) + '%20'; }
-        document.getElementById('displayresults').innerHTML = '';
-        document.getElementById('searchsummary').innerHTML = '';
+        $('#searchsummary').html('');
+        $('#displayresults').html('');
 
         // the script additions can pile up: so first kill off any scripts we have already added
         var bcsh = document.getElementById("browserclickscriptholder");

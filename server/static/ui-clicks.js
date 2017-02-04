@@ -510,20 +510,21 @@ $('#authinfo').click( function() {
         $('#authorholdings').toggle();
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         $.getJSON('/getauthorinfo?au=' + authorid, function (selectiondata) {
-                document.getElementById('authorholdings').innerHTML = selectiondata;
-                             });
+                $('#authorholdings').html(selectiondata);
+                 });
     });
 
 
 $('#searchinfo').click( function() {
         if (  $('#searchlistcontents').is(':visible') == true ) {
             $('#searchlistcontents').hide();
-            document.getElementById('searchlistcontents').innerHTML = '<p class="center"><span class="small>(this might take a second...)</span></p>';
+            $('#searchlistcontents').html('<p class="center"><span class="small>(this might take a second...)</span></p>');
         } else {
+            $('#searchlistcontents').html('');
             $('#searchlistcontents').show();
             $.getJSON('/getsearchlistcontents', function (selectiondata) {
-                document.getElementById('searchlistcontents').innerHTML = selectiondata;
-                 });
+                $('#searchlistcontents').html(selectiondata);
+                });
             }
     });
 
