@@ -74,7 +74,7 @@ $(document).ready( function () {
          var i = setInterval(function(){
             $.getJSON('/progress?id='+searchid, function(progress) {
                 displayprogress(progress);
-                if (progress['active'] == false ) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; }
+                if (progress['active'] == false ) { clearInterval(i); $('#pollingdata').html(''); }
                 });
             }, 400);
         });
@@ -123,7 +123,7 @@ $(document).ready( function () {
         summaryhtml += '<br />Sorted by '+output['sortby'];
         if (output['hitmax'] == 'true') { summaryhtml += '<br />[Search suspended: result cap reached.]';}
 
-        document.getElementById('searchsummary').innerHTML = summaryhtml;
+        $('#searchsummary').html(summaryhtml);
 
         //
         // THE FINDS: each find should come as a lump of HTML formated by htmlifysearchfinds()
@@ -133,7 +133,7 @@ $(document).ready( function () {
         var passagesreturned = '';
         for (i = 0; i < dLen; i++) { passagesreturned += output['found'][i]; }
 
-        document.getElementById('displayresults').innerHTML = passagesreturned;
+        $('#displayresults').html(passagesreturned);
 
         //
         // JS UPDATE

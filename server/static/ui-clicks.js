@@ -308,7 +308,6 @@ $('#greekcorpus').change(function () {
     }
     // because some items on your list just got purged?
     $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
-    // document.getElementById('authoroutputcontent').innerHTML = '<p class="label">Searching all Greek authors</p>';
     });
 
 $('#latincorpus').change(function () {
