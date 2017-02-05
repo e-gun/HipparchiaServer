@@ -1,0 +1,13 @@
+# python
+*.pyc
+config.py
+config.ini
+
+# 3rd party projects
+jquery*
+ui-icons*
+js.cookie.js
+DejaVu*
+
+# IDE
+.idea/
