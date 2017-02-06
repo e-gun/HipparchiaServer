@@ -26,9 +26,12 @@ WORKERS = 3
 DBDEBUGMODE = 'no'
 HTMLDEBUGMODE = 'no'
 
-# settings that you can only configure here and probably do not want to change
+# settings that you can only configure here
+# the css presupposes './server' as part of its path; i.e. you will want to put custom CSS in the
+# same directory as the default installed css
+TLGASSUMESBETACODE = 'yes'
 SHOWLINENUMBERSEVERY = 10
-CSSSTYLESHEET = './server/static/hpparchia_styles.css'
+CSSSTYLESHEET = '/static/hipparchia_styles.css'
 
 # the default settings for various items: they represent what you get if you clear the session
 # these can all be set to different values via the web interface
