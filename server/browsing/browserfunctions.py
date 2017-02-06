@@ -150,9 +150,14 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			columna = line.locus()
 			columnb = '<span class="focusline">' + columnb + '</span>'
 		else:
+			try:
+				linenumber = int(line.l0)
+			except:
+				# 973b is not your friend
+				linenumber = 0
 			if line.samelevelas(previousline) is not True:
 				columna = line.shortlocus()
-			elif int(line.l0) % numbersevery == 0:
+			elif linenumber % numbersevery == 0:
 				columna = line.locus()
 			else:
 				# do not insert a line number or special formatting

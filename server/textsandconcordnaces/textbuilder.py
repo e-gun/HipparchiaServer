@@ -34,11 +34,15 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	finder = re.compile(r'<hmu_metadata_date value="(.*?)" />')
 	
 	output = ['<table>\n']
+
+	# consecutive lines can get numbered twice
+	# 660	       ἤν τιϲ ὀφείλων ἐξαρνῆται. Πρ. πόθεν οὖν ἐδάνειϲ’ ὁ
+	# 660	           δανείϲαϲ,
+	avoiddoubletap = False
+
 	if len(results) > 0:
 		previousline = dblineintolineobject(results[0])
-		linecount = 0
 		for line in results:
-			linecount += 1
 			thisline = dblineintolineobject(line)
 			
 			if work[0:2] in ['in', 'dp', 'ch']:
@@ -62,8 +66,16 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 				columna = thisline.shortlocus()
 			else:
 				columna = ''
-			if linecount % linesevery == 0:
+			try:
+				linenumber = int(thisline.l0)
+			except:
+				# 973b is not your friend
+				linenumber = 0
+			if linenumber % linesevery == 0 and avoiddoubletap == False:
 				columna = thisline.locus()
+				avoiddoubletap = True
+			else:
+				avoiddoubletap = False
 			
 			linehtml = '<tr><td class="browsercite">'+columna+'</td>'
 			linehtml += '<td class="lineoftext">'+columnb+'</td></tr>\n'
