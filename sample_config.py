@@ -3,20 +3,6 @@ DEBUG=False
 SECRET_KEY = 'yourkeyhereitshouldbelongandlooklikecryptographicgobbledygook'
 
 
-# Hipparchia debug variables: show DB locations of hits and/or the raw HTML markup inside the DB
-# there are no security implications here; these can only be set at launch; any changes require restarting HipparchiaServer
-DBDEBUGMODE = 'no'
-HTMLDEBUGMODE = 'no'
-
-
-# Hipparchia performance variable
-# pick a number based on your cpu cores: on an 8 core machine diminishing returns kick in between 3 and 4 as the bottleneck shifts elsewhere
-# on a one-core virtual machine extra workers don't do much good and tend to just get in the way of one another: '1' seems to be best
-# a high number on a fast machine risks lockout from the db as too many requests come too fast: will need to recalibrate the default commit count if you go over 5
-# your mileage will indeed vary, but N > cores*(.5) is probably not going to do much good.
-WORKERS = 3
-
-
 # DB variables
 # a read-only db user is highly recommended; write access means inviting a world of hurt
 DBUSER = 'hippa_rd'
@@ -28,7 +14,23 @@ DBPASS = 'yourpassheretrytomakeitstrongplease'
 LDICT = 'latin_dictionary'
 GDICT = 'greek_dictionary'
 
-# the default settings for various values: what you get if you clear the session
+# Hipparchia performance variable
+# pick a number based on your cpu cores: on an 8 core machine diminishing returns kick in between 3 and 4 as the bottleneck shifts elsewhere
+# on a one-core virtual machine extra workers don't do much good and tend to just get in the way of one another: '1' seems to be best
+# a high number on a fast machine risks lockout from the db as too many requests come too fast: will need to recalibrate the default commit count if you go over 5
+# your mileage will indeed vary, but N > cores*(.5) is probably not going to do much good.
+WORKERS = 3
+
+# Hipparchia debug variables: show DB locations of hits and/or the raw HTML markup inside the DB
+# there are no security implications here; these can only be set at launch; any changes require restarting HipparchiaServer
+DBDEBUGMODE = 'no'
+HTMLDEBUGMODE = 'no'
+
+# settings that you can only configure here and probably do not want to change
+SHOWLINENUMBERSEVERY = 10
+CSSSTYLESHEET = './server/static/hpparchia_styles.css'
+
+# the default settings for various items: they represent what you get if you clear the session
 # these can all be set to different values via the web interface
 
 DEFAULTEARLIESTDATE = '-850'

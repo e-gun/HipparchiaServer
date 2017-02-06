@@ -154,10 +154,6 @@ class dbWorkLine(object):
 		self.l2 = level_02_value
 		self.l1 = level_01_value
 		self.l0 = level_00_value
-		# can remove the regex soon
-		# self.accented = re.sub(r'\s$', '', marked_up_line)
-		# self.polytonic = re.sub(r'\s$', '', accented_line)
-		# self.stripped = re.sub(r'\s$', '', stripped_line)
 		self.accented = marked_up_line
 		self.polytonic = accented_line
 		self.stripped = stripped_line

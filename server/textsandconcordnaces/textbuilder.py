@@ -62,7 +62,6 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 			
 			columnb = thisline.accented
 			if thisline.samelevelas(previousline) is not True:
-				linecount = linesevery + 1
 				columna = thisline.shortlocus()
 			else:
 				columna = ''

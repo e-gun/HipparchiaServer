@@ -54,6 +54,7 @@ def frontpage():
 	"""
 
 	expectedsqltemplateversion = 12272016
+	stylesheet = hipparchia.config['CSSSTYLESHEET']
 
 	sessionvariables()
 
@@ -69,7 +70,7 @@ def frontpage():
 			activecorpora.append(corpus)
 
 	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora,
-						   accents=session['accentsmatter'], onehit=session['onehit'])
+						   accents=session['accentsmatter'], onehit=session['onehit'], css=stylesheet)
 
 	return page
 
@@ -406,10 +407,7 @@ def textmaker():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	try:
-		linesevery = int(re.sub('[^\d]', '', request.args.get('linesevery', '')))
-	except:
-		linesevery = 10
+	linesevery = hipparchia.config['SHOWLINENUMBERSEVERY']
 
 	req = tcparserequest(request, authordict, workdict)
 	ao = req['authorobject']
@@ -980,7 +978,7 @@ def grabtextforbrowsing():
 			wo = ao.listofworks[0]
 
 	ctx = int(session['browsercontext'])
-	numbersevery = 10
+	numbersevery = hipparchia.config['SHOWLINENUMBERSEVERY']
 
 	if bokenwkref == True:
 		passage = '_LN_'+str(wo.starts)

@@ -72,16 +72,16 @@ relativeshift='/../..'
 testresults = compareconfigs(dir_path + relativeshift + '/sample_config.py', dir_path + relativeshift + '/config.py')
 
 if len(testresults['missing']) > 0:
-	print('\n\nWARNING -- WARNING -- WARNING\n')
+	print('WARNING -- WARNING -- WARNING')
 	print('Hipparchia is almost certain to crash. If you are lucky it will merely spew error messages.')
-	print('Your configuration file ("config.py") needs to assign a value to the following:\n')
+	print('Your configuration file ("config.py") needs to assign a value to the following:')
 	for m in testresults['missing']:
 		print('\t', m)
-	print('\nSee "sample_config.py" in the HipparchiaServer directory.\n\n')
+	print('See "sample_config.py" in the HipparchiaServer directory.')
 
 if len(testresults['extra']) > 0:
-	print('\n\nWARNING -- WARNING -- WARNING\n')
-	print('Your active configuration contains items that are not in the template:\n')
+	print('WARNING -- WARNING -- WARNING')
+	print('Your active configuration contains items that are not in the template:')
 	for e in testresults['extra']:
 		print('\t', e)
-	print('\nThese items are being ignored. Consider consulting "sample_config.py" in the HipparchiaServer directory.\n\n')
+	print('These items are being ignored. Consider consulting "sample_config.py" in the HipparchiaServer directory.')
