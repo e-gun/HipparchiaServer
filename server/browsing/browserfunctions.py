@@ -104,8 +104,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	passage['ouputtable'] = []
 	
 	passage['ouputtable'].append('<table>\n')
-	
-	linecount = numbersevery - 3
+
 	# insert something to highlight the citationtuple line
 	previousline = lines[0]
 	
@@ -115,7 +114,6 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	pubfinder = re.compile(r'<hmu_metadata_publicationinfo value="(.*?)" />')
 
 	for line in lines:
-		linecount += 1
 		if workobject.universalid[0:2] in ['in', 'dp', 'ch']:
 			if line.annotations != '':
 				xref = insertcrossreferencerow(line)
@@ -149,14 +147,12 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			columnb = insertparserids(line)
 
 		if line.index == focusline.index:
-			# linecount = numbersevery + 1
 			columna = line.locus()
 			columnb = '<span class="focusline">' + columnb + '</span>'
 		else:
 			if line.samelevelas(previousline) is not True:
-				linecount = numbersevery + 1
 				columna = line.shortlocus()
-			elif linecount % numbersevery == 0:
+			elif int(line.l0) % numbersevery == 0:
 				columna = line.locus()
 			else:
 				# do not insert a line number or special formatting

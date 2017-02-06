@@ -58,10 +58,7 @@ def frontpage():
 	sessionvariables()
 
 	# check to see which dbs we actually own
-	activelists = []
-	for list in listmapper:
-		if len(listmapper[list]['a']) > 0:
-			activelists.append(list)
+	activelists = [l for l in listmapper if len(listmapper[l]['a']) > 0]
 
 	versionchecking(activelists, expectedsqltemplateversion)
 
@@ -96,6 +93,7 @@ def authorlist():
 	keys.sort()
 	for k in keys:
 		authors.append(authordict[k])
+
 	return render_template('lister.html', found=authors, numberfound=len(authors))
 
 
@@ -1107,7 +1105,7 @@ def dictsearch():
 	seeking = re.sub(r'[!@#$|%()*\'\"\[\]]', '', request.args.get('term', ''))
 	seeking = seeking.lower()
 	seeking = re.sub('σ|ς', 'ϲ', seeking)
-	seeking = re.sub('v', 'u', seeking)
+	seeking = re.sub('v', '(u|v|U|V)', seeking)
 	returnarray = []
 
 	if re.search(r'[a-z]', seeking) is not None:
@@ -1126,6 +1124,7 @@ def dictsearch():
 	else:
 		data = ('.*?' + seeking + '.*?',)
 
+	print('q/d',query, data)
 	cur.execute(query, data)
 
 	# note that the dictionary db has a problem with vowel lengths vs accents
