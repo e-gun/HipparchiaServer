@@ -76,9 +76,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	
 	rawpassage = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
 
-	lines = []
-	for r in rawpassage:
-		lines.append(dblineintolineobject(r))
+	lines = [dblineintolineobject(r) for r in rawpassage]
 	
 	focusline = lines[0]
 	for line in lines:

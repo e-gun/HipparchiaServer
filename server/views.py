@@ -1078,7 +1078,7 @@ def findbyform():
 	if morphologymatches:
 		returnarray = lexicalmatchesintohtml(observed, morphologymatches, usedictionary, cur)
 	else:
-		returnarray = [{'value': '<br />[could not find a match for'+observed+'in the morphology table]'}, {'entries': '[not found]'}]
+		returnarray = [{'value': '<br />[could not find a match for '+observed+' in the morphology table]'}, {'entries': '[not found]'}]
 
 	returnarray = [{'observed':observed}] + returnarray
 	returnarray = json.dumps(returnarray)

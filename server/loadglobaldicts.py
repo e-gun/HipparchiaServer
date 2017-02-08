@@ -14,7 +14,7 @@ from server.listsandsession.sessiondicts import buildaugenresdict, buildworkgenr
 
 """
 this stuff gets loaded up front so you have access to all author and work info all the time
-otherwise you'll hit the DB too often and ask the same question over and over again: it's a serious source of lag
+otherwise you'll hit the DB too often and ask the same question over and over again: a serious source of lag
 """
 
 authordict = loadallauthorsasobjects()

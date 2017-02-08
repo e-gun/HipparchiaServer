@@ -139,9 +139,7 @@ def aggregatelines(firstline, lastline, cursor, audbname):
 	cursor.execute(query, data)
 	lines = cursor.fetchall()
 
-	lineobjects = []
-	for dbline in lines:
-		lineobjects.append(dblineintolineobject(dbline))
+	lineobjects = [dblineintolineobject(l) for l in lines]
 
 	aggregate = ''
 	if session['accentsmatter'] == 'yes':
@@ -346,8 +344,7 @@ def formattingworkpile(bundles, criteria, activepoll, allfound):
 
 		if bundle is not None:
 			citwithcontext = formattedcitationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'],
-														criteria['seek'],
-														criteria['prox'], criteria['type'], curs)
+														criteria['seek'], criteria['prox'], criteria['type'], curs)
 			citwithcontext.hitnumber = bundle['hitnumber']
 			activepoll.remain(bundle['hitnumber'])
 
@@ -399,8 +396,7 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 			foundline.accented = '<span class="highlight">' + foundline.accented + '</span>'
 		if proximate != '' and searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(cleansearchterm(proximate), foundline.accented) is not None or re.search(
-					cleansearchterm(proximate), foundline.stripped) is not None:
+			if re.search(cleansearchterm(proximate), foundline.accented) is not None or re.search(cleansearchterm(proximate), foundline.stripped) is not None:
 				foundline.accented = highlightsearchterm(foundline, proximate, 'proximate')
 		citationincontext.formattedlines.append(foundline)
 

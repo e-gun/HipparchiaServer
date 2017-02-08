@@ -291,7 +291,8 @@
             <span class="lat">non solum... sed etiam...</span> bracket just a single word.</li>
     </ul>
     <span class="emph">[*]</span>[Note: the automatic betacode feature will turn <code>\s</code> into <code>\ϲ</code>. so You can only execute
-            this search on the Greek authors if you have some other corpus turned on too. This behavior can be changed by setting
+            this search on the Greek authors if you have some other corpus turned on too. Alternately you can just turn the feature off.
+            Do this by setting
             <code>TLGASSUMESBETACODE = 'no'</code> in <code>config.py</code>.]
     <br />
     <br />
@@ -366,10 +367,11 @@
 
     <p><span class="label">Automatic betacode</span></p>
 
+    This is enabled by default. To disable it, edit <code>config.py</code> to read <code>TLGASSUMESBETACODE = 'no'</code>.
     If you are searching the Greek authors and only Greek authors, then anything you type in Roman characters will be
     converted into betacode: <code>beta</code> becomes <code>βετα</code>, <code>udwr</code> becomes <code>υδωρ</code>
     and <code>u(/dwr</code> will be <code>ὕδωρ</code>. This means you can't search for the
-    Latin inside of these texts unless you turn on some other corpus as well. Note that this bit of magic is not available
+    Latin inside of these texts unless you turn on some other corpus as well or else disable the feature. Note that this bit of magic is not available
     for the other corpora because the texts inside them are bilingual. Enter unicode Greek into the search box instead.
     If you don't already have a unicode keyboard, consider looking into
     <a href="https://classicalstudies.org/publications-and-research/about-greekkeys-2015">GreekKeys</a>.
@@ -518,7 +520,9 @@
     As above, a common word sought across the whole corpus will slow you down.
     Most phrase searches are likely to contain common words. So you will need strategies to make the haystack smaller
     unless you have 45s to spare. It is totally safe to try to double-check Dennison on οὐ μὴν ἀλλὰ, but you should
-    throw some restrictions in there to avoid a long search (that yields more results than you want anyway).
+    throw some restrictions in there to avoid a long search (that yields more results than you want anyway). Ponder this search and ask yourself
+    if the fact that Hipparchia took >2m to generate the results is the real problem here:
+    <span class="sampleoutput">Sought και δη και; Searched 6625 texts and found 2535 passages (<span class="colorhighlight">138.34s</span>)</span>
     </li>
 </ul>
     <span class="emph">Hardware also matters</span>: προκατέλαβον (the first example above)
