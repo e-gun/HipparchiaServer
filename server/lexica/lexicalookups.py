@@ -14,6 +14,7 @@ from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
 from server.searching.betacodetounicode import stripaccents
+from server import hipparchia
 
 
 """
@@ -256,10 +257,14 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 		if u'\u0304' in metrics or u'\u0306' in metrics:
 			cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
 		cleanedentry += '</p>\n'
-		summarydict = entrysummary(definition, usedictionary, translationlabel)
+
+		if hipparchia.config['SHOWLEXICALSUMMARYINFO'] == 'yes':
+			summarydict = entrysummary(definition, usedictionary, translationlabel)
+		else:
+			summarydict = {'authors': '', 'senses': '', 'quotes': ''}
 
 		if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
-			# this is basically just a gloss entry
+			# either you have turned off summary infor or this is basically just a gloss entry
 			cleanedentry += formatmicroentry(definition)
 		else:
 			cleanedentry += formatdictionarysummary(summarydict)

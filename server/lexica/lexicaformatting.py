@@ -65,10 +65,7 @@ def entrysummary(fullentry,lang, translationlabel):
 	notin = ['id.', 'ib.', 'Id.']
 	a[:] = [value for value in a if value not in notin]
 	a.sort()
-	newa = []
-	for au in a:
-		newa.append(deabbreviateauthors(au, lang))
-	a = newa
+	a = [deabbreviateauthors(au, lang) for au in a]
 
 	s = soup.find_all(translationlabel)
 	notin = ['ab', 'de', 'ex', 'ut', 'nihil', 'quam', 'quid']
@@ -324,8 +321,12 @@ def formatmicroentry(entrybody):
 	
 	entryhtml += '<span class="highlight">Senses:</span><br />'
 	for s in senses:
-		entryhtml += s + '<br />'
-		
+		try:
+			entryhtml += s + '<br />'
+		except:
+			# s was NoneType
+			pass
+
 	entryhtml = entrybody
 	
 	return entryhtml

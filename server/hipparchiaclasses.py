@@ -319,6 +319,8 @@ class dbWorkLine(object):
 		
 		if version in ['polytonic', 'stripped']:
 			line = getattr(self, version)
+			# Non-breaking space needs to go
+			line = re.sub(r'\xa0', ' ', line)
 			wordlist = line.split(' ')
 			wordlist = [w for w in wordlist if w]
 		
