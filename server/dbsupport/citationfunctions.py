@@ -60,9 +60,7 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 		values = [('-9999',)]
 	low = values[0][0]
 	high = values[-1][0]
-	rng = []
-	for val in values:
-		rng.append(val[0])
+	rng = [val[0] for val in values]
 	rng = list(set(rng))
 	rng.sort()
 
@@ -77,9 +75,8 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 			rangebottom.append(item)
 	rangekeys = sorted(rangenumbers.keys())
 	
-	sortedrange = []
-	for key in 	rangekeys:
-		sortedrange.append(rangenumbers[key])
+	sortedrange = [rangenumbers[key] for key in rangekeys]
+
 	sortedrange += rangebottom
 
 	lowandhigh = (availablelevels, atlevel-1, workstructure[atlevel - 1], low, high, sortedrange)
