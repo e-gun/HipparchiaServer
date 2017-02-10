@@ -92,8 +92,8 @@ def authorlist():
 
 	keys = list(authordict.keys())
 	keys.sort()
-	for k in keys:
-		authors.append(authordict[k])
+
+	authors = [authordict[k] for k in keys]
 
 	return render_template('lister.html', found=authors, numberfound=len(authors))
 

@@ -563,9 +563,10 @@ hmu_mid_line_citation_boundary {
 	}
 
 hmu_roman_in_a_greek_text {
-	font-style: italic;
-	font-size: 85%;
-	color: #222;
+	font-size: 90%;
+	color: #352;
+	font-family: DejaVuSansCondensed-Oblique;
+	src: url(/static/ttf/DejaVuSansCondensed-Oblique.ttf);
 	}
 
 hmu_title {

@@ -312,9 +312,7 @@ def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searcht
 
 	# allfound = { 1: <server.hipparchiaclasses.FormattedSearchResult object at 0x111e73160>, 2: ... }
 	keys = sorted(allfound.keys())
-	finds = []
-	for k in keys:
-		finds.append(allfound[k])
+	finds = [allfound[k] for k in keys]
 
 	return finds
 
@@ -385,8 +383,18 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 	highlightline = lineobject.index
 	citation = locusintocitation(workobject, lineobject.locustuple())
 
-	citationincontext = FormattedSearchResult(-1, authorobject.shortname, workobject.title, citation,
-											  lineobject.universalid, [])
+	if workobject.universalid[0:2] not in ['in', 'dp', 'ch']:
+		name = authorobject.shortname
+		title = workobject.title
+	else:
+		name = authorobject.idxname
+		# e.g.,  'Ionia (Ephesos) - 461'
+		# should move all of this into the builder?
+		title = workobject.title.split(' - ')
+		title = 'Number '+title[-1]
+
+	citationincontext = FormattedSearchResult(-1, name, title, citation, lineobject.universalid, [])
+
 	environs = simplecontextgrabber(workobject, highlightline, linesofcontext, curs)
 
 	for foundline in environs:

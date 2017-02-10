@@ -38,7 +38,17 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	"""
 
 	table = workobject.universalid
-	title = workobject.title
+
+	if workobject.universalid[0:2] not in ['in', 'dp', 'ch']:
+		name = authorobject.shortname
+		title = workobject.title
+	else:
+		name = authorobject.idxname
+		# e.g.,  'Ionia (Ephesos) - 461'
+		# should move all of this into the builder?
+		title = workobject.title.split(' - ')
+		title = 'Number '+title[-1]
+
 	try:
 		if int(workobject.converted_date) < 1500:
 			date = str(workobject.converted_date)
@@ -87,7 +97,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	
 	citation = locusintocitation(workobject, focusline.locustuple())
 
-	cv = '<span class="author">' + authorobject.shortname + '</span>, <span class="work">' + title + '</span><br />'
+	cv = '<span class="author">' + name + '</span>, <span class="work">' + title + '</span><br />'
 	# author + title can get pretty long
 	cv = avoidlonglines(cv, 100, '<br />', [])
 	cv += '<span class="citation">'+citation+'</span>'
