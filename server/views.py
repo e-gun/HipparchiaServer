@@ -1204,12 +1204,11 @@ def reverselexiconsearch():
 		m = match[0]
 		definition = searchdictionary(cur, dict + '_dictionary', 'entry_name', m, syntax='LIKE')
 		# returns (metrical_entry, entry_body, entry_type)
-		definition = definition[1]
-		a, s, q = entrysummary(definition, dict, translationlabel)
-		del a
-		del q
 
-		for sense in s:
+		definition = definition['definition']
+		summarydict = entrysummary(definition, dict, translationlabel)
+
+		for sense in summarydict['senses']:
 			if re.search(r'^'+seeking,sense) is not None:
 				entries.append(m)
 
@@ -1217,9 +1216,10 @@ def reverselexiconsearch():
 	entries = polytonicsort(entries)
 
 	# in which case we should retrieve and format this entry
+	count = 0
 	for entry in entries:
-		returnarray.append(
-			{'value': browserdictionarylookup(entry, dict, cur) + '<hr style="border: 1px solid;" />'})
+		count += 1
+		returnarray.append({'value': browserdictionarylookup(count, entry, dict, cur)})
 
 	returnarray = json.dumps(returnarray)
 
