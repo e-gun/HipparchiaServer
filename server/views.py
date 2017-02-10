@@ -881,7 +881,11 @@ def getsearchlistcontents():
 		work = work[:10]
 		count += 1
 		w = workdict[work]
-		a = authordict[work[0:6]].shortname
+
+		if w.universalid[0:2] not in ['in', 'dp', 'ch']:
+			a = authordict[work[0:6]].shortname
+		else:
+			a = authordict[work[0:6]].idxname
 
 		try:
 			wordstotal += workdict[work].wordcount
@@ -893,9 +897,9 @@ def getsearchlistcontents():
 		if w.converted_date is not None:
 			if int(w.converted_date) < 2000:
 				if int(w.converted_date) < 1:
-					searchlistinfo += '('+w.converted_date[1:]+ ' BCE)&nbsp;'
+					searchlistinfo += '(<span class="date">'+w.converted_date[1:]+ ' BCE</span>)&nbsp;'
 				else:
-					searchlistinfo += '(' + w.converted_date + ' CE)&nbsp;'
+					searchlistinfo += '(<span class="date">' + w.converted_date + ' CE</span>)&nbsp;'
 
 		searchlistinfo += formatauthorandworkinfo(a, w)
 

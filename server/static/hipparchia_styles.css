@@ -37,6 +37,16 @@
 	padding-bottom: 10px;
 	}
 
+.date{
+    color: #722;
+    }
+
+.denominator{
+	position: relative;
+	bottom: -0.5em;
+	font-size: 80%;
+    }
+
 .dictionaryform {
 	color: #334750;
 	font-style: italic;
@@ -561,6 +571,8 @@ hmu_greek_in_a_latin_text {
 hmu_mid_line_citation_boundary {
 	padding: 50px;
 	}
+
+hmu_papyrological_fraction{ }
 
 hmu_roman_in_a_greek_text {
 	font-size: 90%;
