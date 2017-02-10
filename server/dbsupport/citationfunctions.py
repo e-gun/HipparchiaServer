@@ -147,7 +147,11 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 	        5: 'level_05_value'}
 
 	workdb = workid[0:6]
-	wklvs = findtoplevelofwork(workid, cursor)
+
+	if workid[0:2] in ['in', 'dp', 'ch']:
+		wklvs = 2
+	else:
+		wklvs = findtoplevelofwork(workid, cursor)
 
 	if wklvs != len(citationtuple):
 		print('mismatch between shape of work and browsing request: impossible citation of'+workid+'.')

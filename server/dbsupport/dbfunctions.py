@@ -170,8 +170,8 @@ def findtoplevelofwork(workuid, cursor):
 	except:
 		results = ['zero','','','','', '']
 
-	label = ''
-	while label == '':
+	label = None
+	while label == '' or label == None:
 		try:
 			label = results.pop()
 		except:
@@ -179,7 +179,7 @@ def findtoplevelofwork(workuid, cursor):
 			results = '[emptypop]'
 		
 	numberoflevels = len(results)+1
-	
+
 	return numberoflevels
 
 

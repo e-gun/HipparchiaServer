@@ -202,7 +202,7 @@ class dbWorkLine(object):
 		"""
 		loc = []
 		for lvl in [self.l1, self.l2, self.l3, self.l4, self.l5]:
-			if str(lvl) != '-1' and (self.wkuinversalid[0:2] not in ['in','dp'] and lvl != 'recto'):
+			if str(lvl) != '-1' and (self.wkuinversalid[0:2] not in ['in','dp', 'ch'] and lvl != 'recto'):
 				loc.append(lvl)
 		loc.reverse()
 		if loc == []:

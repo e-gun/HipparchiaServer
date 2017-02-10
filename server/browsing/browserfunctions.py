@@ -39,15 +39,8 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 	table = workobject.universalid
 
-	if workobject.universalid[0:2] not in ['in', 'dp', 'ch']:
-		name = authorobject.shortname
-		title = workobject.title
-	else:
-		name = authorobject.idxname
-		# e.g.,  'Ionia (Ephesos) - 461'
-		# should move all of this into the builder?
-		title = workobject.title.split(' - ')
-		title = 'Number '+title[-1]
+	name = authorobject.shortname
+	title = workobject.title
 
 	try:
 		if int(workobject.converted_date) < 1500:
