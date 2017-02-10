@@ -39,7 +39,11 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 	table = workobject.universalid
 
-	name = authorobject.shortname
+	if workobject.universalid[0:2] not in ['in', 'dp', 'ch']:
+		name = authorobject.shortname
+	else:
+		name = authorobject.idxname
+
 	title = workobject.title
 
 	try:
