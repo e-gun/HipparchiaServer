@@ -19,7 +19,8 @@ from server.hipparchiaclasses import ProgressPoll
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import entrysummary, dbquickfixes
-from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, lookformorphologymatches
+from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, \
+	lookformorphologymatches
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
 from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
@@ -1109,17 +1110,16 @@ def dictsearch():
 	seeking = seeking.lower()
 	seeking = re.sub('σ|ς', 'ϲ', seeking)
 	seeking = re.sub('v', '(u|v|U|V)', seeking)
-	returnarray = []
 
 	if re.search(r'[a-z]', seeking) is not None:
-		dict = 'latin'
+		usedictionary = 'latin'
 		usecolumn = 'entry_name'
 	else:
-		dict = 'greek'
+		usedictionary = 'greek'
 		usecolumn = 'unaccented_entry'
 
 	seeking = stripaccents(seeking)
-	query = 'SELECT entry_name FROM ' + dict + '_dictionary' + ' WHERE ' + usecolumn + ' ~* %s'
+	query = 'SELECT entry_name FROM ' + usedictionary + '_dictionary' + ' WHERE ' + usecolumn + ' ~* %s'
 	if seeking[0] == ' ' and seeking[-1] == ' ':
 		data = ('^' + seeking[1:-1] + '$',)
 	elif seeking[0] == ' ' and seeking[-1] != ' ':
@@ -1137,16 +1137,14 @@ def dictsearch():
 		found = []
 
 	# the results should be given the polytonicsort() treatment
+	returnarray = []
+
 	if len(found) > 0:
-		sortedfinds = []
-		finddict = {}
-		for f in found:
-			finddict[f[0]] = f
+		finddict = {f[0]:f for f in found}
 		keys = finddict.keys()
 		keys = polytonicsort(keys)
 
-		for k in keys:
-			sortedfinds.append(finddict[k])
+		sortedfinds = [finddict[k] for k in keys]
 
 		if len(sortedfinds) == 1:
 			# sending '0' to browserdictionarylookup() will hide the count number
@@ -1156,8 +1154,7 @@ def dictsearch():
 
 		for entry in sortedfinds:
 			count += 1
-			returnarray.append(
-				{'value': browserdictionarylookup(count, entry[0], dict, cur)})
+			returnarray.append({'value': browserdictionarylookup(count, entry[0], usedictionary, cur)})
 	else:
 		returnarray.append({'value':'[nothing found]'})
 

@@ -239,7 +239,7 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 
 	founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
 
-	if hipparchia.config['SHOWGLOBALCOUNTS'] == 'yes':
+	if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
 		foundcountdict = findcounts(entry, usedictionary, cursor)
 		# print('foundcountdict',entry,foundcountdict)
 
@@ -262,22 +262,23 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 			cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
 		cleanedentry += '</p>\n'
 
-		if hipparchia.config['SHOWGLOBALCOUNTS'] == 'yes':
+		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
 			if foundcountdict['totals'] > 0:
 				skiptotals = False
 				for heading in ['gr', 'lt', 'in', 'dp', 'ch']:
 					if foundcountdict[heading] == foundcountdict['totals']:
 						skiptotals = True
-				cleanedentry += '<p class="wordcounts">Uses per corpus: <br />'
+				cleanedentry += '<p class="wordcounts">Prevalence: '
 
 				if skiptotals == True:
-					headings = ['gr', 'lt', 'in', 'dp', 'ch']
+					headings = {'gr': 'Ⓖ', 'lt': 'Ⓛ', 'in':'Ⓘ', 'dp':'Ⓓ', 'ch':'Ⓒ'}
 				else:
-					headings = ['gr', 'lt', 'in', 'dp', 'ch', 'totals']
+					headings = {'gr': 'Ⓖ', 'lt': 'Ⓛ', 'in':'Ⓘ', 'dp':'Ⓓ', 'ch':'Ⓒ', 'totals': 'Ⓣ'}
 
 				for heading in headings:
 					if foundcountdict[heading] > 0:
-						cleanedentry += '&nbsp;&nbsp;&nbsp;<span class="emph">'+heading+'</span> - '+ str(foundcountdict[heading])+'<br />'
+						cleanedentry += '<span class="emph">'+headings[heading]+'</span>&nbsp;'+ str(foundcountdict[heading])+' / '
+				cleanedentry = cleanedentry[:-3]
 				cleanedentry += '</p>\n'
 
 		if hipparchia.config['SHOWLEXICALSUMMARYINFO'] == 'yes':

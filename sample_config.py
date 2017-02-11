@@ -48,6 +48,7 @@ TLGASSUMESBETACODE = 'yes'
 SHOWLINENUMBERSEVERY = 10
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 SHOWLEXICALSUMMARYINFO='yes'
+SHOWGLOBALWORDCOUNTS='yes'
 
 ### [6] the default settings for various 'session' items ###
 ##  [set any/all of these to suit your own typical use scenarios] ##

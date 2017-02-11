@@ -81,28 +81,28 @@ function parsepassagereturned(passagereturned) {
         $('#browserdialog').show();
         $('observed').click( function(e) {
             e.preventDefault();
-            $.getJSON('/observed?word='+this.id, function (definitionreturned) {
-                $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
-                var windowWidth = $(window).width();
-                var windowHeight = $(window).height();
-                $( '#parserdialog' ).dialog({
+            var windowWidth = $(window).width();
+            var windowHeight = $(window).height();
+            $( '#parserdialog' ).dialog({
                     autoOpen: false,
                     minWidth: windowWidth*.33,
                     maxHeight: windowHeight*.9,
                     // position: { my: "left top", at: "left top", of: window },
-                    title: definitionreturned[0]['observed'],
+                    title: this.id,
                     draggable: true,
                     icons: { primary: 'ui-icon-close' },
                     click: function() { $( this ).dialog( 'close' ); }
                     });
-                $( '#parserdialog' ).dialog( 'open' );
+            $( '#parserdialog' ).dialog( 'open' );
+            $( '#parserdialog' ).html('[searching...]');
+            $.getJSON('/observed?word='+this.id, function (definitionreturned) {
+                $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
                 var dLen = definitionreturned.length;
                 var linesreturned = []
                 for (i = 0; i < dLen; i++) {
                     linesreturned.push(definitionreturned[i]['value']);
                     }
                 $( '#parserdialog' ).html(linesreturned);
-
             });
             return false;
         });
