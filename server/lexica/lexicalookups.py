@@ -505,9 +505,11 @@ def findcounts(word, language, cursor):
 	use the wordcounts info:
 
 	[a] take a dictionary entry: ἄκρατοϲ
-	[b] find its possible forms
+	[b1] find the possible forms via the lemmata database: faster, but prone to fail because of silly entries like 'ὑπὸ-ἀναφέρω'
+		SELECT * FROM greek_lemmata WHERE dictionary_entry='φέρω'
+	[b2] find its possible forms via the morphology database: slower, but should work...
 		SELECT * FROM greek_morphology WHERE possible_dictionary_forms ~ '[>,]ἄκρατοϲ<'
-		(the ',' and the '<' ensure that you find the head and tail of the 'possibility' rather than a middle [φέρω vs ἐκφέρω])
+		(the '>', ',' and the '<' ensure that you find the head and tail of the 'possibility' rather than a middle [φέρω vs ἐκφέρω])
 	[c] find how many times each form appears in the wordcounts
 
 	could also use this to sort the revese lexicon hits by frequency
@@ -519,16 +521,29 @@ def findcounts(word, language, cursor):
 	manager = Manager()
 	workers = hipparchia.config['WORKERS']
 
-
-	q = 'SELECT * FROM '+language+'_morphology WHERE possible_dictionary_forms ~ %s'
-	d = ('[>,]'+word+'<',)
+	# first try:
+	q = 'SELECT * FROM '+language+'_lemmata WHERE dictionary_entry=%s'
+	d = (word,)
 	cursor.execute(q,d)
+	results = cursor.fetchone()
 
-	results = cursor.fetchall()
-
-	checklist = manager.list([r[0] for r in results])
-
-	print('checklist',checklist)
+	if results == None:
+		# second try, different table (this will take c. 2s to execute on a fast machine)
+		# note that the ultimate results will not necessarily agree (!)
+		#   lemmata     φέρω - Prevalence: Ⓖ 176,118 / Ⓛ 45 / Ⓘ 2,496 / Ⓓ 2,214 / Ⓒ 273 / Ⓣ 181,146
+		#   morphology  φέρω - Prevalence: Ⓖ 176,121 / Ⓛ 45 / Ⓘ 2,496 / Ⓓ 2,214 / Ⓒ 273 / Ⓣ 181,149
+		q = 'SELECT * FROM '+language+'_morphology WHERE possible_dictionary_forms ~ %s'
+		d = ('[>,]'+word+'<',)
+		cursor.execute(q,d)
+		results = cursor.fetchall()
+		checklist = manager.list([r[0] for r in results])
+	else:
+		# parse the lemmata entry: tab seaparated + space separated
+		#   'φέρεν (imperf ind act 3rd sg)	'φερε (imperf ind act 3rd sg)	'φερεν (imperf ind act 3rd sg) ...
+		forms = results[2]
+		forms = forms.split('\t')
+		forms = [x.split(' ')[0] for x in forms]
+		checklist = manager.list([x for x in forms if x])
 
 	finds = manager.list()
 
@@ -537,7 +552,6 @@ def findcounts(word, language, cursor):
 	for j in jobs: j.start()
 	for j in jobs: j.join()
 
-	print('# of finds',len(finds))
 	# TypeError: 'NoneType' object is not subscriptable
 
 	finds = [f for f in finds if f]
