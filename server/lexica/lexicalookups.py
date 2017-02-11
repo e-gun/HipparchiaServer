@@ -521,10 +521,15 @@ def findcounts(word, language, cursor):
 	manager = Manager()
 	workers = hipparchia.config['WORKERS']
 
+	# 'edo (1)' can only be found as 'edo1'
+	lemmaword = re.sub(r'(.*?)\s\((\d{1,})\)', r'\1\2',word)
+
 	# first try:
-	q = 'SELECT * FROM '+language+'_lemmata WHERE dictionary_entry=%s'
-	d = (word,)
+	q = 'SELECT * FROM '+language+'_lemmata WHERE dictionary_entry = %s'
+	d = (lemmaword,)
 	cursor.execute(q,d)
+	# notice that we are only grabbing one out of something like 'edo1', 'edo2', 'edo3'
+	# this needs to be fixed
 	results = cursor.fetchone()
 
 	if results == None:

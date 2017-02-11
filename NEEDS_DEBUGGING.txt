@@ -14,4 +14,3 @@
     formattedcitationincontext() needs to address this with a check of the HTML of the last line of a citation?
 
 [C] wspolling.py remains off; delete it or make it work?
-
