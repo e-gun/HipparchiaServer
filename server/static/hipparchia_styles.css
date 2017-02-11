@@ -341,7 +341,11 @@
 	color: #393F94;
 	text-shadow: 1px 1px #aaa;
 	 }
- 
+
+ .wordcounts{
+    font-size: 85%;
+    }
+
 .work, .title {
 	font-style: italic;
 	font-weight: bold;

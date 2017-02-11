@@ -8,6 +8,7 @@
 
 
 import re
+from time import time
 from multiprocessing import Value, Array
 
 
@@ -475,7 +476,4 @@ class FormattedSearchResult(object):
 		self.citationstring = citationstring
 		self.clickurl = clickurl
 		self.formattedlines = formattedlines
-
-
-
 

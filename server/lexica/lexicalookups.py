@@ -7,9 +7,9 @@
 """
 
 import re
-
+from multiprocessing import Manager, Process
 from flask import session
-
+from server.dbsupport.dbfunctions import setconnection
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
@@ -239,6 +239,10 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 
 	founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
 
+	if hipparchia.config['SHOWGLOBALCOUNTS'] == 'yes':
+		foundcountdict = findcounts(entry, usedictionary, cursor)
+		# print('foundcountdict',entry,foundcountdict)
+
 	metrics = founddict['metrics']
 	definition = founddict['definition']
 	type = founddict['type']
@@ -257,6 +261,24 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 		if u'\u0304' in metrics or u'\u0306' in metrics:
 			cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
 		cleanedentry += '</p>\n'
+
+		if hipparchia.config['SHOWGLOBALCOUNTS'] == 'yes':
+			if foundcountdict['totals'] > 0:
+				skiptotals = False
+				for heading in ['gr', 'lt', 'in', 'dp', 'ch']:
+					if foundcountdict[heading] == foundcountdict['totals']:
+						skiptotals = True
+				cleanedentry += '<p class="wordcounts">Uses per corpus: <br />'
+
+				if skiptotals == True:
+					headings = ['gr', 'lt', 'in', 'dp', 'ch']
+				else:
+					headings = ['gr', 'lt', 'in', 'dp', 'ch', 'totals']
+
+				for heading in headings:
+					if foundcountdict[heading] > 0:
+						cleanedentry += '&nbsp;&nbsp;&nbsp;<span class="emph">'+heading+'</span> - '+ str(foundcountdict[heading])+'<br />'
+				cleanedentry += '</p>\n'
 
 		if hipparchia.config['SHOWLEXICALSUMMARYINFO'] == 'yes':
 			summarydict = entrysummary(definition, usedictionary, translationlabel)
@@ -297,9 +319,7 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 		cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under '+searched+'</p>\n'
 		cleanedentry += 'But the parser can get fooled by enclitics (which will alter the accent), spelling variations, and disagreement about the number of entries for a word.<br />'
 		cleanedentry += '<br />Try looking for this word yourself by using the proper search box: something is likely to turn up. Remember that partial word searching is acceptable and that accents do not matter.'
-	
-	clickableentry = cleanedentry
-	# in progress
+
 	clickableentry = insertbrowserlookups(cleanedentry)
 	clickableentry = insertbrowserjs(clickableentry)
 	
@@ -477,3 +497,73 @@ def definebylemma(lemmadict,corporatable,cursor):
 		dictionaryentries.append('<p class="lemma">'+value+'</p>\n<p class="dictionaryentry">'+entry+'</p>\n')
 	return dictionaryentries
 
+
+def findcounts(word, language, cursor):
+	"""
+
+	use the wordcounts info:
+
+	[a] take a dictionary entry: ἄκρατοϲ
+	[b] find its possible forms
+		SELECT * FROM greek_morphology WHERE possible_dictionary_forms LIKE '%ἄκρατοϲ%'
+	[c] find how many times each form appears in the wordcounts
+
+	could also use this to sort the revese lexicon hits by frequency
+
+	:param word:
+	:param dblist:
+	:return:
+	"""
+	manager = Manager()
+	workers = hipparchia.config['WORKERS']
+
+
+	q = 'SELECT * FROM '+language+'_morphology WHERE possible_dictionary_forms LIKE %s'
+	d = ('%'+word+'%',)
+	cursor.execute(q,d)
+
+	results = cursor.fetchall()
+
+	checklist = manager.list([r[0] for r in results])
+
+	finds = manager.list()
+
+	jobs = [Process(target=mpfindcounts, args=(checklist, finds)) for i in range(workers)]
+
+	for j in jobs: j.start()
+	for j in jobs: j.join()
+
+
+	# TypeError: 'NoneType' object is not subscriptable
+	finds = [f for f in finds if f]
+
+	totalfinds = {}
+	totalfinds['totals'] = sum([f[1] for f in finds])
+	totalfinds['gr'] = sum([f[2] for f in finds])
+	totalfinds['lt'] = sum([f[3] for f in finds])
+	totalfinds['dp'] = sum([f[4] for f in finds])
+	totalfinds['in'] = sum([f[5] for f in finds])
+	totalfinds['ch'] = sum([f[6] for f in finds])
+
+	return totalfinds
+
+
+def mpfindcounts(checklist, finds):
+
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
+
+	for c in checklist:
+		initial = stripaccents(c[0])
+		q = 'SELECT * FROM wordcounts_'+initial+' WHERE entry_name=%s'
+		d = (c,)
+		try:
+			curs.execute(q, d)
+			finds.append(curs.fetchone())
+		except:
+			# the word did not start with a letter: LINE 1: SELECT * FROM wordcounts_' WHERE entry_name='''ϲτω'
+			pass
+
+	dbconnection.commit()
+
+	return finds
