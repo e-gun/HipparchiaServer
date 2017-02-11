@@ -55,7 +55,6 @@ SHOWGLOBALWORDCOUNTS='yes'
 # these items can all be set to different values via the web interface
 # below you have the values that represent what you get if you clear the session and start anew
 
-
 # valid options for the next are: shortname, authgenre, location, provenance, universalid, converted_date
 DEFAULTSORTORDER = 'shortname'
 DEFAULTEARLIESTDATE = '-850'
