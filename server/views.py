@@ -1078,7 +1078,8 @@ def findbyform():
 	returnarray = []
 
 	morphologymatches = lookformorphologymatches(word, usedictionary, cur)
-	# matches is a matchgroup: 1 = matchnumber, 2 = word, 3 = xrefnumber, 4 = body
+
+	# φέρεται --> morphologymatches [('<possibility_1>', '1', 'φέρω', '122883104', '<transl>fero</transl><analysis>pres ind mp 3rd sg</analysis>')]
 
 	if morphologymatches:
 		returnarray = lexicalmatchesintohtml(observed, morphologymatches, usedictionary, cur)
@@ -1152,9 +1153,15 @@ def dictsearch():
 		else:
 			count = 0
 
+		if len(found) > 25:
+			# it takes a long time to do the 80 finds for φερω
+			suppressprevalence = True
+		else:
+			suppressprevalence = False
+
 		for entry in sortedfinds:
 			count += 1
-			returnarray.append({'value': browserdictionarylookup(count, entry[0], usedictionary, cur)})
+			returnarray.append({'value': browserdictionarylookup(count, entry[0], usedictionary, cur, suppressprevalence)})
 	else:
 		returnarray.append({'value':'[nothing found]'})
 
@@ -1211,11 +1218,17 @@ def reverselexiconsearch():
 	entries = list(set(entries))
 	entries = polytonicsort(entries)
 
+	if len(entries) > 25:
+		# it takes a long time to do 50 finds
+		suppressprevalence = True
+	else:
+		suppressprevalence = False
+
 	# in which case we should retrieve and format this entry
 	count = 0
 	for entry in entries:
 		count += 1
-		returnarray.append({'value': browserdictionarylookup(count, entry, dict, cur)})
+		returnarray.append({'value': browserdictionarylookup(count, entry, dict, cur, suppressprevalence)})
 
 	returnarray = json.dumps(returnarray)
 

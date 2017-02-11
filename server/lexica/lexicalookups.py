@@ -213,7 +213,7 @@ def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 	return returnarray
 
 
-def browserdictionarylookup(count, entry, usedictionary, cursor):
+def browserdictionarylookup(count, entry, usedictionary, cursor, suppressprevalence=False):
 	"""
 	look up a word and return an htlm version of its dictionary entry
 	:param entry:
@@ -239,7 +239,7 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 
 	founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
 
-	if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
+	if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes' and suppressprevalence==False:
 		foundcountdict = findcounts(entry, usedictionary, cursor)
 		# print('foundcountdict',entry,foundcountdict)
 
@@ -262,7 +262,7 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 			cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
 		cleanedentry += '</p>\n'
 
-		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
+		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes' and suppressprevalence==False:
 			if foundcountdict['totals'] > 0:
 				skiptotals = False
 				for heading in ['gr', 'lt', 'in', 'dp', 'ch']:
@@ -277,7 +277,7 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 
 				for heading in headings:
 					if foundcountdict[heading] > 0:
-						cleanedentry += '<span class="emph">'+headings[heading]+'</span>&nbsp;'+ str(foundcountdict[heading])+' / '
+						cleanedentry += '<span class="emph">'+headings[heading]+'</span>&nbsp;'+ "{:,}".format(foundcountdict[heading])+' / '
 				cleanedentry = cleanedentry[:-3]
 				cleanedentry += '</p>\n'
 
@@ -287,7 +287,7 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 			summarydict = {'authors': '', 'senses': '', 'quotes': ''}
 
 		if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
-			# either you have turned off summary infor or this is basically just a gloss entry
+			# either you have turned off summary info or this is basically just a gloss entry
 			cleanedentry += formatmicroentry(definition)
 		else:
 			cleanedentry += formatdictionarysummary(summarydict)
@@ -506,7 +506,8 @@ def findcounts(word, language, cursor):
 
 	[a] take a dictionary entry: ἄκρατοϲ
 	[b] find its possible forms
-		SELECT * FROM greek_morphology WHERE possible_dictionary_forms LIKE '%ἄκρατοϲ%'
+		SELECT * FROM greek_morphology WHERE possible_dictionary_forms ~ '[>,]ἄκρατοϲ<'
+		(the ',' and the '<' ensure that you find the head and tail of the 'possibility' rather than a middle [φέρω vs ἐκφέρω])
 	[c] find how many times each form appears in the wordcounts
 
 	could also use this to sort the revese lexicon hits by frequency
@@ -519,13 +520,15 @@ def findcounts(word, language, cursor):
 	workers = hipparchia.config['WORKERS']
 
 
-	q = 'SELECT * FROM '+language+'_morphology WHERE possible_dictionary_forms LIKE %s'
-	d = ('%'+word+'%',)
+	q = 'SELECT * FROM '+language+'_morphology WHERE possible_dictionary_forms ~ %s'
+	d = ('[>,]'+word+'<',)
 	cursor.execute(q,d)
 
 	results = cursor.fetchall()
 
 	checklist = manager.list([r[0] for r in results])
+
+	print('checklist',checklist)
 
 	finds = manager.list()
 
@@ -534,8 +537,9 @@ def findcounts(word, language, cursor):
 	for j in jobs: j.start()
 	for j in jobs: j.join()
 
-
+	print('# of finds',len(finds))
 	# TypeError: 'NoneType' object is not subscriptable
+
 	finds = [f for f in finds if f]
 
 	totalfinds = {}
@@ -556,14 +560,20 @@ def mpfindcounts(checklist, finds):
 
 	for c in checklist:
 		initial = stripaccents(c[0])
-		q = 'SELECT * FROM wordcounts_'+initial+' WHERE entry_name=%s'
-		d = (c,)
-		try:
-			curs.execute(q, d)
-			finds.append(curs.fetchone())
-		except:
-			# the word did not start with a letter: LINE 1: SELECT * FROM wordcounts_' WHERE entry_name='''ϲτω'
-			pass
+		if initial in 'abcdefghijklmnopqrstuvwxyzαβψδεφγηιξκλμνοπρϲτυωχθζ':
+			# note that we just lost "'φερον", "'φερεν", "'φέρεν", "'φερεϲ", "'φερε",...
+			# this needs to be addressed in HipparchiaBuilder
+			q = 'SELECT * FROM wordcounts_'+initial+' WHERE entry_name=%s'
+			d = (c,)
+			try:
+				curs.execute(q, d)
+				result = curs.fetchone()
+			except:
+				# the word did not start with a letter: LINE 1: SELECT * FROM wordcounts_' WHERE entry_name='''ϲτω'
+				result = None
+
+			if result:
+				finds.append(result)
 
 	dbconnection.commit()
 
