@@ -89,12 +89,6 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 	wkid = workdbname[0:10]
 	
 	mysyntax = '~*'
-	if seeking[0] == ' ':
-		# otherwise you will miss words that start lines because they do not have a leading whitespace
-		seeking = r'(^|\s)' + seeking[1:]
-	elif seeking[0:1] == '\s':
-		seeking = r'(^|\s)' + seeking[2:]
-	
 	restrictions = []
 	for p in session['psgexclusions']:
 		if workdbname in p:
@@ -146,12 +140,6 @@ def substringsearch(seeking, cursor, workdbname, authors):
 	seeking = cleansearchterm(seeking)
 	
 	mysyntax = '~*'
-	if seeking[0] == ' ':
-		# otherwise you will miss words that start lines because they do not have a leading whitespace
-		seeking = r'(^|\s)' + seeking[1:]
-	elif seeking[0:1] == '\s':
-		seeking = r'(^|\s)' + seeking[2:]
-	
 	found = []
 	
 	if len(workdbname) == 10:

@@ -157,6 +157,7 @@ def executesearch():
 
 	if len(seeking) > 0:
 		seeking = seeking.lower()
+
 		starttime = time.time()
 		poll[ts].statusis('Compiling the list of works to search')
 
@@ -1063,15 +1064,15 @@ def findbyform():
 	cur = dbc.cursor()
 
 	observed = request.args.get('word', '')
-	word = re.sub('[\W_|]+', '',observed)
+	cleanedword = re.sub('[\W_|]+', '',observed)
 	# oddly 'ὕβˈριν' survives the '\W' check; should be ready to extend this list
-	word = re.sub('[ˈ]+', '', word)
-	word = removegravity(word)
+	cleanedword = re.sub('[ˈ]+', '', cleanedword)
+	cleanedword = removegravity(cleanedword)
 	# python seems to know how to do this with greek...
-	word = word.lower()
+	word = cleanedword.lower()
 
 	if re.search(r'[a-z]', word[0]) is not None:
-		word = stripaccents(word)
+		cleanedword = stripaccents(word)
 		usedictionary = 'latin'
 	else:
 		usedictionary = 'greek'
@@ -1079,16 +1080,16 @@ def findbyform():
 	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
 	returnarray = []
 
-	morphologymatches = lookformorphologymatches(word, usedictionary, cur)
+	morphologymatches = lookformorphologymatches(cleanedword, usedictionary, cur)
 
 	# φέρεται --> morphologymatches [('<possibility_1>', '1', 'φέρω', '122883104', '<transl>fero</transl><analysis>pres ind mp 3rd sg</analysis>')]
 
 	if morphologymatches:
-		returnarray = lexicalmatchesintohtml(observed, morphologymatches, usedictionary, cur)
+		returnarray = lexicalmatchesintohtml(cleanedword, morphologymatches, usedictionary, cur)
 	else:
-		returnarray = [{'value': '<br />[could not find a match for '+observed+' in the morphology table]'}, {'entries': '[not found]'}]
+		returnarray = [{'value': '<br />[could not find a match for '+cleanedword+' in the morphology table]'}, {'entries': '[not found]'}]
 
-	returnarray = [{'observed':observed}] + returnarray
+	returnarray = [{'observed':cleanedword}] + returnarray
 	returnarray = json.dumps(returnarray)
 
 	cur.close()

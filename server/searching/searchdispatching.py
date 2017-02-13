@@ -41,6 +41,18 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 	:return:
 	"""
 
+	if seeking[0] == ' ':
+		# otherwise you will miss words that start lines because they do not have a leading whitespace
+		seeking = r'(^|\s)' + seeking[1:]
+	elif seeking[0:1] == '\s':
+		seeking = r'(^|\s)' + seeking[2:]
+
+	if seeking[-1] == ' ':
+		# otherwise you will miss words that start lines because they do not have a leading whitespace
+		seeking = seeking[:-1] + r'(\s|$)'
+	elif seeking[-2:] == '\s':
+		seeking = seeking[:-2] + r'(\s|$)'
+
 	activepoll.statusis('Loading the the dispatcher...')
 	# we no longer receive the full authordict but instead a pre-pruned dict: authorswheredict{}
 
