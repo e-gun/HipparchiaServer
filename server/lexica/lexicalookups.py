@@ -109,8 +109,12 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 
 	matches = None
 
-	query = 'SELECT possible_dictionary_forms FROM ' + usedictionary + '_morphology WHERE observed_form LIKE %s'
+	word = re.sub(r'[uv]', '[uv]', word)
+	word = '^'+word+'$'
+
+	query = 'SELECT possible_dictionary_forms FROM ' + usedictionary + '_morphology WHERE observed_form ~ %s'
 	data = (word,)
+	print('lookformorphologymatches q/d',query,data)
 	cursor.execute(query, data)
 
 	analysis = cursor.fetchone()
@@ -176,6 +180,15 @@ def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 	transfinder = re.compile(r'<transl>(.*?)</transl>')
 	analysisfinder = re.compile(r'<analysis>(.*?)</analysis>')
 
+	prevalence = None
+	if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
+		thiswordoccurs = mpfindcounts([observedform], [])
+		# thiswordoccurs [('ἀϲήμου', 349, 162, 0, 153, 28, 6)]
+		try:
+			prevalence = thiswordoccurs[0]
+		except:
+			# funky characters? 'miserarént'
+			pass
 	# the top part of the HTML: just the analyses
 	count = 0
 	for w in differentwordsfound:
@@ -194,7 +207,7 @@ def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 		analyses = [re.search(analysisfinder, x[1]) for x in theentry]
 		analysislist = [x.group(1) for x in analyses]
 		consolidatedentry = {'count': count, 'form': observedform, 'word': theword, 'transl': thetransl,
-							 'anal': analysislist}
+							 'anal': analysislist, 'prevalence': prevalence}
 		returnarray.append({'value': formateconsolidatedgrammarentry(consolidatedentry)})
 		entriestocheck[w] = theword
 
@@ -579,13 +592,15 @@ def mpfindcounts(checklist, finds):
 
 	for c in checklist:
 		initial = stripaccents(c[0])
+		# alternatives = re.sub(r'[uv]','[uv]',c)
+		# alternatives = '^'+alternatives+'$'
 		if initial in 'abcdefghijklmnopqrstuvwxyzαβψδεφγηιξκλμνοπρϲτυωχθζ':
 			# note that we just lost "'φερον", "'φερεν", "'φέρεν", "'φερεϲ", "'φερε",...
 			# but the punctuation killer probably zapped them long ago
 			# this needs to be addressed in HipparchiaBuilder
-			q = 'SELECT * FROM wordcounts_'+initial+' WHERE entry_name=%s'
+			q = 'SELECT * FROM wordcounts_'+initial+' WHERE entry_name = %s'
 		else:
-			q = 'SELECT * FROM wordcounts_0 WHERE entry_name=%s'
+			q = 'SELECT * FROM wordcounts_0 WHERE entry_name = %s'
 
 		d = (c,)
 		curs.execute(q, d)
