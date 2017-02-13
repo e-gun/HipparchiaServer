@@ -20,7 +20,7 @@ from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makea
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
 from server.lexica.lexicaformatting import entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, \
-	lookformorphologymatches
+	lookformorphologymatches, getobservedwordprevalencedata
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
 from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
@@ -1085,7 +1085,9 @@ def findbyform():
 	# φέρεται --> morphologymatches [('<possibility_1>', '1', 'φέρω', '122883104', '<transl>fero</transl><analysis>pres ind mp 3rd sg</analysis>')]
 
 	if morphologymatches:
-		returnarray = lexicalmatchesintohtml(cleanedword, morphologymatches, usedictionary, cur)
+		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
+			returnarray.append(getobservedwordprevalencedata(cleanedword))
+		returnarray += lexicalmatchesintohtml(cleanedword, morphologymatches, usedictionary, cur)
 	else:
 		returnarray = [{'value': '<br />[could not find a match for '+cleanedword+' in the morphology table]'}, {'entries': '[not found]'}]
 

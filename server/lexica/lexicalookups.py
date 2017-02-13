@@ -109,12 +109,16 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 
 	matches = None
 
-	word = re.sub(r'[uv]', '[uv]', word)
-	word = '^'+word+'$'
+	if usedictionary == 'latin':
+		word = re.sub(r'[uv]', '[uv]', word)
+		word = '^'+word+'$'
+		syntax = '~'
+	else:
+		syntax = '='
 
-	query = 'SELECT possible_dictionary_forms FROM ' + usedictionary + '_morphology WHERE observed_form ~ %s'
+	query = 'SELECT possible_dictionary_forms FROM ' + usedictionary + '_morphology WHERE observed_form '+syntax+' %s'
 	data = (word,)
-	print('lookformorphologymatches q/d',query,data)
+
 	cursor.execute(query, data)
 
 	analysis = cursor.fetchone()
@@ -180,15 +184,6 @@ def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 	transfinder = re.compile(r'<transl>(.*?)</transl>')
 	analysisfinder = re.compile(r'<analysis>(.*?)</analysis>')
 
-	prevalence = None
-	if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
-		thiswordoccurs = mpfindcounts([observedform], [])
-		# thiswordoccurs [('ἀϲήμου', 349, 162, 0, 153, 28, 6)]
-		try:
-			prevalence = thiswordoccurs[0]
-		except:
-			# funky characters? 'miserarént'
-			pass
 	# the top part of the HTML: just the analyses
 	count = 0
 	for w in differentwordsfound:
@@ -207,7 +202,7 @@ def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 		analyses = [re.search(analysisfinder, x[1]) for x in theentry]
 		analysislist = [x.group(1) for x in analyses]
 		consolidatedentry = {'count': count, 'form': observedform, 'word': theword, 'transl': thetransl,
-							 'anal': analysislist, 'prevalence': prevalence}
+							 'anal': analysislist}
 		returnarray.append({'value': formateconsolidatedgrammarentry(consolidatedentry)})
 		entriestocheck[w] = theword
 
@@ -612,3 +607,26 @@ def mpfindcounts(checklist, finds):
 	dbconnection.commit()
 
 	return finds
+
+
+def getobservedwordprevalencedata(dictionaryword):
+	"""
+
+	:return:
+	"""
+	thiswordoccurs = mpfindcounts([dictionaryword], [])
+	thiswordoccurs = thiswordoccurs[0]
+
+	if thiswordoccurs:
+		# ('ἀϲήμου', 349, 162, 0, 153, 28, 6)
+		categories = 'ⓉⒼⓁⒾⒹⒸ'
+		prevalence = 'Prevalence: '
+		for c in range(1,len(categories)):
+			prevalence += '<span class="emph">'+categories[c]+'</span>'+' {:,}'.format(thiswordoccurs[c+1]) + ' / '
+		prevalence += '<span class="emph">'+categories[0]+'</span>'+' {:,}'.format(thiswordoccurs[1])
+		thehtml = '<p class="wordcounts">'+prevalence+'</p>'
+
+	returngobbet = {'value': thehtml}
+
+	return returngobbet
+

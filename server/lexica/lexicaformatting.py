@@ -253,7 +253,7 @@ def formateconsolidatedgrammarentry(consolidatedentry):
 	consolidatedentry = {'count': count, 'form': wordandform[0], 'word': wordandform[1], 'transl': thetransl, 'anal': analysislist}
 
 	example:
-		{'count': 1, 'form': 'nūbibus', 'word': 'nubes', 'transl': 'a cloud', 'anal': ['fem abl pl', 'fem dat pl']}
+		 {'count': 1, 'form': 'ἀϲήμου', 'word': 'ἄϲημοϲ', 'transl': 'without mark', 'anal': ['masc/fem/neut gen sg']}
 
 	:param entrydata:
 	:return:
