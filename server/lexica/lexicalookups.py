@@ -625,8 +625,7 @@ def getobservedwordprevalencedata(dictionaryword):
 			prevalence += '<span class="emph">'+categories[c]+'</span>'+' {:,}'.format(thiswordoccurs[c+1]) + ' / '
 		prevalence += '<span class="emph">'+categories[0]+'</span>'+' {:,}'.format(thiswordoccurs[1])
 		thehtml = '<p class="wordcounts">'+prevalence+'</p>'
-
-	returngobbet = {'value': thehtml}
-
-	return returngobbet
+		return {'value': thehtml}
+	else:
+		return None
 
