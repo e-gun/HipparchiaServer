@@ -1064,6 +1064,8 @@ def findbyform():
 
 	observed = request.args.get('word', '')
 	word = re.sub('[\W_|]+', '',observed)
+	# oddly 'ὕβˈριν' survives the '\W' check; should be ready to extend this list
+	word = re.sub('[ˈ]+', '', word)
 	word = removegravity(word)
 	# python seems to know how to do this with greek...
 	word = word.lower()

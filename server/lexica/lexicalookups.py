@@ -581,18 +581,18 @@ def mpfindcounts(checklist, finds):
 		initial = stripaccents(c[0])
 		if initial in 'abcdefghijklmnopqrstuvwxyzαβψδεφγηιξκλμνοπρϲτυωχθζ':
 			# note that we just lost "'φερον", "'φερεν", "'φέρεν", "'φερεϲ", "'φερε",...
+			# but the punctuation killer probably zapped them long ago
 			# this needs to be addressed in HipparchiaBuilder
 			q = 'SELECT * FROM wordcounts_'+initial+' WHERE entry_name=%s'
-			d = (c,)
-			try:
-				curs.execute(q, d)
-				result = curs.fetchone()
-			except:
-				# the word did not start with a letter: LINE 1: SELECT * FROM wordcounts_' WHERE entry_name='''ϲτω'
-				result = None
+		else:
+			q = 'SELECT * FROM wordcounts_0 WHERE entry_name=%s'
 
-			if result:
-				finds.append(result)
+		d = (c,)
+		curs.execute(q, d)
+		result = curs.fetchone()
+
+		if result:
+			finds.append(result)
 
 	dbconnection.commit()
 
