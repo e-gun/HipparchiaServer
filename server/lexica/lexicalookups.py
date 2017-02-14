@@ -14,6 +14,7 @@ from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
 from server.searching.betacodetounicode import stripaccents
+from server.listsandsession.sessionfunctions import corpusselectionsaspseudobinarystring
 from server import hipparchia
 
 
@@ -248,8 +249,9 @@ def browserdictionarylookup(count, entry, usedictionary, cursor, suppressprevale
 	founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
 
 	if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes' and suppressprevalence==False:
-		foundcountdict = findcounts(entry, usedictionary, cursor)
-		# print('foundcountdict',entry,foundcountdict)
+		totalfinds = findcounts(entry, usedictionary, cursor)
+		# totalfinds ('ϲυνόχωκα', 16299, 15840, 6, 405, 45, 3)
+		hitdict = buildhitdict(totalfinds)
 
 	metrics = founddict['metrics']
 	definition = founddict['definition']
@@ -271,23 +273,21 @@ def browserdictionarylookup(count, entry, usedictionary, cursor, suppressprevale
 		cleanedentry += '</p>\n'
 
 		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes' and suppressprevalence==False:
-			if foundcountdict['totals'] > 0:
-				skiptotals = False
-				for heading in ['gr', 'lt', 'in', 'dp', 'ch']:
-					if foundcountdict[heading] == foundcountdict['totals']:
-						skiptotals = True
-				cleanedentry += '<p class="wordcounts">Prevalence: '
-
-				if skiptotals == True:
-					headings = {'gr': 'Ⓖ', 'lt': 'Ⓛ', 'in':'Ⓘ', 'dp':'Ⓓ', 'ch':'Ⓒ'}
-				else:
-					headings = {'gr': 'Ⓖ', 'lt': 'Ⓛ', 'in':'Ⓘ', 'dp':'Ⓓ', 'ch':'Ⓒ', 'totals': 'Ⓣ'}
-
-				for heading in headings:
-					if foundcountdict[heading] > 0:
-						cleanedentry += '<span class="emph">'+headings[heading]+'</span>&nbsp;'+ "{:,}".format(foundcountdict[heading])+' / '
+			cleanedentry += '<p class="wordcounts">Prevalence: '
+			max = 0
+			for i in range(0, 5):
+				if hitdict[i][0] > max:
+					max = hitdict[i][0]
+				if hitdict[i][0] > 0:
+					cleanedentry += '<span class="emph">' + hitdict[i][1] + '</span>' + ' {:,}'.format(
+						hitdict[i][0]) + ' / '
+			if hitdict['total'][0] != max:
+				cleanedentry += '<span class="emph">' + hitdict['total'][1] + '</span>' + ' {:,}'.format(
+					hitdict['total'][0])
+			else:
+				# there was just one hit; so you should drop the ' / '
 				cleanedentry = cleanedentry[:-3]
-				cleanedentry += '</p>\n'
+			cleanedentry += '</p>\n'
 
 		if hipparchia.config['SHOWLEXICALSUMMARYINFO'] == 'yes':
 			summarydict = entrysummary(definition, usedictionary, translationlabel)
@@ -522,6 +522,9 @@ def findcounts(word, language, cursor):
 
 	could also use this to sort the revese lexicon hits by frequency
 
+	sample output: (word, totals, gr, lt, dp, in, ch)
+		totalfinds ('ϲυνόχωκα', 16299, 15840, 6, 405, 45, 3)
+
 	:param word:
 	:param dblist:
 	:return:
@@ -569,13 +572,24 @@ def findcounts(word, language, cursor):
 
 	finds = [f for f in finds if f]
 
-	totalfinds = {}
-	totalfinds['totals'] = sum([f[1] for f in finds])
-	totalfinds['gr'] = sum([f[2] for f in finds])
-	totalfinds['lt'] = sum([f[3] for f in finds])
-	totalfinds['dp'] = sum([f[4] for f in finds])
-	totalfinds['in'] = sum([f[5] for f in finds])
-	totalfinds['ch'] = sum([f[6] for f in finds])
+	# totalfinds = {}
+	# totalfinds['totals'] = sum([f[1] for f in finds])
+	# totalfinds['gr'] = sum([f[2] for f in finds])
+	# totalfinds['lt'] = sum([f[3] for f in finds])
+	# totalfinds['dp'] = sum([f[4] for f in finds])
+	# totalfinds['in'] = sum([f[5] for f in finds])
+	# totalfinds['ch'] = sum([f[6] for f in finds])
+
+	# (word, totals, gr, lt, dp, in, ch)
+	totalfinds = (
+		word,
+		sum([f[1] for f in finds]),
+		sum([f[2] for f in finds]),
+		sum([f[3] for f in finds]),
+		sum([f[4] for f in finds]),
+		sum([f[5] for f in finds]),
+		sum([f[6] for f in finds])
+		)
 
 	return totalfinds
 
@@ -615,17 +629,56 @@ def getobservedwordprevalencedata(dictionaryword):
 	:return:
 	"""
 	thiswordoccurs = mpfindcounts([dictionaryword], [])
-	thiswordoccurs = thiswordoccurs[0]
+
+	try:
+		thiswordoccurs = thiswordoccurs[0]
+	except:
+		return None
 
 	if thiswordoccurs:
-		# ('ἀϲήμου', 349, 162, 0, 153, 28, 6)
-		categories = 'ⓉⒼⓁⒾⒹⒸ'
+
+		hitdict = buildhitdict(thiswordoccurs)
+
 		prevalence = 'Prevalence: '
-		for c in range(1,len(categories)):
-			prevalence += '<span class="emph">'+categories[c]+'</span>'+' {:,}'.format(thiswordoccurs[c+1]) + ' / '
-		prevalence += '<span class="emph">'+categories[0]+'</span>'+' {:,}'.format(thiswordoccurs[1])
+		max = 0
+		for i in range(0,5):
+			if hitdict[i][0] > max:
+				max = hitdict[i][0]
+			if hitdict[i][0] > 0:
+				prevalence += '<span class="emph">'+hitdict[i][1]+'</span>'+' {:,}'.format(hitdict[i][0]) + ' / '
+		if hitdict['total'][0] != max:
+			prevalence += '<span class="emph">'+hitdict['total'][1]+'</span>'+' {:,}'.format(hitdict['total'][0])
+		else:
+			# there was just one hit; so you should drop the ' / '
+			prevalence = prevalence[:-3]
 		thehtml = '<p class="wordcounts">'+prevalence+'</p>'
 		return {'value': thehtml}
 	else:
 		return None
 
+
+def buildhitdict(thiswordoccurs):
+	"""
+
+	take the tuple and map it into a dict
+	this will help with formatting since two functions call this information and the results should look the same
+
+	in:
+		thiswordoccurs ('βάδιζε', 257, 253, 0, 0, 2, 2)
+
+	out:
+		hitdict {'total': (257, 'Ⓣ'), 1: (253, 'Ⓖ'), 0: (0, 'Ⓛ'), 3: (0, 'Ⓓ'), 2: (2, 'Ⓘ'), 4: (2, 'Ⓒ')}
+
+	:param thiswordoccurs:
+	:return:
+	"""
+
+	hitdict = {'total': (thiswordoccurs[1], 'Ⓣ'),
+	           1: (thiswordoccurs[2], 'Ⓖ'),
+	           0: (thiswordoccurs[3], 'Ⓛ'),
+	           3: (thiswordoccurs[4], 'Ⓓ'),
+	           2: (thiswordoccurs[5], 'Ⓘ'),
+	           4: (thiswordoccurs[6], 'Ⓒ'),
+	           }
+
+	return hitdict
