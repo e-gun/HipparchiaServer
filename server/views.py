@@ -1158,7 +1158,7 @@ def dictsearch():
 		else:
 			count = 0
 
-		if len(found) > 25:
+		if len(found) > 10:
 			# it takes a long time to do the 80 finds for φερω
 			suppressprevalence = True
 		else:

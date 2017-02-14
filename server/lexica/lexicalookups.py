@@ -546,7 +546,7 @@ def findcounts(word, language, cursor):
 		forms = [x.split(' ')[0] for x in forms]
 		checklist = manager.list([x for x in forms if x])
 
-	# print('checklist',checklist)
+	print('checklist',checklist)
 
 	finds = manager.list()
 
@@ -557,6 +557,8 @@ def findcounts(word, language, cursor):
 
 	# TypeError: 'NoneType' object is not subscriptable
 	finds = [f for f in finds if f]
+	# mp means multiple versions of the same result can come back
+	finds = list(set(finds))
 
 	# totalfinds = {}
 	# totalfinds['totals'] = sum([f[1] for f in finds])
@@ -633,6 +635,7 @@ def getobservedwordprevalencedata(dictionaryword):
 	else:
 		return None
 
+
 def formatprevalencedata(hitdict):
 	"""
 
@@ -654,6 +657,7 @@ def formatprevalencedata(hitdict):
 		thehtml = thehtml[:-3]
 
 	return thehtml
+
 
 def buildhitdict(thiswordoccurs):
 	"""

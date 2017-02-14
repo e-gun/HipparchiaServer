@@ -15,6 +15,7 @@ from server import hipparchia
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+
 def removegravity(accentedword):
 	"""
 	turn all graves into accutes so you can match the dictionary form
@@ -23,40 +24,67 @@ def removegravity(accentedword):
 	"""
 	# this failed to work when i typed the greekkeys versions: look out for identical looks with diff unicode vals...
 	# meanwhile eta did not work until the unicode codes were forced...
-	accenttuples = (
-		(r'ὰ', r'ά'),
-		(r'ὲ', r'έ'),
-		(r'ὶ', r'ί'),
-		(r'ὸ',r'ό'),
-		(r'ὺ', r'ύ'),
-		(r'ὴ', r'ή'),
-		(r'ὼ', r'ώ'),
-		(r'ἃ', r'ἅ'),
-		(r'ἓ', r'ἕ'),
-		(r'ἳ', r'ἵ'),
-		(r'ὃ', r'ὅ'),
-		(r'ὓ', r'ὕ'),
-		(r'ἣ', r'ἥ'),
-		(r'ὣ', r'ὥ'),
-		(r'ἂ', r'ἄ'),
-		(r'ἒ', r'ἔ'),
-		(r'ἲ', r'ἴ'),
-		(r'ὂ', r'ὄ'),
-		(r'ὒ', r'ὔ'),
-		(r'ἢ', r'ἤ'),
-		(r'ὢ', r'ὤ'),
-		(r'ᾃ', r'ᾅ'),
-		(r'ᾓ', r'ᾕ'),
-		(r'ᾣ', r'ᾥ'),
-		(r'ᾂ', r'ᾄ'),
-		(r'ᾒ', r'ᾔ'),
-		(r'ᾢ', r'ᾤ'),
-	)
 
-	for i in range(0, len(accenttuples)):
-		accentedword = re.sub(accenttuples[i][0], accenttuples[i][1], accentedword)
+	terminalgravea = re.compile(r'([ὰὲὶὸὺὴὼἂἒἲὂὒἢὢᾃᾓᾣᾂᾒᾢ])$')
+	terminalgraveb = re.compile(r'([ὰὲὶὸὺὴὼἂἒἲὂὒἢὢᾃᾓᾣᾂᾒᾢ])(.)$')
+
+	try:
+		if accentedword[-1] in 'ὰὲὶὸὺὴὼἂἒἲὂὒἢὢᾃᾓᾣᾂᾒᾢ':
+			accentedword = re.sub(terminalgravea, forceterminalacute, accentedword)
+	except:
+		# the word was not >0 char long
+		pass
+	try:
+		if accentedword[-2] in 'ὰὲὶὸὺὴὼἂἒἲὂὒἢὢᾃᾓᾣᾂᾒᾢ':
+			accentedword = re.sub(terminalgraveb, forceterminalacute, accentedword)
+	except:
+		# the word was not >1 char long
+		pass
 
 	return accentedword
+
+
+def forceterminalacute(matchgroup):
+	"""
+	θαμά and θαμὰ need to be stored in the same place
+
+	otherwise you will click on θαμὰ, search for θαμά and get prevalence data that is not what you really wanted
+
+	:param match:
+	:return:
+	"""
+
+	map = { 'ὰ': 'ά',
+	        'ὲ': 'έ',
+	        'ὶ': 'ί',
+	        'ὸ': 'ό',
+	        'ὺ': 'ύ',
+	        'ὴ': 'ή',
+	        'ὼ': 'ώ',
+			'ἂ': 'ἄ',
+			'ἒ': 'ἔ',
+			'ἲ': 'ἴ',
+			'ὂ': 'ὄ',
+			'ὒ': 'ὔ',
+			'ἢ': 'ἤ',
+			'ὢ': 'ὤ',
+			'ᾃ': 'ᾅ',
+			'ᾓ': 'ᾕ',
+			'ᾣ': 'ᾥ',
+			'ᾂ': 'ᾄ',
+			'ᾒ': 'ᾔ',
+			'ᾢ': 'ᾤ',
+		}
+
+	substitute = map[matchgroup[1]]
+	try:
+		# the word did not end with a vowel
+		substitute += matchgroup[2]
+	except:
+		# the word ended with a vowel
+		pass
+
+	return substitute
 
 
 def stripaccents(texttostrip):
@@ -253,11 +281,9 @@ def injectbrowserjavascript(listofurls):
 	:return:
 	"""
 	
-	jsoutput = ''
-	
-	for url in listofurls:
-		jsoutput += '\n\tdocument.getElementById("'+url+'").onclick = openbrowserfromclick;'
-	
+	jso = ['document.getElementById("'+url+'").onclick = openbrowserfromclick;' for url in listofurls]
+	jsoutput = '\n'.join(jso)
+
 	return jsoutput
 
 
