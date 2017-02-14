@@ -546,7 +546,7 @@ def findcounts(word, language, cursor):
 		forms = [x.split(' ')[0] for x in forms]
 		checklist = manager.list([x for x in forms if x])
 
-	print('checklist',checklist)
+	# print('checklist',checklist)
 
 	finds = manager.list()
 
