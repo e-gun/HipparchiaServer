@@ -247,11 +247,6 @@ def browserdictionarylookup(count, entry, usedictionary, cursor, suppressprevale
 
 	founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
 
-	if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes' and suppressprevalence==False:
-		totalfinds = findcounts(entry, usedictionary, cursor)
-		# totalfinds ('ϲυνόχωκα', 16299, 15840, 6, 405, 45, 3)
-		hitdict = buildhitdict(totalfinds)
-
 	metrics = founddict['metrics']
 	definition = founddict['definition']
 	type = founddict['type']
@@ -272,20 +267,11 @@ def browserdictionarylookup(count, entry, usedictionary, cursor, suppressprevale
 		cleanedentry += '</p>\n'
 
 		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes' and suppressprevalence==False:
-			cleanedentry += '<p class="wordcounts">Prevalence: '
-			max = 0
-			for i in range(0, 5):
-				if hitdict[i][0] > max:
-					max = hitdict[i][0]
-				if hitdict[i][0] > 0:
-					cleanedentry += '<span class="emph">' + hitdict[i][1] + '</span>' + ' {:,}'.format(
-						hitdict[i][0]) + ' / '
-			if hitdict['total'][0] != max:
-				cleanedentry += '<span class="emph">' + hitdict['total'][1] + '</span>' + ' {:,}'.format(
-					hitdict['total'][0])
-			else:
-				# there was just one hit; so you should drop the ' / '
-				cleanedentry = cleanedentry[:-3]
+			totalfinds = findcounts(entry, usedictionary, cursor)
+			# totalfinds ('ϲυνόχωκα', 16299, 15840, 6, 405, 45, 3)
+			hitdict = buildhitdict(totalfinds)
+			cleanedentry += '<p class="wordcounts">Prevalence (all forms): '
+			cleanedentry += formatprevalencedata(hitdict)
 			cleanedentry += '</p>\n'
 
 		if hipparchia.config['SHOWLEXICALSUMMARYINFO'] == 'yes':
@@ -560,6 +546,8 @@ def findcounts(word, language, cursor):
 		forms = [x.split(' ')[0] for x in forms]
 		checklist = manager.list([x for x in forms if x])
 
+	# print('checklist',checklist)
+
 	finds = manager.list()
 
 	jobs = [Process(target=mpfindcounts, args=(checklist, finds)) for i in range(workers)]
@@ -637,23 +625,35 @@ def getobservedwordprevalencedata(dictionaryword):
 
 		hitdict = buildhitdict(thiswordoccurs)
 
-		prevalence = 'Prevalence: '
-		max = 0
-		for i in range(0,5):
-			if hitdict[i][0] > max:
-				max = hitdict[i][0]
-			if hitdict[i][0] > 0:
-				prevalence += '<span class="emph">'+hitdict[i][1]+'</span>'+' {:,}'.format(hitdict[i][0]) + ' / '
-		if hitdict['total'][0] != max:
-			prevalence += '<span class="emph">'+hitdict['total'][1]+'</span>'+' {:,}'.format(hitdict['total'][0])
-		else:
-			# there was just one hit; so you should drop the ' / '
-			prevalence = prevalence[:-3]
-		thehtml = '<p class="wordcounts">'+prevalence+'</p>'
+		prevalence = 'Prevalence (this form): '
+		prevalence += formatprevalencedata(hitdict)
+		thehtml = '<p class="wordcounts">' + prevalence + '</p>'
+
 		return {'value': thehtml}
 	else:
 		return None
 
+def formatprevalencedata(hitdict):
+	"""
+
+	:param hitdict:
+	:return:
+	"""
+
+	thehtml = ''
+	max = 0
+	for i in range(0, 5):
+		if hitdict[i][0] > max:
+			max = hitdict[i][0]
+		if hitdict[i][0] > 0:
+			thehtml += '<span class="emph">' + hitdict[i][1] + '</span>' + ' {:,}'.format(hitdict[i][0]) + ' / '
+	if hitdict['total'][0] != max:
+		thehtml += '<span class="emph">' + hitdict['total'][1] + '</span>' + ' {:,}'.format(hitdict['total'][0])
+	else:
+		# there was just one hit; so you should drop the ' / '
+		thehtml = thehtml[:-3]
+
+	return thehtml
 
 def buildhitdict(thiswordoccurs):
 	"""
