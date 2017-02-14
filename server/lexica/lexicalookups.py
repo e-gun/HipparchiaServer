@@ -14,7 +14,6 @@ from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
 from server.searching.betacodetounicode import stripaccents
-from server.listsandsession.sessionfunctions import corpusselectionsaspseudobinarystring
 from server import hipparchia
 
 
@@ -569,7 +568,6 @@ def findcounts(word, language, cursor):
 	for j in jobs: j.join()
 
 	# TypeError: 'NoneType' object is not subscriptable
-
 	finds = [f for f in finds if f]
 
 	# totalfinds = {}
