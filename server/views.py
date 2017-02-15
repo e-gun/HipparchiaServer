@@ -30,7 +30,7 @@ from server.textsandconcordnaces.textandconcordancehelperfunctions import tcpars
 from server.textsandconcordnaces.textbuilder import buildtext
 from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, justlatin, justtlg, reducetosessionselections, returnactivedbs
-from server.formatting_helper_functions import removegravity, stripaccents, bcedating, htmlifysearchfinds
+from server.formatting_helper_functions import removegravity, stripaccents, bcedating, htmlifysearchfinds, cleanwords
 from server.listsandsession.listmanagement import dropdupes, polytonicsort, sortauthorandworklists, sortresultslist, \
 	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions
 from server.browsing.browserfunctions import getandformatbrowsercontext
@@ -115,12 +115,12 @@ def executesearch():
 	sessionvariables()
 	# need to sanitize input at least a bit...
 	try:
-		seeking = re.sub(r'[\'"`!;&]', '', request.args.get('seeking', ''))
+		seeking = cleanwords(request.args.get('seeking', ''))
 	except:
 		seeking = ''
 
 	try:
-		proximate = re.sub(r'[\'"`!;&]', '', request.args.get('proximate', ''))
+		proximate = cleanwords(request.args.get('proximate', ''))
 	except:
 		proximate = ''
 
