@@ -80,6 +80,7 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 		activepoll.statusis('Executing a simple word search...')
 		jobs = [Process(target=workonsimplesearch, args=(count, foundlineobjects, seeking, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	elif searchtype == 'phrase':
+		print('len(authorandworklist)',len(authorandworklist))
 		activepoll.statusis('Executing a phrase search. Checking longest term first...<br />Progress meter only measures this first pass')
 		jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, seeking, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	elif searchtype == 'proximity':

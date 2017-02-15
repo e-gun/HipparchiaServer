@@ -47,6 +47,7 @@ def phrasesearch(searchphrase, cursor, wkid, authorswheredict, activepoll):
 	
 	fullmatches = []
 	for hit in hits:
+		print('hit',hit)
 		phraselen = len(searchphrase.split(' '))
 		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, cursor)
 		if session['accentsmatter'] == 'no':
@@ -54,7 +55,8 @@ def phrasesearch(searchphrase, cursor, wkid, authorswheredict, activepoll):
 		else:
 			# the difference is in the apostrophe: δ vs δ’
 			wordset = re.sub(r'[\.\?\!;:,·]', r'', wordset)
-		
+
+		print('wordset',wordset,'\n')
 		if session['nearornot'] == 'T' and re.search(searchphrase, wordset) is not None:
 			fullmatches.append(hit)
 			activepoll.addhits(1)

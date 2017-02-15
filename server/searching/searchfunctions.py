@@ -193,14 +193,12 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 
 	workdbname = workid[0:6]
 
-	query = 'SELECT * FROM ' + workdbname + ' WHERE index >= %s AND index <= %s'
+	query = 'SELECT * FROM ' + workdbname + ' WHERE index >= %s AND index <= %s ORDER BY index ASC'
 	data = (linenumber-1, linenumber+1)
 	cursor.execute(query, data)
 	results = cursor.fetchall()
-	lines = []
-	for r in results:
-		lines.append(dblineintolineobject(r))
 
+	lines = [dblineintolineobject(r) for r in results]
 	# will get key errors if there is no linenumber+/-1
 	if len(lines) == 2:
 		if lines[0].index == linenumber:
@@ -210,11 +208,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 	if len(lines) == 1:
 		lines = [makeablankline(workdbname, linenumber-1)] + lines
 		lines.append(makeablankline(workdbname, linenumber+1))
-	
-	ldict = {}
-	for line in lines:
-		ldict[line.index] = line
-	
+
 	text = []
 	for line in lines:
 		if session['accentsmatter'] == 'yes':
