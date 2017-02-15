@@ -12,6 +12,8 @@ from flask import session
 
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
 from server.searching.searchformatting import cleansearchterm
+from server.lexica.lexicalookups import mpfindcounts
+from server.formatting_helper_functions import removegravity
 
 
 def whereclauses(uidwithatsign, operand, authors):
@@ -229,3 +231,40 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 	
 	return aggregate
 
+
+def findleastcommonterm(searchphrase):
+	"""
+
+	use the wordcounts to determine the best word to pick first
+
+	:param listofterms:
+	:return:
+	"""
+	stillneedtofindterm = True
+	searchphrase = cleansearchterm(searchphrase)
+	searchterms = searchphrase.split(' ')
+	searchterms = [x for x in searchterms if x]
+	if session['accentsmatter'] == 'yes':
+		# note that graves have been eliminated from the wordcounts; so we have to do the same here
+		# but we still need access to the actual search terms, hence the dict
+		searchterms = {removegravity(t): t for t in searchterms}
+		counts = mpfindcounts(searchterms.keys(), [])
+		# print('counts', counts)
+		# counts [('βεβήλων', 84, 84, 0, 0, 0, 0), ('ὀλίγοϲ', 596, 589, 0, 3, 4, 0)]
+		totals = [(c[1], c[0]) for c in counts]
+		max = sorted(totals, reverse=False)
+		try:
+			leastcommonterm = searchterms[max[0][1]]
+			stillneedtofindterm = False
+		except:
+			# failed so you will do plan b in a moment
+			pass
+
+	if stillneedtofindterm:
+		longestterm = searchterms[0]
+		for term in searchterms:
+			if len(term) > len(longestterm):
+				longestterm = term
+		leastcommonterm = longestterm
+
+	return leastcommonterm

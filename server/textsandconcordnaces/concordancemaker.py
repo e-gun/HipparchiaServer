@@ -9,7 +9,8 @@
 
 from collections import deque
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
-from server.textsandconcordnaces.textandconcordancehelperfunctions import cleanwords
+from server.formatting_helper_functions import cleanwords
+
 
 def compilewordlists(worksandboundaries, cursor):
 	"""

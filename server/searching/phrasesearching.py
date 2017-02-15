@@ -16,7 +16,7 @@ from server.searching.searchfunctions import substringsearch, simplesearchworkwi
 	lookoutsideoftheline
 
 
-def phrasesearch(searchphrase, cursor, wkid, authorswheredict, activepoll):
+def phrasesearch(leastcommon, searchphrase, cursor, wkid, authorswheredict, activepoll):
 	"""
 	a whitespace might mean things are on a new line
 	note how horrible something like και δη και is: you will search και first and then...
@@ -30,24 +30,14 @@ def phrasesearch(searchphrase, cursor, wkid, authorswheredict, activepoll):
 	:return:
 	"""
 
-	searchphrase = cleansearchterm(searchphrase)
-	searchterms = searchphrase.split(' ')
-	searchterms = [x for x in searchterms if x]
-	
-	longestterm = searchterms[0]
-	for term in searchterms:
-		if len(term) > len(longestterm):
-			longestterm = term
-	
 	if 'x' not in wkid:
-		hits = substringsearch(longestterm, cursor, wkid, authorswheredict)
+		hits = substringsearch(leastcommon, cursor, wkid, authorswheredict)
 	else:
 		wkid = re.sub('x', 'w', wkid)
-		hits = simplesearchworkwithexclusion(longestterm, wkid, authorswheredict, cursor)
+		hits = simplesearchworkwithexclusion(leastcommon, wkid, authorswheredict, cursor)
 	
 	fullmatches = []
 	for hit in hits:
-		print('hit',hit)
 		phraselen = len(searchphrase.split(' '))
 		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, cursor)
 		if session['accentsmatter'] == 'no':
@@ -56,7 +46,6 @@ def phrasesearch(searchphrase, cursor, wkid, authorswheredict, activepoll):
 			# the difference is in the apostrophe: δ vs δ’
 			wordset = re.sub(r'[\.\?\!;:,·]', r'', wordset)
 
-		print('wordset',wordset,'\n')
 		if session['nearornot'] == 'T' and re.search(searchphrase, wordset) is not None:
 			fullmatches.append(hit)
 			activepoll.addhits(1)
@@ -212,3 +201,4 @@ def shortphrasesearch(count, foundlineobjects, searchphrase, workstosearch, auth
 	del dbconnection
 	
 	return foundlineobjects
+

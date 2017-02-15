@@ -684,3 +684,5 @@ def buildhitdict(thiswordoccurs):
 	           }
 
 	return hitdict
+
+

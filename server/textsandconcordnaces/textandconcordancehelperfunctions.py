@@ -6,16 +6,14 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-
 import re
-import time
-from string import punctuation
 from collections import deque
 
-from server.dbsupport.dbfunctions import grabonelinefromwork, dblineintolineobject, makeanemptyauthor, makeanemptywork
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
+from server.dbsupport.dbfunctions import grabonelinefromwork, dblineintolineobject, makeanemptyauthor, makeanemptywork
 from server.listsandsession.listmanagement import polytonicsort
 from server.searching.searchfunctions import whereclauses
+
 
 def tcparserequest(request, authordict, workdict):
 	"""
@@ -168,23 +166,3 @@ def concordancesorter(unsortedoutput):
 	return sortedoutput
 
 
-def cleanwords(word):
-	"""
-	remove gunk that should not be in a concordance
-	:param word:
-	:return:
-	"""
-	punct = re.compile('[%s]' % re.escape(punctuation + '\′‵’‘·“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'))
-	# hard to know whether or not to do the editorial insertions stuff: ⟫⟪⌈⌋⌊
-	# word = re.sub(r'\[.*?\]','', word) # '[o]missa' should be 'missa'
-	word = re.sub(r'[0-9]', '', word)
-	word = re.sub(punct, '', word)
-	# best do punct before this next one...
-	try:
-		if re.search(r'[a-zA-z]', word[0]) is None:
-			word = re.sub(r'[a-zA-z]', '', word)
-	except:
-		# must have been ''
-		pass
-	
-	return word

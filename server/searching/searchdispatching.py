@@ -16,7 +16,7 @@ from server.dbsupport.dbfunctions import dblineintolineobject, setconnection
 from server.hipparchiaclasses import MPCounter
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.phrasesearching import shortphrasesearch, phrasesearch
-from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion
+from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, findleastcommonterm
 
 
 def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorswheredict, activepoll):
@@ -80,9 +80,13 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 		activepoll.statusis('Executing a simple word search...')
 		jobs = [Process(target=workonsimplesearch, args=(count, foundlineobjects, seeking, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	elif searchtype == 'phrase':
-		print('len(authorandworklist)',len(authorandworklist))
-		activepoll.statusis('Executing a phrase search. Checking longest term first...<br />Progress meter only measures this first pass')
-		jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, seeking, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
+		if session['accentsmatter'] == 'no':
+			criterion = 'longest'
+		else:
+			criterion = 'least common'
+		activepoll.statusis('Executing a phrase search. Checking the '+criterion+' term first...<br />Progress meter only measures this first pass')
+		leastcommon = findleastcommonterm(seeking)
+		jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, leastcommon, seeking, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	elif searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
 		jobs = [Process(target=workonproximitysearch, args=(count, foundlineobjects, seeking, proximate, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
@@ -205,7 +209,7 @@ def workonsimplesearch(count, foundlineobjects, seeking, searchinginside, commit
 	return foundlineobjects
 
 
-def workonphrasesearch(foundlineobjects, seeking, searchinginside, commitcount, whereclauseinfo, activepoll):
+def workonphrasesearch(foundlineobjects, leastcommon, seeking, searchinginside, commitcount, whereclauseinfo, activepoll):
 	"""
 	a multiprocessors aware function that hands off bits of a phrase search to multiple searchers
 	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase hits the limit
@@ -242,7 +246,7 @@ def workonphrasesearch(foundlineobjects, seeking, searchinginside, commitcount, 
 		if commitcount.value % 400 == 0:
 			dbconnection.commit()
 
-		foundlines = phrasesearch(seeking, curs, wkid, whereclauseinfo, activepoll)
+		foundlines = phrasesearch(leastcommon, seeking, curs, wkid, whereclauseinfo, activepoll)
 
 		for f in foundlines:
 			foundlineobjects.append(dblineintolineobject(f))
