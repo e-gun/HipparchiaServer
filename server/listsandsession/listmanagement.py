@@ -31,101 +31,45 @@ def compileauthorandworklist(listmapper):
 
 	authorandworklist = []
 
-	# build the inclusion list
+	# [A] build the inclusion list
 	if len(searchlist) > 0:
-		if len(session['agnselections'] + session['wkgnselections'] + session['alocselections'] + session['wlocselections']) == 0:
-			# you have only asked for specific passages and there are no genre constraints
-			# 	eg: just Aeschylus + Aristophanes, Frogs
-			# for the sake of speed we will handle this separately from the more complex case
-			# the code at the end of the 'else' section ought to match the code that follows
-			# the passage checks are superfluous if rationalizeselections() got things right
+		# build lists up from specific items (passages) to more general classes (works, then authors)
+		for g in session['wkgnselections']:
+			authorandworklist += foundindict(wd, 'workgenre', g)
 
-			passages = session['psgselections']
-			works = session['wkselections']
-			works = tidyuplist(works)
-			works = dropdupes(works, passages)
-
-			for w in works:
-				authorandworklist.append(w)
-
-			authors = []
-			for a in session['auselections']:
-				authors.append(a)
-
-			tocheck = works + passages
-			authors = dropdupes(authors, tocheck)
-			for a in authors:
+		authorlist = []
+		for g in session['agnselections']:
+			authorlist = foundindict(ad, 'genres', g)
+			for a in authorlist:
 				for w in ad[a].listofworks:
 					authorandworklist.append(w.universalid)
-			del authors
-			del works
+		del authorlist
 
-			if len(session['psgselections']) > 0:
-				authorandworklist = dropdupes(authorandworklist, session['psgselections'])
-				authorandworklist = session['psgselections'] + authorandworklist
+		for l in session['wlocselections']:
+			authorandworklist += foundindict(wd, 'provenance', l)
 
-			authorandworklist = list(set(authorandworklist))
-
-		else:
-			# build lists up from specific items (passages) to more general classes (works, then authors)
-
-			authorandworklist = []
-			for g in session['wkgnselections']:
-				authorandworklist += foundindict(wd, 'workgenre', g)
-
-			authorlist = []
-			for g in session['agnselections']:
-				authorlist = foundindict(ad, 'genres', g)
-				for a in authorlist:
-					for w in ad[a].listofworks:
-						authorandworklist.append(w.universalid)
-			del authorlist
-
-			for l in session['wlocselections']:
-				authorandworklist += foundindict(wd, 'provenance', l)
-
-			authorlist = []
-			for l in session['alocselections']:
-				authorlist = foundindict(ad, 'location', l)
-				for a in authorlist:
-					for w in ad[a].listofworks:
-						authorandworklist.append(w.universalid)
-			del authorlist
-
-			# a tricky spot: when/how to apply prunebydate()
-			# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
-			# accordingly we will do classes and genres first, then trim by date, then add in individual choices
-			authorandworklist = prunebydate(authorandworklist, ad, wd)
-
-			# now we look at things explicitly chosen:
-			# the passage checks are superfluous if rationalizeselections() got things right
-
-			passages = session['psgselections']
-			works = session['wkselections']
-			works = tidyuplist(works)
-			works = dropdupes(works, passages)
-
-			for w in works:
-				authorandworklist.append(w)
-
-			authors = []
-			for a in session['auselections']:
-				authors.append(a)
-
-			tocheck = works + passages
-			authors = dropdupes(authors, tocheck)
-			for a in authors:
+		authorlist = []
+		for l in session['alocselections']:
+			authorlist = foundindict(ad, 'location', l)
+			for a in authorlist:
 				for w in ad[a].listofworks:
 					authorandworklist.append(w.universalid)
-			del authors
-			del works
+		del authorlist
 
-			if len(session['psgselections']) > 0:
-				authorandworklist = dropdupes(authorandworklist, session['psgselections'])
-				authorandworklist = session['psgselections'] + authorandworklist
+		# a tricky spot: when/how to apply prunebydate()
+		# if you want to be able to seek 5th BCE oratory and Plutarch, then you need to let auselections take precedence
+		# accordingly we will do classes and genres first, then trim by date, then add in individual choices
+		authorandworklist = prunebydate(authorandworklist, ad, wd)
 
-			authorandworklist = list(set(authorandworklist))
+		# now we look at things explicitly chosen:
+		authors = [a for a in session['auselections']]
+		worksof = [w.universalid for a in authors for w in ad[a].listofworks]
+		works = session['wkselections']
+		passages = session['psgselections']
 
+		authorandworklist += [w for w in works] + worksof + passages
+		authorandworklist = [aw for aw in authorandworklist if aw]
+		authorandworklist = list(set(authorandworklist))
 	else:
 		# you picked nothing and want everything. well, maybe everything...
 
@@ -137,6 +81,7 @@ def compileauthorandworklist(listmapper):
 		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
 			authorandworklist = prunebydate(authorandworklist, ad, wd)
 
+	# [B] now start subtracting from the list of inclusions
 	if session['spuria'] == 'no':
 		authorandworklist = removespuria(authorandworklist, wd)
 
@@ -145,8 +90,7 @@ def compileauthorandworklist(listmapper):
 	excludedworks = []
 
 	if len(exclusionlist) > 0:
-		excludedworks = []
-		excludedauthors = []
+		excludedauthors = [a for a in session['auexclusions']]
 
 		for g in session['agnexclusions']:
 			excludedauthors += foundindict(ad, 'genres', g)
@@ -154,24 +98,18 @@ def compileauthorandworklist(listmapper):
 		for l in session['alocexclusions']:
 			excludedauthors += foundindict(ad, 'location', l)
 
-		for a in session['auexclusions']:
-			excludedauthors.append(a)
+		excludedauthors = set(excludedauthors)
 
-		excludedauthors = tidyuplist(excludedauthors)
+		# all works of all excluded authors are themselves excluded
+		excludedworks = [w.universalid for a in excludedauthors for w in ad[a].listofworks]
 
-		for a in excludedauthors:
-			for w in ad[a].listofworks:
-				excludedworks.append(w.universalid)
-		del excludedauthors
+		excludedworks += session['wkexclusions']
 
 		for g in session['wkgnexclusions']:
 			excludedworks += foundindict(wd, 'workgenre', g)
 
 		for l in session['wlocexclusions']:
 			excludedworks += foundindict(wd, 'provenance', l)
-
-		excludedworks += session['wkexclusions']
-		excludedworks = set(excludedworks)
 
 	authorandworklist = list(set(authorandworklist) - set(excludedworks))
 
