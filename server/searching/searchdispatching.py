@@ -89,7 +89,7 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 		jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, leastcommon, seeking, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	elif searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
-		if session['accentsmatter'] == 'yes':
+		if session['accentsmatter'] == 'yes' and session['nearornot'] == 'T':
 			# choose the faster option
 			leastcommon = findleastcommonterm(seeking+' '+proximate)
 			if leastcommon != seeking:

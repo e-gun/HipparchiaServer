@@ -473,9 +473,13 @@
             <li><span class="sampleoutput">Sought καλοϲ within 5 words of αγαθοϲ; Searched 6625 texts and found 74 passages (<span class="colorhighlight">38.78s</span>)</span></li>
             <li><span class="sampleoutput">Sought καλοσ within 5 words of αγαθος; Searched 3008 texts and found 75 passages (<span class="colorhighlight">5.76s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
         </ul>
-    <span class="emph">A proximity search is really two searches</span>. Hipparchia looks for the <span class="emph">longest term first</span>.
+    <span class="emph">A proximity search is really two searches</span>.
+        In an <span class="emph">unaccented</span> search Hipparchia looks for the <span class="emph">longest term first</span>.
     It is possible that the long term is more common than the short term, but if, like Hipparchia, you have to guess blindly, then you pick the
     longer term every time.
+        In an <span class="emph">accented</span> search Hipparchia looks for the <span class="emph">rarest term first</span>, even if it is not
+        the longest term: the absolute frequency of any given individual has been calculated already and is available for lookup.
+        Working with accents will always be the fastest way to do a phrase or proximity search.
     After searching for the first term Hipparchia looks for places
     where the second term is near the first term. [NB: If you say a short term not near a long term, then the search will be for
     the short term and then the long term. That's what you really wanted.] This two-step process explains the results you see above.
