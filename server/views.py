@@ -220,6 +220,7 @@ def executesearch():
 				nearstr = ''
 			else:
 				nearstr = ' not'
+
 			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
 			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
 			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
