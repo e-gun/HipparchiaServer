@@ -27,7 +27,7 @@ def grabsenses(fullentry):
 		i += 1
 		lvl = re.search(leveler,sense)
 		num = re.search(nummer,sense)
-		# note that the two dictionaries do not necc aree with one another (or themselves) when it comes to nesting labels
+		# note that the two dictionaries do not necc agree with one another (or themselves) when it comes to nesting labels
 		if re.search(r'[A-Z]',num.group(1)) is not None:
 			paragraphlevel = '1'
 		elif re.search(r'[0-9]',num.group(1)) is not None:
@@ -76,6 +76,7 @@ def entrysummary(fullentry,lang, translationlabel):
 	except:
 		s = []
 	s = list(set(s))
+	# s.sort()
 
 	q = soup.find_all('quote')
 	q[:] = [value.string for value in q]

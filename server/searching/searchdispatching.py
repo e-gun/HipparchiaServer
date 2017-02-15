@@ -48,7 +48,7 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 		seeking = r'(^|\s)' + seeking[2:]
 
 	if seeking[-1] == ' ':
-		# otherwise you will miss words that start lines because they do not have a leading whitespace
+		# otherwise you will miss words that end lines because they do not have a trailing whitespace
 		seeking = seeking[:-1] + r'(\s|$)'
 	elif seeking[-2:] == '\s':
 		seeking = seeking[:-2] + r'(\s|$)'

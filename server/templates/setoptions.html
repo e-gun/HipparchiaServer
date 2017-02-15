@@ -40,27 +40,13 @@
     <fieldset>
           <legend>Corpora to search</legend>
           {% for list in activelists %}
-            {% if list == 'gr' %}
-                Greek authors <input type="checkbox" id="greekcorpus" value="no">
-            {% endif %}
-            {% if list == 'lt' %}
-                &nbsp;&middot;&nbsp;
-                Latin authors <input type="checkbox" id="latincorpus" value="no" >
-
-            {% endif %}
-            {% if list == 'dp' %}
-                &nbsp;&middot;&nbsp;
-                Documentary papyri <input type="checkbox" id="papyruscorpus" value="no" >
-            {% endif %}
-            {% if list == 'in' %}
-                &nbsp;&middot;&nbsp;
-                Inscriptions I <span class="small">(<span class="italic">IG</span>, <span class="italic">SEG</span>, etc.)</span>
-                <input type="checkbox" id="inscriptioncorpus" value="no">
-            {% endif %}
-            {% if list == 'ch' %}
-                &nbsp;&middot;&nbsp;
-                Inscriptions II <span class="small">(Cla., Lt. Antiq., Med.; Christ.)</span> <input type="checkbox" id="christiancorpus" value="no" >
-            {% endif %}
+            {% if list == 'gr' %} Greek authors <input type="checkbox" id="greekcorpus" value="no">{% endif %}
+            {% if list == 'lt' %}&nbsp;&middot;&nbsp;Latin authors <input type="checkbox" id="latincorpus" value="no" >{% endif %}
+            {% if list == 'dp' %}&nbsp;&middot;&nbsp;Documentary papyri <input type="checkbox" id="papyruscorpus" value="no" >{% endif %}
+            {% if list == 'in' %}&nbsp;&middot;&nbsp;Inscriptions I <span class="small">(<span class="italic">IG</span>, <span class="italic">SEG</span>, etc.)</span>
+                <input type="checkbox" id="inscriptioncorpus" value="no">{% endif %}
+            {% if list == 'ch' %}&nbsp;&middot;&nbsp;Inscriptions II <span class="small">(Cla., Lt. Antiq., Med.; Christ.)</span>
+                <input type="checkbox" id="christiancorpus" value="no" >{% endif %}
           {% endfor %}
       </fieldset>
         <br />

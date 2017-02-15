@@ -5,10 +5,6 @@
 
   <h1 class="center">{{ numberfound }}&nbsp;Available Authors</h1>
   	<div class="fourcolumn">
-      {% for result in found %}
-      <p>
-          {{ result.universalid }}: {{ result.cleanname }}
-      </p>
-    {% endfor %}
+        {% for result in found %} <p>{{ result.universalid }}: {{ result.cleanname }}</p> {% endfor %}
 	</div>
 {% endblock %}
