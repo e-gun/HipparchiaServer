@@ -477,3 +477,47 @@ class FormattedSearchResult(object):
 		self.clickurl = clickurl
 		self.formattedlines = formattedlines
 
+
+class dbWordCountObject(object):
+	"""
+	an object that corresponds to a db line
+	"""
+
+	def __init__(self, entryname, totalcount, greekcount, latincount, docpapcount, inscriptioncount, christiancount):
+		self.entryname = entryname
+		self.t = totalcount
+		self.g = greekcount
+		self.l = latincount
+		self.d = docpapcount
+		self.i = inscriptioncount
+		self.c = christiancount
+
+	def getelement(self, element):
+		elements = {
+			'total': self.t, 'gr': self.g, 'lt': self.l, 'dp': self.d, 'in': self.i, 'ch': self.c
+			}
+		try:
+			return elements[element]
+		except:
+			return 0
+
+
+class dbLemmaObject(object):
+	"""
+	an object that corresponds to a db line
+	"""
+
+	def __init__(self, dictionaryentry, xref, derivativeforms):
+		self.dictionaryentry = dictionaryentry
+		self.xref = xref
+		self.formandidentificationlist = [f for f in derivativeforms.split('\t') if f]
+		self.formlist = [f.split(' ')[0] for f in self.formandidentificationlist]
+		self.formlist = [re.sub(r'\'','',f) for f in self.formlist]
+
+	def getformdict(self):
+		fd = {}
+		for f in self.formandidentificationlist:
+			key = f.split(' ')[0]
+			body = f[len(key)+1:]
+			fd[key] = body
+		return fd

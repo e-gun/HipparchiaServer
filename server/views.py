@@ -1224,7 +1224,7 @@ def reverselexiconsearch():
 	entries = list(set(entries))
 	entries = polytonicsort(entries)
 
-	if len(entries) > 25:
+	if len(entries) > 100:
 		# it takes a long time to do 50 finds
 		suppressprevalence = True
 	else:

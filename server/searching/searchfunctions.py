@@ -12,7 +12,7 @@ from flask import session
 
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
 from server.searching.searchformatting import cleansearchterm
-from server.lexica.lexicalookups import mpfindcounts
+from server.lexica.lexicalookups import findcountsviawordcountstable
 from server.formatting_helper_functions import removegravity
 
 
@@ -248,7 +248,7 @@ def findleastcommonterm(searchphrase):
 		# note that graves have been eliminated from the wordcounts; so we have to do the same here
 		# but we still need access to the actual search terms, hence the dict
 		searchterms = {removegravity(t): t for t in searchterms}
-		counts = mpfindcounts(searchterms.keys(), [])
+		counts = findcountsviawordcountstable(searchterms.keys(), [])
 		# print('counts', counts)
 		# counts [('βεβήλων', 84, 84, 0, 0, 0, 0), ('ὀλίγοϲ', 596, 589, 0, 3, 4, 0)]
 		totals = [(c[1], c[0]) for c in counts]
