@@ -111,18 +111,18 @@ class dbOpus(object):
 			if label != '' and label != None:
 				self.structure[idx] = label
 		
-		availablelevels = 1
+		availabellevels = 1
 		for level in [self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04, self.levellabels_05]:
 			if level != '' and level is not None:
-				availablelevels += 1
-		self.availablelevels = availablelevels
+				availabellevels += 1
+		self.availabellevels = availabellevels
 		
 	def citation(self):
 		if self.universalid[0:2] not in ['in', 'dp', 'ch']:
 			cit = []
 			levels = [self.levellabels_00, self.levellabels_01, self.levellabels_02, self.levellabels_03,
 					  self.levellabels_04, self.levellabels_05]
-			for l in range(0,self.availablelevels):
+			for l in range(0,self.availabellevels):
 				cit.append(levels[l])
 			cit.reverse()
 			cit = ', '.join(cit)
@@ -491,15 +491,31 @@ class dbWordCountObject(object):
 		self.d = docpapcount
 		self.i = inscriptioncount
 		self.c = christiancount
+		self.tlabel = 'Ⓣ'
+		self.glabel = 'Ⓖ'
+		self.llabel = 'Ⓛ'
+		self.dlabel = 'Ⓓ'
+		self.ilabel = 'Ⓘ'
+		self.clabel = 'Ⓒ'
 
 	def getelement(self, element):
-		elements = {
+		cdict = {
 			'total': self.t, 'gr': self.g, 'lt': self.l, 'dp': self.d, 'in': self.i, 'ch': self.c
 			}
 		try:
-			return elements[element]
+			return cdict[element]
 		except:
 			return 0
+
+	def getlabel(self, element):
+		ldict = {
+			'total': self.tlabel, 'gr': self.glabel, 'lt': self.llabel, 'dp': self.dlabel, 'in': self.ilabel, 'ch': self.clabel
+			}
+		try:
+			return ldict[element]
+		except:
+			return ''
+
 
 
 class dbHeadwordObject(dbWordCountObject):
@@ -511,8 +527,30 @@ class dbHeadwordObject(dbWordCountObject):
 		self.early = early
 		self.middle = middle
 		self.late = late
+		self.qlabel = 'ⓠ'
+		self.elabel = 'ⓔ'
+		self.mlabel = 'ⓜ'
+		self.latelabel = 'ⓛ'
+		self.unklabel = 'ⓤ'
 		super().__init__(entryname, totalcount, greekcount, latincount, docpapcount, inscriptioncount, christiancount)
 
+	def gettime(self, element):
+		elements = {'early': self.early, 'middle': self.middle, 'late': self.late ,
+		            'unk': self.t - (self.early + self.middle + self.late)
+		            }
+		try:
+			return elements[element]
+		except:
+			return 0
+
+	def gettimelabel(self, element):
+		elements = {'early': self.elabel, 'middle': self.mlabel, 'late': self.latelabel, 'unk': self.unklabel,
+		            'frq': self.frqclass
+		            }
+		try:
+			return elements[element]
+		except:
+			return 0
 
 # currenly unused in HServer; used in HBuilder
 

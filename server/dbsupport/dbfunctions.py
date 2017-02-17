@@ -392,3 +392,43 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 				print('\n\t EXPECT THE WORST IF YOU TRY TO EXECUTE ANY SEARCHES\nWARNING\n')
 
 	return
+
+
+def findchronologicalweights(era,language='G'):
+	"""
+
+	an initial call to dictionary_headword_wordcounts to figure out the relative weight of the different eras
+
+	how many words are 'early' / 'middle' / 'late'
+
+	:param era:
+	:param language:
+	:return:
+	"""
+
+	dbconnection = setconnection('autocommit')
+	curs = dbconnection.cursor()
+
+	eramap = {
+		'early': 'early_occurrences',
+		'middle': 'middle_occurrences',
+		'late': 'late_occurrences'
+	}
+
+	try:
+		theera = eramap[era]
+	except:
+		return -1
+
+	q = 'SELECT SUM('+theera+') FROM dictionary_headword_wordcounts WHERE entry_name ~ %s'
+
+	if language == 'G':
+		d = ('^[^a-z]',)
+	else:
+		d = ('[^a-z]',)
+
+	curs.execute(q,d)
+	sum = curs.fetchall()
+	sum = sum[0][0]
+
+	return sum

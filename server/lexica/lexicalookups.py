@@ -7,7 +7,6 @@
 """
 
 import re
-from multiprocessing import Manager, Process
 from flask import session
 from server.dbsupport.dbfunctions import setconnection
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
@@ -16,83 +15,6 @@ from server.listsandsession.listmanagement import polytonicsort
 from server.searching.betacodetounicode import stripaccents
 from server.hipparchiaclasses import dbWordCountObject, dbHeadwordObject
 from server import hipparchia
-
-
-"""
-[probably not] TODO: clickable INS or DDP xrefs in dictionary entries
-
-it looks like we are now in a position where we have the data to make *some* of these papyrus xrefs work
-
-but you will end up with too many dead ends? a test case eventuated in more sorrow than joy
-
-example:
-
-	κύριοϲ
-
-	3  of gods, esp. in the East, Ϲεκνεβτῦνιϲ ὁ κ. θεόϲ PTeb.284.6 (i B.C.);
-	Κρόνοϲ κ. CIG4521 (Abila, i A.D.); Ζεὺϲ κ. Supp.Epigr.2.830 (Damascus,
-	iii A.D.); κ. Ϲάραπιϲ POxy.110.2 (ii A.D); ἡ κ. Ἄρτεμιϲ IG 4.1124
-	(Tibur, ii A.D.); of deified rulers, τοῦ κ. βαϲιλέοϲ θεοῦ OGI86.8
-	(Egypt, i B.C.); οἱ κ. θεοὶ μέγιϲτοι, of Ptolemy XIV and Cleopatra,
-	Berl.Sitzb.1902.1096: hence, of rulers in general, βαϲιλεὺϲ Ἡρώδηϲ κ.
-	OGI415 (Judaea, i B.C.); of Roman Emperors, BGU1200.11 (Augustus),
-	POxy.37 i 6 (Claudius), etc.
-
-
-[success] PTeb.284.6
-	select universalid,title from works where title like '%PTeb%284'
-		"dp8801w056";"PTebt (Vol 1) - 284"
-
-	select marked_up_line from dp8801 where wkuniversalid='dp8801w056' and level_00_value='6'
-		"ὁ κύριοϲ θεὸϲ καταβή-"
-
-
-[success] BGU1200.11 can be had by:
-
-	select universalid,title from works where title like '%BGU%1200%'
-		"dp0004w057"; "BGU (Vol 4) - 1200"
-
-	select marked_up_line from dp0004 where wkuniversalid='dp0004w057' and level_00_value='11'
-		"ὑπὲρ τοῦ θε̣[οῦ] καὶ κυρίου Αὐτοκράτοροϲ Κ̣α̣[ίϲαροϲ καθηκούϲαϲ]"
-
-
-[fail] Supp.Epigr.2.830
-
-	select universalid,title from works where title like '%Supp%Epigr%830%'
-		"in001aw1en";"Attica (Suppl. Epigr. Gr. 1-41 [SEG]) - 21:830"
-		[not v2, not damascus, not ii AD, ...]
-
-
-[fail] CIG4521:
-
-	select universalid,title from works where title like '%CIG%45%'
-		"ch0201w01v";"Constantinople [Chr.] (CIG IV [part]) - 9445"
-		"ch0305w02z";"Greece [Chr.] (Attica [various sources]) - CIG 9345"
-
-
-[fail] Berl.Sitzb.1902.1096:
-	select universalid,title from works where title like '%Berl%Sitzb%'
-		[nothing returned]
-
-
-[fail] POxy.37 i 6:
-	select universalid,title from works where title like '%POxy% 37'
-		"dp6f01w035";"POxy (Vol 1) - 37"
-	you'll get stuck in the end:
-		"<hmu_roman_in_a_greek_text>POxy 1,37=CPapGr 1,19</hmu_roman_in_a_greek_text>"
-
-
-[fail (but mabe LSJ failed?)] POxy.110.2:
-	select universalid,title from works where title like '%POxy% 102'
-		"dp6f01w003";"POxy (Vol 1) - 102"
-
-	select * from dp6f01 where wkuniversalid='dp6f01w003' and stripped_line like '%κυρ%'
-		three hits; none of them about Sarapis...
-		"<hmu_metadata_provenance value="Oxy" /><hmu_metadata_date value="AD 306" /><hmu_metadata_documentnumber value="65" />ἐπὶ ὑπάτων τ[ῶν] κ[υ]ρίων ἡ[μ]ῶν Αὐτοκρατόρων"
-
-
-"""
-
 
 def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 	"""
@@ -268,12 +190,10 @@ def browserdictionarylookup(count, entry, usedictionary, cursor, suppressprevale
 		cleanedentry += '</p>\n'
 
 		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes' and suppressprevalence==False:
-			totalfinds = findcounts(entry, cursor)
-			# totalfinds ('ϲυνόχωκα', 16299, 15840, 6, 405, 45, 3)
-			hitdict = buildhitdict(totalfinds)
-			if hitdict:
+			countobject = findtotalcounts(entry, cursor)
+			if countobject:
 				cleanedentry += '<p class="wordcounts">Prevalence (all forms): '
-				cleanedentry += formatprevalencedata(hitdict)
+				cleanedentry += formatprevalencedata(countobject)
 				cleanedentry += '</p>\n'
 
 		if hipparchia.config['SHOWLEXICALSUMMARYINFO'] == 'yes':
@@ -494,7 +414,7 @@ def definebylemma(lemmadict,corporatable,cursor):
 	return dictionaryentries
 
 
-def findcounts(word, cursor, asheadwordobject=True):
+def findtotalcounts(word, cursor):
 	"""
 
 	use the dictionary_headword_wordcounts table
@@ -516,22 +436,16 @@ def findcounts(word, cursor, asheadwordobject=True):
 	cursor.execute(q,d)
 	l = cursor.fetchone()
 
-	if asheadwordobject:
-		try:
-			countobject = dbWordCountObject(l[0], l[1], l[2], l[3], l[4], l[5], l[6])
-		except:
-			countobject = None
-	else:
-		try:
-			countobject = dbHeadwordObject(l[0], l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8], l[9], l[10])
-		except:
-			countobject = None
+	try:
+		hwcountobject = dbHeadwordObject(l[0], l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8], l[9], l[10])
+	except:
+		hwcountobject = None
 
 
-	return countobject
+	return hwcountobject
 
 
-def findcountsviawordcountstable(checklist, finds):
+def findcountsviawordcountstable(wordtocheck):
 	"""
 
 	used to look up a list of specific observed forms
@@ -544,28 +458,24 @@ def findcountsviawordcountstable(checklist, finds):
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 
-	for c in checklist:
-		initial = stripaccents(c[0])
-		# alternatives = re.sub(r'[uv]','[uv]',c)
-		# alternatives = '^'+alternatives+'$'
-		if initial in 'abcdefghijklmnopqrstuvwxyzαβψδεφγηιξκλμνοπρϲτυωχθζ':
-			# note that we just lost "'φερον", "'φερεν", "'φέρεν", "'φερεϲ", "'φερε",...
-			# but the punctuation killer probably zapped them long ago
-			# this needs to be addressed in HipparchiaBuilder
-			q = 'SELECT * FROM wordcounts_'+initial+' WHERE entry_name = %s'
-		else:
-			q = 'SELECT * FROM wordcounts_0 WHERE entry_name = %s'
+	initial = stripaccents(wordtocheck[0])
+	# alternatives = re.sub(r'[uv]','[uv]',c)
+	# alternatives = '^'+alternatives+'$'
+	if initial in 'abcdefghijklmnopqrstuvwxyzαβψδεφγηιξκλμνοπρϲτυωχθζ':
+		# note that we just lost "'φερον", "'φερεν", "'φέρεν", "'φερεϲ", "'φερε",...
+		# but the punctuation killer probably zapped them long ago
+		# this needs to be addressed in HipparchiaBuilder
+		q = 'SELECT * FROM wordcounts_'+initial+' WHERE entry_name = %s'
+	else:
+		q = 'SELECT * FROM wordcounts_0 WHERE entry_name = %s'
 
-		d = (c,)
-		curs.execute(q, d)
-		result = curs.fetchone()
-
-		if result:
-			finds.append(result)
+	d = (wordtocheck,)
+	curs.execute(q, d)
+	result = curs.fetchone()
 
 	dbconnection.commit()
 
-	return finds
+	return result
 
 
 def getobservedwordprevalencedata(dictionaryword):
@@ -573,49 +483,62 @@ def getobservedwordprevalencedata(dictionaryword):
 
 	:return:
 	"""
-	resultline = findcountsviawordcountstable([dictionaryword], [])
+	l = findcountsviawordcountstable(dictionaryword)
 
 	try:
-		l = resultline[0]
 		thiswordoccurs = dbWordCountObject(l[0], l[1], l[2], l[3], l[4], l[5], l[6])
 	except:
 		return None
 
 	if thiswordoccurs:
-
-		hitdict = buildhitdict(thiswordoccurs)
-
+		# thiswordoccurs: <server.hipparchiaclasses.dbWordCountObject object at 0x10ad63b00>
 		prevalence = 'Prevalence (this form): '
-		prevalence += formatprevalencedata(hitdict)
+		prevalence += formatprevalencedata(thiswordoccurs)
 		thehtml = '<p class="wordcounts">' + prevalence + '</p>'
 
 		return {'value': thehtml}
 	else:
 		return None
 
-
-def formatprevalencedata(hitdict):
+def formatprevalencedata(wordcountobject):
 	"""
 
-	:param hitdict:
+	html for the results
+
+	:param wordcountobject:
 	:return:
 	"""
 
+	w = wordcountobject
 	thehtml = ''
-	if hitdict:
-		max = 0
-		keys = sorted(hitdict.keys())
-		keys.remove('Ⓣ')
-		for key in keys:
-			if hitdict[key] > max:
-				max = hitdict[key]
-			if hitdict[key] > 0:
-				thehtml += '<span class="emph">' + key + '</span>' + ' {:,}'.format(hitdict[key]) + ' / '
-		if hitdict['Ⓣ'] != max:
-			thehtml += '<span class="emph">Ⓣ</span>' + ' {:,}'.format(hitdict['Ⓣ'])
+
+	max = 0
+	for key in ['gr', 'lt', 'in', 'dp', 'ch']:
+		if w.getelement(key) > max:
+			max = w.getelement(key)
+		if w.getelement(key) > 0:
+			thehtml += '<span class="emph">' + w.getlabel(key) + '</span>' + ' {:,}'.format(w.getelement(key)) + ' / '
+	key = 'total'
+	if w.getelement(key) != max:
+		thehtml += '<span class="emph">'+w.getlabel(key)+'</span>' + ' {:,}'.format(w.getelement(key))
+	else:
+		# there was just one hit; so you should drop the ' / '
+		thehtml = thehtml[:-3]
+
+	if type(w) == dbHeadwordObject:
+		thehtml += '\n<p class="wordcounts">Chronological distribution: '
+		for key in ['early', 'middle', 'late']:
+			if w.gettime(key) > 0:
+				thehtml += '<span class="emph">' + w.gettimelabel(key) + '</span>' + ' {:,}'.format(w.gettime(key)) + ' / '
+		key = 'unk'
+		if w.gettime(key) > 0:
+			thehtml += '<span class="emph">' + w.gettimelabel(key) + '</span>' + ' {:,}'.format(w.gettime(key))
 		else:
-			# there was just one hit; so you should drop the ' / '
 			thehtml = thehtml[:-3]
+		thehtml += '</p>\n'
+		key = 'frq'
+		if w.gettimelabel(key) != 'core vocabulary (more than 50)':
+			thehtml += '<p class="wordcounts">Relative frequency: <span class="italic">' + w.gettimelabel(key) + '</span></p>\n'
 
 	return thehtml
 
@@ -623,14 +546,9 @@ def formatprevalencedata(hitdict):
 def buildhitdict(countobject):
 	"""
 
-	take the tuple and map it into a dict
-	this will help with formatting since two functions call this information and the results should look the same
+	map the object to a dict (so that it will have labels
 
-	in:
-		thiswordoccurs ('βάδιζε', 257, 253, 0, 0, 2, 2)
 
-	out:
-		hitdict {'total': (257, 'Ⓣ'), 1: (253, 'Ⓖ'), 0: (0, 'Ⓛ'), 3: (0, 'Ⓓ'), 2: (2, 'Ⓘ'), 4: (2, 'Ⓒ')}
 
 	:param thiswordoccurs:
 	:return:
@@ -645,9 +563,92 @@ def buildhitdict(countobject):
 		           'Ⓒ': countobject.c
 		           }
 
+		if type(countobject) == dbHeadwordObject:
+			hitdict['ⓔ'] = countobject.early
+			hitdict['ⓜ'] = countobject.middle
+			hitdict['ⓛ'] = countobject.late
+			hitdict['ⓠ'] = countobject.frqclass
+			hitdict['ⓤ'] = countobject.t - (countobject.early + countobject.middle + countobject.late)
+
 		return hitdict
 	else:
 		return None
 
 
+
+
+"""
+[probably not] TODO: clickable INS or DDP xrefs in dictionary entries
+
+it looks like we are now in a position where we have the data to make *some* of these papyrus xrefs work
+
+but you will end up with too many dead ends? a test case eventuated in more sorrow than joy
+
+example:
+
+	κύριοϲ
+
+	3  of gods, esp. in the East, Ϲεκνεβτῦνιϲ ὁ κ. θεόϲ PTeb.284.6 (i B.C.);
+	Κρόνοϲ κ. CIG4521 (Abila, i A.D.); Ζεὺϲ κ. Supp.Epigr.2.830 (Damascus,
+	iii A.D.); κ. Ϲάραπιϲ POxy.110.2 (ii A.D); ἡ κ. Ἄρτεμιϲ IG 4.1124
+	(Tibur, ii A.D.); of deified rulers, τοῦ κ. βαϲιλέοϲ θεοῦ OGI86.8
+	(Egypt, i B.C.); οἱ κ. θεοὶ μέγιϲτοι, of Ptolemy XIV and Cleopatra,
+	Berl.Sitzb.1902.1096: hence, of rulers in general, βαϲιλεὺϲ Ἡρώδηϲ κ.
+	OGI415 (Judaea, i B.C.); of Roman Emperors, BGU1200.11 (Augustus),
+	POxy.37 i 6 (Claudius), etc.
+
+
+[success] PTeb.284.6
+	select universalid,title from works where title like '%PTeb%284'
+		"dp8801w056";"PTebt (Vol 1) - 284"
+
+	select marked_up_line from dp8801 where wkuniversalid='dp8801w056' and level_00_value='6'
+		"ὁ κύριοϲ θεὸϲ καταβή-"
+
+
+[success] BGU1200.11 can be had by:
+
+	select universalid,title from works where title like '%BGU%1200%'
+		"dp0004w057"; "BGU (Vol 4) - 1200"
+
+	select marked_up_line from dp0004 where wkuniversalid='dp0004w057' and level_00_value='11'
+		"ὑπὲρ τοῦ θε̣[οῦ] καὶ κυρίου Αὐτοκράτοροϲ Κ̣α̣[ίϲαροϲ καθηκούϲαϲ]"
+
+
+[fail] Supp.Epigr.2.830
+
+	select universalid,title from works where title like '%Supp%Epigr%830%'
+		"in001aw1en";"Attica (Suppl. Epigr. Gr. 1-41 [SEG]) - 21:830"
+		[not v2, not damascus, not ii AD, ...]
+
+
+[fail] CIG4521:
+
+	select universalid,title from works where title like '%CIG%45%'
+		"ch0201w01v";"Constantinople [Chr.] (CIG IV [part]) - 9445"
+		"ch0305w02z";"Greece [Chr.] (Attica [various sources]) - CIG 9345"
+
+
+[fail] Berl.Sitzb.1902.1096:
+	select universalid,title from works where title like '%Berl%Sitzb%'
+		[nothing returned]
+
+
+[fail] POxy.37 i 6:
+	select universalid,title from works where title like '%POxy% 37'
+		"dp6f01w035";"POxy (Vol 1) - 37"
+	you'll get stuck in the end:
+		"<hmu_roman_in_a_greek_text>POxy 1,37=CPapGr 1,19</hmu_roman_in_a_greek_text>"
+
+
+[fail (but mabe LSJ failed?)] POxy.110.2:
+	select universalid,title from works where title like '%POxy% 102'
+		"dp6f01w003";"POxy (Vol 1) - 102"
+
+	select * from dp6f01 where wkuniversalid='dp6f01w003' and stripped_line like '%κυρ%'
+		three hits; none of them about Sarapis...
+		"<hmu_metadata_provenance value="Oxy" /><hmu_metadata_date value="AD 306" /><hmu_metadata_documentnumber value="65" />ἐπὶ ὑπάτων τ[ῶν] κ[υ]ρίων ἡ[μ]ῶν Αὐτοκρατόρων"
+
+
+"""
 

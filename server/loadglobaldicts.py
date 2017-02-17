@@ -7,7 +7,7 @@
 """
 
 
-from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors
+from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors, findchronologicalweights
 from server.listsandsession.listmanagement import dictitemstartswith
 from server.listsandsession.sessiondicts import buildaugenresdict, buildworkgenresdict, buildauthorlocationdict, \
 	buildworkprovenancedict
@@ -46,3 +46,26 @@ listmapper = {
 	'ch': {'a': chrauthors, 'w': chrworks},
 }
 
+"""
+
+figure out how many more words are 'late' than 'early', etc.
+
+you only need to run this once every major recalibration of the data
+
+the results are something like:
+
+greekwordweights = {'early': 7.883171009462467, 'middle': 1.9249406986576483, 'late': 1}
+
+"""
+
+findweights = False
+if findweights:
+	greekwordcounts = { 'early': findchronologicalweights('early'),
+	                    'middle': findchronologicalweights('middle'),
+	                    'late': findchronologicalweights('late') }
+
+	greekwordweights = {'early': greekwordcounts['late']/greekwordcounts['early'],
+	                    'middle': greekwordcounts['late']/greekwordcounts['middle'],
+	                    'late': 1}
+
+	print('greekwordweights',greekwordweights)
