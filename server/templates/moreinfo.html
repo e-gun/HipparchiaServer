@@ -188,8 +188,8 @@
     <br />
     The window that pops up will contain:
     <ul class="numbered">
-        <li>a line with a count of all occurrences of this form in the available data. For example <code>ὑμᾶϲ</code> yields:
-            <ul>
+        <li>a line with a count of <span class="emph">all occurrences of this form</span> in the available data. For example <code>ὑμᾶϲ</code> yields:
+            <ul class="roman">
                 <li>Prevalence (this form): Ⓖ 22,231 / Ⓛ 1 / Ⓘ 361 / Ⓓ 985 / Ⓒ 39 / Ⓣ 23,617</li>
                 <li>each circled letter corresponds to a database:
                     <ul>
@@ -202,36 +202,159 @@
                     </ul>
                 </li>
             </ul>
-        <li>then you will see a list of parsing analyses for this form
+        <li>then you will see a list of <span class="emph">parsing analyses</span> for this form
             <ul>
                 <li>(1) ὑμᾶϲ (from ϲύ, thou): acc 2nd pl </li>
                 <li>(2) ὑμᾶϲ (from ὑμόϲ, your): fem gen sg (epic doric aeolic) </li>
             </ul>
         </li>
         <li>next you will see the start of the dictionary entry to the first matching headword</li>
-        <li>after this you see a second set of prevalence data. This time the numbers reflect  <span class="emph">all occurrences of all
+        <li>after this you see a second set of <span class="emph">prevalence data</span>. This time the numbers reflect  <span class="emph">all occurrences of all
             forms</span> of the word. The results for <code>εἰμι</code> are a composite of the results for <span class="emph">413</span> individual forms:
-            <code>'... 'ἔϲται', 'ἔϲτε', 'ἔϲτι', 'ἔϲτιν', 'ἔϲτον', 'ἔϲτω' ...'</code>
+            <code>... 'ἔϲται', 'ἔϲτε', 'ἔϲτι', 'ἔϲτιν', 'ἔϲτον', 'ἔϲτω' ...</code>
         </li>
         <li>
-            The weighted chronological distribution combines a series of assumptions and calculations.
-            <ul>
-                <li>All forms of all words are sorted into three eras. <span class="emph">Early</span> (ⓔ) is 850BCE to 300BCE.
-                    <span class="emph">Middle</span> (ⓜ) is 299BCE to 300CE. <span class="emph">Late</span> (ⓛ) is 301CE to 1500CE.</li>
-                <li>Words that have no date associated with them are ignored. Moreover as Peculiarities and Gotchas will tell you, <span class="emph">"The margin of error is at least 50 years."</span></li>
+            The <span class="emph">weighted chronological distribution</span> combines a series of assumptions and calculations.
+            <ul class="roman">
+                <li>All forms of all words are sorted into three eras. <span class="emph">Early</span> or ⓔ is 850BCE to 300BCE.
+                    <span class="emph">Middle</span> or ⓜ is 299BCE to 300CE. <span class="emph">Late</span> or ⓛ is 301CE to 1500CE.</li>
+                <li>Words that have no date associated with them are ignored. Moreover as Peculiarities and Gotchas will tell you,
+                    <span class="emph">"The margin of error is at least 50 years."</span></li>
                 <li>After the results for all forms of each word have been sifted into three chronological piles a
                     <span class="emph">weight</span> is applied to this number.</li>
                 <li>This wieght is derived from the fact that there are roughly 1/8 as many words preserved from the early
                     period as there are from the late period. Similarly there are about 1/2 as many words in the middle era
-                    as there are in the late era. Accordingly <span class="emph">100 early hits have the weight of about 800 late hits</span> when
+                    as there are in the late era. Accordingly, <span class="emph">100 early hits have the weight of about 800 late hits</span> when
                     it comes time to decide if the word is, relatively speaking, more of an 'early' word than a 'late' word.
                 </li>
                 <li>The final weighting score normalizes all three numbers to make them comparable to one another. Then
                 <span class="emph">the maximum of the three is given a value of 100</span>. Then the other two are represented in relation to that 100.</li>
-                <li><code>τύμμα</code> yields: ⓔ 37 / ⓜ 100 / ⓛ 35. This means that, relative to the middle period, the early and late periods are only
+                <li><code>τύμμα</code> yields: ⓜ 100  / ⓔ 37 / ⓛ 35. This means that, relative to the middle period, the early and late periods are only
                 about 1/3 as likely to use the word. And so one would plausibly describe it as more typical of that era than of the others. </li>
                 <li>Obviously no account is taken of which words exist in later periods only via quotations of earlier periods. </li>
                 <li>These figures are meant to give you general ideas about further queries, not to be some sort of final word.</li>
+            </ul>
+        </li>
+        <li>
+            <span class="emph">Weighted distribution by corpus</span> is calculated according to the same logic as the weight is applied to the chronological
+            distribution of words. The <span class="emph">radical disparity in the size of the various corpora</span> can distort
+            the results if a rare word appears in a small corpus.
+            <ul class="roman">
+                <li>Ⓖ is the largest with 98,957,805 words.</li>
+                <li>Compared to Ⓖ, Ⓛ is only about 1/11 as large, Ⓘ is 1/28th as large, Ⓓ is 1/28th as large, and Ⓒ is 1/130th as large.
+                Furthermore Ⓒ is strongly bilingual, so this further distorts the weight of an individual word in it as against
+                    some other largely monolingual corpus.</li>
+                <li>The final weighting score normalizes all five numbers to make them comparable to one another. Then
+                    <span class="emph">the maximum of the five is given a value of 100</span>. </li>
+                <li>Many words are strongly associated with one corpus or another. And in that sense one can say that they are
+                more 'literary' or 'civic' or 'legal' or 'religious' depending on the pattern.</li>
+                <ul class="forexample">
+                    <li><code>ψήφιϲμα</code> yields: Ⓘ 100 / Ⓖ 2 / Ⓒ 1 / Ⓓ 1 / Ⓛ 0. Even though there are over 2100 examples in the Greek
+                        literary corpus, there are 4000 examples among the inscriptions. And <span class="emph">each of those 4000 'weighs' 28x as much</span> as
+                    each of the 2100. Accordingly the word, though quite common in the Greek corpus comes across looking like it might
+                    be somehow rare. Well, it is, at least when compared to its ubiquity in the inscriptions.</li>
+                    <li><code>οἶδα</code> yields: Ⓓ 100 / Ⓖ 85 / Ⓘ 25 / Ⓒ 11 / Ⓛ 0. This probably tells you something about the documentary papyri.</li>
+                    <li>It comes as little surprise that <code>δυϲτυχήϲ</code> is weighted towards the literary authors: Ⓖ 100 / Ⓒ 25 / Ⓘ 13 / Ⓓ 2 / Ⓛ 0.
+                        If you search for it among the inscriptions the results will generally be gravestones.</li>
+                    <li><code>requies</code> is so common in epitaphs that this drowns out the Latin literary uses:  Ⓒ 100 / Ⓛ 6 / Ⓓ 0 / Ⓘ 0 / Ⓖ 0.</li>
+                </ul>
+
+            </ul>
+
+        </li>
+        <li>
+            You may also be shown a <span class="emph">relative frequency</span> label. This label will not be shown for 'core vocabulary' as defined below.
+            <ul class="roman">
+                <li>The corpora have been sliced into <span class="emph">four subdivisions</span>: top 25, core vocabulary, rare, and very rare</li>
+                <ul class="forexample">
+                    <li><span class="emph">Core</span> corresponds to the semi-arbitrary cut-off of >50 uses of a word.</li>
+                    <li><span class="emph">Rare</span> implies between 50 and 5 uses.</li>
+                    <li><span class="emph">Very rare</span> words are used fewer than 5 times.</li>
+                </ul>
+                <li>These divisions reflect the <span class="emph">logarithmic distribution</span> of word frequencies. A small number of words are
+                exceptionally common. A large number of words are extremely uncommon. The cuts put comparable numbers of words inside
+                of each major division (less 'top 25', of course). But the curve shape of the word distributions means that
+                    <span class="emph">the averages and the medians tend to be
+                        severly disparate</span>.</li>
+                <li> Some raw data follows. These numbers will change as the parser is adjusted, but not so much as to distort the general shape of the data.
+                    <code>count</code> is the number of dictionary entries inside of a heading. The other numbers are the distribution of occurrences.
+                    If <code>low</code> is 429120, then you need at least 429120 uses to make it into that category <pre>
+
+greek
+
+full set
+	count	113010
+	high	3649037
+	low	1
+	average	794
+	median	7
+
+top twenty five
+	count	25
+	high	3649037
+	low	429120
+	average	1177696
+	median	949783
+
+core vocabulary (more than 50)
+	count	28376
+	high	425747
+	low	51
+	average	2099
+	median	229
+
+rare (between 50 and 5)
+	count	32614
+	high	50
+	low	6
+	average	18
+	median	15
+
+very rare (less than 5)
+	count	48003
+	high	4
+	low	1
+	average	1
+	median	2
+latin
+
+full set
+	count	27960
+	high	244812
+	low	1
+	average	348
+	median	11
+
+top twenty five
+	count	25
+	high	244812
+	low	40371
+	average	86260
+	median	64356
+
+core vocabulary (more than 50)
+	count	8624
+	high	40256
+	low	51
+	average	859
+	median	219
+
+rare (between 50 and 5)
+	count	8095
+	high	50
+	low	6
+	average	19
+	median	16
+
+very rare (less than 5)
+	count	10404
+	high	4
+	low	1
+	average	1
+	median	2
+
+
+                </pre></li>
             </ul>
         </li>
     </ul>
