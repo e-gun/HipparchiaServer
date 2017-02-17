@@ -526,55 +526,16 @@ def formatprevalencedata(wordcountobject):
 		thehtml = thehtml[:-3]
 
 	if type(w) == dbHeadwordObject:
-		thehtml += '\n<p class="wordcounts">Chronological distribution: '
+		thehtml += '\n<p class="wordcounts">Weighted chronological distribution: '
 		for key in ['early', 'middle', 'late']:
-			if w.gettime(key) > 0:
-				thehtml += '<span class="emph">' + w.gettimelabel(key) + '</span>' + ' {:,}'.format(w.gettime(key)) + ' / '
-		key = 'unk'
-		if w.gettime(key) > 0:
-			thehtml += '<span class="emph">' + w.gettimelabel(key) + '</span>' + ' {:,}'.format(w.gettime(key))
-		else:
-			thehtml = thehtml[:-3]
+			thehtml += '<span class="emph">' + w.gettimelabel(key) + '</span>' + ' {0:.0f}'.format(w.getweightedtime(key)) + ' / '
+		thehtml = thehtml[:-3]
 		thehtml += '</p>\n'
 		key = 'frq'
 		if w.gettimelabel(key) != 'core vocabulary (more than 50)':
 			thehtml += '<p class="wordcounts">Relative frequency: <span class="italic">' + w.gettimelabel(key) + '</span></p>\n'
 
 	return thehtml
-
-
-def buildhitdict(countobject):
-	"""
-
-	map the object to a dict (so that it will have labels
-
-
-
-	:param thiswordoccurs:
-	:return:
-	"""
-
-	if countobject:
-		hitdict = {'Ⓣ': countobject.t,
-		           'Ⓖ': countobject.g,
-		           'Ⓛ': countobject.l,
-		           'Ⓓ': countobject.d,
-		           'Ⓘ': countobject.i,
-		           'Ⓒ': countobject.c
-		           }
-
-		if type(countobject) == dbHeadwordObject:
-			hitdict['ⓔ'] = countobject.early
-			hitdict['ⓜ'] = countobject.middle
-			hitdict['ⓛ'] = countobject.late
-			hitdict['ⓠ'] = countobject.frqclass
-			hitdict['ⓤ'] = countobject.t - (countobject.early + countobject.middle + countobject.late)
-
-		return hitdict
-	else:
-		return None
-
-
 
 
 """

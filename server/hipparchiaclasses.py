@@ -522,11 +522,23 @@ class dbHeadwordObject(dbWordCountObject):
 	"""
 	an extended wordcount object
 	"""
-	def __init__(self, entryname, totalcount, greekcount, latincount, docpapcount, inscriptioncount, christiancount, frqclass, early, middle, late):
+
+	# see note in lexicallookups.py for deriving these weight numbers
+
+	greekwordweights = {'early': 7.883171009462467, 'middle': 1.9249406986576483, 'late': 1}
+
+	def __init__(self, entryname, totalcount, greekcount, latincount, docpapcount, inscriptioncount, christiancount,
+	             frqclass, early, middle, late, wts=greekwordweights):
+
 		self.frqclass = frqclass
 		self.early = early
 		self.middle = middle
 		self.late = late
+		self.wtdearly = self.early * wts['early']
+		self.wtdmiddle = self.middle * wts['middle']
+		self.wtdlate = self.late * wts['late']
+		# use our weighted values to determine its relative time balance
+		self.predom = max(self.wtdearly, self.wtdmiddle, self.wtdlate)
 		self.qlabel = 'ⓠ'
 		self.elabel = 'ⓔ'
 		self.mlabel = 'ⓜ'
@@ -542,6 +554,15 @@ class dbHeadwordObject(dbWordCountObject):
 			return elements[element]
 		except:
 			return 0
+
+	def getweightedtime(self, element):
+		elements = {'early': (self.wtdearly/self.predom)*100, 'middle': (self.wtdmiddle/self.predom)*100, 'late': (self.wtdlate/self.predom)*100
+		            }
+		try:
+			return elements[element]
+		except:
+			return 0
+
 
 	def gettimelabel(self, element):
 		elements = {'early': self.elabel, 'middle': self.mlabel, 'late': self.latelabel, 'unk': self.unklabel,
