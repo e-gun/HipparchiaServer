@@ -111,18 +111,18 @@ class dbOpus(object):
 			if label != '' and label != None:
 				self.structure[idx] = label
 		
-		availabellevels = 1
+		availablelevels = 1
 		for level in [self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04, self.levellabels_05]:
 			if level != '' and level is not None:
-				availabellevels += 1
-		self.availabellevels = availabellevels
+				availablelevels += 1
+		self.availablelevels = availablelevels
 		
 	def citation(self):
 		if self.universalid[0:2] not in ['in', 'dp', 'ch']:
 			cit = []
 			levels = [self.levellabels_00, self.levellabels_01, self.levellabels_02, self.levellabels_03,
 					  self.levellabels_04, self.levellabels_05]
-			for l in range(0,self.availabellevels):
+			for l in range(0,self.availablelevels):
 				cit.append(levels[l])
 			cit.reverse()
 			cit = ', '.join(cit)
