@@ -7,7 +7,8 @@
 """
 
 
-from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors, findchronologicalweights
+from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors, \
+	findchronologicalweights, findcorpusweight
 from server.listsandsession.listmanagement import dictitemstartswith
 from server.listsandsession.sessiondicts import buildaugenresdict, buildworkgenresdict, buildauthorlocationdict, \
 	buildworkprovenancedict
@@ -46,20 +47,15 @@ listmapper = {
 	'ch': {'a': chrauthors, 'w': chrworks},
 }
 
-"""
 
-figure out how many more words are 'late' than 'early', etc.
+def findchronologicalweights():
+	"""
+	figure out how many more words are 'late' than 'early', etc.
+	you only need to run this once every major recalibration of the data
+	the results are something like:
+		greekwordweights = {'early': 7.883171009462467, 'middle': 1.9249406986576483, 'late': 1}
+	"""
 
-you only need to run this once every major recalibration of the data
-
-the results are something like:
-
-greekwordweights = {'early': 7.883171009462467, 'middle': 1.9249406986576483, 'late': 1}
-
-"""
-
-findweights = False
-if findweights:
 	greekwordcounts = { 'early': findchronologicalweights('early'),
 	                    'middle': findchronologicalweights('middle'),
 	                    'late': findchronologicalweights('late') }
@@ -69,3 +65,31 @@ if findweights:
 	                    'late': 1}
 
 	print('greekwordweights',greekwordweights)
+
+	return
+
+
+def findccorporaweights():
+	"""
+	figure out how many more words are 'gr' than 'lt', etc.
+	you only need to run this once every major recalibration of the data
+	the results are something like:
+		corpus weights {'gr': 1.0, 'lt': 11.371559943504066, 'in': 28.130258550554572, 'dp': 27.492143340147255, 'ch': 129.8977636244065}
+
+	:return:
+	"""
+
+	corpora = ['gr', 'lt', 'in', 'dp', 'ch']
+
+	counts = {corpus: findcorpusweight(corpus) for corpus in corpora}
+
+	max = counts['gr']
+
+	weights = {corpus: max/counts[corpus] for corpus in counts}
+
+	print('corpus weights',weights)
+
+	return
+
+# findchronologicalweights()
+# findccorporaweights()

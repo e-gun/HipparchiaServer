@@ -3,6 +3,7 @@
 <ul>
     <li><a href="#Interface"><span>Interface</span></a></li>
     <li><a href="#Browsing"><span>Browsing</span></a></li>
+    <li><a href="#Dictionaries"><span>Dictionaries and word counts</span></a></li>
     <li><a href="#MakingSearchLists"><span>Searching: Building search lists</span></a></li>
     <li><a href="#RegexSearching"><span>Searching: REGEX</span></a></li>
     <li><a href="#HitsAndMisses"><span>Searching: Hits and Misses</span></a></li>
@@ -178,6 +179,64 @@
         <span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
         <span class="label">Browse forwards (click or press the &#8594; key)</span></p></p>
     </div>
+
+<div id="Dictionaries">
+    <br />
+    The dictionary data is connected to a parser table. This enables you to <span class="emph">click on a word</span> in the text browser and to (ideally) get a
+    morphological analysis as well as a definition. See also <span class="emph">Peculiarities and Gotchas</span> for more about the force of "ideally"
+    in the previous sentence.
+    <br />
+    The window that pops up will contain:
+    <ul class="numbered">
+        <li>a line with a count of all occurrences of this form in the available data. For example <code>ὑμᾶϲ</code> yields:
+            <ul>
+                <li>Prevalence (this form): Ⓖ 22,231 / Ⓛ 1 / Ⓘ 361 / Ⓓ 985 / Ⓒ 39 / Ⓣ 23,617</li>
+                <li>each circled letter corresponds to a database:
+                    <ul>
+                        <li>Ⓖreek</li>
+                        <li>Ⓛatin</li>
+                        <li>Ⓘnscriptions I</li>
+                        <li>Ⓓocumentary Papyri</li>
+                        <li>(Ⓒhristian Era) Inscriptions II</li>
+                        <li>There is also a Ⓣotal</li>
+                    </ul>
+                </li>
+            </ul>
+        <li>then you will see a list of parsing analyses for this form
+            <ul>
+                <li>(1) ὑμᾶϲ (from ϲύ, thou): acc 2nd pl </li>
+                <li>(2) ὑμᾶϲ (from ὑμόϲ, your): fem gen sg (epic doric aeolic) </li>
+            </ul>
+        </li>
+        <li>next you will see the start of the dictionary entry to the first matching headword</li>
+        <li>after this you see a second set of prevalence data. This time the numbers reflect  <span class="emph">all occurrences of all
+            forms</span> of the word. The results for <code>εἰμι</code> are a composite of the results for <span class="emph">413</span> individual forms:
+            <code>'... 'ἔϲται', 'ἔϲτε', 'ἔϲτι', 'ἔϲτιν', 'ἔϲτον', 'ἔϲτω' ...'</code>
+        </li>
+        <li>
+            The weighted chronological distribution combines a series of assumptions and calculations.
+            <ul>
+                <li>All forms of all words are sorted into three eras. <span class="emph">Early</span> (ⓔ) is 850BCE to 300BCE.
+                    <span class="emph">Middle</span> (ⓜ) is 299BCE to 300CE. <span class="emph">Late</span> (ⓛ) is 301CE to 1500CE.</li>
+                <li>Words that have no date associated with them are ignored. Moreover as Peculiarities and Gotchas will tell you, <span class="emph">"The margin of error is at least 50 years."</span></li>
+                <li>After the results for all forms of each word have been sifted into three chronological piles a
+                    <span class="emph">weight</span> is applied to this number.</li>
+                <li>This wieght is derived from the fact that there are roughly 1/8 as many words preserved from the early
+                    period as there are from the late period. Similarly there are about 1/2 as many words in the middle era
+                    as there are in the late era. Accordingly <span class="emph">100 early hits have the weight of about 800 late hits</span> when
+                    it comes time to decide if the word is, relatively speaking, more of an 'early' word than a 'late' word.
+                </li>
+                <li>The final weighting score normalizes all three numbers to make them comparable to one another. Then
+                <span class="emph">the maximum of the three is given a value of 100</span>. Then the other two are represented in relation to that 100.</li>
+                <li><code>τύμμα</code> yields: ⓔ 37 / ⓜ 100 / ⓛ 35. This means that, relative to the middle period, the early and late periods are only
+                about 1/3 as likely to use the word. And so one would plausibly describe it as more typical of that era than of the others. </li>
+                <li>Obviously no account is taken of which words exist in later periods only via quotations of earlier periods. </li>
+                <li>These figures are meant to give you general ideas about further queries, not to be some sort of final word.</li>
+            </ul>
+        </li>
+    </ul>
+
+</div>
 
 <div id="MakingSearchLists">
     <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Include this category and/or genre">

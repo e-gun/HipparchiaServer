@@ -527,8 +527,18 @@ def formatprevalencedata(wordcountobject):
 
 	if type(w) == dbHeadwordObject:
 		thehtml += '\n<p class="wordcounts">Weighted chronological distribution: '
-		for key in ['early', 'middle', 'late']:
-			thehtml += '<span class="emph">' + w.gettimelabel(key) + '</span>' + ' {0:.0f}'.format(w.getweightedtime(key)) + ' / '
+		wts = [(w.getweightedtime(key), w.gettimelabel(key)) for key in ['early', 'middle', 'late']]
+		wts = sorted(wts, reverse=True)
+		for wt in wts:
+			thehtml += '<span class="emph">' + wt[1] + '</span>' + ' {0:.0f}'.format(wt[0]) + ' / '
+		thehtml = thehtml[:-3]
+		thehtml += '</p>\n'
+
+		thehtml += '\n<p class="wordcounts">Weighted distribution by corpus: '
+		wts = [(w.getweightedcorpora(key), w.getlabel(key)) for key in ['gr', 'lt', 'in', 'dp', 'ch']]
+		wts = sorted(wts, reverse=True)
+		for wt in wts:
+			thehtml += '<span class="emph">' + wt[1] + '</span>' + ' {0:.0f}'.format(wt[0]) + ' / '
 		thehtml = thehtml[:-3]
 		thehtml += '</p>\n'
 		key = 'frq'

@@ -432,3 +432,23 @@ def findchronologicalweights(era,language='G'):
 	sum = sum[0][0]
 
 	return sum
+
+
+def findcorpusweight(corpus):
+	"""
+
+
+	:param corpus:
+	:return:
+	"""
+
+	dbconnection = setconnection('autocommit')
+	curs = dbconnection.cursor()
+
+	q = 'SELECT SUM('+corpus+'_count) FROM dictionary_headword_wordcounts'
+
+	curs.execute(q)
+	sum = curs.fetchall()
+	sum = sum[0][0]
+
+	return sum

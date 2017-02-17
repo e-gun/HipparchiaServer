@@ -521,30 +521,41 @@ class dbWordCountObject(object):
 class dbHeadwordObject(dbWordCountObject):
 	"""
 	an extended wordcount object
+
 	"""
 
-	# see note in lexicallookups.py for deriving these weight numbers
+	greekworderaweights = {'early': 7.883171009462467, 'middle': 1.9249406986576483, 'late': 1}
+	corporaweights =  {'gr': 1.0, 'lt': 11.371559943504066, 'in': 28.130258550554572, 'dp': 27.492143340147255, 'ch': 129.8977636244065}
 
-	greekwordweights = {'early': 7.883171009462467, 'middle': 1.9249406986576483, 'late': 1}
+	# into one dict so we can pass it to __init__
+	wts = {'gkera': greekworderaweights, 'corp': corporaweights}
 
 	def __init__(self, entryname, totalcount, greekcount, latincount, docpapcount, inscriptioncount, christiancount,
-	             frqclass, early, middle, late, wts=greekwordweights):
+	             frqclass, early, middle, late, weights=wts):
 
+		# see note in lexicallookups.py for deriving these weight numbers
 		self.frqclass = frqclass
 		self.early = early
 		self.middle = middle
 		self.late = late
-		self.wtdearly = self.early * wts['early']
-		self.wtdmiddle = self.middle * wts['middle']
-		self.wtdlate = self.late * wts['late']
+		self.wtdgkearly = self.early * weights['gkera']['early']
+		self.wtdgkmiddle = self.middle * weights['gkera']['middle']
+		self.wtdgklate = self.late * weights['gkera']['late']
 		# use our weighted values to determine its relative time balance
-		self.predom = max(self.wtdearly, self.wtdmiddle, self.wtdlate)
+		self.predomera = max(self.wtdgkearly, self.wtdgkmiddle, self.wtdgklate)
 		self.qlabel = 'ⓠ'
 		self.elabel = 'ⓔ'
 		self.mlabel = 'ⓜ'
 		self.latelabel = 'ⓛ'
 		self.unklabel = 'ⓤ'
 		super().__init__(entryname, totalcount, greekcount, latincount, docpapcount, inscriptioncount, christiancount)
+		# can't do this until self.g, etc exist owing to a call to super()
+		self.wtdgr = self.g * weights['corp']['gr']
+		self.wtdlt = self.l * weights['corp']['lt']
+		self.wtdin = self.i * weights['corp']['in']
+		self.wtddp = self.d * weights['corp']['dp']
+		self.wtdch = self.c * weights['corp']['ch']
+		self.predomcorp = max(self.wtdgr, self.wtdlt, self.wtdin, self.wtddp, self.wtdch)
 
 	def gettime(self, element):
 		elements = {'early': self.early, 'middle': self.middle, 'late': self.late ,
@@ -556,13 +567,21 @@ class dbHeadwordObject(dbWordCountObject):
 			return 0
 
 	def getweightedtime(self, element):
-		elements = {'early': (self.wtdearly/self.predom)*100, 'middle': (self.wtdmiddle/self.predom)*100, 'late': (self.wtdlate/self.predom)*100
+		elements = {'early': (self.wtdgkearly/self.predomera)*100, 'middle': (self.wtdgkmiddle/self.predomera)*100, 'late': (self.wtdgklate/self.predomera)*100
 		            }
 		try:
 			return elements[element]
 		except:
 			return 0
 
+	def getweightedcorpora(self, element):
+		elements = {'gr': (self.wtdgr/self.predomcorp)*100, 'lt': (self.wtdlt/self.predomcorp)*100, 'in': (self.wtdin/self.predomcorp)*100,
+		            'dp': (self.wtddp / self.predomcorp) * 100, 'ch': (self.wtdch/self.predomcorp)*100,
+		            }
+		try:
+			return elements[element]
+		except:
+			return 0
 
 	def gettimelabel(self, element):
 		elements = {'early': self.elabel, 'middle': self.mlabel, 'late': self.latelabel, 'unk': self.unklabel,

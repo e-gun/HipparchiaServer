@@ -39,6 +39,7 @@ key features:
 			look up individual words in Greek or Latin
 			get a morphological analysis of a Greek or Latin word
 			get per corpus counts of the use of the word and its derivatives
+			get a weighted chronological distribution of the word's use: mostly 'early', etc.
 			get a summary of uses, senses, and quotes
 			reverse lookup: 'unexpected' returns ἀδευκήϲ, ἀδόκητοϲ, ἀδόξαϲτοϲ, ἀελπτία, ...
 			click to browse to passages cited in the lexical entries
