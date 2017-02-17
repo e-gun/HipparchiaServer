@@ -538,11 +538,15 @@ class dbHeadwordObject(dbWordCountObject):
 		self.early = early
 		self.middle = middle
 		self.late = late
-		self.wtdgkearly = self.early * weights['gkera']['early']
-		self.wtdgkmiddle = self.middle * weights['gkera']['middle']
-		self.wtdgklate = self.late * weights['gkera']['late']
-		# use our weighted values to determine its relative time balance
-		self.predomera = max(self.wtdgkearly, self.wtdgkmiddle, self.wtdgklate)
+		try:
+			self.wtdgkearly = self.early * weights['gkera']['early']
+			self.wtdgkmiddle = self.middle * weights['gkera']['middle']
+			self.wtdgklate = self.late * weights['gkera']['late']
+			# use our weighted values to determine its relative time balance
+			self.predomera = max(self.wtdgkearly, self.wtdgkmiddle, self.wtdgklate)
+		except:
+			# no date info is available for this (Latin) word
+			self.wtdgkearly, self.wtdgkmiddle, self.wtdgklate, self.predomera = -1, -1, -1, -1
 		self.qlabel = 'ⓠ'
 		self.elabel = 'ⓔ'
 		self.mlabel = 'ⓜ'
@@ -569,10 +573,13 @@ class dbHeadwordObject(dbWordCountObject):
 	def getweightedtime(self, element):
 		elements = {'early': (self.wtdgkearly/self.predomera)*100, 'middle': (self.wtdgkmiddle/self.predomera)*100, 'late': (self.wtdgklate/self.predomera)*100
 		            }
-		try:
-			return elements[element]
-		except:
-			return 0
+		if self.predomera != -1:
+			try:
+				return elements[element]
+			except:
+				return 0
+		else:
+			return None
 
 	def getweightedcorpora(self, element):
 		elements = {'gr': (self.wtdgr/self.predomcorp)*100, 'lt': (self.wtdlt/self.predomcorp)*100, 'in': (self.wtdin/self.predomcorp)*100,

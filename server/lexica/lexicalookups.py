@@ -526,13 +526,17 @@ def formatprevalencedata(wordcountobject):
 		thehtml = thehtml[:-3]
 
 	if type(w) == dbHeadwordObject:
-		thehtml += '\n<p class="wordcounts">Weighted chronological distribution: '
+
 		wts = [(w.getweightedtime(key), w.gettimelabel(key)) for key in ['early', 'middle', 'late']]
 		wts = sorted(wts, reverse=True)
-		for wt in wts:
-			thehtml += '<span class="emph">' + wt[1] + '</span>' + ' {0:.0f}'.format(wt[0]) + ' / '
-		thehtml = thehtml[:-3]
-		thehtml += '</p>\n'
+
+		if wts[0][0]:
+			# None was returned if there is no time data for this (Latin) word
+			thehtml += '\n<p class="wordcounts">Weighted chronological distribution: '
+			for wt in wts:
+				thehtml += '<span class="emph">' + wt[1] + '</span>' + ' {0:.0f}'.format(wt[0]) + ' / '
+			thehtml = thehtml[:-3]
+			thehtml += '</p>\n'
 
 		thehtml += '\n<p class="wordcounts">Weighted distribution by corpus: '
 		wts = [(w.getweightedcorpora(key), w.getlabel(key)) for key in ['gr', 'lt', 'in', 'dp', 'ch']]
@@ -542,7 +546,7 @@ def formatprevalencedata(wordcountobject):
 		thehtml = thehtml[:-3]
 		thehtml += '</p>\n'
 		key = 'frq'
-		if w.gettimelabel(key) != 'core vocabulary (more than 50)':
+		if w.gettimelabel(key) is not None and w.gettimelabel(key) != 'core vocabulary (more than 50)':
 			thehtml += '<p class="wordcounts">Relative frequency: <span class="italic">' + w.gettimelabel(key) + '</span></p>\n'
 
 	return thehtml
