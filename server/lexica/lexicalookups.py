@@ -14,7 +14,7 @@ from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
 from server.searching.betacodetounicode import stripaccents
-from server.hipparchiaclasses import dbLemmaObject, dbWordCountObject
+from server.hipparchiaclasses import dbWordCountObject, dbHeadwordObject
 from server import hipparchia
 
 
@@ -494,7 +494,7 @@ def definebylemma(lemmadict,corporatable,cursor):
 	return dictionaryentries
 
 
-def findcounts(word, cursor):
+def findcounts(word, cursor, asheadwordobject=True):
 	"""
 
 	use the dictionary_headword_wordcounts table
@@ -510,15 +510,23 @@ def findcounts(word, cursor):
 	word = re.sub(r'v','u',word)
 
 	table = 'dictionary_headword_wordcounts'
-	q = 'SELECT * FROM ' + table + ' WHERE entry_name=%s'
+	q = 'SELECT entry_name , total_count, gr_count, lt_count, dp_count, in_count, ch_count, ' \
+	    'frequency_classification, early_occurrences, middle_occurrences ,late_occurrences FROM ' + table + ' WHERE entry_name=%s'
 	d = (word,)
 	cursor.execute(q,d)
 	l = cursor.fetchone()
 
-	try:
-		countobject = dbWordCountObject(l[0], l[1], l[2], l[3], l[4], l[5], l[6])
-	except:
-		countobject = None
+	if asheadwordobject:
+		try:
+			countobject = dbWordCountObject(l[0], l[1], l[2], l[3], l[4], l[5], l[6])
+		except:
+			countobject = None
+	else:
+		try:
+			countobject = dbHeadwordObject(l[0], l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8], l[9], l[10])
+		except:
+			countobject = None
+
 
 	return countobject
 
@@ -641,95 +649,5 @@ def buildhitdict(countobject):
 	else:
 		return None
 
-# slated for removal
-
-def bruteforcefindcounts(word, language, cursor):
-	"""
-
-	use the wordcounts info:
-
-	[a] take a dictionary entry: ἄκρατοϲ
-	[b1] find the possible forms via the lemmata database: faster, but prone to fail because of silly entries like 'ὑπὸ-ἀναφέρω'
-		SELECT * FROM greek_lemmata WHERE dictionary_entry='φέρω'
-	[b2] find its possible forms via the morphology database: slower, but should work...
-		SELECT * FROM greek_morphology WHERE possible_dictionary_forms ~ '[>,]ἄκρατοϲ<'
-		(the '>', ',' and the '<' ensure that you find the head and tail of the 'possibility' rather than a middle [φέρω vs ἐκφέρω])
-	[c] find how many times each form appears in the wordcounts
-
-	could also use this to sort the revese lexicon hits by frequency
-
-	sample output: (word, totals, gr, lt, dp, in, ch)
-		totalfinds ('ϲυνόχωκα', 16299, 15840, 6, 405, 45, 3)
-
-	:param word:
-	:param dblist:
-	:return:
-	"""
-	manager = Manager()
-	workers = hipparchia.config['WORKERS']
-
-	# 'edo (1)' can only be found as 'edo1'
-	lemmaword = re.sub(r'(.*?)\s\((\d{1,})\)', r'\1\2',word)
-
-	# first try:
-	q = 'SELECT * FROM '+language+'_lemmata WHERE dictionary_entry = %s'
-	d = (lemmaword,)
-	cursor.execute(q,d)
-	# notice that we are only grabbing one out of something like 'edo1', 'edo2', 'edo3'
-	# this needs to be fixed...
-	results = cursor.fetchone()
-
-	if results == None:
-		# second try, different table (this will take c. 2s to execute on a fast machine)
-		# note that the ultimate results will not necessarily agree (!)
-		#   lemmata     φέρω - Prevalence: Ⓖ 176,118 / Ⓛ 45 / Ⓘ 2,496 / Ⓓ 2,214 / Ⓒ 273 / Ⓣ 181,146
-		#   morphology  φέρω - Prevalence: Ⓖ 176,121 / Ⓛ 45 / Ⓘ 2,496 / Ⓓ 2,214 / Ⓒ 273 / Ⓣ 181,149
-		q = 'SELECT * FROM '+language+'_morphology WHERE possible_dictionary_forms ~ %s'
-		d = ('[>,]'+word+'<',)
-		cursor.execute(q,d)
-		results = cursor.fetchall()
-		checklist = manager.list([r[0] for r in results])
-	else:
-		# parse the lemmata entry: tab seaparated + space separated
-		#   'φέρεν (imperf ind act 3rd sg)	'φερε (imperf ind act 3rd sg)	'φερεν (imperf ind act 3rd sg) ...
-		forms = results[2]
-		forms = forms.split('\t')
-		forms = [x.split(' ')[0] for x in forms]
-		checklist = manager.list([x for x in forms if x])
-
-	# print('checklist',checklist)
-
-	finds = manager.list()
-
-	jobs = [Process(target=findcountsviawordcountstable, args=(checklist, finds)) for i in range(workers)]
-
-	for j in jobs: j.start()
-	for j in jobs: j.join()
-
-	# TypeError: 'NoneType' object is not subscriptable
-	finds = [f for f in finds if f]
-	# mp means multiple versions of the same result can come back
-	finds = list(set(finds))
-
-	# totalfinds = {}
-	# totalfinds['totals'] = sum([f[1] for f in finds])
-	# totalfinds['gr'] = sum([f[2] for f in finds])
-	# totalfinds['lt'] = sum([f[3] for f in finds])
-	# totalfinds['dp'] = sum([f[4] for f in finds])
-	# totalfinds['in'] = sum([f[5] for f in finds])
-	# totalfinds['ch'] = sum([f[6] for f in finds])
-
-	# (word, totals, gr, lt, dp, in, ch)
-	totalfinds = (
-		word,
-		sum([f[1] for f in finds]),
-		sum([f[2] for f in finds]),
-		sum([f[3] for f in finds]),
-		sum([f[4] for f in finds]),
-		sum([f[5] for f in finds]),
-		sum([f[6] for f in finds])
-		)
-
-	return totalfinds
 
 

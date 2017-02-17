@@ -502,6 +502,20 @@ class dbWordCountObject(object):
 			return 0
 
 
+class dbHeadwordObject(dbWordCountObject):
+	"""
+	an extended wordcount object
+	"""
+	def __init__(self, entryname, totalcount, greekcount, latincount, docpapcount, inscriptioncount, christiancount, frqclass, early, middle, late):
+		self.frqclass = frqclass
+		self.early = early
+		self.middle = middle
+		self.late = late
+		super().__init__(entryname, totalcount, greekcount, latincount, docpapcount, inscriptioncount, christiancount)
+
+
+# currenly unused in HServer; used in HBuilder
+
 class dbLemmaObject(object):
 	"""
 	an object that corresponds to a db line
