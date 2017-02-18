@@ -158,7 +158,7 @@ def browserdictionarylookup(count, entry, usedictionary, cursor, suppressprevale
 
 	nothingfound = { 'metrics': '', 'definition': '', 'type': '' }
 
-	print('browserdictionarylookup(): entry',entry)
+	# print('browserdictionarylookup(): entry',entry)
 
 	# entry = re.sub(r'#','',entry)
 	#
@@ -259,9 +259,9 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	query = 'SELECT metrical_entry, entry_body, entry_type FROM ' + dictionary + ' WHERE '+usecolumn+' '+syntax+' %s'
 	data = (seeking,)
 	cursor.execute(query, data)
-	print('searchdictionary()',query,'\n\t',data)
-	# note that the dictionary db has a problem with vowel lengths vs accents
-	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
+
+	#print('searchdictionary()',query,'\n\t',data)
+
 	found = cursor.fetchone()
 
 	# we might be at trial 2+ and so we need to strip the supplement we used at trial #1

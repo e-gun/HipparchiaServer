@@ -404,6 +404,8 @@ def attemptelision(hypenatedgreekheadword):
 	call this successively in the case of multiple compounds: first you get ἀπό-αὔω2 then you ask for
 	ἀνά-ἀπαὔω2, then you ask for ὑπό-ἀνάπόαὔω2
 
+	IN PROGRESS BUT MOSTLY WORKING
+
 	:param hypenatedgreekheadword:
 	:return:
 	"""
@@ -425,10 +427,9 @@ def attemptelision(hypenatedgreekheadword):
 	prefix = hyphenated.split('-')[0]
 	stem = hyphenated.split('-')[1]
 
-	if extraunits:
-		print('prefix1',prefix)
-		prefix = attemptelision(extraunits+'-'+prefix)
-		print('prefix2', prefix)
+	# if extraunits:
+	# 	# recursion
+	# 	prefix = attemptelision(extraunits+'-'+prefix)
 
 	if re.search(terminalacute, prefix[-1]) is not None and re.search(initialrough, stem[0]) is None and re.search(initialsmooth, stem[0]) is not None:
 		# print('A')
@@ -445,18 +446,18 @@ def attemptelision(hypenatedgreekheadword):
 			# consonant + consonant: 'ἐκ-δαϲύνω'
 			entry = prefix+stem
 		elif prefix[-1] in ['ν'] and stem[0] in ['γ', 'λ', 'μ', 'ϲ']:
-			print('C2')
+			# print('C2')
 			# consonant + consonant: 'ϲύν-μνημονεύω'
 			if prefix == 'ϲύν':
 				prefix = stripaccents(prefix)
 			entry = prefix[:-1]+stem[0]+stem
 		elif prefix[-1] in ['ν']:
-			print('C3')
+			#print('C3')
 			prefix = stripaccents(prefix)
 			entry = prefix+stem
 		else:
-			print('C0')
+			#print('C0')
+			pass
 
-	print('entry/newentry',hypenatedgreekheadword, entry)
 	return entry
 
