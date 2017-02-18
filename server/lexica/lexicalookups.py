@@ -9,12 +9,14 @@
 import re
 from flask import session
 from server.dbsupport.dbfunctions import setconnection
+from server.formatting_helper_functions import attemptelision
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
 from server.searching.betacodetounicode import stripaccents
-from server.hipparchiaclasses import dbWordCountObject, dbHeadwordObject
+from server.hipparchiaclasses import dbWordCountObject, dbHeadwordObject, dbMorphologyObject
 from server import hipparchia
+
 
 def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 	"""
@@ -26,11 +28,10 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 
 	trialnumber += 1
 
-	possible = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value>(.*?)</possibility_\d{1,2}>')
 	# the things that can confuse me
 	terminalacute = re.compile(r'[άέίόύήώ]')
 
-	matches = None
+	matchingobject = None
 
 	if usedictionary == 'latin':
 		word = re.sub(r'[uv]', '[uv]', word)
@@ -39,16 +40,15 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 	else:
 		syntax = '='
 
-	query = 'SELECT possible_dictionary_forms FROM ' + usedictionary + '_morphology WHERE observed_form '+syntax+' %s'
+	query = 'SELECT * FROM ' + usedictionary + '_morphology WHERE observed_form '+syntax+' %s'
 	data = (word,)
 
 	cursor.execute(query, data)
 
 	analysis = cursor.fetchone()
-	print('lookformorphologymatches()',analysis)
+
 	if analysis:
-		matches = re.findall(possible, analysis[0])
-		# 1 = #, 2 = word, 4 = body, 3 = xref
+		matchingobject = dbMorphologyObject(analysis[0], analysis[1], analysis[2], analysis[3])
 	else:
 		# this code lets you make multiple stabs at an answer if you have already failed once
 		# [a] something like πλακουντάριόν τι will fail because of the enclitic (greek_morphology can find πλακουντάριον and πλακουντάριοϲ)
@@ -60,18 +60,18 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 			if re.search(terminalacute,word[-1]) is not None and trialnumber < 3:
 				sub = stripaccents(word[-1])
 				newword = word[:-1]+sub
-				matches = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
+				matchingobject = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
 			elif re.search(terminalacute,word[-2]) is not None and trialnumber < 3:
 				sub = stripaccents(word[-2])
 				newword = word[:-2] + sub + word[-1]
-				matches = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
+				matchingobject = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
 		except:
-			matches = None
+			matchingobject = None
 
-	return matches
+	return matchingobject
 
 
-def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
+def lexicalmatchesintohtml(observedform, morphologyobject, usedictionary, cursor):
 	"""
 
 	you have found the word(s), now generate a collection of HTML lines to hand to the JS
@@ -96,38 +96,36 @@ def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 	"""
 
 	returnarray = []
-	differentwordsfound = {}
 	entriestocheck = {}
-	for m in matcheslist:
-		if m[3] not in differentwordsfound:
-			differentwordsfound[m[3]] = [(m[2], m[4])]
-		else:
-			differentwordsfound[m[3]].append((m[2], m[4]))
-
-	transfinder = re.compile(r'<transl>(.*?)</transl>')
-	analysisfinder = re.compile(r'<analysis>(.*?)</analysis>')
+	possibilities = morphologyobject.getpossible()
 
 	# the top part of the HTML: just the analyses
 	count = 0
-	for w in differentwordsfound:
+	for p in possibilities:
 		count += 1
 		# {'50817064': [('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem dat pl</analysis>')], '50839960': [('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]}
-		theentry = differentwordsfound[w]
-		wordandform = theentry[0][0]
-		wordandform = wordandform.split(', ')
-		form = wordandform[0]
-		try:
-			theword = wordandform[1]
-		except:
-			theword = form
-		thetransl = re.search(transfinder, theentry[0][1])
-		thetransl = thetransl.group(1)
-		analyses = [re.search(analysisfinder, x[1]) for x in theentry]
-		analysislist = [x.group(1) for x in analyses]
-		consolidatedentry = {'count': count, 'form': observedform, 'word': theword, 'transl': thetransl,
-							 'anal': analysislist}
+		theentry = p.entry
+		theword = p.getbaseform()
+		print('theentry',theentry, p.number, p.gettranslation(), p.getanalysislist())
+
+
+		# there is a HUGE PROBLEM in the original data here:
+		#   [a] 'ὑπό, ἐκ-ἀράω²': what comes before the comma is a prefix to the verb
+		#   [b] 'ἠχούϲαϲ, ἠχέω': what comes before the comma is an observed form of the verb
+		# when you .split() what do you have at wordandform[0]?
+
+		# you have to look at the full db entry for the word:
+		# the number of items in prefixrefs corresponds to the number of prefix checks you will need to make to recompose the verb
+
+		consolidatedentry = {'count': count, 'form': observedform, 'word': p.entry, 'transl': p.gettranslation(),
+							 'anal': p.getanalysislist()}
 		returnarray.append({'value': formateconsolidatedgrammarentry(consolidatedentry)})
-		entriestocheck[w] = theword
+
+	distinct = list(set([(p.getbaseform(), p.entry) for p in possibilities]))
+	count = 0
+	for d in distinct:
+		count += 1
+		entriestocheck[count] = d[0]
 
 	# look up and format the dictionary entries
 	if len(entriestocheck) == 1:
@@ -160,10 +158,12 @@ def browserdictionarylookup(count, entry, usedictionary, cursor, suppressprevale
 
 	nothingfound = { 'metrics': '', 'definition': '', 'type': '' }
 
-	entry = re.sub(r'#','',entry)
+	print('browserdictionarylookup(): entry',entry)
 
-	if re.search(r'\d$',entry) is not None:
-		entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
+	# entry = re.sub(r'#','',entry)
+	#
+	# if re.search(r'\d$',entry) is not None:
+	# 	entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
 	founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
 	cleanedentry = ''
@@ -286,9 +286,9 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		# grab any/all variants: ⁰¹²³⁴⁵⁶⁷⁸⁹
 		newword = seeking+'[⁰¹²³⁴⁵⁶⁷⁸⁹]'
 		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
-	elif trialnumber < maxtrials and '-' in seeking:
-		newword = attemptelision(seeking)
-		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+	# elif trialnumber < maxtrials and '-' in seeking:
+	# 	newword = attemptelision(seeking)
+	# 	founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and seeking[-1] == 'ω':
 		# ὑποϲυναλείφομαι is in the dictionary, but greek_lemmata says to look for ὑπό-ϲυναλείφω
 		newword = seeking[:-1]+'ομαι'
@@ -541,79 +541,6 @@ def formatprevalencedata(wordcountobject):
 			thehtml += '<p class="wordcounts">Relative frequency: <span class="italic">' + w.gettimelabel(key) + '</span></p>\n'
 
 	return thehtml
-
-
-def attemptelision(hypenatedgreekheadword):
-	"""
-
-	useful debug query:
-		select * from greek_lemmata where dictionary_entry like '%ἀπό-%'
-
-	a difficult class of entry: multiple prefixes
-		ὑπό,κατά-κλῄζω1
-		ὑπό,κατά,ἐκ-λάω1
-		ὑπό,ἐν-δύω1
-		ὑπό,ἐκ-λάω1
-		ὑπό,ἐκ-εἴρω2
-		ὑπό,ἐκ-ἐράω1
-		ὑπό,ἐκ-δύω1
-		ὑπό,ἐκ-ἀράω2
-		ὑπό,ἀνά,ἀπό-νέω1
-		ὑπό,ἀνά,ἀπό-αὔω2
-
-	:param hypenatedgreekheadword:
-	:return:
-	"""
-	entry = hypenatedgreekheadword
-	terminalacute = re.compile(r'[άέίόύήώ]')
-	initialrough = re.compile(r'[ἁἑἱὁὑἡὡῥἃἓἳὃὓἣὣ]')
-	initialsmooth = re.compile(r'[ἀἐἰὀὐἠὠἄἔἴὄὔἤὤ]')
-	vowels = re.compile(r'')
-
-	unaspirated = 'π'
-	aspirated = 'φ'
-
-
-	units = hypenatedgreekheadword.split(',')
-	hyphenated = units[-1]
-	extraunits = units[:-1]
-
-	if extraunits:
-		pass
-
-	prefix = hyphenated.split('-')[0]
-	stem = hyphenated.split('-')[1]
-
-	if re.search(terminalacute, prefix[-1]) is not None and re.search(initialrough, stem[0]) is None and re.search(initialsmooth, stem[0]) is not None:
-		print('A')
-		# vowel + vowel: 'ἀπό-ἀθρέω'
-		entry = prefix[:-1]+stripaccents(stem[0])+stem[1:]
-	elif re.search(terminalacute, prefix[-1]) is not None and re.search(initialrough, stem[0]) is None and re.search(initialrough, stem[0]) is None:
-		print('B')
-		# vowel + consonant: 'ἀπό-νέω'
-		entry = prefix[:-1]+stripaccents(prefix[-1])+stem
-	elif re.search(terminalacute, prefix[-1]) is None and re.search(initialrough, stem[0]) is None and re.search(initialrough, stem[0]) is None:
-		# consonant + consonant: 'ἐκ-δαϲύνω'
-		if prefix[-1] not in ['ν'] and stem[0] not in ['γ', 'λ', 'μ']:
-			print('C1')
-			# consonant + consonant: 'ἐκ-δαϲύνω'
-			entry = prefix+stem
-		elif prefix[-1] in ['ν'] and stem[0] in ['γ', 'λ', 'μ', 'ϲ']:
-			print('C2')
-			# consonant + consonant: 'ϲύν-μνημονεύω'
-			if prefix == 'ϲύν':
-				prefix = stripaccents(prefix)
-			entry = prefix[:-1]+stem[0]+stem
-		elif prefix[-1] in ['ν']:
-			print('C3')
-			prefix = stripaccents(prefix)
-			entry = prefix+stem
-		else:
-			print('C0')
-
-	print('entry/newentry',hypenatedgreekheadword, entry)
-	return entry
-
 
 
 """
