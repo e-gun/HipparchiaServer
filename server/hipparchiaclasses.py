@@ -8,14 +8,29 @@
 
 
 import re
-from time import time
 from multiprocessing import Value, Array
-
+from server.formatting_helper_functions import attemptelision
 
 class dbAuthor(object):
 	"""
 	Created out of the DB info, not the IDT or the AUTHTAB
 	Initialized straight out of a DB read
+	
+		
+	CREATE TABLE public.authors
+	(
+    universalid character(6) COLLATE pg_catalog."default",
+    language character varying(10) COLLATE pg_catalog."default",
+    idxname character varying(128) COLLATE pg_catalog."default",
+    akaname character varying(128) COLLATE pg_catalog."default",
+    shortname character varying(128) COLLATE pg_catalog."default",
+    cleanname character varying(128) COLLATE pg_catalog."default",
+    genres character varying(512) COLLATE pg_catalog."default",
+    recorded_date character varying(64) COLLATE pg_catalog."default",
+    converted_date character varying(8) COLLATE pg_catalog."default",
+    location character varying(128) COLLATE pg_catalog."default"
+	)
+	
 	"""
 
 	def __init__(self, universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date,
@@ -71,6 +86,32 @@ class dbOpus(object):
 	Initialized straight out of a DB read
 	note the efforts to match a simple Opus, but the fit is potentially untidy
 	it is always going to be important to know exactly what kind of object you are handling
+	
+	CREATE TABLE public.works
+	(
+    universalid character(10) COLLATE pg_catalog."default",
+    title character varying(512) COLLATE pg_catalog."default",
+    language character varying(10) COLLATE pg_catalog."default",
+    publication_info text COLLATE pg_catalog."default",
+    levellabels_00 character varying(64) COLLATE pg_catalog."default",
+    levellabels_01 character varying(64) COLLATE pg_catalog."default",
+    levellabels_02 character varying(64) COLLATE pg_catalog."default",
+    levellabels_03 character varying(64) COLLATE pg_catalog."default",
+    levellabels_04 character varying(64) COLLATE pg_catalog."default",
+    levellabels_05 character varying(64) COLLATE pg_catalog."default",
+    workgenre character varying(32) COLLATE pg_catalog."default",
+    transmission character varying(32) COLLATE pg_catalog."default",
+    worktype character varying(32) COLLATE pg_catalog."default",
+    provenance character varying(64) COLLATE pg_catalog."default",
+    recorded_date character varying(64) COLLATE pg_catalog."default",
+    converted_date character varying(8) COLLATE pg_catalog."default",
+    wordcount integer,
+    firstline integer,
+    lastline integer,
+    authentic boolean
+	)
+	
+	
 	"""
 
 	def __init__(self, universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02,
@@ -141,6 +182,24 @@ class dbOpus(object):
 class dbWorkLine(object):
 	"""
 	an object that corresponds to a db line
+	
+	CREATE TABLE public.in0207
+	(
+    index integer NOT NULL DEFAULT nextval('in0207'::regclass),
+    wkuniversalid character varying(10) COLLATE pg_catalog."default",
+    level_05_value character varying(64) COLLATE pg_catalog."default",
+    level_04_value character varying(64) COLLATE pg_catalog."default",
+    level_03_value character varying(64) COLLATE pg_catalog."default",
+    level_02_value character varying(64) COLLATE pg_catalog."default",
+    level_01_value character varying(64) COLLATE pg_catalog."default",
+    level_00_value character varying(64) COLLATE pg_catalog."default",
+    marked_up_line text COLLATE pg_catalog."default",
+    accented_line text COLLATE pg_catalog."default",
+    stripped_line text COLLATE pg_catalog."default",
+    hyphenated_words character varying(128) COLLATE pg_catalog."default",
+    annotations character varying(256) COLLATE pg_catalog."default"
+	)
+	
 	"""
 	
 	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value,
@@ -481,6 +540,18 @@ class FormattedSearchResult(object):
 class dbWordCountObject(object):
 	"""
 	an object that corresponds to a db line
+
+	CREATE TABLE public."wordcounts_ϲ"
+	(
+    entry_name character varying(64) COLLATE pg_catalog."default",
+    total_count integer,
+    gr_count integer,
+    lt_count integer,
+    dp_count integer,
+    in_count integer,
+    ch_count integer
+	)
+
 	"""
 
 	def __init__(self, entryname, totalcount, greekcount, latincount, docpapcount, inscriptioncount, christiancount):
@@ -521,6 +592,21 @@ class dbWordCountObject(object):
 class dbHeadwordObject(dbWordCountObject):
 	"""
 	an extended wordcount object
+
+	CREATE TABLE public.dictionary_headword_wordcounts
+	(
+    entry_name character varying(64) COLLATE pg_catalog."default",
+    total_count integer,
+    gr_count integer,
+    lt_count integer,
+    dp_count integer,
+    in_count integer,
+    ch_count integer,
+    frequency_classification character varying(64) COLLATE pg_catalog."default",
+    early_occurrences integer,
+    middle_occurrences integer,
+    late_occurrences integer
+	)
 
 	"""
 
@@ -599,11 +685,128 @@ class dbHeadwordObject(dbWordCountObject):
 		except:
 			return 0
 
+
+class dbMorphologyObject(object):
+	"""
+
+	an object that corresponds to a db line
+
+	CREATE TABLE public.greek_morphology
+	(
+    observed_form character varying(64) COLLATE pg_catalog."default",
+    xrefs character varying(128) COLLATE pg_catalog."default",
+    prefixrefs character varying(128) COLLATE pg_catalog."default",
+    possible_dictionary_forms text COLLATE pg_catalog."default"
+	)
+
+	"""
+
+	def __init__(self, observed, xrefs, prefixrefs, possibleforms):
+		self.observed = observed
+		self.xrefs = xrefs.split(', ')
+		self.prefixrefs = [x for x in prefixrefs.split(', ') if x]
+		self.possibleforms = possibleforms
+		self.prefixcount = len(self.prefixrefs)
+		self.xrefcount = len(self.xrefs)
+
+	def countpossible(self):
+		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
+		thepossible = re.findall(possiblefinder,self.possibleforms)
+		return len(thepossible)
+
+	def getpossible(self):
+		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
+		thepossible = re.findall(possiblefinder,self.possibleforms)
+		listofpossibilitiesobjects = [MorphPossibilityObject(p, self.prefixcount) for p in thepossible]
+		return listofpossibilitiesobjects
+
+
+class MorphPossibilityObject(object):
+	"""
+
+	the embedded morphological possibilities
+
+	"""
+
+	def __init__(self, findalltuple, prefixcount):
+		self.number = findalltuple[1]
+		self.entry = findalltuple[2]
+		self.xref = findalltuple[3]
+		self.xkind = findalltuple[4]
+		self.transandanal = findalltuple[5]
+		self.prefixcount = prefixcount
+
+	def gettranslation(self):
+		transfinder = re.compile(r'<transl>(.*?)</transl>')
+		trans = re.findall(transfinder, self.transandanal)
+		return ('; ').join(trans)
+
+	def getanalysislist(self):
+		analysisfinder = re.compile(r'<analysis>(.*?)</analysis>')
+		analysislist = re.findall(analysisfinder, self.transandanal)
+		return analysislist
+
+	def getbaseform(self):
+		"""
+		the tricky bit:
+
+		some are quite easy: 'ἐπώνυμοϲ'
+		others are compounds with a ', ' separation
+
+		there is a HUGE PROBLEM in the original data here:
+		   [a] 'ὑπό, ἐκ-ἀράω²': what comes before the comma is a prefix to the verb
+		   [b] 'ἠχούϲαϲ, ἠχέω': what comes before the comma is an observed form of the verb
+		when you .split() what do you have at wordandform[0]?
+
+		you have to look at the full db entry for the word:
+		the number of items in prefixrefs corresponds to the number of prefix checks you will need to make to recompose the verb
+
+		:return:
+		"""
+
+		# need an aspiration check; incl εκ -⟩ εξ
+
+		baseform = ''
+		segments = self.entry.split(', ')
+
+		if len(segments) == 1 and '-' not in segments[-1]:
+			# [a] the simplest case where what you see is what you should seek: 'ἐπώνυμοϲ'
+			baseform = segments[-1]
+		elif len(segments) == 2 and '-' not in segments[-1] and self.prefixcount == 0:
+			# [b] a compound case, but it does not involve prefixes just morphology: 'ἠχούϲαϲ, ἠχέω'
+			baseform = segments[-1]
+		elif len(segments) == 1 and '-' in segments[-1]:
+			# [c] the simplest version of a prefix: ἐκ-ϲύρω
+			baseform = attemptelision(segments[-1])
+		elif len(segments) == 2 and '-' in segments[-1] and self.prefixcount == 1:
+			# [d] more info, but we do not need it: ἐκϲύρωμεν, ἐκ-ϲύρω
+			baseform = attemptelision(segments[-1])
+		elif len(segments) > 1 and '-' in segments[-1] and self.prefixcount > 1:
+			# [e] all bets are off: ὑπό,κατά,ἐκ-λάω
+			print('segments',segments)
+			for i in range(self.prefixcount-2,-1, -1):
+				print('i=',i)
+				baseform = attemptelision(segments[-1])
+				baseform = segments[i]+'-'+baseform
+				print('getbaseform() baseform',baseform)
+		else:
+			print('getbaseform() is confused',self.entry, segments)
+
+		return baseform
+
 # currenly unused in HServer; used in HBuilder
 
 class dbLemmaObject(object):
 	"""
 	an object that corresponds to a db line
+
+	CREATE TABLE public.greek_lemmata
+	(
+    dictionary_entry character varying(64) COLLATE pg_catalog."default",
+    xref_number integer,
+    derivative_forms text COLLATE pg_catalog."default"
+	)
+
 	"""
 
 	def __init__(self, dictionaryentry, xref, derivativeforms):
