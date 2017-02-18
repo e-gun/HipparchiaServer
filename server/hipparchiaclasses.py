@@ -783,12 +783,12 @@ class MorphPossibilityObject(object):
 			baseform = attemptelision(segments[-1])
 		elif len(segments) > 1 and '-' in segments[-1] and self.prefixcount > 1:
 			# [e] all bets are off: ὑπό,κατά,ἐκ-λάω
-			print('segments',segments)
+			# print('segments',segments)
 			for i in range(self.prefixcount-2,-1, -1):
 				print('i=',i)
 				baseform = attemptelision(segments[-1])
 				baseform = segments[i]+'-'+baseform
-				print('getbaseform() baseform',baseform)
+				# print('getbaseform() baseform',baseform)
 		else:
 			print('getbaseform() is confused',self.entry, segments)
 
