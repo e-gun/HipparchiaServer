@@ -265,20 +265,19 @@
         <li>
             You may also be shown a <span class="emph">relative frequency</span> label. This label will not be shown for 'core vocabulary' as defined below.
             <ul class="roman">
-                <li>The corpora have been sliced into <span class="emph">four subdivisions</span>: top 25, core vocabulary, rare, and very rare</li>
+                <li>The corpora have been sliced into <span class="emph">five subdivisions</span>: top 250, top 2500, core vocabulary, rare, and very rare</li>
                 <ul class="forexample">
                     <li><span class="emph">Core</span> corresponds to the semi-arbitrary cut-off of >50 uses of a word.</li>
                     <li><span class="emph">Rare</span> implies between 50 and 5 uses.</li>
                     <li><span class="emph">Very rare</span> words are used fewer than 5 times.</li>
                 </ul>
                 <li>These divisions reflect the <span class="emph">logarithmic distribution</span> of word frequencies. A small number of words are
-                exceptionally common. A large number of words are extremely uncommon. The cuts put comparable numbers of words inside
-                of each major division (less 'top 25', of course). But the curve shape of the word distributions means that
+                exceptionally common. A large number of words are extremely uncommon. But the curve shape of the word distributions means that
                     <span class="emph">the averages and the medians tend to be
-                        severly disparate</span>.</li>
+                        severly disparate</span> within each class.</li>
                 <li> Some raw data follows. These numbers will change as the parser is adjusted, but not so much as to distort the general shape of the data.
                     <code>count</code> is the number of dictionary entries inside of a heading. The other numbers are the distribution of occurrences.
-                    If <code>low</code> is 429120, then you need at least 429120 uses to make it into that category <pre>
+                    If <code>low</code> is 39356, then you need at least 39356 uses to make it into that category <pre>
 
 greek
 
@@ -289,33 +288,42 @@ full set
 	average	794
 	median	7
 
-top twenty five
-	count	25
+top 250
+	count	250
 	high	3649037
-	low	429120
-	average	1177696
-	median	949783
+	low	39356
+	average	218482
+	median	78551
 
-core vocabulary (more than 50)
-	count	28376
-	high	425747
+top 2500
+	count	2250
+	high	38891
+	low	3486
+	average	9912
+	median	7026
+
+core (not in top 2500; >50 occurrences)
+	count	25901
+	high	3479
 	low	51
-	average	2099
-	median	229
+	average	466
+	median	196
 
-rare (between 50 and 5)
+rare (between 50 and 5 occurrences)
 	count	32614
 	high	50
 	low	6
 	average	18
 	median	15
 
-very rare (less than 5)
+very rare (fewer than 5 occurrences)
 	count	48003
 	high	4
 	low	1
 	average	1
 	median	2
+
+
 latin
 
 full set
@@ -325,28 +333,35 @@ full set
 	average	348
 	median	11
 
-top twenty five
-	count	25
+top 250
+	count	250
 	high	244812
-	low	40371
-	average	86260
-	median	64356
+	low	5859
+	average	19725
+	median	10358
 
-core vocabulary (more than 50)
-	count	8624
-	high	40256
+top 2500
+	count	2250
+	high	5843
+	low	541
+	average	1565
+	median	1120
+
+core (not in top 2500; >50 occurrences)
+	count	6149
+	high	541
 	low	51
-	average	859
-	median	219
+	average	181
+	median	139
 
-rare (between 50 and 5)
+rare (between 50 and 5 occurrences)
 	count	8095
 	high	50
 	low	6
 	average	19
 	median	16
 
-very rare (less than 5)
+very rare (fewer than 5 occurrences)
 	count	10404
 	high	4
 	low	1
