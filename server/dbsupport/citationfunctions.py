@@ -171,7 +171,9 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 		indexvalue = found[0]
 	except:
 		indexvalue = returnfirstlinenumber(workdb, cursor)
-		
+
+	# print('finddblinefromlocus() - indexvalue:',indexvalue)
+
 	return indexvalue
 
 

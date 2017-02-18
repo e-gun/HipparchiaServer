@@ -53,12 +53,14 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			date = ''
 	except:
 		date = ''
-	
+
 	if locusindexvalue - linesofcontext < workobject.starts:
+		# note that partial db builds can leave works that do not have this value
+		# None will return and you will not get a browser window for this author
 		first = workobject.starts
 	else:
 		first = locusindexvalue - linesofcontext
-	
+
 	if locusindexvalue + linesofcontext > workobject.ends:
 		last = workobject.ends
 	else:

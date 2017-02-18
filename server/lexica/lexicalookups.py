@@ -45,7 +45,7 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 	cursor.execute(query, data)
 
 	analysis = cursor.fetchone()
-
+	print('lookformorphologymatches()',analysis)
 	if analysis:
 		matches = re.findall(possible, analysis[0])
 		# 1 = #, 2 = word, 4 = body, 3 = xref
@@ -83,10 +83,10 @@ def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 		nubibus
 
 	matcheslist:
-		[('<possibility_1>', '1', 'nūbibus,nubes', '50817064', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('<possibility_2>', '2', 'nūbibus,nubes', '50817064', '<transl>a cloud</transl><analysis>fem dat pl</analysis>'), ('<possibility_3>', '3', 'nūbibus,nubis', '50839960', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('<possibility_4>', '4', 'nūbibus,nubis', '50839960', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]
+		[('<possibility_1>χρημάτων, χρῆμα<xref_value>128139149</xref_value><transl>need</transl><analysis>neut gen pl</analysis></possibility_1>\n',)]
 
 	usedictionary:
-		latin
+		greek
 
 	:param observedform:
 	:param matcheslist:
@@ -114,7 +114,7 @@ def lexicalmatchesintohtml(observedform, matcheslist, usedictionary, cursor):
 		# {'50817064': [('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem dat pl</analysis>')], '50839960': [('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]}
 		theentry = differentwordsfound[w]
 		wordandform = theentry[0][0]
-		wordandform = wordandform.split(',')
+		wordandform = wordandform.split(', ')
 		form = wordandform[0]
 		try:
 			theword = wordandform[1]
@@ -160,85 +160,70 @@ def browserdictionarylookup(count, entry, usedictionary, cursor, suppressprevale
 
 	nothingfound = { 'metrics': '', 'definition': '', 'type': '' }
 
-	# mismatch between homonymns as per the lemmas and the dictionary: "λέγω1" vs "λέγω (1)"
-	# a potential moving target if things change with the builder
-
 	entry = re.sub(r'#','',entry)
 
 	if re.search(r'\d$',entry) is not None:
 		entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
 	founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
-
-	metrics = founddict['metrics']
-	definition = founddict['definition']
-	type = founddict['type']
-	metrics = re.sub(r'\(\d{1,}\)',r'',metrics)
-	
-	# can't have xml in our html
-	definition = re.sub(r'<title>(.*?)</title>', r'<worktitle>\1</worktitle>', definition)
-	
 	cleanedentry = ''
-	
-	if definition != '' and type != 'gloss':
-		if count == 0:
-			cleanedentry += '<hr /><p class="dictionaryheading">'+entry
-		else:
-			cleanedentry += '<hr /><p class="dictionaryheading">(' + str(count) + ')&nbsp;' + entry
-		if u'\u0304' in metrics or u'\u0306' in metrics:
-			cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
-		cleanedentry += '</p>\n'
+	if founddict != nothingfound:
+		# rewrite entry because if lemma says go to χαρίζομαι you really need to go to χαρίζω
+		entry = founddict['foundunder']
+		metrics = founddict['metrics']
+		definition = founddict['definition']
+		type = founddict['type']
+		metrics = re.sub(r'\(\d{1,}\)',r'',metrics)
 
-		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes' and suppressprevalence==False:
-			countobject = findtotalcounts(entry, cursor)
-			if countobject:
-				cleanedentry += '<p class="wordcounts">Prevalence (all forms): '
-				cleanedentry += formatprevalencedata(countobject)
-				cleanedentry += '</p>\n'
+		# can't have xml in our html
+		definition = re.sub(r'<title>(.*?)</title>', r'<worktitle>\1</worktitle>', definition)
 
-		if hipparchia.config['SHOWLEXICALSUMMARYINFO'] == 'yes':
-			summarydict = entrysummary(definition, usedictionary, translationlabel)
-		else:
-			summarydict = {'authors': '', 'senses': '', 'quotes': ''}
-
-		if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
-			# either you have turned off summary info or this is basically just a gloss entry
-			cleanedentry += formatmicroentry(definition)
-		else:
-			cleanedentry += formatdictionarysummary(summarydict)
-			cleanedentry += grabheadmaterial(definition) + '<br />\n'
-			senses = grabsenses(definition)
-			if len(senses) > 0:
-				for n in senses:
-					cleanedentry += n
+		if type != 'gloss':
+			if count == 0:
+				cleanedentry += '<hr /><p class="dictionaryheading">'+entry
 			else:
+				cleanedentry += '<hr /><p class="dictionaryheading">(' + str(count) + ')&nbsp;' + entry
+			if u'\u0304' in metrics or u'\u0306' in metrics:
+				cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
+			cleanedentry += '</p>\n'
+
+			if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes' and suppressprevalence==False:
+				countobject = findtotalcounts(entry, cursor)
+				if countobject:
+					cleanedentry += '<p class="wordcounts">Prevalence (all forms): '
+					cleanedentry += formatprevalencedata(countobject)
+					cleanedentry += '</p>\n'
+
+			if hipparchia.config['SHOWLEXICALSUMMARYINFO'] == 'yes':
+				summarydict = entrysummary(definition, usedictionary, translationlabel)
+			else:
+				summarydict = {'authors': '', 'senses': '', 'quotes': ''}
+
+			if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
+				# either you have turned off summary info or this is basically just a gloss entry
 				cleanedentry += formatmicroentry(definition)
-	elif definition != '' and type == 'gloss':
-		cleanedentry += '<br />\n<p class="dictionaryheading">' + entry + '<span class="metrics">[gloss]</span></p>\n'
-		cleanedentry += formatgloss(definition)
-	else:
-		if '-' in entry:
-			parts = entry.split('-')
-			partone = parts[0]
-			parttwo = parts[1]
-			# ά --> α, etc.
-			tail = stripaccents(partone[-1])
-			head = stripaccents(parttwo[0])
-			guessone = partone[:-1] + tail + parttwo[1:]
-			guesstwo = partone[:-1] + head + parttwo[1:]
-			if guessone != guesstwo:
-				searched = entry + ' (both '+guessone+' and '+guesstwo+' were searched)'
 			else:
-				searched = entry + ' ('+guessone+' was searched)'
+				cleanedentry += formatdictionarysummary(summarydict)
+				cleanedentry += grabheadmaterial(definition) + '<br />\n'
+				senses = grabsenses(definition)
+				if len(senses) > 0:
+					for n in senses:
+						cleanedentry += n
+				else:
+					cleanedentry += formatmicroentry(definition)
 		else:
-			searched = entry
-		cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under '+searched+'</p>\n'
+			cleanedentry += '<br />\n<p class="dictionaryheading">' + entry + '<span class="metrics">[gloss]</span></p>\n'
+			cleanedentry += formatgloss(definition)
+
+		clickableentry = insertbrowserlookups(cleanedentry)
+		clickableentry = insertbrowserjs(clickableentry)
+
+	else:
+		cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under '+entry+'</p>\n'
 		cleanedentry += 'But the parser can get fooled by enclitics (which will alter the accent), spelling variations, and disagreement about the number of entries for a word.<br />'
 		cleanedentry += '<br />Try looking for this word yourself by using the proper search box: something is likely to turn up. Remember that partial word searching is acceptable and that accents do not matter.'
+		clickableentry = cleanedentry
 
-	clickableentry = insertbrowserlookups(cleanedentry)
-	clickableentry = insertbrowserjs(clickableentry)
-	
 	return clickableentry
 
 
@@ -262,7 +247,9 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	:param seeking:
 	:return:
 	"""
+	# print('seeking/trial',seeking,trialnumber)
 
+	maxtrials = 7
 	trialnumber += 1
 	accenteddiaresis = re.compile(r'αί|εί|οί|υί|ηί|ωί')
 	unaccenteddiaresis = re.compile(r'αι|ει|οι|υι|ηι|ωι')
@@ -272,41 +259,45 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	query = 'SELECT metrical_entry, entry_body, entry_type FROM ' + dictionary + ' WHERE '+usecolumn+' '+syntax+' %s'
 	data = (seeking,)
 	cursor.execute(query, data)
+	print('searchdictionary()',query,'\n\t',data)
 	# note that the dictionary db has a problem with vowel lengths vs accents
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
 	found = cursor.fetchone()
 
 	# we might be at trial 2+ and so we need to strip the supplement we used at trial #1
-	seeking = re.sub(r'\s%$','',seeking)
+	if trialnumber > 2:
+		seeking = re.sub(r'\[⁰¹²³⁴⁵⁶⁷⁸⁹\]','',seeking)
 
 	founddict = nothingfound
 
 	if found is not None:
 		# success!
+		founddict['foundunder'] = seeking
 		founddict['metrics'] = found[0]
 		founddict['definition'] = found[1]
 		founddict['type'] = found[2]
 	elif trialnumber == 1:
 		# failure...
 		# the word is probably there, we have just been given the wrong search term; try some other solutions
-		# [1] first guess: there were multiple possible entries, not just one; change your syntax
-		# this lets you find 'WORD (1)' and 'WORD (2)' if you failed to find WORD
-		founddict = searchdictionary(cursor, dictionary, usecolumn, seeking+ ' %', 'LIKE', trialnumber)
-	elif trialnumber < 4 and '-' in seeking:
-		# [2] next guess: sometimes you get sent things like κατά-ἀράζω & κατά-ἐρέω
-		# these will fail; hence the retry structure
-		parts = seeking.split('-')
-		partone = parts[0]
-		parttwo = parts[1]
-		# ά --> α, etc.
-		tail = stripaccents(partone[-1])
-		head = stripaccents(parttwo[0])
-		guessone = partone[:-1] + tail + parttwo[1:]
-		guesstwo = partone[:-1] + head + parttwo[1:]
-		founddict = searchdictionary(cursor, dictionary, usecolumn, guessone, '=',trialnumber)
-		if founddict == nothingfound:
-			founddict = searchdictionary(cursor, dictionary, usecolumn, guesstwo, '=',trialnumber)
-	elif trialnumber < 4 and re.search(accenteddiaresis,seeking) is not None:
+		# [1] first guess: there were multiple possible entries, not just one
+		newword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]','',seeking)
+		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+	elif trialnumber == 2:
+		# grab any/all variants: ⁰¹²³⁴⁵⁶⁷⁸⁹
+		newword = seeking+'[⁰¹²³⁴⁵⁶⁷⁸⁹]'
+		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
+	elif trialnumber < maxtrials and '-' in seeking:
+		newword = attemptelision(seeking)
+		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+	elif trialnumber < maxtrials and seeking[-1] == 'ω':
+		# ὑποϲυναλείφομαι is in the dictionary, but greek_lemmata says to look for ὑπό-ϲυναλείφω
+		newword = seeking[:-1]+'ομαι'
+		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+	elif trialnumber < maxtrials and re.search(r'ομαι$',seeking) is not None:
+		# χαρίζω is in the dictionary, but greek_lemmata says to look for χαρίζομαι
+		newword = seeking[:-4]+'ω'
+		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+	elif trialnumber < maxtrials and re.search(accenteddiaresis,seeking) is not None:
 		# false positives very easy here, but we are getting desperate and have nothing to lose
 		diaresis = re.search(accenteddiaresis, seeking)
 		head = seeking[:diaresis.start()]
@@ -315,7 +306,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		vowels = vowels[0] + 'ΐ'
 		newword = head + vowels + tail
 		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
-	elif trialnumber < 4 and re.search(unaccenteddiaresis,seeking) is not None:
+	elif trialnumber < maxtrials and re.search(unaccenteddiaresis,seeking) is not None:
 		diaresis = re.search(unaccenteddiaresis, seeking)
 		head = seeking[:diaresis.start()]
 		tail = seeking[diaresis.end():]
@@ -550,6 +541,111 @@ def formatprevalencedata(wordcountobject):
 			thehtml += '<p class="wordcounts">Relative frequency: <span class="italic">' + w.gettimelabel(key) + '</span></p>\n'
 
 	return thehtml
+
+
+def attemptelision(hypenatedgreekheadword):
+	"""
+
+	useful debug query:
+		select * from greek_lemmata where dictionary_entry like '%ἀπό-%'
+
+	a difficult class of entry: multiple prefixes
+		ὑπό,κατά-κλῄζω1
+		ὑπό,κατά,ἐκ-λάω1
+		ὑπό,ἐν-δύω1
+		ὑπό,ἐκ-λάω1
+		ὑπό,ἐκ-εἴρω2
+		ὑπό,ἐκ-ἐράω1
+		ὑπό,ἐκ-δύω1
+		ὑπό,ἐκ-ἀράω2
+		ὑπό,ἀνά,ἀπό-νέω1
+		ὑπό,ἀνά,ἀπό-αὔω2
+
+	:param hypenatedgreekheadword:
+	:return:
+	"""
+	entry = hypenatedgreekheadword
+	terminalacute = re.compile(r'[άέίόύήώ]')
+	initialrough = re.compile(r'[ἁἑἱὁὑἡὡῥἃἓἳὃὓἣὣ]')
+	initialsmooth = re.compile(r'[ἀἐἰὀὐἠὠἄἔἴὄὔἤὤ]')
+	vowels = re.compile(r'')
+
+	unaspirated = 'π'
+	aspirated = 'φ'
+
+
+	units = hypenatedgreekheadword.split(',')
+	hyphenated = units[-1]
+	extraunits = units[:-1]
+
+	if extraunits:
+		pass
+
+	prefix = hyphenated.split('-')[0]
+	stem = hyphenated.split('-')[1]
+
+	if re.search(terminalacute, prefix[-1]) is not None and re.search(initialrough, stem[0]) is None and re.search(initialsmooth, stem[0]) is not None:
+		print('A')
+		# vowel + vowel: 'ἀπό-ἀθρέω'
+		entry = prefix[:-1]+stripaccents(stem[0])+stem[1:]
+	elif re.search(terminalacute, prefix[-1]) is not None and re.search(initialrough, stem[0]) is None and re.search(initialrough, stem[0]) is None:
+		print('B')
+		# vowel + consonant: 'ἀπό-νέω'
+		entry = prefix[:-1]+stripaccents(prefix[-1])+stem
+	elif re.search(terminalacute, prefix[-1]) is None and re.search(initialrough, stem[0]) is None and re.search(initialrough, stem[0]) is None:
+		# consonant + consonant: 'ἐκ-δαϲύνω'
+		if prefix[-1] not in ['ν'] and stem[0] not in ['γ', 'λ', 'μ']:
+			print('C1')
+			# consonant + consonant: 'ἐκ-δαϲύνω'
+			entry = prefix+stem
+		elif prefix[-1] in ['ν'] and stem[0] in ['γ', 'λ', 'μ', 'ϲ']:
+			print('C2')
+			# consonant + consonant: 'ϲύν-μνημονεύω'
+			if prefix == 'ϲύν':
+				prefix = stripaccents(prefix)
+			entry = prefix[:-1]+stem[0]+stem
+		elif prefix[-1] in ['ν']:
+			print('C3')
+			prefix = stripaccents(prefix)
+			entry = prefix+stem
+		else:
+			print('C0')
+
+	print('entry/newentry',hypenatedgreekheadword, entry)
+	return entry
+
+
+
+"""
+
+queries to help debug the ill fit between lemmata and dictionary entries:
+
+	select * from greek_lemmata where dictionary_entry ~ '\d'
+		ϲυνεράω2
+		ὑπέρ-δύω2
+		ὑπό,ἀνά,ἀπό-νέω1
+		ὑπέρ-ἐράω1
+
+	select * from latin_lemmata where dictionary_entry ~ '\d'
+		sub-pario3
+		volo3
+
+	select * from greek_dictionary where entry_name ~ '\d'
+		ψέγω (2)
+
+	select * from latin_dictionary where entry_name ~ '\d'
+		volutus (2)
+
+	select * from latin_morphology where  possible_dictionary_forms like '%#%'
+		arta
+		<possibility_1>artā,arto<xref_value>6599422</xref_value><transl>to draw</transl><analysis>pres imperat act 2nd sg</analysis></possibility_1>
+<possibility_2>artum<xref_value>6607127</xref_value><transl> </transl><analysis>neut nom/voc/acc pl</analysis></possibility_2>
+<possibility_3>artus#1<xref_value>6607127</xref_value><transl>fitted</transl><analysis>neut nom/voc/acc pl</analysis></possibility_3>
+<possibility_4>artā,artus#1<xref_value>6607127</xref_value><transl>fitted</transl><analysis>fem abl sg</analysis></possibility_4>
+<possibility_5>artus#1<xref_value>6607127</xref_value><transl>fitted</transl><analysis>fem nom/voc sg</analysis></possibility_5>
+
+
+"""
 
 
 """

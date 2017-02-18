@@ -1082,7 +1082,7 @@ def findbyform():
 	returnarray = []
 
 	morphologymatches = lookformorphologymatches(cleanedword, usedictionary, cur)
-
+	print('findbyform() mm',morphologymatches)
 	# φέρεται --> morphologymatches [('<possibility_1>', '1', 'φέρω', '122883104', '<transl>fero</transl><analysis>pres ind mp 3rd sg</analysis>')]
 
 	if morphologymatches:
@@ -1092,6 +1092,7 @@ def findbyform():
 	else:
 		returnarray = [{'value': '<br />[could not find a match for '+cleanedword+' in the morphology table]'}, {'entries': '[not found]'}]
 
+	returnarray = [r for r in returnarray if r]
 	returnarray = [{'observed':cleanedword}] + returnarray
 	returnarray = json.dumps(returnarray)
 
