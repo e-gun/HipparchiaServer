@@ -1078,17 +1078,18 @@ def findbyform():
 	else:
 		usedictionary = 'greek'
 
+	cleanedword = cleanedword.lower()
 	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
 	returnarray = []
 
-	morphologymatches = lookformorphologymatches(cleanedword, usedictionary, cur)
-	print('findbyform() mm',morphologymatches)
+	morphologyobject = lookformorphologymatches(cleanedword, usedictionary, cur)
+	# print('findbyform() mm',morphologyobject.getpossible()[0].transandanal)
 	# φέρεται --> morphologymatches [('<possibility_1>', '1', 'φέρω', '122883104', '<transl>fero</transl><analysis>pres ind mp 3rd sg</analysis>')]
 
-	if morphologymatches:
+	if morphologyobject:
 		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
 			returnarray.append(getobservedwordprevalencedata(cleanedword))
-		returnarray += lexicalmatchesintohtml(cleanedword, morphologymatches, usedictionary, cur)
+		returnarray += lexicalmatchesintohtml(cleanedword, morphologyobject, usedictionary, cur)
 	else:
 		returnarray = [{'value': '<br />[could not find a match for '+cleanedword+' in the morphology table]'}, {'entries': '[not found]'}]
 

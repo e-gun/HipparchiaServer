@@ -379,3 +379,84 @@ def cleanwords(word):
 		pass
 
 	return word
+
+
+def attemptelision(hypenatedgreekheadword):
+	"""
+
+	useful debug query:
+		select * from greek_lemmata where dictionary_entry like '%ἀπό-%'
+
+	a difficult class of entry: multiple prefixes
+		ὑπό,κατά-κλῄζω1
+		ὑπό,κατά,ἐκ-λάω1
+		ὑπό,ἐν-δύω1
+		ὑπό,ἐκ-λάω1
+		ὑπό,ἐκ-εἴρω2
+		ὑπό,ἐκ-ἐράω1
+		ὑπό,ἐκ-δύω1
+		ὑπό,ἐκ-ἀράω2
+		ὑπό,ἀνά,ἀπό-νέω1
+		ὑπό,ἀνά,ἀπό-αὔω2
+
+	this will try to do it all at a go, but ideally a MorphPossibilityObject.getbaseform() call will
+	send nothing worse than things that look like 'ὑπό,ἐκ-δύω' here since that function attempts to
+	call this successively in the case of multiple compounds: first you get ἀπό-αὔω2 then you ask for
+	ἀνά-ἀπαὔω2, then you ask for ὑπό-ἀνάπόαὔω2
+
+	:param hypenatedgreekheadword:
+	:return:
+	"""
+
+	entry = hypenatedgreekheadword
+	terminalacute = re.compile(r'[άέίόύήώ]')
+	initialrough = re.compile(r'[ἁἑἱὁὑἡὡῥἃἓἳὃὓἣὣ]')
+	initialsmooth = re.compile(r'[ἀἐἰὀὐἠὠἄἔἴὄὔἤὤ]')
+	vowels = re.compile(r'')
+
+	unaspirated = 'π'
+	aspirated = 'φ'
+
+
+	units = hypenatedgreekheadword.split(',')
+	hyphenated = units[-1]
+	extraunits = units[:-1]
+
+	prefix = hyphenated.split('-')[0]
+	stem = hyphenated.split('-')[1]
+
+	if extraunits:
+		print('prefix1',prefix)
+		prefix = attemptelision(extraunits+'-'+prefix)
+		print('prefix2', prefix)
+
+	if re.search(terminalacute, prefix[-1]) is not None and re.search(initialrough, stem[0]) is None and re.search(initialsmooth, stem[0]) is not None:
+		# print('A')
+		# vowel + vowel: 'ἀπό-ἀθρέω'
+		entry = prefix[:-1]+stripaccents(stem[0])+stem[1:]
+	elif re.search(terminalacute, prefix[-1]) is not None and re.search(initialrough, stem[0]) is None and re.search(initialrough, stem[0]) is None:
+		# print('B')
+		# vowel + consonant: 'ἀπό-νέω'
+		entry = prefix[:-1]+stripaccents(prefix[-1])+stem
+	elif re.search(terminalacute, prefix[-1]) is None and re.search(initialrough, stem[0]) is None and re.search(initialrough, stem[0]) is None:
+		# consonant + consonant: 'ἐκ-δαϲύνω'
+		if prefix[-1] not in ['ν'] and stem[0] not in ['γ', 'λ', 'μ']:
+			# print('C1')
+			# consonant + consonant: 'ἐκ-δαϲύνω'
+			entry = prefix+stem
+		elif prefix[-1] in ['ν'] and stem[0] in ['γ', 'λ', 'μ', 'ϲ']:
+			print('C2')
+			# consonant + consonant: 'ϲύν-μνημονεύω'
+			if prefix == 'ϲύν':
+				prefix = stripaccents(prefix)
+			entry = prefix[:-1]+stem[0]+stem
+		elif prefix[-1] in ['ν']:
+			print('C3')
+			prefix = stripaccents(prefix)
+			entry = prefix+stem
+		else:
+			print('C0')
+
+	print('entry/newentry',hypenatedgreekheadword, entry)
+	return entry
+
