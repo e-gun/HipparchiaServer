@@ -56,13 +56,17 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 		# greek_morphology has προχοίδιον; the greek_dictionary has προχοΐδιον
 		try:
 			# have to 'try' because there might not be a word[-2]
-			if re.search(terminalacute,word[-1]) is not None and trialnumber < 3:
+			if re.search(terminalacute,word[-1]) is not None and trialnumber < 4:
 				sub = stripaccents(word[-1])
 				newword = word[:-1]+sub
 				matchingobject = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
-			elif re.search(terminalacute,word[-2]) is not None and trialnumber < 3:
+			elif re.search(terminalacute,word[-2]) is not None and trialnumber < 4:
 				sub = stripaccents(word[-2])
 				newword = word[:-2] + sub + word[-1]
+				matchingobject = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
+			elif trialnumber < 4:
+				# elided ending? you will ask for ἀλλ, but you need to look for ἀλλ'
+				newword = word + chr(39)
 				matchingobject = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
 		except:
 			matchingobject = None

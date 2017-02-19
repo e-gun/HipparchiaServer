@@ -771,7 +771,7 @@ class MorphPossibilityObject(object):
 		return analysislist
 
 	def amgreek(self):
-		minimumgreek = re.compile(r'[άέίόύήώἄἔἴὄὔἤὤᾅᾕᾥᾄᾔᾤα-ω]')
+		minimumgreek = re.compile(r'[άέίόύήώᾶῖῦῆῶὁἄἔἴὄὔἤὤᾅᾕᾥᾄᾔᾤα-ω]')
 		if re.search(minimumgreek,self.entry) is not None:
 			return True
 		else:
@@ -790,7 +790,7 @@ class MorphPossibilityObject(object):
 		elif self.amlatin():
 			return self.getlatinbaseform()
 		else:
-			print('MorphPossibilityObject failed to determin its own language',self.entry)
+			print('MorphPossibilityObject failed to determine its own language',self.entry)
 			return None
 
 	def getgreekbaseform(self):
