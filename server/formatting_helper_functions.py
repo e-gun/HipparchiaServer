@@ -458,6 +458,11 @@ def attemptelision(hypenatedgreekheadword):
 		else:
 			#print('C0')
 			pass
+	elif re.search(terminalacute, prefix[-1]) is not None and re.search(initialrough, stem[0]) is not None and re.search(unaspirated, prefix[-2]) is not None:
+		# print('D')
+		# vowel + rough and 'π' is in the prefix
+		entry = prefix[:-2] + aspirated + stripaccents(stem[0]) + stem[1:]
+
 
 	return entry
 

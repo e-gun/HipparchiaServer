@@ -620,6 +620,7 @@ class dbHeadwordObject(dbWordCountObject):
 	             frqclass, early, middle, late, weights=wts):
 
 		# see note in lexicallookups.py for deriving these weight numbers
+		self.entry = entryname
 		self.frqclass = frqclass
 		self.early = early
 		self.middle = middle
@@ -656,9 +657,32 @@ class dbHeadwordObject(dbWordCountObject):
 		except:
 			return 0
 
+	def amlatin(self):
+		minimumlatin = re.compile(r'[a-z]')
+		if re.search(minimumlatin,self.entry) is not None:
+			return True
+		else:
+			return False
+
 	def getweightedtime(self, element):
-		elements = {'early': (self.wtdgkearly/self.predomera)*100, 'middle': (self.wtdgkmiddle/self.predomera)*100, 'late': (self.wtdgklate/self.predomera)*100
+		"""
+		it would be nice to be able to turn this off some day
+
+		:param element:
+		:return:
+		"""
+		if self.amlatin() is False:
+			return self.weightedtime(element)
+		else:
+			return None
+
+	def weightedtime(self, element):
+		try:
+			elements = {'early': (self.wtdgkearly/self.predomera)*100, 'middle': (self.wtdgkmiddle/self.predomera)*100, 'late': (self.wtdgklate/self.predomera)*100
 		            }
+		except ZeroDivisionError:
+			# there was no self.predomera value
+			return None
 		if self.predomera != -1:
 			try:
 				return elements[element]
@@ -746,7 +770,30 @@ class MorphPossibilityObject(object):
 		analysislist = re.findall(analysisfinder, self.transandanal)
 		return analysislist
 
+	def amgreek(self):
+		minimumgreek = re.compile(r'[άέίόύήώἄἔἴὄὔἤὤᾅᾕᾥᾄᾔᾤα-ω]')
+		if re.search(minimumgreek,self.entry) is not None:
+			return True
+		else:
+			return False
+
+	def amlatin(self):
+		minimumlatin = re.compile(r'[a-z]')
+		if re.search(minimumlatin,self.entry) is not None:
+			return True
+		else:
+			return False
+
 	def getbaseform(self):
+		if self.amgreek():
+			return self.getgreekbaseform()
+		elif self.amlatin():
+			return self.getlatinbaseform()
+		else:
+			print('MorphPossibilityObject failed to determin its own language',self.entry)
+			return None
+
+	def getgreekbaseform(self):
 		"""
 		the tricky bit:
 
@@ -784,13 +831,26 @@ class MorphPossibilityObject(object):
 		elif len(segments) > 1 and '-' in segments[-1] and self.prefixcount > 1:
 			# [e] all bets are off: ὑπό,κατά,ἐκ-λάω
 			# print('segments',segments)
-			for i in range(self.prefixcount-2,-1, -1):
-				print('i=',i)
+			for i in range(self.prefixcount - 2, -1, -1):
 				baseform = attemptelision(segments[-1])
-				baseform = segments[i]+'-'+baseform
-				# print('getbaseform() baseform',baseform)
+				baseform = segments[i] + '-' + baseform
 		else:
-			print('getbaseform() is confused',self.entry, segments)
+			print('MorphPossibilityObject.getbaseform() is confused', self.entry, segments)
+
+		return baseform
+
+	def getlatinbaseform(self):
+		baseform = ''
+		segments = self.entry.split(', ')
+
+		if len(segments) == 1 and '-' not in segments[-1]:
+			# [a] the simplest case where what you see is what you should seek: 'ἐπώνυμοϲ'
+			baseform = segments[-1]
+		elif len(segments) == 2 and '-' not in segments[-1] and self.prefixcount == 0:
+			# [b] a compound case, but it does not involve prefixes just morphology: 'ἠχούϲαϲ, ἠχέω'
+			baseform = segments[-1]
+		else:
+			print('MorphPossibilityObject.getlatinbaseform() needs work',self.entry)
 
 		return baseform
 

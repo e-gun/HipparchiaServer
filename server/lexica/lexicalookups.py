@@ -9,7 +9,6 @@
 import re
 from flask import session
 from server.dbsupport.dbfunctions import setconnection
-from server.formatting_helper_functions import attemptelision
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
@@ -104,10 +103,8 @@ def lexicalmatchesintohtml(observedform, morphologyobject, usedictionary, cursor
 	for p in possibilities:
 		count += 1
 		# {'50817064': [('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem dat pl</analysis>')], '50839960': [('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]}
-		theentry = p.entry
-		theword = p.getbaseform()
-		print('theentry',theentry, p.number, p.gettranslation(), p.getanalysislist())
 
+		# print('theentry',p.entry, p.number, p.gettranslation(), p.getanalysislist())
 
 		# there is a HUGE PROBLEM in the original data here:
 		#   [a] 'ὑπό, ἐκ-ἀράω²': what comes before the comma is a prefix to the verb
@@ -220,8 +217,6 @@ def browserdictionarylookup(count, entry, usedictionary, cursor, suppressprevale
 
 	else:
 		cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under '+entry+'</p>\n'
-		cleanedentry += 'But the parser can get fooled by enclitics (which will alter the accent), spelling variations, and disagreement about the number of entries for a word.<br />'
-		cleanedentry += '<br />Try looking for this word yourself by using the proper search box: something is likely to turn up. Remember that partial word searching is acceptable and that accents do not matter.'
 		clickableentry = cleanedentry
 
 	return clickableentry
@@ -537,42 +532,10 @@ def formatprevalencedata(wordcountobject):
 		thehtml = thehtml[:-3]
 		thehtml += '</p>\n'
 		key = 'frq'
-		if w.gettimelabel(key) is not None and w.gettimelabel(key) != 'core vocabulary (more than 50)':
+		if w.gettimelabel(key) is not None and re.search(r'core', w.gettimelabel(key)) is None:
 			thehtml += '<p class="wordcounts">Relative frequency: <span class="italic">' + w.gettimelabel(key) + '</span></p>\n'
 
 	return thehtml
-
-
-"""
-
-queries to help debug the ill fit between lemmata and dictionary entries:
-
-	select * from greek_lemmata where dictionary_entry ~ '\d'
-		ϲυνεράω2
-		ὑπέρ-δύω2
-		ὑπό,ἀνά,ἀπό-νέω1
-		ὑπέρ-ἐράω1
-
-	select * from latin_lemmata where dictionary_entry ~ '\d'
-		sub-pario3
-		volo3
-
-	select * from greek_dictionary where entry_name ~ '\d'
-		ψέγω (2)
-
-	select * from latin_dictionary where entry_name ~ '\d'
-		volutus (2)
-
-	select * from latin_morphology where  possible_dictionary_forms like '%#%'
-		arta
-		<possibility_1>artā,arto<xref_value>6599422</xref_value><transl>to draw</transl><analysis>pres imperat act 2nd sg</analysis></possibility_1>
-<possibility_2>artum<xref_value>6607127</xref_value><transl> </transl><analysis>neut nom/voc/acc pl</analysis></possibility_2>
-<possibility_3>artus#1<xref_value>6607127</xref_value><transl>fitted</transl><analysis>neut nom/voc/acc pl</analysis></possibility_3>
-<possibility_4>artā,artus#1<xref_value>6607127</xref_value><transl>fitted</transl><analysis>fem abl sg</analysis></possibility_4>
-<possibility_5>artus#1<xref_value>6607127</xref_value><transl>fitted</transl><analysis>fem nom/voc sg</analysis></possibility_5>
-
-
-"""
 
 
 """
