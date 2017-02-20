@@ -143,7 +143,7 @@ def lexicalmatchesintohtml(observedform, morphologyobject, usedictionary, cursor
 	return returnarray
 
 
-def browserdictionarylookup(count, entry, usedictionary, cursor, suppressprevalence=False):
+def browserdictionarylookup(count, entry, usedictionary, cursor):
 	"""
 	look up a word and return an htlm version of its dictionary entry
 	:param entry:
@@ -188,7 +188,7 @@ def browserdictionarylookup(count, entry, usedictionary, cursor, suppressprevale
 				cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
 			cleanedentry += '</p>\n'
 
-			if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes' and suppressprevalence==False:
+			if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
 				countobject = findtotalcounts(entry, cursor)
 				if countobject:
 					cleanedentry += '<p class="wordcounts">Prevalence (all forms): '
@@ -283,7 +283,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber == 2:
 		# grab any/all variants: ⁰¹²³⁴⁵⁶⁷⁸⁹
-		newword = seeking+'[⁰¹²³⁴⁵⁶⁷⁸⁹]'
+		newword = seeking+'[¹²³⁴⁵⁶⁷⁸⁹]'
 		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
 	# elif trialnumber < maxtrials and '-' in seeking:
 	# 	newword = attemptelision(seeking)
@@ -412,6 +412,8 @@ def findtotalcounts(word, cursor):
 	[a] take a dictionary entry: ἄκρατοϲ
 	[b] look it up
 
+	return a countobject
+
 	:param word:
 	:param cursor:
 	:return:
@@ -517,9 +519,16 @@ def formatprevalencedata(wordcountobject):
 
 	if type(w) == dbHeadwordObject:
 
+		thehtml += '\n<p class="wordcounts">Weighted distribution by corpus: '
+		wts = [(w.getweightedcorpora(key), w.getlabel(key)) for key in ['gr', 'lt', 'in', 'dp', 'ch']]
+		wts = sorted(wts, reverse=True)
+		for wt in wts:
+			thehtml += '<span class="emph">' + wt[1] + '</span>' + ' {0:.0f}'.format(wt[0]) + ' / '
+		thehtml = thehtml[:-3]
+		thehtml += '</p>\n'
+
 		wts = [(w.getweightedtime(key), w.gettimelabel(key)) for key in ['early', 'middle', 'late']]
 		wts = sorted(wts, reverse=True)
-
 		if wts[0][0]:
 			# None was returned if there is no time data for this (Latin) word
 			thehtml += '\n<p class="wordcounts">Weighted chronological distribution: '
@@ -528,13 +537,6 @@ def formatprevalencedata(wordcountobject):
 			thehtml = thehtml[:-3]
 			thehtml += '</p>\n'
 
-		thehtml += '\n<p class="wordcounts">Weighted distribution by corpus: '
-		wts = [(w.getweightedcorpora(key), w.getlabel(key)) for key in ['gr', 'lt', 'in', 'dp', 'ch']]
-		wts = sorted(wts, reverse=True)
-		for wt in wts:
-			thehtml += '<span class="emph">' + wt[1] + '</span>' + ' {0:.0f}'.format(wt[0]) + ' / '
-		thehtml = thehtml[:-3]
-		thehtml += '</p>\n'
 		key = 'frq'
 		if w.gettimelabel(key) is not None and re.search(r'core', w.gettimelabel(key)) is None:
 			thehtml += '<p class="wordcounts">Relative frequency: <span class="italic">' + w.gettimelabel(key) + '</span></p>\n'

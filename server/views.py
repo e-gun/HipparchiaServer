@@ -1161,15 +1161,9 @@ def dictsearch():
 		else:
 			count = 0
 
-		if len(found) > 10:
-			# it takes a long time to do the 80 finds for φερω
-			suppressprevalence = True
-		else:
-			suppressprevalence = False
-
 		for entry in sortedfinds:
 			count += 1
-			returnarray.append({'value': browserdictionarylookup(count, entry[0], usedictionary, cur, suppressprevalence)})
+			returnarray.append({'value': browserdictionarylookup(count, entry[0], usedictionary, cur)})
 	else:
 		returnarray.append({'value':'[nothing found]'})
 
@@ -1226,17 +1220,11 @@ def reverselexiconsearch():
 	entries = list(set(entries))
 	entries = polytonicsort(entries)
 
-	if len(entries) > 100:
-		# it takes a long time to do 50 finds
-		suppressprevalence = True
-	else:
-		suppressprevalence = False
-
 	# in which case we should retrieve and format this entry
 	count = 0
 	for entry in entries:
 		count += 1
-		returnarray.append({'value': browserdictionarylookup(count, entry, dict, cur, suppressprevalence)})
+		returnarray.append({'value': browserdictionarylookup(count, entry, dict, cur)})
 
 	returnarray = json.dumps(returnarray)
 
