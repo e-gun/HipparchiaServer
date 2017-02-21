@@ -929,8 +929,25 @@ very rare (fewer than 5 occurrences)
             <li><span class="emph">Prevalence values</span>
                 <ul class="numbered">
                     <li>
-                        The counts are derived by taking every word from every line. Then the results are parsed and assigned to a dictionary entry.
-                        Incomplete, mangled, and otherwise glitchy words will not get assigned to a dictionary entry.
+                        Prevalence over time requires trusting the dates for all authors and works. One should hesitate
+                        to do this. But if a word is often used, then the distribution pattern is likely accurate.
+                    </li>
+                    <li>
+                        The counts are derived by taking every word from every line of every text.
+                        Then the results are parsed via the parsing dictionary and assigned to a dictionary entry.
+                        Incomplete, mangled, and otherwise glitchy words will not get assigned to a dictionary entry. Or
+                        perhaps they will be misassigned to some other entry if they have the right sort of missing bits.
+                    </li>
+                    <li>
+                        If a word does not exist in the parsing dictionary it will never get matched up with a dictionary entry.
+                        This means that perfectly valid word forms will not be aggregated under their dictionary entry and
+                        that the headword total count will be low. The parsing data was not derived from the full set of
+                        data that is available via Hipparchia. And inscriptional forms like <code>⒣ε̄μέρε̄ι</code>
+                        or <code>ϝεξέ̄κοντα</code> are not something that that data knows about.
+                    </li>
+                    <li>
+                        Peculiarities in the headword list to the parsing dictionary can strand words. Items are recorded but unfindable.
+                        But here better algorithms will eventually yield better search results.
                     </li>
                     <li>
                         Homonymns confuse the counter: is that <span class="emph">esse</span> from <span class="emph">edo</span>
@@ -938,11 +955,12 @@ very rare (fewer than 5 occurrences)
                         The net result is that "eating" suddenly seems to be every bit as common as "being", if not more so.
                     </li>
                     <li>
-                        The u/v confusion in the Latin data means that the counts for words with a 'v' in them can be off.
-                    </li>
-                    <li>
                         A lot of the Latin in the non-Latin corpora comes from editorial comments as well as citations of
                         Latin passages that preserve Greek fragments. This obviously throws of the true count of certain words.
+                    </li>
+                    <li>
+                        Internal labels like "a" to mark a subsection will get counted as occurrences of "a/ab". But
+                        the number of fake hits is easily drowned out by the number of real ones.
                     </li>
                 </ul>
             </li>
