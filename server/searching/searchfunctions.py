@@ -248,7 +248,7 @@ def findleastcommonterm(searchphrase):
 		# note that graves have been eliminated from the wordcounts; so we have to do the same here
 		# but we still need access to the actual search terms, hence the dict
 		searchterms = {removegravity(t): t for t in searchterms}
-		counts = findcountsviawordcountstable(searchterms.keys(), [])
+		counts = findcountsviawordcountstable(searchterms.keys())
 		# print('counts', counts)
 		# counts [('βεβήλων', 84, 84, 0, 0, 0, 0), ('ὀλίγοϲ', 596, 589, 0, 3, 4, 0)]
 		totals = [(c[1], c[0]) for c in counts]
