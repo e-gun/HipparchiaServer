@@ -42,7 +42,7 @@ key features:
 			get a weighted chronological distribution of the word's use: mostly 'early', etc.
 			get a summary of uses, senses, and quotes
 			reverse lookup: 'unexpected' returns ἀδευκήϲ, ἀδόκητοϲ, ἀδόξαϲτοϲ, ἀελπτία, ...
-			click to browse to passages cited in the lexical entries
+			click to browse to passages cited in the lexical entries ('often' works)
 		text maker
 			build a text of a whole work or subsection of a work
 			for example see Xenophon, Hellenica as a whole or just book 3 or just book 3, chapter 4
@@ -51,8 +51,8 @@ key features:
 			for example see a concordance to all of Vergil or just the Aeneid or just Book 1 of the Aeneid
 
 	local/contextual information
-	    searches give progress updates
-	    concordance builds give progress updates
+	    searches give progress updates in percentage complete and time elapsed
+	    concordance builds give progress updates in percentage complete and time elapsed
 	    search lists can be inspected/hidden before execution
 	    local info on current author can be shown/hidden
 	    local info on genre lists can be shown/hidden
@@ -62,6 +62,7 @@ key features:
 	    hover over interface items to get tooltips
 
 	misc
+	    search will attempt to choose the most efficient strategy for any given situation
 		text layout in results/browser/text maker sensitive to shifts in font face and size
 	    text layout via CSS: possible to modify the style sheet to suit your own tastes
 	    configurable defaults for most options

@@ -17,6 +17,7 @@ from server.hipparchiaclasses import MPCounter
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.phrasesearching import shortphrasesearch, phrasesearch
 from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, findleastcommonterm
+from server.lexica.lexicalookups import findcountsviawordcountstable
 
 
 def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorswheredict, activepoll):
@@ -235,8 +236,15 @@ def workonphrasesearch(foundlineobjects, leastcommon, seeking, searchinginside, 
 	:param searching:
 	:return:
 	"""
+
+	if session['accentsmatter'] == 'no':
+		maxhits = 25000
+	else:
+		maxhits = findcountsviawordcountstable(leastcommon)
+	# maxhits ('πολυτρόπωϲ', 506, 506, 0, 0, 0, 0)
+
 	tmp = session['maxresults']
-	session['maxresults'] = 4999
+	session['maxresults'] = maxhits[1]
 
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()

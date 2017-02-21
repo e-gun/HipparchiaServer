@@ -71,8 +71,14 @@ def shortphrasesearch(count, foundlineobjects, searchphrase, workstosearch, auth
 
 	:return:
 	"""
+
 	dbconnection = setconnection('autocommit')
 	curs = dbconnection.cursor()
+
+	searchphrase = cleansearchterm(searchphrase)
+	searchterms = searchphrase.split(' ')
+	searchterms = [x for x in searchterms if x]
+	contextneeded = len(searchterms) - 1
 
 	while len(workstosearch) > 0 and count.value <= int(session['maxresults']):
 		try:
@@ -141,11 +147,6 @@ def shortphrasesearch(count, foundlineobjects, searchphrase, workstosearch, auth
 				acc = 'stripped'
 			else:
 				acc = 'accented'
-			
-			searchphrase = cleansearchterm(searchphrase)
-			searchterms = searchphrase.split(' ')
-			searchterms = [x for x in searchterms if x]
-			contextneeded = len(searchterms) - 1
 
 			for i in range(0, len(lineobjects) - 1):
 				if count.value <= int(session['maxresults']):

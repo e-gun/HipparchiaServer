@@ -158,9 +158,6 @@ def executesearch():
 	poll[ts].activate()
 	poll[ts].statusis('Preparing to search')
 
-	linesofcontext = int(session['linesofcontext'])
-	searchtime = 0
-
 	if len(seeking) > 0:
 		seeking = seeking.lower()
 
@@ -309,8 +306,6 @@ def executesearch():
 		output['onehit'] = session['onehit']
 
 	output = json.dumps(output)
-
-	# poll[ts].deletewspoll()
 
 	del poll[ts]
 
@@ -1391,8 +1386,11 @@ async def wscheckpoll(websocket, path):
 	:param path:
 	:return:
 	"""
-
-	ts = await websocket.recv()
+	try:
+		ts = await websocket.recv()
+	except websockets.exceptions.ConnectionClosed:
+		# you reloaded the page
+		return
 
 	while True:
 		progress = {}
@@ -1503,7 +1501,7 @@ def checkforactivesearch(ts):
 			r = urlopen('http://127.0.0.1:5000/startwspolling/default', data=None, timeout=.1)
 		except socket.timeout:
 			# socket.timeout: but all we needed to do was to send the request, not to read the response
-			print('websocket at',theport,'was dead: revival request sent')
+			print('websocket at',theport,'was asked to restart')
 
 	sock.close()
 	del sock
