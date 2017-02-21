@@ -255,11 +255,11 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 
 	nothingfound = {'metrics': '', 'definition': '', 'type': ''}
 
-	query = 'SELECT metrical_entry, entry_body, entry_type FROM ' + dictionary + ' WHERE '+usecolumn+' '+syntax+' %s'
+	query = 'SELECT entry_name, metrical_entry, entry_body, entry_type FROM ' + dictionary + ' WHERE '+usecolumn+' '+syntax+' %s'
 	data = (seeking,)
 	cursor.execute(query, data)
 
-	#print('searchdictionary()',query,'\n\t',data)
+	# print('searchdictionary()',query,'\n\t',data)
 
 	found = cursor.fetchone()
 
@@ -271,10 +271,11 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 
 	if found is not None:
 		# success!
-		founddict['foundunder'] = seeking
-		founddict['metrics'] = found[0]
-		founddict['definition'] = found[1]
-		founddict['type'] = found[2]
+		# don't return 'ἔχω[¹²³⁴⁵⁶⁷⁸⁹]' if that is what seeking had to be in order to find ἔχω
+		founddict['foundunder'] = found[0]
+		founddict['metrics'] = found[1]
+		founddict['definition'] = found[2]
+		founddict['type'] = found[3]
 	elif trialnumber == 1:
 		# failure...
 		# the word is probably there, we have just been given the wrong search term; try some other solutions
