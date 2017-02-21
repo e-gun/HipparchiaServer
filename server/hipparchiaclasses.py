@@ -8,6 +8,7 @@
 
 
 import re
+import time
 from multiprocessing import Value, Array
 from server.formatting_helper_functions import attemptelision
 from server import hipparchia
@@ -807,6 +808,7 @@ class ProgressPoll(object):
 		# origins is a list of IPs who are allowed to connect [''] = anybody/anywhere
 		self.pd = {}
 		self.searchid = str(timestamp)
+		self.launchtime = time.time()
 		self.portnumber = portnumber
 		self.active = Value('b', False)
 		self.remaining = Value('i', -1)
@@ -817,6 +819,10 @@ class ProgressPoll(object):
 
 	def getstatus(self):
 		return self.statusmessage.decode('utf-8')
+
+	def getelapsed(self):
+		elapsed = round(time.time() - self.launchtime, 1)
+		return elapsed
 
 	def getremaining(self):
 		return self.remaining.value
