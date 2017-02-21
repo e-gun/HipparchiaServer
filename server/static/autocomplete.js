@@ -397,9 +397,10 @@ $('#concordance').click( function() {
             else { var url = '/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus +'&id='+searchid; }
 
             $.getJSON( url, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
-            var i = setInterval(function(){
-                $.getJSON('/progress'+'?id='+searchid, function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } });
-                }, 400);
+            checkactivity(searchid);
+//            var i = setInterval(function(){
+//                $.getJSON('/progress'+'?id='+searchid, function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } });
+//                }, 400);
         }
 });
 
@@ -477,27 +478,3 @@ function loadtextintodisplayresults(returnedtext) {
         $('#displayresults').html(linesreturned);
     }
 
-
-//
-// PROGRESS
-//
-
-function displayprogress(progress){
-    var r = progress['remaining'];
-    var t = progress['total'];
-    var h = progress['hits'];
-    var pct = Math.round((t-r) / t * 100);
-    var done = t - r;
-    var m = progress['message']
-
-    var thehtml = ''
-    if (t != -1) {
-        thehtml += m + ': <span class="progress">' + pct+'%</span> completed';
-    } else {
-        thehtml += m;
-        }
-
-   if ( h > 0) { thehtml += '<br />(<span class="progress">'+h+'</span> found)'; }
-
-   $('#pollingdata').html(thehtml);
-}

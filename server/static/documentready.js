@@ -5,7 +5,7 @@
 //      (see LICENSE in the top level directory of the distribution)
 
 $(document).ready( function () {
-
+    $.getJSON('/startwspolling/default');
     $(document).keydown(function(e) {
         // forward and back arrow; but the click does not exist until you open a passage browser
         switch(e.which) {
@@ -66,18 +66,49 @@ $(document).ready( function () {
         else { var url = '/executesearch?seeking='+seeking+'&proximate='+proximate+'&id='+searchid; }
 
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
-        // ws additions start
-        // $.getJSON('/progress?id='+searchid);
-        // var s = new WebSocket("ws://localhost:9876/");
-        // s.onmessage = function(e){ alert("got: " + e.data); }
-        // ws additions end
-         var i = setInterval(function(){
-            $.getJSON('/progress?id='+searchid, function(progress) {
-                displayprogress(progress);
-                if (progress['active'] == false ) { clearInterval(i); $('#pollingdata').html(''); }
-                });
-            }, 400);
+
+        // websockets additions start
+
+        checkactivity(searchid);
+
+//        $.getJSON('/checkactivity/'+searchid, function() {
+//            s = new WebSocket('ws://localhost:9876/');
+//            var amready = setInterval(function(){
+//                if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
+//                }, 10);
+
+//            s.onmessage = function(e){
+//                var progress = JSON.parse(e.data);
+//                displayprogress(progress);
+//                if  (progress['active'] == 'inactive') { $('#pollingdata').html(''); s.close(); s = null; }
+//                }
+//        });
+
+        // websockets additions end
+
+        // old polling mechanism
+//         var i = setInterval(function(){
+//            $.getJSON('/progress?id='+searchid, function(progress) {
+//                displayprogress(progress);
+//                if (progress['active'] == false ) { clearInterval(i); $('#pollingdata').html(''); }
+//                });
+//            }, 400);
         });
+
+    function checkactivity(searchid) {
+        $.getJSON('/checkactivity/'+searchid, function(portnumber) {
+            // should set port instead of hardcoding
+            s = new WebSocket('ws://localhost:9876/');
+            var amready = setInterval(function(){
+                if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
+                }, 10);
+            s.onmessage = function(e){
+                var progress = JSON.parse(e.data);
+                displayprogress(progress);
+                if  (progress['active'] == 'inactive') { $('#pollingdata').html(''); s.close(); s = null; }
+                }
+        });
+    }
 
     function setoptions(sessionvar,value){
 	    $.getJSON('/setsessionvariable?'+sessionvar+'='+value, function (resultdata) {
@@ -172,5 +203,35 @@ $(document).ready( function () {
     		$('#browseforward').unbind('click');
     		}
 		);
+
+
+    //
+    // PROGRESS
+    //
+
+    function displayprogress(progress){
+        console.log(progress);
+        // ws modification in next line
+        var r = progress['remaining'];
+        var t = progress['total'];
+        var h = progress['hits'];
+        var pct = Math.round((t-r) / t * 100);
+        var done = t - r;
+        var m = progress['message']
+
+        var thehtml = ''
+        if (t != -1) {
+            thehtml += m + ': <span class="progress">' + pct+'%</span> completed';
+        } else {
+            thehtml += m;
+            }
+
+       if ( h > 0) { thehtml += '<br />(<span class="progress">'+h+'</span> found)'; }
+
+       $('#pollingdata').html(thehtml);
+    }
+
 	});
+
+
 

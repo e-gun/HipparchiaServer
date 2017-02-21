@@ -6,8 +6,12 @@
 DEBUG=False
 SECRET_KEY = 'yourkeyhereitshouldbelongandlooklikecryptographicgobbledygook'
 
+### [2] network values ###
+##  [only change this if you know why you are doing it: presumably you have a firewall problem] ##
+PROGRESSPOLLDEFAULTPORT = 9876
 
-### [2] DB variables ###
+
+### [3] DB variables ###
 ##  [set once and forget: DBPASS] ##
 # a read-only db user is highly recommended; write access means inviting a world of hurt,
 # even if the code does everything it can to hobble the ability of DBUSER to alter the DB
@@ -21,7 +25,7 @@ LDICT = 'latin_dictionary'
 GDICT = 'greek_dictionary'
 
 
-### [3] Hipparchia performance variable ###
+### [4] Hipparchia performance variable ###
 ##  [set once and forget: WORKERS] ##
 # pick a number based on your cpu cores: on an 8 core machine diminishing returns kick in between 3 and 4 as the bottleneck shifts elsewhere
 # on a one-core virtual machine extra workers don't do much good and tend to just get in the way of one another: '1' seems to be best
@@ -30,7 +34,7 @@ GDICT = 'greek_dictionary'
 WORKERS = 3
 
 
-### [4] Hipparchia debug variables ###
+### [5] Hipparchia debug variables ###
 ##  [only change this if you know why you are doing it] ##
 # show DB locations of hits and/or the raw HTML markup inside the DB
 # there are no security implications here; these can only be set at launch; any changes require restarting HipparchiaServer
@@ -39,7 +43,7 @@ DBDEBUGMODE = 'no'
 HTMLDEBUGMODE = 'no'
 
 
-### [5] settings that you can only configure here ###
+### [6] settings that you can only configure here ###
 ##  [only change this if you know why you are doing it] ##
 # HipparchiaServer has to be restarted for them to go into effect
 # the css presupposes './server' as part of its path; i.e. you will want to put custom CSS in the
@@ -50,7 +54,7 @@ CSSSTYLESHEET = '/static/hipparchia_styles.css'
 SHOWLEXICALSUMMARYINFO='yes'
 SHOWGLOBALWORDCOUNTS='yes'
 
-### [6] the default settings for various 'session' items ###
+### [7] the default settings for various 'session' items ###
 ##  [set any/all of these to suit your own typical use scenarios] ##
 # these items can all be set to different values via the web interface
 # below you have the values that represent what you get if you clear the session and start anew

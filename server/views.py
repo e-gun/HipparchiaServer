@@ -10,10 +10,12 @@
 import json
 import time
 import re
+import asyncio
+import websockets
 from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
-# this next validates when imported: it is not called later; the IDE will pretend you are not using it
+# this next validates when imported: it is not called later; the IDE will pretend you are not using it and grey it out
 from server.listsandsession import validateconfig
 from server.hipparchiaclasses import ProgressPoll
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking
@@ -300,6 +302,8 @@ def executesearch():
 
 	output = json.dumps(output)
 
+	# poll[ts].deletewspoll()
+
 	del poll[ts]
 
 	return output
@@ -471,6 +475,28 @@ def progressreport():
 
 	New in Python 3.6: PEP 525: Asynchronous Generator
 	This probably makes a websockets poll a lot easier to write
+
+		async def ticker(delay, to):
+	    for i in range(to):
+	        yield i
+	        await asyncio.sleep(delay)
+
+
+		async def run():
+		    async for i in ticker(1, 10):
+		        print(i)
+
+
+		import asyncio
+		loop = asyncio.get_event_loop()
+		try:
+		    loop.run_until_complete(run())
+		finally:
+		    loop.close()
+
+	progressreport() would just open the ws
+	the ws would emit its results until done
+
 
 	:return:
 	"""
@@ -1414,3 +1440,121 @@ def clearsession():
 
 	session.clear()
 	return redirect(url_for('frontpage'))
+
+
+async def wscheckpoll(websocket, path):
+	"""
+
+	note that this is a non-view in views.py: a pain to import it becuase it needs access to poll = {}
+
+	a poll checker started by startwspolling(): the client sends the name of a poll and this will output
+	the status of the poll continuously while the poll remains active
+
+	:param websocket:
+	:param path:
+	:return:
+	"""
+
+	ts = await websocket.recv()
+
+	while True:
+		progress = {}
+		try:
+			progress['active'] = poll[ts].getactivity()
+			progress['total'] = poll[ts].worktotal()
+			progress['remaining'] = poll[ts].getremaining()
+			progress['hits'] = poll[ts].gethits()
+			progress['message'] = poll[ts].getstatus()
+		except:
+			progress['active'] = 'inactive'
+			await websocket.send(json.dumps(progress))
+			break
+		await asyncio.sleep(.33)
+		# print('progress',progress)
+		await websocket.send(json.dumps(progress))
+
+	return
+
+
+@hipparchia.route('/startwspolling/<theport>', methods=['GET'])
+def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
+	"""
+
+	launch a websocket poll server
+
+	tricky because loop.run_forever() will run forever: you can't start this when you launch HipparchiaServer without
+	blocking execution of everything else
+
+	similarly the poll is more or less eternal: the libary was coded that way, and it is kind of irritating
+
+	startwspolling() will get called every time you reload the front page: it is at the top of documentready.js
+
+	multiple servers on multiple ports is possible, but not yet implemented: a multi-client model is not a priority
+
+	:param theport:
+	:return:
+	"""
+
+	# print('called startwspolling()')
+
+	try:
+		theport = int(theport)
+	except:
+		theport = 9876
+
+	if 9800 < theport < 9900:
+		theport = 9876
+
+	# because we are not in the main thread we cannot ask for the default loop
+	loop = asyncio.new_event_loop()
+	asyncio.set_event_loop(loop)
+
+	wspolling = websockets.serve(wscheckpoll, '127.0.0.1', port=theport, loop=loop)
+	try:
+		loop.run_until_complete(wspolling)
+	except OSError:
+		print(theport,'is already listening')
+		# error while attempting to bind on address ('127.0.0.1', 9876): address already in use
+		# error while attempting to bind on address ('127.0.0.1', 9876): address already in use
+		# not good news, but we will live with it for now
+		pass
+
+	try:
+		loop.run_forever()
+	finally:
+		loop.run_until_complete(loop.shutdown_asyncgens())
+		loop.close()
+
+	# actually this function never returns: the loop really does run forever
+	print('wow: startwspolling() returned')
+	return
+
+
+@hipparchia.route('/checkactivity/<ts>')
+def checkforactivesearch(ts):
+	"""
+
+	test the activity of a poll so you don't start conjuring a bunch of key errors if you use wscheckpoll() prematurely
+
+	:param ts:
+	:return:
+	"""
+
+	try:
+		ts = str(int(ts))
+	except:
+		ts = str(int(time.time()))
+
+	try:
+		if poll[ts].getactivity():
+			return json.dumps(ts)
+	except KeyError:
+		time.sleep(.1)
+		try:
+			if poll[ts].getactivity():
+				return json.dumps(ts)
+			else:
+				print('still inactive')
+				return json.dumps('no')
+		except:
+			return json.dumps('no')
