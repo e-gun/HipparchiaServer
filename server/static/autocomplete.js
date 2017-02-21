@@ -398,7 +398,8 @@ $('#concordance').click( function() {
 
             $.getJSON( url, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
             checkactivity(searchid);
-//            var i = setInterval(function(){
+//          old polling mechanism: slated for removal
+//          var i = setInterval(function(){
 //                $.getJSON('/progress'+'?id='+searchid, function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } });
 //                }, 400);
         }

@@ -95,21 +95,6 @@ $(document).ready( function () {
 //            }, 400);
         });
 
-    function checkactivity(searchid) {
-        $.getJSON('/checkactivity/'+searchid, function(portnumber) {
-            // should set port instead of hardcoding
-            s = new WebSocket('ws://localhost:9876/');
-            var amready = setInterval(function(){
-                if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
-                }, 10);
-            s.onmessage = function(e){
-                var progress = JSON.parse(e.data);
-                displayprogress(progress);
-                if  (progress['active'] == 'inactive') { $('#pollingdata').html(''); s.close(); s = null; }
-                }
-        });
-    }
-
     function setoptions(sessionvar,value){
 	    $.getJSON('/setsessionvariable?'+sessionvar+'='+value, function (resultdata) {
 		 // do nothing special: the return exists but is not relevant
@@ -205,6 +190,11 @@ $(document).ready( function () {
 		);
 
 
+
+
+	});
+
+
     //
     // PROGRESS
     //
@@ -231,7 +221,17 @@ $(document).ready( function () {
        $('#pollingdata').html(thehtml);
     }
 
-	});
-
-
-
+    function checkactivity(searchid) {
+        $.getJSON('/checkactivity/'+searchid, function(portnumber) {
+            // should set port instead of hardcoding
+            s = new WebSocket('ws://localhost:9876/');
+            var amready = setInterval(function(){
+                if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
+                }, 10);
+            s.onmessage = function(e){
+                var progress = JSON.parse(e.data);
+                displayprogress(progress);
+                if  (progress['active'] == 'inactive') { $('#pollingdata').html(''); s.close(); s = null; }
+                }
+        });
+    }
