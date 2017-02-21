@@ -43,7 +43,7 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 	data = (word,)
 
 	cursor.execute(query, data)
-
+	# fetchone() because all possiblities are stored inside the analysis itself
 	analysis = cursor.fetchone()
 
 	if analysis:
@@ -143,7 +143,7 @@ def lexicalmatchesintohtml(observedform, morphologyobject, usedictionary, cursor
 	return returnarray
 
 
-def browserdictionarylookup(count, entry, usedictionary, cursor):
+def browserdictionarylookup(count, seekingentry, usedictionary, cursor):
 	"""
 	look up a word and return an htlm version of its dictionary entry
 	:param entry:
@@ -157,7 +157,7 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 	else:
 		translationlabel = 'hi'
 
-	nothingfound = convertdictionaryfindintoobject('nothing', 'nodict')
+	# nothingfound = convertdictionaryfindintoobject('nothing', 'nodict')
 
 	# print('browserdictionarylookup(): entry',entry)
 
@@ -166,55 +166,74 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 	# if re.search(r'\d$',entry) is not None:
 	# 	entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
-	wordobject = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
+	wordobjects = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', seekingentry, syntax='=')
 	cleanedentry = ''
+	clickableentry = ''
 
-	if wordobject != nothingfound:
-		# can't have xml in our html
-		definition = re.sub(r'<title>(.*?)</title>', r'<worktitle>\1</worktitle>', wordobject.body)
-
-		if type != 'gloss':
-			if count == 0:
-				cleanedentry += '<hr /><p class="dictionaryheading">'+entry
-			else:
-				cleanedentry += '<hr /><p class="dictionaryheading">(' + str(count) + ')&nbsp;' + entry
-			if u'\u0304' in wordobject.metricalentry or u'\u0306' in wordobject.metricalentry:
-				cleanedentry += '&nbsp;<span class="metrics">['+wordobject.metricalentry+']</span>'
-			cleanedentry += '</p>\n'
-
-			if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
-				countobject = findtotalcounts(entry, cursor)
-				if countobject:
-					cleanedentry += '<p class="wordcounts">Prevalence (all forms): '
-					cleanedentry += formatprevalencedata(countobject)
-					cleanedentry += '</p>\n'
-
-			if hipparchia.config['SHOWLEXICALSUMMARYINFO'] == 'yes':
-				summarydict = entrysummary(definition, usedictionary, translationlabel)
-			else:
-				summarydict = {'authors': '', 'senses': '', 'quotes': ''}
-
-			if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
-				# either you have turned off summary info or this is basically just a gloss entry
-				cleanedentry += formatmicroentry(definition)
-			else:
-				cleanedentry += formatdictionarysummary(summarydict)
-				cleanedentry += grabheadmaterial(definition) + '<br />\n'
-				senses = grabsenses(definition)
-				if len(senses) > 0:
-					for n in senses:
-						cleanedentry += n
-				else:
-					cleanedentry += formatmicroentry(definition)
+	if wordobjects != None:
+		if len(wordobjects) > 1:
+			# supplement count above
+			# (1a), (1b), (2) ...
+			includesubcounts = True
 		else:
-			cleanedentry += '<br />\n<p class="dictionaryheading">' + entry + '<span class="metrics">[gloss]</span></p>\n'
-			cleanedentry += formatgloss(definition)
+			# just use count above
+			# (1), (2), (3)...
+			includesubcounts = False
+		subcount = 0
+		for w in wordobjects:
+			subcount +=1
+			# can't have xml in our html
+			definition = re.sub(r'<title>(.*?)</title>', r'<worktitle>\1</worktitle>', w.body)
 
-		clickableentry = insertbrowserlookups(cleanedentry)
-		clickableentry = insertbrowserjs(clickableentry)
+			if type != 'gloss':
+				if count == 0:
+					cleanedentry += '<hr /><p class="dictionaryheading">'+w.entry
+				else:
+					if includesubcounts:
+						countval = str(count) + chr(subcount+96)
+					else:
+						countval = str(count)
+					cleanedentry += '<hr /><p class="dictionaryheading">(' + countval + ')&nbsp;' + w.entry
+				if u'\u0304' in w.metricalentry or u'\u0306' in w.metricalentry:
+					cleanedentry += '&nbsp;<span class="metrics">['+w.metricalentry+']</span>'
+				cleanedentry += '</p>\n'
+
+				if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
+					countobject = findtotalcounts(seekingentry, cursor)
+					if countobject:
+						cleanedentry += '<p class="wordcounts">Prevalence (all forms): '
+						cleanedentry += formatprevalencedata(countobject)
+						cleanedentry += '</p>\n'
+
+				if hipparchia.config['SHOWLEXICALSUMMARYINFO'] == 'yes':
+					summarydict = entrysummary(definition, usedictionary, translationlabel)
+				else:
+					summarydict = {'authors': '', 'senses': '', 'quotes': ''}
+
+				if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
+					# either you have turned off summary info or this is basically just a gloss entry
+					cleanedentry += formatmicroentry(definition)
+				else:
+					cleanedentry += formatdictionarysummary(summarydict)
+					cleanedentry += grabheadmaterial(definition) + '<br />\n'
+					senses = grabsenses(definition)
+					if len(senses) > 0:
+						for n in senses:
+							cleanedentry += n
+					else:
+						cleanedentry += formatmicroentry(definition)
+			else:
+				cleanedentry += '<br />\n<p class="dictionaryheading">' + w.entry + '<span class="metrics">[gloss]</span></p>\n'
+				cleanedentry += formatgloss(definition)
+
+			clickableentry = insertbrowserlookups(cleanedentry)
+			clickableentry = insertbrowserjs(clickableentry)
 
 	else:
-		cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under '+entry+'</p>\n'
+		if count == 0:
+			cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under <span class="emph">'+seekingentry+'</span></p>\n'
+		else:
+			cleanedentry += '<br />\n<p class="dictionaryheading">('+str(count)+') nothing found under <span class="emph">' + seekingentry + '</span></p>\n'
 		clickableentry = cleanedentry
 
 	return clickableentry
@@ -247,7 +266,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	accenteddiaresis = re.compile(r'αί|εί|οί|υί|ηί|ωί')
 	unaccenteddiaresis = re.compile(r'αι|ει|οι|υι|ηι|ωι')
 
-	nothingfound = convertdictionaryfindintoobject('nothing', 'nodict')
+	# nothingfound = convertdictionaryfindintoobject('nothing', 'nodict')
 
 	if dictionary == 'latin_dictionary':
 		extra_column = 'entry_key'
@@ -261,37 +280,37 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 
 	# print('searchdictionary()',query,'\n\t',data)
 
-	found = cursor.fetchone()
+	found = cursor.fetchall()
 
 	# we might be at trial 2+ and so we need to strip the supplement we used at trial #1
 	if trialnumber > 2:
 		seeking = re.sub(r'\[⁰¹²³⁴⁵⁶⁷⁸⁹\]','',seeking)
 
-	foundobject = nothingfound
+	foundobjects = None
 
-	if found is not None:
-		foundobject = convertdictionaryfindintoobject(found, dictionary)
+	if len(found) > 0:
+		foundobjects = [convertdictionaryfindintoobject(f, dictionary) for f in found]
 	elif trialnumber == 1:
 		# failure...
 		# the word is probably there, we have just been given the wrong search term; try some other solutions
 		# [1] first guess: there were multiple possible entries, not just one
 		newword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]','',seeking)
-		foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber == 2:
 		# grab any/all variants: ⁰¹²³⁴⁵⁶⁷⁸⁹
 		newword = seeking+'[¹²³⁴⁵⁶⁷⁸⁹]'
-		foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
+		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
 	# elif trialnumber < maxtrials and '-' in seeking:
 	# 	newword = attemptelision(seeking)
 	# 	foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and seeking[-1] == 'ω':
 		# ὑποϲυναλείφομαι is in the dictionary, but greek_lemmata says to look for ὑπό-ϲυναλείφω
 		newword = seeking[:-1]+'ομαι'
-		foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and re.search(r'ομαι$',seeking) is not None:
 		# χαρίζω is in the dictionary, but greek_lemmata says to look for χαρίζομαι
 		newword = seeking[:-4]+'ω'
-		foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and re.search(accenteddiaresis,seeking) is not None:
 		# false positives very easy here, but we are getting desperate and have nothing to lose
 		diaresis = re.search(accenteddiaresis, seeking)
@@ -300,7 +319,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		vowels = diaresis.group(0)
 		vowels = vowels[0] + 'ΐ'
 		newword = head + vowels + tail
-		foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and re.search(unaccenteddiaresis,seeking) is not None:
 		diaresis = re.search(unaccenteddiaresis, seeking)
 		head = seeking[:diaresis.start()]
@@ -308,9 +327,9 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		vowels = diaresis.group(0)
 		vowels = vowels[0] + 'ϊ'
 		newword = head + vowels + tail
-		foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 
-	return foundobject
+	return foundobjects
 
 
 def convertdictionaryfindintoobject(foundline, dictionary):
@@ -339,6 +358,7 @@ def convertdictionaryfindintoobject(foundline, dictionary):
 		wordobject = dbGreekWord(None, None, None, None, None, None, None)
 
 	return wordobject
+
 
 def bulkddictsearch(cursor, dictionary, usecolumn, seeking):
 	"""
