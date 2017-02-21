@@ -67,24 +67,7 @@ $(document).ready( function () {
 
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
 
-        // websockets additions start
-
-        checkactivity(searchid);
-
-//        $.getJSON('/checkactivity/'+searchid, function() {
-//            s = new WebSocket('ws://localhost:9876/');
-//            var amready = setInterval(function(){
-//                if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
-//                }, 10);
-
-//            s.onmessage = function(e){
-//                var progress = JSON.parse(e.data);
-//                displayprogress(progress);
-//                if  (progress['active'] == 'inactive') { $('#pollingdata').html(''); s.close(); s = null; }
-//                }
-//        });
-
-        // websockets additions end
+        checkactivityviawebsocket(searchid);
 
         // old polling mechanism
 //         var i = setInterval(function(){
@@ -196,8 +179,22 @@ $(document).ready( function () {
 
 
     //
-    // PROGRESS
+    // PROGRESS INDICATOR
     //
+
+    function checkactivityviawebsocket(searchid) {
+        $.getJSON('/checkactivity/'+searchid, function(portnumber) {
+            s = new WebSocket('ws://localhost:'+portnumber+'/');
+            var amready = setInterval(function(){
+                if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
+                }, 10);
+            s.onmessage = function(e){
+                var progress = JSON.parse(e.data);
+                displayprogress(progress);
+                if  (progress['active'] == 'inactive') { $('#pollingdata').html(''); s.close(); s = null; }
+                }
+        });
+    }
 
     function displayprogress(progress){
         console.log(progress);
@@ -221,17 +218,3 @@ $(document).ready( function () {
        $('#pollingdata').html(thehtml);
     }
 
-    function checkactivity(searchid) {
-        $.getJSON('/checkactivity/'+searchid, function(portnumber) {
-            // should set port instead of hardcoding
-            s = new WebSocket('ws://localhost:9876/');
-            var amready = setInterval(function(){
-                if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
-                }, 10);
-            s.onmessage = function(e){
-                var progress = JSON.parse(e.data);
-                displayprogress(progress);
-                if  (progress['active'] == 'inactive') { $('#pollingdata').html(''); s.close(); s = null; }
-                }
-        });
-    }

@@ -397,7 +397,7 @@ $('#concordance').click( function() {
             else { var url = '/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus +'&id='+searchid; }
 
             $.getJSON( url, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
-            checkactivity(searchid);
+            checkactivityviawebsocket(searchid);
 //          old polling mechanism: slated for removal
 //          var i = setInterval(function(){
 //                $.getJSON('/progress'+'?id='+searchid, function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } });

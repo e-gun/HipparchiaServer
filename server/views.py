@@ -10,8 +10,11 @@
 import json
 import time
 import re
+import socket
 import asyncio
 import websockets
+import errno
+from urllib.request import urlopen
 from flask import render_template, redirect, request, url_for, session
 
 from server import hipparchia
@@ -454,79 +457,6 @@ def textmaker():
 	del dbc
 
 	return results
-
-
-@hipparchia.route('/progress', methods=['GET'])
-def progressreport():
-	"""
-	allow js to poll the progress of a long operation
-	this code is itself in progress and will remain so for a while
-
-	note that if you run through uWSGI the GET sent to '/executesearch' will block/lock the IO
-	this will prevent anything GET being sent to '/progress' until after jsexecutesearch() finishes
-	not quite the async dreamland you had imagined
-
-	searches will work, but the progress statements will be broken
-
-	also multiple clients will confuse hipparchia
-
-	something like gevent needs to be integrated so you can handle async requests, I guess.
-	websockets: but that's plenty of extra imports for what is generally a one-user model
-
-	New in Python 3.6: PEP 525: Asynchronous Generator
-	This probably makes a websockets poll a lot easier to write
-
-		async def ticker(delay, to):
-	    for i in range(to):
-	        yield i
-	        await asyncio.sleep(delay)
-
-
-		async def run():
-		    async for i in ticker(1, 10):
-		        print(i)
-
-
-		import asyncio
-		loop = asyncio.get_event_loop()
-		try:
-		    loop.run_until_complete(run())
-		finally:
-		    loop.close()
-
-	progressreport() would just open the ws
-	the ws would emit its results until done
-
-
-	:return:
-	"""
-
-	try:
-		ts = str(int(request.args.get('id', '')))
-	except:
-		ts = str(int(time.time()))
-
-	progress = {}
-	try:
-		progress['active'] = poll[ts].getactivity()
-		progress['total'] = poll[ts].worktotal()
-		progress['remaining'] = poll[ts].getremaining()
-		progress['hits'] = poll[ts].gethits()
-		progress['message'] = poll[ts].getstatus()
-	except:
-		time.sleep(.1)
-		try:
-			progress['active'] = poll[ts].getactivity()
-			progress['total'] = poll[ts].worktotal()
-			progress['remaining'] = poll[ts].getremaining()
-			progress['hits'] = poll[ts].gethits()
-			progress['message'] = poll[ts].getstatus()
-		except:
-			progress = {'active': 0}
-
-	progress = json.dumps(progress)
-
-	return progress
 
 
 @hipparchia.route('/getcookie', methods=['GET'])
@@ -1513,10 +1443,7 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	try:
 		loop.run_until_complete(wspolling)
 	except OSError:
-		print(theport,'is already listening')
-		# error while attempting to bind on address ('127.0.0.1', 9876): address already in use
-		# error while attempting to bind on address ('127.0.0.1', 9876): address already in use
-		# not good news, but we will live with it for now
+		print('websocket is already listening at',theport)
 		pass
 
 	try:
@@ -1545,16 +1472,110 @@ def checkforactivesearch(ts):
 	except:
 		ts = str(int(time.time()))
 
+	theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
+
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	# sock.setblocking(0)
+	result = sock.connect_ex(('127.0.0.1', theport))
+	if result == 0:
+		pass
+	else:
+		print('websocket probe error:',errno.errorcode[result])
+		# need to fire up the websocket
+		try:
+			r = urlopen('http://127.0.0.1:5000/startwspolling/default', data=None, timeout=.1)
+		except socket.timeout:
+			# socket.timeout: but all we needed to do was to send the request, not to read the response
+			print('websocket was dead: revival request sent')
+
+	sock.close()
+	del sock
+
 	try:
 		if poll[ts].getactivity():
-			return json.dumps(ts)
+			return json.dumps(theport)
 	except KeyError:
 		time.sleep(.1)
 		try:
 			if poll[ts].getactivity():
-				return json.dumps(ts)
+				return json.dumps(theport)
 			else:
 				print('still inactive')
 				return json.dumps('no')
 		except:
 			return json.dumps('no')
+
+
+# old progress architecture: will be removed
+@hipparchia.route('/progress', methods=['GET'])
+def progressreport():
+	"""
+	allow js to poll the progress of a long operation
+	this code is itself in progress and will remain so for a while
+
+	note that if you run through uWSGI the GET sent to '/executesearch' will block/lock the IO
+	this will prevent anything GET being sent to '/progress' until after jsexecutesearch() finishes
+	not quite the async dreamland you had imagined
+
+	searches will work, but the progress statements will be broken
+
+	also multiple clients will confuse hipparchia
+
+	something like gevent needs to be integrated so you can handle async requests, I guess.
+	websockets: but that's plenty of extra imports for what is generally a one-user model
+
+	New in Python 3.6: PEP 525: Asynchronous Generator
+	This probably makes a websockets poll a lot easier to write
+
+		async def ticker(delay, to):
+	    for i in range(to):
+	        yield i
+	        await asyncio.sleep(delay)
+
+
+		async def run():
+		    async for i in ticker(1, 10):
+		        print(i)
+
+
+		import asyncio
+		loop = asyncio.get_event_loop()
+		try:
+		    loop.run_until_complete(run())
+		finally:
+		    loop.close()
+
+	progressreport() would just open the ws
+	the ws would emit its results until done
+
+
+	:return:
+	"""
+
+	try:
+		ts = str(int(request.args.get('id', '')))
+	except:
+		ts = str(int(time.time()))
+
+	progress = {}
+	try:
+		progress['active'] = poll[ts].getactivity()
+		progress['total'] = poll[ts].worktotal()
+		progress['remaining'] = poll[ts].getremaining()
+		progress['hits'] = poll[ts].gethits()
+		progress['message'] = poll[ts].getstatus()
+	except:
+		time.sleep(.1)
+		try:
+			progress['active'] = poll[ts].getactivity()
+			progress['total'] = poll[ts].worktotal()
+			progress['remaining'] = poll[ts].getremaining()
+			progress['hits'] = poll[ts].gethits()
+			progress['message'] = poll[ts].getstatus()
+		except:
+			progress = {'active': 0}
+
+	progress = json.dumps(progress)
+
+	return progress
+
