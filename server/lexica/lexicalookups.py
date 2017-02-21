@@ -13,7 +13,7 @@ from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
 from server.searching.betacodetounicode import stripaccents
-from server.hipparchiaclasses import dbWordCountObject, dbHeadwordObject, dbMorphologyObject
+from server.hipparchiaclasses import dbWordCountObject, dbHeadwordObject, dbMorphologyObject, dbGreekWord, dbLatinWord
 from server import hipparchia
 
 
@@ -157,7 +157,7 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 	else:
 		translationlabel = 'hi'
 
-	nothingfound = { 'metrics': '', 'definition': '', 'type': '' }
+	nothingfound = convertdictionaryfindintoobject('nothing', 'nodict')
 
 	# print('browserdictionarylookup(): entry',entry)
 
@@ -166,26 +166,20 @@ def browserdictionarylookup(count, entry, usedictionary, cursor):
 	# if re.search(r'\d$',entry) is not None:
 	# 	entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
-	founddict = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
+	wordobject = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', entry, syntax='=')
 	cleanedentry = ''
-	if founddict != nothingfound:
-		# rewrite entry because if lemma says go to χαρίζομαι you really need to go to χαρίζω
-		entry = founddict['foundunder']
-		metrics = founddict['metrics']
-		definition = founddict['definition']
-		type = founddict['type']
-		metrics = re.sub(r'\(\d{1,}\)',r'',metrics)
 
+	if wordobject != nothingfound:
 		# can't have xml in our html
-		definition = re.sub(r'<title>(.*?)</title>', r'<worktitle>\1</worktitle>', definition)
+		definition = re.sub(r'<title>(.*?)</title>', r'<worktitle>\1</worktitle>', wordobject.body)
 
 		if type != 'gloss':
 			if count == 0:
 				cleanedentry += '<hr /><p class="dictionaryheading">'+entry
 			else:
 				cleanedentry += '<hr /><p class="dictionaryheading">(' + str(count) + ')&nbsp;' + entry
-			if u'\u0304' in metrics or u'\u0306' in metrics:
-				cleanedentry += '&nbsp;<span class="metrics">['+metrics+']</span>'
+			if u'\u0304' in wordobject.metricalentry or u'\u0306' in wordobject.metricalentry:
+				cleanedentry += '&nbsp;<span class="metrics">['+wordobject.metricalentry+']</span>'
 			cleanedentry += '</p>\n'
 
 			if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
@@ -253,9 +247,15 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	accenteddiaresis = re.compile(r'αί|εί|οί|υί|ηί|ωί')
 	unaccenteddiaresis = re.compile(r'αι|ει|οι|υι|ηι|ωι')
 
-	nothingfound = {'metrics': '', 'definition': '', 'type': ''}
+	nothingfound = convertdictionaryfindintoobject('nothing', 'nodict')
 
-	query = 'SELECT entry_name, metrical_entry, entry_body, entry_type FROM ' + dictionary + ' WHERE '+usecolumn+' '+syntax+' %s'
+	if dictionary == 'latin_dictionary':
+		extra_column = 'entry_key'
+	else:
+		extra_column = 'unaccented_entry'
+
+	query = 'SELECT entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body, ' \
+	        +extra_column+' FROM ' + dictionary + ' WHERE '+usecolumn+' '+syntax+' %s'
 	data = (seeking,)
 	cursor.execute(query, data)
 
@@ -267,36 +267,31 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	if trialnumber > 2:
 		seeking = re.sub(r'\[⁰¹²³⁴⁵⁶⁷⁸⁹\]','',seeking)
 
-	founddict = nothingfound
+	foundobject = nothingfound
 
 	if found is not None:
-		# success!
-		# don't return 'ἔχω[¹²³⁴⁵⁶⁷⁸⁹]' if that is what seeking had to be in order to find ἔχω
-		founddict['foundunder'] = found[0]
-		founddict['metrics'] = found[1]
-		founddict['definition'] = found[2]
-		founddict['type'] = found[3]
+		foundobject = convertdictionaryfindintoobject(found, dictionary)
 	elif trialnumber == 1:
 		# failure...
 		# the word is probably there, we have just been given the wrong search term; try some other solutions
 		# [1] first guess: there were multiple possible entries, not just one
 		newword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]','',seeking)
-		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber == 2:
 		# grab any/all variants: ⁰¹²³⁴⁵⁶⁷⁸⁹
 		newword = seeking+'[¹²³⁴⁵⁶⁷⁸⁹]'
-		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
+		foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
 	# elif trialnumber < maxtrials and '-' in seeking:
 	# 	newword = attemptelision(seeking)
-	# 	founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+	# 	foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and seeking[-1] == 'ω':
 		# ὑποϲυναλείφομαι is in the dictionary, but greek_lemmata says to look for ὑπό-ϲυναλείφω
 		newword = seeking[:-1]+'ομαι'
-		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and re.search(r'ομαι$',seeking) is not None:
 		# χαρίζω is in the dictionary, but greek_lemmata says to look for χαρίζομαι
 		newword = seeking[:-4]+'ω'
-		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and re.search(accenteddiaresis,seeking) is not None:
 		# false positives very easy here, but we are getting desperate and have nothing to lose
 		diaresis = re.search(accenteddiaresis, seeking)
@@ -305,7 +300,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		vowels = diaresis.group(0)
 		vowels = vowels[0] + 'ΐ'
 		newword = head + vowels + tail
-		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and re.search(unaccenteddiaresis,seeking) is not None:
 		diaresis = re.search(unaccenteddiaresis, seeking)
 		head = seeking[:diaresis.start()]
@@ -313,10 +308,37 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		vowels = diaresis.group(0)
 		vowels = vowels[0] + 'ϊ'
 		newword = head + vowels + tail
-		founddict = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 
-	return founddict
+	return foundobject
 
+
+def convertdictionaryfindintoobject(foundline, dictionary):
+	"""
+
+	dictionary = greek_dictionary or latin_dictionary
+
+	foundline is a db line with the extra parameter last:
+		entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body + extra
+
+	example:
+		foundline ('ἑτερόφθαλμοϲ', 'ἑτερόφθαλμοϲ', 'n43226', 'main', 'n', '<orth extent="suff" lang="greek" opt="n">ἑτερόφθαλμ-οϲ</orth>, <itype lang="greek" opt="n">ον</itype>, <sense id="n43226.0" n="A" level="1" opt="n"><tr opt="n">one-eyed</tr>, <bibl n="Perseus:abo:tlg,0014,024:141" default="NO" valid="yes"><author>D.</author> <biblScope>24.141</biblScope></bibl>, <bibl n="Perseus:abo:tlg,0086,025:1023a:5" default="NO" valid="yes"><author>Arist.</author><title>Metaph.</title><biblScope>1023a5</biblScope></bibl>; <foreign lang="greek">ἑ. γενομένη ἡ Ἑλλάϲ</foreign>, metaph., of the proposed destruction of Athens, Leptines ap. <bibl n="Perseus:abo:tlg,0086,038:1411a:5" default="NO" valid="yes"><author>Arist.</author><title>Rh.</title><biblScope>1411a5</biblScope></bibl>, cf. <bibl default="NO"><author>Demad.</author><biblScope>65</biblScope></bibl> <bibl default="NO"><author>B.</author></bibl>, <bibl default="NO"><author>Plu.</author><biblScope>2.803a</biblScope></bibl>. </sense><sense n="II" id="n43226.1" level="2" opt="n"> <tr opt="n">with different-coloured eyes,</tr> <bibl n="Perseus:abo:tlg,4080,001:16:2:1" default="NO"><author>Gp.</author> <biblScope>16.2.1</biblScope></bibl>.</sense>', 'ετεροφθαλμοϲ')
+
+	:param foundline:
+	:param dictionary:
+	:return:
+	"""
+	# print('foundline',foundline)
+
+	if dictionary == 'greek_dictionary':
+		wordobject = dbGreekWord(foundline[0], foundline[1], foundline[2], foundline[3], foundline[4], foundline[5], foundline[6])
+	elif dictionary == 'latin_dictionary':
+		wordobject = dbLatinWord(foundline[0], foundline[1], foundline[2], foundline[3], foundline[4], foundline[5], foundline[6])
+	else:
+		# you actually want a hollow object
+		wordobject = dbGreekWord(None, None, None, None, None, None, None)
+
+	return wordobject
 
 def bulkddictsearch(cursor, dictionary, usecolumn, seeking):
 	"""

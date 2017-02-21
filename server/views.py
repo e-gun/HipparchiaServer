@@ -1165,24 +1165,27 @@ def reverselexiconsearch():
 	# then go back and see if it is mentioned in the summary of senses
 	for match in matches:
 		m = match[0]
-		definition = searchdictionary(cur, dict + '_dictionary', 'entry_name', m, syntax='LIKE')
-		# returns (metrical_entry, entry_body, entry_type)
+		matchingobject = searchdictionary(cur, dict + '_dictionary', 'entry_name', m, syntax='LIKE')
 
-		definition = definition['definition']
-		summarydict = entrysummary(definition, dict, translationlabel)
+		if matchingobject.entry:
+			definition = matchingobject.body
+			summarydict = entrysummary(definition, dict, translationlabel)
 
-		for sense in summarydict['senses']:
-			if re.search(r'^'+seeking,sense) is not None:
-				entries.append(m)
+			for sense in summarydict['senses']:
+				if re.search(r'^'+seeking,sense) is not None:
+					entries.append(m)
 
 	entries = list(set(entries))
 	entries = polytonicsort(entries)
 
 	# in which case we should retrieve and format this entry
-	count = 0
-	for entry in entries:
-		count += 1
-		returnarray.append({'value': browserdictionarylookup(count, entry, dict, cur)})
+	if entries:
+		count = 0
+		for entry in entries:
+			count += 1
+			returnarray.append({'value': browserdictionarylookup(count, entry, dict, cur)})
+	else:
+		returnarray.append({'value': '<br />[nothing found under "'+seeking+'"]'})
 
 	returnarray = json.dumps(returnarray)
 

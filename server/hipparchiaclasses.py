@@ -754,6 +754,91 @@ class dbWorkLine(object):
 		return allbutfirstandlastword
 
 
+class dbDictionaryEntry(object):
+	"""
+	an object that corresponds to a db line
+
+	CREATE TABLE public.greek_dictionary
+(
+    entry_name character varying(64) COLLATE pg_catalog."default",
+    metrical_entry character varying(64) COLLATE pg_catalog."default",
+    unaccented_entry character varying(64) COLLATE pg_catalog."default",
+    id_number character varying(8) COLLATE pg_catalog."default",
+    entry_type character varying(8) COLLATE pg_catalog."default",
+    entry_options "char",
+    entry_body text COLLATE pg_catalog."default"
+)
+
+CREATE TABLE public.latin_dictionary
+(
+    entry_name character varying(64) COLLATE pg_catalog."default",
+    metrical_entry character varying(64) COLLATE pg_catalog."default",
+    id_number character varying(8) COLLATE pg_catalog."default",
+    entry_type character varying(8) COLLATE pg_catalog."default",
+    entry_key character varying(64) COLLATE pg_catalog."default",
+    entry_options "char",
+    entry_body text COLLATE pg_catalog."default"
+)
+
+	Latin only: entry_key
+	Greek only: unaccented_entry
+
+	"""
+
+	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body):
+		self.entry = entry_name
+		self.metricalentry = metrical_entry
+		self.id = id_number
+		self.type = entry_type
+		self.options = entry_options
+		self.body = entry_body
+
+
+class dbGreekWord(dbDictionaryEntry):
+	"""
+
+	an object that corresponds to a db line
+
+	differs from Latin in self.language and unaccented_entry
+
+	"""
+
+	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body, unaccented_entry):
+		self.language = 'Greek'
+		self.unaccented_entry = unaccented_entry
+		super().__init__(entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body)
+		self.entry_key = None
+
+	def isgreek(self):
+		return True
+
+	def islatin(self):
+		return False
+
+
+class dbLatinWord(dbDictionaryEntry):
+	"""
+
+	an object that corresponds to a db line
+
+	differs from Greek in self.language and unaccented_entry
+
+	"""
+
+	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body,
+	             entry_key):
+		self.language = 'Latin'
+		self.unaccented_entry = None
+		super().__init__(entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body)
+		self.entry_key = entry_key
+
+	def isgreek(self):
+		return False
+
+	def islatin(self):
+		return True
+
+
 class FormattedSearchResult(object):
 	"""
 
