@@ -59,7 +59,7 @@ def frontpage():
 	:return:
 	"""
 
-	expectedsqltemplateversion = 12272016
+	expectedsqltemplateversion = 2182017
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
 
 	sessionvariables()
@@ -1395,13 +1395,23 @@ async def wscheckpoll(websocket, path):
 			progress['remaining'] = poll[ts].getremaining()
 			progress['hits'] = poll[ts].gethits()
 			progress['message'] = poll[ts].getstatus()
-		except:
+			progress['elapsed'] = poll[ts].getelapsed()
+		except KeyError:
+			# the poll is deleted when the query ends; you will always end up here
 			progress['active'] = 'inactive'
-			await websocket.send(json.dumps(progress))
+			try:
+				await websocket.send(json.dumps(progress))
+			except websockets.exceptions.ConnectionClosed:
+				# you reloaded the page in the middle of a search and both the poll and the socket vanished
+				pass
 			break
-		await asyncio.sleep(.33)
+		await asyncio.sleep(.4)
 		# print('progress',progress)
-		await websocket.send(json.dumps(progress))
+		try:
+			await websocket.send(json.dumps(progress))
+		except websockets.exceptions.ConnectionClosed:
+			# websockets.exceptions.ConnectionClosed because you reloaded the page in the middle of a search
+			pass
 
 	return
 
@@ -1430,10 +1440,10 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	try:
 		theport = int(theport)
 	except:
-		theport = 9876
+		theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
-	if 9800 < theport < 9900:
-		theport = 9876
+	if hipparchia.config['PROGRESSPOLLMINPORT'] < theport < hipparchia.config['PROGRESSPOLLMAXPORT']:
+		theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
 	# because we are not in the main thread we cannot ask for the default loop
 	loop = asyncio.new_event_loop()
@@ -1486,7 +1496,7 @@ def checkforactivesearch(ts):
 			r = urlopen('http://127.0.0.1:5000/startwspolling/default', data=None, timeout=.1)
 		except socket.timeout:
 			# socket.timeout: but all we needed to do was to send the request, not to read the response
-			print('websocket was dead: revival request sent')
+			print('websocket at',theport,'was dead: revival request sent')
 
 	sock.close()
 	del sock

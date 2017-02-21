@@ -205,10 +205,11 @@ $(document).ready( function () {
         var pct = Math.round((t-r) / t * 100);
         var done = t - r;
         var m = progress['message']
+        var e = progress['elapsed']
 
         var thehtml = ''
         if (t != -1) {
-            thehtml += m + ': <span class="progress">' + pct+'%</span> completed';
+            thehtml += m + ': <span class="progress">' + pct+'%</span> completed ('+e+'s)';
         } else {
             thehtml += m;
             }

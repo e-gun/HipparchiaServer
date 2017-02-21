@@ -384,7 +384,6 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 	for r in results:
 		corpora[r[0]] = (r[1],r[2])
 
-	print('corpora',corpora)
 	for db in activedbs:
 		if db in corpora:
 			if int(corpora[db][0]) != expectedsqltemplateversion:

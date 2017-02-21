@@ -250,7 +250,7 @@ def findleastcommonterm(searchphrase):
 		searchterms = {removegravity(t): t for t in searchterms}
 		counts = [findcountsviawordcountstable(k) for k in searchterms.keys()]
 		# counts [('βεβήλων', 84, 84, 0, 0, 0, 0), ('ὀλίγοϲ', 596, 589, 0, 3, 4, 0)]
-		totals = [(c[1], c[0]) for c in counts]
+		totals = [(c[1], c[0]) for c in counts if c]
 		max = sorted(totals, reverse=False)
 		try:
 			leastcommonterm = searchterms[max[0][1]]
