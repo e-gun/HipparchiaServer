@@ -14,6 +14,7 @@ import socket
 import asyncio
 import websockets
 import errno
+import locale
 from urllib.request import urlopen
 from flask import render_template, redirect, request, url_for, session
 
@@ -260,12 +261,16 @@ def executesearch():
 			'universalid': 'ID', 'shortname': 'name', 'genres': 'author genre', 'converted_date': 'date', 'location': 'location'
 		}
 
+		locale.setlocale(locale.LC_ALL, 'en_US')
+		resultcount = locale.format("%d", resultcount, grouping=True)
+		workssearched = locale.format("%d", workssearched, grouping=True)
+
 		output = {}
 		output['title'] = thesearch
 		output['found'] = finds
 		output['js'] = findsjs
 		output['resultcount'] = resultcount
-		output['scope'] = str(workssearched)
+		output['scope'] = workssearched
 		output['searchtime'] = str(searchtime)
 		output['lookedfor'] = seeking
 		output['proximate'] = proximate
@@ -382,6 +387,8 @@ def concordance():
 	poll[ts].statusis('Sorting the concordance items')
 	output = concordancesorter(unsortedoutput)
 	count = len(output)
+	locale.setlocale(locale.LC_ALL, 'en_US')
+	count = locale.format("%d", count, grouping=True)
 
 	poll[ts].statusis('Preparing the concordance HTML')
 	output = conctohtmltable(output)

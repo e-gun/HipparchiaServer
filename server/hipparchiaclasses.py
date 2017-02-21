@@ -821,7 +821,7 @@ class ProgressPoll(object):
 		return self.statusmessage.decode('utf-8')
 
 	def getelapsed(self):
-		elapsed = round(time.time() - self.launchtime, 1)
+		elapsed = round(time.time() - self.launchtime, 0)
 		return elapsed
 
 	def getremaining(self):

@@ -1,3 +1,8 @@
+.90degreerotate {
+	-webkit-transform: rotate(-90deg); 
+	-moz-transform: rotate(-90deg);	
+	}
+
 .assigneddate {
 	font-size: 85%;
 	}
