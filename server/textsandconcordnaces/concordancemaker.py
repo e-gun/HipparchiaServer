@@ -92,17 +92,17 @@ def buildconcordancefromwork(cdict, activepoll, cursor):
 			loci = ', '.join(hits)
 		else:
 			previouswork = hits[0][0]
-			loci = '<span class="work">'+previouswork[6:10] + '</span>: '
+			loci = '<span class="work">%(w)s</span>: ' % {'w': previouswork[6:10]}
 			for hit in hits:
 				if hit[0] == previouswork:
 					loci += hit[2] + ', '
 				else:
 					loci = loci[:-2] + '; '
 					previouswork = hit[0]
-					loci += '<span class="work">'+previouswork[6:10] + '</span>: '
+					loci += '<span class="work">%(w)s</span>: ' % {'w': previouswork[6:10]}
 					loci += hit[2] + ', '
 			loci = loci[:-2]
-		
+
 		unsortedoutput.append((c, count, loci))
 	
 	return unsortedoutput

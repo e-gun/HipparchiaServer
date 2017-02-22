@@ -479,25 +479,32 @@ def polytonicsort(unsortedwords):
 
 	deque() is faster than list when you append
 
+	retaining slower but legible code in case you want to understand the logic of the faster comprehension version
+
 	:param unsortedwords:
 	:return:
 	"""
 
 	snipper = re.compile(r'(.*?)(-snip-)(.*?)')
 
-	stripped = deque()
-	for word in unsortedwords:
-		if len(word) > 0:
-			strippedword = stripaccents(word)
-			# one modification to stripaccents(): σ for ϲ in order to get the right values
-			strippedword = re.sub(r'ϲ', r'σ', strippedword)
-			stripped.append(strippedword + '-snip-' + word)
+	# stripped = deque()
+	# for word in unsortedwords:
+	# 	if len(word) > 0:
+	# 		strippedword = stripaccents(word)
+	# 		# one modification to stripaccents(): σ for ϲ in order to get the right values
+	# 		strippedword = re.sub(r'ϲ', r'σ', strippedword)
+	# 		stripped.append(strippedword + '-snip-' + word)
+
+	stripped = [re.sub(r'ϲ', r'σ', stripaccents(word))+ '-snip-' + word for word in unsortedwords if word]
+
 	stripped = sorted(stripped)
 
-	sortedversion = deque()
-	for word in stripped:
-		cleaned = re.sub(snipper, r'\3', word)
-		sortedversion.append(cleaned)
+	# sortedversion = deque()
+	# for word in stripped:
+	# 	cleaned = re.sub(snipper, r'\3', word)
+	# 	sortedversion.append(cleaned)
+
+	sortedversion = [re.sub(snipper, r'\3', word) for word in stripped]
 
 	return sortedversion
 
