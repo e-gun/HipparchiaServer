@@ -166,3 +166,20 @@ def concordancesorter(unsortedoutput):
 	return sortedoutput
 
 
+def dictmerger(masterdict, targetdict):
+	"""
+
+	a more complex version also present in HipparchiaBuilder
+
+	:param masterdict:
+	:param targetdict:
+	:return:
+	"""
+
+	for item in targetdict:
+		if item in masterdict:
+			masterdict[item] += targetdict[item]
+		else:
+			masterdict[item] = targetdict[item]
+
+	return masterdict
