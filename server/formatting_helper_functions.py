@@ -246,22 +246,28 @@ def htmlifysearchfinds(listoffinds):
 		listofurls.append(find.clickurl)
 
 		htmlforthefind += '<locus>\n'
-		htmlforthefind += '\t<span class="findnumber">[' + str(find.hitnumber) + ']</span>&nbsp;&nbsp;'
-		htmlforthefind += '<span class="foundauthor">' + find.author + '</span>,&nbsp;'
-		htmlforthefind += '<span class="foundwork">' + find.work + '</span>:\n'
-		htmlforthefind += '\t<browser id="' + find.clickurl + '">'
-		htmlforthefind += '<span class="foundlocus">' + find.citationstring + '</span><br />'
+		htmlforthefind += '\t<span class="findnumber">[%(hn)d]</span>&nbsp;&nbsp;'
+		htmlforthefind += '<span class="foundauthor">%(au)s</span>,&nbsp;'
+		htmlforthefind += '<span class="foundwork">%(wk)s</span>:\n'
+		htmlforthefind += '\t<browser id="%(url)s">'
+		htmlforthefind += '<span class="foundlocus">%(cs)s</span><br />'
 		htmlforthefind += '</browser>\n</locus>\n'
+
+		substitutes = {'hn': find.hitnumber, 'au': find.author, 'wk': find.work, 'url': find.clickurl, 'cs': find.citationstring}
+		htmlforthefind = htmlforthefind % substitutes
 
 		for ln in lines:
 			prefix = ''
 			if hipparchia.config['DBDEBUGMODE'] == 'yes':
-				prefix = '<smallcode>'+ln.universalid+'</smallcode>&nbsp;'
-			htmlforthefind += prefix+'<span class="locus">' + ln.locus() + '</span>&nbsp;\n'
+				prefix = '<smallcode>%(id)s</smallcode>&nbsp;' %{'id': ln.universalid}
+			htmlforthefind += '%(pr)s<span class="locus">%(lc)s</span>&nbsp;\n'
 			if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
-				htmlforthefind += '<span class="foundtext">' + ln.showlinehtml() + '</span><br />\n'
+				htmlforthefind += '<span class="foundtext">%(lh)s</span><br />\n'
 			else:
-				htmlforthefind += '<span class="foundtext">' + ln.accented + '</span><br />\n'
+				htmlforthefind += '<span class="foundtext">%(la)s</span><br />\n'
+
+			substitutes = {'pr': prefix, 'lc': ln.locus(), 'lh': ln.showlinehtml(), 'la': ln.accented}
+			htmlforthefind = htmlforthefind % substitutes
 
 		resultsashtml.append(htmlforthefind)
 
@@ -299,11 +305,14 @@ def insertcrossreferencerow(lineobject):
 
 	if re.search(r'documentnumber',lineobject.annotations) is None:
 		columna = ''
-		columnb = '<span class="crossreference">' + lineobject.annotations + '</span>'
+		columnb = '<span class="crossreference">%(ln)s</span>' %{'ln': lineobject.annotations}
 
-		linehtml = '<tr class="browser"><td class="crossreference">' + columnb + '</td>'
-		linehtml += '<td class="crossreference">' + columna + '</td></tr>\n'
-	
+		linehtml = '<tr class="browser"><td class="crossreference">%(cb)s</td>'
+		linehtml += '<td class="crossreference">%(ca)s</td></tr>\n'
+
+		substitutes = {'ca': columna, 'cb': columnb}
+		linehtml = linehtml % substitutes
+
 	return linehtml
 
 
@@ -313,15 +322,16 @@ def insertdatarow(label, css, founddate):
 	:param lineobject:
 	:return:
 	"""
-	
-	linehtml = ''
-		
+
 	columna = ''
-	columnb = '<span class="textdate">'+label+':&nbsp;' + founddate + '</span>'
+	columnb = '<span class="textdate">%(l)s:&nbsp;%(fd)s</span>' %{'l': label, 'fd': founddate}
 	
-	linehtml = '<tr class="browser"><td class="'+css+'">' + columnb + '</td>'
-	linehtml += '<td class="crossreference">' + columna + '</td></tr>\n'
-	
+	linehtml = '<tr class="browser"><td class="%(css)s">%(cb)s</td>'
+	linehtml += '<td class="crossreference">%(ca)s</td></tr>\n'
+
+	substitutes = {'css': css, 'ca': columna, 'cb': columnb}
+	linehtml = linehtml % substitutes
+
 	return linehtml
 
 

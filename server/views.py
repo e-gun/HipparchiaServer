@@ -831,8 +831,8 @@ def getsearchlistcontents():
 	authorandworklist = sortauthorandworklists(authorandworklist, authordict)
 
 	if len(authorandworklist) > 1:
-		searchlistinfo = '<br /><h3>Proposing to search the following '+str(len(authorandworklist))+' works:</h3>\n'
-		searchlistinfo += '(Results will be arranged according to '+session['sortorder']+')<br /><br />\n'
+		searchlistinfo = '<br /><h3>Proposing to search the following %(ll)d works:</h3>\n' %{'ll': len(authorandworklist)}
+		searchlistinfo += '(Results will be arranged according to %(so)s)<br /><br />\n' %{'so': session['sortorder']}
 	else:
 		searchlistinfo = '<br /><h3>Proposing to search the following work:</h3>\n'
 
@@ -853,14 +853,14 @@ def getsearchlistcontents():
 		except:
 			# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
 			pass
-		searchlistinfo += '\n[' + str(count) + ']&nbsp;'
+		searchlistinfo += '\n[%(ct)s]&nbsp;' %{'ct': count}
 
 		if w.converted_date is not None:
 			if int(w.converted_date) < 2000:
 				if int(w.converted_date) < 1:
-					searchlistinfo += '(<span class="date">'+w.converted_date[1:]+ ' BCE</span>)&nbsp;'
+					searchlistinfo += '(<span class="date">%(dt)s BCE</span>)&nbsp;' %{'dt': w.converted_date[1:]}
 				else:
-					searchlistinfo += '(<span class="date">' + w.converted_date + ' CE</span>)&nbsp;'
+					searchlistinfo += '(<span class="date">%(dt)s BCE</span>)&nbsp;' %{'dt': w.converted_date}
 
 		searchlistinfo += formatauthorandworkinfo(a, w)
 
