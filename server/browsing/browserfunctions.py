@@ -212,15 +212,15 @@ def insertparserids(lineobject):
 						if word[-1] in [',', ';', '.', '?', '!', ')', '′', '“', '·']:
 							try:
 								if word[-6:] != '&nbsp;':
-									word = '<observed id="' + word[:-1] + '">' + word[:-1] + '</observed>' + word[-1] + ' '
+									word = '<observed id="%(wa)s">%(wa)s</observed>%(wb)s ' % {'wa': word[:-1], 'wb': word[-1]}
 							except:
-								word = '<observed id="' + word[:-1] + '">' + word[:-1] + '</observed>' + word[-1] + ' '
+								word = '<observed id="%(wa)s">%(wa)s</observed>%(wb)s ' % {'wa': word[:-1], 'wb': word[-1]}
 						elif word[-1] == '-' and word == lastword:
-							word = '<observed id="' + hyphenated + '">' + word + '</observed> '
+							word = '<observed id="%(h)s">%(w)s</observed> ' % {'h': hyphenated, 'w': word}
 						elif word[0] in ['(', '‵', '„', '\'']:
-							word = word[0] + '<observed id="' + word[1:] + '">' + word[1:] + '</observed> '
+							word = '%(w0)s<observed id="%(w1)s">%(w1)s"</observed> ' %{'w0': word[0], 'w1': word[1:]}
 						else:
-							word = '<observed id="' + word + '">' + word + '</observed> '
+							word = '<observed id="%(w)s">%(w)s</observed> ' %{'w': word}
 						newline += word
 					except:
 						# word = ''
