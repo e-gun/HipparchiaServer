@@ -1405,7 +1405,10 @@ async def wscheckpoll(websocket, path):
 			progress['message'] = poll[ts].getstatus()
 			progress['elapsed'] = poll[ts].getelapsed()
 			if hipparchia.config['SUPPRESSLONGREQUESTMESSAGE'] == 'no':
-				progress['extrainfo'] = poll[ts].abortmessage()
+				if poll[ts].abortmessage():
+					progress['extrainfo'] = poll[ts].abortmessage()
+				else:
+					progress['extrainfo'] = poll[ts].notes
 			else:
 				progress['extrainfo'] = ''
 		except KeyError:

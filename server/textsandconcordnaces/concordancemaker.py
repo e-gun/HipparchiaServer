@@ -88,6 +88,7 @@ def buildconcordancefromwork(cdict, activepoll, cursor):
 		# 2x as fast to produce the final result; even faster inside the relevant loop
 		# the drawback is the problem sending the poll object into the pool
 		activepoll.allworkis(-1)
+		activepoll.notes = '<span class="small">(progress information unavailable)</span>'
 		concordancedict = pooledconcordance(lineobjects)
 	else:
 		activepoll.statusis('Compiling the concordance')

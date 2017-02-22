@@ -920,6 +920,7 @@ class ProgressPoll(object):
 		self.statusmessage = Array('c', b'')
 		self.hitcount = MPCounter()
 		self.hitcount.increment(-1)
+		self.notes = ''
 
 	def getstatus(self):
 		return self.statusmessage.decode('utf-8')
