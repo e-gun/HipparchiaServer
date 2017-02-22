@@ -48,7 +48,7 @@ listmapper = {
 }
 
 
-def findchronologicalweights():
+def findtemporalweights():
 	"""
 	figure out how many more words are 'late' than 'early', etc.
 	you only need to run this once every major recalibration of the data
@@ -57,12 +57,12 @@ def findchronologicalweights():
 	"""
 
 	greekwordcounts = { 'early': findchronologicalweights('early'),
-	                    'middle': findchronologicalweights('middle'),
-	                    'late': findchronologicalweights('late') }
+						'middle': findchronologicalweights('middle'),
+						'late': findchronologicalweights('late') }
 
 	greekwordweights = {'early': greekwordcounts['late']/greekwordcounts['early'],
-	                    'middle': greekwordcounts['late']/greekwordcounts['middle'],
-	                    'late': 1}
+						'middle': greekwordcounts['late']/greekwordcounts['middle'],
+						'late': 1}
 
 	print('greekwordweights',greekwordweights)
 
@@ -91,5 +91,5 @@ def findccorporaweights():
 
 	return
 
-# findchronologicalweights()
+# findtemporalweights()
 # findccorporaweights()
