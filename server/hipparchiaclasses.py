@@ -963,12 +963,18 @@ class ProgressPoll(object):
 	def getactivity(self):
 		return self.active
 
-	def abortmessage(self):
+	def getnotes(self):
+		message = '<span class="small">%(m)s</span>'
 		if 14 < self.getelapsed() < 21:
-			message = '<span class="small">(long requests can be aborted by reloading the page)</span>'
+			m = '(long requests can be aborted by reloading the page)'
+		elif re.search('unavailable', self.notes) is not None and 9 < self.getelapsed() < 15:
+			m = self.notes
+		elif re.search('unavailable', self.notes) is None:
+			m = self.notes
 		else:
-			message = ''
-		return message
+			m = ''
+
+		return message % {'m': m}
 
 
 # currenly unused in HServer; used in HBuilder
