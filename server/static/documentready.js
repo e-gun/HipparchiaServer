@@ -172,9 +172,6 @@ $(document).ready( function () {
     		}
 		);
 
-
-
-
 	});
 
 
@@ -197,8 +194,6 @@ $(document).ready( function () {
     }
 
     function displayprogress(progress){
-        console.log(progress);
-        // ws modification in next line
         var r = progress['remaining'];
         var t = progress['total'];
         var h = progress['hits'];

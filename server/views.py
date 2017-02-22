@@ -739,12 +739,12 @@ def workstructure():
 	if structure != {}:
 		lowandhigh = findvalidlevelvalues(workid, structure, safepassage, cur)
 		# example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
-		ws['totallevels'] = lowandhigh[0]
-		ws['level'] = lowandhigh[1]
-		ws['label'] = lowandhigh[2]
-		ws['low'] = lowandhigh[3]
-		ws['high'] = lowandhigh[4]
-		ws['range'] = lowandhigh[5]
+		ws['totallevels'] = lowandhigh.levelsavailable
+		ws['level'] = lowandhigh.currentlevel
+		ws['label'] = lowandhigh.levellabel
+		ws['low'] = lowandhigh.low
+		ws['high'] = lowandhigh.high
+		ws['range'] = lowandhigh.valuerange
 	else:
 		# (2, 0, 'verse', '1', '100')
 		ws['totallevels'] = 1

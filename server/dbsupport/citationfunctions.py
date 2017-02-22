@@ -8,6 +8,7 @@
 
 import re
 from server.dbsupport.dbfunctions import findtoplevelofwork, returnfirstlinenumber, perseusidmismatch, returnfirstwork
+from server.hipparchiaclasses import LowandHighInfo
 
 
 def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
@@ -79,9 +80,10 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 
 	sortedrange += rangebottom
 
-	lowandhigh = (availablelevels, atlevel-1, workstructure[atlevel - 1], low, high, sortedrange)
+	# lowandhigh = (availablelevels, atlevel-1, workstructure[atlevel - 1], low, high, sortedrange)
+	lowandhighobject = LowandHighInfo(availablelevels, atlevel-1, workstructure[atlevel - 1], low, high, sortedrange)
 
-	return lowandhigh
+	return lowandhighobject
 
 
 def locusintocitation(workobject, citationtuple):

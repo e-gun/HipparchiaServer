@@ -365,6 +365,7 @@ def cleanwords(word):
 	:param word:
 	:return:
 	"""
+
 	punct = re.compile('[%s]' % re.escape(punctuation + '\′‵’‘·“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'))
 	# hard to know whether or not to do the editorial insertions stuff: ⟫⟪⌈⌋⌊
 	# word = re.sub(r'\[.*?\]','', word) # '[o]missa' should be 'missa'
@@ -404,7 +405,9 @@ def attemptelision(hypenatedgreekheadword):
 	call this successively in the case of multiple compounds: first you get ἀπό-αὔω2 then you ask for
 	ἀνά-ἀπαὔω2, then you ask for ὑπό-ἀνάπόαὔω2
 
-	IN PROGRESS BUT MOSTLY WORKING
+	IN PROGRESS BUT MOSTLY WORKING FOR GREEK
+
+	Latin works on all of the easy cases; no effort made on the hard ones yet
 
 	:param hypenatedgreekheadword:
 	:return:
@@ -414,7 +417,6 @@ def attemptelision(hypenatedgreekheadword):
 	terminalacute = re.compile(r'[άέίόύήώ]')
 	initialrough = re.compile(r'[ἁἑἱὁὑἡὡῥἃἓἳὃὓἣὣ]')
 	initialsmooth = re.compile(r'[ἀἐἰὀὐἠὠἄἔἴὄὔἤὤ]')
-	vowels = re.compile(r'')
 
 	unaspirated = 'π'
 	aspirated = 'φ'
@@ -422,14 +424,9 @@ def attemptelision(hypenatedgreekheadword):
 
 	units = hypenatedgreekheadword.split(',')
 	hyphenated = units[-1]
-	extraunits = units[:-1]
 
 	prefix = hyphenated.split('-')[0]
 	stem = hyphenated.split('-')[1]
-
-	# if extraunits:
-	# 	# recursion
-	# 	prefix = attemptelision(extraunits+'-'+prefix)
 
 	if re.search(terminalacute, prefix[-1]) is not None and re.search(initialrough, stem[0]) is None and re.search(initialsmooth, stem[0]) is not None:
 		# print('A')

@@ -854,6 +854,25 @@ class FormattedSearchResult(object):
 		self.formattedlines = formattedlines
 
 
+class LowandHighInfo(object):
+	"""
+
+	mainly just a dict to store results from findvalidlevelvalues()
+
+	more maintainable
+
+	"""
+
+	def __init__(self, levelsavailable, currentlevel, levellabel, low, high, valuerange):
+		self.levelsavailable = levelsavailable
+		self.currentlevel = currentlevel
+		self.levellabel = levellabel
+		self.low = low
+		self.high = high
+		self.valuerange = valuerange
+
+
+
 class MPCounter(object):
 	"""
 	a counter that is mp safe
