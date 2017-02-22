@@ -96,17 +96,22 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	
 	citation = locusintocitation(workobject, focusline.locustuple())
 
-	cv = '<span class="author">' + name + '</span>, <span class="work">' + title + '</span><br />'
+	cv = '<span class="author">%(n)s</span>, <span class="work">%(t)s</span><br />'
+	substitutes = {'n': name, 't': title}
+	cv = cv % substitutes
 	# author + title can get pretty long
 	cv = avoidlonglines(cv, 100, '<br />', [])
-	cv += '<span class="citation">'+citation+'</span>'
+	cv += '<span class="citation">%(c)s</span>'
 	if date != '':
 		if int(date) > 1:
-			cv += '<br /><span class="assigneddate">(Assigned date of '+date+' CE)</span>'
+			cv += '<br /><span class="assigneddate">(Assigned date of %(dce)s CE)</span>'
 		else:
-			cv += '<br /><span class="assigneddate">(Assigned date of ' + date[1:] + ' BCE)</span>'
+			cv += '<br /><span class="assigneddate">(Assigned date of %(dbce)s BCE)</span>'
+
+	substitutes = {'c': citation, 'dce': date, 'dbce': date[1:]}
+	cv = cv % substitutes
 	cv = cv + '<br />' + biblio
-	
+
 	passage['currentlyviewing'] = '<p class="currentlyviewing">' + cv + '</p>'
 	passage['ouputtable'] = []
 	
@@ -172,12 +177,15 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 		prefix = ''
 		if hipparchia.config['DBDEBUGMODE'] == 'yes':
-			prefix = '<smallcode>' + line.universalid + '&nbsp;&nbsp;&nbsp;</smallcode>&nbsp;'
+			prefix = '<smallcode>%(id)s&nbsp;&nbsp;&nbsp;</smallcode>&nbsp;' %{'id': line.universalid}
 		columnb = prefix+columnb
 
-		linehtml = '<tr class="browser"><td class="browsedline">' + columnb + '</td>'
-		linehtml += '<td class="browsercite">' + columna + '</td></tr>\n'
-		
+		linehtml = '<tr class="browser"><td class="browsedline">%(cb)s</td>'
+		linehtml += '<td class="browsercite">%(ca)s</td></tr>\n'
+
+		substitutes = {'ca': columna, 'cb': columnb}
+		linehtml = linehtml % substitutes
+
 		passage['ouputtable'].append(linehtml)
 		previousline = line
 
@@ -218,7 +226,7 @@ def insertparserids(lineobject):
 						elif word[-1] == '-' and word == lastword:
 							word = '<observed id="%(h)s">%(w)s</observed> ' % {'h': hyphenated, 'w': word}
 						elif word[0] in ['(', '‵', '„', '\'']:
-							word = '%(w0)s<observed id="%(w1)s">%(w1)s"</observed> ' %{'w0': word[0], 'w1': word[1:]}
+							word = '%(wa)s<observed id="%(wb)s">%(wb)s"</observed> ' %{'wa': word[0], 'wb': word[1:]}
 						else:
 							word = '<observed id="%(w)s">%(w)s</observed> ' %{'w': word}
 						newline += word
