@@ -118,11 +118,9 @@ def loadallworksintoallauthors(authorsdict, worksdict):
 	:return:
 	"""
 
-	# for wkid in worksdict.keys():
-	# 	auid = wkid[0:6]
-	# 	authorsdict[auid].addwork(worksdict[wkid])
-
-	map((lambda x: authorsdict[x[0:6]].addwork(worksdict[x])), worksdict.keys())
+	for wkid in worksdict.keys():
+		auid = wkid[0:6]
+		authorsdict[auid].addwork(worksdict[wkid])
 
 	return authorsdict
 
