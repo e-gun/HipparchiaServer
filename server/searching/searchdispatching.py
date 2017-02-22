@@ -237,14 +237,16 @@ def workonphrasesearch(foundlineobjects, leastcommon, seeking, searchinginside, 
 	:return:
 	"""
 
-	if session['accentsmatter'] == 'no':
-		maxhits = 25000
-	else:
+	if session['accentsmatter'] == 'yes':
+		# maxhits ('πολυτρόπωϲ', 506, 506, 0, 0, 0, 0)
 		maxhits = findcountsviawordcountstable(leastcommon)
-	# maxhits ('πολυτρόπωϲ', 506, 506, 0, 0, 0, 0)
 
 	tmp = session['maxresults']
-	session['maxresults'] = maxhits[1]
+
+	try:
+		session['maxresults'] = maxhits[1]
+	except:
+		session['maxresults'] = 25000
 
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()

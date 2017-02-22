@@ -943,6 +943,13 @@ class ProgressPoll(object):
 	def getactivity(self):
 		return self.active
 
+	def abortmessage(self):
+		if 14 < self.getelapsed() < 21:
+			message = '<span class="small">(long requests can be aborted by reloading the page)</span>'
+		else:
+			message = ''
+		return message
+
 
 # currenly unused in HServer; used in HBuilder
 

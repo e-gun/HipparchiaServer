@@ -1404,6 +1404,10 @@ async def wscheckpoll(websocket, path):
 			progress['hits'] = poll[ts].gethits()
 			progress['message'] = poll[ts].getstatus()
 			progress['elapsed'] = poll[ts].getelapsed()
+			if hipparchia.config['SUPPRESSLONGREQUESTMESSAGE'] == 'no':
+				progress['extrainfo'] = poll[ts].abortmessage()
+			else:
+				progress['extrainfo'] = ''
 		except KeyError:
 			# the poll is deleted when the query ends; you will always end up here
 			progress['active'] = 'inactive'
@@ -1475,7 +1479,7 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	return
 
 
-@hipparchia.route('/checkactivity/<ts>')
+@hipparchia.route('/confirm/<ts>')
 def checkforactivesearch(ts):
 	"""
 
@@ -1504,7 +1508,7 @@ def checkforactivesearch(ts):
 			r = urlopen('http://127.0.0.1:5000/startwspolling/default', data=None, timeout=.1)
 		except socket.timeout:
 			# socket.timeout: but all we needed to do was to send the request, not to read the response
-			print('websocket at',theport,'was asked to restart')
+			print('websocket at',theport,'was told to launch')
 
 	sock.close()
 	del sock

@@ -23,9 +23,6 @@ DBPORT = 5432
 DBNAME = 'hipparchiaDB'
 DBPASS = 'yourpassheretrytomakeitstrongplease'
 
-LDICT = 'latin_dictionary'
-GDICT = 'greek_dictionary'
-
 
 ### [4] Hipparchia performance variable ###
 ##  [set once and forget: WORKERS] ##
@@ -55,6 +52,8 @@ SHOWLINENUMBERSEVERY = 10
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 SHOWLEXICALSUMMARYINFO='yes'
 SHOWGLOBALWORDCOUNTS='yes'
+SUPPRESSLONGREQUESTMESSAGE = 'no'
+
 
 ### [7] the default settings for various 'session' items ###
 ##  [set any/all of these to suit your own typical use scenarios] ##

@@ -183,7 +183,7 @@ $(document).ready( function () {
     //
 
     function checkactivityviawebsocket(searchid) {
-        $.getJSON('/checkactivity/'+searchid, function(portnumber) {
+        $.getJSON('/confirm/'+searchid, function(portnumber) {
             s = new WebSocket('ws://localhost:'+portnumber+'/');
             var amready = setInterval(function(){
                 if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
@@ -206,6 +206,7 @@ $(document).ready( function () {
         var done = t - r;
         var m = progress['message']
         var e = progress['elapsed']
+        var x = progress['extrainfo']
 
         var thehtml = ''
         if (t != -1) {
@@ -215,6 +216,8 @@ $(document).ready( function () {
             }
 
        if ( h > 0) { thehtml += '<br />(<span class="progress">'+h+'</span> found)'; }
+
+       thehtml += '<br />'+x
 
        $('#pollingdata').html(thehtml);
     }
