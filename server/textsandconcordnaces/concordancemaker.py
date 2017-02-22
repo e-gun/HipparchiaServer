@@ -7,10 +7,12 @@
 """
 
 import asyncio
+from multiprocessing import Pool
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
 from server.formatting_helper_functions import cleanwords
 from server.textsandconcordnaces.textandconcordancehelperfunctions import dictmerger
+
 
 
 def compilewordlists(worksandboundaries, cursor):
@@ -48,11 +50,10 @@ def compilewordlists(worksandboundaries, cursor):
 def buildconcordancefromwork(cdict, activepoll, cursor):
 	"""
 	speed notes
-		buildconcordancefromconcordance() seemed ineffecient for small chunks: it was; but it is also a lot slower for whole works...
-		single threaded buildconcordancefromwork() is 3-4x faster than mp buildconcordancefromconcordance()
-		a mp version of buildconcordancefromwork() is 50% *slower* than mp buildconcordancefromconcordance()
-	top speed seems to be a single thread diving into a work and building the concordance line by line: endless lock/unlock on the shared dictionary is too costly
-	
+		a Manager() implementation was 50% slower than single-threaded: lock/unlock penalty on a shared dictionary
+		single thread is quite fast: 52s for Eustathius, Commentarii ad Homeri Iliadem [1,099,422 wds]
+		a Pool() is 2x as fast, but you cannot get polling data from inside the pool
+
 	cdict = {wo.universalid: (startline, endline)}
 
 	just caesar's bellum gallicum: cdict {'lt0448w001': (1, 6192)}
@@ -60,7 +61,10 @@ def buildconcordancefromwork(cdict, activepoll, cursor):
 
 	the ultimate output needs to look like
 		(word, count, citations)
-		
+
+	each item will hit the browser as something like:
+		ἀβίωτον | 4 | w028: 246.d.6; w030: 407.a.5, 407.b.1; w034: 926.b.6
+
 	:param work:
 	:param startline:
 	:param endline:
@@ -78,14 +82,21 @@ def buildconcordancefromwork(cdict, activepoll, cursor):
 	
 	lineobjects = compilewordlists(cdict, cursor)
 
-	activepoll.statusis('Compiling the concordance')
-	concordancedict = linesintoconcordance(lineobjects, activepoll)
-	# now you are looking at: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
+	pooling = True
+	if pooling:
+		activepoll.statusis('Compiling the concordance')
+		# 2x as fast to produce the final result; even faster inside the relevant loop
+		# the drawback is the problem sending the poll object into the pool
+		activepoll.allworkis(-1)
+		concordancedict = pooledconcordance(lineobjects)
+	else:
+		activepoll.statusis('Compiling the concordance')
+		activepoll.allworkis(len(lineobjects))
+		activepoll.remain(len(lineobjects))
+		concordancedict = linesintoconcordance(lineobjects, activepoll)
 
-	# functional but no faster: alas
-	# loop = asyncio.new_event_loop()
-	# asyncio.set_event_loop(loop)
-	# concordancedict = loop.run_until_complete(test(lineobjects, activepoll))
+	# concordancedict: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
+	# {'illic': [('lt0472w001', 2048, '68A.35')], 'carpitur': [('lt0472w001', 2048, '68A.35')], ...}
 
 	unsortedoutput = []
 
@@ -121,6 +132,7 @@ def linesintoconcordance(lineobjects, activepoll):
 	"""
 	generate the condordance dictionary:
 		{ wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
+		{'illic': [('lt0472w001', 2048, '68A.35')], 'carpitur': [('lt0472w001', 2048, '68A.35')], ...}
 
 	:return:
 	"""
@@ -132,7 +144,8 @@ def linesintoconcordance(lineobjects, activepoll):
 	while len(lineobjects) > 0:
 		try:
 			line = lineobjects.pop()
-			activepoll.remain(len(lineobjects))
+			if activepoll:
+				activepoll.remain(len(lineobjects))
 		except:
 			line = makeablankline(defaultwork, -1)
 		
@@ -142,27 +155,28 @@ def linesintoconcordance(lineobjects, activepoll):
 			words = list(set(words))
 			for w in words:
 				try:
-					# to forestall the problem of sorting the citation values later, include the index now
 					concordance[w].append((line.wkuinversalid, line.index, line.locus()))
-					# concordance[w].append() seems to have race condition problems in mp land: you will end up with 1 copy of each word
-					# mp variant:
-					# concordance[w] = concordance[w] + [(line.wkuinversalid, line.index, line.locus())]
 				except:
 					concordance[w] = [(line.wkuinversalid, line.index, line.locus())]
 	
 	return concordance
 
 
-# testing alternative implementations
-# this does not speed things up over the simple version:
-# no matter how you slice it it is hard to beat
-# 52s for Concordance to Eustathius, Commentarii ad Homeri Iliadem
+def pooledconcordance(lineobjects):
+	"""
 
-async def lic(a,b):
-	return linesintoconcordance(a, b)
+	split up the line objects and dispatch them into an mp pool
 
-@asyncio.coroutine
-async def test(lineobjects, activepoll):
+	each thread will generate a dict
+
+	then merge the result dicts into a master dict
+
+	return the masterdict
+
+	:param lineobjects:
+	:return: masterdict
+	"""
+
 	workers = hipparchia.config['WORKERS']
 
 	if len(lineobjects) > 100 * workers:
@@ -172,16 +186,20 @@ async def test(lineobjects, activepoll):
 	else:
 		chunklines = [lineobjects]
 
-	dictofdicts = {}
-	piles = min(len(chunklines), workers)
+	# polling does not really work
+	# RuntimeError: Synchronized objects should only be shared between processes through inheritance
+	# Manager() can do this but Pool() can't
+	thereisapoll = False
 
-	for i in range(0,piles):
-		dictofdicts[i] = await lic(chunklines[i], activepoll)
+	argmap = [(c, thereisapoll) for c in chunklines]
 
-	masterdict = dictofdicts.pop(0)
+	with Pool(processes=int(workers)) as pool:
+		listofconcordancedicts = pool.starmap(linesintoconcordance, argmap)
 
-	if dictofdicts:
-		for k in dictofdicts:
-			masterdict = dictmerger(masterdict, dictofdicts[k])
+	masterdict = listofconcordancedicts.pop()
+
+	while listofconcordancedicts:
+		tomerge = listofconcordancedicts.pop()
+		masterdict = dictmerger(masterdict, tomerge)
 
 	return masterdict
