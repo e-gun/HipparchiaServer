@@ -72,7 +72,7 @@ def tcparserequest(request, authordict, workdict):
 	return req
 
 
-def tcfindstartandstop(authorobject, workobject, passageaslist, cursor):
+def textsegmentfindstartandstop(authorobject, workobject, passageaslist, cursor):
 	"""
 	find the first and last lines of a work segment
 	:return:
@@ -114,7 +114,7 @@ def tcfindstartandstop(authorobject, workobject, passageaslist, cursor):
 	return startandstop
 
 
-def conctohtmltable(concordanceoutput):
+def wordindextohtmltable(indexingoutput):
 	"""
 	pre-pack the concordance output into an html table so that the page JS can just iterate through a set of lines when the time comes
 	each result in the list is itself a list: [word, count, lociwherefound]
@@ -123,24 +123,24 @@ def conctohtmltable(concordanceoutput):
 		('καλεῖϲθαι', '1', '1.2')
 		('καλεῖται', '1', '1.4')
 		...
-	:param concordanceoutput:
+	:param indexingoutput:
 	:return:
 	"""
 
 	outputlines = deque()
 	outputlines.append('<table><tr><th>word</th><th>count</th><th>passages</th></tr>\n')
-	for c in concordanceoutput:
+	for i in indexingoutput:
 		outputlines.append('<tr>')
-		outputlines.append('<td class="word"><observed id="'+c[0]+'">'+c[0]+'</observed></td>')
-		outputlines.append('<td class="count">'+c[1]+'</td>')
-		outputlines.append('<td class="passages">' + c[2] + '</td>')
+		outputlines.append('<td class="word"><observed id="{wd}">{wd}</observed></td>'.format(wd=i[0]))
+		outputlines.append('<td class="count">{ct}</td>'.format(ct=i[1]))
+		outputlines.append('<td class="passages">{psg}</td>'.format(psg=i[2]))
 		outputlines.append('</tr>')
 	outputlines.append('</table>')
 	
 	return list(outputlines)
 
 
-def concordancesorter(unsortedoutput):
+def indexdictsorter(unsortedoutput):
 	"""
 	you can't sort the list and then send it to a mp function where it will get unsorted
 	so you have to jump through a hoop before you can jump through a hoop:

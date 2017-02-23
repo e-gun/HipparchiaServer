@@ -72,7 +72,7 @@ function parsepassagereturned(passagereturned) {
         $('#worksautocomplete').show();
         loadWorklist(passagereturned['authornumber']);
         loadLevellist(passagereturned['workid'],'-1');
-        $('#concordance').show();
+        $('#makeanindex').show();
         $('#textofthis').show();
         $('#browseto').show();
         $('#authinfo').show();

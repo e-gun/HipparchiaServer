@@ -6,12 +6,11 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import asyncio
 from multiprocessing import Pool
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
 from server.formatting_helper_functions import cleanwords
-from server.textsandconcordnaces.textandconcordancehelperfunctions import dictmerger
+from server.textsandindices.textandindiceshelperfunctions import dictmerger
 
 
 
@@ -23,7 +22,7 @@ def compilewordlists(worksandboundaries, cursor):
 		one work + a line range (which may or may not be the whole work: {'work1: (start,stop)}
 		multiple (whole) works: {'work1': (start,stop), 'work2': (start,stop), ...}
 	but you could one day use this to mix-and-match:
-		a concordance of Thuc + Hdt 3 + all Epic...
+		a completeindex of Thuc + Hdt 3 + all Epic...
 	this is, you could use compileauthorandworklist() to feed this function
 	the resulting concorances would be massive
 	
@@ -47,7 +46,7 @@ def compilewordlists(worksandboundaries, cursor):
 	return lineobjects
 
 
-def buildconcordancefromwork(cdict, activepoll, cursor):
+def buildindextowork(cdict, activepoll, cursor):
 	"""
 	speed notes
 		a Manager() implementation was 50% slower than single-threaded: lock/unlock penalty on a shared dictionary
@@ -84,29 +83,29 @@ def buildconcordancefromwork(cdict, activepoll, cursor):
 
 	pooling = True
 	if pooling:
-		activepoll.statusis('Compiling the concordance')
+		activepoll.statusis('Compiling the index')
 		# 2x as fast to produce the final result; even faster inside the relevant loop
 		# the drawback is the problem sending the poll object into the pool
 		activepoll.allworkis(-1)
 		activepoll.notes = '(progress information unavailable)'
-		concordancedict = pooledconcordance(lineobjects)
+		completeindexdict = pooledindexmaker(lineobjects)
 	else:
-		activepoll.statusis('Compiling the concordance')
+		activepoll.statusis('Compiling the index')
 		activepoll.allworkis(len(lineobjects))
 		activepoll.remain(len(lineobjects))
-		concordancedict = linesintoconcordance(lineobjects, activepoll)
+		completeindexdict = linesintoindex(lineobjects, activepoll)
 
-	# concordancedict: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
+	# completeindexdict: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
 	# {'illic': [('lt0472w001', 2048, '68A.35')], 'carpitur': [('lt0472w001', 2048, '68A.35')], ...}
 
 	unsortedoutput = []
 
-	activepoll.statusis('Sifting the concordance')
+	activepoll.statusis('Sifting the index')
 	activepoll.notes = ''
 	activepoll.allworkis(-1)
 	
-	for c in concordancedict.keys():
-		hits = concordancedict[c]
+	for c in completeindexdict.keys():
+		hits = completeindexdict[c]
 		count = str(len(hits))
 		hits = sorted(hits)
 		if onework == True:
@@ -130,7 +129,7 @@ def buildconcordancefromwork(cdict, activepoll, cursor):
 	return unsortedoutput
 
 
-def linesintoconcordance(lineobjects, activepoll):
+def linesintoindex(lineobjects, activepoll):
 	"""
 	generate the condordance dictionary:
 		{ wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
@@ -141,7 +140,7 @@ def linesintoconcordance(lineobjects, activepoll):
 
 	defaultwork = lineobjects[0].wkuinversalid
 	
-	concordance = {}
+	completeindex = {}
 	
 	while len(lineobjects) > 0:
 		try:
@@ -157,14 +156,14 @@ def linesintoconcordance(lineobjects, activepoll):
 			words = list(set(words))
 			for w in words:
 				try:
-					concordance[w].append((line.wkuinversalid, line.index, line.locus()))
+					completeindex[w].append((line.wkuinversalid, line.index, line.locus()))
 				except:
-					concordance[w] = [(line.wkuinversalid, line.index, line.locus())]
+					completeindex[w] = [(line.wkuinversalid, line.index, line.locus())]
 	
-	return concordance
+	return completeindex
 
 
-def pooledconcordance(lineobjects):
+def pooledindexmaker(lineobjects):
 	"""
 
 	split up the line objects and dispatch them into an mp pool
@@ -196,12 +195,12 @@ def pooledconcordance(lineobjects):
 	argmap = [(c, thereisapoll) for c in chunklines]
 
 	with Pool(processes=int(workers)) as pool:
-		listofconcordancedicts = pool.starmap(linesintoconcordance, argmap)
+		listofcompleteindexdicts = pool.starmap(linesintoindex, argmap)
 
-	masterdict = listofconcordancedicts.pop()
+	masterdict = listofcompleteindexdicts.pop()
 
-	while listofconcordancedicts:
-		tomerge = listofconcordancedicts.pop()
+	while listofcompleteindexdicts:
+		tomerge = listofcompleteindexdicts.pop()
 		masterdict = dictmerger(masterdict, tomerge)
 
 	return masterdict

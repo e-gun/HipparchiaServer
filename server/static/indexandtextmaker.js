@@ -6,10 +6,10 @@
 
 
 //
-// CONCORDANCE
+// COMPLETE INDEX TO
 //
 
-$('#concordance').click( function() {
+$('#makeanindex').click( function() {
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         var name = $('#authorsautocomplete').val();
         var locus = locusdataloader();
@@ -21,11 +21,11 @@ $('#concordance').click( function() {
             $('#clearpick').show();
             var searchid = Date.now();
 
-            if (wrk == '') { var url = '/concordance?auth=' + authorid+'&id='+searchid; }
-            else if (locus == '') { var url = '/concordance?auth=' + authorid + '&work=' + wrk +'&id='+searchid; }
-            else { var url = '/concordance?auth=' + authorid + '&work=' + wrk + '&locus=' + locus +'&id='+searchid; }
+            if (wrk == '') { var url = '/indexto?auth=' + authorid+'&id='+searchid; }
+            else if (locus == '') { var url = '/indexto?auth=' + authorid + '&work=' + wrk +'&id='+searchid; }
+            else { var url = '/indexto?auth=' + authorid + '&work=' + wrk + '&locus=' + locus +'&id='+searchid; }
 
-            $.getJSON( url, function (concordancedata) { loadconcordanceintodisplayresults(concordancedata); });
+            $.getJSON( url, function (indexdata) { loadindexintodisplayresults(indexdata); });
             checkactivityviawebsocket(searchid);
 //          old polling mechanism: slated for removal
 //          var i = setInterval(function(){
@@ -35,34 +35,34 @@ $('#concordance').click( function() {
 });
 
 
-function loadconcordanceintodisplayresults(concordancedata) {
+function loadindexintodisplayresults(indexdata) {
         var linesreturned = '';
-        linesreturned += 'Concordance to ' + concordancedata['authorname']
-        if (concordancedata['title'] != '') { linesreturned += ',&nbsp;<span class="foundwork">'+concordancedata['title']+'</span>'; }
-        if (concordancedata['worksegment'] == '') {
+        linesreturned += 'Index to ' + indexdata['authorname']
+        if (indexdata['title'] != '') { linesreturned += ',&nbsp;<span class="foundwork">'+indexdata['title']+'</span>'; }
+        if (indexdata['worksegment'] == '') {
             linesreturned += '<br />';
             } else {
-            linesreturned += '&nbsp;'+concordancedata['worksegment']+'<br />';
+            linesreturned += '&nbsp;'+indexdata['worksegment']+'<br />';
             }
-        if (concordancedata['title'] != '') { linesreturned += 'citation format:&nbsp;'+concordancedata['structure']+'<br />'; }
-        linesreturned += concordancedata['wordsfound']+' words found<br />';
+        if (indexdata['title'] != '') { linesreturned += 'citation format:&nbsp;'+indexdata['structure']+'<br />'; }
+        linesreturned += indexdata['wordsfound']+' words found<br />';
 
-        var dLen = concordancedata['keytoworks'].length;
+        var dLen = indexdata['keytoworks'].length;
         if (dLen > 0) {
             linesreturned += '<br />Key to works:<br />'
             for (i = 0; i < dLen; i++) {
-                linesreturned += concordancedata['keytoworks'][i]+'<br />';
+                linesreturned += indexdata['keytoworks'][i]+'<br />';
             }
         }
 
-        linesreturned += '<span class="small">('+concordancedata['elapsed']+'s)</span><br />';
+        linesreturned += '<span class="small">('+indexdata['elapsed']+'s)</span><br />';
 
         $('#searchsummary').html(linesreturned);
 
         var linesreturned = '';
-        var dLen = concordancedata['lines'].length;
+        var dLen = indexdata['lines'].length;
         for (i = 0; i < dLen; i++) {
-            linesreturned += concordancedata['lines'][i];
+            linesreturned += indexdata['lines'][i];
             }
         $('#displayresults').html(linesreturned);
 }

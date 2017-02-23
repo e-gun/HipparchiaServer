@@ -31,10 +31,10 @@ from server.lexica.lexicalookups import browserdictionarylookup, searchdictionar
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
 from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
 from server.searching.betacodetounicode import replacegreekbetacode
-from server.textsandconcordnaces.concordancemaker import buildconcordancefromwork
-from server.textsandconcordnaces.textandconcordancehelperfunctions import tcparserequest, tcfindstartandstop, conctohtmltable, \
-	concordancesorter
-from server.textsandconcordnaces.textbuilder import buildtext
+from server.textsandindices.indexmaker import buildindextowork
+from server.textsandindices.textandindiceshelperfunctions import tcparserequest, textsegmentfindstartandstop, wordindextohtmltable, \
+	indexdictsorter
+from server.textsandindices.textbuilder import buildtext
 from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, justlatin, justtlg, reducetosessionselections, returnactivedbs
 from server.formatting_helper_functions import removegravity, stripaccents, bcedating, htmlifysearchfinds, cleanwords
@@ -313,15 +313,11 @@ def executesearch():
 	return output
 
 
-@hipparchia.route('/concordance', methods=['GET'])
-def concordance():
+@hipparchia.route('/indexto', methods=['GET'])
+def completeindex():
 	"""
-	build a concordance
-	modes should go away later
-	modes:
-		0 - of this work
-		1 - of words unique to this work in this author
-		2 - of this author
+	build a complete index to a an author, work, or segment of a work
+
 	:return:
 	"""
 
@@ -347,27 +343,27 @@ def concordance():
 		# we have both an author and a work, maybe we also have a subset of the work
 		if psg == ['']:
 			# whole work
-			poll[ts].statusis('Preparing a concordance to '+wo.title)
+			poll[ts].statusis('Preparing an index to '+wo.title)
 			startline = wo.starts
 			endline = wo.ends
 		else:
 			# partial work
-			poll[ts].statusis('Preparing a partial concordance to ' + wo.title)
-			startandstop = tcfindstartandstop(ao, wo, psg, cur)
+			poll[ts].statusis('Preparing a partial index to ' + wo.title)
+			startandstop = textsegmentfindstartandstop(ao, wo, psg, cur)
 			startline = startandstop['startline']
 			endline = startandstop['endline']
 
 		cdict = {wo.universalid: (startline, endline)}
-		unsortedoutput = buildconcordancefromwork(cdict, poll[ts], cur)
+		unsortedoutput = buildindextowork(cdict, poll[ts], cur)
 		allworks = []
 
 	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
-		poll[ts].statusis('Preparing a concordance to the works of '+ao.shortname)
+		poll[ts].statusis('Preparing an index to the works of '+ao.shortname)
 		# whole author
 		cdict = {}
 		for wkid in ao.listworkids():
 			cdict[wkid] = (workdict[wkid].starts, workdict[wkid].ends)
-		unsortedoutput = buildconcordancefromwork(cdict, poll[ts], cur)
+		unsortedoutput = buildindextowork(cdict, poll[ts], cur)
 
 		allworks = []
 		for w in ao.listofworks:
@@ -380,14 +376,14 @@ def concordance():
 		allworks = []
 
 	# get ready to send stuff to the page
-	poll[ts].statusis('Sorting the concordance items')
-	output = concordancesorter(unsortedoutput)
+	poll[ts].statusis('Sorting the index items')
+	output = indexdictsorter(unsortedoutput)
 	count = len(output)
 	locale.setlocale(locale.LC_ALL, 'en_US')
 	count = locale.format("%d", count, grouping=True)
 
-	poll[ts].statusis('Preparing the concordance HTML')
-	output = conctohtmltable(output)
+	poll[ts].statusis('Preparing the index HTML')
+	output = wordindextohtmltable(output)
 
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)
@@ -439,7 +435,7 @@ def textmaker():
 			startline = wo.starts
 			endline = wo.ends
 		else:
-			startandstop = tcfindstartandstop(ao, wo, psg, cur)
+			startandstop = textsegmentfindstartandstop(ao, wo, psg, cur)
 			startline = startandstop['startline']
 			endline = startandstop['endline']
 

@@ -365,7 +365,7 @@ def avoidlonglines(string, maxlen, splitval, stringlist=[]):
 
 def cleanwords(word):
 	"""
-	remove gunk that should not be in a concordance
+	remove gunk that should not be in an index
 	:param word:
 	:return:
 	"""

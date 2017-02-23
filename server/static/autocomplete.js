@@ -55,7 +55,7 @@ function reloadAuthorlist(){
         $('#level01').hide();
         $('#level00').hide();
         $('#browseto').hide();
-        $('#concordance').hide();
+        $('#makeanindex').hide();
         $('#textofthis').hide();
         $('#fewerchoices').hide();
         $('#genresautocomplete').hide();
@@ -109,7 +109,7 @@ $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
     source: "/getauthorhint",
     select: function (event, ui) {
-        $('#concordance').show();
+        $('#makeanindex').show();
         $('#textofthis').show();
         $('#browseto').show();
         $('#worksautocomplete').hide();
