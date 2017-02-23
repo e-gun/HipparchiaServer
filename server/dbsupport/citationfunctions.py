@@ -285,7 +285,7 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 				# newworkobject = dbloadasingleworkobject('lt1017'+workobject.universalid[6:])
 				# print('nwo',newworkobject.universalid, newworkobject.title)
 				# results = finddblinefromincompletelocus(newworkobject, citationlist, cursor, trialnumber)				# return results
-
+				dblinenumber = workobject.starts
 				successcode = 'The dictionary regularly points to Seneca Maior [lt1014] when it is citing Seneca Minor [lt107].<br >These citations are broken and cannot be easily fixed. ' \
 				              'Not only is the author number wrong, so too is the work number. Sorry about that.'
 			else:
