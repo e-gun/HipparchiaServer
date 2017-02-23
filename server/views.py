@@ -188,12 +188,12 @@ def executesearch():
 		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
 			searchtype = 'simple'
 			thesearch = seeking
-			htmlsearch = '<span class="emph">%(skg)s</span>' % { 'skg': seeking}
+			htmlsearch = '<span class="emph">{skg}</span>'.format(skg=seeking)
 			hits = searchdispatcher('simple', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
 		elif re.search(phrasefinder, seeking) is not None:
 			searchtype = 'phrase'
 			thesearch = seeking
-			htmlsearch = '<span class="emph">%(skg)s</span>' % {'skg': seeking}
+			htmlsearch = '<span class="emph">{skg}</span>'.format(skg=seeking)
 			terms = seeking.split(' ')
 			if len(max(terms, key=len)) > 3:
 				hits = searchdispatcher('phrase', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
@@ -853,14 +853,14 @@ def getsearchlistcontents():
 		except:
 			# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
 			pass
-		searchlistinfo += '\n[%(ct)s]&nbsp;' %{'ct': count}
+		searchlistinfo += '\n[{ct}]&nbsp;'.format(ct=count)
 
 		if w.converted_date is not None:
 			if int(w.converted_date) < 2000:
 				if int(w.converted_date) < 1:
-					searchlistinfo += '(<span class="date">%(dt)s BCE</span>)&nbsp;' %{'dt': w.converted_date[1:]}
+					searchlistinfo += '(<span class="date">{dt} BCE</span>)&nbsp;'.format(dt=w.converted_date[1:])
 				else:
-					searchlistinfo += '(<span class="date">%(dt)s BCE</span>)&nbsp;' %{'dt': w.converted_date}
+					searchlistinfo += '(<span class="date">{dt} CE</span>)&nbsp;'.format(dt=w.converted_date)
 
 		searchlistinfo += formatauthorandworkinfo(a, w)
 
@@ -1509,7 +1509,7 @@ def checkforactivesearch(ts):
 			r = urlopen('http://127.0.0.1:5000/startwspolling/default', data=None, timeout=.1)
 		except socket.timeout:
 			# socket.timeout: but all we needed to do was to send the request, not to read the response
-			print('websocket at',theport,'was told to launch')
+			print('websocket at {p} was told to launch'.format(p=theport))
 
 	sock.close()
 	del sock
@@ -1523,7 +1523,7 @@ def checkforactivesearch(ts):
 			if poll[ts].getactivity():
 				return json.dumps(theport)
 			else:
-				print('still inactive')
+				print('websocket still inactive: there is a serious problem?')
 				return json.dumps('no')
 		except:
 			return json.dumps('no')

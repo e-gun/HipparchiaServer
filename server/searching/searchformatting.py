@@ -110,9 +110,7 @@ def highlightsearchterm(lineobject, searchterm, spanname):
 		hyph = lineobject.hyphenated
 		find = re.search(accentedsearch, hyph)
 		try:
-			newline = line + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;' + hyph[0:find.start()] + \
-			          '<span class="' + spanname + '">' + find.group() + '</span>' + hyph[
-																																									find.end():] + '&nbsp;)'
+			newline = line+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;{hs}<span class="{sn}">{fg}</span>{he}&nbsp;)'.format(hs=hyph[0:find.start()], sn=spanname, fg=find.group(), he=hyph[find.end():])
 		except:
 			pass
 		# print('nofind',accentedsearch, line, lineobject.lastword('contents'))
@@ -160,10 +158,10 @@ def formatauthinfo(authorobject):
 	:param authorobject:
 	:return:
 	"""
-	n = '<span class="emph">%(n)s</span>' % {'n': authorobject.shortname}
-	d = '[id: %(d)s]<br />' % {'d': authorobject.universalid[2:]}
+	n = '<span class="emph">{n}</span>'.format(n=authorobject.shortname)
+	d = '[id: {id}]<br />'.format(id=authorobject.universalid[2:])
 	if authorobject.genres is not None and authorobject.genres != '':
-		g = 'classified among: %(g)s; ' % {'g': authorobject.genres}
+		g = 'classified among: {g}; '.format(g=authorobject.genres)
 	else:
 		g = ''
 
@@ -174,11 +172,11 @@ def formatauthinfo(authorobject):
 			elif float(authorobject.converted_date) == 2500:
 				fl = '"Incerta" are not assigned to a date'
 			elif float(authorobject.converted_date) > 0:
-				fl = 'assigned to approx date: %(fl)s C.E.' % {'fl': str(authorobject.converted_date)}
-				fl += ' (derived from "%(rd)s")' % {'rd': authorobject.recorded_date}
+				fl = 'assigned to approx date: {fl} C.E.'.format(fl=str(authorobject.converted_date))
+				fl += ' (derived from "{rd}")'.format(rd=authorobject.recorded_date)
 			elif float(authorobject.converted_date) < 0:
-				fl = 'assigned to approx date: %(fl)s B.C.E.' % {'fl': str(authorobject.converted_date)[1:]}
-				fl += ' (derived from "%(rd)s")' % {'rd': authorobject.recorded_date}
+				fl = 'assigned to approx date: {fl} B.C.E.'.format(fl=str(authorobject.converted_date[1:]))
+				fl += ' (derived from "{rd}")'.format(rd=authorobject.recorded_date)
 		except:
 			# there was no f and so no int(f)
 			fl = ''
@@ -221,10 +219,10 @@ def woformatworkinfo(workobject):
 	if dateval < 1500:
 		if dateval > 0:
 			suffix = 'CE'
-			d = '(assigned to %(cd)s %(fx)s)' % {'cd': str(workobject.converted_date), 'fx': suffix}
+			d = '(assigned to {cd} {fx})'.format(cd=str(workobject.converted_date), fx=suffix)
 		else:
 			suffix = 'BCE'
-			d = '(assigned to %(cd)s %(fx)s)' % {'cd': str(workobject.converted_date)[1:], 'fx': suffix}
+			d = '(assigned to {cd} {fx})'.format(cd=str(workobject.converted_date[1:]), fx=suffix)
 	else:
 		d = ''
 
@@ -245,7 +243,7 @@ def formatauthorandworkinfo(authorname, workobject):
 	"""
 
 	a = authorname
-	t = '<span class="italic">%(t)s</span> ' % {'t': workobject.title}
+	t = '<span class="italic">{t}</span> '.format(t=workobject.title)
 
 	c = workobject.wordcount
 
@@ -398,7 +396,7 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 		foundline = dblineintolineobject(foundline)
 		if foundline.index == highlightline:
 			foundline.accented = highlightsearchterm(foundline, searchterm, 'match')
-			foundline.accented = '<span class="highlight">%(fla)s</span>' % {'fla': foundline.accented}
+			foundline.accented = '<span class="highlight">{fla}</span>'.format(fla=foundline.accented)
 		if proximate != '' and searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
 			if re.search(cleansearchterm(proximate), foundline.accented) is not None or re.search(cleansearchterm(proximate), foundline.stripped) is not None:

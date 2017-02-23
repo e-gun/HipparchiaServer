@@ -274,7 +274,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		extra_column = 'unaccented_entry'
 
 	query = 'SELECT entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body, ' \
-	        +extra_column+' FROM ' + dictionary + ' WHERE '+usecolumn+' '+syntax+' %s'
+	        +extra_column+' FROM ' + dictionary + ' WHERE '+usecolumn+' '+syntax+' %s ORDER BY id_number ASC'
 	data = (seeking,)
 	cursor.execute(query, data)
 

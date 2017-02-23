@@ -305,13 +305,10 @@ def insertcrossreferencerow(lineobject):
 
 	if re.search(r'documentnumber',lineobject.annotations) is None:
 		columna = ''
-		columnb = '<span class="crossreference">%(ln)s</span>' %{'ln': lineobject.annotations}
+		columnb = '<span class="crossreference">{ln}</span>'.format(ln=lineobject.annotations)
 
-		linehtml = '<tr class="browser"><td class="crossreference">%(cb)s</td>'
-		linehtml += '<td class="crossreference">%(ca)s</td></tr>\n'
-
-		substitutes = {'ca': columna, 'cb': columnb}
-		linehtml = linehtml % substitutes
+		linehtml = '<tr class="browser"><td class="crossreference">{c}</td>'.format(c=columnb)
+		linehtml += '<td class="crossreference">{c}</td></tr>\n'.format(c=columna)
 
 	return linehtml
 
@@ -324,13 +321,10 @@ def insertdatarow(label, css, founddate):
 	"""
 
 	columna = ''
-	columnb = '<span class="textdate">%(l)s:&nbsp;%(fd)s</span>' %{'l': label, 'fd': founddate}
+	columnb = '<span class="textdate">{l}:&nbsp;{fd}</span>'.format(l=label, fd=founddate)
 	
-	linehtml = '<tr class="browser"><td class="%(css)s">%(cb)s</td>'
-	linehtml += '<td class="crossreference">%(ca)s</td></tr>\n'
-
-	substitutes = {'css': css, 'ca': columna, 'cb': columnb}
-	linehtml = linehtml % substitutes
+	linehtml = '<tr class="browser"><td class="{css}">{cb}</td>'.format(css=css, cb=columnb)
+	linehtml += '<td class="crossreference">{ca}</td></tr>\n'.format(ca=columna)
 
 	return linehtml
 
