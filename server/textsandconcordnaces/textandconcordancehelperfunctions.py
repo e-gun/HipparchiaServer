@@ -79,8 +79,11 @@ def tcfindstartandstop(authorobject, workobject, passageaslist, cursor):
 	"""
 	
 	p = tuple(passageaslist)
-	passage = finddblinefromincompletelocus(workobject.universalid, p, cursor)
-	line = grabonelinefromwork(authorobject.universalid, passage, cursor)
+	lookforline = finddblinefromincompletelocus(workobject.universalid, workobject, p, cursor)
+	# assuming that lookforline['code'] == 'success'
+	# lookforline['code'] is (allegedly) only relevant to the Perseus lookup problem where a bad locus can be sent
+	foundline = lookforline['line']
+	line = grabonelinefromwork(authorobject.universalid, foundline, cursor)
 	lo = dblineintolineobject(line)
 	
 	# let's say you looked for 'book 2' of something that has 'book, chapter, line'

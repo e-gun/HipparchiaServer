@@ -16,6 +16,10 @@
 	font-weight: normal;
 	}
 
+.bold {
+    font-weight: bold;
+    }
+
 .center {
 	display: block;
 	text-align: center;

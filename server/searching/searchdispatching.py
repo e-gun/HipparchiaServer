@@ -85,7 +85,7 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 			criterion = 'longest'
 		else:
 			criterion = 'least common'
-		activepoll.statusis('Executing a phrase search. Checking the '+criterion+' term first...<br />Progress meter only measures this first pass')
+		activepoll.statusis('Executing a phrase search. Checking the {cr} term first...<br />Progress meter only measures this first pass'.format(cr=criterion))
 		leastcommon = findleastcommonterm(seeking)
 		jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, leastcommon, seeking, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	elif searchtype == 'proximity':

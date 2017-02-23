@@ -23,7 +23,7 @@ from server import hipparchia
 from server.listsandsession import validateconfig
 from server.hipparchiaclasses import ProgressPoll
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking
-from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus
+from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus, perseusdelabeler
 from server.lexica.lexicaformatting import entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, \
 	lookformorphologymatches, getobservedwordprevalencedata
@@ -946,6 +946,8 @@ def grabtextforbrowsing():
 	ctx = int(session['browsercontext'])
 	numbersevery = hipparchia.config['SHOWLINENUMBERSEVERY']
 
+	resultmessage = 'success'
+
 	if bokenwkref == True:
 		passage = '_LN_'+str(wo.starts)
 	else:
@@ -966,7 +968,9 @@ def grabtextforbrowsing():
 		elif p[0] == '-1': # cleanedp will strip the '-'
 			passage = wo.starts
 		else:
-			passage = finddblinefromincompletelocus(wo.universalid, cleanedp, cur)
+			p = finddblinefromincompletelocus(wo.universalid, wo, cleanedp, cur)
+			resultmessage = p['code']
+			passage = p['line']
 	elif passage[0:4] == '_PE_':
 		# you came here via a perseus dictionary xref: all sorts of crazy ensues
 		# a nasty kludge: should build the fixes into the db
@@ -975,31 +979,43 @@ def grabtextforbrowsing():
 			workdb = remapper[workdb]
 		citation = passage[4:].split(':')
 		citation.reverse()
-		passage = finddblinefromincompletelocus(workdb, citation, cur)
 
-	try:
+		# life=cal. or section=32
+		needscleaning = [True for c in citation if len(c.split('=')) > 1]
+		if True in needscleaning:
+			citation = perseusdelabeler(citation, wo)
+
+		# another problem 'J. ' in sallust <bibl id="lt0631w001_PE_J. 79:3" default="NO" valid="yes"><author>Sall.</author> J. 79, 3</bibl>
+		# lt0631w002_PE_79:3 is what you need to send to finddblinefromincompletelocus()
+		# note that the work number is wrong, so the next is only a partial fix and valid only if wNNN has been set right
+		# but it has not always been set right
+
+		if ' ' in citation[-1]:
+			citation[-1] = citation[-1].split(' ')[-1]
+
+		p = finddblinefromincompletelocus(workdb, wo, citation, cur)
+		resultmessage = p['code']
+		passage = p['line']
+
+	if passage:
 		browserdata = getandformatbrowsercontext(ao, wo, int(passage), ctx, numbersevery, cur)
-	except:
-		browserdata = [{'forwardsandback': [0,0]}]
-		browserdata.append({'value': 'error in fetching the data to browse for '+ao.shortname+', '+wo.universalid +'<br /><br />'})
-	if passage == -9999:
-		browserdata = [{'forwardsandback': [0, 0]}]
-		browserdata.append({'value': 'could not find a Perseus locus in the Hipparchia DB:<br />'+request.args.get('locus', '')+'<br /><br />'})
+	else:
+		browserdata = {}
+		browserdata['browseforwards'] = wo.ends
+		browserdata['browseback'] = wo.starts
+		browserdata['currentlyviewing'] = '<p class="currentlyviewing">error in fetching the browser data for {ao}, {wo} </p><br /><br />'.format(ao=ao.shortname, wo=wo.title)
 		try:
-			browserdata.append({'value': 'author: '+ao.shortname})
+			browserdata['ouputtable'] = [passage, workdb, citation]
 		except:
-			pass
-		try:
-			w = workdict[workdb]
-			browserdata.append({'value': '<br />work: '+w.title})
-			browserdata.append({'value': '<br /><br />Hipparchia citation structure: ' + w.citation()})
-			passage = request.args.get('locus', '')[10:]
-			pe = passage[4:].split(':')
-			pe = ', '.join(pe)
-			browserdata.append({'value': '<br />Perseus citation structure: ' + pe})
-			browserdata.append({'value': '<br /><br />'})
-		except:
-			pass
+			browserdata['ouputtable'] = [passage, workdb]
+		browserdata['authornumber'] = ao.universalid
+		browserdata['workid'] = wo.universalid
+		browserdata['authorboxcontents'] = ao.cleanname + ' [' + ao.universalid + ']'
+		browserdata['workboxcontents'] = wo.title + ' (' + wo.universalid[-4:] + ')'
+
+	if resultmessage != 'success':
+		resultmessage = '<span class="small">({rc})</span>'.format(rc=resultmessage)
+		browserdata['currentlyviewing'] = '{rc}<br />{bd}'.format(rc=resultmessage, bd=browserdata['currentlyviewing'])
 
 	browserdata = json.dumps(browserdata)
 
@@ -1213,7 +1229,7 @@ def setsessionvariable():
 	# need to accept '-' because of the date spinner
 	val = re.sub('[!@#$%^&*()\[\]=;`+\\\'\"]+', '', val)
 
-	success = modifysessionvar(param, val)
+	modifysessionvar(param, val)
 
 	result = json.dumps([{param: val}])
 
@@ -1436,9 +1452,10 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	launch a websocket poll server
 
 	tricky because loop.run_forever() will run forever: you can't start this when you launch HipparchiaServer without
-	blocking execution of everything else
+	blocking execution of everything else; only a call via the URL mechanism will let you delagate this to an independent
+	thread
 
-	similarly the poll is more or less eternal: the libary was coded that way, and it is kind of irritating
+	the poll is more or less eternal: the libary was coded that way, and it is kind of irritating
 
 	startwspolling() will get called every time you reload the front page: it is at the top of documentready.js
 

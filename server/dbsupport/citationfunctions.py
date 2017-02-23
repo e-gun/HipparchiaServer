@@ -179,7 +179,7 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 	return indexvalue
 
 
-def finddblinefromincompletelocus(workid, citationlist, cursor):
+def finddblinefromincompletelocus(workid, workobject, citationlist, cursor, trialnumber=0):
 	"""
 	need to deal with the perseus bibliographic references which often do not go all the way down to level zero
 	use what you have to find the first available db line so you can construck a '_LN_' browseto click
@@ -197,13 +197,15 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 	:return:
 	"""
 
+	trialnumber +=1
+
 	lmap = {0: 'level_00_value', 1: 'level_01_value', 2: 'level_02_value', 3: 'level_03_value', 4: 'level_04_value',
 	        5: 'level_05_value'}
 	
 	try:
 		# perseus does not always agree with our ids...
 		returnfirstlinenumber(workid, cursor)
-		numberoflevels = findtoplevelofwork(workid, cursor)
+		numberoflevels = workobject.availablelevels
 	except:
 		# perseus did not agree with our ids...: euripides, esp
 		# what follows is a 'hope for the best' approach
@@ -213,15 +215,27 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 		try:
 			numberoflevels = findtoplevelofwork(workid, cursor)
 		except:
-			print('failed 2x to find the work')
 			workid = returnfirstwork(workid[0:6], cursor)
 			numberoflevels = findtoplevelofwork(workid, cursor)
+
+	# now wrestle with the citation
+	# almost all of this code is an attempt to deal with Perseus citation formatting
+	# life is easy when tcfindstartandstop() calls this
 
 	if numberoflevels == len(citationlist):
 		# congratulations, you have a fully formed citation (maybe...)
 		dblinenumber = finddblinefromlocus(workid, citationlist, cursor)
+		if dblinenumber:
+			successcode = 'success'
+		else:
+			# for lt0474w058 PE will send section=33, 11, 1, 1
+			# but Cicero, Epistulae ad Quintum Fratrem is book, letter, section, line
+			results = perseuslookupleveltrimmer(workid, workobject, citationlist, cursor)
+			return results
 	elif numberoflevels < len(citationlist):
 		# something stupid like plautus' acts and scenes when you only want the line numbers
+		# how can this be fixed?
+
 		# option 1: truncate the 'too long' bits and hope for the best
 		# will definitely fail to pull up the right line in the case of plays
 		# unless you were looking at act 1 scene 1 anyway
@@ -231,7 +245,10 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 		# citationlist = newcitationlist
 		
 		# option 2: just give up
-		dblinenumber = -8888
+		dblinenumber = workobject.starts
+		citationlist.reverse()
+		successcode = 'Sending first line. Perseus reference structure does not fit with a valid Hipparchia ' \
+		              'reference: <span class="bold">{pe}</span> ⇎ <span class="bold">{hi}</span>'.format(pe=(', ').join(citationlist), hi=workobject.citation())
 	else:
 		# you have an incomplete citation: assume that the top level is the last item, etc.
 		citationlist = perseuscitationsintohipparchiacitations(citationlist)
@@ -251,12 +268,128 @@ def finddblinefromincompletelocus(workid, citationlist, cursor):
 			cursor.execute(query, data)
 			found = cursor.fetchone()
 			dblinenumber = found[0]
+			# often actually true...
+			successcode = 'success'
 		except:
 			# print('nothing found: returning first line')
-			dblinenumber = returnfirstlinenumber(workid, cursor)
-			# dblinenumber = -9999
-		
-	return dblinenumber
+			if trialnumber < 2:
+				citationlist = perseuslookupchangecase(citationlist)
+				results = finddblinefromincompletelocus(workid, workobject, citationlist, cursor, trialnumber)
+				return results
+			else:
+				dblinenumber = workobject.starts
+				successcode = 'Sending first line of the work. Perseus reference did not return a valid Hipparchia ' \
+				              'reference: <span class="bold">{pe}</span> vs <span class="bold">{hi}</span>'.format(pe=(', ').join(citationlist), hi=workobject.citation())
+
+	results = {'code': successcode, 'line': dblinenumber}
+
+	return results
+
+
+def perseuslookupleveltrimmer(workid, workobject, citationlist, cursor):
+	"""
+	you had a valid looking citation, but it was not in fact valid
+
+	for example, Cicero's Phillipcs should be cited as oration, section, line
+	but PE will send  3, 10, 25: this is really oration 3, section 25
+	[actually, the list comes in in reversed order...]
+
+	it seems that dropping the penultimate item is usually going to be the good second guess
+
+	you should not be able to reach this function 2x because dropping an item from citationlist
+	will cause you to fail the 'if' in finddblinefromincompletelocus() on the next pass
+
+	peeling this off in case we need to add more ways of guessing how to make the second try
+
+	:param workid, workobject, citationlist, cursor, trialnumber:
+	:return:
+	"""
+
+	try:
+		newcitationlist = citationlist[:1]+citationlist[2:]
+	except:
+		dblinenumber = workobject.starts
+		successcode = 'Sending first line of the work. Perseus reference did not return a valid Hipparchia ' \
+		              'reference: <span class="bold">{pe}</span> vs <span class="bold">{hi}</span>'.format(pe=(', ').join(citationlist), hi=workobject.citation())
+		results = {'code': successcode, 'line': dblinenumber}
+		return results
+
+	results = finddblinefromincompletelocus(workid, workobject, newcitationlist, cursor)
+
+	return results
+
+
+def perseuslookupchangecase(citationlist):
+	"""
+	['25', 'cal'] instead of ['25', 'Cal'] when searching seutonius?
+
+
+	:param workid:
+	:param workobject:
+	:param citationlist:
+	:param cursor:
+	:return:
+	"""
+	newcitationlist = []
+
+	for item in citationlist:
+		if re.search(r'[a-z]',item[0]):
+			item = item[0].upper() + item[1:]
+		elif re.search(r'[A-Z]',item[0]):
+			item = item[0].lower() + item[1:]
+		newcitationlist.append(item)
+
+	newcitationlist.reverse()
+
+	return newcitationlist
+
+
+def perseusdelabeler(citationlist, workobject):
+	"""
+
+	the dictionary will send you things like 'life=cl.' or 'section=7'
+
+	try to map them onto a hipparchia structure
+
+	return the best guess
+
+	:param citationlist:
+	:return:
+	"""
+
+
+	allables = [workobject.levellabels_00, workobject.levellabels_01, workobject.levellabels_02, workobject.levellabels_03,
+	              workobject.levellabels_04, workobject.levellabels_05]
+
+	allables = [a for a in allables if a]
+
+	lmap = {allables[i]: i for i in range(0,len(allables))}
+
+	allables.reverse()
+	citationlist.reverse()
+
+	newcitationlist = ['' for c in range(0,len(allables))]
+
+	count = len(allables)
+	for c in citationlist:
+		count -= 1
+		if len(c.split('=')) > 1:
+			if c.split('=')[0] in allables:
+				# try to assign 'section', etc. to the right place on the list
+				mapto = lmap[c.split('=')[0]]
+				newcitationlist[mapto] = c.split('=')[1]
+			else:
+				# i don't know this label: Cicero, Cato Maior de Senectute is supposed to be section, line, but you will be sent chapter=2
+				# just clean out the label name and hope for the best
+				newcitationlist[count] = c.split('=')[1]
+		else:
+			newcitationlist[count] = c
+
+	newcitationlist = [re.sub(r'\.','',n) for n in newcitationlist if n]
+
+	#print('newcitationlist',newcitationlist)
+
+	return newcitationlist
 
 
 def perseuscitationsintohipparchiacitations(citationlist):

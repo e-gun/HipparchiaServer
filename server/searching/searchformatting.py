@@ -198,11 +198,11 @@ def woformatworkinfo(workobject):
 
 	p = formatpublicationinfo(workobject.publication_info)
 
-	n = '(%(n)s)&nbsp;' % {'n': workobject.universalid[-3:]}
-	t = '<span class="title">%(t)s</span> ' % {'t': workobject.title}
+	n = '({n})&nbsp;'.format(n=workobject.universalid[-3:])
+	t = '<span class="title">{t}</span> '.format(t=workobject.title)
 
 	if workobject.workgenre is not None:
-		g = '[%(g)s]&nbsp;' % {'g': workobject.workgenre}
+		g = '[{g}]&nbsp;'.format(g=workobject.workgenre)
 	else:
 		g = ''
 
