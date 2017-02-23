@@ -250,6 +250,9 @@ def perseusidmismatch(badworkdbnumber,cursor):
 	exception handling
 	Perseus says you can look something up in gr0006w16: but there is no such thing
 	go through the work list and pick the 16th: hope for the best
+
+	more common is asking for w001 when really 002 or 003 is the 1st valid work number
+
 	:param workdb:
 	:param cursor:
 	:return:

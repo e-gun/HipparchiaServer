@@ -22,7 +22,8 @@ from server import hipparchia
 # this next validates when imported: it is not called later; the IDE will pretend you are not using it and grey it out
 from server.listsandsession import validateconfig
 from server.hipparchiaclasses import ProgressPoll
-from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking
+from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking, perseusidmismatch, \
+	findtoplevelofwork, returnfirstlinenumber
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus, perseusdelabeler
 from server.lexica.lexicaformatting import entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, \
@@ -948,10 +949,7 @@ def grabtextforbrowsing():
 
 	resultmessage = 'success'
 
-	if bokenwkref == True:
-		passage = '_LN_'+str(wo.starts)
-	else:
-		passage = request.args.get('locus', '')[10:]
+	passage = request.args.get('locus', '')[10:]
 
 	if passage[0:4] == '_LN_':
 		# you were sent here either by the hit list or a forward/back button in the passage browser
@@ -968,15 +966,31 @@ def grabtextforbrowsing():
 		elif p[0] == '-1': # cleanedp will strip the '-'
 			passage = wo.starts
 		else:
-			p = finddblinefromincompletelocus(wo.universalid, wo, cleanedp, cur)
+			p = finddblinefromincompletelocus(wo, cleanedp, cur)
 			resultmessage = p['code']
 			passage = p['line']
 	elif passage[0:4] == '_PE_':
 		# you came here via a perseus dictionary xref: all sorts of crazy ensues
-		# a nasty kludge: should build the fixes into the db
+		# nasty kludge with eur: should build the fixes into the db
+		# euripides
 		if 'gr0006' in workdb:
 			remapper = dbquickfixes([workdb])
-			workdb = remapper[workdb]
+			workid = remapper[workdb]
+			wo = workdict[workid]
+
+		try:
+			# dict does not always agree with our ids...
+			# do an imperfect test for this by inviting the exception
+			# you can still get a valid but wrong work, of course,
+			# but if you ask for w001 and only w003 exists, this is supposed to take care of that
+			returnfirstlinenumber(workdb, cur)
+		except:
+			# dict did not agree with our ids...: euripides, esp
+			# what follows is a 'hope for the best' approach
+			workid = perseusidmismatch(workdb, cur)
+			wo = workdict[workid]
+			# print('dictionary lookup id remap',workdb,workid,wo.title)
+
 		citation = passage[4:].split(':')
 		citation.reverse()
 
@@ -988,12 +1002,11 @@ def grabtextforbrowsing():
 		# another problem 'J. ' in sallust <bibl id="lt0631w001_PE_J. 79:3" default="NO" valid="yes"><author>Sall.</author> J. 79, 3</bibl>
 		# lt0631w002_PE_79:3 is what you need to send to finddblinefromincompletelocus()
 		# note that the work number is wrong, so the next is only a partial fix and valid only if wNNN has been set right
-		# but it has not always been set right
 
 		if ' ' in citation[-1]:
 			citation[-1] = citation[-1].split(' ')[-1]
 
-		p = finddblinefromincompletelocus(workdb, wo, citation, cur)
+		p = finddblinefromincompletelocus(wo, citation, cur)
 		resultmessage = p['code']
 		passage = p['line']
 

@@ -179,7 +179,7 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 	return indexvalue
 
 
-def finddblinefromincompletelocus(workid, workobject, citationlist, cursor, trialnumber=0):
+def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=0):
 	"""
 	need to deal with the perseus bibliographic references which often do not go all the way down to level zero
 	use what you have to find the first available db line so you can construck a '_LN_' browseto click
@@ -197,40 +197,39 @@ def finddblinefromincompletelocus(workid, workobject, citationlist, cursor, tria
 	:return:
 	"""
 
+	# print('citationlist',workobject.universalid,citationlist)
+
 	trialnumber +=1
 
 	lmap = {0: 'level_00_value', 1: 'level_01_value', 2: 'level_02_value', 3: 'level_03_value', 4: 'level_04_value',
 	        5: 'level_05_value'}
 	
-	try:
-		# perseus does not always agree with our ids...
-		returnfirstlinenumber(workid, cursor)
-		numberoflevels = workobject.availablelevels
-	except:
-		# perseus did not agree with our ids...: euripides, esp
-		# what follows is a 'hope for the best' approach
-		# notice that this bad id has been carved into the page html already
-		
-		workid = perseusidmismatch(workid, cursor)
-		try:
-			numberoflevels = findtoplevelofwork(workid, cursor)
-		except:
-			workid = returnfirstwork(workid[0:6], cursor)
-			numberoflevels = findtoplevelofwork(workid, cursor)
+
+	numberoflevels = workobject.availablelevels
 
 	# now wrestle with the citation
 	# almost all of this code is an attempt to deal with Perseus citation formatting
 	# life is easy when tcfindstartandstop() calls this
 
 	if numberoflevels == len(citationlist):
-		# congratulations, you have a fully formed citation (maybe...)
-		dblinenumber = finddblinefromlocus(workid, citationlist, cursor)
+		# congratulations, you have a fully formed citation. Or do you?
+		#
+		# [a] good news if this is aeneid book 1, line 1
+		# [b] bad news if this is Cic. Cat. 1, 2, 4 because that '2' is not 'section' and that '4' is not 'line'
+		# instead the dictionary means oration 1, section 4, line 1 but the dictionary used an old citation format
+		# Hipparchia will return oration 1, section 2, line 4 because this is a valid selection
+		# that's a shame: but at least you are somewhat close to where you want to be
+		# [c] also bad news if this is Cic. Mil. 9, 25
+		# there is no line 25 to section 9. When no result is returned we will dump the 9 and see if just 25 works
+		# is usually does
+
+		dblinenumber = finddblinefromlocus(workobject.universalid, citationlist, cursor)
 		if dblinenumber:
 			successcode = 'success'
 		else:
 			# for lt0474w058 PE will send section=33, 11, 1, 1
 			# but Cicero, Epistulae ad Quintum Fratrem is book, letter, section, line
-			results = perseuslookupleveltrimmer(workid, workobject, citationlist, cursor)
+			results = perseuslookupleveltrimmer(workobject, citationlist, cursor)
 			return results
 	elif numberoflevels < len(citationlist):
 		# something stupid like plautus' acts and scenes when you only want the line numbers
@@ -253,7 +252,7 @@ def finddblinefromincompletelocus(workid, workobject, citationlist, cursor, tria
 		# you have an incomplete citation: assume that the top level is the last item, etc.
 		citationlist = perseuscitationsintohipparchiacitations(citationlist)
 		citationlist.reverse()
-		auid = workid[0:6]
+		auid = workobject.universalid[0:6]
 		query = 'SELECT index FROM ' + auid + ' WHERE wkuniversalid=%s AND '
 		try:
 			for level in range(numberoflevels-1, numberoflevels-len(citationlist)-1,-1):
@@ -263,7 +262,7 @@ def finddblinefromincompletelocus(workid, workobject, citationlist, cursor, tria
 			
 		# drop the final 'AND '
 		query = query[:-4] + ' ORDER BY index ASC'
-		data = tuple([workid]+citationlist)
+		data = tuple([workobject.universalid]+citationlist)
 		try:
 			cursor.execute(query, data)
 			found = cursor.fetchone()
@@ -274,7 +273,7 @@ def finddblinefromincompletelocus(workid, workobject, citationlist, cursor, tria
 			# print('nothing found: returning first line')
 			if trialnumber < 2:
 				citationlist = perseuslookupchangecase(citationlist)
-				results = finddblinefromincompletelocus(workid, workobject, citationlist, cursor, trialnumber)
+				results = finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber)
 				return results
 			else:
 				dblinenumber = workobject.starts
@@ -286,7 +285,7 @@ def finddblinefromincompletelocus(workid, workobject, citationlist, cursor, tria
 	return results
 
 
-def perseuslookupleveltrimmer(workid, workobject, citationlist, cursor):
+def perseuslookupleveltrimmer(workobject, citationlist, cursor):
 	"""
 	you had a valid looking citation, but it was not in fact valid
 
@@ -314,7 +313,7 @@ def perseuslookupleveltrimmer(workid, workobject, citationlist, cursor):
 		results = {'code': successcode, 'line': dblinenumber}
 		return results
 
-	results = finddblinefromincompletelocus(workid, workobject, newcitationlist, cursor)
+	results = finddblinefromincompletelocus(workobject, newcitationlist, cursor)
 
 	return results
 

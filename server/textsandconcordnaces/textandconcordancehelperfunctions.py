@@ -79,7 +79,7 @@ def tcfindstartandstop(authorobject, workobject, passageaslist, cursor):
 	"""
 	
 	p = tuple(passageaslist)
-	lookforline = finddblinefromincompletelocus(workobject.universalid, workobject, p, cursor)
+	lookforline = finddblinefromincompletelocus(workobject, p, cursor)
 	# assuming that lookforline['code'] == 'success'
 	# lookforline['code'] is (allegedly) only relevant to the Perseus lookup problem where a bad locus can be sent
 	foundline = lookforline['line']

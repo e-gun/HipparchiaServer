@@ -493,6 +493,7 @@ class MorphPossibilityObject(object):
 			# [b] a compound case, but it does not involve prefixes just morphology: 'ἠχούϲαϲ, ἠχέω'
 			baseform = segments[-1]
 		else:
+			# MorphPossibilityObject.getlatinbaseform() needs work praevortēmur, prae-verto
 			print('MorphPossibilityObject.getlatinbaseform() needs work',self.entry)
 
 		return baseform
