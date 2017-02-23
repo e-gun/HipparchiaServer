@@ -108,6 +108,36 @@ def loadallworksasobjects():
 	return worksdict
 
 
+def dbloadasingleworkobject(workuniversalid):
+	"""
+
+	if you get stranded down inside a series of function calls you have no way of recaining access to the master dictionary
+	of work objects
+
+	:param workuniversalid:
+	:return:
+	"""
+
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
+
+	q = 'SELECT universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03, ' \
+	        'levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance, recorded_date, converted_date, wordcount, ' \
+			'firstline, lastline, authentic FROM works WHERE universalid=%s'
+	d = (workuniversalid,)
+	curs.execute(q,d)
+	r = curs.fetchone()
+
+	workobject = dbOpus(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8],
+						 r[9], r[10], r[11], r[12], r[13], r[14], r[15], r[16],
+						 r[17], r[18], r[19])
+
+	dbconnection.commit()
+	curs.close()
+
+	return workobject
+
+
 def loadallworksintoallauthors(authorsdict, worksdict):
 	"""
 

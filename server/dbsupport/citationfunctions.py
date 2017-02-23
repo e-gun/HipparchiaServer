@@ -7,7 +7,7 @@
 """
 
 import re
-from server.dbsupport.dbfunctions import findtoplevelofwork, returnfirstlinenumber, perseusidmismatch, returnfirstwork
+from server.dbsupport.dbfunctions import findtoplevelofwork, returnfirstlinenumber, dbloadasingleworkobject
 from server.hipparchiaclasses import LowandHighInfo
 
 
@@ -242,12 +242,13 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 		# for i in range(0,numberoflevels):
 		#	newcitationlist.append(citationlist[i])
 		# citationlist = newcitationlist
-		
+
 		# option 2: just give up
 		dblinenumber = workobject.starts
 		citationlist.reverse()
 		successcode = 'Sending first line. Perseus reference structure does not fit with a valid Hipparchia ' \
 		              'reference: <span class="bold">{pe}</span> ⇎ <span class="bold">{hi}</span>'.format(pe=(', ').join(citationlist), hi=workobject.citation())
+
 	else:
 		# you have an incomplete citation: assume that the top level is the last item, etc.
 		citationlist = perseuscitationsintohipparchiacitations(citationlist)
@@ -275,6 +276,18 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 				citationlist = perseuslookupchangecase(citationlist)
 				results = finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber)
 				return results
+			elif workobject.universalid[0:6] == 'lt1014':
+				# The dictionary regularly (but inconsistently!) points to Seneca Maior [lt1014] when it is citing Seneca Minor [lt107]'
+				# but what follows will not save the day: "lt1014w001_PE_Ira, 2:11:2", "lt1014w001_PE_Cons. ad Marc. 1:6", and
+				# "lt1014w001_PE_Ep. 70:15" are all fundamentally broken: lt1017 will still not get you the right work numbers
+				#
+				# print('minor for maior b', workobject.universalid, workobject.title)
+				# newworkobject = dbloadasingleworkobject('lt1017'+workobject.universalid[6:])
+				# print('nwo',newworkobject.universalid, newworkobject.title)
+				# results = finddblinefromincompletelocus(newworkobject, citationlist, cursor, trialnumber)				# return results
+
+				successcode = 'The dictionary regularly points to Seneca Maior [lt1014] when it is citing Seneca Minor [lt107].<br >These citations are broken and cannot be easily fixed. ' \
+				              'Not only is the author number wrong, so too is the work number. Sorry about that.'
 			else:
 				dblinenumber = workobject.starts
 				successcode = 'Sending first line of the work. Perseus reference did not return a valid Hipparchia ' \

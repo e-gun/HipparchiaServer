@@ -335,12 +335,15 @@ class dbHeadwordObject(dbWordCountObject):
 			return None
 
 	def getweightedcorpora(self, element):
-		elements = {'gr': (self.wtdgr/self.predomcorp)*100, 'lt': (self.wtdlt/self.predomcorp)*100, 'in': (self.wtdin/self.predomcorp)*100,
-		            'dp': (self.wtddp / self.predomcorp) * 100, 'ch': (self.wtdch/self.predomcorp)*100,
-		            }
-		try:
-			return elements[element]
-		except:
+		if self.predomcorp != 0:
+			elements = {'gr': (self.wtdgr/self.predomcorp)*100, 'lt': (self.wtdlt/self.predomcorp)*100, 'in': (self.wtdin/self.predomcorp)*100,
+			            'dp': (self.wtddp / self.predomcorp) * 100, 'ch': (self.wtdch/self.predomcorp)*100,
+			            }
+			try:
+				return elements[element]
+			except:
+				return 0
+		else:
 			return 0
 
 	def gettimelabel(self, element):
