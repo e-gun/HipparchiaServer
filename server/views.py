@@ -188,12 +188,12 @@ def executesearch():
 		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
 			searchtype = 'simple'
 			thesearch = seeking
-			htmlsearch = '<span class="emph">' + seeking + '</span>'
+			htmlsearch = '<span class="emph">%(skg)s</span>' % { 'skg': seeking}
 			hits = searchdispatcher('simple', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
 		elif re.search(phrasefinder, seeking) is not None:
 			searchtype = 'phrase'
 			thesearch = seeking
-			htmlsearch = '<span class="emph">' + seeking + '</span>'
+			htmlsearch = '<span class="emph">%(skg)s</span>' % {'skg': seeking}
 			terms = seeking.split(' ')
 			if len(max(terms, key=len)) > 3:
 				hits = searchdispatcher('phrase', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
@@ -259,8 +259,8 @@ def executesearch():
 		}
 
 		locale.setlocale(locale.LC_ALL, 'en_US')
-		resultcount = locale.format("%d", resultcount, grouping=True)
-		workssearched = locale.format("%d", workssearched, grouping=True)
+		resultcount = locale.format('%d', resultcount, grouping=True)
+		workssearched = locale.format('%d', workssearched, grouping=True)
 
 		output = {}
 		output['title'] = thesearch

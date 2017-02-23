@@ -96,23 +96,19 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	
 	citation = locusintocitation(workobject, focusline.locustuple())
 
-	cv = '<span class="author">%(n)s</span>, <span class="work">%(t)s</span><br />'
-	substitutes = {'n': name, 't': title}
-	cv = cv % substitutes
+	cv = '<span class="author">{n}</span>, <span class="work">{t}</span><br />'.format(n=name, t=title)
 	# author + title can get pretty long
 	cv = avoidlonglines(cv, 100, '<br />', [])
-	cv += '<span class="citation">%(c)s</span>'
+	cv += '<span class="citation">{c}</span>'.format(c=citation)
 	if date != '':
 		if int(date) > 1:
-			cv += '<br /><span class="assigneddate">(Assigned date of %(dce)s CE)</span>'
+			cv += '<br /><span class="assigneddate">(Assigned date of {d} CE)</span>'.format(d=date)
 		else:
-			cv += '<br /><span class="assigneddate">(Assigned date of %(dbce)s BCE)</span>'
+			cv += '<br /><span class="assigneddate">(Assigned date of {d} BCE)</span>'.format(d=date[1:])
 
-	substitutes = {'c': citation, 'dce': date, 'dbce': date[1:]}
-	cv = cv % substitutes
 	cv = cv + '<br />' + biblio
 
-	passage['currentlyviewing'] = '<p class="currentlyviewing">' + cv + '</p>'
+	passage['currentlyviewing'] = '<p class="currentlyviewing">{c}</p>'.format(c=cv)
 	passage['ouputtable'] = []
 	
 	passage['ouputtable'].append('<table>\n')
@@ -160,7 +156,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 		if line.index == focusline.index:
 			columna = line.locus()
-			columnb = '<span class="focusline">' + columnb + '</span>'
+			columnb = '<span class="focusline">{c}</span>'.format(c=columnb)
 		else:
 			try:
 				linenumber = int(line.l0)
@@ -177,14 +173,11 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 		prefix = ''
 		if hipparchia.config['DBDEBUGMODE'] == 'yes':
-			prefix = '<smallcode>%(id)s&nbsp;&nbsp;&nbsp;</smallcode>&nbsp;' %{'id': line.universalid}
+			prefix = '<smallcode>{id}&nbsp;&nbsp;&nbsp;</smallcode>&nbsp;'.format(id=line.universalid)
 		columnb = prefix+columnb
 
-		linehtml = '<tr class="browser"><td class="browsedline">%(cb)s</td>'
-		linehtml += '<td class="browsercite">%(ca)s</td></tr>\n'
-
-		substitutes = {'ca': columna, 'cb': columnb}
-		linehtml = linehtml % substitutes
+		linehtml = '<tr class="browser"><td class="browsedline">{cb}</td>'.format(cb=columnb)
+		linehtml += '<td class="browsercite">{ca}</td></tr>\n'.format(ca=columna)
 
 		passage['ouputtable'].append(linehtml)
 		previousline = line
@@ -220,15 +213,15 @@ def insertparserids(lineobject):
 						if word[-1] in [',', ';', '.', '?', '!', ')', '′', '“', '·']:
 							try:
 								if word[-6:] != '&nbsp;':
-									word = '<observed id="%(wa)s">%(wa)s</observed>%(wb)s ' % {'wa': word[:-1], 'wb': word[-1]}
+									word = '<observed id="{wa}">{wa}</observed>{wb} '.format(wa=word[:-1], wb=word[-1])
 							except:
-								word = '<observed id="%(wa)s">%(wa)s</observed>%(wb)s ' % {'wa': word[:-1], 'wb': word[-1]}
+								word = '<observed id="{wa}">{wa}</observed>{wb} '.format(wa=word[:-1], wb=word[-1])
 						elif word[-1] == '-' and word == lastword:
-							word = '<observed id="%(h)s">%(w)s</observed> ' % {'h': hyphenated, 'w': word}
+							word = '<observed id="{h}">{w}</observed> '.format(h=hyphenated, w=word)
 						elif word[0] in ['(', '‵', '„', '\'']:
-							word = '%(wa)s<observed id="%(wb)s">%(wb)s"</observed> ' %{'wa': word[0], 'wb': word[1:]}
+							word = '{wa}<observed id="{wb}">{wb}"</observed> '.format(wa=word[0], wb=word[1:])
 						else:
-							word = '<observed id="%(w)s">%(w)s</observed> ' %{'w': word}
+							word = '<observed id="{w}">{w}</observed> '.format(w=word)
 						newline += word
 					except:
 						# word = ''
