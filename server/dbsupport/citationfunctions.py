@@ -199,6 +199,13 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 
 	# print('citationlist',workobject.universalid,citationlist)
 
+	if trialnumber > 4:
+		# catch any accidental loops
+		successcode = 'abandoned effort to find a citation after 4 guesses'
+		dblinenumber = workobject.starts
+		results = {'code': successcode, 'line': dblinenumber}
+		return results
+
 	trialnumber +=1
 
 	lmap = {0: 'level_00_value', 1: 'level_01_value', 2: 'level_02_value', 3: 'level_03_value', 4: 'level_04_value',
@@ -229,7 +236,7 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 		else:
 			# for lt0474w058 PE will send section=33, 11, 1, 1
 			# but Cicero, Epistulae ad Quintum Fratrem is book, letter, section, line
-			results = perseuslookupleveltrimmer(workobject, citationlist, cursor)
+			results = perseuslookupleveltrimmer(workobject, citationlist, cursor, trialnumber)
 			return results
 	elif numberoflevels < len(citationlist):
 		# something stupid like plautus' acts and scenes when you only want the line numbers
@@ -298,13 +305,17 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 	return results
 
 
-def perseuslookupleveltrimmer(workobject, citationlist, cursor):
+def perseuslookupleveltrimmer(workobject, citationlist, cursor, trialnumber):
 	"""
 	you had a valid looking citation, but it was not in fact valid
 
 	for example, Cicero's Phillipcs should be cited as oration, section, line
 	but PE will send  3, 10, 25: this is really oration 3, section 25
 	[actually, the list comes in in reversed order...]
+
+	cicero's verrines seem to be (usually) broken: actio, book, section, (line)
+	dictionary will send 2, 18, 45 when the right answer is 2.2.45(.1) (and the 'wrong'
+	request should be 2.2.18.45)
 
 	it seems that dropping the penultimate item is usually going to be the good second guess
 
@@ -326,7 +337,7 @@ def perseuslookupleveltrimmer(workobject, citationlist, cursor):
 		results = {'code': successcode, 'line': dblinenumber}
 		return results
 
-	results = finddblinefromincompletelocus(workobject, newcitationlist, cursor)
+	results = finddblinefromincompletelocus(workobject, newcitationlist, cursor, trialnumber)
 
 	return results
 
