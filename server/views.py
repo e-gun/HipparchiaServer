@@ -1489,10 +1489,11 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	asyncio.set_event_loop(loop)
 
 	wspolling = websockets.serve(wscheckpoll, '127.0.0.1', port=theport, loop=loop)
+
 	try:
 		loop.run_until_complete(wspolling)
 	except OSError:
-		print('websocket is already listening at',theport)
+		# print('websocket is already listening at',theport)
 		pass
 
 	try:
@@ -1501,7 +1502,7 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 		loop.run_until_complete(loop.shutdown_asyncgens())
 		loop.close()
 
-	# actually this function never returns: the loop really does run forever
+	# actually this function never returns
 	print('wow: startwspolling() returned')
 	return
 

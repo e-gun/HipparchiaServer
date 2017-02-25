@@ -299,6 +299,8 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 				dblinenumber = workobject.starts
 				successcode = 'Sending first line of the work. Perseus reference did not return a valid Hipparchia ' \
 				              'reference: <span class="bold">{pe}</span> vs <span class="bold">{hi}</span>'.format(pe=(', ').join(citationlist), hi=workobject.citation())
+				if 'Frag' in workobject.title:
+					successcode += '<br >The edition used by the lexicon might not match the local edition of the fragments.'
 
 	results = {'code': successcode, 'line': dblinenumber}
 
