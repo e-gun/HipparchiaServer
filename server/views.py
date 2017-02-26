@@ -772,8 +772,8 @@ def getsessionvariables():
 	return returndict
 
 
-@hipparchia.route('/getauthorinfo', methods=['GET'])
-def getauthinfo():
+@hipparchia.route('/getauthorinfo/<authorid>')
+def getauthinfo(authorid):
 	"""
 	show local info about the author one is considering in the selection box
 	:return:
@@ -782,7 +782,7 @@ def getauthinfo():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	authorid = re.sub('[\W_]+', '', request.args.get('au', ''))
+	authorid = re.sub('[\W_]+', '', authorid)
 
 	theauthor = authordict[authorid]
 
@@ -794,9 +794,7 @@ def getauthinfo():
 	else:
 		authinfo +='<br /><span class="italic">work:</span><br />\n'
 
-	sortedworks = {}
-	for work in theauthor.listofworks:
-		sortedworks[work.universalid] = work
+	sortedworks = {work.universalid: work for work in theauthor.listofworks}
 
 	keys = sortedworks.keys()
 	keys = sorted(keys)
@@ -1347,28 +1345,9 @@ def selectionmade():
 		session['wloc' + suffix] = tidyuplist(session['wloc' + suffix])
 		session['wloc' + other] = dropdupes(session['wloc' + other], session['wloc' + suffix])
 
-	# efter the update to the data, you need to update the page html
+	# after the update to the data, you need to update the page html
 
 	return getcurrentselections()
-
-
-@hipparchia.route('/getselections')
-def getcurrentselections():
-	"""
-
-	send the html for what we have piced so that the relevant box can be populate
-
-	get three bundles to put in the table cells
-
-	stored in a dict with three keys: timeexclusions, selections, exclusions, numberofselections
-
-	:return:
-	"""
-
-	htmlbundles = sessionselectionsashtml(authordict, workdict)
-	htmlbundles = json.dumps(htmlbundles)
-
-	return htmlbundles
 
 
 @hipparchia.route('/clearselections', methods=['GET'])
@@ -1394,9 +1373,26 @@ def clearselections():
 
 	session.modified = True
 
-	newselections = json.dumps(sessionselectionsashtml(authordict, workdict))
+	return getcurrentselections()
 
-	return newselections
+
+@hipparchia.route('/getselections')
+def getcurrentselections():
+	"""
+
+	send the html for what we have piced so that the relevant box can be populate
+
+	get three bundles to put in the table cells
+
+	stored in a dict with three keys: timeexclusions, selections, exclusions, numberofselections
+
+	:return:
+	"""
+
+	htmlbundles = sessionselectionsashtml(authordict, workdict)
+	htmlbundles = json.dumps(htmlbundles)
+
+	return htmlbundles
 
 
 @hipparchia.route('/clear')

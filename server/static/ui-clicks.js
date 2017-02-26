@@ -508,7 +508,7 @@ $(function() {
 $('#authinfo').click( function() {
         $('#authorholdings').toggle();
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
-        $.getJSON('/getauthorinfo?au=' + authorid, function (selectiondata) {
+        $.getJSON('/getauthorinfo/' + authorid, function (selectiondata) {
                 $('#authorholdings').html(selectiondata);
                  });
     });
