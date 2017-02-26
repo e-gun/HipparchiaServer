@@ -95,7 +95,7 @@ function parsepassagereturned(passagereturned) {
                     });
             $( '#parserdialog' ).dialog( 'open' );
             $( '#parserdialog' ).html('[searching...]');
-            $.getJSON('/observed?word='+this.id, function (definitionreturned) {
+            $.getJSON('/observed/'+this.id, function (definitionreturned) {
                 $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
                 var dLen = definitionreturned.length;
                 var linesreturned = []

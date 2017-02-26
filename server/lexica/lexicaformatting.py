@@ -434,7 +434,7 @@ def deabrevviategreekauthors():
 
 	there are some key collisions, but you are basically done after you whack those moles
 
-	:param abbreviation:
+	:param:
 	:return: authordict
 	"""
 	authordict = {
@@ -1478,6 +1478,7 @@ def deabrevviatelatinauthors():
 		'Enn.': 'Ennius',
 		'Fest.': 'Festus',
 		'Flor.': 'Florus',
+		'Front.': 'Frontinus',
 		'Gell.': 'Gellius',
 		'Hor.': 'Horace',
 		'Isid.': 'Isidore',
@@ -1485,6 +1486,7 @@ def deabrevviatelatinauthors():
 		'Juv.': 'Juvenal',
 		'Lact.': 'Lactantius',
 		'Liv.': 'Livy',
+		'Luc.': 'Lucan',
 		'Lucr.': 'Lucretius',
 		'Macr.': 'Macrobius',
 		'Mart.': 'Martial',
@@ -1506,6 +1508,7 @@ def deabrevviatelatinauthors():
 		'Suet.': 'Suetonius',
 		'Tac.': 'Tacitus',
 		'Ter.': 'Terence',
+		'Tert.': 'Tertullian',
 		'Val. Fl.': 'Valerius Flaccus',
 		'Val. Max.': 'Valerius Maxiumus',
 		'Varr.': 'Varro',

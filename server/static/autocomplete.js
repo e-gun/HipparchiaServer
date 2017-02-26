@@ -199,7 +199,7 @@ $('#excludeauthor').click( function() {
 //
 
 function loadWorklist(authornumber){
-    $.getJSON('/getworkhint?auth='+authornumber, function (selectiondata) {
+    $.getJSON('/getworksof/'+authornumber, function (selectiondata) {
         var dLen = selectiondata.length;
         var worksfound = [];
         for (i = 0; i < dLen; i++) {
@@ -253,7 +253,7 @@ function loadLevellist(workid,pariallocus){
     // and bad thing happen if you send level00 info
     // python will return info about the next level down such as:
     //  [{'totallevels',3},{'level': 0}, {'label': 'verse'}, {'low': 1}, {'high': 100]
-    $.getJSON('/getstructure?locus='+workid+'_AT_'+pariallocus, function (selectiondata) {
+    $.getJSON('/getstructure/'+workid+'_AT_'+pariallocus, function (selectiondata) {
         var top = selectiondata['totallevels']-1;
         var atlevel = selectiondata['level'];
         var label = selectiondata['label'];

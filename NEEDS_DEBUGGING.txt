@@ -15,3 +15,9 @@
 
 [C] wspolling.py remains off; delete it or make it work?
 
+
+[D]
+
+MorphPossibilityObject.getlatinbaseform() needs work per-misceo
+MorphPossibilityObject.getlatinbaseform() needs work permixtā, per-misceo
+MorphPossibilityObject.getlatinbaseform() needs work praevortēmur, prae-verto

@@ -497,6 +497,7 @@ class MorphPossibilityObject(object):
 			baseform = segments[-1]
 		else:
 			# MorphPossibilityObject.getlatinbaseform() needs work praevortēmur, prae-verto
+			# PREF+DASH+STEM is the issue; a number of elisions and phonic shifts to worry about
 			print('MorphPossibilityObject.getlatinbaseform() needs work',self.entry)
 
 		return baseform
@@ -874,7 +875,6 @@ class LowandHighInfo(object):
 		self.low = low
 		self.high = high
 		self.valuerange = valuerange
-
 
 
 class MPCounter(object):

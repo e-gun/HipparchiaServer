@@ -51,7 +51,7 @@ from server.loadglobaldicts import *
 poll = {}
 
 
-@hipparchia.route('/', methods=['GET', 'POST'])
+@hipparchia.route('/')
 def frontpage():
 	"""
 	the front page
@@ -72,10 +72,7 @@ def frontpage():
 	versionchecking(activelists, expectedsqltemplateversion)
 
 	# check to see which dbs we search by default
-	activecorpora = []
-	for corpus in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']:
-		if session[corpus] == 'yes':
-			activecorpora.append(corpus)
+	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus'] if session[c] == 'yes']
 
 	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora,
 						   accents=session['accentsmatter'], onehit=session['onehit'], css=stylesheet)
@@ -95,8 +92,6 @@ def authorlist():
 
 	:return:
 	"""
-
-	authors = []
 
 	keys = list(authordict.keys())
 	keys.sort()
@@ -458,14 +453,14 @@ def textmaker():
 	return results
 
 
-@hipparchia.route('/getcookie', methods=['GET'])
-def cookieintosession():
+@hipparchia.route('/getcookie/<cookienum>')
+def cookieintosession(cookienum):
 	"""
 	take a stored cookie and convert its values into the current session settings
 
 	:return:
 	"""
-	cookienum = request.args.get('cookie', '')
+
 	cookienum = cookienum[0:2]
 
 	thecookie = request.cookies.get('session' + cookienum)
@@ -534,15 +529,14 @@ def offerauthorhints():
 	return hint
 
 
-@hipparchia.route('/getworkhint', methods=['GET'])
-def offerworkhints():
+@hipparchia.route('/getworksof/<authoruid>')
+def findtheworksof(authoruid):
 	"""
 	fill the hint box with constantly updated values
 	:return:
 	"""
-	# global authordict
 
-	strippedquery = re.sub('[\W_]+', '', request.args.get('auth', ''))
+	strippedquery = re.sub('[\W_]+', '', authoruid)
 
 	hint = []
 
@@ -703,24 +697,26 @@ def offerprovenancehints():
 	return hint
 
 
-@hipparchia.route('/getstructure', methods=['GET'])
-def workstructure():
+@hipparchia.route('/getstructure/<locus>')
+def workstructure(locus):
 	"""
 	request detailed info about how a work works
 	this is fed back to the js boxes : who should be active, what are the autocomplete values, etc?
 
-	sample input: '/getstructure?locus=gr0008w001_AT_-1'; '/getstructure?locus=gr0008w001_AT_13|22'
+	sample input:
+		'/getstructure/gr0008w001_AT_-1'
+		'/getstructure/gr0008w001_AT_13|22'
+
+
 	:return:
 	"""
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	passage = request.args.get('locus', '')[14:].split('|')
-	safepassage = []
-	for level in passage:
-		safepassage.append(re.sub('[!@#$%^&*()=]+', '',level))
+	passage = locus[14:].split('|')
+	safepassage = [re.sub('[!@#$%^&*()=]+', '',p) for p in passage]
 	safepassage = tuple(safepassage[:5])
-	workid = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
+	workid = re.sub('[\W_|]+', '', locus)[:10]
 
 	try:
 		ao = authordict[workid[:6]]
@@ -932,9 +928,7 @@ def grabtextforbrowsing():
 
 	try:
 		wo = workdict[workdb]
-		bokenwkref = False
 	except:
-		bokenwkref = True
 		if ao.universalid == 'gr0000':
 			wo = makeanemptywork('gr0000w000')
 		else:
@@ -1033,8 +1027,8 @@ def grabtextforbrowsing():
 	return browserdata
 
 
-@hipparchia.route('/observed', methods=['GET'])
-def findbyform():
+@hipparchia.route('/observed/<observedword>')
+def findbyform(observedword):
 	"""
 	this function sets of a chain of other functions
 	find dictionary form
@@ -1047,8 +1041,7 @@ def findbyform():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	observed = request.args.get('word', '')
-	cleanedword = re.sub('[\W_|]+', '',observed)
+	cleanedword = re.sub('[\W_|]+', '',observedword)
 	# oddly 'ὕβˈριν' survives the '\W' check; should be ready to extend this list
 	cleanedword = re.sub('[ˈ]+', '', cleanedword)
 	cleanedword = removegravity(cleanedword)
@@ -1074,7 +1067,7 @@ def findbyform():
 			returnarray.append(getobservedwordprevalencedata(cleanedword))
 		returnarray += lexicalmatchesintohtml(cleanedword, morphologyobject, usedictionary, cur)
 	else:
-		returnarray = [{'value': '<br />[could not find a match for '+cleanedword+' in the morphology table]'}, {'entries': '[not found]'}]
+		returnarray = [{'value': '<br />[could not find a match for {cw} in the morphology table]'.format(cw=cleanedword)}, {'entries': '[not found]'}]
 
 	returnarray = [r for r in returnarray if r]
 	returnarray = [{'observed':cleanedword}] + returnarray
@@ -1210,7 +1203,7 @@ def reverselexiconsearch():
 			count += 1
 			returnarray.append({'value': browserdictionarylookup(count, entry, dict, cur)})
 	else:
-		returnarray.append({'value': '<br />[nothing found under "'+seeking+'"]'})
+		returnarray.append({'value': '<br />[nothing found under "{skg}"]'.format(skg=seeking)})
 
 	returnarray = json.dumps(returnarray)
 
@@ -1481,6 +1474,7 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	except:
 		theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
+	# min/max are a very good idea since you are theoretically giving anyone anywhere the power to open a ws socket: 64k+ of them would be sad
 	if hipparchia.config['PROGRESSPOLLMINPORT'] < theport < hipparchia.config['PROGRESSPOLLMAXPORT']:
 		theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
@@ -1568,36 +1562,6 @@ def progressreport():
 	not quite the async dreamland you had imagined
 
 	searches will work, but the progress statements will be broken
-
-	also multiple clients will confuse hipparchia
-
-	something like gevent needs to be integrated so you can handle async requests, I guess.
-	websockets: but that's plenty of extra imports for what is generally a one-user model
-
-	New in Python 3.6: PEP 525: Asynchronous Generator
-	This probably makes a websockets poll a lot easier to write
-
-		async def ticker(delay, to):
-	    for i in range(to):
-	        yield i
-	        await asyncio.sleep(delay)
-
-
-		async def run():
-		    async for i in ticker(1, 10):
-		        print(i)
-
-
-		import asyncio
-		loop = asyncio.get_event_loop()
-		try:
-		    loop.run_until_complete(run())
-		finally:
-		    loop.close()
-
-	progressreport() would just open the ws
-	the ws would emit its results until done
-
 
 	:return:
 	"""
