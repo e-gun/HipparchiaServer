@@ -45,7 +45,7 @@ function deleteondrop(event, ui) {
 
 
 function reloadAuthorlist(){
-    $.getJSON('/makeselection', function (selectiondata) {
+    $.getJSON('/getselections', function (selectiondata) {
         reloadselections(selectiondata);
         $('#worksautocomplete').hide();
         $('#level05').hide();

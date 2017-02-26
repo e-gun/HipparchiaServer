@@ -1347,8 +1347,23 @@ def selectionmade():
 		session['wloc' + suffix] = tidyuplist(session['wloc' + suffix])
 		session['wloc' + other] = dropdupes(session['wloc' + other], session['wloc' + suffix])
 
-	# get three bundles to put in the table cells
-	# stored in a dict with three keys: timeexclusions, selections, exclusions, numberofselections
+	# efter the update to the data, you need to update the page html
+
+	return getcurrentselections()
+
+
+@hipparchia.route('/getselections')
+def getcurrentselections():
+	"""
+
+	send the html for what we have piced so that the relevant box can be populate
+
+	get three bundles to put in the table cells
+
+	stored in a dict with three keys: timeexclusions, selections, exclusions, numberofselections
+
+	:return:
+	"""
 
 	htmlbundles = sessionselectionsashtml(authordict, workdict)
 	htmlbundles = json.dumps(htmlbundles)

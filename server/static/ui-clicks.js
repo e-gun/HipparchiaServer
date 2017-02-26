@@ -275,7 +275,7 @@ $('#includespuria').change(function () {
         setoptions('spuria', 'no');
     }
     // because some items on your list just got purged?
-    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
 
 $('#includevaria').change(function () {
@@ -285,7 +285,7 @@ $('#includevaria').change(function () {
         setoptions('varia', 'no');
     }
     // because some items on your list just got purged?
-    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
 
 $('#includeincerta').change(function () {
@@ -295,7 +295,7 @@ $('#includeincerta').change(function () {
         setoptions('incerta', 'no');
     }
     // because some items on your list just got purged?
-    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
 
 $('#greekcorpus').change(function () {
@@ -307,7 +307,7 @@ $('#greekcorpus').change(function () {
         $('#grkisactive').hide();
     }
     // because some items on your list just got purged?
-    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
 
 $('#latincorpus').change(function () {
@@ -319,7 +319,7 @@ $('#latincorpus').change(function () {
         $('#latisactive').hide();
     }
     // because some items on your list just got purged?
-    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
 
 $('#inscriptioncorpus').change(function () {
@@ -331,7 +331,7 @@ $('#inscriptioncorpus').change(function () {
         $('#insisactive').hide();
     }
     // because some items on your list just got purged?
-    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
 
 $('#papyruscorpus').change(function () {
@@ -343,7 +343,7 @@ $('#papyruscorpus').change(function () {
         $('#ddpisactive').hide();
     }
     // because some items on your list just got purged?
-    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
 
 $('#christiancorpus').change(function () {
@@ -355,7 +355,7 @@ $('#christiancorpus').change(function () {
         $('#chrisactive').hide();
     }
     // because some items on your list just got purged?
-    $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
 
 //
@@ -427,12 +427,12 @@ $( "#latestdate" ).spinner({
     stop: function( event, ui ) {
         var result = $('#latestdate').spinner('value');
         setoptions('latestdate', String(result));
-        $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+        $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
         },
     spin: function( event, ui ) {
         var result = $('#latestdate').spinner('value');
         setoptions('latestdate', String(result));
-        $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+        $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
         }
         });
 
@@ -445,12 +445,12 @@ $( "#earliestdate" ).spinner({
     stop: function( event, ui ) {
         var result = $('#earliestdate').spinner('value');
         setoptions('earliestdate', String(result));
-        $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+        $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
         },
     spin: function( event, ui ) {
         var result = $('#earliestdate').spinner('value');
         setoptions('earliestdate', String(result));
-        $.getJSON('/makeselection', function (selectiondata) { reloadselections(selectiondata); });
+        $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
         }
         });
 
@@ -479,11 +479,11 @@ $('#save05').click( function(){ javascriptsessionintocookie('05'); $('#setoption
 
 // timing issues: you will get the cookie properly, but the selections will not show up right unless you use the misleadingly named .always()
 //  'the .always() method replaces the deprecated .complete() method.'
-$('#load01').click( function(){ $.getJSON('/getcookie/01').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
-$('#load02').click( function(){ $.getJSON('/getcookie/02').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
-$('#load03').click( function(){ $.getJSON('/getcookie/03').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
-$('#load04').click( function(){ $.getJSON('/getcookie/04').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
-$('#load05').click( function(){ $.getJSON('/getcookie/05').always( function() { $.getJSON('/makeselection', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
+$('#load01').click( function(){ $.getJSON('/getcookie/01').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
+$('#load02').click( function(){ $.getJSON('/getcookie/02').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
+$('#load03').click( function(){ $.getJSON('/getcookie/03').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
+$('#load04').click( function(){ $.getJSON('/getcookie/04').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
+$('#load05').click( function(){ $.getJSON('/getcookie/05').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
 
 
 ///
