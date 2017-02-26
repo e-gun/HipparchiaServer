@@ -904,8 +904,8 @@ def getgenrelistcontents():
 	return genres
 
 
-@hipparchia.route('/browseto', methods=['GET'])
-def grabtextforbrowsing():
+@hipparchia.route('/browseto/<locus>')
+def grabtextforbrowsing(locus):
 	"""
 	you want to browse something
 	there are two standard ways to get results here: tell me a line or tell me a citation
@@ -921,7 +921,7 @@ def grabtextforbrowsing():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	workdb = re.sub('[\W_|]+', '', request.args.get('locus', ''))[:10]
+	workdb = re.sub('[\W_|]+', '', locus)[:10]
 
 	try: ao = authordict[workdb[:6]]
 	except: ao = makeanemptyauthor('gr0000')
@@ -939,7 +939,7 @@ def grabtextforbrowsing():
 
 	resultmessage = 'success'
 
-	passage = request.args.get('locus', '')[10:]
+	passage = locus[10:]
 
 	if passage[0:4] == '_LN_':
 		# you were sent here either by the hit list or a forward/back button in the passage browser
@@ -1079,8 +1079,8 @@ def findbyform(observedword):
 	return returnarray
 
 
-@hipparchia.route('/dictsearch', methods=['GET'])
-def dictsearch():
+@hipparchia.route('/dictsearch/<searchterm>')
+def dictsearch(searchterm):
 	"""
 	look up words
 	return dictionary entries
@@ -1091,7 +1091,7 @@ def dictsearch():
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	seeking = re.sub(r'[!@#$|%()*\'\"\[\]]', '', request.args.get('term', ''))
+	seeking = re.sub(r'[!@#$|%()*\'\"\[\]]', '', searchterm)
 	seeking = seeking.lower()
 	seeking = re.sub('σ|ς', 'ϲ', seeking)
 	seeking = re.sub('v', '(u|v|U|V)', seeking)
@@ -1151,8 +1151,8 @@ def dictsearch():
 	return returnarray
 
 
-@hipparchia.route('/reverselookup', methods=['GET'])
-def reverselexiconsearch():
+@hipparchia.route('/reverselookup/<searchterm>')
+def reverselexiconsearch(searchterm):
 	"""
 	attempt to find all of the greek/latin dictionary entries that might go with the english search term
 	:return:
@@ -1162,7 +1162,7 @@ def reverselexiconsearch():
 	cur = dbc.cursor()
 
 	returnarray = []
-	seeking = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('word', ''))
+	seeking = re.sub(r'[!@#$|%()*\'\"]', '', searchterm)
 	if justlatin():
 		dict = 'latin'
 		translationlabel = 'hi'
@@ -1183,15 +1183,16 @@ def reverselexiconsearch():
 	# then go back and see if it is mentioned in the summary of senses
 	for match in matches:
 		m = match[0]
-		matchingobject = searchdictionary(cur, dict + '_dictionary', 'entry_name', m, syntax='LIKE')
+		matchingobjectlist = searchdictionary(cur, dict + '_dictionary', 'entry_name', m, syntax='LIKE')
+		for o in matchingobjectlist:
+			if o.entry:
+				# AttributeError: 'list' object has no attribute 'entry'
+				definition = o.body
+				summarydict = entrysummary(definition, dict, translationlabel)
 
-		if matchingobject.entry:
-			definition = matchingobject.body
-			summarydict = entrysummary(definition, dict, translationlabel)
-
-			for sense in summarydict['senses']:
-				if re.search(r'^'+seeking,sense) is not None:
-					entries.append(m)
+				for sense in summarydict['senses']:
+					if re.search(r'^'+seeking,sense) is not None:
+						entries.append(m)
 
 	entries = list(set(entries))
 	entries = polytonicsort(entries)

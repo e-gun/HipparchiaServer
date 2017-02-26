@@ -7,7 +7,7 @@
 
 function browseuponclick(url){
 	$.getJSON(
-	    { url: '/browseto?locus='+url,
+	    { url: '/browseto/'+url,
 	    success: function (passagereturned) {
             $('#browseforward').unbind('click');
             $('#browseback').unbind('click');
@@ -29,7 +29,7 @@ function browseuponclick(url){
 
 var openbrowserfromclick = function() {
     // now do the browsing
-    $.getJSON('/browseto?locus='+this.id, function (passagereturned) {
+    $.getJSON('/browseto/'+this.id, function (passagereturned) {
         $('#browseforward').unbind('click');
         $('#browseback').unbind('click');
 		var fb = parsepassagereturned(passagereturned)
@@ -54,7 +54,7 @@ var openbrowserfromclick = function() {
 function parsepassagereturned(passagereturned) {
 		$('#browserdialogtext').text('');
         // the first item is info
-        // {'forwardsandback': ['/browseto?locus=lt1254w001_AT_2|2|3|6', '/browseto?locus=lt1254w001_AT_6|9|2|6']}
+        // {'forwardsandback': ['/browseto/lt1254w001_AT_2|2|3|6', '/browseto/lt1254w001_AT_6|9|2|6']}
         var fwdurl = passagereturned['browseforwards'];
         var bkdurl = passagereturned['browseback'];
         var linesreturned = passagereturned['currentlyviewing'];

@@ -201,7 +201,7 @@ $('#lexicalsearch').click( function() {
     var windowHeight = $(window).height();
     if ( dictterm.length > 0) {
         searchterm = dictterm;
-        url = '/dictsearch?term=';
+        url = '/dictsearch/';
         var dialogtitle = restoreme;
         var mydictfield = '#lexicon';
     } else if ( parseterm.length > 0 ) {
@@ -212,13 +212,13 @@ $('#lexicalsearch').click( function() {
         restoreme = searchterm;
     } else if ( reverseterm.length > 0 ) {
         searchterm = reverseterm;
-        url = '/reverselookup?word=';
+        url = '/reverselookup/';
         var dialogtitle = searchterm;
         var mydictfield = '#reverselexicon';
         restoreme = searchterm;
     } else {
         searchterm = 'nihil';
-        url = '/dictsearch?term=';
+        url = '/dictsearch/';
         var dialogtitle = searchterm;
     }
 
