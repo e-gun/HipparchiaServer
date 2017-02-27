@@ -39,7 +39,7 @@ from server.listsandsession.sessionfunctions import modifysessionvar, modifysess
 	sessionvariables, sessionselectionsashtml, rationalizeselections, justlatin, justtlg, reducetosessionselections, returnactivedbs
 from server.formatting_helper_functions import removegravity, stripaccents, bcedating, htmlifysearchfinds, cleanwords
 from server.listsandsession.listmanagement import dropdupes, polytonicsort, sortauthorandworklists, sortresultslist, \
-	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions
+	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions, buildhintlist
 from server.browsing.browserfunctions import getandformatbrowsercontext
 
 # ready some sets of objects that will be generally available: a few seconds spent here will save you the same over and over again later as you constantly regenerate author and work info
@@ -499,36 +499,6 @@ def cookieintosession(cookienum):
 	return response
 
 
-@hipparchia.route('/getauthorhint', methods=['GET'])
-def offerauthorhints():
-	"""
-	fill the hint box with constantly updated values
-	:return:
-	"""
-	global authordict
-
-	strippedquery = re.sub(r'[!@#$|%()*\'\"]','',request.args.get('term', ''))
-
-	ad = reducetosessionselections(listmapper, 'a')
-
-	authorlist = []
-	for a in ad:
-		authorlist.append(ad[a].cleanname+' ['+ad[a].universalid+']')
-
-	authorlist.sort()
-
-	hint = []
-
-	if strippedquery != '':
-		query = strippedquery.lower()
-		qlen = len(query)
-		for author in authorlist:
-			if query == author.lower()[0:qlen]:
-				hint.append({'value':author})
-	hint = json.dumps(hint)
-	return hint
-
-
 @hipparchia.route('/getworksof/<authoruid>')
 def findtheworksof(authoruid):
 	"""
@@ -559,6 +529,31 @@ def findtheworksof(authoruid):
 	return hint
 
 
+@hipparchia.route('/getauthorhint', methods=['GET'])
+def offerauthorhints():
+	"""
+	fill the hint box with constantly updated values
+	:return:
+	"""
+
+	strippedquery = re.sub(r'[!@#$|%()*\'\"]','',request.args.get('term', ''))
+
+	ad = reducetosessionselections(listmapper, 'a')
+
+	authorlist = ['{nm} [{id}]'.format(nm=ad[a].cleanname, id=ad[a].universalid) for a in ad]
+
+	authorlist.sort()
+
+	hint = []
+
+	if strippedquery:
+		hint = buildhintlist(strippedquery, authorlist)
+
+	hint = json.dumps(hint)
+
+	return hint
+
+
 @hipparchia.route('/getgenrehint', methods=['GET'])
 def augenrelist():
 	"""
@@ -568,23 +563,19 @@ def augenrelist():
 
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
-	hint = []
-
 	activedbs = returnactivedbs()
 	activegenres = []
 	for key in activedbs:
 		activegenres += authorgenresdict[key]
 
 	activegenres = list(set(activegenres))
+	activegenres.sort()
+
+	hint = []
 
 	if len(activegenres) > 0:
-		if strippedquery != '':
-			query = strippedquery.lower()
-			qlen = len(query)
-			for genre in activegenres:
-				hintgenre = genre.lower()
-				if query == hintgenre[0:qlen]:
-					hint.append({'value': genre})
+		if strippedquery:
+			hint = buildhintlist(strippedquery, activegenres)
 	else:
 		hint = ['(no author genre data available inside of your active database(s))']
 
@@ -602,23 +593,19 @@ def wkgenrelist():
 
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
-	hint = []
-
 	activedbs = returnactivedbs()
 	activegenres = []
 	for key in activedbs:
 		activegenres += workgenresdict[key]
 
 	activegenres = list(set(activegenres))
+	activegenres.sort()
+
+	hint = []
 
 	if len(activegenres) > 0:
-		if strippedquery != '':
-			query = strippedquery.lower()
-			qlen = len(query)
-			for genre in activegenres:
-				hintgenre = genre.lower()
-				if query == hintgenre[0:qlen]:
-					hint.append({'value': genre})
+		if strippedquery:
+			hint = buildhintlist(strippedquery, activegenres)
 	else:
 		hint = ['(no work genre data available inside of your active database(s))']
 
@@ -637,8 +624,6 @@ def offeraulocationhints():
 
 	strippedquery = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('term', ''))
 
-	hint = []
-
 	activedbs = returnactivedbs()
 	activelocations = []
 
@@ -646,18 +631,18 @@ def offeraulocationhints():
 		activelocations += authorlocationdict[key]
 
 	activelocations = list(set(activelocations))
+	activelocations.sort()
+
+	hint = []
 
 	if len(activelocations) > 0:
-		if strippedquery != '':
-			query = strippedquery.lower()
-			qlen = len(query)
-			for location in activelocations:
-				if query == location.lower()[0:qlen]:
-					hint.append({'value': location})
+		if strippedquery:
+			hint = buildhintlist(strippedquery, activelocations)
 		else:
 			hint = ['(no author location data available inside of your active database(s))']
 
 	hint = json.dumps(hint)
+
 	return hint
 
 
@@ -673,8 +658,6 @@ def offerprovenancehints():
 
 	strippedquery = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('term', ''))
 
-	hint = []
-
 	activedbs = returnactivedbs()
 	activelocations = []
 
@@ -682,18 +665,18 @@ def offerprovenancehints():
 		activelocations += workprovenancedict[key]
 
 	activelocations = list(set(activelocations))
+	activelocations.sort()
+
+	hint = []
 
 	if len(activelocations) > 0:
-		if strippedquery != '':
-			query = strippedquery.lower()
-			qlen = len(query)
-			for location in activelocations:
-				if query == location.lower()[0:qlen]:
-					hint.append({'value': location})
+		if strippedquery:
+			hint = buildhintlist(strippedquery, activelocations)
 		else:
 			hint = ['(no work provenance data available inside of your active database(s))']
 
 	hint = json.dumps(hint)
+
 	return hint
 
 
@@ -907,8 +890,8 @@ def grabtextforbrowsing(locus):
 	"""
 	you want to browse something
 	there are two standard ways to get results here: tell me a line or tell me a citation
-		sample input: '/browseto?locus=gr0059w030_LN_48203'
-		sample input: '/browseto?locus=gr0008w001_AT_23|3|3'
+		sample input: '/browseto/gr0059w030_LN_48203'
+		sample input: '/browseto/gr0008w001_AT_23|3|3'
 	alternately you can sent me a perseus ref from a dictionary entry ('_PE_') and I will *try* to convert it into a '_LN_'
 	sample output: [could probably use retooling...]
 		[{'forwardsandback': ['gr0199w010_LN_55', 'gr0199w010_LN_5']}, {'value': '<currentlyviewing><span class="author">Bacchylides</span>, <span class="work">Dithyrambi</span><br />Dithyramb 1, line 42<br /><span class="pubvolumename">Bacchylide. Dithyrambes, épinicies, fragments<br /></span><span class="pubpress">Les Belles Lettres , </span><span class="pubcity">Paris , </span><span class="pubyear">1993. </span><span class="pubeditor"> (Irigoin, J. )</span></currentlyviewing><br /><br />'}, {'value': '<table>\n'}, {'value': '<tr class="browser"><td class="browsedline"><observed id="[–⏑–––⏑–––⏑–]δ̣ουϲ">[–⏑–––⏑–––⏑–]δ̣ουϲ</observed> </td><td class="browsercite"></td></tr>\n'}, ...]
@@ -926,11 +909,11 @@ def grabtextforbrowsing(locus):
 
 	try:
 		wo = workdict[workdb]
-	except:
+	except KeyError:
 		if ao.universalid == 'gr0000':
 			wo = makeanemptywork('gr0000w000')
 		else:
-			# you have only selected an author, but not a work: 'gr7000w_AT_1'
+			# you have only selected an author, but not a work: 'gr7000w_AT_1' will fail fecause we need 'wNNN'
 			# so send line 1 of work 1
 			wo = ao.listofworks[0]
 			locus = wo.universalid + '_LN_' + str(wo.starts)
@@ -1379,7 +1362,7 @@ def clearselections():
 def getcurrentselections():
 	"""
 
-	send the html for what we have piced so that the relevant box can be populate
+	send the html for what we have picked so that the relevant box can be populate
 
 	get three bundles to put in the table cells
 

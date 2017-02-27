@@ -434,6 +434,20 @@ def removespuria(authorandworklist, worksdict):
 	return trimmedlist
 
 
+def buildhintlist(seeking, listofposiblities):
+	"""
+
+	:param seeking:
+	:param listofposiblities:
+	:return:
+	"""
+
+	query = seeking.lower()
+	qlen = len(query)
+	hintlist = [{'value': p} for p in listofposiblities if query == p.lower()[0:qlen]]
+
+	return hintlist
+
 #
 # GENERIC LIST MANAGEMENT
 #
@@ -477,32 +491,22 @@ def polytonicsort(unsortedwords):
 	stripping diacriticals can help this, but then you get words that collide
 	gotta jump through some extra hoops
 
-	deque() is faster than list when you append
-
-	retaining slower but legible code in case you want to understand the logic of the faster comprehension version
+		[a] build an unaccented copy of the word in front of the word
+		[b] substitute sigmas for lunate sigmas (because lunate comes after omega...)
+			θαλαττησ-snip-θαλάττηϲ
+		[c] sort the augmented words (where ά and ᾶ only matter very late in the game)
+		[d] remove the augment
+		[e] return
 
 	:param unsortedwords:
 	:return:
 	"""
 
-	snipper = re.compile(r'(.*?)(-snip-)(.*?)')
-
-	# stripped = deque()
-	# for word in unsortedwords:
-	# 	if len(word) > 0:
-	# 		strippedword = stripaccents(word)
-	# 		# one modification to stripaccents(): σ for ϲ in order to get the right values
-	# 		strippedword = re.sub(r'ϲ', r'σ', strippedword)
-	# 		stripped.append(strippedword + '-snip-' + word)
-
 	stripped = [re.sub(r'ϲ', r'σ', stripaccents(word))+ '-snip-' + word for word in unsortedwords if word]
 
 	stripped = sorted(stripped)
 
-	# sortedversion = deque()
-	# for word in stripped:
-	# 	cleaned = re.sub(snipper, r'\3', word)
-	# 	sortedversion.append(cleaned)
+	snipper = re.compile(r'(.*?)(-snip-)(.*?)')
 
 	sortedversion = [re.sub(snipper, r'\3', word) for word in stripped]
 
@@ -511,7 +515,9 @@ def polytonicsort(unsortedwords):
 
 def dictitemstartswith(originaldict, element, muststartwith):
 	"""
+
 	trim a dict via a criterion: muststartwith must begin the item to survive the check
+
 	:param originaldict:
 	:param element:
 	:param muststartwith:
@@ -543,12 +549,6 @@ def foundindict(dict, element, mustbein):
 	:param mustbein:
 	:return:
 	"""
-
-	# finds = []
-	# for item in dict:
-	# 	if getattr(dict[item], element) is not None:
-	# 		if re.search(re.escape(mustbein), getattr(dict[item], element)) is not None:
-	# 			finds.append(dict[item].universalid)
 
 	finds = [dict[x].universalid for x in dict
 	         if getattr(dict[x], element) is not None and getattr(dict[x], element) == mustbein]
