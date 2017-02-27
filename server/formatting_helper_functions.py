@@ -246,28 +246,26 @@ def htmlifysearchfinds(listoffinds):
 		listofurls.append(find.clickurl)
 
 		htmlforthefind += '<locus>\n'
-		htmlforthefind += '\t<span class="findnumber">[%(hn)d]</span>&nbsp;&nbsp;'
-		htmlforthefind += '<span class="foundauthor">%(au)s</span>,&nbsp;'
-		htmlforthefind += '<span class="foundwork">%(wk)s</span>:\n'
-		htmlforthefind += '\t<browser id="%(url)s">'
-		htmlforthefind += '<span class="foundlocus">%(cs)s</span><br />'
+		htmlforthefind += '\t<span class="findnumber">[{hn}]</span>&nbsp;&nbsp;'
+		htmlforthefind += '<span class="foundauthor">{au}</span>,&nbsp;'
+		htmlforthefind += '<span class="foundwork">{wk}</span>:\n'
+		htmlforthefind += '\t<browser id="{url}">'
+		htmlforthefind += '<span class="foundlocus">{cs}</span><br />'
 		htmlforthefind += '</browser>\n</locus>\n'
 
-		substitutes = {'hn': find.hitnumber, 'au': find.author, 'wk': find.work, 'url': find.clickurl, 'cs': find.citationstring}
-		htmlforthefind = htmlforthefind % substitutes
+		htmlforthefind = htmlforthefind.format(hn=find.hitnumber, au=find.author, wk=find.work, url=find.clickurl, cs=find.citationstring)
 
 		for ln in lines:
 			prefix = ''
 			if hipparchia.config['DBDEBUGMODE'] == 'yes':
-				prefix = '<smallcode>%(id)s</smallcode>&nbsp;' %{'id': ln.universalid}
-			htmlforthefind += '%(pr)s<span class="locus">%(lc)s</span>&nbsp;\n'
+				prefix = '<smallcode>{id}</smallcode>&nbsp;' %{'id': ln.universalid}
+			htmlforthefind += '{pr}<span class="locus">{lc}</span>&nbsp;\n'
 			if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
-				htmlforthefind += '<span class="foundtext">%(lh)s</span><br />\n'
+				htmlforthefind += '<span class="foundtext">{lh}</span><br />\n'
 			else:
-				htmlforthefind += '<span class="foundtext">%(la)s</span><br />\n'
+				htmlforthefind += '<span class="foundtext">{la}</span><br />\n'
 
-			substitutes = {'pr': prefix, 'lc': ln.locus(), 'lh': ln.showlinehtml(), 'la': ln.accented}
-			htmlforthefind = htmlforthefind % substitutes
+			htmlforthefind = htmlforthefind.format(pr=prefix, lc=ln.locus(), lh=ln.showlinehtml(), la=ln.accented)
 
 		resultsashtml.append(htmlforthefind)
 
@@ -289,7 +287,7 @@ def injectbrowserjavascript(listofurls):
 	:return:
 	"""
 	
-	jso = ['document.getElementById("'+url+'").onclick = openbrowserfromclick;' for url in listofurls]
+	jso = ['document.getElementById("{u}").onclick = openbrowserfromclick;'.format(u=url) for url in listofurls]
 	jsoutput = '\n'.join(jso)
 
 	return jsoutput
