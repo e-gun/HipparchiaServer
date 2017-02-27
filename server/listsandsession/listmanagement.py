@@ -511,37 +511,16 @@ def polytonicsort(unsortedwords):
 
 def dictitemstartswith(originaldict, element, muststartwith):
 	"""
-
 	trim a dict via a criterion: muststartwith must begin the item to survive the check
-
 	:param originaldict:
 	:param element:
 	:param muststartwith:
 	:return:
 	"""
 
-	muststartwith = '^'+muststartwith
-	newdict = prunedict(originaldict, element, muststartwith)
-
-	return newdict
-
-
-def prunedict(originaldict, element, mustbein):
-	"""
-	trim a dict via a criterion: mustbein must be in it to survive the check
-
-	:param originaldict:
-	:param criterion:
-	:param mustbe:
-	:return:
-	"""
-	newdict = {}
-
-	mustbein = re.compile(mustbein)
-
-	for item in originaldict:
-		if re.search(mustbein, getattr(originaldict[item], element)) is not None:
-			newdict[item] = originaldict[item]
+	muststartwith = re.compile('^'+muststartwith)
+	newdict = {x: originaldict[x] for x in originaldict
+	           if re.search(muststartwith, getattr(originaldict[x], element)) is not None}
 
 	return newdict
 
@@ -550,17 +529,29 @@ def foundindict(dict, element, mustbein):
 	"""
 	search for an element in a dict
 	return a list of universalids
+
+	dict:
+		{ ... 'gr2625': <server.hipparchiaclasses.dbAuthor object at 0x1096e9cf8>, 'gr1890': <server.hipparchiaclasses.dbAuthor object at 0x1096e9d68>,
+		'gr0045': <server.hipparchiaclasses.dbAuthor object at 0x1096e9dd8>, 'gr2194': <server.hipparchiaclasses.dbAuthor object at 0x1096e9e48>}
+	element:
+		genres
+	mustbein:
+		Astrologici
+
 	:param dict:
 	:param element:
 	:param mustbein:
 	:return:
 	"""
 
-	finds = []
-	for item in dict:
-		if getattr(dict[item], element) is not None:
-			if re.search(re.escape(mustbein), getattr(dict[item], element)) is not None:
-				finds.append(dict[item].universalid)
+	# finds = []
+	# for item in dict:
+	# 	if getattr(dict[item], element) is not None:
+	# 		if re.search(re.escape(mustbein), getattr(dict[item], element)) is not None:
+	# 			finds.append(dict[item].universalid)
+
+	finds = [dict[x].universalid for x in dict
+	         if getattr(dict[x], element) is not None and getattr(dict[x], element) == mustbein]
 
 	return finds
 
