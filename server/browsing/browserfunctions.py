@@ -106,12 +106,17 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		else:
 			cv += '<br /><span class="assigneddate">(Assigned date of {d} BCE)</span>'.format(d=date[1:])
 
-	cv = cv + '<br />' + biblio
+	passage['currentlyviewing'] = '<p class="currentlyviewing">{c}<br />{b}</p>'.format(c=cv, b=biblio)
 
-	passage['currentlyviewing'] = '<p class="currentlyviewing">{c}</p>'.format(c=cv)
 	passage['ouputtable'] = []
-	
 	passage['ouputtable'].append('<table>\n')
+
+	# guarantee a minimum width to the browser dialogue box; or else skip adding this blank row
+	try:
+		spacer = ''.join(['&nbsp;' for i in range(0, hipparchia.config['MINIMUMBROWSERWIDTH'])])
+		passage['ouputtable'].append('<tr class="spacing">{sp}</tr>'.format(sp=spacer))
+	except:
+		pass
 
 	# insert something to highlight the citationtuple line
 	previousline = lines[0]
@@ -187,7 +192,6 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	else:
 		passage['ouputtable'].append('</table>\n')
 
-	
 	return passage
 
 

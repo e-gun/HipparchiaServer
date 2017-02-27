@@ -103,8 +103,7 @@ def highlightsearchterm(lineobject, searchterm, spanname):
 
 	find = re.search(accentedsearch, line)
 	try:
-		newline = line[0:find.start()] + '<span class="' + spanname + '">' + \
-		          find.group() + '</span>' + line[find.end():]
+		newline = '{ls}<span class="{sp}">{fg}</span>{le}'.format(ls=line[0:find.start()], sp=spanname, fg=find.group(), le=line[find.end():])
 	except:
 		# the find was almost certainly a hyphenated last word: 'pro-' instead of 'profuit'
 		hyph = lineobject.hyphenated

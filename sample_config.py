@@ -47,12 +47,13 @@ HTMLDEBUGMODE = 'no'
 # HipparchiaServer has to be restarted for them to go into effect
 # the css presupposes './server' as part of its path; i.e. you will want to put custom CSS in the
 # same directory as the default installed css
+CSSSTYLESHEET = '/static/hipparchia_styles.css'
 TLGASSUMESBETACODE = 'yes'
 SHOWLINENUMBERSEVERY = 10
-CSSSTYLESHEET = '/static/hipparchia_styles.css'
-SHOWLEXICALSUMMARYINFO='yes'
-SHOWGLOBALWORDCOUNTS='yes'
+SHOWLEXICALSUMMARYINFO = 'yes'
+SHOWGLOBALWORDCOUNTS = 'yes'
 SUPPRESSLONGREQUESTMESSAGE = 'no'
+MINIMUMBROWSERWIDTH=100 # either a number or 'off'
 
 
 ### [7] the default settings for various 'session' items ###

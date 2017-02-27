@@ -43,7 +43,7 @@
 	text-align: left;
 	font-weight: bold;
 	color: #393F94;
-	padding-bottom: 10px;
+	padding-bottom: 0px;
 	}
 
 .date{
@@ -406,11 +406,20 @@
 	top: 100px;
 	right: 50px;
 	box-shadow: 5px 5px 2px #999;
-	padding: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 20px;
+	padding-right: 20px;
 	background-color: #fafafa;
 	font-size: 115%;
 	line-height: 1.1;
 	}
+
+#browsernavigationbuttons {
+    margin: auto;
+    text-align: center;
+    padding-bottom: 5px;
+    }
 
 #clickformoreinfo {
 	position: fixed;
