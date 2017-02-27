@@ -950,7 +950,6 @@ def grabtextforbrowsing(locus):
 		p = locus[14:].split('|')
 		cleanedp = [re.sub('[\W_|]+', '',level) for level in p]
 		cleanedp = tuple(cleanedp[:5])
-		print('cleanedp',cleanedp)
 		if len(cleanedp) == wo.availablelevels:
 			passage = finddblinefromlocus(wo.universalid, cleanedp, cur)
 		else:
