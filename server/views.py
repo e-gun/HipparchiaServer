@@ -930,7 +930,10 @@ def grabtextforbrowsing(locus):
 		if ao.universalid == 'gr0000':
 			wo = makeanemptywork('gr0000w000')
 		else:
+			# you have only selected an author, but not a work: 'gr7000w_AT_1'
+			# so send line 1 of work 1
 			wo = ao.listofworks[0]
+			locus = wo.universalid + '_LN_' + str(wo.starts)
 
 	ctx = int(session['browsercontext'])
 	numbersevery = hipparchia.config['SHOWLINENUMBERSEVERY']
@@ -944,15 +947,12 @@ def grabtextforbrowsing(locus):
 		passage = re.sub('[\D]', '', passage[4:])
 	elif passage[0:4] == '_AT_':
 		# you were sent here by the citation builder autofill boxes
-		p = request.args.get('locus', '')[14:].split('|')
-		cleanedp = []
-		for level in p:
-			cleanedp.append(re.sub('[\W_|]+', '',level))
+		p = locus[14:].split('|')
+		cleanedp = [re.sub('[\W_|]+', '',level) for level in p]
 		cleanedp = tuple(cleanedp[:5])
+		print('cleanedp',cleanedp)
 		if len(cleanedp) == wo.availablelevels:
 			passage = finddblinefromlocus(wo.universalid, cleanedp, cur)
-		elif p[0] == '-1': # cleanedp will strip the '-'
-			passage = wo.starts
 		else:
 			p = finddblinefromincompletelocus(wo, cleanedp, cur)
 			resultmessage = p['code']
