@@ -16,14 +16,16 @@ from server.searching.searchfunctions import substringsearch, simplesearchworkwi
 
 def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, authors):
 	"""
+
 	after finding x, look for y within n lines of x
+
 	people who send phrases to both halves and/or a lot of regex will not always get what they want
 	:param distanceinlines:
 	:param additionalterm:
 	:return:
 	"""
 
-	# you will only get session['maxresults'] back unless you raise the cap
+	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
 	# back for checking: but the Aetolians are likley not among those passages...
 	templimit = 9999
@@ -47,13 +49,15 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, aut
 
 def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, authors):
 	"""
+
 	after finding x, look for y within n words of x
+
 	:param distanceinlines:
 	:param additionalterm:
 	:return:
 	"""
 
-	# you will only get session['maxresults'] back unless you raise the cap
+	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
 	# back for checking: but the Aetolians are likley not among those passages...
 	templimit = 9999

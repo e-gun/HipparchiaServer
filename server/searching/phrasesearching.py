@@ -15,7 +15,7 @@ from server.searching.searchfunctions import substringsearch, simplesearchworkwi
 	lookoutsideoftheline
 
 
-def phrasesearch(leastcommon, searchphrase, cursor, wkid, authorswheredict, activepoll):
+def phrasesearch(leastcommon, searchphrase, maxhits, wkid, authorswheredict, activepoll, cursor):
 	"""
 	a whitespace might mean things are on a new line
 	note how horrible something like και δη και is: you will search και first and then...
@@ -30,13 +30,14 @@ def phrasesearch(leastcommon, searchphrase, cursor, wkid, authorswheredict, acti
 	"""
 
 	if 'x' not in wkid:
-		hits = substringsearch(leastcommon, cursor, wkid, authorswheredict)
+		hits = substringsearch(leastcommon, cursor, wkid, authorswheredict, templimit=maxhits)
 	else:
 		wkid = re.sub('x', 'w', wkid)
-		hits = simplesearchworkwithexclusion(leastcommon, wkid, authorswheredict, cursor)
+		hits = simplesearchworkwithexclusion(leastcommon, wkid, authorswheredict, cursor, templimit=maxhits)
 	
 	fullmatches = []
-	for hit in hits:
+	while hits and len(fullmatches) < int(session['maxresults']):
+		hit = hits.pop()
 		phraselen = len(searchphrase.split(' '))
 		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, cursor)
 		if session['accentsmatter'] == 'no':

@@ -243,21 +243,19 @@ def workonphrasesearch(foundlineobjects, leastcommon, seeking, searchinginside, 
 	:return:
 	"""
 
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
+
 	if session['accentsmatter'] == 'yes':
 		# maxhits ('πολυτρόπωϲ', 506, 506, 0, 0, 0, 0)
 		maxhits = findcountsviawordcountstable(leastcommon)
 
-	tmp = session['maxresults']
-
 	try:
-		session['maxresults'] = maxhits[1]
+		maxhits = maxhits[1]
 	except:
-		session['maxresults'] = 25000
+		maxhits = 9999
 
-	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
-
-	while len(searchinginside) > 0:
+	while len(searchinginside) > 0 and len(foundlineobjects) < int(session['maxresults']):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		try:
@@ -269,12 +267,11 @@ def workonphrasesearch(foundlineobjects, leastcommon, seeking, searchinginside, 
 		if commitcount.value % 400 == 0:
 			dbconnection.commit()
 
-		foundlines = phrasesearch(leastcommon, seeking, curs, wkid, whereclauseinfo, activepoll)
+		foundlines = phrasesearch(leastcommon, seeking, maxhits, wkid, whereclauseinfo, activepoll, curs)
 
 		for f in foundlines:
 			foundlineobjects.append(dblineintolineobject(f))
 
-	session['maxresults'] = tmp
 	dbconnection.commit()
 	curs.close()
 	del dbconnection
