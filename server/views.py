@@ -220,9 +220,9 @@ def executesearch():
 			else:
 				nearstr = ' not'
 
-			thesearch = seeking + nearstr + ' within ' + session['proximity'] + ' ' + scope + ' of ' + proximate
-			htmlsearch = '<span class="emph">' + seeking + '</span>' + nearstr + ' within ' + session['proximity'] + ' ' \
-			             + scope + ' of ' + '<span class="emph">' + proximate + '</span>'
+			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=seeking, ns=nearstr, sp=session['proximity'], sc=scope, pr=proximate)
+			htmlsearch = '<span class="emph">{skg}</span>{ns} within {sp} {sc} of <span class="emph">{pr}</span>'.format(
+				skg=seeking, ns=nearstr, sp=session['proximity'], sc=scope, pr=proximate)
 			hits = searchdispatcher('proximity', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
 
 		poll[ts].statusis('Putting the results in context')
@@ -294,7 +294,7 @@ def executesearch():
 		output['hitmax'] = 0
 		output['dmin'] = dmin
 		output['dmax'] = dmax
-		if justlatin() == False:
+		if justlatin() is False:
 			output['icandodates'] = 'yes'
 		else:
 			output['icandodates'] = 'no'
@@ -818,16 +818,25 @@ def workstructure(locus):
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	passage = locus[14:].split('|')
-	safepassage = [re.sub('[!@#$%^&*()=]+', '',p) for p in passage]
+	workid = locus.split('_AT_')[0]
+	workid = re.sub('[\W_|]+', '', workid)
+
+	try:
+		passage = locus.split('_AT_')[1]
+	except IndexError:
+		passage = '-1'
+
+	unsafepassage = passage.split('|')
+	safepassage = [re.sub('[!@#$%^&*()=]+', '',p) for p in unsafepassage]
 	safepassage = tuple(safepassage[:5])
-	workid = re.sub('[\W_|]+', '', locus)[:10]
 
 	try:
 		ao = authordict[workid[:6]]
 	except:
 		ao = makeanemptyauthor('gr0000')
 
+	# it is a list of works and not a dict, so we can't pull the structure from the key
+	# should probably change that some day
 	structure = {}
 	for work in ao.listofworks:
 		if work.universalid == workid:
@@ -862,14 +871,12 @@ def workstructure(locus):
 @hipparchia.route('/getsessionvariables')
 def getsessionvariables():
 	"""
-	a simple fetch and report: JS wants to know what Python knows
+	a simple fetch and report: the JS wants to know what Python knows
 
 	:return:
 	"""
-	returndict = {}
-	for k in session.keys():
-		if k != 'csrf_token':
-			returndict[k] = session[k]
+
+	returndict = {k: session[k] for k in session.keys() if k != 'csrf_token'}
 
 	# print('rd',returndict)
 	returndict = json.dumps(returndict)
@@ -927,8 +934,8 @@ def getsearchlistcontents():
 	authorandworklist = sortauthorandworklists(authorandworklist, authordict)
 
 	if len(authorandworklist) > 1:
-		searchlistinfo = '<br /><h3>Proposing to search the following %(ll)d works:</h3>\n' %{'ll': len(authorandworklist)}
-		searchlistinfo += '(Results will be arranged according to %(so)s)<br /><br />\n' %{'so': session['sortorder']}
+		searchlistinfo = '<br /><h3>Proposing to search the following {ww} works:</h3>\n'.format(ww=len(authorandworklist))
+		searchlistinfo += '(Results will be arranged according to {so})<br /><br />\n'.format(so=session['sortorder'])
 	else:
 		searchlistinfo = '<br /><h3>Proposing to search the following work:</h3>\n'
 
@@ -1340,7 +1347,7 @@ def clearselections():
 	"""
 	category = request.args.get('cat', '')
 	selectiontypes = ['auselections', 'wkselections', 'psgselections', 'agnselections', 'wkgnselections', 'alocselections', 'wlocselections',
-	                  'auexclusions', 'wkexclusions', 'psgexclusions', 'agnexclusions', 'wkgnexclusions', 'alocexclusions', 'wlocexclusions']
+					  'auexclusions', 'wkexclusions', 'psgexclusions', 'agnexclusions', 'wkgnexclusions', 'alocexclusions', 'wlocexclusions']
 	if category not in selectiontypes:
 		category = ''
 
@@ -1401,6 +1408,7 @@ async def wscheckpoll(websocket, path):
 	:param path:
 	:return:
 	"""
+
 	try:
 		ts = await websocket.recv()
 	except websockets.exceptions.ConnectionClosed:

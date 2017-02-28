@@ -180,6 +180,8 @@ def formatpublicationinfo(pubinfo):
 	:return:
 	"""
 
+	maxlinelen = 120
+
 	tags = [
 		{'volumename': ['', '<br />']},
 		{'press': ['', ', ']},
@@ -198,7 +200,7 @@ def formatpublicationinfo(pubinfo):
 		seek = re.compile('<' + tag + '>(.*?)</' + tag + '>')
 		if re.search(seek, pubinfo) is not None:
 			found = re.search(seek, pubinfo)
-			foundinfo = avoidlonglines(found.group(1), 120, '<br />', [])
+			foundinfo = avoidlonglines(found.group(1), maxlinelen, '<br />', [])
 			publicationhtml += '<span class="pub' + tag + '">' + val[0] + foundinfo + val[1] + '</span>'
 	
 	return publicationhtml
@@ -258,14 +260,14 @@ def htmlifysearchfinds(listoffinds):
 		for ln in lines:
 			prefix = ''
 			if hipparchia.config['DBDEBUGMODE'] == 'yes':
-				prefix = '<smallcode>{id}</smallcode>&nbsp;' %{'id': ln.universalid}
+				prefix = '<smallcode>{id}</smallcode>&nbsp;'
 			htmlforthefind += '{pr}<span class="locus">{lc}</span>&nbsp;\n'
 			if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
 				htmlforthefind += '<span class="foundtext">{lh}</span><br />\n'
 			else:
 				htmlforthefind += '<span class="foundtext">{la}</span><br />\n'
 
-			htmlforthefind = htmlforthefind.format(pr=prefix, lc=ln.locus(), lh=ln.showlinehtml(), la=ln.accented)
+			htmlforthefind = htmlforthefind.format(pr=prefix, id=ln.universalid, lc=ln.locus(), lh=ln.showlinehtml(), la=ln.accented)
 
 		resultsashtml.append(htmlforthefind)
 
@@ -368,7 +370,7 @@ def cleanwords(word):
 	:return:
 	"""
 
-	punct = re.compile('[%s]' % re.escape(punctuation + '\′‵’‘·“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'))
+	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + '\′‵’‘·“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓')))
 	# hard to know whether or not to do the editorial insertions stuff: ⟫⟪⌈⌋⌊
 	# word = re.sub(r'\[.*?\]','', word) # '[o]missa' should be 'missa'
 	word = re.sub(r'[0-9]', '', word)

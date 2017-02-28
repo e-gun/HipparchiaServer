@@ -96,7 +96,6 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 			if leastcommon != seeking:
 				proximate = seeking
 				seeking = leastcommon
-				print('seeking','proximate',seeking,proximate)
 		jobs = [Process(target=workonproximitysearch, args=(count, foundlineobjects, seeking, proximate, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	else:
 		# impossible, but...
@@ -320,7 +319,7 @@ def workonproximitysearch(count, foundlineobjects, seeking, proximate, searching
 			wkid = searchinginside.pop()
 			activepoll.remain(len(searchinginside))
 		except:
-			wkid = 'gr0001w001'
+			wkid = 'gr0000w000'
 
 		if wkid != 'gr0000w000':
 			if session['searchscope'] == 'L':
