@@ -305,6 +305,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	# we might be at trial 2+ and so we need to strip the supplement we used at trial #1
 	if trialnumber > 2:
 		seeking = re.sub(r'\[⁰¹²³⁴⁵⁶⁷⁸⁹\]','',seeking)
+		seeking = re.sub(r'\^', '', seeking)
 
 	foundobjects = None
 
@@ -318,7 +319,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber == 2:
 		# grab any/all variants: ⁰¹²³⁴⁵⁶⁷⁸⁹
-		newword = seeking+'[¹²³⁴⁵⁶⁷⁸⁹]'
+		newword = '^'+seeking+'[¹²³⁴⁵⁶⁷⁸⁹]'
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
 	# elif trialnumber < maxtrials and '-' in seeking:
 	# 	newword = attemptelision(seeking)
