@@ -23,6 +23,9 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, aut
 	:return:
 	"""
 
+	# you will only get session['maxresults'] back unless you raise the cap
+	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
+	# back for checking: but the Aetolians are likley not among those passages...
 	templimit = 9999
 
 	if 'x' in workdbname:
@@ -50,15 +53,18 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 	:return:
 	"""
 
+	# you will only get session['maxresults'] back unless you raise the cap
+	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
+	# back for checking: but the Aetolians are likley not among those passages...
+	templimit = 9999
+
 	distanceinwords += 1
 
-	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
-		hits = substringsearch(firstterm, cursor, workdbname, authors)
-	elif 'x' in workdbname:
+	if 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(firstterm, workdbname, authors, cursor)
+		hits = simplesearchworkwithexclusion(firstterm, workdbname, authors, cursor, templimit)
 	else:
-		hits = substringsearch(firstterm, cursor, workdbname, authors)
+		hits = substringsearch(firstterm, cursor, workdbname, authors, templimit)
 	
 	fullmatches = []
 	for hit in hits:
