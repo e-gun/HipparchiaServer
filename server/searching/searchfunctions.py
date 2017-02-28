@@ -28,12 +28,14 @@ def cleaninitialquery(seeking):
 	"""
 
 	# things you never need to see and are not part of a (for us) possible regex expression
-	badpunct = ',;#\'`'
-	seeking = re.sub(r'[' + re.escape(badpunct) + ']', '', seeking)
+	badpunct = ',;#'
+	extrapunct = '\′‵’‘·“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
+
+	seeking = re.sub(r'[' + re.escape(badpunct+extrapunct) + ']', '', seeking)
 
 	if hipparchia.config['HOBBLEREGEX'] == 'yes':
 		seeking = re.sub(r'\d', '', seeking)
-		allowedpunct = '[].^$'
+		allowedpunct = '[].^$\''
 		badpunct = ''.join(set(punctuation) - set(allowedpunct))
 		seeking = re.sub(r'['+re.escape(badpunct)+']', '', seeking)
 
