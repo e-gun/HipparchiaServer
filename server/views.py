@@ -21,26 +21,29 @@ from flask import render_template, redirect, request, url_for, session
 from server import hipparchia
 # this next validates when imported: it is not called later; the IDE will pretend you are not using it and grey it out
 from server.listsandsession import validateconfig
+from server.browsing.browserfunctions import getandformatbrowsercontext
+from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus,\
+	perseusdelabeler
+from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking, \
+	perseusidmismatch, returnfirstlinenumber
+from server.formatting_helper_functions import removegravity, stripaccents, bcedating, htmlifysearchfinds
 from server.hipparchiaclasses import ProgressPoll
-from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking, perseusidmismatch, \
-	findtoplevelofwork, returnfirstlinenumber
-from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus, perseusdelabeler
 from server.lexica.lexicaformatting import entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, \
 	lookformorphologymatches, getobservedwordprevalencedata
-from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
-from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
-from server.searching.betacodetounicode import replacegreekbetacode
-from server.textsandindices.indexmaker import buildindextowork
-from server.textsandindices.textandindiceshelperfunctions import tcparserequest, textsegmentfindstartandstop, wordindextohtmltable, \
-	indexdictsorter
-from server.textsandindices.textbuilder import buildtext
+from server.listsandsession.listmanagement import dropdupes, polytonicsort, sortauthorandworklists, sortresultslist,\
+	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions, buildhintlist
 from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, justlatin, justtlg, reducetosessionselections, returnactivedbs
-from server.formatting_helper_functions import removegravity, stripaccents, bcedating, htmlifysearchfinds, cleanwords
-from server.listsandsession.listmanagement import dropdupes, polytonicsort, sortauthorandworklists, sortresultslist, \
-	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions, buildhintlist
-from server.browsing.browserfunctions import getandformatbrowsercontext
+from server.searching.betacodetounicode import replacegreekbetacode
+from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
+from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
+from server.searching.searchfunctions import cleaninitialquery
+from server.textsandindices.indexmaker import buildindextowork
+from server.textsandindices.textandindiceshelperfunctions import tcparserequest, textsegmentfindstartandstop, \
+	wordindextohtmltable, indexdictsorter
+from server.textsandindices.textbuilder import buildtext
+
 
 # ready some sets of objects that will be generally available: a few seconds spent here will save you the same over and over again later as you constantly regenerate author and work info
 # this will give you listmapper{}, authordict{}, etc.
@@ -115,14 +118,14 @@ def executesearch():
 	:return:
 	"""
 	sessionvariables()
-	# need to sanitize input at least a bit...
+	# need to sanitize input at least a bit: remove digits and punctuation
 	try:
-		seeking = cleanwords(request.args.get('seeking', ''))
+		seeking = cleaninitialquery(request.args.get('seeking', ''))
 	except:
 		seeking = ''
 
 	try:
-		proximate = cleanwords(request.args.get('proximate', ''))
+		proximate = cleaninitialquery(request.args.get('proximate', ''))
 	except:
 		proximate = ''
 
@@ -159,10 +162,6 @@ def executesearch():
 	poll[ts].statusis('Preparing to search')
 
 	if len(seeking) > 0:
-		seeking = seeking.lower()
-
-		if session['accentsmatter'] == 'no':
-			seeking = re.sub(r'v', 'u', seeking)
 
 		starttime = time.time()
 		poll[ts].statusis('Compiling the list of works to search')
@@ -272,7 +271,6 @@ def executesearch():
 		output['resultcount'] = resultcount
 		output['scope'] = workssearched
 		output['searchtime'] = str(searchtime)
-		output['lookedfor'] = seeking
 		output['proximate'] = proximate
 		output['thesearch'] = thesearch
 		output['htmlsearch'] = htmlsearch
@@ -289,15 +287,14 @@ def executesearch():
 
 	else:
 		output = {}
-		output['title'] = seeking
+		output['title'] = '(empty query)'
 		output['found'] = ''
 		output['resultcount'] = 0
 		output['scope'] = 0
 		output['searchtime'] = '0.00'
-		output['lookedfor'] = '[no search executed]'
 		output['proximate'] = proximate
 		output['thesearch'] = ''
-		output['htmlsearch'] = ''
+		output['htmlsearch'] = '<span class="emph">nothing</span> (search not executed)'
 		output['hitmax'] = 0
 		output['dmin'] = dmin
 		output['dmax'] = dmax

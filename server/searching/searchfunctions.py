@@ -7,13 +7,73 @@
 """
 
 import re
-
+from string import punctuation
 from flask import session
 
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
-from server.searching.searchformatting import cleansearchterm
+from server.searching.searchformatting import searchtermregextsubstitutes
 from server.lexica.lexicalookups import findcountsviawordcountstable
 from server.formatting_helper_functions import removegravity
+from server import hipparchia
+
+
+def cleaninitialquery(query):
+	"""
+
+	there is a problem: all of the nasty injection strings are also rexeg strings
+	if you let people do regex, you also open the door for problems
+	the securty has to be instituted elsewhere
+
+	:param query:
+	:return:
+	"""
+
+	query = re.sub(r'\d', '', query)
+
+	if hipparchia.config['HOBBLEREGEX'] == 'yes':
+		allowedpunct = '[].^$'
+		badpunct = ''.join(set(punctuation) - set(allowedpunct))
+		query = re.sub(re.escape(badpunct), '', query)
+
+	return query
+
+
+def massagesearchterms(query):
+	"""
+
+	fiddle with the query before execution
+
+	:param query:
+	:return:
+	"""
+
+	query = query.lower()
+	prefix = None
+	suffix = None
+
+	if query[0] == ' ':
+		# otherwise you will miss words that start lines because they do not have a leading whitespace
+		prefix = r'(^|\s)'
+		startfrom = 1
+	elif query[0:1] == '\s':
+		prefix = r'(^|\s)'
+		startfrom = 2
+
+	if query[-1] == ' ':
+		# otherwise you will miss words that end lines because they do not have a trailing whitespace
+		suffix = r'(\s|$)'
+		endat = -1
+	elif query[-2:] == '\s':
+		suffix = r'(\s|$)'
+		endat = -2
+
+	if prefix:
+		query = prefix + query[startfrom:]
+
+	if suffix:
+		query = query[:endat] + suffix
+
+	return query
 
 
 def whereclauses(uidwithatsign, operand, authors):
@@ -84,8 +144,9 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 	else:
 		columna = 'stripped_line'
 	columnb = 'hyphenated_words'
-	
-	seeking = cleansearchterm(seeking)
+
+	# swap in lunate sigmas, etc.
+	seeking = searchtermregextsubstitutes(seeking)
 	hyphsearch = seeking
 	db = workdbname[0:6]
 	wkid = workdbname[0:10]
@@ -139,7 +200,7 @@ def substringsearch(seeking, cursor, workdbname, authors):
 		column = 'stripped_line'
 
 	audbname = workdbname[0:6]
-	seeking = cleansearchterm(seeking)
+	seeking = searchtermregextsubstitutes(seeking)
 	
 	mysyntax = '~*'
 	found = []
@@ -241,16 +302,17 @@ def findleastcommonterm(searchphrase):
 	:return:
 	"""
 	stillneedtofindterm = True
-	searchphrase = cleansearchterm(searchphrase)
+	searchphrase = searchtermregextsubstitutes(searchphrase)
 	searchterms = searchphrase.split(' ')
 	searchterms = [x for x in searchterms if x]
-	print('searchterms',searchterms)
 	if session['accentsmatter'] == 'yes':
 		# note that graves have been eliminated from the wordcounts; so we have to do the same here
 		# but we still need access to the actual search terms, hence the dict
 		# a second issue: 'v' is not in the wordcounts, but you might be searching for it
-		# hence the double-barreled modfication
-		searchterms = {removegravity(re.sub(r'v','u',t)): t for t in searchterms}
+		# third, whitespace means you might be passing '(^|\\s)κατὰ' instead of 'κατὰ'
+		searchterms = [re.sub(r'\(.*?\)', '', t) for t in searchterms]
+		searchterms = [re.sub(r'v','u',t) for t in searchterms]
+		searchterms = {removegravity(t): t for t in searchterms}
 
 		counts = [findcountsviawordcountstable(k) for k in searchterms.keys()]
 		# counts [('βεβήλων', 84, 84, 0, 0, 0, 0), ('ὀλίγοϲ', 596, 589, 0, 3, 4, 0)]

@@ -10,7 +10,7 @@ import re
 
 from flask import session
 
-from server.searching.searchformatting import cleansearchterm, aggregatelines
+from server.searching.searchformatting import searchtermregextsubstitutes, aggregatelines
 from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion
 
 
@@ -22,8 +22,8 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, aut
 	:param additionalterm:
 	:return:
 	"""
-	firstterm = cleansearchterm(firstterm)
-	secondterm = re.compile(cleansearchterm(secondterm))
+	firstterm = searchtermregextsubstitutes(firstterm)
+	secondterm = re.compile(searchtermregextsubstitutes(secondterm))
 	
 	
 	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
@@ -53,8 +53,8 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 	:return:
 	"""
 	distanceinwords += 1
-	firstterm = cleansearchterm(firstterm)
-	secondterm = cleansearchterm(secondterm)
+	firstterm = searchtermregextsubstitutes(firstterm)
+	secondterm = searchtermregextsubstitutes(secondterm)
 	
 	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
 		hits = substringsearch(firstterm, cursor, workdbname, authors)

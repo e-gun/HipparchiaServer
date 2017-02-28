@@ -12,7 +12,7 @@ from server.dbsupport.dbfunctions import setconnection
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
-from server.searching.betacodetounicode import stripaccents
+from server.searching.betacodetounicode import cleanaccentsandvj
 from server.hipparchiaclasses import dbWordCountObject, dbHeadwordObject, dbMorphologyObject, dbGreekWord, dbLatinWord, \
 	dbLemmaObject
 from server import hipparchia
@@ -58,11 +58,11 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 		try:
 			# have to 'try' because there might not be a word[-2]
 			if re.search(terminalacute,word[-1]) is not None and trialnumber < 4:
-				sub = stripaccents(word[-1])
+				sub = cleanaccentsandvj(word[-1])
 				newword = word[:-1]+sub
 				matchingobject = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
 			elif re.search(terminalacute,word[-2]) is not None and trialnumber < 4:
-				sub = stripaccents(word[-2])
+				sub = cleanaccentsandvj(word[-2])
 				newword = word[:-2] + sub + word[-1]
 				matchingobject = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
 			elif trialnumber < 4:
@@ -464,7 +464,7 @@ def findcountsviawordcountstable(wordtocheck):
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 
-	initial = stripaccents(wordtocheck[0])
+	initial = cleanaccentsandvj(wordtocheck[0])
 	# alternatives = re.sub(r'[uv]','[uv]',c)
 	# alternatives = '^'+alternatives+'$'
 	if initial in 'abcdefghijklmnopqrstuvwxyzαβψδεφγηιξκλμνοπρϲτυωχθζ':

@@ -94,7 +94,6 @@ $(document).ready( function () {
         //		output['resultcount'] = resultcount
         //		output['scope'] = str(len(indexedworklist))
         //		output['searchtime'] = str(searchtime)
-        //		output['lookedfor'] = seeking
         //		output['proximate'] = proximate
         //		output['thesearch'] = thesearch
         //		output['htmlsearch'] = htmlsearch

@@ -54,6 +54,7 @@ SHOWLEXICALSUMMARYINFO = 'yes'
 SHOWGLOBALWORDCOUNTS = 'yes'
 SUPPRESSLONGREQUESTMESSAGE = 'no'
 MINIMUMBROWSERWIDTH=100 # either a number or 'off'
+HOBBLEREGEX = 'no' # 'yes' if you have foolishly exposed Hipparchia to a network but are not so foolish as to allow "!|'", etc.
 
 
 ### [7] the default settings for various 'session' items ###

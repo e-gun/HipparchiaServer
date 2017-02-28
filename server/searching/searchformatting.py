@@ -19,7 +19,7 @@ from server.formatting_helper_functions import formatpublicationinfo
 from server.hipparchiaclasses import FormattedSearchResult
 
 
-def cleansearchterm(seeking):
+def searchtermregextsubstitutes(seeking):
 	"""
 	turn sigma into antisigma, etc
 	:param searchterm:
@@ -29,6 +29,7 @@ def cleansearchterm(seeking):
 	seeking = re.sub('σ|ς', 'ϲ', seeking)
 	if session['accentsmatter'] == 'no':
 		seeking = re.sub('v', 'u', seeking)
+		seeking = re.sub('j', 'i', seeking)
 
 	# possible, but not esp. desirable:
 	# seeking = re.sub('VvUu', '(u|v|U|v)', seeking)
@@ -398,7 +399,7 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 			foundline.accented = '<span class="highlight">{fla}</span>'.format(fla=foundline.accented)
 		if proximate != '' and searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(cleansearchterm(proximate), foundline.accented) is not None or re.search(cleansearchterm(proximate), foundline.stripped) is not None:
+			if re.search(searchtermregextsubstitutes(proximate), foundline.accented) is not None or re.search(searchtermregextsubstitutes(proximate), foundline.stripped) is not None:
 				foundline.accented = highlightsearchterm(foundline, proximate, 'proximate')
 		citationincontext.formattedlines.append(foundline)
 

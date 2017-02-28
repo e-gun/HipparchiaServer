@@ -556,11 +556,14 @@ very rare (fewer than 5 occurrences)
     <p><span class="label">Latin vs "accents matter"</span></p>
 
     You almost certainly want to avoid accented searches in the Latin authors unless you are willing to deal with the
-    <code>v</code> vs <code>u</code> problem. Every v is a u in the unaccented data. And that means that the extremely
+    <code>v</code> vs <code>u</code> problem. Every v is a u in the unaccented data. Similarly every j is an i. This means that the extremely
     inconsistent practice of various editors can be unified. Only do accented searches of texts whose editorial habits you
     understand. Then it will be safe to look for <code>íntro</code> and <code>hóc</code> specifically. Also keep your
     regex cheat sheet handy: either <code>(v|u)</code> or <code>[uv]</code> will ignore the difference between
-    u and v.
+    u and v. Similarly <code>[jiJI]</code> will allow you to find both <code>Justitia</code> and <code>iustitia</code>. There are only
+    3 Js in the LAT data: Juppiter manifests himself thrice in Cicero's <span class="italic">De Officiis</span>, if you must know. But
+    the inscriptions are fairly liberal with their deployment of <code>ejus</code> and <code>jussit</code>. If you turn on "accents matter",
+    then these issues matter to you as well.
 
     <p><span class="label">Automatic betacode</span></p>
 
