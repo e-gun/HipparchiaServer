@@ -365,7 +365,8 @@ def avoidlonglines(string, maxlen, splitval, stringlist=[]):
 
 def cleanwords(word):
 	"""
-	remove gunk that should not be in an index
+	remove gunk that should not be present in a cleaned line
+
 	:param word:
 	:return:
 	"""

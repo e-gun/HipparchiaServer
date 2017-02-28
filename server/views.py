@@ -148,6 +148,10 @@ def executesearch():
 			proximate = proximate.upper()
 			proximate = replacegreekbetacode(proximate)
 
+	# 'in Capitolio vicinam Iovis optimi maximi, ut in Ca-' is stored as
+	# [unaccented] 'in capitolio uicinam iouis optimi maximi ut in catonis'
+	# [accented] 'in capitolio vicinam iovis optimi maximi ut in catonis'
+
 	phrasefinder = re.compile('[^\s]\s[^\s]')
 
 	poll[ts] = ProgressPoll(ts)
@@ -156,6 +160,9 @@ def executesearch():
 
 	if len(seeking) > 0:
 		seeking = seeking.lower()
+
+		if session['accentsmatter'] == 'no':
+			seeking = re.sub(r'v', 'u', seeking)
 
 		starttime = time.time()
 		poll[ts].statusis('Compiling the list of works to search')

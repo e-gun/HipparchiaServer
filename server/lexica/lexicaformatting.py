@@ -175,14 +175,14 @@ def formatdictionarysummary(summarydict):
 		classtwo = sec['classtwo']
 		label = sec['label']
 		if len(items) > 0:
-			summary += '<div class="'+classone+'"><span class="highlight">'+label+'</span><br \>\n'
+			summary += '<div class="{cl}"><span class="highlight">{lb}</span><br \>\n'.format(cl=classone, lb=label)
 		if len(items) == 1:
-			summary += '<span class="'+classtwo+'">' + items[0] + '</span><br \>\n'
+			summary += '<span class="{cl}">{item}</span><br \>\n'.format(cl=classtwo, item=items[0])
 		else:
 			count = 0
 			for i in items:
 				count += 1
-				summary += '<span class="'+classtwo+'">('+str(count)+')&nbsp;' + i + '</span><br \>\n'
+				summary += '<span class="{cl}">({ct})&nbsp;{item}</span><br \>\n'.format(cl=classtwo, item=i, ct=count)
 
 	summary += '</div><br \><br \>\n<span class="highlight">Full entry:</span><br \>'
 
