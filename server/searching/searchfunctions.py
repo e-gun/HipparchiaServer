@@ -135,7 +135,7 @@ def whereclauses(uidwithatsign, operand, authors):
 	return whereclausetuples
 
 
-def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
+def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor, templimit=None):
 	"""
 	special issues arise if you want to search Iliad less books 1 and 24
 	the standard search apparatus can't do this, but this can
@@ -156,8 +156,13 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 
 	"""
 
+	if templimit:
+		lim = str(templimit)
+	else:
+		lim = str(session['maxresults'])
+
 	if session['onehit'] == 'no':
-		mylimit = ' LIMIT ' + str(session['maxresults'])
+		mylimit = ' LIMIT ' + lim
 	else:
 		mylimit = ' LIMIT 1'
 
@@ -197,7 +202,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 	return found
 
 
-def substringsearch(seeking, cursor, workdbname, authors):
+def substringsearch(seeking, cursor, workdbname, authors, templimit=None):
 	"""
 	actually one of the most basic search types: look for a string/substring
 	this is brute force: you wade through the full text of the work
@@ -207,9 +212,14 @@ def substringsearch(seeking, cursor, workdbname, authors):
 	:param authors:
 	:return:
 	"""
-	
+
+	if templimit:
+		lim = str(templimit)
+	else:
+		lim = str(session['maxresults'])
+
 	if session['onehit'] == 'no':
-		mylimit = ' LIMIT ' + str(session['maxresults'])
+		mylimit = ' LIMIT ' + lim
 	else:
 		mylimit = ' LIMIT 1'
 

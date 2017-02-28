@@ -23,14 +23,14 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, aut
 	:return:
 	"""
 
-	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
-		hits = substringsearch(firstterm, cursor, workdbname, authors)
-	elif 'x' in workdbname:
+	templimit = 9999
+
+	if 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(firstterm, workdbname, authors, cursor)
+		hits = simplesearchworkwithexclusion(firstterm, workdbname, authors, cursor, templimit)
 	else:
-		hits = substringsearch(firstterm, cursor, workdbname, authors)
-	
+		hits = substringsearch(firstterm, cursor, workdbname, authors, templimit)
+
 	fullmatches = []
 	for hit in hits:
 		wordset = aggregatelines(hit[0] - distanceinlines, hit[0] + distanceinlines, cursor, workdbname)
@@ -49,6 +49,7 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 	:param additionalterm:
 	:return:
 	"""
+
 	distanceinwords += 1
 
 	if '_AT_' not in workdbname and 'x' not in workdbname and ' ' not in firstterm:
