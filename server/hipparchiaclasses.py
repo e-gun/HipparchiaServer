@@ -986,8 +986,6 @@ class ProgressPoll(object):
 		return message % {'m': m}
 
 
-# currenly unused in HServer; used in HBuilder
-
 class dbLemmaObject(object):
 	"""
 	an object that corresponds to a db line

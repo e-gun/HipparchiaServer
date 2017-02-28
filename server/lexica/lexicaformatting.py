@@ -50,13 +50,19 @@ def grabsenses(fullentry):
 	return numbered
 
 
-def entrysummary(fullentry, lang, translationlabel):
+def entrysummary(fullentry, lang, translationlabel, lemmaobject):
 	"""
 	returns a collection of lists: all authors, senses, and quotes to be found in an entry
+
+	entryxref allows you to trim 'quotes' that are really just morphology examples
+
+	for example, ἔρχομαι will drop 12 items via this check
+
 	:param fullentry:
 	:return:
+
 	"""
-	
+
 	soup = BeautifulSoup(fullentry, 'html.parser')
 	a = soup.find_all('author')
 	a = list(set(a))
@@ -84,6 +90,11 @@ def entrysummary(fullentry, lang, translationlabel):
 
 	q = soup.find_all('quote')
 	q[:] = [value.string for value in q]
+
+	# many of the 'quotes' are really just forms of the word
+	# trim these
+	morphologylist = lemmaobject.formlist
+	q = [x for x in q if x not in morphologylist]
 
 	summarydict = {'authors':a, 'senses': s, 'quotes':q}
 
