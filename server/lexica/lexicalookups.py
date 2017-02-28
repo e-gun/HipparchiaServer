@@ -572,7 +572,11 @@ def grablemmataobjectfor(entryname, db, cursor):
 	cursor.execute(q, d)
 	l = cursor.fetchone()
 
-	lemmaobject = dbLemmaObject(l[0], l[1], l[2])
+	try:
+		lemmaobject = dbLemmaObject(l[0], l[1], l[2])
+	except TypeError:
+		# 'NoneType' object is not subscriptable
+		lemmaobject = dbLemmaObject('[entry not found]', -1, '')
 
 	return lemmaobject
 
