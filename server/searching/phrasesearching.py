@@ -11,7 +11,6 @@ import re
 from flask import session
 
 from server.dbsupport.dbfunctions import setconnection, makeablankline, dblineintolineobject
-from server.searching.searchformatting import searchtermregextsubstitutes
 from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, whereclauses, \
 	lookoutsideoftheline
 
@@ -75,7 +74,6 @@ def shortphrasesearch(count, foundlineobjects, searchphrase, workstosearch, auth
 	dbconnection = setconnection('autocommit')
 	curs = dbconnection.cursor()
 
-	searchphrase = searchtermregextsubstitutes(searchphrase)
 	searchterms = searchphrase.split(' ')
 	searchterms = [x for x in searchterms if x]
 	contextneeded = len(searchterms) - 1

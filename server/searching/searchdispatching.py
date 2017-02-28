@@ -16,7 +16,8 @@ from server.dbsupport.dbfunctions import dblineintolineobject, setconnection
 from server.hipparchiaclasses import MPCounter
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.phrasesearching import shortphrasesearch, phrasesearch
-from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, findleastcommonterm, massagesearchterms
+from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, findleastcommonterm, \
+	massagesearchtermsforwhitespace, searchtermcharactersubstitutions
 from server.lexica.lexicalookups import findcountsviawordcountstable
 
 
@@ -42,9 +43,13 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 	:return:
 	"""
 
-	# recompose 'seeking' in light of the required regex, etc.
+	# recompose 'seeking'
 	# note that 'proximate' does not need as many checks
-	seeking = massagesearchterms(seeking)
+	seeking = massagesearchtermsforwhitespace(seeking)
+
+	# lunate sigmas / UV / JI issues
+	seeking = searchtermcharactersubstitutions(seeking)
+	proximate = searchtermcharactersubstitutions(proximate)
 
 	activepoll.statusis('Loading the the dispatcher...')
 	# we no longer receive the full authordict but instead a pre-pruned dict: authorswheredict{}

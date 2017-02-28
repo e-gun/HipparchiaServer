@@ -11,37 +11,54 @@ from string import punctuation
 from flask import session
 
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
-from server.searching.searchformatting import searchtermregextsubstitutes
 from server.lexica.lexicalookups import findcountsviawordcountstable
 from server.formatting_helper_functions import removegravity
 from server import hipparchia
 
 
-def cleaninitialquery(query):
+def cleaninitialquery(seeking):
 	"""
 
 	there is a problem: all of the nasty injection strings are also rexeg strings
-	if you let people do regex, you also open the door for problems
-	the securty has to be instituted elsewhere
+	if you let people do regex, you also open the door for trouble
+	the securty has to be instituted elsewhere: read-only db is 90% of the job?
 
 	:param query:
 	:return:
 	"""
 
-	query = re.sub(r'\d', '', query)
+	seeking = re.sub(r'\d', '', seeking)
 
 	if hipparchia.config['HOBBLEREGEX'] == 'yes':
 		allowedpunct = '[].^$'
 		badpunct = ''.join(set(punctuation) - set(allowedpunct))
-		query = re.sub(re.escape(badpunct), '', query)
+		seeking = re.sub(re.escape(badpunct), '', seeking)
 
-	return query
+	return seeking
 
 
-def massagesearchterms(query):
+def searchtermcharactersubstitutions(seeking):
+	"""
+	turn sigma into lunate sigma, etc
+	:param searchterm:
+	:return:
 	"""
 
-	fiddle with the query before execution
+	seeking = re.sub('σ|ς', 'ϲ', seeking)
+	if session['accentsmatter'] == 'no':
+		seeking = re.sub('v', 'u', seeking)
+		seeking = re.sub('j', 'i', seeking)
+
+	# possible, but not esp. desirable:
+	# seeking = re.sub('VvUu', '(u|v|U|v)', seeking)
+
+	return seeking
+
+
+def massagesearchtermsforwhitespace(query):
+	"""
+
+	fiddle with the query before execution to handle whitespace start/end of line issues
 
 	:param query:
 	:return:
@@ -145,8 +162,6 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
 		columna = 'stripped_line'
 	columnb = 'hyphenated_words'
 
-	# swap in lunate sigmas, etc.
-	seeking = searchtermregextsubstitutes(seeking)
 	hyphsearch = seeking
 	db = workdbname[0:6]
 	wkid = workdbname[0:10]
@@ -200,7 +215,6 @@ def substringsearch(seeking, cursor, workdbname, authors):
 		column = 'stripped_line'
 
 	audbname = workdbname[0:6]
-	seeking = searchtermregextsubstitutes(seeking)
 	
 	mysyntax = '~*'
 	found = []
@@ -302,7 +316,6 @@ def findleastcommonterm(searchphrase):
 	:return:
 	"""
 	stillneedtofindterm = True
-	searchphrase = searchtermregextsubstitutes(searchphrase)
 	searchterms = searchphrase.split(' ')
 	searchterms = [x for x in searchterms if x]
 	if session['accentsmatter'] == 'yes':
@@ -333,3 +346,5 @@ def findleastcommonterm(searchphrase):
 		leastcommonterm = longestterm
 
 	return leastcommonterm
+
+

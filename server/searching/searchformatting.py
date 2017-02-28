@@ -6,7 +6,6 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-
 import re
 from multiprocessing import Process, Manager
 
@@ -17,24 +16,7 @@ from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, setconnection
 from server.formatting_helper_functions import formatpublicationinfo
 from server.hipparchiaclasses import FormattedSearchResult
-
-
-def searchtermregextsubstitutes(seeking):
-	"""
-	turn sigma into antisigma, etc
-	:param searchterm:
-	:return:
-	"""
-
-	seeking = re.sub('σ|ς', 'ϲ', seeking)
-	if session['accentsmatter'] == 'no':
-		seeking = re.sub('v', 'u', seeking)
-		seeking = re.sub('j', 'i', seeking)
-
-	# possible, but not esp. desirable:
-	# seeking = re.sub('VvUu', '(u|v|U|v)', seeking)
-
-	return seeking
+from server.searching.searchfunctions import searchtermcharactersubstitutions
 
 
 def highlightsearchterm(lineobject, searchterm, spanname):
@@ -399,7 +381,8 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 			foundline.accented = '<span class="highlight">{fla}</span>'.format(fla=foundline.accented)
 		if proximate != '' and searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(searchtermregextsubstitutes(proximate), foundline.accented) is not None or re.search(searchtermregextsubstitutes(proximate), foundline.stripped) is not None:
+			if re.search(searchtermcharactersubstitutions(proximate), foundline.accented) is not None or re.search(
+					searchtermcharactersubstitutions(proximate), foundline.stripped) is not None:
 				foundline.accented = highlightsearchterm(foundline, proximate, 'proximate')
 		citationincontext.formattedlines.append(foundline)
 
