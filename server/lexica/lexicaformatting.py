@@ -9,6 +9,7 @@
 import re
 from string import punctuation
 from bs4 import BeautifulSoup
+from server.listsandsession.listmanagement import polytonicsort
 
 
 def grabsenses(fullentry):
@@ -95,6 +96,7 @@ def entrysummary(fullentry, lang, translationlabel, lemmaobject):
 	# trim these
 	morphologylist = lemmaobject.formlist
 	q = [x for x in q if x not in morphologylist]
+	q = polytonicsort(q)
 
 	summarydict = {'authors':a, 'senses': s, 'quotes':q}
 
