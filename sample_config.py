@@ -16,7 +16,7 @@ PROGRESSPOLLMINPORT = 5016
 ### [3] DB variables ###
 ##  [set once and forget: DBPASS] ##
 # a read-only db user is highly recommended; write access means inviting a world of hurt,
-# even if the code does everything it can to hobble the ability of DBUSER to alter the DB
+# even if the code does everything it can to prevent the DBUSER from altering the DB
 DBUSER = 'hippa_rd'
 DBHOST = '127.0.0.1'
 DBPORT = 5432
@@ -45,16 +45,19 @@ HTMLDEBUGMODE = 'no'
 ### [6] settings that you can only configure here ###
 ##  [only change this if you know why you are doing it] ##
 # HipparchiaServer has to be restarted for them to go into effect
-# the css presupposes './server' as part of its path; i.e. you will want to put custom CSS in the
-# same directory as the default installed css
+# CSSSTYLESHEET presupposes './server' as part of its path; i.e. you will want to put custom CSS in the
+#   same directory as the default installed css
+# MINIMUMBROWSERWIDTH is either a number of whitespace characters or 'off'
+# HOBBLEREGEX is 'yes' if you have foolishly exposed Hipparchia to a network but are not so foolish as to allow "!|'", etc.
+#   only [].^$ will be allowed and all digits will be dropped
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 TLGASSUMESBETACODE = 'yes'
 SHOWLINENUMBERSEVERY = 10
 SHOWLEXICALSUMMARYINFO = 'yes'
 SHOWGLOBALWORDCOUNTS = 'yes'
 SUPPRESSLONGREQUESTMESSAGE = 'no'
-MINIMUMBROWSERWIDTH=100 # either a number or 'off'
-HOBBLEREGEX = 'no' # 'yes' if you have foolishly exposed Hipparchia to a network but are not so foolish as to allow "!|'", etc.
+MINIMUMBROWSERWIDTH=100
+HOBBLEREGEX = 'no'
 
 
 ### [7] the default settings for various 'session' items ###

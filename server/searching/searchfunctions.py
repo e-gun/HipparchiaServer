@@ -27,9 +27,12 @@ def cleaninitialquery(seeking):
 	:return:
 	"""
 
-	seeking = re.sub(r'\d', '', seeking)
+	# things you never need to see and are not part of a (for us) possible regex expression
+
+	seeking = re.sub(r'[;#\'`]', '', seeking)
 
 	if hipparchia.config['HOBBLEREGEX'] == 'yes':
+		seeking = re.sub(r'\d', '', seeking)
 		allowedpunct = '[].^$'
 		badpunct = ''.join(set(punctuation) - set(allowedpunct))
 		seeking = re.sub(re.escape(badpunct), '', seeking)

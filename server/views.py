@@ -119,6 +119,7 @@ def executesearch():
 	"""
 	sessionvariables()
 	# need to sanitize input at least a bit: remove digits and punctuation
+	# dispatcher will do searchtermcharactersubstitutions() and massagesearchtermsforwhitespace() to take care of lunate sigma, etc.
 	try:
 		seeking = cleaninitialquery(request.args.get('seeking', ''))
 	except:
