@@ -7,6 +7,7 @@
 """
 
 import re
+from string import punctuation
 from bs4 import BeautifulSoup
 
 
@@ -38,10 +39,9 @@ def grabsenses(fullentry):
 			paragraphlevel = '2'
 		else:
 			paragraphlevel = '1'
-		
-		
+
 		try:
-			rewritten = '<p class="level'+paragraphlevel+'"><span class="levelabel'+lvl.group(1)+'">'+num.group(1)+'</span>&nbsp;'+sense+'</p>\n'
+			rewritten = '<p class="level{pl}"><span class="levelabel{lv}">{nm}</span>&nbsp;{sn}</p>\n'.format(pl=paragraphlevel, lv=lvl.group(1),nm=num.group(1), sn=sense)
 		except:
 			print('exception in grabsenses at sense number:',i)
 			rewritten = ''
@@ -50,7 +50,7 @@ def grabsenses(fullentry):
 	return numbered
 
 
-def entrysummary(fullentry,lang, translationlabel):
+def entrysummary(fullentry, lang, translationlabel):
 	"""
 	returns a collection of lists: all authors, senses, and quotes to be found in an entry
 	:param fullentry:
@@ -75,8 +75,12 @@ def entrysummary(fullentry,lang, translationlabel):
 		s[:] = [value for value in s if value not in notin]
 	except:
 		s = []
+
+	# so 'go' and 'go,' are not both on the list
+	depunct = '[{p}]$'.format(p=re.escape(punctuation))
+	s = [re.sub(depunct, '',s) for s in s]
 	s = list(set(s))
-	# s.sort()
+	s.sort()
 
 	q = soup.find_all('quote')
 	q[:] = [value.string for value in q]
