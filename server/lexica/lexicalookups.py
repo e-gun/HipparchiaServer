@@ -91,6 +91,12 @@ def lexicalmatchesintohtml(observedform, morphologyobject, usedictionary, cursor
 	usedictionary:
 		greek
 
+	interesting problem with alternative latin genitive plurals: they generate a double entry unless you are careful
+		(1) iudicium (from jūdiciūm, judicium, a judgment):  neut gen pl
+		(2) iudicium (from jūdicium, judicium, a judgment):  neut nom/voc/acc sg
+
+	the xref values help here 42397893 & 42397893
+
 	:param observedform:
 	:param matcheslist:
 	:param usedictionary:
@@ -122,16 +128,22 @@ def lexicalmatchesintohtml(observedform, morphologyobject, usedictionary, cursor
 							 'anal': p.getanalysislist()}
 		returnarray.append({'value': formateconsolidatedgrammarentry(consolidatedentry)})
 
-	distinct = list(set([(p.getbaseform(), p.entry) for p in possibilities]))
+	# the next will trim the items to check by inducing key collisions
+	# p.getbaseform(), p.entry, p.xref: judicium jūdiciūm, judicium 42397893
+	# p.getbaseform(), p.entry, p.xref: judicium jūdicium, judicium 42397893
+	distinct = {}
+	for p in possibilities:
+		distinct[p.xref] = p.getbaseform()
+
 	count = 0
 	for d in distinct:
 		count += 1
-		entriestocheck[count] = d[0]
+		entriestocheck[count] = distinct[d]
 
 	# look up and format the dictionary entries
 	if len(entriestocheck) == 1:
-		entry = entriestocheck.popitem()
-		entryashtml = browserdictionarylookup(0, entry[1], usedictionary, cursor)
+		# sending 0 as the count to browserdictionarylookup() prevents enumeration
+		entryashtml = browserdictionarylookup(0, entriestocheck[1], usedictionary, cursor)
 		returnarray.append({'value': entryashtml})
 	else:
 		count = 0
@@ -146,6 +158,14 @@ def lexicalmatchesintohtml(observedform, morphologyobject, usedictionary, cursor
 def browserdictionarylookup(count, seekingentry, usedictionary, cursor):
 	"""
 	look up a word and return an htlm version of its dictionary entry
+
+	count:
+		1
+	seekingentry:
+		judicium
+	usedictionary:
+		latin
+
 	:param entry:
 	:param dict:
 	:param cursor:
@@ -187,15 +207,15 @@ def browserdictionarylookup(count, seekingentry, usedictionary, cursor):
 
 			if type != 'gloss':
 				if count == 0:
-					cleanedentry += '<hr /><p class="dictionaryheading">'+w.entry
+					cleanedentry += '<hr /><p class="dictionaryheading">{ent}'.format(ent=w.entry)
 				else:
 					if includesubcounts:
 						countval = str(count) + chr(subcount+96)
 					else:
 						countval = str(count)
-					cleanedentry += '<hr /><p class="dictionaryheading">(' + countval + ')&nbsp;' + w.entry
+					cleanedentry += '<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'.format(cv=countval, ent=w.entry)
 				if u'\u0304' in w.metricalentry or u'\u0306' in w.metricalentry:
-					cleanedentry += '&nbsp;<span class="metrics">['+w.metricalentry+']</span>'
+					cleanedentry += '&nbsp;<span class="metrics">[{me}]</span>'.format(me=w.metricalentry)
 				cleanedentry += '</p>\n'
 
 				if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
@@ -223,7 +243,7 @@ def browserdictionarylookup(count, seekingentry, usedictionary, cursor):
 					else:
 						cleanedentry += formatmicroentry(definition)
 			else:
-				cleanedentry += '<br />\n<p class="dictionaryheading">' + w.entry + '<span class="metrics">[gloss]</span></p>\n'
+				cleanedentry += '<br />\n<p class="dictionaryheading">{ent}<span class="metrics">[gloss]</span></p>\n'.format(ent=w.entry)
 				cleanedentry += formatgloss(definition)
 
 			clickableentry = insertbrowserlookups(cleanedentry)
@@ -231,9 +251,9 @@ def browserdictionarylookup(count, seekingentry, usedictionary, cursor):
 
 	else:
 		if count == 0:
-			cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under <span class="emph">'+seekingentry+'</span></p>\n'
+			cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under <span class="emph">{skg}</span></p>\n'.format(skg=seekingentry)
 		else:
-			cleanedentry += '<br />\n<p class="dictionaryheading">('+str(count)+') nothing found under <span class="emph">' + seekingentry + '</span></p>\n'
+			cleanedentry += '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="emph">{skg}</span></p>\n'.format(ct=count, skg=seekingentry)
 		clickableentry = cleanedentry
 
 	return clickableentry

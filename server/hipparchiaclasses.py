@@ -416,6 +416,11 @@ class MorphPossibilityObject(object):
 		analysislist = re.findall(analysisfinder, self.transandanal)
 		return analysislist
 
+	def getxreflist(self):
+		xreffinder = re.compile(r'<xref_value>(.*?)</xref_value')
+		xreflist = re.findall(xreffinder, self.transandanal)
+		return xreflist
+
 	def amgreek(self):
 		minimumgreek = re.compile(r'[άέίόύήώᾶῖῦῆῶὁἄἔἴὄὔἤὤᾅᾕᾥᾄᾔᾤα-ω]')
 		if re.search(minimumgreek,self.entry) is not None:
