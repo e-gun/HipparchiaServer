@@ -86,6 +86,7 @@ def entrysummary(fullentry, lang, translationlabel, lemmaobject):
 	# so 'go' and 'go,' are not both on the list
 	depunct = '[{p}]$'.format(p=re.escape(punctuation))
 	s = [re.sub(depunct, '',s) for s in s]
+	s = [re.sub(r'^To', 'to', s) for s in s]
 	s = list(set(s))
 	s.sort()
 

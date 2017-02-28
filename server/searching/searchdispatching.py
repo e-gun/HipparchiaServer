@@ -48,6 +48,8 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 	seeking = massagesearchtermsforwhitespace(seeking)
 
 	# lunate sigmas / UV / JI issues
+	unomdifiedskg = seeking
+	unmodifiedprx = proximate
 	seeking = searchtermcharactersubstitutions(seeking)
 	proximate = searchtermcharactersubstitutions(proximate)
 
@@ -87,13 +89,21 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 		jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, leastcommon, seeking, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	elif searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
+		termone = seeking
+		termtwo = proximate
 		if session['accentsmatter'] == 'yes' and session['nearornot'] == 'T':
-			# choose the faster option
-			leastcommon = findleastcommonterm(seeking+' '+proximate)
-			if leastcommon != seeking:
-				proximate = seeking
-				seeking = leastcommon
-		jobs = [Process(target=workonproximitysearch, args=(count, foundlineobjects, seeking, proximate, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
+			# choose the necessarily faster option
+			leastcommon = findleastcommonterm(unomdifiedskg+' '+unmodifiedprx)
+			if leastcommon != unomdifiedskg:
+				termone = proximate
+				termtwo = seeking
+		elif len(termtwo) > len(termone) and session['nearornot'] == 'T':
+			# look for the longest word first since that is probably the quicker route
+			# but you can't swap seeking and proximate this way in a 'is not near' search without yielding the wrong focus
+			tmp = termtwo
+			termtwo = termone
+			termone = tmp
+		jobs = [Process(target=workonproximitysearch, args=(count, foundlineobjects, termone, termtwo, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	else:
 		# impossible, but...
 		jobs = []
@@ -299,13 +309,6 @@ def workonproximitysearch(count, foundlineobjects, seeking, proximate, searching
 
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
-
-	if len(proximate) > len(seeking) and session['nearornot'] != 'F' and ' ' not in seeking and ' ' not in proximate:
-		# look for the longest word first since that is probably the quicker route
-		# but you cant swap seeking and proximate this way in a 'is not near' search without yielding the wrong focus
-		tmp = proximate
-		proximate = seeking
-		seeking = tmp
 
 	while len(searchinginside) > 0 and count.value <= int(session['maxresults']):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile

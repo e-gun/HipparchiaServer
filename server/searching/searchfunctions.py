@@ -40,22 +40,24 @@ def cleaninitialquery(seeking):
 	return seeking
 
 
-def searchtermcharactersubstitutions(seeking):
+def searchtermcharactersubstitutions(searchterm):
 	"""
 	turn sigma into lunate sigma, etc
 	:param searchterm:
 	:return:
 	"""
 
-	seeking = re.sub('σ|ς', 'ϲ', seeking)
+	searchterm = re.sub('σ|ς', 'ϲ', searchterm)
 	if session['accentsmatter'] == 'no':
-		seeking = re.sub('v', 'u', seeking)
-		seeking = re.sub('j', 'i', seeking)
+		searchterm = re.sub('v', 'u', searchterm)
+		searchterm = re.sub('j', 'i', searchterm)
 
 	# possible, but not esp. desirable:
 	# seeking = re.sub('VvUu', '(u|v|U|v)', seeking)
 
-	return seeking
+	searchterm = searchterm.lower()
+
+	return searchterm
 
 
 def massagesearchtermsforwhitespace(query):
