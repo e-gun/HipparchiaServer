@@ -241,25 +241,18 @@ def htmlifysearchfinds(listoffinds):
 	resultsashtml = []
 	listofurls = []
 
+	linehtmltemplate = '<span class="locus">{lc}</span>&nbsp;<span class="foundtext">{ft}</span><br />'
+
+	if hipparchia.config['DBDEBUGMODE'] == 'yes':
+		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
+
 	for find in listoffinds:
-		htmlforthefind = ''
+		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
+			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml()) for ln in find.lineobjects]
+		else:
+			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented) for ln in find.lineobjects]
+		resultsashtml.append(find.getlocusthml() + '\n'.join(h))
 		listofurls.append(find.clickurl)
-		htmlforthefind += find.getlocusthml()
-		lines = find.lineobjects
-
-		for ln in lines:
-			prefix = ''
-			if hipparchia.config['DBDEBUGMODE'] == 'yes':
-				prefix = '<smallcode>{id}</smallcode>&nbsp;'
-			htmlforthefind += '{pr}<span class="locus">{lc}</span>&nbsp;\n'
-			if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
-				htmlforthefind += '<span class="foundtext">{lh}</span><br />\n'
-			else:
-				htmlforthefind += '<span class="foundtext">{la}</span><br />\n'
-
-			htmlforthefind = htmlforthefind.format(pr=prefix, id=ln.universalid, lc=ln.locus(), lh=ln.showlinehtml(), la=ln.accented)
-
-		resultsashtml.append(htmlforthefind)
 
 	htmlandjs = {}
 	htmlandjs['hits'] = resultsashtml
