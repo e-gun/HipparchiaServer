@@ -97,6 +97,7 @@ def stripaccents(texttostrip):
 	substitutes = (
 		('v', 'u'),
 		('U', 'V'),
+		('j', 'i'),
 		('(Á|Ä)', 'A'),
 		('(á|ä)', 'a'),
 		('(É|Ë)', 'E'),
@@ -200,7 +201,7 @@ def formatpublicationinfo(pubinfo):
 		if re.search(seek, pubinfo) is not None:
 			found = re.search(seek, pubinfo)
 			foundinfo = avoidlonglines(found.group(1), maxlinelen, '<br />', [])
-			publicationhtml += '<span class="pub' + tag + '">' + val[0] + foundinfo + val[1] + '</span>'
+			publicationhtml += '<span class="pub{t}">{va}{fi}{vb}</span>'.format(t=tag, va=val[0], fi=foundinfo, vb=val[1])
 	
 	return publicationhtml
 
@@ -242,19 +243,9 @@ def htmlifysearchfinds(listoffinds):
 
 	for find in listoffinds:
 		htmlforthefind = ''
-		lines = find.formattedlines
-
 		listofurls.append(find.clickurl)
-
-		htmlforthefind += '<locus>\n'
-		htmlforthefind += '\t<span class="findnumber">[{hn}]</span>&nbsp;&nbsp;'
-		htmlforthefind += '<span class="foundauthor">{au}</span>,&nbsp;'
-		htmlforthefind += '<span class="foundwork">{wk}</span>:\n'
-		htmlforthefind += '\t<browser id="{url}">'
-		htmlforthefind += '<span class="foundlocus">{cs}</span><br />'
-		htmlforthefind += '</browser>\n</locus>\n'
-
-		htmlforthefind = htmlforthefind.format(hn=find.hitnumber, au=find.author, wk=find.work, url=find.clickurl, cs=find.citationstring)
+		htmlforthefind += find.getlocusthml()
+		lines = find.lineobjects
 
 		for ln in lines:
 			prefix = ''

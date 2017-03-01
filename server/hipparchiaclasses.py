@@ -687,6 +687,7 @@ class dbWorkLine(object):
 
 		return visiblehtml
 
+
 	def wordcount(self):
 		"""
 		return a wordcount
@@ -849,19 +850,73 @@ class dbLatinWord(dbDictionaryEntry):
 		return True
 
 
+class dbLemmaObject(object):
+	"""
+	an object that corresponds to a db line
+
+	CREATE TABLE public.greek_lemmata
+	(
+    dictionary_entry character varying(64) COLLATE pg_catalog."default",
+    xref_number integer,
+    derivative_forms text COLLATE pg_catalog."default"
+	)
+
+	"""
+
+	def __init__(self, dictionaryentry, xref, derivativeforms):
+		self.dictionaryentry = dictionaryentry
+		self.xref = xref
+		self.formandidentificationlist = [f for f in derivativeforms.split('\t') if f]
+		self.formlist = [f.split(' ')[0] for f in self.formandidentificationlist]
+		self.formlist = [re.sub(r'\'','',f) for f in self.formlist]
+
+	def getformdict(self):
+		fd = {}
+		for f in self.formandidentificationlist:
+			key = f.split(' ')[0]
+			body = f[len(key)+1:]
+			fd[key] = body
+		return fd
+
+
 class FormattedSearchResult(object):
 	"""
 
 	really just a more maintainable version of a dict
 
 	"""
-	def __init__(self, hitnumber, author, work, citationstring, clickurl, formattedlines):
+	def __init__(self, hitnumber, author, work, citationstring, clickurl, lineobjects):
 		self.hitnumber = hitnumber
 		self.author = author
 		self.work = work
 		self.citationstring = citationstring
 		self.clickurl = clickurl
-		self.formattedlines = formattedlines
+		self.lineobjects = lineobjects
+
+	def getlocusthml(self):
+		"""
+		
+		generate the html for the citation; e.g:
+
+			<locus>
+				<span class="findnumber">[13]</span>&nbsp;&nbsp;<span class="foundauthor">Quintilianus, Marcus Fabius</span>,&nbsp;<span class="foundwork">Declamationes Minores</span>:
+				<browser id="lt1002w002_LN_24040"><span class="foundlocus">oration 289, section pr, line 1</span><br /></browser>
+			</locus>
+
+		:return: 
+		"""
+
+		locushtml = '<locus>\n'
+		locushtml += '\t<span class="findnumber">[{hn}]</span>&nbsp;&nbsp;'
+		locushtml += '<span class="foundauthor">{au}</span>,&nbsp;'
+		locushtml += '<span class="foundwork">{wk}</span>:\n'
+		locushtml += '\t<browser id="{url}">'
+		locushtml += '<span class="foundlocus">{cs}</span><br />'
+		locushtml += '</browser>\n</locus>\n'
+
+		locushtml = locushtml.format(hn=self.hitnumber, au=self.author, wk=self.work, url=self.clickurl, cs=self.citationstring)
+
+		return locushtml
 
 
 class LowandHighInfo(object):
@@ -986,30 +1041,3 @@ class ProgressPoll(object):
 		return message % {'m': m}
 
 
-class dbLemmaObject(object):
-	"""
-	an object that corresponds to a db line
-
-	CREATE TABLE public.greek_lemmata
-	(
-    dictionary_entry character varying(64) COLLATE pg_catalog."default",
-    xref_number integer,
-    derivative_forms text COLLATE pg_catalog."default"
-	)
-
-	"""
-
-	def __init__(self, dictionaryentry, xref, derivativeforms):
-		self.dictionaryentry = dictionaryentry
-		self.xref = xref
-		self.formandidentificationlist = [f for f in derivativeforms.split('\t') if f]
-		self.formlist = [f.split(' ')[0] for f in self.formandidentificationlist]
-		self.formlist = [re.sub(r'\'','',f) for f in self.formlist]
-
-	def getformdict(self):
-		fd = {}
-		for f in self.formandidentificationlist:
-			key = f.split(' ')[0]
-			body = f[len(key)+1:]
-			fd[key] = body
-		return fd

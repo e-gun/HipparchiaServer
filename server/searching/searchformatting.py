@@ -329,7 +329,7 @@ def formattingworkpile(bundles, criteria, activepoll, allfound):
 			if bundle['hitnumber'] % 100 == 0:
 				dbconnection.commit()
 
-			if citwithcontext.formattedlines != []:
+			if citwithcontext.lineobjects != []:
 				allfound[bundle['hitnumber']] = citwithcontext
 
 	dbconnection.commit()
@@ -384,6 +384,6 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 			if re.search(searchtermcharactersubstitutions(proximate), foundline.accented) is not None or re.search(
 					searchtermcharactersubstitutions(proximate), foundline.stripped) is not None:
 				foundline.accented = highlightsearchterm(foundline, proximate, 'proximate')
-		citationincontext.formattedlines.append(foundline)
+		citationincontext.lineobjects.append(foundline)
 
 	return citationincontext
