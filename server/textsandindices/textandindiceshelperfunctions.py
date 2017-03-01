@@ -8,6 +8,7 @@
 
 import re
 from collections import deque
+from string import punctuation
 
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dbfunctions import grabonelinefromwork, dblineintolineobject, makeanemptyauthor, makeanemptywork
@@ -186,3 +187,32 @@ def dictmerger(masterdict, targetdict):
 			masterdict[item] = targetdict[item]
 
 	return masterdict
+
+
+def cleanindexwords(word):
+	"""
+	remove gunk that should not be present in a cleaned line
+
+	:param word:
+	:return:
+	"""
+
+	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
+	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
+	# hard to know whether or not to do the editorial insertions stuff: ⟫⟪⌈⌋⌊
+	# word = re.sub(r'\[.*?\]','', word) # '[o]missa' should be 'missa'
+	word = re.sub(r'[0-9]', '', word)
+	word = re.sub(punct, '', word)
+	# best do punct before this next one...
+	try:
+		if re.search(r'[a-zA-z]', word[0]) is None:
+			word = re.sub(r'[a-zA-z]', '', word)
+	except:
+		# must have been ''
+		pass
+
+	invals = u'jv'
+	outvals = u'iu'
+	word = word.translate(str.maketrans(invals, outvals))
+
+	return word

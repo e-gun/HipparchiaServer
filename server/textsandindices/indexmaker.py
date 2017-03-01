@@ -9,9 +9,7 @@
 from multiprocessing import Pool
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
-from server.formatting_helper_functions import cleanwords
-from server.textsandindices.textandindiceshelperfunctions import dictmerger
-
+from server.textsandindices.textandindiceshelperfunctions import dictmerger, cleanindexwords
 
 
 def compilewordlists(worksandboundaries, cursor):
@@ -113,14 +111,14 @@ def buildindextowork(cdict, activepoll, cursor):
 			loci = ', '.join(hits)
 		else:
 			previouswork = hits[0][0]
-			loci = '<span class="work">%(w)s</span>: ' % {'w': previouswork[6:10]}
+			loci = '<span class="work">{wk}</span>: '.format(wk=previouswork[6:10])
 			for hit in hits:
 				if hit[0] == previouswork:
 					loci += hit[2] + ', '
 				else:
 					loci = loci[:-2] + '; '
 					previouswork = hit[0]
-					loci += '<span class="work">%(w)s</span>: ' % {'w': previouswork[6:10]}
+					loci += '<span class="work">{wk}</span>: '.format(wk=previouswork[6:10])
 					loci += hit[2] + ', '
 			loci = loci[:-2]
 
@@ -152,7 +150,7 @@ def linesintoindex(lineobjects, activepoll):
 		
 		if line.index != -1:
 			words = line.wordlist('polytonic')
-			words = [cleanwords(w).lower() for w in words]
+			words = [cleanindexwords(w).lower() for w in words]
 			words = list(set(words))
 			for w in words:
 				try:

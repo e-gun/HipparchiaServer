@@ -489,7 +489,7 @@ def completeindex():
 
 		allworks = []
 		for w in ao.listofworks:
-			allworks.append(w.universalid[6:10] + ' ==> ' + w.title)
+			allworks.append(w.universalid[6:10] + ' ⇒ ' + w.title)
 		allworks.sort()
 
 	else:
