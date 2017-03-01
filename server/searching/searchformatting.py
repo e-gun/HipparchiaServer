@@ -387,3 +387,142 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 		citationincontext.lineobjects.append(foundline)
 
 	return citationincontext
+
+
+def htmlifysearchfinds(listoffinds):
+	"""
+	it is too painful to let JS turn this information into HTML
+	the Flask template used to do this work, now this does it
+
+	send me a list of FormattedSearchResult objects
+
+	:param listoffinds:
+	:return:
+	"""
+
+	resultsashtml = []
+	listofurls = []
+
+	linehtmltemplate = '<span class="locus">{lc}</span>&nbsp;<span class="foundtext">{ft}</span><br />'
+
+	if hipparchia.config['DBDEBUGMODE'] == 'yes':
+		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
+
+	for find in listoffinds:
+		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
+			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml()) for ln in find.lineobjects]
+		else:
+			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented) for ln in find.lineobjects]
+		resultsashtml.append(find.getlocusthml() + '\n'.join(h))
+		listofurls.append(find.clickurl)
+
+	htmlandjs = {}
+	htmlandjs['hits'] = resultsashtml
+
+	if len(listoffinds) > 0:
+		htmlandjs['hitsjs'] = injectbrowserjavascript(listofurls)
+	else:
+		htmlandjs['hitsjs'] = ''
+
+	return htmlandjs
+
+
+def injectbrowserjavascript(listofurls):
+	"""
+	the clickable urls don't work without inserting new js into the page to catch the clicks
+	need to match the what we used to get via the flask template
+	:return:
+	"""
+
+	jso = ['document.getElementById("{u}").onclick = openbrowserfromclick;'.format(u=url) for url in listofurls]
+	jsoutput = '\n'.join(jso)
+
+	return jsoutput
+
+
+def nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, activepoll):
+	"""
+
+	simply spit out the finds, don't put them in context: speedier and visually more compact
+
+	:param hitdict:
+	:param authordict:
+	:param workdict:
+	:param seeking:
+	:param proximate:
+	:param searchtype:
+	:param activepoll:
+	:return:
+	"""
+
+	if len(hitdict) > int(session['maxresults']):
+		limit = int(session['maxresults'])
+	else:
+		limit = len(hitdict)
+
+	searchresultobjects = []
+
+	for i in range(0, limit):
+		lineobject = hitdict[i]
+		authorobject = authordict[lineobject.wkuinversalid[0:6]]
+		wid = lineobject.wkuinversalid
+		workobject = workdict[wid]
+		if workobject.universalid[0:2] not in ['in', 'dp', 'ch']:
+			name = authorobject.shortname
+		else:
+			name = authorobject.idxname
+		citation = locusintocitation(workobject, lineobject.locustuple())
+
+		lineobject.accented = highlightsearchterm(lineobject, seeking, 'match')
+		if proximate != '' and searchtype == 'proximity':
+			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
+			if re.search(searchtermcharactersubstitutions(proximate), lineobject.accented) is not None or re.search(
+					searchtermcharactersubstitutions(proximate), lineobject.stripped) is not None:
+				lineobject.accented = highlightsearchterm(lineobject, proximate, 'proximate')
+
+		searchresultobjects.append(FormattedSearchResult(i+1, name, workobject.title, citation, lineobject.universalid, [lineobject]))
+
+	return searchresultobjects
+
+
+def nocontexthtmlifysearchfinds(listoffinds):
+	"""
+	it is too painful to let JS turn this information into HTML
+	the Flask template used to do this work, now this does it
+
+	send me a list of FormattedSearchResult objects (each should contain only one associated line)
+
+	:param listoffinds:
+	:return:
+	"""
+
+	resultsashtml = ['<table>']
+	listofurls = []
+
+	linehtmltemplate = '<span class="foundtext">{ft}</span>'
+
+	if hipparchia.config['DBDEBUGMODE'] == 'yes':
+		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
+
+	for find in listoffinds:
+		ln = find.lineobjects[0]
+		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
+			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
+		else:
+			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)
+		citation = find.citationhtml(ln.locus())
+		resultsashtml.append('<tr><td>{cit}</td><td class="leftpad">{h}</td></tr>'.format(cit=citation, h=h))
+		listofurls.append(find.clickurl)
+
+	resultsashtml.append('</table>')
+
+	htmlandjs = {}
+	htmlandjs['hits'] = resultsashtml
+
+	if len(listoffinds) > 0:
+		htmlandjs['hitsjs'] = injectbrowserjavascript(listofurls)
+	else:
+		htmlandjs['hitsjs'] = ''
+
+	return htmlandjs
+

@@ -36,7 +36,7 @@ function loadoptions() {
     $.getJSON('/getsessionvariables', function (data) {
         $('#earliestdate').spinner( 'value', data.earliestdate);
         $('#latestdate').spinner('value', data.latestdate);
-        $('#resultsspinner').spinner('value', data.linesofcontext);
+        $('#linesofcontextspinner').spinner('value', data.linesofcontext);
         $('#hitlimitspinner').spinner('value', data.maxresults);
         $('#browserspinner').spinner('value', data.browsercontext);
         $('#sortresults').val(data.sortorder);
@@ -362,28 +362,17 @@ $('#christiancorpus').change(function () {
 // spinners
 //
 
-$( "#contextspinner" ).spinner({
-    max: 9,
-    min: 1,
-    value: 1,
-    spin: function( event, ui ) {
-        var result = $('#contextspinner').spinner('value');
-        setoptions('proximity', String(result));
-        }
-        });
-
-
-$( "#resultsspinner" ).spinner({
+$( "#linesofcontextspinner" ).spinner({
     max: 20,
-    min: 2,
+    min: 0,
     value: 2,
     step: 2,
     stop: function( event, ui ) {
-        var result = $('#resultsspinner').spinner('value');
+        var result = $('#linesofcontextspinner').spinner('value');
         setoptions('linesofcontext', String(result));
         },
     spin: function( event, ui ) {
-        var result = $('#resultsspinner').spinner('value');
+        var result = $('#linesofcontextspinner').spinner('value');
         setoptions('linesofcontext', String(result));
         }
         });

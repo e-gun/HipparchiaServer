@@ -26,7 +26,7 @@ from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinef
 	perseusdelabeler
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking, \
 	perseusidmismatch, returnfirstlinenumber
-from server.formatting_helper_functions import removegravity, stripaccents, bcedating, htmlifysearchfinds
+from server.formatting_helper_functions import removegravity, stripaccents, bcedating
 from server.hipparchiaclasses import ProgressPoll
 from server.lexica.lexicaformatting import entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, \
@@ -37,7 +37,8 @@ from server.listsandsession.sessionfunctions import modifysessionvar, modifysess
 	sessionvariables, sessionselectionsashtml, rationalizeselections, justlatin, justtlg, reducetosessionselections, returnactivedbs
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
-from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter
+from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter, \
+	nocontextresultformatter, htmlifysearchfinds, nocontexthtmlifysearchfinds
 from server.searching.searchfunctions import cleaninitialquery
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import tcparserequest, textsegmentfindstartandstop, \
@@ -235,7 +236,10 @@ def executesearch():
 		poll[ts].statusis('Putting the results in context')
 
 		hitdict = sortresultslist(hits, authordict, workdict)
-		allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, poll[ts])
+		if int(session['linesofcontext']) > 0:
+			allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, poll[ts])
+		else:
+			allfound = nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, poll[ts])
 
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
@@ -243,7 +247,10 @@ def executesearch():
 			allfound = allfound[0:int(session['maxresults'])]
 
 		poll[ts].statusis('Converting results to HTML')
-		htmlandjs = htmlifysearchfinds(allfound)
+		if int(session['linesofcontext']) > 0:
+			htmlandjs = htmlifysearchfinds(allfound)
+		else:
+			htmlandjs = nocontexthtmlifysearchfinds(allfound)
 		# print('htmlandjs',htmlandjs)
 		finds = htmlandjs['hits']
 		findsjs = htmlandjs['hitsjs']

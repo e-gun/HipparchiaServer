@@ -11,8 +11,6 @@ import re
 
 from flask import session
 
-from server import hipparchia
-
 config = configparser.ConfigParser()
 config.read('config.ini')
 
@@ -225,57 +223,6 @@ def bcedating():
 		dmin = dmin + 'C.E.'
 		
 	return dmin, dmax
-
-
-def htmlifysearchfinds(listoffinds):
-	"""
-	it is too painful to let JS turn this information into HTML
-	the Flask template used to do this work, now this does it
-
-	send me a list of FormattedSearchResult objects
-
-	:param listoffinds:
-	:return:
-	"""
-
-	resultsashtml = []
-	listofurls = []
-
-	linehtmltemplate = '<span class="locus">{lc}</span>&nbsp;<span class="foundtext">{ft}</span><br />'
-
-	if hipparchia.config['DBDEBUGMODE'] == 'yes':
-		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
-
-	for find in listoffinds:
-		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
-			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml()) for ln in find.lineobjects]
-		else:
-			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented) for ln in find.lineobjects]
-		resultsashtml.append(find.getlocusthml() + '\n'.join(h))
-		listofurls.append(find.clickurl)
-
-	htmlandjs = {}
-	htmlandjs['hits'] = resultsashtml
-
-	if len(listoffinds) > 0:
-		htmlandjs['hitsjs'] = injectbrowserjavascript(listofurls)
-	else:
-		htmlandjs['hitsjs'] = ''
-
-	return htmlandjs
-
-
-def injectbrowserjavascript(listofurls):
-	"""
-	the clickable urls don't work without inserting new js into the page to catch the clicks
-	need to match the what we used to get via the flask template
-	:return:
-	"""
-	
-	jso = ['document.getElementById("{u}").onclick = openbrowserfromclick;'.format(u=url) for url in listofurls]
-	jsoutput = '\n'.join(jso)
-
-	return jsoutput
 
 
 def insertcrossreferencerow(lineobject):

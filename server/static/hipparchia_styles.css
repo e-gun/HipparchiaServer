@@ -711,6 +711,10 @@ td.infocellx {
 	*/ text-align: center;
 	}
 
+td.leftpad {
+    padding-left: 10px;
+    }
+
 td.passages {
 	font-weight: normal;
 	}

@@ -586,7 +586,7 @@ class dbWorkLine(object):
 	def shortlocus(self):
 		"""
 		try to get a short citation that drops the lvl0 info: "3.2"
-		useful for tagging level shifts without constantly seeling 'line 1'
+		useful for tagging level shifts without constantly seeing 'line 1'
 		:return:
 		"""
 		loc = []
@@ -896,7 +896,7 @@ class FormattedSearchResult(object):
 	def getlocusthml(self):
 		"""
 		
-		generate the html for the citation; e.g:
+		generate the wrapped html for the citation; e.g:
 
 			<locus>
 				<span class="findnumber">[13]</span>&nbsp;&nbsp;<span class="foundauthor">Quintilianus, Marcus Fabius</span>,&nbsp;<span class="foundwork">Declamationes Minores</span>:
@@ -907,14 +907,31 @@ class FormattedSearchResult(object):
 		"""
 
 		locushtml = '<locus>\n'
-		locushtml += '\t<span class="findnumber">[{hn}]</span>&nbsp;&nbsp;'
-		locushtml += '<span class="foundauthor">{au}</span>,&nbsp;'
-		locushtml += '<span class="foundwork">{wk}</span>:\n'
-		locushtml += '\t<browser id="{url}">'
-		locushtml += '<span class="foundlocus">{cs}</span><br />'
-		locushtml += '</browser>\n</locus>\n'
+		locushtml += self.citationhtml(self.citationstring)
+		locushtml += '</locus><br />\n'
 
-		locushtml = locushtml.format(hn=self.hitnumber, au=self.author, wk=self.work, url=self.clickurl, cs=self.citationstring)
+		return locushtml
+
+	def citationhtml(self, citestring):
+		"""
+
+		generate the non-wrapped html for the citation; e.g:
+
+			<span class="findnumber">[13]</span>&nbsp;&nbsp;<span class="foundauthor">Quintilianus, Marcus Fabius</span>,&nbsp;<span class="foundwork">Declamationes Minores</span>:
+			<browser id="lt1002w002_LN_24040"><span class="foundlocus">oration 289, section pr, line 1</span><br /></browser>
+
+		:return:
+		"""
+
+		locushtml = '<span class="findnumber">[{hn}]</span>&nbsp;&nbsp;'
+		locushtml += '<span class="foundauthor">{au}</span>,&nbsp;'
+		locushtml += '<span class="foundwork">{wk}</span>: '
+		locushtml += '<browser id="{url}">'
+		locushtml += '<span class="foundlocus">{cs}</span>'
+		locushtml += '</browser>'
+
+		locushtml = locushtml.format(hn=self.hitnumber, au=self.author, wk=self.work, url=self.clickurl,
+		                             cs=citestring)
 
 		return locushtml
 
