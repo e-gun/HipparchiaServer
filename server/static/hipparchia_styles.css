@@ -742,6 +742,10 @@ th {
 	text-align: center;
 	}
 
+tr.nthrow{
+    background-color: #e6e6e6;
+    }
+
 transl {
 	padding-right: 20px;
 	}

@@ -632,6 +632,15 @@ very rare (fewer than 5 occurrences)
     read about hardware.
 
     <ul class="forexample">
+        <li>
+            Search <span class="emph">result formatting</span> can be a significant element of the speed of a search.
+            The raw hits arrive in a first
+            pass through the database. The context is derived by revisiting those same segments of the data. For example, the
+            1,173 passages with ἐρχόμενοϲ in them
+            can be found and displayed in <span class="colorhighlight">3.84s</span> if you set "Lines of context to accompany search results" to zero. If you
+            want to see six lines of context, then be prepared to wait for <span class="colorhighlight">16.09s</span>.
+            If you just want to skim a lot of results quickly, then <span class="emph">zero context</span> is a good way to go.
+        </li>
         <li>Consider the following <span class="emph">simple searches</span>. Both searches are across all five databases. There are no restrictions applied at all.
         <ul class="numbered">
             <li><span class="sampleoutput">Sought προκατέλαβον; Searched 236840 texts and found 22 passages (<span class="colorhighlight">4.19s</span>)</span></li>

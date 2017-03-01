@@ -504,14 +504,20 @@ def nocontexthtmlifysearchfinds(listoffinds):
 	if hipparchia.config['DBDEBUGMODE'] == 'yes':
 		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
 
+	count = 0
 	for find in listoffinds:
+		count += 1
+		if count % 3 == 0:
+			rowstyle = 'nthrow'
+		else:
+			rowstyle = 'regular'
 		ln = find.lineobjects[0]
 		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 		else:
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)
 		citation = find.citationhtml(ln.locus())
-		resultsashtml.append('<tr><td>{cit}</td><td class="leftpad">{h}</td></tr>'.format(cit=citation, h=h))
+		resultsashtml.append('<tr class="{rs}"><td>{cit}</td><td class="leftpad">{h}</td></tr>'.format(rs=rowstyle, cit=citation, h=h))
 		listofurls.append(find.clickurl)
 
 	resultsashtml.append('</table>')
