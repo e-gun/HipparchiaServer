@@ -262,7 +262,6 @@ def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searcht
 	activepoll.allworkis(len(hitdict))
 	activepoll.remain(len(hitdict))
 
-	workbundles = []
 	if len(hitdict) > int(session['maxresults']):
 		limit = int(session['maxresults'])
 	else:
@@ -270,6 +269,7 @@ def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searcht
 
 	criteria = {'ctx': linesofcontext, 'seek': seeking, 'prox': proximate, 'type': searchtype}
 
+	workbundles = []
 	for i in range(0, limit):
 		lineobject = hitdict[i]
 		authorobject = authordict[lineobject.wkuinversalid[0:6]]

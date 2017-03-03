@@ -16,7 +16,7 @@ import websockets
 import errno
 import locale
 from urllib.request import urlopen
-from flask import render_template, redirect, request, url_for, session
+from flask import render_template, redirect, request, url_for, session, send_file
 
 from server import hipparchia
 # this next validates when imported: it is not called later; the IDE will pretend you are not using it and grey it out
@@ -1562,6 +1562,16 @@ def checkforactivesearch(ts):
 				return json.dumps('no')
 		except:
 			return json.dumps('no')
+
+
+@hipparchia.route('/favicon.ico')
+def sendfavicon():
+	return send_file('static/images/hipparchia_favicon.ico')
+
+
+@hipparchia.route('/apple-touch-icon-precomposed.png')
+def appletouchticon():
+	return send_file('static/images/hipparchia_apple-touch-icon-precomposed.png')
 
 
 # old progress architecture: will be removed
