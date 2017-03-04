@@ -1,7 +1,4 @@
 $ grep "^class" *.py
-$ grep "^def " *.py
-$ grep "^def " */*.py
-
 hipparchiaclasses.py:class dbAuthor(object):
 hipparchiaclasses.py:class dbOpus(object):
 hipparchiaclasses.py:class dbWordCountObject(object):
@@ -12,30 +9,30 @@ hipparchiaclasses.py:class dbWorkLine(object):
 hipparchiaclasses.py:class dbDictionaryEntry(object):
 hipparchiaclasses.py:class dbGreekWord(dbDictionaryEntry):
 hipparchiaclasses.py:class dbLatinWord(dbDictionaryEntry):
+hipparchiaclasses.py:class dbLemmaObject(object):
 hipparchiaclasses.py:class FormattedSearchResult(object):
 hipparchiaclasses.py:class LowandHighInfo(object):
 hipparchiaclasses.py:class MPCounter(object):
 hipparchiaclasses.py:class ProgressPoll(object):
-hipparchiaclasses.py:class dbLemmaObject(object):
 
+$ grep "^def " *.py
 formatting_helper_functions.py:def removegravity(accentedword):
 formatting_helper_functions.py:def forceterminalacute(matchgroup):
 formatting_helper_functions.py:def stripaccents(texttostrip):
 formatting_helper_functions.py:def getpublicationinfo(workobject, cursor):
 formatting_helper_functions.py:def formatpublicationinfo(pubinfo):
 formatting_helper_functions.py:def bcedating():
-formatting_helper_functions.py:def htmlifysearchfinds(listoffinds):
-formatting_helper_functions.py:def injectbrowserjavascript(listofurls):
 formatting_helper_functions.py:def insertcrossreferencerow(lineobject):
 formatting_helper_functions.py:def insertdatarow(label, css, founddate):
 formatting_helper_functions.py:def avoidlonglines(string, maxlen, splitval, stringlist=[]):
-formatting_helper_functions.py:def cleanwords(word):
 formatting_helper_functions.py:def attemptelision(hypenatedgreekheadword):
 loadglobaldicts.py:def findtemporalweights():
 loadglobaldicts.py:def findccorporaweights():
+loadglobaldicts.py:def findgeneraweights():
 views.py:def frontpage():
 views.py:def authorlist():
 views.py:def executesearch():
+views.py:def grabtextforbrowsing(locus):
 views.py:def completeindex():
 views.py:def textmaker():
 views.py:def cookieintosession(cookienum):
@@ -50,7 +47,6 @@ views.py:def getsessionvariables():
 views.py:def getauthinfo(authorid):
 views.py:def getsearchlistcontents():
 views.py:def getgenrelistcontents():
-views.py:def grabtextforbrowsing(locus):
 views.py:def findbyform(observedword):
 views.py:def dictsearch(searchterm):
 views.py:def reverselexiconsearch(searchterm):
@@ -61,7 +57,11 @@ views.py:def getcurrentselections():
 views.py:def clearsession():
 views.py:def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 views.py:def checkforactivesearch(ts):
+views.py:def sendfavicon():
+views.py:def appletouchticon():
 views.py:def progressreport():
+
+$ grep "^def " */*.py
 browsing/browserfunctions.py:def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
 browsing/browserfunctions.py:def insertparserids(lineobject):
 dbsupport/citationfunctions.py:def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
@@ -94,7 +94,7 @@ dbsupport/dbfunctions.py:def versionchecking(activedbs, expectedsqltemplateversi
 dbsupport/dbfunctions.py:def findchronologicalweights(era,language='G'):
 dbsupport/dbfunctions.py:def findcorpusweight(corpus):
 lexica/lexicaformatting.py:def grabsenses(fullentry):
-lexica/lexicaformatting.py:def entrysummary(fullentry,lang, translationlabel):
+lexica/lexicaformatting.py:def entrysummary(fullentry, lang, translationlabel, lemmaobject):
 lexica/lexicaformatting.py:def grabheadmaterial(fullentry):
 lexica/lexicaformatting.py:def deabbreviateauthors(authorabbr, lang):
 lexica/lexicaformatting.py:def formatdictionarysummary(summarydict):
@@ -112,13 +112,14 @@ lexica/lexicalookups.py:def browserdictionarylookup(count, seekingentry, usedict
 lexica/lexicalookups.py:def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber=0):
 lexica/lexicalookups.py:def convertdictionaryfindintoobject(foundline, dictionary):
 lexica/lexicalookups.py:def bulkddictsearch(cursor, dictionary, usecolumn, seeking):
-lexica/lexicalookups.py:def findlemma(word, cursor):
-lexica/lexicalookups.py:def findotherforms(xref_number, cursor):
-lexica/lexicalookups.py:def definebylemma(lemmadict,corporatable,cursor):
 lexica/lexicalookups.py:def findtotalcounts(word, cursor):
 lexica/lexicalookups.py:def findcountsviawordcountstable(wordtocheck):
 lexica/lexicalookups.py:def getobservedwordprevalencedata(dictionaryword):
 lexica/lexicalookups.py:def formatprevalencedata(wordcountobject):
+lexica/lexicalookups.py:def grablemmataobjectfor(entryname, db, cursor):
+lexica/lexicalookups.py:def findlemma(word, cursor):
+lexica/lexicalookups.py:def definebylemma(lemmadict,corporatable,cursor):
+lexica/lexicalookups.py:def findotherforms(xref_number, cursor):
 listsandsession/listmanagement.py:def compileauthorandworklist(listmapper):
 listsandsession/listmanagement.py:def sortauthorandworklists(authorandworklist, authorsdict):
 listsandsession/listmanagement.py:def sortresultslist(hits, authorsdict, worksdict):
@@ -207,8 +208,8 @@ searching/betacodetounicode.py:def lowercascircumflex(match):
 searching/betacodetounicode.py:def lowercasediaresis(match):
 searching/betacodetounicode.py:def lowercasesubscript(match):
 searching/betacodetounicode.py:def lowercases(match):
-searching/betacodetounicode.py:def stripaccents(texttostrip):
-searching/phrasesearching.py:def phrasesearch(leastcommon, searchphrase, cursor, wkid, authorswheredict, activepoll):
+searching/betacodetounicode.py:def cleanaccentsandvj(texttostrip):
+searching/phrasesearching.py:def phrasesearch(leastcommon, searchphrase, maxhits, wkid, authorswheredict, activepoll, cursor):
 searching/phrasesearching.py:def shortphrasesearch(count, foundlineobjects, searchphrase, workstosearch, authorswheredict, activepoll):
 searching/proximitysearching.py:def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, authors):
 searching/proximitysearching.py:def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, authors):
@@ -217,7 +218,6 @@ searching/searchdispatching.py:def dispatchshortphrasesearch(searchphrase, index
 searching/searchdispatching.py:def workonsimplesearch(count, foundlineobjects, seeking, searchinginside, commitcount, whereclauseinfo, activepoll):
 searching/searchdispatching.py:def workonphrasesearch(foundlineobjects, leastcommon, seeking, searchinginside, commitcount, whereclauseinfo, activepoll):
 searching/searchdispatching.py:def workonproximitysearch(count, foundlineobjects, seeking, proximate, searchinginside, commitcount, whereclauseinfo, activepoll):
-searching/searchformatting.py:def cleansearchterm(seeking):
 searching/searchformatting.py:def highlightsearchterm(lineobject, searchterm, spanname):
 searching/searchformatting.py:def aggregatelines(firstline, lastline, cursor, audbname):
 searching/searchformatting.py:def formatauthinfo(authorobject):
@@ -226,9 +226,16 @@ searching/searchformatting.py:def formatauthorandworkinfo(authorname, workobject
 searching/searchformatting.py:def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, activepoll):
 searching/searchformatting.py:def formattingworkpile(bundles, criteria, activepoll, allfound):
 searching/searchformatting.py:def formattedcitationincontext(lineobject, workobject, authorobject, linesofcontext, searchterm, proximate,
+searching/searchformatting.py:def htmlifysearchfinds(listoffinds):
+searching/searchformatting.py:def injectbrowserjavascript(listofurls):
+searching/searchformatting.py:def nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, activepoll):
+searching/searchformatting.py:def nocontexthtmlifysearchfinds(listoffinds):
+searching/searchfunctions.py:def cleaninitialquery(seeking):
+searching/searchfunctions.py:def searchtermcharactersubstitutions(searchterm):
+searching/searchfunctions.py:def massagesearchtermsforwhitespace(query):
 searching/searchfunctions.py:def whereclauses(uidwithatsign, operand, authors):
-searching/searchfunctions.py:def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor):
-searching/searchfunctions.py:def substringsearch(seeking, cursor, workdbname, authors):
+searching/searchfunctions.py:def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor, templimit=None):
+searching/searchfunctions.py:def substringsearch(seeking, cursor, workdbname, authors, templimit=None):
 searching/searchfunctions.py:def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 searching/searchfunctions.py:def findleastcommonterm(searchphrase):
 textsandindices/indexmaker.py:def compilewordlists(worksandboundaries, cursor):
@@ -240,4 +247,5 @@ textsandindices/textandindiceshelperfunctions.py:def textsegmentfindstartandstop
 textsandindices/textandindiceshelperfunctions.py:def wordindextohtmltable(indexingoutput):
 textsandindices/textandindiceshelperfunctions.py:def indexdictsorter(unsortedoutput):
 textsandindices/textandindiceshelperfunctions.py:def dictmerger(masterdict, targetdict):
+textsandindices/textandindiceshelperfunctions.py:def cleanindexwords(word):
 textsandindices/textbuilder.py:def buildtext(work, firstline, lastline, linesevery, cursor):
