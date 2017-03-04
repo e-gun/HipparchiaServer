@@ -456,7 +456,53 @@ class dbHeadwordObject(dbWordCountObject):
 			return 0
 
 	def sortgenresbyweight(self, gwt=genreweights):
-		# [('comic', 100.0), ('invectiv', 36.68718065621115), ('satura', 28.579618924301734), ('rhet', 15.163212890806758) ...]
+		"""
+
+		who is most likely to use this word? apply weight to counts by genre
+
+		return a list of tuples:
+			[('comic', 100.0), ('invectiv', 36.68718065621115), ('satura', 28.579618924301734), ('rhet', 15.163212890806758) ...]
+
+		:param gwt:
+		:return:
+		"""
+
+		genretuplelist = [(key, getattr(self, key) * gwt[key]) for key in gwt]
+		genretuplelist.sort(key=lambda x: x[1], reverse=True)
+		norming = genretuplelist[0][1] / 100
+		genretuplelist = [(g[0], g[1]/norming) for g in genretuplelist]
+
+		return genretuplelist
+
+	def genresebyweightlessminorgenres(self, maxmodifier, gwt=genreweights):
+		"""
+
+		same as sortgenresbyweight() but use maxmodifier to suppress genres that have so few words that any results
+		spike the frequency outcomes
+
+		i'm not sure you wuld ever want to exclude lyric, though
+
+		basically 'maxmodifier' should be 500 since lyr has a modifier of 493
+
+		14832896 	 comm
+		...
+		45437 	 metrolog
+		34808 	 bucol
+		32677 	 lyr
+		25393 	 coq
+		24994 	 liturg
+		22845 	 physiognom
+		22708 	 pseudepigr
+		18023 	 parod
+		6205 	 mim
+		20 	 ignotum
+
+		:param maxmodifier:
+		:param gwt:
+		:return:
+		"""
+
+		gwt = {g: gwt[g] for g in gwt if gwt[g] < maxmodifier}
 		genretuplelist = [(key, getattr(self, key) * gwt[key]) for key in gwt]
 		genretuplelist.sort(key=lambda x: x[1], reverse=True)
 		norming = genretuplelist[0][1] / 100

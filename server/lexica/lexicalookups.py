@@ -564,7 +564,10 @@ def formatprevalencedata(wordcountobject):
 			thehtml = thehtml[:-3]
 			thehtml += '</p>\n'
 
-		genreinfotuples = w.sortgenresbyweight()
+		if hipparchia.config['EXCLUDEMINORGENRECOUNTS'] == 'yes':
+			genreinfotuples = w.genresebyweightlessminorgenres(500)
+		else:
+			genreinfotuples = w.sortgenresbyweight()
 
 		thehtml += '\n<p class="wordcounts">Predominant genres: '
 		for g in range(0,5):

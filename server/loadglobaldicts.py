@@ -204,7 +204,15 @@ def findgeneraweights():
 
 	max = counts['comm']
 	weights = {corpus: max / counts[corpus] for corpus in counts}
+
 	print('genre weights', weights)
+
+	gcounts = [(counts[g], g) for g in counts]
+	gcounts.sort(reverse=True)
+	print('wordcounts')
+	for g in gcounts:
+		print(g[0],'\t',g[1])
+
 	return
 
 
@@ -217,82 +225,80 @@ def findgeneraweights():
 
 
 """
-genre wordcounts
-
-20	ignotum
-6205	mim
-18023	parod
-22708	pseudepigr
-22845	physiognom
-24994	liturg
-25393	coq
-32677	lyr
-34808	bucol
-45437	metrolog
-52732	satura
-56538	paradox
-56986	orac
-61618	invectiv
-63357	perieg
-70011	eleg
-75660	myth
-106520	fab
-106746	onir
-109551	doxogr
-110842	iamb
-115505	apocalyp
-120553	satyr
-122526	evangel
-129110	hexametr
-138872	prophet
-142633	mech
-143669	magica
-147787	mus
-152550	apocryph
-166049	gnom
-169410	acta
-188850	alchem
-196255	test
-224381	paroem
-239109	poem
-268139	jurisprud
-279956	tact
-302806	hymn
-316004	astron
-429058	trag}
-486027	comic
-590486	polyhist
-626322	hagiogr
-704947	astrol
-754743	epic
-801466	inscr
-829132	concil
-829605	anthol
-946045	narrfict
-1069499	hypoth
-1100990	encom
-1283430	epigr
-1287269	math
-1310016	geogr
-1543408	gramm
-1554049	nathist
-1739312	rhet
-1913044	eccl
-2069660	homilet
-2088318	apol
-2109713	dialog
-2264617	orat
-2301423	biogr
-2305264	theol
-2509554	schol
-2827972	caten
-3023636	chronogr
-3109997	epist
-3248335	lexicogr
-4025740	phil
-6467022	med
-9934632	hist
-11768250	exeget
-14832896	comm
-
+wordcounts
+14832896 	 comm
+11768250 	 exeget
+9934632 	 hist
+6467022 	 med
+5863536 	 epigr
+4025740 	 phil
+3692076 	 docu
+3248335 	 lexicogr
+3109997 	 epist
+3023636 	 chronogr
+2827972 	 caten
+2509554 	 schol
+2305264 	 theol
+2301423 	 biogr
+2264617 	 orat
+2109713 	 dialog
+2088318 	 apol
+2069660 	 homilet
+1913044 	 eccl
+1739312 	 rhet
+1554049 	 nathist
+1543408 	 gramm
+1310016 	 geogr
+1287269 	 math
+1100990 	 encom
+1069499 	 hypoth
+946045 	 narrfict
+829605 	 anthol
+829132 	 concil
+754743 	 epic
+704947 	 astrol
+626322 	 hagiogr
+590486 	 polyhist
+486027 	 comic
+429058 	 trag
+316004 	 astron
+302806 	 hymn
+279956 	 tact
+268139 	 jurisprud
+239109 	 poem
+224381 	 paroem
+196255 	 test
+188850 	 alchem
+169410 	 acta
+166049 	 gnom
+152550 	 apocryph
+147787 	 mus
+143669 	 magica
+142633 	 mech
+138872 	 prophet
+129110 	 hexametr
+122526 	 evangel
+120553 	 satyr
+115505 	 apocalyp
+110842 	 iamb
+109551 	 doxogr
+106746 	 onir
+106520 	 fab
+75660 	 myth
+70011 	 eleg
+63357 	 perieg
+61618 	 invectiv
+56986 	 orac
+56538 	 paradox
+52732 	 satura
+45437 	 metrolog
+34808 	 bucol
+32677 	 lyr
+25393 	 coq
+24994 	 liturg
+22845 	 physiognom
+22708 	 pseudepigr
+18023 	 parod
+6205 	 mim
+20 	 ignotum
 """
