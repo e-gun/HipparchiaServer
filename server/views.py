@@ -30,7 +30,7 @@ from server.formatting_helper_functions import removegravity, stripaccents, bced
 from server.hipparchiaclasses import ProgressPoll
 from server.lexica.lexicaformatting import entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, \
-	lookformorphologymatches, getobservedwordprevalencedata
+	lookformorphologymatches, getobservedwordprevalencedata, grablemmataobjectfor
 from server.listsandsession.listmanagement import dropdupes, polytonicsort, sortauthorandworklists, sortresultslist,\
 	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions, buildhintlist
 from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
@@ -1187,7 +1187,8 @@ def reverselexiconsearch(searchterm):
 			if o.entry:
 				# AttributeError: 'list' object has no attribute 'entry'
 				definition = o.body
-				summarydict = entrysummary(definition, dict, translationlabel)
+				lemmaobject = grablemmataobjectfor(o.entry, dict + '_lemmata', cur)
+				summarydict = entrysummary(definition, dict, translationlabel, lemmaobject)
 
 				for sense in summarydict['senses']:
 					if re.search(r'^'+seeking,sense) is not None:
