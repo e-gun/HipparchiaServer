@@ -439,8 +439,8 @@ def findtotalcounts(word, cursor):
 	q = 'SELECT entry_name , total_count, gr_count, lt_count, dp_count, in_count, ch_count, ' \
 	    'frequency_classification, early_occurrences, middle_occurrences ,late_occurrences, ' \
 		'acta, alchem, anthol, apocalyp, apocryph, apol, astrol, astron, biogr, bucol, caten, chronogr, comic, comm, ' \
-	    'concil, coq, dialog, doxogr, eccl, eleg, encom, epic, epigr, epist, evangel, exeget, fab, geogr, gnom, gramm, ' \
-	    'hagiogr, hexametr, hist, homilet, hymn, hypoth, iamb, ignotum, inscr, invectiv, jurisprud, lexicogr, liturg, lyr, ' \
+	    'concil, coq, dialog, docu, doxogr, eccl, eleg, encom, epic, epigr, epist, evangel, exeget, fab, geogr, gnom, gramm, ' \
+	    'hagiogr, hexametr, hist, homilet, hymn, hypoth, iamb, ignotum, invectiv, jurisprud, lexicogr, liturg, lyr, ' \
 	    'magica, math, mech, med, metrolog, mim, mus, myth, narrfict, nathist, onir, orac, orat, paradox, parod, paroem, ' \
 	    'perieg, phil, physiognom, poem, polyhist, prophet, pseudepigr, rhet, satura, satyr, schol, tact, test, theol, trag ' \
 	    'FROM ' + table + ' WHERE entry_name=%s'

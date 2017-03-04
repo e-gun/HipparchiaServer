@@ -256,33 +256,33 @@ class dbHeadwordObject(dbWordCountObject):
 	greekworderaweights = {'early': 7.883171009462467, 'middle': 1.9249406986576483, 'late': 1}
 	corporaweights =  {'gr': 1.0, 'lt': 11.371559943504066, 'in': 28.130258550554572, 'dp': 27.492143340147255, 'ch': 129.8977636244065}
 
-	genreweights = {'acta': 87.55620093264861, 'alchem': 78.54326714323537, 'anthol': 17.8794679395616, 'apocalyp': 128.41778277996625,
-	'apocryph': 97.23301212717142, 'apol': 7.102795647023107, 'astrol': 21.041150611322553, 'astron': 46.93895013987165,
-	'biogr': 6.445097663489068, 'bucol': 426.1346816823719, 'caten': 5.245064661177692, 'chronogr': 4.9056486958086225,
-	'comic': 30.518666658436672, 'comm': 1.0, 'concil': 17.88966774892297, 'coq': 584.1332650730516, 'dialog': 7.030764848109672,
-	'doxogr': 135.39717574463035, 'eccl': 7.753557158120775, 'eleg': 211.86522117952893, 'encom': 13.472325815856639,
-	'epic': 19.652909665939266, 'epigr': 11.557230234605704, 'epist': 4.769424536422383, 'evangel': 121.05917111470218,
-	'exeget': 1.260416459541563, 'fab': 139.24986856928277, 'geogr': 11.322683081733352, 'gnom': 89.32842715102169,
-	'gramm': 9.610482775779314, 'hagiogr': 23.68254029077695, 'hexametr': 114.88572535047633, 'hist': 1.4930493650897185,
-	'homilet': 7.166827401602196, 'hymn': 48.98481536032972, 'hypoth': 13.86901343526268, 'iamb': 133.82017646740405,
-	'ignotum': 741644.8, 'inscr': 18.50720554583725, 'invectiv': 240.7234249732221, 'jurisprud': 55.31793584670637,
-	'lexicogr': 4.566307354383092, 'liturg': 593.4582699847964, 'lyr': 453.92465648621356, 'magica': 103.2435389680446,
-	'math': 11.522763307436131, 'mech': 103.9934377037572, 'med': 2.2936207732090597, 'metrolog': 326.44972159253473,
-	'mim': 2390.4747784045126, 'mus': 100.36671696427968, 'myth': 196.04673539518902, 'narrfict': 15.678848257746724,
-	'nathist': 9.544677162689208, 'onir': 138.95505217994116, 'orac': 260.29017653458743, 'orat': 6.5498475018071485,
-	'paradox': 262.35268315115496, 'parod': 822.9981690062698, 'paroem': 66.10584675173031, 'perieg': 234.11613554934735,
-	'phil': 3.6845141514355126, 'physiognom': 649.2841321952287, 'poem': 62.03403468710923, 'polyhist': 25.119809783805206,
-	'prophet': 106.80983927645602, 'pseudepigr': 653.2013387352475, 'rhet': 8.528024874203133, 'satura': 281.288325874232,
-	'satyr': 123.0404552354566, 'schol': 5.910570563534397, 'tact': 52.98295446427296, 'test': 75.579710071081,
-	'theol': 6.434358928088063, 'trag': 34.57084123824751}
+	genreweights = {'acta': 87.55620093264861, 'alchem': 78.54326714323537, 'anthol': 17.8794679395616,
+	'apocalyp': 128.41778277996625, 'apocryph': 97.23301212717142, 'apol': 7.102795647023107, 'astrol': 21.041150611322553,
+	'astron': 46.93895013987165, 'biogr': 6.445097663489068, 'bucol': 426.1346816823719, 'caten': 5.245064661177692,
+	'chronogr': 4.9056486958086225, 'comic': 30.518666658436672, 'comm': 1.0, 'concil': 17.88966774892297,
+	'coq': 584.1332650730516, 'dialog': 7.030764848109672, 'docu': 4.0174947644631365, 'doxogr': 135.39717574463035,
+	'eccl': 7.753557158120775, 'eleg': 211.86522117952893, 'encom': 13.472325815856639, 'epic': 19.652909665939266,
+	'epigr': 2.5296844770800417, 'epist': 4.769424536422383, 'evangel': 121.05917111470218, 'exeget': 1.260416459541563,
+	'fab': 139.24986856928277, 'geogr': 11.322683081733352, 'gnom': 89.32842715102169, 'gramm': 9.610482775779314,
+	'hagiogr': 23.68254029077695, 'hexametr': 114.88572535047633, 'hist': 1.4930493650897185, 'homilet': 7.166827401602196,
+	'hymn': 48.98481536032972, 'hypoth': 13.86901343526268, 'iamb': 133.82017646740405, 'ignotum': 741644.8,
+	'invectiv': 240.7234249732221, 'jurisprud': 55.31793584670637, 'lexicogr': 4.566307354383092, 'liturg': 593.4582699847964,
+	'lyr': 453.92465648621356, 'magica': 103.2435389680446, 'math': 11.522763307436131, 'mech': 103.9934377037572,
+	'med': 2.2936207732090597, 'metrolog': 326.44972159253473, 'mim': 2390.4747784045126, 'mus': 100.36671696427968,
+	'myth': 196.04673539518902, 'narrfict': 15.678848257746724, 'nathist': 9.544677162689208, 'onir': 138.95505217994116,
+	'orac': 260.29017653458743, 'orat': 6.5498475018071485, 'paradox': 262.35268315115496, 'parod': 822.9981690062698,
+	'paroem': 66.10584675173031, 'perieg': 234.11613554934735, 'phil': 3.6845141514355126, 'physiognom': 649.2841321952287,
+	'poem': 62.03403468710923, 'polyhist': 25.119809783805206, 'prophet': 106.80983927645602, 'pseudepigr': 653.2013387352475,
+	'rhet': 8.528024874203133, 'satura': 281.288325874232, 'satyr': 123.0404552354566, 'schol': 5.910570563534397,
+	'tact': 52.98295446427296, 'test': 75.579710071081, 'theol': 6.434358928088063, 'trag': 34.57084123824751}
 
 	# into one dict so we can pass it to __init__
 	wts = {'gkera': greekworderaweights, 'corp': corporaweights, 'genre': genreweights}
 
 	def __init__(self, entryname, totalcount, greekcount, latincount, docpapcount, inscriptioncount, christiancount,
 	             frqclass, early, middle, late, acta, alchem, anthol, apocalyp, apocryph, apol, astrol, astron, biogr, bucol,
-	             caten, chronogr, comic, comm, concil, coq, dialog, doxogr, eccl, eleg, encom, epic, epigr, epist, evangel,
-	             exeget, fab, geogr, gnom, gramm, hagiogr, hexametr, hist, homilet, hymn, hypoth, iamb, ignotum, inscr,
+	             caten, chronogr, comic, comm, concil, coq, dialog, docu, doxogr, eccl, eleg, encom, epic, epigr, epist, evangel,
+	             exeget, fab, geogr, gnom, gramm, hagiogr, hexametr, hist, homilet, hymn, hypoth, iamb, ignotum,
 	             invectiv, jurisprud, lexicogr, liturg, lyr, magica, math, mech, med, metrolog, mim, mus, myth, narrfict,
 	             nathist, onir, orac, orat, paradox, parod, paroem, perieg, phil, physiognom, poem, polyhist, prophet,
 	             pseudepigr, rhet, satura, satyr, schol, tact, test, theol, trag, weights=wts):
@@ -310,6 +310,7 @@ class dbHeadwordObject(dbWordCountObject):
 		self.concil = concil
 		self.coq = coq
 		self.dialog = dialog
+		self.docu = docu
 		self.doxogr = doxogr
 		self.eccl = eccl
 		self.eleg = eleg
@@ -331,7 +332,6 @@ class dbHeadwordObject(dbWordCountObject):
 		self.hypoth = hypoth
 		self.iamb = iamb
 		self.ignotum = ignotum
-		self.inscr = inscr
 		self.invectiv = invectiv
 		self.jurisprud = jurisprud
 		self.lexicogr = lexicogr
