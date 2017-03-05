@@ -92,10 +92,12 @@ def findccorporaweights():
 	return
 
 
-def findgeneraweights():
+def findgeneraweights(collapsed=False):
 	"""
 	figure out how many more words are 'acta' than 'lt', etc.
 	you only need to run this once every major recalibration of the data
+
+	collapsing will merge genres under a broader heading
 
 	genre weights {'acta': 87.55620093264861, 'alchem': 78.54326714323537, 'anthol': 17.8794679395616, '
 	apocalyp': 128.41778277996625, 'apocryph': 97.23301212717142, 'apol': 7.102795647023107, 'astrol': 21.041150611322553,
@@ -116,6 +118,9 @@ def findgeneraweights():
 	'poem': 62.03403468710923, 'polyhist': 25.119809783805206, 'prophet': 106.80983927645602, 'pseudepigr': 653.2013387352475,
 	'rhet': 8.528024874203133, 'satura': 281.288325874232, 'satyr': 123.0404552354566, 'schol': 5.910570563534397,
 	'tact': 52.98295446427296, 'test': 75.579710071081, 'theol': 6.434358928088063, 'trag': 34.57084123824751}
+
+	if you 'collapse' you will get:
+		'relig': 0.5892025697245473
 
 	:return:
 	"""
@@ -205,6 +210,13 @@ def findgeneraweights():
 	max = counts['comm']
 	weights = {corpus: max / counts[corpus] for corpus in counts}
 
+	if collapsed:
+		relig = [ 'acta', 'apocalyp', 'apocryph', 'apol', 'caten', 'concil', 'eccl', 'evangel', 'exeget', 'hagiogr',
+		          'homilet', 'liturg', 'prophet', 'pseudepigr', 'theol'	]
+		weights = {weights[w]: w for w in weights if w not in relig}
+		relcount = sum([counts[g] for g in relig])
+		weights['relig'] = max / relcount
+
 	print('genre weights', weights)
 
 	gcounts = [(counts[g], g) for g in counts]
@@ -219,7 +231,7 @@ def findgeneraweights():
 # uncomment when you need to be shown new weight values upon startup and are willing to wait for the weights
 # findtemporalweights()
 # findccorporaweights()
-# findgeneraweights()
+# findgeneraweights(collapsed=True)
 
 
 

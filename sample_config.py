@@ -50,15 +50,20 @@ HTMLDEBUGMODE = 'no'
 # MINIMUMBROWSERWIDTH is either a number of whitespace characters or 'off'
 # HOBBLEREGEX is 'yes' if you have foolishly exposed Hipparchia to a network but are not so foolish as to allow "!|'", etc.
 #   only [].^$ will be allowed and all digits will be dropped
+# EXCLUDEMINORGENRECOUNTS will mitigate spikes in the genre counts when a word appears in a sparsely populated genre
+#   by ignoring all 'small' genres whose word values will give them more than a 500:1 hit weight; everything smaller than lyric...
+# COLLAPSEDGENRECOUNTS will bundle things like 'apocal' and 'theol' under 'relig' when counting
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 TLGASSUMESBETACODE = 'yes'
 SHOWLINENUMBERSEVERY = 10
+SUPPRESSLONGREQUESTMESSAGE = 'no'
+HOBBLEREGEX = 'no'
+MINIMUMBROWSERWIDTH=100
+# lexical output settings
 SHOWLEXICALSUMMARYINFO = 'yes'
 SHOWGLOBALWORDCOUNTS = 'yes'
 EXCLUDEMINORGENRECOUNTS='yes'
-SUPPRESSLONGREQUESTMESSAGE = 'no'
-MINIMUMBROWSERWIDTH=100
-HOBBLEREGEX = 'no'
+COLLAPSEDGENRECOUNTS='yes'
 
 
 ### [7] the default settings for various 'session' items ###

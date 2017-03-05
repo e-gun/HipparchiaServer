@@ -390,6 +390,7 @@ class dbHeadwordObject(dbWordCountObject):
 		self.wtddp = self.d * weights['corp']['dp']
 		self.wtdch = self.c * weights['corp']['ch']
 		self.predomcorp = max(self.wtdgr, self.wtdlt, self.wtdin, self.wtddp, self.wtdch)
+		self.relig = None
 
 	def gettime(self, element):
 		elements = {'early': self.early, 'middle': self.middle, 'late': self.late ,
@@ -467,6 +468,9 @@ class dbHeadwordObject(dbWordCountObject):
 		:return:
 		"""
 
+		if hipparchia.config['EXCLUDEMINORGENRECOUNTS'] == 'yes':
+			return self.genresebyweightlessminorgenres(500, gwt)
+
 		genretuplelist = [(key, getattr(self, key) * gwt[key]) for key in gwt]
 		genretuplelist.sort(key=lambda x: x[1], reverse=True)
 		norming = genretuplelist[0][1] / 100
@@ -509,6 +513,24 @@ class dbHeadwordObject(dbWordCountObject):
 		genretuplelist = [(g[0], g[1]/norming) for g in genretuplelist]
 
 		return genretuplelist
+
+	def collapsedgenreweights(self, gwt=genreweights):
+		"""
+
+		modify the definition of genres, then make a call to sortgenresbyweight()
+
+		:param gwt:
+		:return:
+		"""
+		religwt = 0.5892025697245473
+		relig = ['acta', 'apocalyp', 'apocryph', 'apol', 'caten', 'concil', 'eccl', 'evangel', 'exeget', 'hagiogr',
+	         'homilet', 'liturg', 'prophet', 'pseudepigr', 'theol']
+		self.relig = sum([getattr(self, key) for key in gwt if key in relig])
+
+		gwt = {g: gwt[g] for g in gwt if g not in relig}
+		gwt['relig'] = religwt
+
+		return self.sortgenresbyweight(gwt)
 
 
 class dbMorphologyObject(object):
