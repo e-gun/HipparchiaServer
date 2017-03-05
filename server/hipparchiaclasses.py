@@ -390,7 +390,8 @@ class dbHeadwordObject(dbWordCountObject):
 		self.wtddp = self.d * weights['corp']['dp']
 		self.wtdch = self.c * weights['corp']['ch']
 		self.predomcorp = max(self.wtdgr, self.wtdlt, self.wtdin, self.wtddp, self.wtdch)
-		self.relig = None
+		self.allrelig = None
+		self.allrhet = None
 
 	def gettime(self, element):
 		elements = {'early': self.early, 'middle': self.middle, 'late': self.late ,
@@ -525,10 +526,15 @@ class dbHeadwordObject(dbWordCountObject):
 		religwt = 0.5892025697245473
 		relig = ['acta', 'apocalyp', 'apocryph', 'apol', 'caten', 'concil', 'eccl', 'evangel', 'exeget', 'hagiogr',
 	         'homilet', 'liturg', 'prophet', 'pseudepigr', 'theol']
-		self.relig = sum([getattr(self, key) for key in gwt if key in relig])
-
+		self.allrelig = sum([getattr(self, key) for key in gwt if key in relig])
 		gwt = {g: gwt[g] for g in gwt if g not in relig}
-		gwt['relig'] = religwt
+		gwt['allrelig'] = religwt
+
+		rhtgwt = 2.870955148487275
+		allrhet = ['encom', 'invectiv', 'orat', 'rhet']
+		self.allrhet = sum([getattr(self, key) for key in gwt if key in allrhet])
+		gwt = {g: gwt[g] for g in gwt if g not in allrhet}
+		gwt['allrhet'] = rhtgwt
 
 		return self.sortgenresbyweight(gwt)
 

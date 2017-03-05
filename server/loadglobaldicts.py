@@ -121,6 +121,7 @@ def findgeneraweights(collapsed=False):
 
 	if you 'collapse' you will get:
 		'relig': 0.5892025697245473
+		'allrhet': 2.870955148487275
 
 	:return:
 	"""
@@ -213,9 +214,15 @@ def findgeneraweights(collapsed=False):
 	if collapsed:
 		relig = [ 'acta', 'apocalyp', 'apocryph', 'apol', 'caten', 'concil', 'eccl', 'evangel', 'exeget', 'hagiogr',
 		          'homilet', 'liturg', 'prophet', 'pseudepigr', 'theol'	]
+		allrhet = ['encom', 'invectiv', 'orat', 'rhet']
+
 		weights = {weights[w]: w for w in weights if w not in relig}
 		relcount = sum([counts[g] for g in relig])
 		weights['relig'] = max / relcount
+
+		weights = {weights[w]: w for w in weights if w not in allrhet}
+		rhetcount = sum([counts[g] for g in allrhet])
+		weights['allrhet'] = max / rhetcount
 
 	print('genre weights', weights)
 
