@@ -440,7 +440,7 @@ def findtotalcounts(word, cursor):
 	    'frequency_classification, early_occurrences, middle_occurrences ,late_occurrences, ' \
 		'acta, alchem, anthol, apocalyp, apocryph, apol, astrol, astron, biogr, bucol, caten, chronogr, comic, comm, ' \
 	    'concil, coq, dialog, docu, doxogr, eccl, eleg, encom, epic, epigr, epist, evangel, exeget, fab, geogr, gnom, gramm, ' \
-	    'hagiogr, hexametr, hist, homilet, hymn, hypoth, iamb, ignotum, invectiv, jurisprud, lexicogr, liturg, lyr, ' \
+	    'hagiogr, hexametr, hist, homilet, hymn, hypoth, iamb, ignotum, invectiv, inscr, jurisprud, lexicogr, liturg, lyr, ' \
 	    'magica, math, mech, med, metrolog, mim, mus, myth, narrfict, nathist, onir, orac, orat, paradox, parod, paroem, ' \
 	    'perieg, phil, physiognom, poem, polyhist, prophet, pseudepigr, rhet, satura, satyr, schol, tact, test, theol, trag ' \
 	    'FROM ' + table + ' WHERE entry_name=%s'
@@ -457,8 +457,9 @@ def findtotalcounts(word, cursor):
 		                                 l[51], l[52], l[53], l[54], l[55], l[56], l[57], l[58], l[59], l[60],
 		                                 l[61], l[62], l[63], l[64], l[65], l[66], l[67], l[68], l[69], l[70],
 		                                 l[71], l[72], l[73], l[74], l[75], l[76], l[77], l[78], l[79], l[80],
-		                                 l[81], l[82], l[83], l[84], l[85])
+		                                 l[81], l[82], l[83], l[84], l[85], l[86])
 	except:
+		# print('failed to initialize dbHeadwordObject for',word)
 		hwcountobject = None
 
 	return hwcountobject

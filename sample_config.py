@@ -52,7 +52,7 @@ HTMLDEBUGMODE = 'no'
 #   only [].^$ will be allowed and all digits will be dropped
 # EXCLUDEMINORGENRECOUNTS will mitigate spikes in the genre counts when a word appears in a sparsely populated genre
 #   by ignoring all 'small' genres whose word values will give them more than a 500:1 hit weight; everything smaller than lyric...
-# COLLAPSEDGENRECOUNTS will bundle things like 'apocal' and 'theol' under 'relig' when counting
+# COLLAPSEDGENRECOUNTS will bundle things like 'apocal' and 'theol' under 'allrelig' when counting
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 TLGASSUMESBETACODE = 'yes'
 SHOWLINENUMBERSEVERY = 10

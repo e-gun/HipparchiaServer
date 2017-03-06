@@ -54,6 +54,9 @@ def findtemporalweights():
 	you only need to run this once every major recalibration of the data
 	the results are something like:
 		greekwordweights = {'early': 7.883171009462467, 'middle': 1.9249406986576483, 'late': 1}
+
+	these values get used by dbHeadwordObjects
+
 	"""
 
 	greekwordcounts = { 'early': findchronologicalweights('early'),
@@ -105,11 +108,11 @@ def findgeneraweights(collapsed=False):
 	'chronogr': 4.9056486958086225, 'comic': 30.518666658436672, 'comm': 1.0, 'concil': 17.88966774892297,
 	'coq': 584.1332650730516, 'dialog': 7.030764848109672, 'docu': 4.0174947644631365, 'doxogr': 135.39717574463035,
 	'eccl': 7.753557158120775, 'eleg': 211.86522117952893, 'encom': 13.472325815856639, 'epic': 19.652909665939266,
-	'epigr': 2.5296844770800417, 'epist': 4.769424536422383, 'evangel': 121.05917111470218, 'exeget': 1.260416459541563,
+	'epigr': 11.557230234605704, 'epist': 4.769424536422383, 'evangel': 121.05917111470218, 'exeget': 1.260416459541563,
 	'fab': 139.24986856928277, 'geogr': 11.322683081733352, 'gnom': 89.32842715102169, 'gramm': 9.610482775779314,
 	'hagiogr': 23.68254029077695, 'hexametr': 114.88572535047633, 'hist': 1.4930493650897185, 'homilet': 7.166827401602196,
 	'hymn': 48.98481536032972, 'hypoth': 13.86901343526268, 'iamb': 133.82017646740405, 'ignotum': 741644.8,
-	'invectiv': 240.7234249732221, 'jurisprud': 55.31793584670637, 'lexicogr': 4.566307354383092, 'liturg': 593.4582699847964,
+	'inscr': 3.2385486274771806, 'invectiv': 240.7234249732221, 'jurisprud': 55.31793584670637, 'lexicogr': 4.566307354383092, 'liturg': 593.4582699847964,
 	'lyr': 453.92465648621356, 'magica': 103.2435389680446, 'math': 11.522763307436131, 'mech': 103.9934377037572,
 	'med': 2.2936207732090597, 'metrolog': 326.44972159253473, 'mim': 2390.4747784045126, 'mus': 100.36671696427968,
 	'myth': 196.04673539518902, 'narrfict': 15.678848257746724, 'nathist': 9.544677162689208, 'onir': 138.95505217994116,
@@ -167,6 +170,7 @@ def findgeneraweights(collapsed=False):
 		'Iamb.',
 		'Ignotum',
 		'Invectiv.',
+		'Inscr.',
 		'Jurisprud.',
 		'Lexicogr.',
 		'Liturg.',
@@ -249,7 +253,7 @@ wordcounts
 11768250 	 exeget
 9934632 	 hist
 6467022 	 med
-5863536 	 epigr
+4580106 	 inscr
 4025740 	 phil
 3692076 	 docu
 3248335 	 lexicogr
@@ -269,6 +273,7 @@ wordcounts
 1543408 	 gramm
 1310016 	 geogr
 1287269 	 math
+1283430 	 epigr
 1100990 	 encom
 1069499 	 hypoth
 946045 	 narrfict
@@ -320,4 +325,5 @@ wordcounts
 18023 	 parod
 6205 	 mim
 20 	 ignotum
+
 """
