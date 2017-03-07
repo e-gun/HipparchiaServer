@@ -99,7 +99,7 @@ def entrysummary(fullentry, lang, translationlabel, lemmaobject):
 	q = [x for x in q if x not in morphologylist]
 	q = polytonicsort(q)
 
-	summarydict = {'authors':a, 'senses': s, 'quotes':q}
+	summarydict = {'authors': a, 'senses': s, 'quotes':q}
 
 	return summarydict
 
@@ -169,7 +169,7 @@ def formatdictionarysummary(summarydict):
 
 	summary = ''
 
-	for section in ['authors', 'senses', 'quotes']:
+	for section in ['senses', 'authors', 'quotes']:
 		sec = sections[section]
 		items = sec['items']
 		classone = sec['classone']

@@ -7,7 +7,7 @@
 
 function browseuponclick(url){
 	$.getJSON(
-	    { url: '/browseto/'+url,
+	    { url: '/browse/'+url,
 	    success: function (passagereturned) {
             $('#browseforward').unbind('click');
             $('#browseback').unbind('click');
@@ -29,7 +29,7 @@ function browseuponclick(url){
 
 var openbrowserfromclick = function() {
     // now do the browsing
-    $.getJSON('/browseto/'+this.id, function (passagereturned) {
+    $.getJSON('/browse/'+this.id, function (passagereturned) {
         $('#browseforward').unbind('click');
         $('#browseback').unbind('click');
 		var fb = parsepassagereturned(passagereturned)
@@ -95,7 +95,7 @@ function parsepassagereturned(passagereturned) {
                     });
             $( '#parserdialog' ).dialog( 'open' );
             $( '#parserdialog' ).html('[searching...]');
-            $.getJSON('/observed/'+this.id, function (definitionreturned) {
+            $.getJSON('/parse/'+this.id, function (definitionreturned) {
                 $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
                 var dLen = definitionreturned.length;
                 var linesreturned = []

@@ -153,10 +153,6 @@ def executesearch():
 			proximate = proximate.upper()
 			proximate = replacegreekbetacode(proximate)
 
-	# 'in Capitolio vicinam Iovis optimi maximi, ut in Ca-' is stored as
-	# [unaccented] 'in capitolio uicinam iouis optimi maximi ut in catonis'
-	# [accented] 'in capitolio vicinam iovis optimi maximi ut in catonis'
-
 	phrasefinder = re.compile('[^\s]\s[^\s]')
 
 	poll[ts] = ProgressPoll(ts)
@@ -320,7 +316,7 @@ def executesearch():
 	return output
 
 
-@hipparchia.route('/browseto/<locus>')
+@hipparchia.route('/browse/<locus>')
 def grabtextforbrowsing(locus):
 	"""
 	you want to browse something
@@ -537,7 +533,7 @@ def completeindex():
 	return results
 
 
-@hipparchia.route('/text', methods=['GET'])
+@hipparchia.route('/textof', methods=['GET'])
 def textmaker():
 	"""
 	build a text suitable for display
@@ -1026,7 +1022,7 @@ def getgenrelistcontents():
 	return genres
 
 
-@hipparchia.route('/observed/<observedword>')
+@hipparchia.route('/parse/<observedword>')
 def findbyform(observedword):
 	"""
 	this function sets of a chain of other functions

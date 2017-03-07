@@ -79,9 +79,9 @@ $('#textofthis').click( function() {
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
         if (authorid != '') {
             $('#clearpick').show();
-            if (wrk == '') { var url = '/text?auth=' + authorid + '&work=999'; }
-            else if (locus == '') { var url = '/text?auth=' + authorid + '&work=' + wrk; }
-            else { var url = '/text?auth=' + authorid + '&work=' + wrk + '&locus=' + locus; }
+            if (wrk == '') { var url = '/textof?auth=' + authorid + '&work=999'; }
+            else if (locus == '') { var url = '/textof?auth=' + authorid + '&work=' + wrk; }
+            else { var url = '/textof?auth=' + authorid + '&work=' + wrk + '&locus=' + locus; }
 
             $.getJSON( url, function (returnedtext) { loadtextintodisplayresults(returnedtext); });
         }
