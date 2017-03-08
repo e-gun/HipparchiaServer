@@ -27,6 +27,7 @@ key features:
 				not within N lines or words
 		results
 			results can be limited to a maximum number of hits
+			results can be limited to one hit per author/work
 			results can be sorted by name, date, etc
 			can set amount of context to accompany results
 	tools
@@ -40,6 +41,7 @@ key features:
 			get a morphological analysis of a Greek or Latin word
 			get per corpus counts of the use of the word and its derivatives
 			get a weighted chronological distribution of the word's use: mostly 'early', etc.
+			get a weighted distribution by top 5 genres: show if a word predominantly 'epic', etc.
 			get a summary of uses, senses, and quotes
 			reverse lookup: 'unexpected' returns ἀδευκήϲ, ἀδόκητοϲ, ἀδόξαϲτοϲ, ἀελπτία, ...
 			click to browse to passages cited in the lexical entries ('often' works)

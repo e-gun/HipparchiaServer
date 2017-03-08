@@ -22,6 +22,7 @@ from server import hipparchia
 # this next validates when imported: it is not called later; the IDE will pretend you are not using it and grey it out
 from server.listsandsession import validateconfig
 from server.browsing.browserfunctions import getandformatbrowsercontext
+from server.calculatewordweights import findtemporalweights, findccorporaweights, findgeneraweights
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus,\
 	perseusdelabeler
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking, \
@@ -49,6 +50,19 @@ from server.textsandindices.textbuilder import buildtext
 # ready some sets of objects that will be generally available: a few seconds spent here will save you the same over and over again later as you constantly regenerate author and work info
 # this will give you listmapper{}, authordict{}, etc.
 from server.loadglobaldicts import *
+
+# activate when you need to be shown new weight values upon startup and are willing to wait for the weights
+# these number need to be given to dbHeadwordObject, but they only change between major shifts in the data
+
+if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
+	if hipparchia.config['COLLAPSEDGENRECOUNTS'] == 'yes':
+		c = True
+	else:
+		c = False
+	print('greek wordweights', findtemporalweights('G'))
+	print('corpus weights', findccorporaweights())
+	print('greek genre weights:',findgeneraweights('G', c))
+	print('latin genre weights:',findgeneraweights('L', c))
 
 # empty dict in which to store progress polls
 # note that more than one poll can be running
@@ -102,8 +116,7 @@ def authorlist():
 
 	authors = [authordict[k] for k in keys]
 
-	return render_template('lister.html', found=authors, numberfound=len(authors))
-
+	return render_template('authorlister.html', found=authors, numberfound=len(authors))
 
 #
 # helpers & routes you should not browse directly

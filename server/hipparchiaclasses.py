@@ -253,34 +253,37 @@ class dbHeadwordObject(dbWordCountObject):
 
 	"""
 
-	greekworderaweights = {'early': 7.883171009462467, 'middle': 1.9249406986576483, 'late': 1}
+	greekworderaweights = {'early': 7.72, 'middle': 1.92, 'late': 1}
 	corporaweights =  {'gr': 1.0, 'lt': 11.371559943504066, 'in': 28.130258550554572, 'dp': 27.492143340147255, 'ch': 129.8977636244065}
 
-	genreweights = {'acta': 87.55620093264861, 'alchem': 78.54326714323537, 'anthol': 17.8794679395616,
-	'apocalyp': 128.41778277996625, 'apocryph': 97.23301212717142, 'apol': 7.102795647023107, 'astrol': 21.041150611322553,
-	'astron': 46.93895013987165, 'biogr': 6.445097663489068, 'bucol': 426.1346816823719, 'caten': 5.245064661177692,
-	'chronogr': 4.9056486958086225, 'comic': 30.518666658436672, 'comm': 1.0, 'concil': 17.88966774892297,
-	'coq': 584.1332650730516, 'dialog': 7.030764848109672, 'docu': 4.0174947644631365, 'doxogr': 135.39717574463035,
-	'eccl': 7.753557158120775, 'eleg': 211.86522117952893, 'encom': 13.472325815856639, 'epic': 19.652909665939266,
-	'epigr': 11.557230234605704, 'epist': 4.769424536422383, 'evangel': 121.05917111470218, 'exeget': 1.260416459541563,
-	'fab': 139.24986856928277, 'geogr': 11.322683081733352, 'gnom': 89.32842715102169, 'gramm': 9.610482775779314,
-	'hagiogr': 23.68254029077695, 'hexametr': 114.88572535047633, 'hist': 1.4930493650897185, 'homilet': 7.166827401602196,
-	'hymn': 48.98481536032972, 'hypoth': 13.86901343526268, 'iamb': 133.82017646740405, 'ignotum': 741644.8, 'invectiv': 240.7234249732221,
-	'inscr': 3.2385486274771806, 'jurisprud': 55.31793584670637, 'lexicogr': 4.566307354383092, 'liturg': 593.4582699847964,
-	'lyr': 453.92465648621356, 'magica': 103.2435389680446, 'math': 11.522763307436131, 'mech': 103.9934377037572,
-	'med': 2.2936207732090597, 'metrolog': 326.44972159253473, 'mim': 2390.4747784045126, 'mus': 100.36671696427968,
-	'myth': 196.04673539518902, 'narrfict': 15.678848257746724, 'nathist': 9.544677162689208, 'onir': 138.95505217994116,
-	'orac': 260.29017653458743, 'orat': 6.5498475018071485, 'paradox': 262.35268315115496, 'parod': 822.9981690062698,
-	'paroem': 66.10584675173031, 'perieg': 234.11613554934735, 'phil': 3.6845141514355126, 'physiognom': 649.2841321952287,
-	'poem': 62.03403468710923, 'polyhist': 25.119809783805206, 'prophet': 106.80983927645602, 'pseudepigr': 653.2013387352475,
-	'rhet': 8.528024874203133, 'satura': 281.288325874232, 'satyr': 123.0404552354566, 'schol': 5.910570563534397,
-	'tact': 52.98295446427296, 'test': 75.579710071081, 'theol': 6.434358928088063, 'trag': 34.57084123824751}
+	greekgenreweights = {'agric': 16513.67, 'alchem': 79.21, 'anthol': 17.91, 'astrol': 21.02, 'astron': 47.08, 'biogr': 6.47,
+	                     'bucol': 425.46, 'chronogr': 4.9, 'comic': 30.51, 'comm': 1.0, 'coq': 598.04, 'dialog': 7.08,
+	                     'docu': 4.16, 'doxogr': 141.89, 'eleg': 212.14, 'encom': 13.47, 'epic': 19.64, 'epigr': 11.63,
+	                     'epist': 4.76, 'fab': 139.05, 'geogr': 11.35, 'gnom': 92.62, 'gramm': 9.86, 'hexametr': 115.44,
+	                     'hist': 1.5, 'hymn': 48.94, 'hypoth': 14.04, 'iamb': 133.7, 'ignotum': 477831.0, 'invectiv': 240.4,
+	                     'inscr': 3.72, 'jurisprud': 55.15, 'lexicogr': 4.58, 'lyr': 455.88, 'magica': 103.13, 'math': 11.52,
+	                     'mech': 103.85, 'med': 2.29, 'metrolog': 326.41, 'mim': 2387.23, 'mus': 101.38, 'myth': 195.94,
+	                     'narrfict': 15.67, 'nathist': 9.67, 'onir': 138.77, 'orac': 259.94, 'orat': 6.54, 'paradox': 262.33,
+	                     'parod': 823.62, 'paroem': 66.02, 'perieg': 233.86, 'phil': 3.7, 'physiognom': 648.4, 'poem': 61.97,
+	                     'polyhist': 24.98, 'rhet': 8.51, 'satura': 280.91, 'satyr': 126.45, 'schol': 5.99, 'tact': 52.95,
+	                     'test': 82.78, 'trag': 34.51, 'allrelig': 0.59, 'allrhet': 2.87}
+
+	latingenreweights = {'agric': 5.06, 'alchem': 631.89, 'anthol': 491.2, 'astrol': 5027.98, 'astron': 16.17, 'biogr': 9.35,
+	                     'bucol': 37.89, 'chronogr': 411.78, 'comic': 4.58, 'epic': 2.19, 'coq': 61.11, 'dialog': 72.9,
+	                     'docu': 9.18, 'doxogr': 227.13, 'eleg': 9.83, 'encom': 267.29, 'epigr': 102.17, 'epist': 1.98,
+	                     'fab': 81.09, 'geogr': 223.57, 'gnom': 78.87, 'gramm': 4.84, 'hexametr': 17.92, 'hist': 1.0,
+	                     'hymn': 7607.27, 'hypoth': 81.21, 'iamb': 21300.35, 'ignotum': 421.56, 'inscr': 1.96, 'jurisprud': 17.48,
+	                     'lexicogr': 21.1, 'lyr': 23.5, 'magica': 33471.97, 'math': 722.71, 'mech': 390506.33, 'med': 7.13,
+	                     'metrolog': 20919.98, 'mim': 1026.75, 'mus': 700.67, 'myth': 19525.32, 'narrfict': 11.33,
+	                     'nathist': 2.15, 'orac': 1171519.0, 'orat': 1.74, 'paradox': 16500.27, 'parod': 322.29,
+	                     'perieg': 73219.94, 'phil': 2.1, 'poem': 14.58, 'polyhist': 4.73, 'rhet': 2.61, 'satyr': 343.45,
+	                     'schol': 31.69, 'tact': 36.35, 'test': 67.67, 'trag': 12.86, 'allrelig': 80.16, 'allrhet': 1.04}
 
 	# into one dict so we can pass it to __init__
-	wts = {'gkera': greekworderaweights, 'corp': corporaweights, 'genre': genreweights}
+	wts = {'gkera': greekworderaweights, 'corp': corporaweights, 'gkgenre': greekgenreweights, 'ltgenre': latingenreweights}
 
 	def __init__(self, entryname, totalcount, greekcount, latincount, docpapcount, inscriptioncount, christiancount,
-	             frqclass, early, middle, late, acta, alchem, anthol, apocalyp, apocryph, apol, astrol, astron, biogr, bucol,
+	             frqclass, early, middle, late, acta, agric, alchem, anthol, apocalyp, apocryph, apol, astrol, astron, biogr, bucol,
 	             caten, chronogr, comic, comm, concil, coq, dialog, docu, doxogr, eccl, eleg, encom, epic, epigr, epist, evangel,
 	             exeget, fab, geogr, gnom, gramm, hagiogr, hexametr, hist, homilet, hymn, hypoth, iamb, ignotum,
 	             invectiv, inscr, jurisprud, lexicogr, liturg, lyr, magica, math, mech, med, metrolog, mim, mus, myth, narrfict,
@@ -294,6 +297,7 @@ class dbHeadwordObject(dbWordCountObject):
 		self.middle = middle
 		self.late = late
 		self.acta = acta
+		self.agric = agric
 		self.alchem = alchem
 		self.anthol = anthol
 		self.apocalyp = apocalyp
@@ -369,6 +373,10 @@ class dbHeadwordObject(dbWordCountObject):
 		self.test = test
 		self.theol = theol
 		self.trag = trag
+		if re.search(r'^[^a-z]',self.entry):
+			self.language = 'G'
+		else:
+			self.language = 'L'
 		try:
 			self.wtdgkearly = self.early * weights['gkera']['early']
 			self.wtdgkmiddle = self.middle * weights['gkera']['middle']
@@ -458,7 +466,7 @@ class dbHeadwordObject(dbWordCountObject):
 		except:
 			return 0
 
-	def sortgenresbyweight(self, gwt=genreweights):
+	def sortgenresbyweight(self, gwt={'G': greekgenreweights, 'L': latingenreweights}):
 		"""
 
 		who is most likely to use this word? apply weight to counts by genre
@@ -470,17 +478,20 @@ class dbHeadwordObject(dbWordCountObject):
 		:return:
 		"""
 
-		if hipparchia.config['EXCLUDEMINORGENRECOUNTS'] == 'yes':
-			return self.genresebyweightlessminorgenres(500, gwt)
+		mygenres = gwt[self.language]
 
-		genretuplelist = [(key, getattr(self, key) * gwt[key]) for key in gwt]
+		if hipparchia.config['EXCLUDEMINORGENRECOUNTS'] == 'yes':
+			return self.genresebyweightlessminorgenres(500, mygenres)
+
+		genretuplelist = [(key, getattr(self, key) * mygenres[key]) for key in mygenres]
 		genretuplelist.sort(key=lambda x: x[1], reverse=True)
 		norming = genretuplelist[0][1] / 100
 		genretuplelist = [(g[0], g[1]/norming) for g in genretuplelist]
 
 		return genretuplelist
 
-	def genresebyweightlessminorgenres(self, maxmodifier, gwt=genreweights):
+
+	def genresebyweightlessminorgenres(self, maxmodifier, gwt={'G': greekgenreweights, 'L': latingenreweights}):
 		"""
 
 		same as sortgenresbyweight() but use maxmodifier to suppress genres that have so few words that any results
@@ -508,15 +519,25 @@ class dbHeadwordObject(dbWordCountObject):
 		:return:
 		"""
 
-		gwt = {g: gwt[g] for g in gwt if gwt[g] < maxmodifier}
-		genretuplelist = [(key, getattr(self, key) * gwt[key]) for key in gwt]
+		try:
+			mygenres = gwt[self.language]
+		except KeyError:
+			# we got here by passing only one language to gwt and not a dict of two languages
+			mygenres = gwt
+
+		mygenres = {g: mygenres[g] for g in mygenres if mygenres[g] < maxmodifier}
+
+		genretuplelist = [(key, getattr(self, key) * mygenres[key]) for key in mygenres]
 		genretuplelist.sort(key=lambda x: x[1], reverse=True)
 		norming = genretuplelist[0][1] / 100
-		genretuplelist = [(g[0], g[1]/norming) for g in genretuplelist]
+		try:
+			genretuplelist = [(g[0], g[1]/norming) for g in genretuplelist]
+		except ZeroDivisionError:
+			genretuplelist = None
 
 		return genretuplelist
 
-	def collapsedgenreweights(self, gwt=genreweights):
+	def collapsedgenreweights(self, gwt={'G': greekgenreweights, 'L': latingenreweights}):
 		"""
 
 		modify the definition of genres, then make a call to sortgenresbyweight(); pass it a modified version of gwt
@@ -524,20 +545,23 @@ class dbHeadwordObject(dbWordCountObject):
 		:param gwt:
 		:return:
 		"""
+
+		mygenres = gwt[self.language]
+
 		religwt = 0.5892025697245473
 		relig = ['acta', 'apocalyp', 'apocryph', 'apol', 'caten', 'concil', 'eccl', 'evangel', 'exeget', 'hagiogr',
 	         'homilet', 'liturg', 'prophet', 'pseudepigr', 'theol']
-		self.allrelig = sum([getattr(self, key) for key in gwt if key in relig])
-		gwt = {g: gwt[g] for g in gwt if g not in relig}
-		gwt['allrelig'] = religwt
+		self.allrelig = sum([getattr(self, key) for key in mygenres if key in relig])
+		mygenres = {g: mygenres[g] for g in mygenres if g not in relig}
+		mygenres['allrelig'] = religwt
 
 		rhtgwt = 2.870955148487275
 		allrhet = ['encom', 'invectiv', 'orat', 'rhet']
-		self.allrhet = sum([getattr(self, key) for key in gwt if key in allrhet])
-		gwt = {g: gwt[g] for g in gwt if g not in allrhet}
-		gwt['allrhet'] = rhtgwt
+		self.allrhet = sum([getattr(self, key) for key in mygenres if key in allrhet])
+		mygenres = {g: mygenres[g] for g in mygenres if g not in allrhet}
+		mygenres['allrhet'] = rhtgwt
 
-		return self.sortgenresbyweight(gwt)
+		return self.sortgenresbyweight({'G': mygenres, 'L': mygenres})
 
 
 class dbMorphologyObject(object):
