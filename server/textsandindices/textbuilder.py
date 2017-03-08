@@ -11,9 +11,8 @@ from server.dbsupport.dbfunctions import dblineintolineobject
 
 def buildtext(work, firstline, lastline, linesevery, cursor):
 	"""
-	make a readable/printable version of a work and send it to its own page
-	huge works will overwhelm the ability of most/all browsers to parse that much html
-	printing to pdf is a good idea, but for the incredibly slow pace of such
+	make a readable/printable version of a work
+
 	:param work:
 	:param levelcount:
 	:param higherlevels:
@@ -48,16 +47,14 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 			if work[0:2] in ['in', 'dp', 'ch']:
 				if thisline.annotations != '' and re.search(r'documentnumber',thisline.annotations) is None:
 					columna = ''
-					columnb = '<span class="crossreference">' + thisline.annotations + '</span>'
-					xref = '<tr><td class="browsercite">' + columna + '</td>'
-					xref += '<td class="textcrossreference">' + columnb + '</td></tr>\n'
+					columnb = '<span class="crossreference">{notes}</span>'.format(notes=thisline.annotations)
+					xref = '<tr><td class="browsercite">{ca}</td><td class="textcrossreference">{cb}</td></tr>\n'.format(ca=columna, cb=columnb)
 					output.append(xref)
 			date = re.search(finder, thisline.accented)
 			if date is not None and thisline.index == firstline:
 				columna = ''
-				columnb = '<span class="textdate">Date:&nbsp;' + date.group(1) + '</span>'
-				datehtml = '<tr><td class="browsercite">' + columna + '</td>'
-				datehtml += '<td class="textdate">' + columnb + '</td></tr>\n'
+				columnb = '<span class="textdate">Date:&nbsp;{date}</span>'.format(date=date.group(1))
+				datehtml = '<tr><td class="browsercite">{ca}</td><td class="textdate">{cb}</td></tr>\n'.format(ca=columna, cb=columnb)
 				output.append(datehtml)
 			
 			columnb = thisline.accented
@@ -76,8 +73,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 			else:
 				avoiddoubletap = False
 			
-			linehtml = '<tr><td class="browsercite">'+columna+'</td>'
-			linehtml += '<td class="lineoftext">'+columnb+'</td></tr>\n'
+			linehtml = '<tr><td class="browsercite">{ca}</td><td class="lineoftext">{cb}</td></tr>\n'.format(ca=columna, cb=columnb)
 	
 			output.append(linehtml)
 			previousline = thisline

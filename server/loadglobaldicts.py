@@ -25,7 +25,7 @@ authorlocationdict = buildauthorlocationdict(authordict)
 workgenresdict = buildworkgenresdict(workdict)
 workprovenancedict = buildworkprovenancedict(workdict)
 
-print('building specialized sublists')
+print('building specialized sublists\n')
 tlgauthors = dictitemstartswith(authordict, 'universalid', 'gr')
 tlgworks = dictitemstartswith(workdict, 'universalid', 'gr')
 latauthors = dictitemstartswith(authordict, 'universalid', 'lt')

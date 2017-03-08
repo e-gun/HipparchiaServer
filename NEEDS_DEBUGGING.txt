@@ -1,22 +1,8 @@
-[A] issue: during the formatting call a hang:
-
-...
-    psycopg2.OperationalError: could not create socket: Too many open files
-
-[A] working fix: modify the applescript
-
-    ulimit -n 1024 && ~/hipparchia_venv/bin/python3 ~/hipparchia_venv/HipparchiaServer/run.py
-
-    a bit tricky to fix for everyone and all time since this is not really about Hipparchia per se
-
-[B] unclosed spans at ends of one result output will cause styles to propagate into the next result item
+[A] unclosed spans at ends of one result output will cause styles to propagate into the next result item
 
     formattedcitationincontext() needs to address this with a check of the HTML of the last line of a citation?
 
-[C] wspolling.py remains off; delete it or make it work?
-
-
-[D]
+[B]
 
 MorphPossibilityObject.getlatinbaseform() needs work per-misceo
 MorphPossibilityObject.getlatinbaseform() needs work permixtā, per-misceo
