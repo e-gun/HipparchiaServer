@@ -98,20 +98,6 @@ def modifysessionvar(param,val):
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 
-	# may need to kill off old selections from the 'other' language
-	# do this after sorting out corpus shifts
-	if justlatin():
-		session['auselections'] = []
-		session['wkselections'] = []
-		session['agnselections'] = []
-		session['wkgnselections'] = []
-		session['psgselections'] = []
-		session['auexclusions'] = []
-		session['wkexclusions'] = []
-		session['agnexclusions'] = []
-		session['wkgnexclusions'] = []
-		session['psgexclusions'] = []
-
 	if session['nearornot'] not in ['T', 'F']:
 		session['nearornot'] = 'T'
 
