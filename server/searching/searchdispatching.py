@@ -160,7 +160,6 @@ def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authorswhe
 	for j in jobs: j.start()
 	for j in jobs: j.join()
 
-
 	return foundlineobjects
 
 

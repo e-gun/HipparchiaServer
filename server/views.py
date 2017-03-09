@@ -244,6 +244,7 @@ def executesearch():
 
 		poll[ts].statusis('Putting the results in context')
 
+		# hits [<server.hipparchiaclasses.dbWorkLine object at 0x10d952da0>, <server.hipparchiaclasses.dbWorkLine object at 0x10d952c50>, ... ]
 		hitdict = sortresultslist(hits, authordict, workdict)
 		if int(session['linesofcontext']) > 0:
 			allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, poll[ts])

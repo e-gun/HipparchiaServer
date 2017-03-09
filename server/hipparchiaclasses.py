@@ -9,6 +9,8 @@
 
 import re
 import time
+from itertools import islice
+from collections import deque
 from multiprocessing import Value, Array
 from server.formatting_helper_functions import attemptelision
 from server import hipparchia
@@ -926,6 +928,19 @@ class dbWorkLine(object):
 		
 		return wordlist
 	
+	def lastword(self, version):
+		last = ''
+		if version in ['accented', 'stripped']:
+			line = getattr(self, version).split(' ')
+			last = line[-1]
+		return last
+
+	def firstword(self, version):
+		first = ''
+		if version in ['accented', 'stripped']:
+			line = getattr(self, version).split(' ')
+			first = line[0]
+		return first
 
 	def allbutlastword(self, version):
 		"""
@@ -1267,4 +1282,44 @@ class ProgressPoll(object):
 
 		return message.format(msg=m)
 
+
+class QueryCombinator(object):
+	"""
+
+	take a phrase and grab all of the possible searches that you need to catch its line-spanning variants
+
+	x = 'one two three four five'
+	z = QueryCombinator(x)
+	z.combinationlist()
+		[(['one'], ['two', 'three', 'four', 'five']), (['one', 'two'], ['three', 'four', 'five']), (['one', 'two', 'three'], ['four', 'five']), (['one', 'two', 'three', 'four'], ['five']), (['one', 'two', 'three', 'four', 'five'], [])]
+	z.combinations()
+		[('one', 'two three four five'), ('one two', 'three four five'), ('one two three', 'four five'), ('one two three four', 'five'), ('one two three four five', '')]
+
+	"""
+	def __init__(self, phrase):
+		self.phrase = phrase
+		self.words = [w for w in phrase.split(' ') if w]
+
+	def take(self, n, iterable):
+		"""Return first n items of the iterable as a list"""
+		return list(islice(iterable, n))
+
+	def tail(self, n, iterable):
+		"""Return the last n items of the iterable as a list"""
+		return list(deque(iterable, maxlen=n))
+
+	def combinationlist(self):
+		"""Return all of the possible pairs of list items"""
+		combinations = []
+		for c in range(1, len(self.words) + 1):
+			front = self.take(c, self.words)
+			back = self.tail(len(self.words) - c, self.words)
+			combinations.append((front, back))
+		return combinations
+
+	def combinations(self):
+		"""Return the set of search pairs you will need"""
+		cl = self.combinationlist()
+		combinations = [(' '.join(c[0]), ' '.join(c[1])) for c in cl]
+		return combinations
 
