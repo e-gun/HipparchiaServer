@@ -541,23 +541,23 @@ class dbHeadwordObject(dbWordCountObject):
 
 	def collapsedgenreweights(self, gwt={'G': greekgenreweights, 'L': latingenreweights}):
 		"""
-
 		modify the definition of genres, then make a call to sortgenresbyweight(); pass it a modified version of gwt
-
 		:param gwt:
 		:return:
 		"""
 
+
+		religwt = gwt[self.language]['allrelig']
+		rhtgwt = gwt[self.language]['allrhet']
+
 		mygenres = gwt[self.language]
 
-		religwt = 0.5892025697245473
 		relig = ['acta', 'apocalyp', 'apocryph', 'apol', 'caten', 'concil', 'eccl', 'evangel', 'exeget', 'hagiogr',
 	         'homilet', 'liturg', 'prophet', 'pseudepigr', 'theol']
 		self.allrelig = sum([getattr(self, key) for key in mygenres if key in relig])
 		mygenres = {g: mygenres[g] for g in mygenres if g not in relig}
 		mygenres['allrelig'] = religwt
 
-		rhtgwt = 2.870955148487275
 		allrhet = ['encom', 'invectiv', 'orat', 'rhet']
 		self.allrhet = sum([getattr(self, key) for key in mygenres if key in allrhet])
 		mygenres = {g: mygenres[g] for g in mygenres if g not in allrhet}
