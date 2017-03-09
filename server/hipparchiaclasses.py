@@ -1255,7 +1255,7 @@ class ProgressPoll(object):
 		return self.active
 
 	def getnotes(self):
-		message = '<span class="small">%(m)s</span>'
+		message = '<span class="small">{msg}</span>'
 		if 14 < self.getelapsed() < 21:
 			m = '(long requests can be aborted by reloading the page)'
 		elif re.search('unavailable', self.notes) is not None and 9 < self.getelapsed() < 15:
@@ -1265,6 +1265,6 @@ class ProgressPoll(object):
 		else:
 			m = ''
 
-		return message % {'m': m}
+		return message.format(msg=m)
 
 
