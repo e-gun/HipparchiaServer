@@ -15,19 +15,19 @@ from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, setconnection
 from server.hipparchiaclasses import MPCounter
 from server.searching.proximitysearching import withinxlines, withinxwords
-from server.searching.phrasesearching import shortphrasesearch, phrasesearch
+from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, findleastcommonterm, \
-	massagesearchtermsforwhitespace, searchtermcharactersubstitutions
+	massagesearchtermsforwhitespace, searchtermcharactersubstitutions, findleastcommontermcount
 from server.lexica.lexicalookups import findcountsviawordcountstable
 
 
-def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorswheredict, activepoll):
+def searchdispatcher(searchtype, searchingfor, proximate, authorandworklist, authorswheredict, activepoll):
 	"""
 	assign the search to multiprocessing workers
 	sample paramaters:
 		searchtype:
 			'simple'
-		seeking:
+		searchingfor:
 			'rex'
 		proximate:
 			''
@@ -38,19 +38,19 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 		activepoll:
 			 <server.hipparchiaclasses.ProgressPoll object at 0x1102c15f8>
 
-	:param seeking:
+	:param searchingfor:
 	:param indexedauthorandworklist:
 	:return:
 	"""
 
-	# recompose 'seeking'
+	# recompose 'searchingfor'
 	# note that 'proximate' does not need as many checks
-	seeking = massagesearchtermsforwhitespace(seeking)
+	searchingfor = massagesearchtermsforwhitespace(searchingfor)
 
 	# lunate sigmas / UV / JI issues
-	unomdifiedskg = seeking
+	unomdifiedskg = searchingfor
 	unmodifiedprx = proximate
-	seeking = searchtermcharactersubstitutions(seeking)
+	searchingfor = searchtermcharactersubstitutions(searchingfor)
 	proximate = searchtermcharactersubstitutions(proximate)
 
 	activepoll.statusis('Loading the the dispatcher...')
@@ -60,7 +60,7 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 	manager = Manager()
 	foundlineobjects = manager.list()
 	whereclauseinfo = manager.dict(authorswheredict)
-	searching = manager.list(authorandworklist)
+	searchlist = manager.list(authorandworklist)
 
 	# if you don't autocommit you will soon see: "Error: current transaction is aborted, commands ignored until end of transaction block"
 	# alternately you can commit every N transactions; the small db sizes for INS and DDP works means there can be some real pounding
@@ -78,32 +78,37 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 	# the must be a way, but this also works
 	if searchtype == 'simple':
 		activepoll.statusis('Executing a simple word search...')
-		jobs = [Process(target=workonsimplesearch, args=(count, foundlineobjects, seeking, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
+		jobs = [Process(target=workonsimplesearch, args=(count, foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	elif searchtype == 'phrase':
-		if session['accentsmatter'] == 'no':
-			criterion = 'longest'
+		activepoll.statusis('Executing a phrase search.')
+		leastcommon = findleastcommonterm(searchingfor)
+		lccount = findleastcommontermcount(searchingfor)
+		longestterm = max([len(t) for t in searchingfor.split(' ') if t])
+		# need to figure out when it will be faster to go to subqueryphrasesearch() and when not to
+		# e.g., any phrase involving λιποταξίου can be very fast because that form appears 36x: you can find it in 1s
+		# but if you go through subqueryphrasesearch() you will spend about 17s per full TLG search
+		#   'if 0 < lccount < 500 or longestterm > 5' got burned badly with 'ἐξ ἀρχῆϲ πρῶτον'
+		if 0 < lccount < 500:
+			jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, leastcommon, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 		else:
-			criterion = 'least common'
-		activepoll.statusis('Executing a phrase search. Checking the {cr} term first...<br />Progress meter only measures this first pass'.format(cr=criterion))
-		leastcommon = findleastcommonterm(seeking)
-		jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, leastcommon, seeking, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
+			jobs = [Process(target=subqueryphrasesearch, args=(foundlineobjects, searchingfor, searchlist, count, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	elif searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
-		termone = seeking
+		termone = searchingfor
 		termtwo = proximate
 		if session['accentsmatter'] == 'yes' and session['nearornot'] == 'T':
 			# choose the necessarily faster option
 			leastcommon = findleastcommonterm(unomdifiedskg+' '+unmodifiedprx)
 			if leastcommon != unomdifiedskg:
 				termone = proximate
-				termtwo = seeking
+				termtwo = searchingfor
 		elif len(termtwo) > len(termone) and session['nearornot'] == 'T':
 			# look for the longest word first since that is probably the quicker route
-			# but you can't swap seeking and proximate this way in a 'is not near' search without yielding the wrong focus
+			# but you can't swap searchingfor and proximate this way in a 'is not near' search without yielding the wrong focus
 			tmp = termtwo
 			termtwo = termone
 			termone = tmp
-		jobs = [Process(target=workonproximitysearch, args=(count, foundlineobjects, termone, termtwo, searching, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
+		jobs = [Process(target=workonproximitysearch, args=(count, foundlineobjects, termone, termtwo, searchlist, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	else:
 		# impossible, but...
 		jobs = []
@@ -115,6 +120,185 @@ def searchdispatcher(searchtype, seeking, proximate, authorandworklist, authorsw
 	return foundlineobjects
 
 
+def workonsimplesearch(count, foundlineobjects, searchingfor, searchinginside, commitcount, whereclauseinfo, activepoll):
+	"""
+	a multiprocessors aware function that hands off bits of a simple search to multiple searchers
+	you need to pick the right style of search for each work you search, though
+
+	searchinginside:
+		['lt0400', 'lt0022', 'lt0914w001_AT_1', 'lt0474w001']
+
+	whereclauseinfo: [every author that needs to have a where-clause built because you asked for an '_AT_']
+		{'lt0914': <server.hipparchiaclasses.dbAuthor object at 0x108b5d8d0>}
+
+	searchingfor:
+		'rex'
+
+	:param count:
+	:param hits:
+	:param searchingfor:
+	:param searching:
+	:return: a collection of lineobjects
+		[<server.hipparchiaclasses.dbWorkLine object at 0x114401828>, <server.hipparchiaclasses.dbWorkLine object at 0x1144017b8>,...]
+	"""
+
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
+
+	while len(searchinginside) > 0 and count.value <= int(session['maxresults']):
+		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
+		# the pop() will fail if somebody else grabbed the last available work before it could be registered
+		# that's not supposed to happen with the pool, but somehow it does
+		try:
+			wkid = searchinginside.pop()
+			activepoll.remain(len(searchinginside))
+		except:
+			wkid = 'gr0000w000'
+			
+		if wkid != 'gr0000w000':
+			if 'x' in wkid:
+				wkid = re.sub('x', 'w', wkid)
+				foundlines = simplesearchworkwithexclusion(searchingfor, wkid, whereclauseinfo, curs)
+			else:
+				foundlines = substringsearch(searchingfor, curs, wkid, whereclauseinfo)
+
+			count.increment(len(foundlines))
+			activepoll.addhits(len(foundlines))
+
+			for f in foundlines:
+				foundlineobjects.append(dblineintolineobject(f))
+
+		commitcount.increment()
+		if commitcount.value % 400 == 0:
+			dbconnection.commit()
+	
+	dbconnection.commit()
+	curs.close()
+	del dbconnection
+
+	return foundlineobjects
+
+
+def workonphrasesearch(foundlineobjects, leastcommon, searchingfor, searchinginside, commitcount, whereclauseinfo, activepoll):
+	"""
+	a multiprocessors aware function that hands off bits of a phrase search to multiple searchers
+	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase hits the limit
+
+	searchinginside:
+		['lt0400', 'lt0022', 'lt0914w001_AT_1', 'lt0474w001']
+
+	whereclauseinfo: [every author that needs to have a where-clause built because you asked for an '_AT_']
+		{'lt0914': <server.hipparchiaclasses.dbAuthor object at 0x108b5d8d0>}
+
+	searchingfor:
+		'Romulus rex'
+
+	:param hits:
+	:param searchingfor:
+	:param searching:
+	:return:
+	"""
+
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
+
+	if session['accentsmatter'] == 'yes':
+		# maxhits ('πολυτρόπωϲ', 506, 506, 0, 0, 0, 0)
+		maxhits = findcountsviawordcountstable(leastcommon)
+
+	try:
+		maxhits = maxhits[1]
+	except:
+		maxhits = 9999
+
+	while len(searchinginside) > 0 and len(foundlineobjects) < int(session['maxresults']):
+		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
+		# the pop() will fail if somebody else grabbed the last available work before it could be registered
+		try:
+			wkid = searchinginside.pop()
+			activepoll.remain(len(searchinginside))
+		except:
+			wkid = 'gr0001w001'
+		commitcount.increment()
+		if commitcount.value % 400 == 0:
+			dbconnection.commit()
+
+		foundlines = phrasesearch(leastcommon, searchingfor, maxhits, wkid, whereclauseinfo, activepoll, curs)
+
+		for f in foundlines:
+			foundlineobjects.append(dblineintolineobject(f))
+
+	dbconnection.commit()
+	curs.close()
+	del dbconnection
+
+	return foundlineobjects
+
+
+def workonproximitysearch(count, foundlineobjects, searchingfor, proximate, searchinginside, commitcount, whereclauseinfo, activepoll):
+	"""
+	a multiprocessors aware function that hands off bits of a proximity search to multiple searchers
+	note that exclusions are handled deeper down in withinxlines() and withinxwords()
+
+	searchinginside:
+		['lt0400', 'lt0022', 'lt0914w001_AT_1', 'lt0474w001']
+
+	whereclauseinfo: [every author that needs to have a where-clause built because you asked for an '_AT_']
+		{'lt0914': <server.hipparchiaclasses.dbAuthor object at 0x108b5d8d0>}
+
+	searchingfor:
+		'rex'
+
+	proximate:
+		'patres'
+
+	:param count:
+	:param hits:
+	:param searchingfor:
+	:param proximate:
+	:param searching:
+	:return: a collection of hits
+	"""
+
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
+
+	while len(searchinginside) > 0 and count.value <= int(session['maxresults']):
+		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
+		# the pop() will fail if somebody else grabbed the last available work before it could be registered
+		# not supposed to happen, but it does...
+
+		try:
+			wkid = searchinginside.pop()
+			activepoll.remain(len(searchinginside))
+		except:
+			wkid = 'gr0000w000'
+
+		if wkid != 'gr0000w000':
+			if session['searchscope'] == 'L':
+				foundlines = withinxlines(int(session['proximity']), searchingfor, proximate, curs, wkid, whereclauseinfo)
+			else:
+				foundlines = withinxwords(int(session['proximity']), searchingfor, proximate, curs, wkid, whereclauseinfo)
+
+			count.increment(len(foundlines))
+			activepoll.addhits(len(foundlines))
+
+			for f in foundlines:
+				foundlineobjects.append(dblineintolineobject(f))
+
+			commitcount.increment()
+			if commitcount.value % 400 == 0:
+				dbconnection.commit()
+
+	dbconnection.commit()
+	curs.close()
+	del dbconnection
+
+	return foundlineobjects
+
+
+# slated for removal
+
 def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authorswheredict, activepoll):
 	"""
 	brute force a search for something horrid like και δη και
@@ -123,7 +307,7 @@ def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authorswhe
 	sample paramaters:
 	searchtype:
 		'simple'
-	seeking:
+	searchingfor:
 		'te tu me'
 	proximate:
 		''
@@ -159,182 +343,5 @@ def dispatchshortphrasesearch(searchphrase, indexedauthorandworklist, authorswhe
 
 	for j in jobs: j.start()
 	for j in jobs: j.join()
-
-	return foundlineobjects
-
-
-def workonsimplesearch(count, foundlineobjects, seeking, searchinginside, commitcount, whereclauseinfo, activepoll):
-	"""
-	a multiprocessors aware function that hands off bits of a simple search to multiple searchers
-	you need to pick the right style of search for each work you search, though
-
-	searchinginside:
-		['lt0400', 'lt0022', 'lt0914w001_AT_1', 'lt0474w001']
-
-	whereclauseinfo: [every author that needs to have a where-clause built because you asked for an '_AT_']
-		{'lt0914': <server.hipparchiaclasses.dbAuthor object at 0x108b5d8d0>}
-
-	seeking:
-		'rex'
-
-	:param count:
-	:param hits:
-	:param seeking:
-	:param searching:
-	:return: a collection of lineobjects
-		[<server.hipparchiaclasses.dbWorkLine object at 0x114401828>, <server.hipparchiaclasses.dbWorkLine object at 0x1144017b8>,...]
-	"""
-
-	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
-
-	while len(searchinginside) > 0 and count.value <= int(session['maxresults']):
-		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
-		# the pop() will fail if somebody else grabbed the last available work before it could be registered
-		# that's not supposed to happen with the pool, but somehow it does
-		try:
-			wkid = searchinginside.pop()
-			activepoll.remain(len(searchinginside))
-		except:
-			wkid = 'gr0000w000'
-			
-		if wkid != 'gr0000w000':
-			if 'x' in wkid:
-				wkid = re.sub('x', 'w', wkid)
-				foundlines = simplesearchworkwithexclusion(seeking, wkid, whereclauseinfo, curs)
-			else:
-				foundlines = substringsearch(seeking, curs, wkid, whereclauseinfo)
-
-			count.increment(len(foundlines))
-			activepoll.addhits(len(foundlines))
-
-			for f in foundlines:
-				foundlineobjects.append(dblineintolineobject(f))
-
-		commitcount.increment()
-		if commitcount.value % 400 == 0:
-			dbconnection.commit()
-	
-	dbconnection.commit()
-	curs.close()
-	del dbconnection
-
-	return foundlineobjects
-
-
-def workonphrasesearch(foundlineobjects, leastcommon, seeking, searchinginside, commitcount, whereclauseinfo, activepoll):
-	"""
-	a multiprocessors aware function that hands off bits of a phrase search to multiple searchers
-	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase hits the limit
-
-	searchinginside:
-		['lt0400', 'lt0022', 'lt0914w001_AT_1', 'lt0474w001']
-
-	whereclauseinfo: [every author that needs to have a where-clause built because you asked for an '_AT_']
-		{'lt0914': <server.hipparchiaclasses.dbAuthor object at 0x108b5d8d0>}
-
-	seeking:
-		'Romulus rex'
-
-	:param hits:
-	:param seeking:
-	:param searching:
-	:return:
-	"""
-
-	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
-
-	if session['accentsmatter'] == 'yes':
-		# maxhits ('πολυτρόπωϲ', 506, 506, 0, 0, 0, 0)
-		maxhits = findcountsviawordcountstable(leastcommon)
-
-	try:
-		maxhits = maxhits[1]
-	except:
-		maxhits = 9999
-
-	while len(searchinginside) > 0 and len(foundlineobjects) < int(session['maxresults']):
-		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
-		# the pop() will fail if somebody else grabbed the last available work before it could be registered
-		try:
-			wkid = searchinginside.pop()
-			activepoll.remain(len(searchinginside))
-		except:
-			wkid = 'gr0001w001'
-		commitcount.increment()
-		if commitcount.value % 400 == 0:
-			dbconnection.commit()
-
-		foundlines = phrasesearch(leastcommon, seeking, maxhits, wkid, whereclauseinfo, activepoll, curs)
-
-		for f in foundlines:
-			foundlineobjects.append(dblineintolineobject(f))
-
-	dbconnection.commit()
-	curs.close()
-	del dbconnection
-
-	return foundlineobjects
-
-
-def workonproximitysearch(count, foundlineobjects, seeking, proximate, searchinginside, commitcount, whereclauseinfo, activepoll):
-	"""
-	a multiprocessors aware function that hands off bits of a proximity search to multiple searchers
-	note that exclusions are handled deeper down in withinxlines() and withinxwords()
-
-	searchinginside:
-		['lt0400', 'lt0022', 'lt0914w001_AT_1', 'lt0474w001']
-
-	whereclauseinfo: [every author that needs to have a where-clause built because you asked for an '_AT_']
-		{'lt0914': <server.hipparchiaclasses.dbAuthor object at 0x108b5d8d0>}
-
-	seeking:
-		'rex'
-
-	proximate:
-		'patres'
-
-	:param count:
-	:param hits:
-	:param seeking:
-	:param proximate:
-	:param searching:
-	:return: a collection of hits
-	"""
-
-	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
-
-	while len(searchinginside) > 0 and count.value <= int(session['maxresults']):
-		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
-		# the pop() will fail if somebody else grabbed the last available work before it could be registered
-		# not supposed to happen, but it does...
-
-		try:
-			wkid = searchinginside.pop()
-			activepoll.remain(len(searchinginside))
-		except:
-			wkid = 'gr0000w000'
-
-		if wkid != 'gr0000w000':
-			if session['searchscope'] == 'L':
-				foundlines = withinxlines(int(session['proximity']), seeking, proximate, curs, wkid, whereclauseinfo)
-			else:
-				foundlines = withinxwords(int(session['proximity']), seeking, proximate, curs, wkid, whereclauseinfo)
-
-			count.increment(len(foundlines))
-			activepoll.addhits(len(foundlines))
-
-			for f in foundlines:
-				foundlineobjects.append(dblineintolineobject(f))
-
-			commitcount.increment()
-			if commitcount.value % 400 == 0:
-				dbconnection.commit()
-
-	dbconnection.commit()
-	curs.close()
-	del dbconnection
 
 	return foundlineobjects

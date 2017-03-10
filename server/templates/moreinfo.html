@@ -723,18 +723,18 @@ very rare (fewer than 5 occurrences)
     <span class="emph">Phrase searches are special cases of proximity searches</span>: A near B and in that order. Strategies and results will be
     very similiar to what we saw in the previous case.
         <ul class="numbered">
-            <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 6625 texts and found 3 passages (<span class="colorhighlight">29.27s</span>)</span></li>
-            <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 6625 texts and found 84 passages (<span class="colorhighlight">42.78s</span>)</span></li>
-            <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 3008 texts and found 2 passages (<span class="colorhighlight">2.15s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
-            <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 3008 texts and found 32 passages (<span class="colorhighlight">4.25s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
-            <li><span class="sampleoutput">Sought ου μην αλλ; Searched 180 texts and found 110 passages (<span class="colorhighlight">2.06s</span>). Searched between 850 B.C.E. and 1 C.E. [+ Author categories limited to 'Oratores']</span></li>
+            <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 6625 texts and found 3 passages (<span class="colorhighlight">19.39s</span>)</span></li>
+            <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 6625 texts and found 84 passages (<span class="colorhighlight">23.68s</span>)</span></li>
+            <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 3008 texts and found 2 passages (<span class="colorhighlight">4.89s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
+            <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 3008 texts and found 32 passages (<span class="colorhighlight">4.97s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
+            <li><span class="sampleoutput">Sought οὐ μὴν ἀλλ; Searched 3,008 texts and found 718 passages (<span class="colorhighlight">14.97s</span>). Searched between 850 B.C.E. and 1 C.E.</span></li>
         </ul>
     As above, a common word sought across the whole corpus will slow you down.
     Most phrase searches are likely to contain common words. So you will need strategies to make the haystack smaller
-    unless you have 45s to spare. It is totally safe to try to double-check Dennison on οὐ μὴν ἀλλὰ, but you should
+    unless you have some time to spare. It is totally safe to try to double-check Dennison on οὐ μὴν ἀλλὰ, but you should
     throw some restrictions in there to avoid a long search (that yields more results than you want anyway). Ponder this search and ask yourself
-    if the fact that Hipparchia took >2m to generate the results is the real problem here:
-    <span class="sampleoutput">Sought και δη και; Searched 6625 texts and found 2535 passages (<span class="colorhighlight">138.34s</span>)</span>
+    if the fact that Hipparchia took 1.5m to generate the results is the real problem here:
+    <span class="sampleoutput">Sought και δη και; Searched 6625 texts and found 2535 passages (<span class="colorhighlight">95.29s</span>)</span>
     </li>
 </ul>
     <span class="emph">Hardware also matters</span>: προκατέλαβον (the first example above)

@@ -365,3 +365,38 @@ def findleastcommonterm(searchphrase):
 	return leastcommonterm
 
 
+def findleastcommontermcount(searchphrase):
+	"""
+
+	use the wordcounts to determine the best word to pick first
+
+	:param listofterms:
+	:return:
+	"""
+	fewesthits = -1
+	searchterms = searchphrase.split(' ')
+	searchterms = [x for x in searchterms if x]
+	if session['accentsmatter'] == 'yes':
+		# note that graves have been eliminated from the wordcounts; so we have to do the same here
+		# but we still need access to the actual search terms, hence the dict
+		# a second issue: 'v' is not in the wordcounts, but you might be searching for it
+		# third, whitespace means you might be passing '(^|\\s)κατὰ' instead of 'κατὰ'
+		searchterms = [re.sub(r'\(.*?\)', '', t) for t in searchterms]
+		searchterms = [re.sub(r'v','u',t) for t in searchterms]
+		searchterms = {removegravity(t): t for t in searchterms}
+
+		counts = [findcountsviawordcountstable(k) for k in searchterms.keys()]
+		# counts [('βεβήλων', 84, 84, 0, 0, 0, 0), ('ὀλίγοϲ', 596, 589, 0, 3, 4, 0)]
+		totals = [(c[1], c[0]) for c in counts if c]
+		max = sorted(totals, reverse=False)
+		try:
+			leastcommonterm = searchterms[max[0][1]]
+			fewesthits = max[0][0]
+		except:
+			# failed so you will do plan b in a moment
+			pass
+
+	return fewesthits
+
+
+

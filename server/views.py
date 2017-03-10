@@ -207,24 +207,7 @@ def executesearch():
 			searchtype = 'phrase'
 			thesearch = seeking
 			htmlsearch = '<span class="emph">{skg}</span>'.format(skg=seeking)
-			terms = seeking.split(' ')
-			if len(max(terms, key=len)) > 3:
-				hits = searchdispatcher('phrase', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
-			else:
-				# SPEED NOTES
-				# should this be a UNION search instead?
-				# c. 110s to search 'si tu non' in the full latin corpus no matter which path you choose
-				# but 'και δη και' is still much faster this way
-				# you are looking for a set of little words: και δη και, etc.
-				#   16s to find και δη και via a std phrase search; 1.6s to do it this way
-				# not immediately obvious what the best number for minimum max term len is:
-				# consider what happens if you send a '4' this way:
-				#   εἶναι τὸ κατὰ τὴν (Searched between 850 B.C.E. and 200 B.C.E.)
-				# this takes 13.7s with a std phrase search; it takes 14.6s if sent to shortphrasesearch()
-				#   οἷον κἀν τοῖϲ (Searched between 850 B.C.E. and 200 B.C.E.)
-				#   5.57 std; 17.54s 'short'
-				# so '3' looks like the right answer
-				hits = dispatchshortphrasesearch(seeking, authorandworklist, authorswheredict, poll[ts])
+			hits = searchdispatcher('phrase', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
 		else:
 			searchtype = 'proximity'
 			if session['searchscope'] == 'W':

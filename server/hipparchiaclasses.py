@@ -793,8 +793,7 @@ class dbWorkLine(object):
 				citation = self.l0
 		
 		return citation
-	
-	
+
 	def shortlocus(self):
 		"""
 		try to get a short citation that drops the lvl0 info: "3.2"
@@ -812,8 +811,7 @@ class dbWorkLine(object):
 			citation = '.'.join(loc)
 					
 		return citation
-		
-	
+
 	def locustuple(self):
 		"""
 		call me to get a citation tuple in 0-to-5 order
@@ -826,8 +824,7 @@ class dbWorkLine(object):
 		citationtuple = tuple(cit)
 	
 		return citationtuple
-	
-	
+
 	def samelevelas(self, other):
 		"""
 		are two loci at the same level or have we shifted books, sections, etc?
@@ -840,8 +837,7 @@ class dbWorkLine(object):
 			return True
 		else:
 			return False
-	
-	
+
 	def equivalentlevelas(self, other):
 		"""
 		are two loci at the same level or have we shifted books, sections, etc?
@@ -854,8 +850,7 @@ class dbWorkLine(object):
 			return True
 		else:
 			return False
-	
-	
+
 	def toplevel(self):
 		top = 0
 		for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]:
@@ -866,8 +861,7 @@ class dbWorkLine(object):
 			
 		# should not need this, but...
 		return top
-	
-	
+
 	def unformattedline(self):
 		"""
 		remove markup from contents
@@ -881,7 +875,6 @@ class dbWorkLine(object):
 		unformatted = re.sub(nbsp, r'', unformatted)
 		
 		return unformatted
-
 
 	def showlinehtml(self):
 		"""
@@ -899,7 +892,6 @@ class dbWorkLine(object):
 
 		return visiblehtml
 
-
 	def wordcount(self):
 		"""
 		return a wordcount
@@ -909,7 +901,6 @@ class dbWorkLine(object):
 		words = line.split(' ')
 		
 		return len(words)
-
 
 	def wordlist(self, version):
 		"""
@@ -954,8 +945,7 @@ class dbWorkLine(object):
 			allbutlastword = ' '.join(allbutlast)
 		
 		return allbutlastword
-	
-	
+
 	def allbutfirstword(self, version):
 		"""
 		return the line less its first word
@@ -970,8 +960,7 @@ class dbWorkLine(object):
 			allbutfirstword = ' '.join(allbutfirst)
 		
 		return allbutfirstword
-	
-	
+
 	def allbutfirstandlastword(self, version):
 		"""
 		terun the line lest the first and last words (presumably both are hypenated)
@@ -1298,7 +1287,7 @@ class QueryCombinator(object):
 	"""
 	def __init__(self, phrase):
 		self.phrase = phrase
-		self.words = [w for w in phrase.split(' ') if w]
+		self.words = [w for w in self.phrase.split(' ') if w]
 
 	def take(self, n, iterable):
 		"""Return first n items of the iterable as a list"""
