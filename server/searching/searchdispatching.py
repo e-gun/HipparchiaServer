@@ -85,14 +85,20 @@ def searchdispatcher(searchtype, searchingfor, proximate, authorandworklist, aut
 		lccount = findleastcommontermcount(searchingfor)
 		longestterm = max([len(t) for t in searchingfor.split(' ') if t])
 		# need to figure out when it will be faster to go to subqueryphrasesearch() and when not to
-		# e.g., any phrase involving λιποταξίου can be very fast because that form appears 36x: you can find it in 1s
-		# but if you go through subqueryphrasesearch() you will spend about 17s per full TLG search
+		# logic + trial and error
+		#   e.g., any phrase involving λιποταξίου can be very fast because that form appears 36x: you can find it in 1s
+		#   but if you go through subqueryphrasesearch() you will spend about 17s per full TLG search
+		# lccount = -1 if you are unaccented
 		#   'if 0 < lccount < 500 or longestterm > 5' got burned badly with 'ἐξ ἀρχῆϲ πρῶτον'
+		#   'or (lccount == -1 and longestterm > 6)' would take 1m to find διαφοραϲ ιδεαν via workonphrasesearch()
+		#   but the same can be found in 16.45s via subqueryphrasesearch()
+		# it looks like unaccented searches are very regularly faster via subqueryphrasesearch()
+		#   when is this not true? and how often will the 5-10s difference matter?
 		if 0 < lccount < 500:
-			# print('workonphrasesearch()')
+			# print('workonphrasesearch()',searchingfor)
 			jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, leastcommon, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 		else:
-			# print('subqueryphrasesearch()')
+			# print('subqueryphrasesearch()',searchingfor)
 			jobs = [Process(target=subqueryphrasesearch, args=(foundlineobjects, searchingfor, searchlist, count, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	elif searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')

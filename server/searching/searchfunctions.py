@@ -8,12 +8,13 @@
 
 import re
 from string import punctuation
+
 from flask import session
 
-from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
-from server.lexica.lexicalookups import findcountsviawordcountstable
-from server.formatting_helper_functions import removegravity
 from server import hipparchia
+from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
+from server.formatting_helper_functions import removegravity
+from server.lexica.lexicalookups import findcountsviawordcountstable
 
 
 def cleaninitialquery(seeking):
@@ -29,7 +30,7 @@ def cleaninitialquery(seeking):
 
 	# things you never need to see and are not part of a (for us) possible regex expression
 	badpunct = ',;#'
-	extrapunct = '\′‵’‘·“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
+	extrapunct = '\′‵’‘·“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
 
 	seeking = re.sub(r'[' + re.escape(badpunct+extrapunct) + ']', '', seeking)
 
@@ -356,7 +357,13 @@ def findleastcommonterm(searchphrase):
 			pass
 
 	if stillneedtofindterm:
-		longestterm = searchterms[0]
+		try:
+			longestterm = searchterms[0]
+		except KeyError:
+			# did you send me a bunch of regex that just got wiped?
+			longestterm = [(len(t),t) for t in searchphrase.split(' ') if t]
+			longestterm.sort(reverse=True)
+			return longestterm[0][1]
 		for term in searchterms:
 			if len(term) > len(longestterm):
 				longestterm = term
