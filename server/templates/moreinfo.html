@@ -441,8 +441,11 @@ very rare (fewer than 5 occurrences)
 
 <div id="RegexSearching">
 
-    Regular expressions allow you to search for patterns and to use wildcards. Regex is a dark art unto itself. Consult the <a href="https://www.postgresql.org/docs/9.6/static/functions-matching.html">manual directly</a>.
-    <br />
+    Regular expressions allow you to search for patterns and to use wildcards. Regex is a dark art unto itself.
+    Consult the <a href="https://www.postgresql.org/docs/9.6/static/functions-matching.html">manual directly</a>.
+    Regex searching remains a bit glitchy given the inherent complexity of regex itself when combined with the complex
+    internal structure of the data you are searching: double-checking your results is recommended.
+    <br /><br />
     The more salient things to know/use:
     <ul class="forexample">
         <li><code>[abc]</code> brackets a set of acceptable characters to look for in the next position: a, or b, or c.
@@ -457,11 +460,11 @@ very rare (fewer than 5 occurrences)
         <li><code>.</code> any character: <code>laud.nt</code> will find <span class="lat">laudant</span>, <span class="lat">laudent</span>,
             and, theoretically, <span class="lat">laudZnt</span></li>
         <li><code>\s</code> whitespace: <code>\ssed\setiam\s</code> is a search for <code>' sed etiam '</code>.
-            Please use the 'within 1 word' function instead of <code>\s</code> unless you know why you are not doing so.
     </ul>
     Here are some examples that give you an idea of the sort of things that are possible. But major caveats follow.
     <ul class="forexample">
-        <li><code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each.</li>
+        <li><code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each. Sadly <code>\w</code>
+        will only cover Latin letters and not Greek ones. <code>[αβψδεφγηιξκλμνοπρϲτυωχθζ]</code> is not so hot as an alternative, either.</li>
         <li><code>t.t.t.t.t.</code> will find places where you have 't + anything' five times in a row.
             Your results will be <span class="lat">heres ei extitit Titius</span>; and <span class="lat">nec diu restitit: tota...</span>
             Note that the whitespace between <span class="lat">extitit</span> and <span class="lat">Titius</span> qualified
@@ -484,7 +487,7 @@ very rare (fewer than 5 occurrences)
         <li><code>\sζ[^\s]*?ζ[^\s]*?ουσ</code> will find all words that start with a ζ and then have another ζ internally and
             then have ουσ still later on. ζυμίζουϲα, ζιζανιώδουϲ, and Ζήζουϲ are all matches.<span class="emph">[*]</span>
         </li>
-        <li><span class="emph">[warning: see below]</span> <code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where
+        <li><code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where
             <span class="lat">non solum... sed etiam...</span> bracket just a single word.</li>
     </ul>
     <span class="emph">[*]</span>[Note: the automatic betacode feature will turn <code>\s</code> into <code>\ϲ</code>. so You can only execute
@@ -493,19 +496,18 @@ very rare (fewer than 5 occurrences)
             <code>TLGASSUMESBETACODE = 'no'</code> in <code>config.py</code>.]
     <br />
     <br />
-    Unfortunately a lot of swanky heavy duty regex searches do not make sense: the DB is organized as a collection of 'lines'.
+    Unfortunately a lot of swanky heavy duty regex searches with lookaheads and conditionals do not make sense: the DB is organized as a collection of 'lines'.
     A search like
     <code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> probably only makes sense in the context of verse authors. This is because
-    <span class="emph">your regex cannot look outside of a single database line</span>. The sort of multi-line searching via
-    regex that one might do in a flat text file will fail to find all occurrences of the expression.
+    <span class="emph">your regex (typically) cannot look outside of a single database line</span>. The sort of multi-line searching via
+    regex that one might do in a flat text file will fail to find all occurrences of the expression. What "typically" really
+    means. A "phrase search" will open up a three line window and can catch multi-line runs:
+    "<code> \w\w in \w\w </code>" will look for <code>[two letter word] + in + [two letter word]</code>.
+    And it will indeed find Cicero, In Verrem: actio 2, book 4, section 75, lines 10-11 which end and begin with: <code>nihil se | in eo potestatis</code>.
+    However if youre complex regex does not trigger the phrase search mechanism (by including a whitespace), then the
+    search will be line-by-line and <span class="emph">potential matches can be lost</span>.
     <br />
     <br />
-    Consider again
-    <code>\snon solum\s(\w*?)\ssed etiam</code>. If the <code>non solum</code> is not on the same line as the <code>sed etiam</code>, then
-    you will not have a match. If your first search term includes a whitespace, then the search will move through
-    Hipparchia as a "phrase" (where what matters most is the longest term). This will explore multi-line search zones.
-    But you will lose a certain amount of speed and fine-grained control over the details as well.
-
     If you have to have the sort of search that has full access to lookaheads and what not, then you should consider migrating
     to <a href="https://community.dur.ac.uk/p.j.heslin/Software/Diogenes/index.php">Diogenes</a>.
 
@@ -540,18 +542,6 @@ very rare (fewer than 5 occurrences)
     Accordingly in an accent-aware search ἀχαιούϲ will find Ἀχαιούϲ and ἀχιλῆοϲ will find Ἀχιλῆοϲ. It is less
     surprising that αχιληοϲ finds Ἀχιλῆοϲ in an unaccented search. But it is worth noting that all searches are themselves made
     lower case: ΑΧΙΛΗΟΣ will also find Ἀχιλῆοϲ.
-
-    <p><span class="label">How to execute a phrase search combined with a proximity search</span></p>
-
-    <span class="emph">You must put a word in the first box and a phrase in the second box</span>. You cannot search for two phrases.
-    If you type a phrase into the first box and a single word into the second box, then Hipparchia will ignore the second box.
-    But if you type a single word (or part of a word) into the first box and a phrase into the second box, Hipparchia
-    will search for WordA near PhraseB. For example:
-    <span class="sampleoutput">Sought αξιολογ within 2 lines of μεϲημβρια ετυγχαν; Searched 6625 texts and found 2 passages (<span class="colorhighlight">23.05s</span>)</span>
-    <br />
-    <br />
-    Please note that you can also use regular expressions here. The previous search can be rewritten as follows:
-    <span class="sampleoutput">Sought αξιολ.γ within 2 lines of μεϲ.μβρια ετ.γχαν; Searched 146595 texts and found 2 passages (<span class="colorhighlight">23.01s</span>)</span>
 
     <p><span class="label">Latin vs "accents matter"</span></p>
 
@@ -720,14 +710,17 @@ very rare (fewer than 5 occurrences)
         </ul>
     </li>
     <li>
-    <span class="emph">Phrase searches are special cases of proximity searches</span>: A near B and in that order. Strategies and results will be
-    very similiar to what we saw in the previous case.
+        Phrase searches are sent to one of two functions. If you pick a rare (accented) word, then that word will be searched.
+        Then its environs will be searched. Otherwise PostgreSQL will build a nested query to look at three-line windows of text that
+        may or may not contain your phrase. <span class="emph">Most phrase searches will take roughly the same amount of time</span>
+        since this 'windowing' is itself where most of the calculating happens.
         <ul class="numbered">
             <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 6625 texts and found 3 passages (<span class="colorhighlight">19.39s</span>)</span></li>
             <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 6625 texts and found 84 passages (<span class="colorhighlight">23.68s</span>)</span></li>
             <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 3008 texts and found 2 passages (<span class="colorhighlight">4.89s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
             <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 3008 texts and found 32 passages (<span class="colorhighlight">4.97s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
             <li><span class="sampleoutput">Sought οὐ μὴν ἀλλ; Searched 3,008 texts and found 718 passages (<span class="colorhighlight">14.97s</span>). Searched between 850 B.C.E. and 1 C.E.</span></li>
+            <li><span class="sampleoutput">Sought τῷ φίλῳ μου; 236,845 texts and found 6 passages (<span class="colorhighlight">22.69s</span>)</span></li>
         </ul>
     As above, a common word sought across the whole corpus will slow you down.
     Most phrase searches are likely to contain common words. So you will need strategies to make the haystack smaller
@@ -752,8 +745,8 @@ very rare (fewer than 5 occurrences)
     A solid state drive makes a huge difference here (and just about everywhere else in your computing life). Consider investing in one.
     In sum, fast drives and then more CPUs and then faster CPUs would be the order in which to seek to make speed gains.
     <span class="emph">Access time to the data and not processing time of the data is far and away the most important factor.</span>
-    Get Hipparchia's DB onto a solid state drive if at all possible. But at a certain point a faster machine will end up just doing more waiting
-    for data to come to the processor. 2 or 3 workers on a moderately powerful machine with a fast drive is 85% as fast as a high end machine that in theory
+    Get Hipparchia's DB onto a solid state drive if at all possible. After a certain threshold a faster CPU will end up just doing more waiting
+    for data to reach it. 2 or 3 workers on a moderately powerful machine with a fast drive is 85% as fast as a high end machine that in theory
     can do 600% more work per second.
 
 </div>
@@ -770,7 +763,7 @@ very rare (fewer than 5 occurrences)
                 <li>Dates</li>
                 <li>Author Genres</li>
                 <li>Author Locations</li>
-                <li>Work Genres</li>
+                <li>Work Genres [but most works have been assigned a genre by HipparchiaBuilder]</li>
                 <li>Work Locations</li>
             </ul>
         </li>
@@ -783,12 +776,13 @@ very rare (fewer than 5 occurrences)
             <ul>
                 <li>Author Genres</li>
                 <li>Author Locations</li>
-                <li>Work Genres</li>
+                <li>Work Genres [provisionally assigned to a generic 'Docu.' genre]</li>
             </ul>
         </li>
         <li>The inscriptions data (I & II) is missing:
             <ul>
                 <li>Author Genres</li>
+                <li>Work Genres [provisionally assigned to a generic 'Inscr.' genre]</li>
             </ul>
         </li>
     </ul>
@@ -987,7 +981,8 @@ very rare (fewer than 5 occurrences)
 
 <div id="Openness">
     <br />
-    Hipparchia is open source software. This project would not have been possible had not a whole array of different individuals
+    Hipparchia is open source software. It has been licensed under the <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPL v.3.0</a>.
+    This project would not have been possible had not a whole array of different individuals
     and teams elected to generously donate their time and energy to the furtherance of human knowledge.
     <br />
     <br />
