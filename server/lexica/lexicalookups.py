@@ -7,15 +7,15 @@
 """
 
 import re
-from flask import session
+
+from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
+from server.hipparchiaclasses import dbWordCountObject, dbHeadwordObject, dbMorphologyObject, dbGreekWord, dbLatinWord, \
+	dbLemmaObject
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
 from server.searching.betacodetounicode import cleanaccentsandvj
-from server.hipparchiaclasses import dbWordCountObject, dbHeadwordObject, dbMorphologyObject, dbGreekWord, dbLatinWord, \
-	dbLemmaObject
-from server import hipparchia
 
 
 def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
@@ -681,58 +681,3 @@ example:
 
 
 """
-
-# dlated for deletion because it seems to be unused
-
-def findlemma(word, cursor):
-	# note that lemma entries are internally separated by tabs and SQL does not escape special chars
-	# fortunately even the first item has a lieading tab
-	# SELECT * from greek_lemmata WHERE derivative_forms LIKE '%'||chr(9)||'θρηνεῖν %'
-	finder = re.compile(r'^'+word+' ')
-
-	query = 'SELECT * FROM '+session['usewhichdictionary']+'_lemmata WHERE derivative_forms LIKE %s||chr(9)||%s'
-	data = ('%',word+' %')
-	cursor.execute(query, data)
-	lemmata = cursor.fetchall()
-	dictonary = {}
-	for lem in lemmata:
-		variants = lem[2].split('\t')
-		morphology = ''
-		for var in variants:
-			if re.search(finder,var) is not None:
-				morphology += var+', '
-		dictonary[lem[0]] = morphology[:-2]
-	return dictonary
-
-
-def definebylemma(lemmadict,corporatable,cursor):
-	# the diogenes implementation: <basefont><a onClick="parse_lat('Arma')">Arma</a> <a onClick="parse_lat('uirumque')"><font color="red"><b><u>uirum</u></b></font>que</a>
-	# <a onClick="parse_lat('cano')">cano,</a> <a onClick="parse_lat('Troiae')">Troiae</a> <a onClick="parse_lat('qui')">qui</a> <a onClick="parse_lat('primus')">primus</a>
-	# <a onClick="parse_lat('ab')">ab</a> <a onClick="parse_lat('oris')">oris</a> <br> ...
-
-	# stackoverflow:
-	# Putting the onclick within the href would offend those who believe strongly in separation of content from behavior/action. The argument is that your html content should remain focused solely on content, not on presentation or behavior.
-	# The typical path these days is to use a javascript library (eg. jquery) and create an event handler using that library. It would look something like:
-	# $('a').click( function(e) {e.preventDefault(); /*your_code_here;*/ return false; } );
-	# also consider using 'title' here
-
-	# feed me findlemma stuff
-	# {'δείδω': 'δεῖϲαι (aor imperat mid 2nd sg) (aor inf act)', 'δεῖϲα': 'δεῖϲαι (fem nom/voc pl)'}
-	dictionaryentries = []
-	for key,value in lemmadict.items():
-		entry = bulkddictsearch(cursor, corporatable + '_dictionary', 'entry_name', key)
-		dictionaryentries.append('<p class="lemma">'+value+'</p>\n<p class="dictionaryentry">'+entry+'</p>\n')
-	return dictionaryentries
-
-
-def findotherforms(xref_number, cursor):
-	query = 'SELECT derivative_forms FROM ' + session['usewhichdictionary'] + '_lemmata where xref_number = %s'
-	data = (xref_number,)
-	cursor.execute(query, data)
-	analysis = cursor.fetchone()
-	analysis = list(analysis)
-
-	anaylsys = analysis[0].split('\t')
-	analysis[:] = ['<parsed>'+x+'</parsed>' for x in anaylsys if x != '']
-	oneliner = '\n'.join(analysis)
-	return oneliner
