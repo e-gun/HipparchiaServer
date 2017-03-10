@@ -93,7 +93,7 @@ def searchdispatcher(searchtype, searchingfor, proximate, authorandworklist, aut
 		#   'or (lccount == -1 and longestterm > 6)' would take 1m to find διαφοραϲ ιδεαν via workonphrasesearch()
 		#   but the same can be found in 16.45s via subqueryphrasesearch()
 		# it looks like unaccented searches are very regularly faster via subqueryphrasesearch()
-		#   when is this not true? and how often will the 5-10s difference matter?
+		#   when is this not true? being wrong about sqs() means spending an extra 10s; being wrong about phs() means an extra 40s...
 		if 0 < lccount < 500:
 			# print('workonphrasesearch()',searchingfor)
 			jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, leastcommon, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
@@ -222,6 +222,7 @@ def workonphrasesearch(foundlineobjects, leastcommon, searchingfor, searchingins
 	while len(searchinginside) > 0 and len(foundlineobjects) < int(session['maxresults']):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
+		# notsupposedtohappen butitdoes
 		try:
 			wkid = searchinginside.pop()
 			activepoll.remain(len(searchinginside))

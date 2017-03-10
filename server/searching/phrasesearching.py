@@ -151,11 +151,6 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 						d = wkid[0:10]
 					query = qtemplate.format(db=db, ln=ln, whr=whr, lim=lim)
 					data = (d, sp)
-					# 'if firstterm in i[1]' is a very imperfect check: καὶ might be in the line but not as part of the phrase you sought
-					# nevertheless, provided context > 0, you should be able to spot your find fairly easily
-					# this will yield a bunch of windows: find the centers
-					# [2833, 2834, 2835, 3000, 3092, 3131, 3132, 3133, 3205, 3206, 3207, ...]
-					# [2834, 3000, 3092, 3132, 3206, ...]
 				else:
 					wkid = re.sub(r'x', 'w', wkid)
 					data = [wkid[0:10]]
@@ -168,8 +163,11 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 					whr = '( wkuniversalid = %s) ' + whr
 					query = qtemplate.format(db=db, ln=ln, whr=whr, lim=lim)
 					data.append(sp)
+
 			curs.execute(query, tuple(data))
 			indices = [i[0] for i in curs.fetchall()]
+			# this will yield a bunch of windows: you need to find the centers; see 'while...' below
+
 			locallineobjects = []
 			if indices:
 				for i in indices:
@@ -186,6 +184,9 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 			while locallineobjects and count.value <= int(session['maxresults']) and gotmyonehit == False:
 				# windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]
 				# figure out which line is really the line with the goods
+				# it is not nearly so simple as picking the 2nd element in any run of 3: no always runs of 3 + matches in
+				# subsequent lines means that you really should check your work carefully; this is not an especially costly
+				# operation relative to the whole search and esp. relative to the speed gains of using a subquery search
 				lo = locallineobjects.pop()
 				if re.search(sp, getattr(lo,use)):
 					foundlineobjects.append(lo)
@@ -236,13 +237,11 @@ notes on lead and lag
 lead and lag example
 	https://fle.github.io/detect-value-changes-between-successive-lines-with-postgresql.html
 
-	select index,stripped_line from lt1212 where stripped_line ~ 'stuprator'
-
 paritions: [over clauses]
 	http://tapoueh.org/blog/2013/08/20-Window-Functions
 
 
-next lines:
+next lines via 'lead':
 
 select
 	index,

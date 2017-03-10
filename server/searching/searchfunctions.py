@@ -30,7 +30,7 @@ def cleaninitialquery(seeking):
 
 	# things you never need to see and are not part of a (for us) possible regex expression
 	badpunct = ',;#'
-	extrapunct = '\′‵’‘·“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
+	extrapunct = """‵’‘·“”„'"—†⌈⌋⌊⟫⟪❵❴⟧⟦«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓"""
 
 	seeking = re.sub(r'[' + re.escape(badpunct+extrapunct) + ']', '', seeking)
 

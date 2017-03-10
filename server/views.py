@@ -18,7 +18,6 @@ from urllib.request import urlopen
 import websockets
 from flask import render_template, redirect, request, url_for, session, send_file
 
-from server import hipparchia
 from server.browsing.browserfunctions import getandformatbrowsercontext
 from server.calculatewordweights import findtemporalweights, findccorporaweights, findgeneraweights
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus,\
@@ -167,7 +166,6 @@ def executesearch():
 	poll[ts].statusis('Preparing to search')
 
 	if len(seeking) > 0:
-
 		starttime = time.time()
 		poll[ts].statusis('Compiling the list of works to search')
 
