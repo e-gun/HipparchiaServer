@@ -12,11 +12,6 @@ from server.listsandsession.listmanagement import dictitemstartswith
 from server.listsandsession.sessiondicts import buildaugenresdict, buildworkgenresdict, buildauthorlocationdict, \
 	buildworkprovenancedict
 
-"""
-this stuff gets loaded up front so you have access to all author and work info all the time
-otherwise you'll hit the DB too often and ask the same question over and over again: a serious source of lag
-"""
-
 terminaltext = """
 {project} / Copyright (C) {year} / {fullname}
 {mail}
@@ -29,9 +24,15 @@ it under the terms of the GNU General Public License version 3.
 
 """
 
-if hipparchia.config['SUPPRESSCOPYRIGHTNOTICE'] != 'yes':
+if hipparchia.config['ENOUGHALREADYWITHTHECOPYRIGHTNOTICE'] != 'yes':
 	print(terminaltext.format(project='HipparchiaServer', year='2016-17', fullname='E. Gunderson',
 	                          mail='Department of Classics, 125 Queen’s Park, Toronto, ON M5S 2C7 Canada'))
+
+
+"""
+this stuff gets loaded up front so you have access to all author and work info all the time
+otherwise you'll hit the DB too often and ask the same question over and over again: a serious source of lag
+"""
 
 authordict = loadallauthorsasobjects()
 workdict = loadallworksasobjects()
