@@ -6,21 +6,19 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-
+import asyncio
+import errno
 import json
-import time
+import locale
 import re
 import socket
-import asyncio
-import websockets
-import errno
-import locale
+import time
 from urllib.request import urlopen
+
+import websockets
 from flask import render_template, redirect, request, url_for, session, send_file
 
 from server import hipparchia
-# this next validates when imported: it is not called later; the IDE will pretend you are not using it and grey it out
-from server.listsandsession import validateconfig
 from server.browsing.browserfunctions import getandformatbrowsercontext
 from server.calculatewordweights import findtemporalweights, findccorporaweights, findgeneraweights
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus,\
@@ -36,8 +34,9 @@ from server.listsandsession.listmanagement import dropdupes, polytonicsort, sort
 	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions, buildhintlist
 from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, justlatin, justtlg, reducetosessionselections, returnactivedbs
+from server.loadglobaldicts import *
 from server.searching.betacodetounicode import replacegreekbetacode
-from server.searching.searchdispatching import searchdispatcher, dispatchshortphrasesearch
+from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter, \
 	nocontextresultformatter, htmlifysearchfinds, nocontexthtmlifysearchfinds
 from server.searching.searchfunctions import cleaninitialquery
@@ -45,11 +44,6 @@ from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import tcparserequest, textsegmentfindstartandstop, \
 	wordindextohtmltable, indexdictsorter
 from server.textsandindices.textbuilder import buildtext
-
-
-# ready some sets of objects that will be generally available: a few seconds spent here will save you the same over and over again later as you constantly regenerate author and work info
-# this will give you listmapper{}, authordict{}, etc.
-from server.loadglobaldicts import *
 
 # activate when you need to be shown new weight values upon startup and are willing to wait for the weights
 # these number need to be given to dbHeadwordObject, but they only change between major shifts in the data

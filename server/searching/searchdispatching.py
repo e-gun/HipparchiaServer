@@ -14,11 +14,11 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, setconnection
 from server.hipparchiaclasses import MPCounter
-from server.searching.proximitysearching import withinxlines, withinxwords
+from server.lexica.lexicalookups import findcountsviawordcountstable
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
+from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, findleastcommonterm, \
 	massagesearchtermsforwhitespace, searchtermcharactersubstitutions, findleastcommontermcount
-from server.lexica.lexicalookups import findcountsviawordcountstable
 
 
 def searchdispatcher(searchtype, searchingfor, proximate, authorandworklist, authorswheredict, activepoll):
@@ -89,8 +89,10 @@ def searchdispatcher(searchtype, searchingfor, proximate, authorandworklist, aut
 		# but if you go through subqueryphrasesearch() you will spend about 17s per full TLG search
 		#   'if 0 < lccount < 500 or longestterm > 5' got burned badly with 'ἐξ ἀρχῆϲ πρῶτον'
 		if 0 < lccount < 500:
+			# print('workonphrasesearch()')
 			jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, leastcommon, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 		else:
+			# print('subqueryphrasesearch()')
 			jobs = [Process(target=subqueryphrasesearch, args=(foundlineobjects, searchingfor, searchlist, count, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	elif searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
