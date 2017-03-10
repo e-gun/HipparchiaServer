@@ -260,7 +260,31 @@
                 </ul>
 
             </ul>
-
+        <li>
+            <span class="emph">Weighted distribution by genre</span> is calculated as are its kindred categories above. There are a few of twists.
+            The TLG assigned (almost every) work to one of 75(!) genres. 15 of these genres were 'theological'. And several were 'rhetorical'.
+            The default is to aggregate 'Acta', 'Apocalyp.', 'Apol.', etc. under the heading <span class="emph">allrel</span>. Similarly 'Encom.' and 'Invect.' become
+            part of <span class="emph">allrhet</span>. But you can turn this behavior off in <code>config.py</code>. The LAT data was not assigned to genres.
+            It has been forced into the TLG genres with one addition: 'Agric.'. But often the fit is not all that tidy. And some works
+            should probably be shifted.
+            Latin genres have a different distribution than the Greek ones: for example, "History" dominates the one and "Commentary" the other.
+            And there is no "Agric." in the Greek corpus, but these comprise a major set of writings in the Latin corpus. So there are two sets of weighting scores.
+            Similarly many genres have a small number of words in them. This is especially true for the LAT data in that the only
+            words for a given genre are often Latin editorial notes in a Greek text. One match will have a totally unrealistic weight score.
+            The default is to suppress genre weighting for any genre that is <1/500th the size of the top genre.
+            The five most represented genres are compared to one another in descending order.
+            <ul class="forexample">
+                <li><code>παράδειϲοϲ</code> yields: docu (100) / hymn (85) / orac (30) / narrfict (24) / hexametr (23)</li>
+                <li><code>κατεϲθίω</code> yields: fab (100) / comic (44) / paradox (29) / polyhist (28) / myth (20)</li>
+                <li><code>contio</code> yields: Predominant genres: hist (100) / allrhet (79) / biogr (75) / polyhist (69) / tact (56)</li>
+                <li><code>letifer</code> yields: Predominant genres: epic (100) / lyr (30) / hexametr (23) / astron (20) / poem (17)</li>
+            </ul>
+            And so one can say that you are about 4x as likely to see παράδειϲοϲ in one of the documentary papyri as you are
+            to see it in an ancient novel even though the novel is itself one of the most likely places to find the word. Similarly
+            "gobbling up" is something that happens in fables and in comedy, but it is more common in the one than the other.
+            <span class="italic">Contiones</span> are likely events among a variety of prose genres.
+            "Death-bringing" is a poetic conceit, but it is especially an epic one.
+        </li>
         </li>
         <li>
             You may also be shown a <span class="emph">relative frequency</span> label. This label will not be shown for 'core vocabulary' as defined below.
