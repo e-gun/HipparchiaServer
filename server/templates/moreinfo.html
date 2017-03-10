@@ -5,8 +5,8 @@
     <li><a href="#Browsing"><span>Browsing</span></a></li>
     <li><a href="#Dictionaries"><span>Dictionaries and word counts</span></a></li>
     <li><a href="#MakingSearchLists"><span>Searching: Building search lists</span></a></li>
-    <li><a href="#RegexSearching"><span>Searching: REGEX</span></a></li>
     <li><a href="#HitsAndMisses"><span>Searching: Hits and Misses</span></a></li>
+    <li><a href="#RegexSearching"><span>Searching: REGEX</span></a></li>
     <li><a href="#SpeedSearching"><span>Searching: Speed</span></a></li>
     <li><a href="#Oddities"><span>Peculiarities and Gotchas</span></a></li>
     <li><a href="#Openness"><span>Openness</span></a></li>
@@ -439,84 +439,6 @@ very rare (fewer than 5 occurrences)
         </p>
 </div>
 
-<div id="RegexSearching">
-
-    Regular expressions allow you to search for patterns and to use wildcards. Regex is a dark art unto itself.
-    Consult the <a href="https://www.postgresql.org/docs/9.6/static/functions-matching.html">manual directly</a>.
-    Regex searching remains a bit glitchy given the inherent complexity of regex itself when combined with the complex
-    internal structure of the data you are searching: double-checking your results is recommended.
-    <br /><br />
-    The more salient things to know/use:
-    <ul class="forexample">
-        <li><code>[abc]</code> brackets a set of acceptable characters to look for in the next position: a, or b, or c.
-            <code>lauda[st]</code> will find <span class="lat">laudas</span> or <span class="lat">laudat</span> but not <span class="lat">laudare</span>. </li>
-        <li><code>[^abc]</code> brackets a set of characters to exclude in the next position: not a, nor b, nor c.
-            <code>lauda[^t]</code> is a search that refuses to find <span class="lat">laudat</span>, but it will find <span class="lat">laudant</span>,
-            <span class="lat">laudandum</span>, and <span class="lat">laudasti</span>.</li>
-        <li><code>(a|b|abc)</code> brackets a set of strings to look for: a, or b, or abc. <code>laud(o|as|at)</code>
-            is a search for the present singular indicative forms of <span class="lat">laudare</span>. It will also find
-            <span class="lat">conlaudat</span>. Note how you could use <code>co(n|l)laud</code> to make sure you got alternate
-            spellings of <span class="lat">conlaudare</span>.</li>
-        <li><code>.</code> any character: <code>laud.nt</code> will find <span class="lat">laudant</span>, <span class="lat">laudent</span>,
-            and, theoretically, <span class="lat">laudZnt</span></li>
-        <li><code>\s</code> whitespace: <code>\ssed\setiam\s</code> is a search for <code>' sed etiam '</code>.
-    </ul>
-    Here are some examples that give you an idea of the sort of things that are possible. But major caveats follow.
-    <ul class="forexample">
-        <li><code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each. Sadly <code>\w</code>
-        will only cover Latin letters and not Greek ones. <code>[αβψδεφγηιξκλμνοπρϲτυωχθζ]</code> is not so hot as an alternative, either.</li>
-        <li><code>t.t.t.t.t.</code> will find places where you have 't + anything' five times in a row.
-            Your results will be <span class="lat">heres ei extitit Titius</span>; and <span class="lat">nec diu restitit: tota...</span>
-            Note that the whitespace between <span class="lat">extitit</span> and <span class="lat">Titius</span> qualified
-            as 'anything' in the first match. But you might have composed the search with something else in mind.</li>
-        <li><code>\s..$</code> could find all verses of Homer that end with a two letter word.<span class="emph">[*]</span></li>
-        <li><code>^[^αειουηω][^\s]\s</code> could find all verses of Homer that begin with a two letter word that does not itself start with
-            a vowel.<span class="emph">[*]</span>
-            Matches include: βῆ, μή, ϲῷ, τῇ, and τῷ. Unfortunately matches also include —※. That is, the editorial marks count as part
-            of the start of the line. 
-            The same search is a problem in dramatists for a similar reason. Punctuation is stripped out of
-            the searchable columns and that means that speakers like 'ΚΗ.' and 'ΔΙ.' become 'κη' and 'δι'. They will match the pattern. 
-            And, obviously, speaker attribution in dramas will be able to produce all sorts of possible matches with other searches too. 
-        </li>
-        <li><code>[aeiou]m[aeiou]m[aeiou]m</code> will find words that have 'vowel + m + vowel + m + vowel + m'
-            (i.e., <span class="lat">amomum, cardamomum, cinnamomum, pantomimum</span>) </li>
-        <li><code>(i.o.a.){2,}</code> will find 'i + anything + o + anything + a + anything' where this sequence can be found
-            two or more times in a row. Three phrases that have this structure are <span class="lat">Punico acido arido</span>,
-            <span class="lat">sollicito animo an</span> and <span class="lat">aequissimo animo ad</span>
-        </li>
-        <li><code>\sζ[^\s]*?ζ[^\s]*?ουσ</code> will find all words that start with a ζ and then have another ζ internally and
-            then have ουσ still later on. ζυμίζουϲα, ζιζανιώδουϲ, and Ζήζουϲ are all matches.<span class="emph">[*]</span>
-        </li>
-        <li><code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where
-            <span class="lat">non solum... sed etiam...</span> bracket just a single word.</li>
-    </ul>
-    <span class="emph">[*]</span>[Note: the automatic betacode feature will turn <code>\s</code> into <code>\ϲ</code>. so You can only execute
-            this search on the Greek authors if you have some other corpus turned on too. Alternately you can just turn the feature off.
-            Do this by setting
-            <code>TLGASSUMESBETACODE = 'no'</code> in <code>config.py</code>.]
-    <br />
-    <br />
-    Unfortunately a lot of swanky heavy duty regex searches with lookaheads and conditionals do not make sense: the DB is organized as a collection of 'lines'.
-    A search like
-    <code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> probably only makes sense in the context of verse authors. This is because
-    <span class="emph">your regex (typically) cannot look outside of a single database line</span>. The sort of multi-line searching via
-    regex that one might do in a flat text file will fail to find all occurrences of the expression. What "typically" really
-    means. A "phrase search" will open up a three line window and can catch multi-line runs:
-    "<code> \w\w in \w\w </code>" will look for <code>[two letter word] + in + [two letter word]</code>.
-    And it will indeed find Cicero, In Verrem: actio 2, book 4, section 75, lines 10-11 which end and begin with: <code>nihil se | in eo potestatis</code>.
-    However if youre complex regex does not trigger the phrase search mechanism (by including a whitespace), then the
-    search will be line-by-line and <span class="emph">potential matches can be lost</span>.
-    <br />
-    <br />
-    If you have to have the sort of search that has full access to lookaheads and what not, then you should consider migrating
-    to <a href="https://community.dur.ac.uk/p.j.heslin/Software/Diogenes/index.php">Diogenes</a>.
-
-    Hipparchia's internal data model will never be a good fit for that sort of thing. Even if various workarounds are possible,
-    there is no reason to settle for the wrong tool for the job.
-
-
-</div>
-
 <div id="HitsAndMisses">
 
     Hipparchia stores three versions of every line: a formatted version (which includes information about font display, etc.),
@@ -605,6 +527,89 @@ very rare (fewer than 5 occurrences)
     dispatched means that some corpora will be searched before others and then with a higher chance of certain internal ID
     numbers being checked before others. Do not try to figure out the rules of the game, either raise the cap or refine
     your search instead.
+
+
+</div>
+
+<div id="RegexSearching">
+
+    Regular expressions allow you to search for patterns and to use wildcards. Regex is a dark art unto itself.
+    Consult the <a href="https://www.postgresql.org/docs/9.6/static/functions-matching.html">manual directly</a>.
+    Regex searching remains a bit glitchy given the inherent complexity of regex itself when combined with the complex
+    internal structure of the data you are searching: double-checking your results is recommended.
+    <br /><br />
+    The more salient things to know/use:
+    <ul class="forexample">
+        <li><code>[abc]</code> brackets a set of acceptable characters to look for in the next position: a, or b, or c.
+            <code>lauda[st]</code> will find <span class="lat">laudas</span> or <span class="lat">laudat</span> but not <span class="lat">laudare</span>. </li>
+        <li><code>[^abc]</code> brackets a set of characters to exclude in the next position: not a, nor b, nor c.
+            <code>lauda[^t]</code> is a search that refuses to find <span class="lat">laudat</span>, but it will find <span class="lat">laudant</span>,
+            <span class="lat">laudandum</span>, and <span class="lat">laudasti</span>.</li>
+        <li><code>(a|b|abc)</code> brackets a set of strings to look for: a, or b, or abc. <code>laud(o|as|at)</code>
+            is a search for the present singular indicative forms of <span class="lat">laudare</span>. It will also find
+            <span class="lat">conlaudat</span>. Note how you could use <code>co(n|l)laud</code> to make sure you got alternate
+            spellings of <span class="lat">conlaudare</span>.</li>
+        <li><code>.</code> any character: <code>laud.nt</code> will find <span class="lat">laudant</span>, <span class="lat">laudent</span>,
+            and, theoretically, <span class="lat">laudZnt</span></li>
+        <li><code>\w</code> is any 'word' character and is roughly equivalent to <code>[a-z]</code>. Sadly <code>\w</code>
+        will only cover Latin letters and not Greek ones. <code>[αβψδεφγηιξκλμνοπρϲτυωχθζ]</code> is not so hot as an alternative, either.
+            The search box is pretty small, after all. But you can indeed find <code>τὸ μὲν εὖ</code>, <code>γε μὲν δὴ</code> and
+            <code>τῇ μὲν ἐν</code> via <code> [αβψδεφγηιξκλμνοπρϲτυωχθζ][αβψδεφγηιξκλμνοπρϲτυωχθζ] μεν [αβψδεφγηιξκλμνοπρϲτυωχθζ][αβψδεφγηιξκλμνοπρϲτυωχθζ] </code></li>
+        <li><code>\s</code> whitespace: <code>\ssed\setiam\s</code> is a search for <code>' sed etiam '</code>.
+    </ul>
+    Here are some examples that give you an idea of the sort of things that are possible. But major caveats follow.
+    <ul class="forexample">
+        <li><code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each.</li>
+        <li><code>t.t.t.t.t.</code> will find places where you have 't + anything' five times in a row.
+            Your results will be <span class="lat">heres ei extitit Titius</span>; and <span class="lat">nec diu restitit: tota...</span>
+            Note that the whitespace between <span class="lat">extitit</span> and <span class="lat">Titius</span> qualified
+            as 'anything' in the first match. But you might have composed the search with something else in mind.</li>
+        <li><code>\s..$</code> could find all verses of Homer that end with a two letter word.<span class="emph">[*]</span></li>
+        <li><code>^[^αειουηω][^\s]\s</code> could find all verses of Homer that begin with a two letter word that does not itself start with
+            a vowel.<span class="emph">[*]</span>
+            Matches include: βῆ, μή, ϲῷ, τῇ, and τῷ. Unfortunately matches also include —※. That is, the editorial marks count as part
+            of the start of the line.
+            The same search is a problem in dramatists for a similar reason. Punctuation is stripped out of
+            the searchable columns and that means that speakers like 'ΚΗ.' and 'ΔΙ.' become 'κη' and 'δι'. They will match the pattern.
+            And, obviously, speaker attribution in dramas will be able to produce all sorts of possible matches with other searches too.
+        </li>
+        <li><code>[aeiou]m[aeiou]m[aeiou]m</code> will find words that have <code>vowel + m + vowel + m + vowel + m</code>
+            (i.e., <span class="lat">amomum, cardamomum, cinnamomum, pantomimum</span>) </li>
+        <li><code>(i.o.a.){2,}</code> will find 'i + anything + o + anything + a + anything' where this sequence can be found
+            two or more times in a row. Three phrases that have this structure are <span class="lat">Punico acido arido</span>,
+            <span class="lat">sollicito animo an</span> and <span class="lat">aequissimo animo ad</span>
+        </li>
+        <li><code>\sζ[^\s]*?ζ[^\s]*?ουσ</code> will find all words that start with a ζ and then have another ζ internally and
+            then have ουσ still later on. ζυμίζουϲα, ζιζανιώδουϲ, and Ζήζουϲ are all matches.<span class="emph">[*]</span>
+        </li>
+        <li><code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where
+            <span class="lat">non solum... sed etiam...</span> bracket just a single word.</li>
+    </ul>
+    <span class="emph">[*]</span>[Note: the automatic betacode feature will turn <code>\s</code> into <code>\ϲ</code>. so You can only execute
+            this search on the Greek authors if you have some other corpus turned on too. Alternately you can just turn the feature off.
+            Do this by setting
+            <code>TLGASSUMESBETACODE = 'no'</code> in <code>config.py</code>.]
+    <br />
+    <br />
+    Unfortunately a lot of swanky heavy duty regex searches with lookaheads and conditionals do not make sense: the DB is organized as a collection of 'lines'.
+    A search like
+    <code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> probably makes the most sense in the context of verse authors. This is because
+    <span class="emph">your regex (typically) cannot look outside of a single database line</span>. The sort of multi-line searching via
+    regex that one might do in a flat text file will fail to find all occurrences of the expression.
+    <br />
+    <br />
+    What <span class="emph">typically</span> really means in that notice above. A "phrase search" will open up a three line window and can catch multi-line runs:
+    "<code> \w\w in \w\w </code>" will look for <code>[two letter word] + in + [two letter word]</code>.
+    And it will indeed find Cicero, In Verrem 2.4.75.10-11 where the lines end and begin with: <code>nihil se | in eo potestatis</code>.
+    However if your complex regex does not trigger the phrase search mechanism (by including a whitespace), then the
+    search will be line-by-line and <span class="emph">in this case matches occurring between lines be lost</span>.
+    <br />
+    <br />
+    If you have to have the sort of search that has full access to lookaheads and what not, then you should consider migrating
+    to <a href="https://community.dur.ac.uk/p.j.heslin/Software/Diogenes/index.php">Diogenes</a>.
+
+    Hipparchia's internal data model will never be a good fit for that sort of thing. Even if various workarounds are possible,
+    there is no reason to settle for the wrong tool for the job.
 
 
 </div>
@@ -893,7 +898,7 @@ very rare (fewer than 5 occurrences)
                         But it most of these items are unlikely to ever be supported.
                     </li>
                     <li>
-                        Brackets that converge with HTML or other markup have typically been replaced with a near equivalent: <code>&lt;</code>
+                        Brackets that converge with HTML or other markup have usually been replaced with a near equivalent: <code>&lt;</code>
                         signals markup instructions to a page renderer. Left and right angled bracket were swapped out.
                         They are present in the database with other characters instead: <span class="emph">⟪</span> and <span class="emph">⟫</span>.
                         A similar logic governed the choice of <span class="emph">⦅</span> and <span class="emph">⦆</span>
