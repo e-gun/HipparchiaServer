@@ -7,7 +7,9 @@
 """
 
 import re
+
 from server.dbsupport.dbfunctions import setconnection
+
 
 def findtemporalweights(language):
 	"""
@@ -369,41 +371,41 @@ greek wordcounts
 31 	 ignotum
 
 
-latin wordcounts
-1171519 	 hist
-671379 	 orat
+wordcounts
+1215991 	 hist
+1098321 	 jurisprud
+671410 	 orat
+626013 	 nathist
 599210 	 inscr
 590187 	 epist
 556759 	 phil
-545231 	 nathist
-534915 	 comm
-534590 	 epic
+534959 	 comm
+534933 	 epic
 448876 	 rhet
 255728 	 comic
 247930 	 polyhist
-242298 	 gramm
-231623 	 agric
+243498 	 gramm
+232422 	 agric
 164327 	 med
+156727 	 eleg
 127677 	 docu
 125299 	 biogr
-119213 	 eleg
 103420 	 narrfict
 91130 	 trag
-80331 	 poem
-72459 	 astron
-67015 	 jurisprud
+87412 	 poem
+74244 	 astron
 65390 	 hexametr
 55533 	 lexicogr
 49860 	 lyr
+41281 	 fab
 36973 	 schol
 32229 	 tact
 30920 	 bucol
-19171 	 coq
+19316 	 coq
 17312 	 test
-16071 	 dialog
+17108 	 dialog
+16010 	 hypoth
 14853 	 gnom
-14448 	 fab
-14425 	 hypoth
 11466 	 epigr
 6467 	 exeget
 5240 	 geogr
@@ -413,9 +415,9 @@ latin wordcounts
 3457 	 caten
 3411 	 satyr
 2845 	 chronogr
-2779 	 ignotum
 2570 	 apol
 2385 	 anthol
+1854 	 ignotum
 1854 	 alchem
 1672 	 mus
 1621 	 math
@@ -441,5 +443,6 @@ latin wordcounts
 5 	 liturg
 3 	 mech
 1 	 orac
+
 
 """
