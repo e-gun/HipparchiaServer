@@ -118,17 +118,10 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 			qtemplate = """SELECT secondpass.index, secondpass.{ln}
 				FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.{ln} FROM
 					(SELECT index, {ln},
-						concat(lag({ln}) OVER (ORDER BY index ASC), ' ', {ln}, ' ', lead({ln}) OVER (ORDER BY index ASC)) as linebundle
+						concat({ln}, ' ', lead({ln}) OVER (ORDER BY index ASC)) as linebundle
 						FROM {db} WHERE {whr} ) firstpass
 					) secondpass
 				WHERE secondpass.linebundle ~ %s {lim}"""
-
-			oldqtemplate = """SELECT B.index, B.{ln} FROM (SELECT A.index, A.linebundle, A.{ln} FROM
-				(SELECT index, {ln},
-					concat({ln}, ' ', lead({ln}) OVER (ORDER BY index ASC), ' ', lag({ln}) OVER (ORDER BY index ASC)) as linebundle
-					FROM {db} WHERE {whr} ) A
-				) B
-				WHERE B.linebundle ~ %s {lim}"""
 
 			if re.search(r'x', wkid) is not None:
 				# we have exclusions
@@ -335,9 +328,22 @@ SELECT secondpass.index, secondpass.accented_line
 
 				SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
 					(SELECT index, accented_line,
-						concat(lead(accented_line) OVER (ORDER BY index ASC), ' ', accented_line, ' ', lag(accented_line) OVER (ORDER BY index ASC)) as linebundle
+						concat(lag(accented_line) OVER (ORDER BY index ASC), ' ', accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) as linebundle
 						FROM gr0007 WHERE ( wkuniversalid ~ 'gr0007' ) ) firstpass
 				where firstpass.index < 119176 and firstpass.index > 119172
+
+
+[g] dispensing with lag:
+
+SELECT secondpass.index, secondpass.accented_line
+				FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
+					(SELECT index, accented_line,
+						concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) as linebundle
+						FROM gr0007 WHERE ( wkuniversalid ~ 'gr0007' ) ) firstpass
+					) secondpass
+				WHERE secondpass.linebundle ~ 'τῷ φίλῳ μου' LIMIT 3000
+
+
 
 """
 

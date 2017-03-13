@@ -897,23 +897,23 @@ wordcounts
     </li>
     <li>
         Phrase searches are sent to one of two functions. If you pick a rare (accented) word, then that word will be searched.
-        Then its environs will be searched. Otherwise PostgreSQL will build a nested query to look at three-line windows of text that
+        Then its environs will be searched. Otherwise PostgreSQL will build a nested query to look at two-line windows of text that
         may or may not contain your phrase. <span class="emph">Most phrase searches will take roughly the same amount of time</span>
-        since this 'windowing' is itself where most of the calculating happens.
+        since this 'windowing' is itself where most of the expensive computation happens.
         <ul class="numbered">
-            <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 6625 texts and found 3 passages (<span class="colorhighlight">19.39s</span>)</span></li>
-            <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 6625 texts and found 84 passages (<span class="colorhighlight">23.68s</span>)</span></li>
+            <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 6625 texts and found 3 passages (<span class="colorhighlight">16.39s</span>)</span></li>
+            <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 6625 texts and found 85 passages (<span class="colorhighlight">16.28s</span>)</span></li>
             <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 3008 texts and found 2 passages (<span class="colorhighlight">4.89s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
             <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 3008 texts and found 32 passages (<span class="colorhighlight">4.97s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
             <li><span class="sampleoutput">Sought οὐ μὴν ἀλλ; Searched 3,008 texts and found 718 passages (<span class="colorhighlight">14.97s</span>). Searched between 850 B.C.E. and 1 C.E.</span></li>
-            <li><span class="sampleoutput">Sought τῷ φίλῳ μου; 236,845 texts and found 6 passages (<span class="colorhighlight">22.69s</span>)</span></li>
+            <li><span class="sampleoutput">Sought τῷ φίλῳ μου; 236,845 texts and found 6 passages (<span class="colorhighlight">19.8s</span>)</span></li>
+            <li><span class="sampleoutput">Sought οὐ μὴν ἀλλ; 236,845 texts and found 2,346 passages (<span class="colorhighlight">39.39s</span>)</span></li>
         </ul>
     As above, a common word sought across the whole corpus will slow you down.
-    Most phrase searches are likely to contain common words. So you will need strategies to make the haystack smaller
+    Most phrase searches are likely to contain common words. So you should consider strategies to make the haystack smaller
     unless you have some time to spare. It is totally safe to try to double-check Dennison on οὐ μὴν ἀλλὰ, but you should
-    throw some restrictions in there to avoid a long search (that yields more results than you want anyway). Ponder this search and ask yourself
-    if the fact that Hipparchia took 1.5m to generate the results is the real problem here:
-    <span class="sampleoutput">Sought και δη και; Searched 6625 texts and found 2535 passages (<span class="colorhighlight">95.29s</span>)</span>
+    throw some restrictions in there to avoid a long search (that yields more results than you want anyway). Waiting 40s for 2400 results
+    is perhaps less of a problem than having 2400 results to read after the search completes.
     </li>
 </ul>
     <span class="emph">Hardware also matters</span>: προκατέλαβον (the first example above)
