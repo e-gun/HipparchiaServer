@@ -1049,8 +1049,8 @@ wordcounts
                     </li>
                         <ul class="roman">
                             <li>
-                                Idiosyncratic characters that have no unicode representation. You will see <span class="emph">◦</span> in the text. If you look at
-                                the database and/or HTML output you will see a code number:
+                                Idiosyncratic characters that have no unicode representation. You will see <span class="emph">◦</span>
+                                in the text. If you look at the database and/or HTML output you will see a code number:
                                 <code>hmu_idiosyncratic_char value="1122"</code>, e.g.
                                 This can be decoded via the Betacode manual.
                                 It is possible to know what was in the text, but it is not possible to display it, at least not yet.
@@ -1099,7 +1099,10 @@ wordcounts
                     <li>
                         Clicking on any word in a browser passage is supposed to parse it and open a dictionary window that defines
                         that word. This often works, but not always. The parser has to know the word. And then the dictionary entry
-                        has to match the parser's idea of what the dictionary entry should be. The hand-off between various sets of data
+                        has to match the parser's idea of what the dictionary entry should be. Consider the what happens with <code>ἰχθῦϲ</code>.
+                        If you click on that word, the parser will say <code>ἰχθῦϲ (from ἰχθύϲ)</code>. But ἰχθύϲ will not be found
+                        in the dictionary because LSJ has an entry for ἰχθῦϲ only: <code>ἰχθῦϲ (so Hdn.Gr.2.936, -ῦϲ and -ύϲ freq. in codd.),
+                        ύοϲ, ὁ, acc.</code> In short, the hand-off between various sets of data
                         is not always smooth. You can always look up any word manually by opening up the lexical tools panel:
                             <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Lexical tools">
                             <span class="ui-icon ui-icon-wrench"></span>
@@ -1139,7 +1142,7 @@ wordcounts
                         If a word does not exist in the parsing dictionary it will never get matched up with a dictionary entry.
                         This means that perfectly valid word forms will not be aggregated under their dictionary entry and
                         that the headword total count will be low. The parsing data was not derived from the full set of
-                        data that is available via Hipparchia. And inscriptional forms like <span class="emph">⒣ε̄μέρε̄ι</span>,
+                        data that is available via Hipparchia. And forms unique to the inscriptions like <span class="emph">⒣ε̄μέρε̄ι</span>,
                         <span class="emph">ϝεξέ̄κοντα</span>, and <span class="emph">ϙόϲμοϲ</span> are not something that that data knows about.
                     </li>
                     <li>
@@ -1172,7 +1175,7 @@ wordcounts
     and teams elected to generously donate their time and energy to the furtherance of human knowledge.
     <br />
     <br />
-    I leanrned Python by taking
+    I learned Python by taking
     <a href="https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-00sc-introduction-to-computer-science-and-programming-spring-2011/index.htm">
     "Introduction to Computer Science and Programming"</a> with John Guttag at MIT in 2013. Or, rather, I used the
     MIT OpenCourseWare materials to watch Prof. Guttag's 2011 lectures and to work on his problem sets. You could do the same
