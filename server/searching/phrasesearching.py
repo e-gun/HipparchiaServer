@@ -117,7 +117,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 			db = wkid[0:6]
 			qtemplate = """SELECT B.index, B.{ln} FROM (SELECT A.index, A.linebundle, A.{ln} FROM
 				(SELECT index, {ln},
-					concat({ln}, ' ', lead({ln}) OVER (ORDER BY index ASC), ' ', lag({ln}) OVER (ORDER BY index ASC)) as linebundle
+					concat(lead({ln}) OVER (ORDER BY index ASC), ' ', {ln}, ' ', lag({ln}) OVER (ORDER BY index ASC)) as linebundle
 					FROM {db} WHERE {whr} ) A
 				) B
 				WHERE B.linebundle ~ %s {lim}"""
@@ -313,6 +313,14 @@ from
  ) B
  where B.linebundle ~ 'et tamen'
 
+EXPLAIN:
+﻿Subquery Scan on a  (cost=1676.61..2212.46 rows=2 width=36)
+  Filter: (a.linebundle ~ 'et tamen'::text)
+  ->  WindowAgg  (cost=1676.61..2021.09 rows=15310 width=68)
+        ->  Sort  (cost=1676.61..1714.89 rows=15310 width=52)
+              Sort Key: lt1212.index
+              ->  Seq Scan on lt1212  (cost=0.00..612.40 rows=15310 width=52)
+                    Filter: (index > 0)
 
 
 """
