@@ -114,8 +114,8 @@ def authorlist():
 #
 # helpers & routes you should not browse directly
 #
-@hipparchia.route('/executesearch', methods=['GET'])
-def executesearch():
+@hipparchia.route('/executesearch/<seeking>', methods=['GET'])
+def executesearch(seeking):
 	"""
 	the interface to all of the other search functions
 	tell me what you are looking for and i'll try to find it
@@ -128,7 +128,7 @@ def executesearch():
 	# need to sanitize input at least a bit: remove digits and punctuation
 	# dispatcher will do searchtermcharactersubstitutions() and massagesearchtermsforwhitespace() to take care of lunate sigma, etc.
 	try:
-		seeking = cleaninitialquery(request.args.get('seeking', ''))
+		seeking = cleaninitialquery(seeking)
 	except:
 		seeking = ''
 
@@ -170,6 +170,8 @@ def executesearch():
 		poll[ts].statusis('Compiling the list of works to search')
 
 		authorandworklist = compileauthorandworklist(listmapper)
+		if authorandworklist is None:
+			return executesearch('')
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		poll[ts].statusis('Marking exclusions from the list of works to search')
 		authorandworklist = flagexclusions(authorandworklist)

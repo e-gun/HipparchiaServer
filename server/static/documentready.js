@@ -62,8 +62,8 @@ $(document).ready( function () {
 
         var searchid = Date.now();
 
-        if (proximate == '') { var url = '/executesearch?seeking='+seeking+'&id='+searchid; }
-        else { var url = '/executesearch?seeking='+seeking+'&proximate='+proximate+'&id='+searchid; }
+        if (proximate == '') { var url = '/executesearch/'+seeking+'?id='+searchid; }
+        else { var url = '/executesearch/'+seeking+'?proximate='+proximate+'&id='+searchid; }
 
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
 

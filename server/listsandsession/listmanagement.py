@@ -7,8 +7,9 @@
 """
 
 import re
-from collections import deque
+
 from flask import session
+
 from server.formatting_helper_functions import stripaccents
 from server.listsandsession.sessionfunctions import reducetosessionselections, justlatin
 
@@ -63,7 +64,13 @@ def compileauthorandworklist(listmapper):
 
 		# now we look at things explicitly chosen:
 		authors = [a for a in session['auselections']]
-		worksof = [w.universalid for a in authors for w in ad[a].listofworks]
+		try:
+			worksof = [w.universalid for a in authors for w in ad[a].listofworks]
+		except KeyError:
+			# e.g., you had a LAT list with Cicero and then changed to GRK as you language
+			session['auselections'] = []
+			session.modified = True
+			return
 		works = session['wkselections']
 		passages = session['psgselections']
 

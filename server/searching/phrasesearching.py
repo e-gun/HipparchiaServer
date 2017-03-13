@@ -115,9 +115,11 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 				dbconnection.commit()
 			indices = None
 			db = wkid[0:6]
+			# concat({ln}, ' ', lead({ln}) OVER (ORDER BY index ASC), ' ', lag({ln}) OVER (ORDER BY index ASC)) as linebundle
+			# concat(lead({ln}) OVER (ORDER BY index ASC), ' ', {ln}, ' ', lag({ln}) OVER (ORDER BY index ASC)) as linebundle
 			qtemplate = """SELECT B.index, B.{ln} FROM (SELECT A.index, A.linebundle, A.{ln} FROM
 				(SELECT index, {ln},
-					concat(lead({ln}) OVER (ORDER BY index ASC), ' ', {ln}, ' ', lag({ln}) OVER (ORDER BY index ASC)) as linebundle
+					concat({ln}, ' ', lead({ln}) OVER (ORDER BY index ASC), ' ', lag({ln}) OVER (ORDER BY index ASC)) as linebundle
 					FROM {db} WHERE {whr} ) A
 				) B
 				WHERE B.linebundle ~ %s {lim}"""
