@@ -115,9 +115,15 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 				dbconnection.commit()
 			indices = None
 			db = wkid[0:6]
-			# concat({ln}, ' ', lead({ln}) OVER (ORDER BY index ASC), ' ', lag({ln}) OVER (ORDER BY index ASC)) as linebundle
-			# concat(lead({ln}) OVER (ORDER BY index ASC), ' ', {ln}, ' ', lag({ln}) OVER (ORDER BY index ASC)) as linebundle
-			qtemplate = """SELECT B.index, B.{ln} FROM (SELECT A.index, A.linebundle, A.{ln} FROM
+			qtemplate = """SELECT secondpass.index, secondpass.{ln}
+				FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.{ln} FROM
+					(SELECT index, {ln},
+						concat(lag({ln}) OVER (ORDER BY index ASC), ' ', {ln}, ' ', lead({ln}) OVER (ORDER BY index ASC)) as linebundle
+						FROM {db} WHERE {whr} ) firstpass
+					) secondpass
+				WHERE secondpass.linebundle ~ %s {lim}"""
+
+			oldqtemplate = """SELECT B.index, B.{ln} FROM (SELECT A.index, A.linebundle, A.{ln} FROM
 				(SELECT index, {ln},
 					concat({ln}, ' ', lead({ln}) OVER (ORDER BY index ASC), ' ', lag({ln}) OVER (ORDER BY index ASC)) as linebundle
 					FROM {db} WHERE {whr} ) A
@@ -181,7 +187,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 			locallineobjects.reverse()
 			# debugging
 			# for l in locallineobjects:
-			# 	print(l.universalid, l.locus(), getattr(l,use))
+			#	print(l.universalid, l.locus(), getattr(l,use))
 			gotmyonehit = False
 			while locallineobjects and count.value <= int(session['maxresults']) and gotmyonehit == False:
 				# windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]
@@ -203,8 +209,8 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 						next = makeablankline('gr0000w000', -1)
 
 					if lo.wkuinversalid != next.wkuinversalid or lo.index != (next.index - 1):
-						# this was the next line on the pile, not the actual next line
-						# usually you won't get a hit by grabbing the next line, but sometimes you do...
+						# you grabbed the next line on the pile (e.g., index = 9999), not the actual next line (e.g., index = 101)
+						# usually you won't get a hit by grabbing the next db line, but sometimes you do...
 						query = 'SELECT * FROM ' + wkid[0:6] + ' WHERE index=%s'
 						data = (lo.index + 1,)
 						curs.execute(query, data)
@@ -301,29 +307,37 @@ from
 	) SQ
 where SQ.stripped_line ~ 'stupr'
 
-[e] searching a linebundle:
 
-select B.index, B.linebundle
-from
-(select A.index, A.linebundle
-from
-(select index, stripped_line,
-	concat(stripped_line, ' ', lead(stripped_line) over (ORDER BY index asc), ' ', lag(stripped_line) over (ORDER BY index asc)) as linebundle
-	from lt1212
-	where (index > 0)
- ) A
- ) B
- where B.linebundle ~ 'et tamen'
+[e] putting it all together
 
-EXPLAIN:
-﻿Subquery Scan on a  (cost=1676.61..2212.46 rows=2 width=36)
-  Filter: (a.linebundle ~ 'et tamen'::text)
-  ->  WindowAgg  (cost=1676.61..2021.09 rows=15310 width=68)
-        ->  Sort  (cost=1676.61..1714.89 rows=15310 width=52)
-              Sort Key: lt1212.index
-              ->  Seq Scan on lt1212  (cost=0.00..612.40 rows=15310 width=52)
-                    Filter: (index > 0)
+SELECT secondpass.index, secondpass.accented_line
+				FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
+					(SELECT index, accented_line,
+						concat(lag(accented_line) OVER (ORDER BY index ASC), ' ', accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) as linebundle
+						FROM gr0007 WHERE ( wkuniversalid ~ 'gr0007' ) ) firstpass
+					) secondpass
+				WHERE secondpass.linebundle ~ 'τῷ φίλῳ μου' LIMIT 3000
 
+﻿Limit  (cost=27763.53..32353.51 rows=14 width=97)
+  ->  Subquery Scan on firstpass  (cost=27763.53..32353.51 rows=14 width=97)
+        Filter: (firstpass.linebundle ~ 'τῷ φίλῳ μου'::text)
+        ->  WindowAgg  (cost=27763.53..30588.13 rows=141230 width=129)
+              ->  Sort  (cost=27763.53..28116.61 rows=141230 width=97)
+                    Sort Key: gr0007.index
+                    ->  Seq Scan on gr0007  (cost=0.00..7958.44 rows=141230 width=97)
+                          Filter: ((wkuniversalid)::text ~ 'gr0007'::text)
+
+
+[f] peeking at the windows: ﻿119174 is where you will find:
+	index: 119174
+	linebundle: ἆρά γ ἄξιον τῇ χάριτι ταύτῃ παραβαλεῖν τὰϲ τρίτον ἔφη τῷ φίλῳ μου τούτῳ χαριζόμενοϲ πόλεωϲ καὶ διὰ τὸν οἰκιϲτὴν ἀλέξανδρον καὶ
+	accented_line: τρίτον ἔφη τῷ φίλῳ μου τούτῳ χαριζόμενοϲ
+
+				SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
+					(SELECT index, accented_line,
+						concat(lead(accented_line) OVER (ORDER BY index ASC), ' ', accented_line, ' ', lag(accented_line) OVER (ORDER BY index ASC)) as linebundle
+						FROM gr0007 WHERE ( wkuniversalid ~ 'gr0007' ) ) firstpass
+				where firstpass.index < 119176 and firstpass.index > 119172
 
 """
 
