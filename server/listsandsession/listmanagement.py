@@ -67,10 +67,10 @@ def compileauthorandworklist(listmapper):
 		try:
 			worksof = [w.universalid for a in authors for w in ad[a].listofworks]
 		except KeyError:
-			# e.g., you had a LAT list with Cicero and then changed to GRK as you language
+			# e.g., you had a LAT list with Cicero and then deactivated that set of authors and works
+			worksof = []
 			session['auselections'] = []
 			session.modified = True
-			return
 		works = session['wkselections']
 		passages = session['psgselections']
 
