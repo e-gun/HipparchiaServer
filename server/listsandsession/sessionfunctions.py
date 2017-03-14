@@ -409,7 +409,7 @@ def sessionselectionsinfo(authordict, workdict):
 				uid = s[:6]
 				ao = authordict[uid]
 				wk = workdict[s]
-				thehtml += '<span class="wk{soe}" id="searchselection_0{sc}" listval="{lv}">{au}</span>, ' \
+				thehtml += '<span class="wk{soe}" id="searchselection_0{sc}" listval="{lv}">{au}, ' \
 				           '<span class="pickedwork">{wk}</span></span>' \
 				           '<br />'.format(soe=selectionorexclusion, sc=selcount, lv=localval, au=ao.akaname, wk=wk.title)
 		
@@ -430,7 +430,7 @@ def sessionselectionsinfo(authordict, workdict):
 					if w.universalid == s[0:10]:
 						wk = w
 				loc = citationfunctions.prolixlocus(wk, citationtuple)
-				thehtml += '<span class="psg{soe}" id="searchselection_0{sc}" listval="{lv}">{au}</span>, ' \
+				thehtml += '<span class="psg{soe}" id="searchselection_0{sc}" listval="{lv}">{au}, ' \
 				           '<span class="pickedwork">{wk}</span>&nbsp;<span class="pickedsubsection">{loc}</span></span>' \
 				           '<br />'.format(soe=selectionorexclusion, sc=selcount, lv=localval, au=ao.akaname, wk=wk.title, loc=loc)
 		

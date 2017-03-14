@@ -169,7 +169,7 @@ def formatdictionarysummary(summarydict):
 				 'senses': {'items': senses, 'classone': 'sensesummary', 'classtwo': 'sensesum', 'label': 'Senses'}
 				 }
 
-	summary = ''
+	outputlist = []
 
 	for section in ['senses', 'authors', 'quotes']:
 		sec = sections[section]
@@ -178,18 +178,20 @@ def formatdictionarysummary(summarydict):
 		classtwo = sec['classtwo']
 		label = sec['label']
 		if len(items) > 0:
-			summary += '<div class="{cl}"><span class="highlight">{lb}</span><br \>\n'.format(cl=classone, lb=label)
+			outputlist.append('<div class="{cl}"><span class="highlight">{lb}</span><br \>'.format(cl=classone, lb=label))
 		if len(items) == 1:
-			summary += '<span class="{cl}">{item}</span><br \>\n'.format(cl=classtwo, item=items[0])
+			outputlist.append('<span class="{cl}">{item}</span><br \>'.format(cl=classtwo, item=items[0]))
 		else:
 			count = 0
 			for i in items:
 				count += 1
-				summary += '<span class="{cl}">({ct})&nbsp;{item}</span><br \>\n'.format(cl=classtwo, item=i, ct=count)
+				outputlist.append('<span class="{cl}">({ct})&nbsp;{item}</span><br \>'.format(cl=classtwo, item=i, ct=count))
 
-	summary += '</div><br \><br \>\n<span class="highlight">Full entry:</span><br \>'
+	outputlist.append('</div><br \><br \>\n<span class="highlight">Full entry:</span><br \>')
 
-	return summary
+	summarystring = '\n'.join(outputlist)
+
+	return summarystring
 
 
 def formateconsolidatedgrammarentry(consolidatedentry):
@@ -207,22 +209,25 @@ def formateconsolidatedgrammarentry(consolidatedentry):
 
 	analysislist = consolidatedentry['anal']
 
-	analysis = '<p class="obsv">(' + str(consolidatedentry['count']) + ')&nbsp;'
-	wordandtranslation = '<span class="dictionaryform">'+consolidatedentry['word'] + '</span>'
+	outputlist = []
+	outputlist.append('<p class="obsv">({ct})&nbsp;'.format(ct=str(consolidatedentry['count'])))
+	wordandtranslation = '<span class="dictionaryform">{df}</span>'.format(df=consolidatedentry['word'])
 	if len(consolidatedentry['transl']) > 1:
-		wordandtranslation += ', '  + consolidatedentry['transl']
+		wordandtranslation = ', '.join([wordandtranslation,consolidatedentry['transl']])
 
-	analysis += '<span class="dictionaryform">' + consolidatedentry['form'] + '</span> (from '+wordandtranslation+'): &nbsp;'
+	outputlist.append('<span class="dictionaryform">{df}</span> (from {wt}): &nbsp;'.format(df=consolidatedentry['form'], wt=wordandtranslation))
 	if len(analysislist) == 1:
-		analysis += '\n<br /><span class="possibility">' + analysislist[0] + '</span>&nbsp;'
+		outputlist.append('<br /><span class="possibility">{pos}</span>&nbsp;'.format(pos=analysislist[0]))
 	else:
 		count = 0
 		for a in analysislist:
 			count += 1
-			analysis += '\n<br />[' + chr(count+96) + ']&nbsp;<span class="possibility">' + a + '</span>'
-		analysis += '&nbsp;'
+			outputlist.append('<br />[{ct}]&nbsp;<span class="possibility">{a}</span>'.format(ct=chr(count+96), a=a))
+		outputlist.append('&nbsp;')
 
-	return analysis
+	analysisstring = '\n'.join(outputlist)
+
+	return analysisstring
 
 
 def formatgloss(entrybody):
@@ -239,7 +244,7 @@ def formatgloss(entrybody):
 	
 	senses[:] = [value.string for value in senses]
 	sources[:] = [value.string for value in sources]
-	
+
 	glosshtml += '<span class="highlight">Reported by:</span><br />\n'
 	for s in sources:
 		glosshtml += s + ', '
@@ -321,24 +326,28 @@ def insertbrowserjs(htmlentry):
 	"""
 	now: '<bibl id="gr0527w004_AT_36|11"...>
 	you have something that document.getElementById can click, but no JS to support the click
+
 	add the JS
+
 	:param htmlentry:
 	:return:
 	"""
-	
+
+	outputlist = [htmlentry]
+
 	# clickfinder = re.compile(r'<bibl id="(..\d\d\d\dw\d\d\d\_LN_.*?)"')
 	clickfinder = re.compile(r'<bibl id="(..\d\d\d\dw\d\d\d\_PE_.*?)"')
 	clicks = re.findall(clickfinder,htmlentry)
 	
 	if len(clicks) > 0:
-		clickableentry = htmlentry + '\n<script>'
+		outputlist.append('<script>')
 		for c in clicks:
-			clickableentry += 'document.getElementById(\''+c+'\').onclick = openbrowserfromclick;\n'
-		clickableentry += '</script>'
-	else:
-		clickableentry = htmlentry
+			outputlist.append('document.getElementById(\'{c}\').onclick = openbrowserfromclick;'.format(c=c))
+		outputlist.append('</script>')
+
+	clickableentrystring = '\n'.join(outputlist)
 	
-	return clickableentry
+	return clickableentrystring
 
 
 def dbquickfixes(listofnames):

@@ -153,7 +153,7 @@ def sortauthorandworklists(authorandworklist, authorsdict):
 		# http://stackoverflow.com/questions/5212870/sorting-a-python-list-by-two-criteria#17109098
 		# sorted(list, key=lambda x: (x[0], -x[1]))
 
-		templist = sorted(templist, key=lambda x: (x[0], x[2]))
+		templist = sorted(templist, key=lambda x: (x[0], x[2], x[1]))
 		for t in templist:
 			newlist.append(t[1])
 	else:
