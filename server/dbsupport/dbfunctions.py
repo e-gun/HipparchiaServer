@@ -6,11 +6,12 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import psycopg2
 import configparser
 
-from server.hipparchiaclasses import dbAuthor, dbOpus, dbWorkLine
+import psycopg2
+
 from server import hipparchia
+from server.hipparchiaclasses import dbAuthor, dbOpus, dbWorkLine
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -216,7 +217,7 @@ def simplecontextgrabber(workobject, focusline, linesofcontext, cursor):
 
 	workdbname = workobject.universalid[0:6]
 	# step two use the index value to grab the environs
-	query = 'SELECT * FROM ' + workdbname + ' WHERE (wkuniversalid = %s) AND (index BETWEEN %s AND %s) ORDER BY index'
+	query = 'SELECT * FROM {wk} WHERE (wkuniversalid = %s) AND (index BETWEEN %s AND %s) ORDER BY index'.format(wk=workdbname)
 	data = (workobject.universalid, focusline - (linesofcontext / 2), focusline + (linesofcontext / 2))
 	cursor.execute(query, data)
 	foundlines = cursor.fetchall()
@@ -229,7 +230,7 @@ def grabonelinefromwork(workdbname, lineindex, cursor):
 	grab a line and return its contents
 	"""
 	
-	query = 'SELECT * FROM ' + workdbname + ' WHERE index = %s'
+	query = 'SELECT * FROM {wk} WHERE index = %s'.format(wk=workdbname)
 	data = (lineindex,)
 	cursor.execute(query, data)
 	foundline = cursor.fetchone()

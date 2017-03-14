@@ -114,7 +114,7 @@ def aggregatelines(firstline, lastline, cursor, audbname):
 	# transitional until all code is 'monolithic'
 	audbname = audbname[0:6]
 
-	query = 'SELECT * FROM ' + audbname + ' WHERE index >= %s AND index <= %s'
+	query = 'SELECT * FROM {au} WHERE index >= %s AND index <= %s'.format(au=audbname)
 	data = (firstline, lastline)
 	cursor.execute(query, data)
 	lines = cursor.fetchall()
