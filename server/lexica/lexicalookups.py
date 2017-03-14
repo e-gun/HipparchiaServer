@@ -190,7 +190,7 @@ def browserdictionarylookup(count, seekingentry, usedictionary, cursor):
 	# 	entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
 	wordobjects = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', seekingentry, syntax='=')
-	cleanedentry = ''
+	outputlist = []
 	clickableentry = ''
 
 	if wordobjects != None:
@@ -210,23 +210,23 @@ def browserdictionarylookup(count, seekingentry, usedictionary, cursor):
 
 			if type != 'gloss':
 				if count == 0:
-					cleanedentry += '<hr /><p class="dictionaryheading">{ent}'.format(ent=w.entry)
+					outputlist.append('<hr /><p class="dictionaryheading">{ent}'.format(ent=w.entry))
 				else:
 					if includesubcounts:
 						countval = str(count) + chr(subcount+96)
 					else:
 						countval = str(count)
-					cleanedentry += '<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'.format(cv=countval, ent=w.entry)
+					outputlist.append('<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'.format(cv=countval, ent=w.entry))
 				if u'\u0304' in w.metricalentry or u'\u0306' in w.metricalentry:
-					cleanedentry += '&nbsp;<span class="metrics">[{me}]</span>'.format(me=w.metricalentry)
-				cleanedentry += '</p>\n'
+					outputlist.append('&nbsp;<span class="metrics">[{me}]</span>'.format(me=w.metricalentry))
+				outputlist.append('</p>')
 
 				if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
 					countobject = findtotalcounts(seekingentry, cursor)
 					if countobject:
-						cleanedentry += '<p class="wordcounts">Prevalence (all forms): '
-						cleanedentry += formatprevalencedata(countobject)
-						cleanedentry += '</p>\n'
+						outputlist.append('<p class="wordcounts">Prevalence (all forms): ')
+						outputlist.append(formatprevalencedata(countobject))
+						outputlist.append('</p>')
 
 				if hipparchia.config['SHOWLEXICALSUMMARYINFO'] == 'yes':
 					lemmaobject = grablemmataobjectfor(w.entry, usedictionary+'_lemmata', cursor)
@@ -236,28 +236,29 @@ def browserdictionarylookup(count, seekingentry, usedictionary, cursor):
 
 				if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
 					# either you have turned off summary info or this is basically just a gloss entry
-					cleanedentry += formatmicroentry(definition)
+					outputlist.append(formatmicroentry(definition))
 				else:
-					cleanedentry += formatdictionarysummary(summarydict)
-					cleanedentry += grabheadmaterial(definition) + '<br />\n'
+					outputlist.append(formatdictionarysummary(summarydict))
+					outputlist.append(grabheadmaterial(definition) + '<br />')
 					senses = grabsenses(definition)
 					if len(senses) > 0:
 						for n in senses:
-							cleanedentry += n
+							outputlist.append(n)
 					else:
-						cleanedentry += formatmicroentry(definition)
+						outputlist.append(formatmicroentry(definition))
 			else:
-				cleanedentry += '<br />\n<p class="dictionaryheading">{ent}<span class="metrics">[gloss]</span></p>\n'.format(ent=w.entry)
-				cleanedentry += formatgloss(definition)
+				outputlist.append('<br />\n<p class="dictionaryheading">{ent}<span class="metrics">[gloss]</span></p>'.format(ent=w.entry))
+				outputlist.append(formatgloss(definition))
 
+			cleanedentry = '\n'.join(outputlist)
 			clickableentry = insertbrowserlookups(cleanedentry)
 			clickableentry = insertbrowserjs(clickableentry)
 
 	else:
 		if count == 0:
-			cleanedentry += '<br />\n<p class="dictionaryheading">nothing found under <span class="emph">{skg}</span></p>\n'.format(skg=seekingentry)
+			cleanedentry = '<br />\n<p class="dictionaryheading">nothing found under <span class="emph">{skg}</span></p>\n'.format(skg=seekingentry)
 		else:
-			cleanedentry += '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="emph">{skg}</span></p>\n'.format(ct=count, skg=seekingentry)
+			cleanedentry = '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="emph">{skg}</span></p>\n'.format(ct=count, skg=seekingentry)
 		clickableentry = cleanedentry
 
 	return clickableentry
@@ -293,12 +294,13 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	# nothingfound = convertdictionaryfindintoobject('nothing', 'nodict')
 
 	if dictionary == 'latin_dictionary':
-		extra_column = 'entry_key'
+		extracolumn = 'entry_key'
 	else:
-		extra_column = 'unaccented_entry'
+		extracolumn = 'unaccented_entry'
 
-	query = 'SELECT entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body, ' \
-	        +extra_column+' FROM ' + dictionary + ' WHERE '+usecolumn+' '+syntax+' %s ORDER BY id_number ASC'
+	qtemplate = """SELECT entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body, {ec}
+					FROM {d} WHERE {col} {sy} %s ORDER BY id_number ASC"""
+	query = qtemplate.format(ec=extracolumn, d=dictionary, col=usecolumn, sy=syntax)
 	data = (seeking,)
 	cursor.execute(query, data)
 
@@ -395,8 +397,9 @@ def bulkddictsearch(cursor, dictionary, usecolumn, seeking):
 	:param seeking:
 	:return:
 	"""
-	
-	query = 'SELECT * FROM ' + dictionary + ' WHERE '+usecolumn+' ~* %s'
+
+	qtemplate = 'SELECT * FROM {d} WHERE {d} ~* %s'
+	query = qtemplate.format(d=dictionary, c=usecolumn)
 	data = (seeking,)
 	cursor.execute(query, data)
 
@@ -485,7 +488,7 @@ def findcountsviawordcountstable(wordtocheck):
 		# note that we just lost "'φερον", "'φερεν", "'φέρεν", "'φερεϲ", "'φερε",...
 		# but the punctuation killer probably zapped them long ago
 		# this needs to be addressed in HipparchiaBuilder
-		q = 'SELECT * FROM wordcounts_'+initial+' WHERE entry_name = %s'
+		q = 'SELECT * FROM wordcounts_{i} WHERE entry_name = %s'.format(i=initial)
 	else:
 		q = 'SELECT * FROM wordcounts_0 WHERE entry_name = %s'
 
@@ -512,9 +515,8 @@ def getobservedwordprevalencedata(dictionaryword):
 
 	if thiswordoccurs:
 		# thiswordoccurs: <server.hipparchiaclasses.dbWordCountObject object at 0x10ad63b00>
-		prevalence = 'Prevalence (this form): '
-		prevalence += formatprevalencedata(thiswordoccurs)
-		thehtml = '<p class="wordcounts">' + prevalence + '</p>'
+		prevalence = 'Prevalence (this form): {pd}'.format(pd=formatprevalencedata(thiswordoccurs))
+		thehtml = '<p class="wordcounts">{pr}</p>'.format(pr=prevalence)
 
 		return {'value': thehtml}
 	else:
@@ -594,7 +596,7 @@ def grablemmataobjectfor(entryname, db, cursor):
 	:return:
 	"""
 
-	q = 'SELECT * FROM ' + db + ' WHERE dictionary_entry=%s'
+	q = 'SELECT * FROM {db} WHERE dictionary_entry=%s'.format(db=db)
 	d = (entryname,)
 	cursor.execute(q, d)
 	l = cursor.fetchone()
@@ -606,6 +608,7 @@ def grablemmataobjectfor(entryname, db, cursor):
 		lemmaobject = dbLemmaObject('[entry not found]', -1, '')
 
 	return lemmaobject
+
 
 """
 [probably not] TODO: clickable INS or DDP xrefs in dictionary entries
