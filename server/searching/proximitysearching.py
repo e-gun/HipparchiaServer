@@ -11,7 +11,7 @@ import re
 from flask import session
 
 from server.searching.searchformatting import aggregatelines
-from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion
+from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, dblooknear
 
 
 def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, authors):
@@ -28,7 +28,7 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, aut
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
 	# back for checking: but the Aetolians are likley not among those passages...
-	templimit = 9999
+	templimit = 99999
 
 	if 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
@@ -37,11 +37,17 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, aut
 		hits = substringsearch(firstterm, cursor, workdbname, authors, templimit)
 
 	fullmatches = []
-	for hit in hits:
-		wordset = aggregatelines(hit[0] - distanceinlines, hit[0] + distanceinlines, cursor, workdbname)
-		if session['nearornot'] == 'T' and re.search(secondterm, wordset):
+	if session['accentsmatter'] == 'yes':
+		usecolumn = 'accented_line'
+	else:
+		usecolumn = 'stripped_line'
+
+	while hits and len(fullmatches) < int(session['maxresults']):
+		hit = hits.pop()
+		near = dblooknear(hit[0], distanceinlines + 1, secondterm, hit[1], usecolumn, cursor)
+		if session['nearornot'] == 'T' and near:
 			fullmatches.append(hit)
-		elif session['nearornot'] == 'F' and re.search(secondterm, wordset) is None:
+		elif session['nearornot'] == 'F' and not near:
 			fullmatches.append(hit)
 	
 	return fullmatches
@@ -114,3 +120,39 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 			fullmatches.append(hit)
 	
 	return fullmatches
+
+
+# slated for removal
+
+def oldwithinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, authors):
+	"""
+
+	after finding x, look for y within n lines of x
+
+	people who send phrases to both halves and/or a lot of regex will not always get what they want
+	:param distanceinlines:
+	:param additionalterm:
+	:return:
+	"""
+
+	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
+	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
+	# back for checking: but the Aetolians are likley not among those passages...
+	templimit = 9999
+
+	if 'x' in workdbname:
+		workdbname = re.sub('x', 'w', workdbname)
+		hits = simplesearchworkwithexclusion(firstterm, workdbname, authors, cursor, templimit)
+	else:
+		hits = substringsearch(firstterm, cursor, workdbname, authors, templimit)
+
+	fullmatches = []
+	for hit in hits:
+		wordset = aggregatelines(hit[0] - distanceinlines, hit[0] + distanceinlines, cursor, workdbname)
+		if session['nearornot'] == 'T' and re.search(secondterm, wordset):
+			fullmatches.append(hit)
+		elif session['nearornot'] == 'F' and re.search(secondterm, wordset) is None:
+			fullmatches.append(hit)
+
+	return fullmatches
+

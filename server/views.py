@@ -1466,8 +1466,6 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	:return:
 	"""
 
-	# print('called startwspolling()')
-
 	try:
 		theport = int(theport)
 	except:
@@ -1543,7 +1541,7 @@ def checkforactivesearch(ts):
 			if poll[ts].getactivity():
 				return json.dumps(theport)
 			else:
-				print('checkforactivesearch() reports that the websocket still inactive: there is a serious problem?')
+				print('checkforactivesearch() reports that the websocket is still inactive: there is a serious problem?')
 				return json.dumps('no')
 		except:
 			return json.dumps('no')

@@ -410,4 +410,14 @@ def findleastcommontermcount(searchphrase):
 	return fewesthits
 
 
+def dblooknear(index, distanceinlines, secondterm, workid, usecolumn, cursor):
 
+	table = workid[0:6]
+	q = 'SELECT index FROM {db} WHERE (index > %s AND index < %s AND wkuniversalid = %s AND {c} ~ %s)'.format(db=table, c=usecolumn)
+	d = (index - distanceinlines, index + distanceinlines, workid, secondterm)
+	cursor.execute(q,d)
+	hit = cursor.fetchall()
+	if hit:
+		return True
+	else:
+		return False
