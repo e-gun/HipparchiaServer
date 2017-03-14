@@ -195,9 +195,10 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor, templimi
 		qw = qw[0:-4] + ') AND ('
 	# drop the trailing ') AND ('
 	qw = qw[0:-6]
-	
-	query = 'SELECT * FROM ' + db + ' WHERE ( wkuniversalid=%s ) AND ('  \
-			+ columna + ' ' + mysyntax + ' %s OR ' + columnb + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC '+mylimit
+
+
+	qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {a} {sy} %s OR {b} {sy} %s ) {qw} ORDER BY index ASC {l}'
+	query = qtemplate.format(db=db, a=columna, sy=mysyntax, b=columnb, qw=qw, l=mylimit)
 	data = tuple(d)
 	cursor.execute(query, data)
 	found = cursor.fetchall()
@@ -236,14 +237,16 @@ def substringsearch(seeking, cursor, workdbname, authors, templimit=None):
 	
 	mysyntax = '~*'
 	found = []
-	
+
 	if len(workdbname) == 10:
 		# e.g., 'lt1002w003'
-		query = 'SELECT * FROM ' + audbname + ' WHERE ( wkuniversalid=%s ) AND ( ' + column + ' ' + mysyntax + ' %s ) ' + mylimit
+		qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {c} {sy} %s ) {l}'
+		query = qtemplate.format(db=audbname, c=column, sy=mysyntax, l=mylimit)
 		data = (workdbname, seeking)
 	elif len(workdbname) == 6:
 		# e.g., 'lt0025'
-		query = 'SELECT * FROM ' + audbname + ' WHERE ( ' + column + ' ' + mysyntax + ' %s ) ' + mylimit
+		qtemplate = 'SELECT * FROM {db} WHERE ( {c} {sy} %s ) {l}'
+		query = qtemplate.format(db=audbname, c=column, sy=mysyntax, l=mylimit)
 		data = (seeking,)
 	else:
 		# e.g., 'lt0914w001_AT_3'
@@ -256,9 +259,10 @@ def substringsearch(seeking, cursor, workdbname, authors, templimit=None):
 			qw += 'AND (' + w[i][0] + ') '
 			d.append(w[i][1])
 
-		query = 'SELECT * FROM ' + db + ' WHERE ( wkuniversalid=%s ) AND (' + column + ' ' + mysyntax + ' %s) ' + qw + ' ORDER BY index ASC ' + mylimit
+		qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {c} {sy} ) {qw} ORDER BY index ASC {l}'
+		query = qtemplate.format(db=db, c=column, sy=mysyntax, l=mylimit, qw=qw)
 		data = tuple(d)
-	
+
 	try:
 		cursor.execute(query, data)
 		found = cursor.fetchall()
@@ -288,7 +292,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 
 	workdbname = workid[0:6]
 
-	query = 'SELECT * FROM ' + workdbname + ' WHERE index >= %s AND index <= %s ORDER BY index ASC'
+	query = 'SELECT * FROM {db} WHERE index >= %s AND index <= %s ORDER BY index ASC'.format(db=workdbname)
 	data = (linenumber-1, linenumber+1)
 	cursor.execute(query, data)
 	results = cursor.fetchall()

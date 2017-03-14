@@ -40,7 +40,7 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 	else:
 		syntax = '='
 
-	query = 'SELECT * FROM ' + usedictionary + '_morphology WHERE observed_form '+syntax+' %s'
+	query = 'SELECT * FROM {d}_morphology WHERE observed_form {sy} %s'.format(d=usedictionary, sy=syntax)
 	data = (word,)
 
 	cursor.execute(query, data)
@@ -325,7 +325,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber == 2:
 		# grab any/all variants: ⁰¹²³⁴⁵⁶⁷⁸⁹
-		newword = '^'+seeking+'[¹²³⁴⁵⁶⁷⁸⁹]'
+		newword = '^{sk}[¹²³⁴⁵⁶⁷⁸⁹]'.format(sk=seeking)
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
 	# elif trialnumber < maxtrials and '-' in seeking:
 	# 	newword = attemptelision(seeking)
