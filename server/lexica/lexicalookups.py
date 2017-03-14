@@ -57,11 +57,11 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 		# greek_morphology has προχοίδιον; the greek_dictionary has προχοΐδιον
 		try:
 			# have to 'try' because there might not be a word[-2]
-			if re.search(terminalacute,word[-1]) is not None and trialnumber < 4:
+			if re.search(terminalacute,word[-1]) and trialnumber < 4:
 				sub = cleanaccentsandvj(word[-1])
 				newword = word[:-1]+sub
 				matchingobject = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
-			elif re.search(terminalacute,word[-2]) is not None and trialnumber < 4:
+			elif re.search(terminalacute,word[-2]) and trialnumber < 4:
 				sub = cleanaccentsandvj(word[-2])
 				newword = word[:-2] + sub + word[-1]
 				matchingobject = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
@@ -186,7 +186,7 @@ def browserdictionarylookup(count, seekingentry, usedictionary, cursor):
 
 	# entry = re.sub(r'#','',entry)
 	#
-	# if re.search(r'\d$',entry) is not None:
+	# if re.search(r'\d$',entry):
 	# 	entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
 	wordobjects = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', seekingentry, syntax='=')
@@ -332,11 +332,11 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		# ὑποϲυναλείφομαι is in the dictionary, but greek_lemmata says to look for ὑπό-ϲυναλείφω
 		newword = seeking[:-1]+'ομαι'
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
-	elif trialnumber < maxtrials and re.search(r'ομαι$',seeking) is not None:
+	elif trialnumber < maxtrials and re.search(r'ομαι$',seeking):
 		# χαρίζω is in the dictionary, but greek_lemmata says to look for χαρίζομαι
 		newword = seeking[:-4]+'ω'
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
-	elif trialnumber < maxtrials and re.search(accenteddiaresis,seeking) is not None:
+	elif trialnumber < maxtrials and re.search(accenteddiaresis,seeking):
 		# false positives very easy here, but we are getting desperate and have nothing to lose
 		diaresis = re.search(accenteddiaresis, seeking)
 		head = seeking[:diaresis.start()]
@@ -345,7 +345,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		vowels = vowels[0] + 'ΐ'
 		newword = head + vowels + tail
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
-	elif trialnumber < maxtrials and re.search(unaccenteddiaresis,seeking) is not None:
+	elif trialnumber < maxtrials and re.search(unaccenteddiaresis,seeking):
 		diaresis = re.search(unaccenteddiaresis, seeking)
 		head = seeking[:diaresis.start()]
 		tail = seeking[diaresis.end():]
@@ -580,7 +580,7 @@ def formatprevalencedata(wordcountobject):
 				thehtml = thehtml[:-3]
 
 		key = 'frq'
-		if w.gettimelabel(key) is not None and re.search(r'core', w.gettimelabel(key)) is None:
+		if w.gettimelabel(key) and re.search(r'core', w.gettimelabel(key)) is None:
 			thehtml += '<p class="wordcounts">Relative frequency: <span class="italic">{lb}</span></p>\n'.format(lb=w.gettimelabel(key))
 
 	return thehtml

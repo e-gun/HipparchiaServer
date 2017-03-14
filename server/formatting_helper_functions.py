@@ -196,7 +196,7 @@ def formatpublicationinfo(pubinfo):
 		tag = next(iter(t.keys()))
 		val = next(iter(t.values()))
 		seek = re.compile('<' + tag + '>(.*?)</' + tag + '>')
-		if re.search(seek, pubinfo) is not None:
+		if re.search(seek, pubinfo):
 			found = re.search(seek, pubinfo)
 			foundinfo = avoidlonglines(found.group(1), maxlinelen, '<br />', [])
 			publicationhtml += '<span class="pub{t}">{va}{fi}{vb}</span>'.format(t=tag, va=val[0], fi=foundinfo, vb=val[1])
@@ -339,11 +339,11 @@ def attemptelision(hypenatedgreekheadword):
 	prefix = hyphenated.split('-')[0]
 	stem = hyphenated.split('-')[1]
 
-	if re.search(terminalacute, prefix[-1]) is not None and re.search(initialrough, stem[0]) is None and re.search(initialsmooth, stem[0]) is not None:
+	if re.search(terminalacute, prefix[-1]) and re.search(initialrough, stem[0]) is None and re.search(initialsmooth, stem[0]):
 		# print('A')
 		# vowel + vowel: 'ἀπό-ἀθρέω'
 		entry = prefix[:-1]+stripaccents(stem[0])+stem[1:]
-	elif re.search(terminalacute, prefix[-1]) is not None and re.search(initialrough, stem[0]) is None and re.search(initialrough, stem[0]) is None:
+	elif re.search(terminalacute, prefix[-1]) and re.search(initialrough, stem[0]) is None and re.search(initialrough, stem[0]) is None:
 		# print('B')
 		# vowel + consonant: 'ἀπό-νέω'
 		entry = prefix[:-1]+stripaccents(prefix[-1])+stem
@@ -366,7 +366,7 @@ def attemptelision(hypenatedgreekheadword):
 		else:
 			#print('C0')
 			pass
-	elif re.search(terminalacute, prefix[-1]) is not None and re.search(initialrough, stem[0]) is not None and re.search(unaspirated, prefix[-2]) is not None:
+	elif re.search(terminalacute, prefix[-1]) and re.search(initialrough, stem[0]) and re.search(unaspirated, prefix[-2]):
 		# print('D')
 		# vowel + rough and 'π' is in the prefix
 		entry = prefix[:-2] + aspirated + stripaccents(stem[0]) + stem[1:]

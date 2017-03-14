@@ -169,13 +169,13 @@ def modifysessionselections(cookiedict, authorgenreslist, workgenreslist, author
 			for item in cookievals:
 				if len(item) == 0:
 					cookievals.remove(item)
-				elif categories[cat]['validformat'] is not None:
+				elif categories[cat]['validformat']:
 					if re.search(categories[cat]['validformat'],item) is None:
 						cookievals.remove(item)
-				elif categories[cat]['unacceptable'] is not None:
-					if re.search(categories[cat]['unacceptable'], item) is not None:
+				elif categories[cat]['unacceptable']:
+					if re.search(categories[cat]['unacceptable'], item):
 						cookievals.remove(item)
-				elif categories[cat]['checkagainst'] is not None:
+				elif categories[cat]['checkagainst']:
 					if item not in categories[cat]['checkagainst']:
 						cookievals.remove(item)
 
@@ -348,8 +348,8 @@ def sessionselectionsinfo(authordict, workdict):
 			for s in session['agn' + selectionorexclusion]:
 				selcount += 1
 				localval += 1
-				thehtml += '<span class="agn' + selectionorexclusion + '" id="searchselection_0' + str(selcount) + \
-				           '" listval="' + str(localval) + '">' + s + '</span><br />\n'
+				thehtml += '<span class="agn{soe}" id="searchselection_0{sc}" listval="{lv}">{s}</span>' \
+				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, s=s)
 		
 		# [b] work genres
 		if len(session['wkgn' + selectionorexclusion]) > 0:
@@ -358,8 +358,8 @@ def sessionselectionsinfo(authordict, workdict):
 			for s in session['wkgn' + selectionorexclusion]:
 				selcount += 1
 				localval += 1
-				thehtml += '<span class="wkgn' + selectionorexclusion + '" id="searchselection_0' + str(selcount) + \
-				           '" listval="' + str(localval) + '">' + s + '</span><br />\n'
+				thehtml += '<span class="wkgn{soe}" id="searchselection_0{sc}" listval="{lv}">{s}</span>' \
+				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, s=s)
 
 		# [c] author location
 		if len(session['aloc' + selectionorexclusion]) > 0:
@@ -368,8 +368,8 @@ def sessionselectionsinfo(authordict, workdict):
 			for s in session['aloc' + selectionorexclusion]:
 				selcount += 1
 				localval += 1
-				thehtml += '<span class="aloc' + selectionorexclusion + '" id="searchselection_0' + str(selcount) + \
-				           '" listval="' + str(localval) + '">' + s + '</span><br />\n'
+				thehtml += '<span class="aloc{soe}" id="searchselection_0{sc}" listval="{lv}">{s}</span>' \
+				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, s=s)
 
 		# [d] work provenance
 		if len(session['wloc' + selectionorexclusion]) > 0:
@@ -378,8 +378,8 @@ def sessionselectionsinfo(authordict, workdict):
 			for s in session['wloc' + selectionorexclusion]:
 				selcount += 1
 				localval += 1
-				thehtml += '<span class="wloc' + selectionorexclusion + '" id="searchselection_0' + str(selcount) + \
-				           '" listval="' + str(localval) + '">' + s + '</span><br />\n'
+				thehtml += '<span class="wloc{soe}" id="searchselection_0{sc}" listval="{lv}">{s}</span>' \
+				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, s=s)
 
 		# [e] authors
 		if len(session['au' + selectionorexclusion]) > 0:
@@ -389,9 +389,8 @@ def sessionselectionsinfo(authordict, workdict):
 				selcount += 1
 				localval += 1
 				ao = authordict[s]
-				thehtml += '<span class="au' + selectionorexclusion + '" id="searchselection_0' + str(
-					selcount) + '" listval="' + \
-				           str(localval) + '">' + ao.akaname + '</span><br />\n'
+				thehtml += '<span class="au{soe}" id="searchselection_0{sc}" listval="{lv}">{au}</span>' \
+				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, au=ao.akaname)
 		
 		# [f] works
 		if len(session['wk' + selectionorexclusion]) == 0 and selectionorexclusion == 'exclusions' and session[
@@ -410,9 +409,9 @@ def sessionselectionsinfo(authordict, workdict):
 				uid = s[:6]
 				ao = authordict[uid]
 				wk = workdict[s]
-				thehtml += '<span class="wk' + selectionorexclusion + '" id="searchselection_0' + str(
-					selcount) + '" listval="' \
-				           + str(localval) + '">' + ao.akaname + ', <span class="pickedwork">' + wk.title + '</span></span><br />'
+				thehtml += '<span class="wk{soe}" id="searchselection_0{sc}" listval="{lv}">{au}</span>, ' \
+				           '<span class="pickedwork">{wk}</span></span>' \
+				           '<br />'.format(soe=selectionorexclusion, sc=selcount, lv=localval, au=ao.akaname, wk=wk.title)
 		
 		# [g] passages
 		if len(session['psg' + selectionorexclusion]) > 0:
@@ -431,10 +430,9 @@ def sessionselectionsinfo(authordict, workdict):
 					if w.universalid == s[0:10]:
 						wk = w
 				loc = citationfunctions.prolixlocus(wk, citationtuple)
-				thehtml += '<span class="psg' + selectionorexclusion + '" id="searchselection_0' + str(
-					selcount) + '" listval="' \
-				           + str(localval) + '">' + ao.shortname + ', <span class="pickedwork">' + wk.title + \
-				           '</span>&nbsp;<span class="pickedsubsection">' + loc + '</span></span><br />'
+				thehtml += '<span class="psg{soe}" id="searchselection_0{sc}" listval="{lv}">{au}</span>, ' \
+				           '<span class="pickedwork">{wk}</span>&nbsp;<span class="pickedsubsection">{loc}</span></span>' \
+				           '<br />'.format(soe=selectionorexclusion, sc=selcount, lv=localval, au=ao.akaname, wk=wk.title, loc=loc)
 		
 		returndict[selectionorexclusion] = thehtml
 	

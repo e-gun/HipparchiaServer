@@ -8,7 +8,9 @@
 
 import re
 from string import punctuation
+
 from bs4 import BeautifulSoup
+
 from server.listsandsession.listmanagement import polytonicsort
 
 
@@ -30,13 +32,13 @@ def grabsenses(fullentry):
 		lvl = re.search(leveler,sense)
 		num = re.search(nummer,sense)
 		# note that the two dictionaries do not necc agree with one another (or themselves) when it comes to nesting labels
-		if re.search(r'[A-Z]',num.group(1)) is not None:
+		if re.search(r'[A-Z]',num.group(1)):
 			paragraphlevel = '1'
-		elif re.search(r'[0-9]',num.group(1)) is not None:
+		elif re.search(r'[0-9]',num.group(1)):
 			paragraphlevel = '3'
-		elif re.search(r'[ivx]',num.group(1)) is not None:
+		elif re.search(r'[ivx]',num.group(1)):
 			paragraphlevel = '4'
-		elif re.search(r'[a-hj-w]',num.group(1)) is not None:
+		elif re.search(r'[a-hj-w]',num.group(1)):
 			paragraphlevel = '2'
 		else:
 			paragraphlevel = '1'

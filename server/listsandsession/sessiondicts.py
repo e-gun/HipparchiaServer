@@ -36,7 +36,7 @@ def buildaugenresdict(authordict):
 	genresdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
 
 	for a in authordict:
-		if authordict[a].genres is not None and authordict[a].genres != '':
+		if authordict[a].genres and authordict[a].genres != '':
 			g = authordict[a].genres.split(',')
 			l = authordict[a].universalid[0:2]
 			genresdict[l] += g
@@ -66,7 +66,7 @@ def buildworkgenresdict(workdict):
 	genresdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
 
 	for w in workdict:
-		if workdict[w].workgenre is not None and workdict[w].workgenre != '':
+		if workdict[w].workgenre and workdict[w].workgenre != '':
 			g = workdict[w].workgenre.split(',')
 			l = workdict[w].universalid[0:2]
 			genresdict[l] += g
@@ -99,7 +99,7 @@ def buildauthorlocationdict(authordict):
 	locationdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
 
 	for a in authordict:
-		if authordict[a].location is not None and authordict[a].location != '':
+		if authordict[a].location and authordict[a].location != '':
 			loc = authordict[a].location.split(',')
 			l = authordict[a].universalid[0:2]
 			locationdict[l] += loc
@@ -130,7 +130,7 @@ def buildworkprovenancedict(workdict):
 	locationdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
 
 	for w in workdict:
-		if workdict[w].provenance is not None and workdict[w].provenance != '':
+		if workdict[w].provenance and workdict[w].provenance != '':
 			loc = workdict[w].provenance.split(',')
 			l = workdict[w].universalid[0:2]
 			locationdict[l] += loc

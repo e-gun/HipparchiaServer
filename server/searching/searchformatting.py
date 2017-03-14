@@ -142,7 +142,7 @@ def formatauthinfo(authorobject):
 	"""
 	n = '<span class="emph">{n}</span>'.format(n=authorobject.shortname)
 	d = '[id: {id}]<br />'.format(id=authorobject.universalid[2:])
-	if authorobject.genres is not None and authorobject.genres != '':
+	if authorobject.genres and authorobject.genres != '':
 		g = 'classified among: {g}; '.format(g=authorobject.genres)
 	else:
 		g = ''
@@ -183,12 +183,12 @@ def woformatworkinfo(workobject):
 	n = '({n})&nbsp;'.format(n=workobject.universalid[-3:])
 	t = '<span class="title">{t}</span> '.format(t=workobject.title)
 
-	if workobject.workgenre is not None:
+	if workobject.workgenre:
 		g = '[{g}]&nbsp;'.format(g=workobject.workgenre)
 	else:
 		g = ''
 
-	if workobject.wordcount is not None:
+	if workobject.wordcount:
 		c = '[' + format(workobject.wordcount, ',d') + ' wds]'
 	else:
 		c = ''
@@ -229,7 +229,7 @@ def formatauthorandworkinfo(authorname, workobject):
 
 	c = workobject.wordcount
 
-	if c is not None:
+	if c:
 		c = '[' + format(c, ',d') + ' wds]'
 	else:
 		c = ''
@@ -320,7 +320,7 @@ def formattingworkpile(bundles, criteria, activepoll, allfound):
 			# IndexError: pop from empty list
 			bundle = None
 
-		if bundle is not None:
+		if bundle:
 			citwithcontext = formattedcitationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'],
 														criteria['seek'], criteria['prox'], criteria['type'], curs)
 			citwithcontext.hitnumber = bundle['hitnumber']
@@ -381,8 +381,8 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 			foundline.accented = '<span class="highlight">{fla}</span>'.format(fla=foundline.accented)
 		if proximate != '' and searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(searchtermcharactersubstitutions(proximate), foundline.accented) is not None or re.search(
-					searchtermcharactersubstitutions(proximate), foundline.stripped) is not None:
+			if re.search(searchtermcharactersubstitutions(proximate), foundline.accented) or re.search(
+					searchtermcharactersubstitutions(proximate), foundline.stripped):
 				foundline.accented = highlightsearchterm(foundline, proximate, 'proximate')
 		citationincontext.lineobjects.append(foundline)
 
@@ -476,8 +476,8 @@ def nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, 
 		lineobject.accented = highlightsearchterm(lineobject, seeking, 'match')
 		if proximate != '' and searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(searchtermcharactersubstitutions(proximate), lineobject.accented) is not None or re.search(
-					searchtermcharactersubstitutions(proximate), lineobject.stripped) is not None:
+			if re.search(searchtermcharactersubstitutions(proximate), lineobject.accented) or re.search(
+					searchtermcharactersubstitutions(proximate), lineobject.stripped):
 				lineobject.accented = highlightsearchterm(lineobject, proximate, 'proximate')
 
 		searchresultobjects.append(FormattedSearchResult(i+1, name, workobject.title, citation, lineobject.universalid, [lineobject]))

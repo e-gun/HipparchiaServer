@@ -39,7 +39,7 @@ def withinxlines(distanceinlines, firstterm, secondterm, cursor, workdbname, aut
 	fullmatches = []
 	for hit in hits:
 		wordset = aggregatelines(hit[0] - distanceinlines, hit[0] + distanceinlines, cursor, workdbname)
-		if session['nearornot'] == 'T' and re.search(secondterm, wordset) is not None:
+		if session['nearornot'] == 'T' and re.search(secondterm, wordset):
 			fullmatches.append(hit)
 		elif session['nearornot'] == 'F' and re.search(secondterm, wordset) is None:
 			fullmatches.append(hit)
@@ -108,7 +108,7 @@ def withinxwords(distanceinwords, firstterm, secondterm, cursor, workdbname, aut
 		searchszone = wordlist[startfrom - distanceinwords:startfrom + distanceinwords]
 		searchszone = ' '.join(searchszone)
 		
-		if session['nearornot'] == 'T' and re.search(secondterm, searchszone) is not None:
+		if session['nearornot'] == 'T' and re.search(secondterm, searchszone):
 			fullmatches.append(hit)
 		elif session['nearornot'] == 'F' and re.search(secondterm, searchszone) is None:
 			fullmatches.append(hit)

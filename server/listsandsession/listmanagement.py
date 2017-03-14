@@ -426,7 +426,7 @@ def removespuria(authorandworklist, worksdict):
 		wk = re.sub(r'x',r'w',aw[0:10])
 		title = worksdict[wk].title
 		try:
-			if re.search(sp,title) is not None:
+			if re.search(sp,title):
 				for w in session['wkselections']:
 					if w in aw:
 						trimmedlist.append(aw)
@@ -533,7 +533,7 @@ def dictitemstartswith(originaldict, element, muststartwith):
 
 	muststartwith = re.compile('^'+muststartwith)
 	newdict = {x: originaldict[x] for x in originaldict
-	           if re.search(muststartwith, getattr(originaldict[x], element)) is not None}
+	           if re.search(muststartwith, getattr(originaldict[x], element))}
 
 	return newdict
 
@@ -558,7 +558,7 @@ def foundindict(dict, element, mustbein):
 	"""
 
 	finds = [dict[x].universalid for x in dict
-	         if getattr(dict[x], element) is not None and getattr(dict[x], element) == mustbein]
+	         if getattr(dict[x], element) and getattr(dict[x], element) == mustbein]
 
 	return finds
 

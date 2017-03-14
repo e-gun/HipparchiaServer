@@ -7,7 +7,8 @@
 """
 
 import re
-from server.dbsupport.dbfunctions import findtoplevelofwork, returnfirstlinenumber, dbloadasingleworkobject
+
+from server.dbsupport.dbfunctions import findtoplevelofwork, returnfirstlinenumber
 from server.hipparchiaclasses import LowandHighInfo
 
 
@@ -433,14 +434,14 @@ def perseuscitationsintohipparchiacitations(citationlist):
 	newcitationlist = []
 	
 	for item in citationlist:
-		if re.search(r'^p\.',item) is not None:
+		if re.search(r'^p\.',item):
 			item = item[2:]
 		item = re.sub(r'\(.*?\)','',item)
 		newcitationlist.append(item)
 	
 	citationlist = newcitationlist
 	newcitationlist = []
-	
+
 	for item in citationlist:
 		try:
 			if item[-2].isdigit() and item[-1].islower():

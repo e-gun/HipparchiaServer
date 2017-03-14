@@ -149,13 +149,13 @@ def executesearch(timestamp):
 	dmin, dmax = bcedating()
 
 	if hipparchia.config['TLGASSUMESBETACODE'] == 'yes':
-		if justtlg() and re.search('[a-zA-Z]', seeking) is not None:
+		if justtlg() and re.search('[a-zA-Z]', seeking):
 			# searching greek, but not typing in unicode greek: autoconvert
 			# papyri, inscriptions, and christian texts all contain multiple languages
 			seeking = seeking.upper()
 			seeking = replacegreekbetacode(seeking)
 
-		if justtlg() and re.search('[a-zA-Z]', proximate) is not None:
+		if justtlg() and re.search('[a-zA-Z]', proximate):
 			proximate = proximate.upper()
 			proximate = replacegreekbetacode(proximate)
 
@@ -196,7 +196,7 @@ def executesearch(timestamp):
 			thesearch = seeking
 			htmlsearch = '<span class="emph">{skg}</span>'.format(skg=seeking)
 			hits = searchdispatcher('simple', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
-		elif re.search(phrasefinder, seeking) is not None:
+		elif re.search(phrasefinder, seeking):
 			searchtype = 'phrase'
 			thesearch = seeking
 			htmlsearch = '<span class="emph">{skg}</span>'.format(skg=seeking)
@@ -635,7 +635,7 @@ def findtheworksof(authoruid):
 	except:
 		myauthor = None
 
-	if myauthor is not None:
+	if myauthor:
 		worklist = myauthor.listofworks
 		for work in worklist:
 			hint.append({'value':work.title+' ('+work.universalid[-4:]+')'})
@@ -956,7 +956,7 @@ def getsearchlistcontents():
 			pass
 		searchlistinfo += '\n[{ct}]&nbsp;'.format(ct=count)
 
-		if w.converted_date is not None:
+		if w.converted_date:
 			if int(w.converted_date) < 2000:
 				if int(w.converted_date) < 1:
 					searchlistinfo += '(<span class="date">{dt} BCE</span>)&nbsp;'.format(dt=w.converted_date[1:])
@@ -1033,7 +1033,7 @@ def findbyform(observedword):
 	# python seems to know how to do this with greek...
 	word = cleanedword.lower()
 
-	if re.search(r'[a-z]', word[0]) is not None:
+	if re.search(r'[a-z]', word[0]):
 		cleanedword = stripaccents(word)
 		usedictionary = 'latin'
 	else:
@@ -1081,7 +1081,7 @@ def dictsearch(searchterm):
 	seeking = re.sub('σ|ς', 'ϲ', seeking)
 	seeking = re.sub('v', '(u|v|U|V)', seeking)
 
-	if re.search(r'[a-z]', seeking) is not None:
+	if re.search(r'[a-z]', seeking):
 		usedictionary = 'latin'
 		usecolumn = 'entry_name'
 	else:
@@ -1177,7 +1177,7 @@ def reverselexiconsearch(searchterm):
 				summarydict = entrysummary(definition, dict, translationlabel, lemmaobject)
 
 				for sense in summarydict['senses']:
-					if re.search(r'^'+seeking,sense) is not None:
+					if re.search(r'^'+seeking,sense):
 						entries.append(m)
 
 	entries = list(set(entries))

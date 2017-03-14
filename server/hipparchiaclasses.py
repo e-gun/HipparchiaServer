@@ -22,18 +22,17 @@ class dbAuthor(object):
 	Initialized straight out of a DB read
 	
 		
-	CREATE TABLE public.authors
-	(
-    universalid character(6) COLLATE pg_catalog."default",
-    language character varying(10) COLLATE pg_catalog."default",
-    idxname character varying(128) COLLATE pg_catalog."default",
-    akaname character varying(128) COLLATE pg_catalog."default",
-    shortname character varying(128) COLLATE pg_catalog."default",
-    cleanname character varying(128) COLLATE pg_catalog."default",
-    genres character varying(512) COLLATE pg_catalog."default",
-    recorded_date character varying(64) COLLATE pg_catalog."default",
-    converted_date character varying(8) COLLATE pg_catalog."default",
-    location character varying(128) COLLATE pg_catalog."default"
+	CREATE TABLE public.authors (
+	    universalid character(6) COLLATE pg_catalog."default",
+	    language character varying(10) COLLATE pg_catalog."default",
+	    idxname character varying(128) COLLATE pg_catalog."default",
+	    akaname character varying(128) COLLATE pg_catalog."default",
+	    shortname character varying(128) COLLATE pg_catalog."default",
+	    cleanname character varying(128) COLLATE pg_catalog."default",
+	    genres character varying(512) COLLATE pg_catalog."default",
+	    recorded_date character varying(64) COLLATE pg_catalog."default",
+	    converted_date character varying(8) COLLATE pg_catalog."default",
+	    location character varying(128) COLLATE pg_catalog."default"
 	)
 	
 	"""
@@ -92,28 +91,27 @@ class dbOpus(object):
 	note the efforts to match a simple Opus, but the fit is potentially untidy
 	it is always going to be important to know exactly what kind of object you are handling
 	
-	CREATE TABLE public.works
-	(
-    universalid character(10) COLLATE pg_catalog."default",
-    title character varying(512) COLLATE pg_catalog."default",
-    language character varying(10) COLLATE pg_catalog."default",
-    publication_info text COLLATE pg_catalog."default",
-    levellabels_00 character varying(64) COLLATE pg_catalog."default",
-    levellabels_01 character varying(64) COLLATE pg_catalog."default",
-    levellabels_02 character varying(64) COLLATE pg_catalog."default",
-    levellabels_03 character varying(64) COLLATE pg_catalog."default",
-    levellabels_04 character varying(64) COLLATE pg_catalog."default",
-    levellabels_05 character varying(64) COLLATE pg_catalog."default",
-    workgenre character varying(32) COLLATE pg_catalog."default",
-    transmission character varying(32) COLLATE pg_catalog."default",
-    worktype character varying(32) COLLATE pg_catalog."default",
-    provenance character varying(64) COLLATE pg_catalog."default",
-    recorded_date character varying(64) COLLATE pg_catalog."default",
-    converted_date character varying(8) COLLATE pg_catalog."default",
-    wordcount integer,
-    firstline integer,
-    lastline integer,
-    authentic boolean
+	CREATE TABLE public.works (
+	    universalid character(10) COLLATE pg_catalog."default",
+	    title character varying(512) COLLATE pg_catalog."default",
+	    language character varying(10) COLLATE pg_catalog."default",
+	    publication_info text COLLATE pg_catalog."default",
+	    levellabels_00 character varying(64) COLLATE pg_catalog."default",
+	    levellabels_01 character varying(64) COLLATE pg_catalog."default",
+	    levellabels_02 character varying(64) COLLATE pg_catalog."default",
+	    levellabels_03 character varying(64) COLLATE pg_catalog."default",
+	    levellabels_04 character varying(64) COLLATE pg_catalog."default",
+	    levellabels_05 character varying(64) COLLATE pg_catalog."default",
+	    workgenre character varying(32) COLLATE pg_catalog."default",
+	    transmission character varying(32) COLLATE pg_catalog."default",
+	    worktype character varying(32) COLLATE pg_catalog."default",
+	    provenance character varying(64) COLLATE pg_catalog."default",
+	    recorded_date character varying(64) COLLATE pg_catalog."default",
+	    converted_date character varying(8) COLLATE pg_catalog."default",
+	    wordcount integer,
+	    firstline integer,
+	    lastline integer,
+	    authentic boolean
 	)
 	
 	
@@ -159,7 +157,7 @@ class dbOpus(object):
 		
 		availablelevels = 1
 		for level in [self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04, self.levellabels_05]:
-			if level != '' and level is not None:
+			if  level and level != '':
 				availablelevels += 1
 		self.availablelevels = availablelevels
 		
@@ -188,15 +186,14 @@ class dbWordCountObject(object):
 	"""
 	an object that corresponds to a db line
 
-	CREATE TABLE public."wordcounts_ϲ"
-	(
-    entry_name character varying(64) COLLATE pg_catalog."default",
-    total_count integer,
-    gr_count integer,
-    lt_count integer,
-    dp_count integer,
-    in_count integer,
-    ch_count integer
+	CREATE TABLE public."wordcounts_ϲ" (
+	    entry_name character varying(64) COLLATE pg_catalog."default",
+	    total_count integer,
+	    gr_count integer,
+	    lt_count integer,
+	    dp_count integer,
+	    in_count integer,
+	    ch_count integer
 	)
 
 	"""
@@ -239,19 +236,18 @@ class dbHeadwordObject(dbWordCountObject):
 	"""
 	an extended wordcount object
 
-	CREATE TABLE public.dictionary_headword_wordcounts
-	(
-    entry_name character varying(64) COLLATE pg_catalog."default",
-    total_count integer,
-    gr_count integer,
-    lt_count integer,
-    dp_count integer,
-    in_count integer,
-    ch_count integer,
-    frequency_classification character varying(64) COLLATE pg_catalog."default",
-    early_occurrences integer,
-    middle_occurrences integer,
-    late_occurrences integer
+	CREATE TABLE public.dictionary_headword_wordcounts (
+	    entry_name character varying(64) COLLATE pg_catalog."default",
+	    total_count integer,
+	    gr_count integer,
+	    lt_count integer,
+	    dp_count integer,
+	    in_count integer,
+	    ch_count integer,
+	    frequency_classification character varying(64) COLLATE pg_catalog."default",
+	    early_occurrences integer,
+	    middle_occurrences integer,
+	    late_occurrences integer
 	)
 
 	"""
@@ -422,7 +418,7 @@ class dbHeadwordObject(dbWordCountObject):
 
 	def amlatin(self):
 		minimumlatin = re.compile(r'[a-z]')
-		if re.search(minimumlatin,self.entry) is not None:
+		if re.search(minimumlatin,self.entry):
 			return True
 		else:
 			return False
@@ -510,18 +506,18 @@ class dbHeadwordObject(dbWordCountObject):
 
 		basically 'maxmodifier' should be 500 since lyr has a modifier of 493
 
-		14832896 	 comm
-		...
-		45437 	 metrolog
-		34808 	 bucol
-		32677 	 lyr
-		25393 	 coq
-		24994 	 liturg
-		22845 	 physiognom
-		22708 	 pseudepigr
-		18023 	 parod
-		6205 	 mim
-		20 	 ignotum
+			14832896 	 comm
+			...
+			45437 	 metrolog
+			34808 	 bucol
+			32677 	 lyr
+			25393 	 coq
+			24994 	 liturg
+			22845 	 physiognom
+			22708 	 pseudepigr
+			18023 	 parod
+			6205 	 mim
+			20 	 ignotum
 
 		:param maxmodifier:
 		:param gwt:
@@ -578,12 +574,11 @@ class dbMorphologyObject(object):
 
 	an object that corresponds to a db line
 
-	CREATE TABLE public.greek_morphology
-	(
-    observed_form character varying(64) COLLATE pg_catalog."default",
-    xrefs character varying(128) COLLATE pg_catalog."default",
-    prefixrefs character varying(128) COLLATE pg_catalog."default",
-    possible_dictionary_forms text COLLATE pg_catalog."default"
+	CREATE TABLE public.greek_morphology (
+	    observed_form character varying(64) COLLATE pg_catalog."default",
+	    xrefs character varying(128) COLLATE pg_catalog."default",
+	    prefixrefs character varying(128) COLLATE pg_catalog."default",
+	    possible_dictionary_forms text COLLATE pg_catalog."default"
 	)
 
 	"""
@@ -640,14 +635,14 @@ class MorphPossibilityObject(object):
 
 	def amgreek(self):
 		minimumgreek = re.compile(r'[άέίόύήώᾶῖῦῆῶὁἄἔἴὄὔἤὤᾅᾕᾥᾄᾔᾤα-ω]')
-		if re.search(minimumgreek,self.entry) is not None:
+		if re.search(minimumgreek,self.entry):
 			return True
 		else:
 			return False
 
 	def amlatin(self):
 		minimumlatin = re.compile(r'[a-z]')
-		if re.search(minimumlatin,self.entry) is not None:
+		if re.search(minimumlatin,self.entry):
 			return True
 		else:
 			return False
@@ -729,21 +724,20 @@ class dbWorkLine(object):
 	"""
 	an object that corresponds to a db line
 	
-	CREATE TABLE public.in0207
-	(
-    index integer NOT NULL DEFAULT nextval('in0207'::regclass),
-    wkuniversalid character varying(10) COLLATE pg_catalog."default",
-    level_05_value character varying(64) COLLATE pg_catalog."default",
-    level_04_value character varying(64) COLLATE pg_catalog."default",
-    level_03_value character varying(64) COLLATE pg_catalog."default",
-    level_02_value character varying(64) COLLATE pg_catalog."default",
-    level_01_value character varying(64) COLLATE pg_catalog."default",
-    level_00_value character varying(64) COLLATE pg_catalog."default",
-    marked_up_line text COLLATE pg_catalog."default",
-    accented_line text COLLATE pg_catalog."default",
-    stripped_line text COLLATE pg_catalog."default",
-    hyphenated_words character varying(128) COLLATE pg_catalog."default",
-    annotations character varying(256) COLLATE pg_catalog."default"
+	CREATE TABLE public.in0207 (
+	    index integer NOT NULL DEFAULT nextval('in0207'::regclass),
+	    wkuniversalid character varying(10) COLLATE pg_catalog."default",
+	    level_05_value character varying(64) COLLATE pg_catalog."default",
+	    level_04_value character varying(64) COLLATE pg_catalog."default",
+	    level_03_value character varying(64) COLLATE pg_catalog."default",
+	    level_02_value character varying(64) COLLATE pg_catalog."default",
+	    level_01_value character varying(64) COLLATE pg_catalog."default",
+	    level_00_value character varying(64) COLLATE pg_catalog."default",
+	    marked_up_line text COLLATE pg_catalog."default",
+	    accented_line text COLLATE pg_catalog."default",
+	    stripped_line text COLLATE pg_catalog."default",
+	    hyphenated_words character varying(128) COLLATE pg_catalog."default",
+	    annotations character varying(256) COLLATE pg_catalog."default"
 	)
 	
 	"""
@@ -988,27 +982,25 @@ class dbDictionaryEntry(object):
 	"""
 	an object that corresponds to a db line
 
-	CREATE TABLE public.greek_dictionary
-(
-    entry_name character varying(64) COLLATE pg_catalog."default",
-    metrical_entry character varying(64) COLLATE pg_catalog."default",
-    unaccented_entry character varying(64) COLLATE pg_catalog."default",
-    id_number character varying(8) COLLATE pg_catalog."default",
-    entry_type character varying(8) COLLATE pg_catalog."default",
-    entry_options "char",
-    entry_body text COLLATE pg_catalog."default"
-)
+	CREATE TABLE public.greek_dictionary (
+	    entry_name character varying(64) COLLATE pg_catalog."default",
+	    metrical_entry character varying(64) COLLATE pg_catalog."default",
+	    unaccented_entry character varying(64) COLLATE pg_catalog."default",
+	    id_number character varying(8) COLLATE pg_catalog."default",
+	    entry_type character varying(8) COLLATE pg_catalog."default",
+	    entry_options "char",
+	    entry_body text COLLATE pg_catalog."default"
+	)
 
-CREATE TABLE public.latin_dictionary
-(
-    entry_name character varying(64) COLLATE pg_catalog."default",
-    metrical_entry character varying(64) COLLATE pg_catalog."default",
-    id_number character varying(8) COLLATE pg_catalog."default",
-    entry_type character varying(8) COLLATE pg_catalog."default",
-    entry_key character varying(64) COLLATE pg_catalog."default",
-    entry_options "char",
-    entry_body text COLLATE pg_catalog."default"
-)
+	CREATE TABLE public.latin_dictionary (
+	    entry_name character varying(64) COLLATE pg_catalog."default",
+	    metrical_entry character varying(64) COLLATE pg_catalog."default",
+	    id_number character varying(8) COLLATE pg_catalog."default",
+	    entry_type character varying(8) COLLATE pg_catalog."default",
+	    entry_key character varying(64) COLLATE pg_catalog."default",
+	    entry_options "char",
+	    entry_body text COLLATE pg_catalog."default"
+	)
 
 	Latin only: entry_key
 	Greek only: unaccented_entry
@@ -1073,11 +1065,10 @@ class dbLemmaObject(object):
 	"""
 	an object that corresponds to a db line
 
-	CREATE TABLE public.greek_lemmata
-	(
-    dictionary_entry character varying(64) COLLATE pg_catalog."default",
-    xref_number integer,
-    derivative_forms text COLLATE pg_catalog."default"
+	CREATE TABLE public.greek_lemmata (
+	    dictionary_entry character varying(64) COLLATE pg_catalog."default",
+	    xref_number integer,
+	    derivative_forms text COLLATE pg_catalog."default"
 	)
 
 	"""
@@ -1142,14 +1133,14 @@ class FormattedSearchResult(object):
 		:return:
 		"""
 
-		locushtml = '<span class="findnumber">[{hn}]</span>&nbsp;&nbsp;'
-		locushtml += '<span class="foundauthor">{au}</span>,&nbsp;'
-		locushtml += '<span class="foundwork">{wk}</span>: '
-		locushtml += '<browser id="{url}">'
-		locushtml += '<span class="foundlocus">{cs}</span>'
-		locushtml += '</browser>'
+		citationtemplate = """
+			<span class="findnumber">[{hn}]</span>&nbsp;&nbsp;
+			<span class="foundauthor">{au}</span>,&nbsp;
+			<span class="foundwork">{wk}</span>:
+			<browser id="{url}"><span class="foundlocus">{cs}</span></browser>
+			"""
 
-		locushtml = locushtml.format(hn=self.hitnumber, au=self.author, wk=self.work, url=self.clickurl,
+		locushtml = citationtemplate.format(hn=self.hitnumber, au=self.author, wk=self.work, url=self.clickurl,
 		                             cs=citestring)
 
 		return locushtml
@@ -1267,7 +1258,7 @@ class ProgressPoll(object):
 		message = '<span class="small">{msg}</span>'
 		if 14 < self.getelapsed() < 21:
 			m = '(long requests can be aborted by reloading the page)'
-		elif re.search('unavailable', self.notes) is not None and 9 < self.getelapsed() < 15:
+		elif re.search('unavailable', self.notes) and 9 < self.getelapsed() < 15:
 			m = self.notes
 		elif re.search('unavailable', self.notes) is None:
 			m = self.notes

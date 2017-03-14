@@ -292,157 +292,157 @@ corpus weights {'gr': 1.0, 'lt': 11.37, 'in': 28.13, 'dp': 27.49, 'ch': 129.89}
 greek genre weights: {'agric': 16513.67, 'alchem': 79.21, 'anthol': 17.91, 'astrol': 21.02, 'astron': 47.08, 'biogr': 6.47, 'bucol': 425.46, 'chronogr': 4.9, 'comic': 30.51, 'comm': 1.0, 'coq': 598.04, 'dialog': 7.08, 'docu': 4.16, 'doxogr': 141.89, 'eleg': 212.14, 'encom': 13.47, 'epic': 19.64, 'epigr': 11.63, 'epist': 4.76, 'fab': 139.05, 'geogr': 11.35, 'gnom': 92.62, 'gramm': 9.86, 'hexametr': 115.44, 'hist': 1.5, 'hymn': 48.94, 'hypoth': 14.04, 'iamb': 133.7, 'ignotum': 477831.0, 'invectiv': 240.4, 'inscr': 3.72, 'jurisprud': 55.15, 'lexicogr': 4.58, 'lyr': 455.88, 'magica': 103.13, 'math': 11.52, 'mech': 103.85, 'med': 2.29, 'metrolog': 326.41, 'mim': 2387.23, 'mus': 101.38, 'myth': 195.94, 'narrfict': 15.67, 'nathist': 9.67, 'onir': 138.77, 'orac': 259.94, 'orat': 6.54, 'paradox': 262.33, 'parod': 823.62, 'paroem': 66.02, 'perieg': 233.86, 'phil': 3.7, 'physiognom': 648.4, 'poem': 61.97, 'polyhist': 24.98, 'rhet': 8.51, 'satura': 280.91, 'satyr': 126.45, 'schol': 5.99, 'tact': 52.95, 'test': 82.78, 'trag': 34.51, 0.59: 'relig', 'allrhet': 2.87}
 latin genre weights: {'agric': 5.06, 'alchem': 631.89, 'anthol': 491.2, 'astrol': 5027.98, 'astron': 16.17, 'biogr': 9.35, 'bucol': 37.89, 'chronogr': 411.78, 'comic': 4.58, 'epic': 2.19, 'coq': 61.11, 'dialog': 72.9, 'docu': 9.18, 'doxogr': 227.13, 'eleg': 9.83, 'encom': 267.29, 'epigr': 102.17, 'epist': 1.98, 'fab': 81.09, 'geogr': 223.57, 'gnom': 78.87, 'gramm': 4.84, 'hexametr': 17.92, 'hist': 1.0, 'hymn': 7607.27, 'hypoth': 81.21, 'iamb': 21300.35, 'ignotum': 421.56, 'inscr': 1.96, 'jurisprud': 17.48, 'lexicogr': 21.1, 'lyr': 23.5, 'magica': 33471.97, 'math': 722.71, 'mech': 390506.33, 'med': 7.13, 'metrolog': 20919.98, 'mim': 1026.75, 'mus': 700.67, 'myth': 19525.32, 'narrfict': 11.33, 'nathist': 2.15, 'orac': 1171519.0, 'orat': 1.74, 'paradox': 16500.27, 'parod': 322.29, 'perieg': 73219.94, 'phil': 2.1, 'poem': 14.58, 'polyhist': 4.73, 'rhet': 2.61, 'satyr': 343.45, 'schol': 31.69, 'tact': 36.35, 'test': 67.67, 'trag': 12.86, 80.16: 'relig', 'allrhet': 1.04}
 
-greek wordcounts
-14812761 	 comm
-11761783 	 exeget
-9898136 	 hist
-6467218 	 med
-3998526 	 phil
-3980896 	 inscr
-3564399 	 docu
-3232465 	 lexicogr
-3109863 	 epist
-3020791 	 chronogr
-2824515 	 caten
-2472581 	 schol
-2305015 	 theol
-2289647 	 biogr
-2266016 	 orat
-2093642 	 dialog
-2085748 	 apol
-2069472 	 homilet
-1912832 	 eccl
-1740151 	 rhet
-1531167 	 nathist
-1501598 	 gramm
-1304776 	 geogr
-1285648 	 math
-1273736 	 epigr
-1099734 	 encom
-1055074 	 hypoth
-945378 	 narrfict
-828300 	 concil
-827220 	 anthol
-754061 	 epic
-704714 	 astrol
-626240 	 hagiogr
-592998 	 polyhist
-485518 	 comic
-429197 	 trag
-314597 	 astron
-302652 	 hymn
-279766 	 tact
-268606 	 jurisprud
-239035 	 poem
-224365 	 paroem
-186996 	 alchem
-178943 	 test
-169027 	 acta
-159922 	 gnom
-152470 	 apocryph
-146115 	 mus
-143634 	 magica
-142630 	 mech
-138872 	 prophet
-128315 	 hexametr
-122526 	 evangel
-117142 	 satyr
-115421 	 apocalyp
-110787 	 iamb
-106746 	 onir
-106530 	 fab
-104393 	 doxogr
-75600 	 myth
-69827 	 eleg
-63341 	 perieg
-61618 	 invectiv
-56985 	 orac
-56467 	 paradox
-52732 	 satura
-45381 	 metrolog
-34816 	 bucol
-32493 	 lyr
-24989 	 liturg
-24769 	 coq
-22845 	 physiognom
-22703 	 pseudepigr
-17985 	 parod
-6205 	 mim
-31 	 ignotum
+	greek wordcounts
+	14812761 	 comm
+	11761783 	 exeget
+	9898136 	 hist
+	6467218 	 med
+	3998526 	 phil
+	3980896 	 inscr
+	3564399 	 docu
+	3232465 	 lexicogr
+	3109863 	 epist
+	3020791 	 chronogr
+	2824515 	 caten
+	2472581 	 schol
+	2305015 	 theol
+	2289647 	 biogr
+	2266016 	 orat
+	2093642 	 dialog
+	2085748 	 apol
+	2069472 	 homilet
+	1912832 	 eccl
+	1740151 	 rhet
+	1531167 	 nathist
+	1501598 	 gramm
+	1304776 	 geogr
+	1285648 	 math
+	1273736 	 epigr
+	1099734 	 encom
+	1055074 	 hypoth
+	945378 	 narrfict
+	828300 	 concil
+	827220 	 anthol
+	754061 	 epic
+	704714 	 astrol
+	626240 	 hagiogr
+	592998 	 polyhist
+	485518 	 comic
+	429197 	 trag
+	314597 	 astron
+	302652 	 hymn
+	279766 	 tact
+	268606 	 jurisprud
+	239035 	 poem
+	224365 	 paroem
+	186996 	 alchem
+	178943 	 test
+	169027 	 acta
+	159922 	 gnom
+	152470 	 apocryph
+	146115 	 mus
+	143634 	 magica
+	142630 	 mech
+	138872 	 prophet
+	128315 	 hexametr
+	122526 	 evangel
+	117142 	 satyr
+	115421 	 apocalyp
+	110787 	 iamb
+	106746 	 onir
+	106530 	 fab
+	104393 	 doxogr
+	75600 	 myth
+	69827 	 eleg
+	63341 	 perieg
+	61618 	 invectiv
+	56985 	 orac
+	56467 	 paradox
+	52732 	 satura
+	45381 	 metrolog
+	34816 	 bucol
+	32493 	 lyr
+	24989 	 liturg
+	24769 	 coq
+	22845 	 physiognom
+	22703 	 pseudepigr
+	17985 	 parod
+	6205 	 mim
+	31 	 ignotum
 
 
-wordcounts
-1215991 	 hist
-1098321 	 jurisprud
-671410 	 orat
-626013 	 nathist
-599210 	 inscr
-590187 	 epist
-556759 	 phil
-534959 	 comm
-534933 	 epic
-448876 	 rhet
-255728 	 comic
-247930 	 polyhist
-243498 	 gramm
-232422 	 agric
-164327 	 med
-156727 	 eleg
-127677 	 docu
-125299 	 biogr
-103420 	 narrfict
-91130 	 trag
-87412 	 poem
-74244 	 astron
-65390 	 hexametr
-55533 	 lexicogr
-49860 	 lyr
-41281 	 fab
-36973 	 schol
-32229 	 tact
-30920 	 bucol
-19316 	 coq
-17312 	 test
-17108 	 dialog
-16010 	 hypoth
-14853 	 gnom
-11466 	 epigr
-6467 	 exeget
-5240 	 geogr
-5158 	 doxogr
-4383 	 encom
-3635 	 parod
-3457 	 caten
-3411 	 satyr
-2845 	 chronogr
-2570 	 apol
-2385 	 anthol
-1854 	 ignotum
-1854 	 alchem
-1672 	 mus
-1621 	 math
-1141 	 mim
-832 	 concil
-383 	 acta
-249 	 theol
-233 	 astrol
-212 	 eccl
-188 	 homilet
-154 	 hymn
-84 	 apocalyp
-82 	 hagiogr
-80 	 apocryph
-71 	 paradox
-60 	 myth
-56 	 metrolog
-55 	 iamb
-35 	 magica
-16 	 perieg
-16 	 paroem
-5 	 pseudepigr
-5 	 liturg
-3 	 mech
-1 	 orac
+	wordcounts
+	1215991 	 hist
+	1098321 	 jurisprud
+	671410 	 orat
+	626013 	 nathist
+	599210 	 inscr
+	590187 	 epist
+	556759 	 phil
+	534959 	 comm
+	534933 	 epic
+	448876 	 rhet
+	255728 	 comic
+	247930 	 polyhist
+	243498 	 gramm
+	232422 	 agric
+	164327 	 med
+	156727 	 eleg
+	127677 	 docu
+	125299 	 biogr
+	103420 	 narrfict
+	91130 	 trag
+	87412 	 poem
+	74244 	 astron
+	65390 	 hexametr
+	55533 	 lexicogr
+	49860 	 lyr
+	41281 	 fab
+	36973 	 schol
+	32229 	 tact
+	30920 	 bucol
+	19316 	 coq
+	17312 	 test
+	17108 	 dialog
+	16010 	 hypoth
+	14853 	 gnom
+	11466 	 epigr
+	6467 	 exeget
+	5240 	 geogr
+	5158 	 doxogr
+	4383 	 encom
+	3635 	 parod
+	3457 	 caten
+	3411 	 satyr
+	2845 	 chronogr
+	2570 	 apol
+	2385 	 anthol
+	1854 	 ignotum
+	1854 	 alchem
+	1672 	 mus
+	1621 	 math
+	1141 	 mim
+	832 	 concil
+	383 	 acta
+	249 	 theol
+	233 	 astrol
+	212 	 eccl
+	188 	 homilet
+	154 	 hymn
+	84 	 apocalyp
+	82 	 hagiogr
+	80 	 apocryph
+	71 	 paradox
+	60 	 myth
+	56 	 metrolog
+	55 	 iamb
+	35 	 magica
+	16 	 perieg
+	16 	 paroem
+	5 	 pseudepigr
+	5 	 liturg
+	3 	 mech
+	1 	 orac
 
 
 """

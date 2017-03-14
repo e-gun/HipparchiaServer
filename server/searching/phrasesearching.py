@@ -20,7 +20,9 @@ def phrasesearch(leastcommon, searchphrase, maxhits, wkid, authorswheredict, act
 	"""
 	a whitespace might mean things are on a new line
 	note how horrible something like και δη και is: you will search και first and then...
-	that's why we have shortphrasesearch() which is mighty slow too
+	subqueryphrasesearch() takes a more or less fixed amount of time; this function is
+	faster if you call it with an uncommon word; if you call it with a common word, then
+	you will likely search much more slowly than you would with subqueryphrasesearch()
 
 	:param searchphrase:
 	:param cursor:
@@ -47,7 +49,7 @@ def phrasesearch(leastcommon, searchphrase, maxhits, wkid, authorswheredict, act
 			# the difference is in the apostrophe: δ vs δ’
 			wordset = re.sub(r'[\.\?\!;:,·]', r'', wordset)
 
-		if session['nearornot'] == 'T' and re.search(searchphrase, wordset) is not None:
+		if session['nearornot'] == 'T' and re.search(searchphrase, wordset):
 			fullmatches.append(hit)
 			activepoll.addhits(1)
 		elif session['nearornot'] == 'F' and re.search(searchphrase, wordset) is None:
@@ -123,7 +125,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 					) secondpass
 				WHERE secondpass.linebundle ~ %s {lim}"""
 
-			if re.search(r'x', wkid) is not None:
+			if re.search(r'x', wkid):
 				# we have exclusions
 				wkid = re.sub(r'x', 'w', wkid)
 				restrictions = [whereclauses(p, '<>', authorswheredict) for p in session['psgexclusions'] if wkid in p]
@@ -238,7 +240,7 @@ notes on lead and lag: examining the next row and the previous row
 lead and lag example
 	https://fle.github.io/detect-value-changes-between-successive-lines-with-postgresql.html
 
-paritions: [over clauses]
+partitions: [over clauses]
 	http://tapoueh.org/blog/2013/08/20-Window-Functions
 
 
