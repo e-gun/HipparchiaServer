@@ -1089,7 +1089,7 @@ def dictsearch(searchterm):
 		usecolumn = 'unaccented_entry'
 
 	seeking = stripaccents(seeking)
-	query = 'SELECT entry_name FROM ' + usedictionary + '_dictionary' + ' WHERE ' + usecolumn + ' ~* %s'
+	query = 'SELECT entry_name FROM {d}_dictionary' + ' WHERE {c} ~* %s'.format(d=usedictionary,c=usecolumn)
 	if seeking[0] == ' ' and seeking[-1] == ' ':
 		data = ('^' + seeking[1:-1] + '$',)
 	elif seeking[0] == ' ' and seeking[-1] != ' ':
@@ -1149,16 +1149,14 @@ def reverselexiconsearch(searchterm):
 	returnarray = []
 	seeking = re.sub(r'[!@#$|%()*\'\"]', '', searchterm)
 	if justlatin():
-		dict = 'latin'
+		usedict = 'latin'
 		translationlabel = 'hi'
 	else:
-		dict = 'greek'
+		usedict = 'greek'
 		translationlabel = 'tr'
 
-	usecolumn = 'entry_body'
-
 	# first see if your term is mentioned at all
-	query = 'SELECT entry_name FROM ' + dict + '_dictionary' + ' WHERE ' + usecolumn + ' LIKE %s'
+	query = 'SELECT entry_name FROM {d}_dictionary WHERE entry_body LIKE %s'.format(d=usedict)
 	data = ('%' + seeking + '%',)
 	cur.execute(query, data)
 
@@ -1168,13 +1166,13 @@ def reverselexiconsearch(searchterm):
 	# then go back and see if it is mentioned in the summary of senses
 	for match in matches:
 		m = match[0]
-		matchingobjectlist = searchdictionary(cur, dict + '_dictionary', 'entry_name', m, syntax='LIKE')
+		matchingobjectlist = searchdictionary(cur, usedict + '_dictionary', 'entry_name', m, syntax='LIKE')
 		for o in matchingobjectlist:
 			if o.entry:
 				# AttributeError: 'list' object has no attribute 'entry'
 				definition = o.body
-				lemmaobject = grablemmataobjectfor(o.entry, dict + '_lemmata', cur)
-				summarydict = entrysummary(definition, dict, translationlabel, lemmaobject)
+				lemmaobject = grablemmataobjectfor(o.entry, usedict + '_lemmata', cur)
+				summarydict = entrysummary(definition, usedict, translationlabel, lemmaobject)
 
 				for sense in summarydict['senses']:
 					if re.search(r'^'+seeking,sense):
@@ -1188,7 +1186,7 @@ def reverselexiconsearch(searchterm):
 		count = 0
 		for entry in entries:
 			count += 1
-			returnarray.append({'value': browserdictionarylookup(count, entry, dict, cur)})
+			returnarray.append({'value': browserdictionarylookup(count, entry, usedict, cur)})
 	else:
 		returnarray.append({'value': '<br />[nothing found under "{skg}"]'.format(skg=seeking)})
 
@@ -1525,12 +1523,12 @@ def checkforactivesearch(ts):
 	if result == 0:
 		pass
 	else:
-		print('websocket probe error:',errno.errorcode[result])
+		print('websocket probe failed:',errno.errorcode[result])
 		# need to fire up the websocket
 		try:
 			r = urlopen('http://127.0.0.1:5000/startwspolling/default', data=None, timeout=.1)
 		except socket.timeout:
-			# socket.timeout: but all we needed to do was to send the request, not to read the response
+			# socket.timeout: but our aim was to send the request, not to read the response and get blocked
 			print('websocket at {p} was told to launch'.format(p=theport))
 
 	sock.close()
@@ -1545,7 +1543,7 @@ def checkforactivesearch(ts):
 			if poll[ts].getactivity():
 				return json.dumps(theport)
 			else:
-				print('websocket still inactive: there is a serious problem?')
+				print('checkforactivesearch() reports that the websocket still inactive: there is a serious problem?')
 				return json.dumps('no')
 		except:
 			return json.dumps('no')
