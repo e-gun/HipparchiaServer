@@ -340,7 +340,7 @@ def findleastcommonterm(searchphrase):
 	stillneedtofindterm = True
 	searchterms = searchphrase.split(' ')
 	searchterms = [x for x in searchterms if x]
-	if session['accentsmatter'] == 'yes':
+	if session['accentsmatter'] == 'yes' or re.search(r'^[a-z]',searchterms[0]):
 		# note that graves have been eliminated from the wordcounts; so we have to do the same here
 		# but we still need access to the actual search terms, hence the dict
 		# a second issue: 'v' is not in the wordcounts, but you might be searching for it
@@ -351,6 +351,7 @@ def findleastcommonterm(searchphrase):
 
 		counts = [findcountsviawordcountstable(k) for k in searchterms.keys()]
 		# counts [('βεβήλων', 84, 84, 0, 0, 0, 0), ('ὀλίγοϲ', 596, 589, 0, 3, 4, 0)]
+		# counts [('imperatores', 307, 7, 275, 3, 4, 18), ('paucitate', 42, 0, 42, 0, 0, 0)]
 		totals = [(c[1], c[0]) for c in counts if c]
 		max = sorted(totals, reverse=False)
 		try:
@@ -387,7 +388,7 @@ def findleastcommontermcount(searchphrase):
 	fewesthits = -1
 	searchterms = searchphrase.split(' ')
 	searchterms = [x for x in searchterms if x]
-	if session['accentsmatter'] == 'yes':
+	if session['accentsmatter'] == 'yes' or re.search(r'^[a-z]',searchterms[0]):
 		# note that graves have been eliminated from the wordcounts; so we have to do the same here
 		# but we still need access to the actual search terms, hence the dict
 		# a second issue: 'v' is not in the wordcounts, but you might be searching for it

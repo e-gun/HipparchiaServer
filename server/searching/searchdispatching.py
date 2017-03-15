@@ -104,7 +104,7 @@ def searchdispatcher(searchtype, searchingfor, proximate, authorandworklist, aut
 		activepoll.statusis('Executing a proximity search...')
 		termone = searchingfor
 		termtwo = proximate
-		if session['accentsmatter'] == 'yes' and session['nearornot'] == 'T':
+		if (session['accentsmatter'] == 'yes'  or re.search(r'^[a-z]',termone)) and session['nearornot'] == 'T':
 			# choose the necessarily faster option
 			leastcommon = findleastcommonterm(unomdifiedskg+' '+unmodifiedprx)
 			if leastcommon != unomdifiedskg:
@@ -123,7 +123,6 @@ def searchdispatcher(searchtype, searchingfor, proximate, authorandworklist, aut
 
 	for j in jobs: j.start()
 	for j in jobs: j.join()
-
 
 	return foundlineobjects
 
