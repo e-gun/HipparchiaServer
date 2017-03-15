@@ -32,13 +32,13 @@ def cleaninitialquery(seeking):
 	badpunct = ',;#'
 	extrapunct = """‵’‘·“”„'"—†⌈⌋⌊⟫⟪❵❴⟧⟦«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓"""
 
-	seeking = re.sub(r'[' + re.escape(badpunct+extrapunct) + ']', '', seeking)
+	seeking = re.sub(r'[' + re.escape(badpunct + extrapunct) + ']', '', seeking)
 
 	if hipparchia.config['HOBBLEREGEX'] == 'yes':
 		seeking = re.sub(r'\d', '', seeking)
 		allowedpunct = '[].^$\''
 		badpunct = ''.join(set(punctuation) - set(allowedpunct))
-		seeking = re.sub(r'['+re.escape(badpunct)+']', '', seeking)
+		seeking = re.sub(r'[' + re.escape(badpunct) + ']', '', seeking)
 
 	return seeking
 
@@ -113,20 +113,20 @@ def whereclauses(uidwithatsign, operand, authors):
 	:param operand: this should be either '=' or '!='
 	:return: a tuple consisting of the SQL string and the value to be passed via %s
 	"""
-	
+
 	whereclausetuples = []
-	
+
 	a = uidwithatsign[:6]
 	locus = uidwithatsign[14:].split('|')
-	
+
 	ao = authors[a]
 	for w in ao.listofworks:
 		if w.universalid == uidwithatsign[0:10]:
 			wk = w
-	
+
 	wklvls = list(wk.structure.keys())
 	wklvls.reverse()
-	
+
 	index = -1
 	for l in locus:
 		index += 1
@@ -178,13 +178,13 @@ def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, cursor, 
 	hyphsearch = seeking
 	db = workdbname[0:6]
 	wkid = workdbname[0:10]
-	
+
 	mysyntax = '~*'
 	restrictions = []
 	for p in session['psgexclusions']:
 		if workdbname in p:
 			restrictions.append(whereclauses(p, '<>', whereclauseinfo))
-	
+
 	d = [wkid, seeking, hyphsearch]
 	qw = 'AND ('
 	for r in restrictions:
@@ -196,13 +196,12 @@ def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, cursor, 
 	# drop the trailing ') AND ('
 	qw = qw[0:-6]
 
-
 	qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {a} {sy} %s OR {b} {sy} %s ) {qw} ORDER BY index ASC {l}'
 	query = qtemplate.format(db=db, a=columna, sy=mysyntax, b=columnb, qw=qw, l=mylimit)
 	data = tuple(d)
 	cursor.execute(query, data)
 	found = cursor.fetchall()
-	
+
 	return found
 
 
@@ -234,7 +233,7 @@ def substringsearch(seeking, cursor, workdbname, whereclauseinfo, templimit=None
 		column = 'stripped_line'
 
 	audbname = workdbname[0:6]
-	
+
 	mysyntax = '~*'
 	found = []
 
@@ -276,13 +275,13 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 	"""
 	grab a line and add the N words at the tail and head of the previous and next lines
 	this will let you search for phrases that fall along a line break "και δη | και"
-	
+
 	if you wanted to look for 'ἀείδων Ϲπάρτηϲ'
 	you need this individual line:
 		2.1.374  δεξιτερὴν γὰρ ἀνέϲχε μετάρϲιον, ὡϲ πρὶν ἀείδων
 	to turn extend out to:
 		ὑφαίνων δεξιτερὴν γὰρ ἀνέϲχε μετάρϲιον ὡϲ πρὶν ἀείδων ϲπάρτηϲ
-		
+
 	:param linenumber:
 	:param numberofextrawords:
 	:param workdbname:
@@ -293,7 +292,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 	workdbname = workid[0:6]
 
 	query = 'SELECT * FROM {db} WHERE index >= %s AND index <= %s ORDER BY index ASC'.format(db=workdbname)
-	data = (linenumber-1, linenumber+1)
+	data = (linenumber - 1, linenumber + 1)
 	cursor.execute(query, data)
 	results = cursor.fetchall()
 
@@ -301,12 +300,12 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 	# will get key errors if there is no linenumber+/-1
 	if len(lines) == 2:
 		if lines[0].index == linenumber:
-			lines = [makeablankline(workdbname, linenumber-1)] + lines
+			lines = [makeablankline(workdbname, linenumber - 1)] + lines
 		else:
-			lines.append(makeablankline(workdbname, linenumber+1))
+			lines.append(makeablankline(workdbname, linenumber + 1))
 	if len(lines) == 1:
-		lines = [makeablankline(workdbname, linenumber-1)] + lines
-		lines.append(makeablankline(workdbname, linenumber+1))
+		lines = [makeablankline(workdbname, linenumber - 1)] + lines
+		lines.append(makeablankline(workdbname, linenumber + 1))
 
 	text = []
 	for line in lines:
@@ -314,18 +313,18 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 			wordsinline = line.wordlist('polytonic')
 		else:
 			wordsinline = line.wordlist('stripped')
-		
-		if line.index == linenumber-1:
+
+		if line.index == linenumber - 1:
 			text = wordsinline[(numberofextrawords * -1):]
 		elif line.index == linenumber:
 			text += wordsinline
-		elif line.index == linenumber+1:
+		elif line.index == linenumber + 1:
 			text += wordsinline[0:numberofextrawords]
-			
+
 	aggregate = ' '.join(text)
-	aggregate = re.sub(r'\s\s',r' ', aggregate)
+	aggregate = re.sub(r'\s\s', r' ', aggregate)
 	aggregate = ' ' + aggregate + ' '
-	
+
 	return aggregate
 
 
@@ -334,19 +333,29 @@ def findleastcommonterm(searchphrase):
 
 	use the wordcounts to determine the best word to pick first
 
+	sadly partial words are in the wordcounts so
+		Sought "ϲτρατηγὸϲ" within 6 words of "φιλοτιμ"
+	will give you a 'max' of
+		max [(11, 'φιλοτιμ'), (4494, 'ϲτρατηγόϲ')]
+
+	and that might not be the wises way to go
+
+	might need to institute a check to make sure an accented letter is in a word, but is this starting to be
+	too much trouble for too little gain?
+
 	:param listofterms:
 	:return:
 	"""
 	stillneedtofindterm = True
 	searchterms = searchphrase.split(' ')
 	searchterms = [x for x in searchterms if x]
-	if session['accentsmatter'] == 'yes' or re.search(r'^[a-z]',searchterms[0]):
+	if session['accentsmatter'] == 'yes' or re.search(r'^[a-z]', searchterms[0]):
 		# note that graves have been eliminated from the wordcounts; so we have to do the same here
 		# but we still need access to the actual search terms, hence the dict
 		# a second issue: 'v' is not in the wordcounts, but you might be searching for it
 		# third, whitespace means you might be passing '(^|\\s)κατὰ' instead of 'κατὰ'
 		searchterms = [re.sub(r'\(.*?\)', '', t) for t in searchterms]
-		searchterms = [re.sub(r'v','u',t) for t in searchterms]
+		searchterms = [re.sub(r'v', 'u', t) for t in searchterms]
 		searchterms = {removegravity(t): t for t in searchterms}
 
 		counts = [findcountsviawordcountstable(k) for k in searchterms.keys()]
@@ -366,7 +375,7 @@ def findleastcommonterm(searchphrase):
 			longestterm = searchterms[0]
 		except KeyError:
 			# did you send me a bunch of regex that just got wiped?
-			longestterm = [(len(t),t) for t in searchphrase.split(' ') if t]
+			longestterm = [(len(t), t) for t in searchphrase.split(' ') if t]
 			longestterm.sort(reverse=True)
 			return longestterm[0][1]
 		for term in searchterms:
@@ -388,13 +397,13 @@ def findleastcommontermcount(searchphrase):
 	fewesthits = -1
 	searchterms = searchphrase.split(' ')
 	searchterms = [x for x in searchterms if x]
-	if session['accentsmatter'] == 'yes' or re.search(r'^[a-z]',searchterms[0]):
+	if session['accentsmatter'] == 'yes' or re.search(r'^[a-z]', searchterms[0]):
 		# note that graves have been eliminated from the wordcounts; so we have to do the same here
 		# but we still need access to the actual search terms, hence the dict
 		# a second issue: 'v' is not in the wordcounts, but you might be searching for it
 		# third, whitespace means you might be passing '(^|\\s)κατὰ' instead of 'κατὰ'
 		searchterms = [re.sub(r'\(.*?\)', '', t) for t in searchterms]
-		searchterms = [re.sub(r'v','u',t) for t in searchterms]
+		searchterms = [re.sub(r'v', 'u', t) for t in searchterms]
 		searchterms = {removegravity(t): t for t in searchterms}
 
 		counts = [findcountsviawordcountstable(k) for k in searchterms.keys()]
@@ -402,7 +411,6 @@ def findleastcommontermcount(searchphrase):
 		totals = [(c[1], c[0]) for c in counts if c]
 		max = sorted(totals, reverse=False)
 		try:
-			leastcommonterm = searchterms[max[0][1]]
 			fewesthits = max[0][0]
 		except:
 			# failed so you will do plan b in a moment
@@ -412,11 +420,25 @@ def findleastcommontermcount(searchphrase):
 
 
 def dblooknear(index, distanceinlines, secondterm, workid, usecolumn, cursor):
+	"""
 
+	search for a term within a range of lines
+
+	return True or False if it is found
+
+	:param index:
+	:param distanceinlines:
+	:param secondterm:
+	:param workid:
+	:param usecolumn:
+	:param cursor:
+	:return:
+	"""
 	table = workid[0:6]
-	q = 'SELECT index FROM {db} WHERE (index > %s AND index < %s AND wkuniversalid = %s AND {c} ~ %s)'.format(db=table, c=usecolumn)
+	q = 'SELECT index FROM {db} WHERE (index > %s AND index < %s AND wkuniversalid = %s AND {c} ~ %s)'.format(db=table,
+	                                                                                                          c=usecolumn)
 	d = (index - distanceinlines, index + distanceinlines, workid, secondterm)
-	cursor.execute(q,d)
+	cursor.execute(q, d)
 	hit = cursor.fetchall()
 	if hit:
 		return True

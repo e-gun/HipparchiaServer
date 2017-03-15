@@ -305,6 +305,12 @@
 	font-size: 110%;
 	}
 
+.sought {
+	color: #0f1b76;
+	font-family: DejaVuSansMono;
+	src: url(/static/ttf/DejaVuSansMono.ttf);
+    }
+
 .speakers, .speaker {
 	font-weight: bold;
 	}

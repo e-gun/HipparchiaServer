@@ -7,3 +7,5 @@
 MorphPossibilityObject.getlatinbaseform() needs work per-misceo
 MorphPossibilityObject.getlatinbaseform() needs work permixtā, per-misceo
 MorphPossibilityObject.getlatinbaseform() needs work praevortēmur, prae-verto
+
+[C] changing the session while the search is going on can produce problems ('acentsmatter' toggle, e.g)

@@ -897,9 +897,7 @@ class dbWorkLine(object):
 		"""
 		
 		line = self.stripped
-		words = line.split(' ')
-		
-		return len(words)
+		return len([x for x in line.split(' ') if x])
 
 	def wordlist(self, version):
 		"""
@@ -913,9 +911,8 @@ class dbWorkLine(object):
 			line = getattr(self, version)
 			# Non-breaking space needs to go
 			line = re.sub(r'\xa0', ' ', line)
-			wordlist = line.split(' ')
-			wordlist = [w for w in wordlist if w]
-		
+			wordlist = [w for w in line.split(' ') if w]
+
 		return wordlist
 	
 	def lastword(self, version):

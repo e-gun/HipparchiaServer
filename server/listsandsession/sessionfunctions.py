@@ -106,11 +106,17 @@ def modifysessionvar(param,val):
 	except:
 		session['maxresults'] = '500'
 
-	if int(session['proximity']) > 10:
-		session['proximity'] = '9'
+	if int(session['proximity']) > 15:
+		session['proximity'] = '15'
+
+	if int(session['proximity']) < 1:
+		session['proximity'] = '1'
 
 	if int(session['linesofcontext']) > 20:
 		session['linesofcontext'] = '20'
+
+	if int(session['linesofcontext']) < 1:
+		session['linesofcontext'] = '1'
 
 	try:
 		# if you edit the box you can easily generate a null which will turn into an error

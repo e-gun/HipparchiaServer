@@ -121,13 +121,10 @@ def aggregatelines(firstline, lastline, cursor, audbname):
 
 	lineobjects = [dblineintolineobject(l) for l in lines]
 
-	aggregate = ''
 	if session['accentsmatter'] == 'yes':
-		for line in lineobjects:
-			aggregate += line.polytonic + ' '
+		aggregate = ' '.join([l.polytonic for l in lineobjects])
 	else:
-		for line in lineobjects:
-			aggregate += line.stripped + ' '
+		aggregate = ' '.join([l.stripped for l in lineobjects])
 
 	aggregate = re.sub(r'\s\s', r' ', aggregate)
 

@@ -268,9 +268,6 @@ def workonproximitysearch(count, foundlineobjects, searchingfor, proximate, sear
 	:return: a collection of hits
 	"""
 
-	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
-
 	while len(searchinginside) > 0 and count.value <= int(session['maxresults']):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
@@ -279,28 +276,21 @@ def workonproximitysearch(count, foundlineobjects, searchingfor, proximate, sear
 		try:
 			wkid = searchinginside.pop()
 			activepoll.remain(len(searchinginside))
+
 		except:
 			wkid = 'gr0000w000'
 
 		if wkid != 'gr0000w000':
 			if session['searchscope'] == 'L':
-				foundlines = withinxlines(int(session['proximity']), searchingfor, proximate, curs, wkid, whereclauseinfo)
+				foundlines = withinxlines(int(session['proximity']), searchingfor, proximate, wkid, whereclauseinfo)
 			else:
-				foundlines = withinxwords(int(session['proximity']), searchingfor, proximate, curs, wkid, whereclauseinfo)
+				foundlines = withinxwords(int(session['proximity']), searchingfor, proximate, wkid, whereclauseinfo)
 
 			count.increment(len(foundlines))
 			activepoll.addhits(len(foundlines))
 
 			for f in foundlines:
 				foundlineobjects.append(dblineintolineobject(f))
-
-			commitcount.increment()
-			if commitcount.value % 400 == 0:
-				dbconnection.commit()
-
-	dbconnection.commit()
-	curs.close()
-	del dbconnection
 
 	return foundlineobjects
 

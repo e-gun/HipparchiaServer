@@ -214,7 +214,7 @@ def executesearch(timestamp):
 				nearstr = ' not'
 
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=seeking, ns=nearstr, sp=session['proximity'], sc=scope, pr=proximate)
-			htmlsearch = '<span class="emph">{skg}</span>{ns} within {sp} {sc} of <span class="emph">{pr}</span>'.format(
+			htmlsearch = '<span class="sought">"{skg}"</span>{ns} within {sp} {sc} of <span class="sought">"{pr}"</span>'.format(
 				skg=seeking, ns=nearstr, sp=session['proximity'], sc=scope, pr=proximate)
 			hits = searchdispatcher('proximity', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
 
