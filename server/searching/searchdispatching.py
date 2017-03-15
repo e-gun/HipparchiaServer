@@ -9,8 +9,6 @@
 import re
 from multiprocessing import Manager, Process
 
-from flask import session
-
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, setconnection
 from server.hipparchiaclasses import MPCounter
@@ -55,7 +53,10 @@ def searchdispatcher(searchtype, searchingfor, proximate, authorandworklist, aut
 
 	activepoll.statusis('Loading the the dispatcher...')
 	# we no longer receive the full authordict but instead a pre-pruned dict: authorswheredict{}
-
+	if activepoll.sessionstate['accentsmatter'] == 'yes':
+		accents = True
+	else:
+		accents = False
 	count = MPCounter()
 	manager = Manager()
 	foundlineobjects = manager.list()
@@ -81,8 +82,8 @@ def searchdispatcher(searchtype, searchingfor, proximate, authorandworklist, aut
 		jobs = [Process(target=workonsimplesearch, args=(count, foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
 	elif searchtype == 'phrase':
 		activepoll.statusis('Executing a phrase search.')
-		leastcommon = findleastcommonterm(searchingfor)
-		lccount = findleastcommontermcount(searchingfor)
+		leastcommon = findleastcommonterm(searchingfor, accents)
+		lccount = findleastcommontermcount(searchingfor, accents)
 		longestterm = max([len(t) for t in searchingfor.split(' ') if t])
 		# need to figure out when it will be faster to go to subqueryphrasesearch() and when not to
 		# logic + trial and error
@@ -104,19 +105,19 @@ def searchdispatcher(searchtype, searchingfor, proximate, authorandworklist, aut
 		activepoll.statusis('Executing a proximity search...')
 		termone = searchingfor
 		termtwo = proximate
-		if (session['accentsmatter'] == 'yes'  or re.search(r'^[a-z]',termone)) and session['nearornot'] == 'T':
+		if (activepoll.sessionstate['accentsmatter'] == 'yes'  or re.search(r'^[a-z]',termone)) and activepoll.sessionstate['nearornot'] == 'T':
 			# choose the necessarily faster option
-			leastcommon = findleastcommonterm(unomdifiedskg+' '+unmodifiedprx)
+			leastcommon = findleastcommonterm(unomdifiedskg+' '+unmodifiedprx, accents)
 			if leastcommon != unomdifiedskg:
 				termone = proximate
 				termtwo = searchingfor
-		elif len(termtwo) > len(termone) and session['nearornot'] == 'T':
+		elif len(termtwo) > len(termone) and activepoll.sessionstate['nearornot'] == 'T':
 			# look for the longest word first since that is probably the quicker route
 			# but you can't swap searchingfor and proximate this way in a 'is not near' search without yielding the wrong focus
 			tmp = termtwo
 			termtwo = termone
 			termone = tmp
-		jobs = [Process(target=workonproximitysearch, args=(count, foundlineobjects, termone, termtwo, searchlist, commitcount, whereclauseinfo, activepoll)) for i in range(workers)]
+		jobs = [Process(target=workonproximitysearch, args=(count, foundlineobjects, termone, termtwo, searchlist, whereclauseinfo, activepoll)) for i in range(workers)]
 	else:
 		# impossible, but...
 		jobs = []
@@ -152,7 +153,7 @@ def workonsimplesearch(count, foundlineobjects, searchingfor, searchinginside, c
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 
-	while len(searchinginside) > 0 and count.value <= int(session['maxresults']):
+	while len(searchinginside) > 0 and count.value <= int(activepoll.sessionstate['maxresults']):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		# that's not supposed to happen with the pool, but somehow it does
@@ -165,9 +166,9 @@ def workonsimplesearch(count, foundlineobjects, searchingfor, searchinginside, c
 		if wkid != 'gr0000w000':
 			if 'x' in wkid:
 				wkid = re.sub('x', 'w', wkid)
-				foundlines = simplesearchworkwithexclusion(searchingfor, wkid, whereclauseinfo, curs)
+				foundlines = simplesearchworkwithexclusion(searchingfor, wkid, whereclauseinfo, activepoll, curs)
 			else:
-				foundlines = substringsearch(searchingfor, curs, wkid, whereclauseinfo)
+				foundlines = substringsearch(searchingfor, wkid, whereclauseinfo, activepoll, curs)
 
 			count.increment(len(foundlines))
 			activepoll.addhits(len(foundlines))
@@ -209,7 +210,7 @@ def workonphrasesearch(foundlineobjects, leastcommon, searchingfor, searchingins
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 
-	if session['accentsmatter'] == 'yes':
+	if activepoll.sessionstate['accentsmatter'] == 'yes':
 		# maxhits ('πολυτρόπωϲ', 506, 506, 0, 0, 0, 0)
 		maxhits = findcountsviawordcountstable(leastcommon)
 
@@ -218,7 +219,7 @@ def workonphrasesearch(foundlineobjects, leastcommon, searchingfor, searchingins
 	except:
 		maxhits = 9999
 
-	while len(searchinginside) > 0 and len(foundlineobjects) < int(session['maxresults']):
+	while len(searchinginside) > 0 and len(foundlineobjects) < int(activepoll.sessionstate['maxresults']):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		# notsupposedtohappen butitdoes
@@ -243,7 +244,7 @@ def workonphrasesearch(foundlineobjects, leastcommon, searchingfor, searchingins
 	return foundlineobjects
 
 
-def workonproximitysearch(count, foundlineobjects, searchingfor, proximate, searchinginside, commitcount, whereclauseinfo, activepoll):
+def workonproximitysearch(count, foundlineobjects, searchingfor, proximate, searchinginside, whereclauseinfo, activepoll):
 	"""
 	a multiprocessors aware function that hands off bits of a proximity search to multiple searchers
 	note that exclusions are handled deeper down in withinxlines() and withinxwords()
@@ -268,7 +269,7 @@ def workonproximitysearch(count, foundlineobjects, searchingfor, proximate, sear
 	:return: a collection of hits
 	"""
 
-	while len(searchinginside) > 0 and count.value <= int(session['maxresults']):
+	while len(searchinginside) > 0 and count.value <= int(activepoll.sessionstate['maxresults']):
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		# not supposed to happen, but it does...
@@ -281,10 +282,12 @@ def workonproximitysearch(count, foundlineobjects, searchingfor, proximate, sear
 			wkid = 'gr0000w000'
 
 		if wkid != 'gr0000w000':
-			if session['searchscope'] == 'L':
-				foundlines = withinxlines(int(session['proximity']), searchingfor, proximate, wkid, whereclauseinfo)
+			if activepoll.sessionstate['searchscope'] == 'L':
+				foundlines = withinxlines(int(activepoll.sessionstate['proximity']), searchingfor, proximate, wkid, whereclauseinfo,
+				                          activepoll.sessionstate['accentsmatter'], activepoll.sessionstate['nearornot'])
 			else:
-				foundlines = withinxwords(int(session['proximity']), searchingfor, proximate, wkid, whereclauseinfo)
+				foundlines = withinxwords(int(activepoll.sessionstate['proximity']), searchingfor, proximate, wkid, whereclauseinfo,
+				                          activepoll.sessionstate['accentsmatter'], activepoll.sessionstate['nearornot'])
 
 			count.increment(len(foundlines))
 			activepoll.addhits(len(foundlines))

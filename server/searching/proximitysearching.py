@@ -14,7 +14,7 @@ from server.dbsupport.dbfunctions import dblineintolineobject, grabonelinefromwo
 from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, dblooknear
 
 
-def withinxlines(distanceinlines, firstterm, secondterm, workdbname, authors):
+def withinxlines(distanceinlines, firstterm, secondterm, workdbname, authors, accentsornot, mustbenear):
 	"""
 
 	after finding x, look for y within n lines of x
@@ -39,7 +39,7 @@ def withinxlines(distanceinlines, firstterm, secondterm, workdbname, authors):
 		hits = substringsearch(firstterm, cursor, workdbname, authors, templimit)
 
 	fullmatches = []
-	if session['accentsmatter'] == 'yes':
+	if accentsornot == 'yes':
 		usecolumn = 'accented_line'
 	else:
 		usecolumn = 'stripped_line'
@@ -47,9 +47,9 @@ def withinxlines(distanceinlines, firstterm, secondterm, workdbname, authors):
 	while hits and len(fullmatches) < int(session['maxresults']):
 		hit = hits.pop()
 		near = dblooknear(hit[0], distanceinlines + 1, secondterm, hit[1], usecolumn, cursor)
-		if session['nearornot'] == 'T' and near:
+		if mustbenear == 'T' and near:
 			fullmatches.append(hit)
-		elif session['nearornot'] == 'F' and not near:
+		elif mustbenear == 'F' and not near:
 			fullmatches.append(hit)
 
 	dbconnection.commit()
@@ -58,7 +58,7 @@ def withinxlines(distanceinlines, firstterm, secondterm, workdbname, authors):
 	return fullmatches
 
 
-def withinxwords(distanceinwords, firstterm, secondterm, workdbname, whereclauseinfo):
+def withinxwords(distanceinwords, firstterm, secondterm, workdbname, whereclauseinfo, accentsornot, mustbenear):
 	"""
 
 	int(session['proximity']), searchingfor, proximate, curs, wkid, whereclauseinfo
@@ -80,6 +80,7 @@ def withinxwords(distanceinwords, firstterm, secondterm, workdbname, whereclause
 	:param additionalterm:
 	:return:
 	"""
+
 	dbconnection = setconnection('not_autocommit')
 	cursor = dbconnection.cursor()
 
@@ -90,7 +91,7 @@ def withinxwords(distanceinwords, firstterm, secondterm, workdbname, whereclause
 
 	distanceinwords += 1
 
-	if session['accentsmatter'] == 'yes':
+	if accentsornot == 'yes':
 		use = 'polytonic'
 	else:
 		use = 'stripped'
@@ -150,9 +151,9 @@ def withinxwords(distanceinwords, firstterm, secondterm, workdbname, whereclause
 		leading = leading[:distanceinwords-1]
 		leading = ' '.join(leading)
 
-		if session['nearornot'] == 'T'  and (re.search(secondterm,leading) or re.search(secondterm,lagging)):
+		if mustbenear == 'T'  and (re.search(secondterm,leading) or re.search(secondterm,lagging)):
 			fullmatches.append(hit)
-		elif session['nearornot'] == 'F' and not re.search(secondterm,leading) and not re.search(secondterm,lagging):
+		elif mustbenear == 'F' and not re.search(secondterm,leading) and not re.search(secondterm,lagging):
 			fullmatches.append(hit)
 
 	dbconnection.commit()

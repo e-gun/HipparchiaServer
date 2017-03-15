@@ -138,7 +138,7 @@ def whereclauses(uidwithatsign, operand, authors):
 	return whereclausetuples
 
 
-def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, cursor, templimit=None):
+def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, activepoll, cursor, templimit=None):
 	"""
 	special issues arise if you want to search Iliad less books 1 and 24
 	the standard search apparatus can't do this, but this can
@@ -162,14 +162,14 @@ def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, cursor, 
 	if templimit:
 		lim = str(templimit)
 	else:
-		lim = str(session['maxresults'])
+		lim = str(activepoll.sessionstate['maxresults'])
 
-	if session['onehit'] == 'no':
+	if activepoll.sessionstate['onehit'] == 'no':
 		mylimit = ' LIMIT ' + lim
 	else:
 		mylimit = ' LIMIT 1'
 
-	if session['accentsmatter'] == 'yes':
+	if activepoll.sessionstate['accentsmatter'] == 'yes':
 		columna = 'marked_up_line'
 	else:
 		columna = 'stripped_line'
@@ -181,7 +181,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, cursor, 
 
 	mysyntax = '~*'
 	restrictions = []
-	for p in session['psgexclusions']:
+	for p in activepoll.sessionstate['psgexclusions']:
 		if workdbname in p:
 			restrictions.append(whereclauses(p, '<>', whereclauseinfo))
 
@@ -205,7 +205,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, cursor, 
 	return found
 
 
-def substringsearch(seeking, cursor, workdbname, whereclauseinfo, templimit=None):
+def substringsearch(seeking, workdbname, whereclauseinfo, activepoll, cursor, templimit=None):
 	"""
 	actually one of the most basic search types: look for a string/substring
 	this is brute force: you wade through the full text of the work
@@ -219,14 +219,14 @@ def substringsearch(seeking, cursor, workdbname, whereclauseinfo, templimit=None
 	if templimit:
 		lim = str(templimit)
 	else:
-		lim = str(session['maxresults'])
+		lim = str(activepoll.sessionstate['maxresults'])
 
-	if session['onehit'] == 'no':
+	if activepoll.sessionstate['onehit'] == 'no':
 		mylimit = ' LIMIT ' + lim
 	else:
 		mylimit = ' LIMIT 1'
 
-	if session['accentsmatter'] == 'yes':
+	if activepoll.sessionstate['accentsmatter'] == 'yes':
 		# columna = 'marked_up_line'
 		column = 'accented_line'
 	else:
@@ -328,7 +328,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 	return aggregate
 
 
-def findleastcommonterm(searchphrase):
+def findleastcommonterm(searchphrase, accentsneeded):
 	"""
 
 	use the wordcounts to determine the best word to pick first
@@ -349,7 +349,7 @@ def findleastcommonterm(searchphrase):
 	stillneedtofindterm = True
 	searchterms = searchphrase.split(' ')
 	searchterms = [x for x in searchterms if x]
-	if session['accentsmatter'] == 'yes' or re.search(r'^[a-z]', searchterms[0]):
+	if accentsneeded or re.search(r'^[a-z]', searchterms[0]):
 		# note that graves have been eliminated from the wordcounts; so we have to do the same here
 		# but we still need access to the actual search terms, hence the dict
 		# a second issue: 'v' is not in the wordcounts, but you might be searching for it
@@ -386,7 +386,7 @@ def findleastcommonterm(searchphrase):
 	return leastcommonterm
 
 
-def findleastcommontermcount(searchphrase):
+def findleastcommontermcount(searchphrase, accentsneeded):
 	"""
 
 	use the wordcounts to determine the best word to pick first
@@ -397,7 +397,7 @@ def findleastcommontermcount(searchphrase):
 	fewesthits = -1
 	searchterms = searchphrase.split(' ')
 	searchterms = [x for x in searchterms if x]
-	if session['accentsmatter'] == 'yes' or re.search(r'^[a-z]', searchterms[0]):
+	if accentsneeded or re.search(r'^[a-z]', searchterms[0]):
 		# note that graves have been eliminated from the wordcounts; so we have to do the same here
 		# but we still need access to the actual search terms, hence the dict
 		# a second issue: 'v' is not in the wordcounts, but you might be searching for it
