@@ -138,7 +138,7 @@ def whereclauses(uidwithatsign, operand, authors):
 	return whereclausetuples
 
 
-def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor, templimit=None):
+def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, cursor, templimit=None):
 	"""
 	special issues arise if you want to search Iliad less books 1 and 24
 	the standard search apparatus can't do this, but this can
@@ -183,7 +183,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor, templimi
 	restrictions = []
 	for p in session['psgexclusions']:
 		if workdbname in p:
-			restrictions.append(whereclauses(p, '<>', authors))
+			restrictions.append(whereclauses(p, '<>', whereclauseinfo))
 	
 	d = [wkid, seeking, hyphsearch]
 	qw = 'AND ('
@@ -206,7 +206,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, authors, cursor, templimi
 	return found
 
 
-def substringsearch(seeking, cursor, workdbname, authors, templimit=None):
+def substringsearch(seeking, cursor, workdbname, whereclauseinfo, templimit=None):
 	"""
 	actually one of the most basic search types: look for a string/substring
 	this is brute force: you wade through the full text of the work
@@ -254,12 +254,12 @@ def substringsearch(seeking, cursor, workdbname, authors, templimit=None):
 		db = workdbname[0:6]
 		wid = workdbname[0:10]
 		d = [wid, seeking]
-		w = whereclauses(workdbname, '=', authors)
+		w = whereclauses(workdbname, '=', whereclauseinfo)
 		for i in range(0, len(w)):
 			qw += 'AND (' + w[i][0] + ') '
 			d.append(w[i][1])
 
-		qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {c} {sy} ) {qw} ORDER BY index ASC {l}'
+		qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {c} {sy} %s ) {qw} ORDER BY index ASC {l}'
 		query = qtemplate.format(db=db, c=column, sy=mysyntax, l=mylimit, qw=qw)
 		data = tuple(d)
 
