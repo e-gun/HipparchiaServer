@@ -43,7 +43,7 @@ def phrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
 	while hits and len(fullmatches) < so.cap:
 		hit = hits.pop()
 		phraselen = len(searchphrase.split(' '))
-		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, s, cursor)
+		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, so, cursor)
 		if not so.accented:
 			wordset = re.sub(r'[\.\?\!;:,·’]', r'', wordset)
 		else:

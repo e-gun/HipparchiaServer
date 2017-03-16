@@ -106,8 +106,12 @@ def modifysessionvar(param,val):
 	except:
 		session['maxresults'] = '500'
 
-	if int(session['proximity']) > 15:
-		session['proximity'] = '15'
+	try:
+		if int(session['proximity']) > 15:
+			session['proximity'] = '15'
+	except ValueError:
+		# ValueError: invalid literal for int() with base 10: 'null'
+		session['proximity'] = '5'
 
 	if int(session['proximity']) < 1:
 		session['proximity'] = '1'
@@ -122,12 +126,12 @@ def modifysessionvar(param,val):
 		# if you edit the box you can easily generate a null which will turn into an error
 		if int(session['earliestdate']) < -850 or int(session['earliestdate']) > 1500:
 			session['earliestdate'] = '-850'
-	except:
+	except ValueError:
 		session['earliestdate'] = '-850'
 	try:
 		if int(session['latestdate']) < -850 or int(session['latestdate']) > 1500:
 			session['latestdate'] = '1500'
-	except:
+	except ValueError:
 		session['latestdate'] = '1500'
 
 	# skip this check because as you are typing into the spinner you will generate intermediate values that will ruin things
