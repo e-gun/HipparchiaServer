@@ -1314,18 +1314,28 @@ class SearchObject(object):
 
 	"""
 
-	def __init_(self, ts, termone, termtwo, poll, frozensession):
+	def __init__(self, ts, seeking, proximate, frozensession):
 		self.ts = ts
-		self.poll = poll
-		self.firstterm = termone
-		self.secondterm = termtwo
+		self.seeking = seeking
+		self.proximate = proximate
 		self.session = frozensession
-		if len(termone) < len(termtwo):
-			self.longterm = termtwo
-			self.shorterm = termone
+		self.proximity = frozensession['proximity']
+		self.psgselections = frozensession['psgselections']
+		self.psgexclusions = frozensession['psgexclusions']
+		self.context = int(frozensession['linesofcontext'])
+		if len(seeking) < len(proximate):
+			self.longterm = proximate
+			self.shorterm = seeking
 		else:
-			self.longterm = termone
-			self.shorterm = termtwo
+			self.longterm = seeking
+			self.shorterm = proximate
+
+		# modification or swapping of seeing/proximate mean you want
+		# other holders for what you actually search for
+		self.termone = seeking
+		self.termtwo = proximate
+		self.leastcommon = None
+		self.searchtype = None
 		self.authorandworklist = []
 		self.authorswhere = {}
 
@@ -1335,6 +1345,26 @@ class SearchObject(object):
 			self.scope = 'lines'
 
 		if frozensession['nearornot'] == 'T':
+			self.near = True
 			self.nearstr = ''
 		else:
+			self.near = False
 			self.nearstr = ' not'
+
+		if frozensession['accentsmatter'] == 'yes':
+			self.accented = True
+			self.usecolumn = 'accented_line'
+			self.usewordlist = 'polytonic'
+		else:
+			self.accented = False
+			self.usecolumn = 'stripped_line'
+			self.usewordlist = 'stripped'
+
+		self.cap = int(frozensession['maxresults'])
+
+		if frozensession['onehit'] == 'yes':
+			self.onehit = True
+		else:
+			self.onehit = False
+
+		self.distance = int(frozensession['proximity'])

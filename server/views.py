@@ -25,7 +25,7 @@ from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinef
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking, \
 	perseusidmismatch, returnfirstlinenumber
 from server.formatting_helper_functions import removegravity, stripaccents, bcedating
-from server.hipparchiaclasses import ProgressPoll
+from server.hipparchiaclasses import ProgressPoll, SearchObject
 from server.lexica.lexicaformatting import entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, \
 	lookformorphologymatches, getobservedwordprevalencedata, grablemmataobjectfor
@@ -166,10 +166,11 @@ def executesearch(timestamp):
 	poll[ts].statusis('Preparing to search')
 
 	# a search can take 30s or more and the user might alter the session while the search is running by toggling accentsmatter, etc
-	# that can be a problem later, so freeze the values now
+	# that can be a problem, so freeze the values now and rely on this instead of some moving target
 	frozensession = session.copy()
 
 	if len(seeking) > 0:
+		s = SearchObject(ts, seeking, proximate, frozensession)
 		starttime = time.time()
 		poll[ts].statusis('Compiling the list of works to search')
 		authorandworklist = compileauthorandworklist(listmapper)
@@ -182,63 +183,52 @@ def executesearch(timestamp):
 		workssearched = len(authorandworklist)
 
 		poll[ts].statusis('Calculating full authors to search')
-		authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
+		s.authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
 
 		# assemble a subset of authordict that will be relevant to our actual search and send it to searchdispatcher()
 		# it turns out that we only need to pass authors that are part of psgselections or psgexclusions
-		# whereclauses() is selectively invoked and it needs to check the information in those and only those authors and works
-		# formerly all authors were sent through searchdispatcher(), but loading them into the manager produced
+		# whereclauses() is selectively invoked and it needs to check the information in the listed authors and works
+		# once upon a time all authors were sent through searchdispatcher(), but loading them into the manager produced
 		# a massive slowdown (as 200k objects got pickled into a mpshareable dict)
 		authorswheredict = {}
 
-		for w in frozensession['psgselections']:
+		for w in s.psgselections:
 			authorswheredict[w[0:6]] = authordict[w[0:6]]
-		for w in frozensession['psgexclusions']:
+		for w in s.psgexclusions:
 			authorswheredict[w[0:6]] = authordict[w[0:6]]
+		s.authorswhere = authorswheredict
 
 		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
-			searchtype = 'simple'
+			s.searchtype = 'simple'
 			thesearch = seeking
 			htmlsearch = '<span class="sought">"{skg}"</span>'.format(skg=seeking)
-			hits = searchdispatcher('simple', seeking, proximate, authorandworklist, authorswheredict, poll[ts], frozensession)
 		elif re.search(phrasefinder, seeking):
-			searchtype = 'phrase'
+			s.searchtype = 'phrase'
 			thesearch = seeking
 			htmlsearch = '<span class="sought">"{skg}"</span>'.format(skg=seeking)
-			hits = searchdispatcher('phrase', seeking, proximate, authorandworklist, authorswheredict, poll[ts], frozensession)
 		else:
-			searchtype = 'proximity'
-			if frozensession['searchscope'] == 'W':
-				scope = 'words'
-			else:
-				scope = 'lines'
-
-			if frozensession['nearornot'] == 'T':
-				nearstr = ''
-			else:
-				nearstr = ' not'
-
-			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=seeking, ns=nearstr, sp=frozensession['proximity'], sc=scope, pr=proximate)
+			s.searchtype = 'proximity'
+			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=s.seeking, ns=s.nearstr, sp=s.proximity, sc=s.scope, pr=s.proximate)
 			htmlsearch = '<span class="sought">"{skg}"</span>{ns} within {sp} {sc} of <span class="sought">"{pr}"</span>'.format(
-				skg=seeking, ns=nearstr, sp=frozensession['proximity'], sc=scope, pr=proximate)
-			hits = searchdispatcher('proximity', seeking, proximate, authorandworklist, authorswheredict, poll[ts], frozensession)
+				skg=seeking, ns=s.nearstr, sp=s.proximity, sc=s.scope, pr=proximate)
 
+		hits = searchdispatcher(s, poll[ts])
 		poll[ts].statusis('Putting the results in context')
 
 		# hits [<server.hipparchiaclasses.dbWorkLine object at 0x10d952da0>, <server.hipparchiaclasses.dbWorkLine object at 0x10d952c50>, ... ]
 		hitdict = sortresultslist(hits, authordict, workdict)
-		if int(frozensession['linesofcontext']) > 0:
-			allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, poll[ts])
+		if s.context > 0:
+			allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, s.searchtype, poll[ts])
 		else:
-			allfound = nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, poll[ts])
+			allfound = nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, s.searchtype, poll[ts])
 
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
-		if len(allfound) > int(frozensession['maxresults']):
-			allfound = allfound[0:int(frozensession['maxresults'])]
+		if len(allfound) > s.cap:
+			allfound = allfound[0:s.cap]
 
 		poll[ts].statusis('Converting results to HTML')
-		if int(frozensession['linesofcontext']) > 0:
+		if s.context > 0:
 			htmlandjs = htmlifysearchfinds(allfound)
 		else:
 			htmlandjs = nocontexthtmlifysearchfinds(allfound)
@@ -248,7 +238,7 @@ def executesearch(timestamp):
 
 		resultcount = len(allfound)
 
-		if resultcount < int(frozensession['maxresults']):
+		if resultcount < s.cap:
 			hitmax = 'false'
 		else:
 			hitmax = 'true'

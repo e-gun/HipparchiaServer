@@ -14,7 +14,7 @@ from server.searching.searchfunctions import substringsearch, simplesearchworkwi
 	lookoutsideoftheline
 
 
-def phrasesearch(leastcommon, searchphrase, maxhits, wkid, authorswheredict, activepoll, frozensession, cursor):
+def phrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
 	"""
 	a whitespace might mean things are on a new line
 	note how horrible something like και δη και is: you will search και first and then...
@@ -30,34 +30,37 @@ def phrasesearch(leastcommon, searchphrase, maxhits, wkid, authorswheredict, act
 	:return:
 	"""
 
+	s = searchobject
+	searchphrase = s.termone
+
 	if 'x' not in wkid:
-		hits = substringsearch(leastcommon, cursor, wkid, authorswheredict, frozensession, templimit=maxhits)
+		hits = substringsearch(s.leastcommon, wkid, s, cursor, templimit=maxhits)
 	else:
 		wkid = re.sub('x', 'w', wkid)
-		hits = simplesearchworkwithexclusion(leastcommon, wkid, authorswheredict, cursor, frozensession, templimit=maxhits)
+		hits = simplesearchworkwithexclusion(s.leastcommon, wkid, s, cursor, templimit=maxhits)
 	
 	fullmatches = []
-	while hits and len(fullmatches) < int(frozensession['maxresults']):
+	while hits and len(fullmatches) < s.cap:
 		hit = hits.pop()
 		phraselen = len(searchphrase.split(' '))
-		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, cursor)
-		if frozensession['accentsmatter'] == 'no':
+		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, s, cursor)
+		if not s.accented:
 			wordset = re.sub(r'[\.\?\!;:,·’]', r'', wordset)
 		else:
 			# the difference is in the apostrophe: δ vs δ’
 			wordset = re.sub(r'[\.\?\!;:,·]', r'', wordset)
 
-		if frozensession['nearornot'] == 'T' and re.search(searchphrase, wordset):
+		if s.near and re.search(searchphrase, wordset):
 			fullmatches.append(hit)
 			activepoll.addhits(1)
-		elif frozensession['nearornot'] == 'F' and re.search(searchphrase, wordset) is None:
+		elif not s.near and re.search(searchphrase, wordset) is None:
 			fullmatches.append(hit)
 			activepoll.addhits(1)
 	
 	return fullmatches
 
 
-def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, commitcount, authorswheredict, activepoll, frozensession):
+def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, commitcount, activepoll, searchobject):
 	"""
 	foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll
 
@@ -78,6 +81,8 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 	:return:
 	"""
 
+	s = searchobject
+
 	dbconnection = setconnection('autocommit')
 	curs = dbconnection.cursor()
 
@@ -89,20 +94,13 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 	sp = re.sub(r'^\s', '(^| )', searchphrase)
 	sp = re.sub(r'\s$', '( |$)', sp)
 
-	if frozensession['onehit'] == 'no':
-		lim = ' LIMIT ' + str(frozensession['maxresults'])
+	if not s.onehit:
+		lim = ' LIMIT ' + str(s.cap)
 	else:
 		# the windowing problem means that '1' might be something that gets discarded
 		lim = ' LIMIT 5'
 
-	if frozensession['accentsmatter'] == 'no':
-		ln = 'stripped_line'
-		use = 'stripped'
-	else:
-		ln = 'accented_line'
-		use = 'polytonic'
-
-	while len(workstosearch) > 0 and count.value <= int(frozensession['maxresults']):
+	while len(workstosearch) > 0 and count.value <= s.cap:
 		try:
 			wkid = workstosearch.pop()
 			activepoll.remain(len(workstosearch))
@@ -126,7 +124,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 			if re.search(r'x', wkid):
 				# we have exclusions
 				wkid = re.sub(r'x', 'w', wkid)
-				restrictions = [whereclauses(p, '<>', authorswheredict) for p in frozensession['psgexclusions'] if wkid in p]
+				restrictions = [whereclauses(p, '<>', s.authorswheredict) for p in s.psgexclusions if wkid in p]
 				whr = '( wkuniversalid = %s) AND ('
 				data = [wkid[0:10]]
 				for r in restrictions:
@@ -139,7 +137,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 				# drop the trailing ') AND ('
 				data.append(sp)
 				whr = whr[0:-6]
-				query = qtemplate.format(db=db, ln=ln, whr=whr, lim=lim)
+				query = qtemplate.format(db=db, ln=s.usecolumn, whr=whr, lim=lim)
 			else:
 				if '_AT_' not in wkid:
 					whr = '( wkuniversalid ~ %s )'
@@ -150,19 +148,19 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 					else:
 						# we are searching an individual work
 						d = wkid[0:10]
-					query = qtemplate.format(db=db, ln=ln, whr=whr, lim=lim)
+					query = qtemplate.format(db=db, ln=s.usecolumn, whr=whr, lim=lim)
 					data = (d, sp)
 				else:
 					wkid = re.sub(r'x', 'w', wkid)
 					data = [wkid[0:10]]
 					whr = ''
-					w = whereclauses(wkid, '=', authorswheredict)
+					w = whereclauses(wkid, '=', s.authorswheredict)
 					for i in range(0, len(w)):
 						whr += 'AND (' + w[i][0] + ') '
 						data.append(w[i][1])
 					# strip extra ANDs
 					whr = '( wkuniversalid = %s) ' + whr
-					query = qtemplate.format(db=db, ln=ln, whr=whr, lim=lim)
+					query = qtemplate.format(db=db, ln=s.usecolumn, whr=whr, lim=lim)
 					data.append(sp)
 
 			curs.execute(query, tuple(data))
@@ -172,7 +170,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 			locallineobjects = []
 			if indices:
 				for i in indices:
-					query = 'SELECT * FROM ' + wkid[0:6] + ' WHERE index=%s'
+					query = 'SELECT * FROM {tb} WHERE index=%s'.format(tb=wkid[0:6])
 					data = (i,)
 					curs.execute(query, data)
 					locallineobjects.append(dblineintolineobject(curs.fetchone()))
@@ -180,20 +178,20 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 			locallineobjects.reverse()
 			# debugging
 			# for l in locallineobjects:
-			#	print(l.universalid, l.locus(), getattr(l,use))
+			#	print(l.universalid, l.locus(), getattr(l,s.usewordlist))
 			gotmyonehit = False
-			while locallineobjects and count.value <= int(frozensession['maxresults']) and not gotmyonehit:
+			while locallineobjects and count.value <= s.cap and not gotmyonehit:
 				# windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]
 				# figure out which line is really the line with the goods
 				# it is not nearly so simple as picking the 2nd element in any run of 3: no always runs of 3 + matches in
 				# subsequent lines means that you really should check your work carefully; this is not an especially costly
 				# operation relative to the whole search and esp. relative to the speed gains of using a subquery search
 				lo = locallineobjects.pop()
-				if re.search(sp, getattr(lo,use)):
+				if re.search(sp, getattr(lo,s.usewordlist)):
 					foundlineobjects.append(lo)
 					count.increment(1)
 					activepoll.sethits(count.value)
-					if frozensession['onehit'] == 'yes':
+					if s.onehit:
 						gotmyonehit = True
 				else:
 					try:
@@ -204,7 +202,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 					if lo.wkuinversalid != next.wkuinversalid or lo.index != (next.index - 1):
 						# you grabbed the next line on the pile (e.g., index = 9999), not the actual next line (e.g., index = 101)
 						# usually you won't get a hit by grabbing the next db line, but sometimes you do...
-						query = 'SELECT * FROM ' + wkid[0:6] + ' WHERE index=%s'
+						query = 'SELECT * FROM {tb} WHERE index=%s'.format(tb=wkid[0:6])
 						data = (lo.index + 1,)
 						curs.execute(query, data)
 						try:
@@ -216,12 +214,12 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 						tail = c[0] + '$'
 						head = '^' + c[1]
 						# debugging
-						# print('re',getattr(lo,use),tail, head, getattr(next,use))
-						if re.search(tail, getattr(lo,use)) and re.search(head, getattr(next,use)):
+						# print('re',getattr(lo,s.usewordlist),tail, head, getattr(next,s.usewordlist))
+						if re.search(tail, getattr(lo,s.usewordlist)) and re.search(head, getattr(next,s.usewordlist)):
 							foundlineobjects.append(lo)
 							count.increment(1)
 							activepoll.sethits(count.value)
-							if frozensession['onehit'] == 'yes':
+							if s.onehit:
 								gotmyonehit = True
 
 	curs.close()

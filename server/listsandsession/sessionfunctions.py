@@ -115,8 +115,8 @@ def modifysessionvar(param,val):
 	if int(session['linesofcontext']) > 20:
 		session['linesofcontext'] = '20'
 
-	if int(session['linesofcontext']) < 1:
-		session['linesofcontext'] = '1'
+	if int(session['linesofcontext']) < 0:
+		session['linesofcontext'] = '0'
 
 	try:
 		# if you edit the box you can easily generate a null which will turn into an error

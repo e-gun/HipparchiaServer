@@ -8,13 +8,11 @@
 
 import re
 
-from flask import session
-
 from server.dbsupport.dbfunctions import dblineintolineobject, grabonelinefromwork, makeablankline, setconnection
 from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, dblooknear
 
 
-def withinxlines(firstterm, secondterm, workdbname, whereclauseinfo, frozensession):
+def withinxlines(workdbname, searchobject):
 	"""
 
 	after finding x, look for y within n lines of x
@@ -24,12 +22,11 @@ def withinxlines(firstterm, secondterm, workdbname, whereclauseinfo, frozensessi
 	:param additionalterm:
 	:return:
 	"""
+
+	s = searchobject
+
 	dbconnection = setconnection('not_autocommit')
 	cursor = dbconnection.cursor()
-
-	distanceinlines = int(frozensession['proximity'])
-	accents = frozensession['accentsmatter']
-	mustbenear = frozensession['nearornot']
 
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
@@ -38,22 +35,18 @@ def withinxlines(firstterm, secondterm, workdbname, whereclauseinfo, frozensessi
 
 	if 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(firstterm, workdbname, whereclauseinfo, frozensession, cursor, templimit)
+		hits = simplesearchworkwithexclusion(s.termone, workdbname, s, cursor, templimit)
 	else:
-		hits = substringsearch(firstterm, workdbname, whereclauseinfo, frozensession, cursor, templimit)
+		hits = substringsearch(s.termone, workdbname, s, cursor, templimit)
 
 	fullmatches = []
-	if accents == 'yes':
-		usecolumn = 'accented_line'
-	else:
-		usecolumn = 'stripped_line'
 
-	while hits and len(fullmatches) < int(session['maxresults']):
+	while hits and len(fullmatches) < s.cap:
 		hit = hits.pop()
-		near = dblooknear(hit[0], distanceinlines + 1, secondterm, hit[1], usecolumn, cursor)
-		if mustbenear == 'T' and near:
+		isnear = dblooknear(hit[0], s.distance + 1, s.termtwo, hit[1], s.usecolumn, cursor)
+		if s.near and isnear:
 			fullmatches.append(hit)
-		elif mustbenear == 'F' and not near:
+		elif not s.near and not isnear:
 			fullmatches.append(hit)
 
 	dbconnection.commit()
@@ -62,7 +55,7 @@ def withinxlines(firstterm, secondterm, workdbname, whereclauseinfo, frozensessi
 	return fullmatches
 
 
-def withinxwords(firstterm, secondterm, workdbname, whereclauseinfo, frozensession):
+def withinxwords(workdbname, searchobject):
 	"""
 
 	int(session['proximity']), searchingfor, proximate, curs, wkid, whereclauseinfo
@@ -84,38 +77,31 @@ def withinxwords(firstterm, secondterm, workdbname, whereclauseinfo, frozensessi
 	:param additionalterm:
 	:return:
 	"""
+	s = searchobject
+
+	# look out for off-by-one errors
+	distance = s.distance+1
 
 	dbconnection = setconnection('not_autocommit')
 	cursor = dbconnection.cursor()
-
-	distanceinwords = int(frozensession['proximity'])
-	accents = frozensession['accentsmatter']
-	mustbenear = frozensession['nearornot']
 
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
 	# back for checking: but the Aetolians are likley not among those passages...
 	templimit = 9999
 
-	distanceinwords += 1
-
-	if accents == 'yes':
-		use = 'polytonic'
-	else:
-		use = 'stripped'
-
 	if 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(firstterm, workdbname, whereclauseinfo, frozensession, cursor, templimit)
+		hits = simplesearchworkwithexclusion(s.termone, workdbname, s, cursor, templimit)
 	else:
-		hits = substringsearch(firstterm, workdbname, whereclauseinfo, frozensession, cursor, templimit)
+		hits = substringsearch(s.termone, workdbname, s, cursor, templimit)
 
 	fullmatches = []
 
 	for hit in hits:
 		hitline = dblineintolineobject(hit)
-		searchzone = getattr(hitline,use)
-		match = re.search(firstterm, searchzone)
+		searchzone = getattr(hitline, s.usewordlist)
+		match = re.search(s.termone, searchzone)
 		# but what if you just found 'paucitate' inside of 'paucitatem'?
 		# you will have 'm' left over and this will throw off your distance-in-words count
 		past = searchzone[match.end():]
@@ -131,7 +117,7 @@ def withinxwords(firstterm, secondterm, workdbname, whereclauseinfo, frozensessi
 
 		atline = hitline.index
 		lagging = [x for x in upto.split(' ') if x]
-		while ucount < distanceinwords+1:
+		while ucount < distance+1:
 			atline -= 1
 			try:
 				previous = dblineintolineobject(grabonelinefromwork(workdbname[0:6], atline, cursor))
@@ -139,14 +125,14 @@ def withinxwords(firstterm, secondterm, workdbname, whereclauseinfo, frozensessi
 				# 'NoneType' object is not subscriptable
 				previous = makeablankline(workdbname[0:6], -1)
 				ucount = 999
-			lagging = previous.wordlist(use) + lagging
+			lagging = previous.wordlist(s.usewordlist) + lagging
 			ucount += previous.wordcount()
-		lagging = lagging[-1*(distanceinwords-1):]
+		lagging = lagging[-1*(distance-1):]
 		lagging = ' '.join(lagging)
 
 		leading = [x for x in past.split(' ') if x]
 		atline = hitline.index
-		while pcount < distanceinwords+1:
+		while pcount < distance+1:
 			atline += 1
 			try:
 				next = dblineintolineobject(grabonelinefromwork(workdbname[0:6], atline, cursor))
@@ -154,14 +140,14 @@ def withinxwords(firstterm, secondterm, workdbname, whereclauseinfo, frozensessi
 				# 'NoneType' object is not subscriptable
 				next = makeablankline(workdbname[0:6], -1)
 				pcount = 999
-			leading += next.wordlist(use)
+			leading += next.wordlist(s.usewordlist)
 			pcount += next.wordcount()
-		leading = leading[:distanceinwords-1]
+		leading = leading[:distance-1]
 		leading = ' '.join(leading)
 
-		if mustbenear == 'T'  and (re.search(secondterm,leading) or re.search(secondterm,lagging)):
+		if s.near and (re.search(s.termtwo, leading) or re.search(s.termtwo, lagging)):
 			fullmatches.append(hit)
-		elif mustbenear == 'F' and not re.search(secondterm,leading) and not re.search(secondterm,lagging):
+		elif not s.near and not re.search(s.termtwo, leading) and not re.search(s.termtwo, lagging):
 			fullmatches.append(hit)
 
 	dbconnection.commit()

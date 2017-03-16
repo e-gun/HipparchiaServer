@@ -138,8 +138,11 @@ def whereclauses(uidwithatsign, operand, authors):
 	return whereclausetuples
 
 
-def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, frozensession, cursor, templimit=None):
+def simplesearchworkwithexclusion(seeking, workdbname, searchobject, cursor, templimit=None):
 	"""
+
+	note that we are not pulling seeking from the searchobject
+
 	special issues arise if you want to search Iliad less books 1 and 24
 	the standard search apparatus can't do this, but this can
 	a modified version of substringsearch()
@@ -159,20 +162,18 @@ def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, frozense
 
 	"""
 
+	s = searchobject
+
 	if templimit:
 		lim = str(templimit)
 	else:
-		lim = str(frozensession['maxresults'])
+		lim = str(s.cap)
 
-	if frozensession['onehit'] == 'no':
-		mylimit = ' LIMIT ' + lim
-	else:
+	if s.onehit:
 		mylimit = ' LIMIT 1'
-
-	if frozensession['accentsmatter'] == 'yes':
-		columna = 'marked_up_line'
 	else:
-		columna = 'stripped_line'
+		mylimit = ' LIMIT ' + lim
+
 	columnb = 'hyphenated_words'
 
 	hyphsearch = seeking
@@ -181,9 +182,9 @@ def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, frozense
 
 	mysyntax = '~*'
 	restrictions = []
-	for p in frozensession['psgexclusions']:
+	for p in s.psgexclusions:
 		if workdbname in p:
-			restrictions.append(whereclauses(p, '<>', whereclauseinfo))
+			restrictions.append(whereclauses(p, '<>', s.authorswhere))
 
 	d = [wkid, seeking, hyphsearch]
 	qw = 'AND ('
@@ -197,7 +198,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, frozense
 	qw = qw[0:-6]
 
 	qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {a} {sy} %s OR {b} {sy} %s ) {qw} ORDER BY index ASC {l}'
-	query = qtemplate.format(db=db, a=columna, sy=mysyntax, b=columnb, qw=qw, l=mylimit)
+	query = qtemplate.format(db=db, a=s.usecolumn, sy=mysyntax, b=columnb, qw=qw, l=mylimit)
 	data = tuple(d)
 	cursor.execute(query, data)
 	found = cursor.fetchall()
@@ -205,10 +206,20 @@ def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, frozense
 	return found
 
 
-def substringsearch(seeking, workdbname, whereclauseinfo, frozensession, cursor, templimit=None):
+def substringsearch(seeking, workdbname, searchobject, cursor, templimit=None):
 	"""
+
 	actually one of the most basic search types: look for a string/substring
 	this is brute force: you wade through the full text of the work
+
+	note that we are not pulling seeking from the searchobject
+
+	might refactor to do this, but need to double check every fucntion that calls
+	this and the secret sauce each might use to assemble 'seeking'
+
+	for example, phrasesearching will try to send you 's.leastcommon', so it is not
+	safe to just use 's.termone'
+
 	:param seeking:
 	:param cursor:
 	:param workdbname:
@@ -216,21 +227,17 @@ def substringsearch(seeking, workdbname, whereclauseinfo, frozensession, cursor,
 	:return:
 	"""
 
+	s = searchobject
+
 	if templimit:
 		lim = str(templimit)
 	else:
-		lim = str(frozensession['maxresults'])
+		lim = str(s.cap)
 
-	if frozensession['onehit'] == 'no':
-		mylimit = ' LIMIT ' + lim
-	else:
+	if s.onehit:
 		mylimit = ' LIMIT 1'
-
-	if frozensession['accentsmatter'] == 'yes':
-		# columna = 'marked_up_line'
-		column = 'accented_line'
 	else:
-		column = 'stripped_line'
+		mylimit = ' LIMIT ' + lim
 
 	audbname = workdbname[0:6]
 
@@ -240,12 +247,12 @@ def substringsearch(seeking, workdbname, whereclauseinfo, frozensession, cursor,
 	if len(workdbname) == 10:
 		# e.g., 'lt1002w003'
 		qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {c} {sy} %s ) {l}'
-		query = qtemplate.format(db=audbname, c=column, sy=mysyntax, l=mylimit)
+		query = qtemplate.format(db=audbname, c=s.usecolumn, sy=mysyntax, l=mylimit)
 		data = (workdbname, seeking)
 	elif len(workdbname) == 6:
 		# e.g., 'lt0025'
 		qtemplate = 'SELECT * FROM {db} WHERE ( {c} {sy} %s ) {l}'
-		query = qtemplate.format(db=audbname, c=column, sy=mysyntax, l=mylimit)
+		query = qtemplate.format(db=audbname, c=s.usecolumn, sy=mysyntax, l=mylimit)
 		data = (seeking,)
 	else:
 		# e.g., 'lt0914w001_AT_3'
@@ -253,13 +260,13 @@ def substringsearch(seeking, workdbname, whereclauseinfo, frozensession, cursor,
 		db = workdbname[0:6]
 		wid = workdbname[0:10]
 		d = [wid, seeking]
-		w = whereclauses(workdbname, '=', whereclauseinfo)
+		w = whereclauses(workdbname, '=', s.authorswhere)
 		for i in range(0, len(w)):
 			qw += 'AND (' + w[i][0] + ') '
 			d.append(w[i][1])
 
 		qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {c} {sy} %s ) {qw} ORDER BY index ASC {l}'
-		query = qtemplate.format(db=db, c=column, sy=mysyntax, l=mylimit, qw=qw)
+		query = qtemplate.format(db=db, c=s.usecolumn, sy=mysyntax, l=mylimit, qw=qw)
 		data = tuple(d)
 
 	try:
@@ -271,7 +278,7 @@ def substringsearch(seeking, workdbname, whereclauseinfo, frozensession, cursor,
 	return found
 
 
-def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
+def lookoutsideoftheline(linenumber, numberofextrawords, workid, searchobject, cursor):
 	"""
 	grab a line and add the N words at the tail and head of the previous and next lines
 	this will let you search for phrases that fall along a line break "και δη | και"
@@ -309,11 +316,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, cursor):
 
 	text = []
 	for line in lines:
-		if session['accentsmatter'] == 'yes':
-			wordsinline = line.wordlist('polytonic')
-		else:
-			wordsinline = line.wordlist('stripped')
-
+		wordsinline = line.wordlist(searchobject.usewordlist)
 		if line.index == linenumber - 1:
 			text = wordsinline[(numberofextrawords * -1):]
 		elif line.index == linenumber:
@@ -434,9 +437,9 @@ def dblooknear(index, distanceinlines, secondterm, workid, usecolumn, cursor):
 	:param cursor:
 	:return:
 	"""
+
 	table = workid[0:6]
-	q = 'SELECT index FROM {db} WHERE (index > %s AND index < %s AND wkuniversalid = %s AND {c} ~ %s)'.format(db=table,
-	                                                                                                          c=usecolumn)
+	q = 'SELECT index FROM {db} WHERE (index > %s AND index < %s AND wkuniversalid = %s AND {c} ~ %s)'.format(db=table, c=usecolumn)
 	d = (index - distanceinlines, index + distanceinlines, workid, secondterm)
 	cursor.execute(q, d)
 	hit = cursor.fetchall()
