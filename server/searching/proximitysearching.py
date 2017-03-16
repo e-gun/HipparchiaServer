@@ -14,7 +14,7 @@ from server.dbsupport.dbfunctions import dblineintolineobject, grabonelinefromwo
 from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, dblooknear
 
 
-def withinxlines(distanceinlines, firstterm, secondterm, workdbname, authors, accentsornot, mustbenear):
+def withinxlines(firstterm, secondterm, workdbname, whereclauseinfo, frozensession):
 	"""
 
 	after finding x, look for y within n lines of x
@@ -27,6 +27,10 @@ def withinxlines(distanceinlines, firstterm, secondterm, workdbname, authors, ac
 	dbconnection = setconnection('not_autocommit')
 	cursor = dbconnection.cursor()
 
+	distanceinlines = int(frozensession['proximity'])
+	accents = frozensession['accentsmatter']
+	mustbenear = frozensession['nearornot']
+
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
 	# back for checking: but the Aetolians are likley not among those passages...
@@ -34,12 +38,12 @@ def withinxlines(distanceinlines, firstterm, secondterm, workdbname, authors, ac
 
 	if 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(firstterm, workdbname, authors, cursor, templimit)
+		hits = simplesearchworkwithexclusion(firstterm, workdbname, whereclauseinfo, frozensession, cursor, templimit)
 	else:
-		hits = substringsearch(firstterm, cursor, workdbname, authors, templimit)
+		hits = substringsearch(firstterm, workdbname, whereclauseinfo, frozensession, cursor, templimit)
 
 	fullmatches = []
-	if accentsornot == 'yes':
+	if accents == 'yes':
 		usecolumn = 'accented_line'
 	else:
 		usecolumn = 'stripped_line'
@@ -58,7 +62,7 @@ def withinxlines(distanceinlines, firstterm, secondterm, workdbname, authors, ac
 	return fullmatches
 
 
-def withinxwords(distanceinwords, firstterm, secondterm, workdbname, whereclauseinfo, accentsornot, mustbenear):
+def withinxwords(firstterm, secondterm, workdbname, whereclauseinfo, frozensession):
 	"""
 
 	int(session['proximity']), searchingfor, proximate, curs, wkid, whereclauseinfo
@@ -84,6 +88,10 @@ def withinxwords(distanceinwords, firstterm, secondterm, workdbname, whereclause
 	dbconnection = setconnection('not_autocommit')
 	cursor = dbconnection.cursor()
 
+	distanceinwords = int(frozensession['proximity'])
+	accents = frozensession['accentsmatter']
+	mustbenear = frozensession['nearornot']
+
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
 	# back for checking: but the Aetolians are likley not among those passages...
@@ -91,16 +99,16 @@ def withinxwords(distanceinwords, firstterm, secondterm, workdbname, whereclause
 
 	distanceinwords += 1
 
-	if accentsornot == 'yes':
+	if accents == 'yes':
 		use = 'polytonic'
 	else:
 		use = 'stripped'
 
 	if 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(firstterm, workdbname, whereclauseinfo, cursor, templimit)
+		hits = simplesearchworkwithexclusion(firstterm, workdbname, whereclauseinfo, frozensession, cursor, templimit)
 	else:
-		hits = substringsearch(firstterm, cursor, workdbname, whereclauseinfo, templimit)
+		hits = substringsearch(firstterm, workdbname, whereclauseinfo, frozensession, cursor, templimit)
 
 	fullmatches = []
 

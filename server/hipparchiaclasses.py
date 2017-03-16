@@ -12,8 +12,6 @@ from collections import deque
 from itertools import islice
 from multiprocessing import Value, Array
 
-from flask import session
-
 from server import hipparchia
 from server.formatting_helper_functions import attemptelision
 
@@ -1211,7 +1209,6 @@ class ProgressPoll(object):
 		self.hitcount = MPCounter()
 		self.hitcount.increment(-1)
 		self.notes = ''
-		self.sessionstate = session
 
 	def getstatus(self):
 		return self.statusmessage.decode('utf-8')

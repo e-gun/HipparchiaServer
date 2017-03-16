@@ -138,7 +138,7 @@ def whereclauses(uidwithatsign, operand, authors):
 	return whereclausetuples
 
 
-def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, activepoll, cursor, templimit=None):
+def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, frozensession, cursor, templimit=None):
 	"""
 	special issues arise if you want to search Iliad less books 1 and 24
 	the standard search apparatus can't do this, but this can
@@ -162,14 +162,14 @@ def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, activepo
 	if templimit:
 		lim = str(templimit)
 	else:
-		lim = str(activepoll.sessionstate['maxresults'])
+		lim = str(frozensession['maxresults'])
 
-	if activepoll.sessionstate['onehit'] == 'no':
+	if frozensession['onehit'] == 'no':
 		mylimit = ' LIMIT ' + lim
 	else:
 		mylimit = ' LIMIT 1'
 
-	if activepoll.sessionstate['accentsmatter'] == 'yes':
+	if frozensession['accentsmatter'] == 'yes':
 		columna = 'marked_up_line'
 	else:
 		columna = 'stripped_line'
@@ -181,7 +181,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, activepo
 
 	mysyntax = '~*'
 	restrictions = []
-	for p in activepoll.sessionstate['psgexclusions']:
+	for p in frozensession['psgexclusions']:
 		if workdbname in p:
 			restrictions.append(whereclauses(p, '<>', whereclauseinfo))
 
@@ -205,7 +205,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, whereclauseinfo, activepo
 	return found
 
 
-def substringsearch(seeking, workdbname, whereclauseinfo, activepoll, cursor, templimit=None):
+def substringsearch(seeking, workdbname, whereclauseinfo, frozensession, cursor, templimit=None):
 	"""
 	actually one of the most basic search types: look for a string/substring
 	this is brute force: you wade through the full text of the work
@@ -219,14 +219,14 @@ def substringsearch(seeking, workdbname, whereclauseinfo, activepoll, cursor, te
 	if templimit:
 		lim = str(templimit)
 	else:
-		lim = str(activepoll.sessionstate['maxresults'])
+		lim = str(frozensession['maxresults'])
 
-	if activepoll.sessionstate['onehit'] == 'no':
+	if frozensession['onehit'] == 'no':
 		mylimit = ' LIMIT ' + lim
 	else:
 		mylimit = ' LIMIT 1'
 
-	if activepoll.sessionstate['accentsmatter'] == 'yes':
+	if frozensession['accentsmatter'] == 'yes':
 		# columna = 'marked_up_line'
 		column = 'accented_line'
 	else:

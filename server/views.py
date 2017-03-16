@@ -165,16 +165,22 @@ def executesearch(timestamp):
 	poll[ts].activate()
 	poll[ts].statusis('Preparing to search')
 
+	# a search can take 30s or more and the user might alter the session while the search is running by toggling accentsmatter, etc
+	# that can be a problem later, so freeze the values now
+	frozensession = session
+
 	if len(seeking) > 0:
 		starttime = time.time()
 		poll[ts].statusis('Compiling the list of works to search')
 		authorandworklist = compileauthorandworklist(listmapper)
 		if authorandworklist == []:
 			return redirect(url_for('frontpage'))
+
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		poll[ts].statusis('Marking exclusions from the list of works to search')
 		authorandworklist = flagexclusions(authorandworklist)
 		workssearched = len(authorandworklist)
+
 		poll[ts].statusis('Calculating full authors to search')
 		authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
 
@@ -183,57 +189,56 @@ def executesearch(timestamp):
 		# whereclauses() is selectively invoked and it needs to check the information in those and only those authors and works
 		# formerly all authors were sent through searchdispatcher(), but loading them into the manager produced
 		# a massive slowdown (as 200k objects got pickled into a mpshareable dict)
-
 		authorswheredict = {}
 
-		for w in session['psgselections']:
+		for w in frozensession['psgselections']:
 			authorswheredict[w[0:6]] = authordict[w[0:6]]
-		for w in session['psgexclusions']:
+		for w in frozensession['psgexclusions']:
 			authorswheredict[w[0:6]] = authordict[w[0:6]]
 
 		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
 			searchtype = 'simple'
 			thesearch = seeking
-			htmlsearch = '<span class="emph">{skg}</span>'.format(skg=seeking)
-			hits = searchdispatcher('simple', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
+			htmlsearch = '<span class="sought">"{skg}"</span>'.format(skg=seeking)
+			hits = searchdispatcher('simple', seeking, proximate, authorandworklist, authorswheredict, poll[ts], frozensession)
 		elif re.search(phrasefinder, seeking):
 			searchtype = 'phrase'
 			thesearch = seeking
-			htmlsearch = '<span class="emph">{skg}</span>'.format(skg=seeking)
-			hits = searchdispatcher('phrase', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
+			htmlsearch = '<span class="sought">"{skg}"</span>'.format(skg=seeking)
+			hits = searchdispatcher('phrase', seeking, proximate, authorandworklist, authorswheredict, poll[ts], frozensession)
 		else:
 			searchtype = 'proximity'
-			if session['searchscope'] == 'W':
+			if frozensession['searchscope'] == 'W':
 				scope = 'words'
 			else:
 				scope = 'lines'
 
-			if session['nearornot'] == 'T':
+			if frozensession['nearornot'] == 'T':
 				nearstr = ''
 			else:
 				nearstr = ' not'
 
-			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=seeking, ns=nearstr, sp=session['proximity'], sc=scope, pr=proximate)
+			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=seeking, ns=nearstr, sp=frozensession['proximity'], sc=scope, pr=proximate)
 			htmlsearch = '<span class="sought">"{skg}"</span>{ns} within {sp} {sc} of <span class="sought">"{pr}"</span>'.format(
-				skg=seeking, ns=nearstr, sp=session['proximity'], sc=scope, pr=proximate)
-			hits = searchdispatcher('proximity', seeking, proximate, authorandworklist, authorswheredict, poll[ts])
+				skg=seeking, ns=nearstr, sp=frozensession['proximity'], sc=scope, pr=proximate)
+			hits = searchdispatcher('proximity', seeking, proximate, authorandworklist, authorswheredict, poll[ts], frozensession)
 
 		poll[ts].statusis('Putting the results in context')
 
 		# hits [<server.hipparchiaclasses.dbWorkLine object at 0x10d952da0>, <server.hipparchiaclasses.dbWorkLine object at 0x10d952c50>, ... ]
 		hitdict = sortresultslist(hits, authordict, workdict)
-		if int(session['linesofcontext']) > 0:
+		if int(frozensession['linesofcontext']) > 0:
 			allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, poll[ts])
 		else:
 			allfound = nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, poll[ts])
 
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
-		if len(allfound) > int(session['maxresults']):
-			allfound = allfound[0:int(session['maxresults'])]
+		if len(allfound) > int(frozensession['maxresults']):
+			allfound = allfound[0:int(frozensession['maxresults'])]
 
 		poll[ts].statusis('Converting results to HTML')
-		if int(session['linesofcontext']) > 0:
+		if int(frozensession['linesofcontext']) > 0:
 			htmlandjs = htmlifysearchfinds(allfound)
 		else:
 			htmlandjs = nocontexthtmlifysearchfinds(allfound)
@@ -243,7 +248,7 @@ def executesearch(timestamp):
 
 		resultcount = len(allfound)
 
-		if resultcount < int(session['maxresults']):
+		if resultcount < int(frozensession['maxresults']):
 			hitmax = 'false'
 		else:
 			hitmax = 'true'
@@ -269,8 +274,8 @@ def executesearch(timestamp):
 		output['thesearch'] = thesearch
 		output['htmlsearch'] = htmlsearch
 		output['hitmax'] = hitmax
-		output['onehit'] = session['onehit']
-		output['sortby'] = sortorderdecoder[session['sortorder']]
+		output['onehit'] = frozensession['onehit']
+		output['sortby'] = sortorderdecoder[frozensession['sortorder']]
 		output['dmin'] = dmin
 		output['dmax'] = dmax
 		if justlatin() == False:
@@ -296,8 +301,8 @@ def executesearch(timestamp):
 			output['icandodates'] = 'yes'
 		else:
 			output['icandodates'] = 'no'
-		output['sortby'] = session['sortorder']
-		output['onehit'] = session['onehit']
+		output['sortby'] = frozensession['sortorder']
+		output['onehit'] = frozensession['onehit']
 
 	output = json.dumps(output)
 

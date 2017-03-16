@@ -871,6 +871,11 @@ wordcounts
     Let's walk through what happened when the search executed.
     <ul class="roman">
     <li>
+        Owing to the way the queries are built, a search for A
+        <span class="emph">Within N lines</span> of B is always significantly faster than the same search
+        executed <span class="emph">Within N words</span>. You probably only want to ask for the latter when it really matters.
+    </li>
+    <li>
         There are only
         two places where κεκωλύκατε appears. Finding them takes less than a second. Checking each location for ἰδιώταϲ takes
         less than a hundredth of a second.</li>

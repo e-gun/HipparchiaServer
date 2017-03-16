@@ -8,15 +8,13 @@
 
 import re
 
-from flask import session
-
 from server.dbsupport.dbfunctions import setconnection, makeablankline, dblineintolineobject
 from server.hipparchiaclasses import QueryCombinator
 from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, whereclauses, \
 	lookoutsideoftheline
 
 
-def phrasesearch(leastcommon, searchphrase, maxhits, wkid, authorswheredict, activepoll, cursor):
+def phrasesearch(leastcommon, searchphrase, maxhits, wkid, authorswheredict, activepoll, frozensession, cursor):
 	"""
 	a whitespace might mean things are on a new line
 	note how horrible something like και δη και is: you will search και first and then...
@@ -33,33 +31,33 @@ def phrasesearch(leastcommon, searchphrase, maxhits, wkid, authorswheredict, act
 	"""
 
 	if 'x' not in wkid:
-		hits = substringsearch(leastcommon, cursor, wkid, authorswheredict, templimit=maxhits)
+		hits = substringsearch(leastcommon, cursor, wkid, authorswheredict, frozensession, templimit=maxhits)
 	else:
 		wkid = re.sub('x', 'w', wkid)
-		hits = simplesearchworkwithexclusion(leastcommon, wkid, authorswheredict, cursor, templimit=maxhits)
+		hits = simplesearchworkwithexclusion(leastcommon, wkid, authorswheredict, cursor, frozensession, templimit=maxhits)
 	
 	fullmatches = []
-	while hits and len(fullmatches) < int(session['maxresults']):
+	while hits and len(fullmatches) < int(frozensession['maxresults']):
 		hit = hits.pop()
 		phraselen = len(searchphrase.split(' '))
 		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, cursor)
-		if session['accentsmatter'] == 'no':
+		if frozensession['accentsmatter'] == 'no':
 			wordset = re.sub(r'[\.\?\!;:,·’]', r'', wordset)
 		else:
 			# the difference is in the apostrophe: δ vs δ’
 			wordset = re.sub(r'[\.\?\!;:,·]', r'', wordset)
 
-		if session['nearornot'] == 'T' and re.search(searchphrase, wordset):
+		if frozensession['nearornot'] == 'T' and re.search(searchphrase, wordset):
 			fullmatches.append(hit)
 			activepoll.addhits(1)
-		elif session['nearornot'] == 'F' and re.search(searchphrase, wordset) is None:
+		elif frozensession['nearornot'] == 'F' and re.search(searchphrase, wordset) is None:
 			fullmatches.append(hit)
 			activepoll.addhits(1)
 	
 	return fullmatches
 
 
-def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, commitcount, authorswheredict, activepoll):
+def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, commitcount, authorswheredict, activepoll, frozensession):
 	"""
 	foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll
 
@@ -91,20 +89,20 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 	sp = re.sub(r'^\s', '(^| )', searchphrase)
 	sp = re.sub(r'\s$', '( |$)', sp)
 
-	if session['onehit'] == 'no':
-		lim = ' LIMIT ' + str(session['maxresults'])
+	if frozensession['onehit'] == 'no':
+		lim = ' LIMIT ' + str(frozensession['maxresults'])
 	else:
 		# the windowing problem means that '1' might be something that gets discarded
 		lim = ' LIMIT 5'
 
-	if session['accentsmatter'] == 'no':
+	if frozensession['accentsmatter'] == 'no':
 		ln = 'stripped_line'
 		use = 'stripped'
 	else:
 		ln = 'accented_line'
 		use = 'polytonic'
 
-	while len(workstosearch) > 0 and count.value <= int(session['maxresults']):
+	while len(workstosearch) > 0 and count.value <= int(frozensession['maxresults']):
 		try:
 			wkid = workstosearch.pop()
 			activepoll.remain(len(workstosearch))
@@ -128,7 +126,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 			if re.search(r'x', wkid):
 				# we have exclusions
 				wkid = re.sub(r'x', 'w', wkid)
-				restrictions = [whereclauses(p, '<>', authorswheredict) for p in session['psgexclusions'] if wkid in p]
+				restrictions = [whereclauses(p, '<>', authorswheredict) for p in frozensession['psgexclusions'] if wkid in p]
 				whr = '( wkuniversalid = %s) AND ('
 				data = [wkid[0:10]]
 				for r in restrictions:
@@ -184,7 +182,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 			# for l in locallineobjects:
 			#	print(l.universalid, l.locus(), getattr(l,use))
 			gotmyonehit = False
-			while locallineobjects and count.value <= int(session['maxresults']) and not gotmyonehit:
+			while locallineobjects and count.value <= int(frozensession['maxresults']) and not gotmyonehit:
 				# windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]
 				# figure out which line is really the line with the goods
 				# it is not nearly so simple as picking the 2nd element in any run of 3: no always runs of 3 + matches in
@@ -195,7 +193,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 					foundlineobjects.append(lo)
 					count.increment(1)
 					activepoll.sethits(count.value)
-					if session['onehit'] == 'yes':
+					if frozensession['onehit'] == 'yes':
 						gotmyonehit = True
 				else:
 					try:
@@ -223,7 +221,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 							foundlineobjects.append(lo)
 							count.increment(1)
 							activepoll.sethits(count.value)
-							if session['onehit'] == 'yes':
+							if frozensession['onehit'] == 'yes':
 								gotmyonehit = True
 
 	curs.close()
