@@ -14,17 +14,22 @@ from server.formatting_helper_functions import stripaccents
 from server.listsandsession.sessionfunctions import reducetosessionselections, justlatin
 
 
-def compileauthorandworklist(listmapper):
+def compileauthorandworklist(listmapper, s=session):
 	"""
 	master author dict + session selctions into a list of dbs to search
+
+	s = session, but feel free to send frozensession
+		getsearchlistcontents wants just session
+		executesearch might as well use frozensession
+
 	:param authors:
 	:return:
 	"""
 
-	searchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + session[
-		'psgselections'] + session['wkselections'] + session['alocselections'] + session['wlocselections']
-	exclusionlist = session['auexclusions'] + session['wkexclusions'] + session['agnexclusions'] + session[
-		'wkgnexclusions'] + session['psgexclusions'] + session['alocexclusions'] + session['wlocexclusions']
+	searchlist = s['auselections'] + s['agnselections'] + s['wkgnselections'] + s['psgselections'] + s['wkselections'] \
+	             + s['alocselections'] + s['wlocselections']
+	exclusionlist = s['auexclusions'] + s['wkexclusions'] + s['agnexclusions'] + s['wkgnexclusions'] + s['psgexclusions'] \
+	                + s['alocexclusions'] + s['wlocexclusions']
 
 	# trim by active corpora
 	ad = reducetosessionselections(listmapper, 'a')
@@ -35,22 +40,22 @@ def compileauthorandworklist(listmapper):
 	# [A] build the inclusion list
 	if len(searchlist) > 0:
 		# build lists up from specific items (passages) to more general classes (works, then authors)
-		for g in session['wkgnselections']:
+		for g in s['wkgnselections']:
 			authorandworklist += foundindict(wd, 'workgenre', g)
 
 		authorlist = []
-		for g in session['agnselections']:
+		for g in s['agnselections']:
 			authorlist = foundindict(ad, 'genres', g)
 			for a in authorlist:
 				for w in ad[a].listofworks:
 					authorandworklist.append(w.universalid)
 		del authorlist
 
-		for l in session['wlocselections']:
+		for l in s['wlocselections']:
 			authorandworklist += foundindict(wd, 'provenance', l)
 
 		authorlist = []
-		for l in session['alocselections']:
+		for l in s['alocselections']:
 			authorlist = foundindict(ad, 'location', l)
 			for a in authorlist:
 				for w in ad[a].listofworks:
@@ -63,7 +68,7 @@ def compileauthorandworklist(listmapper):
 		authorandworklist = prunebydate(authorandworklist, ad, wd)
 
 		# now we look at things explicitly chosen:
-		authors = [a for a in session['auselections']]
+		authors = [a for a in s['auselections']]
 		try:
 			worksof = [w.universalid for a in authors for w in ad[a].listofworks]
 		except KeyError:
@@ -71,8 +76,8 @@ def compileauthorandworklist(listmapper):
 			worksof = []
 			session['auselections'] = []
 			session.modified = True
-		works = session['wkselections']
-		passages = session['psgselections']
+		works = s['wkselections']
+		passages = s['psgselections']
 
 		authorandworklist += [w for w in works] + worksof + passages
 		authorandworklist = [aw for aw in authorandworklist if aw]
@@ -85,11 +90,11 @@ def compileauthorandworklist(listmapper):
 
 		authorandworklist = wd.keys()
 
-		if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
+		if s['latestdate'] != '1500' or s['earliestdate'] != '-850':
 			authorandworklist = prunebydate(authorandworklist, ad, wd)
 
 	# [B] now start subtracting from the list of inclusions
-	if session['spuria'] == 'no':
+	if s['spuria'] == 'no':
 		authorandworklist = removespuria(authorandworklist, wd)
 
 	# build the exclusion list
@@ -97,12 +102,12 @@ def compileauthorandworklist(listmapper):
 	excludedworks = []
 
 	if len(exclusionlist) > 0:
-		excludedauthors = [a for a in session['auexclusions']]
+		excludedauthors = [a for a in s['auexclusions']]
 
-		for g in session['agnexclusions']:
+		for g in s['agnexclusions']:
 			excludedauthors += foundindict(ad, 'genres', g)
 
-		for l in session['alocexclusions']:
+		for l in s['alocexclusions']:
 			excludedauthors += foundindict(ad, 'location', l)
 
 		excludedauthors = set(excludedauthors)
@@ -110,12 +115,12 @@ def compileauthorandworklist(listmapper):
 		# all works of all excluded authors are themselves excluded
 		excludedworks = [w.universalid for a in excludedauthors for w in ad[a].listofworks]
 
-		excludedworks += session['wkexclusions']
+		excludedworks += s['wkexclusions']
 
-		for g in session['wkgnexclusions']:
+		for g in s['wkgnexclusions']:
 			excludedworks += foundindict(wd, 'workgenre', g)
 
-		for l in session['wlocexclusions']:
+		for l in s['wlocexclusions']:
 			excludedworks += foundindict(wd, 'provenance', l)
 
 	authorandworklist = list(set(authorandworklist) - set(excludedworks))
@@ -538,12 +543,12 @@ def dictitemstartswith(originaldict, element, muststartwith):
 	return newdict
 
 
-def foundindict(dict, element, mustbein):
+def foundindict(searchdict, element, mustbein):
 	"""
 	search for an element in a dict
 	return a list of universalids
 
-	dict:
+	searchdict:
 		{ ... 'gr2625': <server.hipparchiaclasses.dbAuthor object at 0x1096e9cf8>, 'gr1890': <server.hipparchiaclasses.dbAuthor object at 0x1096e9d68>,
 		'gr0045': <server.hipparchiaclasses.dbAuthor object at 0x1096e9dd8>, 'gr2194': <server.hipparchiaclasses.dbAuthor object at 0x1096e9e48>}
 	element:
@@ -551,14 +556,14 @@ def foundindict(dict, element, mustbein):
 	mustbein:
 		Astrologici
 
-	:param dict:
+	:param searchdict:
 	:param element:
 	:param mustbein:
 	:return:
 	"""
 
-	finds = [dict[x].universalid for x in dict
-	         if getattr(dict[x], element) and getattr(dict[x], element) == mustbein]
+	finds = [searchdict[x].universalid for x in searchdict
+	         if getattr(searchdict[x], element) and getattr(searchdict[x], element) == mustbein]
 
 	return finds
 

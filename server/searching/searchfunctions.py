@@ -162,7 +162,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, searchobject, cursor, tem
 
 	"""
 
-	s = searchobject
+	so = searchobject
 
 	if templimit:
 		lim = str(templimit)
@@ -182,9 +182,9 @@ def simplesearchworkwithexclusion(seeking, workdbname, searchobject, cursor, tem
 
 	mysyntax = '~*'
 	restrictions = []
-	for p in s.psgexclusions:
+	for p in so.psgexclusions:
 		if workdbname in p:
-			restrictions.append(whereclauses(p, '<>', s.authorswhere))
+			restrictions.append(whereclauses(p, '<>', so.authorswhere))
 
 	d = [wkid, seeking, hyphsearch]
 	qw = 'AND ('
@@ -198,7 +198,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, searchobject, cursor, tem
 	qw = qw[0:-6]
 
 	qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {a} {sy} %s OR {b} {sy} %s ) {qw} ORDER BY index ASC {l}'
-	query = qtemplate.format(db=db, a=s.usecolumn, sy=mysyntax, b=columnb, qw=qw, l=mylimit)
+	query = qtemplate.format(db=db, a=so.usecolumn, sy=mysyntax, b=columnb, qw=qw, l=mylimit)
 	data = tuple(d)
 	cursor.execute(query, data)
 	found = cursor.fetchall()
@@ -227,14 +227,14 @@ def substringsearch(seeking, workdbname, searchobject, cursor, templimit=None):
 	:return:
 	"""
 
-	s = searchobject
+	so = searchobject
 
 	if templimit:
 		lim = str(templimit)
 	else:
-		lim = str(s.cap)
+		lim = str(so.cap)
 
-	if s.onehit:
+	if so.onehit:
 		mylimit = ' LIMIT 1'
 	else:
 		mylimit = ' LIMIT ' + lim
@@ -247,12 +247,12 @@ def substringsearch(seeking, workdbname, searchobject, cursor, templimit=None):
 	if len(workdbname) == 10:
 		# e.g., 'lt1002w003'
 		qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {c} {sy} %s ) {l}'
-		query = qtemplate.format(db=audbname, c=s.usecolumn, sy=mysyntax, l=mylimit)
+		query = qtemplate.format(db=audbname, c=so.usecolumn, sy=mysyntax, l=mylimit)
 		data = (workdbname, seeking)
 	elif len(workdbname) == 6:
 		# e.g., 'lt0025'
 		qtemplate = 'SELECT * FROM {db} WHERE ( {c} {sy} %s ) {l}'
-		query = qtemplate.format(db=audbname, c=s.usecolumn, sy=mysyntax, l=mylimit)
+		query = qtemplate.format(db=audbname, c=so.usecolumn, sy=mysyntax, l=mylimit)
 		data = (seeking,)
 	else:
 		# e.g., 'lt0914w001_AT_3'
@@ -266,7 +266,7 @@ def substringsearch(seeking, workdbname, searchobject, cursor, templimit=None):
 			d.append(w[i][1])
 
 		qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {c} {sy} %s ) {qw} ORDER BY index ASC {l}'
-		query = qtemplate.format(db=db, c=s.usecolumn, sy=mysyntax, l=mylimit, qw=qw)
+		query = qtemplate.format(db=db, c=so.usecolumn, sy=mysyntax, l=mylimit, qw=qw)
 		data = tuple(d)
 
 	try:

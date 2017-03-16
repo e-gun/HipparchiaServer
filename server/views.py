@@ -173,7 +173,7 @@ def executesearch(timestamp):
 		s = SearchObject(ts, seeking, proximate, frozensession)
 		starttime = time.time()
 		poll[ts].statusis('Compiling the list of works to search')
-		authorandworklist = compileauthorandworklist(listmapper)
+		authorandworklist = compileauthorandworklist(listmapper, frozensession)
 		if authorandworklist == []:
 			return redirect(url_for('frontpage'))
 
@@ -1084,7 +1084,7 @@ def dictsearch(searchterm):
 		usecolumn = 'unaccented_entry'
 
 	seeking = stripaccents(seeking)
-	query = 'SELECT entry_name FROM {d}_dictionary' + ' WHERE {c} ~* %s'.format(d=usedictionary,c=usecolumn)
+	query = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s'.format(d=usedictionary,c=usecolumn)
 	if seeking[0] == ' ' and seeking[-1] == ' ':
 		data = ('^' + seeking[1:-1] + '$',)
 	elif seeking[0] == ' ' and seeking[-1] != ' ':

@@ -18,12 +18,13 @@ def withinxlines(workdbname, searchobject):
 	after finding x, look for y within n lines of x
 
 	people who send phrases to both halves and/or a lot of regex will not always get what they want
+
 	:param distanceinlines:
 	:param additionalterm:
 	:return:
 	"""
 
-	s = searchobject
+	so = searchobject
 
 	dbconnection = setconnection('not_autocommit')
 	cursor = dbconnection.cursor()
@@ -35,18 +36,18 @@ def withinxlines(workdbname, searchobject):
 
 	if 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(s.termone, workdbname, s, cursor, templimit)
+		hits = simplesearchworkwithexclusion(so.termone, workdbname, so, cursor, templimit)
 	else:
-		hits = substringsearch(s.termone, workdbname, s, cursor, templimit)
+		hits = substringsearch(so.termone, workdbname, so, cursor, templimit)
 
 	fullmatches = []
 
-	while hits and len(fullmatches) < s.cap:
+	while hits and len(fullmatches) < so.cap:
 		hit = hits.pop()
-		isnear = dblooknear(hit[0], s.distance + 1, s.termtwo, hit[1], s.usecolumn, cursor)
-		if s.near and isnear:
+		isnear = dblooknear(hit[0], so.distance + 1, so.termtwo, hit[1], so.usecolumn, cursor)
+		if so.near and isnear:
 			fullmatches.append(hit)
-		elif not s.near and not isnear:
+		elif not so.near and not isnear:
 			fullmatches.append(hit)
 
 	dbconnection.commit()
@@ -77,10 +78,10 @@ def withinxwords(workdbname, searchobject):
 	:param additionalterm:
 	:return:
 	"""
-	s = searchobject
+	so = searchobject
 
 	# look out for off-by-one errors
-	distance = s.distance+1
+	distance = so.distance+1
 
 	dbconnection = setconnection('not_autocommit')
 	cursor = dbconnection.cursor()
@@ -92,16 +93,16 @@ def withinxwords(workdbname, searchobject):
 
 	if 'x' in workdbname:
 		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(s.termone, workdbname, s, cursor, templimit)
+		hits = simplesearchworkwithexclusion(so.termone, workdbname, so, cursor, templimit)
 	else:
-		hits = substringsearch(s.termone, workdbname, s, cursor, templimit)
+		hits = substringsearch(so.termone, workdbname, so, cursor, templimit)
 
 	fullmatches = []
 
 	for hit in hits:
 		hitline = dblineintolineobject(hit)
-		searchzone = getattr(hitline, s.usewordlist)
-		match = re.search(s.termone, searchzone)
+		searchzone = getattr(hitline, so.usewordlist)
+		match = re.search(so.termone, searchzone)
 		# but what if you just found 'paucitate' inside of 'paucitatem'?
 		# you will have 'm' left over and this will throw off your distance-in-words count
 		past = searchzone[match.end():]
@@ -125,7 +126,7 @@ def withinxwords(workdbname, searchobject):
 				# 'NoneType' object is not subscriptable
 				previous = makeablankline(workdbname[0:6], -1)
 				ucount = 999
-			lagging = previous.wordlist(s.usewordlist) + lagging
+			lagging = previous.wordlist(so.usewordlist) + lagging
 			ucount += previous.wordcount()
 		lagging = lagging[-1*(distance-1):]
 		lagging = ' '.join(lagging)
@@ -140,14 +141,14 @@ def withinxwords(workdbname, searchobject):
 				# 'NoneType' object is not subscriptable
 				next = makeablankline(workdbname[0:6], -1)
 				pcount = 999
-			leading += next.wordlist(s.usewordlist)
+			leading += next.wordlist(so.usewordlist)
 			pcount += next.wordcount()
 		leading = leading[:distance-1]
 		leading = ' '.join(leading)
 
-		if s.near and (re.search(s.termtwo, leading) or re.search(s.termtwo, lagging)):
+		if so.near and (re.search(so.termtwo, leading) or re.search(so.termtwo, lagging)):
 			fullmatches.append(hit)
-		elif not s.near and not re.search(s.termtwo, leading) and not re.search(s.termtwo, lagging):
+		elif not so.near and not re.search(so.termtwo, leading) and not re.search(so.termtwo, lagging):
 			fullmatches.append(hit)
 
 	dbconnection.commit()

@@ -30,30 +30,30 @@ def phrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
 	:return:
 	"""
 
-	s = searchobject
-	searchphrase = s.termone
+	so = searchobject
+	searchphrase = so.termone
 
 	if 'x' not in wkid:
-		hits = substringsearch(s.leastcommon, wkid, s, cursor, templimit=maxhits)
+		hits = substringsearch(so.leastcommon, wkid, so, cursor, templimit=maxhits)
 	else:
 		wkid = re.sub('x', 'w', wkid)
-		hits = simplesearchworkwithexclusion(s.leastcommon, wkid, s, cursor, templimit=maxhits)
+		hits = simplesearchworkwithexclusion(so.leastcommon, wkid, so, cursor, templimit=maxhits)
 	
 	fullmatches = []
-	while hits and len(fullmatches) < s.cap:
+	while hits and len(fullmatches) < so.cap:
 		hit = hits.pop()
 		phraselen = len(searchphrase.split(' '))
 		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, s, cursor)
-		if not s.accented:
+		if not so.accented:
 			wordset = re.sub(r'[\.\?\!;:,·’]', r'', wordset)
 		else:
 			# the difference is in the apostrophe: δ vs δ’
 			wordset = re.sub(r'[\.\?\!;:,·]', r'', wordset)
 
-		if s.near and re.search(searchphrase, wordset):
+		if so.near and re.search(searchphrase, wordset):
 			fullmatches.append(hit)
 			activepoll.addhits(1)
-		elif not s.near and re.search(searchphrase, wordset) is None:
+		elif not so.near and re.search(searchphrase, wordset) is None:
 			fullmatches.append(hit)
 			activepoll.addhits(1)
 	
@@ -81,7 +81,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 	:return:
 	"""
 
-	s = searchobject
+	so = searchobject
 
 	dbconnection = setconnection('autocommit')
 	curs = dbconnection.cursor()
@@ -94,13 +94,13 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 	sp = re.sub(r'^\s', '(^| )', searchphrase)
 	sp = re.sub(r'\s$', '( |$)', sp)
 
-	if not s.onehit:
-		lim = ' LIMIT ' + str(s.cap)
+	if not so.onehit:
+		lim = ' LIMIT ' + str(so.cap)
 	else:
 		# the windowing problem means that '1' might be something that gets discarded
 		lim = ' LIMIT 5'
 
-	while len(workstosearch) > 0 and count.value <= s.cap:
+	while len(workstosearch) > 0 and count.value <= so.cap:
 		try:
 			wkid = workstosearch.pop()
 			activepoll.remain(len(workstosearch))
@@ -124,7 +124,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 			if re.search(r'x', wkid):
 				# we have exclusions
 				wkid = re.sub(r'x', 'w', wkid)
-				restrictions = [whereclauses(p, '<>', s.authorswheredict) for p in s.psgexclusions if wkid in p]
+				restrictions = [whereclauses(p, '<>', so.authorswheredict) for p in so.psgexclusions if wkid in p]
 				whr = '( wkuniversalid = %s) AND ('
 				data = [wkid[0:10]]
 				for r in restrictions:
@@ -137,7 +137,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 				# drop the trailing ') AND ('
 				data.append(sp)
 				whr = whr[0:-6]
-				query = qtemplate.format(db=db, ln=s.usecolumn, whr=whr, lim=lim)
+				query = qtemplate.format(db=db, ln=so.usecolumn, whr=whr, lim=lim)
 			else:
 				if '_AT_' not in wkid:
 					whr = '( wkuniversalid ~ %s )'
@@ -148,19 +148,19 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 					else:
 						# we are searching an individual work
 						d = wkid[0:10]
-					query = qtemplate.format(db=db, ln=s.usecolumn, whr=whr, lim=lim)
+					query = qtemplate.format(db=db, ln=so.usecolumn, whr=whr, lim=lim)
 					data = (d, sp)
 				else:
 					wkid = re.sub(r'x', 'w', wkid)
 					data = [wkid[0:10]]
 					whr = ''
-					w = whereclauses(wkid, '=', s.authorswheredict)
+					w = whereclauses(wkid, '=', so.authorswheredict)
 					for i in range(0, len(w)):
 						whr += 'AND (' + w[i][0] + ') '
 						data.append(w[i][1])
 					# strip extra ANDs
 					whr = '( wkuniversalid = %s) ' + whr
-					query = qtemplate.format(db=db, ln=s.usecolumn, whr=whr, lim=lim)
+					query = qtemplate.format(db=db, ln=so.usecolumn, whr=whr, lim=lim)
 					data.append(sp)
 
 			curs.execute(query, tuple(data))
@@ -178,20 +178,20 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 			locallineobjects.reverse()
 			# debugging
 			# for l in locallineobjects:
-			#	print(l.universalid, l.locus(), getattr(l,s.usewordlist))
+			#	print(l.universalid, l.locus(), getattr(l,so.usewordlist))
 			gotmyonehit = False
-			while locallineobjects and count.value <= s.cap and not gotmyonehit:
+			while locallineobjects and count.value <= so.cap and not gotmyonehit:
 				# windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]
 				# figure out which line is really the line with the goods
 				# it is not nearly so simple as picking the 2nd element in any run of 3: no always runs of 3 + matches in
 				# subsequent lines means that you really should check your work carefully; this is not an especially costly
 				# operation relative to the whole search and esp. relative to the speed gains of using a subquery search
 				lo = locallineobjects.pop()
-				if re.search(sp, getattr(lo,s.usewordlist)):
+				if re.search(sp, getattr(lo,so.usewordlist)):
 					foundlineobjects.append(lo)
 					count.increment(1)
 					activepoll.sethits(count.value)
-					if s.onehit:
+					if so.onehit:
 						gotmyonehit = True
 				else:
 					try:
@@ -214,12 +214,12 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 						tail = c[0] + '$'
 						head = '^' + c[1]
 						# debugging
-						# print('re',getattr(lo,s.usewordlist),tail, head, getattr(next,s.usewordlist))
-						if re.search(tail, getattr(lo,s.usewordlist)) and re.search(head, getattr(next,s.usewordlist)):
+						# print('re',getattr(lo,so.usewordlist),tail, head, getattr(next,so.usewordlist))
+						if re.search(tail, getattr(lo,so.usewordlist)) and re.search(head, getattr(next,so.usewordlist)):
 							foundlineobjects.append(lo)
 							count.increment(1)
 							activepoll.sethits(count.value)
-							if s.onehit:
+							if so.onehit:
 								gotmyonehit = True
 
 	curs.close()
@@ -274,10 +274,11 @@ from
 	) SQ
 where SQ.stripped_line ~ 'et tamen'
 
-[d] peeking at the windows: ﻿119174 is where you will find:
-	index: 119174
-	linebundle: ἆρά γ ἄξιον τῇ χάριτι ταύτῃ παραβαλεῖν τὰϲ τρίτον ἔφη τῷ φίλῳ μου τούτῳ χαριζόμενοϲ πόλεωϲ καὶ διὰ τὸν οἰκιϲτὴν ἀλέξανδρον καὶ
-	accented_line: τρίτον ἔφη τῷ φίλῳ μου τούτῳ χαριζόμενοϲ
+[d] peeking at the windows: ﻿
+	119174 is where you will find:
+		index: 119174
+		linebundle: ἆρά γ ἄξιον τῇ χάριτι ταύτῃ παραβαλεῖν τὰϲ τρίτον ἔφη τῷ φίλῳ μου τούτῳ χαριζόμενοϲ πόλεωϲ καὶ διὰ τὸν οἰκιϲτὴν ἀλέξανδρον καὶ
+		accented_line: τρίτον ἔφη τῷ φίλῳ μου τούτῳ χαριζόμενοϲ
 
 				SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
 					(SELECT index, accented_line,

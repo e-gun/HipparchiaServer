@@ -307,6 +307,7 @@
 
 .sought {
 	color: #0f1b76;
+	font-weight: bold;
 	font-family: DejaVuSansMono;
 	src: url(/static/ttf/DejaVuSansMono.ttf);
     }

@@ -31,47 +31,46 @@ def searchdispatcher(searchobject, activepoll):
 	:param indexedauthorandworklist:
 	:return:
 	"""
-	s = searchobject
+	so = searchobject
 
 	# recompose 'searchingfor'
 	# note that 'proximate' does not need as many checks
-	searchingfor = massagesearchtermsforwhitespace(s.seeking)
+	searchingfor = massagesearchtermsforwhitespace(so.seeking)
 
 	# lunate sigmas / UV / JI issues
 	unomdifiedskg = searchingfor
-	unmodifiedprx = s.proximate
-	s.termone = searchtermcharactersubstitutions(searchingfor)
-	s.termtwo = searchtermcharactersubstitutions(s.proximate)
+	unmodifiedprx = so.proximate
+	so.termone = searchtermcharactersubstitutions(searchingfor)
+	so.termtwo = searchtermcharactersubstitutions(so.proximate)
 
 	activepoll.statusis('Loading the the dispatcher...')
 
 	count = MPCounter()
 	manager = Manager()
 	foundlineobjects = manager.list()
-	searchlist = manager.list(s.authorandworklist)
+	searchlist = manager.list(so.authorandworklist)
 
 	# if you don't autocommit you will soon see: "Error: current transaction is aborted, commands ignored until end of transaction block"
-	# alternately you can commit every N transactions; the small db sizes for INS and DDP works means there can be some real pounding
-	# of the server: the commitcount had to drop from 600 to 400 (with 4 workers) in order to avoid 'could not execute SELECT *...' errors
+	# alternately you can commit every N transactions; multiple workers on small tables will lock you out of the DB;
+	# you can go up to 32k without a commit? but every 1k is far safer and more or less cost free for our purposes
 
 	commitcount = MPCounter()
 	workers = hipparchia.config['WORKERS']
-	activepoll.allworkis(len(s.authorandworklist))
-	activepoll.remain(len(s.authorandworklist))
+	activepoll.allworkis(len(so.authorandworklist))
+	activepoll.remain(len(so.authorandworklist))
 	activepoll.sethits(0)
 
 	# a class and/or decorator would be nice, but you have a lot of trouble getting the (mp aware) args into the function
 	# the must be a way, but this also works
-	if s.searchtype == 'simple':
+	if so.searchtype == 'simple':
 		activepoll.statusis('Executing a simple word search...')
-		jobs = [Process(target=workonsimplesearch,
-		                args=(count, foundlineobjects, searchlist, commitcount, activepoll, s))
+		jobs = [Process(target=workonsimplesearch, args=(count, foundlineobjects, searchlist, commitcount, activepoll, so))
 		        for i in range(workers)]
-	elif s.searchtype == 'phrase':
+	elif so.searchtype == 'phrase':
 		activepoll.statusis('Executing a phrase search.')
-		s.leastcommon = findleastcommonterm(s.termone, s.accented)
-		lccount = findleastcommontermcount(s.termone, s.accented)
-		longestterm = max([len(t) for t in s.termone.split(' ') if t])
+		so.leastcommon = findleastcommonterm(so.termone, so.accented)
+		lccount = findleastcommontermcount(so.termone, so.accented)
+		longestterm = max([len(t) for t in so.termone.split(' ') if t])
 		# need to figure out when it will be faster to go to subqueryphrasesearch() and when not to
 		# logic + trial and error
 		#   e.g., any phrase involving λιποταξίου can be very fast because that form appears 36x: you can find it in 1s
@@ -84,31 +83,29 @@ def searchdispatcher(searchobject, activepoll):
 		#   when is this not true? being wrong about sqs() means spending an extra 10s; being wrong about phs() means an extra 40s...
 		if 0 < lccount < 500:
 			# print('workonphrasesearch()',searchingfor)
-			jobs = [Process(target=workonphrasesearch,
-			                args=(foundlineobjects, searchlist, commitcount, activepoll, s))
+			jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, searchlist, commitcount, activepoll, so))
 			        for i in range(workers)]
 		else:
 			# print('subqueryphrasesearch()',searchingfor)
-			jobs = [Process(target=subqueryphrasesearch,
-			                args=(foundlineobjects, s.termone, searchlist, count, commitcount, activepoll, s))
+			jobs = [Process(target=subqueryphrasesearch, args=(foundlineobjects, so.termone, searchlist, count, commitcount, activepoll, so))
 			        for i in range(workers)]
-	elif s.searchtype == 'proximity':
+	elif so.searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
 
-		if s.accented or re.search(r'^[a-z]',s.termone) and s.near:
+		if so.accented or re.search(r'^[a-z]',so.termone) and so.near:
 			# choose the necessarily faster option
-			leastcommon = findleastcommonterm(unomdifiedskg+' '+unmodifiedprx, s.accented)
+			leastcommon = findleastcommonterm(unomdifiedskg+' '+unmodifiedprx, so.accented)
 			if leastcommon != unomdifiedskg:
-				tmp = s.termone
-				s.termone = s.termtwo
-				s.termtwo = tmp
-		elif len(s.termtwo) > len(s.termone) and s.near:
+				tmp = so.termone
+				so.termone = so.termtwo
+				so.termtwo = tmp
+		elif len(so.termtwo) > len(so.termone) and so.near:
 			# look for the longest word first since that is probably the quicker route
 			# but you can't swap searchingfor and proximate this way in a 'is not near' search without yielding the wrong focus
-			tmp = s.termone
-			s.termone = s.termtwo
-			s.termtwo = tmp
-		jobs = [Process(target=workonproximitysearch, args=(count, foundlineobjects, searchlist, activepoll, s))
+			tmp = so.termone
+			so.termone = so.termtwo
+			so.termtwo = tmp
+		jobs = [Process(target=workonproximitysearch, args=(count, foundlineobjects, searchlist, activepoll, so))
 		        for i in range(workers)]
 	else:
 		# impossible, but...
@@ -144,9 +141,9 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
-	s = searchobject
+	so = searchobject
 
-	while len(searchlist) > 0 and count.value <= s.cap:
+	while len(searchlist) > 0 and count.value <= so.cap:
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		# that's not supposed to happen with the pool, but somehow it does
@@ -159,9 +156,9 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 		if wkid != 'gr0000w000':
 			if 'x' in wkid:
 				wkid = re.sub('x', 'w', wkid)
-				foundlines = simplesearchworkwithexclusion(s.termone, wkid, s, curs)
+				foundlines = simplesearchworkwithexclusion(so.termone, wkid, so, curs)
 			else:
-				foundlines = substringsearch(s.termone, wkid, s, curs)
+				foundlines = substringsearch(so.termone, wkid, so, curs)
 
 			count.increment(len(foundlines))
 			activepoll.addhits(len(foundlines))
@@ -200,21 +197,21 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 	:return:
 	"""
 
-	s = searchobject
+	so = searchobject
 
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 
-	if s.accented:
+	if so.accented:
 		# maxhits ('πολυτρόπωϲ', 506, 506, 0, 0, 0, 0)
-		maxhits = findcountsviawordcountstable(s.leastcommon)
+		maxhits = findcountsviawordcountstable(so.leastcommon)
 
 	try:
 		maxhits = maxhits[1]
 	except:
 		maxhits = 9999
 
-	while len(searchinginside) > 0 and len(foundlineobjects) < s.cap:
+	while len(searchinginside) > 0 and len(foundlineobjects) < so.cap:
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		# notsupposedtohappen butitdoes
@@ -222,15 +219,16 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 			wkid = searchinginside.pop()
 			activepoll.remain(len(searchinginside))
 		except:
-			wkid = 'gr0001w001'
+			wkid = 'gr0000w000'
 		commitcount.increment()
 		if commitcount.value % 400 == 0:
 			dbconnection.commit()
 
-		foundlines = phrasesearch(maxhits, wkid, activepoll, s, curs)
+		if wkid != 'gr0000w000':
+			foundlines = phrasesearch(maxhits, wkid, activepoll, so, curs)
 
-		for f in foundlines:
-			foundlineobjects.append(dblineintolineobject(f))
+			for f in foundlines:
+				foundlineobjects.append(dblineintolineobject(f))
 
 	dbconnection.commit()
 	curs.close()
@@ -266,9 +264,9 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 	:return: a collection of hits
 	"""
 
-	s = searchobject
+	so = searchobject
 
-	while len(searchinginside) > 0 and count.value <= s.cap:
+	while len(searchinginside) > 0 and count.value <= so.cap:
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		# not supposed to happen with a managed list, but it does...
@@ -280,10 +278,10 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 			wkid = 'gr0000w000'
 
 		if wkid != 'gr0000w000':
-			if s.scope == 'lines':
-				foundlines = withinxlines(wkid, s)
+			if so.scope == 'lines':
+				foundlines = withinxlines(wkid, so)
 			else:
-				foundlines = withinxwords(wkid, s)
+				foundlines = withinxwords(wkid, so)
 
 			count.increment(len(foundlines))
 			activepoll.addhits(len(foundlines))
