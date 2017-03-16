@@ -1305,3 +1305,36 @@ class QueryCombinator(object):
 		combinations = [(' '.join(c[0]), ' '.join(c[1])) for c in cl]
 		return combinations
 
+
+class SearchObject(object):
+	"""
+
+	an object that can be passed around to the various search functions
+	it knows about the query, the session, etc.
+
+	"""
+
+	def __init_(self, ts, termone, termtwo, poll, frozensession):
+		self.ts = ts
+		self.poll = poll
+		self.firstterm = termone
+		self.secondterm = termtwo
+		self.session = frozensession
+		if len(termone) < len(termtwo):
+			self.longterm = termtwo
+			self.shorterm = termone
+		else:
+			self.longterm = termone
+			self.shorterm = termtwo
+		self.authorandworklist = []
+		self.authorswhere = {}
+
+		if frozensession['searchscope'] == 'W':
+			self.scope = 'words'
+		else:
+			self.scope = 'lines'
+
+		if frozensession['nearornot'] == 'T':
+			self.nearstr = ''
+		else:
+			self.nearstr = ' not'

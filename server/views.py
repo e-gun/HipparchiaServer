@@ -167,7 +167,7 @@ def executesearch(timestamp):
 
 	# a search can take 30s or more and the user might alter the session while the search is running by toggling accentsmatter, etc
 	# that can be a problem later, so freeze the values now
-	frozensession = session
+	frozensession = session.copy()
 
 	if len(seeking) > 0:
 		starttime = time.time()
