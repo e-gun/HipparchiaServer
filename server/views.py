@@ -201,15 +201,15 @@ def executesearch(timestamp):
 		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
 			s.searchtype = 'simple'
 			thesearch = seeking
-			htmlsearch = '<span class="sought">"{skg}"</span>'.format(skg=seeking)
+			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=seeking)
 		elif re.search(phrasefinder, seeking):
 			s.searchtype = 'phrase'
 			thesearch = seeking
-			htmlsearch = '<span class="sought">"{skg}"</span>'.format(skg=seeking)
+			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=seeking)
 		else:
 			s.searchtype = 'proximity'
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=s.seeking, ns=s.nearstr, sp=s.proximity, sc=s.scope, pr=s.proximate)
-			htmlsearch = '<span class="sought">"{skg}"</span>{ns} within {sp} {sc} of <span class="sought">"{pr}"</span>'.format(
+			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'.format(
 				skg=seeking, ns=s.nearstr, sp=s.proximity, sc=s.scope, pr=proximate)
 
 		hits = searchdispatcher(s, poll[ts])
@@ -248,8 +248,10 @@ def executesearch(timestamp):
 		sortorderdecoder = {
 			'universalid': 'ID', 'shortname': 'name', 'genres': 'author genre', 'converted_date': 'date', 'location': 'location'
 		}
-
-		locale.setlocale(locale.LC_ALL, 'en_US')
+		try:
+			locale.setlocale(locale.LC_ALL, 'en_US')
+		except locale.Error:
+			pass
 		resultcount = locale.format('%d', resultcount, grouping=True)
 		workssearched = locale.format('%d', workssearched, grouping=True)
 

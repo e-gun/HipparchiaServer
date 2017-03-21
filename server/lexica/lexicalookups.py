@@ -574,7 +574,7 @@ def formatprevalencedata(wordcountobject):
 
 		if genreinfotuples:
 			thehtml += '\n<p class="wordcounts">Predominant genres: '
-			for g in range(0,5):
+			for g in range(0,hipparchia.config['NUMBEROFGENRESTOTRACK']):
 				git = genreinfotuples[g]
 				if git[1] > 0:
 					thehtml += '<span class="emph">{g}</span>'.format(g=git[0])+' ('+'{0:.0f})'.format(git[1]) + ' / '
