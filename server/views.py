@@ -1273,7 +1273,7 @@ def selectionmade():
 		wkprov = ''
 
 	try:
-		genre = re.sub('[\W_]+', '', request.args.get('genre', ''))
+		genre = re.sub('[!@#$%^&*=;]+', '', request.args.get('genre', ''))
 	except:
 		genre = ''
 
