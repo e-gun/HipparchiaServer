@@ -13,8 +13,8 @@ SECRET_KEY = 'yourkeyhereitshouldbelongandlooklikecryptographicgobbledygook'
 ### [2] network values ###
 ##  [only change this if you know why you are doing it: presumably you have a firewall problem] ##
 PROGRESSPOLLDEFAULTPORT = 5010
-PROGRESSPOLLMAXPORT = 5001
-PROGRESSPOLLMINPORT = 5016
+PROGRESSPOLLMAXPORT = 5016
+PROGRESSPOLLMINPORT = 5001
 
 
 ### [3] DB variables ###
