@@ -1554,7 +1554,7 @@ def appletouchticon():
 	return send_file('static/images/hipparchia_apple-touch-icon-precomposed.png')
 
 
-# old progress architecture: will be removed
+# old progress architecture: you can fall back to this if there are websocket issues
 @hipparchia.route('/progress', methods=['GET'])
 def progressreport():
 	"""
@@ -1582,6 +1582,11 @@ def progressreport():
 		progress['remaining'] = poll[ts].getremaining()
 		progress['hits'] = poll[ts].gethits()
 		progress['message'] = poll[ts].getstatus()
+		if hipparchia.config['SUPPRESSLONGREQUESTMESSAGE'] == 'no':
+			if poll[ts].getnotes():
+				progress['extrainfo'] = poll[ts].getnotes()
+		else:
+			progress['extrainfo'] = ''
 	except:
 		time.sleep(.1)
 		try:
@@ -1590,6 +1595,11 @@ def progressreport():
 			progress['remaining'] = poll[ts].getremaining()
 			progress['hits'] = poll[ts].gethits()
 			progress['message'] = poll[ts].getstatus()
+			if hipparchia.config['SUPPRESSLONGREQUESTMESSAGE'] == 'no':
+				if poll[ts].getnotes():
+					progress['extrainfo'] = poll[ts].getnotes()
+			else:
+				progress['extrainfo'] = ''
 		except:
 			progress = {'active': 0}
 

@@ -70,6 +70,7 @@ $(document).ready( function () {
         checkactivityviawebsocket(searchid);
 
         // old polling mechanism
+        // revert to this if your websockets are failing...
 //         var i = setInterval(function(){
 //            $.getJSON('/progress?id='+searchid, function(progress) {
 //                displayprogress(progress);
@@ -181,6 +182,10 @@ $(document).ready( function () {
     function checkactivityviawebsocket(searchid) {
         $.getJSON('/confirm/'+searchid, function(portnumber) {
             s = new WebSocket('ws://localhost:'+portnumber+'/');
+            // NOTE: you will not be able to get progress reports if you are not at localhost...
+            // the following is required to start moving in the direction of remote progress reports
+            // var ip = location.hostname;
+            // s = new WebSocket('ws://'+ip+':'+portnumber+'/');
             var amready = setInterval(function(){
                 if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
                 }, 10);
