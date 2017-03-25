@@ -1545,15 +1545,15 @@ def checkforactivesearch(ts):
 		if poll[ts].getactivity():
 			return json.dumps(pollport)
 	except KeyError:
-		time.sleep(.1)
+		time.sleep(.15)
 		try:
 			if poll[ts].getactivity():
 				return json.dumps(pollport)
 			else:
 				print('checkforactivesearch() reports that the websocket is still inactive: there is a serious problem?')
-				return json.dumps('no')
+				return json.dumps('nothing at '+pollport)
 		except:
-			return json.dumps('no')
+			return json.dumps('nothing at '+pollport)
 
 
 @hipparchia.route('/favicon.ico')
