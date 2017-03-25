@@ -12,9 +12,15 @@ SECRET_KEY = 'yourkeyhereitshouldbelongandlooklikecryptographicgobbledygook'
 
 ### [2] network values ###
 ##  [only change this if you know why you are doing it: presumably you have a firewall problem] ##
+##  MYEXTERNALIPADDRESS needs to be set if you are going to view polls remotely
+##  FLASKSERVEDFROMPORT is the port flask will serve from
+##  FLASKSEENATPORT might diverge from this if you are feeding flask through uWSGI + nginx
+FLASKSERVEDFROMPORT = 5000
+FLASKSEENATPORT = 5000
 PROGRESSPOLLDEFAULTPORT = 5010
-PROGRESSPOLLMAXPORT = 5016
-PROGRESSPOLLMINPORT = 5001
+PROGRESSPOLLMAXPORT = 5001
+PROGRESSPOLLMINPORT = 5016
+MYEXTERNALIPADDRESS = '127.0.0.1'
 
 
 ### [3] DB variables ###

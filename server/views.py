@@ -1468,6 +1468,11 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	except:
 		theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
+	if hipparchia.config['MYEXTERNALIPADDRESS'] != '127.0.0.1':
+		theip = hipparchia.config['MYEXTERNALIPADDRESS']
+	else:
+		theip = '127.0.0.1'
+
 	# min/max are a very good idea since you are theoretically giving anyone anywhere the power to open a ws socket: 64k+ of them would be sad
 	if hipparchia.config['PROGRESSPOLLMINPORT'] < theport < hipparchia.config['PROGRESSPOLLMAXPORT']:
 		theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
@@ -1476,7 +1481,7 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	loop = asyncio.new_event_loop()
 	asyncio.set_event_loop(loop)
 
-	wspolling = websockets.serve(wscheckpoll, '127.0.0.1', port=theport, loop=loop)
+	wspolling = websockets.serve(wscheckpoll, theip, port=theport, loop=loop)
 
 	try:
 		loop.run_until_complete(wspolling)
@@ -1510,33 +1515,40 @@ def checkforactivesearch(ts):
 	except:
 		ts = str(int(time.time()))
 
-	theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
+	pollport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
+	flaskserverport = hipparchia.config['FLASKSEENATPORT']
+	if hipparchia.config['MYEXTERNALIPADDRESS'] != '127.0.0.1':
+		theip = hipparchia.config['MYEXTERNALIPADDRESS']
+	else:
+		theip = '127.0.0.1'
+
+	theurl = 'http://{ip}:{fp}/startwspolling/{pp}'.format(ip=theip, fp=flaskserverport, pp=pollport)
 
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	# sock.setblocking(0)
-	result = sock.connect_ex(('127.0.0.1', theport))
+	result = sock.connect_ex((theip, pollport))
 	if result == 0:
 		pass
 	else:
 		print('websocket probe failed:',errno.errorcode[result])
 		# need to fire up the websocket
 		try:
-			r = urlopen('http://127.0.0.1:5000/startwspolling/default', data=None, timeout=.1)
+			r = urlopen(theurl, data=None, timeout=.1)
 		except socket.timeout:
 			# socket.timeout: but our aim was to send the request, not to read the response and get blocked
-			print('websocket at {p} was told to launch'.format(p=theport))
+			print('websocket at {p} was told to launch'.format(p=pollport))
 
 	sock.close()
 	del sock
 
 	try:
 		if poll[ts].getactivity():
-			return json.dumps(theport)
+			return json.dumps(pollport)
 	except KeyError:
 		time.sleep(.1)
 		try:
 			if poll[ts].getactivity():
-				return json.dumps(theport)
+				return json.dumps(pollport)
 			else:
 				print('checkforactivesearch() reports that the websocket is still inactive: there is a serious problem?')
 				return json.dumps('no')

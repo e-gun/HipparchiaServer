@@ -13,14 +13,17 @@ from server.listsandsession.sessiondicts import buildaugenresdict, buildworkgenr
 	buildworkprovenancedict
 
 terminaltext = """
+
 {project} / Copyright (C) {year} / {fullname}
 {mail}
 
-This program comes with ABSOLUTELY NO WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+This program comes with ABSOLUTELY NO WARRANTY;
+without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.
 
-This is free software, and you are welcome to redistribute it and/or modify
-it under the terms of the GNU General Public License version 3.
+This is free software, and you are welcome to redistribute
+it and/or modify it under the terms of the GNU General
+Public License version 3.
 
 """
 
