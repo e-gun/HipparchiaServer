@@ -1506,6 +1506,14 @@ def checkforactivesearch(ts):
 
 	test the activity of a poll so you don't start conjuring a bunch of key errors if you use wscheckpoll() prematurely
 
+	note that uWSGI does not look like it will ever be able to work with the polling: poll[ts].getactivity() will
+	never return anything because the processing and threading of uWSGI means that the poll is not going
+	to be inside the instance of HipparchiaServer that receives the confirmation request
+
+	or something like that...
+
+	at a minimum you can count on uWSGI giving you a KeyError when you ask for poll[ts]
+
 	:param ts:
 	:return:
 	"""
@@ -1545,7 +1553,7 @@ def checkforactivesearch(ts):
 		if poll[ts].getactivity():
 			return json.dumps(pollport)
 	except KeyError:
-		time.sleep(.15)
+		time.sleep(.10)
 		try:
 			if poll[ts].getactivity():
 				return json.dumps(pollport)
