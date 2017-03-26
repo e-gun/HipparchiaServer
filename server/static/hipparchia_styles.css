@@ -27,6 +27,11 @@ body {
 	-moz-transform: rotate(-90deg);	
 	}
 
+.activeoption {
+    color: #556970;
+    font-family: 'DejaVuSansMono', monospace;
+    }
+
 .assigneddate {
 	font-size: 85%;
 	}
@@ -56,9 +61,6 @@ body {
 .colorhighlight {
 	color: #760f27;
 	}
-
-.corpusname {
-    }
 
 .crossreference {
 	font-style: italic;

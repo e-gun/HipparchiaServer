@@ -206,12 +206,20 @@ class dbWordCountObject(object):
 		self.d = docpapcount
 		self.i = inscriptioncount
 		self.c = christiancount
-		self.tlabel = 'Ⓣ'
-		self.glabel = 'Ⓖ'
-		self.llabel = 'Ⓛ'
-		self.dlabel = 'Ⓓ'
-		self.ilabel = 'Ⓘ'
-		self.clabel = 'Ⓒ'
+		if hipparchia.config['AVOIDCIRCLEDLETTERS'] != 'yes':
+			self.tlabel = 'Ⓣ'
+			self.glabel = 'Ⓖ'
+			self.llabel = 'Ⓛ'
+			self.dlabel = 'Ⓓ'
+			self.ilabel = 'Ⓘ'
+			self.clabel = 'Ⓒ'
+		else:
+			self.tlabel = 'T'
+			self.glabel = 'G'
+			self.llabel = 'L'
+			self.dlabel = 'D'
+			self.ilabel = 'I'
+			self.clabel = 'C'
 
 	def getelement(self, element):
 		cdict = {
@@ -391,11 +399,18 @@ class dbHeadwordObject(dbWordCountObject):
 		except:
 			# no date info is available for this (Latin) word
 			self.wtdgkearly, self.wtdgkmiddle, self.wtdgklate, self.predomera = -1, -1, -1, -1
-		self.qlabel = 'ⓠ'
-		self.elabel = 'ⓔ'
-		self.mlabel = 'ⓜ'
-		self.latelabel = 'ⓛ'
-		self.unklabel = 'ⓤ'
+		if hipparchia.config['AVOIDCIRCLEDLETTERS'] != 'yes':
+			self.qlabel = 'ⓠ'
+			self.elabel = 'ⓔ'
+			self.mlabel = 'ⓜ'
+			self.latelabel = 'ⓛ'
+			self.unklabel = 'ⓤ'
+		else:
+			self.qlabel = 'q'
+			self.elabel = 'e'
+			self.mlabel = 'm'
+			self.latelabel = 'l'
+			self.unklabel = 'u'
 		super().__init__(entryname, totalcount, greekcount, latincount, docpapcount, inscriptioncount, christiancount)
 		# can't do this until self.g, etc exist owing to a call to super()
 		self.wtdgr = self.g * weights['corp']['gr']

@@ -71,19 +71,21 @@ WORKERS = 3
 #   this is more or less *essential* if you are dealing with Latin words since the editoral inserions in minor Greek genres
 #   will give you 3 words tagged 'mech' whose weight will be 390506.33x as great as any individual word in a historian.
 # COLLAPSEDGENRECOUNTS will bundle things like 'apocal' and 'theol' under 'allrelig' when counting
+# AVOIDCIRCLEDLETTERS if you have trouble displaying Ⓖ, etc.
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 TLGASSUMESBETACODE = 'yes'
+SHOWLINENUMBERSEVERY = 10
 SUPPRESSLONGREQUESTMESSAGE = 'no'
 HOBBLEREGEX = 'no'
 MINIMUMBROWSERWIDTH=100
-SHOWLINENUMBERSEVERY = 10
 ENOUGHALREADYWITHTHECOPYRIGHTNOTICE='no'
 # lexical output settings
 SHOWLEXICALSUMMARYINFO = 'yes'
 SHOWGLOBALWORDCOUNTS = 'yes'
 EXCLUDEMINORGENRECOUNTS='yes'
 COLLAPSEDGENRECOUNTS='yes'
-NUMBEROFGENRESTOTRACK = 7
+NUMBEROFGENRESTOTRACK = 8
+AVOIDCIRCLEDLETTERS='no'
 
 
 ### [7] the default settings for various 'session' items ###

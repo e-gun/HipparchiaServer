@@ -85,7 +85,12 @@ def frontpage():
 	# check to see which dbs we search by default
 	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus'] if session[c] == 'yes']
 
-	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora,
+	if hipparchia.config['AVOIDCIRCLEDLETTERS'] != 'yes':
+		corporalabels = {'g': 'Ⓖ', 'l': 'Ⓛ', 'd': 'Ⓓ', 'i': 'Ⓘ', 'c': 'Ⓒ'}
+	else:
+		corporalabels = {'g': 'G', 'l': 'L', 'd': 'D', 'i': 'I', 'c': 'C'}
+
+	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora, clab=corporalabels,
 						   accents=session['accentsmatter'], onehit=session['onehit'], css=stylesheet)
 
 	return page
@@ -455,12 +460,12 @@ def completeindex():
 		# we have both an author and a work, maybe we also have a subset of the work
 		if psg == ['']:
 			# whole work
-			poll[ts].statusis('Preparing an index to '+wo.title)
+			poll[ts].statusis('Preparing an index to {t}'.format(t=wo.title))
 			startline = wo.starts
 			endline = wo.ends
 		else:
 			# partial work
-			poll[ts].statusis('Preparing a partial index to ' + wo.title)
+			poll[ts].statusis('Preparing a partial index to {t}'.format(t=wo.title))
 			startandstop = textsegmentfindstartandstop(ao, wo, psg, cur)
 			startline = startandstop['startline']
 			endline = startandstop['endline']
@@ -470,7 +475,7 @@ def completeindex():
 		allworks = []
 
 	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
-		poll[ts].statusis('Preparing an index to the works of '+ao.shortname)
+		poll[ts].statusis('Preparing an index to the works of {a}'.format(a=ao.shortname))
 		# whole author
 		cdict = {}
 		for wkid in ao.listworkids():
