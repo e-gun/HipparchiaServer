@@ -256,9 +256,9 @@ def browserdictionarylookup(count, seekingentry, usedictionary, cursor):
 
 	else:
 		if count == 0:
-			cleanedentry = '<br />\n<p class="dictionaryheading">nothing found under <span class="emph">{skg}</span></p>\n'.format(skg=seekingentry)
+			cleanedentry = '<br />\n<p class="dictionaryheading">nothing found under <span class="prevalence">{skg}</span></p>\n'.format(skg=seekingentry)
 		else:
-			cleanedentry = '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="emph">{skg}</span></p>\n'.format(ct=count, skg=seekingentry)
+			cleanedentry = '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="prevalence">{skg}</span></p>\n'.format(ct=count, skg=seekingentry)
 		clickableentry = cleanedentry
 
 	return clickableentry
@@ -540,10 +540,10 @@ def formatprevalencedata(wordcountobject):
 		if w.getelement(key) > max:
 			max = w.getelement(key)
 		if w.getelement(key) > 0:
-			thehtml += '<span class="emph">' + w.getlabel(key) + '</span>' + ' {:,}'.format(w.getelement(key)) + ' / '
+			thehtml += '<span class="prevalence">' + w.getlabel(key) + '</span>' + ' {:,}'.format(w.getelement(key)) + ' / '
 	key = 'total'
 	if w.getelement(key) != max:
-		thehtml += '<span class="emph">'+w.getlabel(key)+'</span>' + ' {:,}'.format(w.getelement(key))
+		thehtml += '<span class="prevalence">'+w.getlabel(key)+'</span>' + ' {:,}'.format(w.getelement(key))
 	else:
 		# there was just one hit; so you should drop the ' / '
 		thehtml = thehtml[:-3]
@@ -553,7 +553,7 @@ def formatprevalencedata(wordcountobject):
 		wts = [(w.getweightedcorpora(key), w.getlabel(key)) for key in ['gr', 'lt', 'in', 'dp', 'ch']]
 		wts = sorted(wts, reverse=True)
 		for wt in wts:
-			thehtml += '<span class="emph">' + wt[1] + '</span>' + ' {0:.0f}'.format(wt[0]) + ' / '
+			thehtml += '<span class="prevalence">' + wt[1] + '</span>' + ' {0:.0f}'.format(wt[0]) + ' / '
 		thehtml = thehtml[:-3]
 		thehtml += '</p>\n'
 
@@ -563,7 +563,7 @@ def formatprevalencedata(wordcountobject):
 			# None was returned if there is no time data for this (Latin) word
 			thehtml += '\n<p class="wordcounts">Weighted chronological distribution: '
 			for wt in wts:
-				thehtml += '<span class="emph">' + wt[1] + '</span>' + ' {0:.0f}'.format(wt[0]) + ' / '
+				thehtml += '<span class="prevalence">' + wt[1] + '</span>' + ' {0:.0f}'.format(wt[0]) + ' / '
 			thehtml = thehtml[:-3]
 			thehtml += '</p>\n'
 

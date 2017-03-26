@@ -1,3 +1,27 @@
+@font-face {
+	font-family: 'DejaVuSans';
+	src: url('/static/ttf/DejaVuSans.ttf') format('truetype');
+	}
+
+@font-face {
+	font-family: 'DejaVuSansMono';
+	src: url('/static/ttf/DejaVuSansMono.ttf') format('truetype');
+	}
+
+@font-face {
+	font-family: 'DejaVuSansCondensed-Oblique';
+	src: url('/static/ttf/DejaVuSansCondensed-Oblique.ttf') format('truetype');
+	}
+
+body {
+	background: #f6f6f6;
+	margin: 10px 10px 10px 10px;
+	font-family: Arial, 'DejaVuSans', sans-serif;
+	color: #101010;
+	font-size: 90%;
+	line-height: 1.4;
+	}
+
 .90degreerotate {
 	-webkit-transform: rotate(-90deg); 
 	-moz-transform: rotate(-90deg);	
@@ -32,6 +56,9 @@
 .colorhighlight {
 	color: #760f27;
 	}
+
+.corpusname {
+    }
 
 .crossreference {
 	font-style: italic;
@@ -242,6 +269,10 @@
 .possibility {
     }
 
+.prevalence {
+    color: #0f1b76;
+    }
+
 .progress {
 	font-weight: bold;
 	}
@@ -308,8 +339,7 @@
 .sought {
 	color: #0f1b76;
 	font-weight: bold;
-	font-family: DejaVuSansMono;
-	src: url(/static/ttf/DejaVuSansMono.ttf);
+	font-family: DejaVuSansMono, monospace;
     }
 
 .speakers, .speaker {
@@ -370,11 +400,6 @@
 @blue: #288DD5;
 	
 @cyan: #15968D;
-
-@font-face {
-	font-family: DejaVu;
-	src: url(/static/ttf/DejaVuSans.ttf);
-	}
 
 @green: #629655;
 	
@@ -542,15 +567,6 @@ bibl:hover{
 	text-shadow: 1px 1px #aaa;
 	 }
 
-body {
-	background: #f6f6f6;
-	margin: 10px 10px 10px 10px;
-	font-family: sans-serif;
-	color: #101010;
-	font-size: 90%;
-	line-height: 1.4;
-	}
-
 browser {
 	color: #393F94;
 	}
@@ -564,8 +580,7 @@ caption {
 code {
 	font-size: 100%;
 	color: #086db5;
-	font-family: DejaVuSansMono;
-	src: url(/static/ttf/DejaVuSansMono.ttf);
+	font-family: DejaVuSansMono, monospace;
 	}
 
 div.fourcolumn {
@@ -607,7 +622,6 @@ hmu_roman_in_a_greek_text {
 	font-size: 90%;
 	color: #352;
 	font-family: DejaVuSansCondensed-Oblique;
-	src: url(/static/ttf/DejaVuSansCondensed-Oblique.ttf);
 	}
 
 hmu_title {
@@ -670,8 +684,7 @@ sense {
 smallcode {
 	font-size: 85%;
 	color: #086db5;
-	font-family: DejaVuSansMono;
-	src: url(/static/ttf/DejaVuSansMono.ttf);
+	font-family: DejaVuSansMono, monospace;
 	}
 
 span.lat {

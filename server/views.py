@@ -1561,7 +1561,7 @@ def checkforactivesearch(ts):
 				print('checkforactivesearch() reports that the websocket is still inactive: there is a serious problem?')
 				return json.dumps('nothing at '+str(pollport))
 		except:
-			return json.dumps('nothing at '+str(pollport))
+			return json.dumps('cannot_find_the_poll')
 
 
 @hipparchia.route('/favicon.ico')
