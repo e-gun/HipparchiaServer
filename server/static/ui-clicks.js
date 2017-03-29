@@ -206,7 +206,7 @@ $('#lexicalsearch').click( function() {
         var mydictfield = '#lexicon';
     } else if ( parseterm.length > 0 ) {
         searchterm = parseterm;
-        url = '/observed/';
+        url = '/parse/';
         var dialogtitle = searchterm;
         var mydictfield = '#parser';
         restoreme = searchterm;

@@ -7,3 +7,4 @@
 MorphPossibilityObject.getlatinbaseform() needs work per-misceo
 MorphPossibilityObject.getlatinbaseform() needs work permixtā, per-misceo
 MorphPossibilityObject.getlatinbaseform() needs work praevortēmur, prae-verto
+MorphPossibilityObject.getlatinbaseform() needs work dissīderent, dis-sido
