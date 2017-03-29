@@ -260,7 +260,7 @@ def substringsearch(seeking, workdbname, searchobject, cursor, templimit=None):
 		db = workdbname[0:6]
 		wid = workdbname[0:10]
 		d = [wid, seeking]
-		w = whereclauses(workdbname, '=', s.authorswhere)
+		w = whereclauses(workdbname, '=', so.authorswhere)
 		for i in range(0, len(w)):
 			qw += 'AND (' + w[i][0] + ') '
 			d.append(w[i][1])

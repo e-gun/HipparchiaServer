@@ -11,7 +11,7 @@ DEBUG=False
 SECRET_KEY = 'yourkeyhereitshouldbelongandlooklikecryptographicgobbledygook'
 
 ### [2] network values ###
-##  [only change this if you know why you are doing it: presumably you have a firewall problem] ##
+##  [only change these if you know why you are doing it: presumably you have a firewall problem] ##
 ##  MYEXTERNALIPADDRESS needs to be set if you are going to view polls remotely
 ##  FLASKSERVEDFROMPORT is the port flask will serve from
 ##  FLASKSEENATPORT might diverge from this if you are feeding flask through uWSGI + nginx
