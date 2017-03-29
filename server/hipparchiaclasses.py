@@ -13,7 +13,7 @@ from itertools import islice
 from multiprocessing import Value, Array
 
 from server import hipparchia
-from server.formatting_helper_functions import attemptelision
+from server.formatting_helper_functions import gkattemptelision, latattemptelision
 
 
 class dbAuthor(object):
@@ -702,15 +702,15 @@ class MorphPossibilityObject(object):
 			baseform = segments[-1]
 		elif len(segments) == 1 and '-' in segments[-1]:
 			# [c] the simplest version of a prefix: ἐκ-ϲύρω
-			baseform = attemptelision(segments[-1])
+			baseform = gkattemptelision(segments[-1])
 		elif len(segments) == 2 and '-' in segments[-1] and self.prefixcount == 1:
 			# [d] more info, but we do not need it: ἐκϲύρωμεν, ἐκ-ϲύρω
-			baseform = attemptelision(segments[-1])
+			baseform = gkattemptelision(segments[-1])
 		elif len(segments) > 1 and '-' in segments[-1] and self.prefixcount > 1:
 			# [e] all bets are off: ὑπό,κατά,ἐκ-λάω
 			# print('segments',segments)
 			for i in range(self.prefixcount - 2, -1, -1):
-				baseform = attemptelision(segments[-1])
+				baseform = gkattemptelision(segments[-1])
 				baseform = segments[i] + '-' + baseform
 		else:
 			print('MorphPossibilityObject.getbaseform() is confused', self.entry, segments)
@@ -730,7 +730,8 @@ class MorphPossibilityObject(object):
 		else:
 			# MorphPossibilityObject.getlatinbaseform() needs work praevortēmur, prae-verto
 			# PREF+DASH+STEM is the issue; a number of elisions and phonic shifts to worry about
-			print('MorphPossibilityObject.getlatinbaseform() needs work',self.entry)
+			#print('MorphPossibilityObject.getlatinbaseform() needs work',self.entry)
+			baseform = latattemptelision(self.entry)
 
 		return baseform
 

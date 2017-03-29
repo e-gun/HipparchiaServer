@@ -293,7 +293,7 @@ def avoidlonglines(string, maxlen, splitval, stringlist=[]):
 	return newstringhtml
 
 
-def attemptelision(hypenatedgreekheadword):
+def gkattemptelision(hypenatedgreekheadword):
 	"""
 
 	useful debug query:
@@ -374,3 +374,90 @@ def attemptelision(hypenatedgreekheadword):
 
 	return entry
 
+
+def latattemptelision(hypenatedlatinheadword):
+	"""
+
+	useful debug query:
+		﻿select * from latin_lemmata where dictionary_entry like '%-%'
+		﻿select * from latin_lemmata where dictionary_entry like '%-%¹'
+
+		de_-sero¹
+		con-manduco¹
+		per-misceo
+		per-misceo
+		prae-verto
+		dis-sido
+
+	typical cases:
+		just combine
+		drop one
+		merge consonants
+
+	in progress: a fair number of cases are still unhandled
+
+	:param hypenatedgreekheadword:
+	:return:
+	"""
+
+	hypenatedlatinheadword = re.sub(r'_','',hypenatedlatinheadword)
+
+	triplets = {
+		'dsc': 'sc',
+		'dse': 'sse',
+		'dsi': 'ssi',
+		'dso': 'sso',
+		'dst': 'st',
+		'dsu': 'ssu'
+	}
+
+	combinations = {
+		'bd': 'd',
+		'bf': 'ff',
+		'bp': 'pp',
+		'bm': 'mm',
+		'br': 'rr',
+		'dt': 'tt',
+		'ds': 'ss',
+		'nr': 'rr',
+		'np': 'mp',
+		'nm': 'mm',
+		'dl': 'll',
+		'dc': 'cc',
+		'xr': 'r',
+		'xn': 'n',
+		'xm': 'm',
+		'xv': 'v',
+		'xl': 'l',
+		'xd': 'd',
+		'sn': 'n',
+		'sm': 'm',
+		'sr': 'r',
+		'sf': 'ff'
+	}
+
+	units = hypenatedlatinheadword.split(',')
+	hyphenated = units[-1]
+
+	prefix = hyphenated.split('-')[0]
+	stem = hyphenated.split('-')[1]
+
+	tail = prefix[-1]
+	try:
+		head = stem[0:1]
+	except:
+		head = stem[0]
+
+	combination = tail+head
+
+	if combination in triplets:
+		entry = prefix[:-1]+triplets[combination]+stem[2:]
+		return entry
+
+	if combination in combinations:
+		entry = prefix[:-1]+combinations[combination]+stem[1:]
+		return entry
+
+	entry = prefix + stem
+
+	return entry
