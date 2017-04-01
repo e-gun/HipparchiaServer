@@ -59,12 +59,7 @@ function loadindexintodisplayresults(indexdata) {
 
         $('#searchsummary').html(linesreturned);
 
-        var linesreturned = '';
-        var dLen = indexdata['lines'].length;
-        for (i = 0; i < dLen; i++) {
-            linesreturned += indexdata['lines'][i];
-            }
-        $('#displayresults').html(linesreturned);
+        $('#displayresults').html(indexdata['indexhtml']);
 }
 
 

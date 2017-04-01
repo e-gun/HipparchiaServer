@@ -90,7 +90,7 @@ $(document).ready( function () {
         //  THE DATA YOU RECEIVE
         //
         //		output['title'] = thesearch
-        //		output['found'] = finds
+        //		output['found'] = findshtml
 		//      output['js'] = findsjs
         //		output['resultcount'] = resultcount
         //		output['scope'] = str(len(indexedworklist))

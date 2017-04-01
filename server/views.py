@@ -500,7 +500,7 @@ def completeindex():
 	count = locale.format("%d", count, grouping=True)
 
 	poll[ts].statusis('Preparing the index HTML')
-	output = wordindextohtmltable(output)
+	indexhtml = wordindextohtmltable(output)
 
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)
@@ -513,7 +513,7 @@ def completeindex():
 	results['worksegment'] = '.'.join(psg)
 	results['elapsed'] = buildtime
 	results['wordsfound'] = count
-	results['lines'] = output
+	results['indexhtml'] = indexhtml
 	results['keytoworks'] = allworks
 
 	results = json.dumps(results)

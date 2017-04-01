@@ -137,8 +137,10 @@ def wordindextohtmltable(indexingoutput):
 		outputlines.append('<td class="passages">{psg}</td>'.format(psg=i[2]))
 		outputlines.append('</tr>')
 	outputlines.append('</table>')
-	
-	return list(outputlines)
+
+	html = '\n'.join(list(outputlines))
+
+	return html
 
 
 def indexdictsorter(unsortedoutput):
