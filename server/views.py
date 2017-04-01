@@ -175,7 +175,7 @@ def executesearch(timestamp):
 	frozensession = session.copy()
 
 	if len(seeking) > 0:
-		s = SearchObject(ts, seeking, proximate, frozensession)
+		so = SearchObject(ts, seeking, proximate, frozensession)
 		starttime = time.time()
 		poll[ts].statusis('Compiling the list of works to search')
 		authorandworklist = compileauthorandworklist(listmapper, frozensession)
@@ -188,7 +188,7 @@ def executesearch(timestamp):
 		workssearched = len(authorandworklist)
 
 		poll[ts].statusis('Calculating full authors to search')
-		s.authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
+		so.authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
 
 		# assemble a subset of authordict that will be relevant to our actual search and send it to searchdispatcher()
 		# it turns out that we only need to pass authors that are part of psgselections or psgexclusions
@@ -197,43 +197,44 @@ def executesearch(timestamp):
 		# a massive slowdown (as 200k objects got pickled into a mpshareable dict)
 		authorswheredict = {}
 
-		for w in s.psgselections:
+		for w in so.psgselections:
 			authorswheredict[w[0:6]] = authordict[w[0:6]]
-		for w in s.psgexclusions:
+		for w in so.psgexclusions:
 			authorswheredict[w[0:6]] = authordict[w[0:6]]
-		s.authorswhere = authorswheredict
+		so.authorswhere = authorswheredict
 
 		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
-			s.searchtype = 'simple'
+			so.searchtype = 'simple'
 			thesearch = seeking
 			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=seeking)
 		elif re.search(phrasefinder, seeking):
-			s.searchtype = 'phrase'
+			so.searchtype = 'phrase'
 			thesearch = seeking
 			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=seeking)
 		else:
-			s.searchtype = 'proximity'
-			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=s.seeking, ns=s.nearstr, sp=s.proximity, sc=s.scope, pr=s.proximate)
+			so.searchtype = 'proximity'
+			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.seeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximate)
 			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'.format(
-				skg=seeking, ns=s.nearstr, sp=s.proximity, sc=s.scope, pr=proximate)
+				skg=seeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=proximate)
 
-		hits = searchdispatcher(s, poll[ts])
+		hits = searchdispatcher(so, poll[ts])
 		poll[ts].statusis('Putting the results in context')
 
 		# hits [<server.hipparchiaclasses.dbWorkLine object at 0x10d952da0>, <server.hipparchiaclasses.dbWorkLine object at 0x10d952c50>, ... ]
 		hitdict = sortresultslist(hits, authordict, workdict)
-		if s.context > 0:
-			allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, s.searchtype, poll[ts])
+		if so.context > 0:
+			allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, so.searchtype, poll[ts])
 		else:
-			allfound = nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, s.searchtype, poll[ts])
+			allfound = nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, so.searchtype, poll[ts])
 
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
-		if len(allfound) > s.cap:
-			allfound = allfound[0:s.cap]
+		if len(allfound) > so.cap:
+			allfound = allfound[0:so.cap]
 
 		poll[ts].statusis('Converting results to HTML')
-		if s.context > 0:
+
+		if so.context > 0:
 			findshtml = htmlifysearchfinds(allfound)
 		else:
 			findshtml = nocontexthtmlifysearchfinds(allfound)
@@ -242,7 +243,7 @@ def executesearch(timestamp):
 
 		resultcount = len(allfound)
 
-		if resultcount < s.cap:
+		if resultcount < so.cap:
 			hitmax = 'false'
 		else:
 			hitmax = 'true'
