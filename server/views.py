@@ -556,16 +556,16 @@ def textmaker():
 			startline = startandstop['startline']
 			endline = startandstop['endline']
 
-		output = buildtext(wo.universalid, startline, endline, linesevery, cur)
+		texthtml = buildtext(wo.universalid, startline, endline, linesevery, cur)
 	else:
-		output = []
+		texthtml = ''
 
 	results = {}
 	results['authorname'] = ao.shortname
 	results['title'] = wo.title
 	results['structure'] = wo.citation()
 	results['worksegment'] = '.'.join(psg)
-	results['lines'] = output
+	results['texthtml'] = texthtml
 
 	results = json.dumps(results)
 

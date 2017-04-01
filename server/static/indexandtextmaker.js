@@ -95,11 +95,6 @@ function loadtextintodisplayresults(returnedtext) {
         linesreturned += 'citation format:&nbsp;'+returnedtext['structure']+'<br />';
         $('#searchsummary').html(linesreturned);
 
-        var linesreturned = '';
-        var dLen = returnedtext['lines'].length;
-        for (i = 0; i < dLen; i++) {
-            linesreturned += returnedtext['lines'][i];
-            }
-        $('#displayresults').html(linesreturned);
+        $('#displayresults').html(returnedtext['texthtml']);
     }
 

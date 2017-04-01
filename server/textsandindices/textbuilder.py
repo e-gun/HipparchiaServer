@@ -81,5 +81,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 			previousline = thisline
 	
 	output.append('</table>\n')
-	
-	return output
+
+	html = '\n'.join(output)
+
+	return html
