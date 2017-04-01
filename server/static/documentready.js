@@ -128,11 +128,7 @@ $(document).ready( function () {
         // THE FINDS: each find should come as a lump of HTML formated by htmlifysearchfinds()
         //
 
-        var dLen = output['found'].length;
-        var passagesreturned = '';
-        for (i = 0; i < dLen; i++) { passagesreturned += output['found'][i]; }
-
-        $('#displayresults').html(passagesreturned);
+        $('#displayresults').html(output['found']);
 
         //
         // JS UPDATE

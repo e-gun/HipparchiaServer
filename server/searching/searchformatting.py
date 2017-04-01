@@ -412,7 +412,9 @@ def htmlifysearchfinds(listofsearchresultobjects):
 			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented) for ln in ro.lineobjects]
 		resultsashtml.append(ro.getlocusthml() + '\n'.join(h))
 
-	return resultsashtml
+	html = '\n'.join(resultsashtml)
+
+	return html
 
 
 def jstoinjectintobrowser(listofsearchresultobjects):
@@ -511,5 +513,7 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 
 	resultsashtml.append('</table>')
 
-	return resultsashtml
+	html = '\n'.join(resultsashtml)
+
+	return html
 
