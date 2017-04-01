@@ -37,7 +37,7 @@ from server.loadglobaldicts import *
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter, \
-	nocontextresultformatter, htmlifysearchfinds, nocontexthtmlifysearchfinds
+	nocontextresultformatter, htmlifysearchfinds, nocontexthtmlifysearchfinds, jstoinjectintobrowser
 from server.searching.searchfunctions import cleaninitialquery
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import tcparserequest, textsegmentfindstartandstop, \
@@ -234,12 +234,11 @@ def executesearch(timestamp):
 
 		poll[ts].statusis('Converting results to HTML')
 		if s.context > 0:
-			htmlandjs = htmlifysearchfinds(allfound)
+			findshtml = htmlifysearchfinds(allfound)
 		else:
-			htmlandjs = nocontexthtmlifysearchfinds(allfound)
-		# print('htmlandjs',htmlandjs)
-		finds = htmlandjs['hits']
-		findsjs = htmlandjs['hitsjs']
+			findshtml = nocontexthtmlifysearchfinds(allfound)
+
+		findsjs = jstoinjectintobrowser(allfound)
 
 		resultcount = len(allfound)
 
@@ -262,7 +261,7 @@ def executesearch(timestamp):
 
 		output = {}
 		output['title'] = thesearch
-		output['found'] = finds
+		output['found'] = findshtml
 		output['js'] = findsjs
 		output['resultcount'] = resultcount
 		output['scope'] = workssearched

@@ -386,14 +386,14 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 	return citationincontext
 
 
-def htmlifysearchfinds(listoffinds):
+def htmlifysearchfinds(listofsearchresultobjects):
 	"""
 	it is too painful to let JS turn this information into HTML
 	the Flask template used to do this work, now this does it
 
 	send me a list of FormattedSearchResult objects
 
-	:param listoffinds:
+	:param listofsearchresultobjects:
 	:return:
 	"""
 
@@ -405,31 +405,24 @@ def htmlifysearchfinds(listoffinds):
 	if hipparchia.config['DBDEBUGMODE'] == 'yes':
 		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
 
-	for find in listoffinds:
+	for ro in listofsearchresultobjects:
 		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
-			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml()) for ln in find.lineobjects]
+			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml()) for ln in ro.lineobjects]
 		else:
-			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented) for ln in find.lineobjects]
-		resultsashtml.append(find.getlocusthml() + '\n'.join(h))
-		listofurls.append(find.clickurl)
+			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented) for ln in ro.lineobjects]
+		resultsashtml.append(ro.getlocusthml() + '\n'.join(h))
 
-	htmlandjs = {}
-	htmlandjs['hits'] = resultsashtml
-
-	if len(listoffinds) > 0:
-		htmlandjs['hitsjs'] = injectbrowserjavascript(listofurls)
-	else:
-		htmlandjs['hitsjs'] = ''
-
-	return htmlandjs
+	return resultsashtml
 
 
-def injectbrowserjavascript(listofurls):
+def jstoinjectintobrowser(listofsearchresultobjects):
 	"""
 	the clickable urls don't work without inserting new js into the page to catch the clicks
 	need to match the what we used to get via the flask template
 	:return:
 	"""
+
+	listofurls = [ro.clickurl for ro in listofsearchresultobjects]
 
 	jso = ['document.getElementById("{u}").onclick = openbrowserfromclick;'.format(u=url) for url in listofurls]
 	jsoutput = '\n'.join(jso)
@@ -482,14 +475,14 @@ def nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, 
 	return searchresultobjects
 
 
-def nocontexthtmlifysearchfinds(listoffinds):
+def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	"""
 	it is too painful to let JS turn this information into HTML
 	the Flask template used to do this work, now this does it
 
 	send me a list of FormattedSearchResult objects (each should contain only one associated line)
 
-	:param listoffinds:
+	:param listofsearchresultobjects:
 	:return:
 	"""
 
@@ -502,30 +495,21 @@ def nocontexthtmlifysearchfinds(listoffinds):
 		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
 
 	count = 0
-	for find in listoffinds:
+	for ro in listofsearchresultobjects:
 		count += 1
 		if count % 3 == 0:
 			rowstyle = 'nthrow'
 		else:
 			rowstyle = 'regular'
-		ln = find.lineobjects[0]
+		ln = ro.lineobjects[0]
 		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 		else:
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)
-		citation = find.citationhtml(ln.locus())
+		citation = ro.citationhtml(ln.locus())
 		resultsashtml.append('<tr class="{rs}"><td>{cit}</td><td class="leftpad">{h}</td></tr>'.format(rs=rowstyle, cit=citation, h=h))
-		listofurls.append(find.clickurl)
 
 	resultsashtml.append('</table>')
 
-	htmlandjs = {}
-	htmlandjs['hits'] = resultsashtml
-
-	if len(listoffinds) > 0:
-		htmlandjs['hitsjs'] = injectbrowserjavascript(listofurls)
-	else:
-		htmlandjs['hitsjs'] = ''
-
-	return htmlandjs
+	return resultsashtml
 
