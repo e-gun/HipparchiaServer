@@ -178,8 +178,8 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			prefix = '<smallcode>{id}&nbsp;&nbsp;&nbsp;</smallcode>&nbsp;'.format(id=line.universalid)
 		columnb = prefix+columnb
 
-		linehtml = '<tr class="browser"><td class="browsedline">{cb}</td>'.format(cb=columnb)
-		linehtml += '<td class="browsercite">{ca}</td></tr>\n'.format(ca=columna)
+		linehtml = '<tr class="browser">\n\t<td class="browsedline">{cb}</td>'.format(cb=columnb)
+		linehtml += '\n\t<td class="browsercite">{ca}</td>\n</tr>\n'.format(ca=columna)
 
 		passage['ouputtable'].append(linehtml)
 		previousline = line
