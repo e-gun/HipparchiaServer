@@ -398,7 +398,6 @@ def htmlifysearchfinds(listofsearchresultobjects):
 	"""
 
 	resultsashtml = []
-	listofurls = []
 
 	linehtmltemplate = '<span class="locus">{lc}</span>&nbsp;<span class="foundtext">{ft}</span><br />'
 
@@ -489,9 +488,19 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	"""
 
 	resultsashtml = ['<table>']
-	listofurls = []
 
 	linehtmltemplate = '<span class="foundtext">{ft}</span>'
+
+	tabelrowtemplate = """
+	<tr class="{rs}">
+		<td>{cit}
+		</td>
+		<td class="leftpad">
+			{h}
+		</td>
+	</tr>
+	"""
+
 
 	if hipparchia.config['DBDEBUGMODE'] == 'yes':
 		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
@@ -508,8 +517,9 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 		else:
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)
+
 		citation = ro.citationhtml(ln.locus())
-		resultsashtml.append('<tr class="{rs}"><td>{cit}</td><td class="leftpad">{h}</td></tr>'.format(rs=rowstyle, cit=citation, h=h))
+		resultsashtml.append(tabelrowtemplate.format(rs=rowstyle, cit=citation, h=h))
 
 	resultsashtml.append('</table>')
 
