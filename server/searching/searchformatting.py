@@ -137,12 +137,19 @@ def formatauthinfo(authorobject):
 	:param authorobject:
 	:return:
 	"""
+
+	template = """
+	<span class="emph">{n}</span>&nbsp;
+	[id: {id}]<br />&nbsp;
+	{gn}
+	{fl}
+	"""
+
 	n = '<span class="emph">{n}</span>'.format(n=authorobject.shortname)
-	d = '[id: {id}]<br />'.format(id=authorobject.universalid[2:])
 	if authorobject.genres and authorobject.genres != '':
-		g = 'classified among: {g}; '.format(g=authorobject.genres)
+		gn = 'classified among: {g}; '.format(g=authorobject.genres)
 	else:
-		g = ''
+		gn = '<!-- no author genre available -->'
 
 	if authorobject.universalid[0:2] in ['gr', 'in', 'dp']:
 		try:
@@ -158,11 +165,11 @@ def formatauthinfo(authorobject):
 				fl += ' (derived from "{rd}")'.format(rd=authorobject.recorded_date)
 		except:
 			# there was no f and so no int(f)
-			fl = ''
+			fl = '<!-- no floruit available -->'
 	else:
-		fl = ''
+		fl = '<!-- no floruit available -->'
 
-	authinfo = n + '&nbsp;' + d + '&nbsp;' + g + fl
+	authinfo = template.format(n=n, id=authorobject.universalid[2:], gn=gn, fl=fl)
 
 	return authinfo
 
@@ -175,20 +182,28 @@ def woformatworkinfo(workobject):
 	:return:
 	"""
 
-	p = formatpublicationinfo(workobject.publication_info)
+	template = """
+	{num}
+	<span class="title">{t}</span>
+	{g}
+	{c}
+	{d}
+	{p}
+	<br />
+	"""
 
-	n = '({n})&nbsp;'.format(n=workobject.universalid[-3:])
-	t = '<span class="title">{t}</span> '.format(t=workobject.title)
+	num = '({n})&nbsp;'.format(n=workobject.universalid[-3:])
+	t = workobject.title
 
 	if workobject.workgenre:
 		g = '[{g}]&nbsp;'.format(g=workobject.workgenre)
 	else:
-		g = ''
+		g = '<!-- no genre info available -->'
 
 	if workobject.wordcount:
 		c = '[' + format(workobject.wordcount, ',d') + ' wds]'
 	else:
-		c = ''
+		c = '<!-- no wordcount available -->'
 
 	try:
 		dateval = int(workobject.converted_date)
@@ -198,17 +213,20 @@ def woformatworkinfo(workobject):
 	if dateval < 1500:
 		if dateval > 0:
 			suffix = 'CE'
-			d = '(assigned to {cd} {fx})'.format(cd=str(workobject.converted_date), fx=suffix)
+			d = ' (assigned to {cd} {fx})'.format(cd=str(workobject.converted_date), fx=suffix)
 		else:
 			suffix = 'BCE'
-			d = '(assigned to {cd} {fx})'.format(cd=str(workobject.converted_date[1:]), fx=suffix)
+			d = ' (assigned to {cd} {fx})'.format(cd=str(workobject.converted_date[1:]), fx=suffix)
 	else:
-		d = ''
+		d = '<!-- no date available -->'
 
-	if len(p) > 0:
-		workinfo = n + t + g + c + d + '<br />' + p + '<br />'
+	p = formatpublicationinfo(workobject.publication_info)
+	if len(p) == 0:
+		p = '<!-- no publication info available -->'
 	else:
-		workinfo = n + t + g + c + d + '<br />'
+		p = '<br />\n' + p
+
+	workinfo = template.format(num=num, t=t, g=g, c=c, d=d, p=p)
 
 	return workinfo
 

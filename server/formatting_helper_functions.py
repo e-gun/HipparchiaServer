@@ -181,7 +181,7 @@ def formatpublicationinfo(pubinfo):
 	maxlinelen = 120
 
 	tags = [
-		{'volumename': ['', '<br />']},
+		{'volumename': ['', '. ']},
 		{'press': ['', ', ']},
 		{'city': ['', ', ']},
 		{'year': ['', '. ']},
