@@ -19,7 +19,7 @@ config.read('config.ini')
 
 def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
 	"""
-	his function does a lot of work via a number of subfunctions
+	this function does a lot of work via a number of subfunctions
 	lots of refactoring required if you change anything...
 
 	sample output:

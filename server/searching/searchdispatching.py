@@ -60,8 +60,8 @@ def searchdispatcher(searchobject, activepoll):
 	activepoll.remain(len(so.authorandworklist))
 	activepoll.sethits(0)
 
-	# a class and/or decorator would be nice, but you have a lot of trouble getting the (mp aware) args into the function
-	# the must be a way, but this also works
+	# be careful about getting mp aware args into the function
+
 	if so.searchtype == 'simple':
 		activepoll.statusis('Executing a simple word search...')
 		jobs = [Process(target=workonsimplesearch, args=(count, foundlineobjects, searchlist, commitcount, activepoll, so))
@@ -212,9 +212,6 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 		maxhits = 9999
 
 	while len(searchinginside) > 0 and len(foundlineobjects) < so.cap:
-		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
-		# the pop() will fail if somebody else grabbed the last available work before it could be registered
-		# notsupposedtohappen butitdoes
 		try:
 			wkid = searchinginside.pop()
 			activepoll.remain(len(searchinginside))
@@ -267,9 +264,6 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 	so = searchobject
 
 	while len(searchinginside) > 0 and count.value <= so.cap:
-		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
-		# the pop() will fail if somebody else grabbed the last available work before it could be registered
-		# not supposed to happen with a managed list, but it does...
 
 		try:
 			wkid = searchinginside.pop()

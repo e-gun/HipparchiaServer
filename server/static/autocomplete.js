@@ -13,9 +13,7 @@ function reloadselections(selectiondata){
 
     if (selectiondata.numberofselections > -1) {
             $('#selectionstable').show();
-            $('#droptodelete').droppable( {
-                drop: deleteondrop
-                });
+            $('#droptodelete').droppable({ drop: deleteondrop });
             $('#droptodelete').show();
             $( function() {
                 for (i = 0; i <= selectiondata.numberofselections; i++) {
@@ -118,9 +116,7 @@ $('#authorsautocomplete').autocomplete({
         // stupid timing issue if you select with mouse instead of keyboard: nothing happens
         // see: http://stackoverflow.com/questions/9809013/jqueryui-autocomplete-select-does-not-work-on-mouse-click-but-works-on-key-eve
         var origEvent = event;
-        while (origEvent.originalEvent !== undefined){
-            origEvent = origEvent.originalEvent;
-        }
+        while (origEvent.originalEvent !== undefined){ origEvent = origEvent.originalEvent; }
         if (origEvent.type == 'click'){
             document.getElementById('authorsautocomplete').value = ui.item.value;
             var auid = $('#authorsautocomplete').val().slice(-7, -1);
@@ -147,10 +143,10 @@ $('#pickauthor').click( function() {
             $('#clearpick').show();
             if (wrk == '') {
               $.getJSON('/makeselection?auth=' + authorid, function (selectiondata) {
-                   reloadselections(selectiondata);
-                   loadWorklist(authorid);
-                  $('#worksautocomplete').prop('placeholder', '(Pick a work)');
-                  });
+                    reloadselections(selectiondata);
+                    loadWorklist(authorid);
+                    $('#worksautocomplete').prop('placeholder', '(Pick a work)');
+                    });
              } else if (locus == '') {
                 $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
                     reloadselections(selectiondata);
@@ -202,9 +198,7 @@ function loadWorklist(authornumber){
     $.getJSON('/getworksof/'+authornumber, function (selectiondata) {
         var dLen = selectiondata.length;
         var worksfound = [];
-        for (i = 0; i < dLen; i++) {
-            worksfound.push(selectiondata[i]);
-            }
+        for (i = 0; i < dLen; i++) { worksfound.push(selectiondata[i]); }
         $('#worksautocomplete').autocomplete( "enable" );
         $('#worksautocomplete').autocomplete({
             source: worksfound
@@ -250,7 +244,8 @@ function loadLevellist(workid,pariallocus){
     //  or gr0565w001_AT_-1 (-1 = no knowledge of the work yet)
     //  or gr0565w001_AT_2|3
     // note that this is to be read as lowest known level first
-    // and bad thing happen if you send level00 info
+    // and bad things happen if you send level00 info
+
     // python will return info about the next level down such as:
     //  [{'totallevels',3},{'level': 0}, {'label': 'verse'}, {'low': 1}, {'high': 100]
     $.getJSON('/getstructure/'+workid+'_AT_'+pariallocus, function (selectiondata) {
