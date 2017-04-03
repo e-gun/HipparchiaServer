@@ -1,4 +1,4 @@
-grep "^class" *.py && grep "^def " *.py && grep "^def " */*.py
+server/ $ grep "^class" *.py && grep "^def " *.py && grep "^def " */*.py
 
 hipparchiaclasses.py:class dbAuthor(object):
 hipparchiaclasses.py:class dbOpus(object):
@@ -247,68 +247,3 @@ textsandindices/textandindiceshelperfunctions.py:def indexdictsorter(unsortedout
 textsandindices/textandindiceshelperfunctions.py:def dictmerger(masterdict, targetdict):
 textsandindices/textandindiceshelperfunctions.py:def cleanindexwords(word):
 textsandindices/textbuilder.py:def buildtext(work, firstline, lastline, linesevery, cursor):
-(hipparchia_venv) 8 ┤erik@Mieko-Kaji├ server/ $ grep "^class" *.py && grep "^def " *.py && grep "^def " */*.py > ../hipparchiaserver_function_and_class_list.txt
-hipparchiaclasses.py:class dbAuthor(object):
-hipparchiaclasses.py:class dbOpus(object):
-hipparchiaclasses.py:class dbWordCountObject(object):
-hipparchiaclasses.py:class dbHeadwordObject(dbWordCountObject):
-hipparchiaclasses.py:class dbMorphologyObject(object):
-hipparchiaclasses.py:class MorphPossibilityObject(object):
-hipparchiaclasses.py:class dbWorkLine(object):
-hipparchiaclasses.py:class dbDictionaryEntry(object):
-hipparchiaclasses.py:class dbGreekWord(dbDictionaryEntry):
-hipparchiaclasses.py:class dbLatinWord(dbDictionaryEntry):
-hipparchiaclasses.py:class dbLemmaObject(object):
-hipparchiaclasses.py:class FormattedSearchResult(object):
-hipparchiaclasses.py:class LowandHighInfo(object):
-hipparchiaclasses.py:class MPCounter(object):
-hipparchiaclasses.py:class ProgressPoll(object):
-hipparchiaclasses.py:class QueryCombinator(object):
-hipparchiaclasses.py:class SearchObject(object):
-calculatewordweights.py:def findtemporalweights(language):
-calculatewordweights.py:def findccorporaweights():
-calculatewordweights.py:def findgeneraweights(language, collapsed=False):
-calculatewordweights.py:def findchronologicalweights(era,language):
-calculatewordweights.py:def findcorpusweight(corpus, language):
-formatting_helper_functions.py:def removegravity(accentedword):
-formatting_helper_functions.py:def forceterminalacute(matchgroup):
-formatting_helper_functions.py:def stripaccents(texttostrip):
-formatting_helper_functions.py:def getpublicationinfo(workobject, cursor):
-formatting_helper_functions.py:def formatpublicationinfo(pubinfo):
-formatting_helper_functions.py:def bcedating():
-formatting_helper_functions.py:def insertcrossreferencerow(lineobject):
-formatting_helper_functions.py:def insertdatarow(label, css, founddate):
-formatting_helper_functions.py:def avoidlonglines(string, maxlen, splitval, stringlist=[]):
-formatting_helper_functions.py:def gkattemptelision(hypenatedgreekheadword):
-formatting_helper_functions.py:def latattemptelision(hypenatedlatinheadword):
-views.py:def frontpage():
-views.py:def authorlist():
-views.py:def executesearch(timestamp):
-views.py:def grabtextforbrowsing(locus):
-views.py:def completeindex():
-views.py:def textmaker():
-views.py:def cookieintosession(cookienum):
-views.py:def findtheworksof(authoruid):
-views.py:def offerauthorhints():
-views.py:def augenrelist():
-views.py:def wkgenrelist():
-views.py:def offeraulocationhints():
-views.py:def offerprovenancehints():
-views.py:def workstructure(locus):
-views.py:def getsessionvariables():
-views.py:def getauthinfo(authorid):
-views.py:def getsearchlistcontents():
-views.py:def getgenrelistcontents():
-views.py:def findbyform(observedword):
-views.py:def dictsearch(searchterm):
-views.py:def reverselexiconsearch(searchterm):
-views.py:def setsessionvariable():
-views.py:def selectionmade():
-views.py:def clearselections():
-views.py:def getcurrentselections():
-views.py:def clearsession():
-views.py:def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
-views.py:def checkforactivesearch(ts):
-views.py:def sendfavicon():
-views.py:def appletouchticon():
-views.py:def progressreport():
