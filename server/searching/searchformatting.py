@@ -14,7 +14,7 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, setconnection
-from server.formatting_helper_functions import formatpublicationinfo
+from server.formattinghelperfunctions import formatpublicationinfo
 from server.hipparchiaclasses import FormattedSearchResult
 from server.searching.searchfunctions import searchtermcharactersubstitutions
 

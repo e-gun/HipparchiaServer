@@ -13,7 +13,7 @@ from itertools import islice
 from multiprocessing import Value, Array
 
 from server import hipparchia
-from server.formatting_helper_functions import gkattemptelision, latattemptelision
+from server.formattinghelperfunctions import gkattemptelision, latattemptelision
 
 
 class dbAuthor(object):

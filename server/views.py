@@ -24,7 +24,7 @@ from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinef
 	perseusdelabeler
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking, \
 	perseusidmismatch, returnfirstlinenumber
-from server.formatting_helper_functions import removegravity, stripaccents, bcedating
+from server.formattinghelperfunctions import removegravity, stripaccents, bcedating
 from server.hipparchiaclasses import ProgressPoll, SearchObject
 from server.lexica.lexicaformatting import entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, \

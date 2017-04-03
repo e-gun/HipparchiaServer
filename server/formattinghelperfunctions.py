@@ -30,13 +30,13 @@ def removegravity(accentedword):
 	try:
 		if accentedword[-1] in 'ὰὲὶὸὺὴὼἂἒἲὂὒἢὢᾃᾓᾣᾂᾒᾢ':
 			accentedword = re.sub(terminalgravea, forceterminalacute, accentedword)
-	except:
+	except IndexError:
 		# the word was not >0 char long
 		pass
 	try:
 		if accentedword[-2] in 'ὰὲὶὸὺὴὼἂἒἲὂὒἢὢᾃᾓᾣᾂᾒᾢ':
 			accentedword = re.sub(terminalgraveb, forceterminalacute, accentedword)
-	except:
+	except IndexError:
 		# the word was not >1 char long
 		pass
 
@@ -445,7 +445,7 @@ def latattemptelision(hypenatedlatinheadword):
 	tail = prefix[-1]
 	try:
 		head = stem[0:1]
-	except:
+	except IndexError:
 		head = stem[0]
 
 	combination = tail+head

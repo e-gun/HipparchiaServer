@@ -10,7 +10,7 @@ import re
 
 from flask import session
 
-from server.formatting_helper_functions import stripaccents
+from server.formattinghelperfunctions import stripaccents
 from server.listsandsession.sessionfunctions import reducetosessionselections, justlatin
 
 

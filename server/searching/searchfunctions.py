@@ -13,7 +13,7 @@ from flask import session
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
-from server.formatting_helper_functions import removegravity
+from server.formattinghelperfunctions import removegravity
 from server.lexica.lexicalookups import findcountsviawordcountstable
 
 
