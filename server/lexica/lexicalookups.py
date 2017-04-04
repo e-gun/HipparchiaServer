@@ -436,7 +436,8 @@ def findtotalcounts(word, cursor):
 	:return:
 	"""
 
-	word = re.sub(r'v','u',word)
+	# actually the words contain 'v' in the original dictionary entries (and this has not been cleaned up)
+	# word = re.sub(r'v','u',word)
 
 	table = 'dictionary_headword_wordcounts'
 	q = 'SELECT entry_name , total_count, gr_count, lt_count, dp_count, in_count, ch_count, ' \
