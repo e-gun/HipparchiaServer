@@ -6,9 +6,13 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import re
 from multiprocessing import Pool
+
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
+from server.lexica.lexicalookups import lookformorphologymatches
+from server.listsandsession.listmanagement import polytonicsort
 from server.textsandindices.textandindiceshelperfunctions import dictmerger, cleanindexwords
 
 
@@ -44,7 +48,7 @@ def compilewordlists(worksandboundaries, cursor):
 	return lineobjects
 
 
-def buildindextowork(cdict, activepoll, cursor):
+def buildindextowork(cdict, activepoll, headwords, cursor):
 	"""
 	speed notes
 		a Manager() implementation was 50% slower than single-threaded: lock/unlock penalty on a shared dictionary
@@ -93,15 +97,131 @@ def buildindextowork(cdict, activepoll, cursor):
 		activepoll.remain(len(lineobjects))
 		completeindexdict = linesintoindex(lineobjects, activepoll)
 
-	# completeindexdict: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
+	# completeindexdict: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),...], wordB: [(...)]}
 	# {'illic': [('lt0472w001', 2048, '68A.35')], 'carpitur': [('lt0472w001', 2048, '68A.35')], ...}
+
+	if headwords:
+		augmentedindexdict = {}
+		remaining = len(completeindexdict)
+		activepoll.statusis('Assigning headwords to entries')
+		activepoll.notes = ''
+		activepoll.allworkis(remaining)
+
+		# [a] find the baseforms
+		for k in completeindexdict.keys():
+			remaining -= 1
+			activepoll.remain(remaining)
+
+			if re.search('[a-z]',k):
+				usedict = 'latin'
+			else:
+				usedict = 'greek'
+
+			mo = lookformorphologymatches(k, usedict, cursor)
+
+			if mo:
+				if mo.countpossible() > 1:
+					parsed = list(set(['{bf} ({tr})'.format(bf=p.getbaseform(), tr=p.gettranslation()) for p in mo.getpossible()]))
+					# cut the blanks
+					parsed = [re.sub(r' \( \)','',p) for p in parsed]
+					if len(parsed) == 1:
+						homonyms = None
+					else:
+						homonyms = len(parsed)
+				else:
+					parsed = [mo.getpossible()[0].getbaseform()]
+					homonyms = None
+			else:
+				parsed = False
+				homonyms = None
+
+			augmentedindexdict[k] = {'baseforms': parsed, 'homonyms': homonyms, 'loci': completeindexdict[k]}
+
+		# sample items in an augmentedindexdict
+		# erant {'baseforms': 'sum¹', 'homonyms': None, 'loci': [('lt2300w001', 5, '1.4')]}
+		# regis {'baseforms': ['rex', 'rego (to keep straight)'], 'homonyms': 2, 'loci': [('lt2300w001', 7, '1.6')]}
+		# qui {'baseforms': ['qui¹', 'quis²', 'quis¹', 'qui²'], 'homonyms': 4, 'loci': [('lt2300w001', 7, '1.6'), ('lt2300w001', 4, '1.3')]}
+
+		# [b] remap under the headwords you found
+
+		headwordindexdict = {}
+
+		for observed in augmentedindexdict.keys():
+			if augmentedindexdict[observed]['homonyms']:
+				tag = 'isahomonymn'
+			else:
+				tag = False
+			augmentedindexdict[observed]['loci'] = [tuple(list(l)+[tag]) for l in augmentedindexdict[observed]['loci']]
+
+			if augmentedindexdict[observed]['baseforms']:
+				baseforms = augmentedindexdict[observed]['baseforms']
+			else:
+				baseforms = ['•unparsed•']
+
+			for bf in baseforms:
+				try:
+					headwordindexdict[bf]
+				except KeyError:
+					headwordindexdict[bf] = {}
+				if observed not in headwordindexdict[bf]:
+					headwordindexdict[bf][observed] = augmentedindexdict[observed]['loci']
+				else:
+					for l in augmentedindexdict[observed]['loci']:
+						headwordindexdict[bf][observed].append(l)
+
+		# sample items in headwordindexdict
+		# 'intersum': {'intersunt': [('lt2300w001', 8, '1.7', False)]}
+		# 'populus² (a poplar)': {'populum': [('lt2300w001', 6, '1.5', 'isahomonymn')], 'populi': [('lt2300w001', 1, 't.1', 'isahomonymn')]}
+		# 'sum¹': {'est': [('lt2300w001', 7, '1.6', 'isahomonymn')], 'erant': [('lt2300w001', 5, '1.4', False)], 'sunt': [('lt2300w001', 2, '1.1', False)]}
+
+		htmlindexdict = {}
+		sortedoutput = []
+		for headword in polytonicsort(headwordindexdict.keys()):
+			for form in polytonicsort(headwordindexdict[headword].keys()):
+				hits = sorted(headwordindexdict[headword][form])
+				isahomonymn = hits[0][3]
+				if onework == True:
+					hits = [h[2] for h in hits]
+					loci = ', '.join(hits)
+				else:
+					previouswork = hits[0][0]
+					loci = '<span class="work">{wk}</span>: '.format(wk=previouswork[6:10])
+					for hit in hits:
+						if hit[0] == previouswork:
+							loci += hit[2] + ', '
+						else:
+							loci = loci[:-2] + '; '
+							previouswork = hit[0]
+							loci += '<span class="work">{wk}</span>: '.format(wk=previouswork[6:10])
+							loci += hit[2] + ', '
+					loci = loci[:-2]
+				htmlindexdict[headword] = loci
+				sortedoutput.append(((headword, form, len(hits), htmlindexdict[headword], isahomonymn)))
+	else:
+		activepoll.statusis('Sifting the index')
+		activepoll.notes = ''
+		activepoll.allworkis(-1)
+		unsortedoutput = htmlifysimpleindex(completeindexdict, onework)
+		sortkeys = [x[0] for x in unsortedoutput]
+		outputdict = {x[0]: x for x in unsortedoutput}
+		sortkeys = polytonicsort(sortkeys)
+		sortedoutput = [outputdict[x] for x in sortkeys]
+		# pad position 0 with a fake, unused headword so that these tuples have the same shape as the ones in the other branch of the condition
+		sortedoutput = [(s[0], s[0], s[1], s[2], False) for s in sortedoutput]
+
+	return sortedoutput
+
+
+def htmlifysimpleindex(completeindexdict, onework):
+	"""
+
+	:param completeindexdict:
+	:param onework:
+	:return:
+	"""
 
 	unsortedoutput = []
 
-	activepoll.statusis('Sifting the index')
-	activepoll.notes = ''
-	activepoll.allworkis(-1)
-	
 	for c in completeindexdict.keys():
 		hits = completeindexdict[c]
 		count = str(len(hits))
@@ -123,7 +243,7 @@ def buildindextowork(cdict, activepoll, cursor):
 			loci = loci[:-2]
 
 		unsortedoutput.append((c, count, loci))
-	
+
 	return unsortedoutput
 
 
@@ -135,6 +255,9 @@ def linesintoindex(lineobjects, activepoll):
 
 	:return:
 	"""
+
+	grave = 'ὰὲὶὸὺὴὼῒῢᾲῂῲἃἓἳὃὓἣὣἂἒἲὂὒἢὢ'
+	acute = 'άέίόύήώΐΰᾴῄῴἅἕἵὅὕἥὥἄἔἴὄὔἤὤ'
 
 	defaultwork = lineobjects[0].wkuinversalid
 	
@@ -152,6 +275,7 @@ def linesintoindex(lineobjects, activepoll):
 			words = line.wordlist('polytonic')
 			words = [cleanindexwords(w).lower() for w in words]
 			words = list(set(words))
+			words = [w.translate(str.maketrans(grave, acute)) for w in words]
 			for w in words:
 				try:
 					completeindex[w].append((line.wkuinversalid, line.index, line.locus()))
