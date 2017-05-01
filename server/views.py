@@ -41,7 +41,7 @@ from server.searching.searchformatting import formatauthinfo, formatauthorandwor
 from server.searching.searchfunctions import cleaninitialquery
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import tcparserequest, textsegmentfindstartandstop, \
-	wordindextohtmltable, indexdictsorter
+	wordindextohtmltable
 from server.textsandindices.textbuilder import buildtext
 
 # activate when you need to be shown new weight values upon startup and are willing to wait for the weights
@@ -456,6 +456,8 @@ def completeindex():
 	wo = req['workobject']
 	psg = req['passagelist']
 
+	useheadwords = hipparchia.config['INDEXBYHEADWORDS']
+
 	if ao.universalid != 'gr0000' and wo.universalid != 'gr0000w000':
 		# we have both an author and a work, maybe we also have a subset of the work
 		if psg == ['']:
@@ -471,7 +473,7 @@ def completeindex():
 			endline = startandstop['endline']
 
 		cdict = {wo.universalid: (startline, endline)}
-		unsortedoutput = buildindextowork(cdict, poll[ts], cur)
+		output = buildindextowork(cdict, poll[ts], useheadwords, cur)
 		allworks = []
 
 	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
@@ -480,7 +482,7 @@ def completeindex():
 		cdict = {}
 		for wkid in ao.listworkids():
 			cdict[wkid] = (workdict[wkid].starts, workdict[wkid].ends)
-		unsortedoutput = buildindextowork(cdict, poll[ts], cur)
+		output = buildindextowork(cdict, poll[ts], useheadwords, cur)
 
 		allworks = []
 		for w in ao.listofworks:
@@ -489,18 +491,16 @@ def completeindex():
 
 	else:
 		# we do not have a valid selection
-		unsortedoutput = []
+		output = []
 		allworks = []
 
 	# get ready to send stuff to the page
-	poll[ts].statusis('Sorting the index items')
-	output = indexdictsorter(unsortedoutput)
 	count = len(output)
 	locale.setlocale(locale.LC_ALL, 'en_US')
 	count = locale.format("%d", count, grouping=True)
 
 	poll[ts].statusis('Preparing the index HTML')
-	indexhtml = wordindextohtmltable(output)
+	indexhtml = wordindextohtmltable(output, useheadwords)
 
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)

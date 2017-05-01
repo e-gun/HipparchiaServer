@@ -149,6 +149,11 @@ body {
 	font-style: italic;
 	}
 
+.homonym {
+    color: #555;
+    font-style: italic;
+	}
+
 .infocell {
 	vertical-align: top;
 	}

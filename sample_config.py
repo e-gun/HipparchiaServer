@@ -72,6 +72,10 @@ WORKERS = 3
 #   will give you 3 words tagged 'mech' whose weight will be 390506.33x as great as any individual word in a historian.
 # COLLAPSEDGENRECOUNTS will bundle things like 'apocal' and 'theol' under 'allrelig' when counting
 # AVOIDCIRCLEDLETTERS if you have trouble displaying Ⓖ, etc.
+# INDEXBYHEADWORDS will tell the indexer to aggregate words under their dictionary headword;
+#   *exceptionally* slow and *many* homonymn issues, unparsed words, etc.
+#   you probably don't want to enable this unless you are ready to wrestle with the results
+
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 TLGASSUMESBETACODE = 'yes'
 SHOWLINENUMBERSEVERY = 10
@@ -86,6 +90,7 @@ EXCLUDEMINORGENRECOUNTS='yes'
 COLLAPSEDGENRECOUNTS='yes'
 NUMBEROFGENRESTOTRACK = 8
 AVOIDCIRCLEDLETTERS='no'
+INDEXBYHEADWORDS = False
 
 
 ### [7] the default settings for various 'session' items ###

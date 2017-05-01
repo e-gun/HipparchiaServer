@@ -23,7 +23,7 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 
 	:param word:
 	:param usedictionary:
-	:return:
+	:return: dbMorphologyObject
 	"""
 
 	trialnumber += 1
