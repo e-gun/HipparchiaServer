@@ -649,7 +649,7 @@ class MorphPossibilityObject(object):
 		return xreflist
 
 	def amgreek(self):
-		minimumgreek = re.compile(r'[άέίόύήώᾶῖῦῆῶὁἄἔἴὄὔἤὤᾅᾕᾥᾄᾔᾤα-ω]')
+		minimumgreek = re.compile(r'[άέίόύήώᾶῖῦῆῶὁἄἔἴὄὔἤὤᾅᾕᾥᾄᾔᾤἅἕὅἆὡἦὗὦα-ω]')
 		if re.search(minimumgreek,self.entry):
 			return True
 		else:

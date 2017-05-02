@@ -150,7 +150,7 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 		try:
 			wkid = searchlist.pop()
 			activepoll.remain(len(searchlist))
-		except:
+		except IndexError:
 			wkid = 'gr0000w000'
 			
 		if wkid != 'gr0000w000':

@@ -73,7 +73,7 @@ WORKERS = 3
 # COLLAPSEDGENRECOUNTS will bundle things like 'apocal' and 'theol' under 'allrelig' when counting
 # AVOIDCIRCLEDLETTERS if you have trouble displaying Ⓖ, etc.
 # INDEXBYHEADWORDS will tell the indexer to aggregate words under their dictionary headword;
-#   *exceptionally* slow and *many* homonymn issues, unparsed words, etc.
+#   *many* homonymn issues, unparsed words, etc.
 #   you probably don't want to enable this unless you are ready to wrestle with the results
 
 CSSSTYLESHEET = '/static/hipparchia_styles.css'

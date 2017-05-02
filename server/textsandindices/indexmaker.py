@@ -7,10 +7,12 @@
 """
 
 import re
+from multiprocessing import Manager, Process
 from multiprocessing import Pool
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
+from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, setconnection
+from server.hipparchiaclasses import MPCounter
 from server.lexica.lexicalookups import lookformorphologymatches
 from server.listsandsession.listmanagement import polytonicsort
 from server.textsandindices.textandindiceshelperfunctions import dictmerger, cleanindexwords
@@ -102,26 +104,41 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 
 	if headwords:
 		augmentedindexdict = {}
+
+		# [a] find the morphologyobjects needed
 		remaining = len(completeindexdict)
-		activepoll.statusis('Assigning headwords to entries')
+		activepoll.statusis('Finding headwords for entries')
 		activepoll.notes = ''
 		activepoll.allworkis(remaining)
 
-		# [a] find the baseforms
+		manager = Manager()
+		commitcount = MPCounter()
+		terms = manager.list(completeindexdict.keys())
+		morphobjects = manager.dict()
+		workers = hipparchia.config['WORKERS']
+
+		jobs = [Process(target=mpmorphology, args=(terms, morphobjects, activepoll, commitcount))
+		        for i in range(workers)]
+		for j in jobs: j.start()
+		for j in jobs: j.join()
+
+		activepoll.statusis('Assigning headwords to entries')
+		activepoll.allworkis(remaining)
+
+		# [b] find the baseforms
 		for k in completeindexdict.keys():
 			remaining -= 1
 			activepoll.remain(remaining)
 
-			if re.search('[a-z]',k):
-				usedict = 'latin'
-			else:
-				usedict = 'greek'
-
-			mo = lookformorphologymatches(k, usedict, cursor)
+			try:
+				mo = morphobjects[k]
+			except KeyError:
+				mo = None
 
 			if mo:
 				if mo.countpossible() > 1:
-					parsed = list(set(['{bf} ({tr})'.format(bf=p.getbaseform(), tr=p.gettranslation()) for p in mo.getpossible()]))
+					# parsed = list(set(['{bf} ({tr})'.format(bf=p.getbaseform(), tr=p.gettranslation()) for p in mo.getpossible()]))
+					parsed = list(set(['{bf}'.format(bf=p.getbaseform()) for p in mo.getpossible()]))
 					# cut the blanks
 					parsed = [re.sub(r' \( \)','',p) for p in parsed]
 					if len(parsed) == 1:
@@ -142,8 +159,9 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		# regis {'baseforms': ['rex', 'rego (to keep straight)'], 'homonyms': 2, 'loci': [('lt2300w001', 7, '1.6')]}
 		# qui {'baseforms': ['qui¹', 'quis²', 'quis¹', 'qui²'], 'homonyms': 4, 'loci': [('lt2300w001', 7, '1.6'), ('lt2300w001', 4, '1.3')]}
 
-		# [b] remap under the headwords you found
+		# [c] remap under the headwords you found
 
+		activepoll.allworkis(-1)
 		headwordindexdict = {}
 
 		for observed in augmentedindexdict.keys():
@@ -211,6 +229,39 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 
 	return sortedoutput
 
+
+def mpmorphology(terms, morphobjects, activepoll, commitcount):
+
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
+
+	while terms:
+		try:
+			t = terms.pop()
+			activepoll.remain = len(terms)
+		except IndexError:
+			t = None
+
+		if t:
+			if re.search('[a-z]', t):
+				usedict = 'latin'
+			else:
+				usedict = 'greek'
+
+			mo = lookformorphologymatches(t, usedict, curs)
+
+			if mo:
+				morphobjects[t] = mo
+			else:
+				morphobjects[t] = None
+
+		commitcount.increment()
+		if commitcount.value % 400 == 0:
+			dbconnection.commit()
+
+	dbconnection.commit()
+
+	return morphobjects
 
 def htmlifysimpleindex(completeindexdict, onework):
 	"""
