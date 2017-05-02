@@ -20,6 +20,8 @@ key features:
 			reset sessions to configurable defaults
 		search syntax
 			search with or without polytonic accents
+    			type accented words to make the search sensitive to accents
+    			type unaccented words and the search is not sensitive to accents
 			wildcard searching via regular expressions
 			phrase searching: "κατὰ τὸ ψήφιϲμα", etc.
 			proximity searching:
@@ -104,6 +106,7 @@ minimum software requirements:
             flask
             psycopg2
             bs4
+            websockets
         postgresql9.5
 
     to properly interact with HipparchiaServer via a browser
