@@ -5,15 +5,11 @@
     <div id="insisactive" title="Inscriptions corpus I is active"><span class="activeoption">{{clab['i']}}</span></div>
     <div id="chrisactive" title="Inscriptions corpus II is active"><span class="activeoption">{{clab['c']}}</span></div>
     <br />
-    <div id="accentsactive" title="Accents matter"><span class="activeoption">ώ</span></div>
-    <div id="accentsnotactive" title="Accents do not matter"><span class="activeoption">ω</span></div>
     <div id="onehitistrue" title="Matches limited to one per work"><span class="activeoption">⑴</span></div>
     <div id="onehitisfalse" title="Unlimited matches per work"></div>
 </div>
 
 <script>
-    $('#accentsactive').hide();
-    $('#accentsnotactive').hide();
     $('#onehitistrue').hide();
     $('#onehitisfalse').hide();
     $('#grkisactive').hide();
@@ -21,7 +17,6 @@
     $('#ddpisactive').hide();
     $('#insisactive').hide();
     $('#chrisactive').hide();
-    {% if accents == 'yes' %} $('#accentsactive').show();  {% else %} $('#accentsnotactive').show(); {% endif %}
     {% if onehit == 'yes' %} $('#onehitistrue').show();  {% else %} $('#onehitisfalse').show(); {% endif %}
     {% for corpus in activecorpora %}
         {% if corpus == 'greekcorpus' %} $('#grkisactive').show(); {% endif %}
