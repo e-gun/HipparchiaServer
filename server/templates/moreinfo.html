@@ -732,10 +732,8 @@ wordcounts
             spellings of <span class="lat">conlaudare</span>.</li>
         <li><code>.</code> any character: <code>laud.nt</code> will find <span class="lat">laudant</span>, <span class="lat">laudent</span>,
             and, theoretically, <span class="lat">laudZnt</span></li>
-        <li><code>\w</code> is any 'word' character and is roughly equivalent to <code>[a-z]</code>. Sadly <code>\w</code>
-        will only cover Latin letters and not Greek ones. <code>[αβψδεφγηιξκλμνοπρϲτυωχθζ]</code> is not so hot as an alternative, either.
-            The search box is pretty small, after all. But you can indeed find <code>τὸ μὲν εὖ</code>, <code>γε μὲν δὴ</code> and
-            <code>τῇ μὲν ἐν</code> via <code> [αβψδεφγηιξκλμνοπρϲτυωχθζ][αβψδεφγηιξκλμνοπρϲτυωχθζ] μεν [αβψδεφγηιξκλμνοπρϲτυωχθζ][αβψδεφγηιξκλμνοπρϲτυωχθζ] </code></li>
+        <li><code>\w</code> is any 'word' character and is roughly equivalent to <code>[a-z]</code>. <code>\w</code> will also find any unaccented
+        letter in the Greek alphabet: α, β, γ, ...</li>
         <li><code>\s</code> whitespace: <code>\ssed\setiam\s</code> is a search for <code>' sed etiam '</code>.
     </ul>
     Here are some examples that give you an idea of the sort of things that are possible. But major caveats follow.
@@ -745,10 +743,10 @@ wordcounts
             Your results will be <span class="lat">heres ei extitit Titius</span>; and <span class="lat">nec diu restitit: tota...</span>
             Note that the whitespace between <span class="lat">extitit</span> and <span class="lat">Titius</span> qualified
             as 'anything' in the first match. But you might have composed the search with something else in mind.</li>
-        <li><code>\s..$</code> could find all verses of Homer that end with a two letter word.<span class="emph">[*]</span></li>
+        <li><code>\s..$</code> could find all verses of Homer that end with a two letter word. Matches include τε, δέ, δῶ, and ὣϲ.</li>
         <li><code>^[^αειουηω][^\s]\s</code> could find all verses of Homer that begin with a two letter word that does not itself start with
-            a vowel.<span class="emph">[*]</span>
-            Matches include: βῆ, μή, ϲῷ, τῇ, and τῷ. Unfortunately matches also include —※. That is, the editorial marks count as part
+            a vowel.
+            Matches include βῆ, μή, ϲῷ, τῇ, and τῷ. Unfortunately matches also include —※. That is, the editorial marks count as part
             of the start of the line.
             The same search is a problem in dramatists for a similar reason. Punctuation is stripped out of
             the searchable columns and that means that speakers like 'ΚΗ.' and 'ΔΙ.' become 'κη' and 'δι'. They will match the pattern.
@@ -761,25 +759,23 @@ wordcounts
             <span class="lat">sollicito animo an</span> and <span class="lat">aequissimo animo ad</span>
         </li>
         <li><code>\sζ[^\s]*?ζ[^\s]*?ουσ</code> will find all words that start with a ζ and then have another ζ internally and
-            then have ουσ still later on. ζυμίζουϲα, ζιζανιώδουϲ, and Ζήζουϲ are all matches.<span class="emph">[*]</span>
+            then have ουσ still later on. ζυμίζουϲα, ζιζανιώδουϲ, and Ζήζουϲ are all matches.
         </li>
         <li><code>\snon solum\s(\w*?)\ssed etiam</code> will find all places where
             <span class="lat">non solum... sed etiam...</span> bracket just a single word.</li>
     </ul>
-    <span class="emph">[*]</span>[Note: the automatic betacode feature will turn <code>\s</code> into <code>\ϲ</code>. so You can only execute
-            this search on the Greek authors if you have some other corpus turned on too. Alternately you can just turn the feature off.
-            Do this by setting
-            <code>TLGASSUMESBETACODE = 'no'</code> in <code>config.py</code>.]
-    <br />
     <br />
     Unfortunately a lot of swanky heavy duty regex searches with lookaheads and conditionals do not make sense: the DB is organized as a collection of 'lines'.
     A search like
     <code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> probably makes the most sense in the context of verse authors. This is because
     <span class="emph">your regex (typically) cannot look outside of a single database line</span>. The sort of multi-line searching via
     regex that one might do in a flat text file will fail to find all occurrences of the expression.
+    But this can find things like "τὼ δέ οἱ οὔ" and "δὲ μή τί με" in Homer.
+    [NB: if you have <code>TLGASSUMESBETACODE</code> set to "yes" and only the Greek corpus active, then your seach will "magically" turn into
+    <code>\ϲ\ὼὼϲ\ὼὼϲ\ὼὼϲ\ὼὼϲ</code>. Either change your settings or add a corpus to dodge this issue.]
     <br />
     <br />
-    What <span class="emph">typically</span> really means in that notice above. A "phrase search" will open up a three line window and can catch multi-line runs:
+    What <span class="emph">typically</span> really means in that notice above is this: a "phrase search" will open up a three line window and can catch multi-line runs:
     "<code> \w\w in \w\w </code>" will look for <code>[two letter word] + in + [two letter word]</code>.
     And it will indeed find Cicero, In Verrem 2.4.75.10-11 where the lines end and begin with: <code>nihil se | in eo potestatis</code>.
     However if your complex regex does not trigger the phrase search mechanism (by including a whitespace), then the
