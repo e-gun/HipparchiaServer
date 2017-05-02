@@ -12,6 +12,7 @@ SECRET_KEY = 'yourkeyhereitshouldbelongandlooklikecryptographicgobbledygook'
 
 ### [2] network values ###
 ##  [only change these if you know why you are doing it: presumably you have a firewall problem] ##
+##  LISTENINGADDRESS sets the interface to listen on; '0.0.0.0' is 'all'
 ##  MYEXTERNALIPADDRESS needs to be set if you are going to view polls remotely
 ##  FLASKSERVEDFROMPORT is the port flask will serve from
 ##  FLASKSEENATPORT might diverge from this if you are feeding flask through uWSGI + nginx
@@ -20,6 +21,7 @@ FLASKSEENATPORT = 5000
 PROGRESSPOLLDEFAULTPORT = 5010
 PROGRESSPOLLMAXPORT = 5001
 PROGRESSPOLLMINPORT = 5016
+LISTENINGADDRESS = '127.0.0.1'
 MYEXTERNALIPADDRESS = '127.0.0.1'
 
 
@@ -71,6 +73,7 @@ WORKERS = 3
 #   this is more or less *essential* if you are dealing with Latin words since the editoral inserions in minor Greek genres
 #   will give you 3 words tagged 'mech' whose weight will be 390506.33x as great as any individual word in a historian.
 # COLLAPSEDGENRECOUNTS will bundle things like 'apocal' and 'theol' under 'allrelig' when counting
+# NUMBEROFGENRESTOTRACK affects how many relative genre weight counts you will see
 # AVOIDCIRCLEDLETTERS if you have trouble displaying Ⓖ, etc.
 # INDEXBYHEADWORDS will tell the indexer to aggregate words under their dictionary headword;
 #   *many* homonymn issues, unparsed words, etc.

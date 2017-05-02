@@ -11,4 +11,4 @@ from server import hipparchia
 
 if __name__ == '__main__':
 
-	hipparchia.run(threaded=True, host="0.0.0.0", port=hipparchia.config['FLASKSERVEDFROMPORT'])
+	hipparchia.run(threaded=True, host=hipparchia.config['LISTENINGADDRESS'], port=hipparchia.config['FLASKSERVEDFROMPORT'])
