@@ -39,7 +39,6 @@ def sessionvariables():
 		session['inscriptioncorpus'] = hipparchia.config['DEFAULTINSCRIPTIONCORPUSVALUE']
 		session['papyruscorpus'] = hipparchia.config['DEFAULTPAPYRUSCORPUSVALUE']
 		session['christiancorpus'] = hipparchia.config['DEFAULTCHRISTIANCORPUSVALUE']
-		session['accentsmatter'] = hipparchia.config['DEFAULTACCENTSMATTER']
 		session['proximity'] = '1'
 		session['nearornot'] = 'T'
 		session['searchscope'] = 'L'
@@ -68,7 +67,6 @@ def modifysessionvar(param,val):
 	"""
 
 	availableoptions = [
-		'accentsmatter',
 		'proximity',
 		'searchscope',
 		'maxresults',
@@ -94,7 +92,7 @@ def modifysessionvar(param,val):
 		# print('param = val:',param,session[param])
 
 	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
-				   'varia', 'incerta', 'spuria', 'accentsmatter', 'onehit']:
+				   'varia', 'incerta', 'spuria', 'onehit']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 
@@ -202,7 +200,7 @@ def parsejscookie(cookiestring):
 	a shame this has to be written
 	
 	example cookies:
-		{%22searchsyntax%22:%22R%22%2C%22linesofcontext%22:6%2C%22agnselections%22:[%22Alchemistae%22%2C%22Biographi%22]%2C%22corpora%22:%22G%22%2C%22proximity%22:%221%22%2C%22sortorder%22:%22shortname%22%2C%22maxresults%22:%22250%22%2C%22auselections%22:[%22gr0116%22%2C%22gr0199%22]%2C%22xmission%22:%22Any%22%2C%22browsercontext%22:%2220%22%2C%22accentsmatter%22:%22N%22%2C%22latestdate%22:%221500%22%2C%22psgselections%22:[]%2C%22searchscope%22:%22L%22%2C%22wkselections%22:[%22gr1908w003%22%2C%22gr2612w001%22]%2C%22authenticity%22:%22Any%22%2C%22earliestdate%22:%22-850%22%2C%22wkgnselections%22:[%22Caten.%22%2C%22Doxogr.%22]}	:return:
+		{%22searchsyntax%22:%22R%22%2C%22linesofcontext%22:6%2C%22agnselections%22:[%22Alchemistae%22%2C%22Biographi%22]%2C%22corpora%22:%22G%22%2C%22proximity%22:%221%22%2C%22sortorder%22:%22shortname%22%2C%22maxresults%22:%22250%22%2C%22auselections%22:[%22gr0116%22%2C%22gr0199%22]%2C%22xmission%22:%22Any%22%2C%22browsercontext%22:%2220%22%2C%22latestdate%22:%221500%22%2C%22psgselections%22:[]%2C%22searchscope%22:%22L%22%2C%22wkselections%22:[%22gr1908w003%22%2C%22gr2612w001%22]%2C%22authenticity%22:%22Any%22%2C%22earliestdate%22:%22-850%22%2C%22wkgnselections%22:[%22Caten.%22%2C%22Doxogr.%22]}	:return:
 	"""
 	try:
 		cookiestring = cookiestring[1:-1]

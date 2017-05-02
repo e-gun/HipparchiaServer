@@ -83,7 +83,8 @@ def frontpage():
 	versionchecking(activelists, expectedsqltemplateversion)
 
 	# check to see which dbs we search by default
-	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus'] if session[c] == 'yes']
+	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
+	                 if session[c] == 'yes']
 
 	if hipparchia.config['AVOIDCIRCLEDLETTERS'] != 'yes':
 		corporalabels = {'g': 'Ⓖ', 'l': 'Ⓛ', 'd': 'Ⓓ', 'i': 'Ⓘ', 'c': 'Ⓒ'}
@@ -91,7 +92,7 @@ def frontpage():
 		corporalabels = {'g': 'G', 'l': 'L', 'd': 'D', 'i': 'I', 'c': 'C'}
 
 	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora, clab=corporalabels,
-						   accents=session['accentsmatter'], onehit=session['onehit'], css=stylesheet)
+						   onehit=session['onehit'], css=stylesheet)
 
 	return page
 
@@ -170,7 +171,7 @@ def executesearch(timestamp):
 	poll[ts].activate()
 	poll[ts].statusis('Preparing to search')
 
-	# a search can take 30s or more and the user might alter the session while the search is running by toggling accentsmatter, etc
+	# a search can take 30s or more and the user might alter the session while the search is running by toggling onehit, etc
 	# that can be a problem, so freeze the values now and rely on this instead of some moving target
 	frozensession = session.copy()
 
