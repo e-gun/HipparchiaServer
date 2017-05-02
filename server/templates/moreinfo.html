@@ -624,7 +624,8 @@ wordcounts
 
     Hipparchia stores three versions of every line: a formatted version (which includes information about font display, etc.),
     a version with accented words only, and a version of accentless words only.
-    The actual searches are executed on the words only versions.
+    The actual searches are executed on the words-only versions. If you type accented Greek or Latin, your search will be sensitive to accents.
+    If you type unaccented words, then the search is indifferent to accents.
 
     <ul class="forexample">
         <li>formatted: <code>Μῆνιν ἄειδε θεὰ Πηληϊάδεω Ἀχιλῆοϲ</code></li>
@@ -646,7 +647,7 @@ wordcounts
     surprising that αχιληοϲ finds Ἀχιλῆοϲ in an unaccented search. But it is worth noting that all searches are themselves made
     lower case: ΑΧΙΛΗΟΣ will also find Ἀχιλῆοϲ.
 
-    <p><span class="label">Latin vs "accents matter"</span></p>
+    <p><span class="label">Latin vs accents</span></p>
 
     You almost certainly want to avoid accented searches in the Latin authors unless you are willing to deal with the
     <code>v</code> vs <code>u</code> problem. Every v is a u in the unaccented data. Similarly every j is an i. This means that the extremely
@@ -655,8 +656,7 @@ wordcounts
     regex cheat sheet handy: either <code>(v|u)</code> or <code>[uv]</code> will ignore the difference between
     u and v. Similarly <code>[jiJI]</code> will allow you to find both <code>Justitia</code> and <code>iustitia</code>. There are only
     3 Js in the LAT data: Juppiter manifests himself thrice in Cicero's <span class="italic">De Officiis</span>, if you must know. But
-    the inscriptions are fairly liberal with their deployment of <code>ejus</code> and <code>jussit</code>. If you turn on "accents matter",
-    then these issues matter to you as well.
+    the inscriptions are fairly liberal with their deployment of <code>ejus</code> and <code>jussit</code>.
 
     <p><span class="label">Automatic betacode</span></p>
 
@@ -671,9 +671,9 @@ wordcounts
 
     <p><span class="label">Iota subscript and adscript</span></p>
 
-    Hipparchia distinguishes between ἀ, ᾀ, ᾶ, ᾷ, ᾳ, and so forth in the searches wehre accents matter. But it has no way of
+    Hipparchia distinguishes between ἀ, ᾀ, ᾶ, ᾷ, ᾳ, and so forth in the searches where accents matter. But it has no built-in way of
     figuring out the difference between a subscript and an adscript. If a text prints ᾶι instead of ᾷ, a search for ᾷ
-    will not yield the results you wanted.
+    will not yield the results you wanted. You would need to search for <code>(ᾶι|ᾷ)</code> to catch both possibilities.
     <br />
     <br />
     If you say that accents do not matter, then all iota subscripts become meaningless: ᾷ is α. This also means that
