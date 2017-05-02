@@ -41,17 +41,6 @@ function loadoptions() {
         $('#browserspinner').spinner('value', data.browsercontext);
         $('#sortresults').val(data.sortorder);
         $('#sortresults').selectmenu('refresh');
-        if (data.accentsmatter == 'no') {
-            $('#accentsmatter_y').prop('checked', false);
-            $('#accentsmatter_n').prop('checked', true);
-            $('#accentsnotactive').show();
-            $('#accentsactive').hide();
-            } else {
-            $('#accentsmatter_y').prop('checked', true);
-            $('#accentsmatter_n').prop('checked', false);
-            $('#accentsactive').show();
-            $('#accentsnotactive').hide();
-            }
         if (data.onehit == 'no') {
             $('#onehit_y').prop('checked', false);
             $('#onehit_n').prop('checked', true);
@@ -261,9 +250,6 @@ function setoptions(sessionvar,value){
 	    }
 	    });
 }
-
-$('#accentsmatter_y').click( function(){ setoptions('accentsmatter', 'yes'); $('#accentsactive').show(); $('#accentsnotactive').hide(); });
-$('#accentsmatter_n').click( function(){ setoptions('accentsmatter', 'no'); $('#accentsnotactive').show(); $('#accentsactive').hide(); });
 
 $('#onehit_y').click( function(){ setoptions('onehit', 'yes'); $('#onehitistrue').show(); $('#onehitisfalse').hide(); });
 $('#onehit_n').click( function(){ setoptions('onehit', 'no'); $('#onehitisfalse').show(); $('#onehitistrue').hide(); });
