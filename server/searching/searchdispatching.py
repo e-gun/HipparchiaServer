@@ -16,7 +16,7 @@ from server.lexica.lexicalookups import findcountsviawordcountstable
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, findleastcommonterm, \
-	massagesearchtermsforwhitespace, searchtermcharactersubstitutions, findleastcommontermcount
+	massagesearchtermsforwhitespace, findleastcommontermcount
 
 
 def searchdispatcher(searchobject, activepoll):
@@ -40,8 +40,6 @@ def searchdispatcher(searchobject, activepoll):
 	# lunate sigmas / UV / JI issues
 	unomdifiedskg = searchingfor
 	unmodifiedprx = so.proximate
-	so.termone = searchtermcharactersubstitutions(searchingfor)
-	so.termtwo = searchtermcharactersubstitutions(so.proximate)
 
 	activepoll.statusis('Loading the the dispatcher...')
 

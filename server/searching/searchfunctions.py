@@ -43,26 +43,6 @@ def cleaninitialquery(seeking):
 	return seeking
 
 
-def searchtermcharactersubstitutions(searchterm):
-	"""
-	turn sigma into lunate sigma, etc
-	:param searchterm:
-	:return:
-	"""
-
-	searchterm = re.sub('σ|ς', 'ϲ', searchterm)
-	if session['accentsmatter'] == 'no':
-		searchterm = re.sub('v', 'u', searchterm)
-		searchterm = re.sub('j', 'i', searchterm)
-
-	# possible, but not esp. desirable:
-	# seeking = re.sub('VvUu', '(u|v|U|v)', seeking)
-
-	searchterm = searchterm.lower()
-
-	return searchterm
-
-
 def massagesearchtermsforwhitespace(query):
 	"""
 
@@ -167,9 +147,9 @@ def simplesearchworkwithexclusion(seeking, workdbname, searchobject, cursor, tem
 	if templimit:
 		lim = str(templimit)
 	else:
-		lim = str(s.cap)
+		lim = str(so.cap)
 
-	if s.onehit:
+	if so.onehit:
 		mylimit = ' LIMIT 1'
 	else:
 		mylimit = ' LIMIT ' + lim
@@ -447,3 +427,24 @@ def dblooknear(index, distanceinlines, secondterm, workid, usecolumn, cursor):
 		return True
 	else:
 		return False
+
+# slated for removal
+
+def zzsearchtermcharactersubstitutions(searchterm):
+	"""
+	turn sigma into lunate sigma, etc
+	:param searchterm:
+	:return:
+	"""
+
+	searchterm = re.sub('σ|ς', 'ϲ', searchterm)
+	if session['accentsmatter'] == 'no':
+		searchterm = re.sub('v', 'u', searchterm)
+		searchterm = re.sub('j', 'i', searchterm)
+
+	# possible, but not esp. desirable:
+	# seeking = re.sub('VvUu', '(u|v|U|v)', seeking)
+
+	searchterm = searchterm.lower()
+
+	return searchterm

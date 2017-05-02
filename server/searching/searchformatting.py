@@ -16,7 +16,6 @@ from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, setconnection
 from server.formattinghelperfunctions import formatpublicationinfo
 from server.hipparchiaclasses import FormattedSearchResult
-from server.searching.searchfunctions import searchtermcharactersubstitutions
 
 
 def highlightsearchterm(lineobject, searchterm, spanname):
@@ -98,37 +97,6 @@ def highlightsearchterm(lineobject, searchterm, spanname):
 		# print('nofind',accentedsearch, line, lineobject.lastword('contents'))
 
 	return newline
-
-
-def aggregatelines(firstline, lastline, cursor, audbname):
-	"""
-	build searchable clumps of words spread over various lines
-
-	:param firstline:
-	:param lastline:
-	:param cursor:
-	:param workdbname:
-	:return:
-	"""
-
-	# transitional until all code is 'monolithic'
-	audbname = audbname[0:6]
-
-	query = 'SELECT * FROM {au} WHERE index >= %s AND index <= %s'.format(au=audbname)
-	data = (firstline, lastline)
-	cursor.execute(query, data)
-	lines = cursor.fetchall()
-
-	lineobjects = [dblineintolineobject(l) for l in lines]
-
-	if session['accentsmatter'] == 'yes':
-		aggregate = ' '.join([l.polytonic for l in lineobjects])
-	else:
-		aggregate = ' '.join([l.stripped for l in lineobjects])
-
-	aggregate = re.sub(r'\s\s', r' ', aggregate)
-
-	return aggregate
 
 
 def formatauthinfo(authorobject):
@@ -396,8 +364,7 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 			foundline.accented = '<span class="highlight">{fla}</span>'.format(fla=foundline.accented)
 		if proximate != '' and searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(searchtermcharactersubstitutions(proximate), foundline.accented) or re.search(
-					searchtermcharactersubstitutions(proximate), foundline.stripped):
+			if re.search(proximate, foundline.accented) or re.search(proximate, foundline.stripped):
 				foundline.accented = highlightsearchterm(foundline, proximate, 'proximate')
 		citationincontext.lineobjects.append(foundline)
 
@@ -485,8 +452,7 @@ def nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, 
 		lineobject.accented = highlightsearchterm(lineobject, seeking, 'match')
 		if proximate != '' and searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(searchtermcharactersubstitutions(proximate), lineobject.accented) or re.search(
-					searchtermcharactersubstitutions(proximate), lineobject.stripped):
+			if re.search(proximate, lineobject.accented) or re.search(proximate, lineobject.stripped):
 				lineobject.accented = highlightsearchterm(lineobject, proximate, 'proximate')
 
 		searchresultobjects.append(FormattedSearchResult(i+1, name, workobject.title, citation, lineobject.universalid, [lineobject]))
@@ -545,3 +511,34 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 
 	return html
 
+# unused? slated for deletion
+
+def aggregatelines(firstline, lastline, cursor, audbname):
+	"""
+	build searchable clumps of words spread over various lines
+
+	:param firstline:
+	:param lastline:
+	:param cursor:
+	:param workdbname:
+	:return:
+	"""
+
+	# transitional until all code is 'monolithic'
+	audbname = audbname[0:6]
+
+	query = 'SELECT * FROM {au} WHERE index >= %s AND index <= %s'.format(au=audbname)
+	data = (firstline, lastline)
+	cursor.execute(query, data)
+	lines = cursor.fetchall()
+
+	lineobjects = [dblineintolineobject(l) for l in lines]
+
+	if session['accentsmatter'] == 'yes':
+		aggregate = ' '.join([l.polytonic for l in lineobjects])
+	else:
+		aggregate = ' '.join([l.stripped for l in lineobjects])
+
+	aggregate = re.sub(r'\s\s', r' ', aggregate)
+
+	return aggregate

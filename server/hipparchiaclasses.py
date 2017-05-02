@@ -649,7 +649,7 @@ class MorphPossibilityObject(object):
 		return xreflist
 
 	def amgreek(self):
-		minimumgreek = re.compile(r'[άέίόύήώᾶῖῦῆῶὁἄἔἴὄὔἤὤᾅᾕᾥᾄᾔᾤἅἕὅἆὡἦὗὦα-ω]')
+		minimumgreek = re.compile(r'[άέίόύήώᾶῖῦῆῶὁἄἔἴὄὔἤὤᾅᾕᾥᾄᾔᾤἅἕὅἆὡἦὗὦᾗα-ω]')
 		if re.search(minimumgreek,self.entry):
 			return True
 		else:
@@ -1331,8 +1331,35 @@ class SearchObject(object):
 
 	def __init__(self, ts, seeking, proximate, frozensession):
 		self.ts = ts
+
+		self.originalseeking = seeking
+		self.originalproximate = proximate
+
+		# searchtermcharactersubstitutions() logic has moved here
+
+		seeking = re.sub('σ|ς', 'ϲ', seeking)
+		proximate = re.sub('σ|ς', 'ϲ', proximate)
+
 		self.seeking = seeking
 		self.proximate = proximate
+
+		# session['accentsmatter'] logic has been transferred to here
+
+		accented = '[äëïöüâêîôûàèìòùáéíóúᾂᾒᾢᾃᾓᾣᾄᾔᾤᾅᾕᾥᾆᾖᾦᾇᾗᾧἂἒἲὂὒἢὢἃἓἳὃὓἣὣἄἔἴὄὔἤὤἅἕἵὅὕἥὥἆἶὖἦὦἇἷὗἧὧᾲῂῲᾴῄῴᾷῇῷᾀᾐᾠᾁᾑᾡῒῢΐΰῧἀἐἰὀὐἠὠῤἁἑἱὁὑἡὡῥὰὲὶὸὺὴὼάέίόύήώᾶῖῦῆῶϊϋ]'
+
+		if re.search(accented, self.seeking) or re.search(accented, self.proximate):
+			# alternate:
+			#   if frozensession['accentsmatter'] == 'yes':
+			self.accented = True
+		else:
+			self.accented = False
+
+		if not self.accented:
+			self.seeking = re.sub('v', 'u', self.seeking)
+			self.seeking = re.sub('j', 'i', self.seeking)
+			self.proximate = re.sub('v', 'u', self.seeking)
+			self.proximate = re.sub('j', 'i', self.seeking)
+
 		self.session = frozensession
 		self.proximity = frozensession['proximity']
 		self.psgselections = frozensession['psgselections']
@@ -1354,6 +1381,13 @@ class SearchObject(object):
 		self.authorandworklist = []
 		self.authorswhere = {}
 
+		if self.accented:
+			self.usecolumn = 'accented_line'
+			self.usewordlist = 'polytonic'
+		else:
+			self.usecolumn = 'stripped_line'
+			self.usewordlist = 'stripped'
+
 		if frozensession['searchscope'] == 'W':
 			self.scope = 'words'
 		else:
@@ -1366,15 +1400,6 @@ class SearchObject(object):
 			self.near = False
 			self.nearstr = ' not'
 
-		if frozensession['accentsmatter'] == 'yes':
-			self.accented = True
-			self.usecolumn = 'accented_line'
-			self.usewordlist = 'polytonic'
-		else:
-			self.accented = False
-			self.usecolumn = 'stripped_line'
-			self.usewordlist = 'stripped'
-
 		self.cap = int(frozensession['maxresults'])
 
 		if frozensession['onehit'] == 'yes':
@@ -1383,3 +1408,4 @@ class SearchObject(object):
 			self.onehit = False
 
 		self.distance = int(frozensession['proximity'])
+

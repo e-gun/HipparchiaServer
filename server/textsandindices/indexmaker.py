@@ -161,6 +161,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 
 		# [c] remap under the headwords you found
 
+		activepoll.statusis('Remapping entries')
 		activepoll.allworkis(-1)
 		headwordindexdict = {}
 
