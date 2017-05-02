@@ -510,35 +510,3 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	html = '\n'.join(resultsashtml)
 
 	return html
-
-# unused? slated for deletion
-
-def aggregatelines(firstline, lastline, cursor, audbname):
-	"""
-	build searchable clumps of words spread over various lines
-
-	:param firstline:
-	:param lastline:
-	:param cursor:
-	:param workdbname:
-	:return:
-	"""
-
-	# transitional until all code is 'monolithic'
-	audbname = audbname[0:6]
-
-	query = 'SELECT * FROM {au} WHERE index >= %s AND index <= %s'.format(au=audbname)
-	data = (firstline, lastline)
-	cursor.execute(query, data)
-	lines = cursor.fetchall()
-
-	lineobjects = [dblineintolineobject(l) for l in lines]
-
-	if session['accentsmatter'] == 'yes':
-		aggregate = ' '.join([l.polytonic for l in lineobjects])
-	else:
-		aggregate = ' '.join([l.stripped for l in lineobjects])
-
-	aggregate = re.sub(r'\s\s', r' ', aggregate)
-
-	return aggregate
