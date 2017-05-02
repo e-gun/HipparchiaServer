@@ -1338,7 +1338,10 @@ class SearchObject(object):
 		# searchtermcharactersubstitutions() logic has moved here
 
 		seeking = re.sub('σ|ς', 'ϲ', seeking)
+		seeking = re.sub(r'\\ϲ', ' ', seeking)
 		proximate = re.sub('σ|ς', 'ϲ', proximate)
+		proximate = re.sub(r'\\ϲ', ' ', proximate)
+		# print ('seeking,proximate',seeking,proximate
 
 		self.seeking = seeking
 		self.proximate = proximate

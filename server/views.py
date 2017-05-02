@@ -155,13 +155,13 @@ def executesearch(timestamp):
 	dmin, dmax = bcedating()
 
 	if hipparchia.config['TLGASSUMESBETACODE'] == 'yes':
-		if justtlg() and re.search('[a-zA-Z]', seeking):
+		if justtlg() and re.search('[a-zA-Z]', seeking) and not re.search('[α-ω]', seeking):
 			# searching greek, but not typing in unicode greek: autoconvert
 			# papyri, inscriptions, and christian texts all contain multiple languages
 			seeking = seeking.upper()
 			seeking = replacegreekbetacode(seeking)
 
-		if justtlg() and re.search('[a-zA-Z]', proximate):
+		if justtlg() and re.search('[a-zA-Z]', proximate) and not re.search('[α-ω]', proximate):
 			proximate = proximate.upper()
 			proximate = replacegreekbetacode(proximate)
 
@@ -206,17 +206,17 @@ def executesearch(timestamp):
 
 		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
 			so.searchtype = 'simple'
-			thesearch = seeking
-			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=seeking)
+			thesearch = so.originalseeking
+			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=so.originalseeking)
 		elif re.search(phrasefinder, seeking):
 			so.searchtype = 'phrase'
-			thesearch = seeking
-			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=seeking)
+			thesearch = so.originalseeking
+			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=so.originalseeking)
 		else:
 			so.searchtype = 'proximity'
-			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.seeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximate)
+			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.originalseeking, ns=so.nearstr, sp=so.originalproximate, sc=so.scope, pr=so.proximate)
 			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'.format(
-				skg=seeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=proximate)
+				skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=proximate)
 
 		hits = searchdispatcher(so, poll[ts])
 		poll[ts].statusis('Putting the results in context')
@@ -224,9 +224,9 @@ def executesearch(timestamp):
 		# hits [<server.hipparchiaclasses.dbWorkLine object at 0x10d952da0>, <server.hipparchiaclasses.dbWorkLine object at 0x10d952c50>, ... ]
 		hitdict = sortresultslist(hits, authordict, workdict)
 		if so.context > 0:
-			allfound = mpresultformatter(hitdict, authordict, workdict, seeking, proximate, so.searchtype, poll[ts])
+			allfound = mpresultformatter(hitdict, authordict, workdict, so.seeking, so.proximate, so.searchtype, poll[ts])
 		else:
-			allfound = nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, so.searchtype, poll[ts])
+			allfound = nocontextresultformatter(hitdict, authordict, workdict, so.seeking, so.proximate, so.searchtype, poll[ts])
 
 		searchtime = time.time() - starttime
 		searchtime = round(searchtime, 2)
