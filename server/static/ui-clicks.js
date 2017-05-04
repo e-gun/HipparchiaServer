@@ -52,6 +52,17 @@ function loadoptions() {
             $('#onehitistrue').show();
             $('#onehitisfalse').hide();
             }
+        if (data.headwordindexing == 'no') {
+            $('#headwordindexing_y').prop('checked', false);
+            $('#headwordindexing_n').prop('checked', true);
+            $('#headwordindexinginactive').show();
+            $('#headwordindexingactive').hide();
+            } else {
+            $('#headwordindexing_y').prop('checked', true);
+            $('#headwordindexing_n').prop('checked', false);
+            $('#headwordindexingactive').show();
+            $('#headwordindexinginactive').hide();
+            }
         if (data.spuria == 'no') {
             $('#includespuria').prop('checked', false);
             } else {
@@ -250,6 +261,9 @@ function setoptions(sessionvar,value){
 	    }
 	    });
 }
+
+$('#headwordindexing_y').click( function(){ setoptions('headwordindexing', 'yes'); $('#headwordindexingactive').show(); $('#headwordindexinginactive').hide(); });
+$('#headwordindexing_n').click( function(){ setoptions('headwordindexing', 'no'); $('#headwordindexinginactive').show(); $('#headwordindexingactive').hide(); });
 
 $('#onehit_y').click( function(){ setoptions('onehit', 'yes'); $('#onehitistrue').show(); $('#onehitisfalse').hide(); });
 $('#onehit_n').click( function(){ setoptions('onehit', 'no'); $('#onehitisfalse').show(); $('#onehitistrue').hide(); });

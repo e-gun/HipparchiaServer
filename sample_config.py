@@ -75,9 +75,6 @@ WORKERS = 3
 # COLLAPSEDGENRECOUNTS will bundle things like 'apocal' and 'theol' under 'allrelig' when counting
 # NUMBEROFGENRESTOTRACK affects how many relative genre weight counts you will see
 # AVOIDCIRCLEDLETTERS if you have trouble displaying Ⓖ, etc.
-# INDEXBYHEADWORDS will tell the indexer to aggregate words under their dictionary headword;
-#   *many* homonymn issues, unparsed words, etc.
-#   you probably don't want to enable this unless you are ready to wrestle with the results
 
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 TLGASSUMESBETACODE = 'yes'
@@ -93,7 +90,6 @@ EXCLUDEMINORGENRECOUNTS='yes'
 COLLAPSEDGENRECOUNTS='yes'
 NUMBEROFGENRESTOTRACK = 8
 AVOIDCIRCLEDLETTERS='no'
-INDEXBYHEADWORDS = False
 
 
 ### [7] the default settings for various 'session' items ###
@@ -114,6 +110,7 @@ DEFAULTVARIA='yes'
 DEFAULTINCERTA='yes'
 DEFAULTSPURIA='yes'
 DEFAULTONEHIT='no'
+DEFAULTINDEXBYHEADWORDS = 'no'
 
 DEFAULTGREEKCORPUSVALUE = 'yes'
 DEFAULTLATINCORPUSVALUE = 'yes'

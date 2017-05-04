@@ -30,6 +30,13 @@
             <option value="universalid">ID Number</option>
         </select>
     </fieldset>
+        <fieldset>
+            <legend>Index by headword</legend>
+            <label for="headwordindexing_y">yes
+            <input type="radio" name="hwindex" id="headwordindexing_y" value="yes"></label>
+            <label for="headwordindexing_n">no
+            <input type="radio" name="hwindex" id="headwordindexing_n" value="no"></label>
+      </fieldset>
     <fieldset>
           <legend>Corpora to search</legend>
           {% for list in activelists %}

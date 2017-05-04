@@ -42,6 +42,7 @@ def sessionvariables():
 		session['proximity'] = '1'
 		session['nearornot'] = 'T'
 		session['searchscope'] = 'L'
+		session['headwordindexing'] = hipparchia.config['DEFAULTINDEXBYHEADWORDS']
 		session['linesofcontext'] = int(hipparchia.config['DEFAULTLINESOFCONTEXT'])
 		session['browsercontext'] = str(int(hipparchia.config['DEFAULTBROWSERLINES']))
 		session['maxresults'] = str(int(hipparchia.config['DEFAULTMAXRESULTS']))
@@ -84,7 +85,8 @@ def modifysessionvar(param,val):
 		'christiancorpus',
 		'varia',
 		'incerta',
-		'onehit'
+		'onehit',
+		'headwordindexing'
 		]
 
 	if param in availableoptions:
@@ -92,7 +94,7 @@ def modifysessionvar(param,val):
 		# print('param = val:',param,session[param])
 
 	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
-				   'varia', 'incerta', 'spuria', 'onehit']:
+				   'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 

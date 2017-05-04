@@ -20,7 +20,7 @@ from flask import render_template, redirect, request, url_for, session, send_fil
 
 from server.browsing.browserfunctions import getandformatbrowsercontext
 from server.calculatewordweights import findtemporalweights, findccorporaweights, findgeneraweights
-from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus,\
+from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus, \
 	perseusdelabeler
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking, \
 	perseusidmismatch, returnfirstlinenumber
@@ -29,14 +29,16 @@ from server.hipparchiaclasses import ProgressPoll, SearchObject
 from server.lexica.lexicaformatting import entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, \
 	lookformorphologymatches, getobservedwordprevalencedata, grablemmataobjectfor
-from server.listsandsession.listmanagement import dropdupes, polytonicsort, sortauthorandworklists, sortresultslist,\
+from server.listsandsession.listmanagement import dropdupes, polytonicsort, sortauthorandworklists, sortresultslist, \
 	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions, buildhintlist
 from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
-	sessionvariables, sessionselectionsashtml, rationalizeselections, justlatin, justtlg, reducetosessionselections, returnactivedbs
+	sessionvariables, sessionselectionsashtml, rationalizeselections, justlatin, justtlg, reducetosessionselections, \
+	returnactivedbs
 from server.loadglobaldicts import *
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.searching.searchdispatching import searchdispatcher
-from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, mpresultformatter, \
+from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, \
+	mpresultformatter, \
 	nocontextresultformatter, htmlifysearchfinds, nocontexthtmlifysearchfinds, jstoinjectintobrowser
 from server.searching.searchfunctions import cleaninitialquery
 from server.textsandindices.indexmaker import buildindextowork
@@ -457,7 +459,10 @@ def completeindex():
 	wo = req['workobject']
 	psg = req['passagelist']
 
-	useheadwords = hipparchia.config['INDEXBYHEADWORDS']
+	if session['headwordindexing'] == 'yes':
+		useheadwords = True
+	else:
+		useheadwords = False
 
 	if ao.universalid != 'gr0000' and wo.universalid != 'gr0000w000':
 		# we have both an author and a work, maybe we also have a subset of the work
