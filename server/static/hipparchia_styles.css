@@ -726,6 +726,11 @@ td.crossreference {
 	padding-bottom: 16px;
 	}
 
+td.headword {
+    font-weight: bold;
+    color: #600;
+    }
+
 td.infocells {
 	background-color: hsl(200, 33%, 95%);
 	/* background-color: hsl(0, 0%, 95%);

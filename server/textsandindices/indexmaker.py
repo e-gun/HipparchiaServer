@@ -29,14 +29,14 @@ def compilewordlists(worksandboundaries, cursor):
 		a completeindex of Thuc + Hdt 3 + all Epic...
 	this is, you could use compileauthorandworklist() to feed this function
 	the resulting concorances would be massive
-	
+
 	:param worksandboundaries:
 	:param cursor:
 	:return:
 	"""
-	
+
 	lineobjects = []
-	
+
 	for w in worksandboundaries:
 		db = w[0:6]
 		query = 'SELECT * FROM ' + db + ' WHERE (index >= %s AND index <= %s)'
@@ -75,14 +75,14 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 	:return:
 	"""
 
-	#print('cdict',cdict)
+	# print('cdict',cdict)
 
 	onework = False
 	if len(cdict) == 1:
 		onework = True
 
 	activepoll.allworkis(-1)
-	
+
 	lineobjects = compilewordlists(cdict, cursor)
 
 	pooling = True
@@ -102,13 +102,24 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 	# completeindexdict: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),...], wordB: [(...)]}
 	# {'illic': [('lt0472w001', 2048, '68A.35')], 'carpitur': [('lt0472w001', 2048, '68A.35')], ...}
 
-	if headwords:
+	if not headwords:
+		activepoll.statusis('Sifting the index')
+		activepoll.notes = ''
+		activepoll.allworkis(-1)
+		unsortedoutput = htmlifysimpleindex(completeindexdict, onework)
+		sortkeys = [x[0] for x in unsortedoutput]
+		outputdict = {x[0]: x for x in unsortedoutput}
+		sortkeys = polytonicsort(sortkeys)
+		sortedoutput = [outputdict[x] for x in sortkeys]
+		# pad position 0 with a fake, unused headword so that these tuples have the same shape as the ones in the other branch of the condition
+		sortedoutput = [(s[0], s[0], s[1], s[2], False) for s in sortedoutput]
+	else:
 		augmentedindexdict = {}
 
 		# [a] find the morphologyobjects needed
 		remaining = len(completeindexdict)
 		activepoll.statusis('Finding headwords for entries')
-		activepoll.notes = ''
+		activepoll.notes = '({r} entries found)'.format(r=remaining)
 		activepoll.allworkis(remaining)
 
 		manager = Manager()
@@ -123,6 +134,8 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		for j in jobs: j.join()
 
 		activepoll.statusis('Assigning headwords to entries')
+		remaining = len(completeindexdict)
+		activepoll.notes = '({bf} baseforms found)'.format(bf=remaining)
 		activepoll.allworkis(remaining)
 
 		# [b] find the baseforms
@@ -140,7 +153,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 					# parsed = list(set(['{bf} ({tr})'.format(bf=p.getbaseform(), tr=p.gettranslation()) for p in mo.getpossible()]))
 					parsed = list(set(['{bf}'.format(bf=p.getbaseform()) for p in mo.getpossible()]))
 					# cut the blanks
-					parsed = [re.sub(r' \( \)','',p) for p in parsed]
+					parsed = [re.sub(r' \( \)', '', p) for p in parsed]
 					if len(parsed) == 1:
 						homonyms = None
 					else:
@@ -170,7 +183,8 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 				tag = 'isahomonymn'
 			else:
 				tag = False
-			augmentedindexdict[observed]['loci'] = [tuple(list(l)+[tag]) for l in augmentedindexdict[observed]['loci']]
+			augmentedindexdict[observed]['loci'] = [tuple(list(l) + [tag]) for l in
+			                                        augmentedindexdict[observed]['loci']]
 
 			if augmentedindexdict[observed]['baseforms']:
 				baseforms = augmentedindexdict[observed]['baseforms']
@@ -196,6 +210,19 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		htmlindexdict = {}
 		sortedoutput = []
 		for headword in polytonicsort(headwordindexdict.keys()):
+			sortedoutput.append(('&nbsp;', '', '', '', False))
+			if len(headwordindexdict[headword].keys()) > 1:
+				formcount = 0
+				homonymncount = 0
+				for form in headwordindexdict[headword].keys():
+					formcount += len(headwordindexdict[headword][form])
+					homonymncount += len([x for x in headwordindexdict[headword][form] if x[3]])
+				if formcount > 1 and homonymncount > 0:
+					sortedoutput.append(
+						(headword, '({fc} / {hc})'.format(fc=formcount, hc=homonymncount), '', '', False))
+				elif formcount > 1:
+					sortedoutput.append((headword, '({fc})'.format(fc=formcount), '', '', False))
+
 			for form in polytonicsort(headwordindexdict[headword].keys()):
 				hits = sorted(headwordindexdict[headword][form])
 				isahomonymn = hits[0][3]
@@ -216,32 +243,24 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 					loci = loci[:-2]
 				htmlindexdict[headword] = loci
 				sortedoutput.append(((headword, form, len(hits), htmlindexdict[headword], isahomonymn)))
-	else:
-		activepoll.statusis('Sifting the index')
-		activepoll.notes = ''
-		activepoll.allworkis(-1)
-		unsortedoutput = htmlifysimpleindex(completeindexdict, onework)
-		sortkeys = [x[0] for x in unsortedoutput]
-		outputdict = {x[0]: x for x in unsortedoutput}
-		sortkeys = polytonicsort(sortkeys)
-		sortedoutput = [outputdict[x] for x in sortkeys]
-		# pad position 0 with a fake, unused headword so that these tuples have the same shape as the ones in the other branch of the condition
-		sortedoutput = [(s[0], s[0], s[1], s[2], False) for s in sortedoutput]
 
 	return sortedoutput
 
 
 def mpmorphology(terms, morphobjects, activepoll, commitcount):
-
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 
 	while terms:
 		try:
 			t = terms.pop()
-			activepoll.remain = len(terms)
 		except IndexError:
 			t = None
+
+		try:
+			activepoll.remain = len(terms)
+		except:
+			activepoll.remain = 0
 
 		if t:
 			if re.search('[a-z]', t):
@@ -257,12 +276,13 @@ def mpmorphology(terms, morphobjects, activepoll, commitcount):
 				morphobjects[t] = None
 
 		commitcount.increment()
-		if commitcount.value % 400 == 0:
+		if commitcount.value % 250 == 0:
 			dbconnection.commit()
 
 	dbconnection.commit()
 
 	return morphobjects
+
 
 def htmlifysimpleindex(completeindexdict, onework):
 	"""
@@ -312,9 +332,9 @@ def linesintoindex(lineobjects, activepoll):
 	acute = 'άέίόύήώΐΰᾴῄῴἅἕἵὅὕἥὥἄἔἴὄὔἤὤ'
 
 	defaultwork = lineobjects[0].wkuinversalid
-	
+
 	completeindex = {}
-	
+
 	while len(lineobjects) > 0:
 		try:
 			line = lineobjects.pop()
@@ -322,7 +342,7 @@ def linesintoindex(lineobjects, activepoll):
 				activepoll.remain(len(lineobjects))
 		except:
 			line = makeablankline(defaultwork, -1)
-		
+
 		if line.index != -1:
 			words = line.wordlist('polytonic')
 			words = [cleanindexwords(w).lower() for w in words]
@@ -333,7 +353,7 @@ def linesintoindex(lineobjects, activepoll):
 					completeindex[w].append((line.wkuinversalid, line.index, line.locus()))
 				except:
 					completeindex[w] = [(line.wkuinversalid, line.index, line.locus())]
-	
+
 	return completeindex
 
 
@@ -356,7 +376,7 @@ def pooledindexmaker(lineobjects):
 
 	if len(lineobjects) > 100 * workers:
 		# if you have only 2 lines of an author and 5 workers how will you divide the author up?
-		chunksize = int(len(lineobjects)/workers)+1
+		chunksize = int(len(lineobjects) / workers) + 1
 		chunklines = [lineobjects[i:i + chunksize] for i in range(0, len(lineobjects), chunksize)]
 	else:
 		chunklines = [lineobjects]
