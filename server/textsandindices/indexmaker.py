@@ -210,6 +210,8 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		htmlindexdict = {}
 		sortedoutput = []
 		for headword in polytonicsort(headwordindexdict.keys()):
+			hw = re.sub('v', 'u', headword)
+			hw = re.sub('j', 'i', hw)
 			sortedoutput.append(('&nbsp;', '', '', '', False))
 			if len(headwordindexdict[headword].keys()) > 1:
 				formcount = 0
@@ -218,10 +220,9 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 					formcount += len(headwordindexdict[headword][form])
 					homonymncount += len([x for x in headwordindexdict[headword][form] if x[3]])
 				if formcount > 1 and homonymncount > 0:
-					sortedoutput.append(
-						(headword, '({fc} / {hc})'.format(fc=formcount, hc=homonymncount), '', '', False))
+					sortedoutput.append((hw, '({fc} / {hc})'.format(fc=formcount, hc=homonymncount), '', '', False))
 				elif formcount > 1:
-					sortedoutput.append((headword, '({fc})'.format(fc=formcount), '', '', False))
+					sortedoutput.append((hw, '({fc})'.format(fc=formcount), '', '', False))
 
 			for form in polytonicsort(headwordindexdict[headword].keys()):
 				hits = sorted(headwordindexdict[headword][form])
@@ -242,7 +243,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 							loci += hit[2] + ', '
 					loci = loci[:-2]
 				htmlindexdict[headword] = loci
-				sortedoutput.append(((headword, form, len(hits), htmlindexdict[headword], isahomonymn)))
+				sortedoutput.append(((hw, form, len(hits), htmlindexdict[headword], isahomonymn)))
 
 	return sortedoutput
 
