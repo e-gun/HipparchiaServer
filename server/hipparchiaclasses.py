@@ -1344,23 +1344,27 @@ class SearchObject(object):
 
 		# print ('seeking,proximate',seeking,proximate
 
-		self.seeking = seeking
-		self.proximate = proximate
-
 		# session['accentsmatter'] logic has been transferred to here
 
 		accented = '[äëïöüâêîôûàèìòùáéíóúᾂᾒᾢᾃᾓᾣᾄᾔᾤᾅᾕᾥᾆᾖᾦᾇᾗᾧἂἒἲὂὒἢὢἃἓἳὃὓἣὣἄἔἴὄὔἤὤἅἕἵὅὕἥὥἆἶὖἦὦἇἷὗἧὧᾲῂῲᾴῄῴᾷῇῷᾀᾐᾠᾁᾑᾡῒῢΐΰῧἀἐἰὀὐἠὠῤἁἑἱὁὑἡὡῥὰὲὶὸὺὴὼάέίόύήώᾶῖῦῆῶϊϋ]'
 
-		if re.search(accented, self.seeking) or re.search(accented, self.proximate):
+		if re.search(accented, seeking) or re.search(accented, proximate):
 			# alternate:
 			#   if frozensession['accentsmatter'] == 'yes':
 			self.accented = True
+			seeking = re.sub('v', '[vu]', seeking)
+			seeking = re.sub('j', '[ji]', seeking)
+			proximate = re.sub('v', '[vu]', proximate)
+			proximate = re.sub('j', '[ji]', proximate)
 		else:
 			self.accented = False
-			self.seeking = re.sub('v', '[vu]', self.seeking)
-			self.seeking = re.sub('j', '[ji]', self.seeking)
-			self.proximate = re.sub('v', '[vu]', self.proximate)
-			self.proximate = re.sub('j', '[ji]', self.proximate)
+			seeking = re.sub('v', 'u', seeking)
+			seeking = re.sub('j', 'i', seeking)
+			proximate = re.sub('v', 'u', proximate)
+			proximate = re.sub('j', 'i', proximate)
+
+		self.seeking = seeking
+		self.proximate = proximate
 
 		self.session = frozensession
 		self.proximity = frozensession['proximity']
