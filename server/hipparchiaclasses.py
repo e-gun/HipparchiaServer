@@ -1352,6 +1352,7 @@ class SearchObject(object):
 			# alternate:
 			#   if frozensession['accentsmatter'] == 'yes':
 			self.accented = True
+			# the following can be counted upon to slow down searches, but not relatively few searches will be affected and not grievously
 			seeking = re.sub('v', '[vu]', seeking)
 			seeking = re.sub('j', '[ji]', seeking)
 			proximate = re.sub('v', '[vu]', proximate)

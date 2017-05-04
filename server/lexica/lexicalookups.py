@@ -33,11 +33,14 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 
 	matchingobject = None
 
-	if usedictionary == 'latin':
-		# because of the syntax, this is *significantly* slower than greek with its '='
+	if usedictionary == 'NEVERMEETTHISCONDITION_latin':
+		# because of the '~' syntax, this is *significantly* slower than greek with its '='
 		# you will feel this problem if you build an index with headword lookups
 		# HipparchiaBuilder could/should get rid of the u/v ambiguity when compiling the latin_morphology table
-		# but note that both 'virtutem' and 'uirtutem' have entries in that table, so some care will be required
+		#   note that both 'virtutem' and 'uirtutem' have entries in that table, so some care will be required
+		#   the shift: substitute u for v in mpanalysisinsert() when generating observedform
+		# this block of code should be deleted if indices can be reliabely generated without too many unparsed
+		# or misparsed elements of the u/v sort
 		word = re.sub(r'[uv]', '[uv]', word)
 		word = '^'+word+'$'
 		syntax = '~'
