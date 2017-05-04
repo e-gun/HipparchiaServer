@@ -1337,10 +1337,11 @@ class SearchObject(object):
 
 		# searchtermcharactersubstitutions() logic has moved here
 
-		seeking = re.sub('σ|ς', 'ϲ', seeking)
+		seeking = re.sub('[σς]', 'ϲ', seeking)
 		seeking = re.sub(r'\\ϲ', ' ', seeking)
-		proximate = re.sub('σ|ς', 'ϲ', proximate)
+		proximate = re.sub('[σς]', 'ϲ', proximate)
 		proximate = re.sub(r'\\ϲ', ' ', proximate)
+
 		# print ('seeking,proximate',seeking,proximate
 
 		self.seeking = seeking
@@ -1356,12 +1357,10 @@ class SearchObject(object):
 			self.accented = True
 		else:
 			self.accented = False
-
-		if not self.accented:
-			self.seeking = re.sub('v', 'u', self.seeking)
-			self.seeking = re.sub('j', 'i', self.seeking)
-			self.proximate = re.sub('v', 'u', self.seeking)
-			self.proximate = re.sub('j', 'i', self.seeking)
+			self.seeking = re.sub('v', '[vu]', self.seeking)
+			self.seeking = re.sub('j', '[ji]', self.seeking)
+			self.proximate = re.sub('v', '[vu]', self.proximate)
+			self.proximate = re.sub('j', '[ji]', self.proximate)
 
 		self.session = frozensession
 		self.proximity = frozensession['proximity']
