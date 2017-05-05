@@ -140,14 +140,14 @@ def wordindextohtmltable(indexingoutput, useheadwords):
 	for i in indexingoutput:
 		outputlines.append('<tr>')
 		if useheadwords and i[0] != previousheadword:
-			outputlines.append('<td class="headword"><observed id="{hw}">{hw}</observed></td>'.format(hw=i[0]))
+			outputlines.append('<td class="headword"><indexobserved id="{hw}">{hw}</indexobserved></td>'.format(hw=i[0]))
 			previousheadword = i[0]
 		elif useheadwords and i[0] == previousheadword:
 			outputlines.append('<td class="headword">&nbsp;</td>')
 		if i[4] == 'isahomonymn':
-			outputlines.append('<td class="word"><span class="homonym"><observed id="{wd}">{wd}</observed></span></td>'.format(wd=i[1]))
+			outputlines.append('<td class="word"><span class="homonym"><indexobserved id="{wd}">{wd}</indexobserved></span></td>'.format(wd=i[1]))
 		else:
-			outputlines.append('<td class="word"><observed id="{wd}">{wd}</observed></td>'.format(wd=i[1]))
+			outputlines.append('<td class="word"><indexobserved id="{wd}">{wd}</indexobserved></td>'.format(wd=i[1]))
 		outputlines.append('<td class="count">{ct}</td>'.format(ct=i[2]))
 		outputlines.append('<td class="passages">{psg}</td>'.format(psg=i[3]))
 		outputlines.append('</tr>')
@@ -204,3 +204,46 @@ def cleanindexwords(word):
 	word = word.translate(str.maketrans(invals, outvals))
 
 	return word
+
+
+def observedformjs():
+	"""
+	
+	insert a js block to handle observed forms
+	
+	:return: 
+	"""
+
+	js = """
+		<script>
+	        $('indexobserved').click( function(e) {
+	            e.preventDefault();
+	            var windowWidth = $(window).width();
+	            var windowHeight = $(window).height();
+	            $( '#parserdialog' ).dialog({
+	                    autoOpen: false,
+	                    minWidth: windowWidth*.33,
+	                    maxHeight: windowHeight*.9,
+	                    // position: { my: "left top", at: "left top", of: window },
+	                    title: this.id,
+	                    draggable: true,
+	                    icons: { primary: 'ui-icon-close' },
+	                    click: function() { $( this ).dialog( 'close' ); }
+	                    });
+	            $( '#parserdialog' ).dialog( 'open' );
+	            $( '#parserdialog' ).html('[searching...]');
+	            $.getJSON('/parse/'+this.id, function (definitionreturned) {
+	                $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
+	                var dLen = definitionreturned.length;
+	                var linesreturned = []
+	                for (i = 0; i < dLen; i++) {
+	                    linesreturned.push(definitionreturned[i]['value']);
+	                    }
+	                $( '#parserdialog' ).html(linesreturned);
+	            });
+            return false;
+        });
+        </script>
+	"""
+
+	return js

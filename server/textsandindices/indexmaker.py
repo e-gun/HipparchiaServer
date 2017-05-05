@@ -114,13 +114,11 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		# pad position 0 with a fake, unused headword so that these tuples have the same shape as the ones in the other branch of the condition
 		sortedoutput = [(s[0], s[0], s[1], s[2], False) for s in sortedoutput]
 	else:
-		augmentedindexdict = {}
 
 		# [a] find the morphologyobjects needed
 		remaining = len(completeindexdict)
 		activepoll.statusis('Finding headwords for entries')
 		activepoll.notes = '({r} entries found)'.format(r=remaining)
-		activepoll.allworkis(remaining)
 
 		manager = Manager()
 		commitcount = MPCounter()
@@ -128,7 +126,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		morphobjects = manager.dict()
 		workers = hipparchia.config['WORKERS']
 
-		jobs = [Process(target=mpmorphology, args=(terms, morphobjects, activepoll, commitcount))
+		jobs = [Process(target=mpmorphology, args=(terms, morphobjects, commitcount))
 		        for i in range(workers)]
 		for j in jobs: j.start()
 		for j in jobs: j.join()
@@ -139,6 +137,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		activepoll.allworkis(remaining)
 
 		# [b] find the baseforms
+		augmentedindexdict = {}
 		for k in completeindexdict.keys():
 			remaining -= 1
 			activepoll.remain(remaining)
@@ -189,7 +188,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 			if augmentedindexdict[observed]['baseforms']:
 				baseforms = augmentedindexdict[observed]['baseforms']
 			else:
-				baseforms = ['•unparsed•']
+				baseforms = ['•••unparsed•••']
 
 			for bf in baseforms:
 				try:
@@ -248,7 +247,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 	return sortedoutput
 
 
-def mpmorphology(terms, morphobjects, activepoll, commitcount):
+def mpmorphology(terms, morphobjects, commitcount):
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 
@@ -257,11 +256,6 @@ def mpmorphology(terms, morphobjects, activepoll, commitcount):
 			t = terms.pop()
 		except IndexError:
 			t = None
-
-		try:
-			activepoll.remain = len(terms)
-		except:
-			activepoll.remain = 0
 
 		if t:
 			if re.search('[a-z]', t):

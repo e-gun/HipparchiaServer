@@ -60,6 +60,12 @@ function loadindexintodisplayresults(indexdata) {
         $('#searchsummary').html(linesreturned);
 
         $('#displayresults').html(indexdata['indexhtml']);
+
+
+        var bcsh = document.getElementById("indexclickscriptholder");
+        if (bcsh.hasChildNodes()) { bcsh.removeChild(bcsh.firstChild); }
+
+        $('#indexclickscriptholder').html(indexdata['newjs']);
 }
 
 

@@ -43,7 +43,7 @@ from server.searching.searchformatting import formatauthinfo, formatauthorandwor
 from server.searching.searchfunctions import cleaninitialquery
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import tcparserequest, textsegmentfindstartandstop, \
-	wordindextohtmltable
+	wordindextohtmltable, observedformjs
 from server.textsandindices.textbuilder import buildtext
 
 # activate when you need to be shown new weight values upon startup and are willing to wait for the weights
@@ -94,7 +94,7 @@ def frontpage():
 		corporalabels = {'g': 'G', 'l': 'L', 'd': 'D', 'i': 'I', 'c': 'C'}
 
 	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora, clab=corporalabels,
-						   onehit=session['onehit'], css=stylesheet)
+						   onehit=session['onehit'], hwindexing=session['headwordindexing'], css=stylesheet)
 
 	return page
 
@@ -521,6 +521,7 @@ def completeindex():
 	results['wordsfound'] = count
 	results['indexhtml'] = indexhtml
 	results['keytoworks'] = allworks
+	results['newjs'] = observedformjs()
 
 	results = json.dumps(results)
 
@@ -1039,10 +1040,13 @@ def findbyform(observedword):
 	cleanedword = re.sub('[ˈ]+', '', cleanedword)
 	cleanedword = removegravity(cleanedword)
 	# python seems to know how to do this with greek...
-	word = cleanedword.lower()
+	cleanedword = cleanedword.lower()
 
-	if re.search(r'[a-z]', word[0]):
-		cleanedword = stripaccents(word)
+	# index clicks will send you things like 'αὖ²'
+	cleanedword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]','',cleanedword)
+
+	if re.search(r'[a-z]', cleanedword[0]):
+		cleanedword = stripaccents(cleanedword)
 		usedictionary = 'latin'
 	else:
 		usedictionary = 'greek'

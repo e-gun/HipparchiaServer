@@ -14,12 +14,15 @@
 <script>
     $('#onehitistrue').hide();
     $('#onehitisfalse').hide();
+    $('#headwordindexingactive').hide();
+    $('#headwordindexiningactive').hide();
     $('#grkisactive').hide();
     $('#latisactive').hide();
     $('#ddpisactive').hide();
     $('#insisactive').hide();
     $('#chrisactive').hide();
     {% if onehit == 'yes' %} $('#onehitistrue').show();  {% else %} $('#onehitisfalse').show(); {% endif %}
+    {% if hwindexing == 'yes' %} $('#headwordindexingactive').show();  {% else %} $('#headwordindexiningactive').show(); {% endif %}
     {% for corpus in activecorpora %}
         {% if corpus == 'greekcorpus' %} $('#grkisactive').show(); {% endif %}
         {% if corpus == 'latincorpus' %}  $('#latisactive').show(); {% endif %}

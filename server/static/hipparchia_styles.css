@@ -636,6 +636,11 @@ hmu_title {
 	font-style: italic;
 	}
 
+indexobserved:hover{
+	color: #393F94;
+	text-shadow: 1px 1px #aaa;
+	 }
+
 input {
 	text-align: center;
 	padding: 5px;
