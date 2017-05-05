@@ -140,19 +140,19 @@ def lexicalmatchesintohtml(observedform, morphologyobject, usedictionary, cursor
 	# look up and format the dictionary entries
 	if len(entriestocheck) == 1:
 		# sending 0 as the count to browserdictionarylookup() prevents enumeration
-		entryashtml = browserdictionarylookup(0, entriestocheck[1], usedictionary, cursor)
+		entryashtml = browserdictionarylookup(0, entriestocheck[1], cursor)
 		returnarray.append({'value': entryashtml})
 	else:
 		count = 0
 		for entry in entriestocheck:
 			count += 1
-			entryashtml = browserdictionarylookup(count, entriestocheck[entry], usedictionary, cursor)
+			entryashtml = browserdictionarylookup(count, entriestocheck[entry], cursor)
 			returnarray.append({'value': entryashtml})
 
 	return returnarray
 
 
-def browserdictionarylookup(count, seekingentry, usedictionary, cursor):
+def browserdictionarylookup(count, seekingentry, cursor):
 	"""
 	look up a word and return an htlm version of its dictionary entry
 
@@ -171,10 +171,12 @@ def browserdictionarylookup(count, seekingentry, usedictionary, cursor):
 	:return:
 	"""
 
-	if usedictionary == 'greek':
-		translationlabel = 'tr'
-	else:
+	if re.search(r'[a-z]', seekingentry):
+		usedictionary = 'latin'
 		translationlabel = 'hi'
+	else:
+		usedictionary = 'greek'
+		translationlabel = 'tr'
 
 	# nothingfound = convertdictionaryfindintoobject('nothing', 'nodict')
 

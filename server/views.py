@@ -1136,7 +1136,7 @@ def dictsearch(searchterm):
 
 		for entry in sortedfinds:
 			count += 1
-			returnarray.append({'value': browserdictionarylookup(count, entry[0], usedictionary, cur)})
+			returnarray.append({'value': browserdictionarylookup(count, entry[0], cur)})
 	else:
 		returnarray.append({'value':'[nothing found]'})
 
@@ -1198,7 +1198,7 @@ def reverselexiconsearch(searchterm):
 		count = 0
 		for entry in entries:
 			count += 1
-			returnarray.append({'value': browserdictionarylookup(count, entry, usedict, cur)})
+			returnarray.append({'value': browserdictionarylookup(count, entry, cur)})
 	else:
 		returnarray.append({'value': '<br />[nothing found under "{skg}"]'.format(skg=seeking)})
 

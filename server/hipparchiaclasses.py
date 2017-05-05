@@ -733,6 +733,8 @@ class MorphPossibilityObject(object):
 			#print('MorphPossibilityObject.getlatinbaseform() needs work',self.entry)
 			baseform = latattemptelision(self.entry)
 
+		baseform = re.sub(r'^\s', '', baseform)
+
 		return baseform
 
 

@@ -139,15 +139,17 @@ def wordindextohtmltable(indexingoutput, useheadwords):
 		outputlines.append('<table><tr><th>word</th><th>count</th><th>passages</th></tr>\n')
 	for i in indexingoutput:
 		outputlines.append('<tr>')
-		if useheadwords and i[0] != previousheadword:
-			outputlines.append('<td class="headword"><indexobserved id="{hw}">{hw}</indexobserved></td>'.format(hw=i[0]))
-			previousheadword = i[0]
-		elif useheadwords and i[0] == previousheadword:
+		headword = i[0]
+		observedword = i[1]
+		if useheadwords and headword != previousheadword:
+			outputlines.append('<td class="headword"><indexobserved id="{hw}">{hw}</indexobserved></td>'.format(hw=headword))
+			previousheadword = headword
+		elif useheadwords and headword == previousheadword:
 			outputlines.append('<td class="headword">&nbsp;</td>')
 		if i[4] == 'isahomonymn':
-			outputlines.append('<td class="word"><span class="homonym"><indexobserved id="{wd}">{wd}</indexobserved></span></td>'.format(wd=i[1]))
+			outputlines.append('<td class="word"><span class="homonym"><indexobserved id="{wd}">{wd}</indexobserved></span></td>'.format(wd=observedword))
 		else:
-			outputlines.append('<td class="word"><indexobserved id="{wd}">{wd}</indexobserved></td>'.format(wd=i[1]))
+			outputlines.append('<td class="word"><indexobserved id="{wd}">{wd}</indexobserved></td>'.format(wd=observedword))
 		outputlines.append('<td class="count">{ct}</td>'.format(ct=i[2]))
 		outputlines.append('<td class="passages">{psg}</td>'.format(psg=i[3]))
 		outputlines.append('</tr>')
