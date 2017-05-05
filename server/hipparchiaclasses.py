@@ -715,6 +715,9 @@ class MorphPossibilityObject(object):
 		else:
 			print('MorphPossibilityObject.getbaseform() is confused', self.entry, segments)
 
+		# not sure this ever happens with the greek data
+		baseform = re.sub(r'^\s', '', baseform)
+
 		return baseform
 
 	def getlatinbaseform(self):
@@ -733,6 +736,7 @@ class MorphPossibilityObject(object):
 			#print('MorphPossibilityObject.getlatinbaseform() needs work',self.entry)
 			baseform = latattemptelision(self.entry)
 
+		# some latin words will erroneously yield ' concupio' as the base form: bad data
 		baseform = re.sub(r'^\s', '', baseform)
 
 		return baseform
@@ -1341,8 +1345,10 @@ class SearchObject(object):
 
 		seeking = re.sub('[σς]', 'ϲ', seeking)
 		seeking = re.sub(r'\\ϲ', ' ', seeking)
+		seeking = seeking.lower()
 		proximate = re.sub('[σς]', 'ϲ', proximate)
 		proximate = re.sub(r'\\ϲ', ' ', proximate)
+		proximate = proximate.lower()
 
 		# print ('seeking,proximate',seeking,proximate
 
