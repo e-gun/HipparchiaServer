@@ -24,7 +24,7 @@ from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinef
 	perseusdelabeler
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking, \
 	perseusidmismatch, returnfirstlinenumber
-from server.formattinghelperfunctions import removegravity, stripaccents, bcedating
+from server.formattinghelperfunctions import removegravity, stripaccents, bcedating, tidyupterm
 from server.hipparchiaclasses import ProgressPoll, SearchObject
 from server.lexica.lexicaformatting import entrysummary, dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, \
@@ -1037,32 +1037,28 @@ def findbyform(observedword):
 
 	cleanedword = re.sub('[\W_|]+', '',observedword)
 	# oddly 'ὕβˈριν' survives the '\W' check; should be ready to extend this list
-	cleanedword = re.sub('[ˈ]+', '', cleanedword)
+	cleanedword = tidyupterm(cleanedword)
 	cleanedword = removegravity(cleanedword)
 	# python seems to know how to do this with greek...
 	cleanedword = cleanedword.lower()
-
 	# index clicks will send you things like 'αὖ²'
 	cleanedword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]','',cleanedword)
 
 	if re.search(r'[a-z]', cleanedword[0]):
 		cleanedword = stripaccents(cleanedword)
-		usedictionary = 'latin'
-	else:
-		usedictionary = 'greek'
 
 	cleanedword = cleanedword.lower()
 	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
 	returnarray = []
 
-	morphologyobject = lookformorphologymatches(cleanedword, usedictionary, cur)
+	morphologyobject = lookformorphologymatches(cleanedword, cur)
 	# print('findbyform() mm',morphologyobject.getpossible()[0].transandanal)
 	# φέρεται --> morphologymatches [('<possibility_1>', '1', 'φέρω', '122883104', '<transl>fero</transl><analysis>pres ind mp 3rd sg</analysis>')]
 
 	if morphologyobject:
 		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
 			returnarray.append(getobservedwordprevalencedata(cleanedword))
-		returnarray += lexicalmatchesintohtml(cleanedword, morphologyobject, usedictionary, cur)
+		returnarray += lexicalmatchesintohtml(cleanedword, morphologyobject, cur)
 	else:
 		returnarray = [{'value': '<br />[could not find a match for {cw} in the morphology table]'.format(cw=cleanedword)}, {'entries': '[not found]'}]
 

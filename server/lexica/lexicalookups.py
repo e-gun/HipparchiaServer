@@ -18,13 +18,19 @@ from server.listsandsession.listmanagement import polytonicsort
 from server.searching.betacodetounicode import cleanaccentsandvj
 
 
-def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
+def lookformorphologymatches(word, cursor, trialnumber=0):
+	"""
+	
+	:param word: 
+	:param cursor: 
+	:param trialnumber: 
+	:return: 
 	"""
 
-	:param word:
-	:param usedictionary:
-	:return: dbMorphologyObject
-	"""
+	if re.search(r'[a-z]', word):
+		usedictionary = 'latin'
+	else:
+		usedictionary = 'greek'
 
 	trialnumber += 1
 
@@ -56,22 +62,22 @@ def lookformorphologymatches(word, usedictionary, cursor, trialnumber=0):
 			if re.search(terminalacute,word[-1]) and trialnumber < 4:
 				sub = cleanaccentsandvj(word[-1])
 				newword = word[:-1]+sub
-				matchingobject = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
+				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
 			elif re.search(terminalacute,word[-2]) and trialnumber < 4:
 				sub = cleanaccentsandvj(word[-2])
 				newword = word[:-2] + sub + word[-1]
-				matchingobject = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
+				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
 			elif trialnumber < 4:
 				# elided ending? you will ask for ἀλλ, but you need to look for ἀλλ'
 				newword = word + chr(39)
-				matchingobject = lookformorphologymatches(newword, usedictionary, cursor, trialnumber)
+				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
 		except:
 			matchingobject = None
 
 	return matchingobject
 
 
-def lexicalmatchesintohtml(observedform, morphologyobject, usedictionary, cursor):
+def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
 	"""
 
 	you have found the word(s), now generate a collection of HTML lines to hand to the JS
@@ -85,9 +91,6 @@ def lexicalmatchesintohtml(observedform, morphologyobject, usedictionary, cursor
 	matcheslist:
 		[('<possibility_1>χρημάτων, χρῆμα<xref_value>128139149</xref_value><transl>need</transl><analysis>neut gen pl</analysis></possibility_1>\n',)]
 
-	usedictionary:
-		greek
-
 	interesting problem with alternative latin genitive plurals: they generate a double entry unless you are careful
 		(1) iudicium (from jūdiciūm, judicium, a judgment):  neut gen pl
 		(2) iudicium (from jūdicium, judicium, a judgment):  neut nom/voc/acc sg
@@ -96,7 +99,6 @@ def lexicalmatchesintohtml(observedform, morphologyobject, usedictionary, cursor
 
 	:param observedform:
 	:param matcheslist:
-	:param usedictionary:
 	:param cursor:
 	:return:
 	"""
@@ -162,8 +164,6 @@ def browserdictionarylookup(count, seekingentry, cursor):
 		judicium
 	entryxref:
 		42397893
-	usedictionary:
-		latin
 
 	:param entry:
 	:param dict:
@@ -473,8 +473,7 @@ def findcountsviawordcountstable(wordtocheck):
 	used to look up a list of specific observed forms
 	(vs. dictionary headwords)
 
-	:param checklist:
-	:param finds:
+	:param wordtocheck:
 	:return:
 	"""
 	dbconnection = setconnection('not_autocommit')
@@ -502,8 +501,9 @@ def findcountsviawordcountstable(wordtocheck):
 
 def getobservedwordprevalencedata(dictionaryword):
 	"""
-
-	:return:
+	
+	:param dictionaryword: 
+	:return: 
 	"""
 	l = findcountsviawordcountstable(dictionaryword)
 

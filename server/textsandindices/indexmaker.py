@@ -12,10 +12,11 @@ from multiprocessing import Pool
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, setconnection
+from server.formattinghelperfunctions import tidyupterm
 from server.hipparchiaclasses import MPCounter
 from server.lexica.lexicalookups import lookformorphologymatches
 from server.listsandsession.listmanagement import polytonicsort
-from server.textsandindices.textandindiceshelperfunctions import dictmerger, cleanindexwords
+from server.textsandindices.textandindiceshelperfunctions import dictmerger
 
 
 def compilewordlists(worksandboundaries, cursor):
@@ -258,12 +259,8 @@ def mpmorphology(terms, morphobjects, commitcount):
 			t = None
 
 		if t:
-			if re.search('[a-z]', t):
-				usedict = 'latin'
-			else:
-				usedict = 'greek'
 
-			mo = lookformorphologymatches(t, usedict, curs)
+			mo = lookformorphologymatches(t, curs)
 
 			if mo:
 				morphobjects[t] = mo
@@ -340,7 +337,7 @@ def linesintoindex(lineobjects, activepoll):
 
 		if line.index != -1:
 			words = line.wordlist('polytonic')
-			words = [cleanindexwords(w).lower() for w in words]
+			words = [tidyupterm(w).lower() for w in words]
 			words = list(set(words))
 			words = [w.translate(str.maketrans(grave, acute)) for w in words]
 			for w in words:

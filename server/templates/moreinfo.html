@@ -211,7 +211,8 @@
         <li>next you will see the start of the dictionary entry to the first matching headword</li>
         <li>after this you see a second set of <span class="emph">prevalence data</span>. This time the numbers reflect  <span class="emph">all occurrences of all
             forms</span> of the word. The results for <code>εἰμι</code> are a composite of the results for <span class="emph">413</span> individual forms:
-            <code>... 'ἔϲται', 'ἔϲτε', 'ἔϲτι', 'ἔϲτιν', 'ἔϲτον', 'ἔϲτω' ...</code>
+            <code>... 'ἔϲται', 'ἔϲτε', 'ἔϲτι', 'ἔϲτιν', 'ἔϲτον', 'ἔϲτω' ...</code>. NB: <span class="emph">homonyms</span> will get swept up in this net.
+            That means that "to eat" will be marked as a very prevalent verb because "he/she/it eats" (est) is an astoundingly common verb form.
         </li>
         <li>
             The <span class="emph">weighted chronological distribution</span> combines a series of assumptions and calculations.
@@ -277,12 +278,12 @@
             meteorologists if you allow 'meterolog' to have a weight of 21714.12 relative to 'hist' owing to the disparity in size
             between the corpora: huge vs. basically non-existant (since no Latin works are actually tagged as meteorological).
             The default is to suppress genre weighting for any genre that is <1/500th the size of the top genre.
-            The five most represented genres are compared to one another in descending order.
+            The most represented genres are compared to one another in descending order.
             <ul class="forexample">
                 <li><code>παράδειϲοϲ</code> yields: docu (100) / hymn (85) / orac (30) / narrfict (24) / hexametr (23)</li>
                 <li><code>κατεϲθίω</code> yields: fab (100) / comic (44) / paradox (29) / polyhist (28) / myth (20)</li>
-                <li><code>contio</code> yields: Predominant genres: hist (100) / allrhet (79) / biogr (75) / polyhist (69) / tact (56)</li>
-                <li><code>letifer</code> yields: Predominant genres: epic (100) / lyr (30) / hexametr (23) / astron (20) / poem (17)</li>
+                <li><code>contio</code> yields: hist (100) / allrhet (79) / biogr (75) / polyhist (69) / tact (56)</li>
+                <li><code>letifer</code> yields: epic (100) / lyr (30) / hexametr (23) / astron (20) / poem (17)</li>
             </ul>
             And so one can say that you are about 4x as likely to see παράδειϲοϲ in one of the documentary papyri as you are
             to see it in an ancient novel even though the novel is itself one of the most likely places to find the word. Similarly

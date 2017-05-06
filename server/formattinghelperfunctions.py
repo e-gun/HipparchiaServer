@@ -8,6 +8,7 @@
 
 import configparser
 import re
+from string import punctuation
 
 from flask import session
 
@@ -433,7 +434,8 @@ def latattemptelision(hypenatedlatinheadword):
 		'sn': 'n',
 		'sm': 'm',
 		'sr': 'r',
-		'sf': 'ff'
+		'sf': 'ff',
+		'xe': 'xse'
 	}
 
 	units = hypenatedlatinheadword.split(',')
@@ -461,3 +463,32 @@ def latattemptelision(hypenatedlatinheadword):
 	entry = prefix + stem
 
 	return entry
+
+
+def tidyupterm(word):
+	"""
+	remove gunk that should not be present in a cleaned line
+
+	:param word:
+	:return:
+	"""
+
+	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
+	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
+	# hard to know whether or not to do the editorial insertions stuff: ⟫⟪⌈⌋⌊
+	# word = re.sub(r'\[.*?\]','', word) # '[o]missa' should be 'missa'
+	word = re.sub(r'[0-9]', '', word)
+	word = re.sub(punct, '', word)
+	# best do punct before this next one...
+	try:
+		if re.search(r'[a-zA-z]', word[0]) is None:
+			word = re.sub(r'[a-zA-z]', '', word)
+	except:
+		# must have been ''
+		pass
+
+	invals = u'jv'
+	outvals = u'iu'
+	word = word.translate(str.maketrans(invals, outvals))
+
+	return word
