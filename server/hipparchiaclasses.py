@@ -1345,12 +1345,16 @@ class SearchObject(object):
 
 		seeking = re.sub('[σς]', 'ϲ', seeking)
 		seeking = re.sub(r'\\ϲ', ' ', seeking)
+		seeking = re.sub(r'^\s', '(^|\s)', seeking)
+		seeking = re.sub(r'\s$', '(\s|$)', seeking)
 		seeking = seeking.lower()
 		proximate = re.sub('[σς]', 'ϲ', proximate)
 		proximate = re.sub(r'\\ϲ', ' ', proximate)
+		proximate = re.sub(r'^\s', '(^|\s)', proximate)
+		proximate = re.sub(r'\s$', '(\s|$)', proximate)
 		proximate = proximate.lower()
 
-		# print ('seeking,proximate',seeking,proximate
+		# print ('seeking,proximate',seeking,proximate)
 
 		# session['accentsmatter'] logic has been transferred to here
 
