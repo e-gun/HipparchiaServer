@@ -349,8 +349,7 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 	if workobject.universalid[0:2] not in ['in', 'dp', 'ch']:
 		name = authorobject.shortname
 	else:
-		name = authorobject.idxname
-
+		name = '[<span class="date">{d}</span>] {n}'.format(n=authorobject.idxname, d=workobject.bcedate())
 	title = workobject.title
 
 	citationincontext = FormattedSearchResult(-1, name, title, citation, lineobject.universalid, [])

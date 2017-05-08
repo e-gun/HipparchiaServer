@@ -181,6 +181,13 @@ class dbOpus(object):
 	def later(self, other):
 		return float(self.converted_date) > other
 
+	def bcedate(self):
+		if int(self.converted_date) < 1:
+			return '{d} BCE'.format(d=self.converted_date[1:])
+		elif int(self.converted_date) < 1500:
+			return '{d} CE'.format(d=self.converted_date)
+		else:
+			return 'date unknown'.format(d=self.converted_date)
 
 class dbWordCountObject(object):
 	"""
@@ -1427,4 +1434,3 @@ class SearchObject(object):
 			self.onehit = False
 
 		self.distance = int(frozensession['proximity'])
-
