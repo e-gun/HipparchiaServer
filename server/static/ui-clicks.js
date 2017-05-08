@@ -213,8 +213,7 @@ $('#lexicalsearch').click( function() {
     } else if ( reverseterm.length > 0 ) {
         searchterm = reverseterm;
         url = '/reverselookup/';
-        if (reverseterm.length > 1 ) { var dialogtitle = '[' + reverseterm.length + '] ' + searchterm; }
-        else { var dialogtitle = searchterm; }
+        var dialogtitle = searchterm;
         var mydictfield = '#reverselexicon';
         restoreme = searchterm;
     } else {

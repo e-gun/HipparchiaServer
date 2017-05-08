@@ -75,6 +75,8 @@ WORKERS = 3
 # COLLAPSEDGENRECOUNTS will bundle things like 'apocal' and 'theol' under 'allrelig' when counting
 # NUMBEROFGENRESTOTRACK affects how many relative genre weight counts you will see
 # AVOIDCIRCLEDLETTERS if you have trouble displaying Ⓖ, etc.
+# REVERSELEXICONRESULTSBYFREQUENCY will either give you the lookup results in alphabetical order ('no') or in descending order
+#   by frequency of occurrence ('yes')
 
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 TLGASSUMESBETACODE = 'yes'
