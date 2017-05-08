@@ -39,7 +39,7 @@ from server.searching.betacodetounicode import replacegreekbetacode
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, \
 	mpresultformatter, \
-	nocontextresultformatter, htmlifysearchfinds, nocontexthtmlifysearchfinds, jstoinjectintobrowser
+	formatname, nocontextresultformatter, htmlifysearchfinds, nocontexthtmlifysearchfinds, jstoinjectintobrowser
 from server.searching.searchfunctions import cleaninitialquery
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import tcparserequest, textsegmentfindstartandstop, \
@@ -940,11 +940,13 @@ def getsearchlistcontents():
 	authorandworklist = compileauthorandworklist(listmapper)
 	authorandworklist = sortauthorandworklists(authorandworklist, authordict)
 
+	searchlistinfo = []
+
 	if len(authorandworklist) > 1:
-		searchlistinfo = '<br /><h3>Proposing to search the following {ww} works:</h3>\n'.format(ww=len(authorandworklist))
-		searchlistinfo += '(Results will be arranged according to {so})<br /><br />\n'.format(so=session['sortorder'])
+		searchlistinfo.append('<br /><h3>Proposing to search the following {ww} works:</h3>'.format(ww=len(authorandworklist)))
+		searchlistinfo.append('(Results will be arranged according to {so})<br /><br />'.format(so=session['sortorder']))
 	else:
-		searchlistinfo = '<br /><h3>Proposing to search the following work:</h3>\n'
+		searchlistinfo.append('<br /><h3>Proposing to search the following work:</h3>')
 
 	count = 0
 	wordstotal = 0
@@ -952,31 +954,20 @@ def getsearchlistcontents():
 		work = work[:10]
 		count += 1
 		w = workdict[work]
-
-		if w.universalid[0:2] not in ['in', 'dp', 'ch']:
-			a = authordict[work[0:6]].shortname
-		else:
-			a = authordict[work[0:6]].idxname
+		au = formatname(w, authordict[work[0:6]])
 
 		try:
 			wordstotal += workdict[work].wordcount
 		except:
 			# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
 			pass
-		searchlistinfo += '\n[{ct}]&nbsp;'.format(ct=count)
-
-		if w.converted_date:
-			if int(w.converted_date) < 2000:
-				if int(w.converted_date) < 1:
-					searchlistinfo += '(<span class="date">{dt} BCE</span>)&nbsp;'.format(dt=w.converted_date[1:])
-				else:
-					searchlistinfo += '(<span class="date">{dt} CE</span>)&nbsp;'.format(dt=w.converted_date)
-
-		searchlistinfo += formatauthorandworkinfo(a, w)
+		searchlistinfo.append('\n[{ct}]&nbsp;'.format(ct=count))
+		searchlistinfo.append(formatauthorandworkinfo(au, w))
 
 	if wordstotal > 0:
-		searchlistinfo += '<br /><span class="emph">total words:</span> ' + format(wordstotal, ',d')
+		searchlistinfo.append('<br /><span class="emph">total words:</span> ' + format(wordstotal, ',d'))
 
+	searchlistinfo = '\n'.join(searchlistinfo)
 	searchlistinfo = json.dumps(searchlistinfo)
 
 	return searchlistinfo

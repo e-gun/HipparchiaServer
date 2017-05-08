@@ -207,17 +207,12 @@ def formatauthorandworkinfo(authorname, workobject):
 	:return:
 	"""
 
-	a = authorname
-	t = '<span class="italic">{t}</span> '.format(t=workobject.title)
-
-	c = workobject.wordcount
-
-	if c:
-		c = '[' + format(c, ',d') + ' wds]'
+	if workobject.wordcount:
+		c = '[' + format(workobject.wordcount, ',d') + ' wds]'
 	else:
 		c = ''
 
-	authorandworkinfo = a + ', ' + t + c + '<br />\n'
+	authorandworkinfo = '{a}, <span class="italic">{t}</span> {c}<br />'.format(a=authorname, t=workobject.title, c=c)
 
 	return authorandworkinfo
 
@@ -346,10 +341,7 @@ def formattedcitationincontext(lineobject, workobject, authorobject, linesofcont
 	highlightline = lineobject.index
 	citation = locusintocitation(workobject, lineobject.locustuple())
 
-	if workobject.universalid[0:2] not in ['in', 'dp', 'ch']:
-		name = authorobject.shortname
-	else:
-		name = '[<span class="date">{d}</span>] {n}'.format(n=authorobject.idxname, d=workobject.bcedate())
+	name = formatname(workobject, authorobject)
 	title = workobject.title
 
 	citationincontext = FormattedSearchResult(-1, name, title, citation, lineobject.universalid, [])
@@ -442,10 +434,7 @@ def nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, 
 		authorobject = authordict[lineobject.wkuinversalid[0:6]]
 		wid = lineobject.wkuinversalid
 		workobject = workdict[wid]
-		if workobject.universalid[0:2] not in ['in', 'dp', 'ch']:
-			name = authorobject.shortname
-		else:
-			name = authorobject.idxname
+		name = formatname(workobject, authorobject)
 		citation = locusintocitation(workobject, lineobject.locustuple())
 
 		lineobject.accented = highlightsearchterm(lineobject, seeking, 'match')
@@ -509,3 +498,25 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	html = '\n'.join(resultsashtml)
 
 	return html
+
+
+def formatname(workobject, authorobject):
+	"""
+	
+	shift name depending on type of hit
+	
+	neede by
+		formattedcitationincontext()
+		nocontexthtmlifysearchfinds()
+	
+	:param workobject: 
+	:param authorobject: 
+	:return: 
+	"""
+
+	if workobject.universalid[0:2] not in ['in', 'dp', 'ch']:
+		name = authorobject.shortname
+	else:
+		name = '[<span class="date">{d}</span>] {n}'.format(n=authorobject.idxname, d=workobject.bcedate())
+
+	return name
