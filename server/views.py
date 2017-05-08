@@ -26,9 +26,9 @@ from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makea
 	perseusidmismatch, returnfirstlinenumber
 from server.formattinghelperfunctions import removegravity, stripaccents, bcedating, tidyupterm
 from server.hipparchiaclasses import ProgressPoll, SearchObject
-from server.lexica.lexicaformatting import entrysummary, dbquickfixes
-from server.lexica.lexicalookups import browserdictionarylookup, searchdictionary, lexicalmatchesintohtml, \
-	lookformorphologymatches, getobservedwordprevalencedata, grablemmataobjectfor
+from server.lexica.lexicaformatting import dbquickfixes
+from server.lexica.lexicalookups import browserdictionarylookup, lexicalmatchesintohtml, findtotalcounts, \
+	lookformorphologymatches, getobservedwordprevalencedata, findtermamongsenses
 from server.listsandsession.listmanagement import dropdupes, polytonicsort, sortauthorandworklists, sortresultslist, \
 	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions, buildhintlist
 from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
@@ -1145,42 +1145,52 @@ def reverselexiconsearch(searchterm):
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	returnarray = []
-	seeking = re.sub(r'[!@#$|%()*\'\"]', '', searchterm)
-	if justlatin():
-		usedict = 'latin'
-		translationlabel = 'hi'
-	else:
-		usedict = 'greek'
-		translationlabel = 'tr'
-
-	# first see if your term is mentioned at all
-	query = 'SELECT entry_name FROM {d}_dictionary WHERE entry_body LIKE %s'.format(d=usedict)
-	data = ('%' + seeking + '%',)
-	cur.execute(query, data)
-
-	matches = cur.fetchall()
 	entries = []
+	returnarray = []
 
-	# then go back and see if it is mentioned in the summary of senses
-	for match in matches:
-		m = match[0]
-		matchingobjectlist = searchdictionary(cur, usedict + '_dictionary', 'entry_name', m, syntax='LIKE')
-		for o in matchingobjectlist:
-			if o.entry:
-				# AttributeError: 'list' object has no attribute 'entry'
-				definition = o.body
-				lemmaobject = grablemmataobjectfor(o.entry, usedict + '_lemmata', cur)
-				summarydict = entrysummary(definition, usedict, translationlabel, lemmaobject)
+	seeking = re.sub(r'[!@#$|%()*\'\"]', '', searchterm)
 
-				for sense in summarydict['senses']:
-					if re.search(r'^'+seeking,sense):
-						entries.append(m)
+	if justlatin():
+		searchunder = [('latin','hi')]
+	elif justtlg():
+		searchunder = [('greek', 'tr')]
+	else:
+		searchunder = [('greek', 'tr'), ('latin','hi')]
+
+	for s in searchunder:
+		usedict = s[0]
+		translationlabel = s[1]
+
+		# first see if your term is mentioned at all
+		query = 'SELECT entry_name FROM {d}_dictionary WHERE entry_body LIKE %s'.format(d=usedict)
+		data = ('%{s}%'.format(s=seeking),)
+		cur.execute(query, data)
+
+		matches = cur.fetchall()
+		matches = [m[0] for m in matches]
+
+		# then go back and see if it is mentioned in the summary of senses (and not just randomly present in the body)
+		for match in matches:
+			entries += findtermamongsenses(match, seeking, usedict, translationlabel, cur)
 
 	entries = list(set(entries))
-	entries = polytonicsort(entries)
 
-	# in which case we should retrieve and format this entry
+	# we have the matches; now we will sort them either by frequency or by initial letter
+	if hipparchia.config['REVERSELEXICONRESULTSBYFREQUENCY'] == 'yes':
+		unsortedentries = [(findtotalcounts(e, cur), e) for e in entries]
+		entries = []
+		for e in unsortedentries:
+			hwcountobject = e[0]
+			term = e[1]
+			if hwcountobject:
+				entries.append((hwcountobject.t, term))
+			else:
+				entries.append((0, term))
+		entries = sorted(entries, reverse=True)
+		entries = [e[1] for e in entries]
+	else:
+		entries = polytonicsort(entries)
+	# now we retrieve and format the entries
 	if entries:
 		count = 0
 		for entry in entries:

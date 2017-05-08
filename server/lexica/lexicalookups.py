@@ -609,6 +609,36 @@ def grablemmataobjectfor(entryname, db, cursor):
 	return lemmaobject
 
 
+def findtermamongsenses(match, seeking, usedict, translationlabel, cur):
+	"""
+	a reverse lookup match finder
+	
+	see reverselexiconsearch()
+	
+	:param match: 
+	:param seeking: 
+	:param usedict: 
+	:param translationlabel: 
+	:param cur: 
+	:return: 
+	"""
+
+	matchingentries = []
+	matchingobjectlist = searchdictionary(cur, usedict + '_dictionary', 'entry_name', match, syntax='LIKE')
+
+	for o in matchingobjectlist:
+		if o.entry:
+			# AttributeError: 'list' object has no attribute 'entry'
+			definition = o.body
+			lemmaobject = grablemmataobjectfor(o.entry, usedict + '_lemmata', cur)
+			summarydict = entrysummary(definition, usedict, translationlabel, lemmaobject)
+
+			for sense in summarydict['senses']:
+				if re.search(r'^' + seeking, sense):
+					matchingentries.append(match)
+
+	return matchingentries
+
 """
 [probably not] TODO: clickable INS or DDP xrefs in dictionary entries
 

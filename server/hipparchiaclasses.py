@@ -189,6 +189,7 @@ class dbOpus(object):
 		else:
 			return 'date unknown'.format(d=self.converted_date)
 
+
 class dbWordCountObject(object):
 	"""
 	an object that corresponds to a db line

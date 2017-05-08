@@ -46,6 +46,7 @@ key features:
 			get a weighted distribution by top 5 genres: show if a word predominantly 'epic', etc.
 			get a summary of uses, senses, and quotes
 			reverse lookup: 'unexpected' returns ἀδευκήϲ, ἀδόκητοϲ, ἀδόξαϲτοϲ, ἀελπτία, ...
+			    by default results return in order of word frequency
 			click to browse to passages cited in the lexical entries ('often' works)
 		text maker
 			build a text of a whole work or subsection of a work
