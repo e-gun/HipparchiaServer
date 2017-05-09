@@ -119,7 +119,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	previousline = lines[0]
 
 	for line in lines:
-		if workobject.universalid[0:2] in ['in', 'dp', 'ch']:
+		if workobject.isnotliterary():
 			metadata = checkfordocumentmetadata(line, workobject)
 			if metadata:
 				passage['ouputtable'].append(metadata)

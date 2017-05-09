@@ -189,6 +189,18 @@ class dbOpus(object):
 		else:
 			return 'date unknown'.format(d=self.converted_date)
 
+	def isnotliterary(self):
+		"""
+		
+		a check to see if you come from something other than 'gr' or 'lt'
+		
+		:return: 
+		"""
+
+		if self.universalid[0:2] in ['in', 'dp', 'ch']:
+			return True
+		else:
+			return False
 
 class dbWordCountObject(object):
 	"""
