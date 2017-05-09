@@ -117,39 +117,12 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 	# insert something to highlight the citationtuple line
 	previousline = lines[0]
-	
-	datefinder = re.compile(r'<hmu_metadata_date value="(.*?)" />')
-	regionfinder = re.compile(r'<hmu_metadata_region value="(.*?)" />')
-	cityfinder = re.compile(r'<hmu_metadata_city value="(.*?)" />')
-	pubfinder = re.compile(r'<hmu_metadata_publicationinfo value="(.*?)" />')
 
 	for line in lines:
 		if workobject.universalid[0:2] in ['in', 'dp', 'ch']:
-			if line.annotations != '':
-				xref = insertcrossreferencerow(line)
-				passage['ouputtable'].append(xref)
-			date = re.search(datefinder, line.accented)
-			region = re.search(regionfinder, line.accented)
-			city = re.search(cityfinder, line.accented)
-			pub = re.search(pubfinder, line.accented)
-			# line.index == workobject.starts added as a check because
-			# otherwise you will re-see date info in the middle of some documents
-			# it gets reasserted with a CD block reinitialization
-			if region and line.index == workobject.starts:
-				html = insertdatarow('Region', 'regioninfo', region.group(1))
-				passage['ouputtable'].append(html)
-			if city and line.index == workobject.starts:
-				html = insertdatarow('City', 'cityinfo', city.group(1))
-				passage['ouputtable'].append(html)
-			if workobject.provenance and city is None and line.index == workobject.starts:
-				html = insertdatarow('Provenance', 'provenance', workobject.provenance)
-				passage['ouputtable'].append(html)
-			if pub and line.index == workobject.starts:
-				html = insertdatarow('Additional publication info', 'pubinfo', pub.group(1))
-				passage['ouputtable'].append(html)
-			if date and line.index == workobject.starts:
-				html = insertdatarow('Editor\'s date', 'textdate', date.group(1))
-				passage['ouputtable'].append(html)
+			metadata = checkfordocumentmetadata(line, workobject)
+			if metadata:
+				passage['ouputtable'].append(metadata)
 
 		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
 			columnb = line.showlinehtml()
@@ -190,6 +163,44 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		passage['ouputtable'].append('</table>\n')
 
 	return passage
+
+
+def checkfordocumentmetadata(line, workobject):
+
+	metadata = []
+
+	datefinder = re.compile(r'<hmu_metadata_date value="(.*?)" />')
+	regionfinder = re.compile(r'<hmu_metadata_region value="(.*?)" />')
+	cityfinder = re.compile(r'<hmu_metadata_city value="(.*?)" />')
+	pubfinder = re.compile(r'<hmu_metadata_publicationinfo value="(.*?)" />')
+
+	if line.annotations != '':
+		xref = insertcrossreferencerow(line)
+		metadata.append(xref)
+	date = re.search(datefinder, line.accented)
+	region = re.search(regionfinder, line.accented)
+	city = re.search(cityfinder, line.accented)
+	pub = re.search(pubfinder, line.accented)
+	# line.index == workobject.starts added as a check because
+	# otherwise you will re-see date info in the middle of some documents
+	# it gets reasserted with a CD block reinitialization
+	if region and line.index == workobject.starts:
+		html = insertdatarow('Region', 'regioninfo', region.group(1))
+		metadata.append(html)
+	if city and line.index == workobject.starts:
+		html = insertdatarow('City', 'cityinfo', city.group(1))
+		metadata.append(html)
+	if workobject.provenance and city is None and line.index == workobject.starts:
+		html = insertdatarow('Provenance', 'provenance', workobject.provenance)
+		metadata.append(html)
+	if pub and line.index == workobject.starts:
+		html = insertdatarow('Additional publication info', 'pubinfo', pub.group(1))
+		metadata.append(html)
+	if date and line.index == workobject.starts:
+		html = insertdatarow('Editor\'s date', 'textdate', date.group(1))
+		metadata.append(html)
+
+	return metadata
 
 
 def insertparserids(lineobject):
