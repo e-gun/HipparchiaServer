@@ -119,21 +119,17 @@ def formatauthinfo(authorobject):
 	else:
 		gn = '<!-- no author genre available -->'
 
-	if authorobject.universalid[0:2] in ['gr', 'in', 'dp']:
-		try:
-			if float(authorobject.converted_date) == 2000:
-				fl = '"Varia" are not assigned to a date'
-			elif float(authorobject.converted_date) == 2500:
-				fl = '"Incerta" are not assigned to a date'
-			elif float(authorobject.converted_date) > 0:
-				fl = 'assigned to approx date: {fl} C.E.'.format(fl=str(authorobject.converted_date))
-				fl += ' (derived from "{rd}")'.format(rd=authorobject.recorded_date)
-			elif float(authorobject.converted_date) < 0:
-				fl = 'assigned to approx date: {fl} B.C.E.'.format(fl=str(authorobject.converted_date[1:]))
-				fl += ' (derived from "{rd}")'.format(rd=authorobject.recorded_date)
-		except:
-			# there was no f and so no int(f)
-			fl = '<!-- no floruit available -->'
+	if authorobject.converted_date:
+		if float(authorobject.converted_date) == 2000:
+			fl = '"Varia" are not assigned to a date'
+		elif float(authorobject.converted_date) == 2500:
+			fl = '"Incerta" are not assigned to a date'
+		elif float(authorobject.converted_date) > 0:
+			fl = 'assigned to approx date: {fl} C.E.'.format(fl=str(authorobject.converted_date))
+			fl += ' (derived from "{rd}")'.format(rd=authorobject.recorded_date)
+		elif float(authorobject.converted_date) < 0:
+			fl = 'assigned to approx date: {fl} B.C.E.'.format(fl=str(authorobject.converted_date[1:]))
+			fl += ' (derived from "{rd}")'.format(rd=authorobject.recorded_date)
 	else:
 		fl = '<!-- no floruit available -->'
 
