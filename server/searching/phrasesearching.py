@@ -105,9 +105,9 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 			wkid = workstosearch.pop()
 			activepoll.remain(len(workstosearch))
 		except:
-			wkid = 'gr0000w000'
+			wkid = None
 
-		if wkid != 'gr0000w000':
+		if wkid:
 			commitcount.increment()
 			if commitcount.value % 400 == 0:
 				dbconnection.commit()

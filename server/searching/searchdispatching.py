@@ -149,9 +149,9 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 			wkid = searchlist.pop()
 			activepoll.remain(len(searchlist))
 		except IndexError:
-			wkid = 'gr0000w000'
+			wkid = None
 			
-		if wkid != 'gr0000w000':
+		if wkid:
 			if 'x' in wkid:
 				wkid = re.sub('x', 'w', wkid)
 				foundlines = simplesearchworkwithexclusion(so.termone, wkid, so, curs)
@@ -170,7 +170,6 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 	
 	dbconnection.commit()
 	curs.close()
-	del dbconnection
 
 	return foundlineobjects
 
@@ -213,21 +212,20 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 		try:
 			wkid = searchinginside.pop()
 			activepoll.remain(len(searchinginside))
-		except:
-			wkid = 'gr0000w000'
+		except IndexError:
+			wkid = None
+
 		commitcount.increment()
 		if commitcount.value % 400 == 0:
 			dbconnection.commit()
 
-		if wkid != 'gr0000w000':
+		if wkid:
 			foundlines = phrasesearch(maxhits, wkid, activepoll, so, curs)
-
 			for f in foundlines:
 				foundlineobjects.append(dblineintolineobject(f))
 
 	dbconnection.commit()
 	curs.close()
-	del dbconnection
 
 	return foundlineobjects
 
@@ -262,14 +260,13 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 	so = searchobject
 
 	while len(searchinginside) > 0 and count.value <= so.cap:
-
 		try:
 			wkid = searchinginside.pop()
 			activepoll.remain(len(searchinginside))
 		except:
-			wkid = 'gr0000w000'
+			wkid = None
 
-		if wkid != 'gr0000w000':
+		if wkid:
 			if so.scope == 'lines':
 				foundlines = withinxlines(wkid, so)
 			else:

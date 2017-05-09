@@ -1594,7 +1594,7 @@ def progressreport():
 	this code is itself in progress and will remain so for a while
 
 	note that if you run through uWSGI the GET sent to '/executesearch' will block/lock the IO
-	this will prevent anything GET being sent to '/progress' until after jsexecutesearch() finishes
+	this will prevent any GET being sent to '/progress' until after jsexecutesearch() finishes
 	not quite the async dreamland you had imagined
 
 	searches will work, but the progress statements will be broken
