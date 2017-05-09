@@ -46,12 +46,12 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 
 	# select level_00_value from gr0565w001 where level_03_value='3' AND level_02_value='2' AND level_01_value='1' AND level_00_value NOT IN ('t') ORDER BY index ASC;
 	# select level_01_value from gr0565w001 where level_03_value='2' AND level_02_value='1' AND level_01_value NOT IN ('t') ORDER BY index ASC;
-	query = 'SELECT level_0' + str(atlevel-1) + '_value FROM ' + audb + ' WHERE ( wkuniversalid=%s ) AND  '
+	query = 'SELECT level_0{lvl}_value FROM {db} WHERE ( wkuniversalid=%s ) AND  '.format(lvl=atlevel-1, db=audb)
 	datalist = [workid]
 	for level in range(availablelevels - 1, atlevel - 1, -1):
-		query += ' level_0' + str(level) + '_value=%s AND '
+		query += ' level_0{lvl}_value=%s AND '.format(lvl=level)
 		datalist.append(partialcitationtuple[availablelevels-level-1])
-	query += 'level_0' + str(atlevel-1) +'_value NOT IN (%s) ORDER BY index'
+	query += 'level_0{lvl}_value NOT IN (%s) ORDER BY index'.format(lvl=atlevel-1)
 	datalist.append('t')
 	data = tuple(datalist)
 	cursor.execute(query, data)
@@ -162,7 +162,7 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 		print('safe to ignore if you requested the first line of a work')
 
 	# step one: find the index number of the passage
-	query = 'SELECT index FROM ' + workdb + ' WHERE ( wkuniversalid=%s ) AND '
+	query = 'SELECT index FROM {w} WHERE ( wkuniversalid=%s ) AND '.format(w=workdb)
 	for level in range(0, len(citationtuple)):
 		query += lmap[level] + '=%s AND '
 	# drop the final 'AND '

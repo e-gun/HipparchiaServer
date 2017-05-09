@@ -191,9 +191,7 @@ class dbOpus(object):
 
 	def isnotliterary(self):
 		"""
-		
 		a check to see if you come from something other than 'gr' or 'lt'
-		
 		:return: 
 		"""
 
@@ -204,9 +202,7 @@ class dbOpus(object):
 
 	def isliterary(self):
 		"""
-
 		a check to see if you come from 'gr' or 'lt'
-
 		:return: 
 		"""
 
@@ -214,6 +210,7 @@ class dbOpus(object):
 			return True
 		else:
 			return False
+
 
 class dbWordCountObject(object):
 	"""

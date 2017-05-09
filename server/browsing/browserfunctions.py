@@ -17,6 +17,7 @@ from server.formattinghelperfunctions import getpublicationinfo, insertcrossrefe
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+
 def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
 	"""
 	this function does a lot of work via a number of subfunctions
@@ -36,7 +37,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 	table = workobject.universalid
 
-	if workobject.universalid[0:2] not in ['in', 'dp', 'ch']:
+	if workobject.isliterary():
 		name = authorobject.shortname
 	else:
 		name = authorobject.idxname
