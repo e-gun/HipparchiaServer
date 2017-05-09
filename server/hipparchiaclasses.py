@@ -202,6 +202,19 @@ class dbOpus(object):
 		else:
 			return False
 
+	def isliterary(self):
+		"""
+
+		a check to see if you come from 'gr' or 'lt'
+
+		:return: 
+		"""
+
+		if self.universalid[0:2] in ['gr', 'lt']:
+			return True
+		else:
+			return False
+
 class dbWordCountObject(object):
 	"""
 	an object that corresponds to a db line

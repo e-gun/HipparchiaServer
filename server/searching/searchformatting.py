@@ -169,20 +169,7 @@ def woformatworkinfo(workobject):
 	else:
 		c = '<!-- no wordcount available -->'
 
-	try:
-		dateval = int(workobject.converted_date)
-	except:
-		dateval = 9999
-
-	if dateval < 1500:
-		if dateval > 0:
-			suffix = 'CE'
-			d = ' (assigned to {cd} {fx})'.format(cd=str(workobject.converted_date), fx=suffix)
-		else:
-			suffix = 'BCE'
-			d = ' (assigned to {cd} {fx})'.format(cd=str(workobject.converted_date[1:]), fx=suffix)
-	else:
-		d = '<!-- no date available -->'
+	d = '(<span class="date">{d}</span>)'.format(d=workobject.bcedate())
 
 	p = formatpublicationinfo(workobject.publication_info)
 	if len(p) == 0:
@@ -510,7 +497,7 @@ def formatname(workobject, authorobject):
 	:return: 
 	"""
 
-	if workobject.universalid[0:2] not in ['in', 'dp', 'ch']:
+	if workobject.isliterary():
 		name = authorobject.shortname
 	else:
 		name = '[<span class="date">{d}</span>] {n}'.format(n=authorobject.idxname, d=workobject.bcedate())
