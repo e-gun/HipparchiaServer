@@ -207,6 +207,10 @@ body {
 	text-decoration: overline;
 	}
 
+.linethrough {
+    text-decoration: line-through;
+    }
+
 .loadoptions:hover {
 	color: #ada;
 	}

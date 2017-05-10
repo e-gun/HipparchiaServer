@@ -68,7 +68,7 @@ CALCULATEWORDWEIGHTS = 'no'
 #   of failed searches. NB: the failures will only show up in the logs; in the browser you will get partial results that will present
 #   themselves as successfully executed searches. That is no good at all.
 WORKERS = 3
-MPCOMMITCOUNT = 500
+MPCOMMITCOUNT = 1000
 
 
 ### [6] settings that you can only configure here ###

@@ -182,12 +182,15 @@ class dbOpus(object):
 		return float(self.converted_date) > other
 
 	def bcedate(self):
-		if int(self.converted_date) < 1:
-			return '{d} BCE'.format(d=self.converted_date[1:])
-		elif int(self.converted_date) < 1500:
-			return '{d} CE'.format(d=self.converted_date)
+		if self.converted_date:
+			if int(self.converted_date) < 1:
+				return '{d} BCE'.format(d=self.converted_date[1:])
+			elif int(self.converted_date) < 1500:
+				return '{d} CE'.format(d=self.converted_date)
+			else:
+				return 'date unknown'
 		else:
-			return 'date unknown'.format(d=self.converted_date)
+			return 'date unknown'
 
 	def isnotliterary(self):
 		"""
@@ -1154,20 +1157,15 @@ class FormattedSearchResult(object):
 
 	def getlocusthml(self):
 		"""
-		
 		generate the wrapped html for the citation; e.g:
-
 			<locus>
 				<span class="findnumber">[13]</span>&nbsp;&nbsp;<span class="foundauthor">Quintilianus, Marcus Fabius</span>,&nbsp;<span class="foundwork">Declamationes Minores</span>:
 				<browser id="lt1002w002_LN_24040"><span class="foundlocus">oration 289, section pr, line 1</span><br /></browser>
 			</locus>
-
 		:return: 
 		"""
 
-		locushtml = '<locus>\n'
-		locushtml += self.citationhtml(self.citationstring)
-		locushtml += '</locus><br />\n'
+		locushtml = '<locus>\n{cit}</locus><br />\n'.format(cit=self.citationhtml(self.citationstring))
 
 		return locushtml
 

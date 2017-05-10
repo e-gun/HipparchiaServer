@@ -169,7 +169,10 @@ def woformatworkinfo(workobject):
 	else:
 		c = '<!-- no wordcount available -->'
 
-	d = '(<span class="date">{d}</span>)'.format(d=workobject.bcedate())
+	if workobject.isnotliterary():
+		d = '(<span class="date">{d}</span>)'.format(d=workobject.bcedate())
+	else:
+		d = ''
 
 	p = formatpublicationinfo(workobject.publication_info)
 	if len(p) == 0:

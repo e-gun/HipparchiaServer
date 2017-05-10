@@ -271,8 +271,12 @@ $('#onehit_n').click( function(){ setoptions('onehit', 'no'); $('#onehitisfalse'
 $('#includespuria').change(function () {
     if(this.checked) {
         setoptions('spuria', 'yes');
+        $('#spuriaistrue').show();
+        $('#spuriaisfalse').hide();
     } else {
         setoptions('spuria', 'no');
+        $('#spuriaistrue').hide();
+        $('#spuriaisfalse').show();
     }
     // because some items on your list just got purged?
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
@@ -281,8 +285,12 @@ $('#includespuria').change(function () {
 $('#includevaria').change(function () {
     if(this.checked) {
         setoptions('varia', 'yes');
+        $('#variaistrue').show();
+        $('#variaisfalse').hide();
     } else {
         setoptions('varia', 'no');
+        $('#variaistrue').hide();
+        $('#variaisfalse').show();
     }
     // because some items on your list just got purged?
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
@@ -291,8 +299,12 @@ $('#includevaria').change(function () {
 $('#includeincerta').change(function () {
     if(this.checked) {
         setoptions('incerta', 'yes');
+        $('#undatedistrue').show();
+        $('#undatedisfalse').hide();
     } else {
         setoptions('incerta', 'no');
+        $('#undatedistrue').hide();
+        $('#undatedisfalse').show();
     }
     // because some items on your list just got purged?
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });

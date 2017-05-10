@@ -94,7 +94,9 @@ def frontpage():
 		corporalabels = {'g': 'G', 'l': 'L', 'd': 'D', 'i': 'I', 'c': 'C'}
 
 	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora, clab=corporalabels,
-						   onehit=session['onehit'], hwindexing=session['headwordindexing'], css=stylesheet, buildinfo=buildinfo)
+						   onehit=session['onehit'], hwindexing=session['headwordindexing'], css=stylesheet, buildinfo=buildinfo,
+						   spuria=session['spuria'], varia=session['varia'], undated=session['incerta']
+	                       )
 
 	return page
 
@@ -190,6 +192,29 @@ def executesearch(timestamp):
 		authorandworklist = flagexclusions(authorandworklist)
 		workssearched = len(authorandworklist)
 
+		# POSSIBLE REFACTORING ROUTE: deprecate 'WHERE index...'
+
+		# with a date search inside the incriptions it would be much faster to always search full authors and then to use
+		# workobject.firstline and workobject.firstline to toss hits that were invalid rather than making 100k SQL WHERE-clause searches
+		# a move in this direction would mean seriously rethinking the role of prunebydate() in compileauthorandworklist()
+		# it would also mean looking at the exclusion mechanism again
+		# and the implications for the cap are huge: a person who was interested in 'δε' in the 3rd c. would be hard to take care of
+
+		# PARTIAL TABLE SPEED [0 context]
+		# Sought »ἐπρυτάνευε« [in 'in']
+		# Searched 56,799 texts and found 172 passages (19.81s)
+		# Searched between 0C.E. and 1500 C.E.
+
+		# WHOLE TABLE SPEED [0 context]
+		# Sought »ἐπρυτάνευε« [in 'in']
+		# Searched 139,970 texts and found 256 passages (1.29s)
+		# Sorted by name
+
+		# just below you would instead be looking for any table that had any possible hits with calculatewholeauthorsearches()
+
+		# at the moment it seems safer to leave this alone: historians who make broad chronological selections are the only
+		# ones affected, and then not so terribly? meanwhile search times will only shrink as hardware improves?
+
 		poll[ts].statusis('Calculating full authors to search')
 		so.authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
 
@@ -219,6 +244,7 @@ def executesearch(timestamp):
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.originalseeking, ns=so.nearstr, sp=so.originalproximate, sc=so.scope, pr=so.proximate)
 			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'.format(
 				skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=proximate)
+
 		hits = searchdispatcher(so, poll[ts])
 		poll[ts].statusis('Putting the results in context')
 
@@ -902,13 +928,13 @@ def getauthinfo(authorid):
 
 	theauthor = authordict[authorid]
 
-	authinfo = ''
-	authinfo += formatauthinfo(theauthor)
+	authinfo = []
+	authinfo.append(formatauthinfo(theauthor))
 
 	if len(theauthor.listofworks) > 1:
-		authinfo +='<br /><br /><span class="italic">work numbers:</span><br />\n'
+		authinfo.append('<br /><br /><span class="italic">work numbers:</span><br />')
 	else:
-		authinfo +='<br /><span class="italic">work:</span><br />\n'
+		authinfo.append('<br /><span class="italic">work:</span><br />')
 
 	sortedworks = {work.universalid: work for work in theauthor.listofworks}
 
@@ -916,9 +942,9 @@ def getauthinfo(authorid):
 	keys = sorted(keys)
 
 	for work in keys:
-		authinfo += woformatworkinfo(sortedworks[work])
+		authinfo.append(woformatworkinfo(sortedworks[work]))
 
-	authinfo = json.dumps(authinfo)
+	authinfo = json.dumps('\n'.join(authinfo))
 
 	cur.close()
 

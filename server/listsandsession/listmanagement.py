@@ -125,9 +125,6 @@ def compileauthorandworklist(listmapper, s=session):
 
 	authorandworklist = list(set(authorandworklist) - set(excludedworks))
 
-	del ad
-	del wd
-
 	return authorandworklist
 
 
