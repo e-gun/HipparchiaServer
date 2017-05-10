@@ -82,7 +82,7 @@ def frontpage():
 	# check to see which dbs we actually own
 	activelists = [l for l in listmapper if len(listmapper[l]['a']) > 0]
 
-	versionchecking(activelists, expectedsqltemplateversion)
+	buildinfo = versionchecking(activelists, expectedsqltemplateversion)
 
 	# check to see which dbs we search by default
 	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
@@ -94,7 +94,7 @@ def frontpage():
 		corporalabels = {'g': 'G', 'l': 'L', 'd': 'D', 'i': 'I', 'c': 'C'}
 
 	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora, clab=corporalabels,
-						   onehit=session['onehit'], hwindexing=session['headwordindexing'], css=stylesheet)
+						   onehit=session['onehit'], hwindexing=session['headwordindexing'], css=stylesheet, buildinfo=buildinfo)
 
 	return page
 
@@ -219,7 +219,6 @@ def executesearch(timestamp):
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.originalseeking, ns=so.nearstr, sp=so.originalproximate, sc=so.scope, pr=so.proximate)
 			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'.format(
 				skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=proximate)
-
 		hits = searchdispatcher(so, poll[ts])
 		poll[ts].statusis('Putting the results in context')
 
@@ -526,7 +525,6 @@ def completeindex():
 	results = json.dumps(results)
 
 	cur.close()
-	del dbc
 	del poll[ts]
 
 	return results
@@ -577,7 +575,6 @@ def textmaker():
 	results = json.dumps(results)
 
 	cur.close()
-	del dbc
 
 	return results
 
@@ -625,6 +622,7 @@ def cookieintosession(cookienum):
 	modifysessionselections(cookiedict, authorgenreslist, workgenreslist, authorlocationlist, workprovenancelist)
 
 	response = redirect(url_for('frontpage'))
+
 	return response
 
 
@@ -870,7 +868,6 @@ def workstructure(locus):
 	results = json.dumps(ws)
 
 	cur.close()
-	del dbc
 
 	return results
 
@@ -924,7 +921,6 @@ def getauthinfo(authorid):
 	authinfo = json.dumps(authinfo)
 
 	cur.close()
-	del dbc
 
 	return authinfo
 
@@ -1058,7 +1054,6 @@ def findbyform(observedword):
 	returnarray = json.dumps(returnarray)
 
 	cur.close()
-	del dbc
 
 	return returnarray
 
@@ -1130,7 +1125,6 @@ def dictsearch(searchterm):
 	returnarray = json.dumps(returnarray)
 
 	cur.close()
-	del dbc
 
 	return returnarray
 
@@ -1202,7 +1196,6 @@ def reverselexiconsearch(searchterm):
 	returnarray = json.dumps(returnarray)
 
 	cur.close()
-	del dbc
 
 	return returnarray
 

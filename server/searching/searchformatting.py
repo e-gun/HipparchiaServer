@@ -277,7 +277,7 @@ def formattingworkpile(bundles, criteria, activepoll, allfound):
 	while len(bundles) > 0:
 		try:
 			bundle = bundles.pop()
-		except:
+		except IndexError:
 			# IndexError: pop from empty list
 			bundle = None
 

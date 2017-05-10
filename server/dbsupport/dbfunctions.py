@@ -263,16 +263,16 @@ def returnfirstlinenumber(workid, cursor):
 
 	firstline = -1
 	while firstline == -1:
-		query = 'SELECT min(index) FROM ' + db + ' WHERE wkuniversalid=%s'
+		query = 'SELECT min(index) FROM {db} WHERE wkuniversalid=%s'.format(db=db)
 		data = (workid,)
 		try:
 			cursor.execute(query, data)
 			found = cursor.fetchone()
 			firstline = found[0]
 		except:
-			workdb = perseusidmismatch(workid,cursor)
+			workid = perseusidmismatch(workid,cursor)
 			firstline = returnfirstlinenumber(workid, cursor)
-		
+
 	return firstline
 
 
@@ -405,9 +405,7 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 	curs.execute(q)
 	results = curs.fetchall()
 
-	corpora = {}
-	for r in results:
-		corpora[r[0]] = (r[1],r[2])
+	corpora = {r[0] : (r[1],r[2]) for r in results}
 
 	for db in activedbs:
 		if db in corpora:
@@ -417,5 +415,8 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 				print('\t But the server expects the template version to be',str(expectedsqltemplateversion))
 				print('\t EXPECT THE WORST IF YOU TRY TO EXECUTE ANY SEARCHES\nWARNING')
 
-	return
+	buildinfo = ['\t{corpus}: {date} [{prolix}]'.format(corpus=c,date=corpora[c][1],prolix=labeldecoder[c]) for c in sorted(corpora.keys())]
+	buildinfo = '\n'.join(buildinfo)
+
+	return buildinfo
 
