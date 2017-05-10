@@ -468,11 +468,11 @@ $('#save05').click( function(){ javascriptsessionintocookie('05'); $('#setoption
 
 // timing issues: you will get the cookie properly, but the selections will not show up right unless you use the misleadingly named .always()
 //  'the .always() method replaces the deprecated .complete() method.'
-$('#load01').click( function(){ $.getJSON('/getcookie/01').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
-$('#load02').click( function(){ $.getJSON('/getcookie/02').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
-$('#load03').click( function(){ $.getJSON('/getcookie/03').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
-$('#load04').click( function(){ $.getJSON('/getcookie/04').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
-$('#load05').click( function(){ $.getJSON('/getcookie/05').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); }); $('#setoptions').hide(); $('#loadslots').hide(); });
+$('#load01').click( function(){ $.getJSON('/getcookie/01').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); location.reload(); }); });
+$('#load02').click( function(){ $.getJSON('/getcookie/02').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); location.reload(); }); });
+$('#load03').click( function(){ $.getJSON('/getcookie/03').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); location.reload(); }); });
+$('#load04').click( function(){ $.getJSON('/getcookie/04').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); location.reload(); }); });
+$('#load05').click( function(){ $.getJSON('/getcookie/05').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); location.reload(); }); });
 
 
 ///
