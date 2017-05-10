@@ -287,7 +287,7 @@ def formattingworkpile(bundles, criteria, activepoll, allfound):
 			citwithcontext.hitnumber = bundle['hitnumber']
 			activepoll.remain(bundle['hitnumber'])
 
-			if bundle['hitnumber'] % 100 == 0:
+			if bundle['hitnumber'] % hipparchia.config['MPCOMMITCOUNT']  == 0:
 				dbconnection.commit()
 
 			if citwithcontext.lineobjects != []:

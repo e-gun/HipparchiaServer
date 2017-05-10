@@ -50,14 +50,22 @@ HTMLDEBUGMODE = 'no'
 CALCULATEWORDWEIGHTS = 'no'
 
 
-### [5] Hipparchia performance variable ###
-##  [set once and forget: WORKERS] ##
-# pick a number based on your cpu cores: on a 4-core/8-thread machine diminishing returns kick in between 3 and 4 as the bottleneck shifts elsewhere
-# on a one-core virtual machine extra workers don't do much good and tend to just get in the way of one another: '1' seems to be best
-# a high number on a fast machine risks lockout from the db as too many requests come too fast: might need to recalibrate the default commit counts if you go over 5
-# your mileage will indeed vary, but N > threads*(.5) is probably not going to do much good. Buy a faster drive first.
-WORKERS = 3
+### [5] Hipparchia performance variables ###
+##  [set once and forget: WORKERS, MPCOMMITCOUNT] ##
+# WORKERS: pick a number based on your cpu cores: on a 4-core/8-thread machine diminishing returns kick in between 3 and 4
+#   as the bottleneck shifts to the I/O subsystem. Very high throughput I/O is a good idea if you are firing up lots of threads.
+#   on a one-core virtual machine extra workers don't do much good and tend to just get in the way of one another: '1' seems to be best
+#   a high number on a fast machine risks lockout from the db as too many requests come too fast: might need to recalibrate
+#   the default commit counts if you go over 5
+#   your mileage will indeed vary, but N > threads*(.5) is probably not going to do much good. Buy a faster drive first.
+# MPCOMMITCOUNT: **do not change this** unless you are getting deluged by messages about failed DB queries (see 'WORKERS' above)
+#   In which case you should *lower* the number because your many threads are accumulating too many uncommited transactions.
+#   Avoid increasing this value: it will make very little difference to your performace, but it will greatly increase your chances
+#   of failed searches. NB: the failures will only show up in the logs; you will get partial results that will present
+#   themselves as successfully compleated searches. That is a no good at all.
 
+WORKERS = 3
+MPCOMMITCOUNT = 500
 
 ### [6] settings that you can only configure here ###
 ##  [only change this if you know why you are doing it] ##

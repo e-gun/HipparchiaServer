@@ -99,7 +99,7 @@ def textsegmentfindstartandstop(authorobject, workobject, passageaslist, cursor)
 		qw += 'AND (' + w[i][0] + ') '
 		d.append(w[i][1])
 
-	query = 'SELECT index FROM ' + authorobject.universalid + ' WHERE wkuniversalid=%s ' + qw + ' ORDER BY index DESC LIMIT 1'
+	query = 'SELECT index FROM {au} WHERE wkuniversalid=%s {whr} ORDER BY index DESC LIMIT 1'.format(au=authorobject.universalid, whr=qw)
 	data = tuple(d)
 
 	cursor.execute(query, data)

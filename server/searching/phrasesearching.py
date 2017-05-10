@@ -8,6 +8,7 @@
 
 import re
 
+from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection, makeablankline, dblineintolineobject
 from server.hipparchiaclasses import QueryCombinator
 from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, whereclauses, \
@@ -109,7 +110,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, c
 
 		if wkid:
 			commitcount.increment()
-			if commitcount.value % 400 == 0:
+			if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
 				dbconnection.commit()
 			indices = None
 			db = wkid[0:6]

@@ -165,7 +165,7 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 				foundlineobjects.append(dblineintolineobject(f))
 
 		commitcount.increment()
-		if commitcount.value % 400 == 0:
+		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
 			dbconnection.commit()
 	
 	dbconnection.commit()
@@ -216,7 +216,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 			wkid = None
 
 		commitcount.increment()
-		if commitcount.value % 400 == 0:
+		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
 			dbconnection.commit()
 
 		if wkid:

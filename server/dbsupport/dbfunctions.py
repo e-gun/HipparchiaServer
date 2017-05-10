@@ -17,6 +17,18 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 
+def setconnection(autocommit='n'):
+	dbconnection = psycopg2.connect(user=hipparchia.config['DBUSER'], host=hipparchia.config['DBHOST'],
+	                                port=hipparchia.config['DBPORT'], database=hipparchia.config['DBNAME'],
+	                                password=hipparchia.config['DBPASS'])
+	if autocommit == 'autocommit':
+		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+
+	dbconnection.set_session(readonly=True)
+
+	return dbconnection
+
+
 def tablenamer(authorobject, thework):
 	# tell me the name of your table
 	# work 1 is stored as 0: try not to create a table 0; lots of unexpected results can stem from this off-by-one slip
@@ -236,18 +248,6 @@ def grabonelinefromwork(workdbname, lineindex, cursor):
 	foundline = cursor.fetchone()
 	
 	return foundline
-
-
-def setconnection(autocommit='n'):
-	dbconnection = psycopg2.connect(user=hipparchia.config['DBUSER'], host=hipparchia.config['DBHOST'],
-	                                port=hipparchia.config['DBPORT'], database=hipparchia.config['DBNAME'],
-	                                password=hipparchia.config['DBPASS'])
-	if autocommit == 'autocommit':
-		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-
-	dbconnection.set_session(readonly=True)
-
-	return dbconnection
 
 
 def returnfirstlinenumber(workid, cursor):

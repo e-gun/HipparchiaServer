@@ -333,7 +333,6 @@ def gkattemptelision(hypenatedgreekheadword):
 	unaspirated = 'π'
 	aspirated = 'φ'
 
-
 	units = hypenatedgreekheadword.split(',')
 	hyphenated = units[-1]
 
