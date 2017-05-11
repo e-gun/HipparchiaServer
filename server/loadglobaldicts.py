@@ -66,24 +66,12 @@ def dictitemstartswith(originaldict, element, muststartwith):
 
 	return newdict
 
-
-tlgauthors = dictitemstartswith(authordict, 'universalid', 'gr')
-tlgworks = dictitemstartswith(workdict, 'universalid', 'gr')
-latauthors = dictitemstartswith(authordict, 'universalid', 'lt')
-latworks = dictitemstartswith(workdict, 'universalid', 'lt')
-insauthors = dictitemstartswith(authordict, 'universalid', 'in')
-insworks = dictitemstartswith(workdict, 'universalid', 'in')
-ddpauthors = dictitemstartswith(authordict, 'universalid', 'dp')
-ddpworks = dictitemstartswith(workdict, 'universalid', 'dp')
-chrauthors = dictitemstartswith(authordict, 'universalid', 'ch')
-chrworks = dictitemstartswith(workdict, 'universalid', 'ch')
-
 listmapper = {
-	'gr': {'a': tlgauthors, 'w': tlgworks},
-	'lt': {'a': latauthors, 'w': latworks},
-	'in': {'a': insauthors, 'w': insworks},
-	'dp': {'a': ddpauthors, 'w': ddpworks},
-	'ch': {'a': chrauthors, 'w': chrworks},
+	'gr': {'a': dictitemstartswith(authordict, 'universalid', 'gr'), 'w': dictitemstartswith(workdict, 'universalid', 'gr')},
+	'lt': {'a': dictitemstartswith(authordict, 'universalid', 'lt'), 'w': dictitemstartswith(workdict, 'universalid', 'lt')},
+	'dp': {'a': dictitemstartswith(authordict, 'universalid', 'dp'), 'w': dictitemstartswith(workdict, 'universalid', 'dp')},
+	'in': {'a': dictitemstartswith(authordict, 'universalid', 'in'), 'w': dictitemstartswith(workdict, 'universalid', 'in')},
+	'ch': {'a': dictitemstartswith(authordict, 'universalid', 'ch'), 'w': dictitemstartswith(workdict, 'universalid', 'ch')},
 }
 
 

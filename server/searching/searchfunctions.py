@@ -178,6 +178,7 @@ def simplesearchworkwithexclusion(seeking, workdbname, searchobject, cursor, tem
 	qtemplate = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND ( {a} {sy} %s OR {b} {sy} %s ) {qw} ORDER BY index ASC {l}'
 	query = qtemplate.format(db=db, a=so.usecolumn, sy=mysyntax, b=columnb, qw=qw, l=mylimit)
 	data = tuple(d)
+
 	cursor.execute(query, data)
 	found = cursor.fetchall()
 

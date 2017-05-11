@@ -345,12 +345,11 @@ def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 			w = workobjectdict[aw]
 			try:
 				# does the work have a date? if not, we will throw an exception
-				int(w.converted_date)
 				if w.earlier(min) or w.later(max):
 					pass
 				else:
 					trimmedlist.append(aw)
-			except:
+			except TypeError:
 				# no work date? then we will look inside the author for the date
 				aid = aw[0:6]
 				try:
@@ -365,7 +364,6 @@ def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 					trimmedlist.append(aw)
 		# [b] then add back in any varia and/or incerta as needed
 		if session['varia'] == 'yes':
-			# varia = findspecificdate(authorandworklist, authorobjectdict, workobjectdict, 2000)
 			varia = [v for v in authorandworklist if v in allvaria]
 			trimmedlist += varia
 		if session['incerta'] == 'yes':

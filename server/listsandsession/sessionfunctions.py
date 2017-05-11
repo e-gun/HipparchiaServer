@@ -681,7 +681,7 @@ def reducetosessionselections(listmapper, criterion):
 	# the order here has to match the order in corpusselectionsasavalue()
 	# a nice source of bugs if you try to refactor elsewhere
 
-	corpora = ('lt', 'gr', 'dp', 'in', 'ch')
+	corpora = ('lt', 'gr', 'in', 'dp', 'ch')
 	
 	active = corpusselectionsaspseudobinarystring()
 
@@ -695,6 +695,8 @@ def reducetosessionselections(listmapper, criterion):
 			toactivate.append(corpora[position])
 
 	d = {}
+
+	# print('active corpora',toactivate)
 
 	for a in toactivate:
 		d.update(listmapper[a][criterion])
