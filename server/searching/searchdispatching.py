@@ -154,7 +154,7 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 		if wkid:
 			if len(wkid) == 10:
 				# with the advent of 'x' in work ids, you can't just re.sub() x for w any more
-				# you can only swap out x at position 6: 'in0c0bx03x' vs 'in0c0bw03x' (which would become 'in0c0bw03w')
+				# you can only swap out x at position 6: 'in0c0bx03x' vs 'in0c0bw03x' (which would become 'in0c0bw03w' otherwise)
 				if wkid[6] == 'x':
 					wkid[6] = 'w'
 					fnc = simplesearchworkwithexclusion

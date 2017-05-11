@@ -355,10 +355,8 @@ def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 				try:
 					if authorobjectdict[aid].earlier(min) or authorobjectdict[aid].later(max):
 						pass
-						# print('passing',aw ,authorobjectdict[aid].converted_date)
 					else:
 						trimmedlist.append(aw)
-					# print('append', aw, authorobjectdict[aid].converted_date)
 				except:
 					# the author can't tell you his date; you must be building a list with both latin authors and something else
 					trimmedlist.append(aw)

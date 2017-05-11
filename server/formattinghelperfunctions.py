@@ -89,69 +89,31 @@ def forceterminalacute(matchgroup):
 
 def stripaccents(texttostrip):
 	"""
+	
 	turn ᾶ into α, etc
-
-	this is one of the more costly functions out there? [ntl it is usually .2s of a 4s search, etc.]
 	
-	you could go faster with a brutal reduction via dict:
-		{ ἀ: α, ἁ: α, ...}
-
-	:return:
+	there are more others ways to do this; but this is the fast way
+	it turns out that this was one of the slowest functions in the profiler
+	
+	:param texttostrip: 
+	:return: 
 	"""
-	substitutes = (
-		('v', 'u'),
-		('U', 'V'),
-		('j', 'i'),
-		('(Á|Ä)', 'A'),
-		('(á|ä)', 'a'),
-		('(É|Ë)', 'E'),
-		('(é|ë)', 'e'),
-		('(Í|Ï)', 'I'),
-		('(í|ï)', 'i'),
-		('(Ó|Ö)', 'O'),
-		('(ó|ö)', 'o'),
-		('(ῤ|ῥ|Ῥ)', 'ρ'),
-		# some sort of problem with acute alpha which seems to be unkillable
-		# (u'u\1f71',u'\u03b1'),
-		('(ἀ|ἁ|ἂ|ἃ|ἄ|ἅ|ἆ|ἇ|ᾀ|ᾁ|ᾂ|ᾃ|ᾄ|ᾅ|ᾆ|ᾇ|ᾲ|ᾳ|ᾴ|ᾶ|ᾷ|ᾰ|ᾱ|ὰ|ά)', 'α'),
-		('(ἐ|ἑ|ἒ|ἓ|ἔ|ἕ|ὲ|έ)', 'ε'),
-		('(ἰ|ἱ|ἲ|ἳ|ἴ|ἵ|ἶ|ἷ|ὶ|ί|ῐ|ῑ|ῒ|ΐ|ῖ|ῗ|ΐ)', 'ι'),
-		('(ὀ|ὁ|ὂ|ὃ|ὄ|ὅ|ό|ὸ)', 'ο'),
-		('(ὐ|ὑ|ὒ|ὓ|ὔ|ὕ|ὖ|ὗ|ϋ|ῠ|ῡ|ῢ|ΰ|ῦ|ῧ|ύ|ὺ)', 'υ'),
-		('(ὠ|ὡ|ὢ|ὣ|ὤ|ὥ|ὦ|ὧ|ᾠ|ᾡ|ᾢ|ᾣ|ᾤ|ᾥ|ᾦ|ᾧ|ῲ|ῳ|ῴ|ῶ|ῷ|ώ|ὼ)', 'ω'),
-		# similar problems with acute eta
-		# (u'\u1f75','η'),
-		('(ᾐ|ᾑ|ᾒ|ᾓ|ᾔ|ᾕ|ᾖ|ᾗ|ῂ|ῃ|ῄ|ῆ|ῇ|ἤ|ἢ|ἥ|ἣ|ὴ|ή|ἠ|ἡ|ἦ|ἧ)', 'η'),
-		('(ᾨ|ᾩ|ᾪ|ᾫ|ᾬ|ᾭ|ᾮ|ᾯ|Ὠ|Ὡ|Ὢ|Ὣ|Ὤ|Ὥ|Ὦ|Ὧ|Ω)', 'ω'),
-		('(Ὀ|Ὁ|Ὂ|Ὃ|Ὄ|Ὅ|Ο)', 'ο'),
-		('(ᾈ|ᾉ|ᾊ|ᾋ|ᾌ|ᾍ|ᾎ|ᾏ|Ἀ|Ἁ|Ἂ|Ἃ|Ἄ|Ἅ|Ἆ|Ἇ|Α)', 'α'),
-		('(Ἐ|Ἑ|Ἒ|Ἓ|Ἔ|Ἕ|Ε)', 'ε'),
-		('(Ἰ|Ἱ|Ἲ|Ἳ|Ἴ|Ἵ|Ἶ|Ἷ|Ι)', 'ι'),
-		('(Ὑ|Ὓ|Ὕ|Ὗ|Υ)', 'υ'),
-		('(ᾘ|ᾙ|ᾚ|ᾛ|ᾜ|ᾝ|ᾞ|ᾟ|Ἠ|Ἡ|Ἢ|Ἣ|Ἤ|Ἥ|Ἦ|Ἧ|Η)', 'η'),
-		('Β', 'β'),
-		('Ψ', 'ψ'),
-		('Δ', 'δ'),
-		('Φ', 'φ'),
-		('Γ', 'γ'),
-		('Ξ', 'ξ'),
-		('Κ', 'κ'),
-		('Λ', 'λ'),
-		('Μ', 'μ'),
-		('Ν', 'ν'),
-		('Π', 'π'),
-		('Ϙ', 'ϙ'),
-		('Ρ', 'ρ'),
-		('Ϲ', 'ϲ'),
-		('Τ', 'τ'),
-		('Θ', 'θ'),
-		('Ζ', 'ζ')
-	)
-	
-	for swap in range(0, len(substitutes)):
-		texttostrip = re.sub(substitutes[swap][0], substitutes[swap][1], texttostrip)
-	
-	return texttostrip
+
+	invals = ['ἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗΐὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ']
+	outvals = ['αααααααααααααααααααααααααεεεεεεεειιιιιιιιιιιιιιιιιοοοοοοοουυυυυυυυυυυυυυυυυηηηηηηηηηηηηηηηηηηηηηηηωωωωωωωωωωωωωωωωωωωωωωω']
+
+	invals.append('ᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑἘἙἚἛἜἝΕἸἹἺἻἼἽἾἿΙὈὉὊὋὌὍΟὙὛὝὟΥᾘᾙᾚᾛᾜᾝᾞᾟἨἩἪἫἬἭἮἯΗᾨᾩᾪᾫᾬᾭᾮᾯὨὩὪὫὬὭὮὯΩῤῥῬΒΨΔΦΓΞΚΛΜΝΠϘΡϹΤΧΘΖ')
+	outvals.append('αααααααααααααααααεεεεεεειιιιιιιιιοοοοοοουυυυυηηηηηηηηηηηηηηηηηωωωωωωωωωωωωωωωωωρρρβψδφγξκλμνπϙρϲτχθζ')
+
+	invals.append('vUjÁÄáäÉËéëÍÏíïÓÖóöÜÚüú')
+	outvals.append('uViaaaaeeeeiiiioooouuuu')
+
+	invals = ''.join(invals)
+	outvals = ''.join(outvals)
+
+	stripped = texttostrip.translate(str.maketrans(invals, outvals))
+
+	return stripped
 
 
 def getpublicationinfo(workobject, cursor):
