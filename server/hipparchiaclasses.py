@@ -31,7 +31,7 @@ class dbAuthor(object):
 	    cleanname character varying(128) COLLATE pg_catalog."default",
 	    genres character varying(512) COLLATE pg_catalog."default",
 	    recorded_date character varying(64) COLLATE pg_catalog."default",
-	    converted_date character varying(8) COLLATE pg_catalog."default",
+	    converted_date integer,
 	    location character varying(128) COLLATE pg_catalog."default"
 	)
 	
@@ -56,22 +56,22 @@ class dbAuthor(object):
 		self.id = universalid
 
 	def earlier(self, other):
-		return float(self.converted_date) < other
+		return self.converted_date < other
 
 	def later(self, other):
-		return float(self.converted_date) > other
+		return self.converted_date > other
 
 	def atorearlier(self, other):
-		return float(self.converted_date) <= other
+		return self.converted_date <= other
 
 	def atorlater(self, other):
-		return float(self.converted_date) >= other
+		return self.converted_date >= other
 
 	def floruitis(self, other):
-		return float(self.converted_date) == other
+		return self.converted_date == other
 
 	def floruitisnot(self, other):
-		return float(self.converted_date) != other
+		return self.converted_date != other
 
 	def addwork(self, work):
 		self.listofworks.append(work)
@@ -107,7 +107,7 @@ class dbOpus(object):
 	    worktype character varying(32) COLLATE pg_catalog."default",
 	    provenance character varying(64) COLLATE pg_catalog."default",
 	    recorded_date character varying(64) COLLATE pg_catalog."default",
-	    converted_date character varying(8) COLLATE pg_catalog."default",
+	    converted_date integer,
 	    wordcount integer,
 	    firstline integer,
 	    lastline integer,
@@ -176,17 +176,19 @@ class dbOpus(object):
 		return cit
 
 	def earlier(self, other):
-		return float(self.converted_date) < other
+		return self.converted_date < other
 
 	def later(self, other):
-		return float(self.converted_date) > other
+		return self.converted_date > other
 
 	def bcedate(self):
 		if self.converted_date:
-			if int(self.converted_date) < 1:
-				return '{d} BCE'.format(d=self.converted_date[1:])
-			elif int(self.converted_date) < 1500:
-				return '{d} CE'.format(d=self.converted_date)
+			# converted_date is a float
+			cds = str(self.converted_date)
+			if self.converted_date < 1:
+				return '{d} BCE'.format(d=cds[1:])
+			elif self.converted_date < 1500:
+				return '{d} CE'.format(d=cds)
 			else:
 				return 'date unknown'
 		else:

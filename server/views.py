@@ -10,7 +10,6 @@ import asyncio
 import errno
 import json
 import locale
-import re
 import socket
 import time
 from urllib.request import urlopen
@@ -74,7 +73,7 @@ def frontpage():
 	:return:
 	"""
 
-	expectedsqltemplateversion = 2182017
+	expectedsqltemplateversion = 5112017
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
 
 	sessionvariables()

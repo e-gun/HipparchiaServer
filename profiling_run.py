@@ -11,13 +11,12 @@ from werkzeug.contrib.profiler import ProfilerMiddleware
 from server import hipparchia
 
 hipparchia.config['PROFILE'] = True
-hipparchia.wsgi_app = ProfilerMiddleware(hipparchia.wsgi_app, restrictions=[30])
+hipparchia.wsgi_app = ProfilerMiddleware(hipparchia.wsgi_app, restrictions=[20])
 
-# debug=True is considered to be a serious security hazard in a networked environment
-# if you are working on Hipparchia's code, you might be interested in this; otherwise there
-# are only bad reasons to set this to 'True'
+d = False
 
-# it is assumed that a profiling run is a debugging run
-# do not use this script in a production setting...
+# WARNING:
+#   debug=True is considered to be a serious security hazard in a networked environment
+#   it is assumed that a profiling run is a debugging run; DO NOT USE THIS SCRIPT IN A PRODUCTION SETTING
 
-hipparchia.run(debug=True, threaded=True)
+hipparchia.run(debug=d, threaded=True)
