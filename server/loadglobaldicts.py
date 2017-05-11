@@ -5,10 +5,10 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+import re
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors
-from server.listsandsession.listmanagement import dictitemstartswith
 from server.listsandsession.sessiondicts import buildaugenresdict, buildworkgenresdict, buildauthorlocationdict, \
 	buildworkprovenancedict
 
@@ -47,6 +47,26 @@ workgenresdict = buildworkgenresdict(workdict)
 workprovenancedict = buildworkprovenancedict(workdict)
 
 print('building specialized sublists\n')
+
+
+def dictitemstartswith(originaldict, element, muststartwith):
+	"""
+
+	trim a dict via a criterion: muststartwith must begin the item to survive the check
+
+	:param originaldict:
+	:param element:
+	:param muststartwith:
+	:return:
+	"""
+
+	muststartwith = re.compile('^'+muststartwith)
+	newdict = {x: originaldict[x] for x in originaldict
+	           if re.search(muststartwith, getattr(originaldict[x], element))}
+
+	return newdict
+
+
 tlgauthors = dictitemstartswith(authordict, 'universalid', 'gr')
 tlgworks = dictitemstartswith(workdict, 'universalid', 'gr')
 latauthors = dictitemstartswith(authordict, 'universalid', 'lt')
@@ -65,3 +85,55 @@ listmapper = {
 	'in': {'a': ddpauthors, 'w': ddpworks},
 	'ch': {'a': chrauthors, 'w': chrworks},
 }
+
+
+def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
+	"""
+
+	tell me which items on the authorandworklist have unknown dates
+
+		incerta = 2500
+		varia = 2000
+		[failedtoparse = 9999]
+
+	this profiles as fairly slow when called on a large search list (.5s): 
+	it might be better to build a list of these up front
+	when loading HipparchiaServer since this is both static and repetitive
+
+	:param authorandworklist:
+	:param authorobjectdict:
+	:param worksdict:
+	:return:
+	"""
+	datematches = []
+
+	for aw in authorandworklist:
+		w = workobjectdict[aw]
+		try:
+			# does the work have a date? if not, we will throw an exception
+			cd = int(w.converted_date)
+			if cd == specificdate:
+				datematches.append(aw)
+		except:
+			# no work date? then we will look inside the author for the date
+			aid = aw[0:6]
+			try:
+				cd = int(authorobjectdict[aid].converted_date)
+				if cd == specificdate:
+					datematches.append(aw)
+			except:
+				# the author can't tell you his date; i guess it is incerta by definition
+				datematches.append(aw)
+
+	return datematches
+
+# search list building and pruning was testing all items for their date this too often at a cost of .5s per full corpus search
+# so a master list is built up front that you can quickly make a check against
+
+allworks = workdict.keys()
+allvaria = set(findspecificdate(allworks, authordict, workdict, 2000))
+allincerta = set(findspecificdate(allworks, authordict, workdict, 2500))
+allunknown = set(findspecificdate(allworks, authordict, workdict, 2000))
+allincerta = allincerta.union(allunknown)
+del allworks
+del allunknown

@@ -12,6 +12,7 @@ from flask import session
 
 from server.formattinghelperfunctions import stripaccents
 from server.listsandsession.sessionfunctions import reducetosessionselections, justlatin
+from server.loadglobaldicts import allvaria, allincerta
 
 
 def compileauthorandworklist(listmapper, s=session):
@@ -364,56 +365,18 @@ def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 					trimmedlist.append(aw)
 		# [b] then add back in any varia and/or incerta as needed
 		if session['varia'] == 'yes':
-			varia = findspecificdate(authorandworklist, authorobjectdict, workobjectdict, 2000)
+			# varia = findspecificdate(authorandworklist, authorobjectdict, workobjectdict, 2000)
+			varia = [v for v in authorandworklist if v in allvaria]
 			trimmedlist += varia
 		if session['incerta'] == 'yes':
-			incerta = findspecificdate(authorandworklist, authorobjectdict, workobjectdict, 2500)
+			incerta = [i for i in authorandworklist if i in allincerta]
 			trimmedlist += incerta
-			unparsable = findspecificdate(authorandworklist, authorobjectdict, workobjectdict, 9999)
-			trimmedlist += unparsable
+			print('incerta',incerta)
 
 	else:
 		trimmedlist = authorandworklist
 
 	return trimmedlist
-
-
-def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
-	"""
-
-	tell me which items on the authorandworklist have unknown dates
-
-		incerta = 2500
-		varia = 2000
-		[failedtoparse = 9999]
-
-
-	:param authorandworklist:
-	:param authorobjectdict:
-	:param worksdict:
-	:return:
-	"""
-	datematches = []
-
-	for aw in authorandworklist:
-		w = workobjectdict[aw]
-		try:
-			# does the work have a date? if not, we will throw an exception
-			cd = int(w.converted_date)
-			if cd == specificdate:
-				datematches.append(aw)
-		except:
-			# no work date? then we will look inside the author for the date
-			aid = aw[0:6]
-			try:
-				cd = int(authorobjectdict[aid].converted_date)
-				if cd == specificdate:
-					datematches.append(aw)
-			except:
-				# the author can't tell you his date; i guess it is incerta by definition
-				datematches.append(aw)
-
-	return datematches
 
 
 def removespuria(authorandworklist, worksdict):
@@ -524,24 +487,6 @@ def polytonicsort(unsortedwords):
 	sortedversion = [re.sub(snipper, r'\3', word) for word in stripped]
 
 	return sortedversion
-
-
-def dictitemstartswith(originaldict, element, muststartwith):
-	"""
-
-	trim a dict via a criterion: muststartwith must begin the item to survive the check
-
-	:param originaldict:
-	:param element:
-	:param muststartwith:
-	:return:
-	"""
-
-	muststartwith = re.compile('^'+muststartwith)
-	newdict = {x: originaldict[x] for x in originaldict
-	           if re.search(muststartwith, getattr(originaldict[x], element))}
-
-	return newdict
 
 
 def foundindict(searchdict, element, mustbein):
