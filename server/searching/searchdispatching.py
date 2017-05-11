@@ -152,12 +152,18 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 			wkid = None
 			
 		if wkid:
-			if 'x' in wkid:
-				wkid = re.sub('x', 'w', wkid)
-				foundlines = simplesearchworkwithexclusion(so.termone, wkid, so, curs)
+			if len(wkid) == 10:
+				# with the advent of 'x' in work ids, you can't just re.sub() x for w any more
+				# you can only swap out x at position 6: 'in0c0bx03x' vs 'in0c0bw03x' (which would become 'in0c0bw03w')
+				if wkid[6] == 'x':
+					wkid[6] = 'w'
+					fnc = simplesearchworkwithexclusion
+				else:
+					fnc = substringsearch
 			else:
-				foundlines = substringsearch(so.termone, wkid, so, curs)
+				fnc = substringsearch
 
+			foundlines = fnc(so.termone, wkid, so, curs)
 			count.increment(len(foundlines))
 			activepoll.addhits(len(foundlines))
 
