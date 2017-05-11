@@ -10,7 +10,7 @@ import re
 
 from flask import session
 
-from server.formattinghelperfunctions import stripaccents
+from server.formattinghelperfunctions import stripaccents, buildhipparchiatranstable
 from server.listsandsession.sessionfunctions import reducetosessionselections, justlatin
 from server.loadglobaldicts import allvaria, allincerta
 
@@ -473,7 +473,9 @@ def polytonicsort(unsortedwords):
 	:return:
 	"""
 
-	stripped = [re.sub(r'ϲ', r'σ', stripaccents(word))+ '-snip-' + word for word in unsortedwords if word]
+	transtable = buildhipparchiatranstable()
+
+	stripped = [re.sub(r'ϲ', r'σ', stripaccents(word, transtable))+ '-snip-' + word for word in unsortedwords if word]
 
 	stripped = sorted(stripped)
 

@@ -87,7 +87,7 @@ def forceterminalacute(matchgroup):
 	return substitute
 
 
-def stripaccents(texttostrip):
+def stripaccents(texttostrip, transtable=None):
 	"""
 	
 	turn ᾶ into α, etc
@@ -95,15 +95,36 @@ def stripaccents(texttostrip):
 	there are more others ways to do this; but this is the fast way
 	it turns out that this was one of the slowest functions in the profiler
 	
+	transtable should be passed here outside of a loop
+	but if you are just doing things one-off, then it is fine to have
+	stripaccents() look up transtable itself
+	
 	:param texttostrip: 
+	:return: 
+	"""
+
+	if transtable == None:
+		transtable = buildhipparchiatranstable()
+
+	stripped = texttostrip.translate(transtable)
+
+	return stripped
+
+
+def buildhipparchiatranstable():
+	"""
+	
+	pulled this out of stripaccents() so you do not maketrans 200k times when
+	polytonicsort() sifts an index
+	
 	:return: 
 	"""
 
 	invals = ['ἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗΐὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ']
 	outvals = ['αααααααααααααααααααααααααεεεεεεεειιιιιιιιιιιιιιιιιοοοοοοοουυυυυυυυυυυυυυυυυηηηηηηηηηηηηηηηηηηηηηηηωωωωωωωωωωωωωωωωωωωωωωω']
 
-	invals.append('ᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑἘἙἚἛἜἝΕἸἹἺἻἼἽἾἿΙὈὉὊὋὌὍΟὙὛὝὟΥᾘᾙᾚᾛᾜᾝᾞᾟἨἩἪἫἬἭἮἯΗᾨᾩᾪᾫᾬᾭᾮᾯὨὩὪὫὬὭὮὯΩῤῥῬΒΨΔΦΓΞΚΛΜΝΠϘΡϹΤΧΘΖ')
-	outvals.append('αααααααααααααααααεεεεεεειιιιιιιιιοοοοοοουυυυυηηηηηηηηηηηηηηηηηωωωωωωωωωωωωωωωωωρρρβψδφγξκλμνπϙρϲτχθζ')
+	invals.append('ᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑἘἙἚἛἜἝΕἸἹἺἻἼἽἾἿΙὈὉὊὋὌὍΟὙὛὝὟΥᾘᾙᾚᾛᾜᾝᾞᾟἨἩἪἫἬἭἮἯΗᾨᾩᾪᾫᾬᾭᾮᾯὨὩὪὫὬὭὮὯΩῤῥῬΒΨΔΦΓΞΚΛΜΝΠϘΡσΣςϹΤΧΘΖ')
+	outvals.append('αααααααααααααααααεεεεεεειιιιιιιιιοοοοοοουυυυυηηηηηηηηηηηηηηηηηωωωωωωωωωωωωωωωωωρρρβψδφγξκλμνπϙρϲϲϲϲτχθζ')
 
 	invals.append('vUjÁÄáäÉËéëÍÏíïÓÖóöÜÚüú')
 	outvals.append('uViaaaaeeeeiiiioooouuuu')
@@ -111,9 +132,10 @@ def stripaccents(texttostrip):
 	invals = ''.join(invals)
 	outvals = ''.join(outvals)
 
-	stripped = texttostrip.translate(str.maketrans(invals, outvals))
+	transtable = str.maketrans(invals, outvals)
 
-	return stripped
+	return transtable
+
 
 
 def getpublicationinfo(workobject, cursor):
