@@ -91,6 +91,11 @@ def stripaccents(texttostrip):
 	"""
 	turn ᾶ into α, etc
 
+	this is one of the more costly functions out there? [ntl it is usually .2s of a 4s search, etc.]
+	
+	you could go faster with a brutal reduction via dict:
+		{ ἀ: α, ἁ: α, ...}
+
 	:return:
 	"""
 	substitutes = (

@@ -292,25 +292,29 @@ def flagexclusions(authorandworklist):
 	some works whould only be searched partially
 	this flags those items on the authorandworklist by changing their workname format
 	gr0001w001 becomes gr0001x001 if session['wkexclusions'] mentions gr0001w001
+	
+	this function profiles as relatively slow: likely a faster way to run the loops
+	
 	:param authorandworklist:
 	:return:
 	"""
-	modifiedauthorandworklist = []
-	for w in authorandworklist:
-		if len(session['psgexclusions']) > 0:
+
+	if len(session['psgexclusions']) == 0:
+		return authorandworklist
+	else:
+		modifiedauthorandworklist = []
+		for w in authorandworklist:
 			for x in session['psgexclusions']:
 				if '_AT_' not in w and w in x:
 					w = re.sub('w', 'x', w)
 					modifiedauthorandworklist.append(w)
 				else:
 					modifiedauthorandworklist.append(w)
-		else:
-			modifiedauthorandworklist.append(w)
 
-	# if you apply 3 restrictions you will now have 3 copies of gr0001x001
-	modifiedauthorandworklist = tidyuplist(modifiedauthorandworklist)
+		# if you apply 3 restrictions you will now have 3 copies of gr0001x001
+		modifiedauthorandworklist = tidyuplist(modifiedauthorandworklist)
 
-	return modifiedauthorandworklist
+		return modifiedauthorandworklist
 
 
 def prunebydate(authorandworklist, authorobjectdict, workobjectdict):

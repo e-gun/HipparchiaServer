@@ -93,8 +93,8 @@ def frontpage():
 	else:
 		corporalabels = {'g': 'G', 'l': 'L', 'd': 'D', 'i': 'I', 'c': 'C'}
 
-	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora, clab=corporalabels,
-						   onehit=session['onehit'], hwindexing=session['headwordindexing'], css=stylesheet, buildinfo=buildinfo,
+	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora, clab=corporalabels, css=stylesheet,
+	                       buildinfo=buildinfo, onehit=session['onehit'], hwindexing=session['headwordindexing'],
 						   spuria=session['spuria'], varia=session['varia'], undated=session['incerta']
 	                       )
 

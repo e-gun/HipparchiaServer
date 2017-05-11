@@ -833,9 +833,7 @@ class dbWorkLine(object):
 		loc = []
 
 		if self.wkuinversalid[0:2] not in ['in', 'dp', 'ch']:
-			for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]:
-				if str(lvl) != '-1':
-					loc.append(lvl)
+			loc = [lvl for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5] if str(lvl) != '-1']
 			loc.reverse()
 			citation = '.'.join(loc)
 		else:
