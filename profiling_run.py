@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #!../bin/python
 """
 	HipparchiaServer: an interface to a database of Greek and Latin texts
@@ -13,4 +12,12 @@ from server import hipparchia
 
 hipparchia.config['PROFILE'] = True
 hipparchia.wsgi_app = ProfilerMiddleware(hipparchia.wsgi_app, restrictions=[30])
-hipparchia.run(debug = True, threaded=True)
+
+# debug=True is considered to be a serious security hazard in a networked environment
+# if you are working on Hipparchia's code, you might be interested in this; otherwise there
+# are only bad reasons to set this to 'True'
+
+# it is assumed that a profiling run is a debugging run
+# do not use this script in a production setting...
+
+hipparchia.run(debug=True, threaded=True)

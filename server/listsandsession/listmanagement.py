@@ -371,7 +371,6 @@ def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 		if session['incerta'] == 'yes':
 			incerta = [i for i in authorandworklist if i in allincerta]
 			trimmedlist += incerta
-			print('incerta',incerta)
 
 	else:
 		trimmedlist = authorandworklist

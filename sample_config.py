@@ -4,10 +4,6 @@
 
 ### [1] Flask variables ###
 ##  [set once and forget: SECRET_KEY] ##
-# DEBUG=True is considered to be a serious security hazard in a networked environment
-# if you are working on Hipparchia's code, you might be interested in this; otherwise there
-# are only bad reasons to set this to 'True'
-DEBUG=False
 SECRET_KEY = 'yourkeyhereitshouldbelongandlooklikecryptographicgobbledygook'
 
 ### [2] network values ###
