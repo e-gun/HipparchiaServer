@@ -264,10 +264,10 @@ def calculatewholeauthorsearches(authorandworklist, authordict):
 	authorspresent = set(authorspresent)
 
 	# B
-	theoreticalpoolofworks = {}
-	for a in authorspresent:
-		for w in authordict[a].listofworks:
-			theoreticalpoolofworks[w.universalid] = a
+	theoreticalpoolofworks = {w.universalid: a for a in authorspresent for w in authordict[a].listofworks }
+	# for a in authorspresent:
+	# 	for w in authordict[a].listofworks:
+	# 		theoreticalpoolofworks[w.universalid] = a
 
 	# C
 	for a in authorandworklist:
