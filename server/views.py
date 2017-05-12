@@ -430,13 +430,13 @@ def grabtextforbrowsing(locus):
 		resultmessage = p['code']
 		passage = p['line']
 
-	if passage:
+	if passage and ao.universalid != 'gr0000':
 		browserdata = getandformatbrowsercontext(ao, wo, int(passage), ctx, numbersevery, cur)
 	else:
 		browserdata = {}
 		browserdata['browseforwards'] = wo.ends
 		browserdata['browseback'] = wo.starts
-		browserdata['currentlyviewing'] = '<p class="currentlyviewing">error in fetching the browser data for {ao}, {wo} </p><br /><br />'.format(ao=ao.shortname, wo=wo.title)
+		browserdata['currentlyviewing'] = '<p class="currentlyviewing">error in fetching the browser data. I was sent a citation I do not understand: {c}</p><br /><br />'.format(c=workdb)
 		try:
 			browserdata['ouputtable'] = [passage, workdb, citation]
 		except:

@@ -11,7 +11,7 @@ from werkzeug.contrib.profiler import ProfilerMiddleware
 from server import hipparchia
 
 hipparchia.config['PROFILE'] = True
-hipparchia.wsgi_app = ProfilerMiddleware(hipparchia.wsgi_app, restrictions=[20])
+hipparchia.wsgi_app = ProfilerMiddleware(hipparchia.wsgi_app, restrictions=[25])
 
 d = False
 
