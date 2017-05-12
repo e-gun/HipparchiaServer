@@ -453,16 +453,16 @@ def latattemptelision(hypenatedlatinheadword):
 	return entry
 
 
-def tidyupterm(word):
+def tidyupterm(word, punct=None):
 	"""
 	remove gunk that should not be present in a cleaned line
 
 	:param word:
 	:return:
 	"""
-
-	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
-	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
+	if not punct:
+		extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
+		punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
 	# hard to know whether or not to do the editorial insertions stuff: ⟫⟪⌈⌋⌊
 	# word = re.sub(r'\[.*?\]','', word) # '[o]missa' should be 'missa'
 	word = re.sub(r'[0-9]', '', word)

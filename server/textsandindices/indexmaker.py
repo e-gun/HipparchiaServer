@@ -9,6 +9,7 @@
 import re
 from multiprocessing import Manager, Process
 from multiprocessing import Pool
+from string import punctuation
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, setconnection
@@ -322,6 +323,10 @@ def linesintoindex(lineobjects, activepoll):
 
 	grave = 'ὰὲὶὸὺὴὼῒῢᾲῂῲἃἓἳὃὓἣὣἂἒἲὂὒἢὢ'
 	acute = 'άέίόύήώΐΰᾴῄῴἅἕἵὅὕἥὥἄἔἴὄὔἤὤ'
+	gravetoacute = str.maketrans(grave, acute)
+
+	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
+	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
 
 	defaultwork = lineobjects[0].wkuinversalid
 
@@ -337,9 +342,9 @@ def linesintoindex(lineobjects, activepoll):
 
 		if line.index != -1:
 			words = line.wordlist('polytonic')
-			words = [tidyupterm(w).lower() for w in words]
+			words = [tidyupterm(w, punct).lower() for w in words]
 			words = list(set(words))
-			words = [w.translate(str.maketrans(grave, acute)) for w in words]
+			words = [w.translate(gravetoacute) for w in words]
 			for w in words:
 				try:
 					completeindex[w].append((line.wkuinversalid, line.index, line.locus()))
