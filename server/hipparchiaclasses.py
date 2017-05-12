@@ -1246,8 +1246,6 @@ class ProgressPoll(object):
 	polltcpport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
 	def __init__(self, timestamp, portnumber=polltcpport):
-		# origins is a list of IPs who are allowed to connect [''] = anybody/anywhere
-		self.pd = {}
 		self.searchid = str(timestamp)
 		self.launchtime = time.time()
 		self.portnumber = portnumber

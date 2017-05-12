@@ -83,7 +83,7 @@ def frontpage():
 
 	buildinfo = versionchecking(activelists, expectedsqltemplateversion)
 
-	# check to see which dbs we search by default
+	# check to see eith which dbs we search by default or are presently active
 	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	                 if session[c] == 'yes']
 
@@ -178,7 +178,10 @@ def executesearch(timestamp):
 	# that can be a problem, so freeze the values now and rely on this instead of some moving target
 	frozensession = session.copy()
 
-	if len(seeking) > 0:
+	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
+	                 if session[c] == 'yes']
+
+	if len(seeking) > 0 and activecorpora:
 		so = SearchObject(ts, seeking, proximate, frozensession)
 		starttime = time.time()
 		poll[ts].statusis('Compiling the list of works to search')
@@ -309,6 +312,11 @@ def executesearch(timestamp):
 		poll[ts].deactivate()
 
 	else:
+		reasons = []
+		if not activecorpora:
+			reasons.append('there are no active databases')
+		if len(seeking) == 0:
+			reasons.append('there is no search term')
 		output = {}
 		output['title'] = '(empty query)'
 		output['found'] = ''
@@ -317,7 +325,7 @@ def executesearch(timestamp):
 		output['searchtime'] = '0.00'
 		output['proximate'] = proximate
 		output['thesearch'] = ''
-		output['htmlsearch'] = '<span class="emph">nothing</span> (search not executed)'
+		output['htmlsearch'] = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=' and '.join(reasons))
 		output['hitmax'] = 0
 		output['dmin'] = dmin
 		output['dmax'] = dmax
