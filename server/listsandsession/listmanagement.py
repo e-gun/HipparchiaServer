@@ -341,25 +341,21 @@ def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 			min = max
 			session['earliestdate'] = session['latestdate']
 
-		for aw in authorandworklist:
-			w = workobjectdict[aw]
+		for universalid in authorandworklist:
+			w = workobjectdict[universalid]
 			try:
 				# does the work have a date? if not, we will throw an exception
-				if w.earlier(min) or w.later(max):
-					pass
-				else:
-					trimmedlist.append(aw)
+				if w.datefallsbetween(min, max):
+					trimmedlist.append(universalid)
 			except TypeError:
 				# no work date? then we will look inside the author for the date
-				aid = aw[0:6]
+				authorid = universalid[0:6]
 				try:
-					if authorobjectdict[aid].earlier(min) or authorobjectdict[aid].later(max):
-						pass
-					else:
-						trimmedlist.append(aw)
-				except:
+					if authorobjectdict[authorid].datefallsbetween(min, max):
+						trimmedlist.append(universalid)
+				except TypeError:
 					# the author can't tell you his date; you must be building a list with both latin authors and something else
-					trimmedlist.append(aw)
+					trimmedlist.append(universalid)
 		# [b] then add back in any varia and/or incerta as needed
 		if session['varia'] == 'yes':
 			varia = [v for v in authorandworklist if v in allvaria]
@@ -387,7 +383,7 @@ def removespuria(authorandworklist, worksdict):
 	sp = re.compile(r'\[(S|s)p\.\]')
 
 	for aw in authorandworklist:
-		wk = re.sub(r'x',r'w',aw[0:10])
+		wk = re.sub(r'(......)x(...)',r'\1w\2',aw[0:10])
 		title = worksdict[wk].title
 		try:
 			if re.search(sp,title):

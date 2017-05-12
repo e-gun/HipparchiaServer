@@ -67,6 +67,9 @@ class dbAuthor(object):
 	def atorlater(self, other):
 		return self.converted_date >= other
 
+	def datefallsbetween(self, min, max):
+		return min <= self.converted_date <= max
+
 	def floruitis(self, other):
 		return self.converted_date == other
 
@@ -180,6 +183,9 @@ class dbOpus(object):
 
 	def later(self, other):
 		return self.converted_date > other
+
+	def datefallsbetween(self, min, max):
+		return min <= self.converted_date <= max
 
 	def bcedate(self):
 		if self.converted_date:
