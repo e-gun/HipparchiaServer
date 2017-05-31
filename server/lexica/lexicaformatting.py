@@ -125,7 +125,6 @@ def grabheadmaterial(fullentry):
 			return ''
 
 
-
 def deabbreviateauthors(authorabbr, lang):
 	"""
 

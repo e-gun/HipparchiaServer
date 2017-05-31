@@ -11,7 +11,7 @@ from collections import deque
 
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dbfunctions import grabonelinefromwork, dblineintolineobject, makeanemptyauthor, makeanemptywork
-from server.searching.searchfunctions import whereclauses
+from server.searching.searchfunctions import atsignwhereclauses
 
 
 def tcparserequest(request, authordict, workdict):
@@ -92,7 +92,7 @@ def textsegmentfindstartandstop(authorobject, workobject, passageaslist, cursor)
 	atloc = '|'.join(passageaslist)
 	selection = workobject.universalid + '_AT_' + atloc
 	
-	w = whereclauses(selection, '=', {authorobject.universalid: authorobject})
+	w = atsignwhereclauses(selection, '=', {authorobject.universalid: authorobject})
 	d = [workobject.universalid]
 	qw = ''
 	for i in range(0, len(w)):

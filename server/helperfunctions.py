@@ -8,9 +8,12 @@
 
 import configparser
 import re
+from os import cpu_count
 from string import punctuation
 
 from flask import session
+
+from server import hipparchia
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -463,6 +466,7 @@ def tidyupterm(word, punct=None):
 	if not punct:
 		extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
 		punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
+
 	# hard to know whether or not to do the editorial insertions stuff: ⟫⟪⌈⌋⌊
 	# word = re.sub(r'\[.*?\]','', word) # '[o]missa' should be 'missa'
 	word = re.sub(r'[0-9]', '', word)
@@ -480,3 +484,18 @@ def tidyupterm(word, punct=None):
 	word = word.translate(str.maketrans(invals, outvals))
 
 	return word
+
+
+def setthreadcount():
+	"""
+	
+	used to set worker count on multithreaded functions
+	return either the manual config value or determine it algorithmically
+	
+	:return: 
+	"""
+
+	if hipparchia.config['AUTOCONFIGWORKERS'] != 'yes':
+		return hipparchia.config['WORKERS']
+	else:
+		return int(cpu_count() / 2) + 1

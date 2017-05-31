@@ -324,6 +324,11 @@ body {
 	text-shadow: 1px 1px #aaa;
 	*/ }
 
+.selection:hover{
+	color: #393F94;
+	text-shadow: 1px 1px #aaa;
+	 }
+
 .serviusformatting {
 	font-style: italic;
 	}

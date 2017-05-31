@@ -47,7 +47,8 @@ CALCULATEWORDWEIGHTS = 'no'
 
 
 ### [5] Hipparchia performance variables ###
-##  [set once and forget: WORKERS, MPCOMMITCOUNT] ##
+##  [set once and forget: AUTOCONFIGWORKERS, WORKERS, MPCOMMITCOUNT] ##
+# AUTOCONFIGWORKERS: if 'yes', then ignore WORKERS and set workers to threads*.5+1
 # WORKERS: pick a number based on your cpu cores: on a 4-core/8-thread machine diminishing returns kick in between 3 and 4
 #   as the bottleneck shifts to the I/O subsystem. Very high I/O throughput is a good idea if you are firing up lots of threads.
 #   [In fact, high I/O throughput is probably the most important factor governing search speed.]
@@ -63,6 +64,7 @@ CALCULATEWORDWEIGHTS = 'no'
 #   Avoid increasing this value: it will make very little difference to your performace, but it will greatly increase your chances
 #   of failed searches. NB: the failures will only show up in the logs; in the browser you will get partial results that will present
 #   themselves as successfully executed searches. That is no good at all.
+AUTOCONFIGWORKERS = 'yes'
 WORKERS = 3
 MPCOMMITCOUNT = 1000
 

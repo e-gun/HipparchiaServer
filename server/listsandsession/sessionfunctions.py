@@ -116,6 +116,12 @@ def modifysessionvar(param,val):
 	if int(session['proximity']) < 1:
 		session['proximity'] = '1'
 
+	try:
+		int(session['linesofcontext'])
+	except ValueError:
+		# you probably had 'null' because you were clearing/typing rather than spinning the value
+		session['linesofcontext'] = int(hipparchia.config['DEFAULTLINESOFCONTEXT'])
+
 	if int(session['linesofcontext']) > 20:
 		session['linesofcontext'] = '20'
 
@@ -268,9 +274,12 @@ def sessionselectionsashtml(authordict, workdict):
 	
 	selectioninfo['selections'] = sxhtml['selections']
 	selectioninfo['exclusions'] = sxhtml['exclusions']
-	
+	# selectioninfo['scount'] = sxhtml['scount']
+	# selectioninfo['xcount'] = sxhtml['xcount']
+	selectioninfo['newjs'] = sessionselectionsjs(sxhtml['jstuples'])
+
 	# numberofselections is -1 if there were no selections
-	# and this will hide the selections table; but it should not be hidden if there are time restrictions or spuria restrictions
+	# returning this will hide the selections table; but it should not be hidden if there are time restrictions or spuria restrictions
 	# so say '0' instead
 	if sxhtml['numberofselections'] == -1 and (selectioninfo['timeexclusions'] != '' or session['spuria'] == 'no'):
 		selectioninfo['numberofselections'] = 0
@@ -278,6 +287,33 @@ def sessionselectionsashtml(authordict, workdict):
 		selectioninfo['numberofselections'] = sxhtml['numberofselections']
 	
 	return selectioninfo
+
+
+def sessionselectionsjs(labeltupleslist):
+	"""
+	
+	build js out of something like:
+	
+		[('agnselections', 0), ('auselections', 0), ('auselections', 1)]
+	
+	:param labeltuples: 
+	:return: 
+	"""
+
+	template = """
+		$( '#{label}_0{number}' ).dblclick(function() lbrk
+			$.getJSON('/clearselections?cat={label}&id={number}', function (selectiondata) lbrk 
+				reloadselections(selectiondata); rbrk);
+		rbrk);
+	"""
+
+	js = [template.format(label=j[0], number=j[1]) for j in labeltupleslist]
+	js = '\n'.join(js)
+	js = '<script>\n{j}\n</script>'.format(j=js)
+	js = re.sub(r'lbrk', r'{',js)
+	js = re.sub(r'rbrk', r'}', js)
+
+	return js
 
 
 def sessiontimeexclusionsinfo():
@@ -323,112 +359,112 @@ def sessionselectionsinfo(authordict, workdict):
 		[f] work selections
 		[g] passage selections
 
-	id numbers need to be attached to the selections so that they can be clicked-and-dragged to the trash by id
-	this needs to be a sequential list and so we do both selections and exclusions in one go to keep one unified 'selcount'
-	the selcount is used to generate a collection of jQuery .droppable()s
+	id numbers need to be attached to the selections so that they can be double-clicked so as to delete them
 
 	:param authordict:
-	:return: dictionary of html: {'selections':selhtml, 'exclusions':exclhtml, 'numberofselections': selcount}
+	:return: 
 	"""
-	
+
 	returndict = {}
-	selcount = -1
-	
+	thejs = []
+	tit = 'title="Double-click to remove this item"'
+
 	sessionsearchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + \
 	                    session['psgselections'] + session['wkselections'] + session['alocselections'] + \
-						session['wlocselections']
-	
+	                    session['wlocselections']
+
 	for selectionorexclusion in ['selections', 'exclusions']:
-		thehtml = ''
-		
+		thehtml = []
 		# if there are no explicit selections, then
 		if len(sessionsearchlist) == 0 and selectionorexclusion == 'selections':
-			thehtml += '<span class="picklabel">Authors</span><br />'
-			thehtml += '[All in active corpora less exclusions]<br />\n'
-		
+			thehtml.append('<span class="picklabel">Authors</span><br />')
+			thehtml.append('[All in active corpora less exclusions]<br />')
+
 		if selectionorexclusion == 'exclusions' and len(sessionsearchlist) == 0 and session['spuria'] == 'Y' and len(
-				session['wkgnexclusions']) == 0 and len(session['agnexclusions']) == 0 and len(session['auexclusions']) == 0:
-			thehtml += '<span class="picklabel">Authors</span><br />'
-			thehtml += '[No exclusions]<br />\n'
-		
+				session['wkgnexclusions']) == 0 and len(session['agnexclusions']) == 0 and len(
+			session['auexclusions']) == 0:
+			thehtml.append('<span class="picklabel">Authors</span><br />')
+			thehtml.append('[No exclusions]<br />')
+
 		# [a] author classes
-		if len(session['agn' + selectionorexclusion]) > 0:
-			thehtml += '<span class="picklabel">Author categories</span><br />'
-			localval = -1
-			for s in session['agn' + selectionorexclusion]:
-				selcount += 1
-				localval += 1
-				thehtml += '<span class="agn{soe}" id="searchselection_0{sc}" listval="{lv}">{s}</span>' \
-				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, s=s)
-		
+		v = 'agn'
+		var = v + selectionorexclusion
+		if len(session[var]) > 0:
+			thehtml.append('<span class="picklabel">Author categories</span><br />')
+			htmlandjs = selectionlinehtmlandjs(v, selectionorexclusion, session)
+			thehtml += htmlandjs['html']
+			thejs += htmlandjs['js']
+
 		# [b] work genres
-		if len(session['wkgn' + selectionorexclusion]) > 0:
-			thehtml += '<span class="picklabel">Work genres</span><br />'
-			localval = -1
-			for s in session['wkgn' + selectionorexclusion]:
-				selcount += 1
-				localval += 1
-				thehtml += '<span class="wkgn{soe}" id="searchselection_0{sc}" listval="{lv}">{s}</span>' \
-				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, s=s)
+		v = 'wkgn'
+		var = v + selectionorexclusion
+		if len(session[var]) > 0:
+			thehtml.append('<span class="picklabel">Work genres</span><br />')
+			htmlandjs = selectionlinehtmlandjs(v, selectionorexclusion, session)
+			thehtml += htmlandjs['html']
+			thejs += htmlandjs['js']
 
 		# [c] author location
-		if len(session['aloc' + selectionorexclusion]) > 0:
-			thehtml += '<span class="picklabel">Author location</span><br />'
-			localval = -1
-			for s in session['aloc' + selectionorexclusion]:
-				selcount += 1
-				localval += 1
-				thehtml += '<span class="aloc{soe}" id="searchselection_0{sc}" listval="{lv}">{s}</span>' \
-				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, s=s)
+		v = 'aloc'
+		var = v + selectionorexclusion
+		if len(session[var]) > 0:
+			thehtml.append('<span class="picklabel">Author location</span><br />')
+			htmlandjs = selectionlinehtmlandjs(v, selectionorexclusion, session)
+			thehtml += htmlandjs['html']
+			thejs += htmlandjs['js']
 
 		# [d] work provenance
-		if len(session['wloc' + selectionorexclusion]) > 0:
-			thehtml += '<span class="picklabel">Work provenance</span><br />'
-			localval = -1
-			for s in session['wloc' + selectionorexclusion]:
-				selcount += 1
-				localval += 1
-				thehtml += '<span class="wloc{soe}" id="searchselection_0{sc}" listval="{lv}">{s}</span>' \
-				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, s=s)
+		v = 'wloc'
+		var = v + selectionorexclusion
+		if len(session[var]) > 0:
+			thehtml.append('<span class="picklabel">Work provenance</span><br />')
+			htmlandjs = selectionlinehtmlandjs(v, selectionorexclusion, session)
+			thehtml += htmlandjs['html']
+			thejs += htmlandjs['js']
 
 		# [e] authors
-		if len(session['au' + selectionorexclusion]) > 0:
-			thehtml += '<span class="picklabel">Authors</span><br />'
+		v = 'au'
+		var = v + selectionorexclusion
+		if len(session[var]) > 0:
+			thehtml.append('<span class="picklabel">Authors</span><br />')
 			localval = -1
-			for s in session['au' + selectionorexclusion]:
-				selcount += 1
+			for s in session[var]:
 				localval += 1
 				ao = authordict[s]
-				thehtml += '<span class="au{soe}" id="searchselection_0{sc}" listval="{lv}">{au}</span>' \
-				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, au=ao.akaname)
-		
+				thehtml.append('<span class="{v}{soe} selection" id="{var}_0{lv}" {tit}>{s}</span>'
+				               '<br />'.format(v=v, soe=selectionorexclusion, var=var, lv=localval, s=ao.akaname, tit=tit))
+				thejs.append((var, localval))
+
 		# [f] works
-		if len(session['wk' + selectionorexclusion]) == 0 and selectionorexclusion == 'exclusions' and session[
-			'spuria'] == 'N':
-			thehtml += '<span class="picklabel">Works</span><br />'
-			thehtml += '[All non-selected spurious works]<br />'
-		
-		if len(session['wk' + selectionorexclusion]) > 0:
-			thehtml += '<span class="picklabel">Works</span><br />'
+		v = 'wk'
+		var = v + selectionorexclusion
+		if len(session[var]) == 0 and selectionorexclusion == 'exclusions' and session['spuria'] == 'N':
+			thehtml.append('<span class="picklabel">Works</span><br />')
+			thehtml.append('[All non-selected spurious works]<br />')
+
+		if len(session[var]) > 0:
+			thehtml.append('<span class="picklabel">Works</span><br />')
 			if selectionorexclusion == 'exclusions' and session['spuria'] == 'N':
-				thehtml += '[Non-selected spurious works]<br />'
+				thehtml.append('[Non-selected spurious works]<br />')
 			localval = -1
-			for s in session['wk' + selectionorexclusion]:
-				selcount += 1
+			for s in session[var]:
 				localval += 1
 				uid = s[:6]
 				ao = authordict[uid]
 				wk = workdict[s]
-				thehtml += '<span class="wk{soe}" id="searchselection_0{sc}" listval="{lv}">{au}, ' \
-				           '<span class="pickedwork">{wk}</span></span>' \
-				           '<br />'.format(soe=selectionorexclusion, sc=selcount, lv=localval, au=ao.akaname, wk=wk.title)
-		
+				thehtml.append('<span class="{v}{soe} selection" id="{var}_0{lv}" {tit}>{au}, '
+			               '<span class="pickedwork">{wk}</span></span>' 
+				           '<br />'.format(v=v, var=var, soe=selectionorexclusion, lv=localval, au=ao.akaname,
+				                           tit=tit, wk=wk.title))
+				thejs.append((var, localval))
+
 		# [g] passages
-		if len(session['psg' + selectionorexclusion]) > 0:
-			thehtml += '<span class="picklabel">Passages</span><br />'
+		v = 'psg'
+		var = v + selectionorexclusion
+		if len(session[var]) > 0:
+			thehtml.append('<span class="picklabel">Passages</span><br />')
 			localval = -1
-			for s in session['psg' + selectionorexclusion]:
-				selcount += 1
+			for s in session[var]:
 				localval += 1
 				locus = s[14:].split('|')
 				# print('l', s, s[:6], s[7:10], s[14:], locus)
@@ -440,14 +476,59 @@ def sessionselectionsinfo(authordict, workdict):
 					if w.universalid == s[0:10]:
 						wk = w
 				loc = citationfunctions.prolixlocus(wk, citationtuple)
-				thehtml += '<span class="psg{soe}" id="searchselection_0{sc}" listval="{lv}">{au}, ' \
-				           '<span class="pickedwork">{wk}</span>&nbsp;<span class="pickedsubsection">{loc}</span></span>' \
-				           '<br />'.format(soe=selectionorexclusion, sc=selcount, lv=localval, au=ao.akaname, wk=wk.title, loc=loc)
-		
-		returndict[selectionorexclusion] = thehtml
+				thehtml.append('<span class="{v}{soe} selection" id="{var}_0{lv}" {tit}>{au}, '
+				               '<span class="pickedwork">{wk}</span>&nbsp;'
+				               '<span class="pickedsubsection">{loc}</span></span><br />'
+				               ''.format(v=v, var=var, soe=selectionorexclusion, lv=localval, au=ao.akaname,
+				                           wk=wk.title, loc=loc, tit=tit))
+				thejs.append((var, localval))
+
+		returndict[selectionorexclusion] = '\n'.join(thehtml)
+
+	scount = len(session['auselections'] + session['wkselections'] + session['agnselections'] +
+	                           session['wkgnselections'] + session['psgselections'] + session['alocselections'] +
+	                           session['wlocselections'])
+	scount += len(session['auexclusions'] + session['wkexclusions'] + session['agnexclusions'] +
+	                           session['wkgnexclusions'] + session['psgexclusions'] + session['alocexclusions'] +
+	                           session['wlocexclusions'])
+
+	returndict['numberofselections'] = -1
+	if scount > 0:
+		returndict['numberofselections'] = scount
+
+	returndict['jstuples'] = thejs
+
+	return returndict
+
+
+def selectionlinehtmlandjs(v, selectionorexclusion, session):
+	"""
 	
-	returndict['numberofselections'] = selcount
+	generate something like:
 	
+		<span class="agnselections" id="agnselections_00" listval="0">Alchemistae</span>
+	
+	:param v: 
+	:param selectionorexclusion: 
+	:param localval: 
+	:param session: 
+	:return: 
+	"""
+
+	var = v + selectionorexclusion
+	thehtml = []
+	thejs = []
+	localval = -1
+	tit = 'title="Double-click to remove this item"'
+
+	for s in session[var]:
+		localval += 1
+		thehtml.append('<span class="{v}{soe} selection" id="{var}_0{lv}" {tit}>{s}</span>' \
+		               '<br />'.format(v=v, soe=selectionorexclusion, var=var, lv=localval, tit=tit, s=s))
+		thejs.append((var, localval))
+
+	returndict = {'html': thehtml, 'js': thejs}
+
 	return returndict
 
 
@@ -727,5 +808,159 @@ def returnactivedbs():
 
 	return keys
 
+
+# slated for removal
+
+def oldsessionselectionsinfo(authordict, workdict):
+	"""
+	build the selections html either for a or b:
+		#selectionstable + #selectioninfocell
+		#selectionstable + #exclusioninfocell
+	there are seven headings to populate
+		[a] author classes
+		[b] work genres
+		[c] author location
+		[d] work provenance
+		[e] author selections
+		[f] work selections
+		[g] passage selections
+
+	id numbers need to be attached to the selections so that they can be clicked-and-dragged to the trash by id
+	this needs to be a sequential list and so we do both selections and exclusions in one go to keep one unified 'selcount'
+	the selcount is used to generate a collection of jQuery .droppable()s
+
+	:param authordict:
+	:return: dictionary of html: {'selections':selhtml, 'exclusions':exclhtml, 'numberofselections': selcount}
+	"""
+
+	returndict = {}
+	selcount = -1
+
+	sessionsearchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + \
+	                    session['psgselections'] + session['wkselections'] + session['alocselections'] + \
+	                    session['wlocselections']
+
+	for selectionorexclusion in ['selections', 'exclusions']:
+		thehtml = ''
+
+		# if there are no explicit selections, then
+		if len(sessionsearchlist) == 0 and selectionorexclusion == 'selections':
+			thehtml += '<span class="picklabel">Authors</span><br />'
+			thehtml += '[All in active corpora less exclusions]<br />\n'
+
+		if selectionorexclusion == 'exclusions' and len(sessionsearchlist) == 0 and session['spuria'] == 'Y' and len(
+				session['wkgnexclusions']) == 0 and len(session['agnexclusions']) == 0 and len(
+			session['auexclusions']) == 0:
+			thehtml += '<span class="picklabel">Authors</span><br />'
+			thehtml += '[No exclusions]<br />\n'
+
+		# [a] author classes
+		if len(session['agn' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Author categories</span><br />'
+			localval = -1
+			for s in session['agn' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				thehtml += '<span class="agn{soe}" id="searchselection_0{sc}" listval="{lv}">{s}</span>' \
+				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, s=s)
+
+		# [b] work genres
+		if len(session['wkgn' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Work genres</span><br />'
+			localval = -1
+			for s in session['wkgn' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				thehtml += '<span class="wkgn{soe}" id="searchselection_0{sc}" listval="{lv}">{s}</span>' \
+				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, s=s)
+
+		# [c] author location
+		if len(session['aloc' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Author location</span><br />'
+			localval = -1
+			for s in session['aloc' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				thehtml += '<span class="aloc{soe}" id="searchselection_0{sc}" listval="{lv}">{s}</span>' \
+				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, s=s)
+
+		# [d] work provenance
+		if len(session['wloc' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Work provenance</span><br />'
+			localval = -1
+			for s in session['wloc' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				thehtml += '<span class="wloc{soe}" id="searchselection_0{sc}" listval="{lv}">{s}</span>' \
+				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, s=s)
+
+		# [e] authors
+		if len(session['au' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Authors</span><br />'
+			localval = -1
+			for s in session['au' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				ao = authordict[s]
+				thehtml += '<span class="au{soe}" id="searchselection_0{sc}" listval="{lv}">{au}</span>' \
+				           '<br />\n'.format(soe=selectionorexclusion, sc=selcount, lv=localval, au=ao.akaname)
+
+		# [f] works
+		if len(session['wk' + selectionorexclusion]) == 0 and selectionorexclusion == 'exclusions' and session[
+			'spuria'] == 'N':
+			thehtml += '<span class="picklabel">Works</span><br />'
+			thehtml += '[All non-selected spurious works]<br />'
+
+		if len(session['wk' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Works</span><br />'
+			if selectionorexclusion == 'exclusions' and session['spuria'] == 'N':
+				thehtml += '[Non-selected spurious works]<br />'
+			localval = -1
+			for s in session['wk' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				uid = s[:6]
+				ao = authordict[uid]
+				wk = workdict[s]
+				thehtml += '<span class="wk{soe}" id="searchselection_0{sc}" listval="{lv}">{au}, ' \
+				           '<span class="pickedwork">{wk}</span></span>' \
+				           '<br />'.format(soe=selectionorexclusion, sc=selcount, lv=localval, au=ao.akaname,
+				                           wk=wk.title)
+
+		# [g] passages
+		if len(session['psg' + selectionorexclusion]) > 0:
+			thehtml += '<span class="picklabel">Passages</span><br />'
+			localval = -1
+			for s in session['psg' + selectionorexclusion]:
+				selcount += 1
+				localval += 1
+				locus = s[14:].split('|')
+				# print('l', s, s[:6], s[7:10], s[14:], locus)
+				locus.reverse()
+				citationtuple = tuple(locus)
+				uid = s[:6]
+				ao = authordict[uid]
+				for w in ao.listofworks:
+					if w.universalid == s[0:10]:
+						wk = w
+				loc = citationfunctions.prolixlocus(wk, citationtuple)
+				thehtml += '<span class="psg{soe}" id="searchselection_0{sc}" listval="{lv}">{au}, ' \
+				           '<span class="pickedwork">{wk}</span>&nbsp;<span class="pickedsubsection">{loc}</span></span>' \
+				           '<br />'.format(soe=selectionorexclusion, sc=selcount, lv=localval, au=ao.akaname,
+				                           wk=wk.title, loc=loc)
+
+		returndict[selectionorexclusion] = thehtml
+
+	returndict['numberofselections'] = selcount
+
+	# IN PROGRESS: refactoring the return dictionary that goes to the JS
+	returndict['scount'] = len(session['auselections'] + session['wkselections'] + session['agnselections'] +
+	                           session['wkgnselections'] + session['psgselections'] + session['alocselections'] +
+	                           session['wlocselections'])
+	returndict['xcount'] = len(session['auexclusions'] + session['wkexclusions'] + session['agnexclusions'] +
+	                           session['wkgnexclusions'] + session['psgexclusions'] + session['alocexclusions'] +
+	                           session['wlocexclusions'])
+
+	return returndict
 
 

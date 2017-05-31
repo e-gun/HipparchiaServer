@@ -11,7 +11,7 @@ import configparser
 import psycopg2
 
 from server import hipparchia
-from server.hipparchiaclasses import dbAuthor, dbOpus, dbWorkLine
+from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus, dbWorkLine
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -24,7 +24,9 @@ def setconnection(autocommit='n'):
 	if autocommit == 'autocommit':
 		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
-	dbconnection.set_session(readonly=True)
+	# would be great to set this to True, but 'CREATE TEMPORARY TABLE...' will not let you
+	# limiting the privileges of hippa_rd is the best you can do
+	dbconnection.set_session(readonly=False)
 
 	return dbconnection
 
@@ -215,6 +217,51 @@ def findtoplevelofwork(workuid, cursor):
 	numberoflevels = len(results)+1
 
 	return numberoflevels
+
+
+def findselectionboundaries(workobject, selection, cursor):
+	"""
+	
+	ask for _AT_x|y|z
+	
+	return (startline, endline) 
+	
+	:param selection: 
+	:return: 
+	"""
+
+	locus = selection[14:].split('|')
+
+	wklvls = list(workobject.structure.keys())
+	wklvls.reverse()
+
+	whereclausetuples = []
+
+	index = -1
+	for l in locus:
+		index += 1
+		lvstr = 'level_0{i}_value=%s '.format(i=wklvls[index])
+		whereclausetuples.append((lvstr, l))
+
+	qw = ['wkuniversalid=%s']
+	d = [workobject.universalid]
+	for i in range(0, len(whereclausetuples)):
+		qw.append(whereclausetuples[i][0])
+		d.append(whereclausetuples[i][1])
+	qw = ' AND '.join(qw)
+
+	q = 'SELECT index FROM {au} WHERE ({whcl}) ORDER BY index ASC'.format(au=workobject.authorid, whcl=qw)
+	d = tuple(d)
+	cursor.execute(q, d)
+	results = cursor.fetchall()
+
+	boundaries = [r[0] for r in results]
+	try:
+		boundaries = (boundaries[0], boundaries[-1])
+	except:
+		boundaries = None
+
+	return boundaries
 
 
 def simplecontextgrabber(workobject, focusline, linesofcontext, cursor):

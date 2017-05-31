@@ -13,8 +13,8 @@ from string import punctuation
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, setconnection
-from server.formattinghelperfunctions import tidyupterm
-from server.hipparchiaclasses import MPCounter
+from server.helperfunctions import tidyupterm, setthreadcount
+from server.hipparchiaobjects.helperobjects import MPCounter
 from server.lexica.lexicalookups import lookformorphologymatches
 from server.listsandsession.listmanagement import polytonicsort
 from server.textsandindices.textandindiceshelperfunctions import dictmerger
@@ -126,7 +126,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		commitcount = MPCounter()
 		terms = manager.list(completeindexdict.keys())
 		morphobjects = manager.dict()
-		workers = hipparchia.config['WORKERS']
+		workers = setthreadcount()
 
 		jobs = [Process(target=mpmorphology, args=(terms, morphobjects, commitcount))
 		        for i in range(workers)]
@@ -369,7 +369,7 @@ def pooledindexmaker(lineobjects):
 	:return: masterdict
 	"""
 
-	workers = hipparchia.config['WORKERS']
+	workers = setthreadcount()
 
 	if len(lineobjects) > 100 * workers:
 		# if you have only 2 lines of an author and 5 workers how will you divide the author up?

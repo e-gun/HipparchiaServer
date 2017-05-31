@@ -23,23 +23,24 @@ from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinef
 	perseusdelabeler
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking, \
 	perseusidmismatch, returnfirstlinenumber
-from server.formattinghelperfunctions import removegravity, stripaccents, bcedating, tidyupterm
-from server.hipparchiaclasses import ProgressPoll, SearchObject
+from server.helperfunctions import removegravity, stripaccents, bcedating, tidyupterm
+from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
 from server.lexica.lexicaformatting import dbquickfixes
 from server.lexica.lexicalookups import browserdictionarylookup, lexicalmatchesintohtml, findtotalcounts, \
 	lookformorphologymatches, getobservedwordprevalencedata, findtermamongsenses
 from server.listsandsession.listmanagement import dropdupes, polytonicsort, sortauthorandworklists, sortresultslist, \
-	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions, buildhintlist
+	tidyuplist, calculatewholeauthorsearches, compileauthorandworklist, flagexclusions, buildhintlist, \
+	configurewhereclausedata
 from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie, \
 	sessionvariables, sessionselectionsashtml, rationalizeselections, justlatin, justtlg, reducetosessionselections, \
 	returnactivedbs
-from server.loadglobaldicts import *
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, \
 	mpresultformatter, \
 	formatname, nocontextresultformatter, htmlifysearchfinds, nocontexthtmlifysearchfinds, jstoinjectintobrowser
 from server.searching.searchfunctions import cleaninitialquery
+from server.startup import *
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import tcparserequest, textsegmentfindstartandstop, \
 	wordindextohtmltable, observedformjs
@@ -181,44 +182,29 @@ def executesearch(timestamp):
 	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	                 if session[c] == 'yes']
 
+	authorandworklist = []
+	output = ''
+	nosearch = True
+	so = SearchObject(ts, seeking, proximate, frozensession)
+	starttime = time.time()
+
 	if len(seeking) > 0 and activecorpora:
-		so = SearchObject(ts, seeking, proximate, frozensession)
-		starttime = time.time()
 		poll[ts].statusis('Compiling the list of works to search')
 		authorandworklist = compileauthorandworklist(listmapper, frozensession)
-		if authorandworklist == []:
-			return redirect(url_for('frontpage'))
 
+	if len(authorandworklist) > 0:
+		nosearch = False
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		poll[ts].statusis('Marking exclusions from the list of works to search')
-		authorandworklist = flagexclusions(authorandworklist)
+		authorandworklist = flagexclusions(authorandworklist, frozensession)
 		workssearched = len(authorandworklist)
 
-		# POSSIBLE REFACTORING ROUTE: deprecate 'WHERE index...'
-
-		# with a date search inside the incriptions it would be much faster to always search full authors and then to use
-		# workobject.firstline and workobject.firstline to toss hits that were invalid rather than making 100k SQL WHERE-clause searches
-		# a move in this direction would mean seriously rethinking the role of prunebydate() in compileauthorandworklist()
-		# it would also mean looking at the exclusion mechanism again
-		# and the implications for the cap are huge: a person who was interested in 'δε' in the 3rd c. would be hard to take care of
-
-		# PARTIAL TABLE SPEED [0 context]
-		# Sought »ἐπρυτάνευε« [in 'in']
-		# Searched 56,799 texts and found 172 passages (19.81s)
-		# Searched between 0C.E. and 1500 C.E.
-
-		# WHOLE TABLE SPEED [0 context]
-		# Sought »ἐπρυτάνευε« [in 'in']
-		# Searched 139,970 texts and found 256 passages (1.29s)
-		# Sorted by name
-
-		# just below you would instead be looking for any table that had any possible hits with calculatewholeauthorsearches()
-
-		# at the moment it seems safer to leave this alone: historians who make broad chronological selections are the only
-		# ones affected, and then not so terribly? meanwhile search times will only shrink as hardware improves?
-
 		poll[ts].statusis('Calculating full authors to search')
-		so.authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
+		authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
+		so.authorandworklist = authorandworklist
+		poll[ts].statusis('Configuring the search restrictions')
+		indexrestrictions = configurewhereclausedata(authorandworklist, workdict, so)
+		so.indexrestrictions = indexrestrictions
 
 		# assemble a subset of authordict that will be relevant to our actual search and send it to searchdispatcher()
 		# it turns out that we only need to pass authors that are part of psgselections or psgexclusions
@@ -243,7 +229,7 @@ def executesearch(timestamp):
 			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=so.originalseeking)
 		else:
 			so.searchtype = 'proximity'
-			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.originalseeking, ns=so.nearstr, sp=so.originalproximate, sc=so.scope, pr=so.proximate)
+			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximate)
 			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'.format(
 				skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=proximate)
 
@@ -311,12 +297,14 @@ def executesearch(timestamp):
 			output['icandodates'] = 'no'
 		poll[ts].deactivate()
 
-	else:
+	if nosearch:
 		reasons = []
 		if not activecorpora:
 			reasons.append('there are no active databases')
 		if len(seeking) == 0:
 			reasons.append('there is no search term')
+		if len(authorandworklist) == 0:
+			reasons.append('zero works match the search criteria')
 		output = {}
 		output['title'] = '(empty query)'
 		output['found'] = ''
@@ -1105,7 +1093,7 @@ def dictsearch(searchterm):
 
 	seeking = re.sub(r'[!@#$|%()*\'\"\[\]]', '', searchterm)
 	seeking = seeking.lower()
-	seeking = re.sub('σ|ς', 'ϲ', seeking)
+	seeking = re.sub('[σς]', 'ϲ', seeking)
 	seeking = re.sub('v', '(u|v|U|V)', seeking)
 
 	if re.search(r'[a-z]', seeking):
@@ -1404,8 +1392,6 @@ def getcurrentselections():
 	send the html for what we have picked so that the relevant box can be populate
 
 	get three bundles to put in the table cells
-
-	stored in a dict with three keys: timeexclusions, selections, exclusions, numberofselections
 
 	:return:
 	"""

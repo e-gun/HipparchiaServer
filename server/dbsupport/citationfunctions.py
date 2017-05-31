@@ -9,7 +9,7 @@
 import re
 
 from server.dbsupport.dbfunctions import findtoplevelofwork, returnfirstlinenumber
-from server.hipparchiaclasses import LowandHighInfo
+from server.hipparchiaobjects.helperobjects import LowandHighInfo
 
 
 def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):

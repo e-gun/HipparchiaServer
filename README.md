@@ -116,6 +116,9 @@ minimum software requirements:
         js-cookie
         dejavu fonts [strongly recommended, not a hard requirement]
 
+    javascript must be enabled in the browser
+    the browser must accept cookies if you wish to save searches
+
 ```
 
 please see HipparchiaBSD about setting up python and postgresql9.

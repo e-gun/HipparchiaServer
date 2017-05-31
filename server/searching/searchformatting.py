@@ -14,8 +14,8 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, setconnection
-from server.formattinghelperfunctions import formatpublicationinfo
-from server.hipparchiaclasses import FormattedSearchResult
+from server.helperfunctions import formatpublicationinfo, setthreadcount
+from server.hipparchiaobjects.helperobjects import FormattedSearchResult
 
 
 def highlightsearchterm(lineobject, searchterm, spanname):
@@ -246,7 +246,7 @@ def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searcht
 	bundles = manager.list(workbundles)
 	criteria = manager.dict(criteria)
 
-	workers = hipparchia.config['WORKERS']
+	workers = setthreadcount()
 
 	jobs = [Process(target=formattingworkpile, args=(bundles, criteria, activepoll, allfound))
 			for i in range(workers)]

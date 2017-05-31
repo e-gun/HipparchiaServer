@@ -9,7 +9,7 @@
 import re
 
 from server.dbsupport.dbfunctions import dblineintolineobject, grabonelinefromwork, makeablankline, setconnection
-from server.searching.searchfunctions import substringsearch, simplesearchworkwithexclusion, dblooknear
+from server.searching.searchfunctions import substringsearch, dblooknear
 
 
 def withinxlines(workdbname, searchobject):
@@ -34,11 +34,7 @@ def withinxlines(workdbname, searchobject):
 	# back for checking: but the Aetolians are likley not among those passages...
 	templimit = 99999
 
-	if 'x' in workdbname:
-		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(so.termone, workdbname, so, cursor, templimit)
-	else:
-		hits = substringsearch(so.termone, workdbname, so, cursor, templimit)
+	hits = substringsearch(so.termone, workdbname, so, cursor, templimit)
 
 	fullmatches = []
 
@@ -91,11 +87,7 @@ def withinxwords(workdbname, searchobject):
 	# back for checking: but the Aetolians are likley not among those passages...
 	templimit = 9999
 
-	if 'x' in workdbname:
-		workdbname = re.sub('x', 'w', workdbname)
-		hits = simplesearchworkwithexclusion(so.termone, workdbname, so, cursor, templimit)
-	else:
-		hits = substringsearch(so.termone, workdbname, so, cursor, templimit)
+	hits = substringsearch(so.termone, workdbname, so, cursor, templimit)
 
 	fullmatches = []
 

@@ -13,33 +13,16 @@ function reloadselections(selectiondata){
 
     if (selectiondata.numberofselections > -1) {
             $('#selectionstable').show();
-            $('#droptodelete').droppable({ drop: deleteondrop });
-            $('#droptodelete').show();
-            $( function() {
-                for (i = 0; i <= selectiondata.numberofselections; i++) {
-                    var newdrag = '#searchselection_0'+i.toString();
-                    $(newdrag).draggable();
-                    }
-                });
         } else {
             $('#selectionstable').hide();
         }
-
     $('#timerestrictions').html(selectiondata.timeexclusions);
     $('#selectioninfocell').html(selectiondata.selections);
     $('#exclusioninfocell').html(selectiondata.exclusions);
+    var holder = document.getElementById("selectionscriptholder");
+    if (holder.hasChildNodes()) { holder.removeChild(holder.firstChild); }
+    $('#selectionscriptholder').html(selectiondata['newjs']);
     }
-
-
-function deleteondrop(event, ui) {
-    var todelete = ui.draggable;
-    var cla = todelete.attr('class').split(' ');
-    var listposition = todelete.attr('listval');
-    $.getJSON('/clearselections?cat='+cla[0]+'&id='+listposition, function (selectiondata) { reloadselections(selectiondata); });
-    $('#searchlistcontents').html('');
-    $('#searchlistcontents').hide();
-    // alert( 'delete '+todelete.attr('id')+' cl:'+cla[0]+' lv:'+todelete.attr('listval'))
-}
 
 
 function reloadAuthorlist(){
@@ -371,3 +354,15 @@ $('#excludegenre').click( function() {
         $('#searchlistcontents').hide();
     });
 
+
+// slated for deletion
+
+function deleteondrop(event, ui) {
+    var todelete = ui.draggable;
+    var cla = todelete.attr('class').split(' ');
+    var listposition = todelete.attr('listval');
+    $.getJSON('/clearselections?cat='+cla[0]+'&id='+listposition, function (selectiondata) { reloadselections(selectiondata); });
+    $('#searchlistcontents').html('');
+    $('#searchlistcontents').hide();
+    // alert( 'delete '+todelete.attr('id')+' cl:'+cla[0]+' lv:'+todelete.attr('listval'))
+}

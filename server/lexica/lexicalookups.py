@@ -10,8 +10,8 @@ import re
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
-from server.hipparchiaclasses import dbWordCountObject, dbHeadwordObject, dbMorphologyObject, dbGreekWord, dbLatinWord, \
-	dbLemmaObject
+from server.hipparchiaobjects.lexicalobjects import dbWordCountObject, dbHeadwordObject, dbMorphologyObject, \
+	dbGreekWord, dbLatinWord, dbLemmaObject
 from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
