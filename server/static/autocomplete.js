@@ -354,15 +354,3 @@ $('#excludegenre').click( function() {
         $('#searchlistcontents').hide();
     });
 
-
-// slated for deletion
-
-function deleteondrop(event, ui) {
-    var todelete = ui.draggable;
-    var cla = todelete.attr('class').split(' ');
-    var listposition = todelete.attr('listval');
-    $.getJSON('/clearselections?cat='+cla[0]+'&id='+listposition, function (selectiondata) { reloadselections(selectiondata); });
-    $('#searchlistcontents').html('');
-    $('#searchlistcontents').hide();
-    // alert( 'delete '+todelete.attr('id')+' cl:'+cla[0]+' lv:'+todelete.attr('listval'))
-}

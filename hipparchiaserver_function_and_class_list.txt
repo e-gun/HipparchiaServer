@@ -1,4 +1,4 @@
-server/ grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
+[ in server/] grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
 
 hipparchiaobjects/dbtextobjects.py:class dbAuthor(object):
 hipparchiaobjects/dbtextobjects.py:class dbOpus(object):
@@ -141,7 +141,6 @@ listsandsession/listmanagement.py:def tidyuplist(untidylist):
 listsandsession/listmanagement.py:def dropdupes(checklist, matchlist):
 listsandsession/listmanagement.py:def polytonicsort(unsortedwords):
 listsandsession/listmanagement.py:def foundindict(searchdict, element, mustbein):
-listsandsession/listmanagement.py:def wkgconfigurewhereclausedata(authorandworklist, workdict, searchobject):
 listsandsession/sessiondicts.py:def buildaugenresdict(authordict):
 listsandsession/sessiondicts.py:def buildworkgenresdict(workdict):
 listsandsession/sessiondicts.py:def buildauthorlocationdict(authordict):
@@ -166,7 +165,6 @@ listsandsession/sessionfunctions.py:def justlit():
 listsandsession/sessionfunctions.py:def justdoc():
 listsandsession/sessionfunctions.py:def reducetosessionselections(listmapper, criterion):
 listsandsession/sessionfunctions.py:def returnactivedbs():
-listsandsession/sessionfunctions.py:def oldsessionselectionsinfo(authordict, workdict):
 listsandsession/validateconfig.py:def loadconfig(filepath):
 listsandsession/validateconfig.py:def parseconfig(configlist):
 listsandsession/validateconfig.py:def compareconfigs(template, model):
@@ -222,15 +220,12 @@ searching/betacodetounicode.py:def lowercases(match):
 searching/betacodetounicode.py:def cleanaccentsandvj(texttostrip):
 searching/phrasesearching.py:def phrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
 searching/phrasesearching.py:def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, commitcount, activepoll, searchobject):
-searching/phrasesearching.py:def oldphrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
-searching/phrasesearching.py:def oldsubqueryphrasesearch(foundlineobjects, searchphrase, workstosearch, count, commitcount, activepoll,
 searching/proximitysearching.py:def withinxlines(workdbname, searchobject):
 searching/proximitysearching.py:def withinxwords(workdbname, searchobject):
 searching/searchdispatching.py:def searchdispatcher(searchobject, activepoll):
 searching/searchdispatching.py:def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activepoll, searchobject):
 searching/searchdispatching.py:def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepoll, searchobject):
 searching/searchdispatching.py:def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, searchobject):
-searching/searchdispatching.py:def oldsearchdispatcher(searchobject, activepoll):
 searching/searchformatting.py:def highlightsearchterm(lineobject, searchterm, spanname):
 searching/searchformatting.py:def formatauthinfo(authorobject):
 searching/searchformatting.py:def woformatworkinfo(workobject):
@@ -252,8 +247,6 @@ searching/searchfunctions.py:def lookoutsideoftheline(linenumber, numberofextraw
 searching/searchfunctions.py:def findleastcommonterm(searchphrase, accentsneeded):
 searching/searchfunctions.py:def findleastcommontermcount(searchphrase, accentsneeded):
 searching/searchfunctions.py:def dblooknear(index, distanceinlines, secondterm, workid, usecolumn, cursor):
-searching/searchfunctions.py:def simplesearchworkwithexclusion(seeking, workdbname, searchobject, cursor, templimit=None):
-searching/searchfunctions.py:def oldsubstringsearch(seeking, workdbname, searchobject, cursor, templimit=None):
 textsandindices/indexmaker.py:def compilewordlists(worksandboundaries, cursor):
 textsandindices/indexmaker.py:def buildindextowork(cdict, activepoll, headwords, cursor):
 textsandindices/indexmaker.py:def mpmorphology(terms, morphobjects, commitcount):
