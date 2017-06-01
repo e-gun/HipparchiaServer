@@ -74,7 +74,7 @@ def frontpage():
 	:return:
 	"""
 
-	expectedsqltemplateversion = 5112017
+	expectedsqltemplateversion = 6012017
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
 
 	sessionvariables()
