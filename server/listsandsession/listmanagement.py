@@ -595,12 +595,10 @@ def flagexclusions(authorandworklist, s=session):
 def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 	"""
 	send me a list of authorsandworks and i will trim it via the session date limit variables
-
 	note that 'varia' and 'incerta' need to be handled here since they have special dates:
 		incerta = 2500
 		varia = 2000
 		[failedtoparse = 9999]
-
 	:param authorandworklist:
 	:param authorobjectdict:
 	:return:
@@ -632,10 +630,10 @@ def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
 					trimmedlist.append(universalid)
 		# [b] then add back in any varia and/or incerta as needed
 		if session['varia'] == 'yes':
-			varia = [v for v in authorandworklist if v in allvaria]
+			varia = list(allvaria.intersection(authorandworklist))
 			trimmedlist += varia
 		if session['incerta'] == 'yes':
-			incerta = [i for i in authorandworklist if i in allincerta]
+			incerta = list(allincerta.intersection(authorandworklist))
 			trimmedlist += incerta
 
 	else:

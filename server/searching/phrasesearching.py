@@ -121,20 +121,26 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 			if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
 				dbconnection.commit()
 			indices = None
-			qtemplate = """SELECT secondpass.index, secondpass.{co}
-				FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.{co} FROM
-					(SELECT index, {co},
-						concat({co}, ' ', lead({co}) OVER (ORDER BY index ASC)) as linebundle
-						FROM {db} {whr} ) firstpass
+			qtemplate = """
+				SELECT secondpass.index, secondpass.{co} FROM 
+					(SELECT firstpass.index, firstpass.linebundle, firstpass.{co} FROM
+							(SELECT index, {co}, concat({co}, ' ', lead({co}) OVER (ORDER BY index ASC)) AS linebundle
+								FROM {db} {whr} ) firstpass
 					) secondpass
 				WHERE secondpass.linebundle ~ %s {lim}"""
 
 			whr = ''
-			indexwedwhere = buildbetweenwhereextension(uid, so)
-			if indexwedwhere != '':
-				# indexwedwhere will come back with an extraneous ' AND'
-				indexwedwhere = indexwedwhere[:-4]
-				whr = 'WHERE {iw}'.format(iw=indexwedwhere)
+			r = so.indexrestrictions[uid]
+			if r['type'] == 'between':
+				indexwedwhere = buildbetweenwhereextension(uid, so)
+				if indexwedwhere != '':
+					# indexwedwhere will come back with an extraneous ' AND'
+					indexwedwhere = indexwedwhere[:-4]
+					whr = 'WHERE {iw}'.format(iw=indexwedwhere)
+			elif r['type'] == 'temptable':
+				q = r['where']['tempquery']
+				curs.execute(q)
+				whr = 'WHERE EXISTS (SELECT 1 FROM {tbl}_includelist incl WHERE incl.includeindex = {tbl}.index)'.format(tbl=uid)
 
 			query = qtemplate.format(db=uid, co=so.usecolumn, whr=whr, lim=lim)
 			data = (sp,)

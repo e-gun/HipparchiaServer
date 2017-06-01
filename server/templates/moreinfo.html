@@ -587,25 +587,18 @@ wordcounts
         But excluding a subsection within a section is not supported: Book 1 less section 1 has not been implemented and probably never will be.
         </p>
 
-    <p><span class="ui-button-icon ui-icon ui-icon-trash" title="Drag here to remove item from list">&nbsp;</span>
-        <span class="label">Remove item from list</span></p>
-        <p class="explanation"><span class="emph">Click and drag</span> items from the include/exclude list here. Release the mouse button. Boom: the item is gone.
-        </p>
-
-
     <p><span class="ui-button-icon ui-icon ui-icon-info" title="Show/hide details of the current search list">&nbsp;</span>
         <span class="label">Check the contents of your current search list</span></p>
         <p class="explanation">If you searched now for <span class="emph">Tragici</span> what text would you in fact search? Click on the <span class="emph">info</span> button to find out.
         This should give you a list of <span class="emph">works</span> that reflect all of the inclusions and exclusions currently in effect.
         </p>
-
         <fieldset><legend>Earliest date to search</legend><input type="text" value="-850" width="25px;"></fieldset>
         <fieldset><legend>Latest date to search</legend><input  type="text" value="1500" width="25px;"></fieldset>
         <p class="explanation">Choose a chronological span within which to limit the search. Note that the dates assigned to authors are very approximate
-        and derived from original data that can look like <code>i-iii A.D.</code>. Such an author would be assigned to <code>200 CE</code>. <code>iv B.C</code> becomes <code>350 BCE</code>. A variety of quirks in the
+        and derived from original data that can look like <code>i-iii A.D.</code>. Such an author would be assigned to <code>200 CE</code>.
+        Similarly <code>iv B.C</code> becomes <code>350 BCE</code>. A variety of quirks in the
         original data has become a variety of quirks here. Similarly many authors have no date at all and some works
-            have a variety of dates because they are composite. You enable searches for <code>Varia</code> and/or <code>Incerta</code>
-            if you have a time restriction on your search. A search with no restriction will include such texts automatically. <span class="emph">Otherwise they are excluded</span>.
+            have a variety of dates because they are composite.
             Check your search lists (<span class="ui-button-icon ui-icon ui-icon-info" title="Show/hide details of the current search list">&nbsp;</span>)
         to make sure you are getting what you want. Searching within a date range that is smaller than one century is likely to yield some measure of disappointment.
         Users are quite free to update authors with their own superior dates, but that requires learning SQL. Please consider sharing with others any/all improvements that you make to the original data.<br />
@@ -619,6 +612,10 @@ wordcounts
             <li>an author/work/passage + a class or classes + a date restriction: search for the specific item(s) and search for all members of the class(es) within that date range;
                 e.g. <span class="emph">Plutarch's <span class="italic">Solon</span></span> and <span class="emph">4th century BCE Greek orators</span></li>
         </ul>
+        </p>
+        <p>&nbsp;
+        <span class="label">Removing items from lists</span></p>
+        <p class="explanation"><span class="emph">Double-click</span> items from the include/exclude list and they will disappear from your list of selections or exclusions.
         </p>
 </div>
 
@@ -797,12 +794,12 @@ wordcounts
     <br />
     Search times will vary widely. If things seem unbearably slow, you should consider
     changing your queries and/or the restrictions placed upon them. <span class="emph">Everything hinges on what you ask for</span>.
-    Slowdowns obey an exponential logic: things get 2x worse, then 4x worse, then...
+    Slowdowns usually obey an exponential logic: things get 2x worse, then 4x worse, then...
     This means that little shifts in your search can lead to huge improvements.
     <br />
     <br />
     As noted below, hardware is a factor, but since you are unlikely to change your hardware much, let's start by spending some
-    time looking at the software side of things. But if your searches are about <span class="emph">50-100x slower</span> than these examples, you should
+    time looking at the software side of things. But if your searches are about <span class="emph">50-75x slower</span> than these examples, you should
     read about hardware.
 
     <ul class="forexample">
@@ -817,8 +814,8 @@ wordcounts
         </li>
         <li>Consider the following <span class="emph">simple searches</span>. Both searches are across all five databases. There are no restrictions applied at all.
         <ul class="numbered">
-            <li><span class="sampleoutput">Sought προκατέλαβον; Searched 236840 texts and found 22 passages (<span class="colorhighlight">4.19s</span>)</span></li>
-            <li><span class="sampleoutput">Sought δεδιότεϲ; Searched 236840 texts and found 589 passages (<span class="colorhighlight">6.89s</span>)</span></li>
+            <li><span class="sampleoutput">Sought »προκατέλαβον«; Searched 236840 texts and found 22 passages (<span class="colorhighlight">4.19s</span>)</span></li>
+            <li><span class="sampleoutput">Sought »δεδιότεϲ«; Searched 236840 texts and found 589 passages (<span class="colorhighlight">6.89s</span>)</span></li>
         </ul>
         The first search is quite fast: a long word and an uncommon word.
         The second search is really about the same speed: most of the extra time was spent on formatting the 589 results not on
@@ -826,96 +823,22 @@ wordcounts
         Common words will slow things down somewhat, but the slowdown is trivial relative to the amount of time it will take
         you to sift through 1000+ results.
     </li>
-    <li>Now let's look at some searches just inside 'Inscriptions I'.
-        <ul class="numbered">
-            <li><span class="sampleoutput">Sought πολιτεια; Searched 139970 texts and found 992 passages (<span class="colorhighlight">13.63s</span>)</span></li>
-            <li><span class="sampleoutput">Sought πολιτεια; Searched 112493 texts and found 895 passages (<span class="colorhighlight">11.34s</span>)</span></li>
-            <li><span class="sampleoutput">Sought πολιτεια; Searched 57627 texts and found 631 passages (<span class="colorhighlight">22.61s</span>); Searched between 600 B.C.E. and 200 B.C.E.</span></li>
-        </ul>
-
-        There were no restrictions on the first search. The searching part took about one second. The formatting took the other 12s.<br  />
-        The second search was restricted by 'Not Attica' for the author locations. The searching part took about one second. The formatting took most of the time.<br  />
-        The third search was 'Not Attica' and <span class="emph">it also had a time restriction</span>. The search itself took a lot longer.
-        <br />
-        <br />
-        Every 'author' is stored in a 'table'.  <span class="emph">Searching a whole table is much faster</span> than searching now one bit and now another bit.
-        Delos (IG XI,4 [510-1349]) contains 841 works. 315 of them fall between 600 B.C.E. and 200 B.C.E. Once you restrict the time,
-        the search of this 'author' turns into 315 mini searches. This is a lot slower than a single pass through that table.
-        It is really when searching papyri and the inscriptions where you feel this: the Greek and Roman authors usually have
-        fewer than 10 embedded works.
-    </li>
-    Obviously we will go a lot faster if we either add or subtract restrictions: the more a table is broken up into bits,
-    the slower you will go. But more restrictions might mean you only needed to look at 10 items inside of the table: that's
-    fast...
-    </li>
-    <li>
-    Here are some searches just inside 'Greek Authors'.
-        <ul class="numbered">
-            <li><span class="sampleoutput">Sought κεκωλυκατε within 2 lines of ιδιωταϲ; Searched 6625 texts and found 1 passages (<span class="colorhighlight">0.97s</span>)</span></li>
-            <li><span class="sampleoutput">Sought πραγμοϲυν within 2 lines of ιδιωταϲ; Searched 6625 texts and found 2 passages (<span class="colorhighlight">8.08s</span>)</span></li>
-            <li><span class="sampleoutput">Sought καλοϲ within 5 words of αγαθοϲ; Searched 6625 texts and found 74 passages (<span class="colorhighlight">38.78s</span>)</span></li>
-            <li><span class="sampleoutput">Sought καλοσ within 5 words of αγαθος; Searched 3008 texts and found 75 passages (<span class="colorhighlight">5.76s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
-        </ul>
-    <span class="emph">A proximity search is really two searches</span>.
-        In an <span class="emph">unaccented</span> search Hipparchia looks for the <span class="emph">longest term first</span>.
-    It is possible that the long term is more common than the short term, but if, like Hipparchia, you have to guess blindly, then you pick the
-    longer term every time.
-        In an <span class="emph">accented</span> search Hipparchia looks for the <span class="emph">rarest term first</span>, even if it is not
-        the longest term: the absolute frequency of any given individual has been calculated already and is available for lookup.
-        Working with accents will always be the fastest way to do a phrase or proximity search.
-    After searching for the first term Hipparchia looks for places
-    where the second term is near the first term. [NB: If you say a short term not near a long term, then the search will be for
-    the short term and then the long term. That's what you really wanted.] This two-step process explains the results you see above.
-    Let's walk through what happened when the search executed.
-    <ul class="roman">
-    <li>
-        Owing to the way the queries are built, a search for A
-        <span class="emph">Within N lines</span> of B is always significantly faster than the same search
-        executed <span class="emph">Within N words</span>. You probably only want to ask for the latter when it really matters.
-    </li>
-    <li>
-        There are only
-        two places where κεκωλύκατε appears. Finding them takes less than a second. Checking each location for ἰδιώταϲ takes
-        less than a hundredth of a second.</li>
-    <li>
-        A search for πραγμοϲυν will turn up 585 passages. It does not take much time to find them. And it does not take
-        all that much time to check those findings to see if they have ιδιωταϲ near them. A simple single-term search that generates 585 hits for
-        πραγμοϲυν takes 5.58s seconds, but a lot of that is spent formatting the results. So the proximity penalty is for looking for
-        πραγμοϲυν near ιδιωταϲ really quite low.
-    </li>
-    <li>
-        καλοϲ within 5 words of αγαθοϲ is a different story. Hipparchia is first going to look for every αγαθοϲ in extant
-        Greek literature. Then those passages will be checked for καλοϲ. The first pass generates a huge number of hits
-        and so the second pass takes plenty of time to complete.
-        But lest ye be scared off from your search for the good and the beautiful, note that adding a time restriction
-        immediately speeds up the search considerably. Confidence in the ugliness of later Greek is all you need.
-    </li>
-    <li>
-        In sum, <span class="emph">full corpus searches for two common words will be slow.</span> <a href="https://community.dur.ac.uk/p.j.heslin/Software/Diogenes/index.php">Diogenes</a>
-        can do this sort of thing much faster if you decide that this sort of query is vital to your research. It would
-        be possible to build a version of Hipparchia that is better at this kind of search, but that would mean
-        building a method to generate pseudo-texts and then to search them with regex, i.e., to insert a little parody
-        of Diogenes into Hipparchia.
-        </ul>
-    </li>
     <li>
         Phrase searches are sent to one of two functions. If you pick a rare (accented) word, then that word will be searched.
-        Then its environs will be searched. Otherwise PostgreSQL will build a nested query to look at two-line windows of text that
+        Then its environs will be searched. Otherwise PostgreSQL will build a nested query to look at windows of text that
         may or may not contain your phrase. <span class="emph">Most phrase searches will take roughly the same amount of time</span>
         since this 'windowing' is itself where most of the expensive computation happens.
         <ul class="numbered">
-            <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 6625 texts and found 3 passages (<span class="colorhighlight">16.39s</span>)</span></li>
-            <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 6625 texts and found 85 passages (<span class="colorhighlight">16.28s</span>)</span></li>
-            <li><span class="sampleoutput">Sought ἀνὴρ καλόϲ τε καὶ ἀγαθὸϲ; Searched 3008 texts and found 2 passages (<span class="colorhighlight">4.89s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
-            <li><span class="sampleoutput">Sought μεγάλην δύναμιν; Searched 3008 texts and found 32 passages (<span class="colorhighlight">4.97s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
-            <li><span class="sampleoutput">Sought οὐ μὴν ἀλλ; Searched 3,008 texts and found 718 passages (<span class="colorhighlight">14.97s</span>). Searched between 850 B.C.E. and 1 C.E.</span></li>
-            <li><span class="sampleoutput">Sought τῷ φίλῳ μου; 236,845 texts and found 6 passages (<span class="colorhighlight">19.8s</span>)</span></li>
-            <li><span class="sampleoutput">Sought οὐ μὴν ἀλλ; 236,845 texts and found 2,346 passages (<span class="colorhighlight">39.39s</span>)</span></li>
+            <li><span class="sampleoutput">Sought »μεγάλην δύναμιν«; Searched 6625 texts and found 85 passages (<span class="colorhighlight">15.01s</span>)</span> (only Greek literary authors active)</li>
+            <li><span class="sampleoutput">Sought »μεγάλην δύναμιν«; Searched 3008 texts and found 32 passages (<span class="colorhighlight">4.97s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
+            <li><span class="sampleoutput">Sought »τῷ φίλῳ μου«; Searched 236,845 texts and found 6 passages (<span class="colorhighlight">19.8s</span>)</span> (all databases active)</li>
+            <li><span class="sampleoutput">Sought »οὐ μὴν ἀλλ«; Searched 236,845 texts and found 2,346 passages (<span class="colorhighlight">29.54s</span>)</span></li>
+            <li><span class="sampleoutput">Sought »ἀνέθηκεν ὑπὲρ«; Searched 49,625 texts and found 33 passages (<span class="colorhighlight">7.09s</span>)</span>; Searched between 850 B.C.E. and 1 C.E.</li>
         </ul>
     As above, a common word sought across the whole corpus will slow you down.
     Most phrase searches are likely to contain common words. So you should consider strategies to make the haystack smaller
     unless you have some time to spare. It is totally safe to try to double-check Dennison on οὐ μὴν ἀλλὰ, but you should
-    throw some restrictions in there to avoid a long search (that yields more results than you want anyway). Waiting 40s for 2400 results
+    throw some restrictions in there to avoid a long search (that yields more results than you want anyway). Waiting 30s for 2400 results
     is perhaps less of a problem than having 2400 results to read after the search completes.
     </li>
 </ul>

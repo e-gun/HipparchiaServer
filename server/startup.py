@@ -121,7 +121,5 @@ def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specif
 allworks = workdict.keys()
 allvaria = set(findspecificdate(allworks, authordict, workdict, 2000))
 allincerta = set(findspecificdate(allworks, authordict, workdict, 2500))
-allunknown = set(findspecificdate(allworks, authordict, workdict, 2000))
-allincerta = allincerta.union(allunknown)
+
 del allworks
-del allunknown
