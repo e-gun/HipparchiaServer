@@ -128,7 +128,7 @@ def formatauthinfo(authorobject):
 			fl = 'assigned to approx date: {fl} C.E.'.format(fl=str(authorobject.converted_date))
 			fl += ' (derived from "{rd}")'.format(rd=authorobject.recorded_date)
 		elif float(authorobject.converted_date) < 0:
-			fl = 'assigned to approx date: {fl} B.C.E.'.format(fl=str(authorobject.converted_date[1:]))
+			fl = 'assigned to approx date: {fl} B.C.E.'.format(fl=str(authorobject.converted_date)[1:])
 			fl += ' (derived from "{rd}")'.format(rd=authorobject.recorded_date)
 	else:
 		fl = '<!-- no floruit available -->'

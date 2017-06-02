@@ -346,7 +346,7 @@ def sessiontimeexclusionsinfo():
 		else:
 			l = session['latestdate'] + ' C.E'
 			
-		timerestrictions ='Unless specifically listed, authors/works must come from ' + e + '&nbspto&nbsp;' + l + ''
+		timerestrictions ='Unless specifically listed, authors/works must come from {e}&nbspto&nbsp;{l}'.format(e=e, l=l)
 
 	return timerestrictions
 

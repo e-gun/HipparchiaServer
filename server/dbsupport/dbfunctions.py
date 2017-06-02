@@ -274,10 +274,10 @@ def simplecontextgrabber(workobject, focusline, linesofcontext, cursor):
 	:return:
 	"""
 
-	workdbname = workobject.universalid[0:6]
+	uid = workobject.universalid[0:6]
 	# step two use the index value to grab the environs
-	query = 'SELECT * FROM {wk} WHERE (wkuniversalid = %s) AND (index BETWEEN %s AND %s) ORDER BY index'.format(wk=workdbname)
-	data = (workobject.universalid, focusline - (linesofcontext / 2), focusline + (linesofcontext / 2))
+	query = 'SELECT * FROM {uid} WHERE (index BETWEEN %s AND %s) ORDER BY index'.format(uid=uid)
+	data = (focusline - (linesofcontext / 2), focusline + (linesofcontext / 2))
 	cursor.execute(query, data)
 	foundlines = cursor.fetchall()
 
