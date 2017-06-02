@@ -444,18 +444,20 @@ def findtotalcounts(word, cursor):
 	:return:
 	"""
 
-	# actually the words contain 'v' in the original dictionary entries (and this has not been cleaned up)
-	# word = re.sub(r'v','u',word)
-
 	table = 'dictionary_headword_wordcounts'
-	q = 'SELECT entry_name , total_count, gr_count, lt_count, dp_count, in_count, ch_count, ' \
-	    'frequency_classification, early_occurrences, middle_occurrences ,late_occurrences, ' \
-		'acta, agric, alchem, anthol, apocalyp, apocryph, apol, astrol, astron, biogr, bucol, caten, chronogr, comic, comm, ' \
-	    'concil, coq, dialog, docu, doxogr, eccl, eleg, encom, epic, epigr, epist, evangel, exeget, fab, geogr, gnom, gramm, ' \
-	    'hagiogr, hexametr, hist, homilet, hymn, hypoth, iamb, ignotum, invectiv, inscr, jurisprud, lexicogr, liturg, lyr, ' \
-	    'magica, math, mech, med, metrolog, mim, mus, myth, narrfict, nathist, onir, orac, orat, paradox, parod, paroem, ' \
-	    'perieg, phil, physiognom, poem, polyhist, prophet, pseudepigr, rhet, satura, satyr, schol, tact, test, theol, trag ' \
-	    'FROM ' + table + ' WHERE entry_name=%s'
+	qtemplate = """
+		SELECT 
+			entry_name , total_count, gr_count, lt_count, dp_count, in_count, ch_count,
+			frequency_classification, early_occurrences, middle_occurrences ,late_occurrences, 
+			acta, agric, alchem, anthol, apocalyp, apocryph, apol, astrol, astron, biogr, bucol, caten, chronogr, comic, comm, 
+			concil, coq, dialog, docu, doxogr, eccl, eleg, encom, epic, epigr, epist, evangel, exeget, fab, geogr, gnom, gramm, 
+			hagiogr, hexametr, hist, homilet, hymn, hypoth, iamb, ignotum, invectiv, inscr, jurisprud, lexicogr, liturg, lyr, 
+			magica, math, mech, med, metrolog, mim, mus, myth, narrfict, nathist, onir, orac, orat, paradox, parod, paroem, 
+			perieg, phil, physiognom, poem, polyhist, prophet, pseudepigr, rhet, satura, satyr, schol, tact, test, theol, trag
+		FROM {tbl} WHERE entry_name=%s
+	"""
+
+	q = qtemplate.format(tbl=table)
 	d = (word,)
 	cursor.execute(q,d)
 	l = cursor.fetchone()
