@@ -8,6 +8,8 @@
 
 import re
 
+from flask import session
+
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
 from server.hipparchiaobjects.lexicalobjects import dbWordCountObject, dbHeadwordObject, dbMorphologyObject, \
@@ -226,11 +228,19 @@ def browserdictionarylookup(count, seekingentry, cursor):
 						outputlist.append(formatprevalencedata(countobject))
 						outputlist.append('</p>')
 
-				if hipparchia.config['SHOWLEXICALSUMMARYINFO'] == 'yes':
+				summarydict = {}
+				if session['sensesummary'] == 'yes' or session['authorssummary'] == 'yes' or session['quotesummary'] == 'yes':
 					lemmaobject = grablemmataobjectfor(w.entry, usedictionary+'_lemmata', cursor)
 					summarydict = entrysummary(definition, usedictionary, translationlabel, lemmaobject)
-				else:
-					summarydict = {'authors': '', 'senses': '', 'quotes': ''}
+
+				if session['sensesummary'] == 'no':
+					summarydict['senses'] = ''
+
+				if session['authorssummary'] == 'no':
+					summarydict['authors'] = ''
+
+				if session['quotesummary'] == 'no':
+					summarydict['quotes'] = ''
 
 				if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
 					# either you have turned off summary info or this is basically just a gloss entry

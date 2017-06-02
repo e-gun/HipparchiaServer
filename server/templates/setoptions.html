@@ -1,6 +1,19 @@
 <div id="setoptions" class="center">
     <br />
     <fieldset>
+      <legend>Corpora to search</legend>
+      {% for list in activelists %}
+        {% if list == 'gr' %} Greek authors <input type="checkbox" id="greekcorpus" value="no">{% endif %}
+        {% if list == 'lt' %}&nbsp;&middot;&nbsp;Latin authors <input type="checkbox" id="latincorpus" value="no" >{% endif %}
+        {% if list == 'dp' %}&nbsp;&middot;&nbsp;Documentary papyri <input type="checkbox" id="papyruscorpus" value="no" >{% endif %}
+        {% if list == 'in' %}&nbsp;&middot;&nbsp;Inscriptions I <span class="small">(<span class="italic">IG</span>, <span class="italic">SEG</span>, etc.)</span>
+            <input type="checkbox" id="inscriptioncorpus" value="no">{% endif %}
+        {% if list == 'ch' %}&nbsp;&middot;&nbsp;Inscriptions II <span class="small">(Cla., Lt. Antiq., Med.; Christ.)</span>
+            <input type="checkbox" id="christiancorpus" value="no" >{% endif %}
+      {% endfor %}
+    </fieldset>
+    <br />
+    <fieldset>
         <legend>Lines of context to accompany search results</legend>
         <input id="linesofcontextspinner" type="text" value="6" width="25px;">
     </fieldset>
@@ -13,7 +26,7 @@
         <input id="hitlimitspinner" type="text" value="500" width="25px;">
     </fieldset>
     <fieldset>
-        <legend>Limit to one hit per author/work</legend>
+        <legend>Limit to one hit per author</legend>
         <label for="onehit_y">yes
         <input type="radio" name="onehit" id="onehit_y" value="yes"></label>
         <label for="onehit_n">no
@@ -30,25 +43,19 @@
             <option value="universalid">ID Number</option>
         </select>
     </fieldset>
-        <fieldset>
-            <legend>Index by headword</legend>
-            <label for="headwordindexing_y">yes
-            <input type="radio" name="hwindex" id="headwordindexing_y" value="yes"></label>
-            <label for="headwordindexing_n">no
-            <input type="radio" name="hwindex" id="headwordindexing_n" value="no"></label>
-      </fieldset>
     <fieldset>
-          <legend>Corpora to search</legend>
-          {% for list in activelists %}
-            {% if list == 'gr' %} Greek authors <input type="checkbox" id="greekcorpus" value="no">{% endif %}
-            {% if list == 'lt' %}&nbsp;&middot;&nbsp;Latin authors <input type="checkbox" id="latincorpus" value="no" >{% endif %}
-            {% if list == 'dp' %}&nbsp;&middot;&nbsp;Documentary papyri <input type="checkbox" id="papyruscorpus" value="no" >{% endif %}
-            {% if list == 'in' %}&nbsp;&middot;&nbsp;Inscriptions I <span class="small">(<span class="italic">IG</span>, <span class="italic">SEG</span>, etc.)</span>
-                <input type="checkbox" id="inscriptioncorpus" value="no">{% endif %}
-            {% if list == 'ch' %}&nbsp;&middot;&nbsp;Inscriptions II <span class="small">(Cla., Lt. Antiq., Med.; Christ.)</span>
-                <input type="checkbox" id="christiancorpus" value="no" >{% endif %}
-          {% endfor %}
-      </fieldset>
+        <legend>Index by headword</legend>
+        <label for="headwordindexing_y">yes
+        <input type="radio" name="hwindex" id="headwordindexing_y" value="yes"></label>
+        <label for="headwordindexing_n">no
+        <input type="radio" name="hwindex" id="headwordindexing_n" value="no"></label>
+    </fieldset>
+    <fieldset>
+        <legend>Lexical entries will show summaries of...</legend>
+        senses <input type="checkbox" id="sensesummary" value="yes">&nbsp;&middot;&nbsp;
+        authors <input type="checkbox" id="authorssummary" value="yes">&nbsp;&middot;&nbsp;
+        quotes <input type="checkbox" id="quotesummary" value="yes">
+    </fieldset>
         <br />
 
 </div>

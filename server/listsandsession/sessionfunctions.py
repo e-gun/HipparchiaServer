@@ -34,6 +34,9 @@ def sessionvariables():
 		session['alocexclusions'] = []
 		session['wlocselections'] = []
 		session['wlocexclusions'] = []
+		session['sensesummary'] = hipparchia.config['DEFAULTSHOWLEXICALSENSES']
+		session['authorssummary'] = hipparchia.config['DEFAULTSHOWLEXICALAUTHORS']
+		session['quotesummary'] = hipparchia.config['DEFAULTSHOWLEXICALQUOTES']
 		session['greekcorpus'] = hipparchia.config['DEFAULTGREEKCORPUSVALUE']
 		session['latincorpus'] = hipparchia.config['DEFAULTLATINCORPUSVALUE']
 		session['inscriptioncorpus'] = hipparchia.config['DEFAULTINSCRIPTIONCORPUSVALUE']
@@ -78,6 +81,9 @@ def modifysessionvar(param,val):
 		'earliestdate',
 		'latestdate',
 		'spuria',
+		'sensesummary',
+		'authorssummary',
+		'quotesummary',
 		'greekcorpus',
 		'latincorpus',
 		'inscriptioncorpus',
@@ -94,7 +100,7 @@ def modifysessionvar(param,val):
 		# print('param = val:',param,session[param])
 
 	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
-				   'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing']:
+				   'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary','authorssummary','quotesummary']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 

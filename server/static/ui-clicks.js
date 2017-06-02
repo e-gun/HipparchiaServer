@@ -78,6 +78,21 @@ function loadoptions() {
             } else {
             $('#includeincerta').prop('checked', true);
             }
+        if (data.sensesummary == 'no') {
+            $('#sensesummary').prop('checked', false);
+            } else {
+            $('#sensesummary').prop('checked', true);
+            }
+        if (data.authorssummary == 'no') {
+            $('#authorssummary').prop('checked', false);
+            } else {
+            $('#authorssummary').prop('checked', true);
+            }
+        if (data.quotesummary == 'no') {
+            $('#quotesummary').prop('checked', false);
+            } else {
+            $('#quotesummary').prop('checked', true);
+            }
         if (data.greekcorpus == 'yes') {
             $('#greekcorpus').prop('checked', true);
             $('#grkisactive').show();
@@ -369,6 +384,31 @@ $('#christiancorpus').change(function () {
     // because some items on your list just got purged?
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
+
+$('#sensesummary').change(function () {
+    if(this.checked) {
+        setoptions('sensesummary', 'yes'); } else { setoptions('sensesummary', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    });
+
+$('#authorssummary').change(function () {
+    if(this.checked) {
+        setoptions('authorssummary', 'yes'); } else { setoptions('authorssummary', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    });
+
+$('#quotesummary').change(function () {
+    if(this.checked) {
+        setoptions('quotesummary', 'yes'); } else { setoptions('quotesummary', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    });
+
 
 //
 // spinners

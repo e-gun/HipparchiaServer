@@ -57,16 +57,16 @@ CALCULATEWORDWEIGHTS = 'no'
 #   the default commit counts if you go over 5 (but the default MPCOMMITCOUNT is very conservative)
 #   Your mileage will indeed vary, but N > threads*(.5) is probably not going to do much good.
 #   You are populating TWO sets of threads when you set WORKERS: one is a collection of Python workers; these communicate with a set
-#   of PostgreSQL clients that will spawn in thier own threads. This is why going over 50% of your thread count is unlikely to do much good.
+#   of PostgreSQL clients that will spawn in their own threads. This is why going over 50% of your thread count is unlikely to do much good.
 #   You will in fact saturate 100% of your cores somewhere around threads*.5 (if you can get data to them fast enough...)
 # MPCOMMITCOUNT: **do not change this** unless you are getting deluged by messages about failed DB queries (see 'WORKERS' above)
 #   In which case you should *lower* the number because your many threads are accumulating too many uncommited transactions.
 #   Avoid increasing this value: it will make very little difference to your performace, but it will greatly increase your chances
-#   of failed searches. NB: the failures will only show up in the logs; in the browser you will get partial results that will present
-#   themselves as successfully executed searches. That is no good at all.
+#   of failed searches. NB: the failures will only show up in the logs as a number of lines starting with "could not execute SELECT * FROM..."
+#   in the browser you will get partial results that will present themselves as successfully executed searches. That is no good at all.
 AUTOCONFIGWORKERS = 'yes'
 WORKERS = 3
-MPCOMMITCOUNT = 1000
+MPCOMMITCOUNT = 750
 
 
 ### [6] settings that you can only configure here ###
@@ -96,7 +96,6 @@ HOBBLEREGEX = 'no'
 MINIMUMBROWSERWIDTH=100
 ENOUGHALREADYWITHTHECOPYRIGHTNOTICE='no'
 # lexical output settings
-SHOWLEXICALSUMMARYINFO = 'yes'
 SHOWGLOBALWORDCOUNTS = 'yes'
 EXCLUDEMINORGENRECOUNTS='yes'
 COLLAPSEDGENRECOUNTS='yes'
@@ -124,6 +123,10 @@ DEFAULTINCERTA='yes'
 DEFAULTSPURIA='yes'
 DEFAULTONEHIT='no'
 DEFAULTINDEXBYHEADWORDS = 'no'
+
+DEFAULTSHOWLEXICALSENSES = 'yes'
+DEFAULTSHOWLEXICALAUTHORS = 'yes'
+DEFAULTSHOWLEXICALQUOTES = 'yes'
 
 DEFAULTGREEKCORPUSVALUE = 'yes'
 DEFAULTLATINCORPUSVALUE = 'yes'
