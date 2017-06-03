@@ -5,7 +5,6 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
-import re
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors
@@ -34,8 +33,22 @@ if hipparchia.config['ENOUGHALREADYWITHTHECOPYRIGHTNOTICE'] != 'yes':
 
 """
 this stuff gets loaded up front so you have access to all author and work info all the time
-otherwise you'll hit the DB too often and ask the same question over and over again: a serious source of lag
+otherwise you'll hit the DB too often and ask the same question over and over again
 """
+
+# startup 4.922947645187378
+# profiling: [see https://zapier.com/engineering/profiling-python-boss/]
+# [a]
+# loadallauthorsasobjects(): 3589 function calls in 0.024 seconds
+# loadallworksasobjects(): 236975 function calls in 2.980 seconds
+#        236845    1.671    0.000    1.671    0.000 dbtextobjects.py:115(__init__)
+#       [but nothing happens inside of __init__ that you can expect to speed up]
+# loadallworksintoallauthors(): 473693 function calls in 0.241 seconds
+# [b]
+# buildaugenresdict(): 1840 function calls (1835 primitive calls) in 0.003 seconds
+# [c]
+# dictitemstartswith(): 1184230 function calls in 0.954 seconds
+# findspecificdate(): 1483 function calls in 0.142 seconds
 
 authordict = loadallauthorsasobjects()
 workdict = loadallworksasobjects()
@@ -48,7 +61,6 @@ workprovenancedict = buildworkprovenancedict(workdict)
 
 print('building specialized sublists\n')
 
-
 def dictitemstartswith(originaldict, element, muststartwith):
 	"""
 
@@ -60,9 +72,8 @@ def dictitemstartswith(originaldict, element, muststartwith):
 	:return:
 	"""
 
-	muststartwith = re.compile('^'+muststartwith)
 	newdict = {x: originaldict[x] for x in originaldict
-	           if re.search(muststartwith, getattr(originaldict[x], element))}
+				if getattr(originaldict[x], element)[0:2] == muststartwith }
 
 	return newdict
 

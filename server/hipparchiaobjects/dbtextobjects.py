@@ -140,8 +140,6 @@ class dbOpus(object):
 			self.length = lastline - firstline
 		except:
 			self.length = -1
-		#self.worknumber = int(universalid[7:])
-		# con't use int() any longer because ins and ddp numbers count via hex
 		self.worknumber = universalid[7:]
 		self.authorid = universalid[0:6]
 		self.structure = {}
@@ -153,7 +151,7 @@ class dbOpus(object):
 
 		availablelevels = 1
 		for level in [self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04, self.levellabels_05]:
-			if  level and level != '':
+			if level and level != '':
 				availablelevels += 1
 		self.availablelevels = availablelevels
 
@@ -217,6 +215,7 @@ class dbOpus(object):
 
 	def lines(self):
 		return set(range(self.starts, self.ends+1))
+
 
 class dbWorkLine(object):
 	"""

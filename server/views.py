@@ -10,6 +10,7 @@ import asyncio
 import errno
 import json
 import locale
+import re
 import socket
 import time
 from urllib.request import urlopen
@@ -104,8 +105,6 @@ def frontpage():
 #
 # unadorned views for quickly peeking at the data
 #
-
-
 @hipparchia.route('/authors')
 def authorlist():
 	"""
