@@ -192,7 +192,8 @@ def observedformjs():
 	            e.preventDefault();
 	            var windowWidth = $(window).width();
 	            var windowHeight = $(window).height();
-	            $( '#parserdialog' ).dialog({
+	            $( '#lexicadialogtext' ).dialog({
+	                    closeOnEscape: true, 
 	                    autoOpen: false,
 	                    minWidth: windowWidth*.33,
 	                    maxHeight: windowHeight*.9,
@@ -202,8 +203,8 @@ def observedformjs():
 	                    icons: { primary: 'ui-icon-close' },
 	                    click: function() { $( this ).dialog( 'close' ); }
 	                    });
-	            $( '#parserdialog' ).dialog( 'open' );
-	            $( '#parserdialog' ).html('[searching...]');
+	            $( '#lexicadialogtext' ).dialog( 'open' );
+	            $( '#lexicadialogtext' ).html('[searching...]');
 	            $.getJSON('/parse/'+this.id, function (definitionreturned) {
 	                $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
 	                var dLen = definitionreturned.length;
@@ -211,7 +212,7 @@ def observedformjs():
 	                for (i = 0; i < dLen; i++) {
 	                    linesreturned.push(definitionreturned[i]['value']);
 	                    }
-	                $( '#parserdialog' ).html(linesreturned);
+	                $( '#lexicadialogtext' ).html(linesreturned);
 	            });
             return false;
         });

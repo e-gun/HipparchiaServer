@@ -239,7 +239,8 @@ $('#lexicalsearch').click( function() {
 
     $(mydictfield).val('[Working on it...]');
     $.getJSON(url + searchterm, function (definitionreturned) {
-           $( '#dictdialog' ).dialog({
+           $( '#lexicadialogtext' ).dialog({
+                closeOnEscape: true,
                 autoOpen: false,
                 maxHeight: windowHeight*.9,
                 maxWidth: windowHeight*.9,
@@ -250,13 +251,13 @@ $('#lexicalsearch').click( function() {
                 icons: { primary: 'ui-icon-close' },
                 click: function() { $( this ).dialog( 'close' ); }
                 });
-           $( '#dictdialog' ).dialog( 'open' );
+           $( '#lexicadialogtext' ).dialog( 'open' );
            var dLen = definitionreturned.length;
            var linesreturned = [];
             for (i = 0; i < dLen; i++) {
                 linesreturned.push(definitionreturned[i]['value']);
                 }
-            $( '#dictdialog' ).html(linesreturned);
+            $( '#lexicadialogtext' ).html(linesreturned);
             $(mydictfield).val(restoreme);
         });
 

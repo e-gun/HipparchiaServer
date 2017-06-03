@@ -15,12 +15,8 @@ function browseuponclick(url){
             var fb = parsepassagereturned(passagereturned);
             // left and right arrow keys
 
-            $('#browseforward').bind('click', function(){
-                browseuponclick(fb[0]);
-                });
-            $('#browseback').bind('click', function(){
-                browseuponclick(fb[1]);
-                });
+            $('#browseforward').bind('click', function(){ browseuponclick(fb[0]); });
+            $('#browseback').bind('click', function(){ browseuponclick(fb[1]); });
             }
         }
         );
@@ -40,13 +36,8 @@ var openbrowserfromclick = function() {
                     case 39: browseuponclick(fb[0]); break;
                     }
                 });
-
-        $('#browseforward').bind('click', function(){
-        	browseuponclick(fb[0]);
-        	});
-        $('#browseback').bind('click', function(){
-        	browseuponclick(fb[1]);
-        	});
+        $('#browseforward').bind('click', function(){ browseuponclick(fb[0]); });
+        $('#browseback').bind('click', function(){ browseuponclick(fb[1]); });
         });
 }
 
@@ -83,7 +74,8 @@ function parsepassagereturned(passagereturned) {
             e.preventDefault();
             var windowWidth = $(window).width();
             var windowHeight = $(window).height();
-            $( '#parserdialog' ).dialog({
+            $( '#lexicadialogtext' ).dialog({
+                    closeOnEscape: true,
                     autoOpen: false,
                     minWidth: windowWidth*.33,
                     maxHeight: windowHeight*.9,
@@ -93,8 +85,8 @@ function parsepassagereturned(passagereturned) {
                     icons: { primary: 'ui-icon-close' },
                     click: function() { $( this ).dialog( 'close' ); }
                     });
-            $( '#parserdialog' ).dialog( 'open' );
-            $( '#parserdialog' ).html('[searching...]');
+            $( '#lexicadialogtext' ).dialog( 'open' );
+            $( '#lexicadialogtext' ).html('[searching...]');
             $.getJSON('/parse/'+this.id, function (definitionreturned) {
                 $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
                 var dLen = definitionreturned.length;
@@ -102,7 +94,7 @@ function parsepassagereturned(passagereturned) {
                 for (i = 0; i < dLen; i++) {
                     linesreturned.push(definitionreturned[i]['value']);
                     }
-                $( '#parserdialog' ).html(linesreturned);
+                $( '#lexicadialogtext' ).html(linesreturned);
             });
             return false;
         });

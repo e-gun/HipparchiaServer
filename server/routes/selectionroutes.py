@@ -173,7 +173,7 @@ def clearselections():
 	try:
 		session[category].pop(item)
 	except:
-		print('failed to pop', category, str(item))
+		print('clearselections() failed to pop', category, str(item))
 		pass
 
 	session.modified = True
@@ -198,7 +198,7 @@ def getcurrentselections():
 	return htmlbundles
 
 
-@hipparchia.route('/clear')
+@hipparchia.route('/resetsession')
 def clearsession():
 	"""
 	clear the session

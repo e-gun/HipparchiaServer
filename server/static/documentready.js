@@ -9,16 +9,13 @@ $(document).ready( function () {
     $(document).keydown(function(e) {
         // forward and back arrow; but the click does not exist until you open a passage browser
         switch(e.which) {
-            case 37:  $('#browseback').click(); break;
+            case 27: $('#browserdialog').hide(); break;
+            case 37: $('#browseback').click(); break;
             case 39: $('#browseforward').click(); break;
             }
         });
 
-    $('#clear_button').click(
-        function() {
-            window.location.href = '/clear';
-        	}
-    	);
+    $('#clear_button').click( function() { window.location.href = '/resetsession'; });
     $('#clearpick').hide();
     $('#moreinfotabs').hide();
     $('#moreinfotabs').tabs();
@@ -162,7 +159,7 @@ $(document).ready( function () {
 
 
     $('#browserclose').bind("click", function(){
-    		$("#browserdialog").hide();
+    		$('#browserdialog').hide();
     		$('#browseback').unbind('click');
     		$('#browseforward').unbind('click');
     		}
