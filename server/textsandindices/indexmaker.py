@@ -57,7 +57,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 	speed notes
 		a Manager() implementation was 50% slower than single-threaded: lock/unlock penalty on a shared dictionary
 		single thread is quite fast: 52s for Eustathius, Commentarii ad Homeri Iliadem [1,099,422 wds]
-		a Pool() is 2x as fast, but you cannot get polling data from inside the pool
+		a Pool() is 2x as fast as a single thread, but you cannot get polling data from inside the pool
 
 	cdict = {wo.universalid: (startline, endline)}
 

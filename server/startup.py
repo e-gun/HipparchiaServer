@@ -7,6 +7,7 @@
 """
 
 from server import hipparchia
+from server.calculatewordweights import findtemporalweights, findccorporaweights, findgeneraweights
 from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors
 from server.listsandsession.sessiondicts import buildaugenresdict, buildworkgenresdict, buildauthorlocationdict, \
 	buildworkprovenancedict
@@ -134,3 +135,17 @@ allvaria = set(findspecificdate(allworks, authordict, workdict, 2000))
 allincerta = set(findspecificdate(allworks, authordict, workdict, 2500))
 
 del allworks
+
+if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
+	if hipparchia.config['COLLAPSEDGENRECOUNTS'] == 'yes':
+		c = True
+	else:
+		c = False
+	print('greek wordweights', findtemporalweights('G'))
+	print('corpus weights', findccorporaweights())
+	print('greek genre weights:',findgeneraweights('G', c))
+	print('latin genre weights:',findgeneraweights('L', c))
+
+# empty dict in which to store progress polls
+# note that more than one poll can be running
+poll = {}

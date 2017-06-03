@@ -19,7 +19,6 @@ import websockets
 from flask import render_template, redirect, request, url_for, session, send_file
 
 from server.browsing.browserfunctions import getandformatbrowsercontext
-from server.calculatewordweights import findtemporalweights, findccorporaweights, findgeneraweights
 from server.dbsupport.citationfunctions import findvalidlevelvalues, finddblinefromlocus, finddblinefromincompletelocus, \
 	perseusdelabeler
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, versionchecking, \
@@ -47,22 +46,23 @@ from server.textsandindices.textandindiceshelperfunctions import tcparserequest,
 	wordindextohtmltable, observedformjs
 from server.textsandindices.textbuilder import buildtext
 
+
 # activate when you need to be shown new weight values upon startup and are willing to wait for the weights
 # these number need to be given to dbHeadwordObject, but they only change between major shifts in the data
 
-if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
-	if hipparchia.config['COLLAPSEDGENRECOUNTS'] == 'yes':
-		c = True
-	else:
-		c = False
-	print('greek wordweights', findtemporalweights('G'))
-	print('corpus weights', findccorporaweights())
-	print('greek genre weights:',findgeneraweights('G', c))
-	print('latin genre weights:',findgeneraweights('L', c))
-
-# empty dict in which to store progress polls
-# note that more than one poll can be running
-poll = {}
+# if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
+# 	if hipparchia.config['COLLAPSEDGENRECOUNTS'] == 'yes':
+# 		c = True
+# 	else:
+# 		c = False
+# 	print('greek wordweights', findtemporalweights('G'))
+# 	print('corpus weights', findccorporaweights())
+# 	print('greek genre weights:',findgeneraweights('G', c))
+# 	print('latin genre weights:',findgeneraweights('L', c))
+#
+# # empty dict in which to store progress polls
+# # note that more than one poll can be running
+# poll = {}
 
 
 @hipparchia.route('/')
