@@ -90,7 +90,7 @@ class dbHeadwordObject(dbWordCountObject):
 	"""
 
 	greekworderaweights = {'early': 7.72, 'middle': 1.92, 'late': 1}
-	corporaweights =  {'gr': 1.0, 'lt': 11.37, 'in': 28.13, 'dp': 27.49, 'ch': 129.89}
+	corporaweights =  {'gr': 1.0, 'lt': 10.49, 'in': 27.95, 'dp': 27.44, 'ch': 122.41}
 
 	greekgenreweights = {'acta': 87.64, 'agric': 16513.67, 'alchem': 79.21, 'anthol': 17.91, 'apocalyp': 128.34,
 	                     'apocryph': 97.15, 'apol': 7.1, 'astrol': 21.02, 'astron': 47.08, 'biogr': 6.47, 'bucol': 425.46,
@@ -107,19 +107,20 @@ class dbHeadwordObject(dbWordCountObject):
 	                     'pseudepigr': 652.46, 'rhet': 8.51, 'satura': 280.91, 'satyr': 126.45, 'schol': 5.99, 'tact': 52.95,
 	                     'test': 82.78, 'theol': 6.43, 'trag': 34.51, 'allrelig': 0.59, 'allrhet': 2.87}
 
-	latingenreweights = {'acta': 3174.91, 'agric': 5.23, 'alchem': 655.87, 'anthol': 509.85, 'apocalyp': 14476.08,
-	                     'apocryph': 15199.89, 'apol': 473.15, 'astrol': 5218.85, 'astron': 16.38, 'biogr': 9.7,
-	                     'bucol': 39.33, 'caten': 351.75, 'chronogr': 427.41, 'comic': 4.76, 'comm': 2.27, 'concil': 1461.53,
-	                     'coq': 62.95, 'dialog': 71.08, 'docu': 9.52, 'doxogr': 235.75, 'eccl': 5735.81, 'eleg': 7.76,
-	                     'encom': 277.43, 'epic': 2.27, 'epigr': 106.05, 'epist': 2.06, 'exeget': 188.03, 'fab': 29.46,
-	                     'geogr': 232.06, 'gnom': 81.87, 'gramm': 4.99, 'hagiogr': 14829.16, 'hexametr': 18.6, 'hist': 1.0,
-	                     'homilet': 6468.04, 'hymn': 7896.05, 'hypoth': 75.95, 'iamb': 22108.93, 'ignotum': 655.87,
-	                     'inscr': 2.03, 'jurisprud': 1.11, 'lexicogr': 21.9, 'liturg': 243198.2, 'lyr': 24.39, 'magica': 34742.6,
-	                     'math': 750.15, 'mech': 405330.33, 'med': 7.4, 'metrolog': 21714.12, 'mim': 1065.72, 'mus': 727.27,
-	                     'myth': 20266.52, 'narrfict': 11.76, 'nathist': 1.94, 'orac': 1215991.0, 'orat': 1.81, 'paradox': 17126.63,
-	                     'parod': 334.52, 'paroem': 75999.44, 'perieg': 75999.44, 'phil': 2.18, 'poem': 13.91, 'polyhist': 4.9,
-	                     'pseudepigr': 243198.2, 'rhet': 2.71, 'satyr': 356.49, 'schol': 32.89, 'tact': 37.73, 'test': 70.24,
-	                     'theol': 4883.5, 'trag': 13.34, 'allrelig': 83.21, 'allrhet': 1.08}
+	latingenreweights = {'acta': 3331.52, 'agric': 5.24, 'alchem': 656.03, 'anthol': 546.51, 'apocalyp': 14991.85,
+	                     'apocryph': 15894.98, 'apol': 472.35, 'astrol': 5194.03, 'astron': 16.34, 'biogr': 9.71,
+	                     'bucol': 38.48, 'caten': 374.48, 'chronogr': 433.26, 'comic': 4.78, 'comm': 2.27,
+	                     'concil': 1470.77, 'coq': 63.11, 'dialog': 71.09, 'docu': 9.8, 'doxogr': 238.61, 'eccl': 5590.18,
+	                     'eleg': 7.68, 'encom': 272.41, 'epic': 2.24, 'epigr': 110.07, 'epist': 2.08, 'exeget': 200.77,
+	                     'fab': 29.21, 'geogr': 235.59, 'gnom': 82.04, 'gramm': 4.99, 'hagiogr': 15340.5, 'hexametr': 18.41,
+	                     'hist': 1.0, 'homilet': 6563.6, 'hymn': 7411.7, 'hypoth': 78.93, 'iamb': 19401.22, 'ignotum': 644.81,
+	                     'inscr': 1.97, 'jurisprud': 1.12, 'lexicogr': 22.46, 'liturg': 263856.6, 'lyr': 23.9,
+	                     'magica': 21278.76, 'math': 765.25, 'mech': 439761.0, 'med': 7.41, 'metrolog': 23145.32,
+	                     'mim': 1069.11, 'mus': 728.89, 'myth': 21627.59, 'narrfict': 11.76, 'nathist': 1.94,
+	                     'orac': 1319283.0, 'orat': 1.81, 'paradox': 17133.55, 'parod': 332.48, 'paroem': 73293.5,
+	                     'perieg': 82455.19, 'phil': 2.19, 'poem': 13.68, 'polyhist': 4.89, 'pseudepigr': 263856.6,
+	                     'rhet': 2.74, 'satyr': 357.82, 'schol': 35.3, 'tact': 37.48, 'test': 71.48, 'theol': 5093.76,
+	                     'trag': 13.22, 'allrelig': 87.12, 'allrhet': 1.09}
 
 	# into one dict so we can pass it to __init__
 	wts = {'gkera': greekworderaweights, 'corp': corporaweights, 'gkgenre': greekgenreweights, 'ltgenre': latingenreweights}
