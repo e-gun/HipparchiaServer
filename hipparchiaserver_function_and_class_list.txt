@@ -38,37 +38,6 @@ helperfunctions.py:def tidyupterm(word, punct=None):
 helperfunctions.py:def setthreadcount():
 startup.py:def dictitemstartswith(originaldict, element, muststartwith):
 startup.py:def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
-views.py:def frontpage():
-views.py:def authorlist():
-views.py:def executesearch(timestamp):
-views.py:def grabtextforbrowsing(locus):
-views.py:def completeindex():
-views.py:def textmaker():
-views.py:def cookieintosession(cookienum):
-views.py:def findtheworksof(authoruid):
-views.py:def offerauthorhints():
-views.py:def augenrelist():
-views.py:def wkgenrelist():
-views.py:def offeraulocationhints():
-views.py:def offerprovenancehints():
-views.py:def workstructure(locus):
-views.py:def getsessionvariables():
-views.py:def getauthinfo(authorid):
-views.py:def getsearchlistcontents():
-views.py:def getgenrelistcontents():
-views.py:def findbyform(observedword):
-views.py:def dictsearch(searchterm):
-views.py:def reverselexiconsearch(searchterm):
-views.py:def setsessionvariable():
-views.py:def selectionmade():
-views.py:def clearselections():
-views.py:def getcurrentselections():
-views.py:def clearsession():
-views.py:def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
-views.py:def checkforactivesearch(ts):
-views.py:def sendfavicon():
-views.py:def appletouchticon():
-views.py:def progressreport():
 browsing/browserfunctions.py:def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
 browsing/browserfunctions.py:def checkfordocumentmetadata(line, workobject):
 browsing/browserfunctions.py:def insertparserids(lineobject):
@@ -168,6 +137,36 @@ listsandsession/sessionfunctions.py:def returnactivedbs():
 listsandsession/validateconfig.py:def loadconfig(filepath):
 listsandsession/validateconfig.py:def parseconfig(configlist):
 listsandsession/validateconfig.py:def compareconfigs(template, model):
+routes/browseroute.py:def grabtextforbrowsing(locus):
+routes/frontpage.py:def frontpage():
+routes/frontpage.py:def sendfavicon():
+routes/frontpage.py:def appletouchticon():
+routes/getterroutes.py:def getsessionvariables():
+routes/getterroutes.py:def cookieintosession(cookienum):
+routes/getterroutes.py:def findtheworksof(authoruid):
+routes/getterroutes.py:def workstructure(locus):
+routes/getterroutes.py:def getauthinfo(authorid):
+routes/getterroutes.py:def getsearchlistcontents():
+routes/getterroutes.py:def getgenrelistcontents():
+routes/hintroutes.py:def offerauthorhints():
+routes/hintroutes.py:def augenrelist():
+routes/hintroutes.py:def wkgenrelist():
+routes/hintroutes.py:def offeraulocationhints():
+routes/hintroutes.py:def offerprovenancehints():
+routes/inforoutes.py:def authorlist():
+routes/lexicalroutes.py:def findbyform(observedword):
+routes/lexicalroutes.py:def dictsearch(searchterm):
+routes/lexicalroutes.py:def reverselexiconsearch(searchterm):
+routes/searchroute.py:def executesearch(timestamp):
+routes/selectionroutes.py:def selectionmade():
+routes/selectionroutes.py:def setsessionvariable():
+routes/selectionroutes.py:def clearselections():
+routes/selectionroutes.py:def getcurrentselections():
+routes/selectionroutes.py:def clearsession():
+routes/textandindexroutes.py:def completeindex():
+routes/textandindexroutes.py:def textmaker():
+routes/websocketroutes.py:def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
+routes/websocketroutes.py:def checkforactivesearch(ts):
 searching/betacodetounicode.py:def replacegreekbetacode(texttoclean):
 searching/betacodetounicode.py:def capitalletters(betacode):
 searching/betacodetounicode.py:def capitalsmoothgraveadscript(match):
