@@ -3,16 +3,13 @@
     <fieldset>
       <legend>Corpora to search</legend>
       {% for list in activelists %}
-        {% if list == 'gr' %} Greek authors <input type="checkbox" id="greekcorpus" value="no">{% endif %}
-        {% if list == 'lt' %}&nbsp;&middot;&nbsp;Latin authors <input type="checkbox" id="latincorpus" value="no" >{% endif %}
-        {% if list == 'dp' %}&nbsp;&middot;&nbsp;Documentary papyri <input type="checkbox" id="papyruscorpus" value="no" >{% endif %}
-        {% if list == 'in' %}&nbsp;&middot;&nbsp;Inscriptions I <span class="small">(<span class="italic">IG</span>, <span class="italic">SEG</span>, etc.)</span>
-            <input type="checkbox" id="inscriptioncorpus" value="no">{% endif %}
-        {% if list == 'ch' %}&nbsp;&middot;&nbsp;Inscriptions II <span class="small">(Cla., Lt. Antiq., Med.; Christ.)</span>
-            <input type="checkbox" id="christiancorpus" value="no" >{% endif %}
+        {% if list == 'gr' %}{{clab['g']}} <input type="checkbox" id="greekcorpus" value="no" title="Greek authors ">{% endif %}
+        {% if list == 'lt' %}&nbsp;&middot;&nbsp;{{clab['l']}} <input type="checkbox" id="latincorpus" value="no" title="Latin authors">{% endif %}
+        {% if list == 'dp' %}&nbsp;&middot;&nbsp;{{clab['d']}} <input type="checkbox" id="papyruscorpus" value="no" title="Documentary papyri">{% endif %}
+        {% if list == 'in' %}&nbsp;&middot;&nbsp;{{clab['i']}} <input type="checkbox" id="inscriptioncorpus" value="no" title="Inscriptions I (IG, SEG, etc.)">{% endif %}
+        {% if list == 'ch' %}&nbsp;&middot;&nbsp;{{clab['c']}} <input type="checkbox" id="christiancorpus" value="no" title="Inscriptions II (Cla., Lt. Antiq., Med.; Christ.)">{% endif %}
       {% endfor %}
     </fieldset>
-    <br />
     <fieldset>
         <legend>Lines of context to accompany search results</legend>
         <input id="linesofcontextspinner" type="text" value="6" width="20px;">
@@ -56,6 +53,5 @@
         authors <input type="checkbox" id="authorssummary" value="yes">&nbsp;&middot;&nbsp;
         quotes <input type="checkbox" id="quotesummary" value="yes">
     </fieldset>
-        <br />
-
+    <br />
 </div>

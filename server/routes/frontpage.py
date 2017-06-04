@@ -19,7 +19,7 @@ def frontpage():
 	"""
 	the front page
 	it used to do stuff
-	now it just loads the JS which then calls all of the routes below
+	now it just loads the JS which then calls all of the routes
 
 	:return:
 	"""
@@ -45,8 +45,7 @@ def frontpage():
 
 	page = render_template('search.html',activelists=activelists, activecorpora=activecorpora, clab=corporalabels, css=stylesheet,
 	                       buildinfo=buildinfo, onehit=session['onehit'], hwindexing=session['headwordindexing'],
-						   spuria=session['spuria'], varia=session['varia'], undated=session['incerta']
-	                       )
+						   spuria=session['spuria'], varia=session['varia'], undated=session['incerta'])
 
 	return page
 
