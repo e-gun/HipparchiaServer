@@ -17,8 +17,9 @@ from server import hipparchia
 from server.helperfunctions import bcedating
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
 from server.listsandsession.listmanagement import sortresultslist, calculatewholeauthorsearches, compilesearchlist, \
-	flagexclusions, configurewhereclausedata
+	flagexclusions
 from server.listsandsession.sessionfunctions import sessionvariables, justlatin, justtlg
+from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.betacodetounicode import replacegreekbetacode
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchformatting import mpresultformatter, nocontextresultformatter, htmlifysearchfinds, \
