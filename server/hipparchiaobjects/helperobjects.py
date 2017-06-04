@@ -298,7 +298,6 @@ class SearchObject(object):
 		self.leastcommon = None
 		self.searchtype = None
 		self.authorandworklist = []
-		self.authorswhere = {}
 		self.indexrestrictions = {}
 
 		if self.accented:

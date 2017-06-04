@@ -110,19 +110,6 @@ def executesearch(timestamp):
 		indexrestrictions = configurewhereclausedata(authorandworklist, workdict, so)
 		so.indexrestrictions = indexrestrictions
 
-		# assemble a subset of authordict that will be relevant to our actual search and send it to searchdispatcher()
-		# it turns out that we only need to pass authors that are part of psgselections or psgexclusions
-		# whereclauses() is selectively invoked and it needs to check the information in the listed authors and works
-		# once upon a time all authors were sent through searchdispatcher(), but loading them into the manager produced
-		# a massive slowdown (as 200k objects got pickled into a mpshareable dict)
-		authorswheredict = {}
-
-		for w in so.psgselections:
-			authorswheredict[w[0:6]] = authordict[w[0:6]]
-		for w in so.psgexclusions:
-			authorswheredict[w[0:6]] = authordict[w[0:6]]
-		so.authorswhere = authorswheredict
-
 		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
 			so.searchtype = 'simple'
 			thesearch = so.originalseeking
