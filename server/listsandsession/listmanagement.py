@@ -29,9 +29,9 @@ def compilesearchlist(listmapper, s=session):
 	:return:
 	"""
 
-	searchlist = s['auselections'] + s['agnselections'] + s['wkgnselections'] + s['psgselections'] + s['wkselections'] \
+	searching = s['auselections'] + s['agnselections'] + s['wkgnselections'] + s['psgselections'] + s['wkselections'] \
 	             + s['alocselections'] + s['wlocselections']
-	exclusionlist = s['auexclusions'] + s['wkexclusions'] + s['agnexclusions'] + s['wkgnexclusions'] + s['psgexclusions'] \
+	excluding = s['auexclusions'] + s['wkexclusions'] + s['agnexclusions'] + s['wkgnexclusions'] + s['psgexclusions'] \
 	                + s['alocexclusions'] + s['wlocexclusions']
 
 	# trim by active corpora
@@ -41,7 +41,7 @@ def compilesearchlist(listmapper, s=session):
 	searchlist = []
 
 	# [A] build the inclusion list
-	if len(searchlist) > 0:
+	if len(searching) > 0:
 		# build lists up from specific items (passages) to more general classes (works, then authors)
 		for g in s['wkgnselections']:
 			searchlist += foundindict(wd, 'workgenre', g)
@@ -102,7 +102,7 @@ def compilesearchlist(listmapper, s=session):
 	# note that we are not handling excluded individual passages yet
 	excludedworks = []
 
-	if len(exclusionlist) > 0:
+	if len(excluding) > 0:
 		excludedauthors = [a for a in s['auexclusions']]
 
 		for g in s['agnexclusions']:
