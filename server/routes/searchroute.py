@@ -16,8 +16,7 @@ from flask import request, session
 from server import hipparchia
 from server.helperfunctions import bcedating
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
-from server.listsandsession.listmanagement import sortresultslist, calculatewholeauthorsearches, \
-	compileauthorandworklist, \
+from server.listsandsession.listmanagement import sortresultslist, calculatewholeauthorsearches, compilesearchlist, \
 	flagexclusions, configurewhereclausedata
 from server.listsandsession.sessionfunctions import sessionvariables, justlatin, justtlg
 from server.searching.betacodetounicode import replacegreekbetacode
@@ -86,7 +85,7 @@ def executesearch(timestamp):
 	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	                 if session[c] == 'yes']
 
-	authorandworklist = []
+	searchlist = []
 	output = ''
 	nosearch = True
 	so = SearchObject(ts, seeking, proximate, frozensession)
@@ -94,20 +93,19 @@ def executesearch(timestamp):
 
 	if len(seeking) > 0 and activecorpora:
 		poll[ts].statusis('Compiling the list of works to search')
-		authorandworklist = compileauthorandworklist(listmapper, frozensession)
+		searchlist = compilesearchlist(listmapper, frozensession)
 
-	if len(authorandworklist) > 0:
+	if len(searchlist) > 0:
 		nosearch = False
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
-		poll[ts].statusis('Marking exclusions from the list of works to search')
-		authorandworklist = flagexclusions(authorandworklist, frozensession)
-		workssearched = len(authorandworklist)
+		searchlist = flagexclusions(searchlist, frozensession)
+		workssearched = len(searchlist)
 
 		poll[ts].statusis('Calculating full authors to search')
-		authorandworklist = calculatewholeauthorsearches(authorandworklist, authordict)
-		so.authorandworklist = authorandworklist
+		searchlist = calculatewholeauthorsearches(searchlist, authordict)
+		so.searchlist = searchlist
 		poll[ts].statusis('Configuring the search restrictions')
-		indexrestrictions = configurewhereclausedata(authorandworklist, workdict, so)
+		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 		so.indexrestrictions = indexrestrictions
 
 		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
@@ -194,7 +192,7 @@ def executesearch(timestamp):
 			reasons.append('there are no active databases')
 		if len(seeking) == 0:
 			reasons.append('there is no search term')
-		if len(authorandworklist) == 0:
+		if len(searchlist) == 0:
 			reasons.append('zero works match the search criteria')
 		output = {}
 		output['title'] = '(empty query)'

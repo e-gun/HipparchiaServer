@@ -51,7 +51,7 @@ def searchdispatcher(searchobject, activepoll):
 
 	commitcount = MPCounter()
 	workers = setthreadcount()
-	activepoll.allworkis(len(so.authorandworklist))
+	activepoll.allworkis(len(so.searchlist))
 	activepoll.remain(len(so.indexrestrictions.keys()))
 	activepoll.sethits(0)
 

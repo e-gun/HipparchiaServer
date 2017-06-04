@@ -297,7 +297,7 @@ class SearchObject(object):
 		self.termtwo = proximate
 		self.leastcommon = None
 		self.searchtype = None
-		self.authorandworklist = []
+		self.searchlist = []
 		self.indexrestrictions = {}
 
 		if self.accented:

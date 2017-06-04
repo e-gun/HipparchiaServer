@@ -14,7 +14,7 @@ from flask import redirect, request, url_for, session
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor
-from server.listsandsession.listmanagement import sortauthorandworklists, compileauthorandworklist
+from server.listsandsession.listmanagement import sortsearchlist, compilesearchlist
 from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie
 from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, formatname
 from server.startup import authordict, workdict, authorgenresdict, authorlocationdict, workgenresdict, \
@@ -227,20 +227,20 @@ def getsearchlistcontents():
 	:return:
 	"""
 
-	authorandworklist = compileauthorandworklist(listmapper)
-	authorandworklist = sortauthorandworklists(authorandworklist, authordict)
+	searchlist = compilesearchlist(listmapper)
+	searchlist = sortsearchlist(searchlist, authordict)
 
 	searchlistinfo = []
 
-	if len(authorandworklist) > 1:
-		searchlistinfo.append('<br /><h3>Proposing to search the following {ww} works:</h3>'.format(ww=len(authorandworklist)))
+	if len(searchlist) > 1:
+		searchlistinfo.append('<br /><h3>Proposing to search the following {ww} works:</h3>'.format(ww=len(searchlist)))
 		searchlistinfo.append('(Results will be arranged according to {so})<br /><br />'.format(so=session['sortorder']))
 	else:
 		searchlistinfo.append('<br /><h3>Proposing to search the following work:</h3>')
 
 	count = 0
 	wordstotal = 0
-	for work in authorandworklist:
+	for work in searchlist:
 		work = work[:10]
 		count += 1
 		w = workdict[work]
