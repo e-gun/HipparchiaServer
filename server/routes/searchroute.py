@@ -37,7 +37,19 @@ def executesearch(timestamp):
 
 	:return:
 	"""
+
+	starttime = time.time()
+
+	try:
+		ts = str(int(timestamp))
+	except:
+		ts = str(int(time.time()))
+
 	sessionvariables()
+	# a search can take 30s or more and the user might alter the session while the search is running by toggling onehit, etc
+	# that can be a problem, so freeze the values now and rely on this instead of some moving target
+	frozensession = session.copy()
+
 	# need to sanitize input at least a bit: remove digits and punctuation
 	# dispatcher will do searchtermcharactersubstitutions() and massagesearchtermsforwhitespace() to take care of lunate sigma, etc.
 	try:
@@ -50,16 +62,9 @@ def executesearch(timestamp):
 	except:
 		proximate = ''
 
-	try:
-		ts = str(int(timestamp))
-	except:
-		ts = str(int(time.time()))
-
 	if len(seeking) < 1 and len(proximate) > 0:
 		seeking = proximate
 		proximate = ''
-
-	dmin, dmax = bcedating()
 
 	if hipparchia.config['TLGASSUMESBETACODE'] == 'yes':
 		if justtlg() and re.search('[a-zA-Z]', seeking) and not re.search('[α-ω]', seeking):
@@ -78,18 +83,14 @@ def executesearch(timestamp):
 	poll[ts].activate()
 	poll[ts].statusis('Preparing to search')
 
-	# a search can take 30s or more and the user might alter the session while the search is running by toggling onehit, etc
-	# that can be a problem, so freeze the values now and rely on this instead of some moving target
-	frozensession = session.copy()
-
-	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
-	                 if session[c] == 'yes']
-
 	searchlist = []
 	output = ''
 	nosearch = True
 	so = SearchObject(ts, seeking, proximate, frozensession)
-	starttime = time.time()
+	dmin, dmax = bcedating(frozensession)
+
+	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
+	                 if frozensession[c] == 'yes']
 
 	if len(seeking) > 0 and activecorpora:
 		poll[ts].statusis('Compiling the list of works to search')

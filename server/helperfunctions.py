@@ -197,14 +197,14 @@ def formatpublicationinfo(pubinfo):
 	return publicationhtml
 
 
-def bcedating():
+def bcedating(s=session):
 	"""
 	return the English equivalents for session['earliestdate'] and session['latestdate']
 	:return:
 	"""
 	
-	dmax = session['latestdate']
-	dmin = session['earliestdate']
+	dmax = s['latestdate']
+	dmin = s['earliestdate']
 	if dmax[0] == '-':
 		dmax = dmax[1:] + ' B.C.E.'
 	else:
