@@ -1,3 +1,23 @@
+cloc --not-match-f='^j' HipparchiaServer/
+      80 text files.
+      80 unique files.
+       9 files ignored.
+
+github.com/AlDanial/cloc v 1.72  T=0.63 s (117.3 files/s, 30426.1 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Python                          48           2658           3260           7454
+XML                              6              0              0           2001
+HTML                            12            120             13           1334
+JavaScript                       6            190            184           1019
+CSS                              1            167              8            650
+Markdown                         1             27              0            115
+-------------------------------------------------------------------------------
+SUM:                            74           3162           3465          12573
+-------------------------------------------------------------------------------
+
+
 [ in server/] grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
 
 hipparchiaobjects/dbtextobjects.py:class dbAuthor(object):

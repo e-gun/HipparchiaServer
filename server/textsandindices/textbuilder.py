@@ -25,9 +25,13 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 
 	auid = work[0:6]
 
-	query = 'SELECT index, wkuniversalid, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, ' \
-			'marked_up_line, accented_line, stripped_line, hyphenated_words, annotations FROM ' + auid + \
-	        ' WHERE (index >= %s and index <= %s) ORDER BY index ASC'
+	qtemplate = """
+	SELECT index, wkuniversalid, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, 
+			marked_up_line, accented_line, stripped_line, hyphenated_words, annotations FROM {a}
+	        WHERE (index >= %s and index <= %s) ORDER BY index ASC
+	"""
+	query = qtemplate.format(a=auid)
+
 	data = (firstline, lastline)
 	cursor.execute(query, data)
 	results = cursor.fetchall()

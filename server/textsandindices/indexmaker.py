@@ -54,6 +54,7 @@ def compilewordlists(worksandboundaries, cursor):
 
 def buildindextowork(cdict, activepoll, headwords, cursor):
 	"""
+
 	speed notes
 		a Manager() implementation was 50% slower than single-threaded: lock/unlock penalty on a shared dictionary
 		single thread is quite fast: 52s for Eustathius, Commentarii ad Homeri Iliadem [1,099,422 wds]
@@ -70,9 +71,9 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 	each item will hit the browser as something like:
 		ἀβίωτον | 4 | w028: 246.d.6; w030: 407.a.5, 407.b.1; w034: 926.b.6
 
-	:param work:
-	:param startline:
-	:param endline:
+	:param cdict:
+	:param activepoll:
+	:param headwords:
 	:param cursor:
 	:return:
 	"""
