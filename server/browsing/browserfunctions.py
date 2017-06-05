@@ -12,8 +12,7 @@ import re
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
-from server.formatting.miscformatting import insertcrossreferencerow, insertdatarow
-from server.formatting.searchformatting import getpublicationinfo, avoidlonglines
+from server.formatting.bibliographicformatting import getpublicationinfo, avoidlonglines
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -245,3 +244,37 @@ def insertparserids(lineobject):
 			pass
 		
 	return newline
+
+
+def insertcrossreferencerow(lineobject):
+	"""
+	inscriptions and papyri have relevant bibliographic information that needs to be displayed
+	:param lineobject:
+	:return:
+	"""
+	linehtml = ''
+
+	if re.search(r'documentnumber',lineobject.annotations) is None:
+		columna = ''
+		columnb = '<span class="crossreference">{ln}</span>'.format(ln=lineobject.annotations)
+
+		linehtml = '<tr class="browser"><td class="crossreference">{c}</td>'.format(c=columnb)
+		linehtml += '<td class="crossreference">{c}</td></tr>\n'.format(c=columna)
+
+	return linehtml
+
+
+def insertdatarow(label, css, founddate):
+	"""
+	inscriptions and papyri have relevant bibliographic information that needs to be displayed
+	:param lineobject:
+	:return:
+	"""
+
+	columna = ''
+	columnb = '<span class="textdate">{l}:&nbsp;{fd}</span>'.format(l=label, fd=founddate)
+
+	linehtml = '<tr class="browser"><td class="{css}">{cb}</td>'.format(css=css, cb=columnb)
+	linehtml += '<td class="crossreference">{ca}</td></tr>\n'.format(ca=columna)
+
+	return linehtml

@@ -15,7 +15,7 @@ from flask import request, session
 
 from server import hipparchia
 from server.formatting.betacodetounicode import replacegreekbetacode
-from server.formatting.miscformatting import bcedating
+from server.formatting.bibliographicformatting import bcedating
 from server.formatting.searchformatting import mpresultformatter, nocontextresultformatter, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds, jstoinjectintobrowser
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
