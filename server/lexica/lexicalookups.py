@@ -12,12 +12,12 @@ from flask import session
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
+from server.formatting.betacodetounicode import cleanaccentsandvj
+from server.formatting.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
+	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.hipparchiaobjects.lexicalobjects import dbWordCountObject, dbHeadwordObject, dbMorphologyObject, \
 	dbGreekWord, dbLatinWord, dbLemmaObject
-from server.lexica.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
-	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
 from server.listsandsession.listmanagement import polytonicsort
-from server.searching.betacodetounicode import cleanaccentsandvj
 
 
 def lookformorphologymatches(word, cursor, trialnumber=0):

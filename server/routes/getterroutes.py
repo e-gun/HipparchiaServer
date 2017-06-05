@@ -14,9 +14,10 @@ from flask import redirect, request, url_for, session
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor
+from server.formatting.miscformatting import formatauthinfo, woformatworkinfo
+from server.formatting.searchformatting import formatauthorandworkinfo, formatname
 from server.listsandsession.listmanagement import sortsearchlist, compilesearchlist
 from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie
-from server.searching.searchformatting import formatauthinfo, formatauthorandworkinfo, woformatworkinfo, formatname
 from server.startup import authordict, workdict, authorgenresdict, authorlocationdict, workgenresdict, \
 	workprovenancedict, listmapper
 

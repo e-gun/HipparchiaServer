@@ -16,7 +16,7 @@ from server.browsing.browserfunctions import getandformatbrowsercontext
 from server.dbsupport.citationfunctions import finddblinefromlocus, finddblinefromincompletelocus, perseusdelabeler
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, perseusidmismatch, \
 	returnfirstlinenumber
-from server.lexica.lexicaformatting import dbquickfixes
+from server.formatting.lexicaformatting import dbquickfixes
 from server.startup import authordict, workdict
 
 

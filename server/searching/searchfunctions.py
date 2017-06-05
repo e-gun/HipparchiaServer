@@ -11,7 +11,7 @@ from string import punctuation
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
-from server.helperfunctions import removegravity
+from server.formatting.wordformatting import removegravity
 from server.lexica.lexicalookups import findcountsviawordcountstable
 
 

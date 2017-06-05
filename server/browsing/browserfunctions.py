@@ -12,7 +12,8 @@ import re
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
-from server.helperfunctions import getpublicationinfo, insertcrossreferencerow, insertdatarow, avoidlonglines
+from server.formatting.miscformatting import insertcrossreferencerow, insertdatarow
+from server.formatting.searchformatting import getpublicationinfo, avoidlonglines
 
 config = configparser.ConfigParser()
 config.read('config.ini')

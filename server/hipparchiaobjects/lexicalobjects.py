@@ -8,7 +8,7 @@
 import re
 
 from server import hipparchia
-from server.helperfunctions import gkattemptelision, latattemptelision
+from server.formatting.wordformatting import gkattemptelision, latattemptelision
 
 
 class dbWordCountObject(object):

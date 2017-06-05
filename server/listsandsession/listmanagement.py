@@ -10,7 +10,7 @@ import re
 
 from flask import session
 
-from server.helperfunctions import stripaccents, buildhipparchiatranstable
+from server.formatting.wordformatting import stripaccents, buildhipparchiatranstable
 from server.listsandsession.sessionfunctions import reducetosessionselections, justlatin
 from server.startup import allvaria, allincerta
 

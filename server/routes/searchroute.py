@@ -14,16 +14,16 @@ import time
 from flask import request, session
 
 from server import hipparchia
-from server.helperfunctions import bcedating
+from server.formatting.betacodetounicode import replacegreekbetacode
+from server.formatting.miscformatting import bcedating
+from server.formatting.searchformatting import mpresultformatter, nocontextresultformatter, htmlifysearchfinds, \
+	nocontexthtmlifysearchfinds, jstoinjectintobrowser
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
 from server.listsandsession.listmanagement import sortresultslist, calculatewholeauthorsearches, compilesearchlist, \
 	flagexclusions
 from server.listsandsession.sessionfunctions import sessionvariables, justlatin, justtlg
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.searching.betacodetounicode import replacegreekbetacode
 from server.searching.searchdispatching import searchdispatcher
-from server.searching.searchformatting import mpresultformatter, nocontextresultformatter, htmlifysearchfinds, \
-	nocontexthtmlifysearchfinds, jstoinjectintobrowser
 from server.searching.searchfunctions import cleaninitialquery
 from server.startup import authordict, workdict, listmapper, poll
 

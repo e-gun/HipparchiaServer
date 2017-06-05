@@ -2,7 +2,7 @@
 
     formattedcitationincontext() needs to address this with a check of the HTML of the last line of a citation?
 
-[B]
+[B] latattemptelision() could use more love
 
 MorphPossibilityObject.getlatinbaseform() needs work per-misceo
 MorphPossibilityObject.getlatinbaseform() needs work permixtā, per-misceo

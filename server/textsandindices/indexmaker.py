@@ -13,7 +13,8 @@ from string import punctuation
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, setconnection
-from server.helperfunctions import tidyupterm, setthreadcount
+from server.formatting.wordformatting import tidyupterm
+from server.helperfunctions import setthreadcount
 from server.hipparchiaobjects.helperobjects import MPCounter
 from server.lexica.lexicalookups import lookformorphologymatches
 from server.listsandsession.listmanagement import polytonicsort

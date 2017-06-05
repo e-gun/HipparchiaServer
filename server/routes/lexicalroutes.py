@@ -11,7 +11,7 @@ import re
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
-from server.helperfunctions import removegravity, stripaccents, tidyupterm
+from server.formatting.wordformatting import removegravity, stripaccents, tidyupterm
 from server.lexica.lexicalookups import browserdictionarylookup, lexicalmatchesintohtml, findtotalcounts, \
 	lookformorphologymatches, getobservedwordprevalencedata, findtermamongsenses
 from server.listsandsession.listmanagement import polytonicsort
