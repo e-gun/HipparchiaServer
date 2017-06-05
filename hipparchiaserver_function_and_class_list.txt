@@ -22,20 +22,6 @@ calculatewordweights.py:def findccorporaweights():
 calculatewordweights.py:def findgeneraweights(language, collapsed=False):
 calculatewordweights.py:def findchronologicalweights(era,language):
 calculatewordweights.py:def findcorpusweight(corpus, language):
-helperfunctions.py:def removegravity(accentedword):
-helperfunctions.py:def forceterminalacute(matchgroup):
-helperfunctions.py:def stripaccents(texttostrip, transtable=None):
-helperfunctions.py:def buildhipparchiatranstable():
-helperfunctions.py:def getpublicationinfo(workobject, cursor):
-helperfunctions.py:def formatpublicationinfo(pubinfo):
-helperfunctions.py:def bcedating():
-helperfunctions.py:def insertcrossreferencerow(lineobject):
-helperfunctions.py:def insertdatarow(label, css, founddate):
-helperfunctions.py:def avoidlonglines(string, maxlen, splitval, stringlist=[]):
-helperfunctions.py:def gkattemptelision(hypenatedgreekheadword):
-helperfunctions.py:def latattemptelision(hypenatedlatinheadword):
-helperfunctions.py:def tidyupterm(word, punct=None):
-helperfunctions.py:def setthreadcount():
 startup.py:def dictitemstartswith(originaldict, element, muststartwith):
 startup.py:def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
 browsing/browserfunctions.py:def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
@@ -50,6 +36,7 @@ dbsupport/citationfunctions.py:def perseuslookupleveltrimmer(workobject, citatio
 dbsupport/citationfunctions.py:def perseuslookupchangecase(citationlist):
 dbsupport/citationfunctions.py:def perseusdelabeler(citationlist, workobject):
 dbsupport/citationfunctions.py:def perseuscitationsintohipparchiacitations(citationlist):
+dbsupport/dbfunctions.py:def setthreadcount():
 dbsupport/dbfunctions.py:def setconnection(autocommit='n'):
 dbsupport/dbfunctions.py:def tablenamer(authorobject, thework):
 dbsupport/dbfunctions.py:def labelmaker(workuid, cursor):
@@ -69,19 +56,94 @@ dbsupport/dbfunctions.py:def makeablankline(work, fakelinenumber):
 dbsupport/dbfunctions.py:def makeanemptyauthor(universalid):
 dbsupport/dbfunctions.py:def makeanemptywork(universalid):
 dbsupport/dbfunctions.py:def versionchecking(activedbs, expectedsqltemplateversion):
-lexica/lexicaformatting.py:def grabsenses(fullentry):
-lexica/lexicaformatting.py:def entrysummary(fullentry, lang, translationlabel, lemmaobject):
-lexica/lexicaformatting.py:def grabheadmaterial(fullentry):
-lexica/lexicaformatting.py:def deabbreviateauthors(authorabbr, lang):
-lexica/lexicaformatting.py:def formatdictionarysummary(summarydict):
-lexica/lexicaformatting.py:def formateconsolidatedgrammarentry(consolidatedentry):
-lexica/lexicaformatting.py:def formatgloss(entrybody):
-lexica/lexicaformatting.py:def formatmicroentry(entrybody):
-lexica/lexicaformatting.py:def insertbrowserlookups(htmlentry):
-lexica/lexicaformatting.py:def insertbrowserjs(htmlentry):
-lexica/lexicaformatting.py:def dbquickfixes(listofnames):
-lexica/lexicaformatting.py:def deabrevviategreekauthors():
-lexica/lexicaformatting.py:def deabrevviatelatinauthors():
+formatting/betacodetounicode.py:def replacegreekbetacode(texttoclean):
+formatting/betacodetounicode.py:def capitalletters(betacode):
+formatting/betacodetounicode.py:def capitalsmoothgraveadscript(match):
+formatting/betacodetounicode.py:def capitalroughgraveadscript(match):
+formatting/betacodetounicode.py:def capitalsmoothacuteadscript(match):
+formatting/betacodetounicode.py:def capitalroughacuteadscript(match):
+formatting/betacodetounicode.py:def capitalsmoothcircumflexadscript(match):
+formatting/betacodetounicode.py:def capitalroughcircumflexadscript(match):
+formatting/betacodetounicode.py:def capitalsmoothgrave(match):
+formatting/betacodetounicode.py:def capitalroughgrave(match):
+formatting/betacodetounicode.py:def capitalsmoothacute(match):
+formatting/betacodetounicode.py:def capitalroughacute(match):
+formatting/betacodetounicode.py:def capitalsmoothcircumflex(match):
+formatting/betacodetounicode.py:def capitalroughcircumflex(match):
+formatting/betacodetounicode.py:def capitalsmooth(match):
+formatting/betacodetounicode.py:def capitalrough(match):
+formatting/betacodetounicode.py:def capitalgrave(match):
+formatting/betacodetounicode.py:def capitalacute(match):
+formatting/betacodetounicode.py:def capitaladscript(match):
+formatting/betacodetounicode.py:def capitals(match):
+formatting/betacodetounicode.py:def lowercaseletters(betacode):
+formatting/betacodetounicode.py:def lowercasesmoothgravesubscript(match):
+formatting/betacodetounicode.py:def lowercaseroughgravesubscript(match):
+formatting/betacodetounicode.py:def lowercasesmoothacutesubscript(match):
+formatting/betacodetounicode.py:def lowercaseroughacutesubscript(match):
+formatting/betacodetounicode.py:def lowercasesmoothcircumflexsubscript(match):
+formatting/betacodetounicode.py:def lowercaseroughcircumflexsubscript(match):
+formatting/betacodetounicode.py:def lowercasesmoothgrave(match):
+formatting/betacodetounicode.py:def lowercaseroughgrave(match):
+formatting/betacodetounicode.py:def lowercasesmoothacute(match):
+formatting/betacodetounicode.py:def lowercaseroughacute(match):
+formatting/betacodetounicode.py:def lowercasesmoothcircumflex(match):
+formatting/betacodetounicode.py:def lowercaseroughcircumflex(match):
+formatting/betacodetounicode.py:def lowercasegravesub(match):
+formatting/betacodetounicode.py:def lowercaseacutedsub(match):
+formatting/betacodetounicode.py:def lowercasesircumflexsub(match):
+formatting/betacodetounicode.py:def lowercasesmoothsub(match):
+formatting/betacodetounicode.py:def lowercaseroughsub(match):
+formatting/betacodetounicode.py:def lowercasegravediaresis(match):
+formatting/betacodetounicode.py:def lowercaseacutediaresis(match):
+formatting/betacodetounicode.py:def lowercasesircumflexdiaresis(match):
+formatting/betacodetounicode.py:def lowercasesmooth(match):
+formatting/betacodetounicode.py:def lowercaserough(match):
+formatting/betacodetounicode.py:def lowercasegrave(match):
+formatting/betacodetounicode.py:def lowercaseacute(match):
+formatting/betacodetounicode.py:def lowercascircumflex(match):
+formatting/betacodetounicode.py:def lowercasediaresis(match):
+formatting/betacodetounicode.py:def lowercasesubscript(match):
+formatting/betacodetounicode.py:def lowercases(match):
+formatting/betacodetounicode.py:def cleanaccentsandvj(texttostrip):
+formatting/lexicaformatting.py:def grabsenses(fullentry):
+formatting/lexicaformatting.py:def entrysummary(fullentry, lang, translationlabel, lemmaobject):
+formatting/lexicaformatting.py:def grabheadmaterial(fullentry):
+formatting/lexicaformatting.py:def deabbreviateauthors(authorabbr, lang):
+formatting/lexicaformatting.py:def formatdictionarysummary(summarydict):
+formatting/lexicaformatting.py:def formateconsolidatedgrammarentry(consolidatedentry):
+formatting/lexicaformatting.py:def formatgloss(entrybody):
+formatting/lexicaformatting.py:def formatmicroentry(entrybody):
+formatting/lexicaformatting.py:def insertbrowserlookups(htmlentry):
+formatting/lexicaformatting.py:def insertbrowserjs(htmlentry):
+formatting/lexicaformatting.py:def dbquickfixes(listofnames):
+formatting/lexicaformatting.py:def deabrevviategreekauthors():
+formatting/lexicaformatting.py:def deabrevviatelatinauthors():
+formatting/miscformatting.py:def bcedating(s=session):
+formatting/miscformatting.py:def insertcrossreferencerow(lineobject):
+formatting/miscformatting.py:def insertdatarow(label, css, founddate):
+formatting/miscformatting.py:def formatauthinfo(authorobject):
+formatting/miscformatting.py:def woformatworkinfo(workobject):
+formatting/searchformatting.py:def highlightsearchterm(lineobject, searchterm, spanname):
+formatting/searchformatting.py:def formatauthorandworkinfo(authorname, workobject):
+formatting/searchformatting.py:def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, activepoll):
+formatting/searchformatting.py:def formattingworkpile(bundles, criteria, activepoll, allfound):
+formatting/searchformatting.py:def formattedcitationincontext(lineobject, workobject, authorobject, linesofcontext, searchterm, proximate,
+formatting/searchformatting.py:def htmlifysearchfinds(listofsearchresultobjects):
+formatting/searchformatting.py:def jstoinjectintobrowser(listofsearchresultobjects):
+formatting/searchformatting.py:def nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, activepoll):
+formatting/searchformatting.py:def nocontexthtmlifysearchfinds(listofsearchresultobjects):
+formatting/searchformatting.py:def formatname(workobject, authorobject):
+formatting/searchformatting.py:def getpublicationinfo(workobject, cursor):
+formatting/searchformatting.py:def formatpublicationinfo(pubinfo):
+formatting/searchformatting.py:def avoidlonglines(string, maxlen, splitval, stringlist=[]):
+formatting/wordformatting.py:def removegravity(accentedword):
+formatting/wordformatting.py:def forceterminalacute(matchgroup):
+formatting/wordformatting.py:def stripaccents(texttostrip, transtable=None):
+formatting/wordformatting.py:def buildhipparchiatranstable():
+formatting/wordformatting.py:def gkattemptelision(hypenatedgreekheadword):
+formatting/wordformatting.py:def latattemptelision(hypenatedlatinheadword):
+formatting/wordformatting.py:def tidyupterm(word, punct=None):
 lexica/lexicalookups.py:def lookformorphologymatches(word, cursor, trialnumber=0):
 lexica/lexicalookups.py:def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
 lexica/lexicalookups.py:def browserdictionarylookup(count, seekingentry, cursor):
@@ -94,17 +156,13 @@ lexica/lexicalookups.py:def getobservedwordprevalencedata(dictionaryword):
 lexica/lexicalookups.py:def formatprevalencedata(wordcountobject):
 lexica/lexicalookups.py:def grablemmataobjectfor(entryname, db, cursor):
 lexica/lexicalookups.py:def findtermamongsenses(match, seeking, usedict, translationlabel, cur):
-listsandsession/listmanagement.py:def compileauthorandworklist(listmapper, s=session):
-listsandsession/listmanagement.py:def configurewhereclausedata(authorandworklist, workdict, searchobject):
-listsandsession/listmanagement.py:def wholeworkbetweenclausecontents(listofworkobjects):
-listsandsession/listmanagement.py:def wholeworktemptablecontents(authorid, setoflinenumbers):
-listsandsession/listmanagement.py:def partialworkbetweenclausecontents(workobject, searchobject):
-listsandsession/listmanagement.py:def sortauthorandworklists(authorandworklist, authorsdict):
+listsandsession/listmanagement.py:def compilesearchlist(listmapper, s=session):
+listsandsession/listmanagement.py:def sortsearchlist(searchlist, authorsdict):
 listsandsession/listmanagement.py:def sortresultslist(hits, authorsdict, worksdict):
-listsandsession/listmanagement.py:def calculatewholeauthorsearches(authorandworklist, authordict):
-listsandsession/listmanagement.py:def flagexclusions(authorandworklist, s=session):
-listsandsession/listmanagement.py:def prunebydate(authorandworklist, authorobjectdict, workobjectdict):
-listsandsession/listmanagement.py:def removespuria(authorandworklist, worksdict):
+listsandsession/listmanagement.py:def calculatewholeauthorsearches(searchlist, authordict):
+listsandsession/listmanagement.py:def flagexclusions(searchlist, s=session):
+listsandsession/listmanagement.py:def prunebydate(searchlist, authorobjectdict, workobjectdict):
+listsandsession/listmanagement.py:def removespuria(searchlist, worksdict):
 listsandsession/listmanagement.py:def buildhintlist(seeking, listofposiblities):
 listsandsession/listmanagement.py:def tidyuplist(untidylist):
 listsandsession/listmanagement.py:def dropdupes(checklist, matchlist):
@@ -137,6 +195,10 @@ listsandsession/sessionfunctions.py:def returnactivedbs():
 listsandsession/validateconfig.py:def loadconfig(filepath):
 listsandsession/validateconfig.py:def parseconfig(configlist):
 listsandsession/validateconfig.py:def compareconfigs(template, model):
+listsandsession/whereclauses.py:def configurewhereclausedata(searchlist, workdict, searchobject):
+listsandsession/whereclauses.py:def wholeworkbetweenclausecontents(listofworkobjects):
+listsandsession/whereclauses.py:def wholeworktemptablecontents(authorid, setoflinenumbers):
+listsandsession/whereclauses.py:def partialworkbetweenclausecontents(workobject, searchobject):
 routes/browseroute.py:def grabtextforbrowsing(locus):
 routes/frontpage.py:def frontpage():
 routes/frontpage.py:def sendfavicon():
@@ -167,56 +229,6 @@ routes/textandindexroutes.py:def completeindex():
 routes/textandindexroutes.py:def textmaker():
 routes/websocketroutes.py:def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 routes/websocketroutes.py:def checkforactivesearch(ts):
-searching/betacodetounicode.py:def replacegreekbetacode(texttoclean):
-searching/betacodetounicode.py:def capitalletters(betacode):
-searching/betacodetounicode.py:def capitalsmoothgraveadscript(match):
-searching/betacodetounicode.py:def capitalroughgraveadscript(match):
-searching/betacodetounicode.py:def capitalsmoothacuteadscript(match):
-searching/betacodetounicode.py:def capitalroughacuteadscript(match):
-searching/betacodetounicode.py:def capitalsmoothcircumflexadscript(match):
-searching/betacodetounicode.py:def capitalroughcircumflexadscript(match):
-searching/betacodetounicode.py:def capitalsmoothgrave(match):
-searching/betacodetounicode.py:def capitalroughgrave(match):
-searching/betacodetounicode.py:def capitalsmoothacute(match):
-searching/betacodetounicode.py:def capitalroughacute(match):
-searching/betacodetounicode.py:def capitalsmoothcircumflex(match):
-searching/betacodetounicode.py:def capitalroughcircumflex(match):
-searching/betacodetounicode.py:def capitalsmooth(match):
-searching/betacodetounicode.py:def capitalrough(match):
-searching/betacodetounicode.py:def capitalgrave(match):
-searching/betacodetounicode.py:def capitalacute(match):
-searching/betacodetounicode.py:def capitaladscript(match):
-searching/betacodetounicode.py:def capitals(match):
-searching/betacodetounicode.py:def lowercaseletters(betacode):
-searching/betacodetounicode.py:def lowercasesmoothgravesubscript(match):
-searching/betacodetounicode.py:def lowercaseroughgravesubscript(match):
-searching/betacodetounicode.py:def lowercasesmoothacutesubscript(match):
-searching/betacodetounicode.py:def lowercaseroughacutesubscript(match):
-searching/betacodetounicode.py:def lowercasesmoothcircumflexsubscript(match):
-searching/betacodetounicode.py:def lowercaseroughcircumflexsubscript(match):
-searching/betacodetounicode.py:def lowercasesmoothgrave(match):
-searching/betacodetounicode.py:def lowercaseroughgrave(match):
-searching/betacodetounicode.py:def lowercasesmoothacute(match):
-searching/betacodetounicode.py:def lowercaseroughacute(match):
-searching/betacodetounicode.py:def lowercasesmoothcircumflex(match):
-searching/betacodetounicode.py:def lowercaseroughcircumflex(match):
-searching/betacodetounicode.py:def lowercasegravesub(match):
-searching/betacodetounicode.py:def lowercaseacutedsub(match):
-searching/betacodetounicode.py:def lowercasesircumflexsub(match):
-searching/betacodetounicode.py:def lowercasesmoothsub(match):
-searching/betacodetounicode.py:def lowercaseroughsub(match):
-searching/betacodetounicode.py:def lowercasegravediaresis(match):
-searching/betacodetounicode.py:def lowercaseacutediaresis(match):
-searching/betacodetounicode.py:def lowercasesircumflexdiaresis(match):
-searching/betacodetounicode.py:def lowercasesmooth(match):
-searching/betacodetounicode.py:def lowercaserough(match):
-searching/betacodetounicode.py:def lowercasegrave(match):
-searching/betacodetounicode.py:def lowercaseacute(match):
-searching/betacodetounicode.py:def lowercascircumflex(match):
-searching/betacodetounicode.py:def lowercasediaresis(match):
-searching/betacodetounicode.py:def lowercasesubscript(match):
-searching/betacodetounicode.py:def lowercases(match):
-searching/betacodetounicode.py:def cleanaccentsandvj(texttostrip):
 searching/phrasesearching.py:def phrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
 searching/phrasesearching.py:def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, commitcount, activepoll, searchobject):
 searching/proximitysearching.py:def withinxlines(workdbname, searchobject):
@@ -225,18 +237,6 @@ searching/searchdispatching.py:def searchdispatcher(searchobject, activepoll):
 searching/searchdispatching.py:def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activepoll, searchobject):
 searching/searchdispatching.py:def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepoll, searchobject):
 searching/searchdispatching.py:def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, searchobject):
-searching/searchformatting.py:def highlightsearchterm(lineobject, searchterm, spanname):
-searching/searchformatting.py:def formatauthinfo(authorobject):
-searching/searchformatting.py:def woformatworkinfo(workobject):
-searching/searchformatting.py:def formatauthorandworkinfo(authorname, workobject):
-searching/searchformatting.py:def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, activepoll):
-searching/searchformatting.py:def formattingworkpile(bundles, criteria, activepoll, allfound):
-searching/searchformatting.py:def formattedcitationincontext(lineobject, workobject, authorobject, linesofcontext, searchterm, proximate,
-searching/searchformatting.py:def htmlifysearchfinds(listofsearchresultobjects):
-searching/searchformatting.py:def jstoinjectintobrowser(listofsearchresultobjects):
-searching/searchformatting.py:def nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, activepoll):
-searching/searchformatting.py:def nocontexthtmlifysearchfinds(listofsearchresultobjects):
-searching/searchformatting.py:def formatname(workobject, authorobject):
 searching/searchfunctions.py:def cleaninitialquery(seeking):
 searching/searchfunctions.py:def massagesearchtermsforwhitespace(query):
 searching/searchfunctions.py:def atsignwhereclauses(uidwithatsign, operand, authors):

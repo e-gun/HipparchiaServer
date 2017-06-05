@@ -10,8 +10,7 @@ import re
 from multiprocessing import Manager, Process
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import dblineintolineobject, setconnection
-from server.helperfunctions import setthreadcount
+from server.dbsupport.dbfunctions import dblineintolineobject, setconnection, setthreadcount
 from server.hipparchiaobjects.helperobjects import MPCounter
 from server.lexica.lexicalookups import findcountsviawordcountstable
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch

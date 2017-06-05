@@ -7,6 +7,7 @@
 """
 
 import configparser
+from os import cpu_count
 
 import psycopg2
 
@@ -15,6 +16,21 @@ from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus, dbWorkLine
 
 config = configparser.ConfigParser()
 config.read('config.ini')
+
+
+def setthreadcount():
+	"""
+
+	used to set worker count on multithreaded functions
+	return either the manual config value or determine it algorithmically
+
+	:return:
+	"""
+
+	if hipparchia.config['AUTOCONFIGWORKERS'] != 'yes':
+		return hipparchia.config['WORKERS']
+	else:
+		return int(cpu_count() / 2) + 1
 
 
 def setconnection(autocommit='n'):

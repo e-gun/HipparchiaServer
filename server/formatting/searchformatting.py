@@ -13,8 +13,7 @@ from flask import session
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
-from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, setconnection
-from server.helperfunctions import setthreadcount
+from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, setconnection, setthreadcount
 from server.hipparchiaobjects.helperobjects import FormattedSearchResult
 
 

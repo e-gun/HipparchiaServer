@@ -1,1 +1,1 @@
-__all__ = ['lexicalformatting', 'lexicallookups']
+__all__ = ['lexicallookups']
