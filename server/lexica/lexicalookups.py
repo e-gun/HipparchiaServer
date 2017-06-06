@@ -12,9 +12,9 @@ from flask import session
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
-from server.formatting.betacodetounicode import cleanaccentsandvj
 from server.formatting.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
+from server.formatting.wordformatting import cleanaccentsandvj
 from server.hipparchiaobjects.lexicalobjects import dbWordCountObject, dbHeadwordObject, dbMorphologyObject, \
 	dbGreekWord, dbLatinWord, dbLemmaObject
 from server.listsandsession.listmanagement import polytonicsort
