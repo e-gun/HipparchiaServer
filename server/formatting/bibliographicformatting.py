@@ -194,7 +194,8 @@ def formatpublicationinfo(pubinfo):
 		seek = re.compile('<' + tag + '>(.*?)</' + tag + '>')
 		if re.search(seek, pubinfo):
 			found = re.search(seek, pubinfo)
-			foundinfo = avoidlonglines(found.group(1), maxlinelen, '<br />', [])
+			data = re.sub(r'\s+$','',found.group(1))
+			foundinfo = avoidlonglines(data, maxlinelen, '<br />', [])
 			publicationhtml += '<span class="pub{t}">{va}{fi}{vb}</span>'.format(t=tag, va=val[0], fi=foundinfo, vb=val[1])
 
 	return publicationhtml

@@ -103,7 +103,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		else:
 			viewing += '<br /><span class="assigneddate">(Assigned date of {d} BCE)</span>'.format(d=date[1:])
 
-	passage['currentlyviewing'] = '<p class="currentlyviewing">{c}<br />{b}</p>'.format(c=viewing, b=biblio)
+	viewing = '<p class="currentlyviewing">{c}<br />{b}</p>'.format(c=viewing, b=biblio)
 
 	ouputtable = []
 	ouputtable.append('<table>')
@@ -166,7 +166,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	else:
 		ouputtable.append('</table>')
 
-	passage['ouputtable'] = '\n'.join(ouputtable)
+	passage['browserhtml'] = viewing + '\n'.join(ouputtable)
 
 	return passage
 

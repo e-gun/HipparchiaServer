@@ -62,7 +62,7 @@ function parsepassagereturned(passagereturned) {
         $('#browseto').show();
         $('#authinfo').show();
 
-        $('#browserdialogtext').html(passagereturned['currentlyviewing'] + passagereturned['ouputtable']);
+        $('#browserdialogtext').html(passagereturned['browserhtml']);
         $('#browserdialog').show();
         $('observed').click( function(e) {
             e.preventDefault();
