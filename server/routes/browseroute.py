@@ -121,11 +121,12 @@ def grabtextforbrowsing(locus):
 		browserdata = {}
 		browserdata['browseforwards'] = wo.ends
 		browserdata['browseback'] = wo.starts
-		browserdata['currentlyviewing'] = '<p class="currentlyviewing">error in fetching the browser data. I was sent a citation I do not understand: {c}</p><br /><br />'.format(c=workdb)
+		viewing = '<p class="currentlyviewing">error in fetching the browser data. I was sent a citation I do not understand: {c}</p><br /><br />'.format(c=workdb)
 		try:
-			browserdata['ouputtable'] = [passage, workdb, citation]
+			table = [passage, workdb, citation]
 		except:
-			browserdata['ouputtable'] = [passage, workdb]
+			table = [passage, workdb]
+		browserdata['browserhtml'] = viewing + '\n'.join(table)
 		browserdata['authornumber'] = ao.universalid
 		browserdata['workid'] = wo.universalid
 		browserdata['authorboxcontents'] = ao.cleanname + ' [' + ao.universalid + ']'
@@ -133,7 +134,7 @@ def grabtextforbrowsing(locus):
 
 	if resultmessage != 'success':
 		resultmessage = '<span class="small">({rc})</span>'.format(rc=resultmessage)
-		browserdata['currentlyviewing'] = '{rc}<br />{bd}'.format(rc=resultmessage, bd=browserdata['currentlyviewing'])
+		browserdata['browserhtml'] = '{rc}<br />{bd}'.format(rc=resultmessage, bd=browserdata['browserhtml'])
 
 	browserdata = json.dumps(browserdata)
 
