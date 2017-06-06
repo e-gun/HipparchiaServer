@@ -68,7 +68,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	# will be used with the browse forwards and back buttons
 	passage['browseforwards'] = thiswork + '_LN_' + str(ends)
 	passage['browseback'] = thiswork + '_LN_' + str(starts)
-	
+
 	# will be used to fill the autocomplete boxes
 	passage['authornumber'] = authorobject.universalid
 	passage['workid'] = workobject.universalid
@@ -76,7 +76,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	passage['authorboxcontents'] = '{n} [{id}]'.format(n=authorobject.cleanname, id=authorobject.universalid)
 	# offerworkhints()
 	passage['workboxcontents'] = '{t} ({id})'.format(t=workobject.title, id=workobject.universalid[-4:])
-	
+
 	surroundinglines = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
 
 	lines = [dblineintolineobject(l) for l in surroundinglines]
@@ -86,9 +86,9 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	for line in lines:
 		if line.index == locusindexvalue:
 			focusline = line
-	
+
 	biblio = getpublicationinfo(workobject, cursor)
-	
+
 	citation = locusintocitation(workobject, focusline.locustuple())
 	authorandwork = '<span class="author">{n}</span>, <span class="work">{t}</span><br />'.format(n=name, t=title)
 	# author + title can get pretty long
@@ -209,12 +209,12 @@ def checkfordocumentmetadata(line, workobject):
 def insertparserids(lineobject):
 	# set up the clickable thing for the browser
 	# this is tricky because there is html in here and you don't want to tag it
-	
+
 	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',lineobject.accented)
 	hyphenated = lineobject.hyphenated
 	segments = theline.split('*snip*')
 	newline = ''
-	
+
 	for seg in segments:
 		try:
 			if seg[0] == '<':

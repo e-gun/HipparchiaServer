@@ -5,7 +5,7 @@
 //      (see LICENSE in the top level directory of the distribution)
 
 $(document).ready( function () {
-    $.getJSON('/startwspolling/default');
+
     $(document).keydown(function(e) {
         // 27 - escape
         // 38 & 40 - up and down arrow
