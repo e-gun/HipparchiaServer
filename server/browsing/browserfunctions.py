@@ -65,18 +65,21 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		ends = locusindexvalue + linesofcontext
 
 	passage = {}
-	# will be used with the browse forwards and back buttons
+	# [A] populating various corners of the UI
+	# urls to send to the browse forwards and back buttons
 	passage['browseforwards'] = thiswork + '_LN_' + str(ends)
 	passage['browseback'] = thiswork + '_LN_' + str(starts)
 
 	# will be used to fill the autocomplete boxes
 	passage['authornumber'] = authorobject.universalid
 	passage['workid'] = workobject.universalid
+
 	# as per offerauthorhints() in views.py
 	passage['authorboxcontents'] = '{n} [{id}]'.format(n=authorobject.cleanname, id=authorobject.universalid)
 	# offerworkhints()
 	passage['workboxcontents'] = '{t} ({id})'.format(t=workobject.title, id=workobject.universalid[-4:])
 
+	# [B] now get into the actual text to display in the main browser element
 	surroundinglines = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
 
 	lines = [dblineintolineobject(l) for l in surroundinglines]
@@ -169,6 +172,14 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 
 def checkfordocumentmetadata(line, workobject):
+	"""
+
+	if this line metadata about the document as a whole, then extract and format it
+
+	:param line:
+	:param workobject:
+	:return:
+	"""
 
 	metadata = []
 
@@ -207,8 +218,21 @@ def checkfordocumentmetadata(line, workobject):
 
 
 def insertparserids(lineobject):
-	# set up the clickable thing for the browser
-	# this is tricky because there is html in here and you don't want to tag it
+	"""
+
+	set up the clickable thing for the browser by bracketing every word with something the JS can respond to:
+
+		<observed id="ἐπειδὲ">ἐπειδὲ</observed>
+		<observed id="δέ">δέ</observed>
+		...
+
+	this is tricky because there is html in here and you don't want to tag it
+
+	also you nned to handle hypenated line-ends
+
+	:param lineobject:
+	:return:
+	"""
 
 	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',lineobject.accented)
 	hyphenated = lineobject.hyphenated
