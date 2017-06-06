@@ -48,12 +48,6 @@ function parsepassagereturned(passagereturned) {
         // {'forwardsandback': ['/browseto/lt1254w001_AT_2|2|3|6', '/browseto/lt1254w001_AT_6|9|2|6']}
         var fwdurl = passagereturned['browseforwards'];
         var bkdurl = passagereturned['browseback'];
-        var linesreturned = passagereturned['currentlyviewing'];
-        // the remaining lines are the lines of the passage
-        var dLen = passagereturned['ouputtable'].length;
-        for (i = 0; i < dLen; i++) {
-            linesreturned += passagereturned['ouputtable'][i];
-        }
 
         resetworksautocomplete();
         $('#authorsautocomplete').val(passagereturned['authorboxcontents']);
@@ -68,7 +62,7 @@ function parsepassagereturned(passagereturned) {
         $('#browseto').show();
         $('#authinfo').show();
 
-        $('#browserdialogtext').html(linesreturned);
+        $('#browserdialogtext').html(passagereturned['currentlyviewing'] + passagereturned['ouputtable']);
         $('#browserdialog').show();
         $('observed').click( function(e) {
             e.preventDefault();

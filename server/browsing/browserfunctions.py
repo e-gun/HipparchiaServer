@@ -35,7 +35,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	:return:
 	"""
 
-	table = workobject.universalid
+	thiswork = workobject.universalid
 
 	if workobject.isliterary():
 		name = authorobject.shortname
@@ -55,36 +55,33 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	if locusindexvalue - linesofcontext < workobject.starts:
 		# note that partial db builds can leave works that do not have this value
 		# None will return and you will not get a browser window for this author
-		first = workobject.starts
+		starts = workobject.starts
 	else:
-		first = locusindexvalue - linesofcontext
+		starts = locusindexvalue - linesofcontext
 
 	if locusindexvalue + linesofcontext > workobject.ends:
-		last = workobject.ends
+		ends = workobject.ends
 	else:
-		last = locusindexvalue + linesofcontext
-	
-	# for the <-- and --> buttons on the browser
-	first = table + '_LN_' + str(first)
-	last = table + '_LN_' + str(last)
+		ends = locusindexvalue + linesofcontext
 
 	passage = {}
 	# will be used with the browse forwards and back buttons
-	passage['browseforwards'] = last
-	passage['browseback'] = first
+	passage['browseforwards'] = thiswork + '_LN_' + str(ends)
+	passage['browseback'] = thiswork + '_LN_' + str(starts)
 	
 	# will be used to fill the autocomplete boxes
 	passage['authornumber'] = authorobject.universalid
 	passage['workid'] = workobject.universalid
 	# as per offerauthorhints() in views.py
-	passage['authorboxcontents'] = authorobject.cleanname+' ['+authorobject.universalid+']'
+	passage['authorboxcontents'] = '{n} [{id}]'.format(n=authorobject.cleanname, id=authorobject.universalid)
 	# offerworkhints()
-	passage['workboxcontents'] = workobject.title+' ('+workobject.universalid[-4:]+')'
+	passage['workboxcontents'] = '{t} ({id})'.format(t=workobject.title, id=workobject.universalid[-4:])
 	
-	rawpassage = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
+	surroundinglines = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
 
-	lines = [dblineintolineobject(r) for r in rawpassage]
-	
+	lines = [dblineintolineobject(l) for l in surroundinglines]
+	lines = [l for l in lines if l.wkuinversalid == thiswork]
+
 	focusline = lines[0]
 	for line in lines:
 		if line.index == locusindexvalue:
@@ -93,37 +90,39 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	biblio = getpublicationinfo(workobject, cursor)
 	
 	citation = locusintocitation(workobject, focusline.locustuple())
-
-	cv = '<span class="author">{n}</span>, <span class="work">{t}</span><br />'.format(n=name, t=title)
+	authorandwork = '<span class="author">{n}</span>, <span class="work">{t}</span><br />'.format(n=name, t=title)
 	# author + title can get pretty long
-	cv = avoidlonglines(cv, 100, '<br />', [])
-	cv += '<span class="citation">{c}</span>'.format(c=citation)
+	viewing = avoidlonglines(authorandwork, 100, '<br />', [])
+	viewing += '<span class="citation">{c}</span>'.format(c=citation)
 	if date != '':
 		if int(date) > 1:
-			cv += '<br /><span class="assigneddate">(Assigned date of {d} CE)</span>'.format(d=date)
+			viewing += '<br /><span class="assigneddate">(Assigned date of {d} CE)</span>'.format(d=date)
 		else:
-			cv += '<br /><span class="assigneddate">(Assigned date of {d} BCE)</span>'.format(d=date[1:])
+			viewing += '<br /><span class="assigneddate">(Assigned date of {d} BCE)</span>'.format(d=date[1:])
 
-	passage['currentlyviewing'] = '<p class="currentlyviewing">{c}<br />{b}</p>'.format(c=cv, b=biblio)
+	passage['currentlyviewing'] = '<p class="currentlyviewing">{c}<br />{b}</p>'.format(c=viewing, b=biblio)
 
-	passage['ouputtable'] = []
-	passage['ouputtable'].append('<table>\n')
+	ouputtable = []
+	ouputtable.append('<table>')
 
 	# guarantee a minimum width to the browser dialogue box; or else skip adding this blank row
 	try:
 		spacer = ''.join(['&nbsp;' for i in range(0, hipparchia.config['MINIMUMBROWSERWIDTH'])])
-		passage['ouputtable'].append('<tr class="spacing">{sp}</tr>'.format(sp=spacer))
+		ouputtable.append('<tr class="spacing">{sp}</tr>'.format(sp=spacer))
 	except:
 		pass
 
-	# insert something to highlight the citationtuple line
+
 	previousline = lines[0]
 
 	for line in lines:
-		if workobject.isnotliterary():
+		if workobject.isnotliterary() and line.index == workobject.starts:
+			# line.index == workobject.starts added as a check because
+			# otherwise you will re-see date info in the middle of some documents
+			# it gets reasserted with a CD block reinitialization
 			metadata = checkfordocumentmetadata(line, workobject)
 			if metadata:
-				passage['ouputtable'].append(metadata)
+				ouputtable.append(metadata)
 
 		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
 			columnb = line.showlinehtml()
@@ -131,6 +130,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			columnb = insertparserids(line)
 
 		if line.index == focusline.index:
+			# highlight the citationtuple line
 			columna = line.locus()
 			columnb = '<span class="focusline">{c}</span>'.format(c=columnb)
 		else:
@@ -155,13 +155,15 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		linehtml = '<tr class="browser">\n\t<td class="browsedline">{cb}</td>'.format(cb=columnb)
 		linehtml += '\n\t<td class="browsercite">{ca}</td>\n</tr>\n'.format(ca=columna)
 
-		passage['ouputtable'].append(linehtml)
+		ouputtable.append(linehtml)
 		previousline = line
 
 	if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
-		passage['ouputtable'].append('</table>\n<span class="emph">(NB: click-to-parse is off if HTMLDEBUGMODE is set)</span>')
+		ouputtable.append('</table>\n<span class="emph">(NB: click-to-parse is off if HTMLDEBUGMODE is set)</span>')
 	else:
-		passage['ouputtable'].append('</table>\n')
+		ouputtable.append('</table>')
+
+	passage['ouputtable'] = '\n'.join(ouputtable)
 
 	return passage
 
@@ -182,26 +184,26 @@ def checkfordocumentmetadata(line, workobject):
 	region = re.search(regionfinder, line.accented)
 	city = re.search(cityfinder, line.accented)
 	pub = re.search(pubfinder, line.accented)
-	# line.index == workobject.starts added as a check because
-	# otherwise you will re-see date info in the middle of some documents
-	# it gets reasserted with a CD block reinitialization
-	if region and line.index == workobject.starts:
+
+	if region:
 		html = insertdatarow('Region', 'regioninfo', region.group(1))
 		metadata.append(html)
-	if city and line.index == workobject.starts:
+	if city:
 		html = insertdatarow('City', 'cityinfo', city.group(1))
 		metadata.append(html)
-	if workobject.provenance and city is None and line.index == workobject.starts:
+	if workobject.provenance and city is None:
 		html = insertdatarow('Provenance', 'provenance', workobject.provenance)
 		metadata.append(html)
-	if pub and line.index == workobject.starts:
+	if pub:
 		html = insertdatarow('Additional publication info', 'pubinfo', pub.group(1))
 		metadata.append(html)
-	if date and line.index == workobject.starts:
+	if date:
 		html = insertdatarow('Editor\'s date', 'textdate', date.group(1))
 		metadata.append(html)
 
-	return metadata
+	metadatahtml = ''.join(metadata)
+
+	return metadatahtml
 
 
 def insertparserids(lineobject):
@@ -259,7 +261,7 @@ def insertcrossreferencerow(lineobject):
 		columnb = '<span class="crossreference">{ln}</span>'.format(ln=lineobject.annotations)
 
 		linehtml = '<tr class="browser"><td class="crossreference">{c}</td>'.format(c=columnb)
-		linehtml += '<td class="crossreference">{c}</td></tr>\n'.format(c=columna)
+		linehtml += '<td class="crossreference">{c}</td></tr>'.format(c=columna)
 
 	return linehtml
 
@@ -275,6 +277,6 @@ def insertdatarow(label, css, founddate):
 	columnb = '<span class="textdate">{l}:&nbsp;{fd}</span>'.format(l=label, fd=founddate)
 
 	linehtml = '<tr class="browser"><td class="{css}">{cb}</td>'.format(css=css, cb=columnb)
-	linehtml += '<td class="crossreference">{ca}</td></tr>\n'.format(ca=columna)
+	linehtml += '<td class="crossreference">{ca}</td></tr>'.format(ca=columna)
 
 	return linehtml
