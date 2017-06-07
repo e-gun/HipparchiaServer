@@ -8,13 +8,10 @@
 
 import re
 from collections import deque
-from multiprocessing import Process, Manager
-
-from flask import session
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
-from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject, setconnection, setthreadcount
+from server.dbsupport.dbfunctions import dblineintolineobject, setconnection
 from server.formatting.bibliographicformatting import formatname
 from server.hipparchiaobjects.helperobjects import SearchResult
 
@@ -344,47 +341,6 @@ def jstoinjectintobrowser(listofsearchresultobjects):
 	return jsoutput
 
 
-def nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, activepoll):
-	"""
-
-	simply spit out the finds, don't put them in context: speedier and visually more compact
-
-	:param hitdict:
-	:param authordict:
-	:param workdict:
-	:param seeking:
-	:param proximate:
-	:param searchtype:
-	:param activepoll:
-	:return:
-	"""
-
-	if len(hitdict) > int(session['maxresults']):
-		limit = int(session['maxresults'])
-	else:
-		limit = len(hitdict)
-
-	searchresultobjects = []
-
-	for i in range(0, limit):
-		lineobject = hitdict[i]
-		authorobject = authordict[lineobject.wkuinversalid[0:6]]
-		wid = lineobject.wkuinversalid
-		workobject = workdict[wid]
-		name = formatname(workobject, authorobject)
-		citation = locusintocitation(workobject, lineobject.locustuple())
-
-		lineobject.accented = highlightsearchterm(lineobject, seeking, 'match')
-		if proximate != '' and searchtype == 'proximity':
-			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(proximate, lineobject.accented) or re.search(proximate, lineobject.stripped):
-				lineobject.accented = highlightsearchterm(lineobject, proximate, 'proximate')
-
-		searchresultobjects.append(SearchResult(i + 1, name, workobject.title, citation, lineobject.universalid, [lineobject]))
-
-	return searchresultobjects
-
-
 def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	"""
 	it is too painful to let JS turn this information into HTML
@@ -435,150 +391,3 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	html = '\n'.join(resultsashtml)
 
 	return html
-
-
-# slated for removal
-
-def xmpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, activepoll):
-	"""
-	if you have lots of results, they don't get formatted as fast as they could:
-	single threaded is fine if all from same author, but something like 1500 hits of αξιολ will bounce you around a lot
-		22s single threaded to do search + format
-		12s multi-threaded to do search + format
-
-	the hitdict is a collection of line objects where the key is the proper sort order for the results
-		hitdict {0: <server.hipparchiaclasses.dbWorkLine object at 0x103dd17b8>, 1: <server.hipparchiaclasses.dbWorkLine object at 0x103dd1780>, 3: ...}
-
-	returns a sorted list of FormattedSearchResult objects
-
-	:return:
-	"""
-
-	# for h in hitdict.keys():
-	#	print(h,hitdict[h].universalid, hitdict[h].accented)
-
-	linesofcontext = int(session['linesofcontext'])
-
-	activepoll.allworkis(len(hitdict))
-	activepoll.remain(len(hitdict))
-
-	if len(hitdict) > int(session['maxresults']):
-		limit = int(session['maxresults'])
-	else:
-		limit = len(hitdict)
-
-	criteria = {'ctx': linesofcontext, 'seek': seeking, 'prox': proximate, 'type': searchtype}
-
-	workbundles = []
-	for i in range(0, limit):
-		lineobject = hitdict[i]
-		authorobject = authordict[lineobject.wkuinversalid[0:6]]
-		wid = lineobject.wkuinversalid
-		workobject = workdict[wid]
-		workbundles.append({'hitnumber': i + 1, 'lo': lineobject, 'wo': workobject, 'ao': authorobject})
-
-	manager = Manager()
-	allfound = manager.dict()
-	bundles = manager.list(workbundles)
-	criteria = manager.dict(criteria)
-
-	workers = setthreadcount()
-
-	jobs = [Process(target=formattingworkpile, args=(bundles, criteria, activepoll, allfound))
-			for i in range(workers)]
-
-	for j in jobs: j.start()
-	for j in jobs: j.join()
-
-	# allfound = { 1: <server.hipparchiaclasses.FormattedSearchResult object at 0x111e73160>, 2: ... }
-	keys = sorted(allfound.keys())
-	finds = [allfound[k] for k in keys]
-
-	return finds
-
-
-def xformattingworkpile(bundles, criteria, activepoll, allfound):
-	"""
-	the work for the workers to send to formattedcittationincontext()
-
-	a bundle:
-		{'hitnumber': 3, 'wo': <server.hipparchiaclasses.dbOpus object at 0x1109ad240>, 'ao': <server.hipparchiaclasses.dbAuthor object at 0x1109ad0f0>, 'lo': <server.hipparchiaclasses.dbWorkLine object at 0x11099d9e8>}
-
-	criteria:
-		{'seek': 'οἵ ῥά οἱ', 'type': 'phrase', 'ctx': 4, 'prox': ''}
-
-	:param workbundles:
-	:return:
-	"""
-	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
-
-	while len(bundles) > 0:
-		try:
-			bundle = bundles.pop()
-		except IndexError:
-			# IndexError: pop from empty list
-			bundle = None
-
-		if bundle:
-			citwithcontext = formattedcitationincontext(bundle['lo'], bundle['wo'], bundle['ao'], criteria['ctx'],
-														criteria['seek'], criteria['prox'], criteria['type'], curs)
-			citwithcontext.hitnumber = bundle['hitnumber']
-			activepoll.remain(bundle['hitnumber'])
-
-			if bundle['hitnumber'] % hipparchia.config['MPCOMMITCOUNT']  == 0:
-				dbconnection.commit()
-
-			if citwithcontext.lineobjects != []:
-				allfound[bundle['hitnumber']] = citwithcontext
-
-	dbconnection.commit()
-	curs.close()
-
-	return allfound
-
-
-def xformattedcitationincontext(lineobject, workobject, authorobject, linesofcontext, searchterm, proximate,
-							   searchtype, curs):
-	"""
-	take a hit
-		turn it into a focus line
-		surround it by some context
-
-	in:
-		lineobject
-
-	out:
-		FormattedSearchResult object
-
-	:param line:
-	:param workdbname:
-	:param authorobject:
-	:param linesofcontext:
-	:param searchterm:
-	:param cursor:
-	:return:
-	"""
-
-	highlightline = lineobject.index
-	citation = locusintocitation(workobject, lineobject.locustuple())
-
-	name = formatname(workobject, authorobject)
-	title = workobject.title
-
-	citationincontext = SearchResult(-1, name, title, citation, lineobject.universalid, [])
-
-	environs = simplecontextgrabber(workobject.authorid, highlightline, linesofcontext, curs)
-
-	for foundline in environs:
-		foundline = dblineintolineobject(foundline)
-		if foundline.index == highlightline:
-			foundline.accented = highlightsearchterm(foundline, searchterm, 'match')
-			foundline.accented = '<span class="highlight">{fla}</span>'.format(fla=foundline.accented)
-		if proximate != '' and searchtype == 'proximity':
-			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(proximate, foundline.accented) or re.search(proximate, foundline.stripped):
-				foundline.accented = highlightsearchterm(foundline, proximate, 'proximate')
-		citationincontext.lineobjects.append(foundline)
-
-	return citationincontext
