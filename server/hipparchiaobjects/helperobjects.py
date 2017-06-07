@@ -15,7 +15,7 @@ from multiprocessing import Value, Array
 from server import hipparchia
 
 
-class FormattedSearchResult(object):
+class SearchResult(object):
 	"""
 
 	really just a more maintainable version of a dict
@@ -28,6 +28,21 @@ class FormattedSearchResult(object):
 		self.citationstring = citationstring
 		self.clickurl = clickurl
 		self.lineobjects = lineobjects
+
+	def getindex(self):
+		"""
+
+		fetch the index value of the focus line
+
+		derive it from the tail of the clickurl, e.g.:
+
+			lt1002w002_LN_24040
+
+		:return:
+		"""
+
+		return int(self.clickurl.split('_')[-1])
+
 
 	def getlocusthml(self):
 		"""

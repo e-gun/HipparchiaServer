@@ -116,6 +116,8 @@ class dbOpus(object):
 				 levellabels_03, levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance,
 				 recorded_date, converted_date, wordcount, firstline, lastline, authentic):
 		self.universalid = universalid
+		self.worknumber = universalid[7:]
+		self.authorid = universalid[0:6]
 		self.title = title
 		self.language = language
 		self.publication_info = publication_info
@@ -140,8 +142,6 @@ class dbOpus(object):
 			self.length = lastline - firstline
 		except:
 			self.length = -1
-		self.worknumber = universalid[7:]
-		self.authorid = universalid[0:6]
 		self.structure = {}
 		idx = -1
 		for label in [levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05]:
@@ -244,6 +244,7 @@ class dbWorkLine(object):
 				 annotations):
 
 		self.wkuinversalid = wkuinversalid[:10]
+		self.authorid = wkuinversalid[:6]
 		self.index = index
 		self.l5 = level_05_value
 		self.l4 = level_04_value

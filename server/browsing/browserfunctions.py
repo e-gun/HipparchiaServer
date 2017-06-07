@@ -80,7 +80,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	passage['workboxcontents'] = '{t} ({id})'.format(t=workobject.title, id=workobject.universalid[-4:])
 
 	# [B] now get into the actual text to display in the main browser element
-	surroundinglines = simplecontextgrabber(workobject, locusindexvalue, linesofcontext, cursor)
+	surroundinglines = simplecontextgrabber(workobject.authorid, locusindexvalue, linesofcontext, cursor)
 
 	lines = [dblineintolineobject(l) for l in surroundinglines]
 	lines = [l for l in lines if l.wkuinversalid == thiswork]

@@ -280,19 +280,17 @@ def findselectionboundaries(workobject, selection, cursor):
 	return boundaries
 
 
-def simplecontextgrabber(workobject, focusline, linesofcontext, cursor):
+def simplecontextgrabber(authortable, focusline, linesofcontext, cursor):
 	"""
 	grab a pile of lines centered around the focusline
-	:param workobject:
+	:param authortable:
 	:param focusline:
 	:param linesofcontext:
 	:param cursor:
 	:return:
 	"""
 
-	uid = workobject.universalid[0:6]
-	# step two use the index value to grab the environs
-	query = 'SELECT * FROM {uid} WHERE (index BETWEEN %s AND %s) ORDER BY index'.format(uid=uid)
+	query = 'SELECT * FROM {uid} WHERE (index BETWEEN %s AND %s) ORDER BY index'.format(uid=authortable)
 	data = (focusline - (linesofcontext / 2), focusline + (linesofcontext / 2))
 	cursor.execute(query, data)
 	foundlines = cursor.fetchall()

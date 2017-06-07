@@ -16,8 +16,8 @@ from flask import request, session
 from server import hipparchia
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.bibliographicformatting import bcedating
-from server.formatting.searchformatting import mpresultformatter, nocontextresultformatter, htmlifysearchfinds, \
-	nocontexthtmlifysearchfinds, jstoinjectintobrowser
+from server.formatting.searchformatting import htmlifysearchfinds, nocontexthtmlifysearchfinds, jstoinjectintobrowser, \
+	buildresultobjects, flagsearchterms
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
 from server.listsandsession.listmanagement import sortresultslist, calculatewholeauthorsearches, compilesearchlist, \
 	flagexclusions
@@ -81,8 +81,9 @@ def executesearch(timestamp):
 	phrasefinder = re.compile('[^\s]\s[^\s]')
 
 	poll[ts] = ProgressPoll(ts)
-	poll[ts].activate()
-	poll[ts].statusis('Preparing to search')
+	activepoll = poll[ts]
+	activepoll.activate()
+	activepoll.statusis('Preparing to search')
 
 	searchlist = []
 	output = ''
@@ -94,7 +95,7 @@ def executesearch(timestamp):
 	                 if frozensession[c] == 'yes']
 
 	if len(seeking) > 0 and activecorpora:
-		poll[ts].statusis('Compiling the list of works to search')
+		activepoll.statusis('Compiling the list of works to search')
 		searchlist = compilesearchlist(listmapper, frozensession)
 
 	if len(searchlist) > 0:
@@ -103,10 +104,10 @@ def executesearch(timestamp):
 		searchlist = flagexclusions(searchlist, frozensession)
 		workssearched = len(searchlist)
 
-		poll[ts].statusis('Calculating full authors to search')
+		activepoll.statusis('Calculating full authors to search')
 		searchlist = calculatewholeauthorsearches(searchlist, authordict)
 		so.searchlist = searchlist
-		poll[ts].statusis('Configuring the search restrictions')
+		activepoll.statusis('Configuring the search restrictions')
 		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 		so.indexrestrictions = indexrestrictions
 
@@ -124,31 +125,27 @@ def executesearch(timestamp):
 			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'.format(
 				skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=proximate)
 
-		hits = searchdispatcher(so, poll[ts])
-		poll[ts].statusis('Putting the results in context')
+		hits = searchdispatcher(so, activepoll)
+		activepoll.statusis('Putting the results in context')
 
 		# hits [<server.hipparchiaclasses.dbWorkLine object at 0x10d952da0>, <server.hipparchiaclasses.dbWorkLine object at 0x10d952c50>, ... ]
 		hitdict = sortresultslist(hits, authordict, workdict)
-		if so.context > 0:
-			allfound = mpresultformatter(hitdict, authordict, workdict, so.seeking, so.proximate, so.searchtype, poll[ts])
-		else:
-			allfound = nocontextresultformatter(hitdict, authordict, workdict, so.seeking, so.proximate, so.searchtype, poll[ts])
 
-		searchtime = time.time() - starttime
-		searchtime = round(searchtime, 2)
-		if len(allfound) > so.cap:
-			allfound = allfound[0:so.cap]
+		resultlist = buildresultobjects(hitdict, authordict, workdict, so, activepoll)
 
-		poll[ts].statusis('Converting results to HTML')
+		for r in resultlist:
+			r.lineobjects = flagsearchterms(r,so)
+
+		activepoll.statusis('Converting results to HTML')
 
 		if so.context > 0:
-			findshtml = htmlifysearchfinds(allfound)
+			findshtml = htmlifysearchfinds(resultlist)
 		else:
-			findshtml = nocontexthtmlifysearchfinds(allfound)
+			findshtml = nocontexthtmlifysearchfinds(resultlist)
 
-		findsjs = jstoinjectintobrowser(allfound)
+		findsjs = jstoinjectintobrowser(resultlist)
 
-		resultcount = len(allfound)
+		resultcount = len(resultlist)
 
 		if resultcount < so.cap:
 			hitmax = 'false'
@@ -156,6 +153,8 @@ def executesearch(timestamp):
 			hitmax = 'true'
 
 		# prepare the output
+		searchtime = time.time() - starttime
+		searchtime = round(searchtime, 2)
 
 		sortorderdecoder = {
 			'universalid': 'ID', 'shortname': 'name', 'genres': 'author genre', 'converted_date': 'date', 'location': 'location'
@@ -186,7 +185,7 @@ def executesearch(timestamp):
 			output['icandodates'] = 'yes'
 		else:
 			output['icandodates'] = 'no'
-		poll[ts].deactivate()
+		activepoll.deactivate()
 
 	if nosearch:
 		reasons = []
