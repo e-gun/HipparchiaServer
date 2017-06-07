@@ -8,6 +8,7 @@
 
 import re
 from collections import deque
+from copy import deepcopy
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
@@ -38,7 +39,6 @@ def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
 	#	print(h,hitdict[h].universalid, hitdict[h].accented)
 
 	so = searchobject
-	context = int(so.session['linesofcontext'])
 
 	hitdict = {h: hitdict[h] for h in hitdict if h < int(so.session['maxresults'])}
 
@@ -52,7 +52,7 @@ def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
 		c = locusintocitation(wo, lo.locustuple())
 		resultlist.append(SearchResult(h+1, n, t, c, hitdict[h].universalid, [hitdict[h]]))
 
-	if context == 0:
+	if so.context == 0:
 		# no need to find the environs
 		return resultlist
 
@@ -73,7 +73,7 @@ def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
 		count = 0
 
 		for table in hitlocations:
-			resultswithenvironments = bulkenvironsfetcher(table, hitlocations[table], context)
+			resultswithenvironments = bulkenvironsfetcher(table, hitlocations[table], so.context)
 			updatedresultlist.extend(resultswithenvironments)
 			count += 1
 			activepoll.remain(len(hitlocations)-count)
@@ -135,58 +135,6 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 	return searchresultlist
 
 
-def formattedenvironment(hitnumber, environs, authordict, workdict, searchobject):
-	"""
-	take an environment
-		turn it into a focus line
-		surround it by some context
-
-	in:
-		(16, [lineobject1, lineobject2, linobject3,...])
-
-	out:
-		FormattedSearchResult object
-
-	:param line:
-	:param workdbname:
-	:param authorobject:
-	:param linesofcontext:
-	:param searchterm:
-	:param cursor:
-	:return:
-	"""
-
-	so = searchobject
-	highlightindex = environs[0]
-	linelist = environs[1]
-
-	highlightlineobject = [l for l in linelist if l.index == highlightindex][0]
-	# discard any lines that are not part of this work
-	linelist = [l for l in linelist if l.wkuinversalid == highlightlineobject.wkuinversalid]
-
-	workobject = workdict[highlightlineobject.wkuinversalid]
-	authorobject = authordict[highlightlineobject.authorid]
-
-	citation = locusintocitation(workobject, highlightlineobject.locustuple())
-
-	name = formatname(workobject, authorobject)
-	title = workobject.title
-
-	citationincontext = SearchResult(hitnumber + 1, name, title, citation, highlightlineobject.universalid, [])
-
-	for foundline in linelist:
-		if foundline.index == highlightindex:
-			foundline.accented = highlightsearchterm(foundline, so.seeking, 'match')
-			foundline.accented = '<span class="highlight">{fla}</span>'.format(fla=foundline.accented)
-		if so.proximate != '' and so.searchtype == 'proximity':
-			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(so.proximate, foundline.accented) or re.search(so.proximate, foundline.stripped):
-				foundline.accented = highlightsearchterm(foundline, so.proximate, 'proximate')
-		citationincontext.lineobjects.append(foundline)
-
-	return citationincontext
-
-
 def flagsearchterms(searchresultobject, searchobject):
 	"""
 
@@ -199,18 +147,20 @@ def flagsearchterms(searchresultobject, searchobject):
 	so = searchobject
 	linelist = searchresultobject.lineobjects
 	highlightindex = searchresultobject.getindex()
-
 	newlineobjects = []
 	for foundline in linelist:
-		if foundline.index == highlightindex:
-			foundline.accented = highlightsearchterm(foundline, so.seeking, 'match')
+		# need a copy because otherwise you will see two+ highlighted lines in a result if this result abuts another one
+		# a highlighted foundline2 of result2 is showing up in result1 in addition to foundline1
+		fl = deepcopy(foundline)
+		if fl.index == highlightindex:
+			fl.accented = highlightsearchterm(fl, so.seeking, 'match')
 			if so.context > 0:
-				foundline.accented = '<span class="highlight">{fla}</span>'.format(fla=foundline.accented)
+				fl.accented = '<span class="highlight">{fla}</span>'.format(fla=fl.accented)
 		if so.proximate != '' and so.searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(so.proximate, foundline.accented) or re.search(so.proximate, foundline.stripped):
-				foundline.accented = highlightsearchterm(foundline, so.proximate, 'proximate')
-		newlineobjects.append(foundline)
+			if re.search(so.proximate, fl.accented) or re.search(so.proximate, fl.stripped):
+				fl.accented = highlightsearchterm(fl, so.proximate, 'proximate')
+		newlineobjects.append(fl)
 
 	return newlineobjects
 
