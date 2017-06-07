@@ -248,10 +248,10 @@ def highlightsearchterm(lineobject, searchterm, spanname):
 
 def htmlifysearchfinds(listofsearchresultobjects):
 	"""
-	it is too painful to let JS turn this information into HTML
-	the Flask template used to do this work, now this does it
 
-	send me a list of FormattedSearchResult objects
+	send me a list of SearchResult objects
+
+	return some html
 
 	:param listofsearchresultobjects:
 	:return:
@@ -276,27 +276,12 @@ def htmlifysearchfinds(listofsearchresultobjects):
 	return html
 
 
-def jstoinjectintobrowser(listofsearchresultobjects):
-	"""
-	the clickable urls don't work without inserting new js into the page to catch the clicks
-	need to match the what we used to get via the flask template
-	:return:
-	"""
-
-	listofurls = [ro.clickurl for ro in listofsearchresultobjects]
-
-	jso = ['document.getElementById("{u}").onclick = openbrowserfromclick;'.format(u=url) for url in listofurls]
-	jsoutput = '\n'.join(jso)
-
-	return jsoutput
-
-
 def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	"""
-	it is too painful to let JS turn this information into HTML
-	the Flask template used to do this work, now this does it
 
-	send me a list of FormattedSearchResult objects (each should contain only one associated line)
+	send me a list of SearchResult objects
+
+	return some html
 
 	:param listofsearchresultobjects:
 	:return:
@@ -341,3 +326,18 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	html = '\n'.join(resultsashtml)
 
 	return html
+
+
+def jstoinjectintobrowser(listofsearchresultobjects):
+	"""
+	the clickable urls don't work without inserting new js into the page to catch the clicks
+	need to match the what we used to get via the flask template
+	:return:
+	"""
+
+	listofurls = [ro.clickurl for ro in listofsearchresultobjects]
+
+	jso = ['document.getElementById("{u}").onclick = openbrowserfromclick;'.format(u=url) for url in listofurls]
+	jsoutput = '\n'.join(jso)
+
+	return jsoutput
