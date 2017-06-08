@@ -1,0 +1,58 @@
+
+<button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Include this category and/or genre">
+    <span class="ui-icon ui-icon-plus"></span>
+    <span class="ui-button-icon-space"> </span>&nbsp;</button>
+    <span class="label">Add an item to the search list</span><br />
+    <p class="explanation">Use the information in the box or boxes to the left of this button to append an item to the list of things one is searching for.
+    These can be whole authors, whole works, parts of works, whole classes of authors, and whole classes of work.</p>
+
+    <p class="explanation">For example: adding the author <span class="emph">Plato</span> and the class <span class="emph">Tragici</span>, you could compare Plato and tragedians.
+    Similarly the author <span class="emph">Plato</span> and the work genre <span class="emph">Satyr.</span> would let you compare Plato and satyr plays.
+    Likewise the work <span class="emph">Thucydides, <span class="italic">Historiae</span></span> could be combined with <span class="emph">Herodotus, <span class="italic">Historiae</span></span>.
+    This could be further refined down to <span class="emph">Thucydides, <span class="italic">Historiae</span> Book 1</span> and <span class="emph">Herodotus, <span class="italic">Historiae</span> Book 1</span>.
+    In fact absurd levels of specificity can be chosen: <span class="emph">Thucydides , <span class="italic">Historiae</span> Book 1, chapter 114, section 2, line 2</span> is a perfectly valid selection.
+    </p>
+
+<button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Exclude this category and/or genre">
+    <span class="ui-icon ui-icon-minus"></span>
+    <span class="ui-button-icon-space"> </span>&nbsp;</button>
+    <span class="label">Add an item to the exclusion list</span><br />
+    <p class="explanation">Use the information in the box or boxes to the left of this button to append an item to the list of things one is not going to search for.
+    These can be whole authors, whole works, parts of works, whole classes of authors, and whole classes of work.</p>
+    <p class="explanation">For example: adding the author <span class="emph">Plato</span> and the class <span class="emph">Tragici</span> to the exclusion list, you could search for the use of a term outside of Plato and Tragedy.
+    Mixing inclusions and exclusions can produce interesting possibilities: the author <span class="emph">Plutarch</span> as a selection and the work genre <span class="emph">Biogr.</span> as an exclusion yields all of Plutarch but for the <span class="italic">Lives</span>.
+    Similarly adding <span class="emph">Homer</span> and <span class="emph">Epici</span> and excluding <span class="emph"><span class="italic">Ilias</span></span> and then setting the time restriction to 850BCE to 500 CE will give you non-Iliadic early epic. Consider tossing in some <span class="emph">Hymn.</span> for good measure...
+    It is also possible to search something like <span class="emph">Herodotus, <span class="italic">Histories</span></span> less books 1 and 2 by adding the former to the selection list and the latter to the exclusion list.
+    But excluding a subsection within a section is not supported: Book 1 less section 1 has not been implemented and probably never will be.
+    </p>
+
+<p><span class="ui-button-icon ui-icon ui-icon-info" title="Show/hide details of the current search list">&nbsp;</span>
+    <span class="label">Check the contents of your current search list</span></p>
+    <p class="explanation">If you searched now for <span class="emph">Tragici</span> what text would you in fact search? Click on the <span class="emph">info</span> button to find out.
+    This should give you a list of <span class="emph">works</span> that reflect all of the inclusions and exclusions currently in effect.
+    </p>
+    <fieldset><legend>Earliest date to search</legend><input type="text" value="-850" width="25px;"></fieldset>
+    <fieldset><legend>Latest date to search</legend><input  type="text" value="1500" width="25px;"></fieldset>
+    <p class="explanation">Choose a chronological span within which to limit the search. Note that the dates assigned to authors are very approximate
+    and derived from original data that can look like <code>i-iii A.D.</code>. Such an author would be assigned to <code>200 CE</code>.
+    Similarly <code>iv B.C</code> becomes <code>350 BCE</code>. A variety of quirks in the
+    original data has become a variety of quirks here. Similarly many authors have no date at all and some works
+        have a variety of dates because they are composite.
+        Check your search lists (<span class="ui-button-icon ui-icon ui-icon-info" title="Show/hide details of the current search list">&nbsp;</span>)
+    to make sure you are getting what you want. Searching within a date range that is smaller than one century is likely to yield some measure of disappointment.
+    Users are quite free to update authors with their own superior dates, but that requires learning SQL. Please consider sharing with others any/all improvements that you make to the original data.<br />
+    <br />
+    Note that there is a conflict between time as an exclusion principle and the selection list. Which should take priority? This question has been resolved as follows:
+        <span class="emph">specific selections take priority over more general chronological exclusions</span>. And so:
+    <ul class="forexample">
+        <li>zero selections + no date restriction (-850 to 1500): search <span class="emph">all active corpora</span></li>
+        <li>zero selections + a date restriction: search for everybody within that date range; e.g., <span class="emph">5th century BCE Greek authors</span> (if this is your only active corpus)</li>
+        <li>zero selections + a class or classes + a date restriction: search for all members of the class(es) within that date range; e.g. <span class="emph">epic before 1 C.E.</span></li>
+        <li>an author/work/passage + a class or classes + a date restriction: search for the specific item(s) and search for all members of the class(es) within that date range;
+            e.g. <span class="emph">Plutarch's <span class="italic">Solon</span></span> and <span class="emph">4th century BCE Greek orators</span></li>
+    </ul>
+    </p>
+    <p>&nbsp;
+    <span class="label">Removing items from lists</span></p>
+    <p class="explanation"><span class="emph">Double-click</span> items from the include/exclude list and they will disappear from your list of selections or exclusions.
+    </p>

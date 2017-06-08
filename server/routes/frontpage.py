@@ -6,6 +6,10 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import json
+from os import path
+from sys import argv
+
 from flask import render_template, send_file, session
 
 from server import hipparchia
@@ -58,3 +62,41 @@ def sendfavicon():
 @hipparchia.route('/apple-touch-icon-precomposed.png')
 def appletouchticon():
 	return send_file('static/images/hipparchia_apple-touch-icon-precomposed.png')
+
+@hipparchia.route('/loadhelpdata')
+def loadhelpdata():
+	"""
+
+	do not load the help html until someone clicks on the '?' button
+
+	then send this stuff
+
+	:return:
+	"""
+
+	currentpath = path.dirname(argv[0])
+	helppath = currentpath + '/server/helpfiles/'
+	divmapper = {'Interface': 'helpinterface.html',
+	              'Browsing': 'helpbrowsing.html',
+	              'Dictionaries': 'helpdictionaries.html',
+	              'MakingSearchLists': 'helpsearchlists.html',
+	              'HitsAndMisses': 'helphitsandmisses.html',
+	              'RegexSearching': 'helpregex.html',
+	              'SpeedSearching': 'helpspeed.html',
+	              'Oddities': 'helpoddities.html',
+	              'Openness': 'helpopenness.html'}
+
+	helpdict = {}
+	helpdict['helpcategories'] = list(divmapper.keys())
+
+	for d in divmapper:
+		helpfilepath = helppath+divmapper[d]
+		helpcontents = ''
+		if path.isfile(helpfilepath):
+			with open(helpfilepath, 'r') as f:
+				helpcontents = f.read()
+		helpdict[d] = helpcontents
+
+	helpdict = json.dumps(helpdict)
+	
+	return helpdict

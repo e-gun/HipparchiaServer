@@ -1,0 +1,70 @@
+
+<br />
+Search times will vary widely. If things seem unbearably slow, you should consider
+changing your queries and/or the restrictions placed upon them. <span class="emph">Everything hinges on what you ask for</span>.
+Slowdowns usually obey an exponential logic: things get 2x worse, then 4x worse, then...
+This means that little shifts in your search can lead to huge improvements.
+<br />
+<br />
+As noted below, hardware is a factor, but since you are unlikely to change your hardware much, let's start by spending some
+time looking at the software side of things. But if your searches are about <span class="emph">50-75x slower</span> than these examples, you should
+read about hardware.
+
+<ul class="forexample">
+    <li>
+        Search <span class="emph">result formatting</span> can be a significant element of the speed of a search.
+        The raw hits arrive in a first
+        pass through the database. The context is derived by revisiting those same segments of the data. For example, the
+        1,173 passages with ἐρχόμενοϲ in them
+        can be found and displayed in <span class="colorhighlight">2.41s</span> if you set "Lines of context to accompany search results" to zero. If you
+        want to see six lines of context, then be prepared to wait for <span class="colorhighlight">13.84s</span>.
+        If you just want to skim a lot of results quickly, then <span class="emph">zero context</span> is a good way to go.
+    </li>
+    <li>Consider the following <span class="emph">simple searches</span>. Both searches are across all five databases. There are no restrictions applied at all.
+    <ul class="numbered">
+        <li><span class="sampleoutput">Sought »προκατέλαβον«; Searched 236840 texts and found 22 passages (<span class="colorhighlight">2.75s</span>)</span></li>
+        <li><span class="sampleoutput">Sought »δεδιότεϲ«; Searched 236840 texts and found 589 passages (<span class="colorhighlight">5.41s</span>)</span></li>
+    </ul>
+    The first search is quite fast: a long word and an uncommon word.
+    The second search is really about the same speed: most of the extra time was spent on formatting the 589 results not on
+    generating the hits themselves. <span class="emph">Unrestricted searches for individual words will always be fastest</span>.
+    Common words will slow things down somewhat, but the slowdown is trivial relative to the amount of time it will take
+    you to sift through 1000+ results.
+</li>
+<li>
+    Phrase searches are sent to one of two functions. If you pick a rare (accented) word, then that word will be searched.
+    Then its environs will be searched. Otherwise PostgreSQL will build a nested query to look at windows of text that
+    may or may not contain your phrase. <span class="emph">Most phrase searches will take roughly the same amount of time</span>
+    since this 'windowing' is itself where most of the expensive computation happens.
+    <ul class="numbered">
+        <li><span class="sampleoutput">Sought »μεγάλην δύναμιν«; Searched 6625 texts and found 85 passages (<span class="colorhighlight">13.18s</span>)</span> (only Greek literary authors active)</li>
+        <li><span class="sampleoutput">Sought »μεγάλην δύναμιν«; Searched 3008 texts and found 32 passages (<span class="colorhighlight">3.71s</span>); Searched between 850 B.C.E. and 1 C.E.</span></li>
+        <li><span class="sampleoutput">Sought »τῷ φίλῳ μου«; Searched 236,845 texts and found 6 passages (<span class="colorhighlight">15.95s</span>)</span> (all databases active)</li>
+        <li><span class="sampleoutput">Sought »οὐ μὴν ἀλλ«; Searched 236,845 texts and found 2,346 passages (<span class="colorhighlight">29.54s</span>)</span></li>
+        <li><span class="sampleoutput">Sought »ἀνέθηκεν ὑπὲρ«; Searched 134,806 texts and found 19 passages (<span class="colorhighlight">8.93s</span>); Searched between 850 B.C.E. and 1 C.E.
+    </ul>
+As above, a common word sought across the whole corpus will slow you down.
+Most phrase searches are likely to contain common words. So you should consider strategies to make the haystack smaller
+unless you have some time to spare. It is totally safe to try to double-check Dennison on οὐ μὴν ἀλλὰ, but you should
+throw some restrictions in there to avoid a long search (that yields more results than you want anyway). Waiting 30s for 2400 results
+is perhaps less of a problem than having 2400 results to read after the search completes.
+</li>
+</ul>
+<span class="emph">Hardware also matters</span>: προκατέλαβον (the first example above)
+takes 2.75s with 5 workers on macOS 10.11 with a SSD and an 8 core CPU running at 3.5GHz.
+With one worker the search executes in 11.32s. The search takes 4.85 seconds on a mac mini with a SSD and 2 cores running at 2.6GHz. But then
+the search will take
+23.4s when executed inside a virtual machine running on the same higher-end computer,
+a virtual machine that has been assigned 4 cores and is running FreeBSD 11.
+The κεκωλυκατε example yields a difference between 0.97s unemulated and 12.79s when inside a virtual machine. In short, emulation is costly. And
+the main culprit is the emulated filesystem. Just see what happens if you pick ZFS instead of UFS...
+A single word inside of just "Greek authors" takes 154s on a low end machine with a very slow 5400rpm 2.5" laptop
+drive.
+The processor load remains very low throughout the search: the culprit is the cheap hard drive. The same word can be found in 2.16s on the speedier machine:
+Hipparchia is <span class="emph">50x-75x faster</span> with a faster drive.
+A solid state drive makes a huge difference here (and just about everywhere else in your computing life). Consider investing in one.
+In sum, fast drives and then more CPUs and then faster CPUs would be the order in which to seek to make speed gains.
+<span class="emph">Access time to the data and not processing time of the data is far and away the most important factor.</span>
+Get Hipparchia's DB onto a solid state drive if at all possible. After a certain threshold a faster CPU will end up just doing more waiting
+for data to reach it. 2 or 3 workers on a moderately powerful machine with a fast drive is 85% as fast as a high end machine that in theory
+can do 600% more work per second.

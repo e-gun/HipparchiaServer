@@ -19,13 +19,27 @@ $(document).ready( function () {
 
     $('#clear_button').click( function() { window.location.href = '/resetsession'; });
     $('#clearpick').hide();
-    $('#moreinfotabs').hide();
-    $('#moreinfotabs').tabs();
+    $('#helptabs').hide();
+    $('#helptabs').tabs();
     $('#edts').hide();
     $('#ldts').hide();
     $('#spur').hide();
 
-    $('#helpbutton').click( function() { $('#moreinfotabs').toggle(); $('#executesearch').toggle(); $('#extendsearch').toggle(); });
+    $('#helpbutton').click( function() {
+        if (document.getElementById('Interface').innerHTML == '<!-- placeholder -->') {
+            $.getJSON('/loadhelpdata', function (data) {
+                var l = data.helpcategories.length;
+                for (i = 0; i < l; i++) {
+                    var divname = data.helpcategories[i];
+                    if (data[divname].length > 0) {
+                        document.getElementById(divname).innerHTML = data[divname];
+                        }
+                    }
+                });
+            }
+        $('#helptabs').toggle();
+        $('#executesearch').toggle();
+        $('#extendsearch').toggle(); });
 
     $('#browserdialog').hide();
     $('#complexsearching').hide();

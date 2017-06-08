@@ -1,0 +1,228 @@
+
+The original data was not really designed to be aggregated. It was also not meant to be sliced up after this fashion.
+Various oddities and peculiarities ensue.
+
+<br />
+<p><span class="label">Missing in action</span></p>
+<ul class="forexample">
+    <li>The original Latin authors data is missing:
+        <ul>
+            <li>Dates</li>
+            <li>Author Genres</li>
+            <li>Author Locations</li>
+            <li>Work Genres [but most works have been assigned a genre by HipparchiaBuilder]</li>
+            <li>Work Locations</li>
+        </ul>
+    </li>
+    <li>The original Greek authors data is missing:
+        <ul>
+            <li>[nothing]</li>
+        </ul>
+    </li>
+    <li>The original papyrus data is missing:
+        <ul>
+            <li>Author Genres</li>
+            <li>Author Locations</li>
+            <li>Work Genres [provisionally assigned to a generic 'Docu.' genre]</li>
+        </ul>
+    </li>
+    <li>The original inscriptions data (I & II) is missing:
+        <ul>
+            <li>Author Genres</li>
+            <li>Work Genres [provisionally assigned to a generic 'Inscr.' genre]</li>
+        </ul>
+    </li>
+</ul>
+
+<p><span class="label">Internal heterogeneity</span></p>
+<ul class="forexample">
+        <li><span class="emph">Dates</span>
+            <ul class="numbered">
+                <li>The dates recorded with the <span class="emph">Greek authors</span> are not of the same sort as those recorded with the papyri and inscriptions.
+                    The Greek authors data is derived from LSJ and it originally looks like <code>A.D. 2–3?</code>. Some
+                    items are listed as <code>Varia</code> or <code>Incerta</code>.
+
+                        In short, these dates are approximate and inexact.
+                        Everything gets converted to the center of any available century or range of centuries.
+                        All questions are ignored.
+
+                        <ul class="roman">
+                            <li><code>4 BC ==> 350 BCE</code></li>
+                            <li><code>A.D. 2–3? ==> 200 CE</code></li>
+                        </ul>
+
+                    The net result is that it is very easy to exclude authors by being over-refined in your search. <span class="emph">The margin of error is at least 50 years</span>.
+
+                    </li>
+                    <li>
+                        The dates recorded with the <span class="emph">papyri</span> and the <span class="emph">inscriptions</span> vary from <code>?</code> to something very precise like <code>212 CE</code>. Hipparchia has
+                        parsed the dates that the editors have assigned to these items as best as it can. Please note that there are
+                        <span class="emph">21584</span> distinct <code>recorded_date</code> values in the works table. Some of these are in German, some use Roman numerals, some use 'a' and 'p',
+                        some 'BC' and 'AD', some ordinal numbers, some cardinal numbers. Some merely say 'the age of X'. It's not easy to get all of these right
+                        (even if the editorial date is itself accurate...). It is not even easy to check that they are right.
+                        As above, all questions are dropped and all spans are turned into a single number representing the midpoint.
+                        'Ages' have had dates assigned to them. Claudius will be the middle of the reign, approximately: 50 CE.
+                        'Byzantine' is a bit trickier... 700 CE has been chosen for lack of some other solution.
+                        Rough/round numbers have been chosen where something specific is not available. Many items are dated precisely,
+                        many to within a decade, others are lucky to be assigned to the right century. Check the editor's date
+                        (if available...) at the top of any inscription to see where the <code>assigned_date</code> came from.
+                        <span class="emph">Avoid over-refined searches</span>
+                        unless you know that you do not care about items that have not been dated with some precision.
+
+                    </li>
+            </ul>
+        </li>
+        <li><span class="emph">Author Locations</span>
+            <ul class="numbered">
+                <li>
+                    The locations recorded with the <span class="emph">Greek authors</span> are not of the same sort as those recorded with the papyri and inscriptions.
+                    The Greek authors data is derived from LSJ and it originally looks like <code>Athenae</code>,
+                    <code>Ilium [vel Troja]</code>, and <code>Sinope</code>. <span class="emph">Many authors have no location
+                    recorded</span>. Be careful not to throw out more authors than you mean to by putting too much confidence in this data.
+                </li>
+                <li>
+                    The locations for <span class="emph">inscription</span> 'authors' is inferential. If the name of the corpus contains something that
+                    looks like a location, it has been grabbed: <code>Attica</code> for example. Note that <code>Attica</code> is not <code>Athenae</code>: you would need
+                    to ask for both locations to get IG's Attica + LSJ's Attic authors. Some sets of inscriptions come from more than one
+                    place: <code>Cos and Calymna</code>, for example, and not just <code>Cos</code>.
+                    Furthermore many corpora do not have any (pseudo-)locations that can be inferred from their name: for example,
+                    <code>Late Antique Latin</code> is not a place, at least not a literal one.
+                </li>
+            </ul>
+        </li>
+        <li><span class="emph">Work Locations</span>
+          <ul class="numbered">
+    <li>
+        There are 14001 distinct locations on offer. That's a painfully large number. It is not at all easy to
+        pare these down in an automated fashion. 110 start with 'Alex'. Some of these could be folded into one
+        another, but the data has many shapes, and no decision has been made yet about where/how to make the unkind cuts.
+    </li>
+    <li>
+        Some items have both a region and a city recorded. Only the city is searchable for now. The uneven distribution
+        of regional assignments means that searching by region would be misleading.
+    </li>
+</ul>
+        </li>
+        <li><span class="emph">Missing characters and display quirks</span>
+            <ul class="numbered">
+                <li>
+                    There are various unprintable characters in the original data. These fall under various headings
+                </li>
+                    <ul class="roman">
+                        <li>
+                            Idiosyncratic characters that have no unicode representation. You will see <span class="emph">◦</span>
+                            in the text. If you look at the database and/or HTML output you will see a code number:
+                            <code>hmu_idiosyncratic_char value="1122"</code>, e.g.
+                            This can be decoded via the Betacode manual.
+                            It is possible to know what was in the text, but it is not possible to display it, at least not yet.
+                        </li>
+                        <li>
+                            Undocumented characters are all rendered as <span class="emph">⊚</span>. If you look at
+                            the database and/or HTML output you will see a code number:
+                            <code>hmu_undocumented_poundsign value="1069"</code>, e.g.
+                            The original data has either been misparsed or it yielded a value that is not present in the Betacode manual.
+                            Further documentation ought to make it possible to put the proper character in here.
+                        </li>
+                        <li>
+                            Some characters will not display becuase they have been properly encoded but they are missing from your fonts.
+                            They will display properly if/when you get a font that supports them.
+                        </li>
+                        <li>
+                            Finally, some characters will not display because the betacode manual does give a code that could
+                            be turned into a character but that code has yet to be implemented in HipparchiaBuilder. The betacode
+                            manual is 99 pages long, so this is not just a case of laziness.
+                        </li>
+                    </ul>
+                <li>
+                    Formatting instructions have typically been followed: make the font bigger, superscript, cross out... But not
+                    all of the codes found have been documented. And some are too painful to implement: start multi-column display,
+                    reverse text direction, writing perpendicular to main text, ... Probing the database will usually let you know what was found.
+                    But it most of these items are unlikely to ever be supported.
+                </li>
+                <li>
+                    Brackets that converge with HTML or other markup have usually been replaced with a near equivalent: <code>&lt;</code>
+                    signals markup instructions to a page renderer. Left and right angled bracket were swapped out.
+                    They are present in the database with other characters instead: <span class="emph">⟪</span> and <span class="emph">⟫</span>.
+                    A similar logic governed the choice of <span class="emph">⦅</span> and <span class="emph">⦆</span>
+                    since <code>(</code> and <code>)</code> are special characters in betacode.
+                    There are other (hopefully) inconsequential items that fall under this heading.
+                </li>
+
+            </ul>
+        </li>
+        <li><span class="emph">Dictionary entries: click to define, etc.</span>
+            <ul class="numbered">
+                <li>
+                    The dictionary data is being asked to do more than it was orignally designed to do. The "senses" and "phrases"
+                    that have been extracted are interpretations of the data. Any irregularities (and there are many...) will
+                    produce surprises. Read the full entry rather than the summary if there is any confusion.
+                </li>
+                <li>
+                    Clicking on any word in a browser passage is supposed to parse it and open a dictionary window that defines
+                    that word. This often works, but not always. The parser has to know the word. And then the dictionary entry
+                    has to match the parser's idea of what the dictionary entry should be. Consider the what happens with <code>ἰχθῦϲ</code>.
+                    If you click on that word, the parser will say <code>ἰχθῦϲ (from ἰχθύϲ)</code>. But ἰχθύϲ will not be found
+                    in the dictionary because LSJ has an entry for ἰχθῦϲ only: <code>ἰχθῦϲ (so Hdn.Gr.2.936, -ῦϲ and -ύϲ freq. in codd.),
+                    ύοϲ, ὁ, acc.</code> In short, the hand-off between various sets of data
+                    is not always smooth. You can always look up any word manually by opening up the lexical tools panel:
+                        <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Lexical tools">
+                        <span class="ui-icon ui-icon-wrench"></span>
+                        <span class="ui-button-icon-space"> </span>&nbsp;</button>
+                </li>
+                <li>
+                    Citations within the dictionaries are <span class="emph">often clickable</span>. The emphasis falls on the word often.
+                    If you click on <code>D.10.74</code> you will be taken to Demosthenes, Philippica 4 [Sp.], Section 74, line 1.
+                    But there will be sorrow as well as joy. The citation format in the dictionary references does not match
+                    the data that Hipparchia is working from and interconversion will often fail. For example, Plautus is cited by
+                    "act" and "scene" in the dictionary entries. <code>Plaut. Merc. 1, 2, 76</code> is meaningless to Hipparchia since "Play"
+                    and "line" are the only valid ways of retrieving anything. The number assigned to each of Euripides' plays in the
+                    dictionary is not the same as in that data as is the number assigned in the TLG-E data. Papyri that are
+                    available are cited, but so seldom in a useful manner that I did not code anything to try to retrieve them.
+                    Nevertheless most of the key texts of key authors will pop right up. Cross your fingers, then click.
+                </li>
+                <li>
+                    Each clickable reference has a HTML ID. The IDs are supposed to be unique. But if the same passage appears two or more
+                    times, then a rule got broken. Only the first reference will be clickable. The second will be dead. I am
+                    too lazy to fix this.
+                </li>
+            </ul>
+        </li>
+        <li><span class="emph">Prevalence values</span>
+            <ul class="numbered">
+                <li>
+                    Prevalence over time requires trusting the dates for all authors and works. One should hesitate
+                    to do this. But if a word is often used, then the distribution pattern is likely accurate.
+                </li>
+                <li>
+                    The counts are derived by taking every word from every line of every text.
+                    Then the results are parsed via the parsing dictionary and assigned to a dictionary entry.
+                    Incomplete, mangled, and otherwise glitchy words will not get assigned to a dictionary entry. Or
+                    perhaps they will be misassigned to some other entry if they have the right sort of missing bits.
+                </li>
+                <li>
+                    If a word does not exist in the parsing dictionary it will never get matched up with a dictionary entry.
+                    This means that perfectly valid word forms will not be aggregated under their dictionary entry and
+                    that the headword total count will be low. The parsing data was not derived from the full set of
+                    data that is available via Hipparchia. And forms unique to the inscriptions like <span class="emph">⒣ε̄μέρε̄ι</span>,
+                    <span class="emph">ϝεξέ̄κοντα</span>, and <span class="emph">ϙόϲμοϲ</span> are not something that that data knows about.
+                </li>
+                <li>
+                    Peculiarities in the headword list to the parsing dictionary can strand words. Items are recorded but unfindable.
+                    But here better algorithms will eventually yield better search results.
+                </li>
+                <li>
+                    Homonymns confuse the counter: is that <span class="emph">esse</span> from <span class="emph">edo</span>
+                    or from <span class="emph">sum</span>? The word will be assigned to both.
+                    The net result is that "eating" suddenly seems to be every bit as common as "being", if not more so.
+                </li>
+                <li>
+                    A lot of the Latin in the non-Latin corpora comes from editorial comments as well as citations of
+                    Latin passages that preserve Greek fragments. This obviously throws of the true count of certain words.
+                </li>
+                <li>
+                    Internal labels like "a" to mark a subsection will get counted as occurrences of "a/ab". But
+                    the number of fake hits is easily drowned out by the number of real ones.
+                </li>
+            </ul>
+        </li>
+        </ul>
