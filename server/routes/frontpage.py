@@ -63,6 +63,7 @@ def sendfavicon():
 def appletouchticon():
 	return send_file('static/images/hipparchia_apple-touch-icon-precomposed.png')
 
+
 @hipparchia.route('/loadhelpdata')
 def loadhelpdata():
 	"""

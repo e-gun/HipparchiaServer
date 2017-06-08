@@ -1,18 +1,60 @@
 
+The text browser can be opened in two ways.
+<ul class="numbered">
+    <li>
+        You can manually enter something in the Author and Text
+        boxes and then click on the <span class="emph">Browse to...</span> button:
+        <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse this location">
+            <span class="ui-icon ui-icon-note"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+    </li>
+    <li>
+        Alternately you can <span class="emph">click on the colored locus</span> in a search result.
+        It will change color if you hover over it.
+        [The sample locus is not clickable.]
+        <locus>
+			<span class="findnumber">[2]</span>&nbsp;&nbsp;
+			<span class="foundauthor">Homer</span>,&nbsp;
+			<span class="foundwork">Ilias</span>:
+			<browser id="gr0012w001_LN_76"><span class="foundlocus">Book 1, line 75</span></browser></locus>
+    </li>
+</ul>
+
+The browser should now display a set of text lines centered on your choice.
+The number of lines you see can be set via the <span class="emph">Configuration options...</span> button.
+    <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Configuration options">
+    <span class="ui-icon ui-icon-gear"></span>
+    <span class="ui-button-icon-space"> </span>&nbsp;</button>
+<br />
+<br />
+Line numbers will be seen every N lines or every time there is a 'level shift' such as
+going from Book 1, Section 1 to Book 1, Section 2. The N in 'every N lines'
+can be configured by editing <code>config.py</code> and restarting HipparchiaServer.
+
+<br />
+<br />
+<span class="emph">Every word in the browser is clickable</span>. If you hover over the words they will change appearance. If you click
+them Hipparchia will attempt to open a lexical window for this word that will parse it and show the relevant
+dictionary entry or entries.
+<br />
+<br />
+
+The bottom of the browser window contains three buttons:
+<br />
+<br />
 <p class="interfacetips">
 <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse backwards (click or press the &#8592; key)">
     <span class="ui-icon ui-icon-arrowthick-1-w">&nbsp;</span>
     <span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-    <span class="label">Browse backwards (click or press the &#8592; key)</span></p>
+    <span class="label">Browse backwards</span> (click or press the &#8592; key)</p>
 
 <p class="interfacetips">
     <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Close the browser">
     <span class="ui-icon ui-icon-close">&nbsp;</span>
     <span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-    <span class="label">Close the browser</span></p>
+    <span class="label">Close the browser</span> (click or press the ESC key)</p>
 
 <p class="interfacetips">
     <button class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse forwards (click or press the &#8594; key)">
     <span class="ui-icon ui-icon-arrowthick-1-e">&nbsp;</span>
     <span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-    <span class="label">Browse forwards (click or press the &#8594; key)</span></p></p>
+    <span class="label">Browse forwards</span> (click or press the &#8594; key)</p>

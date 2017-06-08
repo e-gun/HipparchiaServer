@@ -65,7 +65,7 @@ What <span class="emph">typically</span> really means in that notice above is th
 "<code> \w\w in \w\w </code>" will look for <code>[two letter word] + in + [two letter word]</code>.
 And it will indeed find Cicero, In Verrem 2.4.75.10-11 where the lines end and begin with: <code>nihil se | in eo potestatis</code>.
 However if your complex regex does not trigger the phrase search mechanism (by including a whitespace), then the
-search will be line-by-line and <span class="emph">in this case matches occurring between lines be lost</span>.
+search will be line-by-line and <span class="emph">in this case matches occurring between lines will be lost</span>.
 <br />
 <br />
 If you have to have the sort of search that has full access to lookaheads and what not, then you should consider migrating

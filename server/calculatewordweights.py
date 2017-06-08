@@ -40,6 +40,8 @@ def findccorporaweights():
 	the results are something like:
 		corpus weights {'gr': 1.0, 'lt': 11.371559943504066, 'in': 28.130258550554572, 'dp': 27.492143340147255, 'ch': 129.8977636244065}
 
+	counts {'gr': 98970519, 'lt': 9435706, 'in': 3540624, 'dp': 3606545, 'ch': 808509}
+
 	:return:
 	"""
 
@@ -255,7 +257,7 @@ def findcorpusweight(corpus, language):
 	dbconnection = setconnection('autocommit')
 	curs = dbconnection.cursor()
 
-	q = 'SELECT SUM('+corpus+') FROM dictionary_headword_wordcounts'
+	q = 'SELECT SUM({c}) FROM dictionary_headword_wordcounts'.format(c=corpus)
 
 	w = ' WHERE entry_name ~ %s'
 
