@@ -120,9 +120,6 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 	"""
 
 	actually one of the most basic search types: look for a string/substring
-	this is brute force: you wade through the full text of the work
-
-	note that we are not pulling seeking from the searchobject
 
 	the whereclause is built conditionally:
 	
@@ -268,7 +265,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, searchobject, c
 
 	workdbname = workid[0:6]
 
-	query = 'SELECT * FROM {db} WHERE index >= %s AND index <= %s ORDER BY index ASC'.format(db=workdbname)
+	query = 'SELECT * FROM {db} WHERE index BETWEEN %s AND %s ORDER BY index ASC'.format(db=workdbname)
 	data = (linenumber - 1, linenumber + 1)
 	cursor.execute(query, data)
 	results = cursor.fetchall()
@@ -409,7 +406,7 @@ def dblooknear(index, distanceinlines, secondterm, workid, usecolumn, cursor):
 	"""
 
 	table = workid[0:6]
-	q = 'SELECT index FROM {db} WHERE (index > %s AND index < %s AND wkuniversalid = %s AND {c} ~ %s)'.format(db=table, c=usecolumn)
+	q = 'SELECT index FROM {db} WHERE ((index BETWEEN %s AND %s) AND wkuniversalid = %s AND {c} ~ %s)'.format(db=table, c=usecolumn)
 	d = (index - distanceinlines, index + distanceinlines, workid, secondterm)
 	cursor.execute(q, d)
 	hit = cursor.fetchall()

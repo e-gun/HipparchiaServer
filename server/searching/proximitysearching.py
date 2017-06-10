@@ -19,6 +19,13 @@ def withinxlines(workdbname, searchobject):
 
 	people who send phrases to both halves and/or a lot of regex will not always get what they want
 
+	it might be possible to do this more cleverly with a JOIN or a subquery, but this brute force way seems
+	to be 'fast enough' and those solutions seem to be quite tangled
+
+		Sought »ϲαφῶϲ« within 5 lines of »πάντα«
+		Searched 6,625 texts and found 1,428 passages (8.04s)
+		Sorted by name
+
 	:param distanceinlines:
 	:param additionalterm:
 	:return:
@@ -32,7 +39,7 @@ def withinxlines(workdbname, searchobject):
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
 	# back for checking: but the Aetolians are likley not among those passages...
-	templimit = 99999
+	templimit = 2000000
 
 	hits = substringsearch(so.termone, workdbname, so, cursor, templimit)
 
@@ -40,7 +47,7 @@ def withinxlines(workdbname, searchobject):
 
 	while hits and len(fullmatches) < so.cap:
 		hit = hits.pop()
-		isnear = dblooknear(hit[0], so.distance + 1, so.termtwo, hit[1], so.usecolumn, cursor)
+		isnear = dblooknear(hit[0], so.distance, so.termtwo, hit[1], so.usecolumn, cursor)
 		if so.near and isnear:
 			fullmatches.append(hit)
 		elif not so.near and not isnear:

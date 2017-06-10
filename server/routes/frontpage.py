@@ -81,7 +81,7 @@ def loadhelpdata():
 	              'Browsing': 'helpbrowsing.html',
 	              'Dictionaries': 'helpdictionaries.html',
 	              'MakingSearchLists': 'helpsearchlists.html',
-	              'HitsAndMisses': 'helphitsandmisses.html',
+	              'BasicSyntax': 'helpbasicsyntax.html',
 	              'RegexSearching': 'helpregex.html',
 	              'SpeedSearching': 'helpspeed.html',
 	              'Oddities': 'helpoddities.html',
