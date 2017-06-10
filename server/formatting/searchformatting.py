@@ -153,13 +153,14 @@ def flagsearchterms(searchresultobject, searchobject):
 		# a highlighted foundline2 of result2 is showing up in result1 in addition to foundline1
 		fl = deepcopy(foundline)
 		if fl.index == highlightindex:
-			fl.accented = highlightsearchterm(fl, so.seeking, 'match')
+			fl.accented = highlightsearchterm(fl, so.termone, 'match')
 			if so.context > 0:
 				fl.accented = '<span class="highlight">{fla}</span>'.format(fla=fl.accented)
 		if so.proximate != '' and so.searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(so.proximate, fl.accented) or re.search(so.proximate, fl.stripped):
-				fl.accented = highlightsearchterm(fl, so.proximate, 'proximate')
+			if re.search(so.termtwo, fl.accented) or re.search(so.termtwo, fl.stripped):
+				fl.accented = highlightsearchterm(fl, so.termtwo, 'proximate')
+			#
 		newlineobjects.append(fl)
 
 	return newlineobjects
