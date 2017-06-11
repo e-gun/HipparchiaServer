@@ -8,6 +8,7 @@
 
 import re
 
+from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject
 
 
@@ -62,8 +63,12 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 				columnb = '<span class="textdate">Date:&nbsp;{date}</span>'.format(date=date.group(1))
 				datehtml = '<tr><td class="browsercite">{ca}</td><td class="textdate">{cb}</td></tr>\n'.format(ca=columna, cb=columnb)
 				output.append(datehtml)
-			
-			columnb = thisline.accented
+
+			if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
+				columnb = thisline.markeditorialinsersions()
+			else:
+				columnb = thisline.accented
+
 			if thisline.samelevelas(previousline) is not True:
 				columna = thisline.shortlocus()
 			else:
