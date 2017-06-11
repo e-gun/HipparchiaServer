@@ -17,7 +17,7 @@ from server import hipparchia
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.searchformatting import htmlifysearchfinds, nocontexthtmlifysearchfinds, jstoinjectintobrowser, \
-	buildresultobjects, flagsearchterms
+	buildresultobjects, flagsearchterms, compilesearchtermequivalent
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
 from server.listsandsession.listmanagement import sortresultslist, calculatewholeauthorsearches, compilesearchlist, \
 	flagexclusions
@@ -133,8 +133,13 @@ def executesearch(timestamp):
 
 		resultlist = buildresultobjects(hitdict, authordict, workdict, so, activepoll)
 
+		skg = compilesearchtermequivalent(so.termone)
+		prx = None
+		if so.proximate != '' and so.searchtype == 'proximity':
+			prx = compilesearchtermequivalent(so.termtwo)
+
 		for r in resultlist:
-			r.lineobjects = flagsearchterms(r,so)
+			r.lineobjects = flagsearchterms(r,skg, prx, so)
 
 		activepoll.statusis('Converting results to HTML')
 

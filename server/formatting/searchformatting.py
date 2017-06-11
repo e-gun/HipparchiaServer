@@ -135,16 +135,19 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 	return searchresultlist
 
 
-def flagsearchterms(searchresultobject, searchobject):
+def flagsearchterms(searchresultobject, skg, prx, searchobject):
 	"""
 
 	take the list of lineobjects inside a searchresultobject and highlight the search terms
+
+	skg and prx come from compilesearchtermequivalent()
 
 	:param searchresultobject:
 	:param searchobject:
 	:return:
 	"""
 	so = searchobject
+
 	linelist = searchresultobject.lineobjects
 	highlightindex = searchresultobject.getindex()
 	newlineobjects = []
@@ -153,25 +156,29 @@ def flagsearchterms(searchresultobject, searchobject):
 		# a highlighted foundline2 of result2 is showing up in result1 in addition to foundline1
 		fl = deepcopy(foundline)
 		if fl.index == highlightindex:
-			fl.accented = highlightsearchterm(fl, so.termone, 'match')
+			fl.accented = highlightsearchterm(fl, skg, 'match')
 			if so.context > 0:
 				fl.accented = '<span class="highlight">{fla}</span>'.format(fla=fl.accented)
 		if so.proximate != '' and so.searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
 			if re.search(so.termtwo, fl.accented) or re.search(so.termtwo, fl.stripped):
-				fl.accented = highlightsearchterm(fl, so.termtwo, 'proximate')
+				fl.accented = highlightsearchterm(fl, prx, 'proximate')
 		newlineobjects.append(fl)
 
 	return newlineobjects
 
 
-def highlightsearchterm(lineobject, searchterm, spanname):
+def highlightsearchterm(lineobject, regexequivalent, spanname):
 	"""
-	html markup for the search term in the line
-	in order to highlight a polytonic word that you found via a unaccented search you need to convert:
+
+	html markup for the search term in the line so it can jump out at you
+
+	regexequivalent is compiled via compilesearchtermequivalent()
+
+	in order to properly highlight a polytonic word that you found via a unaccented search you need to convert:
 		ποταμον
 	into:
-		((π|Π)(ο|ὀ|ὁ|ὂ|ὃ|ὄ|ὅ|ό|ὸ|Ο|Ὀ|Ὁ|Ὂ|Ὃ|Ὄ|Ὅ)(τ|Τ)(α|ἀ|ἁ|ἂ|ἃ|ἄ|ἅ|ἆ|ἇ|ᾀ|ᾁ|ᾂ|ᾃ|ᾄ|ᾅ|ᾆ|ᾇ|ᾲ|ᾳ|ᾴ|ᾶ|ᾷ|ᾰ|ᾱ|ὰ|ά|ᾈ|ᾉ|ᾊ|ᾋ|ᾌ|ᾍ|ᾎ|ᾏ|Ἀ|Ἁ|Ἂ|Ἃ|Ἄ|Ἅ|Ἆ|Ἇ|Α)(μ|Μ)ό(ν|Ν))
+		([πΠ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][τΤ][αἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑ][μΜ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][νΝ])
 
 	:param lineobject:
 	:param searchterm:
@@ -180,6 +187,38 @@ def highlightsearchterm(lineobject, searchterm, spanname):
 	"""
 
 	line = lineobject.accented
+	newline = line
+	line = newline
+
+	find = re.search(regexequivalent, line)
+	try:
+		newline = '{ls}<span class="{sp}">{fg}</span>{le}'.format(ls=line[0:find.start()], sp=spanname, fg=find.group(), le=line[find.end():])
+	except:
+		# the find was almost certainly a hyphenated last word: 'pro-' instead of 'profuit'
+		hyph = lineobject.hyphenated
+		find = re.search(regexequivalent, hyph)
+		try:
+			newline = line+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;{hs}<span class="{sn}">{fg}</span>{he}&nbsp;)'.format(hs=hyph[0:find.start()], sn=spanname, fg=find.group(), he=hyph[find.end():])
+		except:
+			pass
+		# print('nofind',accentedsearch, line, lineobject.lastword('contents'))
+
+	return newline
+
+
+def compilesearchtermequivalent(searchterm):
+	"""
+
+	in order to properly highlight a polytonic word that you found via a unaccented search you need to convert:
+		ποταμον
+	into:
+		([πΠ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][τΤ][αἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑ][μΜ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][νΝ])
+
+	NB: this also takes care of capitalization issues
+
+	:param searchterm:
+	:return:
+	"""
 
 	equivalents = {
 		'α': '[αἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑ]',
@@ -216,34 +255,20 @@ def highlightsearchterm(lineobject, searchterm, spanname):
 		'v': '[uüv]'
 	}
 
-	newline = line
-
-	line = newline
 	accentedsearch = ''
 	searchterm = re.sub(r'(^\s|\s$)', '', searchterm)
 	for c in searchterm:
 		try:
 			c = equivalents[c]
-		except:
+		except KeyError:
 			pass
 		accentedsearch += c
 	# accentedsearch = '(^|)('+accentedsearch+')($|)'
-	accentedsearch = '(' + accentedsearch + ')'
+	accentedsearch = '({s})'.format(s=accentedsearch)
 
-	find = re.search(accentedsearch, line)
-	try:
-		newline = '{ls}<span class="{sp}">{fg}</span>{le}'.format(ls=line[0:find.start()], sp=spanname, fg=find.group(), le=line[find.end():])
-	except:
-		# the find was almost certainly a hyphenated last word: 'pro-' instead of 'profuit'
-		hyph = lineobject.hyphenated
-		find = re.search(accentedsearch, hyph)
-		try:
-			newline = line+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;{hs}<span class="{sn}">{fg}</span>{he}&nbsp;)'.format(hs=hyph[0:find.start()], sn=spanname, fg=find.group(), he=hyph[find.end():])
-		except:
-			pass
-		# print('nofind',accentedsearch, line, lineobject.lastword('contents'))
+	accentedsearch = re.compile(accentedsearch)
 
-	return newline
+	return accentedsearch
 
 
 def htmlifysearchfinds(listofsearchresultobjects):
@@ -350,21 +375,23 @@ def jstoinjectintobrowser(listofsearchresultobjects):
 def unbalancedspancleaner(html):
 	"""
 
-	unclosed spans at the end of result chunks: ask for 4 lines of context and search for »ἀδύνατον γ[άὰ]ρ«
+	unbalanced spans inside of result chunks: ask for 4 lines of context and search for »ἀδύνατον γ[άὰ]ρ«
 	this will cough up two examples of the problem in Alexander, In Aristotelis analyticorum priorum librum i commentarium
 
-	the first line of context can close spans that started in previous lines:
+	the first line of context shows spans closing here that were opened in a previous line
 
 		<span class="locus">98.14</span>&nbsp;<span class="foundtext">ὅρων ὄντων πρὸϲ τὸ μέϲον.</span></span></span><br />
 
-	the last line of the context can open a span that runs into the next line of the text where it will close
+	the last line of the context is opening a span that runs into the next line of the text where it will close
 	but since the next line does not appear, the span remains open. This will make the next results bold + italic + ...
 
 		<span class="locus">98.18</span>&nbsp;<span class="foundtext"><hmu_roman_in_a_greek_text>p. 28a18 </hmu_roman_in_a_greek_text><span class="title"><span class="expanded">Καθόλου μὲν οὖν ὄντων, ὅταν καὶ τὸ Π καὶ τὸ Ρ παντὶ</span><br />
 
-	open anything that needs opening: this needs to be done with the first line
+	the solution:
+		open anything that needs opening: this needs to be done with the first line
+		close anything left hanging: this needs to be done with the whole passage
 
-	close anything left hanging: this needs to be done with the whole passage
+	return the html with these supplemental tags
 
 	:param html:
 	:return:
