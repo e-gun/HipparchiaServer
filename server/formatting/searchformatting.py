@@ -247,12 +247,32 @@ def compilesearchtermequivalent(searchterm):
 		'χ': '[χΧ]',
 		'θ': '[θΘ]',
 		'ζ': '[ζΖ]',
-		'a': '[aáä]',
-		'e': '[eéë]',
-		'i': '[iíï]',
-		'o': '[oóö]',
-		'u': '[uüv]',
-		'v': '[uüv]'
+		'b': '[Bb]',
+		'c': '[Cc]',
+		'd': '[Dd]',
+		'f': '[Ff]',
+		'g': '[Gg]',
+		'h': '[Hh]',
+		'j': '[Jj]',
+		'k': '[Kk]',
+		'l': '[Ll]',
+		'm': '[Mm]',
+		'n': '[Nn]',
+		'p': '[Pp]',
+		'q': '[Qq]',
+		'r': '[Rr]',
+		's': '[Ss]',
+		't': '[Tt]',
+		'w': '[Ww]',
+		'x': '[Xx]',
+		'y': '[Yy]',
+		'z': '[Zz]',
+		'a': '[Aaáä]',
+		'e': '[Eeéë]',
+		'i': '[Iiíï]',
+		'o': '[Ooóö]',
+		'u': '[Uuüv]',
+		'v': '[Vuüv]'
 	}
 
 	accentedsearch = ''
@@ -266,6 +286,7 @@ def compilesearchtermequivalent(searchterm):
 	# accentedsearch = '(^|)('+accentedsearch+')($|)'
 	accentedsearch = '({s})'.format(s=accentedsearch)
 
+	print('accentedsearch',accentedsearch)
 	accentedsearch = re.compile(accentedsearch)
 
 	return accentedsearch

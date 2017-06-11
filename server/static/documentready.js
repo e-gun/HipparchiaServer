@@ -11,7 +11,7 @@ $(document).ready( function () {
         // 38 & 40 - up and down arrow
         // 37 & 39 - forward and back arrow; but the click does not exist until you open a passage browser
         switch(e.which) {
-            case 27: $('#browserdialog').hide(); $('#helptabs').hide(); break;
+            case 27: $('#browserdialog').hide(); break;
             case 37: $('#browseback').click(); break;
             case 39: $('#browseforward').click(); break;
             }
