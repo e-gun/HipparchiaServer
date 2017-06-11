@@ -265,11 +265,15 @@ def htmlifysearchfinds(listofsearchresultobjects):
 		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
 
 	for ro in listofsearchresultobjects:
+		firstline = ro.lineobjects[0]
+		firstline.accented = unbalancedspancleaner(firstline.accented)
 		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
-			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml()) for ln in ro.lineobjects]
+			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml()) for ln in ro.lineobjects]
 		else:
-			h = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented) for ln in ro.lineobjects]
-		resultsashtml.append(ro.getlocusthml() + '\n'.join(h))
+			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented) for ln in ro.lineobjects]
+		passage = unbalancedspancleaner('\n'.join(passage))
+		resultsashtml.append(ro.getlocusthml())
+		resultsashtml.append(passage)
 
 	html = '\n'.join(resultsashtml)
 
@@ -291,6 +295,9 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 
 	linehtmltemplate = '<span class="foundtext">{ft}</span>'
 
+	if hipparchia.config['DBDEBUGMODE'] == 'yes':
+		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
+
 	tabelrowtemplate = """
 	<tr class="{rs}">
 		<td>{cit}
@@ -301,10 +308,6 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	</tr>
 	"""
 
-
-	if hipparchia.config['DBDEBUGMODE'] == 'yes':
-		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
-
 	count = 0
 	for ro in listofsearchresultobjects:
 		count += 1
@@ -313,6 +316,7 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 		else:
 			rowstyle = 'regular'
 		ln = ro.lineobjects[0]
+		ln.accented = unbalancedspancleaner(ln.accented)
 		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 		else:
@@ -341,3 +345,48 @@ def jstoinjectintobrowser(listofsearchresultobjects):
 	jsoutput = '\n'.join(jso)
 
 	return jsoutput
+
+
+def unbalancedspancleaner(html):
+	"""
+
+	unclosed spans at the end of result chunks: ask for 4 lines of context and search for »ἀδύνατον γ[άὰ]ρ«
+	this will cough up two examples of the problem in Alexander, In Aristotelis analyticorum priorum librum i commentarium
+
+	the first line of context can close spans that started in previous lines:
+
+		<span class="locus">98.14</span>&nbsp;<span class="foundtext">ὅρων ὄντων πρὸϲ τὸ μέϲον.</span></span></span><br />
+
+	the last line of the context can open a span that runs into the next line of the text where it will close
+	but since the next line does not appear, the span remains open. This will make the next results bold + italic + ...
+
+		<span class="locus">98.18</span>&nbsp;<span class="foundtext"><hmu_roman_in_a_greek_text>p. 28a18 </hmu_roman_in_a_greek_text><span class="title"><span class="expanded">Καθόλου μὲν οὖν ὄντων, ὅταν καὶ τὸ Π καὶ τὸ Ρ παντὶ</span><br />
+
+	open anything that needs opening: this needs to be done with the first line
+
+	close anything left hanging: this needs to be done with the whole passage
+
+	:param html:
+	:return:
+	"""
+
+	o = re.compile(r'<span')
+	c = re.compile(r'</span>')
+
+	opened = len(re.findall(o,html))
+	closed = len(re.findall(c,html))
+
+	supplement = ''
+
+	if closed > opened:
+		for i in range(0, closed - opened):
+			supplement += '<span class="htmlbalancingsupplement">'
+		html = supplement + html
+
+	if opened > closed:
+		for i in range(0,opened-closed):
+			supplement += '</span>'
+		html = html + supplement
+
+	return html
+

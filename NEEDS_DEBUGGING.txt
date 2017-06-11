@@ -1,12 +1,8 @@
-[A] unclosed spans at ends of one result output will cause styles to propagate into the next result item
-
-    formattedcitationincontext() needs to address this with a check of the HTML of the last line of a citation?
-
-[B] latattemptelision() could use more love
+[A] latattemptelision() could use more love
 
 MorphPossibilityObject.getlatinbaseform() needs work per-misceo
 MorphPossibilityObject.getlatinbaseform() needs work permixtā, per-misceo
 MorphPossibilityObject.getlatinbaseform() needs work praevortēmur, prae-verto
 MorphPossibilityObject.getlatinbaseform() needs work dissīderent, dis-sido
 
-[C] [for HipparchiaBuilder: line numbering '+1' problem at Euripides, Ion 1579+]
+[B] [for HipparchiaBuilder: line numbering '+1' problem at Euripides, Ion 1579+]
