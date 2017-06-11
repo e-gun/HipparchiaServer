@@ -453,20 +453,3 @@ def unbalancedspancleaner(html):
 		html = html + supplement
 
 	return html
-
-
-def flagsupplenda(resultobject):
-	"""
-
-	set a '<span>...</span>' around square-bracketed line segments
-
-	:param resultobject:
-	:return:
-	"""
-
-	newlines = {l.index: re.sub(r'\[(.*?)(\]|$)', r'[<span class="suppliedbyeditor">\1</span>\2', l.accented) for l in resultobject.lineobjects}
-
-	for l in resultobject.lineobjects:
-		l.accented = newlines[l.index]
-
-	return resultobject
