@@ -160,7 +160,6 @@ def flagsearchterms(searchresultobject, searchobject):
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
 			if re.search(so.termtwo, fl.accented) or re.search(so.termtwo, fl.stripped):
 				fl.accented = highlightsearchterm(fl, so.termtwo, 'proximate')
-			#
 		newlineobjects.append(fl)
 
 	return newlineobjects
