@@ -80,6 +80,11 @@ def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
 
 		updatedresultlist = sorted(updatedresultlist, key=lambda x: x.hitnumber)
 
+		# toss lines that are not part of this work: 10 lines of context in the inscriptions will grab neighboring
+		# documents otherwise
+		for r in updatedresultlist:
+			r.lineobjects = [l for l in r.lineobjects if l.wkuinversalid == r.getworkid()]
+
 		return updatedresultlist
 
 
@@ -222,7 +227,7 @@ def compilesearchtermequivalent(searchterm):
 	"""
 
 	# need to avoid having '\s' turn into '\[Ss]', etc.
-	searchterm = re.sub(r'\\s','😀',searchterm)
+	searchterm = re.sub(r'\\s', '😀', searchterm)
 	searchterm = re.sub(r'\\w', '👽', searchterm)
 
 	equivalents = {
@@ -320,9 +325,14 @@ def htmlifysearchfinds(listofsearchresultobjects):
 		firstline = ro.lineobjects[0]
 		firstline.accented = unbalancedspancleaner(firstline.accented)
 		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
-			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml()) for ln in ro.lineobjects]
+			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
+			           for ln in ro.lineobjects]
+		elif hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
+			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markeditorialinsersions())
+			           for ln in ro.lineobjects]
 		else:
-			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented) for ln in ro.lineobjects]
+			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)
+			           for ln in ro.lineobjects]
 		passage = unbalancedspancleaner('\n'.join(passage))
 		resultsashtml.append(ro.getlocusthml())
 		resultsashtml.append(passage)
@@ -444,3 +454,19 @@ def unbalancedspancleaner(html):
 
 	return html
 
+
+def flagsupplenda(resultobject):
+	"""
+
+	set a '<span>...</span>' around square-bracketed line segments
+
+	:param resultobject:
+	:return:
+	"""
+
+	newlines = {l.index: re.sub(r'\[(.*?)(\]|$)', r'[<span class="suppliedbyeditor">\1</span>\2', l.accented) for l in resultobject.lineobjects}
+
+	for l in resultobject.lineobjects:
+		l.accented = newlines[l.index]
+
+	return resultobject

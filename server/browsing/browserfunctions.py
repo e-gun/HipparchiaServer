@@ -233,7 +233,11 @@ def insertparserids(lineobject):
 	:return:
 	"""
 
-	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',lineobject.accented)
+	theline = lineobject.accented
+	if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
+		theline = lineobject.markeditorialinsersions()
+
+	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',theline)
 	hyphenated = lineobject.hyphenated
 	segments = theline.split('*snip*')
 	newline = ''
@@ -267,7 +271,7 @@ def insertparserids(lineobject):
 		except:
 			# seg = ''
 			pass
-		
+
 	return newline
 
 

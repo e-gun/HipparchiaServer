@@ -74,6 +74,7 @@ MPCOMMITCOUNT = 750
 # HipparchiaServer has to be restarted for them to go into effect
 # CSSSTYLESHEET presupposes './server' as part of its path; i.e. you will want to put custom CSS in the
 #   same directory as the default installed css
+# COLORBRACKETEDTEXT will visually flag any text between square brackets and so make editorial activity more obvious
 # TLGASSUMESBETACODE means that if you only have the TLG active typing 'ball' is like typing 'βαλλ' and 'ba/ll' is 'βάλλ'
 # MINIMUMBROWSERWIDTH is either a number of whitespace characters or 'off'
 # HOBBLEREGEX is 'yes' if you have foolishly exposed Hipparchia to a network but are not so foolish as to allow "!|'", etc.
@@ -89,6 +90,7 @@ MPCOMMITCOUNT = 750
 #   by frequency of occurrence ('yes')
 
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
+COLORBRACKETEDTEXT = 'yes'
 TLGASSUMESBETACODE = 'yes'
 SHOWLINENUMBERSEVERY = 10
 SUPPRESSLONGREQUESTMESSAGE = 'no'

@@ -43,6 +43,20 @@ class SearchResult(object):
 
 		return int(self.clickurl.split('_')[-1])
 
+	def getworkid(self):
+		"""
+
+		fetch the wkuniversalid value of the focus line
+
+		derive it from the tail of the clickurl, e.g.:
+
+			lt1002w002_LN_24040
+
+		:return:
+		"""
+
+		return self.clickurl[0:10]
+
 
 	def getlocusthml(self):
 		"""

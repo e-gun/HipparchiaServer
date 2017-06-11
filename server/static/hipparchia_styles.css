@@ -368,6 +368,10 @@ body {
 	font-size: 80%;
 	}
 
+.suppliedbyeditor{
+    color: #757585;
+    }
+
 .textdate {
 	font-size: 85%;
 	color: #895b3f;

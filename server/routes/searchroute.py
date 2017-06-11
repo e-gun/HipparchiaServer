@@ -133,6 +133,8 @@ def executesearch(timestamp):
 
 		resultlist = buildresultobjects(hitdict, authordict, workdict, so, activepoll)
 
+		activepoll.statusis('Converting results to HTML')
+
 		skg = compilesearchtermequivalent(so.termone)
 		prx = None
 		if so.proximate != '' and so.searchtype == 'proximity':
@@ -140,8 +142,6 @@ def executesearch(timestamp):
 
 		for r in resultlist:
 			r.lineobjects = flagsearchterms(r,skg, prx, so)
-
-		activepoll.statusis('Converting results to HTML')
 
 		if so.context > 0:
 			findshtml = htmlifysearchfinds(resultlist)

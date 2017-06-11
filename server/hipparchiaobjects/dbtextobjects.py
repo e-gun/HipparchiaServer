@@ -469,3 +469,14 @@ class dbWorkLine(object):
 			allbutfirstandlastword = ' '.join(middle)
 
 		return allbutfirstandlastword
+
+	def markeditorialinsersions(self):
+		"""
+
+		set a '<span>...</span>' around square-bracketed line segments
+
+		:param self:
+		:return:
+		"""
+
+		return re.sub(r'\[(.*?)(\]|$)', r'[<span class="suppliedbyeditor">\1</span>\2', self.accented)
