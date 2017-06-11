@@ -201,7 +201,7 @@ def highlightsearchterm(lineobject, regexequivalent, spanname):
 			newline = line+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;{hs}<span class="{sn}">{fg}</span>{he}&nbsp;)'.format(hs=hyph[0:find.start()], sn=spanname, fg=find.group(), he=hyph[find.end():])
 		except:
 			pass
-		# print('nofind',accentedsearch, line, lineobject.lastword('contents'))
+		# print('nofind',searchtermequivalent, line, lineobject.lastword('contents'))
 
 	return newline
 
@@ -214,11 +214,16 @@ def compilesearchtermequivalent(searchterm):
 	into:
 		([πΠ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][τΤ][αἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑ][μΜ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][νΝ])
 
-	NB: this also takes care of capitalization issues
+	NB: this function also takes care of capitalization issues: the search is always lower case, but results will be marked
+	without regard to their case: 'Antonius', 'Kalendas', etc.
 
 	:param searchterm:
 	:return:
 	"""
+
+	# need to avoid having '\s' turn into '\[Ss]', etc.
+	searchterm = re.sub(r'\\s','😀',searchterm)
+	searchterm = re.sub(r'\\w', '👽', searchterm)
 
 	equivalents = {
 		'α': '[αἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑ]',
@@ -253,7 +258,7 @@ def compilesearchtermequivalent(searchterm):
 		'f': '[Ff]',
 		'g': '[Gg]',
 		'h': '[Hh]',
-		'j': '[Jj]',
+		'j': '[JjIi]',
 		'k': '[Kk]',
 		'l': '[Ll]',
 		'm': '[Mm]',
@@ -269,26 +274,28 @@ def compilesearchtermequivalent(searchterm):
 		'z': '[Zz]',
 		'a': '[Aaáä]',
 		'e': '[Eeéë]',
-		'i': '[Iiíï]',
+		'i': '[IiíïJj]',
 		'o': '[Ooóö]',
-		'u': '[Uuüv]',
-		'v': '[Vuüv]'
+		'u': '[UuüVv]',
+		'v': '[VvUuü]'
 	}
 
-	accentedsearch = ''
+	searchtermequivalent = ''
 	searchterm = re.sub(r'(^\s|\s$)', '', searchterm)
 	for c in searchterm:
 		try:
 			c = equivalents[c]
 		except KeyError:
 			pass
-		accentedsearch += c
-	# accentedsearch = '(^|)('+accentedsearch+')($|)'
-	accentedsearch = '({s})'.format(s=accentedsearch)
+		searchtermequivalent += c
+	# searchtermequivalent = '(^|)('+searchtermequivalent+')($|)'
+	searchtermequivalent = re.sub(r'😀', '\s', searchtermequivalent)
+	searchtermequivalent = re.sub(r'👽', '\w', searchtermequivalent)
+	searchtermequivalent = '({s})'.format(s=searchtermequivalent)
 
-	accentedsearch = re.compile(accentedsearch)
+	searchtermequivalent = re.compile(searchtermequivalent)
 
-	return accentedsearch
+	return searchtermequivalent
 
 
 def htmlifysearchfinds(listofsearchresultobjects):
@@ -387,7 +394,7 @@ def jstoinjectintobrowser(listofsearchresultobjects):
 	listofurls = [ro.clickurl for ro in listofsearchresultobjects]
 
 	jso = ['document.getElementById("{u}").onclick = openbrowserfromclick;'.format(u=url) for url in listofurls]
-	jsoutput = '\n'.join(jso)
+	jsoutput = '\n\t'.join(jso)
 
 	return jsoutput
 
