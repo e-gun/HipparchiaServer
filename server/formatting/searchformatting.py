@@ -286,7 +286,6 @@ def compilesearchtermequivalent(searchterm):
 	# accentedsearch = '(^|)('+accentedsearch+')($|)'
 	accentedsearch = '({s})'.format(s=accentedsearch)
 
-	print('accentedsearch',accentedsearch)
 	accentedsearch = re.compile(accentedsearch)
 
 	return accentedsearch
