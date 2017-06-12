@@ -76,6 +76,8 @@ MPCOMMITCOUNT = 750
 #   same directory as the default installed css
 # COLORBRACKETEDTEXT will visually flag any text between square brackets and so make editorial activity more obvious
 # TLGASSUMESBETACODE means that if you only have the TLG active typing 'ball' is like typing 'βαλλ' and 'ba/ll' is 'βάλλ'
+# UNIVERSALASSUMESBETACODE means that all latin input is converted to unicode. You will be unable to search for 'arma'
+#   because it will be parsed as 'αρμα' and so hit words like 'φαρμάκων' and 'μαρμαίρωϲιν'
 # MINIMUMBROWSERWIDTH is either a number of whitespace characters or 'off'
 # HOBBLEREGEX is 'yes' if you have foolishly exposed Hipparchia to a network but are not so foolish as to allow "!|'", etc.
 #   only [].^$ will be allowed and all digits will be dropped
@@ -92,6 +94,7 @@ MPCOMMITCOUNT = 750
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 COLORBRACKETEDTEXT = 'yes'
 TLGASSUMESBETACODE = 'yes'
+UNIVERSALASSUMESBETACODE = 'yes'
 SHOWLINENUMBERSEVERY = 10
 SUPPRESSLONGREQUESTMESSAGE = 'no'
 HOBBLEREGEX = 'no'

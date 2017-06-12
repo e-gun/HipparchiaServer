@@ -67,16 +67,20 @@ def executesearch(timestamp):
 		seeking = proximate
 		proximate = ''
 
-	if hipparchia.config['TLGASSUMESBETACODE'] == 'yes':
-		if justtlg() and re.search('[a-zA-Z]', seeking) and not re.search('[α-ω]', seeking):
-			# searching greek, but not typing in unicode greek: autoconvert
-			# papyri, inscriptions, and christian texts all contain multiple languages
-			seeking = seeking.upper()
-			seeking = replacegreekbetacode(seeking)
+	replacebeta = False
+	
+	if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
+		replacebeta = True
 
-		if justtlg() and re.search('[a-zA-Z]', proximate) and not re.search('[α-ω]', proximate):
-			proximate = proximate.upper()
-			proximate = replacegreekbetacode(proximate)
+	if hipparchia.config['TLGASSUMESBETACODE'] == 'yes':
+		if justtlg() and (re.search('[a-zA-Z]', seeking) or re.search('[a-zA-Z]', proximate)) and not re.search('[α-ω]', seeking) and not re.search('[α-ω]', proximate):
+			replacebeta = True
+
+	if replacebeta:
+		seeking = seeking.upper()
+		seeking = replacegreekbetacode(seeking)
+		proximate = proximate.upper()
+		proximate = replacegreekbetacode(proximate)
 
 	phrasefinder = re.compile('[^\s]\s[^\s]')
 
