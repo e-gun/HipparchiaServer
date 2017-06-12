@@ -226,3 +226,24 @@ Various oddities and peculiarities ensue.
             </ul>
         </li>
         </ul>
+
+<p><span class="label">"Search suspended: cap reached"</span></p>
+    <p class="explanation">
+    The list of items to search is not sorted. <span class="emph">Only results are sorted</span>. This means that
+    if you want 200 hits in chronological order, you will get 200 hits in chronological order, but, unless you experience
+    a bit of odd luck, you will not get
+    the 200 earliest possible hits (because the full search did not take place). The way the search lists are built and
+    dispatched means that some corpora will be searched before others and then with a higher chance of certain internal ID
+    numbers being checked before others. Do not try to figure out the rules of the game, either raise the cap or refine
+    your search instead.
+    </p>
+
+
+<p><span class="label">Betacode syntax conflicts with regex syntax</span></p>
+    <p class="explanation">
+        Only <code>yes</code> for the <code>TLGASSUMESBETACODE</code> or <code>UNIVERSALASSUMESBETACODE</code> options will trigger this issue.
+        <code>e(i|a)n</code> will become <code>ἑι|ἀν</code> if it hits the betacode converter. But you
+        were probably hoping to search for <code>epsilon + either iota or alpha + nu</code>. You will have to type
+        <code>ε(ι|α)ν</code> if you want to do that. And, in general, you should either type only with
+        betacode in mind or with regular expressions syntax in mind. In the latter case you will use
+        Greek characters, in the former you can use Latin characters.

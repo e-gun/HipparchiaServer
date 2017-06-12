@@ -231,7 +231,7 @@ def insertparserids(lineobject):
 	theline = lineobject.accented
 
 	# there are a bunch of problems when you try to integrate COLORBRACKETEDTEXT here
-	#   [1] illegal nesting issues with '<observed>ABC[<span>DEF</span]GHI</observed>'
+	#   [1] illegal html tag nesting issues with '<observed>ABC[<span>DE</observed> FGH</span]IJK'
 	#   [2] dodgy word division and ill-formatted word spacing issues:
 	#       'ἱε[ ρέω ]ϲ' instead of 'ἱε[ρέω]ϲ'
 	#       all three of those pieces of 'ἱε[ ρέω ]ϲ' will be clicks that lead nowhere

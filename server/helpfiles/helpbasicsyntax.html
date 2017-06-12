@@ -35,21 +35,34 @@ u and v. Similarly <code>[jiJI]</code> will allow you to find both <code>Justiti
 3 Js in the LAT data: Juppiter manifests himself thrice in Cicero's <span class="italic">De Officiis</span>, if you must know. But
 the inscriptions are fairly liberal with their deployment of <code>ejus</code> and <code>jussit</code>.
 
-<p><span class="label">Automatic betacode</span></p>
+<p><span class="label">Betacode and the automatic betacode setting</span></p>
 
-This is enabled by default. To disable it, edit <code>config.py</code> to read <code>TLGASSUMESBETACODE = 'no'</code>.
-If you are searching the Greek authors and only Greek authors, then anything you type in Roman characters will be
+HipparchiaServer can parse <a href="https://en.wikipedia.org/wiki/Beta_Code">betacode</a>.
+Automatic betacode entry is <span class="emph">enabled in the default installation</span>.
+To disable it, edit <code>config.py</code> to read <code>TLGASSUMESBETACODE = 'no'</code>. When this option is active,
+<span class="emph">if you are searching the Greek authors and only Greek authors</span>, then anything you type in Roman characters will be
 converted into betacode: <code>BETA</code> or <code>beta</code> becomes <code>βετα</code>, <code>udwr</code> becomes <code>υδωρ</code>
 and <code>u(/dwr</code> will be <code>ὕδωρ</code>. This means you can't search for the
 Latin inside of these texts unless you turn on some other corpus as well or else disable the feature. Note that this bit of magic is not available
-for the other corpora because the texts inside them are bilingual. Enter unicode Greek into the search box instead.
+for the other corpora because the texts inside them are bilingual. Either enable UNIVERSALASSUMESBETACODE
+or enter unicode Greek into the search box instead.
 If you don't already have a unicode keyboard, consider looking into
 <a href="https://classicalstudies.org/publications-and-research/about-greekkeys-2015">GreekKeys</a>.
-NB: there are lots of places where <span class="emph">betacode syntax will conflict with regex syntax</span>. It will be very hard to employ
-both at once if you are going to be overly ambitious with either.
+NB: there are lots of places where <span class="emph">betacode syntax will conflict with regex syntax</span>. See
+examples at <span class="italic">Peculiarities and Gotchas</span> and also consult
+<span class="italic">Searching: REGEX</span>.
+It will be very hard to employ both betacode and regular expression at once if you are going to be at all ambitious with either.
+The <span class="emph">(undocumented) inscriptional ⒣</span> can be found by asking for <code>j</code>.
+Search for <code>jalaieus</code> or <code>jalaieu\s</code> to find <code>⒣αλαιεὺϲ</code>.
+Unfortunately there is no way to search for <code>ϙόϲμοϲ</code> via betacode:
+<span class="emph">ϙ does not have a betacode equivalent</span>. Since HipparchiaServer will not let you search for capital
+letters or for anything other than a lunate sigma, betacode like <code>*D</code> or <code>S2</code> will be meaningless.
+And, in fact, the asterisk in the former case will be counterproductive since that is a regex wildcard character.
+
 
 <p><span class="label">Mandatory universal betacode</span></p>
-This is <span class="emph">disabled by default</span>. To enable it, edit <code>config.py</code> to read
+
+This is <span class="emph">disabled in the default installation</span>. To enable it, edit <code>config.py</code> to read
 <code>UNIVERSALASSUMESBETACODE = 'yes'</code>.
 <span class="emph">This will make searching for Latin impossible</span>: <code>arma virumque</code> will become <code>αρμα ϝιρυμθυε</code>.
 The syntax caveats about betacode above should also be noted. Nevertheless typing betacode can be easier in some
@@ -57,10 +70,8 @@ circumstances. For example, your keyboard might not want you to type an 'invalid
 a circumflex accent over it. But the Greek inscriptions do contain <span class="emph">long epsilon</span> and
 <span class="emph">long omicron</span> and their accented variants.
 <code>te=s bole=s e(=i</code> or <code>TE=S BOLE=S E(=I</code> will enable you to find
-<code>καὶ ἐπὶ τε͂ϲ βολε͂ϲ ἑ͂ι Κλεγένεϲ ⒣αλαιεὺϲ</code> in IG 3.375.
-And UNIVERSALASSUMESBETACODE is probably the best way to search for <code>⒣αλαιεὺϲ</code> since the
-<span class="emph">(undocumented) inscriptional ⒣</span> can be found by asking for <code>j</code>.
-Search for <code>jalaieus</code> or <code>jalaieu\s</code>
+<code>καὶ ἐπὶ τε͂ϲ βολε͂ϲ ἑ͂ι Κλεγένεϲ ⒣αλαιεὺϲ</code> in IG I<span class="superscript">3</span> 375.
+And, as is implicit from the abouv, UNIVERSALASSUMESBETACODE is probably the best way to search for <code>⒣αλαιεὺϲ</code>.
 
 <p><span class="label">Iota subscript and adscript</span></p>
 
@@ -92,13 +103,5 @@ is present cannot be found. But were you really going to search for &#x03b6;&#x0
 comfort in the fact that a search just for &#x03b6;&#x0337; will turn up what you were after. A capital sigma for stater
 is a problem, though: you will see it (&#x03a3;), but, unlike almost all other special symbols, you can't search for it.
 
-<p><span class="label">"Search suspended: cap reached"</span></p>
 
-The list of items to search is not sorted. <span class="emph">Only results are sorted</span>. This means that
-if you want 200 hits in chronological order, you will get 200 hits in chronological order, but, unless you experience
-a bit of odd luck, you will not get
-the 200 earliest possible hits (because the full search did not take place). The way the search lists are built and
-dispatched means that some corpora will be searched before others and then with a higher chance of certain internal ID
-numbers being checked before others. Do not try to figure out the rules of the game, either raise the cap or refine
-your search instead.
 
