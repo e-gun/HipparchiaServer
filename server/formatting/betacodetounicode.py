@@ -765,9 +765,9 @@ def lowercaseroughcircumflex(match, g=1):
 
 	substitutions = {
 		'A': u'ἇ',
-		'E': u'',
+		'E': u'ἑ͂', # IG: TE=S BOLE=S E(=I
 		'I': u'ἷ',
-		'O': u'',
+		'O': u'ὁ͂', # IG: PE]RI\ DE\ O(=[N !]DIK
 		'U': u'ὗ',
 		'H': u'ἧ',
 		'W': u'ὧ',

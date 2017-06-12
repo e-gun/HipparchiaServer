@@ -202,7 +202,7 @@ def executesearch(timestamp):
 			reasons.append('there are no active databases')
 		if len(seeking) == 0:
 			reasons.append('there is no search term')
-		if len(searchlist) == 0:
+		if len(seeking) > 0 and len(searchlist) == 0:
 			reasons.append('zero works match the search criteria')
 		output = {}
 		output['title'] = '(empty query)'
