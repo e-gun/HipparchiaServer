@@ -1054,7 +1054,7 @@ def lowercases(match, g=0):
 		'G': u'γ',
 		'H': u'η',
 		'I': u'ι',
-		'J': u'J',
+		'J': u'⒣',
 		'K': u'κ',
 		'L': u'λ',
 		'M': u'μ',

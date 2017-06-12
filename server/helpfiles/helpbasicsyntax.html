@@ -39,7 +39,7 @@ the inscriptions are fairly liberal with their deployment of <code>ejus</code> a
 
 This is enabled by default. To disable it, edit <code>config.py</code> to read <code>TLGASSUMESBETACODE = 'no'</code>.
 If you are searching the Greek authors and only Greek authors, then anything you type in Roman characters will be
-converted into betacode: <code>beta</code> becomes <code>βετα</code>, <code>udwr</code> becomes <code>υδωρ</code>
+converted into betacode: <code>BETA</code> or <code>beta</code> becomes <code>βετα</code>, <code>udwr</code> becomes <code>υδωρ</code>
 and <code>u(/dwr</code> will be <code>ὕδωρ</code>. This means you can't search for the
 Latin inside of these texts unless you turn on some other corpus as well or else disable the feature. Note that this bit of magic is not available
 for the other corpora because the texts inside them are bilingual. Enter unicode Greek into the search box instead.
@@ -47,6 +47,20 @@ If you don't already have a unicode keyboard, consider looking into
 <a href="https://classicalstudies.org/publications-and-research/about-greekkeys-2015">GreekKeys</a>.
 NB: there are lots of places where <span class="emph">betacode syntax will conflict with regex syntax</span>. It will be very hard to employ
 both at once if you are going to be overly ambitious with either.
+
+<p><span class="label">Mandatory universal betacode</span></p>
+This is <span class="emph">disabled by default</span>. To enable it, edit <code>config.py</code> to read
+<code>UNIVERSALASSUMESBETACODE = 'yes'</code>.
+<span class="emph">This will make searching for Latin impossible</span>: <code>arma virumque</code> will become <code>αρμα ϝιρυμθυε</code>.
+The syntax caveats about betacode above should also be noted. Nevertheless typing betacode can be easier in some
+circumstances. For example, your keyboard might not want you to type an 'invalid' character like epsilon with
+a circumflex accent over it. But the Greek inscriptions do contain <span class="emph">long epsilon</span> and
+<span class="emph">long omicron</span> and their accented variants.
+<code>te=s bole=s e(=i</code> or <code>TE=S BOLE=S E(=I</code> will enable you to find
+<code>καὶ ἐπὶ τε͂ϲ βολε͂ϲ ἑ͂ι Κλεγένεϲ ⒣αλαιεὺϲ</code> in IG 3.375.
+And UNIVERSALASSUMESBETACODE is probably the best way to search for <code>⒣αλαιεὺϲ</code> since the
+<span class="emph">(undocumented) inscriptional ⒣</span> can be found by asking for <code>j</code>.
+Search for <code>jalaieus</code> or <code>jalaieu\s</code>
 
 <p><span class="label">Iota subscript and adscript</span></p>
 
