@@ -41,6 +41,11 @@ def findbyform(observedword):
 	# index clicks will send you things like 'αὖ²'
 	cleanedword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]','',cleanedword)
 
+	try:
+		cleanedword[0]
+	except:
+		return json.dumps([{'observed': '[clickeded item was not a word]'}])
+
 	if re.search(r'[a-z]', cleanedword[0]):
 		cleanedword = stripaccents(cleanedword)
 

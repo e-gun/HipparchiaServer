@@ -5,4 +5,17 @@ MorphPossibilityObject.getlatinbaseform() needs work permixtā, per-misceo
 MorphPossibilityObject.getlatinbaseform() needs work praevortēmur, prae-verto
 MorphPossibilityObject.getlatinbaseform() needs work dissīderent, dis-sido
 
-[B] [for HipparchiaBuilder: line numbering '+1' problem at Euripides, Ion 1579+]
+[B] [for HipparchiaBuilder]
+    line numbering '+1' problem at Euripides, Ion 1579+]
+
+[C] [for HipparchiaBuilder]
+    bracket substitutions problem?
+    Attica (IG I3 1-2 [1-500 501-1517]), 104, line 30ff
+
+    ∙3Ε̣∙1839∙19τ̣ει ἑμεδ̣-	30
+    [απε͂ι ∙1941∙20]ΟΝΑΤ∙
+    ∙2145∙22Α̣Ν̣Α̣∙∙
+    Ν̣[∙1839∙19 ἄρχον]τ̣α χερ̣-
+    ο͂ν̣ ἀ[δίκον ∙1430∙14 χερ]ο͂ν ἀδίκον κ-
+    τέ[νει ∙37∙3]Ϲ̣[∙819∙9 διαγιγνόϲκ]εν̣ δὲ τὸϲ ἐ-
+    [φέτ]αϲ ∙1736∙17ΕΙϹΕ ἐλεύθ-

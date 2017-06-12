@@ -218,22 +218,27 @@ def checkfordocumentmetadata(line, workobject):
 
 def insertparserids(lineobject):
 	"""
-
 	set up the clickable thing for the browser by bracketing every word with something the JS can respond to:
-
 		<observed id="ἐπειδὲ">ἐπειδὲ</observed>
 		<observed id="δέ">δέ</observed>
 		...
-
 	this is tricky because there is html in here and you don't want to tag it
-
 	also you nned to handle hypenated line-ends
-
 	:param lineobject:
 	:return:
 	"""
 
 	theline = lineobject.accented
+
+	# there are a bunch of problems when you try to integrate COLORBRACKETEDTEXT here
+	#   [1] illegal nesting issues with '<observed>ABC[<span>DEF</span]GHI</observed>'
+	#   [2] dodgy word division and ill-formatted word spacing issues:
+	#       'ἱε[ ρέω ]ϲ' instead of 'ἱε[ρέω]ϲ'
+	#       all three of those pieces of 'ἱε[ ρέω ]ϲ' will be clicks that lead nowhere
+	#       otherwise you can get a clickable entry that does a lookup from 'ἱε[ρέω]ϲ'
+	# the following bypasses #1, but leaves you stuck with #2 until the band-aide regex that closes
+	# the function; nevertheless the clicks will remain broken even after you get to 'ἱε[ρέω]ϲ'
+
 	if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
 		theline = lineobject.markeditorialinsersions()
 
@@ -271,6 +276,12 @@ def insertparserids(lineobject):
 		except:
 			# seg = ''
 			pass
+
+	# address dodgy word division and ill-formatted word spacing issues: 'ἱε[ ρέω ]ϲ' instead of 'ἱε[ρέω]ϲ'
+	spacerightbracket = re.compile(r'</observed> </span><observed id="(.*?)">](.*?)</observed>')
+	spacerleftbracket = re.compile(r'\[</observed> <span')
+	newline = re.sub(spacerightbracket, r'</observed></span><observed id="\1">]\2</observed>', newline)
+	newline = re.sub(spacerleftbracket, r'[</observed><span', newline)
 
 	return newline
 
