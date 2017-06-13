@@ -67,6 +67,7 @@ key features:
 	    hover over interface items to get tooltips
 
 	misc
+	    accepts betacode input of greek
 	    search will attempt to choose the most efficient strategy for any given situation
 		text layout in results/browser/text maker sensitive to shifts in font face and size
 	    text layout via CSS: possible to modify the style sheet to suit your own tastes
@@ -89,24 +90,22 @@ or, more tersely:
 
     % run.py
 
-upon startup you will eventually see:
+Upon startup you will eventually see:
 
     * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
 
-then you aim your browser at http://localhost:5000 and are ready to roll.
+Then you aim your browser at http://localhost:5000 and you are ready to roll.
 
-alternately you can hook HipparchiaServer to something like nginx via uwsgi. that would create a different url
+Alternately you can hook HipparchiaServer to something like nginx via uwsgi. That would create a different url
 
-it would be rather unwise to expose this server to the whole internet. there are many elements to this unwisdom.
+It would be rather unwise to expose this server to the whole internet. There are many elements to this unwisdom.
 
-let us only mention one: there are security checks inside Hipparchia, but many queries can be generated that would
-consume vast computational resources. what would happen if 1000 people tried to do that to your machine at once?
-your inability to execute these queries on the tlg web site is partially a function of their choice to
-adopt a one server and many clients model.
+Let us only mention one of them: there are security checks inside Hipparchia, but many queries can be generated that would
+consume vast computational resources. What would happen if 1000 people tried to do that to your machine at once?
 
-of course, most queries take <2s to execute. but servers live in the worst of all possible worlds.
+Of course, most queries take <2s to execute. But servers live in the worst of all possible worlds.
 
-instructions on how to use Hipparchia can be found by clicking on the '?' button if you can make it to the front page.
+Instructions on how to use Hipparchia can be found by clicking on the '?' button if you can make it to the front page.
 
 ```
 
