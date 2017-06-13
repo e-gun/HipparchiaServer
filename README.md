@@ -81,9 +81,19 @@ key features:
 
 HipparchiaServer typically runs from the command line within a python virtual environment
 
-    % python ./run.py
+for example:
 
-then you point your browser at http://localhost:5000
+    % ~/hipparchia_venv/bin/python3 ~/hipparchia_venv/HipparchiaServer/run.py
+
+or, more tersely:
+
+    % run.py
+
+upon startup you will eventually see:
+
+    * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+
+then you aim your browser at http://localhost:5000 and are ready to roll.
 
 alternately you can hook HipparchiaServer to something like nginx via uwsgi. that would create a different url
 

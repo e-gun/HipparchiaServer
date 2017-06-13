@@ -479,4 +479,6 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		return re.sub(r'\[(.*?)(\]|$)', r'[<span class="suppliedbyeditor">\1</span>\2', self.accented)
+		spanned = re.sub(r'\[(.*?)(\]|$)', r'[<span class="editorialmarker_squarebrackets">\1</span>\2', self.accented)
+
+		return spanned

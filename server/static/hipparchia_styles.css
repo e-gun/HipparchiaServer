@@ -97,6 +97,10 @@ body {
 	font-size: 120%;
 	}
 
+.editorialmarker_squarebrackets{
+    color: #757585;
+    }
+
 .emph {
 	font-weight: 600;
 	color: #0f1b76;
@@ -368,10 +372,6 @@ body {
 	font-size: 80%;
 	}
 
-.suppliedbyeditor{
-    color: #757585;
-    }
-
 .textdate {
 	font-size: 85%;
 	color: #895b3f;
@@ -640,8 +640,8 @@ hmu_papyrological_fraction{ }
 
 hmu_roman_in_a_greek_text {
 	font-size: 90%;
-	color: #352;
-	font-family: DejaVuSansCondensed-Oblique;
+	color: #241;
+	font-family: DejaVuSansCondensed;
 	}
 
 hmu_title {

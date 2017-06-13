@@ -77,8 +77,10 @@ def executesearch(timestamp):
 		#   makes the life of a person who wants unicode+regex w/ a betacode option more difficult
 		replacebeta = True
 
+	isgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
+
 	if hipparchia.config['TLGASSUMESBETACODE'] == 'yes':
-		if justtlg() and (re.search('[a-zA-Z]', seeking) or re.search('[a-zA-Z]', proximate)) and not re.search('[α-ω]', seeking) and not re.search('[α-ω]', proximate):
+		if justtlg() and (re.search('[a-zA-Z]', seeking) or re.search('[a-zA-Z]', proximate)) and not re.search(isgreek, seeking) and not re.search(isgreek, proximate):
 			replacebeta = True
 
 	if replacebeta:
