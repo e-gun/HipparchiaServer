@@ -1054,7 +1054,7 @@ def lowercases(match, g=0):
 		'G': u'γ',
 		'H': u'η',
 		'I': u'ι',
-		'J': u'⒣',
+		'J': u'⒣', # this is a divergence from HipparchiaBuilder's version; don't overwrite it
 		'K': u'κ',
 		'L': u'λ',
 		'M': u'μ',

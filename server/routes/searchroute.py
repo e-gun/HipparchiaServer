@@ -69,7 +69,12 @@ def executesearch(timestamp):
 
 	replacebeta = False
 	
-	if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
+	if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes' and re.search('[a-zA-Z]', seeking):
+		# why the 'and' condition:
+		#   sending unicode 'οὐθενὸϲ' to the betacode function will result in 0 hits
+		#   this is something that could/should be debugged within that function,
+		#   but in practice it is silly to allow hybrid betacode/unicode? this only
+		#   makes the life of a person who wants unicode+regex w/ a betacode option more difficult
 		replacebeta = True
 
 	if hipparchia.config['TLGASSUMESBETACODE'] == 'yes':
@@ -79,8 +84,10 @@ def executesearch(timestamp):
 	if replacebeta:
 		seeking = seeking.upper()
 		seeking = replacegreekbetacode(seeking)
+		seeking = seeking.lower()
 		proximate = proximate.upper()
 		proximate = replacegreekbetacode(proximate)
+		proximate = proximate.lower()
 
 	phrasefinder = re.compile('[^\s]\s[^\s]')
 
@@ -92,9 +99,10 @@ def executesearch(timestamp):
 	searchlist = []
 	output = ''
 	nosearch = True
-	so = SearchObject(ts, seeking, proximate, frozensession)
-	dmin, dmax = bcedating(frozensession)
 
+	so = SearchObject(ts, seeking, proximate, frozensession)
+
+	dmin, dmax = bcedating(frozensession)
 	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	                 if frozensession[c] == 'yes']
 

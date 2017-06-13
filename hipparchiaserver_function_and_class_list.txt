@@ -1,20 +1,20 @@
 cloc --not-match-f='^j' HipparchiaServer/
-      80 text files.
-      80 unique files.
+      89 text files.
+      89 unique files.
        9 files ignored.
 
-github.com/AlDanial/cloc v 1.72  T=0.63 s (117.3 files/s, 30426.1 lines/s)
+github.com/AlDanial/cloc v 1.72  T=0.65 s (127.3 files/s, 29307.6 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                          48           2658           3260           7454
-XML                              6              0              0           2001
-HTML                            12            120             13           1334
-JavaScript                       6            190            184           1019
-CSS                              1            167              8            650
-Markdown                         1             27              0            115
+Python                          48           2729           3346           7567
+XML                              6              0              0           1549
+HTML                            21            126             13           1413
+JavaScript                       6            191            183           1027
+CSS                              1            168              8            653
+Markdown                         1             27              0            116
 -------------------------------------------------------------------------------
-SUM:                            74           3162           3465          12573
+SUM:                            83           3241           3550          12325
 -------------------------------------------------------------------------------
 
 
@@ -23,7 +23,7 @@ SUM:                            74           3162           3465          12573
 hipparchiaobjects/dbtextobjects.py:class dbAuthor(object):
 hipparchiaobjects/dbtextobjects.py:class dbOpus(object):
 hipparchiaobjects/dbtextobjects.py:class dbWorkLine(object):
-hipparchiaobjects/helperobjects.py:class FormattedSearchResult(object):
+hipparchiaobjects/helperobjects.py:class SearchResult(object):
 hipparchiaobjects/helperobjects.py:class LowandHighInfo(object):
 hipparchiaobjects/helperobjects.py:class MPCounter(object):
 hipparchiaobjects/helperobjects.py:class ProgressPoll(object):
@@ -47,6 +47,8 @@ startup.py:def findspecificdate(authorandworklist, authorobjectdict, workobjectd
 browsing/browserfunctions.py:def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
 browsing/browserfunctions.py:def checkfordocumentmetadata(line, workobject):
 browsing/browserfunctions.py:def insertparserids(lineobject):
+browsing/browserfunctions.py:def insertcrossreferencerow(lineobject):
+browsing/browserfunctions.py:def insertdatarow(label, css, founddate):
 dbsupport/citationfunctions.py:def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 dbsupport/citationfunctions.py:def locusintocitation(workobject, citationtuple):
 dbsupport/citationfunctions.py:def prolixlocus(workobject, citationtuple):
@@ -67,7 +69,7 @@ dbsupport/dbfunctions.py:def loadallworksintoallauthors(authorsdict, worksdict):
 dbsupport/dbfunctions.py:def dblineintolineobject(dbline):
 dbsupport/dbfunctions.py:def findtoplevelofwork(workuid, cursor):
 dbsupport/dbfunctions.py:def findselectionboundaries(workobject, selection, cursor):
-dbsupport/dbfunctions.py:def simplecontextgrabber(workobject, focusline, linesofcontext, cursor):
+dbsupport/dbfunctions.py:def simplecontextgrabber(authortable, focusline, linesofcontext, cursor):
 dbsupport/dbfunctions.py:def grabonelinefromwork(workdbname, lineindex, cursor):
 dbsupport/dbfunctions.py:def returnfirstlinenumber(workid, cursor):
 dbsupport/dbfunctions.py:def perseusidmismatch(badworkdbnumber,cursor):
@@ -78,54 +80,61 @@ dbsupport/dbfunctions.py:def makeanemptywork(universalid):
 dbsupport/dbfunctions.py:def versionchecking(activedbs, expectedsqltemplateversion):
 formatting/betacodetounicode.py:def replacegreekbetacode(texttoclean):
 formatting/betacodetounicode.py:def capitalletters(betacode):
-formatting/betacodetounicode.py:def capitalsmoothgraveadscript(match):
-formatting/betacodetounicode.py:def capitalroughgraveadscript(match):
-formatting/betacodetounicode.py:def capitalsmoothacuteadscript(match):
-formatting/betacodetounicode.py:def capitalroughacuteadscript(match):
-formatting/betacodetounicode.py:def capitalsmoothcircumflexadscript(match):
-formatting/betacodetounicode.py:def capitalroughcircumflexadscript(match):
-formatting/betacodetounicode.py:def capitalsmoothgrave(match):
-formatting/betacodetounicode.py:def capitalroughgrave(match):
-formatting/betacodetounicode.py:def capitalsmoothacute(match):
-formatting/betacodetounicode.py:def capitalroughacute(match):
-formatting/betacodetounicode.py:def capitalsmoothcircumflex(match):
-formatting/betacodetounicode.py:def capitalroughcircumflex(match):
-formatting/betacodetounicode.py:def capitalsmooth(match):
-formatting/betacodetounicode.py:def capitalrough(match):
-formatting/betacodetounicode.py:def capitalgrave(match):
-formatting/betacodetounicode.py:def capitalacute(match):
-formatting/betacodetounicode.py:def capitaladscript(match):
-formatting/betacodetounicode.py:def capitals(match):
+formatting/betacodetounicode.py:def capitalsmoothgraveadscript(match, g=1):
+formatting/betacodetounicode.py:def capitalroughgraveadscript(match, g=1):
+formatting/betacodetounicode.py:def capitalsmoothacuteadscript(match, g=1):
+formatting/betacodetounicode.py:def capitalroughacuteadscript(match, g=1):
+formatting/betacodetounicode.py:def capitalsmoothcircumflexadscript(match, g=1):
+formatting/betacodetounicode.py:def capitalroughcircumflexadscript(match, g=1):
+formatting/betacodetounicode.py:def capitalsmoothgrave(match, g=1):
+formatting/betacodetounicode.py:def capitalroughgrave(match, g=1):
+formatting/betacodetounicode.py:def capitalsmoothacute(match, g=1):
+formatting/betacodetounicode.py:def capitalroughacute(match, g=1):
+formatting/betacodetounicode.py:def capitalsmoothcircumflex(match, g=1):
+formatting/betacodetounicode.py:def capitalroughcircumflex(match, g=1):
+formatting/betacodetounicode.py:def capitalsmooth(match, g=1):
+formatting/betacodetounicode.py:def capitalrough(match, g=1):
+formatting/betacodetounicode.py:def capitalgrave(match, g=1):
+formatting/betacodetounicode.py:def capitalacute(match, g=1):
+formatting/betacodetounicode.py:def capitaladscript(match, g=1):
+formatting/betacodetounicode.py:def capitals(match, g=1):
 formatting/betacodetounicode.py:def lowercaseletters(betacode):
-formatting/betacodetounicode.py:def lowercasesmoothgravesubscript(match):
-formatting/betacodetounicode.py:def lowercaseroughgravesubscript(match):
-formatting/betacodetounicode.py:def lowercasesmoothacutesubscript(match):
-formatting/betacodetounicode.py:def lowercaseroughacutesubscript(match):
-formatting/betacodetounicode.py:def lowercasesmoothcircumflexsubscript(match):
-formatting/betacodetounicode.py:def lowercaseroughcircumflexsubscript(match):
-formatting/betacodetounicode.py:def lowercasesmoothgrave(match):
-formatting/betacodetounicode.py:def lowercaseroughgrave(match):
-formatting/betacodetounicode.py:def lowercasesmoothacute(match):
-formatting/betacodetounicode.py:def lowercaseroughacute(match):
-formatting/betacodetounicode.py:def lowercasesmoothcircumflex(match):
-formatting/betacodetounicode.py:def lowercaseroughcircumflex(match):
-formatting/betacodetounicode.py:def lowercasegravesub(match):
-formatting/betacodetounicode.py:def lowercaseacutedsub(match):
-formatting/betacodetounicode.py:def lowercasesircumflexsub(match):
-formatting/betacodetounicode.py:def lowercasesmoothsub(match):
-formatting/betacodetounicode.py:def lowercaseroughsub(match):
-formatting/betacodetounicode.py:def lowercasegravediaresis(match):
-formatting/betacodetounicode.py:def lowercaseacutediaresis(match):
-formatting/betacodetounicode.py:def lowercasesircumflexdiaresis(match):
-formatting/betacodetounicode.py:def lowercasesmooth(match):
-formatting/betacodetounicode.py:def lowercaserough(match):
-formatting/betacodetounicode.py:def lowercasegrave(match):
-formatting/betacodetounicode.py:def lowercaseacute(match):
-formatting/betacodetounicode.py:def lowercascircumflex(match):
-formatting/betacodetounicode.py:def lowercasediaresis(match):
-formatting/betacodetounicode.py:def lowercasesubscript(match):
-formatting/betacodetounicode.py:def lowercases(match):
-formatting/betacodetounicode.py:def cleanaccentsandvj(texttostrip):
+formatting/betacodetounicode.py:def lowercasesmoothgravesubscript(match, g=1):
+formatting/betacodetounicode.py:def lowercaseroughgravesubscript(match, g=1):
+formatting/betacodetounicode.py:def lowercasesmoothacutesubscript(match, g=1):
+formatting/betacodetounicode.py:def lowercaseroughacutesubscript(match, g=1):
+formatting/betacodetounicode.py:def lowercasesmoothcircumflexsubscript(match, g=1):
+formatting/betacodetounicode.py:def lowercaseroughcircumflexsubscript(match, g=1):
+formatting/betacodetounicode.py:def lowercasesmoothgrave(match, g=1):
+formatting/betacodetounicode.py:def lowercaseroughgrave(match, g=1):
+formatting/betacodetounicode.py:def lowercasesmoothacute(match, g=1):
+formatting/betacodetounicode.py:def lowercaseroughacute(match, g=1):
+formatting/betacodetounicode.py:def lowercasesmoothcircumflex(match, g=1):
+formatting/betacodetounicode.py:def lowercaseroughcircumflex(match, g=1):
+formatting/betacodetounicode.py:def lowercasegravesub(match, g=1):
+formatting/betacodetounicode.py:def lowercaseacutedsub(match, g=1):
+formatting/betacodetounicode.py:def lowercasesircumflexsub(match, g=1):
+formatting/betacodetounicode.py:def lowercasesmoothsub(match, g=1):
+formatting/betacodetounicode.py:def lowercaseroughsub(match, g=1):
+formatting/betacodetounicode.py:def lowercasegravediaresis(match, g=1):
+formatting/betacodetounicode.py:def lowercaseacutediaresis(match, g=1):
+formatting/betacodetounicode.py:def lowercasesircumflexdiaresis(match, g=1):
+formatting/betacodetounicode.py:def lowercasesmooth(match, g=1):
+formatting/betacodetounicode.py:def lowercaserough(match, g=1):
+formatting/betacodetounicode.py:def lowercasegrave(match, g=1):
+formatting/betacodetounicode.py:def lowercaseacute(match, g=1):
+formatting/betacodetounicode.py:def lowercascircumflex(match, g=1):
+formatting/betacodetounicode.py:def lowercasediaresis(match, g=1):
+formatting/betacodetounicode.py:def lowercasesubscript(match, g=1):
+formatting/betacodetounicode.py:def lowercases(match, g=0):
+formatting/bibliographicformatting.py:def bcedating(s=session):
+formatting/bibliographicformatting.py:def formatauthinfo(authorobject):
+formatting/bibliographicformatting.py:def woformatworkinfo(workobject):
+formatting/bibliographicformatting.py:def formatname(workobject, authorobject):
+formatting/bibliographicformatting.py:def getpublicationinfo(workobject, cursor):
+formatting/bibliographicformatting.py:def formatpublicationinfo(pubinfo):
+formatting/bibliographicformatting.py:def avoidlonglines(string, maxlen, splitval, stringlist=[]):
+formatting/bibliographicformatting.py:def formatauthorandworkinfo(authorname, workobject):
 formatting/lexicaformatting.py:def grabsenses(fullentry):
 formatting/lexicaformatting.py:def entrysummary(fullentry, lang, translationlabel, lemmaobject):
 formatting/lexicaformatting.py:def grabheadmaterial(fullentry):
@@ -139,24 +148,15 @@ formatting/lexicaformatting.py:def insertbrowserjs(htmlentry):
 formatting/lexicaformatting.py:def dbquickfixes(listofnames):
 formatting/lexicaformatting.py:def deabrevviategreekauthors():
 formatting/lexicaformatting.py:def deabrevviatelatinauthors():
-formatting/miscformatting.py:def bcedating(s=session):
-formatting/miscformatting.py:def insertcrossreferencerow(lineobject):
-formatting/miscformatting.py:def insertdatarow(label, css, founddate):
-formatting/miscformatting.py:def formatauthinfo(authorobject):
-formatting/miscformatting.py:def woformatworkinfo(workobject):
-formatting/searchformatting.py:def highlightsearchterm(lineobject, searchterm, spanname):
-formatting/searchformatting.py:def formatauthorandworkinfo(authorname, workobject):
-formatting/searchformatting.py:def mpresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, activepoll):
-formatting/searchformatting.py:def formattingworkpile(bundles, criteria, activepoll, allfound):
-formatting/searchformatting.py:def formattedcitationincontext(lineobject, workobject, authorobject, linesofcontext, searchterm, proximate,
+formatting/searchformatting.py:def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
+formatting/searchformatting.py:def bulkenvironsfetcher(table, searchresultlist, context):
+formatting/searchformatting.py:def flagsearchterms(searchresultobject, skg, prx, searchobject):
+formatting/searchformatting.py:def highlightsearchterm(lineobject, regexequivalent, spanname):
+formatting/searchformatting.py:def compilesearchtermequivalent(searchterm):
 formatting/searchformatting.py:def htmlifysearchfinds(listofsearchresultobjects):
-formatting/searchformatting.py:def jstoinjectintobrowser(listofsearchresultobjects):
-formatting/searchformatting.py:def nocontextresultformatter(hitdict, authordict, workdict, seeking, proximate, searchtype, activepoll):
 formatting/searchformatting.py:def nocontexthtmlifysearchfinds(listofsearchresultobjects):
-formatting/searchformatting.py:def formatname(workobject, authorobject):
-formatting/searchformatting.py:def getpublicationinfo(workobject, cursor):
-formatting/searchformatting.py:def formatpublicationinfo(pubinfo):
-formatting/searchformatting.py:def avoidlonglines(string, maxlen, splitval, stringlist=[]):
+formatting/searchformatting.py:def jstoinjectintobrowser(listofsearchresultobjects):
+formatting/searchformatting.py:def unbalancedspancleaner(html):
 formatting/wordformatting.py:def removegravity(accentedword):
 formatting/wordformatting.py:def forceterminalacute(matchgroup):
 formatting/wordformatting.py:def stripaccents(texttostrip, transtable=None):
@@ -164,6 +164,7 @@ formatting/wordformatting.py:def buildhipparchiatranstable():
 formatting/wordformatting.py:def gkattemptelision(hypenatedgreekheadword):
 formatting/wordformatting.py:def latattemptelision(hypenatedlatinheadword):
 formatting/wordformatting.py:def tidyupterm(word, punct=None):
+formatting/wordformatting.py:def cleanaccentsandvj(texttostrip):
 lexica/lexicalookups.py:def lookformorphologymatches(word, cursor, trialnumber=0):
 lexica/lexicalookups.py:def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
 lexica/lexicalookups.py:def browserdictionarylookup(count, seekingentry, cursor):
@@ -223,6 +224,7 @@ routes/browseroute.py:def grabtextforbrowsing(locus):
 routes/frontpage.py:def frontpage():
 routes/frontpage.py:def sendfavicon():
 routes/frontpage.py:def appletouchticon():
+routes/frontpage.py:def loadhelpdata():
 routes/getterroutes.py:def getsessionvariables():
 routes/getterroutes.py:def cookieintosession(cookienum):
 routes/getterroutes.py:def findtheworksof(authoruid):
