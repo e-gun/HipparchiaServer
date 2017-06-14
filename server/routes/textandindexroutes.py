@@ -91,8 +91,11 @@ def completeindex():
 
 	# get ready to send stuff to the page
 	count = len(output)
-	locale.setlocale(locale.LC_ALL, 'en_US')
-	count = locale.format("%d", count, grouping=True)
+	try:
+		locale.setlocale(locale.LC_ALL, 'en_US')
+		count = locale.format("%d", count, grouping=True)
+	except locale.Error:
+		count = str(count)
 
 	poll[ts].statusis('Preparing the index HTML')
 	indexhtml = wordindextohtmltable(output, useheadwords)
