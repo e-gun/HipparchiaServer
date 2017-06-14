@@ -649,6 +649,11 @@ hmu_title {
 	font-style: italic;
 	}
 
+indexedlocation:hover{
+	color: #393F94;
+	text-shadow: 1px 1px #aaa;
+	 }
+
 indexobserved:hover{
 	color: #393F94;
 	text-shadow: 1px 1px #aaa;

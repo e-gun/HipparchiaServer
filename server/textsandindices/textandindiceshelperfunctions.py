@@ -9,6 +9,7 @@
 import re
 from collections import deque
 
+from server import hipparchia
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dbfunctions import grabonelinefromwork, dblineintolineobject, makeanemptyauthor, makeanemptywork
 from server.searching.searchfunctions import atsignwhereclauses
@@ -126,6 +127,15 @@ def wordindextohtmltable(indexingoutput, useheadwords):
 	:return:
 	"""
 
+	if len(indexingoutput) < hipparchia.config['CLICKABLEINDEXEDWORDSCAP'] or hipparchia.config['CLICKABLEINDEXEDWORDSCAP'] < 0:
+		thwd = '<td class="headword"><indexobserved id="{wd}">{wd}</indexobserved></td>'
+		thom = '<td class="word"><span class="homonym"><indexobserved id="{wd}">{wd}</indexobserved></td>'
+		twor = '<td class="word"><indexobserved id="{wd}">{wd}</indexobserved></td>'
+	else:
+		thwd = '<td class="headword">{wd}</td>'
+		thom = '<td class="word"><span class="homonym">{wd}</td>'
+		twor = '<td class="word">{wd}</td>'
+
 	previousheadword = ''
 
 	outputlines = deque()
@@ -141,14 +151,14 @@ def wordindextohtmltable(indexingoutput, useheadwords):
 		headword = i[0]
 		observedword = i[1]
 		if useheadwords and headword != previousheadword:
-			outputlines.append('<td class="headword"><indexobserved id="{hw}">{hw}</indexobserved></td>'.format(hw=headword))
+			outputlines.append(thwd.format(wd=headword))
 			previousheadword = headword
 		elif useheadwords and headword == previousheadword:
 			outputlines.append('<td class="headword">&nbsp;</td>')
 		if i[4] == 'isahomonymn':
-			outputlines.append('<td class="word"><span class="homonym"><indexobserved id="{wd}">{wd}</indexobserved></span></td>'.format(wd=observedword))
+			outputlines.append(thom.format(wd=observedword))
 		else:
-			outputlines.append('<td class="word"><indexobserved id="{wd}">{wd}</indexobserved></td>'.format(wd=observedword))
+			outputlines.append(twor.format(wd=observedword))
 		outputlines.append('<td class="count">{ct}</td>'.format(ct=i[2]))
 		outputlines.append('<td class="passages">{psg}</td>'.format(psg=i[3]))
 		outputlines.append('</tr>')
@@ -178,7 +188,7 @@ def dictmerger(masterdict, targetdict):
 	return masterdict
 
 
-def observedformjs():
+def supplementalindexjs():
 	"""
 	
 	insert a js block to handle observed forms
@@ -216,6 +226,26 @@ def observedformjs():
 	            });
             return false;
         });
+        
+
+		    $('indexedlocation').click( function(e) {
+		        e.preventDefault();
+		        $.getJSON('/browse/'+this.id, function (passagereturned) {
+		        $('#browseforward').unbind('click');
+		        $('#browseback').unbind('click');
+				var fb = parsepassagereturned(passagereturned)
+		            // left and right arrow keys
+		           $('#browserdialogtext').keydown(function(e) {
+		                switch(e.which) {
+		                    case 37: browseuponclick(fb[1]); break;
+		                    case 39: browseuponclick(fb[0]); break;
+		                    }
+		                });
+		        $('#browseforward').bind('click', function(){ browseuponclick(fb[0]); });
+		        $('#browseback').bind('click', function(){ browseuponclick(fb[1]); });
+		        });
+		    });
+
         </script>
 	"""
 

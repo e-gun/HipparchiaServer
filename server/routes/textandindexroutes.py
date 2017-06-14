@@ -18,7 +18,7 @@ from server.hipparchiaobjects.helperobjects import ProgressPoll
 from server.startup import authordict, workdict, poll
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import tcparserequest, textsegmentfindstartandstop, \
-	wordindextohtmltable, observedformjs
+	wordindextohtmltable, supplementalindexjs
 from server.textsandindices.textbuilder import buildtext
 
 
@@ -110,7 +110,7 @@ def completeindex():
 	results['wordsfound'] = count
 	results['indexhtml'] = indexhtml
 	results['keytoworks'] = allworks
-	results['newjs'] = observedformjs()
+	results['newjs'] = supplementalindexjs()
 
 	results = json.dumps(results)
 

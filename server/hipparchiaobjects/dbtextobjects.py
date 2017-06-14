@@ -289,6 +289,20 @@ class dbWorkLine(object):
 
 		return citation
 
+	def anchoredlocus(self):
+		"""
+
+		build a clickable url for the locus and wrap the locus in it:
+
+			<indexedlocation id="gr0032w008_LN_30784">1.4.4</indexedlocation>
+
+		:return:
+		"""
+
+		template = '<indexedlocation id="{wk}_LN_{idx}">{loc}</indexedlocation>'
+
+		return template.format(wk=self.wkuinversalid, idx=self.index, loc=self.locus())
+
 	def shortlocus(self):
 		"""
 		try to get a short citation that drops the lvl0 info: "3.2"

@@ -1,6 +1,37 @@
 ## CONFIGURATION NOTES
+## [0] is probably the only place you will visit after your initial configuration: day-to-day default interface settings
 ## [1] and [3] and [5] are relevant to the initial configuration of HipparchiaServer
-## [7] is probably the only place you will visit after that: day-to-day default interface settings
+
+### [0] the default settings for various 'session' items ###
+##  [set any/all of these to suit your own typical use scenarios] ##
+# these items can all be set to different values via the web interface
+# below you have the values that represent what you get if you clear the session and start anew
+
+# valid options for the next are: shortname, authgenre, location, provenance, universalid, converted_date
+DEFAULTSORTORDER = 'shortname'
+DEFAULTEARLIESTDATE = '-850'
+DEFAULTLATESTDATE = '1500'
+
+DEFAULTLINESOFCONTEXT = 4
+DEFAULTBROWSERLINES = 20
+DEFAULTMAXRESULTS = 200
+
+DEFAULTVARIA='yes'
+DEFAULTINCERTA='yes'
+DEFAULTSPURIA='yes'
+DEFAULTONEHIT='no'
+DEFAULTINDEXBYHEADWORDS = 'no'
+
+DEFAULTSHOWLEXICALSENSES = 'yes'
+DEFAULTSHOWLEXICALAUTHORS = 'yes'
+DEFAULTSHOWLEXICALQUOTES = 'yes'
+
+DEFAULTGREEKCORPUSVALUE = 'yes'
+DEFAULTLATINCORPUSVALUE = 'yes'
+DEFAULTINSCRIPTIONCORPUSVALUE = 'no'
+DEFAULTPAPYRUSCORPUSVALUE = 'no'
+DEFAULTCHRISTIANCORPUSVALUE = 'no'
+
 
 ### [1] Flask variables ###
 ##  [set once and forget: SECRET_KEY] ##
@@ -70,7 +101,7 @@ MPCOMMITCOUNT = 750
 
 
 ### [6] settings that you can only configure here ###
-##  [only change this if you know why you are doing it] ##
+##  [only change these items if you know why you are doing it] ##
 # HipparchiaServer has to be restarted for them to go into effect
 # CSSSTYLESHEET presupposes './server' as part of its path; i.e. you will want to put custom CSS in the
 #   same directory as the default installed css
@@ -78,7 +109,31 @@ MPCOMMITCOUNT = 750
 # TLGASSUMESBETACODE means that if you only have the TLG active typing 'ball' is like typing 'βαλλ' and 'ba/ll' is 'βάλλ'
 # UNIVERSALASSUMESBETACODE means that all latin input is converted to unicode. You will be unable to search for 'arma'
 #   because it will be parsed as 'αρμα' and so hit words like 'φαρμάκων' and 'μαρμαίρωϲιν'
+# CLICKABLEINDEXEDPASSAGECAP: you can click to browse the passage associated with an index item. Why would you even turn
+#   something so awesome off? Because the clicks will stop working with big indices: 'RangeError: Maximum call stack size exceeded'.
+#   This is a javascript/browser limitation: too many objects get piled onto the page. Different browsers have different caps.
+		# "The consequences of applying a function with too many arguments
+		# (think more than tens of thousands of arguments) vary across
+		# engines (JavaScriptCore has hard-coded argument limit of 65536),
+		# because the limit (indeed even the nature of any
+		# excessively-large-stack behavior) is unspecified. Some engines
+		# will throw an exception. More perniciously, others will
+		# arbitrarily limit the number of arguments actually passed to the
+		# applied function."
+#   If you hit the cap, then you will have a fat, useless wad of tags that are super slow to load and take
+#   up lots of memory but do nothing else. The same problem can arise for the lookup clicks in a monster index
+#   even if you turn the browser clicking off.
+#       -1: always try to make every item of every index clickable
+#       0: never try to make any item clickable
+#       N: do not try if you are indexing more than N lines (1500 is a decent number to pick)
+# CLICKABLEINDEXEDWORDSCAP: see CLICKABLEINDEXEDPASSAGECAP for the issues.
+#       -1: always try to make every word of every index clickable
+#       0: never try to make any word clickable
+#       N: do not try if you are indexing more than N word (64000 is a decent number to pick)
+# SHOWLINENUMBERSEVERY does just what you think it does
 # MINIMUMBROWSERWIDTH is either a number of whitespace characters or 'off'
+# SUPPRESSLONGREQUESTMESSAGE = 'yes' if you do not want to be reminded that there is a way to abort your long requests
+# ENOUGHALREADYWITHTHECOPYRIGHTNOTICE = 'yes' if you have lost your enthusiasm for legalese
 # HOBBLEREGEX is 'yes' if you have foolishly exposed Hipparchia to a network but are not so foolish as to allow "!|'", etc.
 #   only [].^$ will be allowed and all digits will be dropped
 # EXCLUDEMINORGENRECOUNTS will mitigate spikes in the genre counts when a word appears in a sparsely populated genre
@@ -94,12 +149,14 @@ MPCOMMITCOUNT = 750
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 COLORBRACKETEDTEXT = 'yes'
 TLGASSUMESBETACODE = 'yes'
-UNIVERSALASSUMESBETACODE = 'yes'
+UNIVERSALASSUMESBETACODE = 'no'
+CLICKABLEINDEXEDPASSAGECAP = 1500
+CLICKABLEINDEXEDWORDSCAP = 64000
 SHOWLINENUMBERSEVERY = 10
+MINIMUMBROWSERWIDTH = 100
 SUPPRESSLONGREQUESTMESSAGE = 'no'
-HOBBLEREGEX = 'no'
-MINIMUMBROWSERWIDTH=100
 ENOUGHALREADYWITHTHECOPYRIGHTNOTICE='no'
+HOBBLEREGEX = 'no'
 # lexical output settings
 SHOWGLOBALWORDCOUNTS = 'yes'
 EXCLUDEMINORGENRECOUNTS='yes'
@@ -107,34 +164,3 @@ COLLAPSEDGENRECOUNTS='yes'
 NUMBEROFGENRESTOTRACK = 8
 AVOIDCIRCLEDLETTERS='no'
 REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
-
-
-### [7] the default settings for various 'session' items ###
-##  [set any/all of these to suit your own typical use scenarios] ##
-# these items can all be set to different values via the web interface
-# below you have the values that represent what you get if you clear the session and start anew
-
-# valid options for the next are: shortname, authgenre, location, provenance, universalid, converted_date
-DEFAULTSORTORDER = 'shortname'
-DEFAULTEARLIESTDATE = '-850'
-DEFAULTLATESTDATE = '1500'
-
-DEFAULTLINESOFCONTEXT = 4
-DEFAULTBROWSERLINES = 20
-DEFAULTMAXRESULTS = 200
-
-DEFAULTVARIA='yes'
-DEFAULTINCERTA='yes'
-DEFAULTSPURIA='yes'
-DEFAULTONEHIT='no'
-DEFAULTINDEXBYHEADWORDS = 'no'
-
-DEFAULTSHOWLEXICALSENSES = 'yes'
-DEFAULTSHOWLEXICALAUTHORS = 'yes'
-DEFAULTSHOWLEXICALQUOTES = 'yes'
-
-DEFAULTGREEKCORPUSVALUE = 'yes'
-DEFAULTLATINCORPUSVALUE = 'yes'
-DEFAULTINSCRIPTIONCORPUSVALUE = 'no'
-DEFAULTPAPYRUSCORPUSVALUE = 'no'
-DEFAULTCHRISTIANCORPUSVALUE = 'no'

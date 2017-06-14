@@ -7,6 +7,7 @@
 """
 
 import re
+from collections import deque
 from multiprocessing import Manager, Process
 from multiprocessing import Pool
 from string import punctuation
@@ -37,19 +38,19 @@ def compilewordlists(worksandboundaries, cursor):
 	:return:
 	"""
 
-	lineobjects = []
+	lineobjects = deque()
 
 	for w in worksandboundaries:
 		db = w[0:6]
-		query = 'SELECT * FROM ' + db + ' WHERE (index >= %s AND index <= %s)'
+		query = 'SELECT * FROM {db} WHERE (index >= %s AND index <= %s)'.format(db=db)
 		data = (worksandboundaries[w][0], worksandboundaries[w][1])
 		cursor.execute(query, data)
 		lines = cursor.fetchall()
 
 		thiswork = [dblineintolineobject(l) for l in lines]
-		lineobjects += thiswork
+		lineobjects.extend(thiswork)
 
-	return lineobjects
+	return list(lineobjects)
 
 
 def buildindextowork(cdict, activepoll, headwords, cursor):
@@ -89,6 +90,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 	lineobjects = compilewordlists(cdict, cursor)
 
 	pooling = True
+
 	if pooling:
 		activepoll.statusis('Compiling the index')
 		# 2x as fast to produce the final result; even faster inside the relevant loop
@@ -333,6 +335,15 @@ def linesintoindex(lineobjects, activepoll):
 
 	completeindex = {}
 
+	# clickable entries will break after 16k words? Toggle indexing methods by guessing N words per line and
+	# then pick 'locus' when you have too many lineobjects: a nasty hack
+
+	if len(lineobjects) < hipparchia.config['CLICKABLEINDEXEDPASSAGECAP'] or hipparchia.config['CLICKABLEINDEXEDPASSAGECAP'] < 0:
+		# [a] '<indexedlocation id="gr0032w008_LN_31011">2.17.6</indexedlocation>' vs [b] just '2.17.6'
+		indexingmethod = 'anchoredlocus'
+	else:
+		indexingmethod = 'locus'
+
 	while len(lineobjects) > 0:
 		try:
 			line = lineobjects.pop()
@@ -347,10 +358,11 @@ def linesintoindex(lineobjects, activepoll):
 			words = list(set(words))
 			words = [w.translate(gravetoacute) for w in words]
 			for w in words:
+				referencestyle = getattr(line, indexingmethod)
 				try:
-					completeindex[w].append((line.wkuinversalid, line.index, line.locus()))
+					completeindex[w].append((line.wkuinversalid, line.index, referencestyle()))
 				except:
-					completeindex[w] = [(line.wkuinversalid, line.index, line.locus())]
+					completeindex[w] = [(line.wkuinversalid, line.index, referencestyle())]
 
 	return completeindex
 
