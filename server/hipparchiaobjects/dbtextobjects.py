@@ -132,7 +132,7 @@ class dbOpus(object):
 		self.worktype = worktype
 		self.provenance = provenance
 		self.recorded_date = recorded_date
-		self.converted_date = int(converted_date) # already supposed to be an int, but old tables might have it as chars
+		self.converted_date = converted_date
 		self.wordcount = wordcount
 		self.starts = firstline
 		self.ends = lastline
