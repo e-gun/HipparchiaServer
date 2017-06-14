@@ -335,8 +335,11 @@ def linesintoindex(lineobjects, activepoll):
 
 	completeindex = {}
 
-	# clickable entries will break after 16k words? Toggle indexing methods by guessing N words per line and
+	# clickable entries will break after too many words. Toggle bewteen indexing methods by guessing N words per line and
 	# then pick 'locus' when you have too many lineobjects: a nasty hack
+	# a RangeError arises from jquery trying to push too many items onto its stack?
+	# in which case if you had 32k indexlocationa and then indexlocationb and then ... you could avoid this?
+	# pretty hacky, but it might work; then again, jquery might die after N of any kind not just N of a specific kind
 
 	if len(lineobjects) < hipparchia.config['CLICKABLEINDEXEDPASSAGECAP'] or hipparchia.config['CLICKABLEINDEXEDPASSAGECAP'] < 0:
 		# [a] '<indexedlocation id="gr0032w008_LN_31011">2.17.6</indexedlocation>' vs [b] just '2.17.6'
