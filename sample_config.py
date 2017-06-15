@@ -1,11 +1,12 @@
 ## CONFIGURATION NOTES
 ## [0] is probably the only place you will visit after your initial configuration: day-to-day default interface settings
 ## [1] and [3] and [5] are relevant to the initial configuration of HipparchiaServer
+## if DBUSER, DBNAME, and DBPASS re not properly configured, HipparchiaServer will not launch
 
 ### [0] the default settings for various 'session' items ###
 ##  [set any/all of these to suit your own typical use scenarios] ##
-# these items can all be set to different values via the web interface
-# below you have the values that represent what you get if you clear the session and start anew
+# these items can all be set to different temporary values via the web interface
+# below you have the values that represent what you get if you clear the session and reset your web session
 
 # valid options for the next are: shortname, authgenre, location, provenance, universalid, converted_date
 DEFAULTSORTORDER = 'shortname'
@@ -150,8 +151,8 @@ CSSSTYLESHEET = '/static/hipparchia_styles.css'
 COLORBRACKETEDTEXT = 'yes'
 TLGASSUMESBETACODE = 'yes'
 UNIVERSALASSUMESBETACODE = 'no'
-CLICKABLEINDEXEDPASSAGECAP = 1500
-CLICKABLEINDEXEDWORDSCAP = 64000
+CLICKABLEINDEXEDPASSAGECAP = 1500   # -1, 0, or N
+CLICKABLEINDEXEDWORDSCAP = 64000    # -1, 0, or N
 SHOWLINENUMBERSEVERY = 10
 MINIMUMBROWSERWIDTH = 100
 SUPPRESSLONGREQUESTMESSAGE = 'no'

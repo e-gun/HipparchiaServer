@@ -13,7 +13,7 @@ from flask import request
 
 from server import hipparchia
 from server.listsandsession.listmanagement import buildhintlist
-from server.listsandsession.sessionfunctions import reducetosessionselections, returnactivedbs
+from server.listsandsession.sessionfunctions import reducetosessionselections, returnactivelist
 from server.startup import authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict, listmapper
 
 
@@ -51,12 +51,7 @@ def augenrelist():
 
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
-	activedbs = returnactivedbs()
-	activegenres = []
-	for key in activedbs:
-		activegenres += authorgenresdict[key]
-
-	activegenres = list(set(activegenres))
+	activegenres = returnactivelist(authorgenresdict)
 	activegenres.sort()
 
 	hint = []
@@ -65,7 +60,7 @@ def augenrelist():
 		if strippedquery:
 			hint = buildhintlist(strippedquery, activegenres)
 	else:
-		hint = ['(no author genre data available inside of your active database(s))']
+		hint = ['(no author category data available inside of your active database(s))']
 
 	hint = json.dumps(hint)
 
@@ -81,12 +76,7 @@ def wkgenrelist():
 
 	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
 
-	activedbs = returnactivedbs()
-	activegenres = []
-	for key in activedbs:
-		activegenres += workgenresdict[key]
-
-	activegenres = list(set(activegenres))
+	activegenres = returnactivelist(workgenresdict)
 	activegenres.sort()
 
 	hint = []
@@ -95,7 +85,7 @@ def wkgenrelist():
 		if strippedquery:
 			hint = buildhintlist(strippedquery, activegenres)
 	else:
-		hint = ['(no work genre data available inside of your active database(s))']
+		hint = ['(no work category data available inside of your active database(s))']
 
 	hint = json.dumps(hint)
 
@@ -112,13 +102,7 @@ def offeraulocationhints():
 
 	strippedquery = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('term', ''))
 
-	activedbs = returnactivedbs()
-	activelocations = []
-
-	for key in activedbs:
-		activelocations += authorlocationdict[key]
-
-	activelocations = list(set(activelocations))
+	activelocations = returnactivelist(authorlocationdict)
 	activelocations.sort()
 
 	hint = []
@@ -146,13 +130,7 @@ def offerprovenancehints():
 
 	strippedquery = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('term', ''))
 
-	activedbs = returnactivedbs()
-	activelocations = []
-
-	for key in activedbs:
-		activelocations += workprovenancedict[key]
-
-	activelocations = list(set(activelocations))
+	activelocations = returnactivelist(workprovenancedict)
 	activelocations.sort()
 
 	hint = []

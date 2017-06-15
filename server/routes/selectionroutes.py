@@ -13,8 +13,10 @@ from flask import redirect, request, url_for, session
 
 from server import hipparchia
 from server.listsandsession.listmanagement import dropdupes, tidyuplist
-from server.listsandsession.sessionfunctions import modifysessionvar, sessionselectionsashtml, rationalizeselections
-from server.startup import authordict, workdict
+from server.listsandsession.sessionfunctions import modifysessionvar, sessionselectionsashtml, rationalizeselections, \
+	selectionisactive, returnactivelist
+from server.startup import authordict, workdict, authorgenresdict, authorlocationdict, workgenresdict, \
+	workprovenancedict
 
 
 @hipparchia.route('/makeselection', methods=['GET'])
@@ -35,9 +37,6 @@ def selectionmade():
 	:return:
 	"""
 
-	# lingering bug that should be handled: if you swap languages and leave lt on a gr list, you will have trouble compiling the searchlist
-
-	# you clicked #pickauthor or #excludeauthor
 	try:
 		workid = re.sub('[\W_]+', '', request.args.get('work', ''))
 	except:
@@ -86,6 +85,25 @@ def selectionmade():
 	else:
 		suffix = 'exclusions'
 		other = 'selections'
+
+	# the selection box might contain stale info if you deselect a corpus while items are still in the box
+	uid = selectionisactive(uid)
+	workid = selectionisactive(workid)
+	locus = selectionisactive(locus)
+
+	if genre and genre not in returnactivelist(authorgenresdict):
+		genre = ''
+
+	if wkgenre and wkgenre not in returnactivelist(workgenresdict):
+		wkgenre = ''
+
+	if auloc and auloc not in returnactivelist(authorlocationdict):
+		auloc = ''
+
+	if wkprov and wkprov not in returnactivelist(workprovenancedict):
+		wkprov = ''
+
+	# you have validated the input, now do something with it...
 
 	if (uid != '') and (workid != '') and (locus != ''):
 		# a specific passage

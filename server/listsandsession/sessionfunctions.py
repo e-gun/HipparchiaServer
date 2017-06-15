@@ -12,6 +12,7 @@ from flask import session
 
 from server import hipparchia
 from server.dbsupport import citationfunctions
+from server.startup import authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict
 
 
 def sessionvariables():
@@ -98,6 +99,25 @@ def modifysessionvar(param,val):
 	if param in availableoptions:
 		session[param] = val
 		# print('param = val:',param,session[param])
+
+	# drop all selections/exclusions from any corpus that you just disabled
+	if param in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus'] and session[param] != 'yes':
+		corpora = {'greekcorpus': 'gr', 'latincorpus': 'lt', 'inscriptioncorpus': 'in', 'papyruscorpus': 'dp', 'christiancorpus': 'ch'}
+		lists = ['auselections', 'psgselections', 'wkselections', 'auexclusions', 'psgexclusions', 'wkexclusions']
+		for l in lists:
+			session[l] = [item for item in session[l] if not re.search(r'^'+corpora[param], item)]
+
+		# authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict
+		checkagainst = {'agnselections': authorgenresdict,
+		                'wkgnselections': workgenresdict,
+		                'alocselections': authorlocationdict,
+		                'wlocselections': workprovenancedict,
+		                'agnexclusions': authorgenresdict,
+		                'wkgnexclusions': workgenresdict,
+		                'alocexclusions': authorlocationdict,
+		                'wlocexclusions': workprovenancedict}
+		for l in checkagainst.keys():
+			session[l] = [item for item in session[l] if item in returnactivelist(checkagainst[l])]
 
 	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
 				   'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary','authorssummary','quotesummary']:
@@ -813,4 +833,47 @@ def returnactivedbs():
 		keys.append('ch')
 
 	return keys
+
+
+def selectionisactive(selected):
+	"""
+
+	if you disable a corpus with an something still in the selction box, it remains possible to request that author, work, etc.
+	make it impossible to add an author or work that will not get searched; lazily skipping the genres, etc issue
+
+	:param selected:
+	:return:
+	"""
+
+	active = returnactivedbs()
+	try:
+		prefix = selected[0:2]
+	except:
+		prefix = ''
+
+	if prefix not in active:
+		selected = ''
+
+	return selected
+
+
+def returnactivelist(selectiondict):
+	"""
+
+	what author categories, etc can you pick at the moment?
+
+	selectiondict is something like authorgenresdict or workgenresdict
+
+	:return:
+	"""
+
+	activedbs = returnactivedbs()
+
+	activelist = []
+	for db in activedbs:
+		activelist += selectiondict[db]
+
+	activelist = list(set(activelist))
+
+	return activelist
 
