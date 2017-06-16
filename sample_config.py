@@ -134,7 +134,7 @@ MPCOMMITCOUNT = 750
 # SHOWLINENUMBERSEVERY does just what you think it does
 # MINIMUMBROWSERWIDTH is either a number of whitespace characters or 'off'
 # SUPPRESSLONGREQUESTMESSAGE = 'yes' if you do not want to be reminded that there is a way to abort your long requests
-# ENOUGHALREADYWITHTHECOPYRIGHTNOTICE = 'yes' if you have lost your enthusiasm for legalese
+# ENOUGHALREADYWITHTHECOPYRIGHTNOTICE = 'yes' if you have lost your passion for legalese
 # HOBBLEREGEX is 'yes' if you have foolishly exposed Hipparchia to a network but are not so foolish as to allow "!|'", etc.
 #   only [].^$ will be allowed and all digits will be dropped
 # EXCLUDEMINORGENRECOUNTS will mitigate spikes in the genre counts when a word appears in a sparsely populated genre
@@ -156,12 +156,12 @@ CLICKABLEINDEXEDWORDSCAP = 64000    # -1, 0, or N
 SHOWLINENUMBERSEVERY = 10
 MINIMUMBROWSERWIDTH = 100
 SUPPRESSLONGREQUESTMESSAGE = 'no'
-ENOUGHALREADYWITHTHECOPYRIGHTNOTICE='no'
+ENOUGHALREADYWITHTHECOPYRIGHTNOTICE = 'no'
 HOBBLEREGEX = 'no'
 # lexical output settings
 SHOWGLOBALWORDCOUNTS = 'yes'
-EXCLUDEMINORGENRECOUNTS='yes'
-COLLAPSEDGENRECOUNTS='yes'
+EXCLUDEMINORGENRECOUNTS = 'yes'
+COLLAPSEDGENRECOUNTS = 'yes'
 NUMBEROFGENRESTOTRACK = 8
-AVOIDCIRCLEDLETTERS='no'
+AVOIDCIRCLEDLETTERS = 'no'
 REVERSELEXICONRESULTSBYFREQUENCY = 'yes'

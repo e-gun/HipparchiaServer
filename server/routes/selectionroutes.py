@@ -143,7 +143,7 @@ def selectionmade():
 		session['wloc' + suffix] = tidyuplist(session['wloc' + suffix])
 		session['wloc' + other] = dropdupes(session['wloc' + other], session['wloc' + suffix])
 
-	# after the update to the data, you need to update the page html
+	# after the update to the session, you need to update the page html to reflect the changes
 
 	return getcurrentselections()
 

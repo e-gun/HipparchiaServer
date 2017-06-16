@@ -839,7 +839,9 @@ def selectionisactive(selected):
 	"""
 
 	if you disable a corpus with an something still in the selction box, it remains possible to request that author, work, etc.
-	make it impossible to add an author or work that will not get searched; lazily skipping the genres, etc issue
+	make it impossible to add an author or work that will not get searched
+
+	this function will cover authors/works/passages; genres and locations gets handled via calls to returnactivelist()
 
 	:param selected:
 	:return:
