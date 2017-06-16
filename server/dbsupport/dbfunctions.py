@@ -18,7 +18,7 @@ except ImportError:
 	#   mostly works
 	#   not obviously faster (since searches are 95% waiting for postgres...)
 	#   sometimes much slower (and right where you might think that 'more python' was happening)
-	#       index to arisotle
+	#       index to aristotle
 	#           python3: 9.68s
 	#           pypy3: 72.54s
 	#   bugs out if you have lots of hits
@@ -83,19 +83,6 @@ def tablenamer(authorobject, thework):
 	workdbname = pr + nm + 'w' + wn
 
 	return workdbname
-
-
-def labelmaker(workuid, cursor):
-	query = 'SELECT levellabels_05,levellabels_04,levellabels_03,levellabels_02,levellabels_01,levellabels_00 from works where universalid = %s'
-	# query = 'SELECT levellabels_00,levellabels_01,levellabels_02,levellabels_03,levellabels_04,levellabels_05 from works where universalid = %s'
-	data = (workuid,)
-	try:
-		cursor.execute(query, data)
-	except:
-		print('somehow failed to find work info for', workuid)
-
-	results = cursor.fetchone()
-	return results
 
 
 def loadallauthorsasobjects():
