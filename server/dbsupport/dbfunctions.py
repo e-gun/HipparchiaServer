@@ -9,7 +9,22 @@
 import configparser
 from os import cpu_count
 
-import psycopg2
+try:
+	# python3
+	import psycopg2
+except ImportError:
+	# pypy3
+	# pypy3 support is EXPERIMENTAL (and unlikely to be actively pursued)
+	#   mostly works
+	#   not obviously faster (since searches are 95% waiting for postgres...)
+	#   sometimes much slower (and right where you might think that 'more python' was happening)
+	#       index to arisotle
+	#           python3: 9.68s
+	#           pypy3: 72.54s
+	#   bugs out if you have lots of hits
+	#       psycopg2cffi._impl.exceptions.OperationalError
+	#       [substantially lower the commit count?]
+	import psycopg2cffi as psycopg2
 
 from server import hipparchia
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus, dbWorkLine
