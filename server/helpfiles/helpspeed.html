@@ -64,21 +64,30 @@ As above, a common word sought across the whole corpus will slow you down.
     If you do not use accents Hipparchia will guess that the longer word is the less common one. This might not be true.
 </li>
 </ul>
+<span class="emph">Your browser is part of the equation</span>: an index to Aristotle will find 70,428 words. Finding those
+words will take N seconds. Let's say 10. Then the HTML is sent to your browser to be rendered. There can be a lot of HTML and JavaScript
+that gets sent out. Rendering this information will take additional time: just a few seconds, I hope. In any case, you can
+gague the render time by noting when the status message disappears: after that all waiting is a browser issue. A search where you
+allow 3000 results or the index of an especially long author will be places where you notice this penalty.
+<br />
+<br />
 <span class="emph">Hardware also matters</span>: προκατέλαβον (the first example above)
 takes 2.75s with 5 workers on macOS 10.11 with a SSD and an 8 core CPU running at 3.5GHz.
-With one worker the search executes in 11.32s. The search takes 4.85 seconds on a mac mini with a SSD and 2 cores running at 2.6GHz. But then
-the search will take
-23.4s when executed inside a virtual machine running on the same higher-end computer,
+With one worker the search executes in 11.32s. The search takes 4.85 seconds on a mac mini with a SSD and 2 cores running at 2.6GHz.
+But then the search will take 23.4s when executed inside a virtual machine running on the same higher-end computer,
 a virtual machine that has been assigned 4 cores and is running FreeBSD 11.
-The κεκωλυκατε example yields a difference between 0.97s unemulated and 12.79s when inside a virtual machine. In short, emulation is costly. And
-the main culprit is the emulated filesystem. Just see what happens if you pick ZFS instead of UFS...
-A single word inside of just "Greek authors" takes 154s on a low end machine with a very slow 5400rpm 2.5" laptop
-drive.
-The processor load remains very low throughout the search: the culprit is the cheap hard drive. The same word can be found in 2.16s on the speedier machine:
+The κεκωλυκατε example yields a difference between 0.97s unemulated and 12.79s when inside a virtual machine.
+In short, emulation is costly unless you can figure out how to optimize the set-up.
+Emulation is very, very costly if you do not assign enough memory to the virtual machine.
+Humble hardware will also really struggle. On a low end machine with a very slow 5400rpm 2.5" laptop drive a single word inside
+of just "Greek authors" takes 154s. The processor load remains very low throughout the search:
+the culprit is the cheap hard drive. The same word can be found in 2.16s on the speedier machine:
 Hipparchia is <span class="emph">50x-75x faster</span> with a faster drive.
 A solid state drive makes a huge difference here (and just about everywhere else in your computing life). Consider investing in one.
 In sum, fast drives and then more CPUs and then faster CPUs would be the order in which to seek to make speed gains.
 <span class="emph">Access time to the data and not processing time of the data is far and away the most important factor.</span>
+[As a corollary you do not want to allow Hipparchia to burn through your RAM and to start swapping memory to disk.
+Hipparchia searches should consume well less than 1GB of RAM, so only low end systems that are being pushed already will have this problem.]
 Get Hipparchia's DB onto a solid state drive if at all possible. After a certain threshold a faster CPU will end up just doing more waiting
 for data to reach it. 2 or 3 workers on a moderately powerful machine with a fast drive is 85% as fast as a high end machine that in theory
 can do 600% more work per second.
