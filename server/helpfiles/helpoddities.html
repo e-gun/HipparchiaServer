@@ -34,7 +34,7 @@ Various oddities and peculiarities ensue.
     </li>
 </ul>
 
-<p><span class="label">Internal heterogeneity</span></p>
+<p><span class="label">Internal heterogeneity of the data</span></p>
 <ul class="forexample">
         <li><span class="emph">Dates</span>
             <ul class="numbered">
@@ -211,7 +211,7 @@ Various oddities and peculiarities ensue.
                     These problems are very difficult to address: one would need to revisit the original data.
                 </li>
                 <li>
-                    Homonymns confuse the counter: is that <span class="emph">esse</span> from <span class="emph">edo</span>
+                    Homonymns confuse the counter: is that <span class="emph">est</span> from <span class="emph">edo</span>
                     or from <span class="emph">sum</span>? The word will be assigned to both.
                     The net result is that "eating" suddenly seems to be every bit as common as "being", if not more so.
                 </li>
@@ -238,6 +238,22 @@ Various oddities and peculiarities ensue.
     your search instead.
     </p>
 
+<p><span class="label">Clickable index cross-references and dictionary lookups not always active</span></p>
+        <pre>
+                "The consequences of applying a function with too many arguments
+		(think more than tens of thousands of arguments) vary across
+		engines (JavaScriptCore has hard-coded argument limit of 65536),
+		because the limit (indeed even the nature of any
+		excessively-large-stack behavior) is unspecified. Some engines
+		will throw an exception. More perniciously, others will
+		arbitrarily limit the number of arguments actually passed to the
+		applied function."
+        </pre>
+    <p class="explanation">
+        A big index puts too many new objects onto the page. Only changes to the JavaScript libraries
+        that support HipparchiaServer can address this problem. It may go away some day (or just return
+        when the index has 128k items...)
+    </p>
 
 <p><span class="label">Betacode syntax conflicts with regex syntax</span></p>
     <p class="explanation">
