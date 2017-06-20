@@ -1,7 +1,7 @@
 ## CONFIGURATION NOTES
 ## [0] is probably the only place you will visit after your initial configuration: day-to-day default interface settings
 ## [1] and [3] and [5] are relevant to the initial configuration of HipparchiaServer
-## if DBUSER, DBNAME, and DBPASS re not properly configured, HipparchiaServer will not launch
+## if DBUSER, DBNAME, and DBPASS re not properly configured in [3], HipparchiaServer will not launch
 
 ### [0] the default settings for various 'session' items ###
 ##  [set any/all of these to suit your own typical use scenarios] ##
@@ -171,13 +171,13 @@ MPCOMMITCOUNT = 750
 # 	lots of memory but do nothing else. The same problem can arise
 # 	for the lookup clicks in a monster index   even if you turn the
 # 	browser clicking off. -1: always try to make every item of
-# 	every index clickable 0: never try to make any item clickable
+# 	every index clickable; 0: never try to make any item clickable;
 # 	N: do not try if you are indexing more than N lines (1500 is a
 # 	decent number to pick)
 #
 # CLICKABLEINDEXEDWORDSCAP: see CLICKABLEINDEXEDPASSAGECAP for the
-# 	issues. -1: always try to make every word of every index
-# 	clickable 0: never try to make any word clickable N: do not try
+# 	issues. -1: always try to make every word of every index;
+# 	clickable 0: never try to make any word clickable; N: do not try
 # 	if you are indexing more than N word (64000 is a decent number
 # 	to pick)
 #

@@ -9,6 +9,8 @@
 import re
 from string import punctuation
 
+import psycopg2
+
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
 from server.formatting.wordformatting import removegravity
@@ -178,9 +180,17 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 	q = qtemplate.format(db=authortable, whr=whr, l=mylimit)
 	d = (seeking,)
 
+
 	try:
 		cursor.execute(q, d)
 		found = cursor.fetchall()
+	except psycopg2.DataError:
+		# e.g., invalid regular expression: parentheses () not balanced
+		print('DataError; cannot search for »{d}«\n\tcheck for unbalanced parentheses and/or bad regex'.format(d=d[0]))
+	except psycopg2.InternalError:
+		# current transaction is aborted, commands ignored until end of transaction block
+		# print('transaction is aborted; did not execute',q, d)
+		pass
 	except:
 		print('could not execute', q, d)
 

@@ -298,7 +298,12 @@ def compilesearchtermequivalent(searchterm):
 	searchtermequivalent = re.sub(r'👽', '\w', searchtermequivalent)
 	searchtermequivalent = '({s})'.format(s=searchtermequivalent)
 
-	searchtermequivalent = re.compile(searchtermequivalent)
+	try:
+		searchtermequivalent = re.compile(searchtermequivalent)
+	except:
+		# if you try something like '(Xἰ' you will produce an error:
+		# sre_constants.error: missing ), unterminated subpattern at position 0
+		searchtermequivalent = None
 
 	return searchtermequivalent
 
