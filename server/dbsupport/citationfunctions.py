@@ -87,7 +87,7 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 	return lowandhighobject
 
 
-def locusintocitation(workobject, citationtuple):
+def locusintocitation(workobject, lineobject):
 	"""
 
 	transform something like ('9','109','8') into a citations like "Book 8, section 108, line 9"
@@ -98,9 +98,9 @@ def locusintocitation(workobject, citationtuple):
 	"""
 
 	wklvls = list(workobject.structure.keys())
-	cite = list(citationtuple)
+	cite = list(lineobject.locustuple())
 	wklvls.reverse()
-	citation = ''
+	citation = []
 	for level in wklvls:
 		try:
 			if workobject.isnotliterary() and workobject.structure[level] == ' ' and cite[level] == 'recto':
@@ -108,11 +108,11 @@ def locusintocitation(workobject, citationtuple):
 				# this check will make it so you don't see 'recto' over and over again when looking at inscriptions
 				pass
 			else:
-				citation += workobject.structure[level]+' '+cite[level]+', '
+				citation.append(workobject.structure[level]+' '+cite[level])
 		except:
 			# did you send me a partial citation like "book 2"?
 			pass
-	citation = citation[:-2]
+	citation = ', '.join(citation)
 
 	return citation
 

@@ -49,7 +49,7 @@ def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
 		ao = authordict[lo.authorid]
 		n = formatname(wo, ao)
 		t = wo.title
-		c = locusintocitation(wo, lo.locustuple())
+		c = locusintocitation(wo, lo)
 		resultlist.append(SearchResult(h+1, n, t, c, hitdict[h].universalid, [hitdict[h]]))
 
 	if so.context == 0:
@@ -389,7 +389,7 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 		else:
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)
 
-		citation = ro.citationhtml(ln.locus())
+		citation = ro.citationhtml(ln.avoidminimallocus())
 		resultsashtml.append(tabelrowtemplate.format(rs=rowstyle, cit=citation, h=h))
 
 	resultsashtml.append('</table>')

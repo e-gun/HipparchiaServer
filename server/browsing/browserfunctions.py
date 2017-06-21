@@ -92,7 +92,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 	biblio = getpublicationinfo(workobject, cursor)
 
-	citation = locusintocitation(workobject, focusline.locustuple())
+	citation = locusintocitation(workobject, focusline)
 	authorandwork = '<span class="author">{n}</span>, <span class="work">{t}</span><br />'.format(n=name, t=title)
 	# author + title can get pretty long
 	viewing = avoidlonglines(authorandwork, 100, '<br />', [])

@@ -13,8 +13,8 @@ The more salient things to know/use:
         <span class="lat">laudandum</span>, and <span class="lat">laudasti</span>.</li>
     <li><code>(a|b|abc)</code> brackets a set of strings to look for: a, or b, or abc. <code>laud(o|as|at)</code>
         is a search for the present singular indicative forms of <span class="lat">laudare</span>. It will also find
-        <span class="lat">conlaudat</span>. Note how you could use <code>co(n|l)laud</code> to make sure you got alternate
-        spellings of <span class="lat">conlaudare</span>.</li>
+        <span class="lat">conlaudat</span>. Note how you could use either <code>co(n|l)laud</code> or
+        <code>co[nl]laud</code> to make sure you got alternate spellings of <span class="lat">conlaudare</span>.</li>
     <li><code>.</code> any character: <code>laud.nt</code> will find <span class="lat">laudant</span>, <span class="lat">laudent</span>,
         and, theoretically, <span class="lat">laudZnt</span></li>
     <li><code>\w</code> is any 'word' character and is roughly equivalent to <code>[a-z]</code>. <code>\w</code> will also find any unaccented
@@ -24,7 +24,8 @@ The more salient things to know/use:
 Here are some examples that give you an idea of the sort of things that are possible. But major caveats follow.
 <ul class="forexample">
     <li><code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each.</li>
-    <li><code>t.t.t.t.t.</code> will find places where you have 't + anything' five times in a row.
+    <li><code>t.t.t.t.t.</code> will find places where you have 't + anything' five times in a row. Another way
+        of writing this same expression is <code>(t.){5}</code>
         Your results will be <span class="lat">heres ei extitit Titius</span>; and <span class="lat">nec diu restitit: tota...</span>
         Note that the whitespace between <span class="lat">extitit</span> and <span class="lat">Titius</span> qualified
         as 'anything' in the first match. But you might have composed the search with something else in mind.</li>

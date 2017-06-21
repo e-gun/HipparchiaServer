@@ -289,6 +289,25 @@ class dbWorkLine(object):
 
 		return citation
 
+	def avoidminimallocus(self):
+		"""
+
+		it is possible for locus() to return '1', vel sim when nocontexthtmlifysearchfinds() calls it
+
+		this is not very clickable
+
+		:return:
+		"""
+
+		l = self.locus()
+		try:
+			l = 'line ' + str(int(l))
+		except ValueError:
+			# 'try' will only succeed if l is a simple digit (and so needs expansion)
+			pass
+
+		return l
+
 	def anchoredlocus(self):
 		"""
 
