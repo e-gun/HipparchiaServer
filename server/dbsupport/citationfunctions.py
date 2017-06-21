@@ -90,7 +90,7 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 def locusintocitation(workobject, lineobject):
 	"""
 
-	transform something like ('9','109','8') into a citations like "Book 8, section 108, line 9"
+	generate a prolix citation like "Book 8, section 108, line 9"
 
 	:param workobject:
 	:param citationtuple:
@@ -112,6 +112,7 @@ def locusintocitation(workobject, lineobject):
 		except:
 			# did you send me a partial citation like "book 2"?
 			pass
+
 	citation = ', '.join(citation)
 
 	return citation
@@ -120,7 +121,8 @@ def locusintocitation(workobject, lineobject):
 def prolixlocus(workobject, citationtuple):
 	"""
 	transform something like ('9','109','8') into a citation like "Book 8, section 108, line 9"
-	differes from the preceding only by a range and a wklvls[level]
+	differs from the preceding because it does not have access to the lineobject: sessionselectionsinfo()
+	can only send you level numbers
 
 	:param workobject:
 	:param citationtuple:
@@ -131,14 +133,16 @@ def prolixlocus(workobject, citationtuple):
 	wklvls.reverse()
 	cite = list(citationtuple)
 	cite.reverse()
-	citation = ''
+	citation = []
 	for level in range(0,len(wklvls)):
 		try:
-			citation += workobject.structure[wklvls[level]]+' '+cite[level]+', '
+			citation.append(workobject.structure[wklvls[level]]+' '+cite[level])
 		except:
 			# did you send me a partial citation like "book 2"?
 			pass
-	citation = citation[:-2]
+
+	citation = ', '.join(citation)
+
 	return citation
 
 
@@ -262,16 +266,20 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 		citationlist = perseuscitationsintohipparchiacitations(citationlist)
 		citationlist.reverse()
 		auid = workobject.universalid[0:6]
-		query = 'SELECT index FROM ' + auid + ' WHERE wkuniversalid=%s AND '
+
+		query = []
+		query.append('SELECT index FROM {a} WHERE wkuniversalid=%s'.format(a=auid))
 		try:
 			for level in range(numberoflevels-1, numberoflevels-len(citationlist)-1,-1):
-				query += lmap[level] + '=%s AND '
+				query.append('{lvl}=%s'.format(lvl=lmap[level]))
 		except:
-			query += lmap[0] + '=%s AND '
-			
-		# drop the final 'AND '
-		query = query[:-4] + ' ORDER BY index ASC'
+			query.append('{lvl}=%s'.format(lvl=lmap[0]))
+
+		query = ' AND '.join(query)
+		query += ' ORDER BY index ASC'
+
 		data = tuple([workobject.universalid]+citationlist)
+
 		try:
 			cursor.execute(query, data)
 			found = cursor.fetchone()
