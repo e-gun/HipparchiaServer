@@ -293,6 +293,7 @@ def insertparserids(lineobject):
 def insertcrossreferencerow(lineobject):
 	"""
 	inscriptions and papyri have relevant bibliographic information that needs to be displayed
+
 	:param lineobject:
 	:return:
 	"""

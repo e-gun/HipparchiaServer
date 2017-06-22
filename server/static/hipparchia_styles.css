@@ -408,6 +408,22 @@ body {
 	text-shadow: 1px 1px #aaa;
 	 }
 
+.unhandledpercent{
+    position: relative;
+	top: -0.5em;
+	font-size: 60%;
+	color: #080;
+	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    }
+
+.unhandledpound{
+    position: relative;
+	top: -0.5em;
+	font-size: 60%;
+	color: #800;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    }
+
 .wordcounts{
     font-size: 85%;
     }
