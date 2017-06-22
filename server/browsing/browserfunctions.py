@@ -257,16 +257,16 @@ def insertparserids(lineobject):
 				lastword = words[-1]
 				for word in words:
 					try:
-						if word[-1] in [',', ';', '.', '?', '!', ')', '′', '“', '·']:
+						if word[-1] in [',', ';', '.', '?', '!', ')', '′', '“', '·', '⟩', '}']:
 							try:
 								if word[-6:] != '&nbsp;':
-									word = '<observed id="{wa}">{wa}</observed>{wb} '.format(wa=word[:-1], wb=word[-1])
+									word = '<observed id="{wa}">{wa}</observed>{wb}'.format(wa=word[:-1], wb=word[-1])
 							except:
-								word = '<observed id="{wa}">{wa}</observed>{wb} '.format(wa=word[:-1], wb=word[-1])
+								word = '<observed id="{wa}">{wa}</observed>{wb}'.format(wa=word[:-1], wb=word[-1])
 						elif word[-1] == '-' and word == lastword:
 							word = '<observed id="{h}">{w}</observed> '.format(h=hyphenated, w=word)
-						elif word[0] in ['(', '‵', '„', '\'']:
-							word = '{wa}<observed id="{wb}">{wb}"</observed> '.format(wa=word[0], wb=word[1:])
+						elif word[0] in ['(', '‵', '„', '\'', '⟨', '{']:
+							word = '{wa}<observed id="{wb}">{wb}"</observed>'.format(wa=word[0], wb=word[1:])
 						else:
 							word = '<observed id="{w}">{w}</observed> '.format(w=word)
 						newline += word

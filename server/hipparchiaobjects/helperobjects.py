@@ -85,8 +85,7 @@ class SearchResult(object):
 
 		citationtemplate = """
 			<span class="findnumber">[{hn}]</span>&nbsp;&nbsp;
-			<span class="foundauthor">{au}</span>,&nbsp;
-			<span class="foundwork">{wk}</span>:
+			<span class="foundauthor">{au}</span>,&nbsp;<span class="foundwork">{wk}</span>:
 			<browser id="{url}"><span class="foundlocus">{cs}</span></browser>"""
 
 		locushtml = citationtemplate.format(hn=self.hitnumber, au=self.author, wk=self.work, url=self.clickurl,
