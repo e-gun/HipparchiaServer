@@ -576,4 +576,3 @@ $('#genreinfo').click( function() {
                 document.getElementById('genrelistcontents').innerHTML = selectiondata;
                              });
     });
-

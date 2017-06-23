@@ -13,11 +13,45 @@
 	src: url('/static/ttf/DejaVuSansCondensed-Oblique.ttf') format('truetype');
 	}
 
+/* define colors by variable so you can change them all right here */
+
+:root {
+  --main-body-color: hsla(0, 0%, 97%, 1);
+  --main-font-color: hsla(0, 0%, 6%, 1);
+  --babyblue: hsla(200, 33%, 95%, 1);
+  --black: hsla(0, 0%, 0%, 1);
+  --blue: hsla(240, 100%, 27%, 1);
+  --brtblue: hsla(236, 44%, 40%, 1);
+  --brtgreen: hsla(120, 43%, 77%, 1);
+  --deepblue: hsla(233, 77%, 26%, 1);
+  --dkbabyblue: hsla(237, 43%, 57%, 1);
+  --dkgreen: hsla(120, 80%, 20%, 1);
+  --dkgrey: hsla(0, 0%, 33%, 1);
+  --dkteal: hsla(199, 22%, 26%, 1);
+  --green: hsla(120, 100%, 27%, 1);
+  --huedgrey: hsla(240, 6%, 49%, 1);
+  --lessoffwhite: hsla(0, 0%, 98%, 1);
+  --limegreen: hsla(71, 92%, 28%, 1);
+  --ltbabyblue: hsla(200, 33%, 95%, 1);
+  --ltgrey: hsla(0, 0%, 90%, 1);
+  --maroon: hsla(346, 77%, 26%, 1);
+  --midgrey: hsla(0, 0%, 67%, 1);
+  --offwhite: hsla(0, 0%, 99%, 1);
+  --orange: hsla(47, 100%, 30%, 1);
+  --pink: hsla(0, 33%, 95%, 1);
+  --red: hsla(0, 100%, 27%, 1);
+  --rustedorange: hsla(23, 37%, 39%, 1);
+  --skyblue: hsla(205, 92%, 37%, 1);
+  --teal: hsla(196, 14%, 39%, 1);
+  --vdkteal: hsla(196, 27%, 20%, 1)
+}
+
+
 body {
-	background: #f6f6f6;
+	background: var(--main-body-color);
 	margin: 10px 10px 10px 10px;
 	font-family: Arial, 'DejaVuSans', sans-serif;
-	color: #101010;
+	color: var(--main-font-color);
 	font-size: 90%;
 	line-height: 1.4;
 	}
@@ -28,7 +62,7 @@ body {
 	}
 
 .activeoption {
-    color: #556970;
+    color: var(--teal);
     font-family: 'DejaVuSansMono', monospace;
     }
 
@@ -41,7 +75,7 @@ body {
     }
 
 .browsercite {
-	color: #556970;
+	color: var(--teal);
 	font-weight: normal;
 	}
 
@@ -59,24 +93,24 @@ body {
 	}
 
 .colorhighlight {
-	color: #760f27;
+	color: var(--maroon);
 	}
 
 .crossreference {
 	font-style: italic;
-	color: #895b3f;
+	color: var(--rustedorange);
 	text-align: center;
 	}
 
 .currentlyviewing {
 	text-align: left;
 	font-weight: bold;
-	color: #393F94;
+	color: var(--brtblue);
 	padding-bottom: 0px;
 	}
 
 .date{
-    color: #722;
+    color: var(--maroon);
     }
 
 .denominator{
@@ -86,24 +120,24 @@ body {
     }
 
 .dictionaryform {
-	color: #334750;
+	color: var(--dkteal);
 	font-style: italic;
 	font-weight: bold;
 	}
 
 .dictionaryheading {
-	color: #970;
+	color: var(--orange);
 	font-weight: 600;
 	font-size: 120%;
 	}
 
 .editorialmarker_squarebrackets{
-    color: #757585;
+    color: var(--huedgrey);
     }
 
 .emph {
 	font-weight: 600;
-	color: #0f1b76;
+	color: var(--deepblue);
 	}
 
 .emphatic {
@@ -126,11 +160,11 @@ body {
 
 .findnumber {
 	font-weight: normal;
-	color: #253940;
+	color: var(--vdkteal);
 	}
 
 .focusline, .highlight {
-	color: #880000;
+	color: var(--red);
 	font-weight: 600;
 	}
 
@@ -141,12 +175,12 @@ body {
 	}
 
 .foundlocus:hover{
-	color: #393F94;
-	text-shadow: 1px 1px #aaa;
+	color: var(--brtblue);
+	text-shadow: 1px 1px var(--midgrey);
 	 }
 
 .foundtext {
-	color: #354b53;
+	color: var(--dkteal);
 	}
 
 .foundwork {
@@ -154,7 +188,7 @@ body {
 	}
 
 .homonym {
-    color: #555;
+    color: var(--dkgrey);
     font-style: italic;
 	}
 
@@ -172,14 +206,14 @@ body {
 
 .label {
 	font-weight: 600;
-	font-color: #253940;
+	font-color: var(--vdkteal);
 	padding-left: 25px;
 	padding-right: 10px;
 	}
 
 .labelcell {
 	font-weight: 600;
-	font-color: #253940;
+	font-color: var(--vdkteal);
 	vertical-align: top;
 	text-align: center;
 	}
@@ -216,7 +250,7 @@ body {
     }
 
 .loadoptions:hover {
-	color: #ada;
+	color: var(--brtgreen);
 	}
 
 .locus {
@@ -226,7 +260,7 @@ body {
 	}
 
 .marginaltext{
-	color: #008800;
+	color: var(--green);
 	font-size: 80%;
 	font-style: italic;
 	text-indent: -5px;
@@ -234,20 +268,20 @@ body {
 	}
 
 .match, .proximate {
-	color: #000;
+	color: var(--black);
 	font-weight: 600;
 	border: 1px dotted black;
 	}
 
 .metrics{
-	color: #000;
+	color: var(--black);
 	font-size: 90%;
 	font-style: italic;
 	padding-left: 10px;
 	}
  
 .observed {
-	color: #880000;
+	color: var(--red);
 	padding-right: 10px;
 	}
 
@@ -257,7 +291,7 @@ body {
 	}
 
 .overline {
-	border-top: 1px #000;
+	border-top: 1px var(--black);
 	}
 
 .overline {
@@ -265,8 +299,8 @@ body {
 	}
 
 .overunder {
-	border-bottom: 1px #000;
-	border-top: 1px #000;
+	border-bottom: 1px var(--black);
+	border-top: 1px var(--black);
 	}
 
 .pickedgenre {
@@ -285,7 +319,7 @@ body {
     }
 
 .prevalence {
-    color: #0f1b76;
+    color: var(--deepblue);
     }
 
 .progress {
@@ -307,16 +341,16 @@ body {
 
 .romannumerals {
 	font-variant: small-caps;
-	color: 880000;
+	color: var(--red);
 	}
 
 .sampleoutput {
-	color: #455f56;
+	color: var(--dkteal);
 	font-style: italic;
 	}
 
 .saveoptions:hover, #clearselections:hover {
-	color: #daa;
+	color: var(--pink);
 	}
 
 .scholium {
@@ -325,12 +359,12 @@ body {
 
 .searchsel:hover {
 	/* inactive color: #993354;
-	text-shadow: 1px 1px #aaa;
+	text-shadow: 1px 1px var(--midgrey);
 	*/ }
 
 .selection:hover{
-	color: #393F94;
-	text-shadow: 1px 1px #aaa;
+	color: var(--brtblue);
+	text-shadow: 1px 1px var(--midgrey);
 	 }
 
 .serviusformatting {
@@ -357,7 +391,7 @@ body {
 	}
 
 .sought {
-	color: #0f1b76;
+	color: var(--deepblue);
 	font-weight: bold;
 	font-family: DejaVuSansMono, monospace;
     }
@@ -374,13 +408,13 @@ body {
 
 .textdate {
 	font-size: 85%;
-	color: #895b3f;
+	color: var(--rustedorange);
 	text-align: center;
 	}
 
 .textuallemma, .interlineartext, .interlinearmarginalia, .marginaltext {
 	text-style: italic;
-	text-color: 000088;
+	text-color: var(--blue);
 	}
 
 .translation {
@@ -399,25 +433,25 @@ body {
 	}
 
 .ui-icon ui-icon-arrowthick-1-e:hover{
-	color: #393F94;
-	text-shadow: 1px 1px #aaa;
+	color: var(--brtblue);
+	text-shadow: 1px 1px var(--midgrey);
 	 }
 
 .ui-icon ui-icon-arrowthick-1-w:hover{
-	color: #393F94;
-	text-shadow: 1px 1px #aaa;
+	color: var(--brtblue);
+	text-shadow: 1px 1px var(--midgrey);
 	 }
 
 .unhandledpercent{
 	top: -0.5em;
 	font-size: 80%;
-	color: #777;
+	color: var(--huedgrey);
     }
 
 .unhandledpound{
 	top: -0.5em;
 	font-size: 80%;
-	color: #777;
+	color: var(--huedgrey);
     }
 
 .wordcounts{
@@ -429,22 +463,6 @@ body {
 	font-weight: bold;
 	}
 
-@blue: #288DD5;
-	
-@cyan: #15968D;
-
-@green: #629655;
-	
-@magenta: #E74A93;
-	
-@orange: #E05F27;
-	
-@red: #E74A93;
-	
-@violet: #797FD4;
-	
-@yellow: #B68800;
-	
 #accentsactive, #accentsnotactive {
 	padding-left: 0px;
 	font-size: 120%;
@@ -459,7 +477,7 @@ body {
 	}
 
 #authorholdings, #searchlistcontents {
-	background-color: #fcfcfc;
+	background-color: var(--offwhite);
 	border: 1px dotted black;
 	width: 50%;
 	margin: auto;
@@ -474,7 +492,7 @@ body {
 	padding-bottom: 5px;
 	padding-left: 20px;
 	padding-right: 20px;
-	background-color: #fafafa;
+	background-color: var(--lessoffwhite);
 	font-size: 115%;
 	line-height: 1.1;
 	}
@@ -517,14 +535,14 @@ body {
 	bottom: 125px;
 	box-shadow: 5px 5px 2px #999;
 	padding: 10px;
-	background-color: #fafafa;
+	background-color: var(--lessoffwhite);
 	overflow: auto;
 	}
 
 #outputbox {
 	text-align: center;
 	font-size: 90%;
-	color: #354b53;
+	color: var(--dkteal);
 	}
 
 #parserdialog {
@@ -551,7 +569,7 @@ body {
 	padding-bottom: 20px;
 	padding-left: 20px;
 	padding-right: 20px;
-	background-color: #fcfcfc;
+	background-color: var(--offwhite);
 	border: 1px dotted black;
 	width: 50%;
 	margin: auto;
@@ -560,7 +578,7 @@ body {
 #searchsummary, #pollingdata {
 	padding: 10px;
 	text-align: left;
-	color: #AE5727;
+	color: var(--rustedorange);
 	}
 
 #selectionsandexclusions {
@@ -587,20 +605,20 @@ analysis {
 	}
 
 author {
-	color: #6c71c4;
+	color: var(--dkbabyblue);
 	}
 
 bibl {
-	color: #859900;
+	color: var(--limegreen);
 	}
 
 bibl:hover{
-	color: #393F94;
-	text-shadow: 1px 1px #aaa;
+	color: var(--brtblue);
+	text-shadow: 1px 1px var(--midgrey);
 	 }
 
 browser {
-	color: #393F94;
+	color: var(--brtblue);
 	}
 
 caption {
@@ -611,7 +629,7 @@ caption {
 
 code {
 	font-size: 100%;
-	color: #086db5;
+	color: var(--skyblue);
 	font-family: DejaVuSansMono, monospace;
 	}
 
@@ -652,7 +670,7 @@ hmu_papyrological_fraction{ }
 
 hmu_roman_in_a_greek_text {
 	font-size: 90%;
-	color: #241;
+	color: var(--dkgreen)
 	font-family: DejaVuSansCondensed;
 	}
 
@@ -662,13 +680,13 @@ hmu_title {
 	}
 
 indexedlocation:hover{
-	color: #393F94;
-	text-shadow: 1px 1px #aaa;
+	color: var(--brtblue);
+	text-shadow: 1px 1px var(--midgrey);
 	 }
 
 indexobserved:hover{
-	color: #393F94;
-	text-shadow: 1px 1px #aaa;
+	color: var(--brtblue);
+	text-shadow: 1px 1px var(--midgrey);
 	 }
 
 input {
@@ -692,12 +710,12 @@ locus {
 	}
 
 observed:hover{
-	color: #393F94;
-	text-shadow: 1px 1px #aaa;
+	color: var(--brtblue);
+	text-shadow: 1px 1px var(--midgrey);
 	 }
 
 orth {
-	color: #000088;
+	color: var(--blue);
 	}
 
 p.level1 {}
@@ -725,13 +743,13 @@ sense {
 
 smallcode {
 	font-size: 85%;
-	color: #086db5;
+	color: var(--skyblue);
 	font-family: DejaVuSansMono, monospace;
 	}
 
 span.lat {
 	font-style: italic;
-	font-color: #253940;
+	font-color: var(--vdkteal);
 	}
 
 table {
@@ -751,7 +769,7 @@ td.browsercite {
 	}
 
 td.count {
-	color: #AE5727;
+	color: var(--orange);
 	text-align: center;
 	}
 
@@ -763,17 +781,17 @@ td.crossreference {
 
 td.headword {
     font-weight: bold;
-    color: #600;
+    color: var(--maroon);
     }
 
 td.infocells {
-	background-color: hsl(200, 33%, 95%);
+	background-color: var(--ltbabyblue);
 	/* background-color: hsl(0, 0%, 95%);
 	*/ text-align: center;
 	}
 
 td.infocellx {
-	background-color: hsl(0, 33%, 95%);
+	background-color: var(--pink);
 	/* background-color: hsl(0, 0%, 90%);
 	*/ text-align: center;
 	}
@@ -810,7 +828,7 @@ th {
 	}
 
 tr.nthrow{
-    background-color: #e6e6e6;
+    background-color: var(--ltgrey);
     }
 
 transl {
@@ -843,4 +861,3 @@ ul.roman {
 worktitle {
 	font-style: italic;
 	}
-
