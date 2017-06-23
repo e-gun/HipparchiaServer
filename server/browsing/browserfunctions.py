@@ -132,6 +132,14 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		else:
 			columnb = insertparserids(line, editorialcontinuation)
 
+		if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
+			if line.bracketopenedbutnotclosed():
+				editorialcontinuation = True
+			elif (previousline.bracketopenedbutnotclosed() or editorialcontinuation) and not line.bracketclosed():
+				editorialcontinuation = True
+			else:
+				editorialcontinuation = False
+
 		if line.index == focusline.index:
 			# highlight the citationtuple line
 			columna = line.locus()
@@ -159,13 +167,6 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		linehtml += '\n\t<td class="browsercite">{ca}</td>\n</tr>\n'.format(ca=columna)
 
 		ouputtable.append(linehtml)
-		if line.bracketopenedbutnotclosed():
-			editorialcontinuation = True
-		elif (previousline.bracketopenedbutnotclosed() or editorialcontinuation) and not line.bracketclosed():
-			editorialcontinuation = True
-		else:
-			editorialcontinuation = False
-
 		previousline = line
 
 	if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
