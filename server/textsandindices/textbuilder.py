@@ -48,6 +48,8 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 
 	if len(results) > 0:
 		previousline = dblineintolineobject(results[0])
+		editorialcontinuation = False
+
 		for line in results:
 			thisline = dblineintolineobject(line)
 			
@@ -65,7 +67,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 				output.append(datehtml)
 
 			if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
-				columnb = thisline.markeditorialinsersions()
+				columnb = thisline.markeditorialinsersions(editorialcontinuation)
 			else:
 				columnb = thisline.accented
 
@@ -87,6 +89,14 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 			linehtml = '<tr><td class="browsercite">{ca}</td><td class="lineoftext">{cb}</td></tr>\n'.format(ca=columna, cb=columnb)
 	
 			output.append(linehtml)
+
+			if thisline.bracketopenedbutnotclosed():
+				editorialcontinuation = True
+			elif (previousline.bracketopenedbutnotclosed() or editorialcontinuation) and not thisline.bracketclosed():
+				editorialcontinuation = True
+			else:
+				editorialcontinuation = False
+
 			previousline = thisline
 	
 	output.append('</table>\n')

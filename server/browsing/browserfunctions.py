@@ -116,7 +116,8 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		pass
 
 	previousline = lines[0]
-
+	editorialcontinuation = False
+	
 	for line in lines:
 		if workobject.isnotliterary() and line.index == workobject.starts:
 			# line.index == workobject.starts added as a check because
@@ -129,7 +130,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
 			columnb = line.showlinehtml()
 		else:
-			columnb = insertparserids(line)
+			columnb = insertparserids(line, editorialcontinuation)
 
 		if line.index == focusline.index:
 			# highlight the citationtuple line
@@ -158,6 +159,13 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		linehtml += '\n\t<td class="browsercite">{ca}</td>\n</tr>\n'.format(ca=columna)
 
 		ouputtable.append(linehtml)
+		if line.bracketopenedbutnotclosed():
+			editorialcontinuation = True
+		elif (previousline.bracketopenedbutnotclosed() or editorialcontinuation) and not line.bracketclosed():
+			editorialcontinuation = True
+		else:
+			editorialcontinuation = False
+
 		previousline = line
 
 	if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
@@ -216,7 +224,7 @@ def checkfordocumentmetadata(line, workobject):
 	return metadatahtml
 
 
-def insertparserids(lineobject):
+def insertparserids(lineobject, editorialcontinuation=False):
 	"""
 	set up the clickable thing for the browser by bracketing every word with something the JS can respond to:
 		<observed id="ἐπειδὲ">ἐπειδὲ</observed>
@@ -240,7 +248,7 @@ def insertparserids(lineobject):
 	# the function; nevertheless the clicks will remain broken even after you get to 'ἱε[ρέω]ϲ'
 
 	if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
-		theline = lineobject.markeditorialinsersions()
+		theline = lineobject.markeditorialinsersions(editorialcontinuation)
 
 	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',theline)
 	hyphenated = lineobject.hyphenated

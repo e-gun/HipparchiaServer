@@ -75,7 +75,7 @@ body {
     }
 
 .browsercite {
-	color: var(--teal);
+	color: var(--dkteal);
 	font-weight: normal;
 	}
 
@@ -260,7 +260,7 @@ body {
 	}
 
 .marginaltext{
-	color: var(--green);
+	color: var(--dkgreen);
 	font-size: 80%;
 	font-style: italic;
 	text-indent: -5px;
@@ -670,7 +670,7 @@ hmu_papyrological_fraction{ }
 
 hmu_roman_in_a_greek_text {
 	font-size: 90%;
-	color: var(--dkgreen)
+	color: var(--dkgreen);
 	font-family: DejaVuSansCondensed;
 	}
 

@@ -503,7 +503,7 @@ class dbWorkLine(object):
 
 		return allbutfirstandlastword
 
-	def markeditorialinsersions(self):
+	def markeditorialinsersions(self, continuation=False):
 		"""
 
 		set a '<span>...</span>' around square-bracketed line segments
@@ -512,6 +512,46 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		spanned = re.sub(r'\[(.*?)(\]|$)', r'[<span class="editorialmarker_squarebrackets">\1</span>\2', self.accented)
+		openandmaybeclose = re.compile(r'\[(.*?)(\]|$)')
+		closeandmaybeopen = re.compile(r'(^|\[)(.*?)\]')
+
+		spanned = self.accented
+		if re.search(openandmaybeclose,self.accented):
+			spanned = re.sub(openandmaybeclose, r'[<span class="editorialmarker_squarebrackets">\1</span>\2', self.accented)
+			return spanned
+		elif re.search(closeandmaybeopen,self.accented):
+			spanned = re.sub(closeandmaybeopen, r'\1<span class="editorialmarker_squarebrackets">\2</span>]', self.accented)
+			return spanned
+		elif continuation:
+			spanned = '<span class="editorialmarker_squarebrackets">{sa}</span>'.format(sa=self.accented)
+			return spanned
 
 		return spanned
+
+	def bracketopenedbutnotclosed(self):
+		"""
+
+		return True if you have 'abcd[ef ghij' and so need to continue marking editorial material
+
+		:return:
+		"""
+
+		openandnotclose = re.compile(r'\[[^\]]{0,}$')
+
+		if re.search(openandnotclose,self.accented):
+			return True
+		else:
+			return False
+
+	def bracketclosed(self):
+		"""
+
+		return true if there is a ']' in the line
+
+		:return:
+		"""
+
+		if re.search(r'\]', self.accented):
+			return True
+		else:
+			return False
