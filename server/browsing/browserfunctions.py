@@ -266,6 +266,8 @@ def insertparserids(lineobject, editorialcontinuation=False):
 	for seg in segments:
 		if seg[0] == '<':
 			# this is markup don't 'observe' it
+			# '+=' will prevent an extra whitespace from appearing in the html
+			# as seen below: these require extra cleaning in the end
 			newline[-1] += seg
 		else:
 			words = seg.split(' ')
@@ -301,8 +303,8 @@ def insertparserids(lineobject, editorialcontinuation=False):
 	newline = [re.sub(ob, '', n) for n in newline]
 	newline = [re.sub('> <', '><', n) for n in newline]
 	newline = ''.join(newline)
-	newline = re.sub(r'\s(</span>)([\)\]\}])', r'\1\2', newline)
-	newline = re.sub(r'([\[\(\{])\s(<span)', r'\1\2', newline)
+	newline = re.sub(r'\s(</span>)([⟩\)\]\}])', r'\1\2', newline)
+	newline = re.sub(r'([⟨\(\[\{])\s(<span)', r'\1\2', newline)
 
 	return newline
 
