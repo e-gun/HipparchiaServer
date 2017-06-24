@@ -250,3 +250,25 @@ def supplementalindexjs():
 	"""
 
 	return js
+
+
+def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationvalue):
+	"""
+
+	used to determine if a bracket span is running for multiple lines
+
+	:param lineobject:
+	:param previouslineobject:
+	:return:
+	"""
+
+	if thisline.bracketopenedbutnotclosed():
+		editorialcontinuation = True
+	elif not thisline.samelevelas(previousline):
+		editorialcontinuation = False
+	elif (previousline.bracketopenedbutnotclosed() or previouseditorialcontinuationvalue) and not thisline.bracketclosed():
+		editorialcontinuation = True
+	else:
+		editorialcontinuation = False
+
+	return editorialcontinuation

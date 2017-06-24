@@ -291,9 +291,8 @@ body {
 	color: var(--vdkteal);
 	}
 
-.focusline, .highlight {
-	color: var(--red);
-	font-weight: 600;
+.focusline {
+	text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
 	}
 
 .foundauthor {
@@ -313,6 +312,10 @@ body {
 
 .foundwork {
 	font-style: italic;
+	}
+
+.highlight {
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
 	}
 
 .homonym {
@@ -396,9 +399,10 @@ body {
 	}
 
 .match, .proximate {
-	color: var(--black);
+	color: var(--red);
 	font-weight: 600;
 	border: 1px dotted black;
+	text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
 	}
 
 .metrics{
@@ -803,15 +807,14 @@ the net result is visibly unbalanced spans
 
 furthermore in the hybrid world of the CHR data, you see walls of this
 
-so this is 'off for now'
+*/
 
 hmu_roman_in_a_greek_text {
 	font-size: 90%;
-	color: var(--brown);
 	font-family: DejaVuSansCondensed;
 	}
 
-*/
+
 
 
 hmu_title {

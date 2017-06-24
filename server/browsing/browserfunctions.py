@@ -13,6 +13,7 @@ from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
 from server.formatting.bibliographicformatting import getpublicationinfo, avoidlonglines
+from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -133,12 +134,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			columnb = insertparserids(line, editorialcontinuation)
 
 		if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
-			if line.bracketopenedbutnotclosed():
-				editorialcontinuation = True
-			elif (previousline.bracketopenedbutnotclosed() or editorialcontinuation) and not line.bracketclosed():
-				editorialcontinuation = True
-			else:
-				editorialcontinuation = False
+			editorialcontinuation = setcontinuationvalue(line, previousline, editorialcontinuation)
 
 		if line.index == focusline.index:
 			# highlight the citationtuple line

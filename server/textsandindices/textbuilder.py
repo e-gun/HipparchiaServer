@@ -10,6 +10,7 @@ import re
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject
+from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
 
 def buildtext(work, firstline, lastline, linesevery, cursor):
@@ -69,13 +70,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 			if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
 				brackettypes = ['square', 'rounded', 'angled']
 				columnb = thisline.markeditorialinsersions(brackettypes, editorialcontinuation)
-				if thisline.bracketopenedbutnotclosed():
-					editorialcontinuation = True
-				elif (
-					previousline.bracketopenedbutnotclosed() or editorialcontinuation) and not thisline.bracketclosed():
-					editorialcontinuation = True
-				else:
-					editorialcontinuation = False
+				editorialcontinuation = setcontinuationvalue(thisline, previousline, editorialcontinuation)
 			else:
 				columnb = thisline.accented
 

@@ -586,7 +586,13 @@ class dbWorkLine(object):
 		r = brackettypes[type]['regex']
 		openandnotclose = re.compile(r)
 
-		if re.search(openandnotclose,self.accented):
+		# chorus of aeschylus...
+		exceptions = [re.compile(r'\[(ϲτρ|ἀντ)\. .\.'),
+		              re.compile(r'\[ἐπῳδόϲ')]
+
+		falsify = [re.search(e, self.accented) for e in exceptions]
+
+		if re.search(openandnotclose,self.accented) and not falsify:
 			return True
 		else:
 			return False
