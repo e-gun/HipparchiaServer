@@ -540,7 +540,13 @@ class dbWorkLine(object):
 				'o': '⟨',
 				'c': '⟩'
 			},
-			'curly': {}
+			'curly': {
+				'ocreg': r'\{(.*?)(\}|$)',
+				'coreg': r'(^|\{)(.*?)\}',
+				'class': 'editorialmarker_curlybrackets',
+				'o': '{',
+				'c': '}'
+			}
 		}
 
 		theline = self.accented
@@ -581,6 +587,7 @@ class dbWorkLine(object):
 			'square': { 'regex': r'\[[^\]]{0,}$' },
 			'round': {'regex': r'\([^\)]{0,}$'},
 			'angled': {'regex': r'⟨[^⟩]{0,}$'},
+			'curly': {'regex': r'\{[^\}]{0,}$'},
 			}
 
 		r = brackettypes[type]['regex']
@@ -611,6 +618,7 @@ class dbWorkLine(object):
 			'square': {'c': r'\]'},
 			'round': {'c': r'\)'},
 			'angled': {'c': r'⟩'},
+			'curly': {'c': r'\}'},
 		}
 
 		close = brackettypes[type]['c']

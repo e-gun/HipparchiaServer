@@ -98,6 +98,11 @@ function loadoptions() {
             } else {
             $('#bracketangled').prop('checked', true);
             }
+        if (data.bracketcurly == 'no') {
+            $('#bracketcurly').prop('checked', false);
+            } else {
+            $('#bracketcurly').prop('checked', true);
+            }
         if (data.authorssummary == 'no') {
             $('#authorssummary').prop('checked', false);
             } else {
@@ -443,7 +448,15 @@ $('#bracketround').change(function () {
 
 $('#bracketangled').change(function () {
     if(this.checked) {
-        setoptions('bracketround', 'yes'); } else { setoptions('bracketround', 'no');
+        setoptions('bracketangled', 'yes'); } else { setoptions('bracketangled', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    });
+
+$('#bracketcurly').change(function () {
+    if(this.checked) {
+        setoptions('bracketcurly', 'yes'); } else { setoptions('bracketcurly', 'no');
     }
     // because some items on your list just got purged?
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });

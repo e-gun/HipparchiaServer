@@ -82,6 +82,7 @@
     .prevalence
     .sought
 --dkbabyblue
+    .editorialmarker_curlybrackets
     author
 --dkgreen
     .marginaltext
@@ -247,10 +248,9 @@ body {
     color: var(--limegreen);
     }
 
-
-.editorialmarker_angledquotes {
+.editorialmarker_curlybrackets {
     font-weight: normal;
-    color: var(--rustedorange);
+    color: var(--dkbabyblue);
     }
 
 .editorialmarker_roundbrackets {

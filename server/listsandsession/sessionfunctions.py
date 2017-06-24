@@ -61,6 +61,7 @@ def sessionvariables():
 		session['bracketsquare'] = hipparchia.config['DEFAULTHIGHLIGHTSQUAREBRACKETS']
 		session['bracketround'] = hipparchia.config['DEFAULTHIGHLIGHTROUNDBRACKETS']
 		session['bracketangled'] = hipparchia.config['DEFAULTHIGHLIGHTANGLEDBRACKETS']
+		session['bracketcurly'] = hipparchia.config['DEFAULTHIGHLIGHTCURLYBRACKETS']
 
 	return
 
@@ -99,7 +100,8 @@ def modifysessionvar(param,val):
 		'headwordindexing',
 		'bracketsquare',
 		'bracketround',
-		'bracketangled'
+		'bracketangled',
+		'bracketcurly'
 		]
 
 	if param in availableoptions:
@@ -127,7 +129,7 @@ def modifysessionvar(param,val):
 
 	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
 				   'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary','authorssummary','quotesummary',
-					'bracketsquare', 'bracketround', 'bracketangled' ]:
+					'bracketsquare', 'bracketround', 'bracketangled' , 'bracketcurly']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 
@@ -858,6 +860,8 @@ def findactivebrackethighlighting(s=session):
 		brackets.append('round')
 	if s['bracketangled'] == 'yes':
 		brackets.append('angled')
+	if s['bracketcurly'] == 'yes':
+		brackets.append('curly')
 	return brackets
 
 

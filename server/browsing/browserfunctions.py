@@ -251,7 +251,7 @@ def insertparserids(lineobject, editorialcontinuation=False):
 	spacedclosings = re.compile(r'[,;.?!:·′“”†]$')
 	sometimesspacedclosings = re.compile(r'[)⟩}]$')
 	openings = re.compile(r'^[(‵„“⟨{†]')
-	neveropens = re.compile(r'^[)⟩}]')
+	neveropens = re.compile(r'^[)⟩}\]]')
 
 	for seg in segments:
 		if seg[0] == '<':
@@ -269,20 +269,22 @@ def insertparserids(lineobject, editorialcontinuation=False):
 
 			for word in words:
 				try:
-					if re.search(spacedclosings, word) or re.search(sometimesspacedclosings, word):
+					if re.search(neveropens, word) and not re.search(spacedclosings, word):
+						word = '{wa}<observed id="{wb}">{wb}</observed>'.format(wa=word[0], wb=word[1:])
+					elif re.search(neveropens, word) and re.search(spacedclosings, word):
+						word = '{wa}<observed id="{wb}">{wb}</observed>{wc} '.format(wa=word[0], wb=word[1:-1], wc=word[-1])
+					elif re.search(spacedclosings, word) or re.search(sometimesspacedclosings, word):
 						try:
 							if word[-6:] != '&nbsp;':
 								word = '<observed id="{wa}">{wa}</observed>{wb} '.format(wa=word[:-1], wb=word[-1])
 						except:
 							word = '<observed id="{wa}">{wa}</observed>{wb} '.format(wa=word[:-1], wb=word[-1])
-					elif re.search(sometimesspacedclosings, word):
-					 	word = '<observed id="{wa}">{wa}</observed>{wb}'.format(wa=word[:-1], wb=word[-1])
+					# elif re.search(sometimesspacedclosings, word):
+					# 	word = '<observed id="{wa}">{wa}</observed>{wb}'.format(wa=word[:-1], wb=word[-1])
 					elif word[-1] == '-' and word == lastword:
 						word = '<observed id="{h}">{w}</observed> '.format(h=hyphenated, w=word)
 					elif re.search(openings, word):
 						word = '{wa}<observed id="{wb}">{wb}</observed> '.format(wa=word[0], wb=word[1:])
-					elif re.search(neveropens, word):
-						word = '{wa}<observed id="{wb}">{wb}</observed>'.format(wa=word[0], wb=word[1:])
 					else:
 						word = '<observed id="{w}">{w}</observed> '.format(w=word)
 					newline.append(word)
@@ -303,6 +305,7 @@ def insertparserids(lineobject, editorialcontinuation=False):
 	# add spaces when there are no brackets
 	newline = re.sub(r'(?<![⟨\(\[\{⟩\)\]\}])(</observed>)(<span class=".*?">)(<observed)', r'\1 \2\3', newline)
 	newline = re.sub(r'(</observed>)(</span>)(<observed id=".*?">)(?![⟩\)\]\}])', r'\1\2 \3', newline)
+	newline = re.sub(r'(</observed>)(</span>)(<span class=".*?">)(<observed id=".*?">)(?![⟩\)\]\}])', r'\1\2 \3\4', newline)
 
 	return newline
 
