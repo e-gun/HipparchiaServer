@@ -88,8 +88,6 @@ def selectionmade():
 
 	# the selection box might contain stale info if you deselect a corpus while items are still in the box
 	uid = selectionisactive(uid)
-	workid = selectionisactive(workid)
-	locus = selectionisactive(locus)
 
 	if genre and genre not in returnactivelist(authorgenresdict):
 		genre = ''
