@@ -67,7 +67,8 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 				output.append(datehtml)
 
 			if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
-				columnb = thisline.markeditorialinsersions(editorialcontinuation)
+				brackettypes = ['square', 'rounded', 'angled', 'angledquotes']
+				columnb = thisline.markeditorialinsersions(brackettypes, editorialcontinuation)
 				if thisline.bracketopenedbutnotclosed():
 					editorialcontinuation = True
 				elif (

@@ -503,55 +503,121 @@ class dbWorkLine(object):
 
 		return allbutfirstandlastword
 
-	def markeditorialinsersions(self, continuation=False):
+	def markeditorialinsersions(self, types=['square'], continuation=False):
 		"""
 
-		set a '<span>...</span>' around square-bracketed line segments
+		set a '<span>...</span>' around bracketed line segments
+			square: [abc]
+			rounded:  (abc)
+			angled: ⟨abc⟩
+			angledquotes: »abc«
 
 		:param self:
 		:return:
 		"""
 
-		openandmaybeclose = re.compile(r'\[(.*?)(\]|$)')
-		closeandmaybeopen = re.compile(r'(^|\[)(.*?)\]')
+		candomultilinecontinuation = ['square']
 
-		spanned = self.accented
-		if re.search(openandmaybeclose,self.accented):
-			spanned = re.sub(openandmaybeclose, r'[<span class="editorialmarker_squarebrackets">\1</span>\2', self.accented)
-			return spanned
-		elif re.search(closeandmaybeopen,self.accented):
-			spanned = re.sub(closeandmaybeopen, r'\1<span class="editorialmarker_squarebrackets">\2</span>]', self.accented)
-			return spanned
-		elif continuation:
-			spanned = '<span class="editorialmarker_squarebrackets">{sa}</span>'.format(sa=self.accented)
-			return spanned
+		brackettypes = {
+			'square': {
+				'ocreg': r'\[(.*?)(\]|$)',
+				'coreg': r'(^|\[)(.*?)\]',
+				'class': 'editorialmarker_squarebrackets',
+				'o': '[',
+				'c': ']'
+				},
+			'rounded': {
+				'ocreg': r'\((.*?)(\)|$)',
+				'coreg': r'(^|\()(.*?)\)',
+				'class': 'editorialmarker_roundbrackets',
+				'o': '(',
+				'c': ')'
+			},
+			'angled': {
+				'ocreg': r'⟨(.*?)(⟩|$)',
+				'coreg': r'(^|⟨)(.*?)⟩',
+				'class': 'editorialmarker_angledbrackets',
+				'o': '⟨',
+				'c': '⟩'
+			},
+			'curly': {},
+			'angledquotes': {
+				'ocreg': r'»(.*?)(«|$)',
+				'coreg': r'(^|»)(.*?)«',
+				'class': 'editorialmarker_angledquotes',
+				'o': '»',
+				'c': '«'
+				},
+		}
 
-		return spanned
+		theline = self.accented
 
-	def bracketopenedbutnotclosed(self):
+		for t in types:
+			try:
+				brackettypes[t]
+			except:
+				return theline
+
+			o = brackettypes[t]['o']
+			c = brackettypes[t]['c']
+			cl = brackettypes[t]['class']
+			openandmaybeclose = re.compile(brackettypes[t]['ocreg'])
+			closeandmaybeopen = re.compile(brackettypes[t]['coreg'])
+
+			if re.search(openandmaybeclose, theline):
+				theline = re.sub(openandmaybeclose, r'{o}<span class="{cl}">\1</span>\2'.format(o=o, cl=cl), theline)
+			elif re.search(closeandmaybeopen, theline):
+				theline = re.sub(closeandmaybeopen, r'\1<span class="{cl}">\2</span>{c}'.format(cl=cl, c=c), theline)
+			elif continuation and t in candomultilinecontinuation:
+				theline = '<span class="{cl}">{sa}</span>'.format(cl=cl, sa=theline)
+
+		return theline
+
+	def bracketopenedbutnotclosed(self, type='square'):
 		"""
 
 		return True if you have 'abcd[ef ghij' and so need to continue marking editorial material
 
+		note that only 'square' really works unless/until candomultilinecontinuation expands in markeditorialinsersions()
+		this will actually be tricky since the code was built only to keep track of one continuing item...
+
 		:return:
 		"""
 
-		openandnotclose = re.compile(r'\[[^\]]{0,}$')
+		brackettypes = {
+			'square': { 'regex': r'\[[^\]]{0,}$' },
+			'rounded': {'regex': r'\([^\)]{0,}$'},
+			'angled': {'regex': r'⟨[^⟩]{0,}$'},
+			'angledquotes': { 'regex': r'»[^«]{0,}$' }
+			}
+
+		r = brackettypes[type]['regex']
+		openandnotclose = re.compile(r)
 
 		if re.search(openandnotclose,self.accented):
 			return True
 		else:
 			return False
 
-	def bracketclosed(self):
+	def bracketclosed(self, type='square'):
 		"""
 
 		return true if there is a ']' in the line
 
+		note that only 'square' really works unless/until candomultilinecontinuation expands in markeditorialinsersions()
+
 		:return:
 		"""
 
-		if re.search(r'\]', self.accented):
+		brackettypes = {
+			'square': {'c': r'\]'},
+			'rounded': {'c': r'\)'},
+			'angled': {'c': r'⟩'},
+			'angledquotes': {'c': r'«'}
+		}
+
+		close = brackettypes[type]['c']
+		if re.search(close, self.accented):
 			return True
 		else:
 			return False

@@ -333,7 +333,8 @@ def htmlifysearchfinds(listofsearchresultobjects):
 			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 			           for ln in ro.lineobjects]
 		elif hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
-			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markeditorialinsersions())
+			brackettypes = ['square', 'rounded', 'angled', 'angledquotes']
+			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markeditorialinsersions(brackettypes, False))
 			           for ln in ro.lineobjects]
 		else:
 			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)
