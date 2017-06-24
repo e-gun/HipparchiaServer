@@ -97,15 +97,16 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	citation = locusintocitation(workobject, focusline)
 	authorandwork = '<span class="author">{n}</span>, <span class="work">{t}</span><br />'.format(n=name, t=title)
 	# author + title can get pretty long
-	viewing = avoidlonglines(authorandwork, 100, '<br />', [])
-	viewing += '<span class="citation">{c}</span>'.format(c=citation)
+	viewing = [avoidlonglines(authorandwork, 100, '<br />\n', [])]
+	viewing.append('<span class="citation">{c}</span>'.format(c=citation))
 	if date != '':
 		if int(date) > 1:
-			viewing += '<br /><span class="assigneddate">(Assigned date of {d} CE)</span>'.format(d=date)
+			viewing.append('<br /><span class="assigneddate">(Assigned date of {d} CE)</span>'.format(d=date))
 		else:
-			viewing += '<br /><span class="assigneddate">(Assigned date of {d} BCE)</span>'.format(d=date[1:])
+			viewing.append('<br /><span class="assigneddate">(Assigned date of {d} BCE)</span>'.format(d=date[1:]))
 
-	viewing = '<p class="currentlyviewing">{c}<br />{b}</p>'.format(c=viewing, b=biblio)
+	viewing = '\n'.join(viewing)
+	viewing = '<p class="currentlyviewing">{c}\n<br />\n{b}\n</p>'.format(c=viewing, b=biblio)
 
 	ouputtable = []
 	ouputtable.append('<table>')
@@ -293,8 +294,8 @@ def insertparserids(lineobject, editorialcontinuation=False):
 					pass
 
 	# address dodgy word division and ill-formatted word spacing issues: 'ἱε[ ρέω ]ϲ' instead of 'ἱε[ρέω]ϲ'
-
-	# kludgy, but a simpler way is not obvious given that we are doing multiple overlapping html rewrites
+	# Aeschylus, Fragmenta is a great place to give the parser a workout
+	# this is terriby kludgy, but a simpler way is not obvious given that we are doing multiple overlapping html rewrites
 	newline = [re.sub(r'<observed id=""></observed>', '', n) for n in newline]
 	newline = [re.sub('> <', '><', n) for n in newline]
 
@@ -305,6 +306,9 @@ def insertparserids(lineobject, editorialcontinuation=False):
 	# add spaces when there are no brackets
 	newline = re.sub(r'(?<![⟨\(\[\{⟩\)\]\}])(</observed>)(<span class=".*?">)(<observed)', r'\1 \2\3', newline)
 	newline = re.sub(r'(</observed>)(</span>)(<observed id=".*?">)(?![⟩\)\]\}])', r'\1\2 \3', newline)
+	# add spaces if you have 'the right bracket situation'
+	newline = re.sub(r'(hmu_roman_in_a_greek_text>)(</span>)([⟩\)\]\}])(<observed id=".*?">)(?![⟩\)\]\}])', r'\1\2\3 \4', newline)
+	newline = re.sub(r'(</observed>)(</span>)([⟩\)\]\}])(<observed id=".*?">)(?![⟩\)\]\}])', r'\1\2\3 \4', newline)
 	newline = re.sub(r'(</observed>)(</span>)(<span class=".*?">)(<observed id=".*?">)(?![⟩\)\]\}])', r'\1\2 \3\4', newline)
 
 	return newline
