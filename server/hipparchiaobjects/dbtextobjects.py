@@ -526,7 +526,7 @@ class dbWorkLine(object):
 				'o': '[',
 				'c': ']'
 				},
-			'rounded': {
+			'round': {
 				'ocreg': r'\((.*?)(\)|$)',
 				'coreg': r'(^|\()(.*?)\)',
 				'class': 'editorialmarker_roundbrackets',
@@ -579,7 +579,7 @@ class dbWorkLine(object):
 
 		brackettypes = {
 			'square': { 'regex': r'\[[^\]]{0,}$' },
-			'rounded': {'regex': r'\([^\)]{0,}$'},
+			'round': {'regex': r'\([^\)]{0,}$'},
 			'angled': {'regex': r'⟨[^⟩]{0,}$'},
 			}
 
@@ -609,7 +609,7 @@ class dbWorkLine(object):
 
 		brackettypes = {
 			'square': {'c': r'\]'},
-			'rounded': {'c': r'\)'},
+			'round': {'c': r'\)'},
 			'angled': {'c': r'⟩'},
 		}
 

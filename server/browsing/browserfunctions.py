@@ -251,6 +251,7 @@ def insertparserids(lineobject, editorialcontinuation=False):
 	spacedclosings = re.compile(r'[,;.?!:·′“”†]$')
 	sometimesspacedclosings = re.compile(r'[)⟩}]$')
 	openings = re.compile(r'^[(‵„“⟨{†]')
+	neveropens = re.compile(r'^[)⟩}]')
 
 	for seg in segments:
 		if seg[0] == '<':
@@ -274,12 +275,14 @@ def insertparserids(lineobject, editorialcontinuation=False):
 								word = '<observed id="{wa}">{wa}</observed>{wb} '.format(wa=word[:-1], wb=word[-1])
 						except:
 							word = '<observed id="{wa}">{wa}</observed>{wb} '.format(wa=word[:-1], wb=word[-1])
-					# elif re.search(sometimesspacedclosings, word):
-					# 	word = '<observed id="{wa}">{wa}</observed>{wb}'.format(wa=word[:-1], wb=word[-1])
+					elif re.search(sometimesspacedclosings, word):
+					 	word = '<observed id="{wa}">{wa}</observed>{wb}'.format(wa=word[:-1], wb=word[-1])
 					elif word[-1] == '-' and word == lastword:
 						word = '<observed id="{h}">{w}</observed> '.format(h=hyphenated, w=word)
 					elif re.search(openings, word):
 						word = '{wa}<observed id="{wb}">{wb}</observed> '.format(wa=word[0], wb=word[1:])
+					elif re.search(neveropens, word):
+						word = '{wa}<observed id="{wb}">{wb}</observed>'.format(wa=word[0], wb=word[1:])
 					else:
 						word = '<observed id="{w}">{w}</observed> '.format(w=word)
 					newline.append(word)
@@ -288,12 +291,18 @@ def insertparserids(lineobject, editorialcontinuation=False):
 					pass
 
 	# address dodgy word division and ill-formatted word spacing issues: 'ἱε[ ρέω ]ϲ' instead of 'ἱε[ρέω]ϲ'
-	ob = re.compile(r'<observed id=""></observed>')
-	newline = [re.sub(ob, '', n) for n in newline]
+
+	# kludgy, but a simpler way is not obvious given that we are doing multiple overlapping html rewrites
+	newline = [re.sub(r'<observed id=""></observed>', '', n) for n in newline]
 	newline = [re.sub('> <', '><', n) for n in newline]
+
 	newline = ''.join(newline)
+	# remove spaces between spans that have brackets at their edges
 	newline = re.sub(r'\s(</span>)([⟩\)\]\}])', r'\1\2', newline)
 	newline = re.sub(r'([⟨\(\[\{])\s(<span)', r'\1\2', newline)
+	# add spaces when there are no brackets
+	newline = re.sub(r'(?<![⟨\(\[\{⟩\)\]\}])(</observed>)(<span class=".*?">)(<observed)', r'\1 \2\3', newline)
+	newline = re.sub(r'(</observed>)(</span>)(<observed id=".*?">)(?![⟩\)\]\}])', r'\1\2 \3', newline)
 
 	return newline
 

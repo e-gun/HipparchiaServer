@@ -858,7 +858,6 @@ def findactivebrackethighlighting(s=session):
 		brackets.append('round')
 	if s['bracketangled'] == 'yes':
 		brackets.append('angled')
-
 	return brackets
 
 
