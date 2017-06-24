@@ -83,6 +83,21 @@ function loadoptions() {
             } else {
             $('#sensesummary').prop('checked', true);
             }
+        if (data.bracketsquare == 'no') {
+            $('#bracketsquare').prop('checked', false);
+            } else {
+            $('#bracketsquare').prop('checked', true);
+            }
+        if (data.bracketround == 'no') {
+            $('#bracketround').prop('checked', false);
+            } else {
+            $('#bracketround').prop('checked', true);
+            }
+        if (data.bracketangled == 'no') {
+            $('#bracketangled').prop('checked', false);
+            } else {
+            $('#bracketangled').prop('checked', true);
+            }
         if (data.authorssummary == 'no') {
             $('#authorssummary').prop('checked', false);
             } else {
@@ -410,6 +425,29 @@ $('#quotesummary').change(function () {
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
 
+$('#bracketsquare').change(function () {
+    if(this.checked) {
+        setoptions('bracketsquare', 'yes'); } else { setoptions('bracketsquare', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    });
+
+$('#bracketround').change(function () {
+    if(this.checked) {
+        setoptions('bracketround', 'yes'); } else { setoptions('bracketround', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    });
+
+$('#bracketangled').change(function () {
+    if(this.checked) {
+        setoptions('bracketround', 'yes'); } else { setoptions('bracketround', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    });
 
 //
 // spinners

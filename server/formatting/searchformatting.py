@@ -15,6 +15,7 @@ from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import dblineintolineobject, setconnection
 from server.formatting.bibliographicformatting import formatname
 from server.hipparchiaobjects.helperobjects import SearchResult
+from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 
 
 def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
@@ -308,7 +309,7 @@ def compilesearchtermequivalent(searchterm):
 	return searchtermequivalent
 
 
-def htmlifysearchfinds(listofsearchresultobjects):
+def htmlifysearchfinds(listofsearchresultobjects, searchobject):
 	"""
 
 	send me a list of SearchResult objects
@@ -332,8 +333,8 @@ def htmlifysearchfinds(listofsearchresultobjects):
 		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
 			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 			           for ln in ro.lineobjects]
-		elif hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
-			brackettypes = ['square', 'rounded', 'angled', 'angledquotes']
+		elif findactivebrackethighlighting(searchobject.session):
+			brackettypes = findactivebrackethighlighting(searchobject.session)
 			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markeditorialinsersions(brackettypes, False))
 			           for ln in ro.lineobjects]
 		else:

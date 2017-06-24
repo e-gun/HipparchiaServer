@@ -13,6 +13,7 @@ from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
 from server.formatting.bibliographicformatting import getpublicationinfo, avoidlonglines
+from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
 config = configparser.ConfigParser()
@@ -133,7 +134,8 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		else:
 			columnb = insertparserids(line, editorialcontinuation)
 
-		if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
+		brackettypes = findactivebrackethighlighting()
+		if brackettypes:
 			editorialcontinuation = setcontinuationvalue(line, previousline, editorialcontinuation)
 
 		if line.index == focusline.index:
@@ -235,17 +237,8 @@ def insertparserids(lineobject, editorialcontinuation=False):
 
 	theline = lineobject.accented
 
-	# there are a bunch of problems when you try to integrate COLORBRACKETEDTEXT here
-	#   [1] illegal html tag nesting issues with '<observed>ABC[<span>DE</observed> FGH</span]IJK'
-	#   [2] dodgy word division and ill-formatted word spacing issues:
-	#       'ἱε[ ρέω ]ϲ' instead of 'ἱε[ρέω]ϲ'
-	#       all three of those pieces of 'ἱε[ ρέω ]ϲ' will be clicks that lead nowhere
-	#       otherwise you can get a clickable entry that does a lookup from 'ἱε[ρέω]ϲ'
-	# the following bypasses #1, but leaves you stuck with #2 until the band-aide regex that closes
-	# the function; nevertheless the clicks will remain broken even after you get to 'ἱε[ρέω]ϲ'
-
-	if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
-		brackettypes = ['square', 'rounded', 'angled']
+	brackettypes = findactivebrackethighlighting()
+	if brackettypes:
 		theline = lineobject.markeditorialinsersions(brackettypes, editorialcontinuation)
 
 	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',theline)

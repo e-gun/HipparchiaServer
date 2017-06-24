@@ -18,6 +18,12 @@ DEFAULTLINESOFCONTEXT = 4
 DEFAULTBROWSERLINES = 20
 DEFAULTMAXRESULTS = 200
 
+DEFAULTGREEKCORPUSVALUE = 'yes'
+DEFAULTLATINCORPUSVALUE = 'yes'
+DEFAULTINSCRIPTIONCORPUSVALUE = 'no'
+DEFAULTPAPYRUSCORPUSVALUE = 'no'
+DEFAULTCHRISTIANCORPUSVALUE = 'no'
+
 DEFAULTVARIA='yes'
 DEFAULTINCERTA='yes'
 DEFAULTSPURIA='yes'
@@ -28,12 +34,9 @@ DEFAULTSHOWLEXICALSENSES = 'yes'
 DEFAULTSHOWLEXICALAUTHORS = 'yes'
 DEFAULTSHOWLEXICALQUOTES = 'yes'
 
-DEFAULTGREEKCORPUSVALUE = 'yes'
-DEFAULTLATINCORPUSVALUE = 'yes'
-DEFAULTINSCRIPTIONCORPUSVALUE = 'no'
-DEFAULTPAPYRUSCORPUSVALUE = 'no'
-DEFAULTCHRISTIANCORPUSVALUE = 'no'
-
+DEFAULTHIGHLIGHTSQUAREBRACKETS = 'yes'
+DEFAULTHIGHLIGHTROUNDBRACKETS = 'yes'
+DEFAULTHIGHLIGHTANGLEDBRACKETS = 'yes'
 
 ### [1] Flask variables ###
 ##  [set once and forget: SECRET_KEY] ##
@@ -149,9 +152,6 @@ MPCOMMITCOUNT = 750
 # 	will want to put custom CSS in the same directory as the
 # 	default installed css
 #
-# COLORBRACKETEDTEXT will visually flag any text between square
-# 	brackets and so make editorial activity more obvious
-#
 # TLGASSUMESBETACODE means that if you only have the TLG active
 # 	typing 'ball' is like typing 'βαλλ' and 'ba/ll' is 'βάλλ'
 #
@@ -218,7 +218,6 @@ MPCOMMITCOUNT = 750
 # 	frequency of occurrence ('yes')
 
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
-COLORBRACKETEDTEXT = 'yes'
 TLGASSUMESBETACODE = 'yes'
 UNIVERSALASSUMESBETACODE = 'no'
 CLICKABLEINDEXEDPASSAGECAP = 1500   # -1, 0, or N

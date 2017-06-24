@@ -8,8 +8,8 @@
 
 import re
 
-from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject
+from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
 
@@ -67,8 +67,8 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 				datehtml = '<tr><td class="browsercite">{ca}</td><td class="textdate">{cb}</td></tr>\n'.format(ca=columna, cb=columnb)
 				output.append(datehtml)
 
-			if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
-				brackettypes = ['square', 'rounded', 'angled']
+			brackettypes = findactivebrackethighlighting()
+			if brackettypes:
 				columnb = thisline.markeditorialinsersions(brackettypes, editorialcontinuation)
 				editorialcontinuation = setcontinuationvalue(thisline, previousline, editorialcontinuation)
 			else:

@@ -58,6 +58,9 @@ def sessionvariables():
 		session['varia'] = hipparchia.config['DEFAULTVARIA']
 		session['incerta'] = hipparchia.config['DEFAULTINCERTA']
 		session['onehit'] = hipparchia.config['DEFAULTONEHIT']
+		session['bracketsquare'] = hipparchia.config['DEFAULTHIGHLIGHTSQUAREBRACKETS']
+		session['bracketround'] = hipparchia.config['DEFAULTHIGHLIGHTROUNDBRACKETS']
+		session['bracketangled'] = hipparchia.config['DEFAULTHIGHLIGHTANGLEDBRACKETS']
 
 	return
 
@@ -93,7 +96,10 @@ def modifysessionvar(param,val):
 		'varia',
 		'incerta',
 		'onehit',
-		'headwordindexing'
+		'headwordindexing',
+		'bracketsquare',
+		'bracketround',
+		'bracketangled'
 		]
 
 	if param in availableoptions:
@@ -120,7 +126,8 @@ def modifysessionvar(param,val):
 			session[l] = [item for item in session[l] if item in returnactivelist(checkagainst[l])]
 
 	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
-				   'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary','authorssummary','quotesummary']:
+				   'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary','authorssummary','quotesummary',
+					'bracketsquare', 'bracketround', 'bracketangled' ]:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 
@@ -833,6 +840,26 @@ def returnactivedbs():
 		keys.append('ch')
 
 	return keys
+
+
+def findactivebrackethighlighting(s=session):
+	"""
+
+	what kinds of brackets are we highlighting
+
+	:return:
+	"""
+
+	brackets = []
+
+	if s['bracketsquare'] == 'yes':
+		brackets.append('square')
+	if s['bracketround'] == 'yes':
+		brackets.append('round')
+	if s['bracketangled'] == 'yes':
+		brackets.append('angled')
+
+	return brackets
 
 
 def selectionisactive(selected):

@@ -372,6 +372,11 @@ body {
 	font-style: italic;
 	}
 
+.lexiconhighlight {
+    color: var(--red);
+    font-weight: bold;
+    }
+
 .lineover {
 	text-decoration: overline;
 	}
@@ -381,7 +386,7 @@ body {
     }
 
 .loadoptions:hover {
-	color: var(--brtgreen);
+	color: var(--midgrey);
 	}
 
 .locus {
@@ -481,8 +486,8 @@ body {
 	font-style: italic;
 	}
 
-.saveoptions:hover, #clearselections:hover {
-	color: var(--pink);
+.saveoptions:hover {
+	color: var(--midgrey);
 	}
 
 .scholium {

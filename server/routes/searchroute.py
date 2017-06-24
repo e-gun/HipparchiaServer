@@ -158,7 +158,7 @@ def executesearch(timestamp):
 			r.lineobjects = flagsearchterms(r,skg, prx, so)
 
 		if so.context > 0:
-			findshtml = htmlifysearchfinds(resultlist)
+			findshtml = htmlifysearchfinds(resultlist, so)
 		else:
 			findshtml = nocontexthtmlifysearchfinds(resultlist)
 
