@@ -249,13 +249,13 @@ def insertparserids(lineobject, editorialcontinuation=False):
 	# the function; nevertheless the clicks will remain broken even after you get to 'ἱε[ρέω]ϲ'
 
 	if hipparchia.config['COLORBRACKETEDTEXT'] == 'yes':
-		brackettypes = ['square', 'rounded', 'angled', 'angledquotes']
+		brackettypes = ['square', 'rounded', 'angled']
 		theline = lineobject.markeditorialinsersions(brackettypes, editorialcontinuation)
 
 	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',theline)
 	hyphenated = lineobject.hyphenated
 	segments = [s for s in theline.split('*snip*') if s]
-	newline = []
+	newline = ['']
 
 	# it is tricky to get the tags and the spaces right: it looks like you either get one kind of glitch or another kind
 	# the lesser of two evils has been chosen?
@@ -266,11 +266,15 @@ def insertparserids(lineobject, editorialcontinuation=False):
 	for seg in segments:
 		if seg[0] == '<':
 			# this is markup don't 'observe' it
-			newline.append(seg)
+			newline[-1] += seg
 		else:
 			words = seg.split(' ')
 			words = [w for w in words if len(w) > 0]
-			lastword = words[-1]
+			try:
+				lastword = words[-1]
+			except IndexError:
+				lastword = ''
+
 			for word in words:
 				try:
 					if re.search(spacedclosings, word) or re.search(sometimesspacedclosings, word):
@@ -292,55 +296,15 @@ def insertparserids(lineobject, editorialcontinuation=False):
 					# word = ''
 					pass
 
-	cleaning = True
-	if cleaning:
-		ob = re.compile(r'<observed id=""></observed>')
-		newline = [re.sub(ob, '', n) for n in newline]
-		newline = '\n\t\t'.join(newline)
-		newline = bracketcleaning(newline)
-	else:
-		newline = '\n\t\t'.join(newline)
+	# address dodgy word division and ill-formatted word spacing issues: 'ἱε[ ρέω ]ϲ' instead of 'ἱε[ρέω]ϲ'
+	ob = re.compile(r'<observed id=""></observed>')
+	newline = [re.sub(ob, '', n) for n in newline]
+	newline = [re.sub('> <', '><', n) for n in newline]
+	newline = ''.join(newline)
+	newline = re.sub(r'\s(</span>)([\)\]\}])', r'\1\2', newline)
+	newline = re.sub(r'([\[\(\{])\s(<span)', r'\1\2', newline)
 
 	return newline
-
-
-def bracketcleaning(htmlwithparserids):
-	"""
-
-	address dodgy word division and ill-formatted word spacing issues: 'ἱε[ ρέω ]ϲ' instead of 'ἱε[ρέω]ϲ'
-
-	:param htmlwithparserids:
-	:return:
-	"""
-
-	o = re.compile(r'\(\s\n\t\t(<span class="editorialmarker_roundbrackets">)\n\t\t(<hmu_roman_in_a_greek_text>)\n\t\t')
-	c = re.compile(r'(</observed>)\s\n\t\t(</hmu_roman_in_a_greek_text>)\n\t\t(</span>)\n\t\t\)')
-	cleaned = re.sub(o, r'(\1\2', htmlwithparserids)
-	cleaned = re.sub(c, r'\1\2\3)', cleaned)
-	c = re.compile(r'(</observed>)\s\n\t\t(</hmu_roman_in_a_greek_text>)\n\t\t(</span>)\n\t\t<observed id="\)">\)</observed>')
-	cleaned = re.sub(c, r'\1\2\3)', cleaned)
-
-	o = re.compile(r'\(\s\n\t\t(<span class="editorialmarker_roundbrackets">)\n\t\t')
-	c = re.compile(r'(</observed>)\s\n\t\t(</span>)\n\t\t\)')
-	cleaned = re.sub(o, r'(\1', cleaned)
-	cleaned = re.sub(c, r'\1\2)', cleaned)
-
-	c = re.compile(r'\s\n\t\t</span>\n\t\t<observed id="\]">\]</observed>')
-	o = re.compile(r'<observed id="\[">\[</observed>\s\n\t\t(<span class="editorialmarker_squarebrackets">)\n\t\t')
-	cleaned = re.sub(c, r'</span>]', cleaned)
-	cleaned = re.sub(o, r'[\1', cleaned)
-
-	c = re.compile(r'(</observed>)\s\n\t\t(</span>)\n\t\t(⟩)')
-	o = re.compile(r'(⟨)\s\n\t\t(<span class="editorialmarker_angledbrackets">)\n\t\t')
-	cleaned = re.sub(c, r'\1\2\3', cleaned)
-	cleaned = re.sub(o, r'\1\2', cleaned)
-
-	c = re.compile(r'\s\n\t\t</span>\n\t\t<observed id="«">«</observed>')
-	o = re.compile(r'<observed id="»">»</observed>\s\n\t\t(<span class="editorialmarker_angledquotes">)\n\t\t')
-	cleaned = re.sub(c, r'</span>«', cleaned)
-	cleaned = re.sub(o, r'»\1', cleaned)
-
-	return cleaned
 
 
 def insertcrossreferencerow(lineobject):

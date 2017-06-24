@@ -110,14 +110,6 @@
     td.infocells
 --ltgrey
     tr.nthrow
---red
-    .colorhighlight
-    .date
-    .focusline
-    .highlight
-    .observed
-    .romannumerals
-    td.headword
 --midgrey
     .foundlocus:hover
     .searchsel:hover
@@ -138,6 +130,15 @@
     .saveoptions:hover
     #clearselections:hover
     td.infocell
+--red
+    .colorhighlight
+    .date
+    .focusline
+    .highlight
+    .observed
+    .romannumerals
+    hmu_unconventional_form_written_by_scribe
+    td.headword
 --rustedorange
     .crossreference
     .dictionaryheading
@@ -817,6 +818,12 @@ hmu_title {
 	font-weight: bold;
 	font-style: italic;
 	}
+
+hmu_unconventional_form_written_by_scribe {
+    text-decoration-line: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: var(--red);
+    }
 
 indexedlocation:hover{
 	color: var(--brtblue);

@@ -510,7 +510,7 @@ class dbWorkLine(object):
 			square: [abc]
 			rounded:  (abc)
 			angled: ⟨abc⟩
-			angledquotes: »abc«
+			angledquotes: »abc« BUT some texts are «abc»; therefore this is HOPELESSLY BROKEN
 
 		:param self:
 		:return:
@@ -540,14 +540,7 @@ class dbWorkLine(object):
 				'o': '⟨',
 				'c': '⟩'
 			},
-			'curly': {},
-			'angledquotes': {
-				'ocreg': r'»(.*?)(«|$)',
-				'coreg': r'(^|»)(.*?)«',
-				'class': 'editorialmarker_angledquotes',
-				'o': '»',
-				'c': '«'
-				},
+			'curly': {}
 		}
 
 		theline = self.accented
@@ -588,7 +581,6 @@ class dbWorkLine(object):
 			'square': { 'regex': r'\[[^\]]{0,}$' },
 			'rounded': {'regex': r'\([^\)]{0,}$'},
 			'angled': {'regex': r'⟨[^⟩]{0,}$'},
-			'angledquotes': { 'regex': r'»[^«]{0,}$' }
 			}
 
 		r = brackettypes[type]['regex']
@@ -613,7 +605,6 @@ class dbWorkLine(object):
 			'square': {'c': r'\]'},
 			'rounded': {'c': r'\)'},
 			'angled': {'c': r'⟩'},
-			'angledquotes': {'c': r'«'}
 		}
 
 		close = brackettypes[type]['c']
