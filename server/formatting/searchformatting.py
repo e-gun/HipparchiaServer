@@ -12,10 +12,11 @@ from copy import deepcopy
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
-from server.dbsupport.dbfunctions import dblineintolineobject, setconnection
+from server.dbsupport.dbfunctions import dblineintolineobject, setconnection, makeablankline
 from server.formatting.bibliographicformatting import formatname
 from server.hipparchiaobjects.helperobjects import SearchResult
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
+from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
 
 def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
@@ -334,12 +335,7 @@ def htmlifysearchfinds(listofsearchresultobjects, searchobject):
 			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 			           for ln in ro.lineobjects]
 		elif findactivebrackethighlighting(searchobject.session):
-			# note that this does not know how to do continuations (yet); it only supports the minimal syntax for the functions
-			# need to insert a thisline/previousline structure so you can call setcontinuationvalue()
-			brackettypes = findactivebrackethighlighting(searchobject.session)
-			continuation = {k: False for k in brackettypes}
-			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markeditorialinsersions(continuation))
-			           for ln in ro.lineobjects]
+			passage = brackethtmlifysearchfinds(ro.lineobjects, searchobject, linehtmltemplate)
 		else:
 			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)
 			           for ln in ro.lineobjects]
@@ -351,6 +347,36 @@ def htmlifysearchfinds(listofsearchresultobjects, searchobject):
 
 	return html
 
+
+def brackethtmlifysearchfinds(listoflineobjects, searchobject, linehtmltemplate):
+	"""
+
+	can't do comprehensions: require a thisline/previousline structure so you can call setcontinuationvalue()
+
+	:param listoflineobjects:
+	:return:
+	"""
+
+	brackettypes = findactivebrackethighlighting(searchobject.session)
+	continuationdict = {t: False for t in brackettypes}
+
+	passage = []
+	lines = deque(listoflineobjects)
+	try:
+		previous = lines.popleft()
+	except IndexError:
+		previous = makeablankline('gr0000w000', -1)
+
+	passage.append(linehtmltemplate.format(id=previous.universalid, lc=previous.locus(), ft=previous.markeditorialinsersions(continuationdict)))
+
+	while lines:
+		ln = lines.popleft()
+		passage.append(linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markeditorialinsersions(continuationdict)))
+		continuationdict = {t: setcontinuationvalue(ln, previous, continuationdict[t], t)
+		                         for t in brackettypes}
+		previous = ln
+
+	return passage
 
 def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	"""
