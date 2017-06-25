@@ -42,6 +42,7 @@
   --rustedorange: hsla(23, 37%, 39%, 1);
   --skyblue: hsla(205, 92%, 37%, 1);
   --teal: hsla(196, 14%, 39%, 1);
+  --transparentgrey: hsla(0, 0%, 67%, .8);
   --vdkteal: hsla(196, 27%, 20%, 1)
 }
 
@@ -66,15 +67,9 @@
     hmu_roman_in_a_greek_text
 --brtblue
     .currentlyviewing
-    .foundlocus:hover
-    .selection:hover
     .ui-icon ui-icon-arrowthick-1-e:hover
     .ui-icon ui-icon-arrowthick-1-w:hover
-    bibl:hover
     browser
-    indexedlocation:hover
-    indexobserved:hover
-    observed:hover
 --brtgreen
     .loadoptions:hover
 --deepblue
@@ -83,7 +78,13 @@
     .sought
 --dkbabyblue
     .editorialmarker_curlybrackets
+    .foundlocus:hover
+    .selection:hover
     author
+    bibl:hover
+    indexedlocation:hover
+    indexobserved:hover
+    observed:hover
 --dkgreen
     .marginaltext
 --dkgrey
@@ -151,6 +152,8 @@
     code
     smallcode
 --teal
+--transparentgrey
+    [text-shadows]
 --vdkteal
     .findnumber
     .label
@@ -241,6 +244,7 @@ body {
 	color: var(--rustedorange);
 	font-weight: 600;
 	font-size: 120%;
+	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
 
 .editorialmarker_angledbrackets {
@@ -302,8 +306,8 @@ body {
 	}
 
 .foundlocus:hover{
-	color: var(--brtblue);
-	text-shadow: 1px 1px var(--midgrey);
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
 	 }
 
 .foundtext {
@@ -315,7 +319,7 @@ body {
 	}
 
 .highlight {
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+    text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
 
 .homonym {
@@ -407,7 +411,7 @@ body {
 	color: var(--red);
 	font-weight: 600;
 	border: 1px dotted black;
-	text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
 
 .metrics{
@@ -501,7 +505,7 @@ body {
 
 .selection:hover{
 	color: var(--brtblue);
-	text-shadow: 1px 1px var(--midgrey);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
 	 }
 
 .serviusformatting {
@@ -566,18 +570,17 @@ body {
 .ui-helper-hidden-accessible {
 	position: absolute !important;
 	clip: rect(1px 1px 1px 1px);
-	clip: rect(1px,1px,1px,1px);
 	}
 
 .ui-icon ui-icon-arrowthick-1-e:hover{
 	color: var(--brtblue);
-	text-shadow: 1px 1px var(--midgrey);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
 	 }
 
 .ui-icon ui-icon-arrowthick-1-w:hover{
 	color: var(--brtblue);
-	text-shadow: 1px 1px var(--midgrey);
-	 }
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}
 
 .unhandledpercent{
 	top: -0.5em;
@@ -750,9 +753,9 @@ bibl {
 	}
 
 bibl:hover{
-	color: var(--brtblue);
-	text-shadow: 1px 1px var(--midgrey);
-	 }
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}
 
 browser {
 	color: var(--brtblue);
@@ -819,9 +822,6 @@ hmu_roman_in_a_greek_text {
 	font-family: DejaVuSansCondensed;
 	}
 
-
-
-
 hmu_title {
 	font-weight: bold;
 	font-style: italic;
@@ -834,14 +834,14 @@ hmu_unconventional_form_written_by_scribe {
     }
 
 indexedlocation:hover{
-	color: var(--brtblue);
-	text-shadow: 1px 1px var(--midgrey);
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
 	 }
 
 indexobserved:hover{
-	color: var(--brtblue);
-	text-shadow: 1px 1px var(--midgrey);
-	 }
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}
 
 input {
 	text-align: center;
@@ -864,9 +864,9 @@ locus {
 	}
 
 observed:hover{
-	color: var(--brtblue);
-	text-shadow: 1px 1px var(--midgrey);
-	 }
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}
 
 orth {
 	color: var(--blue);
