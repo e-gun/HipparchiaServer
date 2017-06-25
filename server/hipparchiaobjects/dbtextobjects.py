@@ -598,8 +598,7 @@ class dbWorkLine(object):
 		              re.compile(r'\[ἐπῳδόϲ')]
 
 		falsify = [re.search(e, self.accented) for e in exceptions]
-
-		if re.search(openandnotclose,self.accented) and not falsify:
+		if re.search(openandnotclose,self.accented) and True not in falsify:
 			return True
 		else:
 			return False
