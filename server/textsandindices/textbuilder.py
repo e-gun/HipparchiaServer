@@ -47,9 +47,11 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	# 660	           δανείϲαϲ,
 	avoiddoubletap = False
 
+
 	if len(results) > 0:
 		previousline = dblineintolineobject(results[0])
-		editorialcontinuation = False
+		brackettypes = findactivebrackethighlighting()
+		editorialcontinuation = {'square': False, 'round': False, 'curly': False, 'angled': False}
 
 		for line in results:
 			thisline = dblineintolineobject(line)
@@ -67,10 +69,10 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 				datehtml = '<tr><td class="browsercite">{ca}</td><td class="textdate">{cb}</td></tr>\n'.format(ca=columna, cb=columnb)
 				output.append(datehtml)
 
-			brackettypes = findactivebrackethighlighting()
 			if brackettypes:
-				columnb = thisline.markeditorialinsersions(brackettypes, editorialcontinuation)
-				editorialcontinuation = setcontinuationvalue(thisline, previousline, editorialcontinuation)
+				columnb = thisline.markeditorialinsersions(editorialcontinuation)
+				editorialcontinuation = {t: setcontinuationvalue(thisline, previousline, editorialcontinuation[t], t)
+				                         for t in brackettypes}
 			else:
 				columnb = thisline.accented
 

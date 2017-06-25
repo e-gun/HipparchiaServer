@@ -503,20 +503,22 @@ class dbWorkLine(object):
 
 		return allbutfirstandlastword
 
-	def markeditorialinsersions(self, types=['square'], continuation=False):
+	def markeditorialinsersions(self, editorialcontinuationdict):
 		"""
 
 		set a '<span>...</span>' around bracketed line segments
 			square: [abc]
 			rounded:  (abc)
 			angled: ⟨abc⟩
+			curly: {abc}
 			angledquotes: »abc« BUT some texts are «abc»; therefore this is HOPELESSLY BROKEN
+
+		editorialcontinuationdict looks like:
+			{ 'square': True, 'round': False, 'curly': False, 'angled': False }
 
 		:param self:
 		:return:
 		"""
-
-		candomultilinecontinuation = ['square']
 
 		brackettypes = {
 			'square': {
@@ -550,8 +552,7 @@ class dbWorkLine(object):
 		}
 
 		theline = self.accented
-
-		for t in types:
+		for t in editorialcontinuationdict.keys():
 			try:
 				brackettypes[t]
 			except:
@@ -567,7 +568,7 @@ class dbWorkLine(object):
 				theline = re.sub(openandmaybeclose, r'{o}<span class="{cl}">\1</span>\2'.format(o=o, cl=cl), theline)
 			elif re.search(closeandmaybeopen, theline):
 				theline = re.sub(closeandmaybeopen, r'\1<span class="{cl}">\2</span>{c}'.format(cl=cl, c=c), theline)
-			elif continuation and t in candomultilinecontinuation:
+			elif editorialcontinuationdict[t]:
 				theline = '<span class="{cl}">{sa}</span>'.format(cl=cl, sa=theline)
 
 		return theline
@@ -584,7 +585,8 @@ class dbWorkLine(object):
 		"""
 
 		brackettypes = {
-			'square': { 'regex': r'\[[^\]]{0,}$' },
+			'square': { 'regex': r'\[[^\]]{0,}$',
+			            'exceptions': [re.compile(r'\[(ϲτρ|ἀντ)\. .\.'), re.compile(r'\[ἐπῳδόϲ')]},
 			'round': {'regex': r'\([^\)]{0,}$'},
 			'angled': {'regex': r'⟨[^⟩]{0,}$'},
 			'curly': {'regex': r'\{[^\}]{0,}$'},
@@ -593,11 +595,11 @@ class dbWorkLine(object):
 		r = brackettypes[type]['regex']
 		openandnotclose = re.compile(r)
 
-		# chorus of aeschylus...
-		exceptions = [re.compile(r'\[(ϲτρ|ἀντ)\. .\.'),
-		              re.compile(r'\[ἐπῳδόϲ')]
+		try:
+			falsify = [re.search(e, self.accented) for e in brackettypes[type]['exceptions']]
+		except:
+			falsify = [None]
 
-		falsify = [re.search(e, self.accented) for e in exceptions]
 		if re.search(openandnotclose,self.accented) and True not in falsify:
 			return True
 		else:

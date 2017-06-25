@@ -252,23 +252,28 @@ def supplementalindexjs():
 	return js
 
 
-def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationvalue):
+def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationvalue, type):
 	"""
 
 	used to determine if a bracket span is running for multiple lines
 
-	:param lineobject:
-	:param previouslineobject:
+	type should be something that findactivebrackethighlighting() can return and that bracketopenedbutnotclosed()
+	can receive: 'square', 'curly', etc.
+
+	:param thisline:
+	:param previousline:
+	:param previouseditorialcontinuationvalue:
+	:param type:
 	:return:
 	"""
 
-	if thisline.bracketopenedbutnotclosed():
-		editorialcontinuation = True
+	if thisline.bracketopenedbutnotclosed(type):
+		newcv = True
 	elif not thisline.samelevelas(previousline):
-		editorialcontinuation = False
-	elif (previousline.bracketopenedbutnotclosed() or previouseditorialcontinuationvalue) and not thisline.bracketclosed():
-		editorialcontinuation = True
+		newcv = False
+	elif (previousline.bracketopenedbutnotclosed(type) or previouseditorialcontinuationvalue) and not thisline.bracketclosed(type):
+		newcv = True
 	else:
-		editorialcontinuation = False
+		newcv = False
 
-	return editorialcontinuation
+	return newcv

@@ -120,7 +120,8 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		pass
 
 	previousline = lines[0]
-	editorialcontinuation = False
+	brackettypes = findactivebrackethighlighting()
+	continuationdict = { 'square': False, 'round': False, 'curly': False, 'angled': False }
 
 	for line in lines:
 		if workobject.isnotliterary() and line.index == workobject.starts:
@@ -134,11 +135,11 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
 			columnb = line.showlinehtml()
 		else:
-			columnb = insertparserids(line, editorialcontinuation)
+			columnb = insertparserids(line, continuationdict)
 
-		brackettypes = findactivebrackethighlighting()
 		if brackettypes:
-			editorialcontinuation = setcontinuationvalue(line, previousline, editorialcontinuation)
+			continuationdict = {t: setcontinuationvalue(line, previousline, continuationdict[t], t)
+			                         for t in brackettypes}
 
 		if line.index == focusline.index:
 			# highlight the citationtuple line
@@ -225,7 +226,7 @@ def checkfordocumentmetadata(line, workobject):
 	return metadatahtml
 
 
-def insertparserids(lineobject, editorialcontinuation=False):
+def insertparserids(lineobject, continuationdict):
 	"""
 	set up the clickable thing for the browser by bracketing every word with something the JS can respond to:
 		<observed id="ἐπειδὲ">ἐπειδὲ</observed>
@@ -260,7 +261,8 @@ def insertparserids(lineobject, editorialcontinuation=False):
 
 	brackettypes = findactivebrackethighlighting()
 	if brackettypes:
-		theline = lineobject.markeditorialinsersions(brackettypes, editorialcontinuation)
+		continuationdict = {e: continuationdict[e] for e in brackettypes}
+		theline = lineobject.markeditorialinsersions(continuationdict)
 
 	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',theline)
 	hyphenated = lineobject.hyphenated

@@ -334,8 +334,11 @@ def htmlifysearchfinds(listofsearchresultobjects, searchobject):
 			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 			           for ln in ro.lineobjects]
 		elif findactivebrackethighlighting(searchobject.session):
+			# note that this does not know how to do continuations (yet); it only supports the minimal syntax for the functions
+			# need to insert a thisline/previousline structure so you can call setcontinuationvalue()
 			brackettypes = findactivebrackethighlighting(searchobject.session)
-			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markeditorialinsersions(brackettypes, False))
+			continuation = {k: False for k in brackettypes}
+			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markeditorialinsersions(continuation))
 			           for ln in ro.lineobjects]
 		else:
 			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)
