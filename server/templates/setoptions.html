@@ -11,14 +11,6 @@
       {% endfor %}
     </fieldset>
     <fieldset>
-        <legend>Lines of context to accompany search results</legend>
-        <input id="linesofcontextspinner" type="text" value="6" width="20px;">
-    </fieldset>
-    <fieldset>
-        <legend>Lines of context in the browser window</legend>
-        <input id="browserspinner" type="text" value="20" width="20px;">
-    </fieldset>
-    <fieldset>
         <legend>Maximum number of search results to return</legend>
         <input id="hitlimitspinner" type="text" value="500" width="20px;">
     </fieldset>
@@ -30,6 +22,10 @@
         <input type="radio" name="onehit" id="onehit_n" value="no"></label>
     </fieldset>
     <fieldset>
+        <legend>Lines of context to accompany search results</legend>
+        <input id="linesofcontextspinner" type="text" value="6" width="20px;">
+    </fieldset>
+    <fieldset>
       <legend>Sort results by</legend>
         <select name="sortresults" id="sortresults">
             <option value="shortname">Name</option>
@@ -39,6 +35,10 @@
             <option value="provenance">Work Provenance</option>
             <option value="universalid">ID Number</option>
         </select>
+    </fieldset>
+    <fieldset>
+        <legend>Lines of context in the browser window</legend>
+        <input id="browserspinner" type="text" value="20" width="20px;">
     </fieldset>
     <fieldset>
         <legend>Index by headword</legend>
@@ -54,7 +54,7 @@
         quotes <input type="checkbox" id="quotesummary" value="yes">
     </fieldset>
     <fieldset>
-        <legend>Display color shifts texts inside of brackets that are...</legend>
+        <legend>Display color shifted text inside of brackets that are...</legend>
         square <input type="checkbox" id="bracketsquare" value="yes">&nbsp;&middot;&nbsp;
         rounded <input type="checkbox" id="bracketround" value="yes">&nbsp;&middot;&nbsp;
         angled <input type="checkbox" id="bracketangled" value="yes">&nbsp;&middot;&nbsp;
