@@ -342,7 +342,7 @@ def insertparserids(lineobject, editorialcontinuation=False):
 def bracketcheck(word):
 	"""
 
-	trye if there are brackets in the word
+	true if there are brackets in the word
 
 	:param word:
 	:return:

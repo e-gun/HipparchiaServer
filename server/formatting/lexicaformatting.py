@@ -177,16 +177,18 @@ def formatdictionarysummary(summarydict):
 		classtwo = sec['classtwo']
 		label = sec['label']
 		if len(items) > 0:
-			outputlist.append('<div class="{cl}"><span class="lexiconhighlight">{lb}</span><br \>'.format(cl=classone, lb=label))
+			outputlist.append('<div class="{cl}"><span class="lexiconhighlight">{lb}</span><br />'.format(cl=classone, lb=label))
 		if len(items) == 1:
-			outputlist.append('<span class="{cl}">{item}</span><br \>'.format(cl=classtwo, item=items[0]))
+			outputlist.append('<span class="{cl}">{item}</span><br />'.format(cl=classtwo, item=items[0]))
 		else:
 			count = 0
 			for i in items:
 				count += 1
-				outputlist.append('<span class="{cl}">({ct})&nbsp;{item}</span><br \>'.format(cl=classtwo, item=i, ct=count))
+				outputlist.append('\t<span class="{cl}">({ct})&nbsp;{item}</span><br />'.format(cl=classtwo, item=i, ct=count))
+		if len(items) > 0:
+			outputlist.append('</div>')
 
-	outputlist.append('</div><br \><br \>\n<span class="lexiconhighlight">Full entry:</span><br \>')
+	outputlist.append('<br /><br />\n<span class="lexiconhighlight">Full entry:</span><br />')
 
 	summarystring = '\n'.join(outputlist)
 

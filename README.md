@@ -74,7 +74,7 @@ key features:
 	    search will attempt to choose the most efficient strategy for any given situation
 		text layout in results/browser/text maker sensitive to shifts in font face and size
 	    text layout via CSS: possible to modify the style sheet to suit your own tastes
-	    optional highlighting of editorial insertions
+	    optional highlighting of editorial insertions: {abc}, <def>, (ghi), [jkl]
 	    configurable defaults for most options
 	    unicode support of technical, rare, and exotic characters (that you can also search for: 𐆂,𐄒, 🜚)
 	    forward-compatible unicode: attempt to properly code characters which are not yet available in most fonts
