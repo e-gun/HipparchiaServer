@@ -372,11 +372,11 @@ def brackethtmlifysearchfinds(listoflineobjects, searchobject, linehtmltemplate)
 	while lines:
 		ln = lines.popleft()
 		passage.append(linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markeditorialinsersions(continuationdict)))
-		continuationdict = {t: setcontinuationvalue(ln, previous, continuationdict[t], t)
-		                         for t in brackettypes}
+		continuationdict = {t: setcontinuationvalue(ln, previous, continuationdict[t], t) for t in brackettypes}
 		previous = ln
 
 	return passage
+
 
 def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	"""

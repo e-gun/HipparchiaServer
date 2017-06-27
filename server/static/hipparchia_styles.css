@@ -13,6 +13,11 @@
 	src: url('/static/ttf/DejaVuSansCondensed-Oblique.ttf') format('truetype');
 	}
 
+@font-face {
+	font-family: 'DejaVuSansCondensed';
+	src: url('/static/ttf/DejaVuSansCondensed.ttf') format('truetype');
+	}
+
 /* define colors by variable so you can change them all right here */
 
 :root {
@@ -128,6 +133,7 @@
     #genrelistcontents
 --orange
     td.count
+    hmu_alternative_reading
 --pink
     .saveoptions:hover
     #clearselections:hover
@@ -795,6 +801,11 @@ form {
 	display: inline;
 	}
 
+hmu_alternative_reading {
+    color: var(--orange);
+    font-style: italic;
+    }
+
 hmu_blank_quarter_spaces {
 	margin-left: 0px;
 	}
@@ -807,6 +818,10 @@ hmu_mid_line_citation_boundary {
 	}
 
 hmu_papyrological_fraction{ }
+
+hmu_parenthesis_deletion_marker {
+    text-decoration: line-through;
+    }
 
 /*
 
