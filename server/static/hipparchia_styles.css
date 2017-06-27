@@ -45,6 +45,7 @@
   --pink: hsla(0, 33%, 96%, 1);
   --red: hsla(346, 77%, 26%, 1);
   --rustedorange: hsla(23, 37%, 39%, 1);
+  --sicklyyellow: hsla(44, 22%, 66%, 1);
   --skyblue: hsla(205, 92%, 37%, 1);
   --teal: hsla(196, 14%, 39%, 1);
   --transparentgrey: hsla(0, 0%, 67%, .8);
@@ -124,7 +125,6 @@
     .ui-icon ui-icon-arrowthick-1-e:hover
     .ui-icon ui-icon-arrowthick-1-w:hover
     bibl:hover
-    hmu_unconventional_form_written_by_scribe
     indexedlocation:hover
     indexobserved:hover
     observed:hover
@@ -154,6 +154,8 @@
     .textdate
     #searchsummary
     #pollingdata
+--sicklyyellow
+    hmu_unconventional_form_written_by_scribe
 --skyblue
     code
     smallcode
@@ -856,9 +858,7 @@ hmu_title {
 	}
 
 hmu_unconventional_form_written_by_scribe {
-    color: var(--midgrey);
-    text-decoration: underline;
-    text-decoration-style: wavy;
+    color: var(--sicklyyellow);
     }
 
 indexedlocation:hover{
