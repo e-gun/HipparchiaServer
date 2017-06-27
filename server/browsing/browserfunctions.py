@@ -304,18 +304,21 @@ def insertparserids(lineobject, continuationdict):
 			try:
 				lastword = words.pop()
 			except IndexError:
-				lastword = ''
+				lastword = None
 
-			lastword = re.sub(r'\s$', r'', lastword)
+			try:
+				lastword = re.sub(r'\s$', r'', lastword)
+			except TypeError:
+				pass
 
 			try:
 				firstword = words.popleft()
 			except IndexError:
-				firstword = ''
+				firstword = None
 
-			if firstword == '':
+			if not firstword:
 				firstword = lastword
-				lastword = ''
+				lastword = None
 
 			if not firstword:
 				newline[-1] += ' '
@@ -378,6 +381,11 @@ def addobservedtags(word, lastword, hyphenated):
 		sp = ' '
 	else:
 		sp = ''
+
+	try:
+		word[-1]
+	except:
+		return ''
 
 	if word[-1] == '-' and word == lastword:
 		o = '<observed id="{h}">{w}</observed>{sp}'.format(h=hyphenated, w=word, sp=sp)
