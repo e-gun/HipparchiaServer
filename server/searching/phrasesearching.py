@@ -87,6 +87,49 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 					) secondpass
 				WHERE secondpass.linebundle ~ %s  LIMIT 200
 
+	DEBUGGING notes: SQL oddities
+
+	TROUBLE:
+
+		'ἐρρῶϲθαι ὑμᾶϲ' can't be found in BGU (Vol 1), 108 (dp0001w00b); but it is there:
+			[  𝕔 17 ]μεν. ἐρρῶϲθαι ὑμᾶϲ εὔχο(μαι).
+
+		you will return hits if you search for 'ἐρρῶϲθαι ὑμᾶϲ' in just dp0001:
+			BGU (Vol 1), 332: r, line 13 (dp0001w076)
+			BGU (Vol 1), 8 rp: line 18 (dp0001w09d)
+
+		you will return hits if you search for 'ἐρρῶϲθαι ὑμᾶϲ' in just dp0001w076 or dp0001w09d
+
+		there is nothing special in the original betacode:
+			█⑧① [ &c `17 ]$MEN. E)RRW=SQAI U(MA=S EU)/XO[1MAI]1.
+
+		works:
+			»ϲθαι ὑμᾶϲ εὔ«
+			»ῶϲθαι ὑμᾶϲ«
+			»ρῶϲθαι ὑ«
+			»μεν ἐρρ«
+			»ρῶϲθαι ὑμ«
+			»ῶϲθαι ὑμᾶ«
+		fails:
+			»ρῶϲθαι ὑμᾶ«
+
+		pgAdmin4 has trouble with the phrase too:
+			can find it via '﻿WHERE secondpass.linebundle ~ 'ὑμᾶϲ εὔχομαι'' in a different papyrus
+			can't find it in dp0001w00b
+			but will find it if you ask for the equivalent:
+			﻿'ἐρρῶϲθαι\sὑμᾶϲ'
+
+		WTF?
+
+		It looks like the problem goes away if you substitute '\s' for ' ' in the search phrase.
+		BUT why was there a problem in the first place?
+
+		Something about how the bundles are built? i.e., 'concat(accented_line, ' ', lead(accented_line)' That does
+		not really make sense (since the phrases are not at the edges of the joins...) But that is the only unusual
+		thing we are doing here...
+
+		very disturbing until the root cause of the trouble is made clear...
+
 	:return:
 	"""
 
@@ -100,8 +143,10 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 	combinations = qcomb.combinations()
 	combinations.pop()
 	# lines start/end
-	sp = re.sub(r'^\s', '(^| )', searchphrase)
-	sp = re.sub(r'\s$', '( |$)', sp)
+	sp = re.sub(r'^\s', '(^|\s)', searchphrase)
+	sp = re.sub(r'\s$', '(\s|$)', sp)
+	# on the reasoning behind the following substitution see 'DEBUGGING notes: SQL oddities' above
+	sp = re.sub(r' ', r'\s', sp)
 
 	if not so.onehit:
 		lim = ' LIMIT ' + str(so.cap)
@@ -144,7 +189,6 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 
 			query = qtemplate.format(db=uid, co=so.usecolumn, whr=whr, lim=lim)
 			data = (sp,)
-
 			curs.execute(query, data)
 			indices = [i[0] for i in curs.fetchall()]
 			# this will yield a bunch of windows: you need to find the centers; see 'while...' below

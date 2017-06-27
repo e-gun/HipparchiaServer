@@ -80,7 +80,6 @@ def searchdispatcher(searchobject, activepoll):
 			jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, searchlist, commitcount, activepoll, so))
 			        for i in range(workers)]
 		else:
-			# print('subqueryphrasesearch()',searchingfor)
 			jobs = [Process(target=subqueryphrasesearch, args=(foundlineobjects, so.termone, searchlist, count, commitcount, activepoll, so))
 			        for i in range(workers)]
 	elif so.searchtype == 'proximity':

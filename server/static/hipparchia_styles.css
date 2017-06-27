@@ -810,6 +810,10 @@ hmu_blank_quarter_spaces {
 	margin-left: 0px;
 	}
 
+hmu_discarded_form {
+    text-decoration: line-through;
+    }
+
 hmu_greek_in_a_latin_text {
 	}
 
@@ -843,9 +847,9 @@ hmu_title {
 	}
 
 hmu_unconventional_form_written_by_scribe {
-    text-decoration-line: underline;
+    color: var(--midgrey);
+    text-decoration: underline;
     text-decoration-style: wavy;
-    text-decoration-color: var(--red);
     }
 
 indexedlocation:hover{
