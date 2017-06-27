@@ -239,6 +239,7 @@ def insertparserids(lineobject, continuationdict):
 	the clickable observeds
 
 	a lot of hoops to jump trhough for a humble problem: wrong whitespace position
+
 	the main goal is to avoid 'ab[ <span>cd' when what you want is 'ab[<span>cd'
 	the defect is that anything that is chopped up by bracketing markup will be
 	'unobservable' and so unclickable: 'newline[-1] +=' removes you from consideration

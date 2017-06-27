@@ -3,18 +3,18 @@ cloc --not-match-f='^j' HipparchiaServer/
       89 unique files.
        9 files ignored.
 
-github.com/AlDanial/cloc v 1.72  T=0.65 s (127.3 files/s, 29307.6 lines/s)
+github.com/AlDanial/cloc v 1.72  T=0.89 s (93.1 files/s, 22648.8 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                          48           2729           3346           7567
-XML                              6              0              0           1549
-HTML                            21            126             13           1413
-JavaScript                       6            191            183           1027
-CSS                              1            168              8            653
-Markdown                         1             27              0            116
+Python                          48           2876           3622           7872
+XML                              6              0              0           1556
+HTML                            21            123             13           1487
+JavaScript                       6            193            187           1071
+CSS                              1            184            129            732
+Markdown                         1             32              0            123
 -------------------------------------------------------------------------------
-SUM:                            83           3241           3550          12325
+SUM:                            83           3408           3951          12841
 -------------------------------------------------------------------------------
 
 
@@ -46,11 +46,13 @@ startup.py:def dictitemstartswith(originaldict, element, muststartwith):
 startup.py:def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
 browsing/browserfunctions.py:def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
 browsing/browserfunctions.py:def checkfordocumentmetadata(line, workobject):
-browsing/browserfunctions.py:def insertparserids(lineobject):
+browsing/browserfunctions.py:def insertparserids(lineobject, continuationdict):
+browsing/browserfunctions.py:def bracketcheck(word):
+browsing/browserfunctions.py:def addobservedtags(word, lastword, hyphenated):
 browsing/browserfunctions.py:def insertcrossreferencerow(lineobject):
 browsing/browserfunctions.py:def insertdatarow(label, css, founddate):
 dbsupport/citationfunctions.py:def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
-dbsupport/citationfunctions.py:def locusintocitation(workobject, citationtuple):
+dbsupport/citationfunctions.py:def locusintocitation(workobject, lineobject):
 dbsupport/citationfunctions.py:def prolixlocus(workobject, citationtuple):
 dbsupport/citationfunctions.py:def finddblinefromlocus(workid, citationtuple, cursor):
 dbsupport/citationfunctions.py:def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=0):
@@ -61,7 +63,6 @@ dbsupport/citationfunctions.py:def perseuscitationsintohipparchiacitations(citat
 dbsupport/dbfunctions.py:def setthreadcount():
 dbsupport/dbfunctions.py:def setconnection(autocommit='n'):
 dbsupport/dbfunctions.py:def tablenamer(authorobject, thework):
-dbsupport/dbfunctions.py:def labelmaker(workuid, cursor):
 dbsupport/dbfunctions.py:def loadallauthorsasobjects():
 dbsupport/dbfunctions.py:def loadallworksasobjects():
 dbsupport/dbfunctions.py:def dbloadasingleworkobject(workuniversalid):
@@ -153,7 +154,8 @@ formatting/searchformatting.py:def bulkenvironsfetcher(table, searchresultlist, 
 formatting/searchformatting.py:def flagsearchterms(searchresultobject, skg, prx, searchobject):
 formatting/searchformatting.py:def highlightsearchterm(lineobject, regexequivalent, spanname):
 formatting/searchformatting.py:def compilesearchtermequivalent(searchterm):
-formatting/searchformatting.py:def htmlifysearchfinds(listofsearchresultobjects):
+formatting/searchformatting.py:def htmlifysearchfinds(listofsearchresultobjects, searchobject):
+formatting/searchformatting.py:def brackethtmlifysearchfinds(listoflineobjects, searchobject, linehtmltemplate):
 formatting/searchformatting.py:def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 formatting/searchformatting.py:def jstoinjectintobrowser(listofsearchresultobjects):
 formatting/searchformatting.py:def unbalancedspancleaner(html):
@@ -213,6 +215,9 @@ listsandsession/sessionfunctions.py:def justlit():
 listsandsession/sessionfunctions.py:def justdoc():
 listsandsession/sessionfunctions.py:def reducetosessionselections(listmapper, criterion):
 listsandsession/sessionfunctions.py:def returnactivedbs():
+listsandsession/sessionfunctions.py:def findactivebrackethighlighting(s=session):
+listsandsession/sessionfunctions.py:def selectionisactive(selected):
+listsandsession/sessionfunctions.py:def returnactivelist(selectiondict):
 listsandsession/validateconfig.py:def loadconfig(filepath):
 listsandsession/validateconfig.py:def parseconfig(configlist):
 listsandsession/validateconfig.py:def compareconfigs(template, model):
@@ -237,7 +242,7 @@ routes/hintroutes.py:def augenrelist():
 routes/hintroutes.py:def wkgenrelist():
 routes/hintroutes.py:def offeraulocationhints():
 routes/hintroutes.py:def offerprovenancehints():
-routes/inforoutes.py:def authorlist():
+routes/inforoutes.py:def databasecontents(dictionarytodisplay):
 routes/lexicalroutes.py:def findbyform(observedword):
 routes/lexicalroutes.py:def dictsearch(searchterm):
 routes/lexicalroutes.py:def reverselexiconsearch(searchterm):
@@ -278,5 +283,6 @@ textsandindices/textandindiceshelperfunctions.py:def tcparserequest(request, aut
 textsandindices/textandindiceshelperfunctions.py:def textsegmentfindstartandstop(authorobject, workobject, passageaslist, cursor):
 textsandindices/textandindiceshelperfunctions.py:def wordindextohtmltable(indexingoutput, useheadwords):
 textsandindices/textandindiceshelperfunctions.py:def dictmerger(masterdict, targetdict):
-textsandindices/textandindiceshelperfunctions.py:def observedformjs():
+textsandindices/textandindiceshelperfunctions.py:def supplementalindexjs():
+textsandindices/textandindiceshelperfunctions.py:def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationvalue, type):
 textsandindices/textbuilder.py:def buildtext(work, firstline, lastline, linesevery, cursor):

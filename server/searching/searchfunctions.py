@@ -29,6 +29,7 @@ def cleaninitialquery(seeking):
 	"""
 
 	# things you never need to see and are not part of a (for us) possible regex expression
+	# a lot of this may be hard to type, but if you cut and paste a result to make a new search, this stuff is in there
 	badpunct = ',;#'
 	extrapunct = """‵’‘·“”„'"—†⌈⌋⌊⟫⟪❵❴⟧⟦«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓"""
 
@@ -110,7 +111,7 @@ def atsignwhereclauses(uidwithatsign, operand, authors):
 	index = -1
 	for l in locus:
 		index += 1
-		lvstr = 'level_0' + str(wklvls[index]) + '_value' + operand + '%s '
+		lvstr = 'level_0{l}_value{o}%s '.format(l=wklvls[index],o=operand)
 		whereclausetuples.append((lvstr, l))
 
 	# print('whereclausetuples',whereclausetuples)

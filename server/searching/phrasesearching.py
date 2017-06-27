@@ -103,15 +103,17 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 		there is nothing special in the original betacode:
 			█⑧① [ &c `17 ]$MEN. E)RRW=SQAI U(MA=S EU)/XO[1MAI]1.
 
-		works:
-			»ϲθαι ὑμᾶϲ εὔ«
-			»ῶϲθαι ὑμᾶϲ«
-			»ρῶϲθαι ὑ«
-			»μεν ἐρρ«
-			»ρῶϲθαι ὑμ«
-			»ῶϲθαι ὑμᾶ«
-		fails:
-			»ρῶϲθαι ὑμᾶ«
+		set up a search just inside dp0001w00b
+
+			this will produce a result:
+				»ϲθαι ὑμᾶϲ εὔ«
+				»ῶϲθαι ὑμᾶϲ«
+				»ρῶϲθαι ὑ«
+				»μεν ἐρρ«
+				»ρῶϲθαι ὑμ«
+				»ῶϲθαι ὑμᾶ«
+			this fails to produce a result:
+				»ρῶϲθαι ὑμᾶ«
 
 		pgAdmin4 has trouble with the phrase too:
 			can find it via '﻿WHERE secondpass.linebundle ~ 'ὑμᾶϲ εὔχομαι'' in a different papyrus
@@ -128,7 +130,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 		not really make sense (since the phrases are not at the edges of the joins...) But that is the only unusual
 		thing we are doing here...
 
-		very disturbing until the root cause of the trouble is made clear...
+		very disturbing until the root cause of the trouble is made clear.
 
 	:return:
 	"""
