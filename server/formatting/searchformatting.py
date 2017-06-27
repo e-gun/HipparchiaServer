@@ -197,18 +197,43 @@ def highlightsearchterm(lineobject, regexequivalent, spanname):
 	newline = line
 	line = newline
 
-	find = re.search(regexequivalent, line)
-	try:
-		newline = '{ls}<span class="{sp}">{fg}</span>{le}'.format(ls=line[0:find.start()], sp=spanname, fg=find.group(), le=line[find.end():])
-	except:
-		# the find was almost certainly a hyphenated last word: 'pro-' instead of 'profuit'
-		hyph = lineobject.hyphenated
-		find = re.search(regexequivalent, hyph)
+	# find = re.search(regexequivalent, line)
+
+	#   potential problem: avoid highlighting the markup already in the line
+	#   it took a while to discover this because the sort of search that will produce the
+	#   glitch is not exactly the most common kind of search...
+	#
+	# 	a search for 'in' will send you regexequivalent = re.compile('([IiíïJj][Nn])')
+	# 	this will find the 'in' in '<hmu_roman_in_a_greek_text>'
+	# 	and you will get back '<hmu_roman_<span class="match">in</span>_a_greek_text>'
+	#
+	#   test every substitute to make sure it does not produce marked up markup
+
+	finds = list(re.finditer(regexequivalent, line))
+	finds.reverse()
+	badpattern = re.compile(r'<[^\s>]{0,}<span class="match">.*?</span>.*?>')
+	validresult = False
+
+	while finds and not validresult:
 		try:
-			newline = line+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;{hs}<span class="{sn}">{fg}</span>{he}&nbsp;)'.format(hs=hyph[0:find.start()], sn=spanname, fg=find.group(), he=hyph[find.end():])
+			find = finds.pop()
+		except IndexError:
+			# need to exit, even if we have somehow failed...
+			validresult = True
+
+		try:
+			newline = '{ls}<span class="{sp}">{fg}</span>{le}'.format(ls=line[0:find.start()], sp=spanname, fg=find.group(), le=line[find.end():])
 		except:
-			pass
-		# print('nofind',searchtermequivalent, line, lineobject.lastword('contents'))
+			# the find was almost certainly a hyphenated last word: 'pro-' instead of 'profuit'
+			hyph = lineobject.hyphenated
+			find = re.search(regexequivalent, hyph)
+			try:
+				newline = line+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;{hs}<span class="{sn}">{fg}</span>{he}&nbsp;)'.format(hs=hyph[0:find.start()], sn=spanname, fg=find.group(), he=hyph[find.end():])
+			except:
+				pass
+
+		if not re.search(badpattern,newline):
+			validresult = True
 
 	return newline
 
