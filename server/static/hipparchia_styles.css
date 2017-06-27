@@ -124,6 +124,7 @@
     .ui-icon ui-icon-arrowthick-1-e:hover
     .ui-icon ui-icon-arrowthick-1-w:hover
     bibl:hover
+    hmu_unconventional_form_written_by_scribe
     indexedlocation:hover
     indexobserved:hover
     observed:hover
@@ -145,7 +146,6 @@
     .highlight
     .observed
     .romannumerals
-    hmu_unconventional_form_written_by_scribe
     td.headword
 --rustedorange
     .crossreference
@@ -202,6 +202,11 @@ body {
 
 .bold {
     font-weight: bold;
+    }
+
+.breakintext {
+    font-size: 75%;
+    font-style: italic;
     }
 
 .center {
@@ -283,7 +288,7 @@ body {
 	padding: 20px;
 	}
 
-.erasedepiographicaltext, .strikethrough {
+.erasedepigraphicaltext, {
 	text-decoration: line-through;
 	}
 
@@ -545,6 +550,10 @@ body {
 
 .speakers, .speaker {
 	font-weight: bold;
+	}
+
+.strikethrough {
+	text-decoration: line-through;
 	}
 
 .superscript {
