@@ -214,25 +214,27 @@ def highlightsearchterm(lineobject, regexequivalent, spanname):
 	badpattern = re.compile(r'<[^\s>]{0,}<span class="match">.*?</span>.*?>')
 	validresult = False
 
+	if not finds:
+		# the find was almost certainly a hyphenated last word: 'pro-' instead of 'profuit'
+		hyph = lineobject.hyphenated
+		find = re.search(regexequivalent, hyph)
+		try:
+			newline = '{l}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;{hs}<span class="{sn}">{fg}</span>{he}&nbsp;)'.format(
+				l=line, hs=hyph[0:find.start()], sn=spanname, fg=find.group(), he=hyph[find.end():])
+			return newline
+		except:
+			return line
+
 	while finds and not validresult:
 		try:
 			find = finds.pop()
 		except IndexError:
-			# need to exit, even if we have somehow failed...
+			# need a way out...
 			validresult = True
 
-		try:
-			newline = '{ls}<span class="{sp}">{fg}</span>{le}'.format(ls=line[0:find.start()], sp=spanname, fg=find.group(), le=line[find.end():])
-		except:
-			# the find was almost certainly a hyphenated last word: 'pro-' instead of 'profuit'
-			hyph = lineobject.hyphenated
-			find = re.search(regexequivalent, hyph)
-			try:
-				newline = line+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;{hs}<span class="{sn}">{fg}</span>{he}&nbsp;)'.format(hs=hyph[0:find.start()], sn=spanname, fg=find.group(), he=hyph[find.end():])
-			except:
-				pass
+		newline = '{ls}<span class="{sp}">{fg}</span>{le}'.format(ls=line[0:find.start()], sp=spanname, fg=find.group(), le=line[find.end():])
 
-		if not re.search(badpattern,newline):
+		if not re.search(badpattern, newline):
 			validresult = True
 
 	return newline
