@@ -57,7 +57,9 @@ def compilesearchlist(listmapper, s=session):
 
 		authorlist = []
 		for l in s['alocselections']:
-			authorlist = foundindict(ad, 'location', l)
+			# 'Italy, Africa and the West', but you asked for 'Italy'
+			exactmatch = False
+			authorlist = foundindict(ad, 'location', l, exactmatch)
 			for a in authorlist:
 				for w in ad[a].listofworks:
 					searchlist.append(w.universalid)
@@ -81,6 +83,13 @@ def compilesearchlist(listmapper, s=session):
 		searchlist += [w for w in works] + worksof + passages
 		searchlist = [aw for aw in searchlist if aw]
 		searchlist = list(set(searchlist))
+
+		if s['incerta'] == 'no':
+			searchlist = list(set(searchlist) - set(allincerta))
+
+		if s['varia'] == 'no':
+			searchlist = list(set(searchlist) - set(allvaria))
+
 	else:
 		# you picked nothing and want everything. well, maybe everything...
 
@@ -90,7 +99,7 @@ def compilesearchlist(listmapper, s=session):
 		searchlist = wd.keys()
 
 		if s['latestdate'] != '1500' or s['earliestdate'] != '-850':
-			searchlist = prunebydate(searchlist, ad, wd)
+			searchlist = prunebydate(searchlist, ad, wd, s)
 
 	# [B] now start subtracting from the list of inclusions
 	if s['spuria'] == 'no':
@@ -314,7 +323,7 @@ def flagexclusions(searchlist, s=session):
 		return modifiedsearchlist
 
 
-def prunebydate(searchlist, authorobjectdict, workobjectdict):
+def prunebydate(searchlist, authorobjectdict, workobjectdict, s=session):
 	"""
 	send me a list of authorsandworks and i will trim it via the session date limit variables
 	note that 'varia' and 'incerta' need to be handled here since they have special dates:
@@ -327,13 +336,13 @@ def prunebydate(searchlist, authorobjectdict, workobjectdict):
 	"""
 	trimmedlist = []
 
-	if justlatin() == False and (session['earliestdate'] != '-850' or session['latestdate'] != '1500'):
+	if justlatin() == False and (s['earliestdate'] != '-850' or s['latestdate'] != '1500'):
 		# [a] first prune the bad dates
-		min = int(session['earliestdate'])
-		max = int(session['latestdate'])
+		min = int(s['earliestdate'])
+		max = int(s['latestdate'])
 		if min > max:
 			min = max
-			session['earliestdate'] = session['latestdate']
+			s['earliestdate'] = s['latestdate']
 
 		for universalid in searchlist:
 			w = workobjectdict[universalid]
@@ -351,10 +360,10 @@ def prunebydate(searchlist, authorobjectdict, workobjectdict):
 					# the author can't tell you his date; you must be building a list with both latin authors and something else
 					trimmedlist.append(universalid)
 		# [b] then add back in any varia and/or incerta as needed
-		if session['varia'] == 'yes':
+		if s['varia'] == 'yes':
 			varia = list(allvaria.intersection(searchlist))
 			trimmedlist += varia
-		if session['incerta'] == 'yes':
+		if s['incerta'] == 'yes':
 			incerta = list(allincerta.intersection(searchlist))
 			trimmedlist += incerta
 
@@ -478,7 +487,7 @@ def polytonicsort(unsortedwords):
 	return sortedversion
 
 
-def foundindict(searchdict, element, mustbein):
+def foundindict(searchdict, element, mustbein, exactmatch=True):
 	"""
 	search for an element in a dict
 	return a list of universalids
@@ -497,8 +506,12 @@ def foundindict(searchdict, element, mustbein):
 	:return:
 	"""
 
-	finds = [searchdict[x].universalid for x in searchdict
-	         if getattr(searchdict[x], element) and getattr(searchdict[x], element) == mustbein]
+	if exactmatch:
+		finds = [searchdict[x].universalid for x in searchdict
+		         if getattr(searchdict[x], element) and getattr(searchdict[x], element) == mustbein]
+	else:
+		finds = [searchdict[x].universalid for x in searchdict
+		         if getattr(searchdict[x], element) and re.search(mustbein, getattr(searchdict[x], element))]
 
 	return finds
 

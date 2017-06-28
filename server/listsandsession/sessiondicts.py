@@ -100,13 +100,15 @@ def buildauthorlocationdict(authordict):
 
 	for a in authordict:
 		if authordict[a].location and authordict[a].location != '':
+			# think about what happens if the location looks like 'Italy, Africa and the West [Chr.]'...
 			loc = authordict[a].location.split(',')
 			l = authordict[a].universalid[0:2]
 			locationdict[l] += loc
 
 	for l in ['gr', 'lt', 'in', 'dp', 'ch']:
 		locationdict[l] = list(set(locationdict[l]))
-		locationdict[l] = [re.sub(r'^\s|\s$','',x) for x in locationdict[l]]
+		locationdict[l] = [re.sub(r'^\s|\s$', '', x) for x in locationdict[l]]
+		locationdict[l] = [re.sub(r'\[.*?\]', '', x) for x in locationdict[l]]
 		locationdict[l].sort()
 
 	return locationdict
