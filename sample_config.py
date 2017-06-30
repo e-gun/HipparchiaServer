@@ -93,8 +93,9 @@ DBPASS = 'yourpassheretrytomakeitstrongplease'
 # 	this can take a couple of minutes to calculate, so leaving it
 # 	at 'yes' is not such a great idea.   and the new numbers are
 # 	not in fact entered into the code, just calculated; so you have
-# 	to edit dbHeadwordObject() yourself   after you are given the
-# 	numbers to send to it
+# 	to edit dbHeadwordObject() yourself  after you are given the
+# 	numbers to send to it; if COLLAPSEDGENRECOUNTS is 'yes', you will
+#   not see all of the possibilities
 
 DBDEBUGMODE = 'no'
 HTMLDEBUGMODE = 'no'
