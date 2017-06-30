@@ -221,6 +221,12 @@ body {
 	font-size: 90%;
 	}
 
+.cityinfo, .provenance, .pubinfo, .regioninfo, .textdate {
+	font-size: 85%;
+	color: var(--rustedorange);
+	text-align: center;
+	}
+
 .colorhighlight {
 	color: var(--red);
 	}
@@ -260,6 +266,12 @@ body {
 	font-size: 120%;
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
+
+.documentmetadatalabel {
+    font-size: 85%;
+	color: var(--rustedorange);
+	font-weight: 600;
+    }
 
 .editorialmarker_angledbrackets {
     font-weight: normal;
@@ -681,12 +693,6 @@ keeping (for now) the non-span version of this
 	font-size: 80%;
 	}
 
-.textdate {
-	font-size: 85%;
-	color: var(--rustedorange);
-	text-align: center;
-	}
-
 .textuallemma, .interlineartext, .interlinearmarginalia, .marginaltext {
 	text-style: italic;
 	text-color: var(--blue);
@@ -1022,6 +1028,10 @@ td.browserembeddedannotations {
     font-family: DejaVuSansCondensed;
     font-size: 80%;
     vertical-align: middle;
+    }
+
+td.documentmeta {
+    padding-right: -20px;
     }
 
 td.textmakerembeddedannotations {
