@@ -181,7 +181,6 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 	q = qtemplate.format(db=authortable, whr=whr, l=mylimit)
 	d = (seeking,)
 
-
 	try:
 		cursor.execute(q, d)
 		found = cursor.fetchall()

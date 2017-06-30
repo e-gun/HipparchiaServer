@@ -207,12 +207,17 @@ def highlightsearchterm(lineobject, regexequivalent, spanname):
 	# 	this will find the 'in' in '<hmu_roman_in_a_greek_text>'
 	# 	and you will get back '<hmu_roman_<span class="match">in</span>_a_greek_text>'
 	#
+	#   a search for 'val' can give you 'value' in a line that has 'qualis' (via the [uv] match...)
+	#   <hmu_metadata_notes <span class="match">val</span>ue="Non. 109M" /><hmu_metadata_documentnumber value="12" />Nolo équidem: sed tu huic, quém scis quali in té siet
+	#
 	#   test every substitute to make sure it does not produce marked up markup
+
+	badpatterna = re.compile(r'<[^\s>]{0,}<span class="match">.*?</span>.*?>')
+	badpatternb = re.compile(r'<.*?<span class="match">.*?</span>')
+	validresult = False
 
 	finds = list(re.finditer(regexequivalent, line))
 	finds.reverse()
-	badpattern = re.compile(r'<[^\s>]{0,}<span class="match">.*?</span>.*?>')
-	validresult = False
 
 	if not finds:
 		# the find was almost certainly a hyphenated last word: 'pro-' instead of 'profuit'
@@ -233,8 +238,8 @@ def highlightsearchterm(lineobject, regexequivalent, spanname):
 			validresult = True
 
 		newline = '{ls}<span class="{sp}">{fg}</span>{le}'.format(ls=line[0:find.start()], sp=spanname, fg=find.group(), le=line[find.end():])
-
-		if not re.search(badpattern, newline):
+		print('new',newline)
+		if not re.search(badpatterna, newline) and not re.search(badpatternb, newline):
 			validresult = True
 
 	return newline

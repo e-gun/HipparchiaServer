@@ -294,11 +294,6 @@ body {
 	text-decoration: line-through;
 	}
 
-.expanded {
-	letter-spacing: 0.14em;
-    font-weight: 600;
-	}
-
 .explanation {
 	padding-left: 75px;
 	}
@@ -335,6 +330,137 @@ body {
     text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
 
+/* 
+	HMU FORMS
+	
+	a collection of styles to match formatting assertions in the original data
+	see ltcurlybracketsubstitutes(), etc in HipparchiaBuilder
+	
+ */
+ 
+.hmu_alternative_reading {
+    color: var(--orange);
+    font-style: italic;
+    }
+
+.hmu_blank_quarter_spaces {
+	margin-left: 0px;
+	}
+
+.hmu_date_or_numeric_equivalent_of_date {
+	
+	}
+
+.hmu_discarded_form {
+    text-decoration: line-through;
+    }
+
+.hmu_emendation_by_editor_of_text_not_obviously_incorrect {
+	-webkit-text-decoration-style: wavy;
+	-moz-text-decoration-style: wavy;
+	text-decoration-style: wavy;
+	}
+	
+.hmu_epigraphical_text_after_correction {
+	}
+
+.hmu_epigraphical_text_inserted_after_erasure {
+	}
+
+.hmu_expanded_text {
+	letter-spacing: 0.14em;
+    font-weight: 600;
+	}
+
+.hmu_impression_of_stamp_on_papyrus {
+	font-size: 125%;
+	font-weight: 600;
+	}
+		
+.hmu_latin_expanded_text {
+	letter-spacing: 0.14em;
+    font-weight: 600;
+	}
+
+.hmu_greek_in_a_latin_text {
+	font-style: italic;
+	}
+
+.hmu_marginaltext{
+	color: var(--dkgreen);
+	font-size: 80%;
+	font-style: italic;
+	text-indent: -5px;
+	padding-right: -5px;
+	}
+	
+.hmu_mid_line_citation_boundary {
+	padding: 50px;
+	}
+
+.hmu_overline_and_underline {
+	border-bottom: 1px var(--black);
+	border-top: 1px var(--black);
+	}
+	
+.hmu_papyrological_fraction{ }
+
+.hmu_parenthesis_deletion_marker {
+    text-decoration: line-through;
+    }
+
+.hmu_preferred_epigraphical_text_used {
+	}
+	
+
+.hmu_recitfied_form {
+	text-decoration: underline;
+	}
+
+/*
+
+hmu_roman_in_a_greek_text is problematic: the data often turns this on and then fails to turn it off at the right time
+the net result is visibly unbalanced spans
+
+furthermore in the hybrid world of the CHR data, you see walls of this
+
+keeping (for now) the non-span version of this
+
+*/
+
+.hmu_roman_in_a_greek_text, hmu_roman_in_a_greek_text{
+	font-size: 90%;
+	font-family: DejaVuSansCondensed;
+	}
+
+.hmu_scholium {
+	font-style: italic;
+	}
+
+.hmu_seal_attached_to_papyrus {
+	font-size: 125%;
+	font-weight: 600;
+	}
+	
+.hmu_stacked_text_lower {
+	}
+	
+.hmu_stacked_text_upper {
+	}
+
+.hmu_textual_lemma {
+	text-style: italic;
+	text-color: var(--blue);
+	}
+	
+.hmu_title {
+	font-weight: bold;
+	font-style: italic;
+	}
+
+.hmu_unconventional_form_written_by_scribe {
+    color: var(--sicklyyellow);
+    }
 .homonym {
     color: var(--dkgrey);
     font-style: italic;
@@ -366,6 +492,11 @@ body {
 	text-align: center;
 	}
 
+.largerthannormal {
+	font-size: 115%;
+	}
+	
+	
 .letterbox {
 	border-style: solid;
 	border-width: 1px;
@@ -412,13 +543,6 @@ body {
 	padding-right: 20px;
 	}
 
-.marginaltext{
-	color: var(--dkgreen);
-	font-size: 80%;
-	font-style: italic;
-	text-indent: -5px;
-	padding-right: -5px;
-	}
 
 .match, .proximate {
 	color: var(--red);
@@ -450,11 +574,6 @@ body {
 
 .overline {
 	text-decoration: overline;
-	}
-
-.overunder {
-	border-bottom: 1px var(--black);
-	border-top: 1px var(--black);
 	}
 
 .pickedgenre {
@@ -507,9 +626,6 @@ body {
 	color: var(--midgrey);
 	}
 
-.scholium {
-	font-style: italic;
-	}
 
 .searchsel:hover {
 	/* inactive color: #993354;
@@ -812,54 +928,6 @@ form {
 	display: inline;
 	}
 
-hmu_alternative_reading {
-    color: var(--orange);
-    font-style: italic;
-    }
-
-hmu_blank_quarter_spaces {
-	margin-left: 0px;
-	}
-
-hmu_discarded_form {
-    text-decoration: line-through;
-    }
-
-hmu_greek_in_a_latin_text {
-	}
-
-hmu_mid_line_citation_boundary {
-	padding: 50px;
-	}
-
-hmu_papyrological_fraction{ }
-
-hmu_parenthesis_deletion_marker {
-    text-decoration: line-through;
-    }
-
-/*
-
-hmu_roman_in_a_greek_text is problematic: the data often turns this on and then fails to turn it off at the right time
-the net result is visibly unbalanced spans
-
-furthermore in the hybrid world of the CHR data, you see walls of this
-
-*/
-
-hmu_roman_in_a_greek_text {
-	font-size: 90%;
-	font-family: DejaVuSansCondensed;
-	}
-
-hmu_title {
-	font-weight: bold;
-	font-style: italic;
-	}
-
-hmu_unconventional_form_written_by_scribe {
-    color: var(--sicklyyellow);
-    }
 
 indexedlocation:hover{
 	color: var(--dkbabyblue);

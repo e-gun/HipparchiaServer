@@ -107,8 +107,8 @@ def buildauthorlocationdict(authordict):
 
 	for l in ['gr', 'lt', 'in', 'dp', 'ch']:
 		locationdict[l] = list(set(locationdict[l]))
-		locationdict[l] = [re.sub(r'^\s|\s$', '', x) for x in locationdict[l]]
 		locationdict[l] = [re.sub(r'\[.*?\]', '', x) for x in locationdict[l]]
+		locationdict[l] = [re.sub(r'^\s|\s$', '', x) for x in locationdict[l]]
 		locationdict[l].sort()
 
 	return locationdict
