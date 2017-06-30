@@ -1,25 +1,24 @@
 cloc --not-match-f='^j' HipparchiaServer/
-      89 text files.
-      89 unique files.
+      90 text files.
+      90 unique files.
        9 files ignored.
 
-github.com/AlDanial/cloc v 1.72  T=0.89 s (93.1 files/s, 22648.8 lines/s)
+github.com/AlDanial/cloc v 1.72  T=0.80 s (104.5 files/s, 25921.6 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                          48           2876           3622           7872
-XML                              6              0              0           1556
+Python                          49           2897           3690           7935
+XML                              6              0              0           1942
 HTML                            21            123             13           1487
 JavaScript                       6            193            187           1071
-CSS                              1            184            129            732
-Markdown                         1             32              0            123
+CSS                              1            210            136            797
+Markdown                         1             32              0            124
 -------------------------------------------------------------------------------
-SUM:                            83           3408           3951          12841
+SUM:                            84           3455           4026          13356
 -------------------------------------------------------------------------------
 
 
 [ in server/] grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
-
 hipparchiaobjects/dbtextobjects.py:class dbAuthor(object):
 hipparchiaobjects/dbtextobjects.py:class dbOpus(object):
 hipparchiaobjects/dbtextobjects.py:class dbWorkLine(object):
@@ -49,8 +48,7 @@ browsing/browserfunctions.py:def checkfordocumentmetadata(line, workobject):
 browsing/browserfunctions.py:def insertparserids(lineobject, continuationdict):
 browsing/browserfunctions.py:def bracketcheck(word):
 browsing/browserfunctions.py:def addobservedtags(word, lastword, hyphenated):
-browsing/browserfunctions.py:def insertcrossreferencerow(lineobject):
-browsing/browserfunctions.py:def insertdatarow(label, css, founddate):
+browsing/browserfunctions.py:def buildmetadatarow(label, css, metadata):
 dbsupport/citationfunctions.py:def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 dbsupport/citationfunctions.py:def locusintocitation(workobject, lineobject):
 dbsupport/citationfunctions.py:def prolixlocus(workobject, citationtuple):
@@ -79,6 +77,7 @@ dbsupport/dbfunctions.py:def makeablankline(work, fakelinenumber):
 dbsupport/dbfunctions.py:def makeanemptyauthor(universalid):
 dbsupport/dbfunctions.py:def makeanemptywork(universalid):
 dbsupport/dbfunctions.py:def versionchecking(activedbs, expectedsqltemplateversion):
+formatting/betacodeescapes.py:def andsubstitutes(match):
 formatting/betacodetounicode.py:def replacegreekbetacode(texttoclean):
 formatting/betacodetounicode.py:def capitalletters(betacode):
 formatting/betacodetounicode.py:def capitalsmoothgraveadscript(match, g=1):
@@ -184,13 +183,13 @@ listsandsession/listmanagement.py:def sortsearchlist(searchlist, authorsdict):
 listsandsession/listmanagement.py:def sortresultslist(hits, authorsdict, worksdict):
 listsandsession/listmanagement.py:def calculatewholeauthorsearches(searchlist, authordict):
 listsandsession/listmanagement.py:def flagexclusions(searchlist, s=session):
-listsandsession/listmanagement.py:def prunebydate(searchlist, authorobjectdict, workobjectdict):
+listsandsession/listmanagement.py:def prunebydate(searchlist, authorobjectdict, workobjectdict, s=session):
 listsandsession/listmanagement.py:def removespuria(searchlist, worksdict):
 listsandsession/listmanagement.py:def buildhintlist(seeking, listofposiblities):
 listsandsession/listmanagement.py:def tidyuplist(untidylist):
 listsandsession/listmanagement.py:def dropdupes(checklist, matchlist):
 listsandsession/listmanagement.py:def polytonicsort(unsortedwords):
-listsandsession/listmanagement.py:def foundindict(searchdict, element, mustbein):
+listsandsession/listmanagement.py:def foundindict(searchdict, element, mustbein, exactmatch=True):
 listsandsession/sessiondicts.py:def buildaugenresdict(authordict):
 listsandsession/sessiondicts.py:def buildworkgenresdict(workdict):
 listsandsession/sessiondicts.py:def buildauthorlocationdict(authordict):

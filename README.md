@@ -76,6 +76,7 @@ key features:
 	    text layout via CSS: possible to modify the style sheet to suit your own tastes
 	    optional highlighting of editorial insertions: {abc}, <def>, (ghi), [jkl]
 	    configurable defaults for most options
+	    will display annotations to the original text
 	    unicode support of technical, rare, and exotic characters (that you can also search for: 𐆂,𐄒, 🜚)
 	    forward-compatible unicode: attempt to properly code characters which are not yet available in most fonts
 	    known unknowns: unhandled characters preserve their betacode messages in the metadata for future fixes

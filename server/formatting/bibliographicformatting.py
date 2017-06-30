@@ -174,7 +174,7 @@ def formatpublicationinfo(pubinfo):
 	:return:
 	"""
 
-	maxlinelen = 120
+	maxlinelen = 90
 
 	tags = [
 		{'volumename': ['', '. ']},
