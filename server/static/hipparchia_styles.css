@@ -107,6 +107,7 @@
     .editorialmarker_squarebrackets
     .unhandledpercent
     .unhandledpound
+    td.embeddedannotations
 --lessoffwhite
     #browserdialog
     #helptabs
@@ -1012,6 +1013,25 @@ td.browsedline {
 	padding-left: 10px;
 	padding-bottom: 8px;
 	}
+
+td.browserembeddedannotations {
+	padding-right: 10px;
+	padding-left: 15px;
+	padding-bottom: 8px;
+    color: var(--huedgrey);
+    font-family: DejaVuSansCondensed;
+    font-size: 80%;
+    vertical-align: middle;
+    }
+
+td.textmakerembeddedannotations {
+	padding-right: 10px;
+	padding-left: 15px;
+    color: var(--huedgrey);
+    font-family: DejaVuSansCondensed;
+    font-size: 80%;
+    vertical-align: middle;
+    }
 
 td.browsercite {
 	padding-right: 10px;

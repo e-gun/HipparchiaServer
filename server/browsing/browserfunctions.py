@@ -123,6 +123,23 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	brackettypes = findactivebrackethighlighting()
 	continuationdict = { 'square': False, 'round': False, 'curly': False, 'angled': False }
 
+	shownotes = True
+	if shownotes:
+		linetemplate = """
+		<tr class="browser">
+			<td class="browserembeddedannotations">{n}</td>
+			<td class="browsedline">{l}</td>
+			<td class="browsercite">{c}</td>
+		</tr>
+		"""
+	else:
+		linetemplate = """
+		<tr class="browser">
+			<td class="browsedline">{l}</td>
+			<td class="browsercite">{c}</td>
+		</tr>
+		"""
+
 	for line in lines:
 		if workobject.isnotliterary() and line.index == workobject.starts:
 			# line.index == workobject.starts added as a check because
@@ -164,8 +181,9 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 			prefix = '<smallcode>{id}&nbsp;&nbsp;&nbsp;</smallcode>&nbsp;'.format(id=line.universalid)
 		columnb = prefix+columnb
 
-		linehtml = '<tr class="browser">\n\t<td class="browsedline">{cb}</td>'.format(cb=columnb)
-		linehtml += '\n\t<td class="browsercite">{ca}</td>\n</tr>\n'.format(ca=columna)
+		notes = '; '.join(line.insetannotations())
+
+		linehtml = linetemplate.format(l=columnb, n=notes, c=columna)
 
 		ouputtable.append(linehtml)
 		previousline = line

@@ -238,7 +238,7 @@ def highlightsearchterm(lineobject, regexequivalent, spanname):
 			validresult = True
 
 		newline = '{ls}<span class="{sp}">{fg}</span>{le}'.format(ls=line[0:find.start()], sp=spanname, fg=find.group(), le=line[find.end():])
-		print('new',newline)
+
 		if not re.search(badpatterna, newline) and not re.search(badpatternb, newline):
 			validresult = True
 

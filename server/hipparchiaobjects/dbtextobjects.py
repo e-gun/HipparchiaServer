@@ -7,6 +7,8 @@
 """
 import re
 
+from server.formatting.betacodeescapes import andsubstitutes
+
 
 class dbAuthor(object):
 	"""
@@ -502,6 +504,24 @@ class dbWorkLine(object):
 			allbutfirstandlastword = ' '.join(middle)
 
 		return allbutfirstandlastword
+
+	def insetannotations(self):
+		"""
+
+		<hmu_metadata_notes value="Non. 104M" />
+
+		note that in 'Gel. &3N.A.& 20.3.2' the '&3' turns on italics
+
+		:return:
+		"""
+
+		pattern = re.compile(r'<hmu_metadata_notes value="(.*?)" />')
+		ands = re.compile(r'&(\d{1,2})(.*?)(&\d{0,1})')
+
+		notes = re.findall(pattern, self.accented)
+		notes = [re.sub(ands, andsubstitutes, n) for n in notes]
+
+		return notes
 
 	def markeditorialinsersions(self, editorialcontinuationdict):
 		"""

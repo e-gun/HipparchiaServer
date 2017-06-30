@@ -47,6 +47,22 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	# 660	           δανείϲαϲ,
 	avoiddoubletap = False
 
+	shownotes = True
+	if shownotes:
+		linetemplate = """
+			<tr>
+				<td class="browsercite">{ca}</td>
+				<td class="lineoftext">{cb}</td>
+				<td class="textmakerembeddedannotations">{cc}</td>
+			</tr>
+		"""
+	else:
+		linetemplate = """
+			<tr>
+				<td class="browsercite">{ca}</td>
+				<td class="lineoftext">{cb}</td>
+			</tr>
+		"""
 
 	if len(results) > 0:
 		previousline = dblineintolineobject(results[0])
@@ -60,13 +76,13 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 				if thisline.annotations != '' and re.search(r'documentnumber',thisline.annotations) is None:
 					columna = ''
 					columnb = '<span class="crossreference">{notes}</span>'.format(notes=thisline.annotations)
-					xref = '<tr><td class="browsercite">{ca}</td><td class="textcrossreference">{cb}</td></tr>\n'.format(ca=columna, cb=columnb)
+					xref = '<tr><td class="browsercite">{ca}</td><td class="textcrossreference">{cb}</td><td></td></tr>\n'.format(ca=columna, cb=columnb)
 					output.append(xref)
 			date = re.search(finder, thisline.accented)
 			if date and thisline.index == firstline:
 				columna = ''
 				columnb = '<span class="textdate">Date:&nbsp;{date}</span>'.format(date=date.group(1))
-				datehtml = '<tr><td class="browsercite">{ca}</td><td class="textdate">{cb}</td></tr>\n'.format(ca=columna, cb=columnb)
+				datehtml = '<tr><td class="browsercite">{ca}</td><td class="textdate">{cb}</td><td></td></tr>\n'.format(ca=columna, cb=columnb)
 				output.append(datehtml)
 
 			if brackettypes:
@@ -90,8 +106,10 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 				avoiddoubletap = True
 			else:
 				avoiddoubletap = False
-			
-			linehtml = '<tr><td class="browsercite">{ca}</td><td class="lineoftext">{cb}</td></tr>\n'.format(ca=columna, cb=columnb)
+
+			notes = '; '.join(thisline.insetannotations())
+
+			linehtml = linetemplate.format(ca=columna, cb=columnb, cc=notes)
 	
 			output.append(linehtml)
 
