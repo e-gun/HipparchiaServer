@@ -426,7 +426,7 @@ body {
 	}
 	
 
-.hmu_recitfied_form {
+.hmu_rectified_form {
 	text-decoration: underline;
 	}
 
@@ -598,6 +598,10 @@ keeping (for now) the non-span version of this
 
 .picklabel {
 	font-weight: bold;
+	font-style: italic;
+	}
+
+.poetictext {
 	font-style: italic;
 	}
 

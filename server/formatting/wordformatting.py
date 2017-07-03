@@ -388,3 +388,102 @@ def cleanaccentsandvj(texttostrip):
 		texttostrip = re.sub(substitutes[swap][0], substitutes[swap][1], texttostrip)
 
 	return texttostrip
+
+
+def universalregexequivalent(searchterm):
+	"""
+
+	in order to properly highlight a polytonic word that you found via a unaccented search you need to convert:
+		ποταμον
+	into:
+		([πΠ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][τΤ][αἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑ][μΜ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][νΝ])
+
+	NB: this function also takes care of capitalization issues: the search is always lower case, but results will be marked
+	without regard to their case: 'Antonius', 'Kalendas', etc.
+
+	this function is also called by searchdictionary() to address the τήθη vs τηθή issue
+
+	:param searchterm:
+	:return:
+	"""
+
+	# need to avoid having '\s' turn into '\[Ss]', etc.
+	searchterm = re.sub(r'\\s', '😀', searchterm)
+	searchterm = re.sub(r'\\w', '👽', searchterm)
+
+	equivalents = {
+		'α': '[αἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑ]',
+		'β': '[βΒ]',
+		'ψ': '[ψΨ]',
+		'δ': '[δΔ]',
+		'ε': '[εἐἑἒἓἔἕὲέΕἘἙἚἛἜἝ]',
+		'φ': '[φΦ]',
+		'γ': '[γΓ]',
+		'η': '[ηᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἡἦΗᾘᾙᾚᾛᾜᾝᾞᾟἨἩἪἫἬἭἮἯ]',
+		'ι': '[ιἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗΐἸἹἺἻἼἽἾἿΙ]',
+		'ξ': '[ξΞ]',
+		'κ': '[κΚ]',
+		'λ': '[λΛ]',
+		'μ': '[μΜ]',
+		'ν': '[νΝ]',
+		'ο': '[οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ]',
+		'π': '[πΠ]',
+		'ρ': '[ρΡῥῬ]',
+		'ϲ': '[ϲϹ]',
+		'σ': '[ϲϹ]',
+		'ς': '[ϲϹ]',
+		'τ': '[τΤ]',
+		'υ': '[υὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺὙὛὝὟΥ]',
+		'ω': '[ωὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼΩᾨᾩᾪᾫᾬᾭᾮᾯὨὩὪὫὬὭὮὯΩ]',
+		'χ': '[χΧ]',
+		'θ': '[θΘ]',
+		'ζ': '[ζΖ]',
+		'b': '[Bb]',
+		'c': '[Cc]',
+		'd': '[Dd]',
+		'f': '[Ff]',
+		'g': '[Gg]',
+		'h': '[Hh]',
+		'j': '[JjIi]',
+		'k': '[Kk]',
+		'l': '[Ll]',
+		'm': '[Mm]',
+		'n': '[Nn]',
+		'p': '[Pp]',
+		'q': '[Qq]',
+		'r': '[Rr]',
+		's': '[Ss]',
+		't': '[Tt]',
+		'w': '[Ww]',
+		'x': '[Xx]',
+		'y': '[Yy]',
+		'z': '[Zz]',
+		'a': '[Aaáä]',
+		'e': '[Eeéë]',
+		'i': '[IiíïJj]',
+		'o': '[Ooóö]',
+		'u': '[UuüVv]',
+		'v': '[VvUuü]'
+	}
+
+	searchtermequivalent = ''
+	searchterm = re.sub(r'(^\s|\s$)', '', searchterm)
+	for c in searchterm:
+		try:
+			c = equivalents[c]
+		except KeyError:
+			pass
+		searchtermequivalent += c
+	# searchtermequivalent = '(^|)('+searchtermequivalent+')($|)'
+	searchtermequivalent = re.sub(r'😀', '\s', searchtermequivalent)
+	searchtermequivalent = re.sub(r'👽', '\w', searchtermequivalent)
+	searchtermequivalent = '({s})'.format(s=searchtermequivalent)
+
+	try:
+		searchtermequivalent = searchtermequivalent
+	except:
+		# if you try something like '(Xἰ' you will produce an error:
+		# sre_constants.error: missing ), unterminated subpattern at position 0
+		searchtermequivalent = None
+
+	return searchtermequivalent

@@ -17,7 +17,8 @@ from server import hipparchia
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.searchformatting import htmlifysearchfinds, nocontexthtmlifysearchfinds, jstoinjectintobrowser, \
-	buildresultobjects, flagsearchterms, compilesearchtermequivalent
+	buildresultobjects, flagsearchterms
+from server.formatting.wordformatting import universalregexequivalent
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
 from server.listsandsession.listmanagement import sortresultslist, calculatewholeauthorsearches, compilesearchlist, \
 	flagexclusions
@@ -149,10 +150,10 @@ def executesearch(timestamp):
 
 		activepoll.statusis('Converting results to HTML')
 
-		skg = compilesearchtermequivalent(so.termone)
+		skg = re.compile(universalregexequivalent(so.termone))
 		prx = None
 		if so.proximate != '' and so.searchtype == 'proximity':
-			prx = compilesearchtermequivalent(so.termtwo)
+			prx = re.compile(universalregexequivalent(so.termtwo))
 
 		for r in resultlist:
 			r.lineobjects = flagsearchterms(r,skg, prx, so)

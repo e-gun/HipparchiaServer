@@ -24,7 +24,8 @@ except ImportError:
 	#   bugs out if you have lots of hits
 	#       psycopg2cffi._impl.exceptions.OperationalError
 	#       [substantially lower the commit count?]
-	import psycopg2cffi as psycopg2
+	# import psycopg2cffi as psycopg2
+	pass
 
 from server import hipparchia
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus, dbWorkLine

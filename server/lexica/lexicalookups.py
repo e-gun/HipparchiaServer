@@ -14,7 +14,7 @@ from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
 from server.formatting.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
 	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
-from server.formatting.wordformatting import cleanaccentsandvj
+from server.formatting.wordformatting import cleanaccentsandvj, universalregexequivalent
 from server.hipparchiaobjects.lexicalobjects import dbWordCountObject, dbHeadwordObject, dbMorphologyObject, \
 	dbGreekWord, dbLatinWord, dbLemmaObject
 from server.listsandsession.listmanagement import polytonicsort
@@ -286,6 +286,10 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		seeking: 'προχοΐδιον'
 		syntax: '=' or 'LIKE'
 
+	still unimplemented:
+		τήθη vs τηθή; the parser has the latter, the dictionary expects the former (but knows of the latter)
+
+
 	:param cursor:
 	:param dictionary:
 	:param usecolumn:
@@ -294,7 +298,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	"""
 	# print('seeking/trial',seeking,trialnumber)
 
-	maxtrials = 7
+	maxtrials = 8
 	trialnumber += 1
 	accenteddiaresis = re.compile(r'αί|εί|οί|υί|ηί|ωί')
 	unaccenteddiaresis = re.compile(r'αι|ει|οι|υι|ηι|ωι')
@@ -311,14 +315,14 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	query = qtemplate.format(ec=extracolumn, d=dictionary, col=usecolumn, sy=syntax)
 	data = (seeking,)
 	cursor.execute(query, data)
-
+	print(trialnumber,'d',data)
 	# print('searchdictionary()',query,'\n\t',data)
 
 	found = cursor.fetchall()
 
 	# we might be at trial 2+ and so we need to strip the supplement we used at trial #1
 	if trialnumber > 2:
-		seeking = re.sub(r'\[⁰¹²³⁴⁵⁶⁷⁸⁹\]','',seeking)
+		seeking = re.sub(r'\[¹²³⁴⁵⁶⁷⁸⁹\]','',seeking)
 		seeking = re.sub(r'\^', '', seeking)
 
 	foundobjects = None
@@ -329,7 +333,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		# failure...
 		# the word is probably there, we have just been given the wrong search term; try some other solutions
 		# [1] first guess: there were multiple possible entries, not just one
-		newword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]','',seeking.lower())
+		newword = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹]','',seeking.lower())
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber == 2:
 		# grab any/all variants: ⁰¹²³⁴⁵⁶⁷⁸⁹
@@ -363,6 +367,16 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		vowels = vowels[0] + 'ϊ'
 		newword = head + vowels + tail
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+	elif trialnumber < maxtrials:
+		# τήθη vs τηθή; the parser has the latter, the dictionary expects the former (but knows of the latter)
+		trialnumber = maxtrials - 1
+		newword = re.sub(r'\[¹²³⁴⁵⁶⁷⁸⁹\]', '', seeking)
+		newword = cleanaccentsandvj(newword)
+		newword = universalregexequivalent(newword)
+		# strip '(' and ')'
+		newword = '^{wd}$'.format(wd=newword[1:-1])
+		print('new',newword)
+		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
 
 	return foundobjects
 
