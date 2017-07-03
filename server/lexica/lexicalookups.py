@@ -315,7 +315,6 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	query = qtemplate.format(ec=extracolumn, d=dictionary, col=usecolumn, sy=syntax)
 	data = (seeking,)
 	cursor.execute(query, data)
-	print(trialnumber,'d',data)
 	# print('searchdictionary()',query,'\n\t',data)
 
 	found = cursor.fetchall()
@@ -375,7 +374,6 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		newword = universalregexequivalent(newword)
 		# strip '(' and ')'
 		newword = '^{wd}$'.format(wd=newword[1:-1])
-		print('new',newword)
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
 
 	return foundobjects
