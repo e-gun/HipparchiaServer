@@ -556,39 +556,36 @@ def formatprevalencedata(wordcountobject):
 	"""
 
 	w = wordcountobject
-	thehtml = ''
+	thehtml = []
 
 	max = 0
 	for key in ['gr', 'lt', 'in', 'dp', 'ch']:
 		if w.getelement(key) > max:
 			max = w.getelement(key)
 		if w.getelement(key) > 0:
-			thehtml += '<span class="prevalence">' + w.getlabel(key) + '</span>' + ' {:,}'.format(w.getelement(key)) + ' / '
+			thehtml.append('<span class="prevalence">{a}</span> {b:,}'.format(a=w.getlabel(key), b=w.getelement(key)))
 	key = 'total'
 	if w.getelement(key) != max:
-		thehtml += '<span class="prevalence">'+w.getlabel(key)+'</span>' + ' {:,}'.format(w.getelement(key))
-	else:
-		# there was just one hit; so you should drop the ' / '
-		thehtml = thehtml[:-3]
+		thehtml.append('<span class="prevalence">{a}</span> {b:,}'.format(a=w.getlabel(key), b=w.getelement(key)))
+
+	thehtml = [' / '.join(thehtml)]
 
 	if type(w) == dbHeadwordObject:
-		thehtml += '\n<p class="wordcounts">Weighted distribution by corpus: '
+		thehtml.append('\n<p class="wordcounts">Weighted distribution by corpus: ')
 		wts = [(w.getweightedcorpora(key), w.getlabel(key)) for key in ['gr', 'lt', 'in', 'dp', 'ch']]
 		wts = sorted(wts, reverse=True)
-		for wt in wts:
-			thehtml += '<span class="prevalence">' + wt[1] + '</span>' + ' {0:.0f}'.format(wt[0]) + ' / '
-		thehtml = thehtml[:-3]
-		thehtml += '</p>\n'
+		wts = ['<span class="prevalence">{a}</span> {b:.0f}'.format(a=w[1], b=w[0]) for w in wts]
+		thehtml.append(' / '.join(wts))
+		thehtml.append('</p>')
 
 		wts = [(w.getweightedtime(key), w.gettimelabel(key)) for key in ['early', 'middle', 'late']]
 		wts = sorted(wts, reverse=True)
 		if wts[0][0]:
 			# None was returned if there is no time data for this (Latin) word
-			thehtml += '\n<p class="wordcounts">Weighted chronological distribution: '
-			for wt in wts:
-				thehtml += '<span class="prevalence">' + wt[1] + '</span>' + ' {0:.0f}'.format(wt[0]) + ' / '
-			thehtml = thehtml[:-3]
-			thehtml += '</p>\n'
+			thehtml.append('<p class="wordcounts">Weighted chronological distribution: ')
+			wts = ['<span class="prevalence">{a}</span> {b:.0f}'.format(a=w[1], b=w[0]) for w in wts]
+			thehtml.append(' / '.join(wts))
+			thehtml.append('</p>')
 
 		if hipparchia.config['COLLAPSEDGENRECOUNTS'] == 'yes':
 			genreinfotuples = w.collapsedgenreweights()
@@ -596,17 +593,19 @@ def formatprevalencedata(wordcountobject):
 			genreinfotuples = w.sortgenresbyweight()
 
 		if genreinfotuples:
-			thehtml += '\n<p class="wordcounts">Predominant genres: '
+			thehtml.append('<p class="wordcounts">Predominant genres: ')
+			genres = []
 			for g in range(0,hipparchia.config['NUMBEROFGENRESTOTRACK']):
 				git = genreinfotuples[g]
 				if git[1] > 0:
-					thehtml += '<span class="emph">{g}</span>'.format(g=git[0])+' ('+'{0:.0f})'.format(git[1]) + ' / '
-			if genreinfotuples[1][1] > 0:
-				thehtml = thehtml[:-3]
+					genres.append('<span class="emph">{a}</span>({b:.0f})'.format(a=git[0], b=git[1]))
+			thehtml.append(', '.join(genres))
 
 		key = 'frq'
 		if w.gettimelabel(key) and re.search(r'core', w.gettimelabel(key)) is None:
-			thehtml += '<p class="wordcounts">Relative frequency: <span class="italic">{lb}</span></p>\n'.format(lb=w.gettimelabel(key))
+			thehtml.append('<p class="wordcounts">Relative frequency: <span class="italic">{lb}</span></p>\n'.format(lb=w.gettimelabel(key)))
+
+		thehtml = '\n'.join(thehtml)
 
 	return thehtml
 
