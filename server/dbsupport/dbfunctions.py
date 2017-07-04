@@ -24,7 +24,7 @@ except ImportError:
 	#   bugs out if you have lots of hits
 	#       psycopg2cffi._impl.exceptions.OperationalError
 	#       [substantially lower the commit count?]
-	# import psycopg2cffi as psycopg2
+	import psycopg2cffi as psycopg2
 	pass
 
 from server import hipparchia
@@ -294,7 +294,7 @@ def simplecontextgrabber(authortable, focusline, linesofcontext, cursor):
 	"""
 
 	query = 'SELECT * FROM {uid} WHERE (index BETWEEN %s AND %s) ORDER BY index'.format(uid=authortable)
-	data = (focusline - (linesofcontext / 2), focusline + (linesofcontext / 2))
+	data = (focusline - int(linesofcontext / 2), focusline + int(linesofcontext / 2))
 	cursor.execute(query, data)
 	foundlines = cursor.fetchall()
 
