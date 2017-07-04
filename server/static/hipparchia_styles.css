@@ -1,26 +1,13 @@
-@font-face {
-	font-family: 'DejaVuSans';
-	src: url('/static/ttf/DejaVuSans.ttf') format('truetype');
-	}
-
-@font-face {
-	font-family: 'DejaVuSansMono';
-	src: url('/static/ttf/DejaVuSansMono.ttf') format('truetype');
-	}
-
-@font-face {
-	font-family: 'DejaVuSansCondensed-Oblique';
-	src: url('/static/ttf/DejaVuSansCondensed-Oblique.ttf') format('truetype');
-	}
-
-@font-face {
-	font-family: 'DejaVuSansCondensed';
-	src: url('/static/ttf/DejaVuSansCondensed.ttf') format('truetype');
-	}
-
-/* define colors by variable so you can change them all right here */
-
 :root {
+  /* define the default FONTS that will have precedence over the served-if-necessary fonts
+  that are delivered via @font-face below. NB: only Arial is likely to be pre-installed.
+  The others can be downloaded from various locations. */
+  --regularfontface: Arial;
+  /* --regularfontface: Brill; */
+  /* --regularfontface: Cardo; */
+  /* --regularfontface: GentiumPlusCompact; */
+
+  /* define COLORS by variable so you can change them all right here */
   --main-body-color: hsla(0, 0%, 97%, 1);
   --main-font-color: hsla(0, 0%, 6%, 1);
   --black: hsla(0, 0%, 0%, 1);
@@ -145,6 +132,7 @@
     .date
     .focusline
     .highlight
+    .levellabel1-4
     .observed
     .romannumerals
     td.headword
@@ -171,12 +159,38 @@
 */
 
 
+@font-face {
+	font-family: 'hipparchiasans';
+	src: url('/static/ttf/DejaVuSans.ttf') format('truetype');
+	}
+
+@font-face {
+	font-family: 'hipparchiamono';
+	src: url('/static/ttf/DejaVuSansMono.ttf') format('truetype');
+	}
+
+@font-face {
+	font-family: 'hipparchiaoblique';
+	src: url('/static/ttf/DejaVuSans-Oblique.ttf') format('truetype');
+	}
+
+@font-face {
+	font-family: 'hipparchiacondensed';
+	src: url('/static/ttf/DejaVuSansCondensed.ttf') format('truetype');
+	}
+
+@font-face {
+	font-family: 'hipparchiabold';
+	src: url('/static/ttf/DejaVuSans-Bold.ttf') format('truetype');
+	}
+
+
 body {
 	background: var(--main-body-color);
 	margin: 10px 10px 10px 10px;
-	font-family: Arial, 'DejaVuSans', sans-serif;
+	font-family: var(--regularfontface), 'hipparchiasans', sans-serif;
 	color: var(--main-font-color);
-	font-size: 90%;
+	font-size: 100%;
 	line-height: 1.4;
 	}
 
@@ -187,7 +201,7 @@ body {
 
 .activeoption {
     color: var(--dkteal);
-    font-family: 'DejaVuSansMono', monospace;
+    font-family: 'hipparchiamono', monospace;
     }
 
 .assigneddate {
@@ -443,7 +457,7 @@ keeping (for now) the non-span version of this
 
 .hmu_roman_in_a_greek_text, hmu_roman_in_a_greek_text{
 	font-size: 90%;
-	font-family: DejaVuSansCondensed;
+	font-family: 'hipparchiacondensed';
 	}
 
 .hmu_scholium {
@@ -474,6 +488,7 @@ keeping (for now) the non-span version of this
 .hmu_unconventional_form_written_by_scribe {
     color: var(--sicklyyellow);
     }
+
 .homonym {
     color: var(--dkgrey);
     font-style: italic;
@@ -518,19 +533,23 @@ keeping (for now) the non-span version of this
 .levellabel1 {
 	font-weight: bold;
 	font-size: 120%;
+	color: var(--red);
 	}
 
 .levellabel2 {
 	font-weight: bold;
 	font-size: 100%;
+	color: var(--red);
 	}
 
 .levellabel3 {
 	font-weight: bold;
+	color: var(--red);
 	}
 
 .levellabel4 {
 	font-style: italic;
+	color: var(--red);
 	}
 
 .lexiconhighlight {
@@ -680,7 +699,7 @@ keeping (for now) the non-span version of this
 .sought {
 	color: var(--deepblue);
 	font-weight: bold;
-	font-family: DejaVuSansMono, monospace;
+	font-family: 'hipparchiamono', monospace;
     }
 
 .speakers, .speaker {
@@ -914,7 +933,7 @@ caption {
 code {
 	font-size: 100%;
 	color: var(--skyblue);
-	font-family: DejaVuSansMono, monospace;
+	font-family: 'hipparchiamono', monospace;
 	}
 
 div.fourcolumn {
@@ -1005,7 +1024,7 @@ sense {
 smallcode {
 	font-size: 85%;
 	color: var(--skyblue);
-	font-family: DejaVuSansMono, monospace;
+	font-family: 'hipparchiamono', monospace;
 	}
 
 span.lat {
@@ -1029,7 +1048,7 @@ td.browserembeddedannotations {
 	padding-left: 15px;
 	padding-bottom: 8px;
     color: var(--huedgrey);
-    font-family: DejaVuSansCondensed;
+    font-family: 'hipparchiacondensed';
     font-size: 80%;
     vertical-align: middle;
     }
@@ -1042,7 +1061,7 @@ td.textmakerembeddedannotations {
 	padding-right: 10px;
 	padding-left: 15px;
     color: var(--huedgrey);
-    font-family: DejaVuSansCondensed;
+    font-family: 'hipparchiacondensed';
     font-size: 80%;
     vertical-align: middle;
     }

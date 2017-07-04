@@ -44,7 +44,7 @@ def grabsenses(fullentry):
 			paragraphlevel = '1'
 
 		try:
-			rewritten = '<p class="level{pl}"><span class="levelabel{lv}">{nm}</span>&nbsp;{sn}</p>\n'.format(pl=paragraphlevel, lv=lvl.group(1),nm=num.group(1), sn=sense)
+			rewritten = '<p class="level{pl}"><span class="levellabel{lv}">{nm}</span>{sn}</p>\n'.format(pl=paragraphlevel, lv=lvl.group(1),nm=num.group(1), sn=sense)
 		except:
 			print('exception in grabsenses at sense number:',i)
 			rewritten = ''
