@@ -605,7 +605,7 @@ def formatprevalencedata(wordcountobject):
 		if w.gettimelabel(key) and re.search(r'core', w.gettimelabel(key)) is None:
 			thehtml.append('<p class="wordcounts">Relative frequency: <span class="italic">{lb}</span></p>\n'.format(lb=w.gettimelabel(key)))
 
-		thehtml = '\n'.join(thehtml)
+	thehtml = '\n'.join(thehtml)
 
 	return thehtml
 
