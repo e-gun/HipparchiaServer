@@ -2,10 +2,19 @@
   /* define the default FONTS that will have precedence over the served-if-necessary fonts
   that are delivered via @font-face below. NB: only Arial is likely to be pre-installed.
   The others can be downloaded from various locations. */
-  --regularfontface: Arial;
-  /* --regularfontface: Brill; */
-  /* --regularfontface: Cardo; */
-  /* --regularfontface: GentiumPlusCompact; */
+  --systemdefaultfont: Arial;
+  /* --systemdefaultfont: ArialUnicodeMS; */
+  /* --systemdefaultfont: Alexander; */
+  /* --systemdefaultfont: Asea; */
+  /* --systemdefaultfont: Brill; */
+  /* --systemdefaultfont: Cardo; */
+  /* --systemdefaultfont: GentiumPlusCompact; */
+  /* --systemdefaultfont: IFAO-Grec-Unicode; */
+  /* --systemdefaultfont: Junicode; [but the lunate sigma is ugly] */
+  /* --systemdefaultfont: KerkisSans;  [but the lunate sigma is ugly] */
+  /* --systemdefaultfont: NotoSans; */
+  /* --systemdefaultfont: SourceSansPro; [but the lunate sigma is ugly] */
+  /* --systemdefaultfont: ZZforce_fallback_to_whatever_is_set_as_hipparchiasans; */
 
   /* define COLORS by variable so you can change them all right here */
   --main-body-color: hsla(0, 0%, 97%, 1);
@@ -161,34 +170,44 @@
 
 @font-face {
 	font-family: 'hipparchiasans';
-	src: url('/static/ttf/DejaVuSans.ttf') format('truetype');
+	src: url('/static/ttf/NotoSans-Regular.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiamono';
-	src: url('/static/ttf/DejaVuSansMono.ttf') format('truetype');
+	src: url('/static/ttf/RobotoMono-Medium.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiaoblique';
-	src: url('/static/ttf/DejaVuSans-Oblique.ttf') format('truetype');
+	src: url('/static/ttf/NotoSans-Italic.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiacondensed';
-	src: url('/static/ttf/DejaVuSansCondensed.ttf') format('truetype');
+	src: url('/static/ttf/RobotoCondensed-Regular.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiabold';
-	src: url('/static/ttf/DejaVuSans-Bold.ttf') format('truetype');
+	src: url('/static/ttf/NotoSansUI-Bold.ttf') format('truetype');
+	}
+
+@font-face {
+	font-family: 'hipparchiathin';
+	src: url('/static/ttf/Roboto-Thin.ttf') format('truetype');
+	}
+
+@font-face {
+	font-family: 'hipparchialight';
+	src: url('/static/ttf/Roboto-Light.ttf') format('truetype');
 	}
 
 
 body {
 	background: var(--main-body-color);
 	margin: 10px 10px 10px 10px;
-	font-family: var(--regularfontface), 'hipparchiasans', sans-serif;
+	font-family: var(--systemdefaultfont), 'hipparchiasans', sans-serif;
 	color: var(--main-font-color);
 	font-size: 100%;
 	line-height: 1.4;
@@ -395,7 +414,7 @@ body {
 	}
 
 .hmu_expanded_text {
-	letter-spacing: 0.14em;
+	letter-spacing: 0.12em;
     font-weight: 600;
 	}
 
@@ -405,7 +424,7 @@ body {
 	}
 		
 .hmu_latin_expanded_text {
-	letter-spacing: 0.14em;
+	letter-spacing: 0.12em;
     font-weight: 600;
 	}
 
@@ -456,8 +475,8 @@ keeping (for now) the non-span version of this
 */
 
 .hmu_roman_in_a_greek_text, hmu_roman_in_a_greek_text{
-	font-size: 90%;
-	font-family: 'hipparchiacondensed';
+	font-size: 100%;
+	font-family: 'hipparchiacondensed'
 	}
 
 .hmu_scholium {
@@ -698,7 +717,6 @@ keeping (for now) the non-span version of this
 
 .sought {
 	color: var(--deepblue);
-	font-weight: bold;
 	font-family: 'hipparchiamono', monospace;
     }
 
@@ -951,7 +969,7 @@ div.threecolumn {
 fieldset {
 	display: inline-block;
 	border-width: 1px;
-	font-size: 85%;
+	font-size: 80%;
 	}
 
 form {
@@ -1011,6 +1029,10 @@ p.level3 {
 p.level4 {
 	padding-left: 45;
 	}
+
+pre {
+    font-family: 'hipparchiamono', monospace;
+    }
 
 quote, orth {
 	font-style: italic;
