@@ -598,7 +598,7 @@ def formatprevalencedata(wordcountobject):
 			for g in range(0,hipparchia.config['NUMBEROFGENRESTOTRACK']):
 				git = genreinfotuples[g]
 				if git[1] > 0:
-					genres.append('<span class="emph">{a}</span>({b:.0f})'.format(a=git[0], b=git[1]))
+					genres.append('<span class="emph">{a}</span>&nbsp;({b:.0f})'.format(a=git[0], b=git[1]))
 			thehtml.append(', '.join(genres))
 
 		key = 'frq'

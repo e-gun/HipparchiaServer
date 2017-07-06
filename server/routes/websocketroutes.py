@@ -7,7 +7,6 @@
 """
 
 import asyncio
-import errno
 import json
 import socket
 import time
@@ -167,13 +166,13 @@ def checkforactivesearch(ts):
 	if result == 0:
 		pass
 	else:
-		print('websocket probe failed:',errno.errorcode[result])
+		# print('websocket probe failed:',errno.errorcode[result])
 		# need to fire up the websocket
 		try:
 			r = urlopen(theurl, data=None, timeout=.1)
 		except socket.timeout:
 			# socket.timeout: but our aim was to send the request, not to read the response and get blocked
-			# so we assuredly want to throw this exception so that we can eventually get to one of the 'returns'
+			# so we want to throw this exception so that we can eventually get to one of the 'returns'
 			print('websocket at {p} was told to launch'.format(p=pollport))
 
 	sock.close()

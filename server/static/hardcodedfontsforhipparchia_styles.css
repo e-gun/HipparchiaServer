@@ -2,20 +2,29 @@
   /* define the default FONTS that will have precedence over the served-if-necessary fonts
   that are delivered via @font-face below. NB: only Arial is likely to be pre-installed.
   The others can be downloaded from various locations. Arial is available on >95% of MacOS and PC systems? */
-  --systemdefaultfont: Arial;
-  /* --systemdefaultfont: ArialUnicodeMS; */
-  /* --systemdefaultfont: Alexander; */
-  /* --systemdefaultfont: Asea; */
-  /* --systemdefaultfont: Brill; */
-  /* --systemdefaultfont: Cardo; */
-  /* --systemdefaultfont: GentiumPlusCompact; */
-  /* --systemdefaultfont: IFAO-Grec-Unicode; */
-  /* --systemdefaultfont: Junicode; [but the lunate sigma is ugly] */
-  /* --systemdefaultfont: KerkisSans;  [but the lunate sigma is ugly] */
-  /* --systemdefaultfont: NotoSans; */
-  /* --systemdefaultfont: SourceSansPro; [but the lunate sigma is ugly] */
-  /* --systemdefaultfont: Ubuntu; */
-  /* --systemdefaultfont: ZZforce_fallback_to_whatever_is_set_as_hipparchiasansstatic; */
+
+  /* this variant of the CSS assumes you really have access to these items: the fallback is not graceful if the --var() call
+  points to somehting that does not exist. a browser bug? */
+
+  --installedfont: Arial;
+  --installedfontbold: Arial-BoldMT;
+  --installedfontitalic: Arial-ItalicMT;
+  --installedfontbolditalic: Arial-BoldItalicMT;
+  --installedfontcondensed: ArialNarrow;
+
+  /* --installedfont: ArialUnicodeMS; */
+  /* --installedfont: Alexander; */
+  /* --installedfont: Asea; */
+  /* --installedfont: Brill; */
+  /* --installedfont: Cardo; */
+  /* --installedfont: GentiumPlusCompact; */
+  /* --installedfont: IFAO-Grec-Unicode; */
+  /* --installedfont: Junicode; [but the lunate sigma is ugly] */
+  /* --installedfont: KerkisSans;  [but the lunate sigma is ugly] */
+  /* --installedfont: NotoSans; */
+  /* --installedfont: SourceSansPro; [but the lunate sigma is ugly] */
+  /* --installedfont: Ubuntu; */
+  /* --installedfont: ZZforce_fallback_to_whatever_is_set_as_hipparchiasansstatic; */
 
   /* define COLORS by variable so you can change them all right here */
   --main-body-color: hsla(0, 0%, 97%, 1);
@@ -185,7 +194,7 @@
 	}
 
 @font-face {
-	font-family: 'hipparchiacondensedstatic';
+	font-family: --var(installedfontcondensed);;
 	src: url('/static/ttf/RobotoCondensed-Regular.ttf') format('truetype');
 	}
 
@@ -208,7 +217,7 @@
 body {
 	background: var(--main-body-color);
 	margin: 10px 10px 10px 10px;
-	font-family: var(--systemdefaultfont), 'hipparchiasansstatic', sans-serif;
+	font-family: var(--installedfont), 'hipparchiasansstatic', sans-serif;
 	color: var(--main-font-color);
 	font-size: 100%;
 	line-height: 1.4;
@@ -238,12 +247,12 @@ body {
 	}
 
 .bold {
-    font-weight: bold;
+    font-family: var(--installedfontbold); 
     }
 
 .breakintext {
     font-size: 75%;
-    font-style: italic;
+    font-family: var(--installedfontitalic); 
     }
 
 .center {
@@ -266,14 +275,14 @@ body {
 	}
 
 .crossreference {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	color: var(--rustedorange);
 	text-align: center;
 	}
 
 .currentlyviewing {
 	text-align: left;
-	font-weight: bold;
+	font-family: var(--installedfontbold); 
 	color: var(--brtblue);
 	padding-bottom: 0px;
 	}
@@ -290,13 +299,12 @@ body {
 
 .dictionaryform {
 	color: var(--dkteal);
-	font-style: italic;
-	font-weight: bold;
+    font-family: var(--installedfontbolditalic); 
 	}
 
 .dictionaryheading {
 	color: var(--rustedorange);
-	font-weight: 600;
+	font-family: var(--installedfontbold); 
 	font-size: 120%;
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
@@ -304,7 +312,7 @@ body {
 .documentmetadatalabel {
     font-size: 85%;
 	color: var(--rustedorange);
-	font-weight: 600;
+	font-family: var(--installedfontbold); 
     }
 
 .editorialmarker_angledbrackets {
@@ -328,12 +336,12 @@ body {
     }
 
 .emph {
-	font-weight: 600;
+	font-family: var(--installedfontbold); 
 	color: var(--deepblue);
 	}
 
 .emphatic {
-	font-weight: bold;
+	font-family: var(--installedfontbold); 
 	padding: 20px;
 	}
 
@@ -370,7 +378,7 @@ body {
 	}
 
 .foundwork {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	}
 
 .highlight {
@@ -387,7 +395,7 @@ body {
 
 .hmu_alternative_reading {
     color: var(--orange);
-    font-style: italic;
+    font-family: var(--installedfontitalic); 
     }
 
 .hmu_blank_quarter_spaces {
@@ -416,27 +424,27 @@ body {
 
 .hmu_expanded_text {
 	letter-spacing: 0.12em;
-    font-weight: 600;
+    font-family: var(--installedfontbold); 
 	}
 
 .hmu_impression_of_stamp_on_papyrus {
 	font-size: 125%;
-	font-weight: 600;
+	font-family: var(--installedfontbold); 
 	}
 
 .hmu_latin_expanded_text {
 	letter-spacing: 0.12em;
-    font-weight: 600;
+    font-family: var(--installedfontbold); 
 	}
 
 .hmu_greek_in_a_latin_text {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	}
 
 .hmu_marginaltext{
 	color: var(--dkgreen);
 	font-size: 80%;
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	text-indent: -5px;
 	padding-right: -5px;
 	}
@@ -459,6 +467,7 @@ body {
 .hmu_preferred_epigraphical_text_used {
 	}
 
+
 .hmu_rectified_form {
 	text-decoration: underline;
 	}
@@ -476,16 +485,16 @@ keeping (for now) the non-span version of this
 
 .hmu_roman_in_a_greek_text, hmu_roman_in_a_greek_text{
 	font-size: 100%;
-	font-family: 'hipparchiacondensedstatic'
+	font-family: --var(installedfontcondensed);
 	}
 
 .hmu_scholium {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	}
 
 .hmu_seal_attached_to_papyrus {
 	font-size: 125%;
-	font-weight: 600;
+	font-family: var(--installedfontbold); 
 	}
 
 .hmu_stacked_text_lower {
@@ -500,8 +509,7 @@ keeping (for now) the non-span version of this
 	}
 
 .hmu_title {
-	font-weight: bold;
-	font-style: italic;
+	font-family: var(--installedfontbolditalic);
 	}
 
 .hmu_unconventional_form_written_by_scribe {
@@ -510,7 +518,7 @@ keeping (for now) the non-span version of this
 
 .homonym {
     color: var(--dkgrey);
-    font-style: italic;
+    font-family: var(--installedfontitalic); 
 	}
 
 .infocell {
@@ -522,18 +530,18 @@ keeping (for now) the non-span version of this
 	}
 
 .italic {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	}
 
 .label {
-	font-weight: 600;
+	font-family: var(--installedfontbold); 
 	font-color: var(--vdkteal);
 	padding-left: 25px;
 	padding-right: 10px;
 	}
 
 .labelcell {
-	font-weight: 600;
+	font-family: var(--installedfontbold); 
 	font-color: var(--vdkteal);
 	vertical-align: top;
 	text-align: center;
@@ -550,30 +558,30 @@ keeping (for now) the non-span version of this
 	}
 
 .levellabel1 {
-	font-weight: bold;
+	font-family: var(--installedfontbold); 
 	font-size: 120%;
 	color: var(--red);
 	}
 
 .levellabel2 {
-	font-weight: bold;
+	font-family: var(--installedfontbold); 
 	font-size: 100%;
 	color: var(--red);
 	}
 
 .levellabel3 {
-	font-weight: bold;
+	font-family: var(--installedfontbold); 
 	color: var(--red);
 	}
 
 .levellabel4 {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	color: var(--red);
 	}
 
 .lexiconhighlight {
     color: var(--red);
-    font-weight: bold;
+    font-family: var(--installedfontbold); 
     }
 
 .lineover {
@@ -605,7 +613,7 @@ keeping (for now) the non-span version of this
 .metrics{
 	color: var(--black);
 	font-size: 90%;
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	padding-left: 10px;
 	}
 
@@ -631,16 +639,15 @@ keeping (for now) the non-span version of this
 	}
 
 .pickedwork {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	}
 
 .picklabel {
-	font-weight: bold;
-	font-style: italic;
+	font-family: var(--installedfontbolditalic);
 	}
 
 .poetictext {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	}
 
 .possibility {
@@ -651,7 +658,7 @@ keeping (for now) the non-span version of this
     }
 
 .progress {
-	font-weight: bold;
+	font-family: var(--installedfontbold); 
 	}
 
 .pubeditor, .pubpress, .pubcity, .pubyear, .pubseries {
@@ -660,11 +667,11 @@ keeping (for now) the non-span version of this
 
 .pubvolumename {
 	font-size: 70%;
-	font-style: italic;
+	font-family: var(--installedfontbolditalic);
 	}
 
 .quotedtext {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	}
 
 .romannumerals {
@@ -674,7 +681,7 @@ keeping (for now) the non-span version of this
 
 .sampleoutput {
 	color: var(--dkteal);
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	}
 
 .saveoptions:hover {
@@ -693,7 +700,7 @@ keeping (for now) the non-span version of this
 	 }
 
 .serviusformatting {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	}
 
 .small {
@@ -721,7 +728,7 @@ keeping (for now) the non-span version of this
     }
 
 .speakers, .speaker {
-	font-weight: bold;
+	font-family: var(--installedfontbold); 
 	}
 
 .strikethrough {
@@ -780,14 +787,13 @@ keeping (for now) the non-span version of this
     }
 
 .work, .title {
-	font-style: italic;
-	font-weight: bold;
+    font-family: var(--installedfontbolditalic); 
 	}
 
 #accentsactive, #accentsnotactive {
 	padding-left: 0px;
 	font-size: 120%;
-	font-weight: bold;
+	font-family: var(--installedfontbold); 
 	}
 
 #activeoptions {
@@ -925,7 +931,7 @@ keeping (for now) the non-span version of this
 	}
 
 analysis {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	}
 
 author {
@@ -947,7 +953,7 @@ browser {
 
 caption {
 	font-size: 120%;
-	font-weight: bold;
+	font-family: var(--installedfontbold); 
 	padding-bottom: 20px;
 	}
 
@@ -1038,7 +1044,7 @@ pre {
     }
 
 quote, orth {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	}
 
 sense {
@@ -1053,7 +1059,7 @@ smallcode {
 	}
 
 span.lat {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	font-color: var(--vdkteal);
 	}
 
@@ -1073,7 +1079,7 @@ td.browserembeddedannotations {
 	padding-left: 15px;
 	padding-bottom: 8px;
     color: var(--huedgrey);
-    font-family: 'hipparchiacondensedstatic';
+    font-family: --var(installedfontcondensed);;
     font-size: 80%;
     vertical-align: middle;
     }
@@ -1086,7 +1092,7 @@ td.textmakerembeddedannotations {
 	padding-right: 10px;
 	padding-left: 15px;
     color: var(--huedgrey);
-    font-family: 'hipparchiacondensedstatic';
+    font-family: --var(installedfontcondensed);;
     font-size: 80%;
     vertical-align: middle;
     }
@@ -1108,7 +1114,7 @@ td.crossreference {
 	}
 
 td.headword {
-    font-weight: bold;
+    font-family: var(--installedfontbold); 
     color: var(--red);
     }
 
@@ -1147,7 +1153,7 @@ td.textdate, td.regioninfo, td.cityinfo, td.pubinfo, td.provenance {
 	}
 
 td.word {
-	font-weight: bold;
+	font-family: var(--installedfontbold); 
 	}
 
 th {
@@ -1186,6 +1192,10 @@ ul.roman {
 	padding-bottom: 5px;
 	}
 
+unclickablebibl {
+    color: var(--black);
+    }
+
 worktitle {
-	font-style: italic;
+	font-family: var(--installedfontitalic); 
 	}
