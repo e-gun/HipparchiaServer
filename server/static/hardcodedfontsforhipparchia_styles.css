@@ -4,7 +4,7 @@
   The others can be downloaded from various locations. Arial is available on >95% of MacOS and PC systems? */
 
   /* this variant of the CSS assumes you really have access to these items: the fallback is not graceful if the --var() call
-  points to somehting that does not exist. a browser bug? */
+  points to somehting that does not exist. a browser bug? Firefox hates this CSS; Chromium and Safari are OK with it */
 
   --installedfont: Arial;
   --installedfontbold: Arial-BoldMT;
@@ -178,6 +178,7 @@
 */
 
 
+
 @font-face {
 	font-family: 'hipparchiasansstatic';
 	src: url('/static/ttf/NotoSans-Regular.ttf') format('truetype');
@@ -194,7 +195,7 @@
 	}
 
 @font-face {
-	font-family: --var(installedfontcondensed);;
+	font-family: 'hipparchiacondensedstatic';
 	src: url('/static/ttf/RobotoCondensed-Regular.ttf') format('truetype');
 	}
 
@@ -485,7 +486,8 @@ keeping (for now) the non-span version of this
 
 .hmu_roman_in_a_greek_text, hmu_roman_in_a_greek_text{
 	font-size: 100%;
-	font-family: --var(installedfontcondensed);
+	font-family: var(--installedfontcondensed);
+	color: var(--skyblue);
 	}
 
 .hmu_scholium {
@@ -1079,7 +1081,7 @@ td.browserembeddedannotations {
 	padding-left: 15px;
 	padding-bottom: 8px;
     color: var(--huedgrey);
-    font-family: --var(installedfontcondensed);;
+    font-family: var(--installedfontcondensed);
     font-size: 80%;
     vertical-align: middle;
     }
@@ -1092,7 +1094,7 @@ td.textmakerembeddedannotations {
 	padding-right: 10px;
 	padding-left: 15px;
     color: var(--huedgrey);
-    font-family: --var(installedfontcondensed);;
+    font-family: var(--installedfontcondensed);
     font-size: 80%;
     vertical-align: middle;
     }
@@ -1160,6 +1162,10 @@ th {
 	padding: 5px;
 	text-align: center;
 	}
+
+th.indextable {
+    text-align: left;
+    }
 
 tr.nthrow{
     background-color: var(--ltgrey);

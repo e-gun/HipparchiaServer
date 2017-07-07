@@ -140,12 +140,37 @@ def wordindextohtmltable(indexingoutput, useheadwords):
 
 	outputlines = deque()
 	if useheadwords:
-		outputlines.append('[nb: <span class="word"><span class="homonym">homonyms</span></span> are listed under every known '
-		                   'headword and their <span class="word"><span class="homonym">display differs</span></span> from '
-		                   'that of <span class="word">unambiguous entries</span>]<br />')
-		outputlines.append('<table><tr><th>headword</th><th>word</th><th>count</th><th>passages</th></tr>\n')
+		boilerplate = """
+		[nb: <span class="word"><span class="homonym">homonyms</span></span> 
+		are listed under every known headword and their <span class="word">
+		<span class="homonym">display differs</span></span> from that of 
+		<span class="word">unambiguous entries</span>]
+		<br>
+		<br>	
+		"""
+
+		tablehead = """
+		<table>
+		<tr>
+			<th class="indextable">headword</th>
+			<th class="indextable">word</th>
+			<th class="indextable">count</th>
+			<th class="indextable">passages</th>
+		</tr>
+		"""
+		outputlines.append(boilerplate)
+		outputlines.append(tablehead)
 	else:
-		outputlines.append('<table><tr><th>word</th><th>count</th><th>passages</th></tr>\n')
+		tablehead = """
+		<table>
+		<tr>
+			<th class="indextable">word</th>
+			<th class="indextable">count</th>
+			<th class="indextable">passages</th>
+		</tr>
+		"""
+		outputlines.append(tablehead)
+
 	for i in indexingoutput:
 		outputlines.append('<tr>')
 		headword = i[0]

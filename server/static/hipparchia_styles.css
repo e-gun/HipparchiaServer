@@ -1155,6 +1155,10 @@ th {
 	text-align: center;
 	}
 
+th.indextable {
+    text-align: left;
+    }
+
 tr.nthrow{
     background-color: var(--ltgrey);
     }
