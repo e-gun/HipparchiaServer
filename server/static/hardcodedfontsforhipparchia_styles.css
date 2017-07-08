@@ -12,6 +12,12 @@
   --installedfontbolditalic: Arial-BoldItalicMT;
   --installedfontcondensed: ArialNarrow;
 
+  /* --installedfont: SourceSansPro;
+  --installedfontbold: SourceSansPro-Semibold;
+  --installedfontitalic: SourceSansPro-It;
+  --installedfontbolditalic: SourceSansPro-SemiboldIt;
+  --installedfontcondensed: SourceSansPro-Light; */
+
   /* --installedfont: ArialUnicodeMS; */
   /* --installedfont: Alexander; */
   /* --installedfont: Asea; */
@@ -1069,6 +1075,10 @@ table {
 	text-align: left;
 	font-weight: normal;
 	}
+
+table.showborders, td.showborders {
+    border: 1px solid black;
+    }
 
 td.browsedline {
 	padding-right: 10px;

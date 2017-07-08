@@ -121,7 +121,9 @@ def grabtextforbrowsing(locus):
 		browserdata = {}
 		browserdata['browseforwards'] = wo.ends
 		browserdata['browseback'] = wo.starts
-		viewing = '<p class="currentlyviewing">error in fetching the browser data. I was sent a citation I do not understand: {c}</p><br /><br />'.format(c=workdb)
+		viewing = '<p class="currentlyviewing">error in fetching the browser data.<br />I was sent a citation that returned nothing: {c}</p><br /><br />'.format(c=locus)
+		if not passage:
+			passage = ''
 		try:
 			table = [passage, workdb, citation]
 		except:

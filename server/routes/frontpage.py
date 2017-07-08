@@ -78,14 +78,15 @@ def loadhelpdata():
 	currentpath = path.dirname(argv[0])
 	helppath = currentpath + '/server/helpfiles/'
 	divmapper = {'Interface': 'helpinterface.html',
-	              'Browsing': 'helpbrowsing.html',
-	              'Dictionaries': 'helpdictionaries.html',
-	              'MakingSearchLists': 'helpsearchlists.html',
-	              'BasicSyntax': 'helpbasicsyntax.html',
-	              'RegexSearching': 'helpregex.html',
-	              'SpeedSearching': 'helpspeed.html',
-	              'Oddities': 'helpoddities.html',
-	              'Openness': 'helpopenness.html'}
+					'Browsing': 'helpbrowsing.html',
+					'Dictionaries': 'helpdictionaries.html',
+					'MakingSearchLists': 'helpsearchlists.html',
+					'BasicSyntax': 'helpbasicsyntax.html',
+					'RegexSearching': 'helpregex.html',
+					'SpeedSearching': 'helpspeed.html',
+					'Oddities': 'helpoddities.html',
+					'Extending': 'helpextending.html',
+					'Openness': 'helpopenness.html'}
 
 	helpdict = {}
 	helpdict['helpcategories'] = list(divmapper.keys())
