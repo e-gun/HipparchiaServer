@@ -515,8 +515,13 @@ def findcountsviawordcountstable(wordtocheck):
 		q = 'SELECT * FROM wordcounts_0 WHERE entry_name = %s'
 
 	d = (wordtocheck,)
-	curs.execute(q, d)
-	result = curs.fetchone()
+	try:
+		curs.execute(q, d)
+		result = curs.fetchone()
+	except:
+		# psycopg2.ProgrammingError: relation "wordcounts_ε" does not exist
+		# you did not build the wordcounts at all?
+		result = None
 
 	dbconnection.commit()
 

@@ -554,7 +554,7 @@ keeping (for now) the non-span version of this
 
 .latin {
 	font-size: 100%;
-	font-family: 'hipparchiacondensedstatic';
+	font-family: 'hipparchiacondensedstatic', sans-serif;
 	color: var(--skyblue);
 	}
 
