@@ -388,6 +388,9 @@ body {
 	font-family: var(--installedfontitalic); 
 	}
 
+.greek {
+	}
+
 .highlight {
     text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
@@ -444,10 +447,6 @@ body {
     font-family: var(--installedfontbold); 
 	}
 
-.hmu_greek_in_a_latin_text {
-	font-family: var(--installedfontitalic); 
-	}
-
 .hmu_marginaltext{
 	color: var(--dkgreen);
 	font-size: 80%;
@@ -477,23 +476,6 @@ body {
 
 .hmu_rectified_form {
 	text-decoration: underline;
-	}
-
-/*
-
-hmu_roman_in_a_greek_text is problematic: the data often turns this on and then fails to turn it off at the right time
-the net result is visibly unbalanced spans
-
-furthermore in the hybrid world of the CHR data, you see walls of this
-
-keeping (for now) the non-span version of this
-
-*/
-
-.hmu_roman_in_a_greek_text, hmu_roman_in_a_greek_text{
-	font-size: 100%;
-	font-family: var(--installedfontcondensed);
-	color: var(--skyblue);
 	}
 
 .hmu_scholium {
@@ -559,6 +541,22 @@ keeping (for now) the non-span version of this
 	font-size: 115%;
 	}
 
+/*
+
+latin is problematic: the data often turns this on and then fails to turn it off at the right time
+the net result is visibly unbalanced spans
+
+furthermore in the hybrid world of the CHR data, you see walls of this
+
+keeping (for now) the non-span version of this
+
+*/
+
+.latin {
+	font-size: 100%;
+	font-family: 'hipparchiacondensedstatic';
+	color: var(--skyblue);
+	}
 
 .letterbox {
 	border-style: solid;
@@ -720,8 +718,7 @@ keeping (for now) the non-span version of this
 	}
 
 .smallerthannormalsuperscript {
-	position: relative;
-	top: -0.5em;
+    vertical-align: super;
 	font-size: 60%;
 	}
 
@@ -743,9 +740,13 @@ keeping (for now) the non-span version of this
 	text-decoration: line-through;
 	}
 
+.subscript {
+    font-size: 80%;
+    vertical-align: sub;
+    }
+
 .superscript {
-	position: relative;
-	top: -0.5em;
+    vertical-align: super;
 	font-size: 80%;
 	}
 

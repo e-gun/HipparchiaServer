@@ -40,19 +40,21 @@ def findbyform(observedword):
 	# if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
 	# 	observedword = replacegreekbetacode(observedword.upper())
 
-	cleanedword = re.sub('[\W_|]+', '',observedword)
+	w = re.sub('[\W_|]+', '', observedword)
 	# oddly 'ὕβˈριν' survives the '\W' check; should be ready to extend this list
-	cleanedword = tidyupterm(cleanedword)
-	cleanedword = removegravity(cleanedword)
+	w = tidyupterm(w)
 	# python seems to know how to do this with greek...
-	cleanedword = cleanedword.lower()
+	w = w.lower()
+	retainedgravity = w
+	cleanedword = removegravity(retainedgravity)
 	# index clicks will send you things like 'αὖ²'
 	cleanedword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]','',cleanedword)
 
 	try:
 		cleanedword[0]
 	except:
-		return json.dumps([{'observed': '[clickeded item was not a word]'}])
+		returnarray = [{'value': '[empty search: {w} was sanitized into nothingness]'.format(w=observedword)}]
+		return json.dumps(returnarray)
 
 	if re.search(r'[a-z]', cleanedword[0]):
 		cleanedword = stripaccents(cleanedword)
@@ -70,7 +72,16 @@ def findbyform(observedword):
 			returnarray.append(getobservedwordprevalencedata(cleanedword))
 		returnarray += lexicalmatchesintohtml(cleanedword, morphologyobject, cur)
 	else:
-		returnarray = [{'value': '<br />[could not find a match for {cw} in the morphology table]'.format(cw=cleanedword)}, {'entries': '[not found]'}]
+		returnarray = [
+			{'value': '<br />[could not find a match for {cw} in the morphology table]'.format(cw=cleanedword)},
+			{'entries': '[not found]'}
+			]
+		prev = getobservedwordprevalencedata(cleanedword)
+		if not prev:
+			prev = getobservedwordprevalencedata(retainedgravity)
+		if not prev:
+			prev = {'value': '[no prevalence data for {w}]'.format(w=retainedgravity)}
+		returnarray.append(prev)
 
 	returnarray = [r for r in returnarray if r]
 	returnarray = [{'observed':cleanedword}] + returnarray
