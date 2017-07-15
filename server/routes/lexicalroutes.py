@@ -80,7 +80,7 @@ def findbyform(observedword):
 		if not prev:
 			prev = getobservedwordprevalencedata(retainedgravity)
 		if not prev:
-			prev = {'value': '[no prevalence data for {w}]'.format(w=retainedgravity)}
+			prev = {'value': '<br /><br />no prevalence data for {w}'.format(w=retainedgravity)}
 		returnarray.append(prev)
 
 	returnarray = [r for r in returnarray if r]
