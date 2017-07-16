@@ -471,8 +471,13 @@ def findtotalcounts(word, cursor):
 
 	q = qtemplate.format(tbl=table)
 	d = (word,)
-	cursor.execute(q,d)
-	l = cursor.fetchone()
+	try:
+		cursor.execute(q,d)
+		l = cursor.fetchone()
+	except:
+		# psycopg2.ProgrammingError: relation "dictionary_headword_wordcounts" does not exist
+		# you have not installed the wordcounts (yet)
+		l = None
 
 	try:
 		hwcountobject = dbHeadwordObject(l[0], l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8], l[9], l[10],
