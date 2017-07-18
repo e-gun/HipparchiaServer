@@ -237,7 +237,7 @@ def formatgloss(entrybody):
 	:param entrybody:
 	:return:
 	"""
-	glosshtml = ''
+	glosshtml = []
 	
 	soup = BeautifulSoup(entrybody, 'html.parser')
 	senses = soup.find_all('foreign')
@@ -246,15 +246,22 @@ def formatgloss(entrybody):
 	senses[:] = [value.string for value in senses]
 	sources[:] = [value.string for value in sources]
 
-	glosshtml += '<span class="highlight">Reported by:</span><br />\n'
+	glosshtml.append('<span class="highlight">Reported by:</span><br />')
+	ss = []
 	for s in sources:
-		glosshtml += s + ', '
-	glosshtml = glosshtml[:-2]
-	
-	glosshtml += '<br /><br />\n<span class="highlight">Senses:</span><br />'
+		ss.append(s) + ', '
+	ss = ', '.join(ss)
+	glosshtml.append(ss)
+
+	glosshtml.append('<br /><br />\n<span class="highlight">Senses:</span><br />')
+	ss = []
 	for s in senses:
-		glosshtml += s + '<br />'
-	
+		ss.append(s)
+	ss = '<br />\n'.join(ss)
+	glosshtml.append(ss)
+
+	glosshtml = '\n'.join(glosshtml)
+
 	return glosshtml
 
 

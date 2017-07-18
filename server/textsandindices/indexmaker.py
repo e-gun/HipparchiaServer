@@ -12,6 +12,8 @@ from multiprocessing import Manager, Process
 from multiprocessing import Pool
 from string import punctuation
 
+from flask import session
+
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, setconnection, setthreadcount
 from server.formatting.wordformatting import tidyupterm
@@ -79,6 +81,11 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 	:return:
 	"""
 
+	alphabetical = True
+
+	if session['indexbyfrequency'] == 'yes':
+		alphabetical = False
+
 	# print('cdict',cdict)
 
 	onework = False
@@ -114,10 +121,13 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		activepoll.notes = ''
 		activepoll.allworkis(-1)
 		unsortedoutput = htmlifysimpleindex(completeindexdict, onework)
-		sortkeys = [x[0] for x in unsortedoutput]
-		outputdict = {x[0]: x for x in unsortedoutput}
-		sortkeys = polytonicsort(sortkeys)
-		sortedoutput = [outputdict[x] for x in sortkeys]
+		if alphabetical:
+			sortkeys = [x[0] for x in unsortedoutput]
+			outputdict = {x[0]: x for x in unsortedoutput}
+			sortkeys = polytonicsort(sortkeys)
+			sortedoutput = [outputdict[x] for x in sortkeys]
+		else:
+			sortedoutput = sorted(unsortedoutput, key=lambda x: int(x[1]), reverse=True)
 		# pad position 0 with a fake, unused headword so that these tuples have the same shape as the ones in the other branch of the condition
 		sortedoutput = [(s[0], s[0], s[1], s[2], False) for s in sortedoutput]
 	else:
@@ -209,13 +219,25 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 						headwordindexdict[bf][observed].append(l)
 
 		# sample items in headwordindexdict
-		# 'intersum': {'intersunt': [('lt2300w001', 8, '1.7', False)]}
-		# 'populus² (a poplar)': {'populum': [('lt2300w001', 6, '1.5', 'isahomonymn')], 'populi': [('lt2300w001', 1, 't.1', 'isahomonymn')]}
-		# 'sum¹': {'est': [('lt2300w001', 7, '1.6', 'isahomonymn')], 'erant': [('lt2300w001', 5, '1.4', False)], 'sunt': [('lt2300w001', 2, '1.1', False)]}
+		# δέ {'δέ': [('gr2586w002', 2184, '<indexedlocation id="gr2586w002_LN_2184">400.31</indexedlocation>', False), ('gr2586w002', 2180, '<indexedlocation id="gr2586w002_LN_2180">400.27</indexedlocation>', False), ('gr2586w002', 2179, '<indexedlocation id="gr2586w002_LN_2179">400.26</indexedlocation>', False), ('gr2586w002', 2178, '<indexedlocation id="gr2586w002_LN_2178">400.25</indexedlocation>', False), ('gr2586w002', 2177, '<indexedlocation id="gr2586w002_LN_2177">400.24</indexedlocation>', False), ('gr2586w002', 2175, '<indexedlocation id="gr2586w002_LN_2175">400.22</indexedlocation>', False), ('gr2586w002', 2174, '<indexedlocation id="gr2586w002_LN_2174">400.21</indexedlocation>', False), ('gr2586w002', 2173, '<indexedlocation id="gr2586w002_LN_2173">400.20</indexedlocation>', False), ('gr2586w002', 2172, '<indexedlocation id="gr2586w002_LN_2172">400.19</indexedlocation>', False), ('gr2586w002', 2171, '<indexedlocation id="gr2586w002_LN_2171">400.18</indexedlocation>', False), ('gr2586w002', 2169, '<indexedlocation id="gr2586w002_LN_2169">400.16</indexedlocation>', False), ('gr2586w002', 2164, '<indexedlocation id="gr2586w002_LN_2164">400.11</indexedlocation>', False), ('gr2586w002', 2162, '<indexedlocation id="gr2586w002_LN_2162">400.9</indexedlocation>', False), ('gr2586w002', 2161, '<indexedlocation id="gr2586w002_LN_2161">400.8</indexedlocation>', False), ('gr2586w002', 2156, '<indexedlocation id="gr2586w002_LN_2156">400.3</indexedlocation>', False)]}
+		# οἰκεῖοϲ {'οἰκείαϲ': [('gr2586w002', 2184, '<indexedlocation id="gr2586w002_LN_2184">400.31</indexedlocation>', False)], 'οἰκεῖα': [('gr2586w002', 2158, '<indexedlocation id="gr2586w002_LN_2158">400.5</indexedlocation>', False)]}
+		# μετά {'μετά': [('gr2586w002', 2184, '<indexedlocation id="gr2586w002_LN_2184">400.31</indexedlocation>', False)]}
+
+		if not alphabetical:
+			sorter = []
+			for wd in headwordindexdict:
+				forms = headwordindexdict[wd]
+				allhits = sum([len(forms[f]) for f in forms])
+				sorter.append((allhits,wd))
+			sorter = sorted(sorter, reverse=True)
+			sortedheadwordindexdictkeys = [s[1] for s in sorter if s[1] != '•••unparsed•••']
+			sortedheadwordindexdictkeys.append('•••unparsed•••')
+		else:
+			sortedheadwordindexdictkeys = polytonicsort(headwordindexdict.keys())
 
 		htmlindexdict = {}
 		sortedoutput = []
-		for headword in polytonicsort(headwordindexdict.keys()):
+		for headword in sortedheadwordindexdictkeys:
 			hw = re.sub('v', 'u', headword)
 			hw = re.sub('j', 'i', hw)
 			sortedoutput.append(('&nbsp;', '', '', '', False))

@@ -18,6 +18,13 @@
   --installedfontbolditalic: SourceSansPro-SemiboldIt;
   --installedfontcondensed: SourceSansPro-Light; */
 
+  --installedfont: FiraSans-Regular;
+  --installedfontbold: FiraSans-SemiBold;
+  --installedfontitalic: FiraSans-Italic;
+  --installedfontbolditalic: FiraSans-SemiBoldItalic;
+  --installedfontcondensed: FiraSansExtraCondensed-Light;
+  --installedfontmonospace: FiraMono-Regular;
+  
   /* --installedfont: ArialUnicodeMS; */
   /* --installedfont: Alexander; */
   /* --installedfont: Asea; */
@@ -237,7 +244,7 @@ body {
 
 .activeoption {
     color: var(--dkteal);
-    font-family: 'hipparchiamonostatic', monospace;
+    font-family: var(--installedfontmonospace),'hipparchiamonostatic', monospace;
     }
 
 .assigneddate {
@@ -427,15 +434,21 @@ body {
 	}
 
 .hmu_epigraphical_text_after_correction {
+    color: var(--dkgreen);
 	}
 
 .hmu_epigraphical_text_inserted_after_erasure {
+    color: var(--ltbabyblue);
 	}
 
 .hmu_expanded_text {
 	letter-spacing: 0.12em;
     font-family: var(--installedfontbold); 
 	}
+
+.hmu_form_altered_by_scribe {
+    font-family: var(--installedfontbolditalic);
+    }
 
 .hmu_impression_of_stamp_on_papyrus {
 	font-size: 125%;
@@ -471,8 +484,8 @@ body {
     }
 
 .hmu_preferred_epigraphical_text_used {
+    color: var(--orange);
 	}
-
 
 .hmu_rectified_form {
 	text-decoration: underline;
@@ -729,7 +742,7 @@ keeping (for now) the non-span version of this
 
 .sought {
 	color: var(--deepblue);
-	font-family: 'hipparchiamonostatic', monospace;
+	font-family: var(--installedfontmonospace), 'hipparchiamonostatic', monospace;
     }
 
 .speakers, .speaker {
@@ -969,7 +982,7 @@ caption {
 code {
 	font-size: 100%;
 	color: var(--skyblue);
-	font-family: 'hipparchiamonostatic', monospace;
+	font-family: var(--installedfontmonospace), 'hipparchiamonostatic', monospace;
 	}
 
 div.fourcolumn {
@@ -984,6 +997,10 @@ div.threecolumn {
 	/* Firefox */ column-count: 3;
 	}
 
+etym {
+    color: var(--dkgrey);
+    }
+
 fieldset {
 	display: inline-block;
 	border-width: 1px;
@@ -993,6 +1010,16 @@ fieldset {
 form {
 	display: inline;
 	}
+
+gramgrp {
+    font-family: var(--installedfontbold);
+    color: var(--dkgrey);
+    }
+
+gramm {
+    font-family: var(--installedfontbold);
+    color: var(--dkgrey);
+    }
 
 
 indexedlocation:hover{
@@ -1011,6 +1038,11 @@ input {
 	display: inline;
 	}
 
+itype {
+    font-family: var(--installedfontitalic);
+	color: var(--blue);
+	}
+
 legend {
 	text-align: center;
 	}
@@ -1025,12 +1057,17 @@ locus {
 	padding-bottom: 5px;
 	}
 
+mood {
+    font-family: var(--installedfontbold);
+    }
+
 observed:hover{
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
 
 orth {
+    font-family: var(--installedfontitalic);
 	color: var(--blue);
 	}
 
@@ -1049,10 +1086,15 @@ p.level4 {
 	}
 
 pre {
-    font-family: 'hipparchiamonostatic', monospace;
+    font-family: var(--installedfontmonospace), 'hipparchiamonostatic', monospace;
     }
 
-quote, orth {
+pos {
+    color: var(--skyblue);
+    font-family: var(--installedfontbold);
+    }
+
+quote {
 	font-family: var(--installedfontitalic); 
 	}
 
@@ -1064,7 +1106,7 @@ sense {
 smallcode {
 	font-size: 85%;
 	color: var(--skyblue);
-	font-family: 'hipparchiamonostatic', monospace;
+	font-family: var(--installedfontmonospace), 'hipparchiamonostatic', monospace;
 	}
 
 span.lat {
@@ -1176,6 +1218,10 @@ th {
 
 th.indextable {
     text-align: left;
+    }
+
+tns {
+    font-family: var(--installedfontbold);
     }
 
 tr.nthrow{

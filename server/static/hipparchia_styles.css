@@ -398,7 +398,6 @@ body {
 	}
 
 .hmu_date_or_numeric_equivalent_of_date {
-
 	}
 
 .hmu_discarded_form {
@@ -421,6 +420,11 @@ body {
 	letter-spacing: 0.12em;
     font-weight: 600;
 	}
+
+.hmu_form_altered_by_scribe {
+    font-style: italic;
+    font-weight: 600;
+    }
 
 .hmu_impression_of_stamp_on_papyrus {
 	font-size: 125%;
@@ -970,6 +974,10 @@ div.threecolumn {
 	/* Firefox */ column-count: 3;
 	}
 
+etym {
+    color: var(--dkgrey);
+    }
+
 fieldset {
 	display: inline-block;
 	border-width: 1px;
@@ -980,6 +988,15 @@ form {
 	display: inline;
 	}
 
+gramgrp {
+    color: var(--dkgrey);
+    font-weight: bold;
+    }
+
+gramm {
+    color: var(--dkgrey);
+    font-weight: bold;
+    }
 
 indexedlocation:hover{
 	color: var(--dkbabyblue);
@@ -995,6 +1012,10 @@ input {
 	text-align: center;
 	padding: 5px;
 	display: inline;
+	}
+
+itype {
+	color: var(--blue);
 	}
 
 legend {
@@ -1119,14 +1140,12 @@ td.headword {
 
 td.infocells {
 	background-color: var(--ltbabyblue);
-	/* background-color: hsl(0, 0%, 95%);
-	*/ text-align: center;
+    text-align: center;
 	}
 
 td.infocellx {
 	background-color: var(--pink);
-	/* background-color: hsl(0, 0%, 90%);
-	*/ text-align: center;
+    text-align: center;
 	}
 
 td.leftpad {

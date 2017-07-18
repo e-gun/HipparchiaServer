@@ -63,6 +63,17 @@ function loadoptions() {
             $('#headwordindexingactive').show();
             $('#headwordindexinginactive').hide();
             }
+        if (data.indexbyfrequency == 'no') {
+            $('#frequencyindexing_y').prop('checked', false);
+            $('#frequencyindexing_n').prop('checked', true);
+            $('#frequencyindexinginactive').show();
+            $('#frequencyindexingactive').hide();
+            } else {
+            $('#frequencyindexing_y').prop('checked', true);
+            $('#frequencyindexing_n').prop('checked', false);
+            $('#frequencyindexingactive').show();
+            $('#frequencyindexinginactive').hide();
+            }
         if (data.spuria == 'no') {
             $('#includespuria').prop('checked', false);
             } else {
@@ -300,6 +311,10 @@ function setoptions(sessionvar,value){
 
 $('#headwordindexing_y').click( function(){ setoptions('headwordindexing', 'yes'); $('#headwordindexingactive').show(); $('#headwordindexinginactive').hide(); });
 $('#headwordindexing_n').click( function(){ setoptions('headwordindexing', 'no'); $('#headwordindexinginactive').show(); $('#headwordindexingactive').hide(); });
+
+$('#frequencyindexing_y').click( function(){ setoptions('indexbyfrequency', 'yes'); $('#frequencyindexingactive').show(); $('#frequencyindexinginactive').hide(); });
+$('#frequencyindexing_n').click( function(){ setoptions('indexbyfrequency', 'no'); $('#frequencyindexinginactive').show(); $('#frequencyindexingactive').hide(); });
+
 
 $('#onehit_y').click( function(){ setoptions('onehit', 'yes'); $('#onehitistrue').show(); $('#onehitisfalse').hide(); });
 $('#onehit_n').click( function(){ setoptions('onehit', 'no'); $('#onehitisfalse').show(); $('#onehitistrue').hide(); });
