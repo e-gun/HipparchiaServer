@@ -39,6 +39,7 @@
     $('#chrisactive').hide();
     {% if onehit == 'yes' %} $('#onehitistrue').show();  {% else %} $('#onehitisfalse').show(); {% endif %}
     {% if hwindexing == 'yes' %} $('#headwordindexingactive').show();  {% else %} $('#headwordindexiningactive').show(); {% endif %}
+    {% if indexbyfrequency == 'yes' %} $('#frequencyindexingactive').show();  {% else %} $('#frequencyindexinginactive').show(); {% endif %}
     {% if spuria == 'yes' %} $('#spuriaistrue').show();  {% else %} $('#spuriaisfalse').show(); {% endif %}
     {% if undated == 'yes' %} $('#undatedistrue').show();  {% else %} $('#undatedisfalse').show(); {% endif %}
     {% if varia == 'yes' %} $('#variaistrue').show();  {% else %} $('#variaisfalse').show(); {% endif %}

@@ -531,6 +531,12 @@ class MorphPossibilityObject(object):
 		you have to look at the full db entry for the word:
 		the number of items in prefixrefs corresponds to the number of prefix checks you will need to make to recompose the verb
 
+		some lingering problems:
+			MorphPossibilityObject.getbaseform() is confused ἐνέρριπτεν, ἐν, ἐν-ῥίπτω ['ἐνέρριπτεν', 'ἐν', 'ἐν-ῥίπτω']
+			MorphPossibilityObject.getbaseform() is confused ἐνέρριψεν, ἐν, ἐν-ῥίπτω ['ἐνέρριψεν', 'ἐν', 'ἐν-ῥίπτω']
+			MorphPossibilityObject.getbaseform() is confused ἐνέρριψαν, ἐν, ἐν-ῥίπτω ['ἐνέρριψαν', 'ἐν', 'ἐν-ῥίπτω']
+			MorphPossibilityObject.getbaseform() is confused ἐνέρριψε, ἐν, ἐν-ῥίπτω ['ἐνέρριψε', 'ἐν', 'ἐν-ῥίπτω']
+
 		:return:
 		"""
 

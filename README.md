@@ -55,6 +55,7 @@ key features:
 			build an index for a whole author, work or subsection of a work
 			for example see an index to all of Vergil or just the Aeneid or just Book 1 of the Aeneid
 			index by word observed or by dictionary headword (if found...)
+			sort index alphabetically or by number of hits
 			click on index words to get lexical information [excessive index size will disable this]
 			click on index passages to browse to that passage [excessive index size will disable this]
 

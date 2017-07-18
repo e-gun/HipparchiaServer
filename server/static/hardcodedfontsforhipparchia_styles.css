@@ -11,6 +11,7 @@
   --installedfontitalic: Arial-ItalicMT;
   --installedfontbolditalic: Arial-BoldItalicMT;
   --installedfontcondensed: ArialNarrow;
+  --installedfontmonospace: RobotoMono-Regular;
 
   /* --installedfont: SourceSansPro;
   --installedfontbold: SourceSansPro-Semibold;
@@ -18,12 +19,12 @@
   --installedfontbolditalic: SourceSansPro-SemiboldIt;
   --installedfontcondensed: SourceSansPro-Light; */
 
-  --installedfont: FiraSans-Regular;
+  /* --installedfont: FiraSans-Regular;
   --installedfontbold: FiraSans-SemiBold;
   --installedfontitalic: FiraSans-Italic;
   --installedfontbolditalic: FiraSans-SemiBoldItalic;
   --installedfontcondensed: FiraSansExtraCondensed-Light;
-  --installedfontmonospace: FiraMono-Regular;
+  --installedfontmonospace: FiraMono-Regular; */
   
   /* --installedfont: ArialUnicodeMS; */
   /* --installedfont: Alexander; */
