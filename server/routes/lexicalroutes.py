@@ -107,7 +107,7 @@ def dictsearch(searchterm):
 	if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
 		searchterm = replacegreekbetacode(searchterm.upper())
 
-	seeking = re.sub(r'[!@#$|%()*\'\"\[\]]', '', searchterm)
+	seeking = re.sub(r'[!@#|%()*\'\"\[\]]', '', searchterm)
 	seeking = seeking.lower()
 	seeking = re.sub('[σς]', 'ϲ', seeking)
 	seeking = re.sub('v', '(u|v|U|V)', seeking)

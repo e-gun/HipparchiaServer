@@ -275,11 +275,7 @@ def browserdictionarylookup(count, seekingentry, cursor):
 			</table>
 			"""
 
-			# the spaces will ensure exact matches: otherwise ἔρδω will pull up ὑπερδώριοϲ too
-			p = ' {p} '.format(p=w.preventry)
-			n = ' {n} '.format(n=w.nextentry)
-
-			outputlist.append(navtemplate.format(p=p, n=n))
+			outputlist.append(navtemplate.format(p=w.preventry, n=w.nextentry))
 
 			cleanedentry = '\n'.join(outputlist)
 			clickableentry = insertbrowserlookups(cleanedentry)
@@ -729,6 +725,11 @@ def dictionaryentryjs():
 
 	return js to insert
 
+	ensure exact matches, otherwise ἔρδω will pull up ὑπερδώριοϲ too
+
+	and so:
+		'/dictsearch/^'+this.id+'$'
+
 	:return:
 	"""
 
@@ -751,7 +752,7 @@ def dictionaryentryjs():
                     });
             $( '#lexicadialogtext' ).dialog( 'open' );
             $( '#lexicadialogtext' ).html('[searching...]');
-            $.getJSON('/dictsearch/'+this.id, function (definitionreturned) {
+            $.getJSON('/dictsearch/^'+this.id+'$', function (definitionreturned) {
                 $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
                 var dLen = definitionreturned.length;
                 var linesreturned = []
