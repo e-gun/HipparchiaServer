@@ -597,25 +597,25 @@ class dbDictionaryEntry(object):
 	"""
 	an object that corresponds to a db line
 
-	CREATE TABLE public.greek_dictionary (
-	    entry_name character varying(64) COLLATE pg_catalog."default",
-	    metrical_entry character varying(64) COLLATE pg_catalog."default",
-	    unaccented_entry character varying(64) COLLATE pg_catalog."default",
-	    id_number character varying(8) COLLATE pg_catalog."default",
-	    entry_type character varying(8) COLLATE pg_catalog."default",
+	CREATE TABLE greek_dictionary (
+	    entry_name character varying(64),
+	    metrical_entry character varying(64),
+	    unaccented_entry character varying(64),
+	    id_number integer,
+	    entry_type character varying(8),
 	    entry_options "char",
-	    entry_body text COLLATE pg_catalog."default"
-	)
+	    entry_body text
+	);
 
-	CREATE TABLE public.latin_dictionary (
-	    entry_name character varying(64) COLLATE pg_catalog."default",
-	    metrical_entry character varying(64) COLLATE pg_catalog."default",
-	    id_number character varying(8) COLLATE pg_catalog."default",
-	    entry_type character varying(8) COLLATE pg_catalog."default",
-	    entry_key character varying(64) COLLATE pg_catalog."default",
+	CREATE TABLE latin_dictionary (
+	    entry_name character varying(64),
+	    metrical_entry character varying(64),
+	    id_number integer,
+	    entry_type character varying(8),
+	    entry_key character varying(64),
 	    entry_options "char",
-	    entry_body text COLLATE pg_catalog."default"
-	)
+	    entry_body text
+	);
 
 	Latin only: entry_key
 	Greek only: unaccented_entry
@@ -629,6 +629,10 @@ class dbDictionaryEntry(object):
 		self.type = entry_type
 		self.options = entry_options
 		self.body = entry_body
+		self.nextentryid = -1
+		self.preventryid = -1
+		self.nextentry = '(none)'
+		self.preventry = '(none)'
 
 
 class dbGreekWord(dbDictionaryEntry):

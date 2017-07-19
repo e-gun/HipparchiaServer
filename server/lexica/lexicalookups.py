@@ -258,6 +258,29 @@ def browserdictionarylookup(count, seekingentry, cursor):
 				outputlist.append('<br />\n<p class="dictionaryheading">{ent}<span class="metrics">[gloss]</span></p>'.format(ent=w.entry))
 				outputlist.append(formatgloss(definition))
 
+			# add in next / previous links
+			navtemplate = """
+			<table class="navtable">
+			<tr>
+				<td class="alignleft">
+					<span class="label">Previous: </span>
+					<dictionaryentry id="{p}">{p}</dictionaryentry>
+				</td>
+				<td>&nbsp;</td>
+				<td class="alignright">
+					<span class="label">Next: </span>
+					<dictionaryentry id="{n}">{n}</dictionaryentry>
+				</td>
+			<tr>
+			</table>
+			"""
+
+			# the spaces will ensure exact matches: otherwise ἔρδω will pull up ὑπερδώριοϲ too
+			p = ' {p} '.format(p=w.preventry)
+			n = ' {n} '.format(n=w.nextentry)
+
+			outputlist.append(navtemplate.format(p=p, n=n))
+
 			cleanedentry = '\n'.join(outputlist)
 			clickableentry = insertbrowserlookups(cleanedentry)
 			clickableentry = insertbrowserjs(clickableentry)
@@ -269,7 +292,9 @@ def browserdictionarylookup(count, seekingentry, cursor):
 			cleanedentry = '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="prevalence">{skg}</span></p>\n'.format(ct=count, skg=seekingentry)
 		clickableentry = cleanedentry
 
-	return clickableentry
+	entry = clickableentry + dictionaryentryjs()
+
+	return entry
 
 
 def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber=0):
@@ -327,7 +352,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	foundobjects = None
 
 	if len(found) > 0:
-		foundobjects = [convertdictionaryfindintoobject(f, dictionary) for f in found]
+		foundobjects = [convertdictionaryfindintoobject(f, dictionary, cursor) for f in found]
 	elif trialnumber == 1:
 		# failure...
 		# the word is probably there, we have just been given the wrong search term; try some other solutions
@@ -379,7 +404,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	return foundobjects
 
 
-def convertdictionaryfindintoobject(foundline, dictionary):
+def convertdictionaryfindintoobject(foundline, dictionary, cursor):
 	"""
 
 	dictionary = greek_dictionary or latin_dictionary
@@ -388,7 +413,7 @@ def convertdictionaryfindintoobject(foundline, dictionary):
 		entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body + extra
 
 	example:
-		foundline ('ἑτερόφθαλμοϲ', 'ἑτερόφθαλμοϲ', 'n43226', 'main', 'n', '<orth extent="suff" lang="greek" opt="n">ἑτερόφθαλμ-οϲ</orth>, <itype lang="greek" opt="n">ον</itype>, <sense id="n43226.0" n="A" level="1" opt="n"><tr opt="n">one-eyed</tr>, <bibl n="Perseus:abo:tlg,0014,024:141" default="NO" valid="yes"><author>D.</author> <biblScope>24.141</biblScope></bibl>, <bibl n="Perseus:abo:tlg,0086,025:1023a:5" default="NO" valid="yes"><author>Arist.</author><title>Metaph.</title><biblScope>1023a5</biblScope></bibl>; <foreign lang="greek">ἑ. γενομένη ἡ Ἑλλάϲ</foreign>, metaph., of the proposed destruction of Athens, Leptines ap. <bibl n="Perseus:abo:tlg,0086,038:1411a:5" default="NO" valid="yes"><author>Arist.</author><title>Rh.</title><biblScope>1411a5</biblScope></bibl>, cf. <bibl default="NO"><author>Demad.</author><biblScope>65</biblScope></bibl> <bibl default="NO"><author>B.</author></bibl>, <bibl default="NO"><author>Plu.</author><biblScope>2.803a</biblScope></bibl>. </sense><sense n="II" id="n43226.1" level="2" opt="n"> <tr opt="n">with different-coloured eyes,</tr> <bibl n="Perseus:abo:tlg,4080,001:16:2:1" default="NO"><author>Gp.</author> <biblScope>16.2.1</biblScope></bibl>.</sense>', 'ετεροφθαλμοϲ')
+		foundline ('ἑτερόφθαλμοϲ', 'ἑτερόφθαλμοϲ', '43226', 'main', 'n', '<orth extent="suff" lang="greek" opt="n">ἑτερόφθαλμ-οϲ</orth>, <itype lang="greek" opt="n">ον</itype>, <sense id="n43226.0" n="A" level="1" opt="n"><tr opt="n">one-eyed</tr>, <bibl n="Perseus:abo:tlg,0014,024:141" default="NO" valid="yes"><author>D.</author> <biblScope>24.141</biblScope></bibl>, <bibl n="Perseus:abo:tlg,0086,025:1023a:5" default="NO" valid="yes"><author>Arist.</author><title>Metaph.</title><biblScope>1023a5</biblScope></bibl>; <foreign lang="greek">ἑ. γενομένη ἡ Ἑλλάϲ</foreign>, metaph., of the proposed destruction of Athens, Leptines ap. <bibl n="Perseus:abo:tlg,0086,038:1411a:5" default="NO" valid="yes"><author>Arist.</author><title>Rh.</title><biblScope>1411a5</biblScope></bibl>, cf. <bibl default="NO"><author>Demad.</author><biblScope>65</biblScope></bibl> <bibl default="NO"><author>B.</author></bibl>, <bibl default="NO"><author>Plu.</author><biblScope>2.803a</biblScope></bibl>. </sense><sense n="II" id="n43226.1" level="2" opt="n"> <tr opt="n">with different-coloured eyes,</tr> <bibl n="Perseus:abo:tlg,4080,001:16:2:1" default="NO"><author>Gp.</author> <biblScope>16.2.1</biblScope></bibl>.</sense>', 'ετεροφθαλμοϲ')
 
 	:param foundline:
 	:param dictionary:
@@ -403,6 +428,32 @@ def convertdictionaryfindintoobject(foundline, dictionary):
 	else:
 		# you actually want a hollow object
 		wordobject = dbGreekWord(None, None, None, None, None, None, None)
+
+	ntemplate = 'SELECT entry_name, id_number FROM {d} WHERE id_number > %s ORDER BY id_number ASC LIMIT 1;'
+
+	q = ntemplate.format(d=dictionary)
+	d = (wordobject.id,)
+	cursor.execute(q, d)
+	e = cursor.fetchone()
+
+	try:
+		wordobject.nextentry = e[0]
+		wordobject.nextentryid = e[1]
+	except:
+		pass
+
+	ptemplate = 'SELECT entry_name, id_number FROM {d} WHERE id_number < %s ORDER BY id_number DESC LIMIT 1;'
+
+	q = ptemplate.format(d=dictionary)
+	d = (wordobject.id,)
+	cursor.execute(q, d)
+	e = cursor.fetchone()
+
+	try:
+		wordobject.preventry = e[0]
+		wordobject.preventryid = e[1]
+	except:
+		pass
 
 	return wordobject
 
@@ -671,6 +722,50 @@ def findtermamongsenses(match, seeking, usedict, translationlabel, cur):
 					matchingentries.append(match)
 
 	return matchingentries
+
+
+def dictionaryentryjs():
+	"""
+
+	return js to insert
+
+	:return:
+	"""
+
+	template = """
+	<script>
+	$('dictionaryentry').click( function(e) {
+            e.preventDefault();
+            var windowWidth = $(window).width();
+            var windowHeight = $(window).height();
+            $( '#lexicadialogtext' ).dialog({
+                    closeOnEscape: true,
+                    autoOpen: false,
+                    minWidth: windowWidth*.33,
+                    maxHeight: windowHeight*.9,
+                    // position: { my: "left top", at: "left top", of: window },
+                    title: this.id,
+                    draggable: true,
+                    icons: { primary: 'ui-icon-close' },
+                    click: function() { $( this ).dialog( 'close' ); }
+                    });
+            $( '#lexicadialogtext' ).dialog( 'open' );
+            $( '#lexicadialogtext' ).html('[searching...]');
+            $.getJSON('/dictsearch/'+this.id, function (definitionreturned) {
+                $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
+                var dLen = definitionreturned.length;
+                var linesreturned = []
+                for (i = 0; i < dLen; i++) {
+                    linesreturned.push(definitionreturned[i]['value']);
+                    }
+                $( '#lexicadialogtext' ).html(linesreturned);
+            });
+            return false;
+        });
+    </script>
+	"""
+
+	return template
 
 """
 [probably not] TODO: clickable INS or DDP xrefs in dictionary entries

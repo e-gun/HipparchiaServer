@@ -962,6 +962,15 @@ code {
 	font-family: 'hipparchiamonostatic', monospace;
 	}
 
+dictionaryentry{
+    color: var(--rustedorange);
+    }
+
+dictionaryentry:hover{
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}
+
 div.fourcolumn {
 	-webkit-column-count: 4;
 	/* Chrome, Safari, Opera */ -moz-column-count: 4;
@@ -987,6 +996,11 @@ fieldset {
 form {
 	display: inline;
 	}
+
+gen {
+    /* should probably match orth */
+	color: var(--blue);
+    }
 
 gramgrp {
     color: var(--dkgrey);
@@ -1084,8 +1098,23 @@ table {
 	font-weight: normal;
 	}
 
-table.showborders {
+table.navtable {
+    padding-top: 10px;
+    margin: auto;
+    display: block;
+    font-size: 75%;
+    }
+
+table.showborders, td.showborders {
     border: 1px solid black;
+    }
+
+td.alihnleft {
+    text-align: left;
+    }
+
+td.alignright {
+    text-align: right;
     }
 
 td.browsedline {
