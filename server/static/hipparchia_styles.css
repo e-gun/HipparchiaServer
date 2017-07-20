@@ -984,6 +984,7 @@ div.threecolumn {
 	}
 
 etym {
+    /*one of many dictionary tags: foreign|orth|pron|quote|gen|itype|etym|ref */
     color: var(--dkgrey);
     }
 
@@ -1010,6 +1011,11 @@ gramgrp {
 gramm {
     color: var(--dkgrey);
     font-weight: bold;
+    }
+
+hi {
+    font-weight: bold;
+    color: var(--vdkteal);
     }
 
 indexedlocation:hover{
@@ -1071,6 +1077,10 @@ p.level4 {
 
 pre {
     font-family: 'hipparchiamonostatic', monospace;
+    }
+
+pron {
+    font-style: italic;
     }
 
 quote, orth {

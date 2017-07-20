@@ -34,7 +34,7 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 
-def setthreadcount():
+def setthreadcount(startup=False):
 	"""
 
 	used to set worker count on multithreaded functions
@@ -44,9 +44,17 @@ def setthreadcount():
 	"""
 
 	if hipparchia.config['AUTOCONFIGWORKERS'] != 'yes':
-		return hipparchia.config['WORKERS']
+		w = hipparchia.config['WORKERS']
 	else:
-		return int(cpu_count() / 2) + 1
+		w = int(cpu_count() / 2) + 1
+
+	if w < 1:
+		w = 1
+
+	if w > cpu_count() and startup:
+		print('\nWARNING: threadcount exceeds total available number of threads: {a} vs {b}'.format(a=w, b=cpu_count()))
+
+	return w
 
 
 def setconnection(autocommit='n'):
@@ -484,3 +492,36 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 
 	return buildinfo
 
+
+def probefordatabases():
+	"""
+
+	figure out which non-author tables are actually installed
+
+	:return:
+	"""
+
+	dbconnection = setconnection()
+	curs = dbconnection.cursor()
+
+	available = {}
+
+	possible = ['greek_dictionary', 'greek_lemmata', 'greek_morphology',
+	            'latin_dictionary', 'latin_lemmata', 'latin_morphology',
+	            'wordcounts_0']
+
+	for p in possible:
+		q = 'SELECT * FROM {table} LIMIT 1'.format(table=p)
+		try:
+			curs.execute(q)
+			results = curs.fetchall()
+		except:
+			# psycopg2.ProgrammingError: relation "greek_morphology" does not exist
+			results = False
+
+		if results:
+			available[p] = True
+		else:
+			available[p] = False
+
+	return available

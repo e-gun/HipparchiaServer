@@ -11,7 +11,8 @@ import re
 from flask import session
 
 from server import hipparchia
-from server.dbsupport import citationfunctions
+from server.dbsupport.citationfunctions import prolixlocus
+from server.dbsupport.dbfunctions import probefordatabases
 from server.startup import authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict
 
 
@@ -63,6 +64,7 @@ def sessionvariables():
 		session['bracketround'] = hipparchia.config['DEFAULTHIGHLIGHTROUNDBRACKETS']
 		session['bracketangled'] = hipparchia.config['DEFAULTHIGHLIGHTANGLEDBRACKETS']
 		session['bracketcurly'] = hipparchia.config['DEFAULTHIGHLIGHTCURLYBRACKETS']
+		session['available'] = probefordatabases()
 
 	return
 
@@ -512,7 +514,7 @@ def sessionselectionsinfo(authordict, workdict):
 				for w in ao.listofworks:
 					if w.universalid == s[0:10]:
 						wk = w
-				loc = citationfunctions.prolixlocus(wk, citationtuple)
+				loc = prolixlocus(wk, citationtuple)
 				thehtml.append('<span class="{v}{soe} selection" id="{var}_0{lv}" {tit}>{au}, '
 				               '<span class="pickedwork">{wk}</span>&nbsp;'
 				               '<span class="pickedsubsection">{loc}</span></span><br />'

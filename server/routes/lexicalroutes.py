@@ -9,6 +9,8 @@
 import json
 import re
 
+from flask import session
+
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
 from server.formatting.betacodetounicode import replacegreekbetacode
@@ -56,8 +58,10 @@ def findbyform(observedword):
 		returnarray = [{'value': '[empty search: {w} was sanitized into nothingness]'.format(w=observedword)}]
 		return json.dumps(returnarray)
 
+	isgreek = True
 	if re.search(r'[a-z]', cleanedword[0]):
 		cleanedword = stripaccents(cleanedword)
+		isgreek = False
 
 	cleanedword = cleanedword.lower()
 	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
@@ -72,10 +76,22 @@ def findbyform(observedword):
 			returnarray.append(getobservedwordprevalencedata(cleanedword))
 		returnarray += lexicalmatchesintohtml(cleanedword, morphologyobject, cur)
 	else:
-		returnarray = [
-			{'value': '<br />[could not find a match for {cw} in the morphology table]'.format(cw=cleanedword)},
-			{'entries': '[not found]'}
+		if isgreek and not session['available']['greek_morphology']:
+			returnarray = [
+				{'value': '<br />[the Greek morphology data has not been installed]'.format(cw=cleanedword)},
+				{'entries': '[not found]'}
 			]
+		elif not isgreek and not session['available']['latin_morphology']:
+			returnarray = [
+				{'value': '<br />[the Latin morphology data has not been installed]'.format(cw=cleanedword)},
+				{'entries': '[not found]'}
+			]
+		else:
+			returnarray = [
+				{'value': '<br />[could not find a match for {cw} in the morphology table]'.format(cw=cleanedword)},
+				{'entries': '[not found]'}
+				]
+
 		prev = getobservedwordprevalencedata(cleanedword)
 		if not prev:
 			prev = getobservedwordprevalencedata(retainedgravity)
@@ -118,6 +134,10 @@ def dictsearch(searchterm):
 	else:
 		usedictionary = 'greek'
 		usecolumn = 'unaccented_entry'
+
+	if not session['available'][usedictionary+'_dictionary']:
+		r = [{'value': 'cannot look up {w}: {d} dictionary is not installed'.format(d=usedictionary, w=seeking)}]
+		return json.dumps(r)
 
 	seeking = stripaccents(seeking)
 	query = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s'.format(d=usedictionary,c=usecolumn)

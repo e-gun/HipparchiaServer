@@ -8,7 +8,8 @@
 
 from server import hipparchia
 from server.calculatewordweights import findtemporalweights, findccorporaweights, findgeneraweights
-from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors
+from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors, \
+	setthreadcount, probefordatabases
 from server.listsandsession.sessiondicts import buildaugenresdict, buildworkgenresdict, buildauthorlocationdict, \
 	buildworkprovenancedict
 
@@ -32,10 +33,27 @@ if hipparchia.config['ENOUGHALREADYWITHTHECOPYRIGHTNOTICE'] != 'yes':
 	                          mail='Department of Classics, 125 Queen’s Park, Toronto, ON M5S 2C7 Canada'))
 
 
+available = probefordatabases()
+warning = sum([available[x] for x in available])
+if warning == 0:
+	print('WARNING: support data is missing; some functions will be disabled')
+	for key in available:
+		if not available[key]:
+			print('\t{d} is unavailable'.format(d=key))
+	print()
+
+t = setthreadcount(startup=True)
+s = 's'
+if t < 2:
+	s = ''
+print('queries will be dispatched to {t} thread{s}\n'.format(t=setthreadcount(), s=s))
+
+
 """
 this stuff gets loaded up front so you have access to all author and work info all the time
 otherwise you'll hit the DB too often and ask the same question over and over again
 """
+
 
 # startup 4.922947645187378
 # profiling: [see https://zapier.com/engineering/profiling-python-boss/]

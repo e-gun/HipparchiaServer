@@ -1037,6 +1037,11 @@ gramm {
     color: var(--dkgrey);
     }
 
+hi {
+    font-family: var(--installedfontbold);
+    color: var(--vdkteal);
+    }
+
 indexedlocation:hover{
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
@@ -1102,6 +1107,10 @@ p.level4 {
 
 pre {
     font-family: var(--installedfontmonospace), 'hipparchiamonostatic', monospace;
+    }
+
+pron {
+    font-family: var(--installedfontitalic);
     }
 
 pos {

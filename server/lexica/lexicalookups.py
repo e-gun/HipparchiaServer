@@ -34,6 +34,9 @@ def lookformorphologymatches(word, cursor, trialnumber=0):
 	else:
 		usedictionary = 'greek'
 
+	if not session['available'][usedictionary+'_morphology']:
+		return None
+
 	trialnumber += 1
 
 	# the things that can confuse me
@@ -586,6 +589,10 @@ def getobservedwordprevalencedata(dictionaryword):
 	:param dictionaryword: 
 	:return: 
 	"""
+
+	if not session['available']['wordcounts_0']:
+		return {'value': ''}
+
 	l = findcountsviawordcountstable(dictionaryword)
 
 	try:
@@ -674,6 +681,10 @@ def grablemmataobjectfor(entryname, db, cursor):
 	:param cursor:
 	:return:
 	"""
+
+	if not session['available'][db]:
+		lo = dbLemmaObject('[parsing is impossible: lemmata data was not installed]', -1, '')
+		return lo
 
 	q = 'SELECT * FROM {db} WHERE dictionary_entry=%s'.format(db=db)
 	d = (entryname,)

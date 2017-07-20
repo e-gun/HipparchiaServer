@@ -173,7 +173,7 @@ def checkforactivesearch(ts):
 		except socket.timeout:
 			# socket.timeout: but our aim was to send the request, not to read the response and get blocked
 			# so we want to throw this exception so that we can eventually get to one of the 'returns'
-			print('websocket at {p} was told to launch'.format(p=pollport))
+			print('websocket at {p} opened'.format(p=pollport))
 
 	sock.close()
 	del sock

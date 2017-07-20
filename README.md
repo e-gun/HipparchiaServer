@@ -48,6 +48,7 @@ key features:
 			reverse lookup: 'unexpected' returns ἀδευκήϲ, ἀδόκητοϲ, ἀδόξαϲτοϲ, ἀελπτία, ...
 			    by default results return in order of word frequency
 			click to browse to passages cited in the lexical entries ('often' works)
+			flip forward/backwards through neighboring entries
 		text maker
 			build a text of a whole work or subsection of a work
 			for example see Xenophon, Hellenica as a whole or just book 3 or just book 3, chapter 4
@@ -71,7 +72,10 @@ key features:
 	    hover over interface items to get tooltips
 
 	misc
-	    accepts betacode input of greek
+	    accepts betacode input of greek (with or without accents):
+	        "MH=NIN A)/EIDE QEA\"
+	        "mh=nin a)/eide qea\"
+	        "mhnin aeide qea"
 	    search will attempt to choose the most efficient strategy for any given situation
 		text layout in results/browser/text maker sensitive to shifts in font face and size
 	    text layout via CSS: possible to modify the style sheet to suit your own tastes
@@ -103,7 +107,8 @@ Then you aim your browser at http://localhost:5000 and you are ready to roll.
 
 Alternately you can hook HipparchiaServer to something like nginx via uwsgi. That would create a different url
 
-It would be rather unwise to expose this server to the whole internet. There are many elements to this unwisdom.
+By default HipparchiaServer will not accept connections that do not originate from the host machine. It would be rather
+unwise to expose this server to the whole internet. There are many elements to this unwisdom.
 
 Let us only mention one of them: there are security checks inside Hipparchia, but many queries can be generated that would
 consume vast computational resources. What would happen if 1000 people tried to do that to your machine at once?
