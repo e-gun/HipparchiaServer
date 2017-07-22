@@ -75,7 +75,6 @@ def styesheetsamples():
 	currentpath = path.dirname(argv[0])
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
 	stylefile = currentpath+'/server'+stylesheet
-	print('stylefile',stylefile)
 
 	stylecontents = []
 	if path.isfile(stylefile):
@@ -100,6 +99,7 @@ def styesheetsamples():
 	spans = [s for s in styles if re.search(spanner, s)]
 	notspans = list(set(styles) - set(spans))
 	spans = [s[1:] for s in spans]
+	spans = [s.split(':')[0] for s in spans]
 
 	spans = sorted(spans)
 	notspans = sorted(notspans)

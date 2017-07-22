@@ -11,14 +11,8 @@
     {% include "saveslots.html" ignore missing %}
     {% include "activeoptions.html" ignore missing %}
 
-<script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
-<script src="{{ url_for('static', filename='indexandtextmaker.js') }}"></script>
-<script src="{{ url_for('static', filename='lexical.js') }}"></script>
-<script src="{{ url_for('static', filename='ui-clicks.js') }}"></script>
-<script src="{{ url_for('static', filename='documentready.js') }}"></script>
-
-{% include "hipparchiahelp.html" ignore missing %}
-{% include "wordsearchfields.html" ignore missing %}
+    {% include "hipparchiahelp.html" ignore missing %}
+    {% include "wordsearchfields.html" ignore missing %}
 
 <div id="lexicadialog">
     <div id="lexicadialogtext"></div>
@@ -50,5 +44,12 @@
 <div id="browserclickscriptholder"> </div>
 <div id="indexclickscriptholder"> </div>
 <div id="selectionscriptholder"> </div>
+
+<script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
+<script src="{{ url_for('static', filename='indexandtextmaker.js') }}"></script>
+<script src="{{ url_for('static', filename='lexical.js') }}"></script>
+<script src="{{ url_for('static', filename='ui-clicks.js') }}"></script>
+<script src="{{ url_for('static', filename='hipparchia_browser.js') }}"></script>
+<script src="{{ url_for('static', filename='documentready.js') }}"></script>
 
 {% endblock %}

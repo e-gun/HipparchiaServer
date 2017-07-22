@@ -5,5 +5,9 @@ MorphPossibilityObject.getlatinbaseform() needs work permixtā, per-misceo
 MorphPossibilityObject.getlatinbaseform() needs work praevortēmur, prae-verto
 MorphPossibilityObject.getlatinbaseform() needs work dissīderent, dis-sido
 
-[B] [for HipparchiaBuilder]
-    line numbering '+1' problem at Euripides, Ion 1579+]
+[B] similarly
+MorphPossibilityObject.getbaseform() is confused ἐνέρριπτεν, ἐν, ἐν-ῥίπτω ['ἐνέρριπτεν', 'ἐν', 'ἐν-ῥίπτω']
+MorphPossibilityObject.getbaseform() is confused ἐνέρριψεν, ἐν, ἐν-ῥίπτω ['ἐνέρριψεν', 'ἐν', 'ἐν-ῥίπτω']
+MorphPossibilityObject.getbaseform() is confused ἐνέρριψαν, ἐν, ἐν-ῥίπτω ['ἐνέρριψαν', 'ἐν', 'ἐν-ῥίπτω']
+MorphPossibilityObject.getbaseform() is confused ἐνέρριψε, ἐν, ἐν-ῥίπτω ['ἐνέρριψε', 'ἐν', 'ἐν-ῥίπτω']
+
