@@ -84,12 +84,6 @@ def compilesearchlist(listmapper, s=session):
 		searchlist = [aw for aw in searchlist if aw]
 		searchlist = list(set(searchlist))
 
-		if s['incerta'] == 'no':
-			searchlist = list(set(searchlist) - set(allincerta))
-
-		if s['varia'] == 'no':
-			searchlist = list(set(searchlist) - set(allvaria))
-
 	else:
 		# you picked nothing and want everything. well, maybe everything...
 
@@ -104,6 +98,12 @@ def compilesearchlist(listmapper, s=session):
 	# [B] now start subtracting from the list of inclusions
 	if s['spuria'] == 'no':
 		searchlist = removespuria(searchlist, wd)
+
+	if s['incerta'] == 'no':
+		searchlist = list(set(searchlist) - set(allincerta))
+
+	if s['varia'] == 'no':
+		searchlist = list(set(searchlist) - set(allvaria))
 
 	# build the exclusion list
 	# note that we are not handling excluded individual passages yet

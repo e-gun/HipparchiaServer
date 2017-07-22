@@ -374,7 +374,8 @@ body {
 	}
 
 .greek {
-    }
+    /* not a great idea to use this unless you are only looking at latin authors */
+	}
 
 .highlight {
     text-shadow: 1px 1px 3px var(--transparentgrey);
@@ -704,6 +705,10 @@ keeping (for now) the non-span version of this
 
 .smallcapitals, .uncial {
 	font-variant: small-caps;
+	}
+
+.smallerthannormal {
+	font-size: 85%;
 	}
 
 .smallerthannormalsuperscript {
@@ -1103,6 +1108,10 @@ span.lat {
 	font-color: var(--vdkteal);
 	}
 
+speaker {
+	font-weight: bold;
+	}
+
 table {
 	text-align: left;
 	font-weight: normal;
@@ -1117,6 +1126,7 @@ table.navtable {
 
 table.showborders, td.showborders {
     border: 1px solid black;
+    font-family: 'hipparchiamonostatic', monospace;
     }
 
 td.alihnleft {
