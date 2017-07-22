@@ -6,6 +6,10 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import re
+from os import path
+from sys import argv
+
 from flask import render_template
 
 from server import hipparchia
@@ -55,3 +59,50 @@ def databasecontents(dictionarytodisplay):
 		dictionarytodisplay = '[invalid value]'
 
 	return render_template('dbcontentslister.html', found=results, numberfound=len(results), label=dictionarytodisplay)
+
+
+@hipparchia.route('/csssamples')
+def styesheetsamples():
+	"""
+
+	show what everything will look like
+
+	:return:
+	"""
+
+	excludes = ['td', 'th', 'table']
+
+	currentpath = path.dirname(argv[0])
+	stylesheet = hipparchia.config['CSSSTYLESHEET']
+	stylefile = currentpath+'/server'+stylesheet
+	print('stylefile',stylefile)
+
+	stylecontents = []
+	if path.isfile(stylefile):
+		with open(stylefile, 'r') as f:
+			stylecontents = f.read().splitlines()
+
+	definitions = re.compile(r'^(.*?)\s\{')
+	styles = [re.sub(definitions, r'\1', s) for s in stylecontents
+	          if re.search(definitions, s) and not re.search(r'\.', s[1:])]
+
+	# take care of multiple simult definitions:
+	#   .textuallemma, .interlineartext, .interlinearmarginalia, .marginaltext
+	unpackedstyles = []
+	for s in styles:
+		up = s.split(', ')
+		unpackedstyles += up
+
+	invalid = re.compile(r'^[:@#]')
+	styles = [s for s in unpackedstyles if not re.search(invalid, s) and s not in excludes]
+
+	spanner = re.compile(r'^\.')
+	spans = [s for s in styles if re.search(spanner, s)]
+	notspans = list(set(styles) - set(spans))
+	spans = [s[1:] for s in spans]
+
+	spans = sorted(spans)
+	notspans = sorted(notspans)
+
+	return render_template('stylesampler.html', css=stylesheet, spans=spans, notspans=notspans,
+	                       numberfound=len(spans)+len(notspans))

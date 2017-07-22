@@ -1,0 +1,17 @@
+<!-- extend from base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+
+  <h1 class="center">{{ numberfound }}&nbsp;Style Samples</h1>
+  	<table>
+        {% for s in spans %} <tr>
+            <td>.{{ s }}&nbsp;&nbsp;</td>
+            <td><span class="{{s}}">{{s}}</span></td>
+        </tr> {% endfor %}
+        {% for ns in notspans %} <tr>
+            <td>{{ ns }}&nbsp;&nbsp;</td>
+            <td><{{ns}}>{{ns}}</{{ns}}></td>
+        </tr> {% endfor %}
+    </table>
+{% endblock %}
