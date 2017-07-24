@@ -334,7 +334,8 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	else:
 		extracolumn = 'unaccented_entry'
 
-	qtemplate = """SELECT entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body, {ec}
+	qtemplate = """SELECT entry_name, metrical_entry, id_number, entry_type, entry_options, 
+					translations, entry_body, {ec}
 					FROM {d} WHERE {col} {sy} %s ORDER BY id_number ASC"""
 	query = qtemplate.format(ec=extracolumn, d=dictionary, col=usecolumn, sy=syntax)
 	data = (seeking,)
@@ -409,10 +410,10 @@ def convertdictionaryfindintoobject(foundline, dictionary, cursor):
 	dictionary = greek_dictionary or latin_dictionary
 
 	foundline is a db line with the extra parameter last:
-		entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body + extra
+		entry_name, metrical_entry, id_number, entry_type, entry_options, , translations, entry_body + extra
 
 	example:
-		foundline ('ἑτερόφθαλμοϲ', 'ἑτερόφθαλμοϲ', '43226', 'main', 'n', '<orth extent="suff" lang="greek" opt="n">ἑτερόφθαλμ-οϲ</orth>, <itype lang="greek" opt="n">ον</itype>, <sense id="n43226.0" n="A" level="1" opt="n"><tr opt="n">one-eyed</tr>, <bibl n="Perseus:abo:tlg,0014,024:141" default="NO" valid="yes"><author>D.</author> <biblScope>24.141</biblScope></bibl>, <bibl n="Perseus:abo:tlg,0086,025:1023a:5" default="NO" valid="yes"><author>Arist.</author><title>Metaph.</title><biblScope>1023a5</biblScope></bibl>; <foreign lang="greek">ἑ. γενομένη ἡ Ἑλλάϲ</foreign>, metaph., of the proposed destruction of Athens, Leptines ap. <bibl n="Perseus:abo:tlg,0086,038:1411a:5" default="NO" valid="yes"><author>Arist.</author><title>Rh.</title><biblScope>1411a5</biblScope></bibl>, cf. <bibl default="NO"><author>Demad.</author><biblScope>65</biblScope></bibl> <bibl default="NO"><author>B.</author></bibl>, <bibl default="NO"><author>Plu.</author><biblScope>2.803a</biblScope></bibl>. </sense><sense n="II" id="n43226.1" level="2" opt="n"> <tr opt="n">with different-coloured eyes,</tr> <bibl n="Perseus:abo:tlg,4080,001:16:2:1" default="NO"><author>Gp.</author> <biblScope>16.2.1</biblScope></bibl>.</sense>', 'ετεροφθαλμοϲ')
+		foundline ('ἑτερόφθαλμοϲ', 'ἑτερόφθαλμοϲ', '43226', 'main', 'n', '[transl]', '<orth extent="suff" lang="greek" opt="n">ἑτερόφθαλμ-οϲ</orth>, <itype lang="greek" opt="n">ον</itype>, <sense id="n43226.0" n="A" level="1" opt="n"><tr opt="n">one-eyed</tr>, <bibl n="Perseus:abo:tlg,0014,024:141" default="NO" valid="yes"><author>D.</author> <biblScope>24.141</biblScope></bibl>, <bibl n="Perseus:abo:tlg,0086,025:1023a:5" default="NO" valid="yes"><author>Arist.</author><title>Metaph.</title><biblScope>1023a5</biblScope></bibl>; <foreign lang="greek">ἑ. γενομένη ἡ Ἑλλάϲ</foreign>, metaph., of the proposed destruction of Athens, Leptines ap. <bibl n="Perseus:abo:tlg,0086,038:1411a:5" default="NO" valid="yes"><author>Arist.</author><title>Rh.</title><biblScope>1411a5</biblScope></bibl>, cf. <bibl default="NO"><author>Demad.</author><biblScope>65</biblScope></bibl> <bibl default="NO"><author>B.</author></bibl>, <bibl default="NO"><author>Plu.</author><biblScope>2.803a</biblScope></bibl>. </sense><sense n="II" id="n43226.1" level="2" opt="n"> <tr opt="n">with different-coloured eyes,</tr> <bibl n="Perseus:abo:tlg,4080,001:16:2:1" default="NO"><author>Gp.</author> <biblScope>16.2.1</biblScope></bibl>.</sense>', 'ετεροφθαλμοϲ')
 
 	:param foundline:
 	:param dictionary:
@@ -421,12 +422,12 @@ def convertdictionaryfindintoobject(foundline, dictionary, cursor):
 	# print('foundline',foundline)
 
 	if dictionary == 'greek_dictionary':
-		wordobject = dbGreekWord(foundline[0], foundline[1], foundline[2], foundline[3], foundline[4], foundline[5], foundline[6])
+		wordobject = dbGreekWord(foundline[0], foundline[1], foundline[2], foundline[3], foundline[4], foundline[5], foundline[6], foundline[7])
 	elif dictionary == 'latin_dictionary':
-		wordobject = dbLatinWord(foundline[0], foundline[1], foundline[2], foundline[3], foundline[4], foundline[5], foundline[6])
+		wordobject = dbLatinWord(foundline[0], foundline[1], foundline[2], foundline[3], foundline[4], foundline[5], foundline[6], foundline[7])
 	else:
 		# you actually want a hollow object
-		wordobject = dbGreekWord(None, None, None, None, None, None, None)
+		wordobject = dbGreekWord(None, None, None, None, None, None, None, None)
 
 	ntemplate = 'SELECT entry_name, id_number FROM {d} WHERE id_number > %s ORDER BY id_number ASC LIMIT 1;'
 

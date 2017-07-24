@@ -16,7 +16,7 @@ from server.dbsupport.dbfunctions import setconnection
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import removegravity, stripaccents, tidyupterm
 from server.lexica.lexicalookups import browserdictionarylookup, lexicalmatchesintohtml, findtotalcounts, \
-	lookformorphologymatches, getobservedwordprevalencedata, findtermamongsenses
+	lookformorphologymatches, getobservedwordprevalencedata
 from server.listsandsession.listmanagement import polytonicsort
 from server.listsandsession.sessionfunctions import justlatin, justtlg
 
@@ -190,6 +190,11 @@ def dictsearch(searchterm):
 def reverselexiconsearch(searchterm):
 	"""
 	attempt to find all of the greek/latin dictionary entries that might go with the english search term
+
+	'ape' will drive this crazy; what is needed is a lookup for only the senses
+
+	this can be built into the dictionary via beautiful soup
+	
 	:return:
 	"""
 
@@ -213,16 +218,12 @@ def reverselexiconsearch(searchterm):
 		translationlabel = s[1]
 
 		# first see if your term is mentioned at all
-		query = 'SELECT entry_name FROM {d}_dictionary WHERE entry_body LIKE %s'.format(d=usedict)
-		data = ('%{s}%'.format(s=seeking),)
+		query = 'SELECT entry_name FROM {d}_dictionary WHERE translations ~ %s'.format(d=usedict)
+		data = ('{s}'.format(s=seeking),)
 		cur.execute(query, data)
 
 		matches = cur.fetchall()
-		matches = [m[0] for m in matches]
-
-		# then go back and see if it is mentioned in the summary of senses (and not just randomly present in the body)
-		for match in matches:
-			entries += findtermamongsenses(match, seeking, usedict, translationlabel, cur)
+		entries = [m[0] for m in matches]
 
 	entries = list(set(entries))
 

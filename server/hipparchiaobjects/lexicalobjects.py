@@ -616,12 +616,13 @@ class dbDictionaryEntry(object):
 
 	"""
 
-	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body):
+	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body):
 		self.entry = entry_name
 		self.metricalentry = metrical_entry
 		self.id = id_number
 		self.type = entry_type
 		self.options = entry_options
+		self.translations = translations.split(' ‖ ')
 		self.body = entry_body
 		self.nextentryid = -1
 		self.preventryid = -1
@@ -638,10 +639,10 @@ class dbGreekWord(dbDictionaryEntry):
 
 	"""
 
-	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body, unaccented_entry):
+	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body, unaccented_entry):
 		self.language = 'Greek'
 		self.unaccented_entry = unaccented_entry
-		super().__init__(entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body)
+		super().__init__(entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body)
 		self.entry_key = None
 
 	def isgreek(self):
@@ -660,11 +661,11 @@ class dbLatinWord(dbDictionaryEntry):
 
 	"""
 
-	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body,
+	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body,
 	             entry_key):
 		self.language = 'Latin'
 		self.unaccented_entry = None
-		super().__init__(entry_name, metrical_entry, id_number, entry_type, entry_options, entry_body)
+		super().__init__(entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body)
 		self.entry_key = entry_key
 
 	def isgreek(self):

@@ -246,20 +246,23 @@ $('#lexicalsearch').click( function() {
     var windowWidth = $(window).width();
     var windowHeight = $(window).height();
     if ( dictterm.length > 0) {
-        searchterm = dictterm;
-        url = '/dictsearch/';
+        var searchterm = dictterm;
+        var url = '/dictsearch/';
         var dialogtitle = restoreme;
         var mydictfield = '#lexicon';
     } else if ( parseterm.length > 0 ) {
-        searchterm = parseterm;
-        url = '/parse/';
+        var searchterm = parseterm;
+        var url = '/parse/';
         var dialogtitle = searchterm;
         var mydictfield = '#parser';
         restoreme = searchterm;
     } else if ( reverseterm.length > 0 ) {
-        searchterm = reverseterm;
-        url = '/reverselookup/';
-        var dialogtitle = searchterm;
+        var originalterm = reverseterm
+        // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
+        if (reverseterm.slice(-1) == ' ') { reverseterm = reverseterm.slice(0,-1) + '%20'; }
+        var searchterm = reverseterm;
+        var url = '/reverselookup/';
+        var dialogtitle = originalterm;
         var mydictfield = '#reverselexicon';
         restoreme = searchterm;
     } else {

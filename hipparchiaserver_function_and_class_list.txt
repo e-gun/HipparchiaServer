@@ -1,20 +1,20 @@
 cloc --not-match-f='^j' HipparchiaServer/
-      90 text files.
-      90 unique files.
-       9 files ignored.
+      95 text files.
+      94 unique files.
+      13 files ignored.
 
-github.com/AlDanial/cloc v 1.72  T=0.80 s (104.5 files/s, 25921.6 lines/s)
+github.com/AlDanial/cloc v 1.72  T=1.05 s (82.9 files/s, 21388.7 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                          49           2897           3690           7935
-XML                              6              0              0           1942
-HTML                            21            123             13           1487
-JavaScript                       6            193            187           1071
-CSS                              1            210            136            797
-Markdown                         1             32              0            124
+Python                          49           2962           3785           8116
+CSS                              2            473            322           1786
+HTML                            23            142             14           1622
+XML                              6              0              0           1584
+JavaScript                       6            195            187           1084
+Markdown                         1             32              0            130
 -------------------------------------------------------------------------------
-SUM:                            84           3455           4026          13356
+SUM:                            87           3804           4308          14322
 -------------------------------------------------------------------------------
 
 
@@ -58,7 +58,7 @@ dbsupport/citationfunctions.py:def perseuslookupleveltrimmer(workobject, citatio
 dbsupport/citationfunctions.py:def perseuslookupchangecase(citationlist):
 dbsupport/citationfunctions.py:def perseusdelabeler(citationlist, workobject):
 dbsupport/citationfunctions.py:def perseuscitationsintohipparchiacitations(citationlist):
-dbsupport/dbfunctions.py:def setthreadcount():
+dbsupport/dbfunctions.py:def setthreadcount(startup=False):
 dbsupport/dbfunctions.py:def setconnection(autocommit='n'):
 dbsupport/dbfunctions.py:def tablenamer(authorobject, thework):
 dbsupport/dbfunctions.py:def loadallauthorsasobjects():
@@ -77,6 +77,7 @@ dbsupport/dbfunctions.py:def makeablankline(work, fakelinenumber):
 dbsupport/dbfunctions.py:def makeanemptyauthor(universalid):
 dbsupport/dbfunctions.py:def makeanemptywork(universalid):
 dbsupport/dbfunctions.py:def versionchecking(activedbs, expectedsqltemplateversion):
+dbsupport/dbfunctions.py:def probefordatabases():
 formatting/betacodeescapes.py:def andsubstitutes(match):
 formatting/betacodetounicode.py:def replacegreekbetacode(texttoclean):
 formatting/betacodetounicode.py:def capitalletters(betacode):
@@ -152,7 +153,6 @@ formatting/searchformatting.py:def buildresultobjects(hitdict, authordict, workd
 formatting/searchformatting.py:def bulkenvironsfetcher(table, searchresultlist, context):
 formatting/searchformatting.py:def flagsearchterms(searchresultobject, skg, prx, searchobject):
 formatting/searchformatting.py:def highlightsearchterm(lineobject, regexequivalent, spanname):
-formatting/searchformatting.py:def compilesearchtermequivalent(searchterm):
 formatting/searchformatting.py:def htmlifysearchfinds(listofsearchresultobjects, searchobject):
 formatting/searchformatting.py:def brackethtmlifysearchfinds(listoflineobjects, searchobject, linehtmltemplate):
 formatting/searchformatting.py:def nocontexthtmlifysearchfinds(listofsearchresultobjects):
@@ -166,11 +166,12 @@ formatting/wordformatting.py:def gkattemptelision(hypenatedgreekheadword):
 formatting/wordformatting.py:def latattemptelision(hypenatedlatinheadword):
 formatting/wordformatting.py:def tidyupterm(word, punct=None):
 formatting/wordformatting.py:def cleanaccentsandvj(texttostrip):
+formatting/wordformatting.py:def universalregexequivalent(searchterm):
 lexica/lexicalookups.py:def lookformorphologymatches(word, cursor, trialnumber=0):
 lexica/lexicalookups.py:def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
 lexica/lexicalookups.py:def browserdictionarylookup(count, seekingentry, cursor):
 lexica/lexicalookups.py:def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber=0):
-lexica/lexicalookups.py:def convertdictionaryfindintoobject(foundline, dictionary):
+lexica/lexicalookups.py:def convertdictionaryfindintoobject(foundline, dictionary, cursor):
 lexica/lexicalookups.py:def bulkddictsearch(cursor, dictionary, usecolumn, seeking):
 lexica/lexicalookups.py:def findtotalcounts(word, cursor):
 lexica/lexicalookups.py:def findcountsviawordcountstable(wordtocheck):
@@ -178,6 +179,7 @@ lexica/lexicalookups.py:def getobservedwordprevalencedata(dictionaryword):
 lexica/lexicalookups.py:def formatprevalencedata(wordcountobject):
 lexica/lexicalookups.py:def grablemmataobjectfor(entryname, db, cursor):
 lexica/lexicalookups.py:def findtermamongsenses(match, seeking, usedict, translationlabel, cur):
+lexica/lexicalookups.py:def dictionaryentryjs():
 listsandsession/listmanagement.py:def compilesearchlist(listmapper, s=session):
 listsandsession/listmanagement.py:def sortsearchlist(searchlist, authorsdict):
 listsandsession/listmanagement.py:def sortresultslist(hits, authorsdict, worksdict):
@@ -242,6 +244,7 @@ routes/hintroutes.py:def wkgenrelist():
 routes/hintroutes.py:def offeraulocationhints():
 routes/hintroutes.py:def offerprovenancehints():
 routes/inforoutes.py:def databasecontents(dictionarytodisplay):
+routes/inforoutes.py:def styesheetsamples():
 routes/lexicalroutes.py:def findbyform(observedword):
 routes/lexicalroutes.py:def dictsearch(searchterm):
 routes/lexicalroutes.py:def reverselexiconsearch(searchterm):
