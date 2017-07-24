@@ -636,12 +636,15 @@ def formatprevalencedata(wordcountobject):
 	thehtml = [' / '.join(thehtml)]
 
 	if type(w) == dbHeadwordObject:
-		thehtml.append('\n<p class="wordcounts">Weighted distribution by corpus: ')
+
 		wts = [(w.getweightedcorpora(key), w.getlabel(key)) for key in ['gr', 'lt', 'in', 'dp', 'ch']]
-		wts = sorted(wts, reverse=True)
-		wts = ['<span class="prevalence">{a}</span> {b:.0f}'.format(a=w[1], b=w[0]) for w in wts]
-		thehtml.append(' / '.join(wts))
-		thehtml.append('</p>')
+		allwts = [w[0] for w in wts]
+		if sum(allwts) > 0:
+			thehtml.append('\n<p class="wordcounts">Weighted distribution by corpus: ')
+			wts = sorted(wts, reverse=True)
+			wts = ['<span class="prevalence">{a}</span> {b:.0f}'.format(a=w[1], b=w[0]) for w in wts]
+			thehtml.append(' / '.join(wts))
+			thehtml.append('</p>')
 
 		wts = [(w.getweightedtime(key), w.gettimelabel(key)) for key in ['early', 'middle', 'late']]
 		wts = sorted(wts, reverse=True)
