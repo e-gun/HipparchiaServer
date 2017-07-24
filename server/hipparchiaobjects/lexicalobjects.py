@@ -89,53 +89,51 @@ class dbHeadwordObject(dbWordCountObject):
 
 	"""
 
-	greekworderaweights = {'early': 7.83, 'middle': 1.91, 'late': 1}
-	corporaweights =  {'gr': 1.0, 'lt': 10.54, 'in': 27.77, 'dp': 27.54, 'ch': 123.17}
+	greekworderaweights = {'early': 7.75, 'middle': 1.92, 'late': 1}
+	corporaweights =  {'gr': 1.0, 'lt': 10.68, 'in': 27.78, 'dp': 26.76, 'ch': 124.47}
 
-	greekgenreweights = {'acta': 89.62, 'agric': 16120.21, 'alchem':
-							80.14, 'anthol': 18.46, 'apocalyp': 127.48, 'apocryph': 99.14,
-							'apol': 7.27, 'astrol': 20.89, 'astron': 47.21, 'biogr': 6.61,
-							'bucol': 433.69, 'caten': 5.44, 'chronogr': 4.99, 'comic':
-							31.96, 'comm': 1.0, 'concil': 18.06, 'coq': 594.65, 'dialog':
-							7.36, 'docu': 3.97, 'doxogr': 139.25, 'eccl': 7.93, 'eleg':
-							218.53, 'encom': 13.9, 'epic': 20.43, 'epigr': 11.98, 'epist':
-							4.86, 'evangel': 126.84, 'exeget': 1.3, 'fab': 145.75, 'geogr':
-							11.42, 'gnom': 96.51, 'gramm': 9.93, 'hagiogr': 24.24,
-							'hexametr': 120.44, 'hist': 1.52, 'homilet': 7.34, 'hymn':
-							50.45, 'hypoth': 14.34, 'iamb': 138.75, 'ignotum': 643464.88,
-							'invectiv': 247.75, 'inscr': 2.65, 'jurisprud': 54.06,
-							'lexicogr': 4.66, 'liturg': 370.57, 'lyr': 470.43, 'magica':
-							104.24, 'math': 11.41, 'mech': 106.01, 'med': 2.3, 'metrolog':
-							325.7, 'mim': 2521.74, 'mus': 98.91, 'myth': 197.88,
-							'narrfict': 15.81, 'nathist': 9.67, 'onir': 141.5, 'orac':
-							271.07, 'orat': 6.7, 'paradox': 267.9, 'parod': 869.65,
-							'paroem': 69.1, 'perieg': 235.79, 'phil': 3.73, 'physiognom':
-							663.91, 'poem': 66.21, 'polyhist': 25.64, 'prophet': 106.31,
-							'pseudepigr': 685.94, 'rhet': 8.72, 'satura': 287.76, 'satyr':
-							132.12, 'schol': 6.1, 'tact': 54.4, 'test': 82.0, 'theol':
-							6.54, 'trag': 36.78, 'allrelig': 0.61, 'allrhet': 2.94}
+	greekgenreweights = {'acta': 89.53, 'agric': 101839.74, 'alchem': 80.12, 'anthol':
+						18.42, 'apocalyp': 128.74, 'apocryph': 100.53, 'apol': 7.24,
+						'astrol': 21.11, 'astron': 47.88, 'biogr': 6.68, 'bucol':
+						443.3, 'caten': 5.35, 'chronogr': 5.01, 'comic': 31.81, 'comm':
+						1.0, 'concil': 18.02, 'coq': 607.89, 'dialog': 7.28, 'docu':
+						4.21, 'doxogr': 144.06, 'eccl': 7.92, 'eleg': 223.49, 'encom':
+						13.85, 'epic': 20.51, 'epigr': 11.91, 'epist': 4.87, 'evangel':
+						127.36, 'exeget': 1.29, 'fab': 144.51, 'geogr': 11.62, 'gnom':
+						95.76, 'gramm': 9.94, 'hagiogr': 24.3, 'hexametr': 120.27,
+						'hist': 1.54, 'homilet': 7.25, 'hymn': 50.27, 'hypoth': 14.37,
+						'iamb': 138.75, 'ignotum': 779074.0, 'invectiv': 247.63,
+						'inscr': 4.07, 'jurisprud': 54.78, 'lexicogr': 4.65, 'liturg':
+						589.76, 'lyr': 492.59, 'magica': 104.47, 'math': 11.42, 'mech':
+						105.95, 'med': 2.33, 'metrolog': 326.55, 'mim': 2518.42, 'mus':
+						101.89, 'myth': 203.19, 'narrfict': 16.0, 'nathist': 9.8,
+						'onir': 140.35, 'orac': 270.33, 'orat': 6.71, 'paradox':
+						270.91, 'parod': 853.78, 'paroem': 68.18, 'perieg': 239.39,
+						'phil': 3.74, 'physiognom': 658.34, 'poem': 64.07, 'polyhist':
+						25.7, 'prophet': 107.99, 'pseudepigr': 675.17, 'rhet': 8.74,
+						'satura': 290.06, 'satyr': 133.99, 'schol': 6.15, 'tact': 54.5,
+						'test': 83.53, 'theol': 6.48, 'trag': 36.02, 'allrelig': 0.6, 'allrhet': 2.94 }
 
-	latingenreweights = {'acta': 3362.26, 'agric': 5.21, 'alchem':
-							651.4, 'anthol': 537.96, 'apocalyp': 15130.16, 'apocryph':
-							16041.61, 'apol': 470.31, 'astrol': 5200.99, 'astron': 16.35,
-							'biogr': 9.64, 'bucol': 38.43, 'caten': 352.05, 'chronogr':
-							430.06, 'comic': 4.71, 'comm': 2.24, 'concil': 1461.53, 'coq':
-							62.1, 'dialog': 70.74, 'docu': 9.69, 'doxogr': 236.83, 'eccl':
-							5641.75, 'eleg': 7.69, 'encom': 267.36, 'epic': 2.24, 'epigr':
-							109.72, 'epist': 2.06, 'exeget': 190.73, 'fab': 29.11, 'geogr':
-							233.92, 'gnom': 81.36, 'gramm': 4.9, 'hagiogr': 15482.02,
-							'hexametr': 18.41, 'hist': 1.0, 'homilet': 6079.7, 'hymn':
-							6827.97, 'hypoth': 78.81, 'iamb': 16853.85, 'ignotum': 643.21,
-							'inscr': 1.93, 'jurisprud': 1.1, 'lexicogr': 22.47, 'liturg':
-							266290.8, 'lyr': 23.94, 'magica': 20803.97, 'math': 765.2,
-							'mech': 443818.0, 'med': 7.28, 'metrolog': 23358.84, 'mim':
-							1066.02, 'mus': 721.26, 'myth': 21134.19, 'narrfict': 11.78,
-							'nathist': 1.93, 'orac': 1331454.0, 'orat': 1.79, 'paradox':
-							17291.61, 'parod': 332.03, 'paroem': 66572.7, 'perieg':
-							83215.88, 'phil': 2.17, 'poem': 13.66, 'polyhist': 4.88,
-							'pseudepigr': 266290.8, 'rhet': 2.7, 'satyr': 355.43, 'schol':
-							34.32, 'tact': 37.56, 'test': 70.39, 'theol': 5062.56, 'trag':
-							13.22, 'allrelig': 83.81, 'allrhet': 1.07}
+	latingenreweights = {'acta': 3364.04, 'agric': 5.21, 'alchem': 646.99, 'anthol':
+						538.25, 'apocalyp': 14022.73, 'apocryph': 16050.11, 'apol':
+						469.9, 'astrol': 5203.75, 'astron': 16.36, 'biogr': 9.64,
+						'bucol': 38.45, 'caten': 350.38, 'chronogr': 429.17, 'comic':
+						4.71, 'comm': 2.24, 'concil': 1383.34, 'coq': 62.11, 'dialog':
+						70.63, 'docu': 9.74, 'doxogr': 236.24, 'eccl': 5203.75, 'eleg':
+						7.69, 'encom': 267.18, 'epic': 2.25, 'epigr': 109.53, 'epist':
+						2.06, 'exeget': 189.28, 'fab': 29.13, 'geogr': 234.04, 'gnom':
+						81.28, 'gramm': 4.9, 'hagiogr': 14479.99, 'hexametr': 18.42,
+						'hist': 1.0, 'homilet': 5947.14, 'hymn': 6831.58, 'hypoth':
+						78.77, 'iamb': 16862.77, 'ignotum': 643.56, 'inscr': 1.93,
+						'jurisprud': 1.1, 'lexicogr': 22.35, 'liturg': 222026.5, 'lyr':
+						23.95, 'magica': 20814.98, 'math': 762.54, 'mech': 444053.0,
+						'med': 7.28, 'metrolog': 23371.21, 'mim': 1066.58, 'mus':
+						721.65, 'myth': 20814.98, 'narrfict': 11.78, 'nathist': 1.93,
+						'orac': 1332159.0, 'orat': 1.79, 'paradox': 17300.77, 'parod':
+						331.96, 'paroem': 66607.95, 'perieg': 83259.94, 'phil': 2.17,
+						'poem': 13.66, 'polyhist': 4.88, 'pseudepigr': 266431.8,
+						'rhet': 2.7, 'satyr': 363.38, 'schol': 34.3, 'tact': 37.58,
+						'test': 69.97, 'theol': 4915.72, 'trag': 13.23, 'allrelig': 82.92, 'allrhet': 1.07 }
 
 	# into one dict so we can pass it to __init__
 	wts = {'gkera': greekworderaweights, 'corp': corporaweights, 'gkgenre': greekgenreweights, 'ltgenre': latingenreweights}

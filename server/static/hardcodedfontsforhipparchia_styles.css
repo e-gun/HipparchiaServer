@@ -1022,6 +1022,10 @@ fieldset {
 	font-size: 80%;
 	}
 
+foreign {
+    font-family: var(--installedfontitalic);
+    }
+
 form {
 	display: inline;
 	}
