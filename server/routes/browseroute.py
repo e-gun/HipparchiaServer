@@ -125,9 +125,10 @@ def grabtextforbrowsing(locus):
 		if not passage:
 			passage = ''
 		try:
-			table = [passage, workdb, citation]
+			table = [str(passage), workdb, ' '.join(citation)]
 		except:
-			table = [passage, workdb]
+			table = [str(passage), workdb]
+
 		browserdata['browserhtml'] = viewing + '\n'.join(table)
 		browserdata['authornumber'] = ao.universalid
 		browserdata['workid'] = wo.universalid

@@ -184,6 +184,9 @@ MPCOMMITCOUNT = 750
 # 	if you are indexing more than N word (64000 is a decent number
 # 	to pick)
 #
+# SEARCHLISTPREVIEWCAP: do not show more than N items; useful since
+#   some lists might contain >100k items and choke the browser
+#
 # SHOWLINENUMBERSEVERY does just what you think it does
 #
 # MINIMUMBROWSERWIDTH is either a number of whitespace characters or
@@ -225,6 +228,7 @@ TLGASSUMESBETACODE = 'yes'
 UNIVERSALASSUMESBETACODE = 'no'
 CLICKABLEINDEXEDPASSAGECAP = 1500   # -1, 0, or N
 CLICKABLEINDEXEDWORDSCAP = 64000    # -1, 0, or N
+SEARCHLISTPREVIEWCAP = 500
 SHOWLINENUMBERSEVERY = 10
 MINIMUMBROWSERWIDTH = 100
 SUPPRESSLONGREQUESTMESSAGE = 'no'

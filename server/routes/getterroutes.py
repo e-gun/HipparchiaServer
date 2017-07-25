@@ -233,6 +233,8 @@ def getsearchlistcontents():
 
 	searchlistinfo = []
 
+	cap = hipparchia.config['SEARCHLISTPREVIEWCAP']*2
+
 	if len(searchlist) > 1:
 		searchlistinfo.append('<br /><h3>Proposing to search the following {ww} works:</h3>'.format(ww=len(searchlist)))
 		searchlistinfo.append('(Results will be arranged according to {so})<br /><br />'.format(so=session['sortorder']))
@@ -254,6 +256,10 @@ def getsearchlistcontents():
 			pass
 		searchlistinfo.append('\n[{ct}]&nbsp;'.format(ct=count))
 		searchlistinfo.append(formatauthorandworkinfo(au, w))
+
+	if len(searchlistinfo) > cap:
+		searchlistinfo = searchlistinfo[:cap+1]
+		searchlistinfo.append('<br />[list longer than user-defined cap]<br />')
 
 	if wordstotal > 0:
 		searchlistinfo.append('<br /><span class="emph">total words:</span> ' + format(wordstotal, ',d'))
