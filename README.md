@@ -160,3 +160,24 @@ dejavu fonts:
 see HipparchiaBSD for details on how to acquire and to install these items.
 [details in 00_FreeBSD_initial_setup.txt or 01_macOS_hipparchia_installation.txt]
 
+
+What you will see:
+
+![interface_overview](screenshots/01_interface_overview.png)
+![inclusions_and_exclusions](screenshots/02_inclusions_and_exclusions.png)
+![early_epic_anger_less_the_iliad](screenshots/03_early_epic_anger_less_the_iliad.png)
+![by_location_and_date](screenshots/04_by_location_and_date.png)
+![browser](screenshots/05_browser.png)
+![simple_text](screenshots/06_simple_text.png)
+![click_for_dictionary_lookup](screenshots/07_click_for_dictionary_lookup.png)
+![index_to_author](screenshots/08_index_to_author.png)
+![index_by_headword](screenshots/09_index_by_headword.png)
+![local_author_info](screenshots/10_local_author_info.png)
+![search_list_preview](screenshots/11_search_list_preview.png)
+![proximity_searching](screenshots/12_proximity_searching.png)
+![proximity_searching](screenshots/13_proximity_searching.png)
+![proximity_searching](screenshots/14_proximity_searching.png)
+![phrase_searching](screenshots/15_phrase_searching.png)
+![search_by_special_character](screenshots/16_search_by_special_character.png)
+![runs_of_two_letter_words_in_pl](screenshots/17_runs_of_two_letter_words_in_pl.png)
+![one_hit_zero_context](screenshots/18_one_hit_zero_context.png)
