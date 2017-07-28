@@ -181,39 +181,39 @@ What you will see:
 1. simple text
 ![simple_text](screenshots/06_simple_text.png)
 
-1. click_for_dictionary_lookup
+1. click for dictionary lookup
 ![click_for_dictionary_lookup](screenshots/07_click_for_dictionary_lookup.png)
 
-1. index_to_author
+1. index to author
 ![index_to_author](screenshots/08_index_to_author.png)
 
-1. index_by_headword
+1. index by headword
 ![index_by_headword](screenshots/09_index_by_headword.png)
 
-1. local_author_info
+1. local author info
 ![local_author_info](screenshots/10_local_author_info.png)
 
-1. search_list_preview
+1. search list preview
 ![search_list_preview](screenshots/11_search_list_preview.png)
 
-1. proximity_searching
-![proximity_searching](screenshots/12_proximity_searching.png)
+1. proximity searching a
+![proximity searching](screenshots/12_proximity_searching.png)
 
-1. proximity_searching
+1. proximity searching b
 ![proximity_searching](screenshots/13_proximity_searching.png)
 
-1. proximity_searching
+1. proximity searching c
 ![proximity_searching](screenshots/14_proximity_searching.png)
 
-1. phrase_searching
+1. phrase searching
 ![phrase_searching](screenshots/15_phrase_searching.png)
 
-1. search_by_special_character
+1. search by special character
 ![search_by_special_character](screenshots/16_search_by_special_character.png)
 
-1. runs_of_two_letter_words
+1. runs of two letter words
 ![runs_of_two_letter_words_in_pl](screenshots/17_runs_of_two_letter_words_in_pl.png)
 
-1. one_hit_zero_context
+1. one hit zero context
 ![one_hit_zero_context](screenshots/18_one_hit_zero_context.png)
 
