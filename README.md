@@ -163,21 +163,57 @@ see HipparchiaBSD for details on how to acquire and to install these items.
 
 What you will see:
 
+1. interface overview
 ![interface_overview](screenshots/01_interface_overview.png)
+
+1. inclusions and exclusions
 ![inclusions_and_exclusions](screenshots/02_inclusions_and_exclusions.png)
+
+1. early epic anger less the iliad
 ![early_epic_anger_less_the_iliad](screenshots/03_early_epic_anger_less_the_iliad.png)
+
+1. by location and date
 ![by_location_and_date](screenshots/04_by_location_and_date.png)
+
+1. browser
 ![browser](screenshots/05_browser.png)
+
+1. simple text
 ![simple_text](screenshots/06_simple_text.png)
+
+1. click_for_dictionary_lookup
 ![click_for_dictionary_lookup](screenshots/07_click_for_dictionary_lookup.png)
+
+1. index_to_author
 ![index_to_author](screenshots/08_index_to_author.png)
+
+1. index_by_headword
 ![index_by_headword](screenshots/09_index_by_headword.png)
+
+1. local_author_info
 ![local_author_info](screenshots/10_local_author_info.png)
+
+1. search_list_preview
 ![search_list_preview](screenshots/11_search_list_preview.png)
+
+1. proximity_searching
 ![proximity_searching](screenshots/12_proximity_searching.png)
+
+1. proximity_searching
 ![proximity_searching](screenshots/13_proximity_searching.png)
+
+1. proximity_searching
 ![proximity_searching](screenshots/14_proximity_searching.png)
+
+1. phrase_searching
 ![phrase_searching](screenshots/15_phrase_searching.png)
+
+1. search_by_special_character
 ![search_by_special_character](screenshots/16_search_by_special_character.png)
+
+1. runs_of_two_letter_words
 ![runs_of_two_letter_words_in_pl](screenshots/17_runs_of_two_letter_words_in_pl.png)
+
+1. one_hit_zero_context
 ![one_hit_zero_context](screenshots/18_one_hit_zero_context.png)
+
