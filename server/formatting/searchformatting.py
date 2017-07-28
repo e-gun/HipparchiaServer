@@ -369,6 +369,7 @@ def jstoinjectintobrowser(listofsearchresultobjects):
 	"""
 	the clickable urls don't work without inserting new js into the page to catch the clicks
 	need to match the what we used to get via the flask template
+
 	:return:
 	"""
 

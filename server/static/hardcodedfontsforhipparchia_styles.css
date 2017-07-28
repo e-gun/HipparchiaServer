@@ -397,7 +397,8 @@ body {
 	}
 
 .greek {
-    /* not a great idea to use this unless you are only looking at latin authors */
+	font-size: 100%;
+	color: var(--skyblue);
 	}
 
 .highlight {

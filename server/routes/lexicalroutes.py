@@ -55,7 +55,7 @@ def findbyform(observedword):
 	try:
 		cleanedword[0]
 	except:
-		returnarray = [{'value': '[empty search: {w} was sanitized into nothingness]'.format(w=observedword)}]
+		returnarray = [{'value': '[empty search: <span class="emph">{w}</span> was sanitized into nothingness]'.format(w=observedword)}]
 		return json.dumps(returnarray)
 
 	isgreek = True
@@ -88,8 +88,10 @@ def findbyform(observedword):
 			]
 		else:
 			returnarray = [
-				{'value': '<br />[could not find a match for {cw} in the morphology table]'.format(cw=cleanedword)},
-				{'entries': '[not found]'}
+				{'value':
+					 '<br />[could not find a match for <span class="emph">{cw}</span> in the morphology table]'.format(cw=cleanedword)},
+				{'entries':
+					 '[not found]'}
 				]
 
 		prev = getobservedwordprevalencedata(cleanedword)
