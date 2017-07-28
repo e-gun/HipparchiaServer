@@ -10,4 +10,3 @@ MorphPossibilityObject.getbaseform() is confused ἐνέρριπτεν, ἐν, �
 MorphPossibilityObject.getbaseform() is confused ἐνέρριψεν, ἐν, ἐν-ῥίπτω ['ἐνέρριψεν', 'ἐν', 'ἐν-ῥίπτω']
 MorphPossibilityObject.getbaseform() is confused ἐνέρριψαν, ἐν, ἐν-ῥίπτω ['ἐνέρριψαν', 'ἐν', 'ἐν-ῥίπτω']
 MorphPossibilityObject.getbaseform() is confused ἐνέρριψε, ἐν, ἐν-ῥίπτω ['ἐνέρριψε', 'ἐν', 'ἐν-ῥίπτω']
-
