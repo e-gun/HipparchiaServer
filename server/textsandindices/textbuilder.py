@@ -8,8 +8,10 @@
 
 import re
 
+from server.browsing.browserfunctions import checkfordocumentmetadata
 from server.dbsupport.dbfunctions import dblineintolineobject
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
+from server.startup import workdict
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
 
@@ -24,6 +26,8 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	:param cursor:
 	:return:
 	"""
+
+	workobject = workdict[work]
 
 	auid = work[0:6]
 
@@ -71,19 +75,13 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 
 		for line in results:
 			thisline = dblineintolineobject(line)
-			
-			if work[0:2] in ['in', 'dp', 'ch']:
-				if thisline.annotations != '' and re.search(r'documentnumber',thisline.annotations) is None:
-					columna = ''
-					columnb = '<span class="crossreference">{notes}</span>'.format(notes=thisline.annotations)
-					xref = '<tr><td class="browsercite">{ca}</td><td class="textcrossreference">{cb}</td><td></td></tr>\n'.format(ca=columna, cb=columnb)
-					output.append(xref)
-			date = re.search(finder, thisline.accented)
-			if date and thisline.index == firstline:
-				columna = ''
-				columnb = '<span class="textdate">Date:&nbsp;{date}</span>'.format(date=date.group(1))
-				datehtml = '<tr><td class="browsercite">{ca}</td><td class="textdate">{cb}</td><td></td></tr>\n'.format(ca=columna, cb=columnb)
-				output.append(datehtml)
+			if workobject.isnotliterary() and thisline.index == workobject.starts:
+				# line.index == workobject.starts added as a check because
+				# otherwise you will re-see date info in the middle of some documents
+				# it gets reasserted with a CD block reinitialization
+				metadata = checkfordocumentmetadata(thisline, workobject)
+				if metadata:
+					output.append(metadata)
 
 			if brackettypes:
 				columnb = thisline.markeditorialinsersions(editorialcontinuation)
