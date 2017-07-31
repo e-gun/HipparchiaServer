@@ -14,6 +14,7 @@ from flask import request, session
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
+from server.formatting.bracketformatting import gtltsubstitutes
 from server.hipparchiaobjects.helperobjects import ProgressPoll
 from server.startup import authordict, workdict, poll
 from server.textsandindices.indexmaker import buildindextowork
@@ -157,6 +158,9 @@ def textmaker():
 		texthtml = buildtext(wo.universalid, startline, endline, linesevery, cur)
 	else:
 		texthtml = ''
+
+	if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS'] == 'yes':
+		texthtml = gtltsubstitutes(texthtml)
 
 	results = {}
 	results['authorname'] = ao.shortname

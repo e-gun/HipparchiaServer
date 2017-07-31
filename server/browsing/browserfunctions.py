@@ -14,6 +14,7 @@ from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
 from server.formatting.bibliographicformatting import getpublicationinfo, avoidlonglines
+from server.formatting.bracketformatting import gtltsubstitutes
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
@@ -194,6 +195,9 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		ouputtable.append('</table>')
 
 	passage['browserhtml'] = viewing + '\n'.join(ouputtable)
+
+	if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS'] == 'yes':
+		passage['browserhtml'] = gtltsubstitutes(passage['browserhtml'])
 
 	return passage
 

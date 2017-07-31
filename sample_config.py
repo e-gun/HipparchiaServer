@@ -202,6 +202,9 @@ MPCOMMITCOUNT = 750
 # 	network but are not so foolish as to allow "!|'", etc. only
 # 	[].^$ will be allowed and all digits will be dropped
 #
+# INSISTUPONSTANDARDANGLEBRACKETS: 'no' means you will see ⟨ and ⟩;
+#   'yes' means you will see < and >
+#
 # EXCLUDEMINORGENRECOUNTS will mitigate spikes in the genre counts
 # 	when a word appears in a sparsely populated genre by ignoring
 # 	all 'small' genres whose word values will give them more than a
@@ -234,6 +237,7 @@ MINIMUMBROWSERWIDTH = 100
 SUPPRESSLONGREQUESTMESSAGE = 'no'
 ENOUGHALREADYWITHTHECOPYRIGHTNOTICE = 'no'
 HOBBLEREGEX = 'no'
+INSISTUPONSTANDARDANGLEBRACKETS='no'
 
 # lexical output settings
 SHOWGLOBALWORDCOUNTS = 'yes'

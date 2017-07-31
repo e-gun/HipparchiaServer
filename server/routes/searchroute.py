@@ -16,6 +16,7 @@ from flask import request, session
 from server import hipparchia
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.bibliographicformatting import bcedating
+from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.searchformatting import htmlifysearchfinds, nocontexthtmlifysearchfinds, jstoinjectintobrowser, \
 	buildresultobjects, flagsearchterms
 from server.formatting.wordformatting import universalregexequivalent
@@ -162,6 +163,9 @@ def executesearch(timestamp):
 			findshtml = htmlifysearchfinds(resultlist, so)
 		else:
 			findshtml = nocontexthtmlifysearchfinds(resultlist)
+
+		if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS'] == 'yes':
+			findshtml = gtltsubstitutes(findshtml)
 
 		findsjs = jstoinjectintobrowser(resultlist)
 
