@@ -38,6 +38,8 @@ Here are some examples that give you an idea of the sort of things that are poss
         the searchable columns and that means that speakers like 'ΚΗ.' and 'ΔΙ.' become 'κη' and 'δι'. They will match the pattern.
         And, obviously, speaker attribution in dramas will be able to produce all sorts of possible matches with other searches too.
     </li>
+    <li><code>(?&lt;!nu)trix</code> will find all versions of <code>trix</code> that are not preceded by <code>nu</code>.
+        And so it will give you <code>cicatrix</code>, <code>moderatrix</code>, and <code>uictrix</code>, but not <code>nutrix</code>.</li>
     <li><code>ἀλλὰ [^\s]*? δὴ</code></li> will give you phrases of the form "ἀλλὰ" + word + "δὴ": ἀλλὰ πολλοῖϲ δὴ, ἀλλὰ τί δὴ, ἀλλὰ νῦν δὴ, ...
     <li><code>[aeiou]m[aeiou]m[aeiou]m</code> will find words that have <code>vowel + m + vowel + m + vowel + m</code>
         (i.e., <span class="lat">amomum, cardamomum, cinnamomum, pantomimum</span>) </li>

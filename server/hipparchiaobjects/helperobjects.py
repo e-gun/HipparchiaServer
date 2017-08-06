@@ -269,6 +269,12 @@ class SearchObject(object):
 		self.originalseeking = seeking
 		self.originalproximate = proximate
 
+		# '>' will mess you up still
+		self.originalseeking = re.sub(r'<','&lt;', self.originalseeking)
+		self.originalseeking = re.sub(r'>', '&gt;', self.originalseeking)
+		self.originalproximate = re.sub(r'<','&lt;', self.originalproximate)
+		self.originalproximate = re.sub(r'>', '&gt;', self.originalproximate)
+
 		# searchtermcharactersubstitutions() logic has moved here
 
 		seeking = re.sub('[σς]', 'ϲ', seeking)

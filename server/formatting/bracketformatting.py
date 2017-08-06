@@ -11,6 +11,10 @@ def gtltsubstitutes(text):
 	"""
 		&lt; for ⟨
 		&gt; for ⟩
+
+		should almost certainly be called very late since there are various checks that
+		will check for ⟩ and ⟨
+
 	"""
 
 	text = re.sub(r'⟨', r'&lt;', text)
