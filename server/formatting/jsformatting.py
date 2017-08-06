@@ -35,11 +35,6 @@ def insertbrowserclickjs(tagname):
 
 	js = jstemplate % (tagname)
 
-	# listofurls = [ro.clickurl for ro in listofsearchresultobjects]
-	#
-	# jso = ['document.getElementById("{u}").onclick = openbrowserfromclick;'.format(u=url) for url in listofurls]
-	# jsoutput = '\n\t'.join(jso)
-
 	return js
 
 

@@ -22,26 +22,6 @@ function browseuponclick(url){
         );
     }
 
-
-var openbrowserfromclick = function() {
-    // now do the browsing
-    $.getJSON('/browse/'+this.id, function (passagereturned) {
-        $('#browseforward').unbind('click');
-        $('#browseback').unbind('click');
-		var fb = parsepassagereturned(passagereturned)
-            // left and right arrow keys
-           $('#browserdialogtext').keydown(function(e) {
-                switch(e.which) {
-                    case 37: browseuponclick(fb[1]); break;
-                    case 39: browseuponclick(fb[0]); break;
-                    }
-                });
-        $('#browseforward').bind('click', function(){ browseuponclick(fb[0]); });
-        $('#browseback').bind('click', function(){ browseuponclick(fb[1]); });
-        });
-}
-
-
 function parsepassagereturned(passagereturned) {
 		$('#browserdialogtext').text('');
         // the first item is info
