@@ -341,21 +341,30 @@ def insertbrowserjs(htmlentry):
 	:return:
 	"""
 
-	outputlist = [htmlentry]
+	jstemplate = """
+	<script>
+		$('bibl').click( function() {
+			    $.getJSON('/browse/'+this.id, function (passagereturned) {
+		        $('#browseforward').unbind('click');
+		        $('#browseback').unbind('click');
+				var fb = parsepassagereturned(passagereturned)
+		            // left and right arrow keys
+		           $('#browserdialogtext').keydown(function(e) {
+		                switch(e.which) {
+		                    case 37: browseuponclick(fb[1]); break;
+		                    case 39: browseuponclick(fb[0]); break;
+		                    }
+		                });
+		        $('#browseforward').bind('click', function(){ browseuponclick(fb[0]); });
+		        $('#browseback').bind('click', function(){ browseuponclick(fb[1]); });
+		        });
+		});
+	</script>
+	"""
 
-	# clickfinder = re.compile(r'<bibl id="(..\d\d\d\dw\d\d\d\_LN_.*?)"')
-	clickfinder = re.compile(r'<bibl id="(..\d\d\d\dw\d\d\d\_PE_.*?)"')
-	clicks = re.findall(clickfinder,htmlentry)
-	
-	if len(clicks) > 0:
-		outputlist.append('<script>')
-		for c in clicks:
-			outputlist.append('document.getElementById(\'{c}\').onclick = openbrowserfromclick;'.format(c=c))
-		outputlist.append('</script>')
+	newhtml = htmlentry + jstemplate
 
-	clickableentrystring = '\n'.join(outputlist)
-	
-	return clickableentrystring
+	return newhtml
 
 
 def dbquickfixes(listofnames):

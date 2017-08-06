@@ -1313,6 +1313,11 @@ unclickablebibl {
     color: var(--black);
     }
 
+usg {
+    font-family: var(--installedfontbold);
+    color: var(--red);
+    }
+
 worktitle {
 	font-family: var(--installedfontitalic); 
 	}

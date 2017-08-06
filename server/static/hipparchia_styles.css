@@ -1266,6 +1266,16 @@ ul.roman {
 	padding-bottom: 5px;
 	}
 
+
+unclickablebibl {
+    color: var(--black);
+    }
+
+usg {
+    font-weight: bold;
+    color: var(--red);
+    }
+
 worktitle {
 	font-style: italic;
 	}
