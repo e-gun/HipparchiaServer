@@ -12,8 +12,9 @@ from flask import session
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
+from server.formatting.jsformatting import insertlexicalbrowserjs
 from server.formatting.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
-	formatgloss, formatmicroentry, insertbrowserlookups, insertbrowserjs, formateconsolidatedgrammarentry
+	formatgloss, formatmicroentry, insertbrowserlookups, formateconsolidatedgrammarentry
 from server.formatting.wordformatting import cleanaccentsandvj, universalregexequivalent
 from server.hipparchiaobjects.lexicalobjects import dbWordCountObject, dbHeadwordObject, dbMorphologyObject, \
 	dbGreekWord, dbLatinWord, dbLemmaObject
@@ -282,7 +283,7 @@ def browserdictionarylookup(count, seekingentry, cursor):
 
 			cleanedentry = '\n'.join(outputlist)
 			clickableentry = insertbrowserlookups(cleanedentry)
-			clickableentry = insertbrowserjs(clickableentry)
+			clickableentry = insertlexicalbrowserjs(clickableentry)
 
 	else:
 		if count == 0:

@@ -17,8 +17,9 @@ from server import hipparchia
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.bracketformatting import gtltsubstitutes
-from server.formatting.searchformatting import htmlifysearchfinds, nocontexthtmlifysearchfinds, jstoinjectintobrowser, \
-	buildresultobjects, flagsearchterms
+from server.formatting.jsformatting import insertbrowserclickjs
+from server.formatting.searchformatting import htmlifysearchfinds, nocontexthtmlifysearchfinds, buildresultobjects, \
+	flagsearchterms
 from server.formatting.wordformatting import universalregexequivalent
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
 from server.listsandsession.listmanagement import sortresultslist, calculatewholeauthorsearches, compilesearchlist, \
@@ -167,7 +168,7 @@ def executesearch(timestamp):
 		if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS'] == 'yes':
 			findshtml = gtltsubstitutes(findshtml)
 
-		findsjs = jstoinjectintobrowser(resultlist)
+		findsjs = insertbrowserclickjs('browser')
 
 		resultcount = len(resultlist)
 

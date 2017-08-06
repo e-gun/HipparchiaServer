@@ -365,22 +365,6 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	return html
 
 
-def jstoinjectintobrowser(listofsearchresultobjects):
-	"""
-	the clickable urls don't work without inserting new js into the page to catch the clicks
-	need to match the what we used to get via the flask template
-
-	:return:
-	"""
-
-	listofurls = [ro.clickurl for ro in listofsearchresultobjects]
-
-	jso = ['document.getElementById("{u}").onclick = openbrowserfromclick;'.format(u=url) for url in listofurls]
-	jsoutput = '\n\t'.join(jso)
-
-	return jsoutput
-
-
 def unbalancedspancleaner(html):
 	"""
 
