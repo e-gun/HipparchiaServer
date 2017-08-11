@@ -27,10 +27,6 @@ $('#makeanindex').click( function() {
 
             $.getJSON( url, function (indexdata) { loadindexintodisplayresults(indexdata); });
             checkactivityviawebsocket(searchid);
-//          old polling mechanism: slated for removal
-//          var i = setInterval(function(){
-//                $.getJSON('/progress'+'?id='+searchid, function(progress) { displayprogress(progress); if (progress['active'] == false) { clearInterval(i); document.getElementById('pollingdata').innerHTML = ''; } });
-//                }, 400);
         }
 });
 
@@ -58,9 +54,7 @@ function loadindexintodisplayresults(indexdata) {
         linesreturned += '<span class="small">('+indexdata['elapsed']+'s)</span><br />';
 
         $('#searchsummary').html(linesreturned);
-
         $('#displayresults').html(indexdata['indexhtml']);
-
 
         var bcsh = document.getElementById("indexclickscriptholder");
         if (bcsh.hasChildNodes()) { bcsh.removeChild(bcsh.firstChild); }

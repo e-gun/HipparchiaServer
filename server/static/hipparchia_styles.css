@@ -996,6 +996,8 @@ fieldset {
 	display: inline-block;
 	border-width: 1px;
 	font-size: 80%;
+    color: --var(dkteal);
+	background-color: hsla(0, 0%, 98%, 1);
 	}
 
 foreign {

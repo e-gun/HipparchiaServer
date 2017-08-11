@@ -34,16 +34,14 @@ function parsepassagereturned(passagereturned) {
         $('#authorsautocomplete').prop('placeholder', '');
         $('#worksautocomplete').val(passagereturned['workboxcontents']);
         $('#worksautocomplete').prop('placeholder', '');
-        $('#worksautocomplete').show();
         loadWorklist(passagereturned['authornumber']);
         loadLevellist(passagereturned['workid'],'-1');
-        $('#makeanindex').show();
-        $('#textofthis').show();
-        $('#browseto').show();
-        $('#authinfo').show();
 
         $('#browserdialogtext').html(passagereturned['browserhtml']);
-        $('#browserdialog').show();
+
+        var ids = new Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo', '#browserdialog');
+        bulkshow(ids);
+
         $('observed').click( function(e) {
             e.preventDefault();
             var windowWidth = $(window).width();

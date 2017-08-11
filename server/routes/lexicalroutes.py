@@ -50,12 +50,13 @@ def findbyform(observedword):
 	retainedgravity = w
 	cleanedword = removegravity(retainedgravity)
 	# index clicks will send you things like 'αὖ²'
-	cleanedword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]','',cleanedword)
+	cleanedword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]', '', cleanedword)
 
 	try:
 		cleanedword[0]
 	except:
-		returnarray = [{'value': '[empty search: <span class="emph">{w}</span> was sanitized into nothingness]'.format(w=observedword)}]
+		returnarray = [{'value': '[empty search: <span class="emph">{w}</span> was sanitized into nothingness]'.format(
+			w=observedword)}]
 		return json.dumps(returnarray)
 
 	isgreek = True
@@ -89,10 +90,11 @@ def findbyform(observedword):
 		else:
 			returnarray = [
 				{'value':
-					 '<br />[could not find a match for <span class="emph">{cw}</span> in the morphology table]'.format(cw=cleanedword)},
+					 '<br />[could not find a match for <span class="emph">{cw}</span> in the morphology table]'.format(
+						 cw=cleanedword)},
 				{'entries':
 					 '[not found]'}
-				]
+			]
 
 		prev = getobservedwordprevalencedata(cleanedword)
 		if not prev:
@@ -102,7 +104,7 @@ def findbyform(observedword):
 		returnarray.append(prev)
 
 	returnarray = [r for r in returnarray if r]
-	returnarray = [{'observed':cleanedword}] + returnarray
+	returnarray = [{'observed': cleanedword}] + returnarray
 	returnarray = json.dumps(returnarray)
 
 	cur.close()
@@ -137,12 +139,12 @@ def dictsearch(searchterm):
 		usedictionary = 'greek'
 		usecolumn = 'unaccented_entry'
 
-	if not session['available'][usedictionary+'_dictionary']:
+	if not session['available'][usedictionary + '_dictionary']:
 		r = [{'value': 'cannot look up {w}: {d} dictionary is not installed'.format(d=usedictionary, w=seeking)}]
 		return json.dumps(r)
 
 	seeking = stripaccents(seeking)
-	query = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s'.format(d=usedictionary,c=usecolumn)
+	query = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s'.format(d=usedictionary, c=usecolumn)
 	if seeking[0] == ' ' and seeking[-1] == ' ':
 		data = ('^' + seeking[1:-1] + '$',)
 	elif seeking[0] == ' ' and seeking[-1] != ' ':
@@ -163,7 +165,7 @@ def dictsearch(searchterm):
 	returnarray = []
 
 	if len(found) > 0:
-		finddict = {f[0]:f for f in found}
+		finddict = {f[0]: f for f in found}
 		keys = finddict.keys()
 		keys = polytonicsort(keys)
 
@@ -179,7 +181,7 @@ def dictsearch(searchterm):
 			count += 1
 			returnarray.append({'value': browserdictionarylookup(count, entry[0], cur)})
 	else:
-		returnarray.append({'value':'[nothing found]'})
+		returnarray.append({'value': '[nothing found]'})
 
 	returnarray = json.dumps(returnarray)
 
@@ -196,7 +198,7 @@ def reverselexiconsearch(searchterm):
 	'ape' will drive this crazy; what is needed is a lookup for only the senses
 
 	this can be built into the dictionary via beautiful soup
-	
+
 	:return:
 	"""
 
@@ -209,11 +211,11 @@ def reverselexiconsearch(searchterm):
 	seeking = re.sub(r'[!@#$|%()*\'\"]', '', searchterm)
 
 	if justlatin():
-		searchunder = [('latin','hi')]
+		searchunder = [('latin', 'hi')]
 	elif justtlg():
 		searchunder = [('greek', 'tr')]
 	else:
-		searchunder = [('greek', 'tr'), ('latin','hi')]
+		searchunder = [('greek', 'tr'), ('latin', 'hi')]
 
 	for s in searchunder:
 		usedict = s[0]

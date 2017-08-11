@@ -28,44 +28,19 @@ function reloadselections(selectiondata){
 function reloadAuthorlist(){
     $.getJSON('/getselections', function (selectiondata) {
         reloadselections(selectiondata);
-        $('#worksautocomplete').hide();
-        $('#level05').hide();
-        $('#level04').hide();
-        $('#level03').hide();
-        $('#level02').hide();
-        $('#level01').hide();
-        $('#level00').hide();
-        $('#browseto').hide();
-        $('#makeanindex').hide();
-        $('#textofthis').hide();
-        $('#fewerchoices').hide();
-        $('#genresautocomplete').hide();
-        $('#genreinfo').hide();
-        $('#genrelistcontents').hide();
-        $('#workgenresautocomplete').hide();
-        $('#locationsautocomplete').hide();
-        $('#provenanceautocomplete').hide();
-        $('#pickgenre').hide();
-        $('#excludegenre').hide();
-        $('#setoptions').hide();
-        $('#lexica').hide();
-        $('#authinfo').hide();
-        $('#authorholdings').hide();
-        $('#searchlistcontents').hide();
-        $('#loadslots').hide();
-        $('#saveslots').hide();
-    }
-    );
+        var ids = new Array('#worksautocomplete', '#level05', '#level04', '#level03', '#level02', '#level01', '#level00',
+            '#browseto', '#makeanindex', '#textofthis', '#fewerchoices', '#genresautocomplete', '#genreinfo',
+            '#genrelistcontents', '#workgenresautocomplete', '#locationsautocomplete', '#provenanceautocomplete',
+            '#pickgenre', '#excludegenre', '#setoptions', '#lexica', '#authinfo', '#authorholdings', '#searchlistcontents',
+            '#loadslots', '#saveslots');
+        bulkhider(ids);
+    });
 }
 
-
-function resetworksautocomplete() {
-        $('#level05').hide(); $('#level05').val('');
-        $('#level04').hide(); $('#level04').val('');
-        $('#level03').hide(); $('#level03').val('');
-        $('#level02').hide(); $('#level02').val('');
-        $('#level01').hide(); $('#level01').val('');
-        $('#level00').hide(); $('#level00').val('');
+function resetworksautocomplete(){
+    var ids = new Array('#level05', '#level04', '#level03', '#level02', '#level01', '#level00');
+    bulkhider(ids);
+    bulkclear(ids);
 }
 
 
@@ -90,10 +65,6 @@ $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
     source: "/getauthorhint",
     select: function (event, ui) {
-        $('#makeanindex').show();
-        $('#textofthis').show();
-        $('#browseto').show();
-        $('#worksautocomplete').hide();
         $('#worksautocomplete').val('');
         resetworksautocomplete();
         // stupid timing issue if you select with mouse instead of keyboard: nothing happens
@@ -107,9 +78,9 @@ $('#authorsautocomplete').autocomplete({
             var auid = $('#authorsautocomplete').val().slice(-7, -1);
         }
         loadWorklist(auid);
-        $('#worksautocomplete').show();
-        $('#authinfo').show();
         $('#worksautocomplete').prop('placeholder', '(Pick a work)');
+        var ids = new Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo');
+        bulkshow(ids);
         }
     });
 

@@ -18,12 +18,6 @@ $(document).ready( function () {
         });
 
     $('#clear_button').click( function() { window.location.href = '/resetsession'; });
-    $('#clearpick').hide();
-    $('#helptabs').hide();
-    $('#helptabs').tabs();
-    $('#edts').hide();
-    $('#ldts').hide();
-    $('#spur').hide();
 
     $('#helpbutton').click( function() {
         if (document.getElementById('Interface').innerHTML == '<!-- placeholder -->') {
@@ -39,10 +33,9 @@ $(document).ready( function () {
             }
         $('#helptabs').toggle();
         $('#executesearch').toggle();
-        $('#extendsearch').toggle(); });
+        $('#extendsearch').toggle();
+    });
 
-    $('#browserdialog').hide();
-    $('#complexsearching').hide();
     $('#extendsearch').click( function() {
         $.getJSON('/getsessionvariables', function (data) {
                 $( "#proximityspinner" ).spinner('value', data.proximity);
@@ -62,7 +55,7 @@ $(document).ready( function () {
 
     $('#executesearch').click( function(){
         var seeking = $('#wordsearchform').val();
-        var proximate = $("#proximatesearchform").val();
+        var proximate = $('#proximatesearchform').val();
         // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
         if (seeking.slice(-1) == ' ') { seeking = seeking.slice(0,-1) + '%20'; }
         if (proximate.slice(-1) == ' ') { proximate = proximate.slice(0,-1) + '%20'; }
@@ -82,14 +75,6 @@ $(document).ready( function () {
 
         checkactivityviawebsocket(searchid);
 
-        // old polling mechanism
-        // revert to this if your websockets are failing...
-//         var i = setInterval(function(){
-//            $.getJSON('/progress?id='+searchid, function(progress) {
-//                displayprogress(progress);
-//                if (progress['active'] == false ) { clearInterval(i); $('#pollingdata').html(''); }
-//                });
-//            }, 400);
         });
 
     function setoptions(sessionvar,value){
@@ -173,7 +158,6 @@ $(document).ready( function () {
             }
         });
 
-
     $('#browserclose').bind("click", function(){
     		$('#browserdialog').hide();
     		$('#browseback').unbind('click');
@@ -183,6 +167,31 @@ $(document).ready( function () {
 
 	});
 
+
+    var tohideonfirstload = new Array('#clearpick', '#helptabs', '#helptabs', '#edts', '#ldts', '#spur', '#browserdialog', '#complexsearching');
+    bulkhider(tohideonfirstload);
+
+    //
+    // BULK OPERATIONS ON ARRAYS OF ELEMENTS
+    //
+
+    function bulkhider(arrayofelements) {
+        for (i = 0; i < arrayofelements.length; i++) {
+            $(arrayofelements[i]).hide();
+            }
+    }
+
+    function bulkshow(arrayofelements) {
+        for (i = 0; i < arrayofelements.length; i++) {
+            $(arrayofelements[i]).show();
+            }
+    }
+
+    function bulkclear(arrayofelements) {
+        for (i = 0; i < arrayofelements.length; i++) {
+            $(arrayofelements[i]).val('');
+            }
+    }
 
     //
     // PROGRESS INDICATOR

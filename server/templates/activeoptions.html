@@ -20,23 +20,18 @@
 </div>
 
 <script>
-    $('#onehitistrue').hide();
-    $('#onehitisfalse').hide();
-    $('#spuriaistrue').hide();
-    $('#spuriaisfalse').hide();
-    $('#undatedistrue').hide();
-    $('#undatedisfalse').hide();
-    $('#variaistrue').hide();
-    $('#variaisfalse').hide();
-    $('#headwordindexingactive').hide();
-    $('#headwordindexiningactive').hide();
-    $('#frequencyindexingactive').hide();
-    $('#frequencyindexinginactive').hide();
-    $('#grkisactive').hide();
-    $('#latisactive').hide();
-    $('#ddpisactive').hide();
-    $('#insisactive').hide();
-    $('#chrisactive').hide();
+    // GENERIC
+    var optionids = new Array('#onehitistrue', '#onehitisfalse', '#spuriaistrue',
+        '#spuriaisfalse', '#undatedistrue', '#undatedisfalse',
+        '#variaistrue', '#variaisfalse', '#headwordindexingactive',
+        '#headwordindexiningactive', '#frequencyindexingactive',
+        '#frequencyindexinginactive', '#grkisactive', '#latisactive',
+        '#ddpisactive', '#insisactive', '#chrisactive');
+
+    for (i = 0; i < optionids.length; i++) { $(optionids[i]).hide(); }
+
+    // SPECIFIC TO CURRENT SETTINGS
+
     {% if onehit == 'yes' %} $('#onehitistrue').show();  {% else %} $('#onehitisfalse').show(); {% endif %}
     {% if hwindexing == 'yes' %} $('#headwordindexingactive').show();  {% else %} $('#headwordindexiningactive').show(); {% endif %}
     {% if indexbyfrequency == 'yes' %} $('#frequencyindexingactive').show();  {% else %} $('#frequencyindexinginactive').show(); {% endif %}

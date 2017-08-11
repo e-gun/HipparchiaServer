@@ -23,11 +23,11 @@ from server.listsandsession.listmanagement import polytonicsort
 
 def lookformorphologymatches(word, cursor, trialnumber=0):
 	"""
-	
-	:param word: 
-	:param cursor: 
-	:param trialnumber: 
-	:return: 
+
+	:param word:
+	:param cursor:
+	:param trialnumber:
+	:return:
 	"""
 
 	if re.search(r'[a-z]', word):
@@ -35,7 +35,7 @@ def lookformorphologymatches(word, cursor, trialnumber=0):
 	else:
 		usedictionary = 'greek'
 
-	if not session['available'][usedictionary+'_morphology']:
+	if not session['available'][usedictionary + '_morphology']:
 		return None
 
 	trialnumber += 1
@@ -65,11 +65,11 @@ def lookformorphologymatches(word, cursor, trialnumber=0):
 		# greek_morphology has προχοίδιον; the greek_dictionary has προχοΐδιον
 		try:
 			# have to 'try' because there might not be a word[-2]
-			if re.search(terminalacute,word[-1]) and trialnumber < 4:
+			if re.search(terminalacute, word[-1]) and trialnumber < 4:
 				sub = cleanaccentsandvj(word[-1])
-				newword = word[:-1]+sub
+				newword = word[:-1] + sub
 				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
-			elif re.search(terminalacute,word[-2]) and trialnumber < 4:
+			elif re.search(terminalacute, word[-2]) and trialnumber < 4:
 				sub = cleanaccentsandvj(word[-2])
 				newword = word[:-2] + sub + word[-1]
 				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
@@ -130,7 +130,7 @@ def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
 		# the number of items in prefixrefs corresponds to the number of prefix checks you will need to make to recompose the verb
 
 		consolidatedentry = {'count': count, 'form': observedform, 'word': p.entry, 'transl': p.gettranslation(),
-							 'anal': p.getanalysislist()}
+		                     'anal': p.getanalysislist()}
 		returnarray.append({'value': formateconsolidatedgrammarentry(consolidatedentry)})
 
 	# the next will trim the items to check by inducing key collisions
@@ -193,7 +193,7 @@ def browserdictionarylookup(count, seekingentry, cursor):
 	# if re.search(r'\d$',entry):
 	# 	entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
-	wordobjects = searchdictionary(cursor, usedictionary+'_dictionary', 'entry_name', seekingentry, syntax='=')
+	wordobjects = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', seekingentry, syntax='=')
 	outputlist = []
 	clickableentry = ''
 
@@ -208,7 +208,7 @@ def browserdictionarylookup(count, seekingentry, cursor):
 			includesubcounts = False
 		subcount = 0
 		for w in wordobjects:
-			subcount +=1
+			subcount += 1
 			# can't have xml in our html
 			definition = re.sub(r'<title>(.*?)</title>', r'<worktitle>\1</worktitle>', w.body)
 
@@ -217,10 +217,11 @@ def browserdictionarylookup(count, seekingentry, cursor):
 					outputlist.append('<hr /><p class="dictionaryheading">{ent}'.format(ent=w.entry))
 				else:
 					if includesubcounts:
-						countval = str(count) + chr(subcount+96)
+						countval = str(count) + chr(subcount + 96)
 					else:
 						countval = str(count)
-					outputlist.append('<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'.format(cv=countval, ent=w.entry))
+					outputlist.append(
+						'<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'.format(cv=countval, ent=w.entry))
 				if u'\u0304' in w.metricalentry or u'\u0306' in w.metricalentry:
 					outputlist.append('&nbsp;<span class="metrics">[{me}]</span>'.format(me=w.metricalentry))
 				outputlist.append('</p>')
@@ -234,7 +235,7 @@ def browserdictionarylookup(count, seekingentry, cursor):
 
 				summarydict = {}
 				if session['sensesummary'] == 'yes' or session['authorssummary'] == 'yes' or session['quotesummary'] == 'yes':
-					lemmaobject = grablemmataobjectfor(w.entry, usedictionary+'_lemmata', cursor)
+					lemmaobject = grablemmataobjectfor(w.entry, usedictionary + '_lemmata', cursor)
 					summarydict = entrysummary(definition, usedictionary, translationlabel, lemmaobject)
 
 				if session['sensesummary'] == 'no':
@@ -259,7 +260,8 @@ def browserdictionarylookup(count, seekingentry, cursor):
 					else:
 						outputlist.append(formatmicroentry(definition))
 			else:
-				outputlist.append('<br />\n<p class="dictionaryheading">{ent}<span class="metrics">[gloss]</span></p>'.format(ent=w.entry))
+				outputlist.append(
+					'<br />\n<p class="dictionaryheading">{ent}<span class="metrics">[gloss]</span></p>'.format(ent=w.entry))
 				outputlist.append(formatgloss(definition))
 
 			# add in next / previous links
@@ -287,9 +289,11 @@ def browserdictionarylookup(count, seekingentry, cursor):
 
 	else:
 		if count == 0:
-			cleanedentry = '<br />\n<p class="dictionaryheading">nothing found under <span class="prevalence">{skg}</span></p>\n'.format(skg=seekingentry)
+			cleanedentry = '<br />\n<p class="dictionaryheading">nothing found under <span class="prevalence">{skg}</span></p>\n'.format(
+				skg=seekingentry)
 		else:
-			cleanedentry = '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="prevalence">{skg}</span></p>\n'.format(ct=count, skg=seekingentry)
+			cleanedentry = '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="prevalence">{skg}</span></p>\n'.format(
+				ct=count, skg=seekingentry)
 		clickableentry = cleanedentry
 
 	entry = clickableentry + dictionaryentryjs()
@@ -347,7 +351,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 
 	# we might be at trial 2+ and so we need to strip the supplement we used at trial #1
 	if trialnumber > 2:
-		seeking = re.sub(r'\[¹²³⁴⁵⁶⁷⁸⁹\]','',seeking)
+		seeking = re.sub(r'\[¹²³⁴⁵⁶⁷⁸⁹\]', '', seeking)
 		seeking = re.sub(r'\^', '', seeking)
 
 	foundobjects = None
@@ -358,7 +362,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		# failure...
 		# the word is probably there, we have just been given the wrong search term; try some other solutions
 		# [1] first guess: there were multiple possible entries, not just one
-		newword = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹]','',seeking.lower())
+		newword = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹]', '', seeking.lower())
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber == 2:
 		# grab any/all variants: ⁰¹²³⁴⁵⁶⁷⁸⁹
@@ -369,13 +373,13 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	# 	foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and seeking[-1] == 'ω':
 		# ὑποϲυναλείφομαι is in the dictionary, but greek_lemmata says to look for ὑπό-ϲυναλείφω
-		newword = seeking[:-1]+'ομαι'
+		newword = seeking[:-1] + 'ομαι'
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
-	elif trialnumber < maxtrials and re.search(r'ομαι$',seeking):
+	elif trialnumber < maxtrials and re.search(r'ομαι$', seeking):
 		# χαρίζω is in the dictionary, but greek_lemmata says to look for χαρίζομαι
-		newword = seeking[:-4]+'ω'
+		newword = seeking[:-4] + 'ω'
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
-	elif trialnumber < maxtrials and re.search(accenteddiaresis,seeking):
+	elif trialnumber < maxtrials and re.search(accenteddiaresis, seeking):
 		# false positives very easy here, but we are getting desperate and have nothing to lose
 		diaresis = re.search(accenteddiaresis, seeking)
 		head = seeking[:diaresis.start()]
@@ -384,7 +388,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		vowels = vowels[0] + 'ΐ'
 		newword = head + vowels + tail
 		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
-	elif trialnumber < maxtrials and re.search(unaccenteddiaresis,seeking):
+	elif trialnumber < maxtrials and re.search(unaccenteddiaresis, seeking):
 		diaresis = re.search(unaccenteddiaresis, seeking)
 		head = seeking[:diaresis.start()]
 		tail = seeking[diaresis.end():]
@@ -423,9 +427,11 @@ def convertdictionaryfindintoobject(foundline, dictionary, cursor):
 	# print('foundline',foundline)
 
 	if dictionary == 'greek_dictionary':
-		wordobject = dbGreekWord(foundline[0], foundline[1], foundline[2], foundline[3], foundline[4], foundline[5], foundline[6], foundline[7])
+		wordobject = dbGreekWord(foundline[0], foundline[1], foundline[2], foundline[3], foundline[4], foundline[5],
+		                         foundline[6], foundline[7])
 	elif dictionary == 'latin_dictionary':
-		wordobject = dbLatinWord(foundline[0], foundline[1], foundline[2], foundline[3], foundline[4], foundline[5], foundline[6], foundline[7])
+		wordobject = dbLatinWord(foundline[0], foundline[1], foundline[2], foundline[3], foundline[4], foundline[5],
+		                         foundline[6], foundline[7])
 	else:
 		# you actually want a hollow object
 		wordobject = dbGreekWord(None, None, None, None, None, None, None, None)
@@ -486,7 +492,7 @@ def bulkddictsearch(cursor, dictionary, usecolumn, seeking):
 		finddict[f[0]] = f
 	keys = finddict.keys()
 	keys = polytonicsort(keys)
-	
+
 	for k in keys:
 		sortedfinds.append(finddict[k])
 
@@ -524,7 +530,7 @@ def findtotalcounts(word, cursor):
 	q = qtemplate.format(tbl=table)
 	d = (word,)
 	try:
-		cursor.execute(q,d)
+		cursor.execute(q, d)
 		l = cursor.fetchone()
 	except:
 		# psycopg2.ProgrammingError: relation "dictionary_headword_wordcounts" does not exist
@@ -587,9 +593,9 @@ def findcountsviawordcountstable(wordtocheck):
 
 def getobservedwordprevalencedata(dictionaryword):
 	"""
-	
-	:param dictionaryword: 
-	:return: 
+
+	:param dictionaryword:
+	:return:
 	"""
 
 	if not session['available']['wordcounts_0']:
@@ -664,7 +670,7 @@ def formatprevalencedata(wordcountobject):
 		if genreinfotuples:
 			thehtml.append('<p class="wordcounts">Predominant genres: ')
 			genres = []
-			for g in range(0,hipparchia.config['NUMBEROFGENRESTOTRACK']):
+			for g in range(0, hipparchia.config['NUMBEROFGENRESTOTRACK']):
 				git = genreinfotuples[g]
 				if git[1] > 0:
 					genres.append('<span class="emph">{a}</span>&nbsp;({b:.0f})'.format(a=git[0], b=git[1]))
@@ -672,7 +678,8 @@ def formatprevalencedata(wordcountobject):
 
 		key = 'frq'
 		if w.gettimelabel(key) and re.search(r'core', w.gettimelabel(key)) is None:
-			thehtml.append('<p class="wordcounts">Relative frequency: <span class="italic">{lb}</span></p>\n'.format(lb=w.gettimelabel(key)))
+			thehtml.append('<p class="wordcounts">Relative frequency: <span class="italic">{lb}</span></p>\n'.format(
+				lb=w.gettimelabel(key)))
 
 	thehtml = '\n'.join(thehtml)
 
@@ -753,6 +760,7 @@ def dictionaryentryjs():
 
 	return template
 
+
 """
 [probably not] TODO: clickable INS or DDP xrefs in dictionary entries
 
@@ -779,7 +787,7 @@ example:
 		"dp8801w056";"PTebt (Vol 1) - 284"
 
 	select marked_up_line from dp8801 where wkuniversalid='dp8801w056' and level_00_value='6'
-		"ὁ κύριοϲ θεὸϲ καταβή-"
+		"ὁ κύριοϲ θεὸϲ καταβή-"
 
 
 [success] BGU1200.11 can be had by:

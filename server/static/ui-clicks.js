@@ -171,40 +171,22 @@ $('#openoptions').click( function() {
 
 $('#addtolist').click( function() { addtosearchlist(); });
 
-
 $('#browseto').click( function() { browsetopassage(); });
-
 
 $('#fewerchoices').click( function() {
     $('#morechoices').show();
-    $('#fewerchoices').hide();
-    $('#genresautocomplete').hide();
-    $('#workgenresautocomplete').hide();
-    $('#locationsautocomplete').hide();
-    $('#provenanceautocomplete').hide();
-    $('#pickgenre').hide();
-    $('#excludegenre').hide();
-    $('#genreinfo').hide();
-    $('#genrelistcontents').hide();
-    $('#edts').hide();
-    $('#ldts').hide();
-    $('#spur').hide();
+    var ids = new Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
+        '#provenanceautocomplete', '#pickgenre', '#excludegenre', '#genreinfo', '#genrelistcontents', '#edts',
+        '#ldts', '#spur');
+    bulkhider(ids);
     });
 
 
 $('#morechoices').click( function() {
-    $('#fewerchoices').show();
     $('#morechoices').hide();
-    $('#genresautocomplete').show();
-    $('#workgenresautocomplete').show();
-    $('#locationsautocomplete').show();
-    $('#provenanceautocomplete').show();
-    $('#pickgenre').show();
-    $('#excludegenre').show();
-    $('#genreinfo').show();
-    $('#edts').show();
-    $('#ldts').show();
-    $('#spur').show();
+    var ids = new Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
+        '#provenanceautocomplete', '#pickgenre', '#excludegenre', '#genreinfo', '#edts', '#ldts', '#spur');
+    bulkshow(ids);
     loadoptions();
     });
 
