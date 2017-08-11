@@ -408,6 +408,12 @@ def sessionselectionsinfo(authordict, workdict):
 	thejs = []
 	tit = 'title="Double-click to remove this item"'
 
+	try:
+		# it is possible to hit this function before the session has been set, so...
+		session['auselections']
+	except KeyError:
+		sessionvariables()
+
 	sessionsearchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + \
 	                    session['psgselections'] + session['wkselections'] + session['alocselections'] + \
 	                    session['wlocselections']

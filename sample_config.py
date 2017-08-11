@@ -97,11 +97,19 @@ DBPASS = 'yourpassheretrytomakeitstrongplease'
 # 	to edit dbHeadwordObject() yourself  after you are given the
 # 	numbers to send to it; if COLLAPSEDGENRECOUNTS is 'yes', you will
 #   not see all of the possibilities
+#
+# ENABLELOGGING = 'yes' will turn on logging and send the logs to
+#   HIPPARCHIALOGFILE
+#
+# HIPPARCHIALOGFILE is the log file; pick your path wisely: it is
+#   relative to 'run.py' and so to 'HipparchiaServer'
+#
 
 DBDEBUGMODE = 'no'
 HTMLDEBUGMODE = 'no'
 CALCULATEWORDWEIGHTS = 'no'
-
+ENABLELOGGING = 'no'
+HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 
 ### [5] Hipparchia performance variables ###
 ##  [set once and forget: AUTOCONFIGWORKERS, WORKERS, MPCOMMITCOUNT] ##
