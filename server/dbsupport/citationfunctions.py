@@ -175,7 +175,7 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 
 	# if the last selection box was empty you are sent '-1' instead of a real value (because the first line of lvl05 is not necc. '1')
 	# so wee need to kill off 'level_00_value=%s AND ', etc
-	# example: ('-1', '256', 'beta')
+	# example: ('-1', '256', 'beta') [here the 1st line is actually '10t', btw]
 
 	citation = list(citationtuple)
 
@@ -299,7 +299,6 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 
 		try:
 			cursor.execute(query, data)
-			print('finddblinefromincompletelocus() q,d',query, data)
 			found = cursor.fetchone()
 			dblinenumber = found[0]
 			# often actually true...
