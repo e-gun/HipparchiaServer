@@ -146,7 +146,7 @@ def executesearch(timestamp):
 		activepoll.statusis('Putting the results in context')
 
 		# hits [<server.hipparchiaclasses.dbWorkLine object at 0x10d952da0>, <server.hipparchiaclasses.dbWorkLine object at 0x10d952c50>, ... ]
-		hitdict = sortresultslist(hits, authordict, workdict)
+		hitdict = sortresultslist(hits, so, authordict, workdict)
 
 		resultlist = buildresultobjects(hitdict, authordict, workdict, so, activepoll)
 

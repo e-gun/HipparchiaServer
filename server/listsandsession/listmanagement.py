@@ -172,7 +172,7 @@ def sortsearchlist(searchlist, authorsdict):
 	return newlist
 
 
-def sortresultslist(hits, authorsdict, worksdict):
+def sortresultslist(hits, searchobject, authorsdict, worksdict):
 	"""
 
 	take a list of hits (which is a list of line objects)
@@ -190,7 +190,7 @@ def sortresultslist(hits, authorsdict, worksdict):
 	:return:
 	"""
 
-	sortby = session['sortorder']
+	sortby = searchobject.session['sortorder']
 	templist = []
 
 	for hit in hits:

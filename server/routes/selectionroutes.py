@@ -164,8 +164,8 @@ def setsessionvariable():
 	param = re.search(r'(.*?)=.*?', request.query_string.decode('utf-8'))
 	param = param.group(1)
 	val = request.args.get(param)
-	# need to accept '-' because of the date spinner
-	validpunct = '-'
+	# need to accept '-' because of the date spinner; '_' because of 'converted_date', etc
+	validpunct = '-_'
 	val = depunct(val, validpunct)
 
 	modifysessionvar(param, val)
