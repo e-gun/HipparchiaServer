@@ -62,7 +62,7 @@ def grabtextforbrowsing(locus):
 	passage = locus[10:]
 
 	# unfortunately you might need to find '300,19' as in 'Democritus, Fragmenta: Fragment 300,19, line 4'
-	# '-' is used for '-1' (which really means 'first available line')
+	# '-' is used for '-1' (which really means 'first available line at this level')
 	allowedpunct = ',;-'
 
 	if passage[0:4] == '_LN_':

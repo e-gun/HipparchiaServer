@@ -7,7 +7,6 @@
 """
 
 import json
-import re
 
 from flask import redirect, request, url_for, session
 
@@ -16,6 +15,7 @@ from server.dbsupport.citationfunctions import findvalidlevelvalues
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor
 from server.formatting.bibliographicformatting import formatauthinfo, woformatworkinfo, formatname, \
 	formatauthorandworkinfo
+from server.formatting.wordformatting import depunct
 from server.listsandsession.listmanagement import sortsearchlist, compilesearchlist
 from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie
 from server.startup import authordict, workdict, authorgenresdict, authorlocationdict, workgenresdict, \
@@ -52,12 +52,12 @@ def cookieintosession(cookienum):
 	cookienum = cookienum[0:2]
 
 	thecookie = request.cookies.get('session' + cookienum)
+
 	# comes back as a string that needs parsing
 	cookiedict = parsejscookie(thecookie)
-	# session.clear()
+
 	for key, value in cookiedict.items():
 		modifysessionvar(key, value)
-
 
 	# you need a master list out of authorgenresdict = { 'gk': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
 
@@ -95,7 +95,7 @@ def findtheworksof(authoruid):
 	:return:
 	"""
 
-	strippedquery = re.sub('[\W_]+', '', authoruid)
+	strippedquery = depunct(authoruid)
 
 	hint = []
 
@@ -135,7 +135,7 @@ def workstructure(locus):
 	cur = dbc.cursor()
 
 	workid = locus.split('_AT_')[0]
-	workid = re.sub('[\W_|]+', '', workid)
+	workid = depunct(workid)
 
 	try:
 		passage = locus.split('_AT_')[1]
@@ -143,7 +143,8 @@ def workstructure(locus):
 		passage = '-1'
 
 	unsafepassage = passage.split('|')
-	safepassage = [re.sub('[!@#$%^&*()=]+', '',p) for p in unsafepassage]
+	allowed = ',;-'
+	safepassage = [depunct(p, allowed) for p in unsafepassage]
 	safepassage = tuple(safepassage[:5])
 
 	try:
@@ -193,7 +194,7 @@ def getauthinfo(authorid):
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	authorid = re.sub('[\W_]+', '', authorid)
+	authorid = depunct(authorid)
 
 	theauthor = authordict[authorid]
 
