@@ -7,13 +7,20 @@
 """
 
 import re
+from collections import deque
+
+from server.dbsupport.dbfunctions import makeablankline
+from server.listsandsession.sessionfunctions import findactivebrackethighlighting
+from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
+
+
 def gtltsubstitutes(text):
 	"""
 		&lt; for ⟨
 		&gt; for ⟩
 
 		should almost certainly be called very late since there are various checks that
-		will check for ⟩ and ⟨
+		will look for ⟩ and ⟨ specifically
 
 	"""
 
@@ -21,3 +28,33 @@ def gtltsubstitutes(text):
 	text = re.sub(r'⟩', r'&gt;', text)
 
 	return text
+
+
+def brackethtmlifysearchfinds(listoflineobjects, searchobject, linehtmltemplate):
+	"""
+
+	can't do comprehensions: require a thisline/previousline structure so you can call setcontinuationvalue()
+
+	:param listoflineobjects:
+	:return:
+	"""
+
+	brackettypes = findactivebrackethighlighting(searchobject.session)
+	continuationdict = {t: False for t in brackettypes}
+
+	passage = []
+	lines = deque(listoflineobjects)
+	try:
+		previous = lines.popleft()
+	except IndexError:
+		previous = makeablankline('gr0000w000', -1)
+
+	passage.append(linehtmltemplate.format(id=previous.universalid, lc=previous.locus(), ft=previous.markeditorialinsersions(continuationdict)))
+
+	while lines:
+		ln = lines.popleft()
+		passage.append(linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markeditorialinsersions(continuationdict)))
+		continuationdict = {t: setcontinuationvalue(ln, previous, continuationdict[t], t) for t in brackettypes}
+		previous = ln
+
+	return passage

@@ -5,6 +5,7 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
 import re
 
 from server.formatting.betacodeescapes import andsubstitutes

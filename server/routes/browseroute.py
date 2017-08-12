@@ -17,6 +17,7 @@ from server.dbsupport.citationfunctions import finddblinefromlocus, finddblinefr
 from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, perseusidmismatch, \
 	returnfirstlinenumber
 from server.formatting.lexicaformatting import dbquickfixes
+from server.formatting.wordformatting import depunct
 from server.startup import authordict, workdict
 
 
@@ -60,13 +61,17 @@ def grabtextforbrowsing(locus):
 
 	passage = locus[10:]
 
+	# unfortunately you might need to find '300,19' as in 'Democritus, Fragmenta: Fragment 300,19, line 4'
+	# '-' is used for '-1' (which really means 'first available line')
+	allowedpunct = ',;-'
+
 	if passage[0:4] == '_LN_':
 		# you were sent here either by the hit list or a forward/back button in the passage browser
 		passage = re.sub('[\D]', '', passage[4:])
 	elif passage[0:4] == '_AT_':
 		# you were sent here by the citation builder autofill boxes
 		p = locus[14:].split('|')
-		cleanedp = [re.sub('[\W_|]+', '',level) for level in p]
+		cleanedp = [depunct(level, allowedpunct) for level in p]
 		cleanedp = tuple(cleanedp[:5])
 		if len(cleanedp) == wo.availablelevels:
 			passage = finddblinefromlocus(wo.universalid, cleanedp, cur)
@@ -110,6 +115,9 @@ def grabtextforbrowsing(locus):
 
 		if ' ' in citation[-1]:
 			citation[-1] = citation[-1].split(' ')[-1]
+
+		# meaningful only in the context of someone purposefully submitting bad data...
+		citation = [depunct(level, allowedpunct) for level in citation]
 
 		p = finddblinefromincompletelocus(wo, citation, cur)
 		resultmessage = p['code']

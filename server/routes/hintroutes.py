@@ -7,11 +7,11 @@
 """
 
 import json
-import re
 
 from flask import request
 
 from server import hipparchia
+from server.formatting.wordformatting import depunct
 from server.listsandsession.listmanagement import buildhintlist
 from server.listsandsession.sessionfunctions import reducetosessionselections, returnactivelist
 from server.startup import authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict, listmapper
@@ -24,7 +24,8 @@ def offerauthorhints():
 	:return:
 	"""
 
-	strippedquery = re.sub(r'[!@#$|%()*\'\"]','',request.args.get('term', ''))
+	query = request.args.get('term', '')
+	strippedquery = depunct(query)
 
 	ad = reducetosessionselections(listmapper, 'a')
 
@@ -49,7 +50,8 @@ def augenrelist():
 	:return:
 	"""
 
-	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
+	query = request.args.get('term', '')
+	strippedquery = depunct(query)
 
 	activegenres = returnactivelist(authorgenresdict)
 	activegenres.sort()
@@ -74,7 +76,8 @@ def wkgenrelist():
 	:return:
 	"""
 
-	strippedquery = re.sub('[\W_]+', '', request.args.get('term', ''))
+	query = request.args.get('term', '')
+	strippedquery = depunct(query)
 
 	activegenres = returnactivelist(workgenresdict)
 	activegenres.sort()
@@ -100,7 +103,8 @@ def offeraulocationhints():
 	:return:
 	"""
 
-	strippedquery = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('term', ''))
+	query = request.args.get('term', '')
+	strippedquery = depunct(query)
 
 	activelocations = returnactivelist(authorlocationdict)
 	activelocations.sort()
@@ -128,7 +132,8 @@ def offerprovenancehints():
 	:return:
 	"""
 
-	strippedquery = re.sub(r'[!@#$|%()*\'\"]', '', request.args.get('term', ''))
+	query = request.args.get('term', '')
+	strippedquery = depunct(query)
 
 	activelocations = returnactivelist(workprovenancedict)
 	activelocations.sort()

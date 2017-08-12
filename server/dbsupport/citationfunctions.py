@@ -167,11 +167,23 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 
 	# step one: find the index number of the passage
 	query = 'SELECT index FROM {w} WHERE ( wkuniversalid=%s ) AND '.format(w=workdb)
+	lq = []
 	for level in range(0, len(citationtuple)):
-		query += lmap[level] + '=%s AND '
-	# drop the final 'AND '
-	query = query[:-4]
-	data = tuple([workid] + list(citationtuple))
+		lq.append('{l}=%s'.format(l=lmap[level]))
+
+	query = query + ' AND '.join(lq) + ' ORDER BY index ASC'
+
+	# if the last selection box was empty you are sent '-1' instead of a real value (because the first line of lvl05 is not necc. '1')
+	# so wee need to kill off 'level_00_value=%s AND ', etc
+	# example: ('-1', '256', 'beta')
+
+	citation = list(citationtuple)
+
+	if citation[0] == '-1':
+		query = re.sub(r'level_00_value=%s AND ', '', query)
+		citation = citation[1:]
+
+	data = tuple([workid] + citation)
 	try:
 		cursor.execute(query, data)
 		found = cursor.fetchone()
@@ -186,6 +198,9 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 
 def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=0):
 	"""
+
+	this is used both by the browser selection boxes and by persues passage lookups
+
 	need to deal with the perseus bibliographic references which often do not go all the way down to level zero
 	use what you have to find the first available db line so you can construck a '_LN_' browseto click
 	the citation list arrives in ascending order of levels: 00, 01, 02...
@@ -265,6 +280,8 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 		# you have an incomplete citation: assume that the top level is the last item, etc.
 		citationlist = perseuscitationsintohipparchiacitations(citationlist)
 		citationlist.reverse()
+		# the last selection box was empty and you were sent '-1' instead of a real value
+		citationlist = [c for c in citationlist if c != '-1']
 		auid = workobject.universalid[0:6]
 
 		query = []
@@ -282,6 +299,7 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 
 		try:
 			cursor.execute(query, data)
+			print('finddblinefromincompletelocus() q,d',query, data)
 			found = cursor.fetchone()
 			dblinenumber = found[0]
 			# often actually true...

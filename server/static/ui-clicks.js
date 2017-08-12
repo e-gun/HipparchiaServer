@@ -21,7 +21,7 @@ function browsetopassage() {
             loc += lvls[i]+'|';
         } else {
             if (i == 5) {
-                loc += '1|';
+                loc += '-1|';
                 }
             }
         }

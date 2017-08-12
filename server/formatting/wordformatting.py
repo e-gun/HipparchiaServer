@@ -487,3 +487,23 @@ def universalregexequivalent(searchterm):
 		searchtermequivalent = None
 
 	return searchtermequivalent
+
+
+def depunct(stringtoclean, allowedpunctuationsting=None):
+	"""
+
+	'abc*d$ef, ghi;' + ',;' ==> 'abcdef, ghi;'
+
+	:param wordtoclean:
+	:param allowedpunctuationsting:
+	:return:
+	"""
+
+	badpunct = punctuation
+	if allowedpunctuationsting:
+		badpunct = re.sub(r'[{ap}]'.format(ap=allowedpunctuationsting), '', badpunct)
+	badpunct = r'[{np}]'.format(np=re.escape(badpunct))
+
+	cleaned = re.sub(badpunct, '', stringtoclean)
+
+	return cleaned

@@ -345,6 +345,10 @@ body {
 	padding-left: 75px;
 	}
 
+.extrasmall {
+    font-size: 45%
+    }
+
 .findnumber {
 	font-weight: normal;
 	color: var(--vdkteal);
@@ -710,6 +714,11 @@ keeping (for now) the non-span version of this
 	font-size: 85%;
 	}
 
+.smallerthannormalitalic {
+    /* in practice this comes *inside* a smallerthannormal span and so you will be smaller than smallerthannormal*/
+	/* font-size: 85%; */
+	}
+
 .smallerthannormalsuperscript {
     vertical-align: super;
 	font-size: 60%;
@@ -771,6 +780,12 @@ keeping (for now) the non-span version of this
 	color: var(--brtblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
+
+
+.undocumentedfontshift{
+    text-decoration: underline;
+    color: var(--huedgrey);
+    }
 
 .unhandledpercent{
 	top: -0.5em;

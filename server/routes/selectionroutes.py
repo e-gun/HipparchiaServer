@@ -12,6 +12,7 @@ import re
 from flask import redirect, request, url_for, session
 
 from server import hipparchia
+from server.formatting.wordformatting import depunct
 from server.listsandsession.listmanagement import dropdupes, tidyuplist
 from server.listsandsession.sessionfunctions import modifysessionvar, sessionselectionsashtml, rationalizeselections, \
 	selectionisactive, returnactivelist
@@ -38,17 +39,17 @@ def selectionmade():
 	"""
 
 	try:
-		workid = re.sub('[\W_]+', '', request.args.get('work', ''))
+		workid = depunct(request.args.get('work', ''))
 	except:
 		workid = ''
 
 	try:
-		uid = re.sub('[\W_]+', '', request.args.get('auth', ''))
+		uid = depunct(request.args.get('auth', ''))
 	except:
 		uid = ''
 
 	try:
-		locus = re.sub('[!@#$%^&*()=;]+', '', request.args.get('locus', ''))
+		locus = depunct(request.args.get('locus', ''))
 	except:
 		locus = ''
 
@@ -59,23 +60,25 @@ def selectionmade():
 
 	# you clicked #pickgenre or #excludegenre
 	try:
-		auloc = re.sub('[!@#$%^&*=;]+', '', request.args.get('auloc', ''))
+		auloc = depunct(request.args.get('auloc', ''))
 	except:
 		auloc = ''
 
 	try:
-		wkprov = re.sub('[!@#$%^&*=;]+', '', request.args.get('wkprov', ''))
+		allowed = '.:()-?'
+		wkprov = depunct(request.args.get('wkprov', ''), allowed)
 	except:
 		wkprov = ''
 
 	try:
-		genre = re.sub('[!@#$%^&*=;]+', '', request.args.get('genre', ''))
+		genre = depunct(request.args.get('genre', ''))
 	except:
 		genre = ''
 
 	try:
 		# need periods (for now): just remove some obvious problem cases
-		wkgenre = re.sub('[\[\]\'\\&\*\%\^_;]+', '', request.args.get('wkgenre', ''))
+		allowed = '.'
+		wkgenre = depunct(request.args.get('wkgenre', ''), allowed)
 	except:
 		wkgenre = ''
 
@@ -162,7 +165,8 @@ def setsessionvariable():
 	param = param.group(1)
 	val = request.args.get(param)
 	# need to accept '-' because of the date spinner
-	val = re.sub('[!@#$%^&*()\[\]=;`+\\\'\"]+', '', val)
+	validpunct = '-'
+	val = depunct(val, validpunct)
 
 	modifysessionvar(param, val)
 

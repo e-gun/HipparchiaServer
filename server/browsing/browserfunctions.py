@@ -259,12 +259,12 @@ def insertparserids(lineobject, continuationdict):
 		<observed id="δέ">δέ</observed>
 		...
 	this is tricky because there is html in here and you don't want to tag it
-	also you need to handle hypenated line-ends
+	also you need to handle hyphenated line-ends
 
 	there is a lot of dancing around required to both mark up the brackets and to make
 	the clickable observeds
 
-	a lot of hoops to jump trhough for a humble problem: wrong whitespace position
+	a lot of hoops to jump through for a humble problem: wrong whitespace position
 
 	the main goal is to avoid 'ab[ <span>cd' when what you want is 'ab[<span>cd'
 	the defect is that anything that is chopped up by bracketing markup will be

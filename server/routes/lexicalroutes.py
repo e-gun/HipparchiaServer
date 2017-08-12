@@ -14,6 +14,7 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
 from server.formatting.betacodetounicode import replacegreekbetacode
+from server.formatting.wordformatting import depunct
 from server.formatting.wordformatting import removegravity, stripaccents, tidyupterm
 from server.lexica.lexicalookups import browserdictionarylookup, lexicalmatchesintohtml, findtotalcounts, \
 	lookformorphologymatches, getobservedwordprevalencedata
@@ -42,8 +43,8 @@ def findbyform(observedword):
 	# if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
 	# 	observedword = replacegreekbetacode(observedword.upper())
 
-	w = re.sub('[\W_|]+', '', observedword)
-	# oddly 'ὕβˈριν' survives the '\W' check; should be ready to extend this list
+	# the next makes sense only in the context of pointedly invalid input
+	w = depunct(observedword)
 	w = tidyupterm(w)
 	# python seems to know how to do this with greek...
 	w = w.lower()
@@ -127,7 +128,7 @@ def dictsearch(searchterm):
 	if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
 		searchterm = replacegreekbetacode(searchterm.upper())
 
-	seeking = re.sub(r'[!@#|%()*\'\"\[\]]', '', searchterm)
+	seeking = depunct(searchterm)
 	seeking = seeking.lower()
 	seeking = re.sub('[σς]', 'ϲ', seeking)
 	seeking = re.sub('v', '(u|v|U|V)', seeking)
@@ -208,7 +209,7 @@ def reverselexiconsearch(searchterm):
 	entries = []
 	returnarray = []
 
-	seeking = re.sub(r'[!@#$|%()*\'\"]', '', searchterm)
+	seeking = depunct(searchterm)
 
 	if justlatin():
 		searchunder = [('latin', 'hi')]

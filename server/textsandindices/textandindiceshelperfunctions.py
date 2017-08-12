@@ -6,35 +6,36 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import re
 from collections import deque
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dbfunctions import grabonelinefromwork, dblineintolineobject, makeanemptyauthor, makeanemptywork
+from server.formatting.wordformatting import depunct
 from server.searching.searchfunctions import atsignwhereclauses
 
 
 def tcparserequest(request, authordict, workdict):
 	"""
 	return the author, work, and locus requested
-	also some other handy veriable derived from these items
+	also some other handy variable derived from these items
 	:param requestobject:
 	:return:
 	"""
 	
 	try:
-		uid = re.sub('[\W_]+', '', request.args.get('auth', ''))
+		uid = depunct(request.args.get('auth', ''))
 	except:
 		uid = ''
 		
 	try:
-		workid = re.sub('[\W_]+', '', request.args.get('work', ''))
+		workid = depunct(request.args.get('work', ''))
 	except:
 		workid = ''
 
 	try:
-		locus = re.sub('[!@#$%^&*()=]+', '', request.args.get('locus', ''))
+		allowed = ',;|'
+		locus = depunct(request.args.get('locus', ''), allowed)
 	except:
 		locus = ''
 	
