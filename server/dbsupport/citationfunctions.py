@@ -8,7 +8,7 @@
 
 import re
 
-from server.dbsupport.dbfunctions import findtoplevelofwork, returnfirstlinenumber
+from server.dbsupport.dbfunctions import dblineintolineobject, findtoplevelofwork, returnfirstlinenumber
 from server.hipparchiaobjects.helperobjects import LowandHighInfo
 
 
@@ -43,10 +43,11 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 			atlevel = availablelevels
 
 	audb = workid[0:6]
+	lvl = 'l'+str(atlevel - 1)
 
 	# select level_00_value from gr0565w001 where level_03_value='3' AND level_02_value='2' AND level_01_value='1' AND level_00_value NOT IN ('t') ORDER BY index ASC;
 	# select level_01_value from gr0565w001 where level_03_value='2' AND level_02_value='1' AND level_01_value NOT IN ('t') ORDER BY index ASC;
-	query = 'SELECT level_0{lvl}_value FROM {db} WHERE ( wkuniversalid=%s ) AND '.format(lvl=atlevel-1, db=audb)
+	query = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND '.format(lvl=atlevel-1, db=audb)
 	datalist = [workid]
 	for level in range(availablelevels - 1, atlevel - 1, -1):
 		query += ' level_0{lvl}_value=%s AND '.format(lvl=level)
@@ -57,39 +58,27 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 
 	cursor.execute(query, data)
 
-	values = cursor.fetchall()
+	results = cursor.fetchall()
+	if results:
+		lines = [dblineintolineobject(r) for r in results]
+	else:
+		lines = None
 
-	# for debugging
-	# print('partialcitationtuple', partialcitationtuple)
-	# print('availablelevels,atlevel', availablelevels,atlevel)
-	# print('findvalidlevelvalues()', query, data)
-	# print('values',values)
+	if not lines:
+		lowandhighobject = LowandHighInfo(availablelevels, atlevel - 1, workstructure[atlevel - 1], '-9999', '', [''])
+		return lowandhighobject
 
-	if len(values) < 1:
-		values = [('-9999',)]
-	low = values[0][0]
-	high = values[-1][0]
-	rng = [val[0] for val in values]
-	rng = list(set(rng))
-	rng.sort()
+	low = getattr(lines[0], lvl)
+	high = getattr(lines[-1], lvl)
+	rng = [getattr(l, lvl) for l in lines]
+	# need to drop dupes and keep the index order
+	deduper = set()
+	for r in rng:
+		if r not in deduper:
+			deduper.add(r)
+	rng = list(deduper)
 
-	# print('rng',rng)
-	# but now 1, 11, 12... comes before 2, 3, 4
-	rangenumbers = {}
-	rangebottom = []
-	for item in rng:
-		try:
-			rangenumbers[int(item)] = item
-		except:
-			rangebottom.append(item)
-	rangekeys = sorted(rangenumbers.keys())
-	
-	sortedrange = [rangenumbers[key] for key in rangekeys]
-
-	sortedrange += rangebottom
-
-	# lowandhigh = (availablelevels, atlevel-1, workstructure[atlevel - 1], low, high, sortedrange)
-	lowandhighobject = LowandHighInfo(availablelevels, atlevel-1, workstructure[atlevel - 1], low, high, sortedrange)
+	lowandhighobject = LowandHighInfo(availablelevels, atlevel-1, workstructure[atlevel - 1], low, high, rng)
 
 	return lowandhighobject
 
@@ -169,7 +158,7 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 
 	if wklvs != len(citationtuple):
 		print('mismatch between shape of work and browsing request: impossible citation of'+workid+'.')
-		print(str(wklvs),' levels vs',list(citationtuple))
+		print(str(wklvs), ' levels vs', list(citationtuple))
 		print('safe to ignore if you requested the first line of a work')
 
 	# step one: find the index number of the passage
