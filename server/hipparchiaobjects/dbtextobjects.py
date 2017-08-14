@@ -9,6 +9,7 @@
 import re
 
 from server.formatting.betacodeescapes import andsubstitutes
+from server.formatting.wordformatting import avoidsmallvariants
 
 
 class dbAuthor(object):
@@ -163,7 +164,7 @@ class dbOpus(object):
 			cit = []
 			levels = [self.levellabels_00, self.levellabels_01, self.levellabels_02, self.levellabels_03,
 					  self.levellabels_04, self.levellabels_05]
-			for l in range(0,self.availablelevels):
+			for l in range(0, self.availablelevels):
 				cit.append(levels[l])
 			cit.reverse()
 			cit = ', '.join(cit)
@@ -309,14 +310,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		l = self.uncleanlocus()
-
-		invals = "﹖﹡／﹗│﹦﹢﹪﹠﹕＇❨❩❴❵⟦⟧"
-		outvals = "?*/!|=+%&:'(){}[]"
-
-		cleanlocus = l.translate(str.maketrans(invals, outvals))
-
-		return cleanlocus
+		return avoidsmallvariants(self.uncleanlocus())
 
 	def avoidminimallocus(self):
 		"""
@@ -329,6 +323,7 @@ class dbWorkLine(object):
 		"""
 
 		l = self.locus()
+
 		try:
 			l = 'line ' + str(int(l))
 		except ValueError:
@@ -382,7 +377,6 @@ class dbWorkLine(object):
 
 		return citationtuple
 
-
 	def locustuple(self):
 		"""
 
@@ -398,10 +392,7 @@ class dbWorkLine(object):
 
 		ltuple = self.uncleanlocustuple()
 
-		invals = "﹖﹡／﹗│﹦﹢﹪﹠﹕＇❨❩❴❵⟦⟧"
-		outvals = "?*/!|=+%&:'(){}[]"
-
-		newtuple = (t.translate(str.maketrans(invals, outvals)) for t in ltuple)
+		newtuple = (avoidsmallvariants(t) for t in ltuple)
 
 		return newtuple
 

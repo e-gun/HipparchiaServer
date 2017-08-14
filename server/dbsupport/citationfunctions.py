@@ -9,6 +9,7 @@
 import re
 
 from server.dbsupport.dbfunctions import dblineintolineobject, findtoplevelofwork, returnfirstlinenumber
+from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.helperobjects import LowandHighInfo
 
 
@@ -110,6 +111,8 @@ def locusintocitation(workobject, lineobject):
 			pass
 
 	citation = ', '.join(citation)
+
+	citation = avoidsmallvariants(citation)
 
 	return citation
 

@@ -15,11 +15,12 @@ from flask import request, session
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
 from server.formatting.bracketformatting import gtltsubstitutes
+from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.helperobjects import ProgressPoll
-from server.startup import authordict, workdict, poll
+from server.startup import authordict, poll, workdict
 from server.textsandindices.indexmaker import buildindextowork
-from server.textsandindices.textandindiceshelperfunctions import tcparserequest, textsegmentfindstartandstop, \
-	wordindextohtmltable, supplementalindexjs
+from server.textsandindices.textandindiceshelperfunctions import supplementalindexjs, tcparserequest, \
+	textsegmentfindstartandstop, wordindextohtmltable
 from server.textsandindices.textbuilder import buildtext
 
 
@@ -106,9 +107,9 @@ def completeindex():
 	poll[ts].deactivate()
 
 	results = {}
-	results['authorname'] = ao.shortname
-	results['title'] = wo.title
-	results['structure'] = wo.citation()
+	results['authorname'] = avoidsmallvariants(ao.shortname)
+	results['title'] = avoidsmallvariants(wo.title)
+	results['structure'] = avoidsmallvariants(wo.citation())
 	results['worksegment'] = '.'.join(psg)
 	results['elapsed'] = buildtime
 	results['wordsfound'] = count
@@ -163,9 +164,9 @@ def textmaker():
 		texthtml = gtltsubstitutes(texthtml)
 
 	results = {}
-	results['authorname'] = ao.shortname
-	results['title'] = wo.title
-	results['structure'] = wo.citation()
+	results['authorname'] = avoidsmallvariants(ao.shortname)
+	results['title'] = avoidsmallvariants(wo.title)
+	results['structure'] = avoidsmallvariants(wo.citation())
 	results['worksegment'] = '.'.join(psg)
 	results['texthtml'] = texthtml
 

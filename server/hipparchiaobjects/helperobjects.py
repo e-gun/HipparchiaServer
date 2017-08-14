@@ -10,9 +10,10 @@ import re
 import time
 from collections import deque
 from itertools import islice
-from multiprocessing import Value, Array
+from multiprocessing import Array, Value
 
 from server import hipparchia
+from server.formatting.wordformatting import avoidsmallvariants
 
 
 class SearchResult(object):
@@ -23,8 +24,8 @@ class SearchResult(object):
 	"""
 	def __init__(self, hitnumber, author, work, citationstring, clickurl, lineobjects):
 		self.hitnumber = hitnumber
-		self.author = author
-		self.work = work
+		self.author = avoidsmallvariants(author)
+		self.work = avoidsmallvariants(work)
 		self.citationstring = citationstring
 		self.clickurl = clickurl
 		self.lineobjects = lineobjects

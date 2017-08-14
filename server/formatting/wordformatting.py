@@ -508,3 +508,18 @@ def depunct(stringtoclean, allowedpunctuationsting=None):
 	cleaned = re.sub(badpunct, '', stringtoclean)
 
 	return cleaned
+
+
+def avoidsmallvariants(text):
+	"""
+
+	get rid of small variants of '+', etc.
+	:return:
+	"""
+
+	invals = "﹖﹡／﹗│﹦﹢﹪﹠﹕＇❨❩❴❵⟦⟧"
+	outvals = "?*/!|=+%&:'(){}[]"
+
+	cleantext = text.translate(str.maketrans(invals, outvals))
+
+	return cleantext

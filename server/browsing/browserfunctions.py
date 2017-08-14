@@ -12,9 +12,10 @@ from collections import deque
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
-from server.dbsupport.dbfunctions import simplecontextgrabber, dblineintolineobject
-from server.formatting.bibliographicformatting import getpublicationinfo, avoidlonglines
+from server.dbsupport.dbfunctions import dblineintolineobject, simplecontextgrabber
+from server.formatting.bibliographicformatting import avoidlonglines, getpublicationinfo
 from server.formatting.bracketformatting import gtltsubstitutes
+from server.formatting.wordformatting import avoidsmallvariants
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
@@ -46,7 +47,8 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	else:
 		name = authorobject.idxname
 
-	title = workobject.title
+	name = avoidsmallvariants(name)
+	title = avoidsmallvariants(workobject.title)
 
 	try:
 		if int(workobject.converted_date) < 1500:
