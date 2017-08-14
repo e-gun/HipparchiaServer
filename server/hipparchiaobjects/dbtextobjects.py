@@ -270,9 +270,12 @@ class dbWorkLine(object):
 			self.accented = ''
 			self.stripped = ''
 
-	def locus(self):
+	def uncleanlocus(self):
 		"""
 		call me to get a formatted citation: "3.2.1"
+
+		but funky chars might be in here...
+
 		:param self:
 		:return:
 		"""
@@ -291,6 +294,29 @@ class dbWorkLine(object):
 				citation = self.l0
 
 		return citation
+
+
+	def locus(self):
+		"""
+
+		turn the funky substitutes into standard characters:
+
+		in:     B❨1❩, line 2
+		out:    B(1), line 2
+
+		NB: these might not be in the data...
+
+		:return:
+		"""
+
+		l = self.uncleanlocus()
+
+		invals = "﹖﹡／﹗│﹦﹢﹪﹠﹕＇❨❩❴❵⟦⟧"
+		outvals = "?*/!|=+%&:'(){}[]"
+
+		cleanlocus = l.translate(str.maketrans(invals, outvals))
+
+		return cleanlocus
 
 	def avoidminimallocus(self):
 		"""
@@ -343,7 +369,7 @@ class dbWorkLine(object):
 
 		return citation
 
-	def locustuple(self):
+	def uncleanlocustuple(self):
 		"""
 		call me to get a citation tuple in 0-to-5 order
 		:return:
@@ -355,6 +381,29 @@ class dbWorkLine(object):
 		citationtuple = tuple(cit)
 
 		return citationtuple
+
+
+	def locustuple(self):
+		"""
+
+		turn the funky substitutes into standard characters:
+
+		in:     B❨1❩, line 2
+		out:    B(1), line 2
+
+		NB: these might not be in the data...
+
+		:return:
+		"""
+
+		ltuple = self.uncleanlocustuple()
+
+		invals = "﹖﹡／﹗│﹦﹢﹪﹠﹕＇❨❩❴❵⟦⟧"
+		outvals = "?*/!|=+%&:'(){}[]"
+
+		newtuple = (t.translate(str.maketrans(invals, outvals)) for t in ltuple)
+
+		return newtuple
 
 	def samelevelas(self, other):
 		"""

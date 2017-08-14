@@ -168,7 +168,8 @@ $(document).ready( function () {
 	});
 
 
-    var tohideonfirstload = new Array('#clearpick', '#helptabs', '#helptabs', '#edts', '#ldts', '#spur', '#browserdialog', '#complexsearching');
+    var tohideonfirstload = new Array('#clearpick', '#helptabs', '#helptabs', '#edts', '#ldts', '#spur',
+        '#browserdialog', '#complexsearching');
     bulkhider(tohideonfirstload);
 
     //

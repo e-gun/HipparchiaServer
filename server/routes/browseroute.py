@@ -13,9 +13,9 @@ from flask import session
 
 from server import hipparchia
 from server.browsing.browserfunctions import getandformatbrowsercontext
-from server.dbsupport.citationfunctions import finddblinefromlocus, finddblinefromincompletelocus, perseusdelabeler
-from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor, makeanemptywork, perseusidmismatch, \
-	returnfirstlinenumber
+from server.dbsupport.citationfunctions import finddblinefromincompletelocus, finddblinefromlocus, perseusdelabeler
+from server.dbsupport.dbfunctions import makeanemptyauthor, makeanemptywork, perseusidmismatch, returnfirstlinenumber, \
+	setconnection
 from server.formatting.lexicaformatting import dbquickfixes
 from server.formatting.wordformatting import depunct
 from server.startup import authordict, workdict
@@ -38,7 +38,7 @@ def grabtextforbrowsing(locus):
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	workdb = re.sub('[\W_|]+', '', locus)[:10]
+	workdb = depunct(locus)[:10]
 
 	try: ao = authordict[workdb[:6]]
 	except: ao = makeanemptyauthor('gr0000')
@@ -49,7 +49,7 @@ def grabtextforbrowsing(locus):
 		if ao.universalid == 'gr0000':
 			wo = makeanemptywork('gr0000w000')
 		else:
-			# you have only selected an author, but not a work: 'gr7000w_AT_1' will fail fecause we need 'wNNN'
+			# you have only selected an author, but not a work: 'gr7000w_AT_1' will fail because we need 'wNNN'
 			# so send line 1 of work 1
 			wo = ao.listofworks[0]
 			locus = wo.universalid + '_LN_' + str(wo.starts)
@@ -63,11 +63,15 @@ def grabtextforbrowsing(locus):
 
 	# unfortunately you might need to find '300,19' as in 'Democritus, Fragmenta: Fragment 300,19, line 4'
 	# '-' is used for '-1' (which really means 'first available line at this level')
-	allowedpunct = ',;-'
+	# ( ) and / should be converted to equivalents in the builder: they do us no good here
+	# see dbswapoutbadcharsfromciations() in HipparchiaBuilder
+	allowedpunct = ',-'
 
 	if passage[0:4] == '_LN_':
 		# you were sent here either by the hit list or a forward/back button in the passage browser
 		passage = re.sub('[\D]', '', passage[4:])
+	elif passage == '_AT_-1':
+		passage = wo.starts
 	elif passage[0:4] == '_AT_':
 		# you were sent here by the citation builder autofill boxes
 		p = locus[14:].split('|')
@@ -122,6 +126,9 @@ def grabtextforbrowsing(locus):
 		p = finddblinefromincompletelocus(wo, citation, cur)
 		resultmessage = p['code']
 		passage = p['line']
+	else:
+		# you sent me passage in an impossible format
+		ao = makeanemptyauthor('gr0000')
 
 	if passage and ao.universalid != 'gr0000':
 		browserdata = getandformatbrowsercontext(ao, wo, int(passage), ctx, numbersevery, cur)

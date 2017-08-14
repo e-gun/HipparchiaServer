@@ -501,7 +501,8 @@ def depunct(stringtoclean, allowedpunctuationsting=None):
 
 	badpunct = punctuation
 	if allowedpunctuationsting:
-		badpunct = re.sub(r'[{ap}]'.format(ap=allowedpunctuationsting), '', badpunct)
+		badpunct = set(badpunct) - set(allowedpunctuationsting)
+		badpunct = ''.join(badpunct)
 	badpunct = r'[{np}]'.format(np=re.escape(badpunct))
 
 	cleaned = re.sub(badpunct, '', stringtoclean)

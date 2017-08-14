@@ -133,7 +133,7 @@ def modifysessionvar(param,val):
 
 	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
 				   'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary','authorssummary','quotesummary',
-					'bracketsquare', 'bracketround', 'bracketangled' , 'bracketcurly', 'indexbyfrequency']:
+					'bracketsquare', 'bracketround', 'bracketangled', 'bracketcurly', 'indexbyfrequency']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 

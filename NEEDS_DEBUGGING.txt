@@ -10,3 +10,10 @@ MorphPossibilityObject.getbaseform() is confused ἐνέρριπτεν, ἐν, �
 MorphPossibilityObject.getbaseform() is confused ἐνέρριψεν, ἐν, ἐν-ῥίπτω ['ἐνέρριψεν', 'ἐν', 'ἐν-ῥίπτω']
 MorphPossibilityObject.getbaseform() is confused ἐνέρριψαν, ἐν, ἐν-ῥίπτω ['ἐνέρριψαν', 'ἐν', 'ἐν-ῥίπτω']
 MorphPossibilityObject.getbaseform() is confused ἐνέρριψε, ἐν, ἐν-ῥίπτω ['ἐνέρριψε', 'ἐν', 'ἐν-ῥίπτω']
+
+[C] resetsession
+
+resetsession will reload '/' without clearing date range from html (but the range has been reset)
+a second click will clear the display
+js async timing issue, it seems
+irritating to avoid "return redirect(url_for('frontpage'))" which is so simple and easy to call

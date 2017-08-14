@@ -8,18 +8,18 @@
 
 import json
 
-from flask import redirect, request, url_for, session
+from flask import redirect, request, session, url_for
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
-from server.dbsupport.dbfunctions import setconnection, makeanemptyauthor
-from server.formatting.bibliographicformatting import formatauthinfo, woformatworkinfo, formatname, \
-	formatauthorandworkinfo
+from server.dbsupport.dbfunctions import makeanemptyauthor, setconnection
+from server.formatting.bibliographicformatting import formatauthinfo, formatauthorandworkinfo, formatname, \
+	woformatworkinfo
 from server.formatting.wordformatting import depunct
-from server.listsandsession.listmanagement import sortsearchlist, compilesearchlist
-from server.listsandsession.sessionfunctions import modifysessionvar, modifysessionselections, parsejscookie
-from server.startup import authordict, workdict, authorgenresdict, authorlocationdict, workgenresdict, \
-	workprovenancedict, listmapper
+from server.listsandsession.listmanagement import compilesearchlist, sortsearchlist
+from server.listsandsession.sessionfunctions import modifysessionselections, modifysessionvar, parsejscookie
+from server.startup import authordict, authorgenresdict, authorlocationdict, listmapper, workdict, workgenresdict, \
+	workprovenancedict
 
 
 # getselections is in selectionroutes.py
@@ -143,6 +143,7 @@ def workstructure(locus):
 		passage = '-1'
 
 	unsafepassage = passage.split('|')
+	# this list will need to match the one in '/browse': '-' is absolutely necessry to catch '-1'
 	allowed = ',;-'
 	safepassage = [depunct(p, allowed) for p in unsafepassage]
 	safepassage = tuple(safepassage[:5])

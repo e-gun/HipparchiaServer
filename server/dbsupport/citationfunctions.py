@@ -46,7 +46,7 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 
 	# select level_00_value from gr0565w001 where level_03_value='3' AND level_02_value='2' AND level_01_value='1' AND level_00_value NOT IN ('t') ORDER BY index ASC;
 	# select level_01_value from gr0565w001 where level_03_value='2' AND level_02_value='1' AND level_01_value NOT IN ('t') ORDER BY index ASC;
-	query = 'SELECT level_0{lvl}_value FROM {db} WHERE ( wkuniversalid=%s ) AND  '.format(lvl=atlevel-1, db=audb)
+	query = 'SELECT level_0{lvl}_value FROM {db} WHERE ( wkuniversalid=%s ) AND '.format(lvl=atlevel-1, db=audb)
 	datalist = [workid]
 	for level in range(availablelevels - 1, atlevel - 1, -1):
 		query += ' level_0{lvl}_value=%s AND '.format(lvl=level)
@@ -54,9 +54,16 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 	query += 'level_0{lvl}_value NOT IN (%s) ORDER BY index'.format(lvl=atlevel-1)
 	datalist.append('t')
 	data = tuple(datalist)
+
 	cursor.execute(query, data)
 
 	values = cursor.fetchall()
+
+	# for debugging
+	# print('partialcitationtuple', partialcitationtuple)
+	# print('availablelevels,atlevel', availablelevels,atlevel)
+	# print('findvalidlevelvalues()', query, data)
+	# print('values',values)
 
 	if len(values) < 1:
 		values = [('-9999',)]

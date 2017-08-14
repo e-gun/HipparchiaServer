@@ -341,6 +341,30 @@ def dbquickfixes(listofnames):
 	"""
 	
 	"""
+		perseus
+		001 Cyc
+		002 Alc
+		003 Med
+		004 Her
+		005 Hip
+		006 And
+		007 Hec
+		008 Sup
+		009 HFb
+		010 Ion
+		011 Tr.
+		012 El.
+		013 IT
+		014 Hel
+		015 Ph.
+		016 Or.
+		017 Ba.
+		018 IAb
+		019 Rh.
+		020 Fr.
+		026 Hyp
+		031 APb
+	
 		"gr0006w030";"Fragmenta Oenei"
 		"gr0006w031";"Epigrammata"
 		"gr0006w032";"Fragmenta Phaethontis incertae sedis"
@@ -400,8 +424,12 @@ def dbquickfixes(listofnames):
 		'gr0006w016': 'gr0006w036',
 		'gr0006w017': 'gr0006w050',
 		'gr0006w018': 'gr0006w051',
-		'gr0006w019': 'gr0006w052'
+		'gr0006w019': 'gr0006w052',
+		'gr0006w020': 'gr0006w029',
+		'gr0006w026': 'gr0006w026',
+		'gr0006w031': 'gr0006w031'
 	}
+
 	for item in listofnames:
 		db = re.search(dbfinder,item)
 		if db.group(1) in fixer.keys():
