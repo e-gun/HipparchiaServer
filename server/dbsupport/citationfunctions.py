@@ -133,7 +133,7 @@ def prolixlocus(workobject, citationtuple):
 	cite = list(citationtuple)
 	cite.reverse()
 	citation = []
-	for level in range(0,len(wklvls)):
+	for level in range(0, len(wklvls)):
 		try:
 			citation.append(workobject.structure[wklvls[level]]+' '+cite[level])
 		except:
@@ -172,8 +172,9 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 
 	query = query + ' AND '.join(lq) + ' ORDER BY index ASC'
 
-	# if the last selection box was empty you are sent '-1' instead of a real value (because the first line of lvl05 is not necc. '1')
-	# so wee need to kill off 'level_00_value=%s AND ', etc
+	# if the last selection box was empty you are sent '-1' instead of a real value
+	# (because the first line of lvl05 is not necc. '1')
+	# so we need to kill off 'level_00_value=%s AND ', etc
 	# example: ('-1', '256', 'beta') [here the 1st line is actually '10t', btw]
 
 	citation = list(citationtuple)
@@ -225,10 +226,10 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 		results = {'code': successcode, 'line': dblinenumber}
 		return results
 
-	trialnumber +=1
+	trialnumber += 1
 
 	lmap = {0: 'level_00_value', 1: 'level_01_value', 2: 'level_02_value', 3: 'level_03_value', 4: 'level_04_value',
-	        5: 'level_05_value'}
+			5: 'level_05_value'}
 	
 
 	numberoflevels = workobject.availablelevels
@@ -273,7 +274,7 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 		dblinenumber = workobject.starts
 		citationlist.reverse()
 		successcode = 'Sending first line. Perseus reference structure does not fit with a valid Hipparchia ' \
-		              'reference: <span class="bold">{pe}</span> ⇎ <span class="bold">{hi}</span>'.format(pe=(', ').join(citationlist), hi=workobject.citation())
+			'reference: <span class="bold">{pe}</span> ⇎ <span class="bold">{hi}</span>'.format(pe=(', ').join(citationlist), hi=workobject.citation())
 
 	else:
 		# you have an incomplete citation: assume that the top level is the last item, etc.
@@ -283,7 +284,7 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 		citationlist = [c for c in citationlist if c != '-1']
 		auid = workobject.universalid[0:6]
 
-		query = []
+		query = list()
 		query.append('SELECT index FROM {a} WHERE wkuniversalid=%s'.format(a=auid))
 		try:
 			for level in range(numberoflevels-1, numberoflevels-len(citationlist)-1,-1):
@@ -380,7 +381,7 @@ def perseuslookupchangecase(citationlist):
 	:param cursor:
 	:return:
 	"""
-	newcitationlist = []
+	newcitationlist = list()
 
 	for item in citationlist:
 		if re.search(r'[a-z]',item[0]):
@@ -455,7 +456,7 @@ def perseuscitationsintohipparchiacitations(citationlist):
 	:param citationlist:
 	:return:
 	"""
-	newcitationlist = []
+	newcitationlist = list()
 	
 	for item in citationlist:
 		if re.search(r'^p\.',item):

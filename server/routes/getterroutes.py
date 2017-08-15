@@ -61,22 +61,22 @@ def cookieintosession(cookienum):
 
 	# you need a master list out of authorgenresdict = { 'gk': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
 
-	authorgenreslist = []
+	authorgenreslist = list()
 	for db in authorgenresdict:
 		authorgenreslist += authorgenresdict[db]
 	authorgenreslist = list(set(authorgenreslist))
 
-	workgenreslist = []
+	workgenreslist = list()
 	for db in workgenresdict:
 		workgenreslist += workgenresdict[db]
 	workgenreslist = list(set(workgenreslist))
 
-	authorlocationlist = []
+	authorlocationlist = list()
 	for db in authorlocationdict:
 		authorlocationlist += authorlocationdict[db]
 	authorlocationlist = list(set(authorlocationlist))
 
-	workprovenancelist = []
+	workprovenancelist = list()
 	for db in workprovenancedict:
 		workprovenancelist += workprovenancedict[db]
 	workprovenancelist = list(set(workprovenancelist))
@@ -97,7 +97,7 @@ def findtheworksof(authoruid):
 
 	strippedquery = depunct(authoruid)
 
-	hint = []
+	hint = list()
 
 	try:
 		myauthor = authordict[strippedquery]
@@ -155,12 +155,12 @@ def workstructure(locus):
 
 	# it is a list of works and not a dict, so we can't pull the structure from the key
 	# should probably change that some day
-	structure = {}
+	structure = dict()
 	for work in ao.listofworks:
 		if work.universalid == workid:
 			structure = work.structure
 
-	ws = {}
+	ws = dict()
 	if structure != {}:
 		lowandhigh = findvalidlevelvalues(workid, structure, safepassage, cur)
 		# example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
@@ -199,7 +199,7 @@ def getauthinfo(authorid):
 
 	theauthor = authordict[authorid]
 
-	authinfo = []
+	authinfo = list()
 	authinfo.append(formatauthinfo(theauthor))
 
 	if len(theauthor.listofworks) > 1:
@@ -233,7 +233,7 @@ def getsearchlistcontents():
 	searchlist = compilesearchlist(listmapper)
 	searchlist = sortsearchlist(searchlist, authordict)
 
-	searchlistinfo = []
+	searchlistinfo = list()
 
 	cap = hipparchia.config['SEARCHLISTPREVIEWCAP']*2
 
@@ -281,7 +281,7 @@ def getgenrelistcontents():
 
 	sessionmapper = { 'greekcorpus': 'gr', 'inscriptioncorpus': 'in', 'papyruscorpus': 'dp', 'latincorpus': 'lt'}
 	genres = ''
-	glist = []
+	glist = list()
 
 	genres += '<h3>Author Categories</h3>'
 	for sessionvar in ['greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'latincorpus']:
@@ -294,7 +294,7 @@ def getgenrelistcontents():
 	else:
 		genres += '[no author genres in your currently selected database(s)]'
 
-	glist = []
+	glist = list()
 	genres += '\n<h3>Work Categories</h3>'
 	for sessionvar in ['greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'latincorpus']:
 		if session[sessionvar] == 'yes':

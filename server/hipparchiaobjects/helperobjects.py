@@ -242,7 +242,7 @@ class QueryCombinator(object):
 
 	def combinationlist(self):
 		"""Return all of the possible pairs of list items"""
-		combinations = []
+		combinations = list()
 		for c in range(1, len(self.words) + 1):
 			front = self.take(c, self.words)
 			back = self.tail(len(self.words) - c, self.words)
@@ -271,9 +271,9 @@ class SearchObject(object):
 		self.originalproximate = proximate
 
 		# '>' will mess you up still
-		self.originalseeking = re.sub(r'<','&lt;', self.originalseeking)
+		self.originalseeking = re.sub(r'<', '&lt;', self.originalseeking)
 		self.originalseeking = re.sub(r'>', '&gt;', self.originalseeking)
-		self.originalproximate = re.sub(r'<','&lt;', self.originalproximate)
+		self.originalproximate = re.sub(r'<', '&lt;', self.originalproximate)
 		self.originalproximate = re.sub(r'>', '&gt;', self.originalproximate)
 
 		# searchtermcharactersubstitutions() logic has moved here
@@ -330,8 +330,8 @@ class SearchObject(object):
 		self.termtwo = proximate
 		self.leastcommon = None
 		self.searchtype = None
-		self.searchlist = []
-		self.indexrestrictions = {}
+		self.searchlist = list()
+		self.indexrestrictions = dict()
 
 		if self.accented:
 			self.usecolumn = 'accented_line'

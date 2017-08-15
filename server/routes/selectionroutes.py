@@ -9,14 +9,14 @@
 import json
 import re
 
-from flask import redirect, request, url_for, session
+from flask import redirect, request, session, url_for
 
 from server import hipparchia
 from server.formatting.wordformatting import depunct
 from server.listsandsession.listmanagement import dropdupes, tidyuplist
-from server.listsandsession.sessionfunctions import modifysessionvar, sessionselectionsashtml, rationalizeselections, \
-	selectionisactive, returnactivelist
-from server.startup import authordict, workdict, authorgenresdict, authorlocationdict, workgenresdict, \
+from server.listsandsession.sessionfunctions import modifysessionvar, rationalizeselections, returnactivelist, \
+	selectionisactive, sessionselectionsashtml
+from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \
 	workprovenancedict
 
 
@@ -48,8 +48,9 @@ def selectionmade():
 	except:
 		uid = ''
 
+	allowedpunct = '|,'
 	try:
-		locus = depunct(request.args.get('locus', ''))
+		locus = depunct(request.args.get('locus', ''), allowedpunct)
 	except:
 		locus = ''
 
@@ -64,9 +65,9 @@ def selectionmade():
 	except:
 		auloc = ''
 
+	allowedpunct = '.-?'
 	try:
-		allowed = '.:()-?'
-		wkprov = depunct(request.args.get('wkprov', ''), allowed)
+		wkprov = depunct(request.args.get('wkprov', ''), allowedpunct)
 	except:
 		wkprov = ''
 
@@ -183,7 +184,7 @@ def clearselections():
 	"""
 	category = request.args.get('cat', '')
 	selectiontypes = ['auselections', 'wkselections', 'psgselections', 'agnselections', 'wkgnselections', 'alocselections', 'wlocselections',
-					  'auexclusions', 'wkexclusions', 'psgexclusions', 'agnexclusions', 'wkgnexclusions', 'alocexclusions', 'wlocexclusions']
+						'auexclusions', 'wkexclusions', 'psgexclusions', 'agnexclusions', 'wkgnexclusions', 'alocexclusions', 'wlocexclusions']
 	if category not in selectiontypes:
 		category = ''
 
@@ -192,7 +193,7 @@ def clearselections():
 
 	try:
 		session[category].pop(item)
-	except:
+	except IndexError:
 		print('clearselections() failed to pop', category, str(item))
 		pass
 
@@ -228,4 +229,3 @@ def clearsession():
 
 	session.clear()
 	return redirect(url_for('frontpage'))
-
