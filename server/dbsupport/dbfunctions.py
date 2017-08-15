@@ -64,7 +64,7 @@ def setconnection(autocommit='n'):
 	if autocommit == 'autocommit':
 		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
-	# would be great to set this to True, but 'CREATE TEMPORARY TABLE...' will not let you
+	# would be great to set readonly to True, but 'CREATE TEMPORARY TABLE...' will not let you
 	# limiting the privileges of hippa_rd is the best you can do
 	dbconnection.set_session(readonly=False)
 
@@ -153,7 +153,7 @@ def loadallworksasobjects():
 def dbloadasingleworkobject(workuniversalid):
 	"""
 
-	if you get stranded down inside a series of function calls you have no way of recaining access to the master dictionary
+	if you get stranded down inside a series of function calls you have no way of regaining access to the master dictionary
 	of work objects
 
 	:param workuniversalid:
@@ -231,7 +231,7 @@ def findtoplevelofwork(workuid, cursor):
 		results = cursor.fetchone()
 		results = list(results)
 	except:
-		results = ['zero','','','','', '']
+		results = ['zero', '', '', '', '', '']
 
 	label = None
 	while label == '' or label == None:
@@ -477,17 +477,22 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 	curs.execute(q)
 	results = curs.fetchall()
 
-	corpora = {r[0] : (r[1],r[2]) for r in results}
+	corpora = {r[0]: (r[1], r[2]) for r in results}
 
 	for db in activedbs:
 		if db in corpora:
 			if int(corpora[db][0]) != expectedsqltemplateversion:
-				print('\nWARNING\n\t VERSION MISMATCH')
-				print('\t',labeldecoder[db],'has a builder template version of',str(corpora[db][0]),'( and the data was compiled',corpora[db][1],')')
-				print('\t But the server expects the template version to be',str(expectedsqltemplateversion))
-				print('\t EXPECT THE WORST IF YOU TRY TO EXECUTE ANY SEARCHES\nWARNING')
+				t = """
+				WARNING: VERSION MISMATCH
+				{d} has a builder template version of {v}
+				(and was compiled {t})
+				But the server expects the template version to be {e}.
+				EXPECT THE WORST IF YOU TRY TO EXECUTE ANY SEARCHES
+				"""
+				print(t.format(d=labeldecoder[db], v=corpora[db][0], t=corpora[db][1], e=expectedsqltemplateversion))
 
-	buildinfo = ['\t{corpus}: {date} [{prolix}]'.format(corpus=c,date=corpora[c][1],prolix=labeldecoder[c]) for c in sorted(corpora.keys())]
+	buildinfo = ['\t{corpus}: {date} [{prolix}]'.format(corpus=c, date=corpora[c][1], prolix=labeldecoder[c])
+				for c in sorted(corpora.keys())]
 	buildinfo = '\n'.join(buildinfo)
 
 	return buildinfo

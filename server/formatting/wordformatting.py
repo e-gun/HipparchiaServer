@@ -112,12 +112,42 @@ def buildhipparchiatranstable():
 
 	:return:
 	"""
+	invals = list()
+	outvals = list()
 
-	invals = ['ἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗΐὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ']
-	outvals = ['αααααααααααααααααααααααααεεεεεεεειιιιιιιιιιιιιιιιιοοοοοοοουυυυυυυυυυυυυυυυυηηηηηηηηηηηηηηηηηηηηηηηωωωωωωωωωωωωωωωωωωωωωωω']
+	invals.append('ἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰά')
+	outvals.append('α' * len(invals[-1]))
+	invals.append('ἐἑἒἓἔἕὲέ')
+	outvals.append('ε' * len(invals[-1]))
+	invals.append('ἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗΐ')
+	outvals.append('ι' * len(invals[-1]))
+	invals.append('ὀὁὂὃὄὅόὸ')
+	outvals.append('ο' * len(invals[-1]))
+	invals.append('ὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺ')
+	outvals.append('υ' * len(invals[-1]))
+	invals.append('ᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧ')
+	outvals.append('η' * len(invals[-1]))
+	invals.append('ὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ')
+	outvals.append('ω' * len(invals[-1]))
 
-	invals.append('ᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑἘἙἚἛἜἝΕἸἹἺἻἼἽἾἿΙὈὉὊὋὌὍΟὙὛὝὟΥᾘᾙᾚᾛᾜᾝᾞᾟἨἩἪἫἬἭἮἯΗᾨᾩᾪᾫᾬᾭᾮᾯὨὩὪὫὬὭὮὯΩῤῥῬΒΨΔΦΓΞΚΛΜΝΠϘΡσΣςϹΤΧΘΖ')
-	outvals.append('αααααααααααααααααεεεεεεειιιιιιιιιοοοοοοουυυυυηηηηηηηηηηηηηηηηηωωωωωωωωωωωωωωωωωρρρβψδφγξκλμνπϙρϲϲϲϲτχθζ')
+	invals.append('ᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑ')
+	outvals.append('α'*len(invals[-1]))
+	invals.append('ἘἙἚἛἜἝΕ')
+	outvals.append('ε' * len(invals[-1]))
+	invals.append('ἸἹἺἻἼἽἾἿΙ')
+	outvals.append('ι' * len(invals[-1]))
+	invals.append('ὈὉὊὋὌὍΟ')
+	outvals.append('ο' * len(invals[-1]))
+	invals.append('ὙὛὝὟΥ')
+	outvals.append('υ' * len(invals[-1]))
+	invals.append('ᾘᾙᾚᾛᾜᾝᾞᾟἨἩἪἫἬἭἮἯΗ')
+	outvals.append('η' * len(invals[-1]))
+	invals.append('ᾨᾩᾪᾫᾬᾭᾮᾯὨὩὪὫὬὭὮὯ')
+	outvals.append('ω' * len(invals[-1]))
+	invals.append('ῤῥῬ')
+	outvals.append('ρρρ')
+	invals.append('ΒΨΔΦΓΞΚΛΜΝΠϘΡσΣςϹΤΧΘΖ')
+	outvals.append('βψδφγξκλμνπϙρϲϲϲϲτχθζ')
 
 	invals.append('vUjÁÄáäÉËéëÍÏíïÓÖóöÜÚüú')
 	outvals.append('uViaaaaeeeeiiiioooouuuu')
