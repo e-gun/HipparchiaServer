@@ -237,7 +237,7 @@ def findtoplevelofwork(workuid, cursor):
 	while label == '' or label == None:
 		try:
 			label = results.pop()
-		except:
+		except IndexError:
 			# pop from empty list
 			results = '[emptypop]'
 		
@@ -285,7 +285,7 @@ def findselectionboundaries(workobject, selection, cursor):
 	boundaries = [r[0] for r in results]
 	try:
 		boundaries = (boundaries[0], boundaries[-1])
-	except:
+	except IndexError:
 		boundaries = None
 
 	return boundaries
@@ -348,7 +348,7 @@ def returnfirstlinenumber(workid, cursor):
 	return firstline
 
 
-def perseusidmismatch(badworkdbnumber,cursor):
+def perseusidmismatch(badworkdbnumber, cursor):
 	"""
 	exception handling
 	Perseus says you can look something up in gr0006w16: but there is no such thing
@@ -356,7 +356,7 @@ def perseusidmismatch(badworkdbnumber,cursor):
 
 	more common is asking for w001 when really 002 or 003 is the 1st valid work number
 
-	:param workdb:
+	:param badworkdbnumber:
 	:param cursor:
 	:return:
 	"""
@@ -373,7 +373,7 @@ def perseusidmismatch(badworkdbnumber,cursor):
 			try:
 				oldnumber = int(badworkdbnumber[8:10])
 				newworkid = works[oldnumber][0]
-			except:
+			except IndexError:
 				newworkid = returnfirstwork(badworkdbnumber[0:6], cursor)
 		except psycopg2.DatabaseError as e:
 			print('perseusidmismatch() - could not execute', query)

@@ -47,13 +47,13 @@ def forceterminalacute(matchgroup):
 	:return:
 	"""
 
-	map = { 'ὰ': 'ά',
-	        'ὲ': 'έ',
-	        'ὶ': 'ί',
-	        'ὸ': 'ό',
-	        'ὺ': 'ύ',
-	        'ὴ': 'ή',
-	        'ὼ': 'ώ',
+	remap = {'ὰ': 'ά',
+			'ὲ': 'έ',
+			'ὶ': 'ί',
+			'ὸ': 'ό',
+			'ὺ': 'ύ',
+			'ὴ': 'ή',
+			'ὼ': 'ώ',
 			'ἂ': 'ἄ',
 			'ἒ': 'ἔ',
 			'ἲ': 'ἴ',
@@ -69,7 +69,7 @@ def forceterminalacute(matchgroup):
 			'ᾢ': 'ᾤ',
 		}
 
-	substitute = map[matchgroup[1]]
+	substitute = remap[matchgroup[1]]
 	try:
 		# the word did not end with a vowel
 		substitute += matchgroup[2]

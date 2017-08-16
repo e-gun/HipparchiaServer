@@ -69,7 +69,7 @@ def sessionvariables():
 	return
 
 
-def modifysessionvar(param,val):
+def modifysessionvar(param, val):
 	"""
 	set session varaibles after checking them for validity
 
@@ -121,13 +121,13 @@ def modifysessionvar(param,val):
 
 		# authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict
 		checkagainst = {'agnselections': authorgenresdict,
-		                'wkgnselections': workgenresdict,
-		                'alocselections': authorlocationdict,
-		                'wlocselections': workprovenancedict,
-		                'agnexclusions': authorgenresdict,
-		                'wkgnexclusions': workgenresdict,
-		                'alocexclusions': authorlocationdict,
-		                'wlocexclusions': workprovenancedict}
+						'wkgnselections': workgenresdict,
+						'alocselections': authorlocationdict,
+						'wlocselections': workprovenancedict,
+						'agnexclusions': authorgenresdict,
+						'wkgnexclusions': workgenresdict,
+						'alocexclusions': authorlocationdict,
+						'wlocexclusions': workprovenancedict}
 		for l in checkagainst.keys():
 			session[l] = [item for item in session[l] if item in returnactivelist(checkagainst[l])]
 

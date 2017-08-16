@@ -18,7 +18,7 @@ $(document).ready( function () {
         });
 
     $('#clear_button').click( function() { window.location.href = '/resetsession'; });
-
+    $('#helptabs').tabs();
     $('#helpbutton').click( function() {
         if (document.getElementById('Interface').innerHTML == '<!-- placeholder -->') {
             $.getJSON('/loadhelpdata', function (data) {
@@ -168,7 +168,7 @@ $(document).ready( function () {
 	});
 
 
-    var tohideonfirstload = new Array('#clearpick', '#helptabs', '#helptabs', '#edts', '#ldts', '#spur',
+    var tohideonfirstload = new Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur',
         '#browserdialog', '#complexsearching');
     bulkhider(tohideonfirstload);
 

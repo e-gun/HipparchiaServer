@@ -91,26 +91,26 @@ class dbOpus(object):
 	it is always going to be important to know exactly what kind of object you are handling
 	
 	CREATE TABLE public.works (
-	    universalid character(10) COLLATE pg_catalog."default",
-	    title character varying(512) COLLATE pg_catalog."default",
-	    language character varying(10) COLLATE pg_catalog."default",
-	    publication_info text COLLATE pg_catalog."default",
-	    levellabels_00 character varying(64) COLLATE pg_catalog."default",
-	    levellabels_01 character varying(64) COLLATE pg_catalog."default",
-	    levellabels_02 character varying(64) COLLATE pg_catalog."default",
-	    levellabels_03 character varying(64) COLLATE pg_catalog."default",
-	    levellabels_04 character varying(64) COLLATE pg_catalog."default",
-	    levellabels_05 character varying(64) COLLATE pg_catalog."default",
-	    workgenre character varying(32) COLLATE pg_catalog."default",
-	    transmission character varying(32) COLLATE pg_catalog."default",
-	    worktype character varying(32) COLLATE pg_catalog."default",
-	    provenance character varying(64) COLLATE pg_catalog."default",
-	    recorded_date character varying(64) COLLATE pg_catalog."default",
-	    converted_date integer,
-	    wordcount integer,
-	    firstline integer,
-	    lastline integer,
-	    authentic boolean
+		universalid character(10) COLLATE pg_catalog."default",
+		title character varying(512) COLLATE pg_catalog."default",
+		language character varying(10) COLLATE pg_catalog."default",
+		publication_info text COLLATE pg_catalog."default",
+		levellabels_00 character varying(64) COLLATE pg_catalog."default",
+		levellabels_01 character varying(64) COLLATE pg_catalog."default",
+		levellabels_02 character varying(64) COLLATE pg_catalog."default",
+		levellabels_03 character varying(64) COLLATE pg_catalog."default",
+		levellabels_04 character varying(64) COLLATE pg_catalog."default",
+		levellabels_05 character varying(64) COLLATE pg_catalog."default",
+		workgenre character varying(32) COLLATE pg_catalog."default",
+		transmission character varying(32) COLLATE pg_catalog."default",
+		worktype character varying(32) COLLATE pg_catalog."default",
+		provenance character varying(64) COLLATE pg_catalog."default",
+		recorded_date character varying(64) COLLATE pg_catalog."default",
+		converted_date integer,
+		wordcount integer,
+		firstline integer,
+		lastline integer,
+		authentic boolean
 	)
 	
 	
@@ -179,8 +179,8 @@ class dbOpus(object):
 	def later(self, other):
 		return self.converted_date > other
 
-	def datefallsbetween(self, min, max):
-		return min <= self.converted_date <= max
+	def datefallsbetween(self, minval, maxval):
+		return minval <= self.converted_date <= maxval
 
 	def bcedate(self):
 		if self.converted_date:
@@ -226,19 +226,19 @@ class dbWorkLine(object):
 	an object that corresponds to a db line
 	
 	CREATE TABLE public.in0207 (
-	    index integer NOT NULL UNIQUE DEFAULT nextval('in0207'::regclass),
-	    wkuniversalid character varying(10) COLLATE pg_catalog."default",
-	    level_05_value character varying(64) COLLATE pg_catalog."default",
-	    level_04_value character varying(64) COLLATE pg_catalog."default",
-	    level_03_value character varying(64) COLLATE pg_catalog."default",
-	    level_02_value character varying(64) COLLATE pg_catalog."default",
-	    level_01_value character varying(64) COLLATE pg_catalog."default",
-	    level_00_value character varying(64) COLLATE pg_catalog."default",
-	    marked_up_line text COLLATE pg_catalog."default",
-	    accented_line text COLLATE pg_catalog."default",
-	    stripped_line text COLLATE pg_catalog."default",
-	    hyphenated_words character varying(128) COLLATE pg_catalog."default",
-	    annotations character varying(256) COLLATE pg_catalog."default"
+		index integer NOT NULL UNIQUE DEFAULT nextval('in0207'::regclass),
+		wkuniversalid character varying(10) COLLATE pg_catalog."default",
+		level_05_value character varying(64) COLLATE pg_catalog."default",
+		level_04_value character varying(64) COLLATE pg_catalog."default",
+		level_03_value character varying(64) COLLATE pg_catalog."default",
+		level_02_value character varying(64) COLLATE pg_catalog."default",
+		level_01_value character varying(64) COLLATE pg_catalog."default",
+		level_00_value character varying(64) COLLATE pg_catalog."default",
+		marked_up_line text COLLATE pg_catalog."default",
+		accented_line text COLLATE pg_catalog."default",
+		stripped_line text COLLATE pg_catalog."default",
+		hyphenated_words character varying(128) COLLATE pg_catalog."default",
+		annotations character varying(256) COLLATE pg_catalog."default"
 	)
 	
 	"""
@@ -280,7 +280,6 @@ class dbWorkLine(object):
 		:param self:
 		:return:
 		"""
-		loc = []
 
 		if self.wkuinversalid[0:2] not in ['in', 'dp', 'ch']:
 			loc = [lvl for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5] if str(lvl) != '-1']
@@ -295,7 +294,6 @@ class dbWorkLine(object):
 				citation = self.l0
 
 		return citation
-
 
 	def locus(self):
 		"""
@@ -354,7 +352,7 @@ class dbWorkLine(object):
 		"""
 		loc = []
 		for lvl in [self.l1, self.l2, self.l3, self.l4, self.l5]:
-			if str(lvl) != '-1' and (self.wkuinversalid[0:2] not in ['in','dp', 'ch'] and lvl != 'recto'):
+			if str(lvl) != '-1' and (self.wkuinversalid[0:2] not in ['in', 'dp', 'ch'] and lvl != 'recto'):
 				loc.append(lvl)
 		loc.reverse()
 		if loc == []:
@@ -404,7 +402,8 @@ class dbWorkLine(object):
 		:param other:
 		:return:
 		"""
-		if self.wkuinversalid == other.wkuinversalid and self.l5 == other.l5 and self.l4 == other.l4 and self.l3 == other.l3 and self.l2 == other.l2 and self.l1 == other.l1:
+		if self.wkuinversalid == other.wkuinversalid and self.l5 == other.l5 and self.l4 == other.l4 and \
+						self.l3 == other.l3 and self.l2 == other.l2 and self.l1 == other.l1:
 			return True
 		else:
 			return False
@@ -417,7 +416,8 @@ class dbWorkLine(object):
 		:param other:
 		:return:
 		"""
-		if self.l5 == other.l5 and self.l4 == other.l4 and self.l3 == other.l3 and self.l2 == other.l2 and self.l1 == other.l1:
+		if self.l5 == other.l5 and self.l4 == other.l4 and self.l3 == other.l3 and self.l2 == other.l2 and \
+						self.l1 == other.l1:
 			return True
 		else:
 			return False
@@ -459,7 +459,7 @@ class dbWorkLine(object):
 		left = '<smallcode>&lt;'
 		right = '&gt;</smallcode>'
 
-		visiblehtml = re.sub(markup,left+r'\2'+right,self.accented)
+		visiblehtml = re.sub(markup, left+r'\2'+right, self.accented)
 
 		return visiblehtml
 
@@ -509,7 +509,7 @@ class dbWorkLine(object):
 		if version in ['accented', 'stripped']:
 			line = getattr(self, version)
 			line = line.split(' ')
-			allbutlast= line[:-1]
+			allbutlast = line[:-1]
 			allbutlastword = ' '.join(allbutlast)
 
 		return allbutlastword
@@ -522,7 +522,7 @@ class dbWorkLine(object):
 		if version in ['accented', 'stripped']:
 			line = getattr(self, version)
 			if version == 'accented':
-				line = re.sub(r'(\<.*?\>)', r'', line)
+				line = re.sub(r'(<.*?>)', r'', line)
 			line = line.split(' ')
 			allbutfirst = line[1:]
 			allbutfirstword = ' '.join(allbutfirst)
@@ -557,7 +557,7 @@ class dbWorkLine(object):
 		"""
 
 		pattern = re.compile(r'<hmu_metadata_notes value="(.*?)" />')
-		ands = re.compile(r'&(\d{1,2})(.*?)(&\d{0,1})')
+		ands = re.compile(r'&(\d{1,2})(.*?)(&\d?)')
 
 		notes = re.findall(pattern, self.accented)
 		notes = [re.sub(ands, andsubstitutes, n) for n in notes]
@@ -634,7 +634,7 @@ class dbWorkLine(object):
 
 		return theline
 
-	def bracketopenedbutnotclosed(self, type='square'):
+	def bracketopenedbutnotclosed(self, btype='square'):
 		"""
 
 		return True if you have 'abcd[ef ghij' and so need to continue marking editorial material
@@ -646,27 +646,27 @@ class dbWorkLine(object):
 		"""
 
 		brackettypes = {
-			'square': { 'regex': r'\[[^\]]{0,}$',
+			'square': {'regex': r'\[[^\]]{0,}$',
 			            'exceptions': [re.compile(r'\[(ϲτρ|ἀντ)\. .\.'), re.compile(r'\[ἐπῳδόϲ')]},
 			'round': {'regex': r'\([^\)]{0,}$'},
 			'angled': {'regex': r'⟨[^⟩]{0,}$'},
 			'curly': {'regex': r'\{[^\}]{0,}$'},
 			}
 
-		r = brackettypes[type]['regex']
+		r = brackettypes[btype]['regex']
 		openandnotclose = re.compile(r)
 
 		try:
-			falsify = [re.search(e, self.accented) for e in brackettypes[type]['exceptions']]
+			falsify = [re.search(e, self.accented) for e in brackettypes[btype]['exceptions']]
 		except:
 			falsify = [None]
 
-		if re.search(openandnotclose,self.accented) and True not in falsify:
+		if re.search(openandnotclose, self.accented) and True not in falsify:
 			return True
 		else:
 			return False
 
-	def bracketclosed(self, type='square'):
+	def bracketclosed(self, btype='square'):
 		"""
 
 		return true if there is a ']' in the line
@@ -683,7 +683,7 @@ class dbWorkLine(object):
 			'curly': {'c': r'\}'},
 		}
 
-		close = brackettypes[type]['c']
+		close = brackettypes[btype]['c']
 		if re.search(close, self.accented):
 			return True
 		else:

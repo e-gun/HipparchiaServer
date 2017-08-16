@@ -6,6 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+
 def insertbrowserclickjs(tagname):
 	"""
 	the clickable urls don't work without inserting new js into the page to catch the clicks
@@ -16,20 +17,20 @@ def insertbrowserclickjs(tagname):
 
 	jstemplate = """
 	$('%s').click( function() {
-		    $.getJSON('/browse/'+this.id, function (passagereturned) {
-	        $('#browseforward').unbind('click');
-	        $('#browseback').unbind('click');
+		$.getJSON('/browse/'+this.id, function (passagereturned) {
+			$('#browseforward').unbind('click');
+			$('#browseback').unbind('click');
 			var fb = parsepassagereturned(passagereturned)
-	            // left and right arrow keys
-	           $('#browserdialogtext').keydown(function(e) {
-	                switch(e.which) {
-	                    case 37: browseuponclick(fb[1]); break;
-	                    case 39: browseuponclick(fb[0]); break;
-	                    }
-	                });
-	        $('#browseforward').bind('click', function(){ browseuponclick(fb[0]); });
-	        $('#browseback').bind('click', function(){ browseuponclick(fb[1]); });
-	        });
+			// left and right arrow keys
+			$('#browserdialogtext').keydown(function(e) {
+				switch(e.which) {
+					case 37: browseuponclick(fb[1]); break;
+					case 39: browseuponclick(fb[0]); break;
+				}
+			});
+			$('#browseforward').bind('click', function(){ browseuponclick(fb[0]); });
+			$('#browseback').bind('click', function(){ browseuponclick(fb[1]); });
+		});
 	});
 	"""
 
