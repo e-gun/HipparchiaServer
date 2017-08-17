@@ -38,50 +38,20 @@ def selectionmade():
 	:return:
 	"""
 
-	try:
-		workid = depunct(request.args.get('work', ''))
-	except:
-		workid = ''
-
-	try:
-		uid = depunct(request.args.get('auth', ''))
-	except:
-		uid = ''
+	uid = depunct(request.args.get('auth', ''))
+	workid = depunct(request.args.get('work', ''))
+	genre = depunct(request.args.get('genre', ''))
+	auloc = depunct(request.args.get('auloc', ''))
+	exclude = re.sub('[^tf]', '', request.args.get('exclude', ''))
 
 	allowedpunct = '|,'
-	try:
-		locus = depunct(request.args.get('locus', ''), allowedpunct)
-	except:
-		locus = ''
-
-	try:
-		exclude = re.sub('[^tf]', '', request.args.get('exclude', ''))
-	except:
-		exclude = ''
-
-	# you clicked #pickgenre or #excludegenre
-	try:
-		auloc = depunct(request.args.get('auloc', ''))
-	except:
-		auloc = ''
+	locus = depunct(request.args.get('locus', ''), allowedpunct)
 
 	allowedpunct = '.-?'
-	try:
-		wkprov = depunct(request.args.get('wkprov', ''), allowedpunct)
-	except:
-		wkprov = ''
+	wkprov = depunct(request.args.get('wkprov', ''), allowedpunct)
 
-	try:
-		genre = depunct(request.args.get('genre', ''))
-	except:
-		genre = ''
-
-	try:
-		# need periods (for now): just remove some obvious problem cases
-		allowed = '.'
-		wkgenre = depunct(request.args.get('wkgenre', ''), allowed)
-	except:
-		wkgenre = ''
+	allowedpunct = '.'
+	wkgenre = depunct(request.args.get('wkgenre', ''), allowedpunct)
 
 	if exclude != 't':
 		suffix = 'selections'

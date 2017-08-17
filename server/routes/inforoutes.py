@@ -13,7 +13,7 @@ from sys import argv
 from flask import render_template
 
 from server import hipparchia
-from server.startup import authordict, workdict, authorgenresdict, authorlocationdict, workgenresdict, \
+from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \
 	workprovenancedict
 
 
@@ -44,7 +44,7 @@ def databasecontents(dictionarytodisplay):
 		columntwo = icandisplay[dictionarytodisplay][2]
 		keys = list(viewing.keys())
 		results = [{'key': getattr(viewing[k], columnone), 'value': getattr(viewing[k], columntwo)} for k in keys]
-		results = sorted(results, key= lambda x: x['key'])
+		results = sorted(results, key=lambda x: x['key'])
 	elif dictionarytodisplay in icandisplay.keys() and not icandisplay[dictionarytodisplay][1]:
 		viewing = icandisplay[dictionarytodisplay][0]
 		categories = ['gr', 'lt', 'in', 'dp', 'ch']

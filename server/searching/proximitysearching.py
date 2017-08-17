@@ -9,7 +9,7 @@
 import re
 
 from server.dbsupport.dbfunctions import dblineintolineobject, grabonelinefromwork, makeablankline, setconnection
-from server.searching.searchfunctions import substringsearch, dblooknear
+from server.searching.searchfunctions import dblooknear, substringsearch
 
 
 def withinxlines(workdbname, searchobject):
@@ -26,8 +26,8 @@ def withinxlines(workdbname, searchobject):
 		Searched 6,625 texts and found 1,428 passages (8.04s)
 		Sorted by name
 
-	:param distanceinlines:
-	:param additionalterm:
+	:param workdbname:
+	:param searchobject:
 	:return:
 	"""
 
@@ -76,9 +76,8 @@ def withinxwords(workdbname, searchobject):
 	this will become:
 		'romani' + 'seruorum gloriatos itane tandem ne'
 
-
-	:param distanceinlines:
-	:param additionalterm:
+	:param workdbname:
+	:param searchobject:
 	:return:
 	"""
 	so = searchobject
@@ -135,13 +134,13 @@ def withinxwords(workdbname, searchobject):
 		while pcount < distance+1:
 			atline += 1
 			try:
-				next = dblineintolineobject(grabonelinefromwork(workdbname[0:6], atline, cursor))
+				nextline = dblineintolineobject(grabonelinefromwork(workdbname[0:6], atline, cursor))
 			except TypeError:
 				# 'NoneType' object is not subscriptable
-				next = makeablankline(workdbname[0:6], -1)
+				nextline = makeablankline(workdbname[0:6], -1)
 				pcount = 999
-			leading += next.wordlist(so.usewordlist)
-			pcount += next.wordcount()
+			leading += nextline.wordlist(so.usewordlist)
+			pcount += nextline.wordcount()
 		leading = leading[:distance-1]
 		leading = ' '.join(leading)
 
@@ -154,5 +153,3 @@ def withinxwords(workdbname, searchobject):
 	cursor.close()
 
 	return fullmatches
-
-

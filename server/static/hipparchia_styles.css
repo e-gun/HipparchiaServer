@@ -265,6 +265,10 @@ body {
 	color: var(--red);
 	}
 
+.coptic {
+    color: var(--skyblue);
+    }
+
 .crossreference {
 	font-style: italic;
 	color: var(--rustedorange);

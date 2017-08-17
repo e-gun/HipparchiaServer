@@ -107,8 +107,8 @@ def findtheworksof(authoruid):
 	if myauthor:
 		worklist = myauthor.listofworks
 		for work in worklist:
-			hint.append({'value':work.title+' ('+work.universalid[-4:]+')'})
-		if hint == []:
+			hint.append({'value': '{t} ({id})'.format(t=work.title, id=work.universalid[-4:])})
+		if not hint:
 			hint.append({'value': 'somehow failed to find any works: try picking the author again'})
 	else:
 		hint.append({'value': 'author was not properly loaded: try again'})

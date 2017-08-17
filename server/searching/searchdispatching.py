@@ -15,22 +15,24 @@ from server.hipparchiaobjects.helperobjects import MPCounter
 from server.lexica.lexicalookups import findcountsviawordcountstable
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
-from server.searching.searchfunctions import substringsearch, findleastcommonterm, \
-	massagesearchtermsforwhitespace, findleastcommontermcount
+from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, \
+	massagesearchtermsforwhitespace, substringsearch
 
 
 def searchdispatcher(searchobject, activepoll):
 	"""
+
 	assign the search to multiprocessing workers
 		searchobject:
 			<server.hipparchiaclasses.SearchObject object at 0x1102c15f8>
 		activepoll:
 			<server.hipparchiaclasses.ProgressPoll object at 0x1102c15f8>
 
-	:param searchingfor:
-	:param indexedauthorandworklist:
+	:param searchobject:
+	:param activepoll:
 	:return:
 	"""
+
 	so = searchobject
 
 	# recompose 'searchingfor'
@@ -77,10 +79,12 @@ def searchdispatcher(searchobject, activepoll):
 		#   when is this not true? being wrong about sqs() means spending an extra 10s; being wrong about phs() means an extra 40s...
 		if 0 < lccount < 500:
 			# print('workonphrasesearch()',searchingfor)
-			jobs = [Process(target=workonphrasesearch, args=(foundlineobjects, searchlist, commitcount, activepoll, so))
+			jobs = [Process(target=workonphrasesearch,
+			                args=(foundlineobjects, searchlist, commitcount, activepoll, so))
 			        for i in range(workers)]
 		else:
-			jobs = [Process(target=subqueryphrasesearch, args=(foundlineobjects, so.termone, searchlist, count, commitcount, activepoll, so))
+			jobs = [Process(target=subqueryphrasesearch,
+			                args=(foundlineobjects, so.termone, searchlist, count, commitcount, activepoll, so))
 			        for i in range(workers)]
 	elif so.searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
@@ -98,7 +102,8 @@ def searchdispatcher(searchobject, activepoll):
 			tmp = so.termone
 			so.termone = so.termtwo
 			so.termtwo = tmp
-		jobs = [Process(target=workonproximitysearch, args=(count, foundlineobjects, searchlist, activepoll, so))
+		jobs = [Process(target=workonproximitysearch,
+		                args=(count, foundlineobjects, searchlist, activepoll, so))
 		        for i in range(workers)]
 	else:
 		# impossible, but...
@@ -116,15 +121,15 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
 
-	searchlist:
-		['lt0400', 'lt0022', ...]
+	searchlist: ['gr0461', 'gr0489', 'gr0468', ...]
 
 	:param count:
-	:param hits:
-	:param searchingfor:
-	:param searching:
-	:return: a collection of lineobjects
-		[<server.hipparchiaclasses.dbWorkLine object at 0x114401828>, <server.hipparchiaclasses.dbWorkLine object at 0x1144017b8>,...]
+	:param foundlineobjects:
+	:param searchlist:
+	:param commitcount:
+	:param activepoll:
+	:param searchobject:
+	:return:
 	"""
 
 	dbconnection = setconnection('not_autocommit')
@@ -161,15 +166,18 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 
 def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepoll, searchobject):
 	"""
+
 	a multiprocessor aware function that hands off bits of a phrase search to multiple searchers
 	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase hits the limit
 
 	searchinginside:
 		['lt0400', 'lt0022', ...]
 
-	:param hits:
-	:param searchingfor:
-	:param searching:
+	:param foundlineobjects:
+	:param searchinginside:
+	:param commitcount:
+	:param activepoll:
+	:param searchobject:
 	:return:
 	"""
 
@@ -224,11 +232,11 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 		'patres'
 
 	:param count:
-	:param hits:
-	:param searchingfor:
-	:param proximate:
-	:param searching:
-	:return: a collection of hits
+	:param foundlineobjects:
+	:param searchinginside:
+	:param activepoll:
+	:param searchobject:
+	:return:
 	"""
 
 	so = searchobject

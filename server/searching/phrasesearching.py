@@ -9,24 +9,25 @@
 import re
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection, makeablankline, dblineintolineobject
+from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, setconnection
 from server.hipparchiaobjects.helperobjects import QueryCombinator
-from server.searching.searchfunctions import substringsearch, lookoutsideoftheline, buildbetweenwhereextension
+from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline, substringsearch
 
 
 def phrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
 	"""
+
 	a whitespace might mean things are on a new line
 	note how horrible something like και δη και is: you will search και first and then...
 	subqueryphrasesearch() takes a more or less fixed amount of time; this function is
 	faster if you call it with an uncommon word; if you call it with a common word, then
 	you will likely search much more slowly than you would with subqueryphrasesearch()
 
-	:param searchphrase:
-	:param cursor:
+	:param maxhits:
 	:param wkid:
-	:param authorswheredict:
 	:param activepoll:
+	:param searchobject:
+	:param cursor:
 	:return:
 	"""
 
@@ -41,10 +42,10 @@ def phrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
 		phraselen = len(searchphrase.split(' '))
 		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, so, cursor)
 		if not so.accented:
-			wordset = re.sub(r'[\.\?\!;:,·’]', r'', wordset)
+			wordset = re.sub(r'[.?!;:,·’]', r'', wordset)
 		else:
 			# the difference is in the apostrophe: δ vs δ’
-			wordset = re.sub(r'[\.\?\!;:,·]', r'', wordset)
+			wordset = re.sub(r'[.?!;:,·]', r'', wordset)
 
 		if so.near and re.search(searchphrase, wordset):
 			fullmatches.append(hit)
@@ -195,7 +196,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 			indices = [i[0] for i in curs.fetchall()]
 			# this will yield a bunch of windows: you need to find the centers; see 'while...' below
 
-			locallineobjects = []
+			locallineobjects = list()
 			if indices:
 				for i in indices:
 					query = 'SELECT * FROM {tb} WHERE index=%s'.format(tb=uid)
@@ -223,27 +224,27 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 						gotmyonehit = True
 				else:
 					try:
-						next = locallineobjects[0]
+						nextline = locallineobjects[0]
 					except:
-						next = makeablankline('gr0000w000', -1)
+						nextline = makeablankline('gr0000w000', -1)
 
-					if lo.wkuinversalid != next.wkuinversalid or lo.index != (next.index - 1):
+					if lo.wkuinversalid != nextline.wkuinversalid or lo.index != (nextline.index - 1):
 						# you grabbed the next line on the pile (e.g., index = 9999), not the actual next line (e.g., index = 101)
 						# usually you won't get a hit by grabbing the next db line, but sometimes you do...
 						query = 'SELECT * FROM {tb} WHERE index=%s'.format(tb=uid)
 						data = (lo.index + 1,)
 						curs.execute(query, data)
 						try:
-							next = dblineintolineobject(curs.fetchone())
+							nextline = dblineintolineobject(curs.fetchone())
 						except:
-							next = makeablankline('gr0000w000', -1)
+							nextline = makeablankline('gr0000w000', -1)
 
 					for c in combinations:
 						tail = c[0] + '$'
 						head = '^' + c[1]
 						# debugging
 						# print('re',getattr(lo,so.usewordlist),tail, head, getattr(next,so.usewordlist))
-						if re.search(tail, getattr(lo, so.usewordlist)) and re.search(head, getattr(next, so.usewordlist)):
+						if re.search(tail, getattr(lo, so.usewordlist)) and re.search(head, getattr(nextline, so.usewordlist)):
 							foundlineobjects.append(lo)
 							count.increment(1)
 							activepoll.sethits(count.value)
