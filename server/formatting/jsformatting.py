@@ -34,7 +34,7 @@ def insertbrowserclickjs(tagname):
 	});
 	"""
 
-	js = jstemplate % (tagname)
+	js = jstemplate % tagname
 
 	return js
 

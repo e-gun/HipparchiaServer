@@ -82,7 +82,7 @@ def woformatworkinfo(workobject):
 	dbdata into html
 	send me: universalid, title, workgenre, wordcount
 
-	:param workinfo:
+	:param workobject:
 	:return:
 	"""
 
@@ -146,9 +146,12 @@ def formatname(workobject, authorobject):
 
 def getpublicationinfo(workobject, cursor):
 	"""
+
 	what's in a name?
+
 	:param workobject:
-	:return: html for the bibliography
+	:param cursor:
+	:return:
 	"""
 
 	uid = workobject.universalid
@@ -194,14 +197,14 @@ def formatpublicationinfo(pubinfo):
 		seek = re.compile('<' + tag + '>(.*?)</' + tag + '>')
 		if re.search(seek, pubinfo):
 			found = re.search(seek, pubinfo)
-			data = re.sub(r'\s+$','',found.group(1))
+			data = re.sub(r'\s+$', '', found.group(1))
 			foundinfo = avoidlonglines(data, maxlinelen, '<br />', [])
 			publicationhtml += '<span class="pub{t}">{va}{fi}{vb}</span>'.format(t=tag, va=val[0], fi=foundinfo, vb=val[1])
 
 	return publicationhtml
 
 
-def avoidlonglines(string, maxlen, splitval, stringlist=[]):
+def avoidlonglines(string, maxlen, splitval, stringlist=list()):
 	"""
 
 	Authors like Livy can swallow the browser window by sending 351 characters worth of editors to one of the lines
@@ -212,10 +215,12 @@ def avoidlonglines(string, maxlen, splitval, stringlist=[]):
 
 	:param string:
 	:param maxlen:
+	:param splitval:
+	:param stringlist:
 	:return:
 	"""
 
-	breakcomeswithinamarkupseries = re.compile(r'^\s[^\s]{1,}>')
+	breakcomeswithinamarkupseries = re.compile(r'^\s[^\s]+>')
 
 	if len(string) < maxlen:
 		stringlist.append(string)
@@ -225,8 +230,8 @@ def avoidlonglines(string, maxlen, splitval, stringlist=[]):
 		stop = False
 		stopval = len(string)
 
-		for c in range(maxlen-1,-1,-1):
-			if searchzone[c] == ' ' and stop == False and re.search(breakcomeswithinamarkupseries, string[c:]) is None:
+		for c in range(maxlen-1, -1, -1):
+			if searchzone[c] == ' ' and not stop and re.search(breakcomeswithinamarkupseries, string[c:]) is None:
 				stop = True
 				stringlist.append(string[0:c])
 				stopval = c
@@ -237,9 +242,11 @@ def avoidlonglines(string, maxlen, splitval, stringlist=[]):
 
 def formatauthorandworkinfo(authorname, workobject):
 	"""
+
 	dbdata into html
-	send me: authorname + universalid, title, workgenre, wordcount
-	:param workinfo:
+
+	:param authorname:
+	:param workobject:
 	:return:
 	"""
 

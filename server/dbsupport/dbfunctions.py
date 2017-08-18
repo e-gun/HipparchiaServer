@@ -57,16 +57,16 @@ def setthreadcount(startup=False):
 	return w
 
 
-def setconnection(autocommit='n'):
+def setconnection(autocommit='n', readonlyconnection=True):
 	dbconnection = psycopg2.connect(user=hipparchia.config['DBUSER'], host=hipparchia.config['DBHOST'],
 	                                port=hipparchia.config['DBPORT'], database=hipparchia.config['DBNAME'],
 	                                password=hipparchia.config['DBPASS'])
 	if autocommit == 'autocommit':
 		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
-	# would be great to set readonly to True, but 'CREATE TEMPORARY TABLE...' will not let you
+	# would be great to set readonly to True in all cases, but 'CREATE TEMPORARY TABLE...' will not let you
 	# limiting the privileges of hippa_rd is the best you can do
-	dbconnection.set_session(readonly=False)
+	dbconnection.set_session(readonly=readonlyconnection)
 
 	return dbconnection
 
@@ -87,7 +87,7 @@ def tablenamer(authorobject, thework):
 		pr = 'lt'
 	else:
 		pr = ''
-		print('oh, I do not speak', lg, 'and I will be unable to access a DB')
+		print('oh, I do not speak {l} and I will be unable to access a DB'.format(l=lg))
 
 	workdbname = pr + nm + 'w' + wn
 
@@ -112,9 +112,9 @@ def loadallauthorsasobjects():
 	curs.execute(q)
 	results = curs.fetchall()
 
-	authorsdict = {r[0]:dbAuthor(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9]) for r in results}
+	authorsdict = {r[0]: dbAuthor(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9]) for r in results}
 
-	print('\t',len(authorsdict),'authors loaded')
+	print('\t', len(authorsdict), 'authors loaded')
 
 	return authorsdict
 
@@ -138,7 +138,7 @@ def loadallworksasobjects():
 	curs.execute(q)
 	results = curs.fetchall()
 
-	worksdict = {r[0]:dbOpus(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8],
+	worksdict = {r[0]: dbOpus(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8],
 						 r[9], r[10], r[11], r[12], r[13], r[14], r[15], r[16],
 						 r[17], r[18], r[19]) for r in results}
 
@@ -163,11 +163,15 @@ def dbloadasingleworkobject(workuniversalid):
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 
-	q = 'SELECT universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03, ' \
-	        'levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance, recorded_date, converted_date, wordcount, ' \
-			'firstline, lastline, authentic FROM works WHERE universalid=%s'
+	q = """
+	SELECT universalid, title, language, publication_info, 
+		levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05, 
+		workgenre, transmission, worktype, provenance, recorded_date, converted_date, wordcount, 
+		firstline, lastline, authentic FROM works WHERE universalid=%s
+	"""
+
 	d = (workuniversalid,)
-	curs.execute(q,d)
+	curs.execute(q, d)
 	r = curs.fetchone()
 
 	workobject = dbOpus(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8],
@@ -224,7 +228,11 @@ def findtoplevelofwork(workuid, cursor):
 	:return:
 	"""
 
-	query = 'SELECT levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05 from works where universalid = %s'
+	query = """
+	SELECT levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05 
+		FROM works WHERE universalid = %s
+	"""
+
 	data = (workuid,)
 	try:
 		cursor.execute(query, data)
@@ -262,7 +270,7 @@ def findselectionboundaries(workobject, selection, cursor):
 	wklvls = list(workobject.structure.keys())
 	wklvls.reverse()
 
-	whereclausetuples = []
+	whereclausetuples = list()
 
 	index = -1
 	for l in locus:
@@ -342,7 +350,7 @@ def returnfirstlinenumber(workid, cursor):
 			found = cursor.fetchone()
 			firstline = found[0]
 		except:
-			workid = perseusidmismatch(workid,cursor)
+			workid = perseusidmismatch(workid, cursor)
 			firstline = returnfirstlinenumber(workid, cursor)
 
 	return firstline

@@ -100,7 +100,7 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 	:return:
 	"""
 
-	dbconnection = setconnection('autocommit')
+	dbconnection = setconnection('autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
 
 	tosearch = deque()
@@ -118,7 +118,7 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 	tosearch = [str(x) for x in tosearch]
 
 	tempquery = 'CREATE TEMPORARY TABLE {au}_includelist AS SELECT values AS includeindex FROM unnest(ARRAY[{lines}]) values'.format(
-		au=table, lines = ','.join(tosearch))
+		au=table, lines=','.join(tosearch))
 	curs.execute(tempquery)
 
 	q = 'SELECT * FROM {au} WHERE EXISTS (SELECT 1 FROM {au}_includelist incl WHERE incl.includeindex = {au}.index)'.format(au=table)

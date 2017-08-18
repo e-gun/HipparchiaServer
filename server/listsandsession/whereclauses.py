@@ -1,7 +1,7 @@
 import re
 from collections import deque
 
-from server.dbsupport.dbfunctions import setconnection, findselectionboundaries
+from server.dbsupport.dbfunctions import findselectionboundaries, setconnection
 
 
 def configurewhereclausedata(searchlist, workdict, searchobject):
@@ -39,7 +39,7 @@ def configurewhereclausedata(searchlist, workdict, searchobject):
 	"""
 
 	so = searchobject
-	indexedauthorlist = {}
+	indexedauthorlist = dict()
 
 	hasexclusions = [p[0:10] for p in so.psgexclusions if p]
 	hasselections = [p[0:10] for p in so.psgselections if p]
@@ -49,16 +49,16 @@ def configurewhereclausedata(searchlist, workdict, searchobject):
 		incompleteworks = {x[0:10] for x in searchlist
 		                   if (cleanlistmapper[x] in hasselections or cleanlistmapper[x] in hasexclusions)}
 	else:
-		incompleteworks = {}
+		incompleteworks = dict()
 
-	wholeauthors = {x for x in searchlist if len(x)==6}
-	wholeworks = {x for x in searchlist if len(x)==10 and x[6] != 'x'}
+	wholeauthors = {x for x in searchlist if len(x) == 6}
+	wholeworks = {x for x in searchlist if len(x) == 10 and x[6] != 'x'}
 
 	literaryworks = {x for x in wholeworks if workdict[x].isliterary()}
 	nonliteraryworks = {x for x in wholeworks if workdict[x].isnotliterary()}
 
 	# [A] LITERARY AUTHORS
-	literyauthors = {}
+	literyauthors = dict()
 	for w in literaryworks:
 		try:
 			literyauthors[w[0:6]].append(workdict[w])
@@ -75,7 +75,7 @@ def configurewhereclausedata(searchlist, workdict, searchobject):
 	                           for l in literyauthors}
 
 	# [B] NON-LITERARY AUTHORS
-	nonliteryauthors = {}
+	nonliteryauthors = dict()
 	for n in nonliteraryworks:
 		try:
 			nonliteryauthors[n[0:6]]
@@ -101,7 +101,7 @@ def configurewhereclausedata(searchlist, workdict, searchobject):
 	# sample:
 	# {'gr0032': {'listofboundaries': [(1, 7918)], 'listofomissions': [(5434, 6683), (1846, 2856)]}}
 
-	partialworks = {}
+	partialworks = dict()
 	for i in ixlist:
 		if i[1]['listofboundaries']:
 			try:
@@ -249,8 +249,8 @@ def partialworkbetweenclausecontents(workobject, searchobject):
 	dbconnection = setconnection('autocommit')
 	curs = dbconnection.cursor()
 
-	blist = []
-	olist = []
+	blist = list()
+	olist = list()
 	for sel in searchobject.psgselections:
 		if workobject.universalid == sel[0:10]:
 			boundariestuple = findselectionboundaries(workobject, sel, curs)

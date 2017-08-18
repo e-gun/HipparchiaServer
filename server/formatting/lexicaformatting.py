@@ -24,29 +24,29 @@ def grabsenses(fullentry):
 	senses = re.findall(sensing, fullentry)
 	leveler = re.compile(r'<sense\s.*?level="(.*?)".*?>')
 	nummer = re.compile(r'<sense.*?\sn="(.*?)".*?>')
-	numbered = []
+	numbered = list()
 	i = 0
 	
 	for sense in senses:
 		i += 1
-		lvl = re.search(leveler,sense)
-		num = re.search(nummer,sense)
+		lvl = re.search(leveler, sense)
+		num = re.search(nummer, sense)
 		# note that the two dictionaries do not necc agree with one another (or themselves) when it comes to nesting labels
-		if re.search(r'[A-Z]',num.group(1)):
+		if re.search(r'[A-Z]', num.group(1)):
 			paragraphlevel = '1'
-		elif re.search(r'[0-9]',num.group(1)):
+		elif re.search(r'[0-9]', num.group(1)):
 			paragraphlevel = '3'
-		elif re.search(r'[ivx]',num.group(1)):
+		elif re.search(r'[ivx]', num.group(1)):
 			paragraphlevel = '4'
-		elif re.search(r'[a-hj-w]',num.group(1)):
+		elif re.search(r'[a-hj-w]', num.group(1)):
 			paragraphlevel = '2'
 		else:
 			paragraphlevel = '1'
 
 		try:
-			rewritten = '<p class="level{pl}"><span class="levellabel{lv}">{nm}</span>{sn}</p>\n'.format(pl=paragraphlevel, lv=lvl.group(1),nm=num.group(1), sn=sense)
+			rewritten = '<p class="level{pl}"><span class="levellabel{lv}">{nm}</span>{sn}</p>\n'.format(pl=paragraphlevel, lv=lvl.group(1), nm=num.group(1), sn=sense)
 		except:
-			print('exception in grabsenses at sense number:',i)
+			print('exception in grabsenses at sense number:', i)
 			rewritten = ''
 		numbered.append(rewritten)
 
@@ -55,6 +55,7 @@ def grabsenses(fullentry):
 
 def entrysummary(fullentry, lang, translationlabel, lemmaobject):
 	"""
+
 	returns a collection of lists: all authors, senses, and quotes to be found in an entry
 
 	entryxref allows you to trim 'quotes' that are really just morphology examples
@@ -62,8 +63,10 @@ def entrysummary(fullentry, lang, translationlabel, lemmaobject):
 	for example, ἔρχομαι will drop 12 items via this check
 
 	:param fullentry:
+	:param lang:
+	:param translationlabel:
+	:param lemmaobject:
 	:return:
-
 	"""
 
 	soup = BeautifulSoup(fullentry, 'html.parser')
@@ -83,11 +86,11 @@ def entrysummary(fullentry, lang, translationlabel, lemmaobject):
 		s[:] = [value for value in s if '.' not in value]
 		s[:] = [value for value in s if value not in notin]
 	except:
-		s = []
+		s = list()
 
 	# so 'go' and 'go,' are not both on the list
 	depunct = '[{p}]$'.format(p=re.escape(punctuation))
-	s = [re.sub(depunct, '',s) for s in s]
+	s = [re.sub(depunct, '', s) for s in s]
 	s = [re.sub(r'^To', 'to', s) for s in s]
 	s = list(set(s))
 	s.sort()
@@ -101,7 +104,7 @@ def entrysummary(fullentry, lang, translationlabel, lemmaobject):
 	q = [x for x in q if x not in morphologylist]
 	q = polytonicsort(q)
 
-	summarydict = {'authors': a, 'senses': s, 'quotes':q}
+	summarydict = {'authors': a, 'senses': s, 'quotes': q}
 
 	return summarydict
 
@@ -112,8 +115,8 @@ def grabheadmaterial(fullentry):
 	:param fullentry:
 	:return:
 	"""
-	heading = re.compile(r'(.*?)\<sense')
-	head = re.search(heading,fullentry)
+	heading = re.compile(r'(.*?)<sense')
+	head = re.search(heading, fullentry)
 
 	try:
 		return head.group(0)
@@ -121,14 +124,14 @@ def grabheadmaterial(fullentry):
 		try:
 			return ''
 		except:
-			print('failed to grabheadmaterial()\n\t',fullentry)
+			print('failed to grabheadmaterial()\n\t', fullentry)
 			return ''
 
 
 def deabbreviateauthors(authorabbr, lang):
 	"""
 
-	just hand this off to another fuction via language setting
+	just hand this off to another function via language setting
 
 	:param authorabbr:
 	:param lang:
@@ -140,7 +143,7 @@ def deabbreviateauthors(authorabbr, lang):
 	elif lang == 'latin':
 		authordict = deabrevviatelatinauthors()
 	else:
-		authordict = {}
+		authordict = dict()
 
 	if authorabbr in authordict:
 		author = authordict[authorabbr]
@@ -163,12 +166,12 @@ def formatdictionarysummary(summarydict):
 	senses = summarydict['senses']
 	quotes = summarydict['quotes']
 
-	sections = { 'authors': { 'items': authors, 'classone': 'authorsummary', 'classtwo': 'authorsum', 'label': 'Used by'},
+	sections = {'authors': { 'items': authors, 'classone': 'authorsummary', 'classtwo': 'authorsum', 'label': 'Used by'},
 				 'quotes': {'items': quotes, 'classone': 'quotessummary', 'classtwo': 'quotesum', 'label': 'Quotes'},
 				 'senses': {'items': senses, 'classone': 'sensesummary', 'classtwo': 'sensesum', 'label': 'Senses'}
-				 }
+				}
 
-	outputlist = []
+	outputlist = list()
 
 	for section in ['senses', 'authors', 'quotes']:
 		sec = sections[section]
@@ -204,17 +207,17 @@ def formateconsolidatedgrammarentry(consolidatedentry):
 	example:
 		 {'count': 1, 'form': 'ἀϲήμου', 'word': 'ἄϲημοϲ', 'transl': 'without mark', 'anal': ['masc/fem/neut gen sg']}
 
-	:param entrydata:
+	:param consolidatedentry:
 	:return:
 	"""
 
 	analysislist = consolidatedentry['anal']
 
-	outputlist = []
+	outputlist = list()
 	outputlist.append('<p class="obsv">({ct})&nbsp;'.format(ct=str(consolidatedentry['count'])))
 	wordandtranslation = '<span class="dictionaryform">{df}</span>'.format(df=consolidatedentry['word'])
 	if len(consolidatedentry['transl']) > 1:
-		wordandtranslation = ', '.join([wordandtranslation,consolidatedentry['transl']])
+		wordandtranslation = ', '.join([wordandtranslation, consolidatedentry['transl']])
 
 	outputlist.append('<span class="dictionaryform">{df}</span> (from {wt}): &nbsp;'.format(df=consolidatedentry['form'], wt=wordandtranslation))
 	if len(analysislist) == 1:
@@ -237,7 +240,7 @@ def formatgloss(entrybody):
 	:param entrybody:
 	:return:
 	"""
-	glosshtml = []
+	glosshtml = list()
 	
 	soup = BeautifulSoup(entrybody, 'html.parser')
 	senses = soup.find_all('foreign')
@@ -282,7 +285,7 @@ def formatmicroentry(entrybody):
 	for s in senses:
 		try:
 			entryhtml += s + '<br />'
-		except:
+		except TypeError:
 			# s was NoneType
 			pass
 
@@ -313,7 +316,7 @@ def insertbrowserlookups(htmlentry):
 		else:
 			head = bib[0]
 			tail = bib[2]
-		bdict[('').join(bib)] = head + bib[1] + tail
+		bdict[''.join(bib)] = head + bib[1] + tail
 	
 	# print('here',bdict)
 	for key in bdict.keys():
@@ -431,7 +434,7 @@ def dbquickfixes(listofnames):
 	}
 
 	for item in listofnames:
-		db = re.search(dbfinder,item)
+		db = re.search(dbfinder, item)
 		if db.group(1) in fixer.keys():
 			hipparchiadb = fixer[db.group(1)]
 			substitutes[item] = hipparchiadb+db.group(2)

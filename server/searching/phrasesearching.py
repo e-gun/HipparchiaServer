@@ -138,7 +138,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 
 	so = searchobject
 
-	dbconnection = setconnection('autocommit')
+	dbconnection = setconnection('autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
 
 	qcomb = QueryCombinator(searchphrase)

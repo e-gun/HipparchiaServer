@@ -83,6 +83,7 @@ key features:
 	    configurable defaults for most options
 	    will display annotations to the original text
 	    unicode support of technical, rare, and exotic characters (that you can also search for: 𐆂,𐄒, 🜚)
+	    can find Coptic words and characters: 'ⲫⲓⲗⲟⲑⲉⲟⲥ', 'ϩανϭοϊ̈', etc.
 	    forward-compatible unicode: attempt to properly code characters which are not yet available in most fonts
 	    known unknowns: unhandled characters preserve their betacode messages in the metadata for future fixes
 
