@@ -136,7 +136,7 @@ def prolixlocus(workobject, citationtuple):
 	for level in range(0, len(wklvls)):
 		try:
 			citation.append(workobject.structure[wklvls[level]]+' '+cite[level])
-		except KeyError:
+		except IndexError:
 			# did you send me a partial citation like "book 2"?
 			pass
 
