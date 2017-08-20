@@ -16,7 +16,7 @@ def loadconfig(filepath):
 	:return: configlist
 	"""
 
-	configlist = []
+	configlist = list()
 
 	with open(filepath) as f:
 		for line in f:
@@ -34,7 +34,7 @@ def parseconfig(configlist):
 	"""
 	findconfig = re.compile(r'^[A-Z]{1,}')
 
-	configvariablelist = []
+	configvariablelist = list()
 	for c in configlist:
 		configvar = re.search(findconfig, c)
 		try:

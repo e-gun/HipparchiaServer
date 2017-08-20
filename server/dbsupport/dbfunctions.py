@@ -66,6 +66,7 @@ def setconnection(autocommit='n', readonlyconnection=True):
 
 	# would be great to set readonly to True in all cases, but 'CREATE TEMPORARY TABLE...' will not let you
 	# limiting the privileges of hippa_rd is the best you can do
+
 	dbconnection.set_session(readonly=readonlyconnection)
 
 	return dbconnection

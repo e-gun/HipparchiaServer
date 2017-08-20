@@ -89,7 +89,7 @@ def loadhelpdata():
 					'Extending': 'helpextending.html',
 					'Openness': 'helpopenness.html'}
 
-	helpdict = {}
+	helpdict = dict()
 	helpdict['helpcategories'] = list(divmapper.keys())
 
 	for d in divmapper:

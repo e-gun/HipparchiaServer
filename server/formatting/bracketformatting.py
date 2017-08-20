@@ -36,13 +36,15 @@ def brackethtmlifysearchfinds(listoflineobjects, searchobject, linehtmltemplate)
 	can't do comprehensions: require a thisline/previousline structure so you can call setcontinuationvalue()
 
 	:param listoflineobjects:
+	:param searchobject:
+	:param linehtmltemplate:
 	:return:
 	"""
 
 	brackettypes = findactivebrackethighlighting(searchobject.session)
 	continuationdict = {t: False for t in brackettypes}
 
-	passage = []
+	passage = list()
 	lines = deque(listoflineobjects)
 	try:
 		previous = lines.popleft()

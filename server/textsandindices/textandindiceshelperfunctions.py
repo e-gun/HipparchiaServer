@@ -10,48 +10,42 @@ from collections import deque
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
-from server.dbsupport.dbfunctions import grabonelinefromwork, dblineintolineobject, makeanemptyauthor, makeanemptywork
+from server.dbsupport.dbfunctions import dblineintolineobject, grabonelinefromwork, makeanemptyauthor, makeanemptywork
 from server.formatting.wordformatting import depunct
 from server.searching.searchfunctions import atsignwhereclauses
 
 
 def tcparserequest(request, authordict, workdict):
 	"""
+
 	return the author, work, and locus requested
 	also some other handy variable derived from these items
-	:param requestobject:
+
+	:param request:
+	:param authordict:
+	:param workdict:
 	:return:
 	"""
-	
-	try:
-		uid = depunct(request.args.get('auth', ''))
-	except:
-		uid = ''
-		
-	try:
-		workid = depunct(request.args.get('work', ''))
-	except:
-		workid = ''
 
-	try:
-		allowed = ',;|'
-		locus = depunct(request.args.get('locus', ''), allowed)
-	except:
-		locus = ''
-	
+	uid = depunct(request.args.get('auth', ''))
+	workid = depunct(request.args.get('work', ''))
+
+	allowed = ',;|'
+	locus = depunct(request.args.get('locus', ''), allowed)
+
 	workdb = uid + 'w' + workid
 	
-	if uid != '':
+	if uid != str():
 		try:
 			ao = authordict[uid]
 			if len(workdb) == 10:
 				try:
 					wo = workdict[workdb]
-				except:
+				except KeyError:
 					wo = makeanemptywork('gr0000w000')
 			else:
 					wo = makeanemptywork('gr0000w000')
-		except:
+		except KeyError:
 			ao = makeanemptyauthor('gr0000')
 			wo = makeanemptywork('gr0000w000')
 		
@@ -61,9 +55,9 @@ def tcparserequest(request, authordict, workdict):
 	else:
 		ao = makeanemptyauthor('gr0000')
 		wo = makeanemptywork('gr0000w000')
-		passage = []
+		passage = list()
 	
-	req = {}
+	req = dict()
 	
 	req['authorobject'] = ao
 	req['workobject'] = wo
@@ -96,7 +90,7 @@ def textsegmentfindstartandstop(authorobject, workobject, passageaslist, cursor)
 	
 	w = atsignwhereclauses(selection, '=', {authorobject.universalid: authorobject})
 	d = [workobject.universalid]
-	qw = ''
+	qw = str()
 	for i in range(0, len(w)):
 		qw += 'AND (' + w[i][0] + ') '
 		d.append(w[i][1])
@@ -107,11 +101,10 @@ def textsegmentfindstartandstop(authorobject, workobject, passageaslist, cursor)
 	cursor.execute(query, data)
 	found = cursor.fetchone()
 	
-	startandstop = {}
+	startandstop = dict()
 	startandstop['startline'] = lo.index
 	startandstop['endline'] = found[0]
-	
-	
+
 	return startandstop
 
 
@@ -137,7 +130,7 @@ def wordindextohtmltable(indexingoutput, useheadwords):
 		thom = '<td class="word"><span class="homonym">{wd}</td>'
 		twor = '<td class="word">{wd}</td>'
 
-	previousheadword = ''
+	previousheadword = str()
 
 	outputlines = deque()
 	if useheadwords:
@@ -224,61 +217,58 @@ def supplementalindexjs():
 
 	js = """
 		<script>
-	        $('indexobserved').click( function(e) {
-	            e.preventDefault();
-	            var windowWidth = $(window).width();
-	            var windowHeight = $(window).height();
-	            $( '#lexicadialogtext' ).dialog({
-	                    closeOnEscape: true, 
-	                    autoOpen: false,
-	                    minWidth: windowWidth*.33,
-	                    maxHeight: windowHeight*.9,
-	                    // position: { my: "left top", at: "left top", of: window },
-	                    title: this.id,
-	                    draggable: true,
-	                    icons: { primary: 'ui-icon-close' },
-	                    click: function() { $( this ).dialog( 'close' ); }
-	                    });
-	            $( '#lexicadialogtext' ).dialog( 'open' );
-	            $( '#lexicadialogtext' ).html('[searching...]');
-	            $.getJSON('/parse/'+this.id, function (definitionreturned) {
-	                $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
-	                var dLen = definitionreturned.length;
-	                var linesreturned = []
-	                for (i = 0; i < dLen; i++) {
-	                    linesreturned.push(definitionreturned[i]['value']);
-	                    }
-	                $( '#lexicadialogtext' ).html(linesreturned);
-	            });
-            return false;
-        });
-        
+			$('indexobserved').click( function(e) {
+				e.preventDefault();
+				var windowWidth = $(window).width();
+				var windowHeight = $(window).height();
+				$( '#lexicadialogtext' ).dialog({
+					closeOnEscape: true, 
+					autoOpen: false,
+					minWidth: windowWidth*.33,
+					maxHeight: windowHeight*.9,
+					// position: { my: "left top", at: "left top", of: window },
+					title: this.id,
+					draggable: true,
+					icons: { primary: 'ui-icon-close' },
+					click: function() { $( this ).dialog( 'close' ); }
+					});
+				$( '#lexicadialogtext' ).dialog( 'open' );
+				$( '#lexicadialogtext' ).html('[searching...]');
+				$.getJSON('/parse/'+this.id, function (definitionreturned) {
+					$( '#lexicon').val(definitionreturned[0]['trylookingunder']);
+					var dLen = definitionreturned.length;
+					var linesreturned = []
+					for (i = 0; i < dLen; i++) { linesreturned.push(definitionreturned[i]['value']); }
+					$( '#lexicadialogtext' ).html(linesreturned);
+				});
+			return false;
+		});
 
-		    $('indexedlocation').click( function(e) {
-		        e.preventDefault();
-		        $.getJSON('/browse/'+this.id, function (passagereturned) {
-		        $('#browseforward').unbind('click');
-		        $('#browseback').unbind('click');
+			$('indexedlocation').click( function(e) {
+				e.preventDefault();
+				$.getJSON('/browse/'+this.id, function (passagereturned) {
+				$('#browseforward').unbind('click');
+				$('#browseback').unbind('click');
 				var fb = parsepassagereturned(passagereturned)
-		            // left and right arrow keys
-		           $('#browserdialogtext').keydown(function(e) {
-		                switch(e.which) {
-		                    case 37: browseuponclick(fb[1]); break;
-		                    case 39: browseuponclick(fb[0]); break;
-		                    }
-		                });
-		        $('#browseforward').bind('click', function(){ browseuponclick(fb[0]); });
-		        $('#browseback').bind('click', function(){ browseuponclick(fb[1]); });
-		        });
-		    });
+					// left and right arrow keys
+					$('#browserdialogtext').keydown(function(e) {
+						switch(e.which) {
+							case 37: browseuponclick(fb[1]); break;
+							case 39: browseuponclick(fb[0]); break;
+							}
+					});
+				$('#browseforward').bind('click', function(){ browseuponclick(fb[0]); });
+				$('#browseback').bind('click', function(){ browseuponclick(fb[1]); });
+				});
+			});
 
-        </script>
+		</script>
 	"""
 
 	return js
 
 
-def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationvalue, type):
+def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationvalue, brktype):
 	"""
 
 	used to determine if a bracket span is running for multiple lines
@@ -289,15 +279,15 @@ def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationva
 	:param thisline:
 	:param previousline:
 	:param previouseditorialcontinuationvalue:
-	:param type:
+	:param brktype:
 	:return:
 	"""
 
-	if thisline.bracketopenedbutnotclosed(type):
+	if thisline.bracketopenedbutnotclosed(brktype):
 		newcv = True
 	elif not thisline.samelevelas(previousline):
 		newcv = False
-	elif (previousline.bracketopenedbutnotclosed(type) or previouseditorialcontinuationvalue) and not thisline.bracketclosed(type):
+	elif (previousline.bracketopenedbutnotclosed(brktype) or previouseditorialcontinuationvalue) and not thisline.bracketclosed(brktype):
 		newcv = True
 	else:
 		newcv = False

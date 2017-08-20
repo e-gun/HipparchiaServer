@@ -40,7 +40,7 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 		atlevel = 1
 		try:
 			partialcitationtuple.pop()
-		except:
+		except IndexError:
 			atlevel = availablelevels
 
 	audb = workid[0:6]
@@ -90,14 +90,14 @@ def locusintocitation(workobject, lineobject):
 	generate a prolix citation like "Book 8, section 108, line 9"
 
 	:param workobject:
-	:param citationtuple:
+	:param lineobject:
 	:return:
 	"""
 
 	wklvls = list(workobject.structure.keys())
 	cite = list(lineobject.locustuple())
 	wklvls.reverse()
-	citation = []
+	citation = list()
 	for level in wklvls:
 		try:
 			if workobject.isnotliterary() and workobject.structure[level] == ' ' and cite[level] == 'recto':
@@ -106,7 +106,7 @@ def locusintocitation(workobject, lineobject):
 				pass
 			else:
 				citation.append(workobject.structure[level]+' '+cite[level])
-		except:
+		except KeyError:
 			# did you send me a partial citation like "book 2"?
 			pass
 
@@ -132,11 +132,11 @@ def prolixlocus(workobject, citationtuple):
 	wklvls.reverse()
 	cite = list(citationtuple)
 	cite.reverse()
-	citation = []
+	citation = list()
 	for level in range(0, len(wklvls)):
 		try:
 			citation.append(workobject.structure[wklvls[level]]+' '+cite[level])
-		except:
+		except KeyError:
 			# did you send me a partial citation like "book 2"?
 			pass
 
@@ -188,7 +188,8 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 		cursor.execute(query, data)
 		found = cursor.fetchone()
 		indexvalue = found[0]
-	except:
+	except TypeError:
+		# TypeError: 'NoneType' object is not subscriptable
 		indexvalue = returnfirstlinenumber(workdb, cursor)
 
 	# print('finddblinefromlocus() - indexvalue:',indexvalue)
@@ -199,10 +200,10 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=0):
 	"""
 
-	this is used both by the browser selection boxes and by persues passage lookups
+	this is used both by the browser selection boxes and by perseus passage lookups
 
 	need to deal with the perseus bibliographic references which often do not go all the way down to level zero
-	use what you have to find the first available db line so you can construck a '_LN_' browseto click
+	use what you have to find the first available db line so you can construct a '_LN_' browseto click
 	the citation list arrives in ascending order of levels: 00, 01, 02...
 
 	sent something like:
@@ -211,9 +212,10 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 
 	= 'Quintilian IO 1.7.28'
 
-	:param workid:
+	:param workobject:
 	:param citationlist:
 	:param cursor:
+	:param trialnumber:
 	:return:
 	"""
 
@@ -230,7 +232,6 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 
 	lmap = {0: 'level_00_value', 1: 'level_01_value', 2: 'level_02_value', 3: 'level_03_value', 4: 'level_04_value',
 			5: 'level_05_value'}
-	
 
 	numberoflevels = workobject.availablelevels
 
@@ -273,8 +274,9 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 		# option 2: just give up
 		dblinenumber = workobject.starts
 		citationlist.reverse()
+		cl = ', '.join(citationlist)
 		successcode = 'Sending first line. Perseus reference structure does not fit with a valid Hipparchia ' \
-			'reference: <span class="bold">{pe}</span> ⇎ <span class="bold">{hi}</span>'.format(pe=(', ').join(citationlist), hi=workobject.citation())
+			'reference: <span class="bold">{pe}</span> ⇎ <span class="bold">{hi}</span>'.format(pe=cl, hi=workobject.citation())
 
 	else:
 		# you have an incomplete citation: assume that the top level is the last item, etc.
@@ -287,7 +289,7 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 		query = list()
 		query.append('SELECT index FROM {a} WHERE wkuniversalid=%s'.format(a=auid))
 		try:
-			for level in range(numberoflevels-1, numberoflevels-len(citationlist)-1,-1):
+			for level in range(numberoflevels-1, numberoflevels-len(citationlist)-1, -1):
 				query.append('{lvl}=%s'.format(lvl=lmap[level]))
 		except:
 			query.append('{lvl}=%s'.format(lvl=lmap[0]))
@@ -303,7 +305,8 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 			dblinenumber = found[0]
 			# often actually true...
 			successcode = 'success'
-		except:
+		except TypeError:
+			# TypeError: 'NoneType' object is not subscriptable
 			# print('nothing found: returning first line')
 			if trialnumber < 2:
 				citationlist = perseuslookupchangecase(citationlist)
@@ -319,12 +322,18 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 				# print('nwo',newworkobject.universalid, newworkobject.title)
 				# results = finddblinefromincompletelocus(newworkobject, citationlist, cursor, trialnumber)				# return results
 				dblinenumber = workobject.starts
-				successcode = 'The dictionary regularly points to Seneca Maior [lt1014] when it is citing Seneca Minor [lt107].<br >These citations are broken and cannot be easily fixed. ' \
-				              'Not only is the author number wrong, so too is the work number. Sorry about that.'
+				successcode = """
+				The dictionary regularly points to Seneca Maior [lt1014] when it is citing Seneca Minor [lt107].
+				<br >These citations are broken and cannot be easily fixed. 
+				Not only is the author number wrong, so too is the work number. Sorry about that.
+				"""
 			else:
 				dblinenumber = workobject.starts
-				successcode = 'Sending first line of the work. Perseus reference did not return a valid Hipparchia ' \
-				              'reference: <span class="bold">{pe}</span> vs <span class="bold">{hi}</span>'.format(pe=(', ').join(citationlist), hi=workobject.citation())
+				successcode = """
+				Sending first line of the work. Perseus reference did not return a valid Hipparchia reference:
+				<span class="bold">{pe}</span> vs <span class="bold">{hi}</span>
+				"""
+				successcode = successcode.format(pe=', '.join(citationlist), hi=workobject.citation())
 				if 'Frag' in workobject.title:
 					successcode += '<br >The edition used by the lexicon might not match the local edition of the fragments.'
 
@@ -335,6 +344,7 @@ def finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber=
 
 def perseuslookupleveltrimmer(workobject, citationlist, cursor, trialnumber):
 	"""
+
 	you had a valid looking citation, but it was not in fact valid
 
 	for example, Cicero's Phillipcs should be cited as oration, section, line
@@ -352,7 +362,10 @@ def perseuslookupleveltrimmer(workobject, citationlist, cursor, trialnumber):
 
 	peeling this off in case we need to add more ways of guessing how to make the second try
 
-	:param workid, workobject, citationlist, cursor, trialnumber:
+	:param workobject:
+	:param citationlist:
+	:param cursor:
+	:param trialnumber:
 	:return:
 	"""
 
@@ -372,21 +385,19 @@ def perseuslookupleveltrimmer(workobject, citationlist, cursor, trialnumber):
 
 def perseuslookupchangecase(citationlist):
 	"""
+
 	['25', 'cal'] instead of ['25', 'Cal'] when searching seutonius?
 
-
-	:param workid:
-	:param workobject:
 	:param citationlist:
-	:param cursor:
 	:return:
 	"""
+
 	newcitationlist = list()
 
 	for item in citationlist:
-		if re.search(r'[a-z]',item[0]):
+		if re.search(r'[a-z]', item[0]):
 			item = item[0].upper() + item[1:]
-		elif re.search(r'[A-Z]',item[0]):
+		elif re.search(r'[A-Z]', item[0]):
 			item = item[0].lower() + item[1:]
 		newcitationlist.append(item)
 
@@ -405,21 +416,21 @@ def perseusdelabeler(citationlist, workobject):
 	return the best guess
 
 	:param citationlist:
+	:param workobject:
 	:return:
 	"""
-
 
 	allables = [workobject.levellabels_00, workobject.levellabels_01, workobject.levellabels_02, workobject.levellabels_03,
 	              workobject.levellabels_04, workobject.levellabels_05]
 
 	allables = [a for a in allables if a]
 
-	lmap = {allables[i]: i for i in range(0,len(allables))}
+	lmap = {allables[i]: i for i in range(0, len(allables))}
 
 	allables.reverse()
 	citationlist.reverse()
 
-	newcitationlist = ['' for c in range(0,len(allables))]
+	newcitationlist = ['' for c in range(0, len(allables))]
 
 	count = len(allables)
 	for c in citationlist:
@@ -436,15 +447,16 @@ def perseusdelabeler(citationlist, workobject):
 		else:
 			newcitationlist[count] = c
 
-	newcitationlist = [re.sub(r'\.','',n) for n in newcitationlist if n]
+	newcitationlist = [re.sub(r'\.', '', n) for n in newcitationlist if n]
 
-	#print('newcitationlist',newcitationlist)
+	# print('newcitationlist', newcitationlist)
 
 	return newcitationlist
 
 
 def perseuscitationsintohipparchiacitations(citationlist):
 	"""
+
 	a collections of hopes and prayers that attempts to minimize the misfits between perseus citations and hipparchia citations
 	the perseus data is saturated with problems
 		euripides work numbers are always bad
@@ -453,19 +465,20 @@ def perseuscitationsintohipparchiacitations(citationlist):
 		plutarch looks like 'Plu.2.263f' and not just '263f'
 		sometimes you have '30(31)'
 		some citations are not tied to a tlg reference
+
 	:param citationlist:
 	:return:
 	"""
 	newcitationlist = list()
 	
 	for item in citationlist:
-		if re.search(r'^p\.',item):
+		if re.search(r'^p\.', item):
 			item = item[2:]
-		item = re.sub(r'\(.*?\)','',item)
+		item = re.sub(r'\(.*?\)', '', item)
 		newcitationlist.append(item)
 	
 	citationlist = newcitationlist
-	newcitationlist = []
+	newcitationlist = list()
 
 	for item in citationlist:
 		try:
@@ -476,7 +489,7 @@ def perseuscitationsintohipparchiacitations(citationlist):
 				newcitationlist.append(partb)
 			else:
 				newcitationlist.append(item)
-		except:
+		except IndexError:
 			# item[-2] was impossible
 			newcitationlist.append(item)
 	

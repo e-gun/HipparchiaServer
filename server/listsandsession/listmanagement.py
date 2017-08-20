@@ -10,9 +10,9 @@ import re
 
 from flask import session
 
-from server.formatting.wordformatting import stripaccents, buildhipparchiatranstable
-from server.listsandsession.sessionfunctions import reducetosessionselections, justlatin
-from server.startup import allvaria, allincerta
+from server.formatting.wordformatting import buildhipparchiatranstable, stripaccents
+from server.listsandsession.sessionfunctions import justlatin, reducetosessionselections
+from server.startup import allincerta, allvaria
 
 
 def compilesearchlist(listmapper, s=session):
@@ -295,13 +295,15 @@ def calculatewholeauthorsearches(searchlist, authordict):
 
 def flagexclusions(searchlist, s=session):
 	"""
+
 	some works should only be searched partially
 	this flags those items on the searchlist by changing their workname format
 	gr0001w001 becomes gr0001x001 if session['wkexclusions'] mentions gr0001w001
-	
+
 	this function profiles as relatively slow: likely a faster way to run the loops
-	
+
 	:param searchlist:
+	:param s:
 	:return:
 	"""
 
@@ -325,18 +327,23 @@ def flagexclusions(searchlist, s=session):
 
 def prunebydate(searchlist, authorobjectdict, workobjectdict, s=session):
 	"""
+
 	send me a list of authorsandworks and i will trim it via the session date limit variables
 	note that 'varia' and 'incerta' need to be handled here since they have special dates:
 		incerta = 2500
 		varia = 2000
 		[failedtoparse = 9999]
+
 	:param searchlist:
 	:param authorobjectdict:
+	:param workobjectdict:
+	:param s:
 	:return:
 	"""
-	trimmedlist = []
 
-	if justlatin() == False and (s['earliestdate'] != '-850' or s['latestdate'] != '1500'):
+	trimmedlist = list()
+
+	if not justlatin() and (s['earliestdate'] != '-850' or s['latestdate'] != '1500'):
 		# [a] first prune the bad dates
 		min = int(s['earliestdate'])
 		max = int(s['latestdate'])
@@ -375,21 +382,24 @@ def prunebydate(searchlist, authorobjectdict, workobjectdict, s=session):
 
 def removespuria(searchlist, worksdict):
 	"""
+
 	at the moment pretty crude: just look for [Sp.] or [sp.] at the end of a title
 	toss it from the list if you find it
+
 	:param searchlist:
-	:param cursor:
+	:param worksdict:
 	:return:
 	"""
-	trimmedlist = []
 
-	sp = re.compile(r'\[(S|s)p\.\]')
+	trimmedlist = list()
+
+	sp = re.compile(r'\[[Ss]p\.\]')
 
 	for aw in searchlist:
 		wk = re.sub(r'(......)x(...)', '\1w\2', aw[0:10])
 		title = worksdict[wk].title
 		try:
-			if re.search(sp,title):
+			if re.search(sp, title):
 				for w in session['wkselections']:
 					if w in aw:
 						trimmedlist.append(aw)
@@ -436,7 +446,7 @@ def tidyuplist(untidylist):
 		tidylist = list(set(untidylist))
 		tidylist.sort()
 	else:
-		tidylist = []
+		tidylist = list()
 
 	return tidylist
 

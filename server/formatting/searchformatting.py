@@ -44,7 +44,7 @@ def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
 
 	hitdict = {h: hitdict[h] for h in hitdict if h < int(so.session['maxresults'])}
 
-	resultlist = []
+	resultlist = list()
 	for h in hitdict:
 		lo = hitdict[h]
 		wo = workdict[lo.wkuinversalid]
@@ -60,7 +60,7 @@ def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
 
 	else:
 		# aggregate hits by author table so we can search each table once instead of 100x
-		hitlocations = {}
+		hitlocations = dict()
 		for r in resultlist:
 			table = r.lineobjects[0].authorid
 			try:
@@ -104,7 +104,7 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 	curs = dbconnection.cursor()
 
 	tosearch = deque()
-	reversemap = {}
+	reversemap = dict()
 
 	for r in searchresultlist:
 		resultnumber = r.hitnumber
@@ -157,7 +157,7 @@ def flagsearchterms(searchresultobject, skg, prx, searchobject):
 
 	linelist = searchresultobject.lineobjects
 	highlightindex = searchresultobject.getindex()
-	newlineobjects = []
+	newlineobjects = list()
 	for foundline in linelist:
 		# need a copy because otherwise you will see two+ highlighted lines in a result if this result abuts another one
 		# a highlighted foundline2 of result2 is showing up in result1 in addition to foundline1
@@ -256,7 +256,7 @@ def htmlifysearchfinds(listofsearchresultobjects, searchobject):
 	:return:
 	"""
 
-	resultsashtml = []
+	resultsashtml = list()
 
 	linehtmltemplate = '<span class="locus">{lc}</span>&nbsp;<span class="foundtext">{ft}</span><br />'
 
@@ -366,7 +366,7 @@ def unbalancedspancleaner(html):
 	opened = len(re.findall(o,html))
 	closed = len(re.findall(c,html))
 
-	supplement = ''
+	supplement = str()
 
 	if closed > opened:
 		for i in range(0, closed - opened):

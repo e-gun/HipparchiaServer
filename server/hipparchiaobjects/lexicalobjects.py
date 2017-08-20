@@ -16,13 +16,13 @@ class dbWordCountObject(object):
 	an object that corresponds to a db line
 
 	CREATE TABLE public."wordcounts_ϲ" (
-	    entry_name character varying(64) COLLATE pg_catalog."default",
-	    total_count integer,
-	    gr_count integer,
-	    lt_count integer,
-	    dp_count integer,
-	    in_count integer,
-	    ch_count integer
+		entry_name character varying(64) COLLATE pg_catalog."default",
+		total_count integer,
+		gr_count integer,
+		lt_count integer,
+		dp_count integer,
+		in_count integer,
+		ch_count integer
 	)
 
 	"""
@@ -74,23 +74,23 @@ class dbHeadwordObject(dbWordCountObject):
 	an extended wordcount object
 
 	CREATE TABLE public.dictionary_headword_wordcounts (
-	    entry_name character varying(64) COLLATE pg_catalog."default",
-	    total_count integer,
-	    gr_count integer,
-	    lt_count integer,
-	    dp_count integer,
-	    in_count integer,
-	    ch_count integer,
-	    frequency_classification character varying(64) COLLATE pg_catalog."default",
-	    early_occurrences integer,
-	    middle_occurrences integer,
-	    late_occurrences integer
+		entry_name character varying(64) COLLATE pg_catalog."default",
+		total_count integer,
+		gr_count integer,
+		lt_count integer,
+		dp_count integer,
+		in_count integer,
+		ch_count integer,
+		frequency_classification character varying(64) COLLATE pg_catalog."default",
+		early_occurrences integer,
+		middle_occurrences integer,
+		late_occurrences integer
 	)
 
 	"""
 
 	greekworderaweights = {'early': 7.75, 'middle': 1.92, 'late': 1}
-	corporaweights =  {'gr': 1.0, 'lt': 10.68, 'in': 27.78, 'dp': 26.76, 'ch': 124.47}
+	corporaweights = {'gr': 1.0, 'lt': 10.68, 'in': 27.78, 'dp': 26.76, 'ch': 124.47}
 
 	greekgenreweights = {'acta': 89.53, 'agric': 101839.74, 'alchem': 80.12, 'anthol':
 						18.42, 'apocalyp': 128.74, 'apocryph': 100.53, 'apol': 7.24,
@@ -112,7 +112,7 @@ class dbHeadwordObject(dbWordCountObject):
 						'phil': 3.74, 'physiognom': 658.34, 'poem': 64.07, 'polyhist':
 						25.7, 'prophet': 107.99, 'pseudepigr': 675.17, 'rhet': 8.74,
 						'satura': 290.06, 'satyr': 133.99, 'schol': 6.15, 'tact': 54.5,
-						'test': 83.53, 'theol': 6.48, 'trag': 36.02, 'allrelig': 0.6, 'allrhet': 2.94 }
+						'test': 83.53, 'theol': 6.48, 'trag': 36.02, 'allrelig': 0.6, 'allrhet': 2.94}
 
 	latingenreweights = {'acta': 3364.04, 'agric': 5.21, 'alchem': 646.99, 'anthol':
 						538.25, 'apocalyp': 14022.73, 'apocryph': 16050.11, 'apol':
@@ -133,7 +133,7 @@ class dbHeadwordObject(dbWordCountObject):
 						331.96, 'paroem': 66607.95, 'perieg': 83259.94, 'phil': 2.17,
 						'poem': 13.66, 'polyhist': 4.88, 'pseudepigr': 266431.8,
 						'rhet': 2.7, 'satyr': 363.38, 'schol': 34.3, 'tact': 37.58,
-						'test': 69.97, 'theol': 4915.72, 'trag': 13.23, 'allrelig': 82.92, 'allrhet': 1.07 }
+						'test': 69.97, 'theol': 4915.72, 'trag': 13.23, 'allrelig': 82.92, 'allrhet': 1.07}
 
 	# into one dict so we can pass it to __init__
 	wts = {'gkera': greekworderaweights, 'corp': corporaweights, 'gkgenre': greekgenreweights, 'ltgenre': latingenreweights}
@@ -229,7 +229,7 @@ class dbHeadwordObject(dbWordCountObject):
 		self.test = test
 		self.theol = theol
 		self.trag = trag
-		if re.search(r'^[^a-z]',self.entry):
+		if re.search(r'^[^a-z]', self.entry):
 			self.language = 'G'
 		else:
 			self.language = 'L'
@@ -276,7 +276,7 @@ class dbHeadwordObject(dbWordCountObject):
 
 	def amlatin(self):
 		minimumlatin = re.compile(r'[a-z]')
-		if re.search(minimumlatin,self.entry):
+		if re.search(minimumlatin, self.entry):
 			return True
 		else:
 			return False
@@ -295,8 +295,9 @@ class dbHeadwordObject(dbWordCountObject):
 
 	def weightedtime(self, element):
 		try:
-			elements = {'early': (self.wtdgkearly/self.predomera)*100, 'middle': (self.wtdgkmiddle/self.predomera)*100, 'late': (self.wtdgklate/self.predomera)*100
-		            }
+			elements = {'early': (self.wtdgkearly/self.predomera)*100,
+						'middle': (self.wtdgkmiddle/self.predomera)*100,
+						'late': (self.wtdgklate/self.predomera)*100}
 		except ZeroDivisionError:
 			# there was no self.predomera value
 			return None
@@ -310,9 +311,11 @@ class dbHeadwordObject(dbWordCountObject):
 
 	def getweightedcorpora(self, element):
 		if self.predomcorp != 0:
-			elements = {'gr': (self.wtdgr/self.predomcorp)*100, 'lt': (self.wtdlt/self.predomcorp)*100, 'in': (self.wtdin/self.predomcorp)*100,
-			            'dp': (self.wtddp / self.predomcorp) * 100, 'ch': (self.wtdch/self.predomcorp)*100,
-			            }
+			elements = {'gr': (self.wtdgr/self.predomcorp)*100,
+						'lt': (self.wtdlt/self.predomcorp)*100,
+						'in': (self.wtdin/self.predomcorp)*100,
+						'dp': (self.wtddp / self.predomcorp) * 100,
+						'ch': (self.wtdch/self.predomcorp)*100}
 			try:
 				return elements[element]
 			except:
@@ -321,9 +324,11 @@ class dbHeadwordObject(dbWordCountObject):
 			return 0
 
 	def gettimelabel(self, element):
-		elements = {'early': self.elabel, 'middle': self.mlabel, 'late': self.latelabel, 'unk': self.unklabel,
-		            'frq': self.frqclass
-		            }
+		elements = {'early': self.elabel,
+					'middle': self.mlabel,
+					'late': self.latelabel,
+					'unk': self.unklabel,
+					'frq': self.frqclass}
 		try:
 			return elements[element]
 		except:
@@ -406,7 +411,6 @@ class dbHeadwordObject(dbWordCountObject):
 		:param gwt:
 		:return:
 		"""
-
 
 		religwt = gwt[self.language]['allrelig']
 		rhtgwt = gwt[self.language]['allrhet']
@@ -590,23 +594,23 @@ class dbDictionaryEntry(object):
 	an object that corresponds to a db line
 
 	CREATE TABLE greek_dictionary (
-	    entry_name character varying(64),
-	    metrical_entry character varying(64),
-	    unaccented_entry character varying(64),
-	    id_number integer,
-	    entry_type character varying(8),
-	    entry_options "char",
-	    entry_body text
+		entry_name character varying(64),
+		metrical_entry character varying(64),
+		unaccented_entry character varying(64),
+		id_number integer,
+		entry_type character varying(8),
+		entry_options "char",
+		entry_body text
 	);
 
 	CREATE TABLE latin_dictionary (
-	    entry_name character varying(64),
-	    metrical_entry character varying(64),
-	    id_number integer,
-	    entry_type character varying(8),
-	    entry_key character varying(64),
-	    entry_options "char",
-	    entry_body text
+		entry_name character varying(64),
+		metrical_entry character varying(64),
+		id_number integer,
+		entry_type character varying(8),
+		entry_key character varying(64),
+		entry_options "char",
+		entry_body text
 	);
 
 	Latin only: entry_key
@@ -678,9 +682,9 @@ class dbLemmaObject(object):
 	an object that corresponds to a db line
 
 	CREATE TABLE public.greek_lemmata (
-	    dictionary_entry character varying(64) COLLATE pg_catalog."default",
-	    xref_number integer,
-	    derivative_forms text COLLATE pg_catalog."default"
+		dictionary_entry character varying(64) COLLATE pg_catalog."default",
+		xref_number integer,
+		derivative_forms text COLLATE pg_catalog."default"
 	)
 
 	"""
@@ -690,12 +694,13 @@ class dbLemmaObject(object):
 		self.xref = xref
 		self.formandidentificationlist = [f for f in derivativeforms.split('\t') if f]
 		self.formlist = [f.split(' ')[0] for f in self.formandidentificationlist]
-		self.formlist = [re.sub(r'\'','',f) for f in self.formlist]
+		self.formlist = [re.sub(r'\'', '', f) for f in self.formlist]
 
 	def getformdict(self):
-		fd = {}
+		fd = dict()
 		for f in self.formandidentificationlist:
 			key = f.split(' ')[0]
 			body = f[len(key)+1:]
 			fd[key] = body
+
 		return fd

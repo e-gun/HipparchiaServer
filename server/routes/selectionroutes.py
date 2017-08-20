@@ -153,8 +153,9 @@ def clearselections():
 	:return:
 	"""
 	category = request.args.get('cat', '')
-	selectiontypes = ['auselections', 'wkselections', 'psgselections', 'agnselections', 'wkgnselections', 'alocselections', 'wlocselections',
-						'auexclusions', 'wkexclusions', 'psgexclusions', 'agnexclusions', 'wkgnexclusions', 'alocexclusions', 'wlocexclusions']
+	selectiontypes = ['auselections', 'wkselections', 'psgselections', 'agnselections', 'wkgnselections',
+						'alocselections', 'wlocselections', 'auexclusions', 'wkexclusions', 'psgexclusions',
+						'agnexclusions', 'wkgnexclusions', 'alocexclusions', 'wlocexclusions']
 	if category not in selectiontypes:
 		category = ''
 

@@ -71,19 +71,17 @@ def completeindex():
 
 		cdict = {wo.universalid: (startline, endline)}
 		output = buildindextowork(cdict, poll[ts], useheadwords, cur)
-		allworks = []
+		allworks = list()
 
 	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
 		poll[ts].statusis('Preparing an index to the works of {a}'.format(a=ao.shortname))
 		# whole author
-		cdict = {}
+		cdict = dict()
 		for wkid in ao.listworkids():
 			cdict[wkid] = (workdict[wkid].starts, workdict[wkid].ends)
 		output = buildindextowork(cdict, poll[ts], useheadwords, cur)
 
-		allworks = []
-		for w in ao.listofworks:
-			allworks.append(w.universalid[6:10] + ' ⇒ ' + w.title)
+		allworks = ['{w}  ⇒ {t}'.format(w=w.universalid[6:10], t=w.title) for w in ao.listofworks]
 		allworks.sort()
 
 	else:
@@ -131,6 +129,7 @@ def textmaker():
 	build a text suitable for display
 	:return:
 	"""
+
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
@@ -163,7 +162,7 @@ def textmaker():
 	if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS'] == 'yes':
 		texthtml = gtltsubstitutes(texthtml)
 
-	results = {}
+	results = dict()
 	results['authorname'] = avoidsmallvariants(ao.shortname)
 	results['title'] = avoidsmallvariants(wo.title)
 	results['structure'] = avoidsmallvariants(wo.citation())

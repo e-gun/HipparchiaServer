@@ -272,9 +272,11 @@ def formatmicroentry(entrybody):
 	"""
 	some entries work like glosses but are not labeled as glosses: no quote, authors, etc. just a synonym or synonyms listed
 	deal with it
+
 	:param entrybody:
 	:return:
 	"""
+	
 	entryhtml = ''
 	
 	soup = BeautifulSoup(entrybody, 'html.parser')

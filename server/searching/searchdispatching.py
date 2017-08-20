@@ -103,14 +103,16 @@ def searchdispatcher(searchobject, activepoll):
 			so.termone = so.termtwo
 			so.termtwo = tmp
 		jobs = [Process(target=workonproximitysearch,
-		                args=(count, foundlineobjects, searchlist, activepoll, so))
-		        for i in range(workers)]
+				args=(count, foundlineobjects, searchlist, activepoll, so))
+				for i in range(workers)]
 	else:
 		# impossible, but...
 		jobs = []
 
-	for j in jobs: j.start()
-	for j in jobs: j.join()
+	for j in jobs:
+		j.start()
+	for j in jobs:
+		j.join()
 
 	return foundlineobjects
 

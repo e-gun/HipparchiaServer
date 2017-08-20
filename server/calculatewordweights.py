@@ -51,7 +51,7 @@ def findccorporaweights():
 
 	maximum = max(counts.values())
 
-	weights = {corpus: round(maximum/counts[corpus],2) for corpus in counts}
+	weights = {corpus: round(maximum/counts[corpus], 2) for corpus in counts}
 
 	return weights
 
@@ -179,8 +179,8 @@ def findgeneraweights(language, collapsed=False):
 	weights = {g: round(maximum / counts[g], 2) for g in counts}
 
 	if collapsed:
-		relig = [ 'acta', 'apocalyp', 'apocryph', 'apol', 'caten', 'concil', 'eccl', 'evangel', 'exeget', 'hagiogr',
-		          'homilet', 'liturg', 'prophet', 'pseudepigr', 'theol'	]
+		relig = ['acta', 'apocalyp', 'apocryph', 'apol', 'caten', 'concil', 'eccl', 'evangel', 'exeget', 'hagiogr',
+		          'homilet', 'liturg', 'prophet', 'pseudepigr', 'theol']
 		relig = [r for r in relig if r in counts]
 
 		allrhet = ['encom', 'invectiv', 'orat', 'rhet']
@@ -230,27 +230,29 @@ def findchronologicalweights(era,language):
 
 	try:
 		theera = eramap[era]
-	except:
+	except KeyError:
 		return -1
 
-	q = 'SELECT SUM('+theera+') FROM dictionary_headword_wordcounts WHERE entry_name ~ %s'
+	q = 'SELECT SUM({e}) FROM dictionary_headword_wordcounts WHERE entry_name ~ %s'.format(e=theera)
 
 	if language == 'G':
 		d = ('^[^a-z]',)
 	else:
 		d = ('^[a-z]',)
 
-	curs.execute(q,d)
-	sum = curs.fetchall()
-	sum = sum[0][0]
+	curs.execute(q, d)
+	thesum = curs.fetchall()
+	thesum = thesum[0][0]
 
-	return sum
+	return thesum
 
 
 def findcorpusweight(corpus, language):
 	"""
 
+
 	:param corpus:
+	:param language:
 	:return:
 	"""
 
@@ -283,10 +285,10 @@ def findcorpusweight(corpus, language):
 		curs.execute(q)
 	else:
 		curs.execute(q+w, d)
-	sum = curs.fetchall()
-	sum = sum[0][0]
+	thesum = curs.fetchall()
+	thesum = thesum[0][0]
 
-	return sum
+	return thesum
 
 """
 greek wordweights {'early': 7.72, 'middle': 1.92, 'late': 1}

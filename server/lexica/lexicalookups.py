@@ -13,11 +13,11 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
 from server.formatting.jsformatting import insertlexicalbrowserjs
-from server.formatting.lexicaformatting import entrysummary, formatdictionarysummary, grabheadmaterial, grabsenses, \
-	formatgloss, formatmicroentry, insertbrowserlookups, formateconsolidatedgrammarentry
+from server.formatting.lexicaformatting import entrysummary, formatdictionarysummary, formateconsolidatedgrammarentry, \
+	formatgloss, formatmicroentry, grabheadmaterial, grabsenses, insertbrowserlookups
 from server.formatting.wordformatting import cleanaccentsandvj, universalregexequivalent
-from server.hipparchiaobjects.lexicalobjects import dbWordCountObject, dbHeadwordObject, dbMorphologyObject, \
-	dbGreekWord, dbLatinWord, dbLemmaObject
+from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbHeadwordObject, dbLatinWord, dbLemmaObject, \
+	dbMorphologyObject, dbWordCountObject
 from server.listsandsession.listmanagement import polytonicsort
 
 
@@ -628,16 +628,16 @@ def formatprevalencedata(wordcountobject):
 	"""
 
 	w = wordcountobject
-	thehtml = []
+	thehtml = list()
 
-	max = 0
+	maxval = 0
 	for key in ['gr', 'lt', 'in', 'dp', 'ch']:
-		if w.getelement(key) > max:
-			max = w.getelement(key)
+		if w.getelement(key) > maxval:
+			maxval = w.getelement(key)
 		if w.getelement(key) > 0:
 			thehtml.append('<span class="prevalence">{a}</span> {b:,}'.format(a=w.getlabel(key), b=w.getelement(key)))
 	key = 'total'
-	if w.getelement(key) != max:
+	if w.getelement(key) != maxval:
 		thehtml.append('<span class="prevalence">{a}</span> {b:,}'.format(a=w.getlabel(key), b=w.getelement(key)))
 
 	thehtml = [' / '.join(thehtml)]

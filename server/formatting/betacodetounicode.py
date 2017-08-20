@@ -23,7 +23,7 @@ def replacegreekbetacode(texttoclean):
 	# combining dot
 	texttoclean = re.sub(r'\?', u'\u0323', texttoclean)
 	# exclmation point not properly documented
-	texttoclean = re.sub(r'\!', u'\u2219', texttoclean)
+	texttoclean = re.sub(r'!', u'\u2219', texttoclean)
 
 	return texttoclean
 
@@ -80,7 +80,7 @@ def capitalletters(betacode):
 	unicode = re.sub(cad, capitaladscript, unicode)
 
 	# sigmas: all lunates
-	sig = re.compile(r'[*]S[1-3]{0,1}')
+	sig = re.compile(r'[*]S[1-3]?')
 	unicode = re.sub(sig, u'\u03f9', unicode)
 
 	# capitals
@@ -747,9 +747,9 @@ def lowercasesmoothcircumflex(match, g=1):
 
 	substitutions = {
 		'A': u'ἆ',
-		'E': u'ἐ͂', # IG 104.27: AI)/TIOS E)=I FO/NO --> αἴτιος ἐ͂ι φόνο [U1f10 + U0342]
+		'E': u'ἐ͂',  # IG 104.27: AI)/TIOS E)=I FO/NO --> αἴτιος ἐ͂ι φόνο [U1f10 + U0342]
 		'I': u'ἶ',
-		'O': u'ὀ͂', # IG 127.36: E)PAINE/SAI W(S O)=SIN A)NDRA/SIN --> ἐπαινέσαι ὡς ὀ͂σιν ἀνδράσιν [U1f40 + U0342]
+		'O': u'ὀ͂',  # IG 127.36: E)PAINE/SAI W(S O)=SIN A)NDRA/SIN --> ἐπαινέσαι ὡς ὀ͂σιν ἀνδράσιν [U1f40 + U0342]
 		'U': u'ὖ',
 		'H': u'ἦ',
 		'W': u'ὦ',
@@ -765,9 +765,9 @@ def lowercaseroughcircumflex(match, g=1):
 
 	substitutions = {
 		'A': u'ἇ',
-		'E': u'ἑ͂', # IG: TE=S BOLE=S E(=I
+		'E': u'ἑ͂',  # IG: TE=S BOLE=S E(=I
 		'I': u'ἷ',
-		'O': u'ὁ͂', # IG: PE]RI\ DE\ O(=[N !]DIK
+		'O': u'ὁ͂',  # IG: PE]RI\ DE\ O(=[N !]DIK
 		'U': u'ὗ',
 		'H': u'ἧ',
 		'W': u'ὧ',
@@ -1054,7 +1054,7 @@ def lowercases(match, g=0):
 		'G': u'γ',
 		'H': u'η',
 		'I': u'ι',
-		'J': u'⒣', # this is a divergence from HipparchiaBuilder's version; don't overwrite it
+		'J': u'⒣',  # this is a divergence from HipparchiaBuilder's version; don't overwrite it
 		'K': u'κ',
 		'L': u'λ',
 		'M': u'μ',

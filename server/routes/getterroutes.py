@@ -101,7 +101,7 @@ def findtheworksof(authoruid):
 
 	try:
 		myauthor = authordict[strippedquery]
-	except:
+	except KeyError:
 		myauthor = None
 
 	if myauthor:
@@ -150,7 +150,7 @@ def workstructure(locus):
 
 	try:
 		ao = authordict[workid[:6]]
-	except:
+	except KeyError:
 		ao = makeanemptyauthor('gr0000')
 
 	# it is a list of works and not a dict, so we can't pull the structure from the key
@@ -253,7 +253,7 @@ def getsearchlistcontents():
 
 		try:
 			wordstotal += workdict[work].wordcount
-		except:
+		except TypeError:
 			# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
 			pass
 		searchlistinfo.append('\n[{ct}]&nbsp;'.format(ct=count))
@@ -279,8 +279,8 @@ def getgenrelistcontents():
 	:return:
 	"""
 
-	sessionmapper = { 'greekcorpus': 'gr', 'inscriptioncorpus': 'in', 'papyruscorpus': 'dp', 'latincorpus': 'lt'}
-	genres = ''
+	sessionmapper = {'greekcorpus': 'gr', 'inscriptioncorpus': 'in', 'papyruscorpus': 'dp', 'latincorpus': 'lt'}
+	genres = str()
 	glist = list()
 
 	genres += '<h3>Author Categories</h3>'

@@ -16,8 +16,8 @@ from server.dbsupport.dbfunctions import setconnection
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import depunct
 from server.formatting.wordformatting import removegravity, stripaccents, tidyupterm
-from server.lexica.lexicalookups import browserdictionarylookup, lexicalmatchesintohtml, findtotalcounts, \
-	lookformorphologymatches, getobservedwordprevalencedata
+from server.lexica.lexicalookups import browserdictionarylookup, findtotalcounts, getobservedwordprevalencedata, \
+	lexicalmatchesintohtml, lookformorphologymatches
 from server.listsandsession.listmanagement import polytonicsort
 from server.listsandsession.sessionfunctions import justlatin, justtlg
 
@@ -55,7 +55,7 @@ def findbyform(observedword):
 
 	try:
 		cleanedword[0]
-	except:
+	except IndexError:
 		returnarray = [{'value': '[empty search: <span class="emph">{w}</span> was sanitized into nothingness]'.format(
 			w=observedword)}]
 		return json.dumps(returnarray)
@@ -93,8 +93,7 @@ def findbyform(observedword):
 				{'value':
 					 '<br />[could not find a match for <span class="emph">{cw}</span> in the morphology table]'.format(
 						 cw=cleanedword)},
-				{'entries':
-					 '[not found]'}
+				{'entries': '[not found]'}
 			]
 
 		prev = getobservedwordprevalencedata(cleanedword)
@@ -128,10 +127,11 @@ def dictsearch(searchterm):
 	if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
 		searchterm = replacegreekbetacode(searchterm.upper())
 
-	seeking = depunct(searchterm)
+	allowedpunct = '^$.'
+	seeking = depunct(searchterm, allowedpunct)
 	seeking = seeking.lower()
 	seeking = re.sub('[σς]', 'ϲ', seeking)
-	seeking = re.sub('v', '(u|v|U|V)', seeking)
+	seeking = re.sub('v', '[uvUV]', seeking)
 
 	if re.search(r'[a-z]', seeking):
 		usedictionary = 'latin'

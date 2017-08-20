@@ -70,7 +70,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	else:
 		ends = locusindexvalue + linesofcontext
 
-	passage = {}
+	passage = dict()
 	# [A] populating various corners of the UI
 	# urls to send to the browse forwards and back buttons
 	passage['browseforwards'] = thiswork + '_LN_' + str(ends)
@@ -112,7 +112,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	viewing = '\n'.join(viewing)
 	viewing = '<p class="currentlyviewing">{c}\n<br />\n{b}\n</p>'.format(c=viewing, b=biblio)
 
-	ouputtable = []
+	ouputtable = list()
 	ouputtable.append('<table>')
 
 	# guarantee a minimum width to the browser dialogue box; or else skip adding this blank row
@@ -124,7 +124,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 	previousline = lines[0]
 	brackettypes = findactivebrackethighlighting()
-	continuationdict = { 'square': False, 'round': False, 'curly': False, 'angled': False }
+	continuationdict = {'square': False, 'round': False, 'curly': False, 'angled': False }
 
 	shownotes = True
 	if shownotes:
@@ -168,7 +168,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		else:
 			try:
 				linenumber = int(line.l0)
-			except:
+			except ValueError:
 				# 973b is not your friend
 				linenumber = 0
 			if line.samelevelas(previousline) is not True:
@@ -382,7 +382,7 @@ def bracketcheck(word):
 	:return:
 	"""
 
-	brackets = re.compile(r'[\[\(\{⟨\]\)\}⟩]')
+	brackets = re.compile(r'[\[({⟨\])}⟩]')
 
 	if re.search(brackets, word):
 		return True
@@ -405,8 +405,8 @@ def addobservedtags(word, lastword, hyphenated):
 	untaggedclosings = re.compile(r'[\])⟩},;.?!:·’′“”»†]$')
 	neveropens = re.compile(r'^[‵„“«†]')
 
-	if re.search(r'\s$',word):
-		word = re.sub(r'\s$',r'', word)
+	if re.search(r'\s$', word):
+		word = re.sub(r'\s$', '', word)
 		sp = ' '
 	else:
 		sp = ''
@@ -439,6 +439,7 @@ def addobservedtags(word, lastword, hyphenated):
 
 def buildmetadatarow(label, css, metadata):
 	"""
+
 	inscriptions and papyri have relevant bibliographic information that needs to be displayed
 
 	example:
@@ -448,7 +449,9 @@ def buildmetadatarow(label, css, metadata):
 		label, css, metadata: Additional publication info pubinfo SEG 16.476+
 		label, css, metadata: Editor's date textdate 182a
 
-	:param lineobject:
+	:param label:
+	:param css:
+	:param metadata:
 	:return:
 	"""
 
