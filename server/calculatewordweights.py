@@ -22,12 +22,12 @@ def findtemporalweights(language):
 
 	"""
 
-	wordcounts = { 'early': findchronologicalweights('early', language),
+	wordcounts = {'early': findchronologicalweights('early', language),
 						'middle': findchronologicalweights('middle', language),
-						'late': findchronologicalweights('late', language) }
+						'late': findchronologicalweights('late', language)}
 
-	wordweights = {'early': round(wordcounts['late']/wordcounts['early'],2),
-						'middle': round(wordcounts['late']/wordcounts['middle'],2),
+	wordweights = {'early': round(wordcounts['late']/wordcounts['early'], 2),
+						'middle': round(wordcounts['late']/wordcounts['middle'], 2),
 						'late': 1}
 
 	return wordweights
@@ -207,7 +207,7 @@ def findgeneraweights(language, collapsed=False):
 	return weights
 
 
-def findchronologicalweights(era,language):
+def findchronologicalweights(era, language):
 	"""
 
 	an initial call to dictionary_headword_wordcounts to figure out the relative weight of the different eras

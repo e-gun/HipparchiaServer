@@ -266,7 +266,7 @@ class dbHeadwordObject(dbWordCountObject):
 		self.allrhet = None
 
 	def gettime(self, element):
-		elements = {'early': self.early, 'middle': self.middle, 'late': self.late ,
+		elements = {'early': self.early, 'middle': self.middle, 'late': self.late,
 		            'unk': self.t - (self.early + self.middle + self.late)
 		            }
 		try:
@@ -304,7 +304,7 @@ class dbHeadwordObject(dbWordCountObject):
 		if self.predomera != -1:
 			try:
 				return elements[element]
-			except:
+			except KeyError:
 				return 0
 		else:
 			return None
@@ -318,7 +318,7 @@ class dbHeadwordObject(dbWordCountObject):
 						'ch': (self.wtdch/self.predomcorp)*100}
 			try:
 				return elements[element]
-			except:
+			except KeyError:
 				return 0
 		else:
 			return 0

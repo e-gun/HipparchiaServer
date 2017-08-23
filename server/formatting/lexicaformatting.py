@@ -155,10 +155,10 @@ def deabbreviateauthors(authorabbr, lang):
 
 def formatdictionarysummary(summarydict):
 	"""
-	turn three lists into html formatting for the summary material that will be inserted at the top of a dictionary entry
-	:param authors:
-	:param senses:
-	:param quotes:
+	turn three lists into html formatting for the summary material that will be inserted at the top of a
+	dictionary entry
+
+	:param summarydict:
 	:return:
 	"""
 

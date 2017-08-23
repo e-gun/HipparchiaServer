@@ -145,8 +145,10 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 
 		jobs = [Process(target=mpmorphology, args=(terms, morphobjects, commitcount))
 		        for i in range(workers)]
-		for j in jobs: j.start()
-		for j in jobs: j.join()
+		for j in jobs:
+			j.start()
+		for j in jobs:
+			j.join()
 
 		activepoll.statusis('Assigning headwords to entries')
 		remaining = len(completeindexdict)
@@ -192,7 +194,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 
 		activepoll.statusis('Remapping entries')
 		activepoll.allworkis(-1)
-		headwordindexdict = {}
+		headwordindexdict = dict()
 
 		for observed in augmentedindexdict.keys():
 			if augmentedindexdict[observed]['homonyms']:
@@ -211,7 +213,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 				try:
 					headwordindexdict[bf]
 				except KeyError:
-					headwordindexdict[bf] = {}
+					headwordindexdict[bf] = dict()
 				if observed not in headwordindexdict[bf]:
 					headwordindexdict[bf][observed] = augmentedindexdict[observed]['loci']
 				else:
@@ -224,19 +226,19 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		# μετά {'μετά': [('gr2586w002', 2184, '<indexedlocation id="gr2586w002_LN_2184">400.31</indexedlocation>', False)]}
 
 		if not alphabetical:
-			sorter = []
+			sorter = list()
 			for wd in headwordindexdict:
 				forms = headwordindexdict[wd]
 				allhits = sum([len(forms[f]) for f in forms])
-				sorter.append((allhits,wd))
+				sorter.append((allhits, wd))
 			sorter = sorted(sorter, reverse=True)
 			sortedheadwordindexdictkeys = [s[1] for s in sorter if s[1] != '•••unparsed•••']
 			sortedheadwordindexdictkeys.append('•••unparsed•••')
 		else:
 			sortedheadwordindexdictkeys = polytonicsort(headwordindexdict.keys())
 
-		htmlindexdict = {}
-		sortedoutput = []
+		htmlindexdict = dict()
+		sortedoutput = list()
 		for headword in sortedheadwordindexdictkeys:
 			hw = re.sub('v', 'u', headword)
 			hw = re.sub('j', 'i', hw)
@@ -255,7 +257,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 			for form in polytonicsort(headwordindexdict[headword].keys()):
 				hits = sorted(headwordindexdict[headword][form])
 				isahomonymn = hits[0][3]
-				if onework == True:
+				if onework:
 					hits = [h[2] for h in hits]
 					loci = ', '.join(hits)
 				else:
@@ -312,13 +314,13 @@ def htmlifysimpleindex(completeindexdict, onework):
 	:return:
 	"""
 
-	unsortedoutput = []
+	unsortedoutput = list()
 
 	for c in completeindexdict.keys():
 		hits = completeindexdict[c]
 		count = str(len(hits))
 		hits = sorted(hits)
-		if onework == True:
+		if onework:
 			hits = [h[2] for h in hits]
 			loci = ', '.join(hits)
 		else:
@@ -357,7 +359,7 @@ def linesintoindex(lineobjects, activepoll):
 
 	defaultwork = lineobjects[0].wkuinversalid
 
-	completeindex = {}
+	completeindex = dict()
 
 	# clickable entries will break after too many words. Toggle bewteen indexing methods by guessing N words per line and
 	# then pick 'locus' when you have too many lineobjects: a nasty hack
@@ -376,10 +378,10 @@ def linesintoindex(lineobjects, activepoll):
 			line = lineobjects.pop()
 			if activepoll:
 				activepoll.remain(len(lineobjects))
-		except:
-			line = makeablankline(defaultwork, -1)
+		except IndexError:
+			line = makeablankline(defaultwork, None)
 
-		if line.index != -1:
+		if line.index:
 			words = line.wordlist('polytonic')
 			words = [tidyupterm(w, punct).lower() for w in words]
 			words = list(set(words))
@@ -388,7 +390,7 @@ def linesintoindex(lineobjects, activepoll):
 				referencestyle = getattr(line, indexingmethod)
 				try:
 					completeindex[w].append((line.wkuinversalid, line.index, referencestyle()))
-				except:
+				except KeyError:
 					completeindex[w] = [(line.wkuinversalid, line.index, referencestyle())]
 
 	return completeindex

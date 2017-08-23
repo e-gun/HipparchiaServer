@@ -124,7 +124,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 	previousline = lines[0]
 	brackettypes = findactivebrackethighlighting()
-	continuationdict = {'square': False, 'round': False, 'curly': False, 'angled': False }
+	continuationdict = {'square': False, 'round': False, 'curly': False, 'angled': False}
 
 	shownotes = True
 	if shownotes:
@@ -282,6 +282,7 @@ def insertparserids(lineobject, continuationdict):
 	in the course of debugging it is possible to produce versions that work with only some of those three types of passage
 
 	:param lineobject:
+	:param continuationdict:
 	:return:
 	"""
 
@@ -413,7 +414,7 @@ def addobservedtags(word, lastword, hyphenated):
 
 	try:
 		word[-1]
-	except:
+	except IndexError:
 		return ''
 
 	if word[-1] == '-' and word == lastword:

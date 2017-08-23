@@ -133,9 +133,12 @@ def loadallworksasobjects():
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 
-	q = 'SELECT universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02, levellabels_03, ' \
-	        'levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance, recorded_date, converted_date, wordcount, ' \
-			'firstline, lastline, authentic FROM works'
+	q = """
+	SELECT universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02,
+		levellabels_03, levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance, 
+		recorded_date, converted_date, wordcount, firstline, lastline, authentic FROM works
+	"""
+
 	curs.execute(q)
 	results = curs.fetchall()
 
@@ -350,7 +353,7 @@ def returnfirstlinenumber(workid, cursor):
 			cursor.execute(query, data)
 			found = cursor.fetchone()
 			firstline = found[0]
-		except:
+		except IndexError:
 			workid = perseusidmismatch(workid, cursor)
 			firstline = returnfirstlinenumber(workid, cursor)
 
@@ -408,7 +411,7 @@ def returnfirstwork(authorid, cursor):
 	found = cursor.fetchone()
 	try:
 		found = found[0]
-	except:
+	except IndexError:
 		# yikes: an author we don't know about
 		# perseus will send you gr1415, but he is not in the db
 		# homer...

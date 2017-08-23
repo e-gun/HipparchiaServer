@@ -45,7 +45,7 @@ def configurewhereclausedata(searchlist, workdict, searchobject):
 	hasselections = [p[0:10] for p in so.psgselections if p]
 
 	if hasexclusions != [] or hasselections != []:
-		cleanlistmapper = {wk: re.sub(r'(......)x','\1w',wk[0:10]) for wk in searchlist}
+		cleanlistmapper = {wk: re.sub(r'(......)x', '\1w', wk[0:10]) for wk in searchlist}
 		incompleteworks = {x[0:10] for x in searchlist
 		                   if (cleanlistmapper[x] in hasselections or cleanlistmapper[x] in hasexclusions)}
 	else:
@@ -153,10 +153,7 @@ def wholeworkbetweenclausecontents(listofworkobjects):
 	for now just return the relevant numbers as a list of tuples:
 		[(start1, end1), (start2,end2),...]
 
-	:param authoruniversalid:
-	:param workstarts:
-	:param workends:
-	:param include:
+	:param listofworkobjects:
 	:return:
 	"""
 
@@ -215,9 +212,8 @@ def wholeworktemptablecontents(authorid, setoflinenumbers):
 		WHERE NOT EXISTS syntax is too cumbersome to implement in light of all of the other issues in the air
 		(inclusion lists, etc)? It is not clear that the speed gains are going to justify trying to do this.
 
-	:param authoruniversalid:
-	:param setoflines:
-	:param includeorexclude:
+	:param authorid:
+	:param setoflinenumbers:
 	:return:
 	"""
 

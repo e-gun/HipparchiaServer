@@ -81,7 +81,7 @@ def styesheetsamples():
 		with open(stylefile, 'r') as f:
 			stylecontents = f.read().splitlines()
 
-	definitions = re.compile(r'^(.*?)\s\{')
+	definitions = re.compile(r'^(.*?)\s{')
 	styles = [re.sub(definitions, r'\1', s) for s in stylecontents
 	          if re.search(definitions, s) and not re.search(r'\.', s[1:])]
 

@@ -32,7 +32,7 @@ def parseconfig(configlist):
 	:param configlist:
 	:return:
 	"""
-	findconfig = re.compile(r'^[A-Z]{1,}')
+	findconfig = re.compile(r'^[A-Z]+')
 
 	configvariablelist = list()
 	for c in configlist:
@@ -62,7 +62,7 @@ def compareconfigs(template, model):
 	missing = set(sample) - set(active)
 	extra = set(active) - set(sample)
 
-	differencedict = { 'missing': missing, 'extra': extra }
+	differencedict = {'missing': missing, 'extra': extra}
 
 	return differencedict
 

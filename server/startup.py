@@ -7,10 +7,10 @@
 """
 
 from server import hipparchia
-from server.calculatewordweights import findtemporalweights, findccorporaweights, findgeneraweights
+from server.calculatewordweights import findccorporaweights, findgeneraweights, findtemporalweights
 from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors, \
-	setthreadcount, probefordatabases
-from server.listsandsession.sessiondicts import buildaugenresdict, buildworkgenresdict, buildauthorlocationdict, \
+	probefordatabases, setthreadcount
+from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildworkgenresdict, \
 	buildworkprovenancedict
 
 terminaltext = """
@@ -80,6 +80,7 @@ workprovenancedict = buildworkprovenancedict(workdict)
 
 print('building specialized sublists\n')
 
+
 def dictitemstartswith(originaldict, element, muststartwith):
 	"""
 
@@ -92,7 +93,7 @@ def dictitemstartswith(originaldict, element, muststartwith):
 	"""
 
 	newdict = {x: originaldict[x] for x in originaldict
-				if getattr(originaldict[x], element)[0:2] == muststartwith }
+				if getattr(originaldict[x], element)[0:2] == muststartwith}
 
 	return newdict
 
@@ -161,9 +162,9 @@ if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
 		c = False
 	print('greek wordweights', findtemporalweights('G'))
 	print('corpus weights', findccorporaweights())
-	print('greek genre weights:',findgeneraweights('G', c))
-	print('latin genre weights:',findgeneraweights('L', c))
+	print('greek genre weights:', findgeneraweights('G', c))
+	print('latin genre weights:', findgeneraweights('L', c))
 
 # empty dict in which to store progress polls
 # note that more than one poll can be running
-poll = {}
+poll = dict()

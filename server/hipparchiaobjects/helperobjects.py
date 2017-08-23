@@ -58,7 +58,6 @@ class SearchResult(object):
 
 		return self.clickurl[0:10]
 
-
 	def getlocusthml(self):
 		"""
 		generate the wrapped html for the citation; e.g:
@@ -297,7 +296,8 @@ class SearchObject(object):
 
 		if re.search(accented, seeking) or re.search(accented, proximate):
 			self.accented = True
-			# the following can be counted upon to slow down searches, but relatively few searches will be affected and not grievously
+			# the following can be counted upon to slow down searches, but relatively few searches will be
+			# affected and not grievously
 			seeking = re.sub('v', '[vu]', seeking)
 			seeking = re.sub('j', '[ji]', seeking)
 			proximate = re.sub('v', '[vu]', proximate)
