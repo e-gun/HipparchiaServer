@@ -15,7 +15,7 @@ from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dbfunctions import dblineintolineobject, simplecontextgrabber
 from server.formatting.bibliographicformatting import avoidlonglines, getpublicationinfo
 from server.formatting.bracketformatting import gtltsubstitutes
-from server.formatting.wordformatting import avoidsmallvariants
+from server.formatting.wordformatting import avoidsmallvariants, forcelunates
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
@@ -438,6 +438,9 @@ def addobservedtags(word, lastword, hyphenated):
 		o = '{wa}<observed id="{wb}">{wb}</observed>{sp}'.format(wa=wa, wb=wb, sp=sp)
 	else:
 		o = '<observed id="{w}">{w}</observed>{sp}'.format(w=word, sp=sp)
+
+	if hipparchia.config['RESTOREMEDIALANDFINALSIGMA'] == 'yes':
+		o = re.sub(r'<observed id="(.*?)">', lambda x: '<observed id="{sub}">'.format(sub=forcelunates(x.group(1))), o)
 
 	return o
 
