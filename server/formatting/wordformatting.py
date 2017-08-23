@@ -226,17 +226,16 @@ def gkattemptelision(hypenatedgreekheadword):
 				prefix = stripaccents(prefix)
 			entry = prefix[:-1]+stem[0]+stem
 		elif prefix[-1] in ['ν']:
-			#print('C3')
+			# print('C3')
 			prefix = stripaccents(prefix)
 			entry = prefix+stem
 		else:
-			#print('C0')
+			# print('C0')
 			pass
 	elif re.search(terminalacute, prefix[-1]) and re.search(initialrough, stem[0]) and re.search(unaspirated, prefix[-2]):
 		# print('D')
 		# vowel + rough and 'π' is in the prefix
 		entry = prefix[:-2] + aspirated + stripaccents(stem[0]) + stem[1:]
-
 
 	return entry
 
@@ -262,11 +261,11 @@ def latattemptelision(hypenatedlatinheadword):
 
 	in progress: a fair number of cases are still unhandled
 
-	:param hypenatedgreekheadword:
+	:param hypenatedlatinheadword:
 	:return:
 	"""
 
-	hypenatedlatinheadword = re.sub(r'_','',hypenatedlatinheadword)
+	hypenatedlatinheadword = re.sub(r'_', '', hypenatedlatinheadword)
 
 	triplets = {
 		'dsc': 'sc',
@@ -332,9 +331,13 @@ def latattemptelision(hypenatedlatinheadword):
 
 def tidyupterm(word, punct=None):
 	"""
+
 	remove gunk that should not be present in a cleaned line
 
+	pass punct if you do not feel like compiling it 100k times
+
 	:param word:
+	:param punct:
 	:return:
 	"""
 
@@ -350,7 +353,7 @@ def tidyupterm(word, punct=None):
 	try:
 		if re.search(r'[a-zA-z]', word[0]) is None:
 			word = re.sub(r'[a-zA-z]', '', word)
-	except:
+	except IndexError:
 		# must have been ''
 		pass
 
@@ -551,5 +554,48 @@ def avoidsmallvariants(text):
 	outvals = "?*/!|=+%&:'(){}[]"
 
 	cleantext = text.translate(str.maketrans(invals, outvals))
+
+	return cleantext
+
+
+def forcelunates(text):
+	"""
+
+	override σ and ς in the data and instead print ϲ
+
+	:param text:
+	:return:
+	"""
+
+	invals = "σςΣ"
+	outvals = "ϲϲϹ"
+
+	cleantext = text.translate(str.maketrans(invals, outvals))
+
+	return cleantext
+
+
+def attemptsigmadifferentiation(text):
+	"""
+
+	override ϲ and try to print σ or ς as needed
+
+	:param text:
+	:return:
+	"""
+
+	# first pass
+	invals = "ϲϹ"
+	outvals = "σΣ"
+
+	text = text.translate(str.maketrans(invals, outvals))
+
+	# then do terminal sigma
+	# look out for ς’ instead of σ’
+	straypunct = r'\<\>\{\}\[\]\(\)⟨⟩₍₎\.\?\!⌉⎜͙✳※¶§͜﹖→𐄂𝕔;:ˈ＇,‚‛‘“”„·‧∣'
+	combininglowerdot = u'\u0323'
+	boundaries = r'([' + combininglowerdot + straypunct + '\s]|$)'
+	terminalsigma = re.compile(r'σ' + boundaries)
+	cleantext = re.sub(terminalsigma, r'ς\1', text)
 
 	return cleantext

@@ -233,6 +233,14 @@ MPCOMMITCOUNT = 750
 # REVERSELEXICONRESULTSBYFREQUENCY will either give you the lookup
 # 	results in alphabetical order ('no') or in descending order by
 # 	frequency of occurrence ('yes')
+#
+# FORCELUNATESIGMANOMATTERWHAT: 'yes' means you will override σ and ς in the data and instead print ϲ; this is only
+#   meaningful if the HipparchiaBuilder (lamentably) had the 'lunates = n' option set to begin with
+#
+# RESTOREMEDIALANDFINALSIGMA: 'yes' means you will, alas, override ϲ and try to print σ or ς as needed; this is only
+#   meaningful if the HipparchiaBuilder had the 'lunates = y' option set to begin with.
+#   NB: if both FORCELUNATESIGMANOMATTERWHAT and RESTOREMEDIALANDFINALSIGMA are set to 'yes' lunates win (and you
+#   waste CPU cycles).
 
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 TLGASSUMESBETACODE = 'yes'
@@ -254,4 +262,5 @@ COLLAPSEDGENRECOUNTS = 'yes'
 NUMBEROFGENRESTOTRACK = 8
 AVOIDCIRCLEDLETTERS = 'no'
 REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
-
+FORCELUNATESIGMANOMATTERWHAT = 'no'
+RESTOREMEDIALANDFINALSIGMA = 'no'

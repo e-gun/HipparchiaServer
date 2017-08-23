@@ -8,7 +8,9 @@
 
 import re
 
+from server import hipparchia
 from server.formatting.betacodeescapes import andsubstitutes
+from server.formatting.wordformatting import attemptsigmadifferentiation, forcelunates
 from server.formatting.wordformatting import avoidsmallvariants
 
 
@@ -271,6 +273,11 @@ class dbWorkLine(object):
 			self.accented = ''
 			self.stripped = ''
 
+		if hipparchia.config['RESTOREMEDIALANDFINALSIGMA'] == 'yes':
+			self.accented = attemptsigmadifferentiation(self.accented)
+		if hipparchia.config['FORCELUNATESIGMANOMATTERWHAT'] == 'yes':
+			self.accented = forcelunates(self.accented)
+
 	def uncleanlocus(self):
 		"""
 		call me to get a formatted citation: "3.2.1"
@@ -455,7 +462,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		markup = re.compile(r'(\<)(.*?)(\>)')
+		markup = re.compile(r'(<)(.*?)(>)')
 		left = '<smallcode>&lt;'
 		right = '&gt;</smallcode>'
 
@@ -539,7 +546,7 @@ class dbWorkLine(object):
 		if version in ['accented', 'stripped']:
 			line = getattr(self, version)
 			if version == 'accented':
-				line = re.sub(r'(\<.*?\>)', r'', line)
+				line = re.sub(r'(<.*?>)', r'', line)
 			line = line.split(' ')
 			middle = line[1:-1]
 			allbutfirstandlastword = ' '.join(middle)
