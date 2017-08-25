@@ -149,8 +149,8 @@ def buildhipparchiatranstable():
 	invals.append('ΒΨΔΦΓΞΚΛΜΝΠϘΡσΣςϹΤΧΘΖ')
 	outvals.append('βψδφγξκλμνπϙρϲϲϲϲτχθζ')
 
-	invals.append('vUjÁÄáäÉËéëÍÏíïÓÖóöÜÚüú')
-	outvals.append('uViaaaaeeeeiiiioooouuuu')
+	invals.append('vUJjÁÄáäÉËéëÍÏíïÓÖóöÜÚüú')
+	outvals.append('uVIiaaaaeeeeiiiioooouuuu')
 
 	invals = ''.join(invals)
 	outvals = ''.join(outvals)
@@ -362,65 +362,6 @@ def tidyupterm(word, punct=None):
 	word = word.translate(str.maketrans(invals, outvals))
 
 	return word
-
-
-def cleanaccentsandvj(texttostrip):
-	"""
-	turn ᾶ into α, etc
-
-	:return:
-	"""
-
-	substitutes = (
-		('v', 'u'),
-		('U', 'V'),
-		('[Jj]', 'i'),
-		('[ÁÄ]', 'A'),
-		('[áä]', 'a'),
-		('[ÉË]', 'E'),
-		('[éë]', 'e'),
-		('[ÍÏ]', 'I'),
-		('[íï]', 'i'),
-		('[ÓÖ]', 'O'),
-		('[óö]', 'o'),
-		('[ῥῤῬ]', 'ρ'),
-		('[ἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰά]', 'α'),
-		('[ἐἑἒἓἔἕὲέ]', 'ε'),
-		('[ἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗΐϊ]', 'ι'),
-		('[ὀὁὂὃὄὅόὸ]', 'ο'),
-		('[ὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺ]', 'υ'),
-		('[ὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]', 'ω'),
-		('[ᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧ]', 'η'),
-		('[ᾨᾩᾪᾫᾬᾭᾮᾯὨὩὪὫὬὭὮὯΩ]', 'ω'),
-		('[ὈὉὊὋὌὍΟ]', 'ο'),
-		('[ᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑ]', 'α'),
-		('[ἘἙἚἛἜἝΕ]', 'ε'),
-		('[ἸἹἺἻἼἽἾἿΙΪ]', 'ι'),
-		('[ὙὛὝὟΥΫ]', 'υ'),
-		('[ᾘᾙᾚᾛᾜᾝᾞᾟἨἩἪἫἬἭἮἯΗ]', 'η'),
-		('Β', 'β'),
-		('Ψ', 'ψ'),
-		('Δ', 'δ'),
-		('Φ', 'φ'),
-		('Γ', 'γ'),
-		('Ξ', 'ξ'),
-		('Κ', 'κ'),
-		('Λ', 'λ'),
-		('Μ', 'μ'),
-		('Ν', 'ν'),
-		('Π', 'π'),
-		('Ϙ', 'ϙ'),
-		('Ρ', 'ρ'),
-		('Ϲ', 'ϲ'),
-		('Τ', 'τ'),
-		('Θ', 'θ'),
-		('Ζ', 'ζ')
-	)
-
-	for swap in range(0, len(substitutes)):
-		texttostrip = re.sub(substitutes[swap][0], substitutes[swap][1], texttostrip)
-
-	return texttostrip
 
 
 def universalregexequivalent(searchterm):

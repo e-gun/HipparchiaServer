@@ -15,7 +15,7 @@ from server.dbsupport.dbfunctions import setconnection
 from server.formatting.jsformatting import insertlexicalbrowserjs
 from server.formatting.lexicaformatting import entrysummary, formatdictionarysummary, formateconsolidatedgrammarentry, \
 	formatgloss, formatmicroentry, grabheadmaterial, grabsenses, insertbrowserlookups
-from server.formatting.wordformatting import cleanaccentsandvj, universalregexequivalent
+from server.formatting.wordformatting import stripaccents, universalregexequivalent
 from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbHeadwordObject, dbLatinWord, dbLemmaObject, \
 	dbMorphologyObject, dbWordCountObject
 from server.listsandsession.listmanagement import polytonicsort
@@ -66,18 +66,18 @@ def lookformorphologymatches(word, cursor, trialnumber=0):
 		try:
 			# have to 'try' because there might not be a word[-2]
 			if re.search(terminalacute, word[-1]) and trialnumber < 4:
-				sub = cleanaccentsandvj(word[-1])
+				sub = stripaccents(word[-1])
 				newword = word[:-1] + sub
 				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
 			elif re.search(terminalacute, word[-2]) and trialnumber < 4:
-				sub = cleanaccentsandvj(word[-2])
+				sub = stripaccents(word[-2])
 				newword = word[:-2] + sub + word[-1]
 				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
 			elif trialnumber < 4:
 				# elided ending? you will ask for ἀλλ, but you need to look for ἀλλ'
 				newword = word + chr(39)
 				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
-		except:
+		except IndexError:
 			matchingobject = None
 
 	return matchingobject
@@ -400,7 +400,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		# τήθη vs τηθή; the parser has the latter, the dictionary expects the former (but knows of the latter)
 		trialnumber = maxtrials - 1
 		newword = re.sub(r'\[¹²³⁴⁵⁶⁷⁸⁹\]', '', seeking)
-		newword = cleanaccentsandvj(newword)
+		newword = stripaccents(newword)
 		newword = universalregexequivalent(newword)
 		# strip '(' and ')'
 		newword = '^{wd}$'.format(wd=newword[1:-1])
@@ -566,7 +566,7 @@ def findcountsviawordcountstable(wordtocheck):
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 
-	initial = cleanaccentsandvj(wordtocheck[0])
+	initial = stripaccents(wordtocheck[0])
 	# alternatives = re.sub(r'[uv]','[uv]',c)
 	# alternatives = '^'+alternatives+'$'
 	if initial in 'abcdefghijklmnopqrstuvwxyzαβψδεφγηιξκλμνοπρϲτυωχθζ':
