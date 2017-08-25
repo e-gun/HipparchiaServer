@@ -92,7 +92,7 @@ DBPASS = 'yourpassheretrytomakeitstrongplease'
 # CALCULATEWORDWEIGHTS will recalibrate the weighting constants: only
 # 	useful after a new DB build with new corpora definitions.
 # 	this can take a couple of minutes to calculate, so leaving it
-# 	at 'yes' is not such a great idea.   and the new numbers are
+# 	at 'yes' is not such a great idea. And the new numbers are
 # 	not in fact entered into the code, just calculated; so you have
 # 	to edit dbHeadwordObject() yourself  after you are given the
 # 	numbers to send to it; if COLLAPSEDGENRECOUNTS is 'yes', you will
@@ -141,9 +141,9 @@ HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 # MPCOMMITCOUNT: **do not change this** unless you are getting
 # 	deluged by messages about failed DB queries (see 'WORKERS'
 # 	above) In which case you should *lower* the number because your
-# 	many threads are accumulating too many uncommited transactions.
+# 	many threads are accumulating too many uncommitted transactions.
 # 	Avoid increasing this value: it will make very little
-# 	difference to your performace, but it will greatly increase
+# 	difference to your performance, but it will greatly increase
 # 	your chances of failed searches. NB: the failures will only
 # 	show up in the logs as a number of lines starting with "could
 # 	not execute SELECT * FROM..." in the browser you will get
@@ -175,12 +175,12 @@ MPCOMMITCOUNT = 750
 # 	associated with an index item. Why would you even turn
 # 	something so awesome off? Because the clicks will stop working
 # 	with big indices: 'RangeError: Maximum call stack size
-# 	exceeded'.   This is a javascript/browser limitation: too many
+# 	exceeded'.  This is a javascript/browser limitation: too many
 # 	objects get piled onto the page. Different browsers have
-# 	different caps.   If you hit the cap, then you will have a fat,
+# 	different caps.  If you hit the cap, then you will have a fat,
 # 	useless wad of tags that are super slow to load and take   up
 # 	lots of memory but do nothing else. The same problem can arise
-# 	for the lookup clicks in a monster index   even if you turn the
+# 	for the lookup clicks in a monster index  even if you turn the
 # 	browser clicking off. -1: always try to make every item of
 # 	every index clickable; 0: never try to make any item clickable;
 # 	N: do not try if you are indexing more than N lines (1500 is a
@@ -218,7 +218,7 @@ MPCOMMITCOUNT = 750
 # 	all 'small' genres whose word values will give them more than a
 # 	500:1 hit weight; everything smaller than lyric... this is more
 # 	or less *essential* if you are dealing with Latin words since
-# 	the editoral inserions in minor Greek genres will give you 3
+# 	the editorial insertions in minor Greek genres will give you 3
 # 	words tagged 'mech' whose weight will be 390506.33x as great as
 # 	any individual word in a historian.
 #
@@ -234,12 +234,15 @@ MPCOMMITCOUNT = 750
 # 	results in alphabetical order ('no') or in descending order by
 # 	frequency of occurrence ('yes')
 #
-# FORCELUNATESIGMANOMATTERWHAT: 'yes' means you will override σ and ς in the data and instead print ϲ; this is only
-#   meaningful if the HipparchiaBuilder (lamentably) had the 'lunates = n' option set to begin with
+# FORCELUNATESIGMANOMATTERWHAT: 'yes' means you will override σ and ς
+#  	in the data and instead print ϲ; this is only
+# 	meaningful if the HipparchiaBuilder (lamentably) had the 'lunates = n' option set to begin with
 #
-# RESTOREMEDIALANDFINALSIGMA: 'yes' means you will, alas, override ϲ and try to print σ or ς as needed; this is only
-#   meaningful if the HipparchiaBuilder had the 'lunates = y' option set to begin with.
-#   NB: if both FORCELUNATESIGMANOMATTERWHAT and RESTOREMEDIALANDFINALSIGMA are set to 'yes' lunates win (and you
+# RESTOREMEDIALANDFINALSIGMA: 'yes' means you will, alas, override ϲ
+#  	and try to print σ or ς as needed; this is only meaningful if the
+#  	HipparchiaBuilder had the 'lunates = y' option set to begin with.
+#   NB: if both FORCELUNATESIGMANOMATTERWHAT and RESTOREMEDIALANDFINALSIGMA
+#  	are set to 'yes' lunates win (and you
 #   waste CPU cycles).
 
 CSSSTYLESHEET = '/static/hipparchia_styles.css'

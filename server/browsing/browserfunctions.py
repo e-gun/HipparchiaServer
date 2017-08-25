@@ -434,7 +434,8 @@ def addobservedtags(word, lastword, hyphenated):
 		o = '{wa}<observed id="{wb}">{wb}</observed>{sp}'.format(wa=word[0], wb=word[1:], sp=sp)
 	elif re.search(r'^&nbsp;', word):
 		wb = re.sub(r'&nbsp;', '', word)
-		wa = re.sub(wb, '', word)
+		# if wb='*', you have a problem...
+		wa = re.sub(re.escape(wb), '', word)
 		o = '{wa}<observed id="{wb}">{wb}</observed>{sp}'.format(wa=wa, wb=wb, sp=sp)
 	else:
 		o = '<observed id="{w}">{w}</observed>{sp}'.format(w=word, sp=sp)

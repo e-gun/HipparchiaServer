@@ -721,16 +721,6 @@ keeping (for now) the non-span version of this
 	font-size: 85%;
 	}
 
-.smallerthannormalitalic {
-    /* in practice this comes *inside* a smallerthannormal span and so you will be smaller than smallerthannormal*/
-	/* font-size: 85%; */
-	}
-
-.smallerthannormalsuperscript {
-    vertical-align: super;
-	font-size: 60%;
-	}
-
 .smlatcaps {
 	font-variant: small-caps;
 	font-size: 110%;

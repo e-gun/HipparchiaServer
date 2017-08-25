@@ -1,24 +1,24 @@
 cloc --not-match-f='^j' HipparchiaServer/
-      95 text files.
-      94 unique files.
+      97 text files.
+      96 unique files.
       13 files ignored.
 
-github.com/AlDanial/cloc v 1.72  T=1.05 s (82.9 files/s, 21388.7 lines/s)
+github.com/AlDanial/cloc v 1.72  T=0.68 s (131.3 files/s, 33905.9 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                          49           2962           3785           8116
-CSS                              2            473            322           1786
-HTML                            23            142             14           1622
-XML                              6              0              0           1584
-JavaScript                       6            195            187           1084
-Markdown                         1             32              0            130
+Python                          50           3039           4013           8183
+CSS                              2            489            320           1822
+XML                              7              0              0           1715
+HTML                            23            145             14           1617
+JavaScript                       6            192            177           1035
+Markdown                         1             52              0            168
 -------------------------------------------------------------------------------
-SUM:                            87           3804           4308          14322
+SUM:                            89           3917           4524          14540
 -------------------------------------------------------------------------------
 
 
-[ in server/] grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
+server/ $ grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
 hipparchiaobjects/dbtextobjects.py:class dbAuthor(object):
 hipparchiaobjects/dbtextobjects.py:class dbOpus(object):
 hipparchiaobjects/dbtextobjects.py:class dbWorkLine(object):
@@ -39,7 +39,7 @@ hipparchiaobjects/lexicalobjects.py:class dbLemmaObject(object):
 calculatewordweights.py:def findtemporalweights(language):
 calculatewordweights.py:def findccorporaweights():
 calculatewordweights.py:def findgeneraweights(language, collapsed=False):
-calculatewordweights.py:def findchronologicalweights(era,language):
+calculatewordweights.py:def findchronologicalweights(era, language):
 calculatewordweights.py:def findcorpusweight(corpus, language):
 startup.py:def dictitemstartswith(originaldict, element, muststartwith):
 startup.py:def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
@@ -59,7 +59,7 @@ dbsupport/citationfunctions.py:def perseuslookupchangecase(citationlist):
 dbsupport/citationfunctions.py:def perseusdelabeler(citationlist, workobject):
 dbsupport/citationfunctions.py:def perseuscitationsintohipparchiacitations(citationlist):
 dbsupport/dbfunctions.py:def setthreadcount(startup=False):
-dbsupport/dbfunctions.py:def setconnection(autocommit='n'):
+dbsupport/dbfunctions.py:def setconnection(autocommit='n', readonlyconnection=True):
 dbsupport/dbfunctions.py:def tablenamer(authorobject, thework):
 dbsupport/dbfunctions.py:def loadallauthorsasobjects():
 dbsupport/dbfunctions.py:def loadallworksasobjects():
@@ -71,7 +71,7 @@ dbsupport/dbfunctions.py:def findselectionboundaries(workobject, selection, curs
 dbsupport/dbfunctions.py:def simplecontextgrabber(authortable, focusline, linesofcontext, cursor):
 dbsupport/dbfunctions.py:def grabonelinefromwork(workdbname, lineindex, cursor):
 dbsupport/dbfunctions.py:def returnfirstlinenumber(workid, cursor):
-dbsupport/dbfunctions.py:def perseusidmismatch(badworkdbnumber,cursor):
+dbsupport/dbfunctions.py:def perseusidmismatch(badworkdbnumber, cursor):
 dbsupport/dbfunctions.py:def returnfirstwork(authorid, cursor):
 dbsupport/dbfunctions.py:def makeablankline(work, fakelinenumber):
 dbsupport/dbfunctions.py:def makeanemptyauthor(universalid):
@@ -134,8 +134,12 @@ formatting/bibliographicformatting.py:def woformatworkinfo(workobject):
 formatting/bibliographicformatting.py:def formatname(workobject, authorobject):
 formatting/bibliographicformatting.py:def getpublicationinfo(workobject, cursor):
 formatting/bibliographicformatting.py:def formatpublicationinfo(pubinfo):
-formatting/bibliographicformatting.py:def avoidlonglines(string, maxlen, splitval, stringlist=[]):
+formatting/bibliographicformatting.py:def avoidlonglines(string, maxlen, splitval, stringlist=list()):
 formatting/bibliographicformatting.py:def formatauthorandworkinfo(authorname, workobject):
+formatting/bracketformatting.py:def gtltsubstitutes(text):
+formatting/bracketformatting.py:def brackethtmlifysearchfinds(listoflineobjects, searchobject, linehtmltemplate):
+formatting/jsformatting.py:def insertbrowserclickjs(tagname):
+formatting/jsformatting.py:def insertlexicalbrowserjs(htmlentry):
 formatting/lexicaformatting.py:def grabsenses(fullentry):
 formatting/lexicaformatting.py:def entrysummary(fullentry, lang, translationlabel, lemmaobject):
 formatting/lexicaformatting.py:def grabheadmaterial(fullentry):
@@ -145,7 +149,6 @@ formatting/lexicaformatting.py:def formateconsolidatedgrammarentry(consolidatede
 formatting/lexicaformatting.py:def formatgloss(entrybody):
 formatting/lexicaformatting.py:def formatmicroentry(entrybody):
 formatting/lexicaformatting.py:def insertbrowserlookups(htmlentry):
-formatting/lexicaformatting.py:def insertbrowserjs(htmlentry):
 formatting/lexicaformatting.py:def dbquickfixes(listofnames):
 formatting/lexicaformatting.py:def deabrevviategreekauthors():
 formatting/lexicaformatting.py:def deabrevviatelatinauthors():
@@ -154,9 +157,7 @@ formatting/searchformatting.py:def bulkenvironsfetcher(table, searchresultlist, 
 formatting/searchformatting.py:def flagsearchterms(searchresultobject, skg, prx, searchobject):
 formatting/searchformatting.py:def highlightsearchterm(lineobject, regexequivalent, spanname):
 formatting/searchformatting.py:def htmlifysearchfinds(listofsearchresultobjects, searchobject):
-formatting/searchformatting.py:def brackethtmlifysearchfinds(listoflineobjects, searchobject, linehtmltemplate):
 formatting/searchformatting.py:def nocontexthtmlifysearchfinds(listofsearchresultobjects):
-formatting/searchformatting.py:def jstoinjectintobrowser(listofsearchresultobjects):
 formatting/searchformatting.py:def unbalancedspancleaner(html):
 formatting/wordformatting.py:def removegravity(accentedword):
 formatting/wordformatting.py:def forceterminalacute(matchgroup):
@@ -165,8 +166,11 @@ formatting/wordformatting.py:def buildhipparchiatranstable():
 formatting/wordformatting.py:def gkattemptelision(hypenatedgreekheadword):
 formatting/wordformatting.py:def latattemptelision(hypenatedlatinheadword):
 formatting/wordformatting.py:def tidyupterm(word, punct=None):
-formatting/wordformatting.py:def cleanaccentsandvj(texttostrip):
 formatting/wordformatting.py:def universalregexequivalent(searchterm):
+formatting/wordformatting.py:def depunct(stringtoclean, allowedpunctuationsting=None):
+formatting/wordformatting.py:def avoidsmallvariants(text):
+formatting/wordformatting.py:def forcelunates(text):
+formatting/wordformatting.py:def attemptsigmadifferentiation(text):
 lexica/lexicalookups.py:def lookformorphologymatches(word, cursor, trialnumber=0):
 lexica/lexicalookups.py:def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
 lexica/lexicalookups.py:def browserdictionarylookup(count, seekingentry, cursor):
@@ -178,11 +182,10 @@ lexica/lexicalookups.py:def findcountsviawordcountstable(wordtocheck):
 lexica/lexicalookups.py:def getobservedwordprevalencedata(dictionaryword):
 lexica/lexicalookups.py:def formatprevalencedata(wordcountobject):
 lexica/lexicalookups.py:def grablemmataobjectfor(entryname, db, cursor):
-lexica/lexicalookups.py:def findtermamongsenses(match, seeking, usedict, translationlabel, cur):
 lexica/lexicalookups.py:def dictionaryentryjs():
 listsandsession/listmanagement.py:def compilesearchlist(listmapper, s=session):
 listsandsession/listmanagement.py:def sortsearchlist(searchlist, authorsdict):
-listsandsession/listmanagement.py:def sortresultslist(hits, authorsdict, worksdict):
+listsandsession/listmanagement.py:def sortresultslist(hits, searchobject, authorsdict, worksdict):
 listsandsession/listmanagement.py:def calculatewholeauthorsearches(searchlist, authordict):
 listsandsession/listmanagement.py:def flagexclusions(searchlist, s=session):
 listsandsession/listmanagement.py:def prunebydate(searchlist, authorobjectdict, workobjectdict, s=session):
@@ -197,7 +200,7 @@ listsandsession/sessiondicts.py:def buildworkgenresdict(workdict):
 listsandsession/sessiondicts.py:def buildauthorlocationdict(authordict):
 listsandsession/sessiondicts.py:def buildworkprovenancedict(workdict):
 listsandsession/sessionfunctions.py:def sessionvariables():
-listsandsession/sessionfunctions.py:def modifysessionvar(param,val):
+listsandsession/sessionfunctions.py:def modifysessionvar(param, val):
 listsandsession/sessionfunctions.py:def modifysessionselections(cookiedict, authorgenreslist, workgenreslist, authorlocationlist, workprovenancelist):
 listsandsession/sessionfunctions.py:def parsejscookie(cookiestring):
 listsandsession/sessionfunctions.py:def sessionselectionsashtml(authordict, workdict):
@@ -286,5 +289,5 @@ textsandindices/textandindiceshelperfunctions.py:def textsegmentfindstartandstop
 textsandindices/textandindiceshelperfunctions.py:def wordindextohtmltable(indexingoutput, useheadwords):
 textsandindices/textandindiceshelperfunctions.py:def dictmerger(masterdict, targetdict):
 textsandindices/textandindiceshelperfunctions.py:def supplementalindexjs():
-textsandindices/textandindiceshelperfunctions.py:def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationvalue, type):
+textsandindices/textandindiceshelperfunctions.py:def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationvalue, brktype):
 textsandindices/textbuilder.py:def buildtext(work, firstline, lastline, linesevery, cursor):
