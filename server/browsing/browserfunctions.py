@@ -294,7 +294,7 @@ def insertparserids(lineobject, continuationdict):
 		continuationdict = {e: continuationdict[e] for e in brackettypes}
 		theline = lineobject.markeditorialinsersions(continuationdict)
 
-	theline = re.sub(r'(\<.*?\>)',r'*snip*\1*snip*',theline)
+	theline = re.sub(r'(<.*?>)', r'*snip*\1*snip*',theline)
 	hyphenated = lineobject.hyphenated
 	segments = deque([s for s in theline.split('*snip*') if s])
 	
@@ -304,7 +304,7 @@ def insertparserids(lineobject, continuationdict):
 	#	['ὁ μὲν ', ' ', '<span class="expanded">', 'Μυρμιδόϲιν·', '</span>']
 	# another place where you need space:
 	#	['</span>', ' Κωπάιδων']
-	properlyspacedsegments = []
+	properlyspacedsegments = list()
 	while len(segments) > 1:
 		if len(segments[0]) > 1 and re.search(r'\s$', segments[0]) and re.search(r'^<', segments[1]):
 			# ['ὁ μὲν ', '<span class="expanded">', 'Μυρμιδόϲιν·', '</span>']
@@ -396,9 +396,11 @@ def addobservedtags(word, lastword, hyphenated):
 
 	take a word and sandwich it with a tag
 
-		'<observed id="imperator">imperator</observed>'
+	'<observed id="imperator">imperator</observed>'
 
 	:param word:
+	:param lastword:
+	:param hyphenated:
 	:return:
 	"""
 

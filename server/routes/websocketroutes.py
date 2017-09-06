@@ -136,11 +136,39 @@ def checkforactivesearch(ts):
 
 	note that uWSGI does not look like it will ever be able to work with the polling: poll[ts].getactivity() will
 	never return anything because the processing and threading of uWSGI means that the poll is not going
-	to be inside the instance of HipparchiaServer that receives the confirmation request
-
-	or something like that...
+	to be available to the instance; redis, vel. sim could fix this, but that's a lot of trouble to go to
 
 	at a minimum you can count on uWSGI giving you a KeyError when you ask for poll[ts]
+
+	you must comply with RFC 6455 or you will get 'websockets.exceptions.InvalidHandshake', etc. from websockets
+
+	sample exchange with websockets' http.py
+
+		websocket at 5010 opened
+		127.0.0.1 - - [06/Sep/2017 15:12:55] "GET /confirm/1504725175310 HTTP/1.1" 200 -
+		read_line(): b'GET / HTTP/1.1\r\n'
+		read_line(): b'Host: localhost:5010\r\n'
+		read_line(): b'Connection: Upgrade\r\n'
+		read_line(): b'Pragma: no-cache\r\n'
+		read_line(): b'Cache-Control: no-cache\r\n'
+		read_line(): b'Upgrade: websocket\r\n'
+		read_line(): b'Origin: http://localhost:5000\r\n'
+		read_line(): b'Sec-WebSocket-Version: 13\r\n'
+		read_line(): b'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36\r\n'
+		read_line(): b'DNT: 1\r\n'
+		read_line(): b'Accept-Encoding: gzip, deflate, br\r\n'
+		read_line(): b'Accept-Language: en-US,en;q=0.8\r\n'
+		read_line(): b'Cookie: session=.eJxtk01v2zAMhv-LzhmQDusw5Nb7jrsNRaHIrE1YJh1Sqm0U_e-lnG87Rz1-9JokqE_na4IxxKzIpG73_3VTkEKEkG5Q5LDSjK28vLLy2kkNi2ruOi-T27kJ1Bn-8Bj9PoLbfbpaANq3Cud7s5Ukw-bEI9jV5O9hx9I3HLm-yNEnpAchR74IOcJ1yMBSBc6U9G17ZF8btxcfWkie6gjVpYMTDVnitIRiEcUkvjI9ZC9wY_KgIIEpwZgM_9waDY2gJvQUrLSs5wjwEhE0VT6VhB9_nos8T-IiHmMb8FVpAqmCEak-JyAFkNL_yZu_76d3gUMGCtPV0yDYlxnel2ATuxbw9LzdutMUFxoSKL9f2vq1cZ0fBTTHVKTf80WyhliIS9__7MwEDaZzRu_7SbLeB_fCI3aYSqVP5az1cvkMLbfvkNnKXuye2t9DY_l96eXvTOwNrDSWZJMEMaK2w4l8B4X3WfA6yQ9_exraZVVDu35zhS1LHdoVefAMhwfPcOxQi2JFvNDkvr4BWbtfzg.DJHUoA.Je_KZJQ0LY1Z6iFuJZU7iNTRfgU\r\n'
+		read_line(): b'Sec-WebSocket-Key: gqDCHf/EPrL5rrU43t1yVg==\r\n'
+		read_line(): b'Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits\r\n'
+		read_line(): b'\r\n'
+
+	from RFC 6455:
+	The request MUST include a header field with the name
+		|Sec-WebSocket-Key|.  The value of this header field MUST be a
+		nonce consisting of a randomly selected 16-byte value that has
+		been base64-encoded (see Section 4 of [RFC4648]).  The nonce
+		MUST be selected randomly for each connection.
 
 	:param ts:
 	:return:
@@ -160,23 +188,36 @@ def checkforactivesearch(ts):
 
 	theurl = 'http://{ip}:{fp}/startwspolling/{pp}'.format(ip=theip, fp=flaskserverport, pp=pollport)
 
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	# sock.setblocking(0)
-	result = sock.connect_ex((theip, pollport))
-	if result == 0:
-		pass
-	else:
-		# print('websocket probe failed:',errno.errorcode[result])
-		# need to fire up the websocket
-		try:
-			r = urlopen(theurl, data=None, timeout=.1)
-		except socket.timeout:
-			# socket.timeout: but our aim was to send the request, not to read the response and get blocked
-			# so we want to throw this exception so that we can eventually get to one of the 'returns'
-			print('websocket at {p} opened'.format(p=pollport))
+	handshake = list()
+	handshake.append('GET / HTTP/1.1\r\n')
+	handshake.append('Host: {ip}:{pp}\r\n')
+	handshake.append('Connection: Upgrade\r\n')
+	handshake.append('Upgrade: websocket\r\n')
+	handshake.append('Origin: self_probe\r\n')
+	handshake.append('Sec-WebSocket-Key: {k}\r\n')
+	handshake.append('Sec-WebSocket-Version: 13\r\n')
+	handshake.append('\r\n')
+	handshake = ''.join(handshake)
+	# key = b64encode(urandom(16))
+	key = 'GwPND1CD9u2Sf3lnsNwRnw=='
+	handshake = handshake.format(ip=theip, pp=flaskserverport, k=key)
+	handshake = handshake.encode(encoding='UTF-8')
 
-	sock.close()
-	del sock
+	with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+		try:
+			s.connect((theip, pollport))
+			s.sendall(handshake)
+		except ConnectionRefusedError:
+			# need to fire up the websocket
+			try:
+				response = urlopen(theurl, data=None, timeout=.1)
+			except socket.timeout:
+				# socket.timeout: but our aim was to send the request, not to read the response and get blocked
+				# so we want to throw this exception so that we can eventually get to one of the 'returns'
+				print('websocket at {p} opened'.format(p=pollport))
+
+	s.close()
+	del s
 
 	try:
 		if poll[ts].getactivity():
