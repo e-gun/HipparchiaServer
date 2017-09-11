@@ -93,7 +93,7 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 
 	try:
 		theport = int(theport)
-	except:
+	except ValueError:
 		theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
 	if hipparchia.config['MYEXTERNALIPADDRESS'] != '127.0.0.1':
@@ -176,7 +176,7 @@ def checkforactivesearch(ts):
 
 	try:
 		ts = str(int(ts))
-	except:
+	except ValueError:
 		ts = str(int(time.time()))
 
 	pollport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
@@ -198,6 +198,7 @@ def checkforactivesearch(ts):
 	handshake.append('Sec-WebSocket-Version: 13\r\n')
 	handshake.append('\r\n')
 	handshake = ''.join(handshake)
+	# oddly the next does not work (but hard-coding a random example is ok for our purposes)
 	# key = b64encode(urandom(16))
 	key = 'GwPND1CD9u2Sf3lnsNwRnw=='
 	handshake = handshake.format(ip=theip, pp=flaskserverport, k=key)
@@ -230,6 +231,5 @@ def checkforactivesearch(ts):
 			else:
 				print('checkforactivesearch() reports that the websocket is still inactive: there is a serious problem?')
 				return json.dumps('nothing at '+str(pollport))
-		except:
+		except KeyError:
 			return json.dumps('cannot_find_the_poll')
-

@@ -40,8 +40,16 @@ def grabtextforbrowsing(locus):
 
 	workdb = depunct(locus)[:10]
 
-	try: ao = authordict[workdb[:6]]
-	except: ao = makeanemptyauthor('gr0000')
+	perseusauthorneedsfixing = ['gr0006']
+	if '_PE_' in locus and workdb[:6] in perseusauthorneedsfixing:
+		# perseus has mis-mapped id numbers for the works relative to tlg-e
+		remapper = dbquickfixes([workdb])
+		workdb = remapper[workdb]
+
+	try:
+		ao = authordict[workdb[:6]]
+	except:
+		ao = makeanemptyauthor('gr0000')
 
 	try:
 		wo = workdict[workdb]
@@ -84,14 +92,6 @@ def grabtextforbrowsing(locus):
 			resultmessage = p['code']
 			passage = p['line']
 	elif passage[0:4] == '_PE_':
-		# you came here via a perseus dictionary xref: all sorts of crazy ensues
-		# nasty kludge with eur: should build the fixes into the db
-		# euripides
-		if 'gr0006' in workdb:
-			remapper = dbquickfixes([workdb])
-			workid = remapper[workdb]
-			wo = workdict[workid]
-
 		try:
 			# dict does not always agree with our ids...
 			# do an imperfect test for this by inviting the exception
