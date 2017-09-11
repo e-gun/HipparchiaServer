@@ -6,6 +6,9 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import re
+
+
 def andsubstitutes(match):
 	"""
 	turn &NN...& into unicode
@@ -43,7 +46,9 @@ def andsubstitutes(match):
 	}
 
 	try:
-		substitute = substitutions[val][0] + core + substitutions[val][1]
+		one = re.sub(r'hmu_fontshift_latin_', '', substitutions[val][0])
+		two = re.sub(r'hmu_fontshift_latin_', '', substitutions[val][1])
+		substitute = one + core + two
 	except KeyError:
 		substitute = '<hmu_unhandled_latin_font_shift betacodeval="{v}" />{c}'.format(v=val, c=core)
 
