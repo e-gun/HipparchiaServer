@@ -6,7 +6,6 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-
 def andsubstitutes(match):
 	"""
 	turn &NN...& into unicode
@@ -23,23 +22,24 @@ def andsubstitutes(match):
 	core = match.group(2)
 
 	substitutions = {
-		91: [r'<hmu_undocumented_font_shift_AND91>', r'</hmu_undocumented_font_shift_AND91>'],
-		90: [r'<hmu_undocumented_font_shift_AND90>', r'</hmu_undocumented_font_shift_AND90>'],
-		82: [r'<hmu_undocumented_font_shift_AND82>', r'</hmu_undocumented_font_shift_AND82>'],
-		81: [r'<hmu_undocumented_font_shift_AND81>', r'</hmu_undocumented_font_shift_AND81>'],
-		20: [r'<span class="largerthannormal">', r'</span>'],
-		14: [r'<span class="smallerthannormalsuperscript">', r'</span>'],
-		13: [r'<span class="smallerthannormalitalic">', r'</span>'],
-		10: [r'<span class="smallerthannormal">', r'</span>'],
-		9: [r'<span class="normal">', r'</span>'],
-		8: [r'<span class="smallcapitalsitalic">', r'</span>'],
-		7: [r'<span class="smallcapitals">', r'</span>'],
-		6: [r'<span class="romannumerals">', r'</span>'],
-		5: [r'<span class="subscript">', r'</span>'],
-		4: [r'<span class="superscript">', r'</span>'],
-		3: [r'<span class="italic">', r'</span>'],
-		2: [r'<span class="bolditalic">', r'</span>'],
-		1: [r'<span class="bold">', r'</span>'],
+		91: [r'<hmu_fontshift_latin_undocumentedfontshift_AND91>', r'</hmu_fontshift_latin_undocumentedfontshift_AND91>'],
+		90: [r'<hmu_fontshift_latin_undocumentedfontshift_AND90>', r'</hmu_fontshift_latin_undocumentedfontshift_AND90>'],
+		82: [r'<hmu_fontshift_latin_undocumentedfontshift_AND82>', r'</hmu_fontshift_latin_undocumentedfontshift_AND82>'],
+		81: [r'<hmu_fontshift_latin_undocumentedfontshift_AND81>', r'</hmu_fontshift_latin_undocumentedfontshift_AND81>'],
+		20: [r'<hmu_fontshift_latin_largerthannormal>', r'</hmu_fontshift_latin_largerthannormal>'],
+		14: [r'<hmu_fontshift_latin_smallerthannormal_superscript>', r'</hmu_fontshift_latin_smallerthannormal_superscript>'],
+		13: [r'<hmu_fontshift_latin_smallerthannormal_italic>', r'</hmu_fontshift_latin_smallerthannormal_italic>'],
+		10: [r'<hmu_fontshift_latin_smallerthannormal>', r'</hmu_fontshift_latin_smallerthannormal>'],
+		9: [r'<hmu_fontshift_latin_normal>', r'</hmu_fontshift_latin_normal>'],
+		8: [r'<hmu_fontshift_latin_smallcapitals_italic>', r'</hmu_fontshift_latin_smallcapitals_italic>'],
+		7: [r'<hmu_fontshift_latin_smallcapitals>', r'</hmu_fontshift_latin_smallcapitals>'],
+		6: [r'<hmu_fontshift_latin_romannumerals>', r'</hmu_fontshift_latin_romannumerals>'],
+		5: [r'<hmu_fontshift_latin_subscript>', r'</hmu_fontshift_latin_subscript>'],
+		4: [r'<hmu_fontshift_latin_superscript>', r'</hmu_fontshift_latin_superscript>'],
+		3: [r'<hmu_fontshift_latin_italic>', r'</hmu_fontshift_latin_italic>'],
+		2: [r'<hmu_fontshift_latin_bold_italic>', r'</hmu_fontshift_latin_bold_italic>'],
+		1: [r'<hmu_fontshift_latin_bold>', r'</hmu_fontshift_latin_bold>'],
+		0: [r'<hmu_fontshift_latin_normal>', r'</hmu_fontshift_latin_normal>'],
 	}
 
 	try:
