@@ -42,6 +42,13 @@ class dbWordCountObject(object):
 			self.dlabel = 'Ⓓ'
 			self.ilabel = 'Ⓘ'
 			self.clabel = 'Ⓒ'
+		elif hipparchia.config['FALLBACKTODOUBLESTRIKES'] == 'yes':
+			self.tlabel = '𝕋'
+			self.glabel = '𝔾'
+			self.llabel = '𝕃'
+			self.dlabel = '𝔻'
+			self.ilabel = '𝕀'
+			self.clabel = 'ℂ'
 		else:
 			self.tlabel = 'T'
 			self.glabel = 'G'
@@ -56,7 +63,7 @@ class dbWordCountObject(object):
 			}
 		try:
 			return cdict[element]
-		except:
+		except KeyError:
 			return 0
 
 	def getlabel(self, element):
@@ -248,6 +255,12 @@ class dbHeadwordObject(dbWordCountObject):
 			self.mlabel = 'ⓜ'
 			self.latelabel = 'ⓛ'
 			self.unklabel = 'ⓤ'
+		elif hipparchia.config['FALLBACKTODOUBLESTRIKES'] == 'yes':
+			self.qlabel = '𝕢'
+			self.elabel = '𝕖'
+			self.mlabel = '𝕞'
+			self.latelabel = '𝕝'
+			self.unklabel = '𝕦'
 		else:
 			self.qlabel = 'q'
 			self.elabel = 'e'
@@ -271,7 +284,7 @@ class dbHeadwordObject(dbWordCountObject):
 		            }
 		try:
 			return elements[element]
-		except:
+		except KeyError:
 			return 0
 
 	def amlatin(self):

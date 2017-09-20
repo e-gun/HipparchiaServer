@@ -226,6 +226,8 @@ MPCOMMITCOUNT = 750
 #
 # AVOIDCIRCLEDLETTERS if you have trouble displaying Ⓖ, etc.
 #
+# FALLBACKTODOUBLESTRIKES will give you 𝔾, etc. if you turned Ⓖ off.
+#
 # REVERSELEXICONRESULTSBYFREQUENCY will either give you the lookup
 # 	results in alphabetical order ('no') or in descending order by
 # 	frequency of occurrence ('yes')
@@ -260,6 +262,7 @@ EXCLUDEMINORGENRECOUNTS = 'yes'
 COLLAPSEDGENRECOUNTS = 'yes'
 NUMBEROFGENRESTOTRACK = 8
 AVOIDCIRCLEDLETTERS = 'no'
+FALLBACKTODOUBLESTRIKES = 'yes'
 REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
 FORCELUNATESIGMANOMATTERWHAT = 'no'
 RESTOREMEDIALANDFINALSIGMA = 'no'
