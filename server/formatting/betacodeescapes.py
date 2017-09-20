@@ -24,6 +24,7 @@ def andsubstitutes(match):
 	val = int(match.group(1))
 	core = match.group(2)
 
+	# the next bit is all you really need to sync with HipparchiaBuilder
 	substitutions = {
 		91: [r'<hmu_fontshift_latin_undocumentedfontshift_AND91>', r'</hmu_fontshift_latin_undocumentedfontshift_AND91>'],
 		90: [r'<hmu_fontshift_latin_undocumentedfontshift_AND90>', r'</hmu_fontshift_latin_undocumentedfontshift_AND90>'],

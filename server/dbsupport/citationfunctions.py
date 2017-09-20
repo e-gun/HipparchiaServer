@@ -23,9 +23,10 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 	:return: a tuple with the available levels, current level, level label, low and high value, and a list of valid values:
 		example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
 	"""
+	partialcitation = list(partialcitationtuple)
 	availablelevels = len(workstructure)
 
-	atlevel = availablelevels-len(partialcitationtuple)
+	atlevel = availablelevels-len(partialcitation)
 	# cheat in the case where you want to find the top by sending a 'noncitation': '-1'
 	# e.g.: /getstructure?locus=gr0003w001_AT_-1
 	if partialcitationtuple[0] == '-1':
@@ -39,7 +40,7 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 		# and so: massage the data
 		atlevel = 1
 		try:
-			partialcitationtuple.pop()
+			partialcitation.pop()
 		except IndexError:
 			atlevel = availablelevels
 

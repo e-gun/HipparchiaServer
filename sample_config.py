@@ -130,13 +130,9 @@ HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 # 	default commit counts if you go over 5 (but the default
 # 	MPCOMMITCOUNT is very conservative) Your mileage will indeed
 # 	vary, but N > threads*(.5) is probably not going to do much
-# 	good. You are populating TWO sets of threads when you set
-# 	WORKERS: one is a collection of Python workers; these
-# 	communicate with a set of PostgreSQL clients that will spawn in
-# 	their own threads. This is why going over 50% of your thread
-# 	count is unlikely to do much good. You will in fact saturate
-# 	100% of your cores somewhere around threads*.5 (if you can get
-# 	data to them fast enough...)
+# 	good if you have a SATA SSD. A 12-thread Ryzen 1600x with NVMe
+#   storage is capable of going faster and faster all of the way
+#   up to 12 workers: the drive is no longer the bottleneck.
 #
 # MPCOMMITCOUNT: **do not change this** unless you are getting
 # 	deluged by messages about failed DB queries (see 'WORKERS'

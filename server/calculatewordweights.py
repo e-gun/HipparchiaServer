@@ -188,7 +188,7 @@ def findgeneraweights(language, collapsed=False):
 
 		weights = {weights[w]: w for w in weights if w not in relig}
 		relcount = sum([counts[g] for g in relig])
-		relwt = round(maximum / relcount,2)
+		relwt = round(maximum / relcount, 2)
 
 		weights = {weights[w]: w for w in weights if w not in allrhet}
 		rhetcount = sum([counts[g] for g in allrhet])

@@ -104,7 +104,7 @@ def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
 	the xref values help here 42397893 & 42397893
 
 	:param observedform:
-	:param matcheslist:
+	:param morphologyobject:
 	:param cursor:
 	:return:
 	"""
@@ -194,10 +194,10 @@ def browserdictionarylookup(count, seekingentry, cursor):
 	# 	entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
 	wordobjects = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', seekingentry, syntax='=')
-	outputlist = []
+	outputlist = list()
 	clickableentry = ''
 
-	if wordobjects != None:
+	if wordobjects:
 		if len(wordobjects) > 1:
 			# supplement count above
 			# (1a), (1b), (2) ...

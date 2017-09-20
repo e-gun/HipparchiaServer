@@ -338,7 +338,8 @@ def returnfirstlinenumber(workid, cursor):
 	"""
 	return the lowest index value
 	used to handle exceptions
-	:param db:
+
+	:param workid:
 	:param cursor:
 	:return:
 	"""
