@@ -44,6 +44,8 @@ def frontpage():
 
 	if hipparchia.config['AVOIDCIRCLEDLETTERS'] != 'yes':
 		corporalabels = {'g': 'Ⓖ', 'l': 'Ⓛ', 'd': 'Ⓓ', 'i': 'Ⓘ', 'c': 'Ⓒ'}
+	elif hipparchia.config['FALLBACKTODOUBLESTRIKES'] == 'yes':
+		corporalabels = {'g': '𝔾', 'l': '𝕃', 'd': '𝔻', 'i': '𝕀', 'c': 'ℂ'}
 	else:
 		corporalabels = {'g': 'G', 'l': 'L', 'd': 'D', 'i': 'I', 'c': 'C'}
 
