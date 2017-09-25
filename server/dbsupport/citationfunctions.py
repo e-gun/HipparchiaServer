@@ -79,6 +79,12 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 		if r not in deduper:
 			deduper.add(r)
 	rng = list(deduper)
+	try:
+		rng = [int(r) for r in rng]
+		rng = sorted(rng)
+		rng = [str(r) for r in rng]
+	except ValueError:
+		rng = sorted(rng)
 
 	lowandhighobject = LowandHighInfo(availablelevels, atlevel-1, workstructure[atlevel - 1], low, high, rng)
 

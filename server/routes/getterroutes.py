@@ -161,7 +161,7 @@ def workstructure(locus):
 			structure = work.structure
 
 	ws = dict()
-	if structure != {}:
+	if structure:
 		lowandhigh = findvalidlevelvalues(workid, structure, safepassage, cur)
 		# example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
 		ws['totallevels'] = lowandhigh.levelsavailable
