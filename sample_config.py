@@ -117,22 +117,22 @@ HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 # AUTOCONFIGWORKERS: if 'yes', then ignore WORKERS and set workers to
 # 	threads*.5+1
 #
-# WORKERS: pick a number based on your cpu cores: on a
+# WORKERS: pick a number based on your cpu cores and I/O: on a
 # 	4-core/8-thread machine diminishing returns kick in between 3
 # 	and 4 as the bottleneck shifts to the I/O subsystem. Very high
 # 	I/O throughput is a good idea if you are firing up lots of
-# 	threads. [In fact, high I/O throughput is probably the most
-# 	important factor governing search speed.] On a one-core virtual
+# 	threads. In fact, high I/O throughput is probably the most
+# 	important factor governing search speed. On a one-core virtual
 # 	machine extra workers don't do much good and tend to just get
-# 	in the way of one another: '1' seems to be best a high number
+# 	in the way of one another: '1' seems to be best. A high number
 # 	of workers on a fast machine risks lockout from the db as too
-# 	many requests come too fast: might need to recalibrate the
+# 	many requests come too fast: you might need to recalibrate the
 # 	default commit counts if you go over 5 (but the default
-# 	MPCOMMITCOUNT is very conservative) Your mileage will indeed
-# 	vary, but N > threads*(.5) is probably not going to do much
-# 	good if you have a SATA SSD. A 12-thread Ryzen 1600x with NVMe
-#   storage is capable of going faster and faster all of the way
-#   up to 12 workers: the drive is no longer the bottleneck.
+# 	MPCOMMITCOUNT is very conservative). A SATA SSD will max out at
+#   c. 5 threads: more workers cannot grab more data. But a 12-thread
+#   Ryzen 1600x with NVMe storage is capable of going faster and
+#   faster all of the way up to 12 workers: the drive is no longer
+#   the bottleneck.
 #
 # MPCOMMITCOUNT: **do not change this** unless you are getting
 # 	deluged by messages about failed DB queries (see 'WORKERS'

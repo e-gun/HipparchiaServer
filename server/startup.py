@@ -165,6 +165,10 @@ if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
 	print('greek genre weights:', findgeneraweights('G', c))
 	print('latin genre weights:', findgeneraweights('L', c))
 
+	# see notes: better once you set a language value for every work...
+	# print('greek genre weights:', workobjectgeneraweights('G', c, workdict))
+	# print('latin genre weights:', workobjectgeneraweights('L', c, workdict))
+
 # empty dict in which to store progress polls
 # note that more than one poll can be running
 poll = dict()

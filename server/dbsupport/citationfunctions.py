@@ -79,6 +79,7 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 		if r not in deduper:
 			deduper.add(r)
 	rng = list(deduper)
+	
 	try:
 		rng = [int(r) for r in rng]
 		rng = sorted(rng)
