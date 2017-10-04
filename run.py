@@ -28,4 +28,21 @@ if __name__ == '__main__':
 	# if you are working on Hipparchia's code, you might be interested in this; otherwise there
 	# are only bad reasons to set this to 'True'
 
+	"""
+	sometimes ^C will not kill every thread and you will still have an open server port
+	this will leave you unable to restart without rebooting: 'socket already in use'
+	you need to find the process that is holding the port open and kill it
+	for example
+	
+	# lsof | grep pyth | grep 5000
+	
+	python3.6 53249 hipparchia   23u    PIPE 0xfffff8017e2e5000              16384        ->0xfffff8017e2e5168
+	python3.6 77379 hipparchia   23u    PIPE 0xfffff8017e2e5000              16384        ->0xfffff8017e2e5168
+	python3.6 78871 hipparchia   23u    PIPE 0xfffff8017e2e5000              16384        ->0xfffff8017e2e5168
+	python3.6 78871 hipparchia   36u    PIPE 0xfffff8004ee15000              16384        ->0xfffff8004ee15168
+
+	# kill -15 53249 77379 78871
+	
+	"""
+
 	hipparchia.run(threaded=True, debug=False, host=hipparchia.config['LISTENINGADDRESS'], port=hipparchia.config['FLASKSERVEDFROMPORT'])
