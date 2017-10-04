@@ -328,7 +328,7 @@ def findgeneraweights(language, collapsed=False):
 	# gcounts.sort(reverse=True)
 	# print('wordcounts')
 	# for g in gcounts:
-	# 	print(g[0],'\t',g[1])
+	# 	print(g[0], '\t', g[1])
 
 	return weights
 
@@ -380,10 +380,9 @@ def findgenreweightfromworkobject(genre, language, workdict):
 
 	use work.wordcount + work.workgenre
 
-	the problem here is that inscruptions do not have their language set right
-
-	:param corpus:
+	:param genre:
 	:param language:
+	:param workdict:
 	:return:
 	"""
 
@@ -417,8 +416,6 @@ def findcorpusweight(corpus, language):
 	the question is whether or not this distortion is uniform between genres.
 
 	this function is less accurate than if you use "work.wordcount" & "work.workgenre"
-
-	but that method would have problems sifting greek from latin...
 
 	:param corpus:
 	:param language:
@@ -464,8 +461,8 @@ def findcorpusweight(corpus, language):
 """
 greek wordweights {'early': 7.75, 'middle': 1.92, 'late': 1}
 corpus weights {'gr': 1.0, 'lt': 10.68, 'in': 27.77, 'dp': 26.76, 'ch': 124.85}
-greek genre weights: {'agric': 101830.16, 'alchem': 79.98, 'anthol': 18.41, 'astrol': 21.11, 'astron': 47.89, 'biogr': 6.68, 'bucol': 443.43, 'chronogr': 5.01, 'comic': 31.81, 'comm': 1.0, 'coq': 607.86, 'dialog': 7.28, 'docu': 4.21, 'doxogr': 144.05, 'eleg': 223.48, 'encom': 13.84, 'epic': 20.51, 'epigr': 11.9, 'epist': 4.87, 'fab': 144.49, 'geogr': 11.61, 'gnom': 95.75, 'gramm': 9.95, 'hexametr': 120.23, 'hist': 1.54, 'hymn': 50.26, 'hypoth': 14.36, 'iamb': 138.69, 'ignotum': 779000.75, 'invectiv': 247.55, 'inscr': 4.07, 'jurisprud': 54.75, 'lexicogr': 4.65, 'lyr': 492.48, 'magica': 104.45, 'math': 11.43, 'mech': 105.98, 'med': 2.33, 'metrolog': 326.58, 'mim': 2516.15, 'mus': 101.88, 'myth': 203.16, 'narrfict': 15.99, 'nathist': 9.8, 'onir': 140.3, 'orac': 270.24, 'orat': 6.7, 'paradox': 270.84, 'parod': 853.7, 'paroem': 68.17, 'perieg': 239.43, 'phil': 3.74, 'physiognom': 658.3, 'poem': 64.04, 'polyhist': 25.69, 'rhet': 8.74, 'satura': 290.02, 'satyr': 133.94, 'schol': 6.15, 'tact': 54.5, 'test': 83.51, 'trag': 35.99, 'allrelig': 0.6, 'allrhet': 2.94}
-latin genre weights: {'agric': 5.06, 'alchem': 631.89, 'anthol': 491.2, 'astrol': 5027.98, 'astron': 16.17, 'biogr': 9.35, 'bucol': 37.89, 'chronogr': 411.78, 'comic': 4.58, 'epic': 2.19, 'coq': 61.11, 'dialog': 72.9, 'docu': 9.18, 'doxogr': 227.13, 'eleg': 9.83, 'encom': 267.29, 'epigr': 102.17, 'epist': 1.98, 'fab': 81.09, 'geogr': 223.57, 'gnom': 78.87, 'gramm': 4.84, 'hexametr': 17.92, 'hist': 1.0, 'hymn': 7607.27, 'hypoth': 81.21, 'iamb': 21300.35, 'ignotum': 421.56, 'inscr': 1.96, 'jurisprud': 17.48, 'lexicogr': 21.1, 'lyr': 23.5, 'magica': 33471.97, 'math': 722.71, 'mech': 390506.33, 'med': 7.13, 'metrolog': 20919.98, 'mim': 1026.75, 'mus': 700.67, 'myth': 19525.32, 'narrfict': 11.33, 'nathist': 2.15, 'orac': 1171519.0, 'orat': 1.74, 'paradox': 16500.27, 'parod': 322.29, 'perieg': 73219.94, 'phil': 2.1, 'poem': 14.58, 'polyhist': 4.73, 'rhet': 2.61, 'satyr': 343.45, 'schol': 31.69, 'tact': 36.35, 'test': 67.67, 'trag': 12.86, 80.16: 'relig', 'allrhet': 1.04}
+greek genre weights: {'acta': 85.38, 'alchem': 72.13, 'anthol': 17.68, 'apocalyp': 117.69, 'apocryph': 89.77, 'apol': 7.0, 'astrol': 20.68, 'astron': 44.72, 'biogr': 6.39, 'bucol': 416.66, 'caten': 5.21, 'chronogr': 4.55, 'comic': 29.61, 'comm': 1.0, 'concil': 16.75, 'coq': 532.74, 'dialog': 7.1, 'docu': 2.66, 'doxogr': 130.84, 'eccl': 7.57, 'eleg': 188.08, 'encom': 13.17, 'epic': 19.36, 'epigr': 10.87, 'epist': 4.7, 'evangel': 118.66, 'exeget': 1.24, 'fab': 140.87, 'geogr': 10.74, 'gnom': 88.54, 'gramm': 8.65, 'hagiogr': 22.83, 'hexametr': 110.78, 'hist': 1.44, 'homilet': 6.87, 'hymn': 48.18, 'hypoth': 12.95, 'iamb': 122.22, 'ignotum': 122914.2, 'invectiv': 238.54, 'inscr': 1.91, 'jurisprud': 51.42, 'lexicogr': 4.14, 'liturg': 531.5, 'lyr': 213.43, 'magica': 85.38, 'math': 9.91, 'mech': 103.44, 'med': 2.25, 'metrolog': 276.78, 'mim': 2183.94, 'mus': 96.32, 'myth': 201.78, 'narrfict': 14.62, 'nathist': 9.67, 'onir': 145.15, 'orac': 240.47, 'orat': 6.67, 'paradox': 267.32, 'parod': 831.51, 'paroem': 65.58, 'perieg': 220.38, 'phil': 3.69, 'physiognom': 628.77, 'poem': 62.82, 'polyhist': 24.91, 'prophet': 95.51, 'pseudepigr': 611.65, 'rhet': 8.67, 'satura': 291.58, 'satyr': 96.78, 'schol': 5.56, 'tact': 52.01, 'test': 66.53, 'theol': 6.28, 'trag': 35.8}
+latin genre weights: {'agric': 5.27, 'astron': 17.15, 'biogr': 9.87, 'bucol': 40.42, 'comic': 4.22, 'comm': 2.25, 'coq': 60.0, 'dialog': 1132.94, 'docu': 6.19, 'eleg': 8.35, 'encom': 404.84, 'epic': 2.37, 'epigr': 669.7, 'epist': 2.06, 'fab': 25.41, 'gnom': 147.29, 'gramm': 5.75, 'hexametr': 20.07, 'hist': 1.0, 'hypoth': 763.05, 'ignotum': 586.93, 'inscr': 1.3, 'jurisprud': 1.11, 'lexicogr': 27.68, 'lyr': 24.77, 'med': 7.26, 'mim': 1046.32, 'narrfict': 11.69, 'nathist': 1.94, 'orat': 1.81, 'parod': 339.44, 'phil': 2.3, 'poem': 14.35, 'polyhist': 4.75, 'rhet': 2.71, 'satura': 23.01, 'tact': 37.6, 'trag': 13.3}
 
 gr_count	102549980
 lt_count	9599518

@@ -7,7 +7,7 @@
 """
 
 from server import hipparchia
-from server.calculatewordweights import findccorporaweights, findgeneraweights, findtemporalweights
+from server.calculatewordweights import findccorporaweights, findtemporalweights, workobjectgeneraweights
 from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors, \
 	probefordatabases, setthreadcount
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildworkgenresdict, \
@@ -162,12 +162,13 @@ if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
 		c = False
 	print('greek wordweights', findtemporalweights('G'))
 	print('corpus weights', findccorporaweights())
-	print('greek genre weights:', findgeneraweights('G', c))
-	print('latin genre weights:', findgeneraweights('L', c))
+	# see function notes on the difference between this pair and the next pair
+	# print('greek genre weights:', findgeneraweights('G', c))
+	# print('latin genre weights:', findgeneraweights('L', c))
 
-	# see notes: better once you set a language value for every work...
-	# print('greek genre weights:', workobjectgeneraweights('G', c, workdict))
-	# print('latin genre weights:', workobjectgeneraweights('L', c, workdict))
+	# faster and smarter
+	print('greek genre weights:', workobjectgeneraweights('G', c, workdict))
+	print('latin genre weights:', workobjectgeneraweights('L', c, workdict))
 
 # empty dict in which to store progress polls
 # note that more than one poll can be running
