@@ -445,10 +445,10 @@ class dbMorphologyObject(object):
 	an object that corresponds to a db line
 
 	CREATE TABLE public.greek_morphology (
-	    observed_form character varying(64) COLLATE pg_catalog."default",
-	    xrefs character varying(128) COLLATE pg_catalog."default",
-	    prefixrefs character varying(128) COLLATE pg_catalog."default",
-	    possible_dictionary_forms text COLLATE pg_catalog."default"
+		observed_form character varying(64) COLLATE pg_catalog."default",
+		xrefs character varying(128) COLLATE pg_catalog."default",
+		prefixrefs character varying(128) COLLATE pg_catalog."default",
+		possible_dictionary_forms text COLLATE pg_catalog."default"
 	)
 
 	"""

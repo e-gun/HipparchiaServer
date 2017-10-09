@@ -389,6 +389,9 @@ def findgenreweightfromworkobject(genre, language, workdict):
 	wordlist = [workdict[w].wordcount for w in workdict if workdict[w].workgenre == genre and (workdict[w].language==language or workdict[w].language==None)]
 	totalwords = sum(wordlist)
 
+	# w = "{:,}".format(totalwords)
+	# print('{g}\t{t}'.format(g=genre, t=w))
+
 	return totalwords
 
 
@@ -454,7 +457,8 @@ def findcorpusweight(corpus, language):
 	thesum = curs.fetchall()
 	thesum = thesum[0][0]
 
-	# print('{c}\t{n}'.format(c=corpus, n=thesum))
+	# w = "{:,}".format(thesum)
+	# print('{c}\t{n}'.format(c=corpus, n=w))
 
 	return thesum
 
@@ -470,164 +474,171 @@ in_count	3692171
 dp_count	3832371
 ch_count	821412
 
+	nb: there is a difference between the following two 'identical' items
+	
+		dp_count=3832371 
+		Docu.=4,108,146
+		
+	the real issue is that dp_count is a count of headword matches (i.e., parseable words). Docu is a count of all words (and
+	parts of words...)
 
 GREEK
-comm			15580015
-exeget			12105611
-hist			10117710
-med			    6691727
-phil			4163002
-inscr			3829979
-docu			3696918
-lexicogr		3348612
-epist			3202441
-chronogr		3111423
-caten			2913740
-schol			2535046
-theol			2404905
-biogr			2333334
-orat			2323720
-apol			2154498
-homilet			2148169
-dialog			2141348
-eccl			1967108
-rhet			1783173
-nathist			1589173
-gramm			1566538
-math			1362989
-geogr			1341505
-epigr			1309103
-encom			1125346
-hypoth			1084667
-narrfict		974177
-concil			864852
-anthol			846132
-epic			759537
-astrol			738108
-hagiogr			641353
-polyhist		606369
-comic			489792
-trag			432854
-astron			325319
-hymn			310015
-tact			285886
-jurisprud		284568
-poem			243282
-paroem			228558
-alchem			194801
-test			186562
-acta			173996
-gnom			162723
-apocryph		155011
-mus			    152929
-magica			149157
-mech			147004
-prophet			144285
-hexametr		129582
-evangel			122329
-apocalyp		121042
-satyr			116322
-iamb			112333
-onir			111051
-doxogr			108158
-fab			    107825
-myth			76688
-eleg			69715
-perieg			65071
-invectiv		62936
-orac			57652
-paradox			57525
-satura			53720
-metrolog		47707
-bucol			35135
-lyr			    31636
-liturg			26426
-coq			    25631
-physiognom		23667
-pseudepigr		23074
-parod			18250
-mim			    6192
-agric			153
-ignotum			20
+Comm.	10,939,364
+Exeget.	8,846,704
+Hist.	7,622,971
+Inscr.	5,736,904
+Med.	4,863,957
+Docu.	4,108,146
+Phil.	2,960,832
+Lexicogr.	2,645,407
+Chronogr.	2,403,380
+Epist.	2,325,234
+Caten.	2,101,547
+Schol.	1,968,642
+Theol.	1,742,265
+Biogr.	1,712,397
+Orat.	1,640,409
+Homilet.	1,593,483
+Apol.	1,562,718
+Dialog.	1,540,843
+Eccl.	1,445,473
+Gramm.	1,265,294
+Rhet.	1,261,290
+Nat. Hist.	1,130,914
+Math.	1,103,492
+Geogr.	1,018,141
+Epigr.	1,006,589
+Hypoth.	844,452
+Encom.	830,935
+Narr. Fict.	748,164
+Concil.	653,271
+Anthol.	618,917
+Epic.	564,955
+Astrol.	528,929
+Hagiogr.	479,241
+Polyhist.	439,216
+Comic.	369,416
+Trag.	305,584
+Astron.	244,611
+Hymn.	227,033
+Jurisprud.	212,761
+Tact.	210,323
+Poem.	174,143
+Paroem.	166,820
+Test.	164,425
+Alchem.	151,659
+Magica	128,128
+Acta	128,126
+Gnom.	123,554
+Apocryph.	121,854
+Prophet.	114,531
+Mus.	113,577
+Satyr.	113,029
+Mech.	105,758
+Hexametr.	98,752
+Apocalyp.	92,952
+Evangel.	92,189
+Iamb.	89,502
+Doxogr.	83,611
+Fab.	77,654
+Onir.	75,365
+Eleg.	58,163
+Myth.	54,213
+Lyr.	51,255
+Perieg.	49,638
+Invectiv.	45,859
+Orac.	45,491
+Paradox.	40,923
+Metrolog.	39,523
+Satura	37,517
+Bucol.	26,255
+Liturg.	20,582
+Coq.	20,534
+Pseudepigr.	17,885
+Physiognom.	17,398
+Parod.	13,156
+Mim.	5,009
+Ignotum	89
+Agric.	0
 
 
 LATIN
-hist			1332157
-jurisprud		1213614
-orat			742790
-nathist			688718
-inscr			686456
-epist			647337
-phil			612694
-comm			595172
-epic			593336
-rhet			492489
-comic			282924
-polyhist		272745
-gramm			272024
-agric			255480
-med				182875
-eleg			173236
-biogr			138139
-docu			136742
-narrfict		113051
-trag			100713
-poem			97501
-astron			81448
-hexametr		72310
-lexicogr		59615
-lyr				55622
-fab				45736
-schol			38834
-tact			35448
-bucol			34648
-coq				21448
-test			19038
-dialog			18862
-hypoth			16911
-gnom			16389
-epigr			11786
-exeget			7038
-geogr			5692
-doxogr			5639
-encom			4986
-parod			4013
-caten			3802
-satyr			3666
-chronogr		3104
-apol			2835
-anthol			2475
-ignotum			2070
-alchem			2059
-mus				1846
-math			1747
-mim				1249
-concil			963
-acta			396
-theol			271
-astrol			256
-eccl			256
-homilet			224
-hymn			195
-apocalyp		95
-hagiogr			92
-apocryph		83
-iamb			79
-paradox			77
-magica			64
-myth			64
-metrolog		57
-paroem			20
-perieg			16
-liturg			6
-pseudepigr		5
-mech			3
-orac			1
-evangel			0
-invectiv		0
-onir			0
-physiognom		0
-prophet			0
-satura			0
+Hist.	1,040,043
+Jurisprud.	936,812
+Inscr.	801,908
+Orat.	573,366
+Nat. Hist.	535,714
+Epist.	505,214
+Comm.	462,756
+Phil.	452,337
+Epic.	438,017
+Rhet.	384,113
+Comic.	246,612
+Polyhist.	218,891
+Agric.	197,449
+Gramm.	181,030
+Docu.	167,928
+Med.	143,202
+Eleg.	124,507
+Biogr.	105,398
+Narr. Fict.	88,986
+Trag.	78,188
+Poem.	72,498
+Astron.	60,652
+Hexametr.	51,826
+Satura	45,194
+Lyr.	41,989
+Fab.	40,934
+Lexicogr.	37,569
+Tact.	27,663
+Bucol.	25,732
+Coq.	17,334
+Gnom.	7,061
+Parod.	3,064
+Encom.	2,569
+Ignotum	1,772
+Epigr.	1,553
+Hypoth.	1,363
+Mim.	994
+Dialog.	918
+Acta	0
+Alchem.	0
+Anthol.	0
+Apocalyp.	0
+Apocryph.	0
+Apol.	0
+Astrol.	0
+Caten.	0
+Chronogr.	0
+Concil.	0
+Doxogr.	0
+Eccl.	0
+Evangel.	0
+Exeget.	0
+Geogr.	0
+Hagiogr.	0
+Homilet.	0
+Hymn.	0
+Iamb.	0
+Invectiv.	0
+Liturg.	0
+Magica	0
+Math.	0
+Mech.	0
+Metrolog.	0
+Mus.	0
+Myth.	0
+Onir.	0
+Orac.	0
+Paradox.	0
+Paroem.	0
+Perieg.	0
+Physiognom.	0
+Prophet.	0
+Pseudepigr.	0
+Satyr.	0
+Schol.	0
+Test.	0
+Theol.	0
 
 """
