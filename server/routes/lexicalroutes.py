@@ -262,7 +262,7 @@ def reverselexiconsearch(searchterm):
 			summary.append((count, c, totalhits))
 
 		summary = sorted(summary, key=lambda x: x[2], reverse=True)
-		summary = ['<p class="sensesum">({n})&nbsp;{w} [{t:,}]</p>'.format(n=e[0], w=e[1], t=e[2]) for e in summary]
+		summary = ['<span class="sensesum">({n})&nbsp;{w} <span class="small">({t:,})</span></span><br />'.format(n=e[0], w=e[1], t=e[2]) for e in summary]
 		# summary = ['<p class="dictionaryheading">{w}</p>'.format(w=seeking)] + summary
 		returnarray.append({'value': '\n'.join(summary)})
 
