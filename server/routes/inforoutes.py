@@ -48,14 +48,14 @@ def databasecontents(dictionarytodisplay):
 	elif dictionarytodisplay in icandisplay.keys() and not icandisplay[dictionarytodisplay][1]:
 		viewing = icandisplay[dictionarytodisplay][0]
 		categories = ['gr', 'lt', 'in', 'dp', 'ch']
-		results = []
+		results = list()
 		for c in categories:
 			results += viewing[c]
 		results = list(set(results))
 		results = [{'key': '', 'value': r} for r in results]
 		results = sorted(results, key=lambda x: x['value'])
 	else:
-		results = []
+		results = list()
 		dictionarytodisplay = '[invalid value]'
 
 	return render_template('dbcontentslister.html', found=results, numberfound=len(results), label=dictionarytodisplay)
@@ -76,7 +76,7 @@ def styesheetsamples():
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
 	stylefile = currentpath+'/server'+stylesheet
 
-	stylecontents = []
+	stylecontents = list()
 	if path.isfile(stylefile):
 		with open(stylefile, 'r') as f:
 			stylecontents = f.read().splitlines()
@@ -87,7 +87,7 @@ def styesheetsamples():
 
 	# take care of multiple simult definitions:
 	#   .textuallemma, .interlineartext, .interlinearmarginalia, .marginaltext
-	unpackedstyles = []
+	unpackedstyles = list()
 	for s in styles:
 		up = s.split(', ')
 		unpackedstyles += up

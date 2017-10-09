@@ -366,7 +366,6 @@ class dbHeadwordObject(dbWordCountObject):
 
 		return genretuplelist
 
-
 	def genresebyweightlessminorgenres(self, maxmodifier, gwt={'G': greekgenreweights, 'L': latingenreweights}):
 		"""
 

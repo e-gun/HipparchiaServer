@@ -67,7 +67,7 @@ def findbyform(observedword):
 
 	cleanedword = cleanedword.lower()
 	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
-	returnarray = []
+	returnarray = list()
 
 	morphologyobject = lookformorphologymatches(cleanedword, cur)
 	# print('findbyform() mm',morphologyobject.getpossible()[0].transandanal)
@@ -160,10 +160,10 @@ def dictsearch(searchterm):
 	try:
 		found = cur.fetchall()
 	except:
-		found = []
+		found = list()
 
 	# the results should be given the polytonicsort() treatment
-	returnarray = []
+	returnarray = list()
 
 	if len(found) > 0:
 		finddict = {f[0]: f for f in found}
@@ -206,8 +206,8 @@ def reverselexiconsearch(searchterm):
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
-	entries = []
-	returnarray = []
+	entries = list()
+	returnarray = list()
 
 	seeking = depunct(searchterm)
 
@@ -235,7 +235,7 @@ def reverselexiconsearch(searchterm):
 	# we have the matches; now we will sort them either by frequency or by initial letter
 	if hipparchia.config['REVERSELEXICONRESULTSBYFREQUENCY'] == 'yes':
 		unsortedentries = [(findtotalcounts(e, cur), e) for e in entries]
-		entries = []
+		entries = list()
 		for e in unsortedentries:
 			hwcountobject = e[0]
 			term = e[1]
@@ -249,6 +249,24 @@ def reverselexiconsearch(searchterm):
 		entries = polytonicsort(entries)
 	# now we retrieve and format the entries
 	if entries:
+		# summary of entry values first
+		countobjectdict = {e: findtotalcounts(e, cur) for e in entries}
+		summary = list()
+		count = 0
+		for c in countobjectdict.keys():
+			count += 1
+			try:
+				totalhits = countobjectdict[c].t
+			except:
+				totalhits = 0
+			summary.append((count, c, totalhits))
+
+		summary = sorted(summary, key=lambda x: x[2], reverse=True)
+		summary = ['<p class="sensesum">({n})&nbsp;{w} [{t:,}]</p>'.format(n=e[0], w=e[1], t=e[2]) for e in summary]
+		# summary = ['<p class="dictionaryheading">{w}</p>'.format(w=seeking)] + summary
+		returnarray.append({'value': '\n'.join(summary)})
+
+		# then the entries proper
 		count = 0
 		for entry in entries:
 			count += 1
@@ -258,6 +276,7 @@ def reverselexiconsearch(searchterm):
 
 	returnarray = json.dumps(returnarray)
 
+	dbc.commit()
 	cur.close()
 
 	return returnarray
