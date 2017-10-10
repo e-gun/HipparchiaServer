@@ -154,7 +154,7 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		mylimit = ' LIMIT ' + lim
 
 	mysyntax = '~*'
-	found = []
+	found = list()
 
 	r = so.indexrestrictions[authortable]
 	whereextensions = ''

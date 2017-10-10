@@ -17,7 +17,7 @@ if __name__ == '__main__':
 		here = stack()[-1][1]
 		thisdir = path.dirname(here)
 		logger = logging.getLogger('werkzeug')
-		handler = logging.FileHandler('{h}/{l}'.format(h=thisdir, l=hipparchia.config['HIPPARCHIALOGFILE']))
+		handler = logging.FileHandler('{ld}/{lf}'.format(ld=thisdir, lf=hipparchia.config['HIPPARCHIALOGFILE']))
 		logger.addHandler(handler)
 
 		# Also add the handler to Flask's logger for cases

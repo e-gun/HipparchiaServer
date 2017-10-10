@@ -72,7 +72,7 @@ allow 3000 results or the index of an especially long author will be places wher
 <br />
 <br />
 <span class="emph">Hardware also matters</span>: προκατέλαβον (the first example above)
-takes 2.75s with 5 workers on macOS 10.11 with a SSD and an 8 core CPU running at 3.5GHz.
+takes 2.75s with 5 workers on macOS 10.11 with a SSD and an 8 thread CPU running at 3.5GHz.
 With one worker the search executes in 11.32s. The search takes 4.85 seconds on a mac mini with a SSD and 2 cores running at 2.6GHz.
 But then the search will take 23.4s when executed inside a virtual machine running on the same higher-end computer,
 a virtual machine that has been assigned 4 cores and is running FreeBSD 11.
