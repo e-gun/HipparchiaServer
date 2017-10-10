@@ -138,6 +138,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 
 	so = searchobject
 
+	# substringsearch() needs ability to CREATE TEMPORARY TABLE
 	dbconnection = setconnection('autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
 

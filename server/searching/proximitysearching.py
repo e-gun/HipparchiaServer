@@ -33,7 +33,8 @@ def withinxlines(workdbname, searchobject):
 
 	so = searchobject
 
-	dbconnection = setconnection('not_autocommit')
+	# substringsearch() needs ability to CREATE TEMPORARY TABLE
+	dbconnection = setconnection('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
@@ -43,7 +44,7 @@ def withinxlines(workdbname, searchobject):
 
 	hits = substringsearch(so.termone, workdbname, so, cursor, templimit)
 
-	fullmatches = []
+	fullmatches = list()
 
 	while hits and len(fullmatches) < so.cap:
 		hit = hits.pop()
@@ -85,7 +86,8 @@ def withinxwords(workdbname, searchobject):
 	# look out for off-by-one errors
 	distance = so.distance+1
 
-	dbconnection = setconnection('not_autocommit')
+	# substringsearch() needs ability to CREATE TEMPORARY TABLE
+	dbconnection = setconnection('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
