@@ -36,7 +36,7 @@ def phrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
 
 	hits = substringsearch(so.leastcommon, wkid, so, cursor, templimit=maxhits)
 
-	fullmatches = []
+	fullmatches = list()
 	while hits and len(fullmatches) < so.cap:
 		hit = hits.pop()
 		phraselen = len(searchphrase.split(' '))

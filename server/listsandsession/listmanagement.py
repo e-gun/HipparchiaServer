@@ -23,8 +23,9 @@ def compilesearchlist(listmapper, s=session):
 		getsearchlistcontents wants just session
 		executesearch might as well use frozensession
 
-	:param authors:
-	:return:
+	:param listmapper: 
+	:param s: 
+	:return: 
 	"""
 
 	searching = s['auselections'] + s['agnselections'] + s['wkgnselections'] + s['psgselections'] + s['wkselections'] \
@@ -36,7 +37,7 @@ def compilesearchlist(listmapper, s=session):
 	ad = reducetosessionselections(listmapper, 'a')
 	wd = reducetosessionselections(listmapper, 'w')
 
-	searchlist = []
+	searchlist = list()
 
 	# [A] build the inclusion list
 	if len(searching) > 0:
@@ -44,7 +45,7 @@ def compilesearchlist(listmapper, s=session):
 		for g in s['wkgnselections']:
 			searchlist += foundindict(wd, 'workgenre', g)
 
-		authorlist = []
+		authorlist = list()
 		for g in s['agnselections']:
 			authorlist = foundindict(ad, 'genres', g)
 			for a in authorlist:
@@ -55,7 +56,7 @@ def compilesearchlist(listmapper, s=session):
 		for l in s['wlocselections']:
 			searchlist += foundindict(wd, 'provenance', l)
 
-		authorlist = []
+		authorlist = list()
 		for l in s['alocselections']:
 			# 'Italy, Africa and the West', but you asked for 'Italy'
 			exactmatch = False
@@ -76,7 +77,7 @@ def compilesearchlist(listmapper, s=session):
 			worksof = [w.universalid for a in authors for w in ad[a].listofworks]
 		except KeyError:
 			# e.g., you had a LAT list with Cicero and then deactivated that set of authors and works
-			worksof = []
+			worksof = list()
 		works = s['wkselections']
 		passages = s['psgselections']
 
@@ -107,7 +108,7 @@ def compilesearchlist(listmapper, s=session):
 
 	# build the exclusion list
 	# note that we are not handling excluded individual passages yet
-	excludedworks = []
+	excludedworks = list()
 
 	if len(excluding) > 0:
 		excludedauthors = [a for a in s['auexclusions']]
@@ -144,8 +145,8 @@ def sortsearchlist(searchlist, authorsdict):
 	:return:
 	"""
 	sortby = session['sortorder']
-	templist = []
-	newlist = []
+	templist = list()
+	newlist = list()
 
 	if sortby != 'universalid':
 		for a in searchlist:
@@ -155,7 +156,7 @@ def sortsearchlist(searchlist, authorsdict):
 			if sortby == 'converted_date':
 				try:
 					crit = float(crit)
-				except:
+				except ValueError:
 					crit = 9999
 
 			templist.append([crit, a, name])
@@ -186,12 +187,14 @@ def sortresultslist(hits, searchobject, authorsdict, worksdict):
 		{0: <server.hipparchiaclasses.dbWorkLine object at 0x108981780>, 1: <server.hipparchiaclasses.dbWorkLine object at 0x108981a20>, 2: <server.hipparchiaclasses.dbWorkLine object at 0x108981b70>, ...}
 
 	:param hits:
+	:param searchobject:
 	:param authorsdict:
+	:param worksdict:
 	:return:
 	"""
 
 	sortby = searchobject.session['sortorder']
-	templist = []
+	templist = list()
 
 	for hit in hits:
 		auid = hit.wkuinversalid[0:6]
@@ -203,12 +206,12 @@ def sortresultslist(hits, searchobject, authorsdict, worksdict):
 				if crit > 2000:
 					try:
 						crit = int(authorsdict[auid].converted_date)
-					except:
+					except ValueError:
 						crit = 9999
 			except:
 				try:
 					crit = int(authorsdict[auid].converted_date)
-				except:
+				except ValueError:
 					crit = 9999
 		elif sortby == 'provenance':
 			crit = getattr(worksdict[wkid], sortby)
@@ -310,7 +313,7 @@ def flagexclusions(searchlist, s=session):
 	if len(s['psgexclusions']) == 0:
 		return searchlist
 	else:
-		modifiedsearchlist = []
+		modifiedsearchlist = list()
 		for w in searchlist:
 			for x in s['psgexclusions']:
 				if '_AT_' not in w and w in x:
@@ -453,10 +456,13 @@ def tidyuplist(untidylist):
 
 def dropdupes(checklist, matchlist):
 	"""
+	
 	clean up a list
 	drop anything that already has something else like it chosen
-	:param uidlist:
-	:return:
+	
+	:param checklist: 
+	:param matchlist: 
+	:return: 
 	"""
 
 	c = set(checklist)

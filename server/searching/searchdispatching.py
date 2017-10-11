@@ -186,7 +186,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 
 	so = searchobject
 
-	dbconnection = setconnection('not_autocommit')
+	dbconnection = setconnection('autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
 
 	if so.accented:
