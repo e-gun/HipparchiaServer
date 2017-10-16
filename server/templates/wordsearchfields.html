@@ -6,6 +6,12 @@
         <input id="wordsearchform" type="text" action="" method="" name="seeking" placeholder="(looking for...)" value="{{ lookedfor }}" size=25>
         {% endif %}
         <input id="lemmatasearchform" type="text" action="" method="" name="lemmata" placeholder="(all forms of...)" size=25>
+        <span id="termonelemmaradios">
+            <label for="termoneisnotalemma">lemmatized
+            <input type="radio" name="searchfor" id="termoneisalemma" value="T"></label>
+            <label for="termoneisnotalemma">not lemmatized
+            <input type="radio" name="searchfor" id="termoneisnotalemma" value="F"></label>
+        </span>
     <button id="extendsearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Complicate the search"><span class="ui-button-icon ui-icon ui-icon-arrow-1-e"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
     <br />
     <div id="complexsearching">
@@ -24,6 +30,12 @@
         <input type="radio" name="searchfor" id="searchlines" value="L"></label>
         <label for="searchwords">words
         <input type="radio" name="searchfor" id="searchwords" value="W"></label>
+        <span id="termtwolemmaradios">
+            <label for="termtwoisalemma">lemmatized
+            <input type="radio" name="searchfor" id="termtwoisalemma" value="T"></label>
+            <label for="termtwoisnotalemma">not lemmatized
+            <input type="radio" name="searchfor" id="termtwoisnotalemma" value="F"></label>
+        </span>
     </div>
 </div>
 <br />

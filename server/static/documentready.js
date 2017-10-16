@@ -54,12 +54,6 @@ $(document).ready( function () {
         });
 
     $('#executesearch').click( function(){
-        var seeking = $('#wordsearchform').val();
-        var proximate = $('#proximatesearchform').val();
-        var lemmasearch = $('#lemmatasearchform').val();
-        // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
-        if (seeking.slice(-1) == ' ') { seeking = seeking.slice(0,-1) + '%20'; }
-        if (proximate.slice(-1) == ' ') { proximate = proximate.slice(0,-1) + '%20'; }
         $('#searchsummary').html('');
         $('#displayresults').html('');
 
@@ -67,8 +61,24 @@ $(document).ready( function () {
         var bcsh = document.getElementById("browserclickscriptholder");
         if (bcsh.hasChildNodes()) { bcsh.removeChild(bcsh.firstChild); }
 
+        var terms = {
+            'skg': $('#wordsearchform').val(),
+            'prx': $('#proximatesearchform').val(),
+            'lem': $('#lemmatasearchform').val(),
+            'plm': $('#proximatelemmatasearchform').val()
+            }
+        // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
+        if (terms['skg'].slice(-1) == ' ') { terms['skg'] = terms['skg'].slice(0,-1) + '%20'; }
+        if (terms['prx'].slice(-1) == ' ') { terms['prx'] = terms['prx'].slice(0,-1) + '%20'; }
+
+        var qstringarray = []
+        for (var t in terms) {
+            if (terms[t] != '') {qstringarray.push(t+'='+terms[t]); }
+            }
+        var qstring = qstringarray.join('&');
+
         var searchid = Date.now();
-        var url = '/executesearch/'+searchid+'?s='+seeking+'&p='+proximate+'&l='+lemmasearch;
+        var url = '/executesearch/'+searchid+'?'+qstring;
 
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
 
@@ -168,7 +178,8 @@ $(document).ready( function () {
 
 
     var tohideonfirstload = new Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur',
-        '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform');
+        '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform',
+        '#termonelemmaradios', '#termtwolemmaradios');
     bulkhider(tohideonfirstload);
 
     //

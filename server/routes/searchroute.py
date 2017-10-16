@@ -57,23 +57,23 @@ def executesearch(timestamp):
 	# need to sanitize input at least a bit: remove digits and punctuation
 	# dispatcher will do searchtermcharactersubstitutions() and massagesearchtermsforwhitespace() to take care of lunate sigma, etc.
 	try:
-		seeking = cleaninitialquery(request.args.get('s', ''))
+		seeking = cleaninitialquery(request.args.get('skg', ''))
 	except:
 		seeking = ''
 
 	try:
-		proximate = cleaninitialquery(request.args.get('p', ''))
+		proximate = cleaninitialquery(request.args.get('prx', ''))
 	except:
 		proximate = ''
 
 	try:
-		lemma = cleaninitialquery(request.args.get('l', ''))
+		lemma = cleaninitialquery(request.args.get('lem', ''))
 		lemma = lemmatadict[lemma]
 	except:
 		lemma = None
 
 	try:
-		proximatelemma = cleaninitialquery(request.args.get('pl', ''))
+		proximatelemma = cleaninitialquery(request.args.get('plm', ''))
 		proximatelemma = lemmatadict[proximatelemma]
 	except:
 		proximatelemma = None
