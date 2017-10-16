@@ -150,6 +150,9 @@ def dictsearch(searchterm):
 		data = ('^' + seeking[1:-1] + '$',)
 	elif seeking[0] == ' ' and seeking[-1] != ' ':
 		data = ('^' + seeking[1:] + '.*?',)
+	elif seeking[0] == '^' and seeking[-1] == '$':
+		# esp if the dictionary sent this via next/previous entry
+		data = (seeking,)
 	else:
 		data = ('.*?' + seeking + '.*?',)
 

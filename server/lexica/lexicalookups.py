@@ -747,7 +747,7 @@ def dictionaryentryjs():
             $.getJSON('/dictsearch/^'+this.id+'$', function (definitionreturned) {
                 $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
                 var dLen = definitionreturned.length;
-                var linesreturned = list()
+                var linesreturned = []
                 for (i = 0; i < dLen; i++) {
                     linesreturned.push(definitionreturned[i]['value']);
                     }
