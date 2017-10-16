@@ -18,17 +18,17 @@ from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
-from server.formatting.searchformatting import htmlifysearchfinds, nocontexthtmlifysearchfinds, buildresultobjects, \
-	flagsearchterms
-from server.formatting.wordformatting import universalregexequivalent
+from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
+	nocontexthtmlifysearchfinds
+from server.formatting.wordformatting import stripaccents, universalregexequivalent
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
-from server.listsandsession.listmanagement import sortresultslist, calculatewholeauthorsearches, compilesearchlist, \
-	flagexclusions
-from server.listsandsession.sessionfunctions import sessionvariables, justlatin, justtlg
+from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
+	sortresultslist
+from server.listsandsession.sessionfunctions import justlatin, justtlg, sessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import cleaninitialquery
-from server.startup import authordict, workdict, listmapper, poll
+from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
 
 @hipparchia.route('/executesearch/<timestamp>', methods=['GET'])
@@ -57,14 +57,27 @@ def executesearch(timestamp):
 	# need to sanitize input at least a bit: remove digits and punctuation
 	# dispatcher will do searchtermcharactersubstitutions() and massagesearchtermsforwhitespace() to take care of lunate sigma, etc.
 	try:
-		seeking = cleaninitialquery(request.args.get('seeking', ''))
+		seeking = cleaninitialquery(request.args.get('s', ''))
 	except:
 		seeking = ''
 
 	try:
-		proximate = cleaninitialquery(request.args.get('proximate', ''))
+		proximate = cleaninitialquery(request.args.get('p', ''))
 	except:
 		proximate = ''
+
+	try:
+		lemma = cleaninitialquery(request.args.get('l', ''))
+		lemma = lemmatadict[lemma]
+	except:
+		lemma = None
+
+	try:
+		proximatelemma = cleaninitialquery(request.args.get('pl', ''))
+		proximatelemma = lemmatadict[proximatelemma]
+	except:
+		proximatelemma = None
+
 
 	if len(seeking) < 1 and len(proximate) > 0:
 		seeking = proximate
@@ -101,17 +114,17 @@ def executesearch(timestamp):
 	activepoll.activate()
 	activepoll.statusis('Preparing to search')
 
-	searchlist = []
+	searchlist = list()
 	output = ''
 	nosearch = True
 
-	so = SearchObject(ts, seeking, proximate, frozensession)
+	so = SearchObject(ts, seeking, proximate, lemma, proximatelemma, frozensession)
 
 	dmin, dmax = bcedating(frozensession)
 	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	                 if frozensession[c] == 'yes']
 
-	if len(seeking) > 0 and activecorpora:
+	if (len(seeking) > 0 or lemma) and activecorpora:
 		activepoll.statusis('Compiling the list of works to search')
 		searchlist = compilesearchlist(listmapper, frozensession)
 
@@ -128,7 +141,17 @@ def executesearch(timestamp):
 		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 		so.indexrestrictions = indexrestrictions
 
-		if len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
+		if lemma and not (proximatelemma or proximate):
+			so.searchtype = 'simplelemma'
+			wordlist = so.lemma.formlist
+			wordlist = [universalregexequivalent(stripaccents(w)) for w in wordlist]
+			wordlist = ['((^|\s){w}(\s|$))'.format(w=w) for w in wordlist]
+			so.termone = '|'.join(wordlist)
+			so.usecolumn = 'accented_line'
+			so.usewordlist = 'polytonic'
+			thesearch = 'all forms of »{skg}«'.format(skg=lemma.dictionaryentry)
+			htmlsearch = '<span class="sought">all {n} known forms of »{skg}«</span>'.format(n=len(wordlist), skg=lemma.dictionaryentry)
+		elif len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
 			so.searchtype = 'simple'
 			thesearch = so.originalseeking
 			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=so.originalseeking)
@@ -152,13 +175,17 @@ def executesearch(timestamp):
 
 		activepoll.statusis('Converting results to HTML')
 
-		skg = re.compile(universalregexequivalent(so.termone))
+		if so.searchtype == 'simplelemma':
+			skg = so.termone
+		else:
+			skg = re.compile(universalregexequivalent(so.termone))
 		prx = None
+
 		if so.proximate != '' and so.searchtype == 'proximity':
 			prx = re.compile(universalregexequivalent(so.termtwo))
 
 		for r in resultlist:
-			r.lineobjects = flagsearchterms(r,skg, prx, so)
+			r.lineobjects = flagsearchterms(r, skg, prx, so)
 
 		if so.context > 0:
 			findshtml = htmlifysearchfinds(resultlist, so)

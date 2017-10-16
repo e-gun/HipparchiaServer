@@ -109,8 +109,8 @@ def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
 	:return:
 	"""
 
-	returnarray = []
-	entriestocheck = {}
+	returnarray = list()
+	entriestocheck = dict()
 	possibilities = morphologyobject.getpossible()
 
 	# the top part of the HTML: just the analyses
@@ -136,7 +136,7 @@ def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
 	# the next will trim the items to check by inducing key collisions
 	# p.getbaseform(), p.entry, p.xref: judicium jūdiciūm, judicium 42397893
 	# p.getbaseform(), p.entry, p.xref: judicium jūdicium, judicium 42397893
-	distinct = {}
+	distinct = dict()
 	for p in possibilities:
 		distinct[p.xref] = p.getbaseform()
 
@@ -233,7 +233,7 @@ def browserdictionarylookup(count, seekingentry, cursor):
 						outputlist.append(formatprevalencedata(countobject))
 						outputlist.append('</p>')
 
-				summarydict = {}
+				summarydict = dict()
 				if session['sensesummary'] == 'yes' or session['authorssummary'] == 'yes' or session['quotesummary'] == 'yes':
 					lemmaobject = grablemmataobjectfor(w.entry, usedictionary + '_lemmata', cursor)
 					summarydict = entrysummary(definition, usedictionary, translationlabel, lemmaobject)
@@ -486,8 +486,8 @@ def bulkddictsearch(cursor, dictionary, usecolumn, seeking):
 	found = cursor.fetchall()
 
 	# the results should be given the polytonicsort() treatment
-	sortedfinds = []
-	finddict = {}
+	sortedfinds = list()
+	finddict = dict()
 	for f in found:
 		finddict[f[0]] = f
 	keys = finddict.keys()
@@ -669,7 +669,7 @@ def formatprevalencedata(wordcountobject):
 
 		if genreinfotuples:
 			thehtml.append('<p class="wordcounts">Predominant genres: ')
-			genres = []
+			genres = list()
 			for g in range(0, hipparchia.config['NUMBEROFGENRESTOTRACK']):
 				git = genreinfotuples[g]
 				if git[1] > 0:
@@ -747,7 +747,7 @@ def dictionaryentryjs():
             $.getJSON('/dictsearch/^'+this.id+'$', function (definitionreturned) {
                 $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
                 var dLen = definitionreturned.length;
-                var linesreturned = []
+                var linesreturned = list()
                 for (i = 0; i < dLen; i++) {
                     linesreturned.push(definitionreturned[i]['value']);
                     }

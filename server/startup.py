@@ -9,7 +9,7 @@
 from server import hipparchia
 from server.calculatewordweights import findccorporaweights, findtemporalweights, workobjectgeneraweights
 from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors, \
-	probefordatabases, setthreadcount
+	loadlemmataasobjects, probefordatabases, setthreadcount
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildworkgenresdict, \
 	buildworkprovenancedict
 
@@ -72,6 +72,7 @@ otherwise you'll hit the DB too often and ask the same question over and over ag
 authordict = loadallauthorsasobjects()
 workdict = loadallworksasobjects()
 authordict = loadallworksintoallauthors(authordict, workdict)
+lemmatadict = loadlemmataasobjects()
 
 authorgenresdict = buildaugenresdict(authordict)
 authorlocationdict = buildauthorlocationdict(authordict)
@@ -124,7 +125,7 @@ def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specif
 	:param worksdict:
 	:return:
 	"""
-	datematches = []
+	datematches = list()
 
 	for aw in authorandworklist:
 		w = workobjectdict[aw]

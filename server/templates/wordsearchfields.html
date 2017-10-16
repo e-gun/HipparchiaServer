@@ -5,23 +5,25 @@
         {% else %}
         <input id="wordsearchform" type="text" action="" method="" name="seeking" placeholder="(looking for...)" value="{{ lookedfor }}" size=25>
         {% endif %}
+        <input id="lemmatasearchform" type="text" action="" method="" name="lemmata" placeholder="(all forms of...)" size=25>
     <button id="extendsearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Complicate the search"><span class="ui-button-icon ui-icon ui-icon-arrow-1-e"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
     <br />
     <div id="complexsearching">
-          <label for="wordisnear">near
-          <input type="radio" name="near" id="wordisnear" value="T"></label>
-          <label for="wordisnotnear">not near
-          <input type="radio" name="near" id="wordisnotnear" value="F"></label>
-            {% if proximate == '' %}
-            <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" size=25>
-            {% else %}
-            <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" value="{{ proximate }}" size=25>
-            {% endif %}
-          <input id="proximityspinner" type="text" value="1" width="25px;">
-          <label for="searchlines">lines
-          <input type="radio" name="searchfor" id="searchlines" value="L"></label>
-          <label for="searchwords">words
-          <input type="radio" name="searchfor" id="searchwords" value="W"></label>
-        </div>
+        <label for="wordisnear">near
+        <input type="radio" name="near" id="wordisnear" value="T"></label>
+        <label for="wordisnotnear">not near
+        <input type="radio" name="near" id="wordisnotnear" value="F"></label>
+        {% if proximate == '' %}
+        <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" size=25>
+        {% else %}
+        <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" value="{{ proximate }}" size=25>
+        {% endif %}
+        <input id="proximatelemmatasearchform" type="text" action="" method="" name="lemmata" placeholder="(near all forms of...)" size=25>
+        <input id="proximityspinner" type="text" value="1" width="25px;">
+        <label for="searchlines">lines
+        <input type="radio" name="searchfor" id="searchlines" value="L"></label>
+        <label for="searchwords">words
+        <input type="radio" name="searchfor" id="searchwords" value="W"></label>
+    </div>
 </div>
 <br />

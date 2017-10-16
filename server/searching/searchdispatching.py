@@ -35,9 +35,12 @@ def searchdispatcher(searchobject, activepoll):
 
 	so = searchobject
 
-	# recompose 'searchingfor'
+	# recompose 'searchingfor' (if it exists)
 	# note that 'proximate' does not need as many checks
-	searchingfor = massagesearchtermsforwhitespace(so.seeking)
+	if so.seeking:
+		searchingfor = massagesearchtermsforwhitespace(so.seeking)
+	else:
+		searchingfor = ''
 
 	# lunate sigmas / UV / JI issues
 	unomdifiedskg = searchingfor
@@ -60,6 +63,10 @@ def searchdispatcher(searchobject, activepoll):
 
 	if so.searchtype == 'simple':
 		activepoll.statusis('Executing a simple word search...')
+		jobs = [Process(target=workonsimplesearch, args=(count, foundlineobjects, searchlist, commitcount, activepoll, so))
+		        for i in range(workers)]
+	elif so.searchtype == 'simplelemma':
+		activepoll.statusis('Executing a lemmatized word search for the {n} known forms of {w}...'.format(n=len(so.lemma.formlist), w=so.lemma.dictionaryentry))
 		jobs = [Process(target=workonsimplesearch, args=(count, foundlineobjects, searchlist, commitcount, activepoll, so))
 		        for i in range(workers)]
 	elif so.searchtype == 'phrase':

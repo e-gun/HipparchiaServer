@@ -94,6 +94,12 @@ class dbHeadwordObject(dbWordCountObject):
 		late_occurrences integer
 	)
 
+	hipparchiaDB=# select count(entry_name) from dictionary_headword_wordcounts;;
+	 count
+	--------
+	 152692
+	(1 row)
+
 	"""
 
 	greekworderaweights = {'early': 7.75, 'middle': 1.92, 'late': 1}
@@ -450,6 +456,18 @@ class dbMorphologyObject(object):
 		possible_dictionary_forms text COLLATE pg_catalog."default"
 	)
 
+	hipparchiaDB=# select count(observed_form) from greek_morphology;
+	 count
+	--------
+	 911871
+	(1 row)
+
+	hipparchiaDB=# select count(observed_form) from latin_morphology;
+	 count
+	--------
+	 270227
+	(1 row)
+
 	"""
 
 	def __init__(self, observed, xrefs, prefixrefs, possibleforms):
@@ -462,12 +480,12 @@ class dbMorphologyObject(object):
 
 	def countpossible(self):
 		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
-		thepossible = re.findall(possiblefinder,self.possibleforms)
+		thepossible = re.findall(possiblefinder, self.possibleforms)
 		return len(thepossible)
 
 	def getpossible(self):
 		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
-		thepossible = re.findall(possiblefinder,self.possibleforms)
+		thepossible = re.findall(possiblefinder, self.possibleforms)
 		listofpossibilitiesobjects = [MorphPossibilityObject(p, self.prefixcount) for p in thepossible]
 		return listofpossibilitiesobjects
 
@@ -693,6 +711,18 @@ class dbLemmaObject(object):
 		xref_number integer,
 		derivative_forms text COLLATE pg_catalog."default"
 	)
+
+	hipparchiaDB=# select count(dictionary_entry) from greek_lemmata;
+	 count
+	--------
+	 114098
+	(1 row)
+
+	hipparchiaDB=# select count(dictionary_entry) from latin_lemmata;
+	 count
+	-------
+	 38662
+	(1 row)
 
 	"""
 

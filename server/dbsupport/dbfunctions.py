@@ -29,6 +29,7 @@ except ImportError:
 
 from server import hipparchia
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus, dbWorkLine
+from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -152,6 +153,38 @@ def loadallworksasobjects():
 	print('\t', len(worksdict), 'works loaded')
 
 	return worksdict
+
+
+def loadlemmataasobjects():
+	"""
+
+	return a dict of all possible lemmataobjects
+
+	:return:
+	"""
+
+	print('loading all lemmata...')
+	dbconnection = setconnection('not_autocommit')
+	curs = dbconnection.cursor()
+
+	q = """
+	SELECT dictionary_entry, xref_number, derivative_forms FROM {lang}_lemmata
+	"""
+
+	lemmatadict = dict()
+
+	languages = {1: 'greek', 2: 'latin'}
+
+	for key in languages:
+		curs.execute(q.format(lang=languages[key]))
+		results = curs.fetchall()
+		lemmatadict = {**{r[0]: dbLemmaObject(r[0], r[1], r[2]) for r in results}, **lemmatadict}
+
+	print('\t', len(lemmatadict), 'lemmata loaded')
+	# print('lemmatadict["laudo"]', lemmatadict['laudo'].formlist)
+	# print('lemmatadict["λύω"]', lemmatadict['λύω'].formlist)
+
+	return lemmatadict
 
 
 def dbloadasingleworkobject(workuniversalid):

@@ -27,13 +27,13 @@ def buildaugenresdict(authordict):
 	:return:
 	"""
 
-	gklist = []
-	ltlist = []
-	inlist = []
-	dplist = []
-	chlist = []
+	gklist = list()
+	ltlist = list()
+	inlist = list()
+	dplist = list()
+	chlist = list()
 
-	genresdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
+	genresdict = {'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
 
 	for a in authordict:
 		if authordict[a].genres and authordict[a].genres != '':
@@ -57,11 +57,11 @@ def buildworkgenresdict(workdict):
 	:return:
 	"""
 
-	gklist = []
-	ltlist = []
-	inlist = []
-	dplist = []
-	chlist = []
+	gklist = list()
+	ltlist = list()
+	inlist = list()
+	dplist = list()
+	chlist = list()
 
 	genresdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
 
@@ -90,11 +90,11 @@ def buildauthorlocationdict(authordict):
 	:return:
 	"""
 
-	gklist = []
-	ltlist = []
-	inlist = []
-	dplist = []
-	chlist = []
+	gklist = list()
+	ltlist = list()
+	inlist = list()
+	dplist = list()
+	chlist = list()
 
 	locationdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
 
@@ -123,13 +123,13 @@ def buildworkprovenancedict(workdict):
 	:return:
 	"""
 
-	gklist = []
-	ltlist = []
-	inlist = []
-	dplist = []
-	chlist = []
+	gklist = list()
+	ltlist = list()
+	inlist = list()
+	dplist = list()
+	chlist = list()
 
-	locationdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
+	locationdict = {'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
 
 	for w in workdict:
 		if workdict[w].provenance and workdict[w].provenance != '':
@@ -139,7 +139,7 @@ def buildworkprovenancedict(workdict):
 
 	for l in ['gr', 'lt', 'in', 'dp', 'ch']:
 		locationdict[l] = list(set(locationdict[l]))
-		locationdict[l] = [re.sub(r'^\s|\s$','',x) for x in locationdict[l]]
+		locationdict[l] = [re.sub(r'^\s|\s$', '', x) for x in locationdict[l]]
 		locationdict[l].sort()
 
 	return locationdict

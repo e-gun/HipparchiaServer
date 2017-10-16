@@ -56,6 +56,7 @@ $(document).ready( function () {
     $('#executesearch').click( function(){
         var seeking = $('#wordsearchform').val();
         var proximate = $('#proximatesearchform').val();
+        var lemmasearch = $('#lemmatasearchform').val();
         // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
         if (seeking.slice(-1) == ' ') { seeking = seeking.slice(0,-1) + '%20'; }
         if (proximate.slice(-1) == ' ') { proximate = proximate.slice(0,-1) + '%20'; }
@@ -67,9 +68,7 @@ $(document).ready( function () {
         if (bcsh.hasChildNodes()) { bcsh.removeChild(bcsh.firstChild); }
 
         var searchid = Date.now();
-
-        if (proximate == '') { var url = '/executesearch/'+searchid+'?seeking='+seeking; }
-        else { var url = '/executesearch/'+searchid+'?seeking='+seeking+'&proximate='+proximate; }
+        var url = '/executesearch/'+searchid+'?s='+seeking+'&p='+proximate+'&l='+lemmasearch;
 
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
 
@@ -169,7 +168,7 @@ $(document).ready( function () {
 
 
     var tohideonfirstload = new Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur',
-        '#browserdialog', '#complexsearching');
+        '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform');
     bulkhider(tohideonfirstload);
 
     //
