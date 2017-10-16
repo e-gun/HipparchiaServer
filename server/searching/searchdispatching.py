@@ -95,8 +95,9 @@ def searchdispatcher(searchobject, activepoll):
 			        for i in range(workers)]
 	elif so.searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
-
-		if so.accented or re.search(r'^[a-z]',so.termone) and so.near:
+		if so.lemma or so.proximatelemma:
+			pass
+		elif so.accented or re.search(r'^[a-z]', so.termone) and so.near:
 			# choose the necessarily faster option
 			leastcommon = findleastcommonterm(unomdifiedskg+' '+unmodifiedprx, so.accented)
 			if leastcommon != unomdifiedskg:

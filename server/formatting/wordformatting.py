@@ -540,3 +540,24 @@ def attemptsigmadifferentiation(text):
 	cleantext = re.sub(terminalsigma, r'ς\1', text)
 
 	return cleantext
+
+
+def wordlistintoregex(wordlist):
+	"""
+
+	turn
+		['a', 'b', 'c']
+
+	into something like
+		re.search(r'('a'|'b'|'c')')
+
+	:param wordlist:
+	:return:
+	"""
+
+	wordlist = [universalregexequivalent(stripaccents(w)) for w in wordlist]
+	wordlist = ['((^|\s){w}(\s|$))'.format(w=w) for w in wordlist]
+	searchterm = '|'.join(wordlist)
+
+	return searchterm
+

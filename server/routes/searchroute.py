@@ -20,7 +20,7 @@ from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds
-from server.formatting.wordformatting import stripaccents, universalregexequivalent
+from server.formatting.wordformatting import universalregexequivalent, wordlistintoregex
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
 	sortresultslist
@@ -143,14 +143,19 @@ def executesearch(timestamp):
 
 		if lemma and not (proximatelemma or proximate):
 			so.searchtype = 'simplelemma'
-			wordlist = so.lemma.formlist
-			wordlist = [universalregexequivalent(stripaccents(w)) for w in wordlist]
-			wordlist = ['((^|\s){w}(\s|$))'.format(w=w) for w in wordlist]
-			so.termone = '|'.join(wordlist)
+			so.termone = wordlistintoregex(so.lemma.formlist)
 			so.usecolumn = 'accented_line'
 			so.usewordlist = 'polytonic'
 			thesearch = 'all forms of »{skg}«'.format(skg=lemma.dictionaryentry)
-			htmlsearch = '<span class="sought">all {n} known forms of »{skg}«</span>'.format(n=len(wordlist), skg=lemma.dictionaryentry)
+			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry)
+		elif lemma and proximatelemma:
+			so.searchtype = 'proximity'
+			so.termone = wordlistintoregex(so.lemma.formlist)
+			so.termtwo = wordlistintoregex(so.proximatelemma.formlist)
+			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximatelemma.dictionaryentry)
+			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span> within {sp} {sc} of all {pn} known forms of <span class="sought">»{pskg}«</span>'.format(
+				n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pn=len(so.proximatelemma.formlist), pskg=so.proximatelemma.dictionaryentry
+			)
 		elif len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
 			so.searchtype = 'simple'
 			thesearch = so.originalseeking

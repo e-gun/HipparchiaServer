@@ -270,9 +270,6 @@ class SearchObject(object):
 		self.originalproximate = proximate
 		self.lemma = lemmaobject
 		self.proximatelemma = proximatelemmaobject
-		# the next are used by lemma searches and set after initialization
-		self.count = 0
-		self.total = 0
 
 		# '>' will mess you up still
 		self.originalseeking = re.sub(r'<', '&lt;', self.originalseeking)
