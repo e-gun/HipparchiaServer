@@ -27,6 +27,8 @@ key features:
 			proximity searching:
 				within N lines or words
 				not within N lines or words
+			lemmatized searches: look for all known forms of a word
+			lemmatized searches can be combined with non-lemmatized proximity searches
 		results
 			results can be limited to a maximum number of hits
 			results can be limited to one hit per author/work
