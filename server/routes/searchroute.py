@@ -79,9 +79,9 @@ def executesearch(timestamp):
 		proximatelemma = None
 
 
-	if len(seeking) < 1 and len(proximate) > 0:
-		seeking = proximate
-		proximate = ''
+	# if len(seeking) < 1 and len(proximate) > 0:
+	# 	seeking = proximate
+	# 	proximate = ''
 
 	replacebeta = False
 	
@@ -130,6 +130,8 @@ def executesearch(timestamp):
 
 	if len(searchlist) > 0:
 		nosearch = False
+		skg = None
+		prx = None
 		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		searchlist = flagexclusions(searchlist, frozensession)
 		workssearched = len(searchlist)
@@ -141,30 +143,54 @@ def executesearch(timestamp):
 		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 		so.indexrestrictions = indexrestrictions
 
-		if lemma and not (proximatelemma or proximate):
-			so.searchtype = 'simplelemma'
+		if lemma:
 			so.termone = wordlistintoregex(so.lemma.formlist)
+			skg = so.termone
+
+		if proximatelemma:
+			so.termtwo = wordlistintoregex(so.proximatelemma.formlist)
+			prx = so.termtwo
+
+		if lemma and not (proximatelemma or proximate):
+			print('executesearch(): a')
+			print('proximate',proximate)
+			so.searchtype = 'simplelemma'
 			so.usecolumn = 'accented_line'
 			so.usewordlist = 'polytonic'
 			thesearch = 'all forms of »{skg}«'.format(skg=lemma.dictionaryentry)
 			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry)
 		elif lemma and proximatelemma:
+			print('executesearch(): b')
 			so.searchtype = 'proximity'
-			so.termone = wordlistintoregex(so.lemma.formlist)
-			so.termtwo = wordlistintoregex(so.proximatelemma.formlist)
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximatelemma.dictionaryentry)
 			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span> within {sp} {sc} of all {pn} known forms of <span class="sought">»{pskg}«</span>'.format(
 				n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pn=len(so.proximatelemma.formlist), pskg=so.proximatelemma.dictionaryentry
 			)
+		elif (lemma or proximatelemma) and (seeking or proximate):
+			print('executesearch(): c')
+			so.searchtype = 'proximity'
+			if lemma:
+				lm = so.lemma
+				t = proximate
+			else:
+				lm = so.proximatelemma
+				t = seeking
+			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=lm.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=t)
+			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span> within {sp} {sc} of <span class="sought">»{pskg}«</span>'.format(
+				n=len(lm.formlist), skg=lm.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pskg=t
+			)
 		elif len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
+			print('executesearch(): d')
 			so.searchtype = 'simple'
 			thesearch = so.originalseeking
 			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=so.originalseeking)
 		elif re.search(phrasefinder, seeking):
+			print('executesearch(): e')
 			so.searchtype = 'phrase'
 			thesearch = so.originalseeking
 			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=so.originalseeking)
 		else:
+			print('executesearch(): f')
 			so.searchtype = 'proximity'
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximate)
 			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'.format(
@@ -180,13 +206,10 @@ def executesearch(timestamp):
 
 		activepoll.statusis('Converting results to HTML')
 
-		if so.searchtype == 'simplelemma':
-			skg = so.termone
-		else:
+		if not skg:
 			skg = re.compile(universalregexequivalent(so.termone))
-		prx = None
 
-		if so.proximate != '' and so.searchtype == 'proximity':
+		if not prx and so.proximate != '' and so.searchtype == 'proximity':
 			prx = re.compile(universalregexequivalent(so.termtwo))
 
 		for r in resultlist:
@@ -223,7 +246,7 @@ def executesearch(timestamp):
 		resultcount = locale.format('%d', resultcount, grouping=True)
 		workssearched = locale.format('%d', workssearched, grouping=True)
 
-		output = {}
+		output = dict()
 		output['title'] = thesearch
 		output['found'] = findshtml
 		output['js'] = findsjs
@@ -245,7 +268,7 @@ def executesearch(timestamp):
 		activepoll.deactivate()
 
 	if nosearch:
-		reasons = []
+		reasons = list()
 		if not activecorpora:
 			reasons.append('there are no active databases')
 		if len(seeking) == 0:
