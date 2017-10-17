@@ -7,6 +7,7 @@
 """
 
 import re
+from collections import defaultdict
 
 """
 simple loaders called when HipparchiaServer launches
@@ -143,3 +144,31 @@ def buildworkprovenancedict(workdict):
 		locationdict[l].sort()
 
 	return locationdict
+
+
+def buildkeyedlemmata(listofentries):
+	"""
+
+	a list of 140k words is too long to send to 'getlemmahint/' without offering quicker access
+
+	a dict with keys...
+
+	:param listofentries:
+	:return:
+	"""
+	invals = u'jvσς'
+	outvals = u'iuϲϲ'
+
+	keyedlemmata = defaultdict(dict)
+
+	for e in listofentries:
+		if len(e) > 1:
+			a = e[0].translate(str.maketrans(invals, outvals))
+			b = e[1].translate(str.maketrans(invals, outvals))
+			try:
+				keyedlemmata[a][b].append(e)
+			except:
+				keyedlemmata[a][b] = list(e)
+
+	print('keyedlemmata[a][r]',keyedlemmata['a']['r'])
+	return keyedlemmata

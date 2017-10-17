@@ -325,3 +325,16 @@ $('#excludegenre').click( function() {
         $('#searchlistcontents').hide();
     });
 
+
+//
+// LEMMATA
+//
+
+$('#lemmatasearchform').autocomplete({
+    source: '/getlemmahint'
+    });
+
+
+$('#proximatelemmatasearchform').autocomplete({
+    source: '/getlemmahint'
+    });

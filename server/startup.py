@@ -10,8 +10,8 @@ from server import hipparchia
 from server.calculatewordweights import findccorporaweights, findtemporalweights, workobjectgeneraweights
 from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors, \
 	loadlemmataasobjects, probefordatabases, setthreadcount
-from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildworkgenresdict, \
-	buildworkprovenancedict
+from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
+	buildworkgenresdict, buildworkprovenancedict
 
 terminaltext = """
 
@@ -73,6 +73,9 @@ authordict = loadallauthorsasobjects()
 workdict = loadallworksasobjects()
 authordict = loadallworksintoallauthors(authordict, workdict)
 lemmatadict = loadlemmataasobjects()
+# the next is too long to be used by the hinter: need quicker acces via a dict
+keyedlemmata = buildkeyedlemmata(list(lemmatadict.keys()))
+
 
 authorgenresdict = buildaugenresdict(authordict)
 authorlocationdict = buildauthorlocationdict(authordict)

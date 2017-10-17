@@ -11,10 +11,11 @@ import json
 from flask import request
 
 from server import hipparchia
-from server.formatting.wordformatting import depunct
+from server.formatting.wordformatting import depunct, stripaccents
 from server.listsandsession.listmanagement import buildhintlist
 from server.listsandsession.sessionfunctions import reducetosessionselections, returnactivelist
-from server.startup import authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict, listmapper
+from server.startup import authorgenresdict, authorlocationdict, keyedlemmata, listmapper, workgenresdict, \
+	workprovenancedict
 
 
 @hipparchia.route('/getauthorhint', methods=['GET'])
@@ -33,7 +34,7 @@ def offerauthorhints():
 
 	authorlist.sort()
 
-	hint = []
+	hint = list()
 
 	if strippedquery:
 		hint = buildhintlist(strippedquery, authorlist)
@@ -56,7 +57,7 @@ def augenrelist():
 	activegenres = returnactivelist(authorgenresdict)
 	activegenres.sort()
 
-	hint = []
+	hint = list()
 
 	if len(activegenres) > 0:
 		if strippedquery:
@@ -82,7 +83,7 @@ def wkgenrelist():
 	activegenres = returnactivelist(workgenresdict)
 	activegenres.sort()
 
-	hint = []
+	hint = list()
 
 	if len(activegenres) > 0:
 		if strippedquery:
@@ -109,7 +110,7 @@ def offeraulocationhints():
 	activelocations = returnactivelist(authorlocationdict)
 	activelocations.sort()
 
-	hint = []
+	hint = list()
 
 	if len(activelocations) > 0:
 		if strippedquery:
@@ -138,7 +139,7 @@ def offerprovenancehints():
 	activelocations = returnactivelist(workprovenancedict)
 	activelocations.sort()
 
-	hint = []
+	hint = list()
 
 	if len(activelocations) > 0:
 		if strippedquery:
@@ -147,5 +148,40 @@ def offerprovenancehints():
 			hint = ['(no work provenance data available inside of your active database(s))']
 
 	hint = json.dumps(hint)
+
+	return hint
+
+
+@hipparchia.route('/getlemmahint', methods=['GET'])
+def offerlemmatahints():
+	"""
+
+	fill in the hint box with eligible values
+
+	since there are a crazy number of words, don't update until you are beyond 3 chars
+
+	:return:
+	"""
+
+	term = request.args.get('term', '')
+
+	hintlist = list()
+
+	invals = u'jvσς'
+	outvals = u'iuϲϲ'
+
+	if len(term) > 1:
+		query = stripaccents(term.lower())
+		qlen = len(query)
+		a = query[0].translate(str.maketrans(invals, outvals))
+		b = query[1].translate(str.maketrans(invals, outvals))
+		wordlist = keyedlemmata[a][b]
+		if qlen > 2:
+			q = a+b+query[2:]
+		else:
+			q = a+b
+		hintlist = [{'value': w} for w in wordlist if q == stripaccents(w.lower()[0:qlen])]
+
+	hint = json.dumps(hintlist)
 
 	return hint
