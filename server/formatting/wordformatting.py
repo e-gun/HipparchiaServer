@@ -565,7 +565,7 @@ def wordlistintoregex(wordlist):
 	wordlist = ['((^|\s){w}(\s|$))'.format(w=w) for w in wordlist]
 	searchterm = '|'.join(wordlist)
 
-	# print('searchterm',searchterm)
+	print('searchterm',searchterm)
 	return searchterm
 
 
@@ -623,12 +623,19 @@ def acuteorgrav(word):
 			'ᾤ': 'ᾢ'
 	         }
 
-	reg = ''
+	tail = word[-2:]
 
-	for w in word:
-		if w in remap:
-			reg += '[{a}{b}]'.format(a=w, b=remap[w])
+	if len(word) > 2:
+		head = word[0:-2]
+	else:
+		head = ''
+
+	reg = head
+
+	for t in tail:
+		if t in remap:
+			reg += '[{a}{b}]'.format(a=t, b=remap[t])
 		else:
-			reg += w
+			reg += t
 
 	return reg
