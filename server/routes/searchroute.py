@@ -119,6 +119,7 @@ def executesearch(timestamp):
 	nosearch = True
 
 	so = SearchObject(ts, seeking, proximate, lemma, proximatelemma, frozensession)
+	print('so.near',so.near)
 
 	dmin, dmax = bcedating(frozensession)
 	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
@@ -162,7 +163,7 @@ def executesearch(timestamp):
 			# print('executesearch(): b')
 			so.searchtype = 'proximity'
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximatelemma.dictionaryentry)
-			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span> within {sp} {sc} of all {pn} known forms of <span class="sought">»{pskg}«</span>'.format(
+			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of all {pn} known forms of <span class="sought">»{pskg}«</span>'.format(
 				n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pn=len(so.proximatelemma.formlist), pskg=so.proximatelemma.dictionaryentry
 			)
 		elif (lemma or proximatelemma) and (seeking or proximate):
@@ -175,7 +176,7 @@ def executesearch(timestamp):
 				lm = so.proximatelemma
 				t = seeking
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=lm.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=t)
-			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span> within {sp} {sc} of <span class="sought">»{pskg}«</span>'.format(
+			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pskg}«</span>'.format(
 				n=len(lm.formlist), skg=lm.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pskg=t
 			)
 		elif len(proximate) < 1 and re.search(phrasefinder, seeking) is None:
