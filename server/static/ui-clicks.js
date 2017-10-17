@@ -462,6 +462,31 @@ $('#bracketcurly').change(function () {
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
 
+
+$('#termoneisalemma').change(function () {
+    if(this.checked) {
+        $('#wordsearchform').hide();
+        $('#wordsearchform').val('');
+        $('#lemmatasearchform').show();
+        } else {
+        $('#lemmatasearchform').hide();
+        $('#lemmatasearchform').val('');
+        $('#wordsearchform').show();
+        }
+    });
+
+$('#termtwoisalemma').change(function () {
+    if(this.checked) {
+        $('#proximatesearchform').hide();
+        $('#proximatesearchform').val('');
+        $('#proximatelemmatasearchform').show();
+        } else {
+        $('#proximatelemmatasearchform').hide();
+        $('#proximatelemmatasearchform').val('');
+        $('#proximatesearchform').show();
+        }
+    });
+
 //
 // spinners
 //

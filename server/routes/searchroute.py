@@ -119,7 +119,6 @@ def executesearch(timestamp):
 	nosearch = True
 
 	so = SearchObject(ts, seeking, proximate, lemma, proximatelemma, frozensession)
-	print('so.near',so.near)
 
 	dmin, dmax = bcedating(frozensession)
 	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']

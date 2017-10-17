@@ -51,6 +51,7 @@ $(document).ready( function () {
                 }
                 });
         $('#complexsearching').toggle();
+        $('#termonecheckbox').toggle();
         });
 
     $('#executesearch').click( function(){
@@ -179,7 +180,7 @@ $(document).ready( function () {
 
     var tohideonfirstload = new Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur',
         '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform',
-        '#termonelemmaradios', '#termtwolemmaradios');
+        '#zztermtwocheckbox', '#termonecheckbox');
     bulkhider(tohideonfirstload);
 
     //
