@@ -555,7 +555,7 @@ def wordlistintoregex(wordlist):
 	:return:
 	"""
 
-	# overkill
+	# overkill: but this can deal with enclitics that change the accentuation of the word...
 	# wordlist = [universalregexequivalent(stripaccents(w)) for w in wordlist]
 
 	# all words in the data column are lowercase...
@@ -565,7 +565,6 @@ def wordlistintoregex(wordlist):
 	wordlist = ['((^|\s){w}(\s|$))'.format(w=w) for w in wordlist]
 	searchterm = '|'.join(wordlist)
 
-	print('searchterm',searchterm)
 	return searchterm
 
 
