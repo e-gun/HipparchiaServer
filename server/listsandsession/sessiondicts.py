@@ -170,5 +170,6 @@ def buildkeyedlemmata(listofentries):
 			except:
 				keyedlemmata[a][b] = list(e)
 
-	print('keyedlemmata[a][r]',keyedlemmata['a']['r'])
+	# print('keyedlemmata[a][r]', keyedlemmata['a']['r'])
+
 	return keyedlemmata

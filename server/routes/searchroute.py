@@ -211,6 +211,15 @@ def executesearch(timestamp):
 		if not prx and so.proximate != '' and so.searchtype == 'proximity':
 			prx = re.compile(universalregexequivalent(so.termtwo))
 
+		if lemma:
+			# clean out the whitespace/start/stop checks
+			skg = re.sub(r'\(\^\|\\s\)', '', skg)
+			skg = re.sub(r'\(\\s\|\$\)', '', skg)
+
+		if proximatelemma:
+			prx = re.sub(r'\(\^\|\\s\)', '', prx)
+			prx = re.sub(r'\(\\s\|\$\)', '', prx)
+
 		for r in resultlist:
 			r.lineobjects = flagsearchterms(r, skg, prx, so)
 

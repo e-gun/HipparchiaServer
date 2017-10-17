@@ -180,7 +180,7 @@ $(document).ready( function () {
 
     var tohideonfirstload = new Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur',
         '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform',
-        '#zztermtwocheckbox', '#termonecheckbox');
+        '#termonecheckbox');
     bulkhider(tohideonfirstload);
 
     //

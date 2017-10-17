@@ -166,7 +166,7 @@ def flagsearchterms(searchresultobject, skg, prx, searchobject):
 			fl.accented = highlightsearchterm(fl, skg, 'match')
 			if so.context > 0:
 				fl.accented = '<span class="highlight">{fla}</span>'.format(fla=fl.accented)
-		if so.proximate != '' and so.searchtype == 'proximity':
+		if so.searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
 			if re.search(so.termtwo, fl.accented) or re.search(so.termtwo, fl.stripped):
 				fl.accented = highlightsearchterm(fl, prx, 'proximate')
