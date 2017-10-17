@@ -551,6 +551,8 @@ def wordlistintoregex(wordlist):
 	into something like
 		re.search(r'('a'|'b'|'c')')
 
+	need to clean up all of the odd things about these words in order to make them match up with the actual data
+	
 	:param wordlist:
 	:return:
 	"""
@@ -561,6 +563,7 @@ def wordlistintoregex(wordlist):
 	# all words in the data column are lowercase...
 	# wordlist = [upperorlowerregex(w) for w in wordlist]
 
+	wordlist = [re.sub(r'v', 'u', w) for w in wordlist]
 	wordlist = [acuteorgrav(w.lower()) for w in wordlist]
 	wordlist = ['((^|\s){w}(\s|$))'.format(w=w) for w in wordlist]
 	searchterm = '|'.join(wordlist)
