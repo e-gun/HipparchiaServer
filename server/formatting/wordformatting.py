@@ -555,9 +555,80 @@ def wordlistintoregex(wordlist):
 	:return:
 	"""
 
-	wordlist = [universalregexequivalent(stripaccents(w)) for w in wordlist]
+	# overkill
+	# wordlist = [universalregexequivalent(stripaccents(w)) for w in wordlist]
+
+	# all words in the data column are lowercase...
+	# wordlist = [upperorlowerregex(w) for w in wordlist]
+
+	wordlist = [acuteorgrav(w.lower()) for w in wordlist]
 	wordlist = ['((^|\s){w}(\s|$))'.format(w=w) for w in wordlist]
 	searchterm = '|'.join(wordlist)
 
+	# print('searchterm',searchterm)
 	return searchterm
 
+
+def upperorlowerregex(word):
+	"""
+
+	turn
+		'word'
+
+	into
+		'[wW][oO][rR][dD]'
+
+	:param word:
+	:return:
+	"""
+
+	reg = ['[{a}{b}]'.format(a=w, b=w.upper()) for w in word]
+	reg = ''.join(reg)
+
+	return reg
+
+
+def acuteorgrav(word):
+	"""
+
+	turn
+		τολμηρόϲ
+
+	into
+		τολμηρ[όὸ]ϲ
+
+	:param word:
+	:return:
+	"""
+
+	remap = {'ά': 'ὰ',
+			'έ': 'ὲ',
+			'ί': 'ὶ',
+			'ό': 'ὸ',
+			'ύ': 'ὺ',
+			'ή': 'ὴ',
+			'ώ': 'ὼ',
+			'ἄ': 'ἂ',
+			'ἔ': 'ἒ',
+			'ἴ': 'ἲ',
+			'ὄ': 'ὂ',
+			'ὔ': 'ὒ',
+			'ἤ': 'ἢ',
+			'ὤ': 'ὢ',
+			'ᾅ': 'ᾃ',
+			'ᾕ': 'ᾓ',
+			'ᾥ': 'ᾣ',
+			'ᾄ': 'ᾂ',
+			'ᾔ': 'ᾒ',
+			'ᾤ': 'ᾢ'
+	         }
+
+	reg = ''
+
+	for w in word:
+		if w in remap:
+			reg += '[{a}{b}]'.format(a=w, b=remap[w])
+		else:
+			reg += w
+
+	return reg

@@ -161,6 +161,7 @@ def executesearch(timestamp):
 		elif lemma and proximatelemma:
 			# print('executesearch(): b')
 			so.searchtype = 'proximity'
+			so.usecolumn = 'accented_line'
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximatelemma.dictionaryentry)
 			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of all {pn} known forms of <span class="sought">»{pskg}«</span>'.format(
 				n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pn=len(so.proximatelemma.formlist), pskg=so.proximatelemma.dictionaryentry
@@ -168,6 +169,7 @@ def executesearch(timestamp):
 		elif (lemma or proximatelemma) and (seeking or proximate):
 			# print('executesearch(): c')
 			so.searchtype = 'proximity'
+			so.usecolumn = 'accented_line'
 			if lemma:
 				lm = so.lemma
 				t = proximate
