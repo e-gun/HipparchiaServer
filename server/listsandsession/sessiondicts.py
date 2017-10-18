@@ -9,6 +9,8 @@
 import re
 from collections import defaultdict
 
+from server.formatting.wordformatting import stripaccents
+
 """
 simple loaders called when HipparchiaServer launches
 these lists will contain (more or less...) globally available values
@@ -163,8 +165,8 @@ def buildkeyedlemmata(listofentries):
 
 	for e in listofentries:
 		if len(e) > 1:
-			a = e[0].translate(str.maketrans(invals, outvals))
-			b = e[1].translate(str.maketrans(invals, outvals))
+			a = stripaccents(e[0].translate(str.maketrans(invals, outvals)))
+			b = stripaccents(e[1].translate(str.maketrans(invals, outvals)))
 			try:
 				keyedlemmata[a][b].append(e)
 			except:

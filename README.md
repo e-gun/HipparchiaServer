@@ -220,3 +220,6 @@ What you will see:
 1. one hit zero context
 ![one_hit_zero_context](screenshots/18_one_hit_zero_context.png)
 
+1. lemmatized search
+![lemmatized search](screenshots/19_lemmatized_search.png)
+

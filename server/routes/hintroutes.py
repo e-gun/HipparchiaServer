@@ -12,7 +12,7 @@ from flask import request
 
 from server import hipparchia
 from server.formatting.wordformatting import depunct, stripaccents
-from server.listsandsession.listmanagement import buildhintlist
+from server.listsandsession.listmanagement import buildhintlist, polytonicsort
 from server.listsandsession.sessionfunctions import reducetosessionselections, returnactivelist
 from server.startup import authorgenresdict, authorlocationdict, keyedlemmata, listmapper, workgenresdict, \
 	workprovenancedict
@@ -179,6 +179,8 @@ def offerlemmatahints():
 			wordlist = keyedlemmata[a][b]
 		except KeyError:
 			wordlist = list()
+
+		wordlist = polytonicsort(wordlist)
 
 		if qlen > 2:
 			# always true, but what if you changed 'len(term) > 2'?
