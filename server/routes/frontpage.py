@@ -87,6 +87,7 @@ def loadhelpdata():
 					'BasicSyntax': 'helpbasicsyntax.html',
 					'RegexSearching': 'helpregex.html',
 					'SpeedSearching': 'helpspeed.html',
+					'LemmaSearching': 'helplemmata.html',
 					'Oddities': 'helpoddities.html',
 					'Extending': 'helpextending.html',
 					'Openness': 'helpopenness.html'}
