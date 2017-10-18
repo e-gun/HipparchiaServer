@@ -146,22 +146,26 @@ def executesearch(timestamp):
 		if lemma:
 			so.termone = wordlistintoregex(so.lemma.formlist)
 			skg = so.termone
+			if re.search(isgreek, skg):
+				# 'v' is a problem because the lemmata list is going to send 'u'
+				# but the greek lemmata are accented
+				so.usecolumn = 'accented_line'
 
 		if proximatelemma:
 			so.termtwo = wordlistintoregex(so.proximatelemma.formlist)
 			prx = so.termtwo
+			if re.search(isgreek, prx):
+				so.usecolumn = 'accented_line'
 
 		if lemma and not (proximatelemma or proximate):
 			# print('executesearch(): a')
 			so.searchtype = 'simplelemma'
-			so.usecolumn = 'accented_line'
 			so.usewordlist = 'polytonic'
 			thesearch = 'all forms of »{skg}«'.format(skg=lemma.dictionaryentry)
 			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry)
 		elif lemma and proximatelemma:
 			# print('executesearch(): b')
 			so.searchtype = 'proximity'
-			so.usecolumn = 'accented_line'
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximatelemma.dictionaryentry)
 			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of all {pn} known forms of <span class="sought">»{pskg}«</span>'.format(
 				n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pn=len(so.proximatelemma.formlist), pskg=so.proximatelemma.dictionaryentry
@@ -169,7 +173,6 @@ def executesearch(timestamp):
 		elif (lemma or proximatelemma) and (seeking or proximate):
 			# print('executesearch(): c')
 			so.searchtype = 'proximity'
-			so.usecolumn = 'accented_line'
 			if lemma:
 				lm = so.lemma
 				t = proximate
@@ -209,9 +212,15 @@ def executesearch(timestamp):
 
 		if not skg:
 			skg = re.compile(universalregexequivalent(so.termone))
+		else:
+			skg = re.sub(r'u', '[UVuv]', skg)
+			skg = re.sub(r'i', '[IJij]', skg)
 
 		if not prx and so.proximate != '' and so.searchtype == 'proximity':
 			prx = re.compile(universalregexequivalent(so.termtwo))
+		elif prx:
+			prx = re.sub(r'u', '[UVuv]', prx)
+			prx = re.sub(r'i', '[IJij]', prx)
 
 		if lemma:
 			# clean out the whitespace/start/stop checks
@@ -285,7 +294,7 @@ def executesearch(timestamp):
 			reasons.append('there is no search term')
 		if len(seeking) > 0 and len(searchlist) == 0:
 			reasons.append('zero works match the search criteria')
-		output = {}
+		output = dict()
 		output['title'] = '(empty query)'
 		output['found'] = ''
 		output['resultcount'] = 0

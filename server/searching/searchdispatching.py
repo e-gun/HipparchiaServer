@@ -133,6 +133,9 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 
 	searchlist: ['gr0461', 'gr0489', 'gr0468', ...]
 
+	lemmatized clivius:
+		(^|\s)clivi(\s|$)|(^|\s)cliviam(\s|$)|(^|\s)clivique(\s|$)|(^|\s)cliviae(\s|$)|(^|\s)cliui(\s|$)
+
 	:param count:
 	:param foundlineobjects:
 	:param searchlist:
@@ -146,6 +149,8 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 	dbconnection = setconnection('not_autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
 	so = searchobject
+
+	# print('workonsimplesearch() - so.termone', so.termone)
 
 	while len(searchlist) > 0 and count.value <= so.cap:
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile

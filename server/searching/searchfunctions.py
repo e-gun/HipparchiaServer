@@ -174,7 +174,7 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		whr = 'WHERE {xtn} ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax, xtn=whereextensions)
 	else:
 		# should never see this
-		print('error in substringsearch(): unknown whereclause type',r['type'])
+		print('error in substringsearch(): unknown whereclause type', r['type'])
 		whr = 'WHERE ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax)
 
 	qtemplate = 'SELECT * FROM {db} {whr} {l}'
