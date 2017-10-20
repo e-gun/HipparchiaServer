@@ -66,7 +66,7 @@ def buildworkgenresdict(workdict):
 	dplist = list()
 	chlist = list()
 
-	genresdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
+	genresdict = {'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist}
 
 	for w in workdict:
 		if workdict[w].workgenre and workdict[w].workgenre != '':

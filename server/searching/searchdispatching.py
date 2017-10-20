@@ -115,7 +115,7 @@ def searchdispatcher(searchobject, activepoll):
 				for i in range(workers)]
 	else:
 		# impossible, but...
-		jobs = []
+		jobs = list()
 
 	for j in jobs:
 		j.start()

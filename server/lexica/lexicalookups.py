@@ -427,11 +427,9 @@ def convertdictionaryfindintoobject(foundline, dictionary, cursor):
 	# print('foundline',foundline)
 
 	if dictionary == 'greek_dictionary':
-		wordobject = dbGreekWord(foundline[0], foundline[1], foundline[2], foundline[3], foundline[4], foundline[5],
-		                         foundline[6], foundline[7])
+		wordobject = dbGreekWord(*foundline)
 	elif dictionary == 'latin_dictionary':
-		wordobject = dbLatinWord(foundline[0], foundline[1], foundline[2], foundline[3], foundline[4], foundline[5],
-		                         foundline[6], foundline[7])
+		wordobject = dbLatinWord(*foundline)
 	else:
 		# you actually want a hollow object
 		wordobject = dbGreekWord(None, None, None, None, None, None, None, None)
@@ -538,15 +536,7 @@ def findtotalcounts(word, cursor):
 		l = None
 
 	try:
-		hwcountobject = dbHeadwordObject(l[0], l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8], l[9], l[10],
-		                                 l[11], l[12], l[13], l[14], l[15], l[16], l[17], l[18], l[19], l[20],
-		                                 l[21], l[22], l[23], l[24], l[25], l[26], l[27], l[28], l[29], l[30],
-		                                 l[31], l[32], l[33], l[34], l[35], l[36], l[37], l[38], l[39], l[40],
-		                                 l[41], l[42], l[43], l[44], l[45], l[46], l[47], l[48], l[49], l[50],
-		                                 l[51], l[52], l[53], l[54], l[55], l[56], l[57], l[58], l[59], l[60],
-		                                 l[61], l[62], l[63], l[64], l[65], l[66], l[67], l[68], l[69], l[70],
-		                                 l[71], l[72], l[73], l[74], l[75], l[76], l[77], l[78], l[79], l[80],
-		                                 l[81], l[82], l[83], l[84], l[85], l[86], l[87])
+		hwcountobject = dbHeadwordObject(*l)
 	except:
 		# print('failed to initialize dbHeadwordObject for',word)
 		hwcountobject = None
@@ -604,7 +594,7 @@ def getobservedwordprevalencedata(dictionaryword):
 	l = findcountsviawordcountstable(dictionaryword)
 
 	try:
-		thiswordoccurs = dbWordCountObject(l[0], l[1], l[2], l[3], l[4], l[5], l[6])
+		thiswordoccurs = dbWordCountObject(*l)
 	except:
 		return None
 
@@ -704,7 +694,7 @@ def grablemmataobjectfor(entryname, db, cursor):
 	l = cursor.fetchone()
 
 	try:
-		lemmaobject = dbLemmaObject(l[0], l[1], l[2])
+		lemmaobject = dbLemmaObject(*l)
 	except TypeError:
 		# 'NoneType' object is not subscriptable
 		lemmaobject = dbLemmaObject('[entry not found]', -1, '')

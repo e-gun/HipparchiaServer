@@ -1,20 +1,20 @@
 cloc --not-match-f='^j' HipparchiaServer/
-      97 text files.
-      96 unique files.
+      98 text files.
+      97 unique files.
       13 files ignored.
 
-github.com/AlDanial/cloc v 1.72  T=0.68 s (131.3 files/s, 33905.9 lines/s)
+github.com/AlDanial/cloc v 1.72  T=0.90 s (99.8 files/s, 26404.6 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                          50           3039           4013           8183
+Python                          50           3173           4210           8519
 CSS                              2            489            320           1822
-XML                              7              0              0           1715
-HTML                            23            145             14           1617
-JavaScript                       6            192            177           1035
-Markdown                         1             52              0            168
+XML                              7              0              0           1818
+HTML                            24            146             14           1624
+JavaScript                       6            200            180           1073
+Markdown                         1             53              0            172
 -------------------------------------------------------------------------------
-SUM:                            89           3917           4524          14540
+SUM:                            90           4061           4724          15028
 -------------------------------------------------------------------------------
 
 
@@ -38,8 +38,10 @@ hipparchiaobjects/lexicalobjects.py:class dbLatinWord(dbDictionaryEntry):
 hipparchiaobjects/lexicalobjects.py:class dbLemmaObject(object):
 calculatewordweights.py:def findtemporalweights(language):
 calculatewordweights.py:def findccorporaweights():
+calculatewordweights.py:def workobjectgeneraweights(language, iscollapsed, workobjects):
 calculatewordweights.py:def findgeneraweights(language, collapsed=False):
 calculatewordweights.py:def findchronologicalweights(era, language):
+calculatewordweights.py:def findgenreweightfromworkobject(genre, language, workdict):
 calculatewordweights.py:def findcorpusweight(corpus, language):
 startup.py:def dictitemstartswith(originaldict, element, muststartwith):
 startup.py:def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
@@ -63,6 +65,7 @@ dbsupport/dbfunctions.py:def setconnection(autocommit='n', readonlyconnection=Tr
 dbsupport/dbfunctions.py:def tablenamer(authorobject, thework):
 dbsupport/dbfunctions.py:def loadallauthorsasobjects():
 dbsupport/dbfunctions.py:def loadallworksasobjects():
+dbsupport/dbfunctions.py:def loadlemmataasobjects():
 dbsupport/dbfunctions.py:def dbloadasingleworkobject(workuniversalid):
 dbsupport/dbfunctions.py:def loadallworksintoallauthors(authorsdict, worksdict):
 dbsupport/dbfunctions.py:def dblineintolineobject(dbline):
@@ -170,7 +173,11 @@ formatting/wordformatting.py:def universalregexequivalent(searchterm):
 formatting/wordformatting.py:def depunct(stringtoclean, allowedpunctuationsting=None):
 formatting/wordformatting.py:def avoidsmallvariants(text):
 formatting/wordformatting.py:def forcelunates(text):
+formatting/wordformatting.py:def basiclemmacleanup(text):
 formatting/wordformatting.py:def attemptsigmadifferentiation(text):
+formatting/wordformatting.py:def wordlistintoregex(wordlist):
+formatting/wordformatting.py:def upperorlowerregex(word):
+formatting/wordformatting.py:def acuteorgrav(word):
 lexica/lexicalookups.py:def lookformorphologymatches(word, cursor, trialnumber=0):
 lexica/lexicalookups.py:def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
 lexica/lexicalookups.py:def browserdictionarylookup(count, seekingentry, cursor):
@@ -199,6 +206,7 @@ listsandsession/sessiondicts.py:def buildaugenresdict(authordict):
 listsandsession/sessiondicts.py:def buildworkgenresdict(workdict):
 listsandsession/sessiondicts.py:def buildauthorlocationdict(authordict):
 listsandsession/sessiondicts.py:def buildworkprovenancedict(workdict):
+listsandsession/sessiondicts.py:def buildkeyedlemmata(listofentries):
 listsandsession/sessionfunctions.py:def sessionvariables():
 listsandsession/sessionfunctions.py:def modifysessionvar(param, val):
 listsandsession/sessionfunctions.py:def modifysessionselections(cookiedict, authorgenreslist, workgenreslist, authorlocationlist, workprovenancelist):
@@ -246,6 +254,7 @@ routes/hintroutes.py:def augenrelist():
 routes/hintroutes.py:def wkgenrelist():
 routes/hintroutes.py:def offeraulocationhints():
 routes/hintroutes.py:def offerprovenancehints():
+routes/hintroutes.py:def offerlemmatahints():
 routes/inforoutes.py:def databasecontents(dictionarytodisplay):
 routes/inforoutes.py:def styesheetsamples():
 routes/lexicalroutes.py:def findbyform(observedword):
