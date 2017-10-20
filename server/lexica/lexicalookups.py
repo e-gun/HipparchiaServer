@@ -56,7 +56,7 @@ def lookformorphologymatches(word, cursor, trialnumber=0):
 	analysis = cursor.fetchone()
 
 	if analysis:
-		matchingobject = dbMorphologyObject(analysis[0], analysis[1], analysis[2], analysis[3])
+		matchingobject = dbMorphologyObject(*analysis)
 	else:
 		# this code lets you make multiple stabs at an answer if you have already failed once
 		# [a] something like πλακουντάριόν τι will fail because of the enclitic (greek_morphology can find πλακουντάριον and πλακουντάριοϲ)

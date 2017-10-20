@@ -95,7 +95,7 @@ def atsignwhereclauses(uidwithatsign, operand, authors):
 	:return: a tuple consisting of the SQL string and the value to be passed via %s
 	"""
 
-	whereclausetuples = []
+	whereclausetuples = list()
 
 	a = uidwithatsign[:6]
 	locus = uidwithatsign[14:].split('|')

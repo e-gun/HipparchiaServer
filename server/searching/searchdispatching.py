@@ -158,7 +158,6 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 		# that's not supposed to happen with the pool, but somehow it does
 		try:
 			authortable = searchlist.pop()
-			activepoll.remain(len(searchlist))
 		except IndexError:
 			authortable = None
 			
@@ -173,7 +172,8 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 		commitcount.increment()
 		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
 			dbconnection.commit()
-	
+		activepoll.remain(len(searchlist))
+
 	dbconnection.commit()
 	curs.close()
 
@@ -214,7 +214,6 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 	while len(searchinginside) > 0 and len(foundlineobjects) < so.cap:
 		try:
 			wkid = searchinginside.pop()
-			activepoll.remain(len(searchinginside))
 		except IndexError:
 			wkid = None
 
@@ -226,6 +225,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 			foundlines = phrasesearch(maxhits, wkid, activepoll, so, curs)
 			for f in foundlines:
 				foundlineobjects.append(dblineintolineobject(f))
+		activepoll.remain(len(searchinginside))
 
 	dbconnection.commit()
 	curs.close()
@@ -260,7 +260,6 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 	while len(searchinginside) > 0 and count.value <= so.cap:
 		try:
 			wkid = searchinginside.pop()
-			activepoll.remain(len(searchinginside))
 		except:
 			wkid = None
 
@@ -275,6 +274,7 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 
 			for f in foundlines:
 				foundlineobjects.append(dblineintolineobject(f))
+		activepoll.remain(len(searchinginside))
 
 	return foundlineobjects
 
