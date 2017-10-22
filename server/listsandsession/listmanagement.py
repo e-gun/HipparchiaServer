@@ -156,7 +156,7 @@ def sortsearchlist(searchlist, authorsdict):
 			if sortby == 'converted_date':
 				try:
 					crit = float(crit)
-				except ValueError:
+				except TypeError:
 					crit = 9999
 
 			templist.append([crit, a, name])
@@ -206,12 +206,12 @@ def sortresultslist(hits, searchobject, authorsdict, worksdict):
 				if crit > 2000:
 					try:
 						crit = int(authorsdict[auid].converted_date)
-					except ValueError:
+					except TypeError:
 						crit = 9999
 			except:
 				try:
 					crit = int(authorsdict[auid].converted_date)
-				except ValueError:
+				except TypeError:
 					crit = 9999
 		elif sortby == 'provenance':
 			crit = getattr(worksdict[wkid], sortby)

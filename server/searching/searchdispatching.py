@@ -145,6 +145,8 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 	:return:
 	"""
 
+	# print('workonsimplesearch() - searchlist', searchlist)
+
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
 	dbconnection = setconnection('not_autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()

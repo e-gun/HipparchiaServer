@@ -137,7 +137,9 @@ def executesearch(timestamp):
 		workssearched = len(searchlist)
 
 		activepoll.statusis('Calculating full authors to search')
+
 		searchlist = calculatewholeauthorsearches(searchlist, authordict)
+
 		so.searchlist = searchlist
 		activepoll.statusis('Configuring the search restrictions')
 		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)

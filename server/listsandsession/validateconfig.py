@@ -68,7 +68,7 @@ def compareconfigs(template, model):
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-relativeshift='/../..'
+relativeshift = '/../..'
 testresults = compareconfigs(dir_path + relativeshift + '/sample_config.py', dir_path + relativeshift + '/config.py')
 
 if len(testresults['missing']) > 0:

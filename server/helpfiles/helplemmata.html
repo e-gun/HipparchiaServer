@@ -24,6 +24,7 @@ But the full set of data might indeed have that word somewhere now (or in the fu
         from the data that included these forms.</li>
     <li>Since this search is sensitive to accents, <span class="emph">enclitics</span> like <code>μοι</code> that change accentuation will
     produce misses.</li>
-    <li>Some word lists are huge. Looking up 128 exact forms of a verb can be mighty slow. Lemmatized searches of common words across whole corpora will take a lot of time.</li>
+    <li>Some word lists are huge. Looking up 128 exact forms of a verb can be mighty slow. Lemmatized searches of common words across whole corpora will take a lot of time.
+    For example, searching for <code>καθοπλιζ</code> is <span class="emph">roughly 100x faster</span> than searching for all 101 known forms of <code>καθοπλίζω</code></li>
 </ul>
 Consider double-checking anything desperately important via REGEX searches. REGEX can also find what you want more quickly if the query is properly constructed.
