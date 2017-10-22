@@ -44,8 +44,8 @@ def configurewhereclausedata(searchlist, workdict, searchobject):
 	hasexclusions = [p[0:10] for p in so.psgexclusions if p]
 	hasselections = [p[0:10] for p in so.psgselections if p]
 
-	if hasexclusions != [] or hasselections != []:
-		cleanlistmapper = {wk: re.sub(r'(......)x', '\1w', wk[0:10]) for wk in searchlist}
+	if hasexclusions or hasselections:
+		cleanlistmapper = {wk: re.sub(r'(......)x', r'\1w', wk[0:10]) for wk in searchlist}
 		incompleteworks = {x[0:10] for x in searchlist
 		                   if (cleanlistmapper[x] in hasselections or cleanlistmapper[x] in hasexclusions)}
 	else:
