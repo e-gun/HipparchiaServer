@@ -24,7 +24,7 @@ def cleaninitialquery(seeking):
 	if you let people do regex, you also open the door for trouble
 	the securty has to be instituted elsewhere: read-only db is 90% of the job?
 
-	:param query:
+	:param seeking:
 	:return:
 	"""
 
@@ -33,7 +33,10 @@ def cleaninitialquery(seeking):
 	badpunct = ',;#'
 	extrapunct = """‵’‘·“”„'"—†⌈⌋⌊⟫⟪❵❴⟧⟦«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓"""
 
-	seeking = re.sub(r'[' + re.escape(badpunct + extrapunct) + ']', '', seeking)
+	seeking = re.sub(r'[{p}]'.format(p=re.escape(badpunct + extrapunct)), '', seeking)
+
+	# split() later at ' ' means confusion if you have double spaces
+	seeking = re.sub(r' {2,}', r' ', seeking)
 
 	if hipparchia.config['HOBBLEREGEX'] == 'yes':
 		seeking = re.sub(r'\d', '', seeking)
@@ -176,6 +179,42 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		# should never see this
 		print('error in substringsearch(): unknown whereclause type', r['type'])
 		whr = 'WHERE ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax)
+
+	if so.searchtype == 'zz_disabled_simplelemma':
+		# gets very slow if the number of forms is large
+		# faster to use arrays? probably not...: see below
+		# mix and match? [array of items that look like ['a|b|c', 'd|e|f', ...]
+
+		# Sample SQL:
+		# CREATE TEMPORARY TABLE lemmatizedforms AS SELECT term FROM unnest(ARRAY['hospitium', 'hospitio']) term;
+		# SELECT index, stripped_line FROM lt1212 WHERE stripped_line ~* ANY (SELECT term FROM lemmatizedforms);
+
+		"""
+		ARRAYS + TEMP TABLE VERSION
+		
+		Sought all 12 known forms of »hospitium«
+		Searched 7,461 texts and found 250 passages (31.64s)
+		Sorted by name
+		[Search suspended: result cap reached.]
+		
+		"""
+
+		"""
+		GIANTREGEX VERSION
+		
+		Sought all 12 known forms of »hospitium«
+		Searched 7,461 texts and found 250 passages (1.72s)
+		Sorted by name
+		[Search suspended: result cap reached.]
+		"""
+
+		forms = so.lemma.formlist
+		q = 'CREATE TEMPORARY TABLE IF NOT EXISTS lemmatizedforms_{wd} AS SELECT term FROM unnest(%s) term;'.format(wd=so.lemma.dictionaryentry)
+		d = (forms,)
+		cursor.execute(q, d)
+
+		# now modify the '%s' that we have from above
+		whr = re.sub(r'%s', 'ANY (SELECT term FROM lemmatizedforms_{wd})'.format(wd=so.lemma.dictionaryentry), whr)
 
 	qtemplate = 'SELECT * FROM {db} {whr} {l}'
 	q = qtemplate.format(db=authortable, whr=whr, l=mylimit)
