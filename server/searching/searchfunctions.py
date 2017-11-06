@@ -14,6 +14,7 @@ import psycopg2
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
 from server.formatting.wordformatting import removegravity
+from server.formatting.wordformatting import wordlistintoregex
 from server.lexica.lexicalookups import findcountsviawordcountstable
 
 
@@ -180,10 +181,10 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		print('error in substringsearch(): unknown whereclause type', r['type'])
 		whr = 'WHERE ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax)
 
-	if so.searchtype == 'zz_disabled_simplelemma':
-		# gets very slow if the number of forms is large
-		# faster to use arrays? probably not...: see below
-		# mix and match? [array of items that look like ['a|b|c', 'd|e|f', ...]
+	if so.searchtype == 'zz_never_meet_condition_simplelemma':
+		# lemmatized searching gets very slow if the number of forms is large
+		# faster to use arrays? nope...: see below
+		# mix and match? [array of items that look like ['a|b|c', 'd|e|f', ...] nope...
 
 		# Sample SQL:
 		# CREATE TEMPORARY TABLE lemmatizedforms AS SELECT term FROM unnest(ARRAY['hospitium', 'hospitio']) term;
@@ -200,6 +201,16 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		"""
 
 		"""
+		MIXANDMATCH: ARRAYS of REREGEX
+		
+		Sought all 12 known forms of »hospitium«
+		Searched 7,461 texts and found 250 passages (15.73s)
+		Sorted by name
+		[Search suspended: result cap reached.]
+
+		"""
+
+		"""
 		GIANTREGEX VERSION
 		
 		Sought all 12 known forms of »hospitium«
@@ -209,6 +220,11 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		"""
 
 		forms = so.lemma.formlist
+		# MIXANDMATCH if the next three lines are enabled
+		n = 3
+		forms = [forms[i:i + n] for i in range(0, len(forms), n)]
+		forms = [wordlistintoregex(f) for f in forms]
+
 		q = 'CREATE TEMPORARY TABLE IF NOT EXISTS lemmatizedforms_{wd} AS SELECT term FROM unnest(%s) term;'.format(wd=so.lemma.dictionaryentry)
 		d = (forms,)
 		cursor.execute(q, d)

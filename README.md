@@ -131,7 +131,7 @@ minimum software requirements:
             psycopg2
             bs4
             websockets
-        postgresql9.5
+        postgresql9.6+
 
     to properly interact with HipparchiaServer via a browser
         jquery
