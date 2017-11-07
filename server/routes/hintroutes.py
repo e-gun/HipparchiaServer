@@ -189,6 +189,10 @@ def offerlemmatahints():
 			q = a+b
 		hintlist = [{'value': w} for w in wordlist if q == stripaccents(w.lower()[0:qlen])]
 
+	if len(hintlist) > 100:
+		hintlist = hintlist[0:100]
+		hintlist = ['(>50 items: list was truncated)'] + hintlist
+
 	hint = json.dumps(hintlist)
 
 	return hint
