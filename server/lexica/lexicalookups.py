@@ -45,7 +45,7 @@ def lookformorphologymatches(word, cursor, trialnumber=0):
 
 	matchingobject = None
 
-	#	syntax = '~' if you have to deal with '[uv]' problems, e.g.
+	# syntax = '~' if you have to deal with '[uv]' problems, e.g.
 	syntax = '='
 
 	query = 'SELECT * FROM {d}_morphology WHERE observed_form {sy} %s'.format(d=usedictionary, sy=syntax)
@@ -233,19 +233,19 @@ def browserdictionarylookup(count, seekingentry, cursor):
 						outputlist.append(formatprevalencedata(countobject))
 						outputlist.append('</p>')
 
-				summarydict = dict()
-				if session['sensesummary'] == 'yes' or session['authorssummary'] == 'yes' or session['quotesummary'] == 'yes':
-					lemmaobject = grablemmataobjectfor(w.entry, usedictionary + '_lemmata', cursor)
-					summarydict = entrysummary(definition, usedictionary, translationlabel, lemmaobject)
+				# summarydict = dict()
+				# if session['sensesummary'] == 'yes' or session['authorssummary'] == 'yes' or session['quotesummary'] == 'yes':
+				lemmaobject = grablemmataobjectfor(w.entry, usedictionary + '_lemmata', cursor)
+				summarydict = entrysummary(definition, usedictionary, translationlabel, lemmaobject)
 
 				if session['sensesummary'] == 'no':
-					summarydict['senses'] = ''
+					summarydict['senses'] = ['{n} senses found'.format(n=len(summarydict['senses']))]
 
 				if session['authorssummary'] == 'no':
-					summarydict['authors'] = ''
+					summarydict['authors'] = ['{n} authors'.format(n=len(summarydict['authors']))]
 
 				if session['quotesummary'] == 'no':
-					summarydict['quotes'] = ''
+					summarydict['quotes'] = ['{n} quotes found'.format(n=len(summarydict['quotes']))]
 
 				if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
 					# either you have turned off summary info or this is basically just a gloss entry
