@@ -162,6 +162,7 @@ def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
 
 def browserdictionarylookup(count, seekingentry, cursor):
 	"""
+
 	look up a word and return an htlm version of its dictionary entry
 
 	count:
@@ -171,8 +172,8 @@ def browserdictionarylookup(count, seekingentry, cursor):
 	entryxref:
 		42397893
 
-	:param entry:
-	:param dict:
+	:param count:
+	:param seekingentry:
 	:param cursor:
 	:return:
 	"""
@@ -318,11 +319,12 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	still unimplemented:
 		τήθη vs τηθή; the parser has the latter, the dictionary expects the former (but knows of the latter)
 
-
 	:param cursor:
 	:param dictionary:
 	:param usecolumn:
 	:param seeking:
+	:param syntax:
+	:param trialnumber:
 	:return:
 	"""
 	# print('seeking/trial',seeking,trialnumber)
@@ -529,16 +531,16 @@ def findtotalcounts(word, cursor):
 	d = (word,)
 	try:
 		cursor.execute(q, d)
-		l = cursor.fetchone()
+		hw = cursor.fetchone()
 	except:
 		# psycopg2.ProgrammingError: relation "dictionary_headword_wordcounts" does not exist
 		# you have not installed the wordcounts (yet)
-		l = None
+		hw = None
 
 	try:
-		hwcountobject = dbHeadwordObject(*l)
+		hwcountobject = dbHeadwordObject(*hw)
 	except:
-		# print('failed to initialize dbHeadwordObject for',word)
+		# print('failed to initialize dbHeadwordObject for', word)
 		hwcountobject = None
 
 	return hwcountobject
@@ -591,10 +593,10 @@ def getobservedwordprevalencedata(dictionaryword):
 	if not session['available']['wordcounts_0']:
 		return {'value': ''}
 
-	l = findcountsviawordcountstable(dictionaryword)
+	wc = findcountsviawordcountstable(dictionaryword)
 
 	try:
-		thiswordoccurs = dbWordCountObject(*l)
+		thiswordoccurs = dbWordCountObject(*wc)
 	except:
 		return None
 
@@ -679,6 +681,9 @@ def formatprevalencedata(wordcountobject):
 def grablemmataobjectfor(entryname, db, cursor):
 	"""
 
+	send a word, return a lemmaobject
+
+	:param entryname:
 	:param db:
 	:param cursor:
 	:return:

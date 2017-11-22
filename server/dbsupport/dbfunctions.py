@@ -9,6 +9,10 @@
 import configparser
 from os import cpu_count
 
+# to fiddle with some day:
+# 'In our testing asyncpg is, on average, 3x faster than psycopg2 (and its asyncio variant -- aiopg).'
+# https://github.com/MagicStack/asyncpg
+
 try:
 	# python3
 	import psycopg2
