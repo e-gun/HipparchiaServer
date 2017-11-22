@@ -17,6 +17,35 @@ import websockets
 from server import hipparchia
 from server.startup import poll
 
+"""
+
+websockets 4.0.1 is buggy with Firefox 57
+works but you will see the following
+
+Error in data transfer
+Traceback (most recent call last):
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/websockets/protocol.py", line 496, in transfer_data
+    msg = yield from self.read_message()
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/websockets/protocol.py", line 526, in read_message
+    frame = yield from self.read_data_frame(max_size=self.max_size)
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/websockets/protocol.py", line 591, in read_data_frame
+    frame = yield from self.read_frame(max_size)
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/websockets/protocol.py", line 632, in read_frame
+    extensions=self.extensions,
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/websockets/framing.py", line 100, in read
+    data = yield from reader(2)
+  File "/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/streams.py", line 668, in readexactly
+    yield from self._wait_for_data('readexactly')
+  File "/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/streams.py", line 458, in _wait_for_data
+    yield from self._waiter
+  File "/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/selector_events.py", line 724, in _read_ready
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 54] Connection reset by peer
+
+current remedy:
+	pip install -Iv websockets==3.4
+
+"""
 
 async def wscheckpoll(websocket, path):
 	"""
