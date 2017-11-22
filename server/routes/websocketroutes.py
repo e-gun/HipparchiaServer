@@ -55,7 +55,9 @@ def checkforactivesearch(ts):
 			return json.dumps('cannot_find_the_poll')
 
 
+#
 # support functions for websockets including initial launch of socket server on startup
+#
 
 
 async def wscheckpoll(websocket, path):
@@ -136,10 +138,6 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	else:
 		theip = '127.0.0.1'
 
-	# min/max are a very good idea since you are theoretically giving anyone anywhere the power to open a ws socket: 64k+ of them would be sad
-	if hipparchia.config['PROGRESSPOLLMINPORT'] < theport < hipparchia.config['PROGRESSPOLLMAXPORT']:
-		theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
-
 	# because we are not in the main thread we cannot ask for the default loop
 	loop = asyncio.new_event_loop()
 	asyncio.set_event_loop(loop)
@@ -162,6 +160,7 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	# actually this function never returns
 	print('wow: startwspolling() returned')
 	return
+
 
 pollstart = threading.Thread(target=startwspolling, args=())
 pollstart.start()
