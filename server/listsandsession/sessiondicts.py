@@ -46,7 +46,7 @@ def buildaugenresdict(authordict):
 
 	for l in ['gr', 'lt', 'in', 'dp', 'ch']:
 		genresdict[l] = list(set(genresdict[l]))
-		genresdict[l] = [re.sub(r'^\s|\s$','',x) for x in genresdict[l]]
+		genresdict[l] = [re.sub(r'^\s|\s$', '', x) for x in genresdict[l]]
 		genresdict[l].sort()
 
 	return genresdict
@@ -71,13 +71,13 @@ def buildworkgenresdict(workdict):
 	for w in workdict:
 		if workdict[w].workgenre and workdict[w].workgenre != '':
 			g = workdict[w].workgenre.split(',')
-			l = workdict[w].universalid[0:2]
-			genresdict[l] += g
+			lg = workdict[w].universalid[0:2]
+			genresdict[lg] += g
 
-	for l in ['gr', 'lt', 'in', 'dp', 'ch']:
-		genresdict[l] = list(set(genresdict[l]))
-		genresdict[l] = [re.sub(r'^\s|\s$','',x) for x in genresdict[l]]
-		genresdict[l].sort()
+	for lg in ['gr', 'lt', 'in', 'dp', 'ch']:
+		genresdict[lg] = list(set(genresdict[lg]))
+		genresdict[lg] = [re.sub(r'^\s|\s$', '', x) for x in genresdict[lg]]
+		genresdict[lg].sort()
 
 	return genresdict
 
@@ -99,20 +99,20 @@ def buildauthorlocationdict(authordict):
 	dplist = list()
 	chlist = list()
 
-	locationdict = { 'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
+	locationdict = {'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist}
 
 	for a in authordict:
 		if authordict[a].location and authordict[a].location != '':
 			# think about what happens if the location looks like 'Italy, Africa and the West [Chr.]'...
 			loc = authordict[a].location.split(',')
-			l = authordict[a].universalid[0:2]
-			locationdict[l] += loc
+			lg = authordict[a].universalid[0:2]
+			locationdict[lg] += loc
 
-	for l in ['gr', 'lt', 'in', 'dp', 'ch']:
-		locationdict[l] = list(set(locationdict[l]))
-		locationdict[l] = [re.sub(r'\[.*?\]', '', x) for x in locationdict[l]]
-		locationdict[l] = [re.sub(r'^\s|\s$', '', x) for x in locationdict[l]]
-		locationdict[l].sort()
+	for lg in ['gr', 'lt', 'in', 'dp', 'ch']:
+		locationdict[lg] = list(set(locationdict[lg]))
+		locationdict[lg] = [re.sub(r'\[.*?\]', '', x) for x in locationdict[lg]]
+		locationdict[lg] = [re.sub(r'^\s|\s$', '', x) for x in locationdict[lg]]
+		locationdict[lg].sort()
 
 	return locationdict
 
@@ -137,13 +137,13 @@ def buildworkprovenancedict(workdict):
 	for w in workdict:
 		if workdict[w].provenance and workdict[w].provenance != '':
 			loc = workdict[w].provenance.split(',')
-			l = workdict[w].universalid[0:2]
-			locationdict[l] += loc
+			lg = workdict[w].universalid[0:2]
+			locationdict[lg] += loc
 
-	for l in ['gr', 'lt', 'in', 'dp', 'ch']:
-		locationdict[l] = list(set(locationdict[l]))
-		locationdict[l] = [re.sub(r'^\s|\s$', '', x) for x in locationdict[l]]
-		locationdict[l].sort()
+	for lg in ['gr', 'lt', 'in', 'dp', 'ch']:
+		locationdict[lg] = list(set(locationdict[lg]))
+		locationdict[lg] = [re.sub(r'^\s|\s$', '', x) for x in locationdict[lg]]
+		locationdict[lg].sort()
 
 	return locationdict
 

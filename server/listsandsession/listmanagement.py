@@ -348,23 +348,23 @@ def prunebydate(searchlist, authorobjectdict, workobjectdict, s=session):
 
 	if not justlatin() and (s['earliestdate'] != '-850' or s['latestdate'] != '1500'):
 		# [a] first prune the bad dates
-		min = int(s['earliestdate'])
-		max = int(s['latestdate'])
-		if min > max:
-			min = max
+		minimum = int(s['earliestdate'])
+		maximum = int(s['latestdate'])
+		if minimum > maximum:
+			minimum = maximum
 			s['earliestdate'] = s['latestdate']
 
 		for universalid in searchlist:
 			w = workobjectdict[universalid]
 			try:
 				# does the work have a date? if not, we will throw an exception
-				if w.datefallsbetween(min, max):
+				if w.datefallsbetween(minimum, maximum):
 					trimmedlist.append(universalid)
 			except TypeError:
 				# no work date? then we will look inside the author for the date
 				authorid = universalid[0:6]
 				try:
-					if authorobjectdict[authorid].datefallsbetween(min, max):
+					if authorobjectdict[authorid].datefallsbetween(minimum, maximum):
 						trimmedlist.append(universalid)
 				except TypeError:
 					# the author can't tell you his date; you must be building a list with both latin authors and something else
@@ -492,7 +492,7 @@ def polytonicsort(unsortedwords):
 
 	transtable = buildhipparchiatranstable()
 
-	stripped = [re.sub(r'ϲ', r'σ', stripaccents(word, transtable))+ '-snip-' + word for word in unsortedwords if word]
+	stripped = [re.sub(r'ϲ', r'σ', stripaccents(word, transtable)) + '-snip-' + word for word in unsortedwords if word]
 
 	stripped = sorted(stripped)
 
@@ -505,6 +505,7 @@ def polytonicsort(unsortedwords):
 
 def foundindict(searchdict, element, mustbein, exactmatch=True):
 	"""
+
 	search for an element in a dict
 	return a list of universalids
 
@@ -519,6 +520,7 @@ def foundindict(searchdict, element, mustbein, exactmatch=True):
 	:param searchdict:
 	:param element:
 	:param mustbein:
+	:param exactmatch:
 	:return:
 	"""
 

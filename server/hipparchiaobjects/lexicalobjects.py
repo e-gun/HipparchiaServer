@@ -522,14 +522,14 @@ class MorphPossibilityObject(object):
 
 	def amgreek(self):
 		minimumgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
-		if re.search(minimumgreek,self.entry):
+		if re.search(minimumgreek, self.entry):
 			return True
 		else:
 			return False
 
 	def amlatin(self):
 		minimumlatin = re.compile(r'[a-z]')
-		if re.search(minimumlatin,self.entry):
+		if re.search(minimumlatin, self.entry):
 			return True
 		else:
 			return False
@@ -540,7 +540,7 @@ class MorphPossibilityObject(object):
 		elif self.amlatin():
 			return self.getlatinbaseform()
 		else:
-			print('MorphPossibilityObject failed to determine its own language',self.entry)
+			print('MorphPossibilityObject failed to determine its own language', self.entry)
 			return None
 
 	def getgreekbaseform(self):
@@ -672,10 +672,12 @@ class dbGreekWord(dbDictionaryEntry):
 		super().__init__(entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body)
 		self.entry_key = None
 
-	def isgreek(self):
+	@staticmethod
+	def isgreek():
 		return True
 
-	def islatin(self):
+	@staticmethod
+	def islatin():
 		return False
 
 
@@ -688,17 +690,18 @@ class dbLatinWord(dbDictionaryEntry):
 
 	"""
 
-	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body,
-	             entry_key):
+	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body, entry_key):
 		self.language = 'Latin'
 		self.unaccented_entry = None
 		super().__init__(entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body)
 		self.entry_key = entry_key
 
-	def isgreek(self):
+	@staticmethod
+	def isgreek():
 		return False
 
-	def islatin(self):
+	@staticmethod
+	def islatin():
 		return True
 
 

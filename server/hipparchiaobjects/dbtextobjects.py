@@ -49,7 +49,7 @@ class dbAuthor(object):
 		self.converted_date = converted_date
 		self.location = location
 		self.authornumber = universalid[2:]
-		self.listofworks = []
+		self.listofworks = list()
 		self.name = akaname
 		self.id = universalid
 
@@ -65,8 +65,8 @@ class dbAuthor(object):
 	def atorlater(self, other):
 		return self.converted_date >= other
 
-	def datefallsbetween(self, min, max):
-		return min <= self.converted_date <= max
+	def datefallsbetween(self, minimum, maximum):
+		return minimum <= self.converted_date <= maximum
 
 	def floruitis(self, other):
 		return self.converted_date == other
@@ -78,7 +78,7 @@ class dbAuthor(object):
 		self.listofworks.append(work)
 
 	def listworkids(self):
-		workids = []
+		workids = list()
 		for w in self.listofworks:
 			workids.append(w.universalid)
 
@@ -148,7 +148,7 @@ class dbOpus(object):
 			self.length = lastline - firstline
 		except:
 			self.length = -1
-		self.structure = {}
+		self.structure = dict()
 		idx = -1
 		for label in [levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05]:
 			idx += 1
@@ -327,15 +327,15 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		l = self.locus()
+		lc = self.locus()
 
 		try:
-			l = 'line ' + str(int(l))
+			lc = 'line ' + str(int(lc))
 		except ValueError:
 			# 'try' will only succeed if l is a simple digit (and so needs expansion)
 			pass
 
-		return l
+		return lc
 
 	def anchoredlocus(self):
 		"""
@@ -357,12 +357,13 @@ class dbWorkLine(object):
 		useful for tagging level shifts without constantly seeing 'line 1'
 		:return:
 		"""
-		loc = []
+		loc = list()
 		for lvl in [self.l1, self.l2, self.l3, self.l4, self.l5]:
 			if str(lvl) != '-1' and (self.wkuinversalid[0:2] not in ['in', 'dp', 'ch'] and lvl != 'recto'):
 				loc.append(lvl)
 		loc.reverse()
-		if loc == []:
+
+		if not loc:
 			citation = self.locus()
 		else:
 			citation = '.'.join(loc)
@@ -446,7 +447,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		markup = re.compile(r'(\<.*?\>)')
+		markup = re.compile(r'(<.*?>)')
 		nbsp = re.compile(r'&nbsp;')
 
 		unformatted = re.sub(markup, r'', self.accented)
