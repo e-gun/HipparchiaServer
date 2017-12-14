@@ -555,7 +555,7 @@ def probefordatabases():
 	dbconnection = setconnection()
 	curs = dbconnection.cursor()
 
-	available = {}
+	available = dict()
 
 	possible = ['greek_dictionary', 'greek_lemmata', 'greek_morphology',
 	            'latin_dictionary', 'latin_lemmata', 'latin_morphology',
