@@ -166,11 +166,12 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 			
 		if authortable:
 			foundlines = substringsearch(so.termone, authortable, so, curs)
-			count.increment(len(foundlines))
-			activepoll.addhits(len(foundlines))
+			lineobjects = [dblineintolineobject(f) for f in foundlines]
+			foundlineobjects += lineobjects
 
-			for f in foundlines:
-				foundlineobjects.append(dblineintolineobject(f))
+			numberoffinds = len(lineobjects)
+			count.increment(numberoffinds)
+			activepoll.addhits(numberoffinds)
 
 		commitcount.increment()
 		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:

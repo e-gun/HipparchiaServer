@@ -88,24 +88,24 @@ def tablenamer(authorobject, thework):
 		pr = 'lt'
 	else:
 		pr = ''
-		print('oh, I do not speak {l} and I will be unable to access a DB'.format(l=lg))
+		print('oh, I do not speak {lg} and I will be unable to access a DB'.format(lg=lg))
 
 	workdbname = pr + nm + 'w' + wn
 
 	return workdbname
 
 
-def resultiterator(cursor, chunksize=2500):
+def resultiterator(cursor, chunksize=5000):
 	"""
 
-	An iterator that uses fetchmany to keep memory usage down in contrast to
+	Yield a generator from fetchmany to keep memory usage down in contrast to
 
 		results = curs.fetchall()
 
 	see: http://code.activestate.com/recipes/137270-use-generators-for-fetching-large-db-record-sets/
 
 	:param cursor:
-	:param arraysize:
+	:param chunksize:
 	:return:
 	"""
 

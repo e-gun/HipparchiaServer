@@ -113,7 +113,7 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 		tosearch.extend(environs)
 		rmap = {e: resultnumber for e in environs}
 		reversemap.update(rmap)
-		r.lineobjects = []
+		r.lineobjects = list()
 
 	tosearch = [str(x) for x in tosearch]
 
@@ -150,9 +150,12 @@ def flagsearchterms(searchresultobject, skg, prx, searchobject):
 	skg and prx come from compilesearchtermequivalent()
 
 	:param searchresultobject:
+	:param skg:
+	:param prx:
 	:param searchobject:
 	:return:
 	"""
+
 	so = searchobject
 
 	linelist = searchresultobject.lineobjects
