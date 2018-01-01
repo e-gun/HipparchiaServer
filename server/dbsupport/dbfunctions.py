@@ -9,31 +9,26 @@
 import configparser
 from os import cpu_count
 
-# to fiddle with some day:
-# 'In our testing asyncpg is, on average, 3x faster than psycopg2 (and its asyncio variant -- aiopg).'
-# https://github.com/MagicStack/asyncpg
-
-try:
-	# python3
-	import psycopg2
-except ImportError:
-	# pypy3
-	# pypy3 support is EXPERIMENTAL (and unlikely to be actively pursued)
-	#   mostly works
-	#   not obviously faster (since searches are 95% waiting for postgres...)
-	#   sometimes much slower (and right where you might think that 'more python' was happening)
-	#       index to aristotle
-	#           python3: 9.68s
-	#           pypy3: 72.54s
-	#   bugs out if you have lots of hits
-	#       psycopg2cffi._impl.exceptions.OperationalError
-	#       [substantially lower the commit count?]
-	import psycopg2cffi as psycopg2
-	pass
+import psycopg2
 
 from server import hipparchia
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus, dbWorkLine
 from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
+
+# to fiddle with some day:
+# 'In our testing asyncpg is, on average, 3x faster than psycopg2 (and its asyncio variant -- aiopg).'
+# https://github.com/MagicStack/asyncpg
+# pypy3
+# pypy3 support is EXPERIMENTAL (and unlikely to be actively pursued)
+#   mostly works
+#   not obviously faster (since searches are 95% waiting for postgres...)
+#   sometimes much slower (and right where you might think that 'more python' was happening)
+#       index to aristotle
+#           python3: 9.68s
+#           pypy3: 72.54s
+#   bugs out if you have lots of hits
+#       psycopg2cffi._impl.exceptions.OperationalError
+#       [substantially lower the commit count?]
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -100,6 +95,28 @@ def tablenamer(authorobject, thework):
 	return workdbname
 
 
+def resultiterator(cursor, chunksize=2500):
+	"""
+
+	An iterator that uses fetchmany to keep memory usage down in contrast to
+
+		results = curs.fetchall()
+
+	see: http://code.activestate.com/recipes/137270-use-generators-for-fetching-large-db-record-sets/
+
+	:param cursor:
+	:param arraysize:
+	:return:
+	"""
+
+	while True:
+		results = cursor.fetchmany(chunksize)
+		if not results:
+			break
+		for result in results:
+			yield result
+
+
 def loadallauthorsasobjects():
 	"""
 
@@ -116,7 +133,7 @@ def loadallauthorsasobjects():
 	q = 'SELECT * FROM authors'
 
 	curs.execute(q)
-	results = curs.fetchall()
+	results = resultiterator(curs)
 
 	authorsdict = {r[0]: dbAuthor(*r) for r in results}
 
@@ -145,7 +162,7 @@ def loadallworksasobjects():
 	"""
 
 	curs.execute(q)
-	results = curs.fetchall()
+	results = resultiterator(curs)
 
 	worksdict = {r[0]: dbOpus(*r) for r in results}
 
@@ -179,7 +196,7 @@ def loadlemmataasobjects():
 
 	for key in languages:
 		curs.execute(q.format(lang=languages[key]))
-		results = curs.fetchall()
+		results = resultiterator(curs)
 		lemmatadict = {**{r[0]: dbLemmaObject(*r) for r in results}, **lemmatadict}
 
 	print('\t', len(lemmatadict), 'lemmata loaded')

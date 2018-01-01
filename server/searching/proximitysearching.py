@@ -46,13 +46,25 @@ def withinxlines(workdbname, searchobject):
 
 	fullmatches = list()
 
-	while hits and len(fullmatches) < so.cap:
-		hit = hits.pop()
-		isnear = dblooknear(hit[0], so.distance, so.termtwo, hit[1], so.usecolumn, cursor)
-		if so.near and isnear:
-			fullmatches.append(hit)
-		elif not so.near and not isnear:
-			fullmatches.append(hit)
+	# while hits and len(fullmatches) < so.cap:
+	# 	hit = hits.pop()
+	# 	isnear = dblooknear(hit[0], so.distance, so.termtwo, hit[1], so.usecolumn, cursor)
+	# 	if so.near and isnear:
+	# 		fullmatches.append(hit)
+	# 	elif not so.near and not isnear:
+	# 		fullmatches.append(hit)
+
+	while True:
+		# since hits is now a generator you can no longer pop til you drop
+		for hit in hits:
+			if len(fullmatches) > so.cap:
+				break
+			isnear = dblooknear(hit[0], so.distance, so.termtwo, hit[1], so.usecolumn, cursor)
+			if so.near and isnear:
+				fullmatches.append(hit)
+			elif not so.near and not isnear:
+				fullmatches.append(hit)
+		break
 
 	dbconnection.commit()
 	cursor.close()
@@ -97,7 +109,7 @@ def withinxwords(workdbname, searchobject):
 
 	hits = substringsearch(so.termone, workdbname, so, cursor, templimit)
 
-	fullmatches = []
+	fullmatches = list()
 
 	for hit in hits:
 		hitline = dblineintolineobject(hit)

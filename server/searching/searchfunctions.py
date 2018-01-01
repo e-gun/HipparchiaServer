@@ -12,7 +12,7 @@ from string import punctuation
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline
+from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, resultiterator
 from server.formatting.wordformatting import removegravity
 from server.formatting.wordformatting import wordlistintoregex
 from server.lexica.lexicalookups import findcountsviawordcountstable
@@ -232,22 +232,20 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		# now modify the '%s' that we have from above
 		whr = re.sub(r'%s', 'ANY (SELECT term FROM lemmatizedforms_{wd})'.format(wd=so.lemma.dictionaryentry), whr)
 
-	qtemplate = 'SELECT * FROM {db} {whr} {l}'
-	q = qtemplate.format(db=authortable, whr=whr, l=mylimit)
+	qtemplate = 'SELECT * FROM {db} {whr} {lm}'
+	q = qtemplate.format(db=authortable, whr=whr, lm=mylimit)
 	d = (seeking,)
 
 	try:
 		cursor.execute(q, d)
-		found = cursor.fetchall()
+		found = resultiterator(cursor)
 	except psycopg2.DataError:
 		# e.g., invalid regular expression: parentheses () not balanced
 		print('DataError; cannot search for »{d}«\n\tcheck for unbalanced parentheses and/or bad regex'.format(d=d[0]))
 	except psycopg2.InternalError:
 		# current transaction is aborted, commands ignored until end of transaction block
-		# print('transaction is aborted; did not execute',q, d)
+		print('psycopg2.InternalError; did not execute', q, d)
 		pass
-	except:
-		print('could not execute', q, d)
 
 	return found
 
@@ -346,7 +344,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, searchobject, c
 		lines = [makeablankline(workdbname, linenumber - 1)] + lines
 		lines.append(makeablankline(workdbname, linenumber + 1))
 
-	text = []
+	text = list()
 	for line in lines:
 		wordsinline = line.wordlist(searchobject.usewordlist)
 		if line.index == linenumber - 1:
@@ -397,9 +395,9 @@ def findleastcommonterm(searchphrase, accentsneeded):
 		# counts [('βεβήλων', 84, 84, 0, 0, 0, 0), ('ὀλίγοϲ', 596, 589, 0, 3, 4, 0)]
 		# counts [('imperatores', 307, 7, 275, 3, 4, 18), ('paucitate', 42, 0, 42, 0, 0, 0)]
 		totals = [(c[1], c[0]) for c in counts if c]
-		max = sorted(totals, reverse=False)
+		maxval = sorted(totals, reverse=False)
 		try:
-			leastcommonterm = searchterms[max[0][1]]
+			leastcommonterm = searchterms[maxval[0][1]]
 			stillneedtofindterm = False
 		except:
 			# failed so you will do plan b in a moment
@@ -444,9 +442,9 @@ def findleastcommontermcount(searchphrase, accentsneeded):
 		counts = [findcountsviawordcountstable(k) for k in searchterms.keys()]
 		# counts [('βεβήλων', 84, 84, 0, 0, 0, 0), ('ὀλίγοϲ', 596, 589, 0, 3, 4, 0)]
 		totals = [(c[1], c[0]) for c in counts if c]
-		max = sorted(totals, reverse=False)
+		maxval = sorted(totals, reverse=False)
 		try:
-			fewesthits = max[0][0]
+			fewesthits = maxval[0][0]
 		except:
 			# failed so you will do plan b in a moment
 			pass
