@@ -77,8 +77,8 @@ def searchdispatcher(searchobject, activepoll):
 		# longestterm = max([len(t) for t in so.termone.split(' ') if t])
 		# need to figure out when it will be faster to go to subqueryphrasesearch() and when not to
 		# logic + trial and error
-		#   e.g., any phrase involving λιποταξίου can be very fast because that form appears 36x: you can find it in 1s
-		#   but if you go through subqueryphrasesearch() you will spend about 17s per full TLG search
+		#   e.g., any phrase involving λιποταξίου (e.g., γράψομαι λιποταξίου) can be very fast because that form appears 36x:
+		#   you can find it in 1s but if you go through subqueryphrasesearch() you will spend about 17s per full TLG search
 		# lccount = -1 if you are unaccented
 		#   'if 0 < lccount < 500 or longestterm > 5' got burned badly with 'ἐξ ἀρχῆϲ πρῶτον'
 		#   'or (lccount == -1 and longestterm > 6)' would take 1m to find διαφοραϲ ιδεαν via workonphrasesearch()

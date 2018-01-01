@@ -37,22 +37,27 @@ def phrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
 	hits = substringsearch(so.leastcommon, wkid, so, cursor, templimit=maxhits)
 
 	fullmatches = list()
-	while hits and len(fullmatches) < so.cap:
-		hit = hits.pop()
-		phraselen = len(searchphrase.split(' '))
-		wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, so, cursor)
-		if not so.accented:
-			wordset = re.sub(r'[.?!;:,·’]', r'', wordset)
-		else:
-			# the difference is in the apostrophe: δ vs δ’
-			wordset = re.sub(r'[.?!;:,·]', r'', wordset)
 
-		if so.near and re.search(searchphrase, wordset):
-			fullmatches.append(hit)
-			activepoll.addhits(1)
-		elif not so.near and re.search(searchphrase, wordset) is None:
-			fullmatches.append(hit)
-			activepoll.addhits(1)
+	while True:
+		# since hits is now a generator you can no longer pop til you drop
+		for hit in hits:
+			if len(fullmatches) > so.cap:
+				break
+			phraselen = len(searchphrase.split(' '))
+			wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, so, cursor)
+			if not so.accented:
+				wordset = re.sub(r'[.?!;:,·’]', r'', wordset)
+			else:
+				# the difference is in the apostrophe: δ vs δ’
+				wordset = re.sub(r'[.?!;:,·]', r'', wordset)
+
+			if so.near and re.search(searchphrase, wordset):
+				fullmatches.append(hit)
+				activepoll.addhits(1)
+			elif not so.near and re.search(searchphrase, wordset) is None:
+				fullmatches.append(hit)
+				activepoll.addhits(1)
+		break
 
 	return fullmatches
 
