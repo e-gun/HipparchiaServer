@@ -72,9 +72,9 @@ otherwise you'll hit the DB too often and ask the same question over and over ag
 authordict = loadallauthorsasobjects()
 workdict = loadallworksasobjects()
 authordict = loadallworksintoallauthors(authordict, workdict)
-# lemmatadict = loadlemmataasobjects()
-print('lemmatadict disabled for debugging run')
-lemmatadict = dict()
+lemmatadict = loadlemmataasobjects()
+# print('lemmatadict disabled for debugging run')
+# lemmatadict = dict()
 # the next is too long to be used by the hinter: need quicker acces via a dict
 keyedlemmata = buildkeyedlemmata(list(lemmatadict.keys()))
 
