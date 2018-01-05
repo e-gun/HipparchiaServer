@@ -15,7 +15,8 @@ from string import punctuation
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, setconnection, setthreadcount
+from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, resultiterator, setconnection, \
+	setthreadcount
 from server.formatting.wordformatting import tidyupterm
 from server.hipparchiaobjects.helperobjects import MPCounter
 from server.lexica.lexicalookups import lookformorphologymatches
@@ -47,7 +48,7 @@ def compilewordlists(worksandboundaries, cursor):
 		query = 'SELECT * FROM {db} WHERE (index >= %s AND index <= %s)'.format(db=db)
 		data = (worksandboundaries[w][0], worksandboundaries[w][1])
 		cursor.execute(query, data)
-		lines = cursor.fetchall()
+		lines = resultiterator(cursor)
 
 		thiswork = [dblineintolineobject(l) for l in lines]
 		lineobjects.extend(thiswork)

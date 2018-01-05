@@ -99,7 +99,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 			except:
 				# 973b is not your friend
 				linenumber = 0
-			if linenumber % linesevery == 0 and avoiddoubletap == False:
+			if linenumber % linesevery == 0 and not avoiddoubletap:
 				columna = thisline.locus()
 				avoiddoubletap = True
 			else:
