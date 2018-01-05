@@ -12,7 +12,6 @@ from multiprocessing import Manager, Process
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, setconnection, setthreadcount
 from server.hipparchiaobjects.helperobjects import MPCounter
-from server.lexica.lexicalookups import findcountsviawordcountstable
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, \
@@ -86,11 +85,12 @@ def searchdispatcher(searchobject, activepoll):
 		# it looks like unaccented searches are very regularly faster via subqueryphrasesearch()
 		#   when is this not true? being wrong about sqs() means spending an extra 10s; being wrong about phs() means an extra 40s...
 		if 0 < lccount < 500:
-			# print('workonphrasesearch()',searchingfor)
+			# print('workonphrasesearch()', searchingfor)
 			jobs = [Process(target=workonphrasesearch,
 			                args=(foundlineobjects, searchlist, commitcount, activepoll, so))
 			        for i in range(workers)]
 		else:
+			# print('subqueryphrasesearch()', searchingfor)
 			jobs = [Process(target=subqueryphrasesearch,
 			                args=(foundlineobjects, so.termone, searchlist, count, commitcount, activepoll, so))
 			        for i in range(workers)]
@@ -206,15 +206,6 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 	dbconnection = setconnection('autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
 
-	if so.accented:
-		# maxhits ('πολυτρόπωϲ', 506, 506, 0, 0, 0, 0)
-		maxhits = findcountsviawordcountstable(so.leastcommon)
-
-	try:
-		maxhits = maxhits[1]
-	except:
-		maxhits = 9999
-
 	while len(searchinginside) > 0 and len(foundlineobjects) < so.cap:
 		try:
 			wkid = searchinginside.pop()
@@ -226,7 +217,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 			dbconnection.commit()
 
 		if wkid:
-			foundlines = phrasesearch(maxhits, wkid, activepoll, so, curs)
+			foundlines = phrasesearch(wkid, activepoll, so, curs)
 			for f in foundlines:
 				foundlineobjects.append(dblineintolineobject(f))
 		activepoll.remain(len(searchinginside))

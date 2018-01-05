@@ -14,7 +14,7 @@ from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline, substringsearch
 
 
-def phrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
+def phrasesearch(wkid, activepoll, searchobject, cursor):
 	"""
 
 	a whitespace might mean things are on a new line
@@ -34,13 +34,21 @@ def phrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
 	so = searchobject
 	searchphrase = so.termone
 
-	hits = substringsearch(so.leastcommon, wkid, so, cursor, templimit=maxhits)
+	# print('so.leastcommon', so.leastcommon)
+
+	# need a high templimit because you can actually fool "leastcommon"
+	# "πλῶϲ θανατώδη" will not find "ἁπλῶϲ θανατώδη": you really wanted the latter (presumably), but
+	# "πλῶϲ" is going to be entered as leastcommon, and a search for it will find "ἁπλῶϲ" many, many times
+	# as the latter is a common term...
+
+	hits = substringsearch(so.leastcommon, wkid, so, cursor, templimit=999999)
 
 	fullmatches = list()
 
 	while True:
 		# since hits is now a generator you can no longer pop til you drop
 		for hit in hits:
+			# print('hit', hit)
 			if len(fullmatches) > so.cap:
 				break
 			phraselen = len(searchphrase.split(' '))
