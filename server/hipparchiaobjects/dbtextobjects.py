@@ -572,7 +572,7 @@ class dbWorkLine(object):
 
 		return notes
 
-	def markeditorialinsersions(self, editorialcontinuationdict):
+	def markeditorialinsersions(self, editorialcontinuationdict, bracketfinder=None):
 		"""
 
 		set a '<span>...</span>' around bracketed line segments
@@ -589,49 +589,50 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		brackettypes = {
-			'square': {
-				'ocreg': r'\[(.*?)(\]|$)',
-				'coreg': r'(^|\[)(.*?)\]',
-				'class': 'editorialmarker_squarebrackets',
-				'o': '[',
-				'c': ']'
+		if not bracketfinder:
+			bracketfinder = {
+				'square': {
+					'ocreg': re.compile(r'\[(.*?)(\]|$)'),
+					'coreg': re.compile(r'(^|\[)(.*?)\]'),
+					'class': 'editorialmarker_squarebrackets',
+					'o': '[',
+					'c': ']'
+					},
+				'round': {
+					'ocreg': re.compile(r'\((.*?)(\)|$)'),
+					'coreg': re.compile(r'(^|\()(.*?)\)'),
+					'class': 'editorialmarker_roundbrackets',
+					'o': '(',
+					'c': ')'
 				},
-			'round': {
-				'ocreg': r'\((.*?)(\)|$)',
-				'coreg': r'(^|\()(.*?)\)',
-				'class': 'editorialmarker_roundbrackets',
-				'o': '(',
-				'c': ')'
-			},
-			'angled': {
-				'ocreg': r'⟨(.*?)(⟩|$)',
-				'coreg': r'(^|⟨)(.*?)⟩',
-				'class': 'editorialmarker_angledbrackets',
-				'o': '⟨',
-				'c': '⟩'
-			},
-			'curly': {
-				'ocreg': r'\{(.*?)(\}|$)',
-				'coreg': r'(^|\{)(.*?)\}',
-				'class': 'editorialmarker_curlybrackets',
-				'o': '{',
-				'c': '}'
+				'angled': {
+					'ocreg': re.compile(r'⟨(.*?)(⟩|$)'),
+					'coreg': re.compile(r'(^|⟨)(.*?)⟩'),
+					'class': 'editorialmarker_angledbrackets',
+					'o': '⟨',
+					'c': '⟩'
+				},
+				'curly': {
+					'ocreg': re.compile(r'\{(.*?)(\}|$)'),
+					'coreg': re.compile(r'(^|\{)(.*?)\}'),
+					'class': 'editorialmarker_curlybrackets',
+					'o': '{',
+					'c': '}'
+				}
 			}
-		}
 
 		theline = self.accented
 		for t in editorialcontinuationdict.keys():
 			try:
-				brackettypes[t]
+				bracketfinder[t]
 			except:
 				return theline
 
-			o = brackettypes[t]['o']
-			c = brackettypes[t]['c']
-			cl = brackettypes[t]['class']
-			openandmaybeclose = re.compile(brackettypes[t]['ocreg'])
-			closeandmaybeopen = re.compile(brackettypes[t]['coreg'])
+			o = bracketfinder[t]['o']
+			c = bracketfinder[t]['c']
+			cl = bracketfinder[t]['class']
+			openandmaybeclose = bracketfinder[t]['ocreg']
+			closeandmaybeopen = bracketfinder[t]['coreg']
 
 			if re.search(openandmaybeclose, theline):
 				theline = re.sub(openandmaybeclose, r'{o}<span class="{cl}">\1</span>\2'.format(o=o, cl=cl), theline)
@@ -642,7 +643,7 @@ class dbWorkLine(object):
 
 		return theline
 
-	def bracketopenedbutnotclosed(self, btype='square'):
+	def bracketopenedbutnotclosed(self, btype='square', bracketfinder=None):
 		"""
 
 		return True if you have 'abcd[ef ghij' and so need to continue marking editorial material
@@ -653,19 +654,19 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		brackettypes = {
-			'square': {'regex': r'\[[^\]]{0,}$',
-			            'exceptions': [re.compile(r'\[(ϲτρ|ἀντ)\. .\.'), re.compile(r'\[ἐπῳδόϲ')]},
-			'round': {'regex': r'\([^\)]{0,}$'},
-			'angled': {'regex': r'⟨[^⟩]{0,}$'},
-			'curly': {'regex': r'\{[^\}]{0,}$'},
-			}
+		if not bracketfinder:
+			bracketfinder = {
+				'square': {'regex': re.compile(r'\[[^\]]{0,}$'),
+				            'exceptions': [re.compile(r'\[(ϲτρ|ἀντ)\. .\.'), re.compile(r'\[ἐπῳδόϲ')]},
+				'round': {'regex': re.compile(r'\([^\)]{0,}$')},
+				'angled': {'regex': re.compile(r'⟨[^⟩]{0,}$')},
+				'curly': {'regex': re.compile(r'\{[^\}]{0,}$')},
+				}
 
-		r = brackettypes[btype]['regex']
-		openandnotclose = re.compile(r)
+		openandnotclose = bracketfinder[btype]['regex']
 
 		try:
-			falsify = [re.search(e, self.accented) for e in brackettypes[btype]['exceptions']]
+			falsify = [re.search(e, self.accented) for e in bracketfinder[btype]['exceptions']]
 		except:
 			falsify = [None]
 
@@ -674,7 +675,7 @@ class dbWorkLine(object):
 		else:
 			return False
 
-	def bracketclosed(self, btype='square'):
+	def bracketclosed(self, btype='square', bracketfinder=None):
 		"""
 
 		return true if there is a ']' in the line
@@ -684,14 +685,15 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		brackettypes = {
-			'square': {'c': r'\]'},
-			'round': {'c': r'\)'},
-			'angled': {'c': r'⟩'},
-			'curly': {'c': r'\}'},
-		}
+		if not bracketfinder:
+			bracketfinder = {
+				'square': {'c': re.compile(r'\]')},
+				'round': {'c': re.compile(r'\)')},
+				'angled': {'c': re.compile(r'⟩')},
+				'curly': {'c': re.compile(r'\}')},
+			}
 
-		close = brackettypes[btype]['c']
+		close = bracketfinder[btype]['c']
 		if re.search(close, self.accented):
 			return True
 		else:

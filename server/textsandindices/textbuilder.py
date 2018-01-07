@@ -41,9 +41,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	data = (firstline, lastline)
 	cursor.execute(query, data)
 	results = cursor.fetchall()
-	
-	finder = re.compile(r'<hmu_metadata_date value="(.*?)" />')
-	
+
 	output = ['<table>\n']
 
 	# consecutive lines can get numbered twice
@@ -68,7 +66,54 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 			</tr>
 		"""
 
-	if len(results) > 0:
+	# pull these outside the loop lest you compile the regex 4000x over 1000 lines
+	bracketfinder = {
+				'square': {
+					'ocreg': re.compile(r'\[(.*?)(\]|$)'),
+					'coreg': re.compile(r'(^|\[)(.*?)\]'),
+					'class': 'editorialmarker_squarebrackets',
+					'o': '[',
+					'c': ']'
+					},
+				'round': {
+					'ocreg': re.compile(r'\((.*?)(\)|$)'),
+					'coreg': re.compile(r'(^|\()(.*?)\)'),
+					'class': 'editorialmarker_roundbrackets',
+					'o': '(',
+					'c': ')'
+				},
+				'angled': {
+					'ocreg': re.compile(r'⟨(.*?)(⟩|$)'),
+					'coreg': re.compile(r'(^|⟨)(.*?)⟩'),
+					'class': 'editorialmarker_angledbrackets',
+					'o': '⟨',
+					'c': '⟩'
+				},
+				'curly': {
+					'ocreg': re.compile(r'\{(.*?)(\}|$)'),
+					'coreg': re.compile(r'(^|\{)(.*?)\}'),
+					'class': 'editorialmarker_curlybrackets',
+					'o': '{',
+					'c': '}'
+				}
+			}
+
+	openfinder = {
+		'square': {'regex': re.compile(r'\[[^\]]{0,}$'),
+		            'exceptions': [re.compile(r'\[(ϲτρ|ἀντ)\. .\.'), re.compile(r'\[ἐπῳδόϲ')]},
+		'round': {'regex': re.compile(r'\([^\)]{0,}$')},
+		'angled': {'regex': re.compile(r'⟨[^⟩]{0,}$')},
+		'curly': {'regex': re.compile(r'\{[^\}]{0,}$')},
+	}
+
+	closefinder = {
+			'square': {'c': re.compile(r'\]')},
+			'round': {'c': re.compile(r'\)')},
+			'angled': {'c': re.compile(r'⟩')},
+			'curly': {'c': re.compile(r'\}')},
+	}
+
+	if results:
 		previousline = dblineintolineobject(results[0])
 		brackettypes = findactivebrackethighlighting()
 		editorialcontinuation = {'square': False, 'round': False, 'curly': False, 'angled': False}
@@ -84,8 +129,8 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 					output.append(metadata)
 
 			if brackettypes:
-				columnb = thisline.markeditorialinsersions(editorialcontinuation)
-				editorialcontinuation = {t: setcontinuationvalue(thisline, previousline, editorialcontinuation[t], t)
+				columnb = thisline.markeditorialinsersions(editorialcontinuation, bracketfinder=bracketfinder)
+				editorialcontinuation = {t: setcontinuationvalue(thisline, previousline, editorialcontinuation[t], t, openfinder=openfinder, closefinder=closefinder)
 				                         for t in brackettypes}
 			else:
 				columnb = thisline.accented
