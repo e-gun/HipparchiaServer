@@ -66,7 +66,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 			</tr>
 		"""
 
-	# pull these outside the loop lest you compile the regex 4000x over 1000 lines
+	# pull these outside the "line in results" loop lest you compile the regex 12000x over 1000 lines
 	bracketfinder = {
 				'square': {
 					'ocreg': re.compile(r'\[(.*?)(\]|$)'),

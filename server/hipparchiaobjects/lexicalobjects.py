@@ -8,7 +8,7 @@
 import re
 
 from server import hipparchia
-from server.formatting.wordformatting import basiclemmacleanup, gkattemptelision, latattemptelision
+from server.formatting.wordformatting import gkattemptelision, latattemptelision
 
 
 class dbWordCountObject(object):
@@ -732,17 +732,4 @@ class dbLemmaObject(object):
 	def __init__(self, dictionaryentry, xref, derivativeforms):
 		self.dictionaryentry = dictionaryentry
 		self.xref = xref
-		self.formandidentificationlist = [f for f in derivativeforms.split('\t') if f]
-		self.formlist = [f.split(' ')[0] for f in self.formandidentificationlist]
-		self.formlist = [re.sub(r'\'', '', f) for f in self.formlist]
-		self.formlist = [basiclemmacleanup(f) for f in self.formlist]
-		self.formlist = list(set(self.formlist))
-
-	def getformdict(self):
-		fd = dict()
-		for f in self.formandidentificationlist:
-			key = f.split(' ')[0]
-			body = f[len(key)+1:]
-			fd[key] = body
-
-		return fd
+		self.formlist = derivativeforms
