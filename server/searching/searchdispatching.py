@@ -155,7 +155,7 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 
 	# print('workonsimplesearch() - so.termone', so.termone)
 
-	while len(searchlist) > 0 and count.value <= so.cap:
+	while searchlist and count.value <= so.cap:
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		# that's not supposed to happen with the pool, but somehow it does
@@ -163,6 +163,7 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 			authortable = searchlist.pop()
 		except IndexError:
 			authortable = None
+			searchlist = None
 			
 		if authortable:
 			foundlines = substringsearch(so.termone, authortable, so, curs)
@@ -206,11 +207,12 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 	dbconnection = setconnection('autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
 
-	while len(searchinginside) > 0 and len(foundlineobjects) < so.cap:
+	while searchinginside and len(foundlineobjects) < so.cap:
 		try:
 			wkid = searchinginside.pop()
 		except IndexError:
 			wkid = None
+			searchinginside = None
 
 		commitcount.increment()
 		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
@@ -252,11 +254,12 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 
 	so = searchobject
 
-	while len(searchinginside) > 0 and count.value <= so.cap:
+	while searchinginside and count.value <= so.cap:
 		try:
 			wkid = searchinginside.pop()
 		except:
 			wkid = None
+			searchinginside = None
 
 		if wkid:
 			if so.scope == 'lines':
