@@ -263,7 +263,7 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 	while searchinginside and count.value <= so.cap:
 		try:
 			wkid = searchinginside.pop()
-		except:
+		except IndexError:
 			wkid = None
 			searchinginside = None
 
