@@ -156,10 +156,6 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 	# print('workonsimplesearch() - so.termone', so.termone)
 
 	while searchlist and count.value <= so.cap:
-		# a very odd bug in here on a Ryzen 1600x on FreeBSD 11.1: you can search for "all 33 known forms of »ἱερεύϲ«" 10x
-		# somewhere in those trials the search will fail: one of the threads will get stuck in this function
-		# this cannot be reproduced on macOS 10.13.2 with identical versions of python and postgres installed...
-		# this bug is not in Hipparchia? presumably it also does not affect just this function
 
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered

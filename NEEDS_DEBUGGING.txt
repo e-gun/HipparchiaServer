@@ -17,3 +17,24 @@ resetsession will reload '/' without clearing date range from html (but the rang
 a second click will clear the display
 js async timing issue, it seems
 irritating to avoid "return redirect(url_for('frontpage'))" which is so simple and easy to call
+
+[D] platform specific bug? FreeBSD vs threads
+
+workonsimplesearch() (and probably its kin)
+
+a very odd bug in here on a Ryzen 1600x running FreeBSD 11.1: you can search for "mentior" 10x and
+somewhere in those trials the search will fail: one of the threads will get stuck in this function
+this cannot be reproduced on macOS 10.13.2 with identical versions of python and postgres installed...
+this bug is not in Hipparchia? presumably it also does not affect just this function
+
+you will not trigger the bug with the following number of workers set in config.py
+    1
+    2
+    3
+    4
+at 5 and 6 you get fails: often right away
+but then you can do more searches that will work for a while
+then you will fail
+then you can do more searches on top of this
+this will leave you with two zombie threads and two eternally updating polls
+
