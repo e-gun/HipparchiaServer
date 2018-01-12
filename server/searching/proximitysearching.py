@@ -8,7 +8,9 @@
 
 import re
 
+from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, grabonelinefromwork, makeablankline, setconnection
+from server.formatting.wordformatting import wordlistintoregex
 from server.searching.searchfunctions import dblooknear, substringsearch
 
 
@@ -42,20 +44,20 @@ def withinxlines(workdbname, searchobject):
 	# back for checking: but the Aetolians are likley not among those passages...
 	templimit = 2000000
 
-	hits = substringsearch(so.termone, workdbname, so, cursor, templimit)
+	if so.lemma:
+		chunksize = hipparchia.config['LEMMACHUNKSIZE']
+		terms = so.lemma.formlist
+		chunked = [terms[i:i + chunksize] for i in range(0, len(terms), chunksize)]
+		chunked = [wordlistintoregex(c) for c in chunked]
+		hits = list()
+		for c in chunked:
+			hits += list(substringsearch(c, workdbname, so, cursor, templimit))
+	else:
+		hits = list(substringsearch(so.termone, workdbname, so, cursor, templimit))
 
 	fullmatches = list()
 
-	# while hits and len(fullmatches) < so.cap:
-	# 	hit = hits.pop()
-	# 	isnear = dblooknear(hit[0], so.distance, so.termtwo, hit[1], so.usecolumn, cursor)
-	# 	if so.near and isnear:
-	# 		fullmatches.append(hit)
-	# 	elif not so.near and not isnear:
-	# 		fullmatches.append(hit)
-
 	while True:
-		# since hits is now a generator you can no longer pop til you drop
 		for hit in hits:
 			if len(fullmatches) > so.cap:
 				break
@@ -107,7 +109,16 @@ def withinxwords(workdbname, searchobject):
 	# back for checking: but the Aetolians are likley not among those passages...
 	templimit = 9999
 
-	hits = substringsearch(so.termone, workdbname, so, cursor, templimit)
+	if so.lemma:
+		chunksize = hipparchia.config['LEMMACHUNKSIZE']
+		terms = so.lemma.formlist
+		chunked = [terms[i:i + chunksize] for i in range(0, len(terms), chunksize)]
+		chunked = [wordlistintoregex(c) for c in chunked]
+		hits = list()
+		for c in chunked:
+			hits += list(substringsearch(c, workdbname, so, cursor, templimit))
+	else:
+		hits = list(substringsearch(so.termone, workdbname, so, cursor, templimit))
 
 	fullmatches = list()
 
