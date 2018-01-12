@@ -143,11 +143,16 @@ HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 # 	not execute SELECT * FROM..." in the browser you will get
 # 	partial results that will present themselves as successfully
 # 	executed searches. That is no good at all.
+#
+# LEMMACHUNKSIZE: how many lemmatized forms to search for at once
+#   the query is a regex 'or' that can have > 400 variations; this
+#   makes for slow faster; 40 tries of 10 variants is faster
+#
 
 AUTOCONFIGWORKERS = 'yes'
 WORKERS = 3
 MPCOMMITCOUNT = 750
-
+LEMMACHUNKSIZE = 8
 
 ### [6] settings that you can only configure here ###
 ##  [only change these items if you know why you are doing it] ##

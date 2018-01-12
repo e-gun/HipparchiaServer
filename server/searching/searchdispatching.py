@@ -67,7 +67,17 @@ def searchdispatcher(searchobject, activepoll):
 		        for i in range(workers)]
 	elif so.searchtype == 'simplelemma':
 		activepoll.statusis('Executing a lemmatized word search for the {n} known forms of {w}...'.format(n=len(so.lemma.formlist), w=so.lemma.dictionaryentry))
-		jobs = [Process(target=workonsimplesearch, args=(count, foundlineobjects, searchlist, commitcount, activepoll, so))
+		chunksize = hipparchia.config['LEMMACHUNKSIZE']
+		terms = so.termone.split(')|(')
+		chunked = [terms[i:i + chunksize] for i in range(0, len(terms), chunksize)]
+		chunked = [')|('.join(c) for c in chunked]
+		chunked = ['(' + c if c[0] != '(' else c for c in chunked]
+		chunked = [c + ')' if c[-1] != ')' else c for c in chunked]
+		searchlists = manager.list()
+		for c in chunked:
+			searchlists.append(searchlist)
+		activepoll.allworkis(sum([len(s) for s in searchlists]))
+		jobs = [Process(target=workonsimplelemmasearch, args=(chunked, count, foundlineobjects, searchlists, commitcount, activepoll, so))
 		        for i in range(workers)]
 	elif so.searchtype == 'phrase':
 		activepoll.statusis('Executing a phrase search.')
@@ -134,8 +144,6 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 
 	searchlist: ['gr0461', 'gr0489', 'gr0468', ...]
 
-	lemmatized clivius:
-		(^|\s)clivi(\s|$)|(^|\s)cliviam(\s|$)|(^|\s)clivique(\s|$)|(^|\s)cliviae(\s|$)|(^|\s)cliui(\s|$)
 
 	:param count:
 	:param foundlineobjects:
@@ -180,6 +188,75 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
 			dbconnection.commit()
 		activepoll.remain(len(searchlist))
+
+	dbconnection.commit()
+	curs.close()
+
+	return foundlineobjects
+
+
+def workonsimplelemmasearch(chunked, count, foundlineobjects, searchlists, commitcount, activepoll, searchobject):
+	"""
+
+	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
+	you need to pick the right style of search for each work you search, though
+
+	searchlist: ['gr0461', 'gr0489', 'gr0468', ...]
+
+	lemmatized clivius:
+		(^|\s)clivi(\s|$)|(^|\s)cliviam(\s|$)|(^|\s)clivique(\s|$)|(^|\s)cliviae(\s|$)|(^|\s)cliui(\s|$)
+
+	these searches go very slowly of you seek "all 429 known forms of »εὑρίϲκω«"
+
+	:param count:
+	:param foundlineobjects:
+	:param searchlists:
+	:param commitcount:
+	:param activepoll:
+	:param searchobject:
+	:return:
+	"""
+
+	so = searchobject
+
+	# print('workonsimplesearch() - searchlist', searchlist)
+
+	# substringsearch() needs ability to CREATE TEMPORARY TABLE
+	dbconnection = setconnection('not_autocommit', readonlyconnection=False)
+	curs = dbconnection.cursor()
+	so = searchobject
+
+	for c in chunked:
+		try:
+			searchlist = searchlists.pop()
+		except:
+			searchlist = None
+		searchingfor = c
+		while searchlist and count.value <= so.cap:
+
+			# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
+			# the pop() will fail if somebody else grabbed the last available work before it could be registered
+			# that's not supposed to happen with the pool, but somehow it does
+
+			try:
+				authortable = searchlist.pop()
+			except IndexError:
+				authortable = None
+				searchlist = None
+
+			if authortable:
+				foundlines = substringsearch(searchingfor, authortable, so, curs)
+				lineobjects = [dblineintolineobject(f) for f in foundlines]
+				foundlineobjects += lineobjects
+
+				numberoffinds = len(lineobjects)
+				count.increment(numberoffinds)
+				activepoll.addhits(numberoffinds)
+
+			commitcount.increment()
+			if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
+				dbconnection.commit()
+			activepoll.remain(sum([len(s) for s in searchlists]))
 
 	dbconnection.commit()
 	curs.close()
