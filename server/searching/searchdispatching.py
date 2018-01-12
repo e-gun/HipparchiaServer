@@ -72,11 +72,13 @@ def searchdispatcher(searchobject, activepoll):
 		terms = so.lemma.formlist
 		chunked = [terms[i:i + chunksize] for i in range(0, len(terms), chunksize)]
 		chunked = [wordlistintoregex(c) for c in chunked]
-		searchlists = manager.list()
+		searchtuples = manager.list()
+		masterlist = so.indexrestrictions.keys()
 		for c in chunked:
-			searchlists.append(manager.list(searchlist))
-		activepoll.allworkis(sum([len(s) for s in searchlists]))
-		jobs = [Process(target=workonsimplelemmasearch, args=(chunked, count, foundlineobjects, searchlists, commitcount, activepoll, so))
+			for item in masterlist:
+				searchtuples.append((c, item))
+		activepoll.allworkis(len(searchtuples))
+		jobs = [Process(target=workonsimplelemmasearch, args=(count, foundlineobjects, searchtuples, commitcount, activepoll, so))
 		        for i in range(workers)]
 	elif so.searchtype == 'phrase':
 		activepoll.statusis('Executing a phrase search.')
@@ -194,7 +196,7 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 	return foundlineobjects
 
 
-def workonsimplelemmasearch(chunked, count, foundlineobjects, searchlists, commitcount, activepoll, searchobject):
+def workonsimplelemmasearch(count, foundlineobjects, searchtuples, commitcount, activepoll, searchobject):
 	"""
 
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
@@ -204,6 +206,9 @@ def workonsimplelemmasearch(chunked, count, foundlineobjects, searchlists, commi
 
 	lemmatized clivius:
 		(^|\s)clivi(\s|$)|(^|\s)cliviam(\s|$)|(^|\s)clivique(\s|$)|(^|\s)cliviae(\s|$)|(^|\s)cliui(\s|$)
+
+	searchtuples:
+		[(lemmatizedchunk1, tabletosearch1), (lemmatizedchunk1, tabletosearch2), ...]
 
 	these searches go very slowly of you seek "all 429 known forms of »εὑρίϲκω«"
 
@@ -224,40 +229,33 @@ def workonsimplelemmasearch(chunked, count, foundlineobjects, searchlists, commi
 	dbconnection = setconnection('not_autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
 
-	for c in chunked:
-		# print('chunk=', c)
+	while searchtuples and count.value <= so.cap:
+
+		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
+		# the pop() will fail if somebody else grabbed the last available work before it could be registered
+		# that's not supposed to happen with the pool, but somehow it does
+
 		try:
-			searchlist = searchlists.pop()
+			searchingfor, authortable = searchtuples.pop()
 		except IndexError:
-			searchlist = None
-		searchingfor = c
+			authortable = None
+			searchingfor = None
+			searchtuples = None
 
-		while searchlist and count.value <= so.cap:
+		if authortable:
+			foundlines = substringsearch(searchingfor, authortable, so, curs)
+			lineobjects = [dblineintolineobject(f) for f in foundlines]
+			foundlineobjects += lineobjects
 
-			# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
-			# the pop() will fail if somebody else grabbed the last available work before it could be registered
-			# that's not supposed to happen with the pool, but somehow it does
+			numberoffinds = len(lineobjects)
+			count.increment(numberoffinds)
+			activepoll.addhits(numberoffinds)
 
-			try:
-				authortable = searchlist.pop()
-			except IndexError:
-				authortable = None
-				searchlist = None
-
-			if authortable:
-				foundlines = substringsearch(searchingfor, authortable, so, curs)
-				lineobjects = [dblineintolineobject(f) for f in foundlines]
-				foundlineobjects += lineobjects
-
-				numberoffinds = len(lineobjects)
-				count.increment(numberoffinds)
-				activepoll.addhits(numberoffinds)
-
-			commitcount.increment()
-			if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
-				dbconnection.commit()
-			activepoll.remain(sum([len(s) for s in searchlists])+len(searchlist))
-			#
+		commitcount.increment()
+		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
+			dbconnection.commit()
+		activepoll.remain(len(searchtuples))
+		#
 
 	dbconnection.commit()
 	curs.close()
