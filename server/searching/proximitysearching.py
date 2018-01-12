@@ -117,6 +117,8 @@ def withinxwords(workdbname, searchobject):
 		hits = list()
 		for c in chunked:
 			hits += list(substringsearch(c, workdbname, so, cursor, templimit))
+		so.termone = wordlistintoregex(terms)
+		so.usewordlist = 'polytonic'
 	else:
 		hits = list(substringsearch(so.termone, workdbname, so, cursor, templimit))
 
