@@ -11,6 +11,7 @@ from multiprocessing import Manager, Process
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, setconnection, setthreadcount
+from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.helperobjects import MPCounter
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
@@ -68,14 +69,12 @@ def searchdispatcher(searchobject, activepoll):
 	elif so.searchtype == 'simplelemma':
 		activepoll.statusis('Executing a lemmatized word search for the {n} known forms of {w}...'.format(n=len(so.lemma.formlist), w=so.lemma.dictionaryentry))
 		chunksize = hipparchia.config['LEMMACHUNKSIZE']
-		terms = so.termone.split(')|(')
+		terms = so.lemma.formlist
 		chunked = [terms[i:i + chunksize] for i in range(0, len(terms), chunksize)]
-		chunked = [')|('.join(c) for c in chunked]
-		chunked = ['(' + c if c[0] != '(' else c for c in chunked]
-		chunked = [c + ')' if c[-1] != ')' else c for c in chunked]
+		chunked = [wordlistintoregex(c) for c in chunked]
 		searchlists = manager.list()
 		for c in chunked:
-			searchlists.append(searchlist)
+			searchlists.append(manager.list(searchlist))
 		activepoll.allworkis(sum([len(s) for s in searchlists]))
 		jobs = [Process(target=workonsimplelemmasearch, args=(chunked, count, foundlineobjects, searchlists, commitcount, activepoll, so))
 		        for i in range(workers)]
@@ -224,14 +223,15 @@ def workonsimplelemmasearch(chunked, count, foundlineobjects, searchlists, commi
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
 	dbconnection = setconnection('not_autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
-	so = searchobject
 
 	for c in chunked:
+		# print('chunk=', c)
 		try:
 			searchlist = searchlists.pop()
-		except:
+		except IndexError:
 			searchlist = None
 		searchingfor = c
+
 		while searchlist and count.value <= so.cap:
 
 			# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
@@ -256,7 +256,8 @@ def workonsimplelemmasearch(chunked, count, foundlineobjects, searchlists, commi
 			commitcount.increment()
 			if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
 				dbconnection.commit()
-			activepoll.remain(sum([len(s) for s in searchlists]))
+			activepoll.remain(sum([len(s) for s in searchlists])+len(searchlist))
+			#
 
 	dbconnection.commit()
 	curs.close()
