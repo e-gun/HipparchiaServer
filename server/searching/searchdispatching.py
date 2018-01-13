@@ -62,10 +62,13 @@ def searchdispatcher(searchobject, activepoll):
 
 	# be careful about getting mp aware args into the function
 
+	targetfunction = None
+	argumentuple = None
+
 	if so.searchtype == 'simple':
 		activepoll.statusis('Executing a simple word search...')
-		jobs = [Process(target=workonsimplesearch, args=(count, foundlineobjects, searchlist, commitcount, activepoll, so))
-		        for i in range(workers)]
+		targetfunction = workonsimplesearch
+		argumentuple = (count, foundlineobjects, searchlist, commitcount, activepoll, so)
 	elif so.searchtype == 'simplelemma':
 		activepoll.statusis('Executing a lemmatized word search for the {n} known forms of {w}...'.format(n=len(so.lemma.formlist), w=so.lemma.dictionaryentry))
 		chunksize = hipparchia.config['LEMMACHUNKSIZE']
@@ -78,8 +81,8 @@ def searchdispatcher(searchobject, activepoll):
 			for item in masterlist:
 				searchtuples.append((c, item))
 		activepoll.allworkis(len(searchtuples))
-		jobs = [Process(target=workonsimplelemmasearch, args=(count, foundlineobjects, searchtuples, commitcount, activepoll, so))
-		        for i in range(workers)]
+		targetfunction = workonsimplelemmasearch
+		argumentuple = (count, foundlineobjects, searchtuples, commitcount, activepoll, so)
 	elif so.searchtype == 'phrase':
 		activepoll.statusis('Executing a phrase search.')
 		so.leastcommon = findleastcommonterm(so.termone, so.accented)
@@ -97,14 +100,12 @@ def searchdispatcher(searchobject, activepoll):
 		#   when is this not true? being wrong about sqs() means spending an extra 10s; being wrong about phs() means an extra 40s...
 		if 0 < lccount < 500:
 			# print('workonphrasesearch()', searchingfor)
-			jobs = [Process(target=workonphrasesearch,
-			                args=(foundlineobjects, searchlist, commitcount, activepoll, so))
-			        for i in range(workers)]
+			targetfunction = workonphrasesearch
+			argumentuple = (foundlineobjects, searchlist, commitcount, activepoll, so)
 		else:
+			targetfunction = subqueryphrasesearch
+			argumentuple = (foundlineobjects, so.termone, searchlist, count, commitcount, activepoll, so)
 			# print('subqueryphrasesearch()', searchingfor)
-			jobs = [Process(target=subqueryphrasesearch,
-			                args=(foundlineobjects, so.termone, searchlist, count, commitcount, activepoll, so))
-			        for i in range(workers)]
 	elif so.searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
 		if so.lemma or so.proximatelemma:
@@ -122,12 +123,13 @@ def searchdispatcher(searchobject, activepoll):
 			tmp = so.termone
 			so.termone = so.termtwo
 			so.termtwo = tmp
-		jobs = [Process(target=workonproximitysearch,
-				args=(count, foundlineobjects, searchlist, activepoll, so))
-				for i in range(workers)]
+		targetfunction = workonproximitysearch
+		argumentuple = (count, foundlineobjects, searchlist, activepoll, so)
 	else:
 		# impossible, but...
-		jobs = list()
+		workers = 0
+
+	jobs = [Process(target=targetfunction, args=argumentuple) for i in range(workers)]
 
 	for j in jobs:
 		j.start()
@@ -198,7 +200,6 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 
 def workonsimplelemmasearch(count, foundlineobjects, searchtuples, commitcount, activepoll, searchobject):
 	"""
-
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
 
@@ -210,11 +211,12 @@ def workonsimplelemmasearch(count, foundlineobjects, searchtuples, commitcount, 
 	searchtuples:
 		[(lemmatizedchunk1, tabletosearch1), (lemmatizedchunk1, tabletosearch2), ...]
 
-	these searches go very slowly of you seek "all 429 known forms of »εὑρίϲκω«"
+	these searches go very slowly of you seek "all 429 known forms of »εὑρίϲκω«"; so they have been broken up
+	you will search N forms in all tables; then another N forms in all tables; ...
 
 	:param count:
 	:param foundlineobjects:
-	:param searchlists:
+	:param searchtuples:
 	:param commitcount:
 	:param activepoll:
 	:param searchobject:
@@ -267,7 +269,8 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 	"""
 
 	a multiprocessor aware function that hands off bits of a phrase search to multiple searchers
-	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase hits the limit
+	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase
+	hits the limit
 
 	searchinginside:
 		['lt0400', 'lt0022', ...]
@@ -353,5 +356,3 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 		activepoll.remain(len(searchinginside))
 
 	return foundlineobjects
-
-
