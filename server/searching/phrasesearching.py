@@ -70,7 +70,7 @@ def phrasesearch(wkid, activepoll, searchobject, cursor):
 	return fullmatches
 
 
-def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, commitcount, activepoll, searchobject):
+def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, activepoll, searchobject):
 	"""
 	foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll
 
@@ -171,7 +171,9 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 		# the windowing problem means that '1' might be something that gets discarded
 		lim = ' LIMIT 5'
 
+	commitcount = 0
 	while len(tablestosearch) > 0 and count.value <= so.cap:
+		commitcount += 1
 		try:
 			uid = tablestosearch.pop()
 			activepoll.remain(len(tablestosearch))
@@ -179,9 +181,9 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 			uid = None
 
 		if uid:
-			commitcount.increment()
-			if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
+			if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
 				dbconnection.commit()
+
 			indices = None
 			qtemplate = """
 				SELECT secondpass.index, secondpass.{co} FROM 

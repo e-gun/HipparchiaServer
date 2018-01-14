@@ -53,7 +53,6 @@ def searchdispatcher(searchobject, activepoll):
 	foundlineobjects = manager.list()
 	searchlist = manager.list(so.indexrestrictions.keys())
 
-	commitcount = MPCounter()
 	workers = setthreadcount()
 	
 	activepoll.allworkis(len(so.searchlist))
@@ -82,7 +81,7 @@ def searchdispatcher(searchobject, activepoll):
 				searchtuples.append((c, item))
 		activepoll.allworkis(len(searchtuples))
 		targetfunction = workonsimplelemmasearch
-		argumentuple = (count, foundlineobjects, searchtuples, commitcount, activepoll, so)
+		argumentuple = (count, foundlineobjects, searchtuples, activepoll, so)
 	elif so.searchtype == 'phrase':
 		activepoll.statusis('Executing a phrase search.')
 		so.leastcommon = findleastcommonterm(so.termone, so.accented)
@@ -101,10 +100,10 @@ def searchdispatcher(searchobject, activepoll):
 		if 0 < lccount < 500:
 			# print('workonphrasesearch()', searchingfor)
 			targetfunction = workonphrasesearch
-			argumentuple = (foundlineobjects, searchlist, commitcount, activepoll, so)
+			argumentuple = (foundlineobjects, searchlist, activepoll, so)
 		else:
 			targetfunction = subqueryphrasesearch
-			argumentuple = (foundlineobjects, so.termone, searchlist, count, commitcount, activepoll, so)
+			argumentuple = (foundlineobjects, so.termone, searchlist, count, activepoll, so)
 			# print('subqueryphrasesearch()', searchingfor)
 	elif so.searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
@@ -139,7 +138,7 @@ def searchdispatcher(searchobject, activepoll):
 	return foundlineobjects
 
 
-def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activepoll, searchobject):
+def workonsimplesearch(count, foundlineobjects, searchlist, activepoll, searchobject):
 	"""
 
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
@@ -166,7 +165,11 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 
 	# print('workonsimplesearch() - so.termone', so.termone)
 
+	# note that each worker has a copy of this; you will need to set MPCOMMITCOUNT accordingly
+	commitcount = 0
+
 	while searchlist and count.value <= so.cap:
+		commitcount += 1
 
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
@@ -184,12 +187,12 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 			foundlineobjects.extend(lineobjects)
 
 			if lineobjects:
+				# print(authortable, len(lineobjects))
 				numberoffinds = len(lineobjects)
 				count.increment(numberoffinds)
 				activepoll.addhits(numberoffinds)
 
-		commitcount.increment()
-		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
+		if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
 			dbconnection.commit()
 
 		try:
@@ -203,7 +206,7 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 	return foundlineobjects
 
 
-def workonsimplelemmasearch(count, foundlineobjects, searchtuples, commitcount, activepoll, searchobject):
+def workonsimplelemmasearch(count, foundlineobjects, searchtuples, activepoll, searchobject):
 	"""
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
@@ -236,8 +239,9 @@ def workonsimplelemmasearch(count, foundlineobjects, searchtuples, commitcount, 
 	dbconnection = setconnection('not_autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
 
+	commitcount = 0
 	while searchtuples and count.value <= so.cap:
-
+		commitcount += 1
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		# that's not supposed to happen with the pool, but somehow it does
@@ -259,9 +263,9 @@ def workonsimplelemmasearch(count, foundlineobjects, searchtuples, commitcount, 
 				count.increment(numberoffinds)
 				activepoll.addhits(numberoffinds)
 
-		commitcount.increment()
-		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
+		if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
 			dbconnection.commit()
+
 		try:
 			activepoll.remain(len(searchtuples))
 		except TypeError:
@@ -273,7 +277,7 @@ def workonsimplelemmasearch(count, foundlineobjects, searchtuples, commitcount, 
 	return foundlineobjects
 
 
-def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepoll, searchobject):
+def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobject):
 	"""
 
 	a multiprocessor aware function that hands off bits of a phrase search to multiple searchers
@@ -296,15 +300,16 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 	dbconnection = setconnection('autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
 
+	commitcount = 0
 	while searchinginside and len(foundlineobjects) < so.cap:
+		commitcount += 1
 		try:
 			wkid = searchinginside.pop()
 		except IndexError:
 			wkid = None
 			searchinginside = None
 
-		commitcount.increment()
-		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
+		if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
 			dbconnection.commit()
 
 		if wkid:
