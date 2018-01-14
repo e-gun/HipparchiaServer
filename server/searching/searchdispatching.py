@@ -12,7 +12,6 @@ from multiprocessing import Manager, Process
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, setconnection, setthreadcount
 from server.formatting.wordformatting import wordlistintoregex
-from server.hipparchiaobjects.helperobjects import MPCounter
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, \
@@ -48,7 +47,6 @@ def searchdispatcher(searchobject, activepoll):
 
 	activepoll.statusis('Loading the the dispatcher...')
 
-	count = MPCounter()
 	manager = Manager()
 	foundlineobjects = manager.list()
 	searchlist = manager.list(so.indexrestrictions.keys())
@@ -67,7 +65,7 @@ def searchdispatcher(searchobject, activepoll):
 	if so.searchtype == 'simple':
 		activepoll.statusis('Executing a simple word search...')
 		targetfunction = workonsimplesearch
-		argumentuple = (count, foundlineobjects, searchlist, activepoll, so)
+		argumentuple = (foundlineobjects, searchlist, activepoll, so)
 	elif so.searchtype == 'simplelemma':
 		activepoll.statusis('Executing a lemmatized word search for the {n} known forms of {w}...'.format(n=len(so.lemma.formlist), w=so.lemma.dictionaryentry))
 		chunksize = hipparchia.config['LEMMACHUNKSIZE']
@@ -81,7 +79,7 @@ def searchdispatcher(searchobject, activepoll):
 				searchtuples.append((c, item))
 		activepoll.allworkis(len(searchtuples))
 		targetfunction = workonsimplelemmasearch
-		argumentuple = (count, foundlineobjects, searchtuples, activepoll, so)
+		argumentuple = (foundlineobjects, searchtuples, activepoll, so)
 	elif so.searchtype == 'phrase':
 		activepoll.statusis('Executing a phrase search.')
 		so.leastcommon = findleastcommonterm(so.termone, so.accented)
@@ -103,7 +101,7 @@ def searchdispatcher(searchobject, activepoll):
 			argumentuple = (foundlineobjects, searchlist, activepoll, so)
 		else:
 			targetfunction = subqueryphrasesearch
-			argumentuple = (foundlineobjects, so.termone, searchlist, count, activepoll, so)
+			argumentuple = (foundlineobjects, so.termone, searchlist, activepoll, so)
 			# print('subqueryphrasesearch()', searchingfor)
 	elif so.searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
@@ -123,7 +121,7 @@ def searchdispatcher(searchobject, activepoll):
 			so.termone = so.termtwo
 			so.termtwo = tmp
 		targetfunction = workonproximitysearch
-		argumentuple = (count, foundlineobjects, searchlist, activepoll, so)
+		argumentuple = (foundlineobjects, searchlist, activepoll, so)
 	else:
 		# impossible, but...
 		workers = 0
@@ -138,7 +136,7 @@ def searchdispatcher(searchobject, activepoll):
 	return foundlineobjects
 
 
-def workonsimplesearch(count, foundlineobjects, searchlist, activepoll, searchobject):
+def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
 	"""
 
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
@@ -168,7 +166,7 @@ def workonsimplesearch(count, foundlineobjects, searchlist, activepoll, searchob
 	# note that each worker has a copy of this; you will need to set MPCOMMITCOUNT accordingly
 	commitcount = 0
 
-	while searchlist and count.value <= so.cap:
+	while searchlist and activepoll.hitcount.value <= so.cap:
 		commitcount += 1
 
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
@@ -189,7 +187,6 @@ def workonsimplesearch(count, foundlineobjects, searchlist, activepoll, searchob
 			if lineobjects:
 				# print(authortable, len(lineobjects))
 				numberoffinds = len(lineobjects)
-				count.increment(numberoffinds)
 				activepoll.addhits(numberoffinds)
 
 		if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
@@ -206,7 +203,7 @@ def workonsimplesearch(count, foundlineobjects, searchlist, activepoll, searchob
 	return foundlineobjects
 
 
-def workonsimplelemmasearch(count, foundlineobjects, searchtuples, activepoll, searchobject):
+def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchobject):
 	"""
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
@@ -240,7 +237,7 @@ def workonsimplelemmasearch(count, foundlineobjects, searchtuples, activepoll, s
 	curs = dbconnection.cursor()
 
 	commitcount = 0
-	while searchtuples and count.value <= so.cap:
+	while searchtuples and activepoll.hitcount.value <= so.cap:
 		commitcount += 1
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
@@ -260,7 +257,6 @@ def workonsimplelemmasearch(count, foundlineobjects, searchtuples, activepoll, s
 
 			if lineobjects:
 				numberoffinds = len(lineobjects)
-				count.increment(numberoffinds)
 				activepoll.addhits(numberoffinds)
 
 		if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
@@ -326,7 +322,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobje
 	return foundlineobjects
 
 
-def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, searchobject):
+def workonproximitysearch(foundlineobjects, searchinginside, activepoll, searchobject):
 	"""
 
 	a multiprocessor aware function that hands off bits of a proximity search to multiple searchers
@@ -350,7 +346,7 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 
 	so = searchobject
 
-	while searchinginside and count.value <= so.cap:
+	while searchinginside and activepoll.hitcount.value <= so.cap:
 		try:
 			wkid = searchinginside.pop()
 		except IndexError:
@@ -364,7 +360,6 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 				foundlines = withinxwords(wkid, so)
 
 			if foundlines:
-				count.increment(len(foundlines))
 				activepoll.addhits(len(foundlines))
 
 			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])

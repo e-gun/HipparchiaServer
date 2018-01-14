@@ -70,7 +70,7 @@ def phrasesearch(wkid, activepoll, searchobject, cursor):
 	return fullmatches
 
 
-def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, activepoll, searchobject):
+def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activepoll, searchobject):
 	"""
 	foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll
 
@@ -172,7 +172,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 		lim = ' LIMIT 5'
 
 	commitcount = 0
-	while tablestosearch and count.value <= so.cap:
+	while tablestosearch and activepoll.hitcount.value <= so.cap:
 		commitcount += 1
 		try:
 			uid = tablestosearch.pop()
@@ -226,7 +226,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 			# for l in locallineobjects:
 			#	print(l.universalid, l.locus(), getattr(l,so.usewordlist))
 			gotmyonehit = False
-			while locallineobjects and count.value <= so.cap and not gotmyonehit:
+			while locallineobjects and activepoll.hitcount.value <= so.cap and not gotmyonehit:
 				# windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]
 				# figure out which line is really the line with the goods
 				# it is not nearly so simple as picking the 2nd element in any run of 3: no always runs of 3 + matches in
@@ -235,8 +235,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 				lo = locallineobjects.pop()
 				if re.search(sp, getattr(lo, so.usewordlist)):
 					foundlineobjects.append(lo)
-					count.increment(1)
-					activepoll.sethits(count.value)
+					activepoll.addhits(1)
 					if so.onehit:
 						gotmyonehit = True
 				else:
@@ -263,8 +262,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 						# print('re',getattr(lo,so.usewordlist),tail, head, getattr(next,so.usewordlist))
 						if re.search(tail, getattr(lo, so.usewordlist)) and re.search(head, getattr(nextline, so.usewordlist)):
 							foundlineobjects.append(lo)
-							count.increment(1)
-							activepoll.sethits(count.value)
+							activepoll.addhits(1)
 							if so.onehit:
 								gotmyonehit = True
 
