@@ -183,13 +183,15 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 			lineobjects = [dblineintolineobject(f) for f in foundlines]
 			foundlineobjects.extend(lineobjects)
 
-			numberoffinds = len(lineobjects)
-			count.increment(numberoffinds)
-			activepoll.addhits(numberoffinds)
+			if lineobjects:
+				numberoffinds = len(lineobjects)
+				count.increment(numberoffinds)
+				activepoll.addhits(numberoffinds)
 
 		commitcount.increment()
 		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
 			dbconnection.commit()
+
 		try:
 			activepoll.remain(len(searchlist))
 		except TypeError:
@@ -252,9 +254,10 @@ def workonsimplelemmasearch(count, foundlineobjects, searchtuples, commitcount, 
 			lineobjects = [dblineintolineobject(f) for f in foundlines]
 			foundlineobjects.extend(lineobjects)
 
-			numberoffinds = len(lineobjects)
-			count.increment(numberoffinds)
-			activepoll.addhits(numberoffinds)
+			if lineobjects:
+				numberoffinds = len(lineobjects)
+				count.increment(numberoffinds)
+				activepoll.addhits(numberoffinds)
 
 		commitcount.increment()
 		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
@@ -355,8 +358,9 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 			else:
 				foundlines = withinxwords(wkid, so)
 
-			count.increment(len(foundlines))
-			activepoll.addhits(len(foundlines))
+			if foundlines:
+				count.increment(len(foundlines))
+				activepoll.addhits(len(foundlines))
 
 			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
 
