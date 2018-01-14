@@ -181,7 +181,7 @@ def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activep
 		if authortable:
 			foundlines = substringsearch(so.termone, authortable, so, curs)
 			lineobjects = [dblineintolineobject(f) for f in foundlines]
-			foundlineobjects += lineobjects
+			foundlineobjects.extend(lineobjects)
 
 			numberoffinds = len(lineobjects)
 			count.increment(numberoffinds)
@@ -250,7 +250,7 @@ def workonsimplelemmasearch(count, foundlineobjects, searchtuples, commitcount, 
 		if authortable:
 			foundlines = substringsearch(searchingfor, authortable, so, curs)
 			lineobjects = [dblineintolineobject(f) for f in foundlines]
-			foundlineobjects += lineobjects
+			foundlineobjects.extend(lineobjects)
 
 			numberoffinds = len(lineobjects)
 			count.increment(numberoffinds)
@@ -306,8 +306,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepol
 
 		if wkid:
 			foundlines = phrasesearch(wkid, activepoll, so, curs)
-			for f in foundlines:
-				foundlineobjects.append(dblineintolineobject(f))
+			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
 		try:
 			activepoll.remain(len(searchinginside))
 		except TypeError:
@@ -359,8 +358,8 @@ def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, 
 			count.increment(len(foundlines))
 			activepoll.addhits(len(foundlines))
 
-			for f in foundlines:
-				foundlineobjects.append(dblineintolineobject(f))
+			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
+
 		try:
 			activepoll.remain(len(searchinginside))
 		except TypeError:
