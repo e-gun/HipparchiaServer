@@ -172,13 +172,14 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, 
 		lim = ' LIMIT 5'
 
 	commitcount = 0
-	while len(tablestosearch) > 0 and count.value <= so.cap:
+	while tablestosearch and count.value <= so.cap:
 		commitcount += 1
 		try:
 			uid = tablestosearch.pop()
 			activepoll.remain(len(tablestosearch))
 		except:
 			uid = None
+			tablestosearch = None
 
 		if uid:
 			if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:

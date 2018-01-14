@@ -67,7 +67,7 @@ def searchdispatcher(searchobject, activepoll):
 	if so.searchtype == 'simple':
 		activepoll.statusis('Executing a simple word search...')
 		targetfunction = workonsimplesearch
-		argumentuple = (count, foundlineobjects, searchlist, commitcount, activepoll, so)
+		argumentuple = (count, foundlineobjects, searchlist, activepoll, so)
 	elif so.searchtype == 'simplelemma':
 		activepoll.statusis('Executing a lemmatized word search for the {n} known forms of {w}...'.format(n=len(so.lemma.formlist), w=so.lemma.dictionaryentry))
 		chunksize = hipparchia.config['LEMMACHUNKSIZE']
