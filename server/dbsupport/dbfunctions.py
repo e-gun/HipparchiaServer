@@ -73,8 +73,16 @@ def setconnection(autocommit='n', readonlyconnection=True):
 
 
 def tablenamer(authorobject, thework):
-	# tell me the name of your table
-	# work 1 is stored as 0: try not to create a table 0; lots of unexpected results can stem from this off-by-one slip
+	"""
+
+	tell me the name of your table
+	work 1 is stored as 0: try not to create a table 0; lots of unexpected results can stem from this off-by-one slip
+
+	:param authorobject:
+	:param thework:
+	:return:
+	"""
+
 	wk = authorobject.listofworks[thework - 1]
 	# wk = authorobject.listworks()[thework - 1]
 	nm = authorobject.authornumber
@@ -139,6 +147,9 @@ def loadallauthorsasobjects():
 
 	print('\t', len(authorsdict), 'authors loaded')
 
+	dbconnection.commit()
+	curs.close()
+
 	return authorsdict
 
 
@@ -166,10 +177,10 @@ def loadallworksasobjects():
 
 	worksdict = {r[0]: dbOpus(*r) for r in results}
 
+	print('\t', len(worksdict), 'works loaded')
+
 	dbconnection.commit()
 	curs.close()
-
-	print('\t', len(worksdict), 'works loaded')
 
 	return worksdict
 
@@ -202,6 +213,9 @@ def loadlemmataasobjects():
 	print('\t', len(lemmatadict), 'lemmata loaded')
 	# print('lemmatadict["laudo"]', lemmatadict['laudo'].formlist)
 	# print('lemmatadict["λύω"]', lemmatadict['λύω'].formlist)
+
+	dbconnection.commit()
+	curs.close()
 
 	return lemmatadict
 
@@ -558,6 +572,9 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 				for c in sorted(corpora.keys())]
 	buildinfo = '\n'.join(buildinfo)
 
+	dbconnection.commit()
+	curs.close()
+
 	return buildinfo
 
 
@@ -591,5 +608,8 @@ def probefordatabases():
 			available[p] = True
 		else:
 			available[p] = False
+
+	dbconnection.commit()
+	curs.close()
 
 	return available
