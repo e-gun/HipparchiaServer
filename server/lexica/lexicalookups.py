@@ -18,7 +18,6 @@ from server.formatting.lexicaformatting import entrysummary, formatdictionarysum
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
 from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbHeadwordObject, dbLatinWord, dbLemmaObject, \
 	dbMorphologyObject, dbWordCountObject
-from server.listsandsession.listmanagement import polytonicsort
 
 
 def lookformorphologymatches(word, cursor, trialnumber=0):
@@ -463,40 +462,6 @@ def convertdictionaryfindintoobject(foundline, dictionary, cursor):
 		pass
 
 	return wordobject
-
-
-def bulkddictsearch(cursor, dictionary, usecolumn, seeking):
-	"""
-	fetchall vs fetchone
-	only called by the lemma lookups; don't confuse this with the dictionary search up in views.py
-	:param cursor:
-	:param dictionary:
-	:param usecolumn:
-	:param seeking:
-	:return:
-	"""
-
-	qtemplate = 'SELECT * FROM {d} WHERE {d} ~* %s'
-	query = qtemplate.format(d=dictionary, c=usecolumn)
-	data = (seeking,)
-	cursor.execute(query, data)
-
-	# note that the dictionary db has a problem with vowel lengths vs accents
-	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
-	found = cursor.fetchall()
-
-	# the results should be given the polytonicsort() treatment
-	sortedfinds = list()
-	finddict = dict()
-	for f in found:
-		finddict[f[0]] = f
-	keys = finddict.keys()
-	keys = polytonicsort(keys)
-
-	for k in keys:
-		sortedfinds.append(finddict[k])
-
-	return sortedfinds
 
 
 def findtotalcounts(word, cursor):
