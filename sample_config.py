@@ -151,7 +151,7 @@ HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 
 AUTOCONFIGWORKERS = 'yes'
 WORKERS = 3
-MPCOMMITCOUNT = 750
+MPCOMMITCOUNT = 250
 LEMMACHUNKSIZE = 10
 
 ### [6] settings that you can only configure here ###

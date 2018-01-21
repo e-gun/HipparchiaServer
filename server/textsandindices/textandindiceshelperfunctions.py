@@ -193,6 +193,19 @@ def dictmerger(masterdict, targetdict):
 
 	a more complex version also present in HipparchiaBuilder
 
+	there does not seem to be a quicker way to do this with comprehensions since they have
+	to break the job up into too many parts in order to non-destructively merge the intersection
+
+	intersection = masterdict.keys() & targetdict.keys()
+	mast = masterdict.keys() - intersection
+	targ = targetdict.keys() - intersection
+
+	inter = {i: masterdict[i] + targetdict[i] for i in intersection}
+	m = {k: masterdict[k] for k in mast}
+	t = {k: targetdict[k] for k in targ}
+
+	merged = {**m, **t, **inter}
+
 	:param masterdict:
 	:param targetdict:
 	:return:

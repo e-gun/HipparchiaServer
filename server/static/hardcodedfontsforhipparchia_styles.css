@@ -632,6 +632,8 @@ keeping (for now) the non-span version of this
 	font-weight: normal;
 	padding-left: 40px;
 	padding-right: 20px;
+	font-size: 85%;
+	color: var(--huedgrey);
 	}
 
 

@@ -151,7 +151,7 @@ def buildworkprovenancedict(workdict):
 def buildkeyedlemmata(listofentries):
 	"""
 
-	a list of 140k words is too long to send to 'getlemmahint/' without offering quicker access
+	a list of 140k words is too long to send to 'getlemmahint' without offering quicker access
 
 	a dict with keys...
 

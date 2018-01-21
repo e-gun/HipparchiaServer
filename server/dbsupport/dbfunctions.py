@@ -600,7 +600,7 @@ def probefordatabases():
 		try:
 			curs.execute(q)
 			results = curs.fetchall()
-		except:
+		except psycopg2.ProgrammingError:
 			# psycopg2.ProgrammingError: relation "greek_morphology" does not exist
 			results = False
 

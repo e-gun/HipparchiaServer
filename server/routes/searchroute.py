@@ -50,38 +50,29 @@ def executesearch(timestamp):
 		ts = str(int(time.time()))
 
 	sessionvariables()
-	# a search can take 30s or more and the user might alter the session while the search is running by toggling onehit, etc
-	# that can be a problem, so freeze the values now and rely on this instead of some moving target
+	# a search can take 30s or more and the user might alter the session while the search is running
+	# by toggling onehit, etc that can be a problem, so freeze the values now and rely on this instead
+	# of some moving target
 	frozensession = session.copy()
 
 	# need to sanitize input at least a bit: remove digits and punctuation
-	# dispatcher will do searchtermcharactersubstitutions() and massagesearchtermsforwhitespace() to take care of lunate sigma, etc.
-	try:
-		seeking = cleaninitialquery(request.args.get('skg', ''))
-	except:
-		seeking = ''
+	# dispatcher will do searchtermcharactersubstitutions() and massagesearchtermsforwhitespace() to take
+	# care of lunate sigma, etc.
+
+	seeking = cleaninitialquery(request.args.get('skg', ''))
+	proximate = cleaninitialquery(request.args.get('prx', ''))
+	lemma = cleaninitialquery(request.args.get('lem', ''))
+	proximatelemma = cleaninitialquery(request.args.get('plm', ''))
 
 	try:
-		proximate = cleaninitialquery(request.args.get('prx', ''))
-	except:
-		proximate = ''
-
-	try:
-		lemma = cleaninitialquery(request.args.get('lem', ''))
 		lemma = lemmatadict[lemma]
-	except:
+	except KeyError:
 		lemma = None
 
 	try:
-		proximatelemma = cleaninitialquery(request.args.get('plm', ''))
 		proximatelemma = lemmatadict[proximatelemma]
-	except:
+	except KeyError:
 		proximatelemma = None
-
-
-	# if len(seeking) < 1 and len(proximate) > 0:
-	# 	seeking = proximate
-	# 	proximate = ''
 
 	replacebeta = False
 	
@@ -121,8 +112,8 @@ def executesearch(timestamp):
 	so = SearchObject(ts, seeking, proximate, lemma, proximatelemma, frozensession)
 
 	dmin, dmax = bcedating(frozensession)
-	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
-	                 if frozensession[c] == 'yes']
+	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
+	activecorpora = [c for c in allcorpora if frozensession[c] == 'yes']
 
 	if (len(seeking) > 0 or lemma) and activecorpora:
 		activepoll.statusis('Compiling the list of works to search')
@@ -132,7 +123,8 @@ def executesearch(timestamp):
 		nosearch = False
 		skg = None
 		prx = None
-		# mark works that have passage exclusions associated with them: gr0001x001 instead of gr0001w001 if you are skipping part of w001
+		# mark works that have passage exclusions associated with them:
+		# gr0001x001 instead of gr0001w001 if you are skipping part of w001
 		searchlist = flagexclusions(searchlist, frozensession)
 		workssearched = len(searchlist)
 
@@ -258,12 +250,17 @@ def executesearch(timestamp):
 		searchtime = round(searchtime, 2)
 
 		sortorderdecoder = {
-			'universalid': 'ID', 'shortname': 'name', 'genres': 'author genre', 'converted_date': 'date', 'location': 'location'
+			'universalid': 'ID',
+			'shortname': 'name',
+			'genres': 'author genre',
+			'converted_date': 'date',
+			'location': 'location'
 		}
 		try:
 			locale.setlocale(locale.LC_ALL, 'en_US')
 		except locale.Error:
 			pass
+
 		resultcount = locale.format('%d', resultcount, grouping=True)
 		workssearched = locale.format('%d', workssearched, grouping=True)
 
@@ -282,7 +279,7 @@ def executesearch(timestamp):
 		output['sortby'] = sortorderdecoder[frozensession['sortorder']]
 		output['dmin'] = dmin
 		output['dmax'] = dmax
-		if justlatin() == False:
+		if justlatin() is False:
 			output['icandodates'] = 'yes'
 		else:
 			output['icandodates'] = 'no'
