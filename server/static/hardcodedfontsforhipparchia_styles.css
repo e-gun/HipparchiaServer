@@ -636,7 +636,6 @@ keeping (for now) the non-span version of this
 	color: var(--huedgrey);
 	}
 
-
 .match, .proximate {
 	color: var(--red);
 	font-weight: normal;
@@ -1224,6 +1223,8 @@ td.textmakerembeddedannotations {
 td.browsercite {
 	padding-right: 10px;
 	padding-left: 10px;
+    font-size: 85%;
+	color: var(--huedgrey);
 	}
 
 td.count {

@@ -1190,6 +1190,8 @@ td.textmakerembeddedannotations {
 td.browsercite {
 	padding-right: 10px;
 	padding-left: 10px;
+    font-size: 85%;
+	color: var(--huedgrey);
 	}
 
 td.count {
