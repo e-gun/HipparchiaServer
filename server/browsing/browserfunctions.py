@@ -101,7 +101,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	citation = locusintocitation(workobject, focusline)
 	authorandwork = '<span class="author">{n}</span>, <span class="work">{t}</span><br />'.format(n=name, t=title)
 	# author + title can get pretty long
-	viewing = [avoidlonglines(authorandwork, 100, '<br />\n', [])]
+	viewing = [avoidlonglines(authorandwork, 100, '<br />\n', list())]
 	viewing.append('<span class="citation">{c}</span>'.format(c=citation))
 	if date != '':
 		if int(date) > 1:

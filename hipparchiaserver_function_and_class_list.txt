@@ -1,20 +1,20 @@
-cloc --not-match-f='^j' HipparchiaServer/
-      98 text files.
-      97 unique files.
+hipparchia_venv/ $ cloc --not-match-f='^j' HipparchiaServer/
+      99 text files.
+      98 unique files.
       13 files ignored.
 
-github.com/AlDanial/cloc v 1.72  T=0.90 s (99.8 files/s, 26404.6 lines/s)
+github.com/AlDanial/cloc v 1.74  T=1.10 s (82.7 files/s, 21594.2 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                          50           3173           4210           8519
-CSS                              2            489            320           1822
-XML                              7              0              0           1818
-HTML                            24            146             14           1624
+Python                          50           3225           4273           8585
+CSS                              2            488            322           1830
+HTML                            24            146             14           1625
+XML                              8              0              0           1562
 JavaScript                       6            200            180           1073
 Markdown                         1             53              0            172
 -------------------------------------------------------------------------------
-SUM:                            90           4061           4724          15028
+SUM:                            91           4112           4789          14847
 -------------------------------------------------------------------------------
 
 
@@ -63,6 +63,7 @@ dbsupport/citationfunctions.py:def perseuscitationsintohipparchiacitations(citat
 dbsupport/dbfunctions.py:def setthreadcount(startup=False):
 dbsupport/dbfunctions.py:def setconnection(autocommit='n', readonlyconnection=True):
 dbsupport/dbfunctions.py:def tablenamer(authorobject, thework):
+dbsupport/dbfunctions.py:def resultiterator(cursor, chunksize=5000):
 dbsupport/dbfunctions.py:def loadallauthorsasobjects():
 dbsupport/dbfunctions.py:def loadallworksasobjects():
 dbsupport/dbfunctions.py:def loadlemmataasobjects():
@@ -183,7 +184,6 @@ lexica/lexicalookups.py:def lexicalmatchesintohtml(observedform, morphologyobjec
 lexica/lexicalookups.py:def browserdictionarylookup(count, seekingentry, cursor):
 lexica/lexicalookups.py:def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber=0):
 lexica/lexicalookups.py:def convertdictionaryfindintoobject(foundline, dictionary, cursor):
-lexica/lexicalookups.py:def bulkddictsearch(cursor, dictionary, usecolumn, seeking):
 lexica/lexicalookups.py:def findtotalcounts(word, cursor):
 lexica/lexicalookups.py:def findcountsviawordcountstable(wordtocheck):
 lexica/lexicalookups.py:def getobservedwordprevalencedata(dictionaryword):
@@ -268,16 +268,17 @@ routes/selectionroutes.py:def getcurrentselections():
 routes/selectionroutes.py:def clearsession():
 routes/textandindexroutes.py:def completeindex():
 routes/textandindexroutes.py:def textmaker():
-routes/websocketroutes.py:def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 routes/websocketroutes.py:def checkforactivesearch(ts):
-searching/phrasesearching.py:def phrasesearch(maxhits, wkid, activepoll, searchobject, cursor):
-searching/phrasesearching.py:def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, count, commitcount, activepoll, searchobject):
+routes/websocketroutes.py:def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
+searching/phrasesearching.py:def phrasesearch(wkid, activepoll, searchobject, cursor):
+searching/phrasesearching.py:def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activepoll, searchobject):
 searching/proximitysearching.py:def withinxlines(workdbname, searchobject):
 searching/proximitysearching.py:def withinxwords(workdbname, searchobject):
 searching/searchdispatching.py:def searchdispatcher(searchobject, activepoll):
-searching/searchdispatching.py:def workonsimplesearch(count, foundlineobjects, searchlist, commitcount, activepoll, searchobject):
-searching/searchdispatching.py:def workonphrasesearch(foundlineobjects, searchinginside, commitcount, activepoll, searchobject):
-searching/searchdispatching.py:def workonproximitysearch(count, foundlineobjects, searchinginside, activepoll, searchobject):
+searching/searchdispatching.py:def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
+searching/searchdispatching.py:def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchobject):
+searching/searchdispatching.py:def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobject):
+searching/searchdispatching.py:def workonproximitysearch(foundlineobjects, searchinginside, activepoll, searchobject):
 searching/searchfunctions.py:def cleaninitialquery(seeking):
 searching/searchfunctions.py:def massagesearchtermsforwhitespace(query):
 searching/searchfunctions.py:def atsignwhereclauses(uidwithatsign, operand, authors):
@@ -298,5 +299,5 @@ textsandindices/textandindiceshelperfunctions.py:def textsegmentfindstartandstop
 textsandindices/textandindiceshelperfunctions.py:def wordindextohtmltable(indexingoutput, useheadwords):
 textsandindices/textandindiceshelperfunctions.py:def dictmerger(masterdict, targetdict):
 textsandindices/textandindiceshelperfunctions.py:def supplementalindexjs():
-textsandindices/textandindiceshelperfunctions.py:def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationvalue, brktype):
+textsandindices/textandindiceshelperfunctions.py:def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationvalue, brktype, openfinder=None, closefinder=None):
 textsandindices/textbuilder.py:def buildtext(work, firstline, lastline, linesevery, cursor):
