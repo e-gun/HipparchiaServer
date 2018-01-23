@@ -3,7 +3,7 @@
 
 {% block content %}
 
-  <h1 class="center">{{ numberfound }}&nbsp;Available {{ label }}</h1>
+  <h1 class="center">{{ numberfound }}&nbsp;{{ tag }} {{ label }}</h1>
   	<table>
         {% for result in found %} <tr><td>{{ result.key }}&nbsp;&nbsp;</td><td>{{ result.value }}</td></tr> {% endfor %}
     </table>

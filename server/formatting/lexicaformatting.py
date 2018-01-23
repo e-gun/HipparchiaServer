@@ -309,7 +309,7 @@ def insertbrowserlookups(htmlentry):
 	
 	biblios = re.compile(r'(<bibl.*?)(.*?)(</bibl>)')
 	bibs = re.findall(biblios, htmlentry)
-	bdict = {}
+	bdict = dict()
 	
 	for bib in bibs:
 		if 'Perseus:abo' not in bib[1]:

@@ -148,11 +148,17 @@ HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 #   the query is a regex 'or' that can have > 400 variations; this
 #   makes for slow faster; 40 tries of 10 variants is faster
 #
+# MAXVECTORSPACE: what is the largest set of words you are willing
+#   to vectorize in order to find the association network of a given
+#   lemmatized term? This sort of query get exponentially harder to
+#   execute and so you if you allow a full corpora search you will
+#   bring your system to it knees for a long, long time
 
 AUTOCONFIGWORKERS = 'yes'
 WORKERS = 3
 MPCOMMITCOUNT = 250
 LEMMACHUNKSIZE = 10
+MAXVECTORSPACE = 100000
 
 ### [6] settings that you can only configure here ###
 ##  [only change these items if you know why you are doing it] ##

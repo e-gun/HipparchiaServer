@@ -10,7 +10,7 @@ import re
 from os import path
 from sys import argv
 
-from flask import render_template
+from flask import redirect, render_template, url_for
 
 from server import hipparchia
 from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \
@@ -58,7 +58,7 @@ def databasecontents(dictionarytodisplay):
 		results = list()
 		dictionarytodisplay = '[invalid value]'
 
-	return render_template('dbcontentslister.html', found=results, numberfound=len(results), label=dictionarytodisplay)
+	return render_template('dbcontentslister.html', found=results, numberfound=len(results), label=dictionarytodisplay, tag='Available')
 
 
 @hipparchia.route('/csssamples')
@@ -106,3 +106,21 @@ def styesheetsamples():
 
 	return render_template('stylesampler.html', css=stylesheet, spans=spans, notspans=notspans,
 	                       numberfound=len(spans)+len(notspans))
+
+
+@hipparchia.route('/testroute')
+def testroute():
+	"""
+
+	execute a debugging function of your choice...
+
+	note that we expect to be using print() to generate the results and to send them to the console
+
+	:return:
+	"""
+
+	from server.routes.vectorroutes import findvectors
+
+	doimportedfunction = findvectors(0)
+
+	return redirect(url_for('frontpage'))
