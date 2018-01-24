@@ -148,6 +148,7 @@ def findvectors(timestamp):
 		allwords = set(allwords) - {''}
 
 		# find all possible forms of all the words we used
+		# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
 		morphdict = findheadwords(allwords, activepoll)
 		morphdict = {k: v for k, v in morphdict.items() if v is not None}
 		morphdict = {k: set([p.getbaseform() for p in morphdict[k].getpossible()]) for k in morphdict.keys()}
@@ -170,6 +171,10 @@ def findvectors(timestamp):
 		# 	print(k, vectorspace[k])
 
 		cosinevalues = caclulatecosinevalues(so.lemma.dictionaryentry, vectorspace, allheadwords.keys())
+
+		# apply the threshold and drop the 'None' items
+		threshold = 1.0 - hipparchia.config['VECTORDISTANCECUTOFF']
+		cosinevalues = {c: cosinevalues[c] for c in cosinevalues if cosinevalues[c] and cosinevalues[c] < threshold}
 
 		for v in polytonicsort(cosinevalues):
 			print(v, cosinevalues[v])

@@ -251,6 +251,12 @@ MAXVECTORSPACE = 100000
 #   NB: if both FORCELUNATESIGMANOMATTERWHAT and RESTOREMEDIALANDFINALSIGMA
 #  	are set to 'yes' lunates win (and you
 #   waste CPU cycles).
+#
+# VECTORDISTANCECUTOFF: how close Word A needs to be to Word B for the associative matrix
+#   calculations to decide that there is a relationship worth pursuing: a value between 1 and 0
+#   1 --> identical;
+#   0 --> completely unrelated
+#
 
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 TLGASSUMESBETACODE = 'yes'
@@ -264,6 +270,7 @@ SUPPRESSLONGREQUESTMESSAGE = 'no'
 ENOUGHALREADYWITHTHECOPYRIGHTNOTICE = 'no'
 HOBBLEREGEX = 'no'
 INSISTUPONSTANDARDANGLEBRACKETS = 'no'
+VECTORDISTANCECUTOFF = .2
 
 # lexical output settings
 SHOWGLOBALWORDCOUNTS = 'yes'
