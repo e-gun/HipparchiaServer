@@ -13,8 +13,7 @@ from flask import request, session
 from server import hipparchia
 from server.formatting.wordformatting import removegravity
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
-from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
-	polytonicsort
+from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.sessionfunctions import sessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import cleaninitialquery
@@ -122,10 +121,28 @@ def findvectors(timestamp):
 		print('wordstotal', wordstotal)
 
 	# DEBUGGING
-	# Nero Imperator
-
+	# Frogs and mice
 	so.lemma = lemmatadict['βάτραχοϲ']
 	searchlist = ['gr1220']
+
+	# Hippocrates
+	"""
+	Sought all 6 known forms of »εὕρηϲιϲ«
+	Searched 57 texts and found 35 passages (0.25s)
+	Sorted by name
+	"""
+	so.lemma = lemmatadict['εὕρηϲιϲ']
+	searchlist = ['gr0627']
+
+	# Galen
+	"""
+	Sought all 6 known forms of »εὕρηϲιϲ«
+	Searched 110 texts and found 296 passages (0.93s)
+	Sorted by name
+	"""
+	so.lemma = lemmatadict['εὕρηϲιϲ']
+	searchlist = ['gr0057']
+
 
 	if len(searchlist) > 0:
 		nosearch = False
@@ -155,7 +172,7 @@ def findvectors(timestamp):
 
 		# {'θεῶν': {'θεόϲ', 'θέα', 'θεάω', 'θεά'}, 'πώ': {'πω'}, 'πολλά': {'πολύϲ'}, 'πατήρ': {'πατήρ'}, ... }
 
-		# over-aggressive?
+		# over-aggressive? more thought/care might be required here
 		delenda = mostcommonwords()
 		morphdict = {k: v for k, v in morphdict.items() if v - delenda == v}
 
@@ -176,7 +193,24 @@ def findvectors(timestamp):
 		threshold = 1.0 - hipparchia.config['VECTORDISTANCECUTOFF']
 		cosinevalues = {c: cosinevalues[c] for c in cosinevalues if cosinevalues[c] and cosinevalues[c] < threshold}
 
-		for v in polytonicsort(cosinevalues):
-			print(v, cosinevalues[v])
+		# now we have the relationship of everybody to our lemmatized word
+
+		# print('CORE COSINE VALUES')
+		# for v in polytonicsort(cosinevalues):
+		# 	print(v, cosinevalues[v])
+
+		# next we look for the interrelationships of the words that are above the threshold
+		metacosinevals = dict()
+		metacosinevals[so.lemma.dictionaryentry] = cosinevalues
+		for v in cosinevalues:
+			metac = caclulatecosinevalues(v, vectorspace, cosinevalues.keys())
+			metac = {c: metac[c] for c in metac if metac[c] and metac[c] < threshold}
+			metacosinevals[v] = metac
+
+		# for headword in polytonicsort(metacosinevals.keys()):
+		# 	print(headword)
+		# 	for word in metacosinevals[headword]:
+		# 		print('\t',word, metacosinevals[headword][word])
+
 
 	return
