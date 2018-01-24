@@ -11,12 +11,15 @@ import time
 from flask import request, session
 
 from server import hipparchia
+from server.formatting.wordformatting import removegravity
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
-from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
+from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
+	polytonicsort
 from server.listsandsession.sessionfunctions import sessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import cleaninitialquery
-from server.semanticvectors.vectordispatcher import vectordispatching
+from server.semanticvectors.vectordispatcher import findheadwords, vectordispatching
+from server.semanticvectors.vectorhelpers import buildvectorspace, caclulatecosinevalues, mostcommonwords
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
 """
@@ -116,12 +119,12 @@ def findvectors(timestamp):
 		searchlist = list()
 		print('aborted vectorization: too many words {a} > {b}'.format(a=wordstotal, b=maxwords))
 	else:
-		print('wordstotal',wordstotal)
+		print('wordstotal', wordstotal)
 
 	# DEBUGGING
 	# Nero Imperator
 
-	so.lemma = lemmatadict['πατήρ']
+	so.lemma = lemmatadict['βάτραχοϲ']
 	searchlist = ['gr1220']
 
 	if len(searchlist) > 0:
@@ -134,9 +137,41 @@ def findvectors(timestamp):
 		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 		so.indexrestrictions = indexrestrictions
 
+		# find all sentences
 		sentences = vectordispatching(so, activepoll)
 
-		for s in enumerate(sentences):
-			print(s[0], s[1])
+		# find all words in use
+		allwords = [s.split(' ') for s in sentences]
+		# flatten
+		allwords = [item for sublist in allwords for item in sublist]
+		allwords = [removegravity(w) for w in allwords]
+		allwords = set(allwords) - {''}
+
+		# find all possible forms of all the words we used
+		morphdict = findheadwords(allwords, activepoll)
+		morphdict = {k: v for k, v in morphdict.items() if v is not None}
+		morphdict = {k: set([p.getbaseform() for p in morphdict[k].getpossible()]) for k in morphdict.keys()}
+
+		# {'θεῶν': {'θεόϲ', 'θέα', 'θεάω', 'θεά'}, 'πώ': {'πω'}, 'πολλά': {'πολύϲ'}, 'πατήρ': {'πατήρ'}, ... }
+
+		# over-aggressive?
+		delenda = mostcommonwords()
+		morphdict = {k: v for k, v in morphdict.items() if v - delenda == v}
+
+		# find all possible headwords of all of the forms in use
+		allheadwords = dict()
+		for m in morphdict.keys():
+			for h in morphdict[m]:
+				allheadwords[h] = m
+
+		vectorspace = buildvectorspace(allheadwords, morphdict, sentences, delenda)
+
+		# for k in vectorspace.keys():
+		# 	print(k, vectorspace[k])
+
+		cosinevalues = caclulatecosinevalues(so.lemma.dictionaryentry, vectorspace, allheadwords.keys())
+
+		for v in polytonicsort(cosinevalues):
+			print(v, cosinevalues[v])
 
 	return

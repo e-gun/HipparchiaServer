@@ -10,7 +10,9 @@ from multiprocessing import Manager, Process
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection, setthreadcount
+from server.hipparchiaobjects.helperobjects import MPCounter
 from server.semanticvectors.vectorhelpers import findsentences
+from server.textsandindices.indexmaker import mpmorphology
 
 
 def vectordispatching(searchobject, activepoll):
@@ -46,7 +48,36 @@ def vectordispatching(searchobject, activepoll):
 	for j in jobs:
 		j.join()
 
-	return foundsentences
+	return list(foundsentences)
+
+
+def findheadwords(wordlist, activepoll):
+	"""
+
+	return a dict of morpholog objects
+
+	:param wordlist:
+	:param activepoll:
+	:return:
+	"""
+
+	manager = Manager()
+	commitcount = MPCounter()
+	terms = manager.list(wordlist)
+	morphobjects = manager.dict()
+	workers = setthreadcount()
+
+	targetfunction = mpmorphology
+	argumentuple = (terms, morphobjects, commitcount)
+
+	jobs = [Process(target=targetfunction, args=argumentuple) for i in range(workers)]
+
+	for j in jobs:
+		j.start()
+	for j in jobs:
+		j.join()
+
+	return morphobjects
 
 
 def breaktextsintosentences(foundsentences, searchlist, activepoll, searchobject):
@@ -77,7 +108,7 @@ def breaktextsintosentences(foundsentences, searchlist, activepoll, searchobject
 			authortable = None
 
 		if authortable:
-			foundsentences = findsentences(authortable, so, curs)
+			foundsentences += findsentences(authortable, so, curs)
 
 			if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
 				dbconnection.commit()
@@ -91,3 +122,5 @@ def breaktextsintosentences(foundsentences, searchlist, activepoll, searchobject
 	curs.close()
 
 	return foundsentences
+
+

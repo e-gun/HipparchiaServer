@@ -86,8 +86,8 @@ def completeindex():
 
 	else:
 		# we do not have a valid selection
-		output = []
-		allworks = []
+		output = list()
+		allworks = list()
 
 	# get ready to send stuff to the page
 	count = len(output)
@@ -104,7 +104,7 @@ def completeindex():
 	buildtime = round(buildtime, 2)
 	poll[ts].deactivate()
 
-	results = {}
+	results = dict()
 	results['authorname'] = avoidsmallvariants(ao.shortname)
 	results['title'] = avoidsmallvariants(wo.title)
 	results['structure'] = avoidsmallvariants(wo.citation())

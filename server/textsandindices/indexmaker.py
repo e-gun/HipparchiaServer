@@ -157,7 +157,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		activepoll.allworkis(remaining)
 
 		# [b] find the baseforms
-		augmentedindexdict = {}
+		augmentedindexdict = dict()
 		for k in completeindexdict.keys():
 			remaining -= 1
 			activepoll.remain(remaining)
@@ -280,6 +280,16 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 
 
 def mpmorphology(terms, morphobjects, commitcount):
+	"""
+
+	build a dict of morphology objects
+
+	:param terms:
+	:param morphobjects:
+	:param commitcount:
+	:return:
+	"""
+
 	dbconnection = setconnection('not_autocommit')
 	curs = dbconnection.cursor()
 
