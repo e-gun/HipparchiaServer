@@ -6,12 +6,13 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import re
 import time
 
 from flask import request, session
 
 from server import hipparchia
-from server.formatting.wordformatting import removegravity
+from server.formatting.wordformatting import buildhipparchiatranstable, removegravity, stripaccents
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.sessionfunctions import sessionvariables
@@ -143,6 +144,11 @@ def findvectors(timestamp):
 	so.lemma = lemmatadict['εὕρηϲιϲ']
 	searchlist = ['gr0057']
 
+	# Vergil
+	so.lemma = lemmatadict['flos']
+	searchlist = ['lt0690']
+
+
 
 	if len(searchlist) > 0:
 		nosearch = False
@@ -156,13 +162,21 @@ def findvectors(timestamp):
 
 		# find all sentences
 		sentences = vectordispatching(so, activepoll)
-
+		print('sentences',sentences)
 		# find all words in use
 		allwords = [s.split(' ') for s in sentences]
 		# flatten
 		allwords = [item for sublist in allwords for item in sublist]
-		allwords = [removegravity(w) for w in allwords]
+
+		minimumgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
+		greekwords = [w for w in allwords if re.search(minimumgreek, w)]
+
+		trans = buildhipparchiatranstable()
+		latinwords = [w for w in allwords if not re.search(minimumgreek, w)]
+
+		allwords = [removegravity(w) for w in greekwords] + [stripaccents(w, trans) for w in latinwords]
 		allwords = set(allwords) - {''}
+		print('allwords',allwords)
 
 		# find all possible forms of all the words we used
 		# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
