@@ -349,13 +349,15 @@ def tidyupterm(word, punct=None):
 	# word = re.sub(r'\[.*?\]','', word) # '[o]missa' should be 'missa'
 	word = re.sub(r'[0-9]', '', word)
 	word = re.sub(punct, '', word)
+
 	# best do punct before this next one...
-	try:
-		if re.search(r'[a-zA-z]', word[0]) is None:
-			word = re.sub(r'[a-zA-z]', '', word)
-	except IndexError:
-		# must have been ''
-		pass
+	# wait a minute: why is this needed again? i is deadly if you use this function within vectorland
+	# try:
+	# 	if re.search(r'[a-zA-z]', word[0]) is None:
+	# 		word = re.sub(r'[a-zA-z]', '', word)
+	# except IndexError:
+	# 	# must have been ''
+	# 	pass
 
 	invals = u'jv'
 	outvals = u'iu'

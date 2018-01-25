@@ -20,51 +20,52 @@ def sessionvariables():
 
 	try:
 		session['greekcorpus']
-	except:
+	except KeyError:
 		# print('resetting session variables')
-		session['auselections'] = []
-		session['wkselections'] = []
-		session['agnselections'] = []
-		session['wkgnselections'] = []
-		session['psgselections'] = []
-		session['auexclusions'] = []
-		session['wkexclusions'] = []
-		session['agnexclusions'] = []
-		session['wkgnexclusions'] = []
-		session['psgexclusions'] = []
-		session['alocselections'] = []
-		session['alocexclusions'] = []
-		session['wlocselections'] = []
-		session['wlocexclusions'] = []
-		session['sensesummary'] = hipparchia.config['DEFAULTSHOWLEXICALSENSES']
+		session['agnexclusions'] = list()
+		session['agnselections'] = list()
+		session['alocexclusions'] = list()
+		session['alocselections'] = list()
+		session['auexclusions'] = list()
+		session['auselections'] = list()
 		session['authorssummary'] = hipparchia.config['DEFAULTSHOWLEXICALAUTHORS']
-		session['quotesummary'] = hipparchia.config['DEFAULTSHOWLEXICALQUOTES']
-		session['greekcorpus'] = hipparchia.config['DEFAULTGREEKCORPUSVALUE']
-		session['latincorpus'] = hipparchia.config['DEFAULTLATINCORPUSVALUE']
-		session['inscriptioncorpus'] = hipparchia.config['DEFAULTINSCRIPTIONCORPUSVALUE']
-		session['papyruscorpus'] = hipparchia.config['DEFAULTPAPYRUSCORPUSVALUE']
-		session['christiancorpus'] = hipparchia.config['DEFAULTCHRISTIANCORPUSVALUE']
-		session['proximity'] = '1'
-		session['nearornot'] = 'T'
-		session['searchscope'] = 'L'
-		session['headwordindexing'] = hipparchia.config['DEFAULTINDEXBYHEADWORDS']
-		session['indexbyfrequency'] = hipparchia.config['DEFAULTINDEXBYFREQUENCY']
-		session['linesofcontext'] = int(hipparchia.config['DEFAULTLINESOFCONTEXT'])
-		session['browsercontext'] = str(int(hipparchia.config['DEFAULTBROWSERLINES']))
-		session['maxresults'] = str(int(hipparchia.config['DEFAULTMAXRESULTS']))
-		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
-		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
-		session['latestdate'] = hipparchia.config['DEFAULTLATESTDATE']
-		session['xmission'] = 'Any'
-		session['spuria'] = hipparchia.config['DEFAULTSPURIA']
-		session['varia'] = hipparchia.config['DEFAULTVARIA']
-		session['incerta'] = hipparchia.config['DEFAULTINCERTA']
-		session['onehit'] = hipparchia.config['DEFAULTONEHIT']
-		session['bracketsquare'] = hipparchia.config['DEFAULTHIGHLIGHTSQUAREBRACKETS']
-		session['bracketround'] = hipparchia.config['DEFAULTHIGHLIGHTROUNDBRACKETS']
+		session['available'] = probefordatabases()
 		session['bracketangled'] = hipparchia.config['DEFAULTHIGHLIGHTANGLEDBRACKETS']
 		session['bracketcurly'] = hipparchia.config['DEFAULTHIGHLIGHTCURLYBRACKETS']
-		session['available'] = probefordatabases()
+		session['bracketround'] = hipparchia.config['DEFAULTHIGHLIGHTROUNDBRACKETS']
+		session['bracketsquare'] = hipparchia.config['DEFAULTHIGHLIGHTSQUAREBRACKETS']
+		session['browsercontext'] = str(int(hipparchia.config['DEFAULTBROWSERLINES']))
+		session['christiancorpus'] = hipparchia.config['DEFAULTCHRISTIANCORPUSVALUE']
+		session['cosinedistancesearch'] = 'no'
+		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
+		session['greekcorpus'] = hipparchia.config['DEFAULTGREEKCORPUSVALUE']
+		session['headwordindexing'] = hipparchia.config['DEFAULTINDEXBYHEADWORDS']
+		session['incerta'] = hipparchia.config['DEFAULTINCERTA']
+		session['indexbyfrequency'] = hipparchia.config['DEFAULTINDEXBYFREQUENCY']
+		session['inscriptioncorpus'] = hipparchia.config['DEFAULTINSCRIPTIONCORPUSVALUE']
+		session['latestdate'] = hipparchia.config['DEFAULTLATESTDATE']
+		session['latincorpus'] = hipparchia.config['DEFAULTLATINCORPUSVALUE']
+		session['linesofcontext'] = int(hipparchia.config['DEFAULTLINESOFCONTEXT'])
+		session['maxresults'] = str(int(hipparchia.config['DEFAULTMAXRESULTS']))
+		session['nearornot'] = 'T'
+		session['onehit'] = hipparchia.config['DEFAULTONEHIT']
+		session['papyruscorpus'] = hipparchia.config['DEFAULTPAPYRUSCORPUSVALUE']
+		session['proximity'] = '1'
+		session['psgexclusions'] = list()
+		session['psgselections'] = list()
+		session['quotesummary'] = hipparchia.config['DEFAULTSHOWLEXICALQUOTES']
+		session['searchscope'] = 'L'
+		session['sensesummary'] = hipparchia.config['DEFAULTSHOWLEXICALSENSES']
+		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
+		session['spuria'] = hipparchia.config['DEFAULTSPURIA']
+		session['varia'] = hipparchia.config['DEFAULTVARIA']
+		session['wkexclusions'] = list()
+		session['wkgnexclusions'] = list()
+		session['wkgnselections'] = list()
+		session['wkselections'] = list()
+		session['wlocexclusions'] = list()
+		session['wlocselections'] = list()
+		session['xmission'] = 'Any'
 
 	return
 
@@ -79,33 +80,34 @@ def modifysessionvar(param, val):
 	"""
 
 	availableoptions = [
-		'proximity',
-		'searchscope',
-		'maxresults',
-		'linesofcontext',
-		'browsercontext',
-		'sortorder',
-		'nearornot',
-		'earliestdate',
-		'latestdate',
-		'spuria',
-		'sensesummary',
 		'authorssummary',
-		'quotesummary',
-		'greekcorpus',
-		'latincorpus',
-		'inscriptioncorpus',
-		'papyruscorpus',
-		'christiancorpus',
-		'varia',
-		'incerta',
-		'onehit',
-		'headwordindexing',
-		'indexbyfrequency',
-		'bracketsquare',
-		'bracketround',
 		'bracketangled',
-		'bracketcurly'
+		'bracketcurly',
+		'bracketround',
+		'bracketsquare',
+		'browsercontext',
+		'christiancorpus',
+		'cosinedistancesearch',
+		'earliestdate',
+		'greekcorpus',
+		'headwordindexing',
+		'incerta',
+		'indexbyfrequency',
+		'inscriptioncorpus',
+		'latestdate',
+		'latincorpus',
+		'linesofcontext',
+		'maxresults',
+		'nearornot',
+		'onehit',
+		'papyruscorpus',
+		'proximity',
+		'quotesummary',
+		'searchscope',
+		'sensesummary',
+		'sortorder',
+		'spuria',
+		'varia'
 		]
 
 	if param in availableoptions:
@@ -131,9 +133,10 @@ def modifysessionvar(param, val):
 		for l in checkagainst.keys():
 			session[l] = [item for item in session[l] if item in returnactivelist(checkagainst[l])]
 
+	# our yes/no options
 	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
 				   'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary','authorssummary','quotesummary',
-					'bracketsquare', 'bracketround', 'bracketangled', 'bracketcurly', 'indexbyfrequency']:
+					'bracketsquare', 'bracketround', 'bracketangled', 'bracketcurly', 'indexbyfrequency', 'cosinedistancesearch']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 
@@ -306,7 +309,7 @@ def sessionselectionsashtml(authordict, workdict):
 	:return:
 	"""
 
-	selectioninfo = {}
+	selectioninfo = dict()
 	
 	selectioninfo['timeexclusions'] = sessiontimeexclusionsinfo()
 	sxhtml = sessionselectionsinfo(authordict, workdict)
@@ -404,8 +407,8 @@ def sessionselectionsinfo(authordict, workdict):
 	:return: 
 	"""
 
-	returndict = {}
-	thejs = []
+	returndict = dict()
+	thejs = list()
 	tit = 'title="Double-click to remove this item"'
 
 	try:
@@ -419,7 +422,7 @@ def sessionselectionsinfo(authordict, workdict):
 	                    session['wlocselections']
 
 	for selectionorexclusion in ['selections', 'exclusions']:
-		thehtml = []
+		thehtml = list()
 		# if there are no explicit selections, then
 		if len(sessionsearchlist) == 0 and selectionorexclusion == 'selections':
 			thehtml.append('<span class="picklabel">Authors</span><br />')
@@ -561,8 +564,8 @@ def selectionlinehtmlandjs(v, selectionorexclusion, session):
 	"""
 
 	var = v + selectionorexclusion
-	thehtml = []
-	thejs = []
+	thehtml = list()
+	thejs = list()
 	localval = -1
 	tit = 'title="Double-click to remove this item"'
 
@@ -811,7 +814,7 @@ def reducetosessionselections(listmapper, criterion):
 	
 	active = corpusselectionsaspseudobinarystring()
 
-	toactivate = []
+	toactivate = list()
 	position = -1
 
 	for a in active:
@@ -839,7 +842,7 @@ def returnactivedbs():
 	:return:
 	"""
 
-	keys = []
+	keys = list()
 	if session['latincorpus'] == 'yes':
 		keys.append('lt')
 	if session['greekcorpus'] == 'yes':
@@ -862,7 +865,7 @@ def findactivebrackethighlighting(s=session):
 	:return:
 	"""
 
-	brackets = []
+	brackets = list()
 
 	if s['bracketsquare'] == 'yes':
 		brackets.append('square')
@@ -911,7 +914,7 @@ def returnactivelist(selectiondict):
 
 	activedbs = returnactivedbs()
 
-	activelist = []
+	activelist = list()
 	for db in activedbs:
 		activelist += selectiondict[db]
 

@@ -9,6 +9,8 @@
 import re
 from string import punctuation
 
+# bleh: numpy and scipy will fail to install on FreeBSD 11.x
+# the work-around functions below might be needed instead: presumably there are markedly slower...
 import numpy as np
 from scipy.spatial.distance import cosine as cosinedist
 
@@ -56,7 +58,7 @@ def findsentences(authortable, searchobject, cursor):
 
 	turn it into a collection of sentences
 
-	look for the relevent lemma in them
+	look for the relevant lemma in them
 
 	return those sentences that contain the lemmatized word
 
@@ -128,7 +130,7 @@ def findsentences(authortable, searchobject, cursor):
 	return cleanedmatches
 
 
-def buildvectorspace(allheadwords, morphdict, sentences, delenda):
+def buildvectorspace(allheadwords, morphdict, sentences):
 	"""
 
 	build a vector space of all headwords for all words in all sentences

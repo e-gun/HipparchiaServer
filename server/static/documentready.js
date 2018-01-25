@@ -123,7 +123,7 @@ $(document).ready( function () {
 
         summaryhtml += 'Sought '+output['htmlsearch']+'<br />\n';
         if ( output['scope'] != '1') { summaryhtml += 'Searched '+output['scope']+' texts '; } else { summaryhtml += 'Searched 1 text '; }
-        summaryhtml += 'and found '+output['resultcount']+' passages';
+        summaryhtml += 'and found '+output['resultcount'];
         summaryhtml += ' ('+output['searchtime']+'s)';
         if (output['icandodates'] == 'yes' ) { if (output['dmin'] != '850 B.C.E.' || output['dmax'] != '1500 C.E.') { summaryhtml += '<br />Searched between '+output['dmin']+' and '+output['dmax']; } }
         if (output['onehit'] == 'yes') { summaryhtml += '<br />Only allowing one match per item searched (either a whole author or a specified work)'; }
@@ -180,7 +180,7 @@ $(document).ready( function () {
 
     var tohideonfirstload = new Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur',
         '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform',
-        '#termonecheckbox');
+        '#termonecheckbox', '#cosinedistancecheckbox');
     bulkhider(tohideonfirstload);
 
     //

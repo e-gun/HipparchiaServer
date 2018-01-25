@@ -26,6 +26,7 @@ from server.listsandsession.listmanagement import calculatewholeauthorsearches, 
 	sortresultslist
 from server.listsandsession.sessionfunctions import justlatin, justtlg, sessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
+from server.routes.vectorroutes import findvectors
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import cleaninitialquery
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
@@ -49,7 +50,15 @@ def executesearch(timestamp):
 	except:
 		ts = str(int(time.time()))
 
+
 	sessionvariables()
+	# fork over to the associative vectors fraework if that option we checked
+	# return the data derived therefrom instead of "search result" data
+	if session['cosinedistancesearch'] == 'yes':
+		lemma = cleaninitialquery(request.args.get('lem', ''))
+		output = findvectors(lemma)
+		return output
+
 	# a search can take 30s or more and the user might alter the session while the search is running
 	# by toggling onehit, etc that can be a problem, so freeze the values now and rely on this instead
 	# of some moving target
@@ -268,7 +277,7 @@ def executesearch(timestamp):
 		output['title'] = thesearch
 		output['found'] = findshtml
 		output['js'] = findsjs
-		output['resultcount'] = resultcount
+		output['resultcount'] = '{r} passages'.format(r=resultcount)
 		output['scope'] = workssearched
 		output['searchtime'] = str(searchtime)
 		output['proximate'] = proximate
@@ -296,7 +305,7 @@ def executesearch(timestamp):
 		output = dict()
 		output['title'] = '(empty query)'
 		output['found'] = ''
-		output['resultcount'] = 0
+		output['resultcount'] = '0 passages'
 		output['scope'] = 0
 		output['searchtime'] = '0.00'
 		output['proximate'] = proximate

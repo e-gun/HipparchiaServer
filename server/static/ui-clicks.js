@@ -159,6 +159,11 @@ function loadoptions() {
             $('#christiancorpus').prop('checked', false);
             $('#chrisactive').hide();
             }
+        if (data.cosinedistancesearch == 'yes') {
+            $('#cosinedistancesearch').prop('checked', true);
+            } else {
+            $('#cosinedistancesearch').prop('checked', false);
+            }
         });
 }
 
@@ -462,16 +467,27 @@ $('#bracketcurly').change(function () {
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
 
+$('#cosinedistancesearch').change(function () {
+    if(this.checked) {
+        setoptions('cosinedistancesearch', 'yes'); } else { setoptions('cosinedistancesearch', 'no');
+    }
+    // because some items on your list just got purged?
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    });
 
 $('#termoneisalemma').change(function () {
     if(this.checked) {
         $('#wordsearchform').hide();
         $('#wordsearchform').val('');
         $('#lemmatasearchform').show();
+        $('#cosinedistancecheckbox').show()
+        $('#cosinedistancesearch').attr('checked', false);
         } else {
         $('#lemmatasearchform').hide();
         $('#lemmatasearchform').val('');
         $('#wordsearchform').show();
+        $('#cosinedistancecheckbox').hide()
+        $('#cosinedistancesearch').attr('checked', false);
         }
     });
 

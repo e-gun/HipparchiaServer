@@ -158,7 +158,7 @@ AUTOCONFIGWORKERS = 'yes'
 WORKERS = 3
 MPCOMMITCOUNT = 250
 LEMMACHUNKSIZE = 10
-MAXVECTORSPACE = 100000
+MAXVECTORSPACE = 2000000
 
 ### [6] settings that you can only configure here ###
 ##  [only change these items if you know why you are doing it] ##

@@ -6,18 +6,20 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import json
+import locale
 import re
 import time
 
-from flask import request, session
+from flask import session
 
 from server import hipparchia
+from server.formatting.bibliographicformatting import bcedating
 from server.formatting.wordformatting import buildhipparchiatranstable, removegravity, stripaccents
 from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.sessionfunctions import sessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.searching.searchfunctions import cleaninitialquery
 from server.semanticvectors.vectordispatcher import findheadwords, vectordispatching
 from server.semanticvectors.vectorhelpers import buildvectorspace, caclulatecosinevalues, mostcommonwords
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
@@ -52,8 +54,8 @@ from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 """
 
 
-@hipparchia.route('/findvectors/<timestamp>', methods=['GET'])
-def findvectors(timestamp):
+@hipparchia.route('/findvectors', methods=['GET'])
+def findvectors(lemma=None):
 	"""
 
 	use the searchlist to grab a collection of passages
@@ -62,17 +64,16 @@ def findvectors(timestamp):
 
 	then take a lemmatized search term and build association semanticvectors around that term in those passages
 
-	:param timestamp:
+	:param lemma:
 	:return:
 	"""
 	starttime = time.time()
 
-	try:
-		ts = str(int(timestamp))
-	except:
-		ts = str(int(time.time()))
+	ts = str(int(time.time()))
 
-	lemma = cleaninitialquery(request.args.get('lem', ''))
+	# we are not really a route at the moment, but instead being called by execute search
+	# when the Δ option is checked; hence the commenting out of the following
+	# lemma = cleaninitialquery(request.args.get('lem', ''))
 
 	try:
 		lemma = lemmatadict[lemma]
@@ -85,6 +86,7 @@ def findvectors(timestamp):
 	activepoll.statusis('Preparing to search')
 
 	searchlist = list()
+	reasons = list()
 	output = ''
 	nosearch = True
 
@@ -93,6 +95,8 @@ def findvectors(timestamp):
 	proximatelemma = ''
 	sessionvariables()
 	frozensession = session.copy()
+
+	dmin, dmax = bcedating(frozensession)
 
 	so = SearchObject(ts, seeking, proximate, lemma, proximatelemma, frozensession)
 	so.usecolumn = 'marked_up_line'
@@ -117,38 +121,50 @@ def findvectors(timestamp):
 
 	if wordstotal > maxwords:
 		searchlist = list()
-		print('aborted vectorization: too many words {a} > {b}'.format(a=wordstotal, b=maxwords))
-	else:
-		print('wordstotal', wordstotal)
+		print('too many words {a} > {b}'.format(a=wordstotal, b=maxwords))
+		reasons.append('aborted vectorization: too many words {a} > {b}'.format(a=wordstotal, b=maxwords))
 
 	# DEBUGGING
 	# Frogs and mice
-	so.lemma = lemmatadict['βάτραχοϲ']
-	searchlist = ['gr1220']
+	# so.lemma = lemmatadict['βάτραχοϲ']
+	# searchlist = ['gr1220']
+	#
+	# # Hippocrates
+	# """
+	# Sought all 6 known forms of »εὕρηϲιϲ«
+	# Searched 57 texts and found 35 passages (0.25s)
+	# Sorted by name
+	# """
+	# so.lemma = lemmatadict['εὕρηϲιϲ']
+	# searchlist = ['gr0627']
+	#
+	# # Galen
+	# """
+	# Sought all 6 known forms of »εὕρηϲιϲ«
+	# Searched 110 texts and found 296 passages (0.93s)
+	# Sorted by name
+	#
+	# Sought all 9 known forms of »εὕρεϲιϲ«
+	# Searched 110 texts and found 288 passages (0.59s)
+	# Sorted by name
+	#
+	# """
+	#
+	# so.lemma = lemmatadict['εὕρεϲιϲ']
+	# so.lemma.formlist = list(set(lemmatadict['εὕρεϲιϲ'].formlist + lemmatadict['εὕρηϲιϲ'].formlist))
+	# searchlist = ['gr0057']
+	#
+	# so.lemma = lemmatadict['παραλείπω']
 
-	# Hippocrates
-	"""
-	Sought all 6 known forms of »εὕρηϲιϲ«
-	Searched 57 texts and found 35 passages (0.25s)
-	Sorted by name
-	"""
-	so.lemma = lemmatadict['εὕρηϲιϲ']
-	searchlist = ['gr0627']
-
-	# Galen
-	"""
-	Sought all 6 known forms of »εὕρηϲιϲ«
-	Searched 110 texts and found 296 passages (0.93s)
-	Sorted by name
-	"""
-	so.lemma = lemmatadict['εὕρηϲιϲ']
-	searchlist = ['gr0057']
+	# Euripides
+	# so.lemma = lemmatadict['ἄτη']
+	# print(so.lemma.formlist)
+	# so.lemma.formlist = ['ἄτῃ', 'ἄταν', 'ἄτηϲ', 'ἄτηι']
+	# searchlist = ['gr0006']
 
 	# Vergil
-	so.lemma = lemmatadict['flos']
-	searchlist = ['lt0690']
-
-
+	# so.lemma = lemmatadict['flos']
+	# searchlist = ['lt0690']
 
 	if len(searchlist) > 0:
 		nosearch = False
@@ -162,7 +178,7 @@ def findvectors(timestamp):
 
 		# find all sentences
 		sentences = vectordispatching(so, activepoll)
-		print('sentences',sentences)
+
 		# find all words in use
 		allwords = [s.split(' ') for s in sentences]
 		# flatten
@@ -176,7 +192,6 @@ def findvectors(timestamp):
 
 		allwords = [removegravity(w) for w in greekwords] + [stripaccents(w, trans) for w in latinwords]
 		allwords = set(allwords) - {''}
-		print('allwords',allwords)
 
 		# find all possible forms of all the words we used
 		# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
@@ -191,12 +206,13 @@ def findvectors(timestamp):
 		morphdict = {k: v for k, v in morphdict.items() if v - delenda == v}
 
 		# find all possible headwords of all of the forms in use
+		# note that we will not know what we did not know: count unparsed words too and deliver that as info at the end?
 		allheadwords = dict()
 		for m in morphdict.keys():
 			for h in morphdict[m]:
 				allheadwords[h] = m
 
-		vectorspace = buildvectorspace(allheadwords, morphdict, sentences, delenda)
+		vectorspace = buildvectorspace(allheadwords, morphdict, sentences)
 
 		# for k in vectorspace.keys():
 		# 	print(k, vectorspace[k])
@@ -212,6 +228,10 @@ def findvectors(timestamp):
 		# print('CORE COSINE VALUES')
 		# for v in polytonicsort(cosinevalues):
 		# 	print(v, cosinevalues[v])
+		ccv = [(cosinevalues[v], v) for v in cosinevalues]
+		ccv = sorted(ccv, key=lambda t: t[0])
+		ccv = ['{a}\t{b}'.format(a=c[0], b=c[1]) for c in ccv]
+		ccv = '\n'.join(ccv)
 
 		# next we look for the interrelationships of the words that are above the threshold
 		metacosinevals = dict()
@@ -224,7 +244,58 @@ def findvectors(timestamp):
 		# for headword in polytonicsort(metacosinevals.keys()):
 		# 	print(headword)
 		# 	for word in metacosinevals[headword]:
-		# 		print('\t',word, metacosinevals[headword][word])
+		# 		print('\t', word, metacosinevals[headword][word])
 
+		findshtml = '<pre>{ccv}</pre>'.format(ccv=ccv)
+		nosearch = False
 
-	return
+	if not nosearch:
+		searchtime = time.time() - starttime
+		searchtime = round(searchtime, 2)
+		workssearched = locale.format('%d', workssearched, grouping=True)
+
+		output = dict()
+		output['title'] = 'Cosine distances to »{skg}«'.format(skg=lemma.dictionaryentry)
+		output['found'] = findshtml
+		# ultimately the js should let you clock on any top word to find its associations...
+		output['js'] = ''
+		output['resultcount'] = '{c} related terms'.format(c=len(cosinevalues))
+		output['scope'] = workssearched
+		output['searchtime'] = str(searchtime)
+		output['proximate'] = ''
+		output['thesearch'] = 'all forms of »{skg}«'.format(skg=lemma.dictionaryentry)
+		output['htmlsearch'] = 'all forms of <span class="sought">»{skg}«</span>'.format(skg=lemma.dictionaryentry)
+		output['hitmax'] = ''
+		output['onehit'] = ''
+		output['sortby'] = 'distance'
+		output['dmin'] = dmin
+		output['dmax'] = dmax
+		activepoll.deactivate()
+
+	if nosearch:
+		if not activecorpora:
+			reasons.append('there are no active databases')
+		if not lemma:
+			reasons.append('no lemmatized term was provided')
+		if len(searchlist) == 0:
+			reasons.append('no works in the searchlist')
+		output = dict()
+		output['title'] = '(empty query)'
+		output['found'] = ''
+		output['resultcount'] = 0
+		output['scope'] = 0
+		output['searchtime'] = '0.00'
+		output['proximate'] = proximate
+		output['thesearch'] = ''
+		output['htmlsearch'] = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=' and '.join(reasons))
+		output['hitmax'] = 0
+		output['dmin'] = dmin
+		output['dmax'] = dmax
+		output['sortby'] = frozensession['sortorder']
+		output['onehit'] = frozensession['onehit']
+
+	output = json.dumps(output)
+
+	del poll[ts]
+
+	return output
