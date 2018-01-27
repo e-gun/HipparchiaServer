@@ -55,7 +55,7 @@ from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
 
 @hipparchia.route('/findvectors', methods=['GET'])
-def findvectors(lemma=None):
+def findvectors(searchitem=None, vtype='lemma'):
 	"""
 
 	use the searchlist to grab a collection of passages
@@ -64,9 +64,11 @@ def findvectors(lemma=None):
 
 	then take a lemmatized search term and build association semanticvectors around that term in those passages
 
-	:param lemma:
+	:param searchitem:
+	:param vtype:
 	:return:
 	"""
+
 	starttime = time.time()
 
 	ts = str(int(time.time()))
@@ -75,10 +77,16 @@ def findvectors(lemma=None):
 	# when the Δ option is checked; hence the commenting out of the following
 	# lemma = cleaninitialquery(request.args.get('lem', ''))
 
-	try:
-		lemma = lemmatadict[lemma]
-	except KeyError:
-		lemma = None
+	lemma = None
+	seeking = ''
+
+	if vtype == 'string':
+		seeking = searchitem
+	else:
+		try:
+			lemma = lemmatadict[searchitem]
+		except KeyError:
+			pass
 
 	poll[ts] = ProgressPoll(ts)
 	activepoll = poll[ts]
@@ -90,7 +98,6 @@ def findvectors(lemma=None):
 	output = ''
 	nosearch = True
 
-	seeking = ''
 	proximate = ''
 	proximatelemma = ''
 	sessionvariables()
@@ -104,7 +111,7 @@ def findvectors(lemma=None):
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	activecorpora = [c for c in allcorpora if frozensession[c] == 'yes']
 
-	if lemma and activecorpora:
+	if (lemma or seeking) and activecorpora:
 		activepoll.statusis('Compiling the list of works to search')
 		searchlist = compilesearchlist(listmapper, frozensession)
 
@@ -121,8 +128,7 @@ def findvectors(lemma=None):
 
 	if wordstotal > maxwords:
 		searchlist = list()
-		print('too many words {a} > {b}'.format(a=wordstotal, b=maxwords))
-		reasons.append('aborted vectorization: too many words {a} > {b}'.format(a=wordstotal, b=maxwords))
+		reasons.append('the vector scope max exceeded: {a} > {b} '.format(a=locale.format('%d', wordstotal, grouping=True), b=locale.format('%d', maxwords, grouping=True)))
 
 	# DEBUGGING
 	# Frogs and mice
@@ -177,6 +183,7 @@ def findvectors(lemma=None):
 		so.indexrestrictions = indexrestrictions
 
 		# find all sentences
+		activepoll.statusis('Finding all sentences')
 		sentences = vectordispatching(so, activepoll)
 
 		# find all words in use
@@ -195,6 +202,7 @@ def findvectors(lemma=None):
 
 		# find all possible forms of all the words we used
 		# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
+		activepoll.statusis('Finding headwords')
 		morphdict = findheadwords(allwords, activepoll)
 		morphdict = {k: v for k, v in morphdict.items() if v is not None}
 		morphdict = {k: set([p.getbaseform() for p in morphdict[k].getpossible()]) for k in morphdict.keys()}
@@ -212,12 +220,19 @@ def findvectors(lemma=None):
 			for h in morphdict[m]:
 				allheadwords[h] = m
 
-		vectorspace = buildvectorspace(allheadwords, morphdict, sentences)
+		activepoll.statusis('Building vectors')
+		vectorspace = buildvectorspace(allheadwords, morphdict, sentences, focusterm=seeking)
 
 		# for k in vectorspace.keys():
 		# 	print(k, vectorspace[k])
 
-		cosinevalues = caclulatecosinevalues(so.lemma.dictionaryentry, vectorspace, allheadwords.keys())
+		activepoll.statusis('Calculating cosine distances')
+		if lemma:
+			focus = so.lemma.dictionaryentry
+		else:
+			focus = seeking
+
+		cosinevalues = caclulatecosinevalues(focus, vectorspace, allheadwords.keys())
 
 		# apply the threshold and drop the 'None' items
 		threshold = 1.0 - hipparchia.config['VECTORDISTANCECUTOFF']
@@ -230,12 +245,12 @@ def findvectors(lemma=None):
 		# 	print(v, cosinevalues[v])
 		ccv = [(cosinevalues[v], v) for v in cosinevalues]
 		ccv = sorted(ccv, key=lambda t: t[0])
-		ccv = ['{a}\t{b}'.format(a=c[0], b=c[1]) for c in ccv]
+		ccv = ['\t{a}\t{b}'.format(a=round(c[0],3), b=c[1]) for c in ccv]
 		ccv = '\n'.join(ccv)
 
 		# next we look for the interrelationships of the words that are above the threshold
 		metacosinevals = dict()
-		metacosinevals[so.lemma.dictionaryentry] = cosinevalues
+		metacosinevals[focus] = cosinevalues
 		for v in cosinevalues:
 			metac = caclulatecosinevalues(v, vectorspace, cosinevalues.keys())
 			metac = {c: metac[c] for c in metac if metac[c] and metac[c] < threshold}
@@ -255,19 +270,23 @@ def findvectors(lemma=None):
 		workssearched = locale.format('%d', workssearched, grouping=True)
 
 		output = dict()
-		output['title'] = 'Cosine distances to »{skg}«'.format(skg=lemma.dictionaryentry)
+		output['title'] = 'Cosine distances to »{skg}«'.format(skg=focus)
 		output['found'] = findshtml
 		# ultimately the js should let you clock on any top word to find its associations...
 		output['js'] = ''
-		output['resultcount'] = '{c} related terms'.format(c=len(cosinevalues))
+		output['resultcount'] = '{c} related terms in {s} sentences'.format(c=len(cosinevalues), s=len(sentences))
 		output['scope'] = workssearched
 		output['searchtime'] = str(searchtime)
 		output['proximate'] = ''
-		output['thesearch'] = 'all forms of »{skg}«'.format(skg=lemma.dictionaryentry)
-		output['htmlsearch'] = 'all forms of <span class="sought">»{skg}«</span>'.format(skg=lemma.dictionaryentry)
+		if lemma:
+			xtra = 'all forms of '
+		else:
+			xtra = ''
+		output['thesearch'] = '{x}»{skg}«'.format(x=xtra, skg=focus)
+		output['htmlsearch'] = '{x}<span class="sought">»{skg}«</span>'.format(x=xtra, skg=focus)
 		output['hitmax'] = ''
 		output['onehit'] = ''
-		output['sortby'] = 'distance'
+		output['sortby'] = 'distance with a cutoff of {c}'.format(c=1-hipparchia.config['VECTORDISTANCECUTOFF'])
 		output['dmin'] = dmin
 		output['dmax'] = dmax
 		activepoll.deactivate()
@@ -275,8 +294,8 @@ def findvectors(lemma=None):
 	if nosearch:
 		if not activecorpora:
 			reasons.append('there are no active databases')
-		if not lemma:
-			reasons.append('no lemmatized term was provided')
+		if not (lemma or seeking):
+			reasons.append('no search term was provided')
 		if len(searchlist) == 0:
 			reasons.append('no works in the searchlist')
 		output = dict()

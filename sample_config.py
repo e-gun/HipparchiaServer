@@ -152,7 +152,10 @@ HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 #   to vectorize in order to find the association network of a given
 #   lemmatized term? This sort of query get exponentially harder to
 #   execute and so you if you allow a full corpora search you will
-#   bring your system to it knees for a long, long time
+#   bring your system to it knees for a long, long time. 7548165 is
+#   all of Latin. If you search for a common word you can easily
+#   chew up >24GB of RAM. Your sytem will hang unless/until Hipparchia
+#   receives more memory optimizations
 
 AUTOCONFIGWORKERS = 'yes'
 WORKERS = 3

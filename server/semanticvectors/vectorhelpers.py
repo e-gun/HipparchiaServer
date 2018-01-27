@@ -113,9 +113,12 @@ def findsentences(authortable, searchobject, cursor):
 	terminations = ['.', '?', '!', '·', ';']
 	allsentences = recursivesplit([wholetext], terminations)
 
-	terms = [acuteorgrav(t) for t in so.lemma.formlist]
-	lookingfor = "|".join(terms)
-	lookingfor = '({lf})'.format(lf=lookingfor)
+	if so.lemma:
+		terms = [acuteorgrav(t) for t in so.lemma.formlist]
+		lookingfor = "|".join(terms)
+		lookingfor = '({lf})'.format(lf=lookingfor)
+	else:
+		lookingfor = so.seeking
 
 	matches = [s for s in allsentences if re.search(lookingfor, s)]
 
@@ -130,7 +133,7 @@ def findsentences(authortable, searchobject, cursor):
 	return cleanedmatches
 
 
-def buildvectorspace(allheadwords, morphdict, sentences):
+def buildvectorspace(allheadwords, morphdict, sentences, focusterm=None):
 	"""
 
 	build a vector space of all headwords for all words in all sentences
@@ -152,6 +155,7 @@ def buildvectorspace(allheadwords, morphdict, sentences):
 	  'θέα': 0, 'θεόϲ': 0, 'ἐάν': 0, 'ἄν²': 0, 'ἀνά': 0, 'μεγαλήτωρ': 1, 'Πηλεύϲ':
 	  0, 'ἑόϲ': 0, 'ὕπτιοϲ': 0, 'τότε': 0, 'ἐκ-ἁπλόω': 0, 'ἔρδω': 0, 'ἕνεκα': 0}
 
+	a lemmatized search does not need the focus term
 
 	:param allheadwords:
 	:param morphdict:
@@ -161,7 +165,15 @@ def buildvectorspace(allheadwords, morphdict, sentences):
 
 	vectorspace = dict()
 	vectormapper = dict()
+	extracount = dict()
+
 	for n, s in enumerate(sentences):
+		if focusterm:
+			# pull it out because it will not lemmatize
+			# and then allheadwords.keys() will thrown an exception
+			# note that if you have the same word 2x in an sentence we just lost count of that...
+			extracount[n] = len(re.findall(focusterm, s))
+			s = re.sub(focusterm, '', s)
 		words = s.split(' ')
 		vectormapper[n] = [w for w in words if w]
 
@@ -179,6 +191,9 @@ def buildvectorspace(allheadwords, morphdict, sentences):
 
 		for h in headwords:
 			vectorspace[n][h] += 1
+
+		if focusterm:
+			vectorspace[n][focusterm] = extracount[n]
 
 	return vectorspace
 
@@ -241,6 +256,7 @@ def caclulatecosinevalues(focusword, vectorspace, headwords):
 	numberedsentences = vectorspace.keys()
 
 	lemmavalues = list()
+
 	for num in numberedsentences:
 		lemmavalues.append(vectorspace[num][focusword])
 

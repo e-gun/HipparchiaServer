@@ -469,8 +469,12 @@ $('#bracketcurly').change(function () {
 
 $('#cosinedistancesearch').change(function () {
     if(this.checked) {
-        setoptions('cosinedistancesearch', 'yes'); } else { setoptions('cosinedistancesearch', 'no');
-    }
+        setoptions('cosinedistancesearch', 'yes');
+        $('#complexsearching').hide();
+        } else {
+        setoptions('cosinedistancesearch', 'no');
+        $('#complexsearching').show();
+        }
     // because some items on your list just got purged?
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
@@ -480,14 +484,10 @@ $('#termoneisalemma').change(function () {
         $('#wordsearchform').hide();
         $('#wordsearchform').val('');
         $('#lemmatasearchform').show();
-        $('#cosinedistancecheckbox').show()
-        $('#cosinedistancesearch').attr('checked', false);
         } else {
         $('#lemmatasearchform').hide();
         $('#lemmatasearchform').val('');
         $('#wordsearchform').show();
-        $('#cosinedistancecheckbox').hide()
-        $('#cosinedistancesearch').attr('checked', false);
         }
     });
 

@@ -56,7 +56,11 @@ def executesearch(timestamp):
 	# return the data derived therefrom instead of "search result" data
 	if session['cosinedistancesearch'] == 'yes':
 		lemma = cleaninitialquery(request.args.get('lem', ''))
-		output = findvectors(lemma)
+		seeking = cleaninitialquery(request.args.get('skg', ''))
+		if len(lemma) > len(seeking):
+			output = findvectors(lemma, vtype='lemma')
+		else:
+			output = findvectors(seeking, vtype='string')
 		return output
 
 	# a search can take 30s or more and the user might alter the session while the search is running

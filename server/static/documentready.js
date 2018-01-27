@@ -52,6 +52,7 @@ $(document).ready( function () {
                 });
         $('#complexsearching').toggle();
         $('#termonecheckbox').toggle();
+        $('#cosinedistancecheckbox').toggle();
         });
 
     $('#executesearch').click( function(){
