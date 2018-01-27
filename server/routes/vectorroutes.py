@@ -12,7 +12,8 @@ import time
 
 from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
-from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
+from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
+	polytonicsort
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
 from server.semanticvectors.vectorhelpers import buildvectorspace, caclulatecosinevalues, findverctorenvirons, \
@@ -157,7 +158,6 @@ def findvectorsfromhits(searchobject, hitdict, activepoll, starttime, workssearc
 	:return:
 	"""
 
-	print('findvectorsfromhits()')
 
 	so = searchobject
 	fs = so.session
@@ -221,12 +221,24 @@ def findvectorsfromhits(searchobject, hitdict, activepoll, starttime, workssearc
 		metac = {c: metac[c] for c in metac if metac[c] and metac[c] < threshold}
 		metacosinevals[v] = metac
 
-	# for headword in polytonicsort(metacosinevals.keys()):
-	# 	print(headword)
-	# 	for word in metacosinevals[headword]:
-	# 		print('\t', word, metacosinevals[headword][word])
+	mcv = list(['\nrelationships of these terms to one another\n'])
+	for headword in polytonicsort(metacosinevals.keys()):
+		# print(headword)
+		# for word in metacosinevals[headword]:
+		# 	print('\t', word, metacosinevals[headword][word])
+		if headword != focus:
+			insetvals = [(metacosinevals[headword][word], word) for word in metacosinevals[headword]]
+			insetvals = sorted(insetvals, key=lambda t: t[0])
+			insetvals = ['\t{a}\t{b}'.format(a=round(c[0], 3), b=c[1]) for c in insetvals]
+			if insetvals:
+				mcv.append(headword)
+			mcv += insetvals
+	if len(mcv) > 1:
+		mcv = '\n'.join(mcv)
+	else:
+		mcv = ''
 
-	findshtml = '<pre>{ccv}</pre>'.format(ccv=ccv)
+	findshtml = '<pre>{ccv}</pre>\n\n<pre>{mcv}</pre>'.format(ccv=ccv, mcv=mcv)
 	searchtime = time.time() - starttime
 	searchtime = round(searchtime, 2)
 	workssearched = locale.format('%d', workssearched, grouping=True)

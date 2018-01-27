@@ -373,7 +373,7 @@ def findverctorenvirons(hitdict, searchobject):
 
 		# generate the environs
 		dropdupes = set()
-		# RESUME HERE
+
 		for h in hitdict:
 			need = ['{t}@{i}'.format(t=hitdict[h].authorid, i=i) for i in range(hitdict[h].index-distance, hitdict[h].index+distance)]
 			for n in need:
