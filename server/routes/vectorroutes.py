@@ -133,7 +133,7 @@ def findvectorsbysentence(activepoll, searchobject):
 		activepoll.statusis('Finding all sentences')
 		sentences = vectorsentencedispatching(so, activepoll)
 
-		output = generatevectoroutput(sentences, workssearched, so, activepoll, starttime)
+		output = generatevectoroutput(sentences, workssearched, so, activepoll, starttime, 'sentences')
 	else:
 		return emptyvectoroutput(so)
 
@@ -158,123 +158,17 @@ def findvectorsfromhits(searchobject, hitdict, activepoll, starttime, workssearc
 	:return:
 	"""
 
-
 	so = searchobject
-	fs = so.session
-
-	dmin, dmax = bcedating(fs)
 
 	activepoll.statusis('Compiling proximite wordlists')
 	environs = findverctorenvirons(hitdict, so)
 
-	allwords = findwordvectorset(environs)
-
-	activepoll.statusis('Finding headwords')
-	morphdict = findheadwords(allwords, activepoll)
-	morphdict = tidyupmophdict(morphdict)
-
-	# print('morphdict', morphdict)
-
-	# find all possible headwords of all of the forms in use
-	# note that we will not know what we did not know: count unparsed words too and deliver that as info at the end?
-	allheadwords = dict()
-	for m in morphdict.keys():
-		for h in morphdict[m]:
-			allheadwords[h] = m
-
-	if so.lemma:
-		focus = None
-	else:
-		focus = so.seeking
-
-	activepoll.statusis('Building vectors')
-	vectorspace = buildvectorspace(allheadwords, morphdict, environs, focusterm=focus)
-
-	# for k in vectorspace.keys():
-	# 	print(k, vectorspace[k])
-
-	activepoll.statusis('Calculating cosine distances')
-	if so.lemma:
-		focus = so.lemma.dictionaryentry
-	cosinevalues = caclulatecosinevalues(focus, vectorspace, allheadwords.keys())
-
-	# apply the threshold and drop the 'None' items
-	threshold = 1.0 - hipparchia.config['VECTORDISTANCECUTOFF']
-	cosinevalues = {c: cosinevalues[c] for c in cosinevalues if cosinevalues[c] and cosinevalues[c] < threshold}
-
-	# now we have the relationship of everybody to our lemmatized word
-
-	# print('CORE COSINE VALUES')
-	# for v in polytonicsort(cosinevalues):
-	# 	print(v, cosinevalues[v])
-	ccv = [(cosinevalues[v], v) for v in cosinevalues]
-	ccv = sorted(ccv, key=lambda t: t[0])
-	ccv = ['\t{a}\t{b}'.format(a=round(c[0], 3), b=c[1]) for c in ccv]
-	ccv = '\n'.join(ccv)
-
-	# next we look for the interrelationships of the words that are above the threshold
-	metacosinevals = dict()
-	metacosinevals[focus] = cosinevalues
-
-	for v in cosinevalues:
-		metac = caclulatecosinevalues(v, vectorspace, cosinevalues.keys())
-		metac = {c: metac[c] for c in metac if metac[c] and metac[c] < threshold}
-		metacosinevals[v] = metac
-
-	mcv = list(['\nrelationships of these terms to one another\n'])
-	for headword in polytonicsort(metacosinevals.keys()):
-		# print(headword)
-		# for word in metacosinevals[headword]:
-		# 	print('\t', word, metacosinevals[headword][word])
-		if headword != focus:
-			insetvals = [(metacosinevals[headword][word], word) for word in metacosinevals[headword]]
-			insetvals = sorted(insetvals, key=lambda t: t[0])
-			insetvals = ['\t{a}\t{b}'.format(a=round(c[0], 3), b=c[1]) for c in insetvals]
-			if insetvals:
-				mcv.append(headword)
-			mcv += insetvals
-	if len(mcv) > 1:
-		mcv = '\n'.join(mcv)
-	else:
-		mcv = ''
-
-	findshtml = '<pre>{ccv}</pre>\n\n<pre>{mcv}</pre>'.format(ccv=ccv, mcv=mcv)
-	searchtime = time.time() - starttime
-	searchtime = round(searchtime, 2)
-	workssearched = locale.format('%d', workssearched, grouping=True)
-
-	output = dict()
-	output['title'] = 'Cosine distances to »{skg}«'.format(skg=focus)
-	output['found'] = findshtml
-	# ultimately the js should let you clock on any top word to find its associations...
-	output['js'] = ''
-	output['resultcount'] = '{c} related terms in {p} passages'.format(c=len(cosinevalues), p=len(hitdict))
-	output['scope'] = workssearched
-	output['searchtime'] = str(searchtime)
-	output['proximate'] = ''
-	if so.lemma:
-		xtra = 'all forms of '
-	else:
-		xtra = ''
-	if so.session['searchscope'] == 'W':
-		scope = 'words'
-	else:
-		scope = 'lines'
-	output['thesearch'] = '{x}»{skg}«'.format(x=xtra, skg=focus)
-	output['htmlsearch'] = '{x}<span class="sought">»{skg}«</span> and then collected all words within {n} {s} of the results'.format(x=xtra, skg=focus, n=so.session['proximity'], s=scope)
-	output['hitmax'] = ''
-	output['onehit'] = ''
-	output['sortby'] = 'distance with a cutoff of {c}'.format(c=1-hipparchia.config['VECTORDISTANCECUTOFF'])
-	output['dmin'] = dmin
-	output['dmax'] = dmax
-	activepoll.deactivate()
-
-	output = json.dumps(output)
+	output = generatevectoroutput(environs, workssearched, so, activepoll, starttime, 'passages')
 
 	return output
 
 
-def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, starttime):
+def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, starttime, vtype):
 	"""
 
 
@@ -329,6 +223,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	ccv = '\n'.join(ccv)
 
 	# next we look for the interrelationships of the words that are above the threshold
+	activepoll.statusis('Calculating metacosine distances')
 	metacosinevals = dict()
 	metacosinevals[focus] = cosinevalues
 	for v in cosinevalues:
@@ -336,12 +231,24 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 		metac = {c: metac[c] for c in metac if metac[c] and metac[c] < threshold}
 		metacosinevals[v] = metac
 
-	# for headword in polytonicsort(metacosinevals.keys()):
-	# 	print(headword)
-	# 	for word in metacosinevals[headword]:
-	# 		print('\t', word, metacosinevals[headword][word])
+	mcv = list(['\nrelationships of these terms to one another\n'])
+	for headword in polytonicsort(metacosinevals.keys()):
+		# print(headword)
+		# for word in metacosinevals[headword]:
+		# 	print('\t', word, metacosinevals[headword][word])
+		if headword != focus:
+			insetvals = [(metacosinevals[headword][word], word) for word in metacosinevals[headword]]
+			insetvals = sorted(insetvals, key=lambda t: t[0])
+			insetvals = ['\t{a}\t{b}'.format(a=round(c[0], 3), b=c[1]) for c in insetvals]
+			if insetvals:
+				mcv.append(headword)
+			mcv += insetvals
+	if len(mcv) > 1:
+		mcv = '\n'.join(mcv)
+	else:
+		mcv = ''
 
-	findshtml = '<pre>{ccv}</pre>'.format(ccv=ccv)
+	findshtml = '<pre>{ccv}</pre>\n\n<pre>{mcv}</pre>'.format(ccv=ccv, mcv=mcv)
 
 	searchtime = time.time() - starttime
 	searchtime = round(searchtime, 2)
@@ -352,7 +259,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	output['found'] = findshtml
 	# ultimately the js should let you clock on any top word to find its associations...
 	output['js'] = ''
-	output['resultcount'] = '{c} related terms in {s} sentences'.format(c=len(cosinevalues), s=len(listsofwords))
+	output['resultcount'] = '{c} related terms in {s} {t}'.format(c=len(cosinevalues), s=len(listsofwords), t=vtype)
 	output['scope'] = workssearched
 	output['searchtime'] = str(searchtime)
 	output['proximate'] = ''
