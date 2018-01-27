@@ -279,7 +279,7 @@ def dblineintolineobject(dbline):
 	:return:
 	"""
 
-	# note the [1], [0], [2], order: wkuinversalid, index, level_05_value, ...
+	# WARNING: be careful about the [1], [0], [2], order: wkuinversalid, index, level_05_value, ...
 
 	lineobject = dbWorkLine(dbline[1], dbline[0], dbline[2], dbline[3], dbline[4], dbline[5], dbline[6], dbline[7],
 	                        dbline[8], dbline[9], dbline[10], dbline[11], dbline[12])

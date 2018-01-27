@@ -263,7 +263,9 @@ def caclulatecosinevalues(focusword, vectorspace, headwords):
 		try:
 			lemmavalues.append(vectorspace[num][focusword])
 		except KeyError:
-			print('KeyError in caclulatecosinevalues()')
+			# print('KeyError in caclulatecosinevalues()')
+			# we know that the word appears, but it might have been there more than once...
+			# we just lost that information when the KeyError bit
 			lemmavalues.append(1)
 
 	cosinevals = dict()
@@ -349,9 +351,63 @@ def findverctorenvirons(hitdict, searchobject):
 			leadandlag = grableadingandlagging(hitdict[h], searchobject, cursor)
 			environs.append('{a} {b} {c}'.format(a=leadandlag['lead'], b=supplement, c=leadandlag['lag']))
 
+	else:
+		# there is a double-count issue if you get a word 2x in 2 lines and then grab the surrounding lines
+
+		distance = int(so.proximity)
+		# note that you can slowly iterate through it all or more quickly grab just what you need at one gulp...
+		tables = dict()
+		for h in hitdict:
+			if hitdict[h].authorid not in tables:
+				tables[hitdict[h].authorid] = list()
+			if hitdict[h].index not in tables[hitdict[h].authorid]:
+				tables[hitdict[h].authorid] += list(range(hitdict[h].index-distance, hitdict[h].index+distance))
+
+		tables = {t: set(tables[t]) for t in tables}
+		# print('tables', tables)
+
+		# grab all of the lines from all of the tables
+		linesdict = dict()
+		for t in tables:
+			linesdict[t] = bulklinegrabber(t, so.usecolumn, 'index', tables[t], cursor)
+
+		# generate the environs
+		dropdupes = set()
+		# RESUME HERE
+		for h in hitdict:
+			need = ['{t}@{i}'.format(t=hitdict[h].authorid, i=i) for i in range(hitdict[h].index-distance, hitdict[h].index+distance)]
+			for n in need:
+				if n not in dropdupes:
+					dropdupes.add(n)
+					try:
+						environs.append(linesdict[hitdict[h].authorid][n])
+					except KeyError:
+						pass
+
 	cursor.close()
 
 	return environs
+
+
+def bulklinegrabber(table, column, criterion, setofcriteria, cursor):
+	"""
+
+
+	:param table:
+	:param setofindices:
+	:return:
+	"""
+
+	qtemplate = 'SELECT {cri}, {col} FROM {t} WHERE {cri} = ANY(%s)'
+	q = qtemplate.format(col=column, t=table, cri=criterion)
+	d = (list(setofcriteria),)
+
+	cursor.execute(q, d)
+	lines = resultiterator(cursor)
+
+	contents = {'{t}@{i}'.format(t=table, i=l[0]): l[1] for l in lines}
+
+	return contents
 
 
 def mostcommonwords():
