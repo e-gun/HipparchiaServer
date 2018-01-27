@@ -72,7 +72,7 @@ def findvectorsbysentence(activepoll, searchobject):
 	# lemma = cleaninitialquery(request.args.get('lem', ''))
 
 	try:
-		lemma = lemmatadict[so.lemma]
+		lemma = lemmatadict[so.lemma.dictionaryentry]
 	except KeyError:
 		lemma = None
 
