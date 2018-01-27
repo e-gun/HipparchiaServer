@@ -119,8 +119,8 @@ def testroute():
 	:return:
 	"""
 
-	from server.routes.vectorroutes import findvectors
+	from server.routes.vectorroutes import findvectorsbysentence
 
-	doimportedfunction = findvectors(0)
+	doimportedfunction = findvectorsbysentence(0)
 
 	return redirect(url_for('frontpage'))

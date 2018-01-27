@@ -36,7 +36,8 @@ def sessionvariables():
 		session['bracketsquare'] = hipparchia.config['DEFAULTHIGHLIGHTSQUAREBRACKETS']
 		session['browsercontext'] = str(int(hipparchia.config['DEFAULTBROWSERLINES']))
 		session['christiancorpus'] = hipparchia.config['DEFAULTCHRISTIANCORPUSVALUE']
-		session['cosinedistancesearch'] = 'no'
+		session['cosdistbysentence'] = 'no'
+		session['cosdistbylineorword'] = 'no'
 		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
 		session['greekcorpus'] = hipparchia.config['DEFAULTGREEKCORPUSVALUE']
 		session['headwordindexing'] = hipparchia.config['DEFAULTINDEXBYHEADWORDS']
@@ -72,7 +73,7 @@ def sessionvariables():
 
 def modifysessionvar(param, val):
 	"""
-	set session varaibles after checking them for validity
+	set session variables after checking them for validity
 
 	:param param:
 	:param val:
@@ -87,7 +88,8 @@ def modifysessionvar(param, val):
 		'bracketsquare',
 		'browsercontext',
 		'christiancorpus',
-		'cosinedistancesearch',
+		'cosdistbylineorword',
+		'cosdistbysentence',
 		'earliestdate',
 		'greekcorpus',
 		'headwordindexing',
@@ -112,7 +114,10 @@ def modifysessionvar(param, val):
 
 	if param in availableoptions:
 		session[param] = val
-		# print('param = val:',param,session[param])
+		# print('param = val:', param, session[param])
+	else:
+		# print('param not found:', param)
+		pass
 
 	# drop all selections/exclusions from any corpus that you just disabled
 	if param in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus'] and session[param] != 'yes':
@@ -135,10 +140,18 @@ def modifysessionvar(param, val):
 
 	# our yes/no options
 	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
-				   'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary','authorssummary','quotesummary',
-					'bracketsquare', 'bracketround', 'bracketangled', 'bracketcurly', 'indexbyfrequency', 'cosinedistancesearch']:
+					'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary', 'authorssummary',
+					'quotesummary', 'bracketsquare', 'bracketround', 'bracketangled', 'bracketcurly',
+					'indexbyfrequency', 'cosdistbysentence', 'cosdistbylineorword']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
+
+	# both can't be active at once
+	if param == 'cosdistbysentence' and val == 'yes':
+		session['cosdistbylineorword'] = 'no'
+
+	if param == 'cosdistbylineorword' and val == 'yes':
+		session['cosdistbysentence'] = 'no'
 
 	if session['nearornot'] not in ['T', 'F']:
 		session['nearornot'] = 'T'

@@ -52,7 +52,8 @@ $(document).ready( function () {
                 });
         $('#complexsearching').toggle();
         $('#termonecheckbox').toggle();
-        $('#cosinedistancecheckbox').toggle();
+        $('#cosinedistancesentencecheckbox').toggle();
+        $('#cosinedistancelineorwordcheckbox').toggle();
         });
 
     $('#executesearch').click( function(){
@@ -181,7 +182,7 @@ $(document).ready( function () {
 
     var tohideonfirstload = new Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur',
         '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform',
-        '#termonecheckbox', '#cosinedistancecheckbox');
+        '#termonecheckbox', '#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox');
     bulkhider(tohideonfirstload);
 
     //

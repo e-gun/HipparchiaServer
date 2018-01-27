@@ -97,9 +97,6 @@ def withinxwords(workdbname, searchobject):
 	"""
 	so = searchobject
 
-	# look out for off-by-one errors
-	distance = so.distance+1
-
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
 	dbconnection = setconnection('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
@@ -117,7 +114,6 @@ def withinxwords(workdbname, searchobject):
 		hits = list()
 		for c in chunked:
 			hits += list(substringsearch(c, workdbname, so, cursor, templimit))
-		so.termone = wordlistintoregex(terms)
 		so.usewordlist = 'polytonic'
 	else:
 		hits = list(substringsearch(so.termone, workdbname, so, cursor, templimit))
@@ -126,50 +122,10 @@ def withinxwords(workdbname, searchobject):
 
 	for hit in hits:
 		hitline = dblineintolineobject(hit)
-		searchzone = getattr(hitline, so.usewordlist)
-		match = re.search(so.termone, searchzone)
-		# but what if you just found 'paucitate' inside of 'paucitatem'?
-		# you will have 'm' left over and this will throw off your distance-in-words count
-		past = searchzone[match.end():]
-		while past and past[0] != ' ':
-			past = past[1:]
 
-		upto = searchzone[:match.start()]
-		while upto and upto[-1] != ' ':
-			upto = upto[:-1]
-
-		ucount = len([x for x in upto.split(' ') if x])
-		pcount = len([x for x in past.split(' ') if x])
-
-		atline = hitline.index
-		lagging = [x for x in upto.split(' ') if x]
-		while ucount < distance+1:
-			atline -= 1
-			try:
-				previous = dblineintolineobject(grabonelinefromwork(workdbname[0:6], atline, cursor))
-			except TypeError:
-				# 'NoneType' object is not subscriptable
-				previous = makeablankline(workdbname[0:6], -1)
-				ucount = 999
-			lagging = previous.wordlist(so.usewordlist) + lagging
-			ucount += previous.wordcount()
-		lagging = lagging[-1*(distance-1):]
-		lagging = ' '.join(lagging)
-
-		leading = [x for x in past.split(' ') if x]
-		atline = hitline.index
-		while pcount < distance+1:
-			atline += 1
-			try:
-				nextline = dblineintolineobject(grabonelinefromwork(workdbname[0:6], atline, cursor))
-			except TypeError:
-				# 'NoneType' object is not subscriptable
-				nextline = makeablankline(workdbname[0:6], -1)
-				pcount = 999
-			leading += nextline.wordlist(so.usewordlist)
-			pcount += nextline.wordcount()
-		leading = leading[:distance-1]
-		leading = ' '.join(leading)
+		leadandlag = grableadingandlagging(hitline, so, cursor)
+		lagging = leadandlag['lag']
+		leading = leadandlag['lead']
 
 		if so.near and (re.search(so.termtwo, leading) or re.search(so.termtwo, lagging)):
 			fullmatches.append(hit)
@@ -180,3 +136,73 @@ def withinxwords(workdbname, searchobject):
 	cursor.close()
 
 	return fullmatches
+
+
+def grableadingandlagging(hitline, searchobject, cursor):
+	"""
+
+	take a dbline and grab the N words in front of it and after it
+
+	:param litline:
+	:param searchobject:
+	:return:
+	"""
+
+	so = searchobject
+	# look out for off-by-one errors
+	distance = so.distance + 1
+
+	if so.lemma:
+		seeking = wordlistintoregex(so.lemma.formlist)
+		so.usewordlist = 'polytonic'
+	else:
+		seeking = so.termone
+
+	searchzone = getattr(hitline, so.usewordlist)
+	match = re.search(r'{s}'.format(s=seeking), searchzone)
+	# but what if you just found 'paucitate' inside of 'paucitatem'?
+	# you will have 'm' left over and this will throw off your distance-in-words count
+	past = searchzone[match.end():]
+	while past and past[0] != ' ':
+		past = past[1:]
+
+	upto = searchzone[:match.start()]
+	while upto and upto[-1] != ' ':
+		upto = upto[:-1]
+
+	ucount = len([x for x in upto.split(' ') if x])
+	pcount = len([x for x in past.split(' ') if x])
+
+	atline = hitline.index
+	lagging = [x for x in upto.split(' ') if x]
+	while ucount < distance + 1:
+		atline -= 1
+		try:
+			previous = dblineintolineobject(grabonelinefromwork(hitline.authorid, atline, cursor))
+		except TypeError:
+			# 'NoneType' object is not subscriptable
+			previous = makeablankline(hitline.authorid, -1)
+			ucount = 999
+		lagging = previous.wordlist(so.usewordlist) + lagging
+		ucount += previous.wordcount()
+	lagging = lagging[-1 * (distance - 1):]
+	lagging = ' '.join(lagging)
+
+	leading = [x for x in past.split(' ') if x]
+	atline = hitline.index
+	while pcount < distance + 1:
+		atline += 1
+		try:
+			nextline = dblineintolineobject(grabonelinefromwork(hitline.authorid, atline, cursor))
+		except TypeError:
+			# 'NoneType' object is not subscriptable
+			nextline = makeablankline(hitline.authorid, -1)
+			pcount = 999
+		leading += nextline.wordlist(so.usewordlist)
+		pcount += nextline.wordcount()
+	leading = leading[:distance - 1]
+	leading = ' '.join(leading)
+
+	returndict = {'lag': lagging, 'lead': leading}
+
+	return returndict

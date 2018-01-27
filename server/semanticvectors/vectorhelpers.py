@@ -15,7 +15,9 @@ import numpy as np
 from scipy.spatial.distance import cosine as cosinedist
 
 from server.dbsupport.dbfunctions import resultiterator, setconnection
-from server.formatting.wordformatting import acuteorgrav, tidyupterm
+from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
+	tidyupterm
+from server.searching.proximitysearching import grableadingandlagging
 from server.searching.searchfunctions import buildbetweenwhereextension
 
 
@@ -258,7 +260,11 @@ def caclulatecosinevalues(focusword, vectorspace, headwords):
 	lemmavalues = list()
 
 	for num in numberedsentences:
-		lemmavalues.append(vectorspace[num][focusword])
+		try:
+			lemmavalues.append(vectorspace[num][focusword])
+		except KeyError:
+			print('KeyError in caclulatecosinevalues()')
+			lemmavalues.append(1)
 
 	cosinevals = dict()
 	for w in headwords:
@@ -272,6 +278,80 @@ def caclulatecosinevalues(focusword, vectorspace, headwords):
 			cosinevals[w] = None
 
 	return cosinevals
+
+
+def findwordvectorset(listofwordclusters):
+	"""
+
+	get ready to vectorize by splitting and cleaning a set of lines or sentences
+
+	:param listofwordclusters:
+	:return:
+	"""
+
+	# find all words in use
+	allwords = [c.split(' ') for c in listofwordclusters]
+	# flatten
+	allwords = [item for sublist in allwords for item in sublist]
+
+	minimumgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
+	greekwords = [w for w in allwords if re.search(minimumgreek, w)]
+
+	trans = buildhipparchiatranstable()
+	latinwords = [w for w in allwords if not re.search(minimumgreek, w)]
+
+	allwords = [removegravity(w) for w in greekwords] + [stripaccents(w, trans) for w in latinwords]
+	allwords = set(allwords) - {''}
+
+	return allwords
+
+
+def tidyupmophdict(morphdict):
+	"""
+
+	:return:
+	"""
+
+	morphdict = {k: v for k, v in morphdict.items() if v is not None}
+	morphdict = {k: set([p.getbaseform() for p in morphdict[k].getpossible()]) for k in morphdict.keys()}
+
+	# {'θεῶν': {'θεόϲ', 'θέα', 'θεάω', 'θεά'}, 'πώ': {'πω'}, 'πολλά': {'πολύϲ'}, 'πατήρ': {'πατήρ'}, ... }
+
+	# over-aggressive? more thought/care might be required here
+	delenda = mostcommonwords()
+	morphdict = {k: v for k, v in morphdict.items() if v - delenda == v}
+
+	return morphdict
+
+
+def findverctorenvirons(hitdict, searchobject):
+	"""
+
+
+
+	:param hitdict:
+	:return:
+	"""
+
+	dbconnection = setconnection('autocommit', readonlyconnection=False)
+	cursor = dbconnection.cursor()
+
+	so = searchobject
+
+	if so.lemma:
+		supplement = so.lemma
+	else:
+		supplement = so.termone
+
+	environs = list()
+	if so.session['searchscope'] == 'W':
+		for h in hitdict:
+			leadandlag = grableadingandlagging(hitdict[h], searchobject, cursor)
+			environs.append('{a} {b} {c}'.format(a=leadandlag['lead'], b=supplement, c=leadandlag['lag']))
+
+	cursor.close()
+
+	return environs
 
 
 def mostcommonwords():

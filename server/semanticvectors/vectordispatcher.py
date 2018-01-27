@@ -15,7 +15,7 @@ from server.semanticvectors.vectorhelpers import findsentences
 from server.textsandindices.indexmaker import mpmorphology
 
 
-def vectordispatching(searchobject, activepoll):
+def vectorsentencedispatching(searchobject, activepoll):
 	"""
 
 	assign the vectorization to multiprocessing workers

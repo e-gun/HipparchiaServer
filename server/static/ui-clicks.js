@@ -467,16 +467,27 @@ $('#bracketcurly').change(function () {
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
     });
 
-$('#cosinedistancesearch').change(function () {
+$('#cosdistbysentence').change(function () {
     if(this.checked) {
-        setoptions('cosinedistancesearch', 'yes');
+        $('#cosdistbylineorword').prop('checked', false);
         $('#complexsearching').hide();
+        $('#proximatesearchform').val('');
+        setoptions('cosdistbysentence', 'yes');
         } else {
-        setoptions('cosinedistancesearch', 'no');
         $('#complexsearching').show();
+        setoptions('cosdistbysentence', 'no');
         }
-    // because some items on your list just got purged?
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    });
+
+$('#cosdistbylineorword').change(function () {
+    if(this.checked) {
+        $('#cosdistbysentence').prop('checked', false);
+        $('#complexsearching').show();
+        $('#proximatesearchform').val('');
+        setoptions('cosdistbylineorword', 'yes');
+        } else {
+        setoptions('cosdistbylineorword', 'no');
+        }
     });
 
 $('#termoneisalemma').change(function () {

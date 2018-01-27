@@ -585,6 +585,7 @@ def wordlistintoregex(wordlist):
 	# wordlist = [upperorlowerregex(w) for w in wordlist]
 
 	wordlist = [acuteorgrav(w.lower()) for w in wordlist]
+	wordlist = [re.sub('[uv]', '[uv]', w) for w in wordlist]
 	# wordlist = ['((^|\s){w}(\s|$))'.format(w=w) for w in wordlist]
 	wordlist = ['(^|\s){w}(\s|$)'.format(w=w) for w in wordlist]
 	searchterm = '|'.join(wordlist)

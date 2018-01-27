@@ -26,7 +26,7 @@ from server.listsandsession.listmanagement import calculatewholeauthorsearches, 
 	sortresultslist
 from server.listsandsession.sessionfunctions import justlatin, justtlg, sessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.routes.vectorroutes import findvectors
+from server.routes.vectorroutes import findvectorsbysentence, findvectorsfromhits
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import cleaninitialquery
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
@@ -52,16 +52,6 @@ def executesearch(timestamp):
 
 
 	sessionvariables()
-	# fork over to the associative vectors fraework if that option we checked
-	# return the data derived therefrom instead of "search result" data
-	if session['cosinedistancesearch'] == 'yes':
-		lemma = cleaninitialquery(request.args.get('lem', ''))
-		seeking = cleaninitialquery(request.args.get('skg', ''))
-		if len(lemma) > len(seeking):
-			output = findvectors(lemma, vtype='lemma')
-		else:
-			output = findvectors(seeking, vtype='string')
-		return output
 
 	# a search can take 30s or more and the user might alter the session while the search is running
 	# by toggling onehit, etc that can be a problem, so freeze the values now and rely on this instead
@@ -150,6 +140,17 @@ def executesearch(timestamp):
 		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 		so.indexrestrictions = indexrestrictions
 
+		# fork over to the associative vectors framework if that option we checked
+		# return the data derived therefrom instead of "search result" data
+
+		if frozensession['cosdistbysentence'] == 'yes':
+			# print('cosdistbysentence')
+			so.proximate = ''
+			so.proximatelemma = ''
+			output = findvectorsbysentence(activepoll, so)
+			del poll[ts]
+			return output
+
 		if lemma:
 			so.termone = wordlistintoregex(so.lemma.formlist)
 			skg = so.termone
@@ -212,6 +213,13 @@ def executesearch(timestamp):
 
 		# hits [<server.hipparchiaclasses.dbWorkLine object at 0x10d952da0>, <server.hipparchiaclasses.dbWorkLine object at 0x10d952c50>, ... ]
 		hitdict = sortresultslist(hits, so, authordict, workdict)
+
+		if frozensession['cosdistbylineorword'] == 'yes':
+			# print('cosdistbylineorword')
+			# take these hits and head on over to the vector worker
+			output = findvectorsfromhits(so, hitdict, activepoll, starttime, workssearched)
+			del poll[ts]
+			return output
 
 		resultlist = buildresultobjects(hitdict, authordict, workdict, so, activepoll)
 
