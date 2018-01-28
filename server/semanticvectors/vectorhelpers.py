@@ -329,9 +329,10 @@ def tidyupmophdict(morphdict):
 def findverctorenvirons(hitdict, searchobject):
 	"""
 
-
+	grab the stuff around the term you were looking for and return that as the environs
 
 	:param hitdict:
+	:param searchobject:
 	:return:
 	"""
 

@@ -7,15 +7,20 @@
 """
 
 import re
+import time
 from string import punctuation
 
 import psycopg2
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, resultiterator
-from server.formatting.wordformatting import removegravity
-from server.formatting.wordformatting import wordlistintoregex
+from server.formatting.betacodetounicode import replacegreekbetacode
+from server.formatting.wordformatting import removegravity, wordlistintoregex
+from server.hipparchiaobjects.helperobjects import SearchObject
 from server.lexica.lexicalookups import findcountsviawordcountstable
+from server.listsandsession.sessionfunctions import justtlg
+from server.listsandsession.sessionfunctions import sessionvariables
+from server.startup import lemmatadict
 
 
 def cleaninitialquery(seeking):
@@ -477,3 +482,72 @@ def dblooknear(index, distanceinlines, secondterm, workid, usecolumn, cursor):
 		return True
 	else:
 		return False
+
+
+def buildsearchobject(ts, request, session):
+	"""
+
+	generic searchobject builder
+
+	:param ts:
+	:param request:
+	:param session:
+	:return:
+	"""
+
+	if not ts:
+		ts = str(int(time.time()))
+
+	sessionvariables()
+
+	# a search can take 30s or more and the user might alter the session while the search is running
+	# by toggling onehit, etc that can be a problem, so freeze the values now and rely on this instead
+	# of some moving target
+	frozensession = session.copy()
+
+	# need to sanitize input at least a bit: remove digits and punctuation
+	# dispatcher will do searchtermcharactersubstitutions() and massagesearchtermsforwhitespace() to take
+	# care of lunate sigma, etc.
+
+	seeking = cleaninitialquery(request.args.get('skg', ''))
+	proximate = cleaninitialquery(request.args.get('prx', ''))
+	lemma = cleaninitialquery(request.args.get('lem', ''))
+	proximatelemma = cleaninitialquery(request.args.get('plm', ''))
+
+	try:
+		lemma = lemmatadict[lemma]
+	except KeyError:
+		lemma = None
+
+	try:
+		proximatelemma = lemmatadict[proximatelemma]
+	except KeyError:
+		proximatelemma = None
+
+	replacebeta = False
+
+	if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes' and re.search('[a-zA-Z]', seeking):
+		# why the 'and' condition:
+		#   sending unicode 'οὐθενὸϲ' to the betacode function will result in 0 hits
+		#   this is something that could/should be debugged within that function,
+		#   but in practice it is silly to allow hybrid betacode/unicode? this only
+		#   makes the life of a person who wants unicode+regex w/ a betacode option more difficult
+		replacebeta = True
+
+	isgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
+
+	if hipparchia.config['TLGASSUMESBETACODE'] == 'yes':
+		if justtlg() and (re.search('[a-zA-Z]', seeking) or re.search('[a-zA-Z]', proximate)) and not re.search(isgreek, seeking) and not re.search(isgreek, proximate):
+			replacebeta = True
+
+	if replacebeta:
+		seeking = seeking.upper()
+		seeking = replacegreekbetacode(seeking)
+		seeking = seeking.lower()
+		proximate = proximate.upper()
+		proximate = replacegreekbetacode(proximate)
+		proximate = proximate.lower()
+
+	so = SearchObject(ts, seeking, proximate, lemma, proximatelemma, frozensession)
+
+	return so

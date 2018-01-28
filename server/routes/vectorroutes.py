@@ -10,15 +10,20 @@ import json
 import locale
 import time
 
+from flask import request, session
+
 from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
+from server.formatting.jsformatting import generatevectorjs
+from server.hipparchiaobjects.helperobjects import ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
 	polytonicsort
 from server.listsandsession.whereclauses import configurewhereclausedata
+from server.searching.searchfunctions import buildsearchobject
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
 from server.semanticvectors.vectorhelpers import buildvectorspace, caclulatecosinevalues, findverctorenvirons, \
 	findwordvectorset, tidyupmophdict
-from server.startup import authordict, lemmatadict, listmapper, workdict
+from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
 """
 	THE MATH
@@ -50,7 +55,39 @@ from server.startup import authordict, lemmatadict, listmapper, workdict
 """
 
 
-@hipparchia.route('/findvectors', methods=['GET'])
+@hipparchia.route('/findvectors/<headword>', methods=['GET'])
+def findvectors(headword):
+	"""
+
+
+	:param headword:
+	:return:
+	"""
+
+	ts = str(int(time.time()))
+
+	so = buildsearchobject(ts, request, session)
+
+	try:
+		so.lemma = lemmatadict[headword]
+	except KeyError:
+		so.lemma = None
+
+	poll[ts] = ProgressPoll(ts)
+	activepoll = poll[ts]
+	activepoll.activate()
+	activepoll.statusis('Preparing to search')
+
+	# nb: basically forcing so.session['cosdistbysentence'] == 'yes'
+	# don't know how to enter executesearch() properly to handle the other option
+	# print('cosdistbysentence')
+	so.proximate = ''
+	so.proximatelemma = ''
+	output = findvectorsbysentence(activepoll, so)
+	del poll[ts]
+	return output
+
+
 def findvectorsbysentence(activepoll, searchobject):
 	"""
 
@@ -219,7 +256,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	# 	print(v, cosinevalues[v])
 	ccv = [(cosinevalues[v], v) for v in cosinevalues]
 	ccv = sorted(ccv, key=lambda t: t[0])
-	ccv = ['\t{a}\t{b}'.format(a=round(c[0], 3), b=c[1]) for c in ccv]
+	ccv = ['\t{a}\t<lemmaheadword id="{b}">{b}</lemmaheadword>'.format(a=round(c[0], 3), b=c[1]) for c in ccv]
 	ccv = '\n'.join(ccv)
 
 	# next we look for the interrelationships of the words that are above the threshold
@@ -250,6 +287,8 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 
 	findshtml = '<pre>{ccv}</pre>\n\n<pre>{mcv}</pre>'.format(ccv=ccv, mcv=mcv)
 
+	findsjs = generatevectorjs()
+
 	searchtime = time.time() - starttime
 	searchtime = round(searchtime, 2)
 	workssearched = locale.format('%d', workssearched, grouping=True)
@@ -258,7 +297,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	output['title'] = 'Cosine distances to »{skg}«'.format(skg=focus)
 	output['found'] = findshtml
 	# ultimately the js should let you clock on any top word to find its associations...
-	output['js'] = ''
+	output['js'] = findsjs
 	output['resultcount'] = '{c} related terms in {s} {t}'.format(c=len(cosinevalues), s=len(listsofwords), t=vtype)
 	output['scope'] = workssearched
 	output['searchtime'] = str(searchtime)
@@ -308,8 +347,7 @@ def emptyvectoroutput(searchobject, reasons=list()):
 	output['searchtime'] = '0.00'
 	output['proximate'] = so.proximate
 	output['thesearch'] = ''
-	output['htmlsearch'] = '<span class="emph">nothing</span> (search not executed because {r})'.format(
-		r=' and '.join(reasons))
+	output['htmlsearch'] = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=' and '.join(reasons))
 	output['hitmax'] = 0
 	output['dmin'] = dmin
 	output['dmax'] = dmax

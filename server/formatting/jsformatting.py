@@ -58,3 +58,26 @@ def insertlexicalbrowserjs(htmlentry):
 	newhtml = htmlentry + js.format(jst=jstemplate)
 
 	return newhtml
+
+
+def generatevectorjs():
+	"""
+
+
+
+	:param headwordwordlist:
+	:return:
+	"""
+
+	jstemplate = """
+	$('lemmaheadword').click( function() {
+		$('#searchsummary').html('');
+		$('#displayresults').html('');
+		$.getJSON('/findvectors/'+this.id, function (returnedresults) {
+			{ loadsearchresultsintodisplayresults(returnedresults);
+		});
+	});
+	
+	"""
+
+	return jstemplate
