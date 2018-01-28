@@ -112,6 +112,9 @@ def findvectorsbysentence(activepoll, searchobject):
 		lemma = lemmatadict[so.lemma.dictionaryentry]
 	except KeyError:
 		lemma = None
+	except AttributeError:
+		# 'NoneType' object has no attribute 'dictionaryentry'
+		lemma = None
 
 	activepoll.statusis('Preparing to search')
 
