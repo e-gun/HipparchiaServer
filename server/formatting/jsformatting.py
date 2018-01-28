@@ -70,66 +70,17 @@ def generatevectorjs():
 	"""
 
 	jstemplate = """
-
-	function loadresults(output) {
-
-		document.title = output['title'];
-
-		var summaryhtml = '';
-
-		summaryhtml += 'Sought '+output['htmlsearch']+'<br />\n';
-		if ( output['scope'] != '1') { 
-			summaryhtml += 'Searched '+output['scope']+' texts '; 
-			} else { 
-			summaryhtml += 'Searched 1 text '; 
-			}
-			
-		summaryhtml += 'and found '+output['resultcount'];
-		summaryhtml += ' ('+output['searchtime']+'s)';
-		
-		if (output['icandodates'] == 'yes' ) { 
-			if (output['dmin'] != '850 B.C.E.' || output['dmax'] != '1500 C.E.') { 
-				summaryhtml += '<br />Searched between '+output['dmin']+' and '+output['dmax']; 
-				} 
-			}
-		
-		if (output['onehit'] == 'yes') { 
-			summaryhtml += '<br />Only allowing one match per item searched (either a whole author or a specified work)'; 
-			}
-			
-		summaryhtml += '<br />Sorted by '+output['sortby'];
-		
-		if (output['hitmax'] == 'true') { 
-			summaryhtml += '<br />[Search suspended: result cap reached.]';
-			}
-		
-		$('#searchsummary').html(summaryhtml);
-		
-		$('#displayresults').html(output['found']);
-		
-		var browserclickscript = document.createElement("script");
-		browserclickscript.innerHTML = output['js'];
-		document.getElementById('browserclickscriptholder').appendChild(browserclickscript);
-		
-		}
-
-	$('lemmaheadword').click( function(e) { 
-		var searchid = Date.now();
-		var url = '/findvectors/'+searchid+'?lem='+this.id;
-		$('#searchsummary').html(''); 
-		$('#displayresults').html(''); 
-		$.getJSON(url, function (output) { loadresults(output); });
-		});
-	
-	"""
-
-	jstemplate = """
 		$('lemmaheadword').click( function(e) { 
 		var searchid = Date.now();
 		var url = '/findvectors/'+searchid+'?lem='+this.id;
 		$('#searchsummary').html(''); 
 		$('#displayresults').html('');
 		$('#wordsearchform').hide();
+		$.getJSON( {url: '/setsessionvariable?cosdistbylineorword=no', async: false, success: function (resultdata) { } });
+		$.getJSON( {url: '/setsessionvariable?cosdistbysentence=yes', async: false, success: function (resultdata) { } });
+		$('#cosdistbysentence').prop('checked', true);
+		$('#cosdistbylineorword').prop('checked', false);
+		$('#complexsearching').hide();
 		$('#lemmatasearchform').show();
 		$('#lemmatasearchform').val(this.id);
 		$.getJSON(url, function (output) { 
