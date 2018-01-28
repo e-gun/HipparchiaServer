@@ -286,9 +286,9 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 		if headword != focus:
 			insetvals = [(metacosinevals[headword][word], word) for word in metacosinevals[headword]]
 			insetvals = sorted(insetvals, key=lambda t: t[0])
-			insetvals = ['\t{a}\t{b}'.format(a=round(c[0], 3), b=c[1]) for c in insetvals]
+			insetvals = ['\t{a}\t<lemmaheadword id="{b}">{b}</lemmaheadword>'.format(a=round(c[0], 3), b=c[1]) for c in insetvals]
 			if insetvals:
-				mcv.append(headword)
+				mcv.append('<lemmaheadword id="{h}">{h}</lemmaheadword>'.format(h=headword))
 			mcv += insetvals
 	if len(mcv) > 1:
 		mcv = '\n'.join(mcv)
