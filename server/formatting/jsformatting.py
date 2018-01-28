@@ -70,13 +70,13 @@ def generatevectorjs():
 	"""
 
 	jstemplate = """
-	$('lemmaheadword').click( function() {
-		$('#searchsummary').html('');
-		$('#displayresults').html('');
-		$.getJSON('/findvectors/'+this.id, function (returnedresults) {
-			{ loadsearchresultsintodisplayresults(returnedresults);
+	$('lemmaheadword').click( function(e) { 
+		$('#searchsummary').html(''); 
+		$('#displayresults').html(''); 
+		$.getJSON('/findvectors/'+this.id, function (returnedresults) { 
+			loadsearchresultsintodisplayresults(returnedresults); 
+			});
 		});
-	});
 	
 	"""
 

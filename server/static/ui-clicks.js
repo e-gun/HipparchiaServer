@@ -159,14 +159,22 @@ function loadoptions() {
             $('#christiancorpus').prop('checked', false);
             $('#chrisactive').hide();
             }
-        if (data.cosinedistancesearch == 'yes') {
-            $('#cosinedistancesearch').prop('checked', true);
+        if (data.cosdistbysentence == 'yes') {
+            $('#cosdistbysentence').prop('checked', true);
+            $('#complexsearching').show();
+            $('#proximatesearchform').val('');
             } else {
-            $('#cosinedistancesearch').prop('checked', false);
+            $('#cosdistbysentence').prop('checked', false);
+            }
+        if (data.cosdistbylineorword == 'yes') {
+            $('#cosdistbylineorword').prop('checked', true);
+            $('#complexsearching').show();
+            $('#proximatesearchform').val('');
+            } else {
+            $('#cosdistbylineorword').prop('checked', false);
             }
         });
 }
-
 
 $('#openoptions').click( function() {
     loadoptions();

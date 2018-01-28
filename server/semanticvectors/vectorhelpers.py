@@ -342,7 +342,7 @@ def findverctorenvirons(hitdict, searchobject):
 	so = searchobject
 
 	if so.lemma:
-		supplement = so.lemma
+		supplement = so.lemma.dictionaryentry
 	else:
 		supplement = so.termone
 
