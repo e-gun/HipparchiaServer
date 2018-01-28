@@ -19,7 +19,7 @@ from server.hipparchiaobjects.helperobjects import ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
 	polytonicsort
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.searching.searchfunctions import buildsearchobject
+from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
 from server.semanticvectors.vectorhelpers import buildvectorspace, caclulatecosinevalues, findverctorenvirons, \
 	findwordvectorset, tidyupmophdict
@@ -55,8 +55,8 @@ from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 """
 
 
-@hipparchia.route('/findvectors/<headword>', methods=['GET'])
-def findvectors(headword):
+@hipparchia.route('/findvectors/<timestamp>', methods=['GET'])
+def findvectors(timestamp):
 	"""
 
 
@@ -64,12 +64,18 @@ def findvectors(headword):
 	:return:
 	"""
 
-	ts = str(int(time.time()))
+	try:
+		ts = str(int(timestamp))
+	except ValueError:
+		ts = str(int(time.time()))
 
 	so = buildsearchobject(ts, request, session)
+	so.seeking = ''
+	so.proximate = ''
+	so.proximatelemma = ''
 
 	try:
-		so.lemma = lemmatadict[headword]
+		so.lemma = lemmatadict[cleaninitialquery(request.args.get('lem', ''))]
 	except KeyError:
 		so.lemma = None
 
@@ -81,10 +87,11 @@ def findvectors(headword):
 	# nb: basically forcing so.session['cosdistbysentence'] == 'yes'
 	# don't know how to enter executesearch() properly to handle the other option
 	# print('cosdistbysentence')
-	so.proximate = ''
-	so.proximatelemma = ''
+
 	output = findvectorsbysentence(activepoll, so)
+
 	del poll[ts]
+
 	return output
 
 
