@@ -8,8 +8,17 @@
 
 import re
 
-import numpy as np
-from scipy.spatial.distance import cosine as cosinedist
+try:
+	# import THROWEXCEPTION
+	import numpy as np
+	from scipy.spatial.distance import cosine as cosinedist
+	ihavenumpy = True
+except ImportError:
+	print('WARNING: vector math will be slow; install numpy and scipy for exponential speed gains')
+	from math import sqrt
+	ihavenumpy = False
+	np = None
+	cosinedist = None
 
 
 def finddotproduct(listofavalues, listofbvalues):
@@ -17,15 +26,13 @@ def finddotproduct(listofavalues, listofbvalues):
 
 	(a1 * b1)  + (a2 * b2) + ... (ai * bi)
 
-	using numpy instead
-
 	:param listofvalues:
 	:return:
 	"""
 
-	if len(listofavalues) == len(listofbvalues):
+	try:
 		dotproduct = sum(listofavalues[i] * listofbvalues[i] for i in range(len(listofavalues)))
-	else:
+	except IndexError:
 		dotproduct = None
 
 	return dotproduct
@@ -40,12 +47,40 @@ def findvectorlength(listofvalues):
 	:return:
 	"""
 
-	# dotproduct = finddotproduct(listofvalues, listofvalues)
-	# vlen = sqrt(dotproduct)
-
-	vlen = np.linalg.norm(listofvalues)
+	if not ihavenumpy:
+		dotproduct = finddotproduct(listofvalues, listofvalues)
+		vlen = sqrt(dotproduct)
+	else:
+		# but in practice, we never hit this branch: numpy version does not ask for this intermediate math
+		vlen = np.linalg.norm(listofvalues)
 
 	return vlen
+
+
+def findcosinedist(avalues, lemmavalues, lemmavaluelength):
+	"""
+
+	calculate without appeal to scipy or numpy
+
+	'pax' in L:
+		scipy - Searched 836 texts and found 21 related terms in 2913 sentences (27.85s)
+		noscipy - Did not finish after several minutes
+
+	'pax' in Vergil:
+		scipy - Searched 3 texts and found 135 related terms in 46 sentences (2.67s)
+		noscipy - Searched 3 texts and found 555 related terms in 46 sentences (14.29s)
+
+	:param avalues:
+	:param lemmavalues:
+	:return:
+	"""
+
+	try:
+		cosinevals = finddotproduct(avalues, lemmavalues) / (findvectorlength(avalues) * lemmavaluelength)
+	except ZeroDivisionError:
+		return None
+
+	return cosinevals
 
 
 def caclulatecosinevalues(focusword, vectorspace, headwords):
@@ -82,6 +117,10 @@ def caclulatecosinevalues(focusword, vectorspace, headwords):
 			# we just lost that information when the KeyError bit
 			lemmavalues.append(1)
 
+	# do it by hand
+	if not ihavenumpy:
+		lvl = findvectorlength(lemmavalues)
+
 	cosinevals = dict()
 	for w in headwords:
 		avalues = list()
@@ -92,10 +131,13 @@ def caclulatecosinevalues(focusword, vectorspace, headwords):
 		# RuntimeWarning: invalid value encountered in true_divide dist = 1.0 - np.dot(u, v) / (norm(u) * norm(v))
 		# be careful not to end up with 0 in lemmavalues with 'voluptas' becuase of the 'v-for-u' issue
 		# print('w/av/bv', sum(avalues), sum(lemmavalues), '({w})'.format(w=w))
-		if sum(avalues) != 0:
-			cosinevals[w] = cosinedist(avalues, lemmavalues)
+
+		if not ihavenumpy:
+			# do it by hand
+			cosinevals[w] = findcosinedist(avalues, lemmavalues, lvl)
 		else:
-			cosinevals[w] = None
+			# do it by scipy
+			cosinevals[w] = cosinedist(avalues, lemmavalues)
 
 	return cosinevals
 

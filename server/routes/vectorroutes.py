@@ -264,7 +264,8 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 
 	# apply the threshold and drop the 'None' items
 	threshold = 1.0 - hipparchia.config['VECTORDISTANCECUTOFF']
-	cosinevalues = {c: cosinevalues[c] for c in cosinevalues if cosinevalues[c] and cosinevalues[c] < threshold}
+	falseidentity = .02
+	cosinevalues = {c: cosinevalues[c] for c in cosinevalues if cosinevalues[c] and falseidentity < cosinevalues[c] < threshold}
 
 	# now we have the relationship of everybody to our lemmatized word
 
@@ -282,7 +283,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	metacosinevals[focus] = cosinevalues
 	for v in cosinevalues:
 		metac = caclulatecosinevalues(v, vectorspace, cosinevalues.keys())
-		metac = {c: metac[c] for c in metac if metac[c] and metac[c] < threshold}
+		metac = {c: metac[c] for c in metac if metac[c] and falseidentity < metac[c] < threshold}
 		metacosinevals[v] = metac
 
 	mcv = list(['\nrelationships of these terms to one another\n'])
