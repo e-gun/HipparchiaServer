@@ -21,8 +21,9 @@ from server.listsandsession.listmanagement import calculatewholeauthorsearches, 
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
-from server.semanticvectors.vectorhelpers import buildvectorspace, caclulatecosinevalues, findverctorenvirons, \
+from server.semanticvectors.vectorhelpers import findverctorenvirons, \
 	findwordvectorset, tidyupmophdict
+from server.semanticvectors.vectormath import buildvectorspace, caclulatecosinevalues
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
 """
@@ -241,15 +242,21 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 			allheadwords[h] = m
 
 	if so.lemma:
-		focus = so.lemma.dictionaryentry
+		# set to none for now
+		subtractterm = None
 	else:
-		focus = so.seeking
+		subtractterm = so.seeking
 
 	activepoll.statusis('Building vectors')
-	vectorspace = buildvectorspace(allheadwords, morphdict, listsofwords, focusterm=focus)
+	vectorspace = buildvectorspace(allheadwords, morphdict, listsofwords, subtractterm=subtractterm)
 
 	# for k in vectorspace.keys():
 	# 	print(k, vectorspace[k])
+
+	if so.lemma:
+		focus = so.lemma.dictionaryentry
+	else:
+		focus = so.seeking
 
 	activepoll.statusis('Calculating cosine distances')
 
