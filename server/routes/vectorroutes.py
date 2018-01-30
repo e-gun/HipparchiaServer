@@ -261,6 +261,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	activepoll.statusis('Calculating cosine distances')
 
 	cosinevalues = caclulatecosinevalues(focus, vectorspace, allheadwords.keys())
+	# cosinevalues = vectorcosinedispatching(focus, vectorspace, allheadwords.keys())
 
 	# apply the threshold and drop the 'None' items
 	threshold = 1.0 - hipparchia.config['VECTORDISTANCECUTOFF']
@@ -283,6 +284,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	metacosinevals[focus] = cosinevalues
 	for v in cosinevalues:
 		metac = caclulatecosinevalues(v, vectorspace, cosinevalues.keys())
+		# metac = vectorcosinedispatching(v, vectorspace, cosinevalues.keys())
 		metac = {c: metac[c] for c in metac if metac[c] and falseidentity < metac[c] < threshold}
 		metacosinevals[v] = metac
 

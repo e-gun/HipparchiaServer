@@ -8,8 +8,7 @@
 
 import re
 from collections import deque
-from multiprocessing import Manager, Process
-from multiprocessing import Pool
+from multiprocessing import Manager, Pool, Process
 from string import punctuation
 
 from flask import session

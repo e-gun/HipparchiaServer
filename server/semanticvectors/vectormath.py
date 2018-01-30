@@ -7,19 +7,17 @@
 """
 
 import re
+from multiprocessing import Manager, Process
+
+from server.dbsupport.dbfunctions import setthreadcount
 
 try:
 	# import THROWEXCEPTION
 	import numpy as np
 	from scipy.spatial.distance import cosine as cosinedist
-	ihavenumpy = True
 except ImportError:
 	print('WARNING: vector math will be slow; install numpy and scipy for exponential speed gains')
 	from math import sqrt
-	ihavenumpy = False
-	np = None
-	cosinedist = None
-
 
 def finddotproduct(listofavalues, listofbvalues):
 	"""
@@ -47,12 +45,12 @@ def findvectorlength(listofvalues):
 	:return:
 	"""
 
-	if not ihavenumpy:
+	try:
+		vlen = np.linalg.norm(listofvalues)
+	except NameError:
+		# np was not imported
 		dotproduct = finddotproduct(listofvalues, listofvalues)
 		vlen = sqrt(dotproduct)
-	else:
-		# but in practice, we never hit this branch: numpy version does not ask for this intermediate math
-		vlen = np.linalg.norm(listofvalues)
 
 	return vlen
 
@@ -117,8 +115,11 @@ def caclulatecosinevalues(focusword, vectorspace, headwords):
 			# we just lost that information when the KeyError bit
 			lemmavalues.append(1)
 
-	# do it by hand
-	if not ihavenumpy:
+	try:
+		cosinedist
+		lvl = None
+	except NameError:
+		# we did not import numpy/scipy
 		lvl = findvectorlength(lemmavalues)
 
 	cosinevals = dict()
@@ -132,12 +133,11 @@ def caclulatecosinevalues(focusword, vectorspace, headwords):
 		# be careful not to end up with 0 in lemmavalues with 'voluptas' becuase of the 'v-for-u' issue
 		# print('w/av/bv', sum(avalues), sum(lemmavalues), '({w})'.format(w=w))
 
-		if not ihavenumpy:
-			# do it by hand
-			cosinevals[w] = findcosinedist(avalues, lemmavalues, lvl)
-		else:
-			# do it by scipy
+		try:
 			cosinevals[w] = cosinedist(avalues, lemmavalues)
+		except NameError:
+			# we did not import numpy/scipy
+			cosinevals[w] = findcosinedist(avalues, lemmavalues, lvl)
 
 	return cosinevals
 
@@ -205,3 +205,98 @@ def buildvectorspace(allheadwords, morphdict, sentences, subtractterm=None):
 			vectorspace[n][subtractterm] = extracount[n]
 
 	return vectorspace
+
+
+def vectorcosinedispatching(focusword, vectorspace, headwords):
+	"""
+
+	this is a lot slower than single thread until reconceptualized
+		Pool will thow away time on mp locks
+		Manager will throw away time on posix.waitpid
+
+	could first send everything out to a berkeleyDB and just read from it?
+
+	at the moment a lot of vectorizing is "fast enough" single threaded
+
+	work this out "later"
+
+	:return:
+	"""
+
+	numberedsentences = vectorspace.keys()
+
+	lemmavalues = list()
+
+	for num in numberedsentences:
+		try:
+			lemmavalues.append(vectorspace[num][focusword])
+		except KeyError:
+			# print('KeyError in caclulatecosinevalues()')
+			# we know that the word appears, but it might have been there more than once...
+			# we just lost that information when the KeyError bit
+			lemmavalues.append(1)
+
+	try:
+		cosinedist
+		lvl = None
+	except NameError:
+		# we did not import numpy/scipy
+		lvl = findvectorlength(lemmavalues)
+
+	workpiledict = dict()
+	for w in headwords:
+		avalues = list()
+		for num in numberedsentences:
+			avalues.append(vectorspace[num][w])
+		workpiledict[w] = (avalues, lemmavalues, lvl)
+
+	manager = Manager()
+	managedheadwords = manager.list(headwords)
+	cosinevals = manager.dict()
+
+	workers = setthreadcount()
+
+	targetfunction = vectorcosineworker
+	argumentuple = (managedheadwords, workpiledict, cosinevals)
+
+	jobs = [Process(target=targetfunction, args=argumentuple) for i in range(workers)]
+
+	for j in jobs:
+		j.start()
+	for j in jobs:
+		j.join()
+
+	# print('cosinevals', cosinevals)
+
+	return dict(cosinevals)
+
+
+def vectorcosineworker(headwords, workpiledict, resultdict):
+	"""
+
+	itemfromworkpile = (avalues, lemmavalues, lemmalength)
+
+	:return:
+	"""
+
+	while headwords:
+		try:
+			headword = headwords.pop()
+		except IndexError:
+			headword = None
+
+		if headword:
+			item = workpiledict[headword]
+			avalues = item[0]
+			lemmavalues = item[1]
+			lemmalength = item[2]
+
+			try:
+				cv = cosinedist(avalues, lemmavalues)
+			except NameError:
+				# scipy not available
+				cv = findcosinedist(avalues, lemmavalues, lemmalength)
+
+			resultdict[headword] = cv
+
+	return resultdict
