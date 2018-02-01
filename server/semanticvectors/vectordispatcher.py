@@ -51,7 +51,7 @@ def vectorsentencedispatching(searchobject, activepoll):
 	return list(foundsentences)
 
 
-def findheadwords(wordlist, activepoll):
+def findheadwords(wordlist):
 	"""
 
 	return a dict of morpholog objects

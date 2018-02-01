@@ -19,6 +19,7 @@ except ImportError:
 	print('WARNING: vector math will be slow; install numpy and scipy for exponential speed gains')
 	from math import sqrt
 
+
 def finddotproduct(listofavalues, listofbvalues):
 	"""
 
@@ -150,7 +151,7 @@ def buildvectorspace(allheadwords, morphdict, sentences, subtractterm=None):
 	for example one sentence of Frogs and Mice is:
 		'εἰμὶ δὲ κοῦροϲ Τρωξάρταο πατρὸϲ μεγαλήτοροϲ'
 
-	this will turn into:
+	if you look for 'father' this will turn into:
 
 	{'ἐλαιόω': 0, 'ἔλαιον': 0, 'ἔλαιοϲ': 0, 'μέγαϲ': 0, 'πόντοϲ': 0, 'κῆρυξ': 0,
 	'ὄχθη': 0, 'κοῦροϲ': 1, 'κόροϲ': 1, 'Τρωξάρτηϲ': 1, 'τείρω': 0, 'πω': 0,
@@ -192,6 +193,9 @@ def buildvectorspace(allheadwords, morphdict, sentences, subtractterm=None):
 		headwords = list()
 		for w in wordlist:
 			try:
+				# WARNING: we are treating homonymns as if 2+ words were there instead of just one
+				# 'rectum' will give you 'rectus' and 'rego'; 'res' will give you 'reor' and 'res'
+				# this necessarily distorts the vector space
 				countable = [item for item in morphdict[w]]
 			except KeyError:
 				# 'καί', etc. are skipped

@@ -7,14 +7,18 @@
 """
 
 import re
+import time
 from os import path
 from sys import argv
 
-from flask import redirect, render_template, url_for
+from flask import redirect, render_template, request, session, url_for
 
 from server import hipparchia
+from server.hipparchiaobjects.helperobjects import ProgressPoll
+from server.searching.searchfunctions import buildsearchobject
 from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \
 	workprovenancedict
+from server.startup import poll
 
 
 #
@@ -119,8 +123,16 @@ def testroute():
 	:return:
 	"""
 
-	from server.routes.vectorroutes import findvectorsbysentence
+	ts = str(int(time.time()))
+	poll[ts] = ProgressPoll(ts)
+	activepoll = poll[ts]
+	activepoll.activate()
+	activepoll.statusis('executing testroute()')
 
-	doimportedfunction = findvectorsbysentence(0)
+	from server.routes.vectorroutes import findlatentsemanticindex
+
+	so = buildsearchobject(ts, request, session)
+
+	doimportedfunction = findlatentsemanticindex(activepoll, so)
 
 	return redirect(url_for('frontpage'))
