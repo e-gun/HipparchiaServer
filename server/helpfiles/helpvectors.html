@@ -1,0 +1,52 @@
+EXPERIMENTAL semantic vector searching can be enabled by clicking on the box next to <code>δ</code>
+or <code>Δ</code> once <span class="emph">complex searching</span> is selected.
+<br />
+<br />
+<code>δ</code> will execute the following sequence of operations:
+<ul>
+    <li>find all <span class="emph">sentences</span> containing the matching term or lemmatized wordlist in all texts on the active searchlist</li>
+    <li>calculate the <code>cosine distance</code> from this word to all other words that appear in these sentences</li>
+    <li>generate a ranked list of associated words that are above a certain threshold</li>
+</ul>
+<code>Δ</code> will execute the following sequence of operations:
+<ul>
+    <li>find all <span class="emph">passages</span> containing the matching term or lemmatized wordlist in all texts on the active searchlist</li>
+    <li>grab the relevant <span class="emph">context</span> around the word: N lines or N words</li>
+    <li>calculate the <code>cosine distance</code> from this word to all other words that appear in these passages</li>
+    <li>generate a ranked list of associated words that are above a certain threshold</li>
+</ul>
+
+<code>0</code> indicates identity: that is, there is no distance. <code>1</code> is maximal distance, i.e., no significant relationship between the terms.
+
+<br />
+<br />
+The <span class="emph">math</span> behind the cosine distances:
+<br />
+<br />
+<code>cos(α, β) = α · β / ||α|| ||β||</code>
+<br />
+<br />
+<code>||α|| = sqrt(α · α)</code>
+<br />
+<br />
+where <code>α</code> and <code>β</code> are vectors whose dimension is the N distinct lemmatized
+terms that can be derived from all terms found in all the passages acquired.
+<br />
+<br />
+Notes:
+<ul>
+    <li>not every word can be lemmatized</li>
+    <li>homonymns cannot be avoided</li>
+    <li>more context means more terms: a <code>.4</code> association in a small set of words becomes
+        something like a <code>.6</code> if you have too many words. Beyond a certain point you will
+        never have any strong associations.</li>
+</ul>
+What is NOT (yet) happening:
+<br />
+<br />
+"Latent Semantic Indexing, LSI (or sometimes LSA) transforms documents from either bag-of-words or (preferably)
+TfIdf-weighted space into a latent space of a lower dimensionality."
+<br />
+<br />
+The hooks are in the code, and certain "secret routes" will build a vectorspace and executa a query against it,
+but a number of theoretical issues still need to be worked out, especially the question of <code>dimensionality</code>.

@@ -466,6 +466,12 @@ def findlatentsemanticindex(activepoll, searchobject):
 	# hdt
 	searchlist = ['gr0016']
 
+	# hippoc
+	searchlist = ['gr0627']
+
+	# nepos
+	# searchlist = ['lt0588']
+
 	if len(searchlist) > 0:
 		searchlist = flagexclusions(searchlist, so.session)
 		workssearched = len(searchlist)
@@ -663,12 +669,13 @@ def lsibuildspace(allheadwords, morphdict, sentences):
 
 	corpustfidf = termfreqinversedocfreq[lsicorpus]
 
-	semanticindex = models.LsiModel(corpustfidf, id2word=lsidictionary, num_topics=400)
+	semanticindex = models.LsiModel(corpustfidf, id2word=lsidictionary, num_topics=350)
+
 	"""	
 	"An empirical study of required dimensionality for large-scale latent semantic indexing applications"
 	Bradford 2008
 	
-	For a term-dodument matrix that has been decomposed via SVD with a non-dero diagonal... 
+	For a term-document matrix that has been decomposed via SVD with a non-zero diagonal... 
 	
 	Dimensionality is reduced by deleting all but the k largest values on 
 	this diagonal, together with the corresponding columns in the
@@ -694,21 +701,19 @@ def lsibuildspace(allheadwords, morphdict, sentences):
 
 	corpussemanticindex = semanticindex[corpustfidf]
 
-	# print('topics', semanticindex.print_topics(10))
-
-	vectorquery = 'αἴτιοϲ ἀδίκημα'
-	vqi = vectorquery.split(' ')
+	vectorquery = 'εὕρηϲιϲ φύϲιϲ'
 	vectorquerybag = lsidictionary.doc2bow(vectorquery.lower().split())
 	vectorquerylsi = semanticindex[vectorquerybag]
+	# print('vectorquerylsi', vectorquerylsi)
 
 	vectorindex = similarities.MatrixSimilarity(semanticindex[lsicorpus])
 
 	similis = vectorindex[vectorquerylsi]
-	# print('similis', similis)
+	print('similis', similis)
 
 	sims = sorted(enumerate(similis), key=lambda item: -item[1])
 	for s in sims:
-		if s[1] > .5 and set(bagsofwords[s[0]]) - set(vqi) == set(bagsofwords[s[0]]):
+		if s[1] > .5:
 			print(s, ' '.join(sentences[s[0]]), bagsofwords[s[0]])
 			# print(s, ' '.join(sentences[s[0]]))
 
