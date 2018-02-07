@@ -109,7 +109,7 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 	for r in searchresultlist:
 		resultnumber = r.hitnumber
 		focusline = r.getindex()
-		environs = list(range(int(focusline - (context / 2)), int(focusline + (context / 2))+1))
+		environs = list(range(int(focusline - (context / 2)), int(focusline + (context / 2)) + 1))
 		tosearch.extend(environs)
 		rmap = {e: resultnumber for e in environs}
 		reversemap.update(rmap)
@@ -138,6 +138,8 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 				pass
 
 	curs.close()
+	dbconnection.close()
+	del dbconnection
 
 	return searchresultlist
 
