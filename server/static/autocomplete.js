@@ -28,7 +28,7 @@ function reloadselections(selectiondata){
 function reloadAuthorlist(){
     $.getJSON('/getselections', function (selectiondata) {
         reloadselections(selectiondata);
-        var ids = new Array('#worksautocomplete', '#level05', '#level04', '#level03', '#level02', '#level01', '#level00',
+        var ids = Array('#worksautocomplete', '#level05', '#level04', '#level03', '#level02', '#level01', '#level00',
             '#browseto', '#makeanindex', '#textofthis', '#fewerchoices', '#genresautocomplete', '#genreinfo',
             '#genrelistcontents', '#workgenresautocomplete', '#locationsautocomplete', '#provenanceautocomplete',
             '#pickgenre', '#excludegenre', '#setoptions', '#lexica', '#authinfo', '#authorholdings', '#searchlistcontents',
@@ -38,7 +38,7 @@ function reloadAuthorlist(){
 }
 
 function resetworksautocomplete(){
-    var ids = new Array('#level05', '#level04', '#level03', '#level02', '#level01', '#level00');
+    var ids = Array('#level05', '#level04', '#level03', '#level02', '#level01', '#level00');
     bulkhider(ids);
     bulkclear(ids);
 }
@@ -79,15 +79,15 @@ $('#authorsautocomplete').autocomplete({
         }
         loadWorklist(auid);
         $('#worksautocomplete').prop('placeholder', '(Pick a work)');
-        var ids = new Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo');
+        var ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo');
         bulkshow(ids);
         }
     });
 
 
 $('#pickauthor').click( function() {
-        var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         var name = $('#authorsautocomplete').val();
+        var authorid = name.slice(-7, -1);
         var locus = locusdataloader();
         // $('#authorsautocomplete').val('');
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
@@ -116,8 +116,8 @@ $('#pickauthor').click( function() {
 
 
 $('#excludeauthor').click( function() {
-        var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         var name = $('#authorsautocomplete').val();
+        var authorid = name.slice(-7, -1);
         var locus = locusdataloader();
         // $('#authorsautocomplete').val('');
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
@@ -154,9 +154,7 @@ function loadWorklist(authornumber){
         var worksfound = [];
         for (i = 0; i < dLen; i++) { worksfound.push(selectiondata[i]); }
         $('#worksautocomplete').autocomplete( "enable" );
-        $('#worksautocomplete').autocomplete({
-            source: worksfound
-            });
+        $('#worksautocomplete').autocomplete({ source: worksfound });
         // $('#worksautocomplete').val(worksfound[0]);
     });
 }

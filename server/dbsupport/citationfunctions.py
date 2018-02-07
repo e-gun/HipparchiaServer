@@ -382,7 +382,7 @@ def perseuslookupleveltrimmer(workobject, citationlist, cursor, trialnumber):
 	except:
 		dblinenumber = workobject.starts
 		successcode = 'Sending first line of the work. Perseus reference did not return a valid Hipparchia ' \
-		              'reference: <span class="bold">{pe}</span> vs <span class="bold">{hi}</span>'.format(pe=(', ').join(citationlist), hi=workobject.citation())
+		              'reference: <span class="bold">{pe}</span> vs <span class="bold">{hi}</span>'.format(pe=', '.join(citationlist), hi=workobject.citation())
 		results = {'code': successcode, 'line': dblinenumber}
 		return results
 

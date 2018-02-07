@@ -144,11 +144,8 @@ def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
 
 	searchlist: ['gr0461', 'gr0489', 'gr0468', ...]
 
-
-	:param count:
 	:param foundlineobjects:
 	:param searchlist:
-	:param commitcount:
 	:param activepoll:
 	:param searchobject:
 	:return:
@@ -199,6 +196,8 @@ def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
 
 	dbconnection.commit()
 	curs.close()
+	dbconnection.close()
+	del dbconnection
 
 	return foundlineobjects
 
@@ -219,10 +218,8 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchob
 	these searches go very slowly of you seek "all 429 known forms of »εὑρίϲκω«"; so they have been broken up
 	you will search N forms in all tables; then another N forms in all tables; ...
 
-	:param count:
 	:param foundlineobjects:
 	:param searchtuples:
-	:param commitcount:
 	:param activepoll:
 	:param searchobject:
 	:return:
@@ -269,6 +266,8 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchob
 
 	dbconnection.commit()
 	curs.close()
+	dbconnection.close()
+	del dbconnection
 
 	return foundlineobjects
 
@@ -285,7 +284,6 @@ def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobje
 
 	:param foundlineobjects:
 	:param searchinginside:
-	:param commitcount:
 	:param activepoll:
 	:param searchobject:
 	:return:
@@ -318,6 +316,8 @@ def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobje
 
 	dbconnection.commit()
 	curs.close()
+	dbconnection.close()
+	del dbconnection
 
 	return foundlineobjects
 
@@ -336,7 +336,6 @@ def workonproximitysearch(foundlineobjects, searchinginside, activepoll, searcho
 	searchobject.termtwo:
 		'patres'
 
-	:param count:
 	:param foundlineobjects:
 	:param searchinginside:
 	:param activepoll:

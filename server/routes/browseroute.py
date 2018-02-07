@@ -133,7 +133,7 @@ def grabtextforbrowsing(locus):
 	if passage and ao.universalid != 'gr0000':
 		browserdata = getandformatbrowsercontext(ao, wo, int(passage), ctx, numbersevery, cur)
 	else:
-		browserdata = {}
+		browserdata = dict()
 		browserdata['browseforwards'] = wo.ends
 		browserdata['browseback'] = wo.starts
 		viewing = '<p class="currentlyviewing">error in fetching the browser data.<br />I was sent a citation that returned nothing: {c}</p><br /><br />'.format(c=locus)

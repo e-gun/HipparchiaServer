@@ -23,7 +23,6 @@ def phrasesearch(wkid, activepoll, searchobject, cursor):
 	faster if you call it with an uncommon word; if you call it with a common word, then
 	you will likely search much more slowly than you would with subqueryphrasesearch()
 
-	:param maxhits:
 	:param wkid:
 	:param activepoll:
 	:param searchobject:
@@ -225,6 +224,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 			# debugging
 			# for l in locallineobjects:
 			#	print(l.universalid, l.locus(), getattr(l,so.usewordlist))
+
 			gotmyonehit = False
 			while locallineobjects and activepoll.hitcount.value <= so.cap and not gotmyonehit:
 				# windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]

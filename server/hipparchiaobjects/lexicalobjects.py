@@ -508,7 +508,7 @@ class MorphPossibilityObject(object):
 	def gettranslation(self):
 		transfinder = re.compile(r'<transl>(.*?)</transl>')
 		trans = re.findall(transfinder, self.transandanal)
-		return ('; ').join(trans)
+		return '; '.join(trans)
 
 	def getanalysislist(self):
 		analysisfinder = re.compile(r'<analysis>(.*?)</analysis>')
