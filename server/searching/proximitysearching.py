@@ -70,6 +70,8 @@ def withinxlines(workdbname, searchobject):
 
 	dbconnection.commit()
 	cursor.close()
+	dbconnection.close()
+	del dbconnection
 
 	return fullmatches
 
@@ -134,6 +136,8 @@ def withinxwords(workdbname, searchobject):
 
 	dbconnection.commit()
 	cursor.close()
+	dbconnection.close()
+	del dbconnection
 
 	return fullmatches
 
