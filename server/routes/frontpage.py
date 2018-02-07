@@ -31,6 +31,8 @@ def frontpage():
 	expectedsqltemplateversion = 1082018
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
 
+	icandovectors = hipparchia.config['SEMANTICVECTORSENABLED']
+
 	sessionvariables()
 
 	# check to see which dbs we actually own
@@ -52,7 +54,7 @@ def frontpage():
 	page = render_template('search.html', activelists=activelists, activecorpora=activecorpora, clab=corporalabels,
 	                       css=stylesheet, buildinfo=buildinfo, onehit=session['onehit'],
 	                       hwindexing=session['headwordindexing'], indexbyfrequency=session['indexbyfrequency'],
-						   spuria=session['spuria'], varia=session['varia'], undated=session['incerta'])
+						   spuria=session['spuria'], varia=session['varia'], undated=session['incerta'], icandovectors=icandovectors)
 
 	return page
 

@@ -148,20 +148,13 @@ HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 #   the query is a regex 'or' that can have > 400 variations; this
 #   makes for slow faster; 40 tries of 10 variants is faster
 #
-# MAXVECTORSPACE: what is the largest set of words you are willing
-#   to vectorize in order to find the association network of a given
-#   lemmatized term? This sort of query get exponentially harder to
-#   execute and so you if you allow a full corpora search you will
-#   bring your system to it knees for a long, long time. 7548165 is
-#   all of Latin. If you search for a common word you can easily
-#   chew up >24GB of RAM. Your sytem will hang unless/until Hipparchia
-#   receives more memory optimizations
+
 
 AUTOCONFIGWORKERS = 'yes'
 WORKERS = 3
 MPCOMMITCOUNT = 250
 LEMMACHUNKSIZE = 10
-MAXVECTORSPACE = 2000000
+
 
 ### [6] settings that you can only configure here ###
 ##  [only change these items if you know why you are doing it] ##
@@ -255,11 +248,6 @@ MAXVECTORSPACE = 2000000
 #  	are set to 'yes' lunates win (and you
 #   waste CPU cycles).
 #
-# VECTORDISTANCECUTOFF: how close Word A needs to be to Word B for the associative matrix
-#   calculations to decide that there is a relationship worth pursuing: a value between 1 and 0
-#   1 --> identical;
-#   0 --> completely unrelated
-#
 
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 TLGASSUMESBETACODE = 'yes'
@@ -273,7 +261,7 @@ SUPPRESSLONGREQUESTMESSAGE = 'no'
 ENOUGHALREADYWITHTHECOPYRIGHTNOTICE = 'no'
 HOBBLEREGEX = 'no'
 INSISTUPONSTANDARDANGLEBRACKETS = 'no'
-VECTORDISTANCECUTOFF = .2
+
 
 # lexical output settings
 SHOWGLOBALWORDCOUNTS = 'yes'
@@ -285,3 +273,24 @@ FALLBACKTODOUBLESTRIKES = 'yes'
 REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
 FORCELUNATESIGMANOMATTERWHAT = 'no'
 RESTOREMEDIALANDFINALSIGMA = 'no'
+
+# [7] semantic vectors: experimental
+
+# MAXVECTORSPACE: what is the largest set of words you are willing
+#   to vectorize in order to find the association network of a given
+#   lemmatized term? This sort of query get exponentially harder to
+#   execute and so you if you allow a full corpora search you will
+#   bring your system to it knees for a long, long time. 7548165 is
+#   all of Latin. If you search for a common word you can easily
+#   chew up >24GB of RAM. Your sytem will hang unless/until Hipparchia
+#   receives more memory optimizations
+#
+# VECTORDISTANCECUTOFF: how close Word A needs to be to Word B for the associative matrix
+#   calculations to decide that there is a relationship worth pursuing: a value between 1 and 0
+#   1 --> identical;
+#   0 --> completely unrelated
+#
+
+SEMANTICVECTORSENABLED = 'no'
+MAXVECTORSPACE = 7548165
+VECTORDISTANCECUTOFF = .2
