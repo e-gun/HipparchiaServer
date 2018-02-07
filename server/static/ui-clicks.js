@@ -5,35 +5,20 @@
 //      (see LICENSE in the top level directory of the distribution)
 
 
-function browsetopassage() {
-    var auth = $('#authorsautocomplete').val().slice(-7, -1);
-    var wrk = $('#worksautocomplete').val().slice(-4, -1);
-    var l5 = $('#level05').val();
-    var l4 = $('#level04').val();
-    var l3 = $('#level03').val();
-    var l2 = $('#level02').val();
-    var l1 = $('#level01').val();
-    var l0 = $('#level00').val();
-    var lvls = [ l5,l4,l3,l2,l1,l0];
-    var loc = '';
-    for (var i = 5; i > -1; i-- ) {
-        if (lvls[i] !== '') {
-            loc += lvls[i]+'|';
-        } else {
-            if (i === 5) {
-                loc += '-1|';
-                }
-            }
-        }
-
-    if (wrk.length !== 3) { wrk = '999'}
-    loc = auth+'w'+wrk+'_AT_'+loc.slice(0, (loc.length)-1);
-    browseuponclick(loc);
+function setoptions(sessionvar, value){
+	$.getJSON( {url: '/setsessionvariable?' + sessionvar + '=' + value,
+	    async: false,
+	    success: function (resultdata) {
+		 // do nothing special: the return exists but is not relevant
+	    }
+	    });
 }
+
 
 function refreshselections() {
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
 }
+
 
 function loadoptions() {
     $.getJSON('/getsessionvariables', function (data) {
@@ -131,6 +116,34 @@ function loadoptions() {
             }
         });
 }
+
+
+function browsetopassage() {
+    var auth = $('#authorsautocomplete').val().slice(-7, -1);
+    var wrk = $('#worksautocomplete').val().slice(-4, -1);
+    var l5 = $('#level05').val();
+    var l4 = $('#level04').val();
+    var l3 = $('#level03').val();
+    var l2 = $('#level02').val();
+    var l1 = $('#level01').val();
+    var l0 = $('#level00').val();
+    var lvls = [ l5,l4,l3,l2,l1,l0];
+    var loc = '';
+    for (var i = 5; i > -1; i-- ) {
+        if (lvls[i] !== '') {
+            loc += lvls[i]+'|';
+        } else {
+            if (i === 5) {
+                loc += '-1|';
+                }
+            }
+        }
+
+    if (wrk.length !== 3) { wrk = '999'}
+    loc = auth+'w'+wrk+'_AT_'+loc.slice(0, (loc.length)-1);
+    browseuponclick(loc);
+}
+
 
 $('#openoptions').click(function(){
     loadoptions();
@@ -257,16 +270,6 @@ $('#lexicalsearch').click(function(){
 //
 // the radio options
 //
-
-
-function setoptions(sessionvar, value){
-	$.getJSON( {url: '/setsessionvariable?' + sessionvar + '=' + value,
-	    async: false,
-	    success: function (resultdata) {
-		 // do nothing special: the return exists but is not relevant
-	    }
-	    });
-}
 
 $('#headwordindexing_y').click( function(){ setoptions('headwordindexing', 'yes'); $('#headwordindexingactive').show(); $('#headwordindexinginactive').hide(); });
 
