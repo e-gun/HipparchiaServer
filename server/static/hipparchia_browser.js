@@ -7,46 +7,52 @@
 
 function browseuponclick(url){
 	$.getJSON(
-	    { url: '/browse/'+url,
+	    { url: '/browse/' + url,
 	    success: function (passagereturned) {
-            $('#browseforward').unbind('click');
-            $('#browseback').unbind('click');
+	        var bf = $('#browseforward');
+	        var bb = $('#browseback');
+            bf.unbind('click');
+            bb.unbind('click');
 
             var fb = parsepassagereturned(passagereturned);
             // left and right arrow keys
 
-            $('#browseforward').bind('click', function(){ browseuponclick(fb[0]); });
-            $('#browseback').bind('click', function(){ browseuponclick(fb[1]); });
+            bf.bind('click', function(){ browseuponclick(fb[0]); });
+            bb.bind('click', function(){ browseuponclick(fb[1]); });
             }
         }
         );
     }
 
 function parsepassagereturned(passagereturned) {
-		$('#browserdialogtext').text('');
+        var bdt = $('#browserdialogtext');
+        var ldt = $('#lexicadialogtext');
+        var aac = $('#authorsautocomplete');
+        var wac = $('#worksautocomplete');
+		bdt.text('');
         // the first item is info
         // {'forwardsandback': ['/browseto/lt1254w001_AT_2|2|3|6', '/browseto/lt1254w001_AT_6|9|2|6']}
         var fwdurl = passagereturned['browseforwards'];
         var bkdurl = passagereturned['browseback'];
 
         resetworksautocomplete();
-        $('#authorsautocomplete').val(passagereturned['authorboxcontents']);
-        $('#authorsautocomplete').prop('placeholder', '');
-        $('#worksautocomplete').val(passagereturned['workboxcontents']);
-        $('#worksautocomplete').prop('placeholder', '');
+        aac.val(passagereturned['authorboxcontents']);
+        aac.prop('placeholder', '');
+        wac.val(passagereturned['workboxcontents']);
+        wac.prop('placeholder', '');
         loadWorklist(passagereturned['authornumber']);
         loadLevellist(passagereturned['workid'],'-1');
 
-        $('#browserdialogtext').html(passagereturned['browserhtml']);
+        bdt.html(passagereturned['browserhtml']);
 
-        var ids = new Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo', '#browserdialog');
+        var ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo', '#browserdialog');
         bulkshow(ids);
 
         $('observed').click( function(e) {
             e.preventDefault();
             var windowWidth = $(window).width();
             var windowHeight = $(window).height();
-            $( '#lexicadialogtext' ).dialog({
+            ldt.dialog({
                     closeOnEscape: true,
                     autoOpen: false,
                     minWidth: windowWidth*.33,
@@ -57,16 +63,16 @@ function parsepassagereturned(passagereturned) {
                     icons: { primary: 'ui-icon-close' },
                     click: function() { $( this ).dialog( 'close' ); }
                     });
-            $( '#lexicadialogtext' ).dialog( 'open' );
-            $( '#lexicadialogtext' ).html('[searching...]');
-            $.getJSON('/parse/'+this.id, function (definitionreturned) {
-                $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
+            ldt.dialog( 'open' );
+            ldt.html('[searching...]');
+            $.getJSON('/parse/' + this.id, function (definitionreturned) {
+                $('#lexicon').val(definitionreturned[0]['trylookingunder']);
                 var dLen = definitionreturned.length;
-                var linesreturned = []
-                for (i = 0; i < dLen; i++) {
+                var linesreturned = Array();
+                for (var i = 0; i < dLen; i++) {
                     linesreturned.push(definitionreturned[i]['value']);
                     }
-                $( '#lexicadialogtext' ).html(linesreturned);
+                ldt.html(linesreturned);
             });
             return false;
         });

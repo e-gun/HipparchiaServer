@@ -20,7 +20,7 @@ $(document).ready( function () {
     $('#clear_button').click( function() { window.location.href = '/resetsession'; });
     $('#helptabs').tabs();
     $('#helpbutton').click( function() {
-        if (document.getElementById('Interface').innerHTML == '<!-- placeholder -->') {
+        if (document.getElementById('Interface').innerHTML === '<!-- placeholder -->') {
             $.getJSON('/loadhelpdata', function (data) {
                 var l = data.helpcategories.length;
                 for (var i = 0; i < l; i++) {
@@ -81,7 +81,7 @@ $(document).ready( function () {
         var qstring = qstringarray.join('&');
 
         var searchid = Date.now();
-        var url = '/executesearch/'+searchid+'?'+qstring;
+        var url = '/executesearch/' + searchid + '?' + qstring;
 
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
 
@@ -90,7 +90,7 @@ $(document).ready( function () {
         });
 
     function setoptions(sessionvar,value){
-	    $.getJSON('/setsessionvariable?'+sessionvar+'='+value, function (resultdata) {
+	    $.getJSON('/setsessionvariable?' + sessionvar + '=' + value, function (resultdata) {
 		 // do nothing special: the return exists but is not relevant
 		 // [{"searchsyntax": "R"}]
 	    });
@@ -124,9 +124,9 @@ $(document).ready( function () {
         var summaryhtml = '';
 
         summaryhtml += 'Sought '+output['htmlsearch']+'<br />\n';
-        if ( output['scope'] !== '1') { summaryhtml += 'Searched '+output['scope']+' texts '; } else { summaryhtml += 'Searched 1 text '; }
+        if ( output['scope'] !== '1') { summaryhtml += 'Searched ' + output['scope'] + ' texts '; } else { summaryhtml += 'Searched 1 text '; }
         summaryhtml += 'and found '+output['resultcount'];
-        summaryhtml += ' ('+output['searchtime']+'s)';
+        summaryhtml += ' (' + output['searchtime'] + 's)';
         if (output['icandodates'] === 'yes' ) { if (output['dmin'] !== '850 B.C.E.' || output['dmax'] !== '1500 C.E.') { summaryhtml += '<br />Searched between '+output['dmin']+' and '+output['dmax']; } }
         if (output['onehit'] === 'yes') { summaryhtml += '<br />Only allowing one match per item searched (either a whole author or a specified work)'; }
         summaryhtml += '<br />Sorted by '+output['sortby'];

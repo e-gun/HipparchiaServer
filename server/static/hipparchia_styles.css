@@ -48,7 +48,7 @@
   --skyblue: hsla(205, 92%, 37%, 1);
   --teal: hsla(196, 14%, 39%, 1);
   --transparentgrey: hsla(0, 0%, 67%, .8);
-  --vdkteal: hsla(196, 27%, 20%, 1)
+  --vdkteal: hsla(196, 27%, 20%, 1);
 }
 
 /* COLOR USE OVERVIEW
@@ -173,42 +173,48 @@
 
 @font-face {
 	font-family: 'hipparchiasansstatic';
+	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/NotoSans-Regular.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiamonostatic';
+	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/DejaVuSansMono.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiaobliquestatic';
+	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/NotoSans-Italic.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiacondensedstatic';
+	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/RobotoCondensed-Regular.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiaboldstatic';
+	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/NotoSans-Bold.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiathinstatic';
+	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/Roboto-Thin.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchialightstatic';
+	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/Roboto-Light.ttf') format('truetype');
 	}
 
-
 body {
-	background: var(--main-body-color);
+	background-color: var(--main-body-color);
 	margin: 10px 10px 10px 10px;
 	font-family: var(--systemdefaultfont), 'hipparchiasansstatic', sans-serif;
 	color: var(--main-font-color);
@@ -343,7 +349,7 @@ body {
 	padding: 20px;
 	}
 
-.erasedepigraphicaltext, {
+.erasedepigraphicaltext {
 	text-decoration: line-through;
 	}
 
@@ -1012,7 +1018,7 @@ fieldset {
 	display: inline-block;
 	border-width: 1px;
 	font-size: 80%;
-    color: --var(dkteal);
+    color: var(--dkteal);
 	background-color: hsla(0, 0%, 98%, 1);
 	}
 
@@ -1098,7 +1104,7 @@ p.level3 {
 	}
 
 p.level4 {
-	padding-left: 45;
+	padding-left: 45px;
 	}
 
 pre {

@@ -10,20 +10,20 @@
 //
 
 $('#makeanindex').click( function() {
-        var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         var name = $('#authorsautocomplete').val();
+        var authorid = name.slice(-7, -1);
         var locus = locusdataloader();
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
         $('#searchsummary').html('');
         $('#displayresults').html('');
 
-        if (authorid != '') {
+        if (authorid !== '') {
             $('#clearpick').show();
             var searchid = Date.now();
-
-            if (wrk == '') { var url = '/indexto?auth=' + authorid+'&id='+searchid; }
-            else if (locus == '') { var url = '/indexto?auth=' + authorid + '&work=' + wrk +'&id='+searchid; }
-            else { var url = '/indexto?auth=' + authorid + '&work=' + wrk + '&locus=' + locus +'&id='+searchid; }
+            var url = '';
+            if (wrk === '') { url = '/indexto?auth=' + authorid+'&id='+searchid; }
+            else if (locus === '') { url = '/indexto?auth=' + authorid + '&work=' + wrk +'&id='+searchid; }
+            else { url = '/indexto?auth=' + authorid + '&work=' + wrk + '&locus=' + locus +'&id='+searchid; }
 
             $.getJSON( url, function (indexdata) { loadindexintodisplayresults(indexdata); });
             checkactivityviawebsocket(searchid);
@@ -33,25 +33,25 @@ $('#makeanindex').click( function() {
 
 function loadindexintodisplayresults(indexdata) {
         var linesreturned = '';
-        linesreturned += 'Index to ' + indexdata['authorname']
-        if (indexdata['title'] != '') { linesreturned += ',&nbsp;<span class="foundwork">'+indexdata['title']+'</span>'; }
-        if (indexdata['worksegment'] == '') {
+        linesreturned += 'Index to ' + indexdata['authorname'];
+        if (indexdata['title'] !== '') { linesreturned += ',&nbsp;<span class="foundwork">'+indexdata['title']+'</span>'; }
+        if (indexdata['worksegment'] === '') {
             linesreturned += '<br />';
             } else {
             linesreturned += '&nbsp;'+indexdata['worksegment']+'<br />';
             }
-        if (indexdata['title'] != '') { linesreturned += 'citation format:&nbsp;'+indexdata['structure']+'<br />'; }
+        if (indexdata['title'] !== '') { linesreturned += 'citation format:&nbsp;'+indexdata['structure']+'<br />'; }
         linesreturned += indexdata['wordsfound']+' words found<br />';
 
         var dLen = indexdata['keytoworks'].length;
         if (dLen > 0) {
-            linesreturned += '<br />Key to works:<br />'
-            for (i = 0; i < dLen; i++) {
+            linesreturned += '<br />Key to works:<br />';
+            for (var i = 0; i < dLen; i++) {
                 linesreturned += indexdata['keytoworks'][i]+'<br />';
             }
         }
 
-        linesreturned += '<span class="small">('+indexdata['elapsed']+'s)</span><br />';
+        linesreturned += '<span class="small">(' + indexdata['elapsed']+ 's)</span><br />';
 
         $('#searchsummary').html(linesreturned);
         $('#displayresults').html(indexdata['indexhtml']);
@@ -68,31 +68,33 @@ function loadindexintodisplayresults(indexdata) {
 //
 
 $('#textofthis').click( function() {
-        var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         var name = $('#authorsautocomplete').val();
+        var authorid = name.slice(-7, -1);
         var locus = locusdataloader();
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
-        if (authorid != '') {
+        if (authorid !== '') {
             $('#clearpick').show();
-            if (wrk == '') { var url = '/textof?auth=' + authorid + '&work=999'; }
-            else if (locus == '') { var url = '/textof?auth=' + authorid + '&work=' + wrk; }
-            else { var url = '/textof?auth=' + authorid + '&work=' + wrk + '&locus=' + locus; }
+            var url = '';
+            if (wrk === '') { url = '/textof?auth=' + authorid + '&work=999'; }
+            else if (locus === '') { url = '/textof?auth=' + authorid + '&work=' + wrk; }
+            else { url = '/textof?auth=' + authorid + '&work=' + wrk + '&locus=' + locus; }
 
             $.getJSON( url, function (returnedtext) { loadtextintodisplayresults(returnedtext); });
         }
-});
+    });
 
 
 function loadtextintodisplayresults(returnedtext) {
         var linesreturned = '';
-        linesreturned += 'Text of ' + returnedtext['authorname']
-        linesreturned += ',&nbsp;<span class="foundwork">'+returnedtext['title']+'</span>';
-        if (returnedtext['worksegment'] == '') {
+        linesreturned += 'Text of ' + returnedtext['authorname'];
+        linesreturned += ',&nbsp;<span class="foundwork">' + returnedtext['title'] + '</span>';
+        if (returnedtext['worksegment'] === '') {
             linesreturned += '<br /><br />';
             } else {
-            linesreturned += '&nbsp;'+returnedtext['worksegment']+'<br /><br />';
+            linesreturned += '&nbsp;' + returnedtext['worksegment'] + '<br /><br />';
             }
-        linesreturned += 'citation format:&nbsp;'+returnedtext['structure']+'<br />';
+        linesreturned += 'citation format:&nbsp;' + returnedtext['structure'] + '<br />';
+
         $('#searchsummary').html(linesreturned);
 
         $('#displayresults').html(returnedtext['texthtml']);

@@ -46,17 +46,17 @@ function resetworksautocomplete(){
 
 function checklocus() {
     var locusval = '';
-    for (i = 5; i > -1; i--) {
-        if ($('#level0'+i.toString()).val() != '') {
+    for (var i = 5; i > -1; i--) {
+        if ($('#level0'+i.toString()).val() !== '') {
             var foundval = $('#level0'+i.toStrint()).val();
-            if (locusval != '') {
+            if (locusval !== '') {
                 locusval += '|'+foundval;
             } else {
                 locusval = foundval;
             }
         }
     }
-    console.log(locusval)
+    console.log(locusval);
     return locusval;
 }
 
@@ -65,20 +65,22 @@ $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
     source: "/getauthorhint",
     select: function (event, ui) {
-        $('#worksautocomplete').val('');
+        var selector = $('#worksautocomplete');
+        selector.val('');
         resetworksautocomplete();
         // stupid timing issue if you select with mouse instead of keyboard: nothing happens
         // see: http://stackoverflow.com/questions/9809013/jqueryui-autocomplete-select-does-not-work-on-mouse-click-but-works-on-key-eve
         var origEvent = event;
+        var auid = '';
         while (origEvent.originalEvent !== undefined){ origEvent = origEvent.originalEvent; }
-        if (origEvent.type == 'click'){
+        if (origEvent.type === 'click'){
             document.getElementById('authorsautocomplete').value = ui.item.value;
-            var auid = $('#authorsautocomplete').val().slice(-7, -1);
+            auid = $('#authorsautocomplete').val().slice(-7, -1);
         } else {
-            var auid = $('#authorsautocomplete').val().slice(-7, -1);
+            auid = $('#authorsautocomplete').val().slice(-7, -1);
         }
         loadWorklist(auid);
-        $('#worksautocomplete').prop('placeholder', '(Pick a work)');
+        selector.prop('placeholder', '(Pick a work)');
         var ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo');
         bulkshow(ids);
         }
@@ -93,15 +95,15 @@ $('#pickauthor').click( function() {
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
         // $('#worksautocomplete').val('');
         resetworksautocomplete();
-        if (authorid != '') {
+        if (authorid !== '') {
             $('#clearpick').show();
-            if (wrk == '') {
+            if (wrk === '') {
               $.getJSON('/makeselection?auth=' + authorid, function (selectiondata) {
                     reloadselections(selectiondata);
                     loadWorklist(authorid);
                     $('#worksautocomplete').prop('placeholder', '(Pick a work)');
                     });
-             } else if (locus == '') {
+             } else if (locus === '') {
                 $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
                     reloadselections(selectiondata);
                 });
@@ -123,15 +125,15 @@ $('#excludeauthor').click( function() {
         var wrk = $('#worksautocomplete').val().slice(-4, -1);
         // $('#worksautocomplete').val('');
         resetworksautocomplete();
-        if (authorid != '') {
+        if (authorid !== '') {
             $('#clearpick').show();
-            if (wrk == '') {
+            if (wrk === '') {
               $.getJSON('/makeselection?auth=' + authorid+'&exclude=t', function (selectiondata) {
                    reloadselections(selectiondata);
                    loadWorklist(authorid);
                   $('#worksautocomplete').prop('placeholder', '(Pick a work)');
                   });
-             } else if (locus == '') {
+             } else if (locus === '') {
                 $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk+'&exclude=t', function (selectiondata) {
                     reloadselections(selectiondata);
                 });
@@ -151,11 +153,12 @@ $('#excludeauthor').click( function() {
 function loadWorklist(authornumber){
     $.getJSON('/getworksof/'+authornumber, function (selectiondata) {
         var dLen = selectiondata.length;
-        var worksfound = [];
-        for (i = 0; i < dLen; i++) { worksfound.push(selectiondata[i]); }
-        $('#worksautocomplete').autocomplete( "enable" );
-        $('#worksautocomplete').autocomplete({ source: worksfound });
-        // $('#worksautocomplete').val(worksfound[0]);
+        var worksfound = Array();
+        selector = $('#worksautocomplete');
+        for (var i = 0; i < dLen; i++) { worksfound.push(selectiondata[i]); }
+        selector.autocomplete( "enable" );
+        selector.autocomplete({ source: worksfound });
+        // selector.val(worksfound[0]);
     });
 }
 
@@ -183,8 +186,8 @@ function locusdataloader() {
     var l0 = $('#level00').val();
     var lvls = [ l5,l4,l3,l2,l1,l0];
     var locusdata = '';
-    for (i = 0; i < 6; i++ ) {
-        if (lvls[i] != '') { locusdata += lvls[i]+'|' } }
+    for (var i = 0; i < 6; i++ ) {
+        if (lvls[i] !== '') { locusdata += lvls[i]+'|' } }
     locusdata = locusdata.slice(0,(locusdata.length)-1);
 
     return locusdata;
@@ -210,7 +213,7 @@ function loadLevellist(workid,pariallocus){
         var possibilities = selectiondata['range'];
 
         var generateme = '#level0'+String(atlevel);
-        if ( low != '-9999') { $(generateme).prop('placeholder', '('+label+' '+String(low)+' to '+String(high)+')'); }
+        if ( low !== '-9999') { $(generateme).prop('placeholder', '('+label+' '+String(low)+' to '+String(high)+')'); }
         else { $(generateme).prop('placeholder', '(awaiting a valid selection...)'); }
         $(generateme).show();
         $(generateme).autocomplete ({
@@ -266,22 +269,22 @@ $('#pickgenre').click( function() {
         var loc = $('#locationsautocomplete').val();
         var prov = $('#provenanceautocomplete').val();
 
-        if (genre != '') {
+        if (genre !== '') {
             $.getJSON('/makeselection?genre=' + genre, function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
-        if (wkgenre != '') {
+        if (wkgenre !== '') {
             $.getJSON('/makeselection?wkgenre=' + wkgenre, function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
-        if (loc != '') {
+        if (loc !== '') {
             $.getJSON('/makeselection?auloc=' + loc, function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
-        if (prov != '') {
+        if (prov !== '') {
             $.getJSON('/makeselection?wkprov=' + prov, function (selectiondata) {
                 reloadselections(selectiondata);
              });
@@ -298,23 +301,23 @@ $('#excludegenre').click( function() {
         var loc = $('#locationsautocomplete').val();
         var prov = $('#provenanceautocomplete').val();
 
-        if (genre != '') {
+        if (genre !== '') {
             $.getJSON('/makeselection?genre=' + genre +'&exclude=t', function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
-        if (wkgenre != '') {
+        if (wkgenre !== '') {
             $.getJSON('/makeselection?wkgenre=' + wkgenre +'&exclude=t', function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
 
-        if (loc != '') {
+        if (loc !== '') {
             $.getJSON('/makeselection?auloc=' + loc +'&exclude=t', function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
-        if (prov != '') {
+        if (prov !== '') {
             $.getJSON('/makeselection?wkprov=' + prov +'&exclude=t', function (selectiondata) {
                 reloadselections(selectiondata);
              });

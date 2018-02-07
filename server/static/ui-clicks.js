@@ -16,214 +16,167 @@ function browsetopassage() {
     var l0 = $('#level00').val();
     var lvls = [ l5,l4,l3,l2,l1,l0];
     var loc = '';
-    for (i = 5; i > -1; i-- ) {
-        if (lvls[i] != '') {
+    for (var i = 5; i > -1; i-- ) {
+        if (lvls[i] !== '') {
             loc += lvls[i]+'|';
         } else {
-            if (i == 5) {
+            if (i === 5) {
                 loc += '-1|';
                 }
             }
         }
 
-    if (wrk.length != 3) { wrk == '999'}
-    loc = auth+'w'+wrk+'_AT_'+loc.slice(0,(loc.length)-1);
+    if (wrk.length !== 3) { wrk = '999'}
+    loc = auth+'w'+wrk+'_AT_'+loc.slice(0, (loc.length)-1);
     browseuponclick(loc);
 }
 
 
 function loadoptions() {
     $.getJSON('/getsessionvariables', function (data) {
-        $('#earliestdate').spinner( 'value', data.earliestdate);
-        $('#latestdate').spinner('value', data.latestdate);
-        $('#linesofcontextspinner').spinner('value', data.linesofcontext);
-        $('#hitlimitspinner').spinner('value', data.maxresults);
-        $('#browserspinner').spinner('value', data.browsercontext);
+        var simpletoggles = {
+            'spuria': $('#includespuria'),
+            'varia': $('#includevaria'),
+            'incerta': $('#includeincerta'),
+            'sensesummary': $('#sensesummary'),
+            'bracketsquare': $('#bracketsquare'),
+            'bracketround': $('#bracketround'),
+            'bracketangled': $('#bracketangled'),
+            'bracketcurly': $('#bracketcurly'),
+            'authorssummary': $('#authorssummary'),
+            'quotesummary': $('#quotesummary'),
+            'greekcorpus': $('#greekcorpus'),
+            'latincorpus': $('#latincorpus'),
+            'inscriptioncorpus': $('#inscriptioncorpus'),
+            'papyruscorpus': $('#papyruscorpus'),
+            'christiancorpus': $('#christiancorpus'),
+            'cosdistbysentence': $('#cosdistbysentence'),
+            'cosdistbylineorword': $('#cosdistbylineorword')
+        };
+
+        Object.keys(simpletoggles).forEach(function(key) {
+            if (data[key] === 'yes') {
+                simpletoggles[key].prop('checked', true);
+            } else {
+                simpletoggles[key].prop('checked', false);
+            }
+        });
+
+        var sidebaricontoggles = {
+            'greekcorpus': {'t': $('#grkisactive'), 'f': $('#grkisnotactive')},
+            'latincorpus': {'t': $('#latisactive'), 'f': $('#latisnotactive')},
+            'inscriptioncorpus': {'t': $('#insisactive'), 'f': $('#insnotisactive')},
+            'papyruscorpus': {'t': $('#ddpisactive'), 'f': $('#ddpnotisactive')},
+            'christiancorpus': {'t': $('#chrisactive'), 'f': $('#chrnotisactive')},
+            'spuria': {'t': $('#spuriaistrue'), 'f': $('#spuriaisfalse')},
+            'varia': {'t': $('#variaistrue'), 'f': $('#variaisfalse')},
+            'incerta': {'t': $('#undatedistrue'), 'f': $('#undatedisfalse')}
+        };
+
+        Object.keys(sidebaricontoggles).forEach(function(key) {
+            if (data[key] === 'yes') {
+                sidebaricontoggles[key]['t'].show();
+                sidebaricontoggles[key]['f'].hide();
+            } else {
+                sidebaricontoggles[key]['t'].hide();
+                sidebaricontoggles[key]['f'].show();
+            }
+        });
+
+        var xoredtoggles = {
+            'onehit': {'y': $('#onehit_y'), 'n': $('#onehit_n'), 'f': $('#onehitisfalse'), 't': $('#onehitistrue')},
+            'headwordindexing': {'y': $('#headwordindexing_y'), 'n': $('#headwordindexing_n'), 'f': $('#headwordindexinginactive'), 't': $('#headwordindexingactive')},
+            'indexbyfrequency': {'y': $('#frequencyindexing_y'), 'n': $('#frequencyindexing_n'), 'f': $('#frequencyindexinginactive'), 't': $('#frequencyindexingactive')}
+        };
+
+        Object.keys(xoredtoggles).forEach(function(key) {
+            if (data[key] === 'yes') {
+                xoredtoggles[key]['y'].prop('checked', true);
+                xoredtoggles[key]['n'].prop('checked', false);
+                xoredtoggles[key]['t'].show();
+                xoredtoggles[key]['f'].hide();
+            } else {
+                xoredtoggles[key]['n'].prop('checked', true);
+                xoredtoggles[key]['y'].prop('checked', false);
+                xoredtoggles[key]['f'].show();
+                xoredtoggles[key]['t'].hide();
+            }
+        });
+
+        var setspinnervalues = {
+            'earliestdate': $('#earliestdate'),
+            'latestdate': $('#latestdate'),
+            'linesofcontext': $('#linesofcontextspinner'),
+            'maxresults': $('#hitlimitspinner'),
+            'browsercontext': $('#browserspinner')
+        };
+
+        Object.keys(setspinnervalues).forEach(function(key) {
+            setspinnervalues[key].spinner('value', data[key]);
+        });
+
         $('#sortresults').val(data.sortorder);
         $('#sortresults').selectmenu('refresh');
-        if (data.onehit == 'no') {
-            $('#onehit_y').prop('checked', false);
-            $('#onehit_n').prop('checked', true);
-            $('#onehitisfalse').show();
-            $('#onehitistrue').hide();
-            } else {
-            $('#onehit_y').prop('checked', true);
-            $('#onehit_n').prop('checked', false);
-            $('#onehitistrue').show();
-            $('#onehitisfalse').hide();
-            }
-        if (data.headwordindexing == 'no') {
-            $('#headwordindexing_y').prop('checked', false);
-            $('#headwordindexing_n').prop('checked', true);
-            $('#headwordindexinginactive').show();
-            $('#headwordindexingactive').hide();
-            } else {
-            $('#headwordindexing_y').prop('checked', true);
-            $('#headwordindexing_n').prop('checked', false);
-            $('#headwordindexingactive').show();
-            $('#headwordindexinginactive').hide();
-            }
-        if (data.indexbyfrequency == 'no') {
-            $('#frequencyindexing_y').prop('checked', false);
-            $('#frequencyindexing_n').prop('checked', true);
-            $('#frequencyindexinginactive').show();
-            $('#frequencyindexingactive').hide();
-            } else {
-            $('#frequencyindexing_y').prop('checked', true);
-            $('#frequencyindexing_n').prop('checked', false);
-            $('#frequencyindexingactive').show();
-            $('#frequencyindexinginactive').hide();
-            }
-        if (data.spuria == 'no') {
-            $('#includespuria').prop('checked', false);
-            } else {
-            $('#includespuria').prop('checked', true);
-            }
-        if (data.varia == 'no') {
-            $('#includevaria').prop('checked', false);
-            } else {
-            $('#includevaria').prop('checked', true);
-            }
-        if (data.incerta == 'no') {
-            $('#includeincerta').prop('checked', false);
-            } else {
-            $('#includeincerta').prop('checked', true);
-            }
-        if (data.sensesummary == 'no') {
-            $('#sensesummary').prop('checked', false);
-            } else {
-            $('#sensesummary').prop('checked', true);
-            }
-        if (data.bracketsquare == 'no') {
-            $('#bracketsquare').prop('checked', false);
-            } else {
-            $('#bracketsquare').prop('checked', true);
-            }
-        if (data.bracketround == 'no') {
-            $('#bracketround').prop('checked', false);
-            } else {
-            $('#bracketround').prop('checked', true);
-            }
-        if (data.bracketangled == 'no') {
-            $('#bracketangled').prop('checked', false);
-            } else {
-            $('#bracketangled').prop('checked', true);
-            }
-        if (data.bracketcurly == 'no') {
-            $('#bracketcurly').prop('checked', false);
-            } else {
-            $('#bracketcurly').prop('checked', true);
-            }
-        if (data.authorssummary == 'no') {
-            $('#authorssummary').prop('checked', false);
-            } else {
-            $('#authorssummary').prop('checked', true);
-            }
-        if (data.quotesummary == 'no') {
-            $('#quotesummary').prop('checked', false);
-            } else {
-            $('#quotesummary').prop('checked', true);
-            }
-        if (data.greekcorpus == 'yes') {
-            $('#greekcorpus').prop('checked', true);
-            $('#grkisactive').show();
-            } else {
-            $('#greekcorpus').prop('checked', false);
-            $('#grkisactive').hide();
-            }
-        if (data.latincorpus == 'yes') {
-            $('#latincorpus').prop('checked', true);
-            $('#latisactive').show();
-            } else {
-            $('#latincorpus').prop('checked', false);
-            $('#latisactive').hide();
-            }
-        if (data.inscriptioncorpus == 'yes') {
-            $('#inscriptioncorpus').prop('checked', true);
-            $('#insisactive').show();
-            } else {
-            $('#inscriptioncorpus').prop('checked', false);
-            $('#insisactive').hide();
-            }
-        if (data.papyruscorpus == 'yes') {
-            $('#papyruscorpus').prop('checked', true);
-            $('#ddpisactive').show();
-            } else {
-            $('#papyruscorpus').prop('checked', false);
-            $('#ddpisactive').hide();
-            }
-        if (data.christiancorpus == 'yes') {
-            $('#christiancorpus').prop('checked', true);
-            $('#chrisactive').show();
-            } else {
-            $('#christiancorpus').prop('checked', false);
-            $('#chrisactive').hide();
-            }
-        if (data.cosdistbysentence == 'yes') {
-            $('#cosdistbysentence').prop('checked', true);
+   
+        if (data.cosdistbysentence === 'yes') {
             $('#complexsearching').show();
             $('#proximatesearchform').val('');
-            } else {
-            $('#cosdistbysentence').prop('checked', false);
             }
-        if (data.cosdistbylineorword == 'yes') {
-            $('#cosdistbylineorword').prop('checked', true);
+        if (data.cosdistbylineorword === 'yes') {
             $('#complexsearching').show();
             $('#proximatesearchform').val('');
-            } else {
-            $('#cosdistbylineorword').prop('checked', false);
             }
         });
 }
 
-$('#openoptions').click( function() {
+$('#openoptions').click(function(){
     loadoptions();
     $('#setoptions').toggle();
 });
 
 
-$('#addtolist').click( function() { addtosearchlist(); });
+$('#addtolist').click(function(){ addtosearchlist(); });
 
-$('#browseto').click( function() { browsetopassage(); });
+$('#browseto').click(function(){ browsetopassage(); });
 
-$('#fewerchoices').click( function() {
+$('#fewerchoices').click(function(){
     $('#morechoices').show();
-    var ids = new Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
+    var ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
         '#provenanceautocomplete', '#pickgenre', '#excludegenre', '#genreinfo', '#genrelistcontents', '#edts',
         '#ldts', '#spur');
     bulkhider(ids);
     });
 
 
-$('#morechoices').click( function() {
+$('#morechoices').click(function(){
     $('#morechoices').hide();
-    var ids = new Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
+    var ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
         '#provenanceautocomplete', '#pickgenre', '#excludegenre', '#genreinfo', '#edts', '#ldts', '#spur');
     bulkshow(ids);
     loadoptions();
     });
 
 
-$('#moretools').click( function() { $('#lexica').toggle(); });
+$('#moretools').click(function(){ $('#lexica').toggle(); });
 
 // not working as expected
 // supposed to clear out the other boxes and restore the placeholder; only clears the boxes
 
-//$('#parser').on('focus', function () {
+//$('#parser').on('focus', function() {
 //    var $rl = $('#reverselexicon');
 //    var $lx = $('#lexicon');
 //    $rl.val(''); $rl.removeAttr("value"); $rl.attr('placeholder', '(English to Greek or Latin)');
 //    $lx.val(''); $lx.removeAttr("value"); $lx.attr('placeholder', '(Dictionary Search)');
 //    });
 //
-//$('#reverselexicon').on('focus', function () {
+//$('#reverselexicon').on('focus', function() {
 //    var $pp = $('#parser');
 //    var $lx = $('#lexicon');
 //    $pp.val(''); $pp.removeAttr("value"); $pp.attr('placeholder', '(Morphology Search)');
 //    $lx.val(''); $lx.removeAttr("value"); $lx.attr('placeholder', '(Dictionary Search)');
 //    });
 //
-//$('#lexicon').on('focus', function () {
+//$('#lexicon').on('focus', function() {
 //    var $rl = $('#reverselexicon');
 //    var $lx = $('#lexicon');
 //    $rl.val(''); $rl.removeAttr("value"); $rl.attr('placeholder', '(English to Greek or Latin)');
@@ -231,44 +184,49 @@ $('#moretools').click( function() { $('#lexica').toggle(); });
 //    });
 
 
-$('#lexicalsearch').click( function() {
+$('#lexicalsearch').click(function(){
     var dictterm = $('#lexicon').val();
     var restoreme = dictterm;
     // trailing space will be lost unless you do this: ' gladiator ' --> ' gladiator' and so you can't spearch for only that word...
-    if (dictterm.slice(-1) == ' ') { dictterm = dictterm.slice(0,-1) + '%20'; }
+    if (dictterm.slice(-1) === ' ') { dictterm = dictterm.slice(0,-1) + '%20'; }
     var parseterm = $('#parser').val();
     var reverseterm = $('#reverselexicon').val();
     var windowWidth = $(window).width();
     var windowHeight = $(window).height();
+    var searchterm = '';
+    var url = '';
+    var dialogtitle = '';
+    var mydictfield = '';
     if ( dictterm.length > 0) {
-        var searchterm = dictterm;
-        var url = '/dictsearch/';
-        var dialogtitle = restoreme;
-        var mydictfield = '#lexicon';
+        searchterm = dictterm;
+        url = '/dictsearch/';
+        dialogtitle = restoreme;
+        mydictfield = '#lexicon';
     } else if ( parseterm.length > 0 ) {
-        var searchterm = parseterm;
-        var url = '/parse/';
-        var dialogtitle = searchterm;
-        var mydictfield = '#parser';
+        searchterm = parseterm;
+        url = '/parse/';
+        dialogtitle = searchterm;
+        mydictfield = '#parser';
         restoreme = searchterm;
     } else if ( reverseterm.length > 0 ) {
-        var originalterm = reverseterm
+        var originalterm = reverseterm;
         // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
-        if (reverseterm.slice(-1) == ' ') { reverseterm = reverseterm.slice(0,-1) + '%20'; }
-        var searchterm = reverseterm;
-        var url = '/reverselookup/';
-        var dialogtitle = originalterm;
-        var mydictfield = '#reverselexicon';
+        if (reverseterm.slice(-1) === ' ') { reverseterm = reverseterm.slice(0,-1) + '%20'; }
+        searchterm = reverseterm;
+        url = '/reverselookup/';
+        dialogtitle = originalterm;
+        mydictfield = '#reverselexicon';
         restoreme = searchterm;
     } else {
         searchterm = 'nihil';
         url = '/dictsearch/';
-        var dialogtitle = searchterm;
+        dialogtitle = searchterm;
     }
 
     $(mydictfield).val('[Working on it...]');
     $.getJSON(url + searchterm, function (definitionreturned) {
-           $( '#lexicadialogtext' ).dialog({
+            var ldt = $('#lexicadialogtext');
+           ldt.dialog({
                 closeOnEscape: true,
                 autoOpen: false,
                 maxHeight: windowHeight*.9,
@@ -280,13 +238,13 @@ $('#lexicalsearch').click( function() {
                 icons: { primary: 'ui-icon-close' },
                 click: function() { $( this ).dialog( 'close' ); }
                 });
-           $( '#lexicadialogtext' ).dialog( 'open' );
+           ldt.dialog( 'open' );
            var dLen = definitionreturned.length;
            var linesreturned = [];
-            for (i = 0; i < dLen; i++) {
+            for (var i = 0; i < dLen; i++) {
                 linesreturned.push(definitionreturned[i]['value']);
                 }
-            $( '#lexicadialogtext' ).html(linesreturned);
+            ldt.html(linesreturned);
             $(mydictfield).val(restoreme);
         });
 
@@ -298,8 +256,8 @@ $('#lexicalsearch').click( function() {
 //
 
 
-function setoptions(sessionvar,value){
-	$.getJSON( {url: '/setsessionvariable?'+sessionvar+'='+value,
+function setoptions(sessionvar, value){
+	$.getJSON( {url: '/setsessionvariable?' + sessionvar + '=' + value,
 	    async: false,
 	    success: function (resultdata) {
 		 // do nothing special: the return exists but is not relevant
@@ -308,174 +266,109 @@ function setoptions(sessionvar,value){
 }
 
 $('#headwordindexing_y').click( function(){ setoptions('headwordindexing', 'yes'); $('#headwordindexingactive').show(); $('#headwordindexinginactive').hide(); });
+
 $('#headwordindexing_n').click( function(){ setoptions('headwordindexing', 'no'); $('#headwordindexinginactive').show(); $('#headwordindexingactive').hide(); });
 
 $('#frequencyindexing_y').click( function(){ setoptions('indexbyfrequency', 'yes'); $('#frequencyindexingactive').show(); $('#frequencyindexinginactive').hide(); });
+
 $('#frequencyindexing_n').click( function(){ setoptions('indexbyfrequency', 'no'); $('#frequencyindexinginactive').show(); $('#frequencyindexingactive').hide(); });
 
 
 $('#onehit_y').click( function(){ setoptions('onehit', 'yes'); $('#onehitistrue').show(); $('#onehitisfalse').hide(); });
+
 $('#onehit_n').click( function(){ setoptions('onehit', 'no'); $('#onehitisfalse').show(); $('#onehitistrue').hide(); });
 
-$('#includespuria').change(function () {
-    if(this.checked) {
-        setoptions('spuria', 'yes');
-        $('#spuriaistrue').show();
-        $('#spuriaisfalse').hide();
-    } else {
-        setoptions('spuria', 'no');
-        $('#spuriaistrue').hide();
-        $('#spuriaisfalse').show();
-    }
-    // because some items on your list just got purged?
+$('#includespuria').change(function() {
+    if(this.checked) { setoptions('spuria', 'yes'); } else { setoptions('spuria', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#includevaria').change(function () {
-    if(this.checked) {
-        setoptions('varia', 'yes');
-        $('#variaistrue').show();
-        $('#variaisfalse').hide();
-    } else {
-        setoptions('varia', 'no');
-        $('#variaistrue').hide();
-        $('#variaisfalse').show();
-    }
-    // because some items on your list just got purged?
+$('#includevaria').change(function() {
+    if(this.checked) { setoptions('varia', 'yes'); } else { setoptions('varia', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#includeincerta').change(function () {
-    if(this.checked) {
-        setoptions('incerta', 'yes');
-        $('#undatedistrue').show();
-        $('#undatedisfalse').hide();
-    } else {
-        setoptions('incerta', 'no');
-        $('#undatedistrue').hide();
-        $('#undatedisfalse').show();
-    }
-    // because some items on your list just got purged?
+$('#includeincerta').change(function() {
+    if(this.checked) { setoptions('incerta', 'yes'); } else { setoptions('incerta', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#greekcorpus').change(function () {
-    if(this.checked) {
-        setoptions('greekcorpus', 'yes');
-        $('#grkisactive').show();
-    } else {
-        setoptions('greekcorpus', 'no');
-        $('#grkisactive').hide();
-    }
-    // because some items on your list just got purged?
+$('#greekcorpus').change(function() {
+    if(this.checked) { setoptions('greekcorpus', 'yes'); } else { setoptions('greekcorpus', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#latincorpus').change(function () {
-    if(this.checked) {
-        setoptions('latincorpus', 'yes');
-        $('#latisactive').show();
-    } else {
-        setoptions('latincorpus', 'no');
-        $('#latisactive').hide();
-    }
-    // because some items on your list just got purged?
+$('#latincorpus').change(function() {
+    if(this.checked) { setoptions('latincorpus', 'yes'); } else { setoptions('latincorpus', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#inscriptioncorpus').change(function () {
-    if(this.checked) {
-        setoptions('inscriptioncorpus', 'yes');
-        $('#insisactive').show();
-    } else {
-        setoptions('inscriptioncorpus', 'no');
-        $('#insisactive').hide();
-    }
-    // because some items on your list just got purged?
+$('#inscriptioncorpus').change(function() {
+    if(this.checked) { setoptions('inscriptioncorpus', 'yes'); } else { setoptions('inscriptioncorpus', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#papyruscorpus').change(function () {
-    if(this.checked) {
-        setoptions('papyruscorpus', 'yes');
-        $('#ddpisactive').show();
-    } else {
-        setoptions('papyruscorpus', 'no');
-        $('#ddpisactive').hide();
-    }
-    // because some items on your list just got purged?
+$('#papyruscorpus').change(function() {
+    if(this.checked) { setoptions('papyruscorpus', 'yes'); } else { setoptions('papyruscorpus', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#christiancorpus').change(function () {
-    if(this.checked) {
-        setoptions('christiancorpus', 'yes');
-        $('#chrisactive').show();
-    } else {
-        setoptions('christiancorpus', 'no');
-        $('#chrisactive').hide();
-    }
-    // because some items on your list just got purged?
+$('#christiancorpus').change(function() {
+    if(this.checked) { setoptions('christiancorpus', 'yes'); } else { setoptions('christiancorpus', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#sensesummary').change(function () {
-    if(this.checked) {
-        setoptions('sensesummary', 'yes'); } else { setoptions('sensesummary', 'no');
-    }
-    // because some items on your list just got purged?
+$('#sensesummary').change(function() {
+    if(this.checked) { setoptions('sensesummary', 'yes'); } else { setoptions('sensesummary', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#authorssummary').change(function () {
-    if(this.checked) {
-        setoptions('authorssummary', 'yes'); } else { setoptions('authorssummary', 'no');
-    }
-    // because some items on your list just got purged?
+$('#authorssummary').change(function() {
+    if(this.checked) { setoptions('authorssummary', 'yes'); } else { setoptions('authorssummary', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#quotesummary').change(function () {
-    if(this.checked) {
-        setoptions('quotesummary', 'yes'); } else { setoptions('quotesummary', 'no');
-    }
-    // because some items on your list just got purged?
+$('#quotesummary').change(function() {
+    if(this.checked) { setoptions('quotesummary', 'yes'); } else { setoptions('quotesummary', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#bracketsquare').change(function () {
-    if(this.checked) {
-        setoptions('bracketsquare', 'yes'); } else { setoptions('bracketsquare', 'no');
-    }
-    // because some items on your list just got purged?
+$('#bracketsquare').change(function() {
+    if(this.checked) { setoptions('bracketsquare', 'yes'); } else { setoptions('bracketsquare', 'no');}
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#bracketround').change(function () {
-    if(this.checked) {
-        setoptions('bracketround', 'yes'); } else { setoptions('bracketround', 'no');
-    }
-    // because some items on your list just got purged?
+$('#bracketround').change(function() {
+    if(this.checked) { setoptions('bracketround', 'yes'); } else { setoptions('bracketround', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#bracketangled').change(function () {
-    if(this.checked) {
-        setoptions('bracketangled', 'yes'); } else { setoptions('bracketangled', 'no');
-    }
-    // because some items on your list just got purged?
+$('#bracketangled').change(function() {
+    if(this.checked) { setoptions('bracketangled', 'yes'); } else { setoptions('bracketangled', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#bracketcurly').change(function () {
-    if(this.checked) {
-        setoptions('bracketcurly', 'yes'); } else { setoptions('bracketcurly', 'no');
-    }
-    // because some items on your list just got purged?
+$('#bracketcurly').change(function() {
+    if(this.checked) { setoptions('bracketcurly', 'yes'); } else { setoptions('bracketcurly', 'no'); }
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    loadoptions();
     });
 
-$('#cosdistbysentence').change(function () {
+$('#cosdistbysentence').change(function() {
     if(this.checked) {
         $('#cosdistbylineorword').prop('checked', false);
         $('#complexsearching').hide();
@@ -487,7 +380,7 @@ $('#cosdistbysentence').change(function () {
         }
     });
 
-$('#cosdistbylineorword').change(function () {
+$('#cosdistbylineorword').change(function() {
     if(this.checked) {
         $('#cosdistbysentence').prop('checked', false);
         $('#complexsearching').show();
@@ -498,27 +391,31 @@ $('#cosdistbylineorword').change(function () {
         }
     });
 
-$('#termoneisalemma').change(function () {
+$('#termoneisalemma').change(function() {
+    var wsf = $('#wordsearchform');
+    var lsf = $('#lemmatasearchform');
     if(this.checked) {
-        $('#wordsearchform').hide();
-        $('#wordsearchform').val('');
-        $('#lemmatasearchform').show();
+        wsf.hide();
+        wsf.val('');
+        lsf.show();
         } else {
-        $('#lemmatasearchform').hide();
-        $('#lemmatasearchform').val('');
-        $('#wordsearchform').show();
+        lsf.hide();
+        lsf.val('');
+        wsf.show();
         }
     });
 
-$('#termtwoisalemma').change(function () {
+$('#termtwoisalemma').change(function() {
+    var psf = $('#proximatesearchform');
+    var plsf = $('#proximatelemmatasearchform');
     if(this.checked) {
-        $('#proximatesearchform').hide();
-        $('#proximatesearchform').val('');
-        $('#proximatelemmatasearchform').show();
+        psf.hide();
+        psf.val('');
+        plsf.show();
         } else {
-        $('#proximatelemmatasearchform').hide();
-        $('#proximatelemmatasearchform').val('');
-        $('#proximatesearchform').show();
+        plsf.hide();
+        plsf.val('');
+        psf.show();
         }
     });
 
@@ -612,6 +509,7 @@ $( "#earliestdate" ).spinner({
 //
 
 $('#togglesaveslots').click( function(){ $('#saveslots').toggle()});
+
 $('#toggleloadslots').click( function(){ $('#loadslots').toggle()});
 
 function javascriptsessionintocookie(cookienumberstr){
@@ -658,7 +556,7 @@ $(function() {
 // info
 //
 
-$('#authinfo').click( function() {
+$('#authinfo').click(function(){
         $('#authorholdings').toggle();
         var authorid = $('#authorsautocomplete').val().slice(-7, -1);
         $.getJSON('/getauthorinfo/' + authorid, function (selectiondata) {
@@ -667,8 +565,8 @@ $('#authinfo').click( function() {
     });
 
 
-$('#searchinfo').click( function() {
-        if (  $('#searchlistcontents').is(':visible') == true ) {
+$('#searchinfo').click(function(){
+        if (  $('#searchlistcontents').is(':visible') === true ) {
             $('#searchlistcontents').hide();
             $('#searchlistcontents').html('<p class="center"><span class="small>(this might take a second...)</span></p>');
         } else {
@@ -681,9 +579,9 @@ $('#searchinfo').click( function() {
     });
 
 
-$('#genreinfo').click( function() {
+$('#genreinfo').click(function(){
         $('#genrelistcontents').toggle();
         $.getJSON('/getgenrelistcontents', function (selectiondata) {
                 document.getElementById('genrelistcontents').innerHTML = selectiondata;
-                             });
+                });
     });
