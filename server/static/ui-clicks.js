@@ -31,6 +31,9 @@ function browsetopassage() {
     browseuponclick(loc);
 }
 
+function refreshselections() {
+    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+}
 
 function loadoptions() {
     $.getJSON('/getsessionvariables', function (data) {
@@ -280,91 +283,91 @@ $('#onehit_n').click( function(){ setoptions('onehit', 'no'); $('#onehitisfalse'
 
 $('#includespuria').change(function() {
     if(this.checked) { setoptions('spuria', 'yes'); } else { setoptions('spuria', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#includevaria').change(function() {
     if(this.checked) { setoptions('varia', 'yes'); } else { setoptions('varia', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#includeincerta').change(function() {
     if(this.checked) { setoptions('incerta', 'yes'); } else { setoptions('incerta', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#greekcorpus').change(function() {
     if(this.checked) { setoptions('greekcorpus', 'yes'); } else { setoptions('greekcorpus', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#latincorpus').change(function() {
     if(this.checked) { setoptions('latincorpus', 'yes'); } else { setoptions('latincorpus', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#inscriptioncorpus').change(function() {
     if(this.checked) { setoptions('inscriptioncorpus', 'yes'); } else { setoptions('inscriptioncorpus', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#papyruscorpus').change(function() {
     if(this.checked) { setoptions('papyruscorpus', 'yes'); } else { setoptions('papyruscorpus', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#christiancorpus').change(function() {
     if(this.checked) { setoptions('christiancorpus', 'yes'); } else { setoptions('christiancorpus', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#sensesummary').change(function() {
     if(this.checked) { setoptions('sensesummary', 'yes'); } else { setoptions('sensesummary', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#authorssummary').change(function() {
     if(this.checked) { setoptions('authorssummary', 'yes'); } else { setoptions('authorssummary', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#quotesummary').change(function() {
     if(this.checked) { setoptions('quotesummary', 'yes'); } else { setoptions('quotesummary', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#bracketsquare').change(function() {
     if(this.checked) { setoptions('bracketsquare', 'yes'); } else { setoptions('bracketsquare', 'no');}
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#bracketround').change(function() {
     if(this.checked) { setoptions('bracketround', 'yes'); } else { setoptions('bracketround', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#bracketangled').change(function() {
     if(this.checked) { setoptions('bracketangled', 'yes'); } else { setoptions('bracketangled', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
 $('#bracketcurly').change(function() {
     if(this.checked) { setoptions('bracketcurly', 'yes'); } else { setoptions('bracketcurly', 'no'); }
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    refreshselections();
     loadoptions();
     });
 
@@ -477,12 +480,12 @@ $( "#latestdate" ).spinner({
     stop: function( event, ui ) {
         var result = $('#latestdate').spinner('value');
         setoptions('latestdate', String(result));
-        $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+        refreshselections();
         },
     spin: function( event, ui ) {
         var result = $('#latestdate').spinner('value');
         setoptions('latestdate', String(result));
-        $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+        refreshselections();
         }
         });
 
@@ -495,12 +498,12 @@ $( "#earliestdate" ).spinner({
     stop: function( event, ui ) {
         var result = $('#earliestdate').spinner('value');
         setoptions('earliestdate', String(result));
-        $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+        refreshselections();
         },
     spin: function( event, ui ) {
         var result = $('#earliestdate').spinner('value');
         setoptions('earliestdate', String(result));
-        $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+        refreshselections();
         }
         });
 
@@ -535,7 +538,6 @@ $('#load02').click( function(){ $.getJSON('/getcookie/02').always( function() { 
 $('#load03').click( function(){ $.getJSON('/getcookie/03').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); location.reload(); }); });
 $('#load04').click( function(){ $.getJSON('/getcookie/04').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); location.reload(); }); });
 $('#load05').click( function(){ $.getJSON('/getcookie/05').always( function() { $.getJSON('/getselections', function(selectiondata) { reloadselections(selectiondata); }); location.reload(); }); });
-
 
 ///
 /// selectmenu
