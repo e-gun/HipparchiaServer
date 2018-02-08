@@ -9,6 +9,7 @@
 import json
 import locale
 import time
+from copy import deepcopy
 
 try:
 	from gensim import corpora, models, similarities
@@ -18,6 +19,7 @@ except ImportError:
 from flask import request, session
 
 from server import hipparchia
+from server.formatting.vectorformatting import formatlsimatches
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.jsformatting import generatevectorjs
 from server.hipparchiaobjects.helperobjects import ProgressPoll
@@ -400,8 +402,6 @@ def findlatentsemanticindex(activepoll, searchobject):
 	:return:
 	"""
 
-	print('findlatentsemanticindex')
-
 	starttime = time.time()
 
 	so = searchobject
@@ -500,7 +500,6 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 
 	:return:
 	"""
-	print('lsigenerateoutput()')
 
 	so = searchobject
 	dmin, dmax = bcedating(so.session)
@@ -510,7 +509,9 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 
 	# find all possible forms of all the words we used
 	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
-	activepoll.statusis('Finding headwords')
+	wl = locale.format('%d', len(listsofwords), grouping=True)
+	activepoll.statusis('Finding headwords for {n} sentences'.format(n=wl))
+
 	morphdict = findheadwords(allwords)
 	morphdict = tidyupmophdict(morphdict)
 
@@ -521,7 +522,8 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 		for h in morphdict[m]:
 			allheadwords[h] = m
 
-	activepoll.statusis('Building vectors')
+	hw = locale.format('%d', len(allheadwords.keys()), grouping=True)
+	activepoll.statusis('Building vectors for {h} headwords in {n} sentences'.format(h=hw, n=wl))
 
 	corpus = lsibuildspace(morphdict, listsofwords)
 	c = corpus
@@ -545,22 +547,35 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 	similis = vectorindex[vectorquerylsi]
 	# print('similis', similis)
 
+	threshold = hipparchia.config['VECTORDISTANCECUTOFF']
+
+	matches = list()
 	sims = sorted(enumerate(similis), key=lambda item: -item[1])
+	count = 0
+	activepoll.statusis('Sifting results')
+	subsearchobject = deepcopy(so)
+
 	for s in sims:
-		if s[1] > .3:
+		if s[1] > threshold:
 			thissentence = c.sentences[s[0]]
-			dbline = finddblinefromsentence(thissentence, so)
-			print(s[1], dbline.universalid, ' '.join(thissentence), c.bagsofwords[s[0]])
-			# print(s, ' '.join(sentences[s[0]]))
+			# this part is slow and needs MP refactoring?
+			dblines = finddblinefromsentence(thissentence, subsearchobject)
+			if dblines:
+				if len(dblines) > 1:
+					xtra = ' <span class="small">[1 of {n} occurrences]</span>'.format(n=len(dblines))
+				else:
+					xtra = ''
+				dbline = dblines[0]
+				count += 1
+				thismatch = dict()
+				thismatch['count'] = count
+				thismatch['score'] = float(s[1])  # s[1] comes back as <class 'numpy.float32'>
+				thismatch['line'] = dbline
+				thismatch['sentence'] = '{s}{x}'.format(s=' '.join(thissentence), x=xtra)
+				thismatch['words'] = c.bagsofwords[s[0]]
+				matches.append(thismatch)
 
-	print('throwexception')
-	throwexception
-
-	# apply the threshold and drop the 'None' items
-	threshold = 1.0 - hipparchia.config['VECTORDISTANCECUTOFF']
-	falseidentity = .02
-
-	findshtml = ''
+	findshtml = formatlsimatches(matches)
 
 	findsjs = generatevectorjs()
 
@@ -568,24 +583,48 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 	searchtime = round(searchtime, 2)
 	workssearched = locale.format('%d', workssearched, grouping=True)
 
+	lm = so.lemma.dictionaryentry
+	try:
+		pr = so.proximatelemma.dictionaryentry
+	except AttributeError:
+		# proximatelemma is None
+		pr = None
+
 	output = dict()
-	output['title'] = 'Cosine distances to »{skg}«'.format(skg=focus)
+	if lm and pr:
+		output['title'] = 'Semantic index for all forms of »{skg}« and »{pr}«'.format(skg=lm, pr=pr)
+	else:
+		output['title'] = 'Semantic index for all forms of »{skg}« and »{pr}«'.format(skg=lm, pr=pr)
 	output['found'] = findshtml
 	# ultimately the js should let you clock on any top word to find its associations...
 	output['js'] = findsjs
-	output['resultcount'] = '{c} related terms in {s} {t}'.format(c=len(cosinevalues), s=len(listsofwords), t=vtype)
+	output['resultcount'] = '{n} sentences above the cutoff'.format(n=len(matches))
 	output['scope'] = workssearched
 	output['searchtime'] = str(searchtime)
 	output['proximate'] = ''
+
 	if so.lemma:
-		xtra = 'all forms of '
+		all = 'all forms of »{skg}«'.format(skg=lm)
 	else:
-		xtra = ''
-	output['thesearch'] = '{x}»{skg}«'.format(x=xtra, skg=focus)
-	output['htmlsearch'] = '{x}<span class="sought">»{skg}«</span>'.format(x=xtra, skg=focus)
+		all = ''
+	if so.proximatelemma:
+		near = ' all forms of »{skg}«'.format(skg=pr)
+	else:
+		near = ''
+	output['thesearch'] = '{all}{near}'.format(all=all, near=near)
+
+	if so.lemma:
+		all = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
+	else:
+		all = ''
+	if so.proximatelemma:
+		near = ' all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.proximatelemma.formlist), skg=pr)
+	else:
+		near = ''
+	output['htmlsearch'] = '{all}{near}'.format(all=all, near=near)
 	output['hitmax'] = ''
 	output['onehit'] = ''
-	output['sortby'] = 'distance with a cutoff of {c}'.format(c=1 - hipparchia.config['VECTORDISTANCECUTOFF'])
+	output['sortby'] = 'proximity'
 	output['dmin'] = dmin
 	output['dmax'] = dmax
 	activepoll.deactivate()

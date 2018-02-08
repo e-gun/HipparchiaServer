@@ -8,7 +8,6 @@
 
 import re
 import time
-from copy import deepcopy
 from string import punctuation
 
 from server.dbsupport.dbfunctions import resultiterator, setconnection
@@ -266,6 +265,35 @@ def bulklinegrabber(table, column, criterion, setofcriteria, cursor):
 	return contents
 
 
+def finddblinefromsentence(thissentence, modifiedsearchobject):
+	"""
+
+	get a locus from a random sentence coughed up by the vector corpus
+
+	:param thissentence:
+	:param searchobject:
+	:return:
+	"""
+
+	nullpoll = ProgressPoll(time.time())
+	mso = modifiedsearchobject
+	mso.lemma = None
+	mso.proximatelemma = None
+	mso.searchtype = 'phrase'
+	mso.usecolumn = 'accented_line'
+	mso.usewordlist = 'polytonic'
+	mso.accented = True
+	mso.seeking = ' '.join(thissentence[:6])
+	mso.termone = mso.seeking
+	mso.termtwo = ' '.join(thissentence[-5:])
+	hits = searchdispatcher(mso, nullpoll)
+
+	# if len(hits) > 1:
+	# 	print('findlocusfromsentence() found {h} hits when looking for {s}'.format(h=len(hits), s=mso.seeking))
+
+	return hits
+
+
 def mostcommonwords():
 	"""
 
@@ -443,37 +471,3 @@ idem - 24600
 ἔτι - 197966
 ὑπό - 194308
 """
-
-
-def finddblinefromsentence(thissentence, searchobject):
-	"""
-
-	get a locus from a random sentence coughed up by the vector corpus
-
-	:param thissentence:
-	:param searchobject:
-	:return:
-	"""
-
-	nullpoll = ProgressPoll(time.time())
-	modifiedsearch = deepcopy(searchobject)
-	modifiedsearch.lemma = None
-	modifiedsearch.proximatelemma = None
-	modifiedsearch.searchtype = 'phrase'
-	modifiedsearch.usecolumn = 'accented_line'
-	modifiedsearch.usewordlist = 'polytonic'
-	modifiedsearch.accented = True
-	modifiedsearch.seeking = ' '.join(thissentence[:6])
-	modifiedsearch.termone = modifiedsearch.seeking
-	modifiedsearch.termtwo = ' '.join(thissentence[-5:])
-	hits = searchdispatcher(modifiedsearch, nullpoll)
-
-	if len(hits) > 1:
-		print('findlocusfromsentence() found {h} hits when looking for {s}'.format(h=len(hits), s=modifiedsearch.seeking))
-
-	try:
-		locus = hits[0]
-	except IndexError:
-		locus = None
-
-	return locus

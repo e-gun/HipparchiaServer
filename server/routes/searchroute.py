@@ -104,9 +104,6 @@ def executesearch(timestamp):
 			return output
 
 		if frozensession['semanticvectorquery'] == 'yes':
-			# print('cosdistbysentence')
-			so.proximate = ''
-			so.proximatelemma = ''
 			output = findlatentsemanticindex(activepoll, so)
 			del poll[ts]
 			return output
