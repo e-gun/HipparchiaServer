@@ -11,6 +11,8 @@ from collections import defaultdict
 from multiprocessing import Manager, Process
 
 from gensim import corpora, models
+from gensim.models import Word2Vec
+from gensim.similarities.index import AnnoyIndexer
 
 from server.dbsupport.dbfunctions import setthreadcount
 from server.hipparchiaobjects.helperobjects import SemanticVectorCorpus
@@ -322,26 +324,7 @@ def lsibuildspace(morphdict, sentences):
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
-	bagsofwords = list()
-	for s in sentences:
-		lemattized = list()
-		for word in s:
-			try:
-				# WARNING: we are treating homonymns as if 2+ words were there instead of just one
-				# 'rectum' will give you 'rectus' and 'rego'; 'res' will give you 'reor' and 'res'
-				# this necessarily distorts the vector space
-				lemattized.append([item for item in morphdict[word]])
-			except KeyError:
-				pass
-		# flatten
-		bagsofwords.append([item for sublist in lemattized for item in sublist])
-
-	prevalence = defaultdict(int)
-	for bag in bagsofwords:
-		for word in bag:
-			prevalence[word] += 1
-
-	bagsofwords = [[w for w in bag if prevalence[w] > 1] for bag in bagsofwords]
+	bagsofwords = buildbagsofwords(morphdict, sentences)
 
 	lsidictionary = corpora.Dictionary(bagsofwords)
 
@@ -382,3 +365,90 @@ def lsibuildspace(morphdict, sentences):
 	corpus = SemanticVectorCorpus(semanticindex, corpustfidf, lsidictionary, lsicorpus, bagsofwords, sentences)
 
 	return corpus
+
+
+def findapproximatenearestneighbors(query, morphdict, sentences):
+	"""
+
+	search for points in space that are close to a given query point
+
+	the query should be a dictionary headword
+
+	:param query:
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
+	sentences = [s for s in sentences if s]
+
+	bagsofwords = buildbagsofwords(morphdict, sentences)
+
+	workers = setthreadcount()
+
+	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
+	model = Word2Vec(bagsofwords, min_count=1, seed=1, workers=workers)
+	indexer = AnnoyIndexer(model, 2)
+	mostsimilar = model.most_similar(query, topn=10, indexer=indexer)
+
+	return mostsimilar
+
+
+def findword2vecsimilarities(query, morphdict, sentences):
+	"""
+
+	:param query:
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
+	sentences = [s for s in sentences if s]
+
+	bagsofwords = buildbagsofwords(morphdict, sentences)
+
+	workers = setthreadcount()
+
+	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
+	model = Word2Vec(bagsofwords, min_count=1, seed=1, workers=workers)
+
+
+
+	return
+
+
+
+def buildbagsofwords(morphdict, sentences):
+	"""
+
+	turn a list of sentences into a list of list of headwords
+
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	bagsofwords = list()
+	for s in sentences:
+		lemattized = list()
+		for word in s:
+			try:
+				# WARNING: we are treating homonymns as if 2+ words were there instead of just one
+				# 'rectum' will give you 'rectus' and 'rego'; 'res' will give you 'reor' and 'res'
+				# this necessarily distorts the vector space
+				lemattized.append([item for item in morphdict[word]])
+			except KeyError:
+				pass
+		# flatten
+		bagsofwords.append([item for sublist in lemattized for item in sublist])
+
+	prevalence = defaultdict(int)
+	for bag in bagsofwords:
+		for word in bag:
+			prevalence[word] += 1
+
+	bagsofwords = [[w for w in bag if prevalence[w] > 1] for bag in bagsofwords]
+
+	return bagsofwords

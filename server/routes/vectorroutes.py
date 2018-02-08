@@ -525,6 +525,11 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 	hw = locale.format('%d', len(allheadwords.keys()), grouping=True)
 	activepoll.statusis('Building vectors for {h} headwords in {n} sentences'.format(h=hw, n=wl))
 
+	# TESTING
+	# mostsimilar = findapproximatenearestneighbors(so.lemma.dictionaryentry, morphdict, listsofwords)
+	# print('mostsimilar',mostsimilar)
+	# throwexception
+
 	corpus = lsibuildspace(morphdict, listsofwords)
 	c = corpus
 
