@@ -84,6 +84,8 @@ def searchdispatcher(searchobject, activepoll):
 		activepoll.statusis('Executing a phrase search.')
 		so.leastcommon = findleastcommonterm(so.termone, so.accented)
 		lccount = findleastcommontermcount(so.termone, so.accented)
+
+		# print('least common word in phrase:', lccount, ':', so.leastcommon, so.termone)
 		# longestterm = max([len(t) for t in so.termone.split(' ') if t])
 		# need to figure out when it will be faster to go to subqueryphrasesearch() and when not to
 		# logic + trial and error

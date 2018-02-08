@@ -12,10 +12,12 @@
     <button id="extendsearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Complicate the search"><span class="ui-button-icon ui-icon ui-icon-arrow-1-e"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
     <br />
     <div id="complexsearching">
-        <label for="wordisnear">near
-        <input type="radio" name="near" id="wordisnear" value="T"></label>
-        <label for="wordisnotnear">not near
-        <input type="radio" name="near" id="wordisnotnear" value="F"></label>
+        <div id="nearornot">
+            <label for="wordisnear">near
+            <input type="radio" name="near" id="wordisnear" value="T"></label>
+            <label for="wordisnotnear">not near
+            <input type="radio" name="near" id="wordisnotnear" value="F"></label>
+        </div>
         {% if proximate == '' %}
         <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" size=25>
         {% else %}
@@ -34,11 +36,15 @@
     <div id="vectorzone">
         {% if icandovectors == 'yes' %}
         <span id="cosinedistancesentencecheckbox">
-            <span class="small">Vector Search:</span>
+            <span class="small">local cosine distances:</span>
             <span class="small">δ</span><input type="checkbox" id="cosdistbysentence" value="yes" title="Cosine distances: words in the same sentence">
         </span>
         <span id="cosinedistancelineorwordcheckbox">
             <span class="small">Δ</span><input type="checkbox" id="cosdistbylineorword" value="yes" title="Cosine distances within N lines or words">
+        </span>
+        <span id="semanticvectorquerycheckbox">
+            <span class="small">&nbsp;&middot;&nbsp;semantic vector query:</span>
+            <span class="small">v&#8407;</span><input type="checkbox" id="semanticvectorquery" value="yes" title="Make a latent semantic analysis query">
         </span>
         {% endif %}
     </div>

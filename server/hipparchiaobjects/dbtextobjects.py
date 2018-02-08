@@ -375,7 +375,7 @@ class dbWorkLine(object):
 		call me to get a citation tuple in 0-to-5 order
 		:return:
 		"""
-		cit = []
+		cit = list()
 		for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]:
 			if str(lvl) != '-1':
 				cit.append(lvl)

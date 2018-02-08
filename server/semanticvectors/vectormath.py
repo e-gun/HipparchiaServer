@@ -7,9 +7,13 @@
 """
 
 import re
+from collections import defaultdict
 from multiprocessing import Manager, Process
 
+from gensim import corpora, models
+
 from server.dbsupport.dbfunctions import setthreadcount
+from server.hipparchiaobjects.helperobjects import SemanticVectorCorpus
 
 try:
 	# import THROWEXCEPTION
@@ -304,3 +308,77 @@ def vectorcosineworker(headwords, workpiledict, resultdict):
 			resultdict[headword] = cv
 
 	return resultdict
+
+
+def lsibuildspace(morphdict, sentences):
+	"""
+
+	:param allheadwords:
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
+	sentences = [s for s in sentences if s]
+
+	bagsofwords = list()
+	for s in sentences:
+		lemattized = list()
+		for word in s:
+			try:
+				# WARNING: we are treating homonymns as if 2+ words were there instead of just one
+				# 'rectum' will give you 'rectus' and 'rego'; 'res' will give you 'reor' and 'res'
+				# this necessarily distorts the vector space
+				lemattized.append([item for item in morphdict[word]])
+			except KeyError:
+				pass
+		# flatten
+		bagsofwords.append([item for sublist in lemattized for item in sublist])
+
+	prevalence = defaultdict(int)
+	for bag in bagsofwords:
+		for word in bag:
+			prevalence[word] += 1
+
+	bagsofwords = [[w for w in bag if prevalence[w] > 1] for bag in bagsofwords]
+
+	lsidictionary = corpora.Dictionary(bagsofwords)
+
+	lsicorpus = [lsidictionary.doc2bow(bag) for bag in bagsofwords]
+
+	termfreqinversedocfreq = models.TfidfModel(lsicorpus)
+
+	corpustfidf = termfreqinversedocfreq[lsicorpus]
+
+	semanticindex = models.LsiModel(corpustfidf, id2word=lsidictionary, num_topics=350)
+
+	"""	
+	"An empirical study of required dimensionality for large-scale latent semantic indexing applications"
+	Bradford 2008
+	
+	For a term-document matrix that has been decomposed via SVD with a non-zero diagonal... 
+	
+	Dimensionality is reduced by deleting all but the k largest values on 
+	this diagonal, together with the corresponding columns in the
+	other two matrices. This truncation process is used to generate a
+	k-dimensional vector space. Both terms and documents are represented
+	by k-dimensional vectors in this vector space.
+	
+	Landauer and Dumais in 1997: They found that the degree of match 
+	between cosine measures in the LSI space and human judgment
+	was strongly dependent on k, with a maximum for k = 300
+	
+	It is clear that there will be a growing degradation of representational
+	fidelity as the dimensionality is increased beyond 400. Depending
+	upon the application, such behavior may preclude use of
+	dimensionality greater than 400.  
+	
+	recommendations:
+	300: thousands to 10s of thousands
+
+	"""
+
+	corpus = SemanticVectorCorpus(semanticindex, corpustfidf, lsidictionary, lsicorpus, bagsofwords, sentences)
+
+	return corpus

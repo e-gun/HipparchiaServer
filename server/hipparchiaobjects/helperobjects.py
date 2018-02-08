@@ -255,6 +255,31 @@ class QueryCombinator(object):
 		return combinations
 
 
+class SemanticVectorCorpus(object):
+	"""
+
+	something to hold LSI results
+
+	"""
+
+	def __init__(self, semanticindex, corpustfidf, lsidictionary, lsicorpus, bagsofwords, sentences):
+		self.semanticindex = semanticindex
+		self.tfidf = corpustfidf
+		self.lsidictionary = lsidictionary
+		self.lsicorpus = lsicorpus
+		self.bagsofwords = bagsofwords
+		self.sentences = sentences
+		self.semantics = semanticindex[lsicorpus]
+
+	def showtopics(self, numberoftopics):
+		return self.semanticindex.print_topics(numberoftopics)
+
+	def findquerylsi(self, query):
+		vectorquerybag = self.lsidictionary.doc2bow(query.lower().split())
+		vectorquerylsi = self.semanticindex[vectorquerybag]
+		return vectorquerylsi
+
+
 class SearchObject(object):
 	"""
 

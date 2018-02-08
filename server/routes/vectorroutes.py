@@ -9,7 +9,6 @@
 import json
 import locale
 import time
-from collections import defaultdict
 
 try:
 	from gensim import corpora, models, similarities
@@ -28,8 +27,8 @@ from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
 from server.semanticvectors.vectorhelpers import findverctorenvirons, \
-	findwordvectorset, tidyupmophdict
-from server.semanticvectors.vectormath import buildvectorspace, caclulatecosinevalues
+	findwordvectorset, tidyupmophdict, finddblinefromsentence
+from server.semanticvectors.vectormath import buildvectorspace, caclulatecosinevalues, lsibuildspace
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
 """
@@ -402,23 +401,30 @@ def findlatentsemanticindex(activepoll, searchobject):
 	"""
 
 	print('findlatentsemanticindex')
-	searchobject.seeking = 'fortestingpurposes'
 
 	starttime = time.time()
 
 	so = searchobject
 
-	# we are not really a route at the moment, but instead being called by execute search
-	# when the δ option is checked; hence the commenting out of the following
-	# lemma = cleaninitialquery(request.args.get('lem', ''))
-
 	try:
-		lemma = lemmatadict[so.lemma.dictionaryentry]
+		validlemma = lemmatadict[so.lemma.dictionaryentry]
 	except KeyError:
-		lemma = None
+		validlemma = None
 	except AttributeError:
 		# 'NoneType' object has no attribute 'dictionaryentry'
-		lemma = None
+		validlemma = None
+
+	so.lemma = validlemma
+
+	try:
+		validlemmatwo = lemmatadict[so.proximatelemma.dictionaryentry]
+	except KeyError:
+		validlemmatwo = None
+	except AttributeError:
+		# 'NoneType' object has no attribute 'dictionaryentry'
+		validlemmatwo = None
+
+	so.proximatelemma = validlemmatwo
 
 	activepoll.statusis('Preparing to search')
 
@@ -427,7 +433,7 @@ def findlatentsemanticindex(activepoll, searchobject):
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	activecorpora = [c for c in allcorpora if so.session[c] == 'yes']
 
-	if (lemma or so.seeking) and activecorpora:
+	if (so.lemma or so.seeking) and activecorpora:
 		activepoll.statusis('Compiling the list of works to search')
 		searchlist = compilesearchlist(listmapper, so.session)
 	else:
@@ -460,18 +466,6 @@ def findlatentsemanticindex(activepoll, searchobject):
 	# so.lemma.formlist = ['ἄτῃ', 'ἄταν', 'ἄτηϲ', 'ἄτηι']
 	# searchlist = ['gr0006']
 
-	# catullus
-	# searchlist = ['lt0472']
-
-	# hdt
-	searchlist = ['gr0016']
-
-	# hippoc
-	searchlist = ['gr0627']
-
-	# nepos
-	# searchlist = ['lt0588']
-
 	if len(searchlist) > 0:
 		searchlist = flagexclusions(searchlist, so.session)
 		workssearched = len(searchlist)
@@ -481,14 +475,19 @@ def findlatentsemanticindex(activepoll, searchobject):
 		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 		so.indexrestrictions = indexrestrictions
 
-		# find all sentences
-		activepoll.statusis('Finding all sentences')
-		# blanking out the search term will really return every last sentence...
-		# otherwise you only return sentences with the search term in them
-		so.lemma = None
-		so.seeking = r'.'
-		sentences = vectorsentencedispatching(so, activepoll)
-		output = lsigenerateoutput(sentences, workssearched, so, activepoll, starttime, 'sentences')
+		if validlemma:
+			# find all sentences
+			activepoll.statusis('Finding all sentences')
+			# blanking out the search term will really return every last sentence...
+			# otherwise you only return sentences with the search term in them
+			restorelemma = lemmatadict[so.lemma.dictionaryentry]
+			so.lemma = None
+			so.seeking = r'.'
+			sentences = vectorsentencedispatching(so, activepoll)
+			so.lemma = restorelemma
+			output = lsigenerateoutput(sentences, workssearched, so, activepoll, starttime, 'sentences')
+		else:
+			return emptyvectoroutput(so)
 	else:
 		return emptyvectoroutput(so)
 
@@ -501,6 +500,7 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 
 	:return:
 	"""
+	print('lsigenerateoutput()')
 
 	so = searchobject
 	dmin, dmax = bcedating(so.session)
@@ -521,75 +521,46 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 		for h in morphdict[m]:
 			allheadwords[h] = m
 
-	if so.lemma:
-		# set to none for now
-		subtractterm = None
-	else:
-		subtractterm = so.seeking
-
 	activepoll.statusis('Building vectors')
 
-	vectorspace = lsibuildspace(allheadwords, morphdict, listsofwords)
+	corpus = lsibuildspace(morphdict, listsofwords)
+	c = corpus
+
+	# print('tokens', c.lsidictionary)
+	# print('cshape', c.lsicorpus)
+	# for d in c.lsicorpus:
+	# 	print('doc:', d)
+	# print('10 topics', corpus.showtopics(10))
+
+	try:
+		vq = ' '.join([so.lemma.dictionaryentry, so.proximatelemma.dictionaryentry])
+	except AttributeError:
+		# there was no second lemma & you cant join None
+		vq = so.lemma.dictionaryentry
+
+	vectorquerylsi = c.findquerylsi(vq)
+
+	vectorindex = similarities.MatrixSimilarity(c.semantics)
+
+	similis = vectorindex[vectorquerylsi]
+	# print('similis', similis)
+
+	sims = sorted(enumerate(similis), key=lambda item: -item[1])
+	for s in sims:
+		if s[1] > .3:
+			thissentence = c.sentences[s[0]]
+			dbline = finddblinefromsentence(thissentence, so)
+			print(s[1], dbline.universalid, ' '.join(thissentence), c.bagsofwords[s[0]])
+			# print(s, ' '.join(sentences[s[0]]))
 
 	print('throwexception')
 	throwexception
 
-	# for k in vectorspace.keys():
-	# 	print(k, vectorspace[k])
-
-	if so.lemma:
-		focus = so.lemma.dictionaryentry
-	else:
-		focus = so.seeking
-
-	activepoll.statusis('Calculating cosine distances')
-
-	cosinevalues = caclulatecosinevalues(focus, vectorspace, allheadwords.keys())
-	# cosinevalues = vectorcosinedispatching(focus, vectorspace, allheadwords.keys())
-
 	# apply the threshold and drop the 'None' items
 	threshold = 1.0 - hipparchia.config['VECTORDISTANCECUTOFF']
 	falseidentity = .02
-	cosinevalues = {c: cosinevalues[c] for c in cosinevalues if cosinevalues[c] and falseidentity < cosinevalues[c] < threshold}
 
-	# now we have the relationship of everybody to our lemmatized word
-
-	# print('CORE COSINE VALUES')
-	# for v in polytonicsort(cosinevalues):
-	# 	print(v, cosinevalues[v])
-	ccv = [(cosinevalues[v], v) for v in cosinevalues]
-	ccv = sorted(ccv, key=lambda t: t[0])
-	ccv = ['\t{a}\t<lemmaheadword id="{b}">{b}</lemmaheadword>'.format(a=round(c[0], 3), b=c[1]) for c in ccv]
-	ccv = '\n'.join(ccv)
-
-	# next we look for the interrelationships of the words that are above the threshold
-	activepoll.statusis('Calculating metacosine distances')
-	metacosinevals = dict()
-	metacosinevals[focus] = cosinevalues
-	for v in cosinevalues:
-		metac = caclulatecosinevalues(v, vectorspace, cosinevalues.keys())
-		# metac = vectorcosinedispatching(v, vectorspace, cosinevalues.keys())
-		metac = {c: metac[c] for c in metac if metac[c] and falseidentity < metac[c] < threshold}
-		metacosinevals[v] = metac
-
-	mcv = list(['\nrelationships of these terms to one another\n'])
-	for headword in polytonicsort(metacosinevals.keys()):
-		# print(headword)
-		# for word in metacosinevals[headword]:
-		# 	print('\t', word, metacosinevals[headword][word])
-		if headword != focus:
-			insetvals = [(metacosinevals[headword][word], word) for word in metacosinevals[headword]]
-			insetvals = sorted(insetvals, key=lambda t: t[0])
-			insetvals = ['\t{a}\t<lemmaheadword id="{b}">{b}</lemmaheadword>'.format(a=round(c[0], 3), b=c[1]) for c in insetvals]
-			if insetvals:
-				mcv.append('<lemmaheadword id="{h}">{h}</lemmaheadword>'.format(h=headword))
-			mcv += insetvals
-	if len(mcv) > 1:
-		mcv = '\n'.join(mcv)
-	else:
-		mcv = ''
-
-	findshtml = '<pre>{ccv}</pre>\n\n<pre>{mcv}</pre>'.format(ccv=ccv, mcv=mcv)
+	findshtml = ''
 
 	findsjs = generatevectorjs()
 
@@ -622,103 +593,6 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 	output = json.dumps(output)
 
 	return output
-
-
-def lsibuildspace(allheadwords, morphdict, sentences):
-	"""
-
-	:param allheadwords:
-	:param morphdict:
-	:param sentences:
-	:return:
-	"""
-
-	vectorspace = dict()
-	vectormapper = dict()
-
-	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
-	sentences = [s for s in sentences if s]
-
-	bagsofwords = list()
-	for s in sentences:
-		lemattized = list()
-		for word in s:
-			try:
-				# WARNING: we are treating homonymns as if 2+ words were there instead of just one
-				# 'rectum' will give you 'rectus' and 'rego'; 'res' will give you 'reor' and 'res'
-				# this necessarily distorts the vector space
-				lemattized.append([item for item in morphdict[word]])
-			except KeyError:
-				pass
-		# flatten
-		bagsofwords.append([item for sublist in lemattized for item in sublist])
-
-	prevalence = defaultdict(int)
-	for bag in bagsofwords:
-		for word in bag:
-			prevalence[word] += 1
-
-	bagsofwords = [[w for w in bag if prevalence[w] > 1] for bag in bagsofwords]
-
-	lsidictionary = corpora.Dictionary(bagsofwords)
-	print('lsidictionary', lsidictionary)
-
-	lsicorpus = [lsidictionary.doc2bow(bag) for bag in bagsofwords]
-
-	termfreqinversedocfreq = models.TfidfModel(lsicorpus)
-
-	corpustfidf = termfreqinversedocfreq[lsicorpus]
-
-	semanticindex = models.LsiModel(corpustfidf, id2word=lsidictionary, num_topics=350)
-
-	"""	
-	"An empirical study of required dimensionality for large-scale latent semantic indexing applications"
-	Bradford 2008
-	
-	For a term-document matrix that has been decomposed via SVD with a non-zero diagonal... 
-	
-	Dimensionality is reduced by deleting all but the k largest values on 
-	this diagonal, together with the corresponding columns in the
-	other two matrices. This truncation process is used to generate a
-	k-dimensional vector space. Both terms and documents are represented
-	by k-dimensional vectors in this vector space.
-	
-	Landauer and Dumais in 1997: They found that the degree of match 
-	between cosine measures in the LSI space and human judgment
-	was strongly dependent on k, with a maximum for k = 300
-	
-	It is clear that there will be a growing degradation of representational
-	fidelity as the dimensionality is increased beyond 400. Depending
-	upon the application, such behavior may preclude use of
-	dimensionality greater than 400.  
-	
-	recommendations:
-	300: thousands to 10s of thousands
-
-	"""
-
-	print('10 topics', semanticindex.print_topics(10))
-
-	corpussemanticindex = semanticindex[corpustfidf]
-
-	vectorquery = 'εὕρηϲιϲ φύϲιϲ'
-	vectorquerybag = lsidictionary.doc2bow(vectorquery.lower().split())
-	vectorquerylsi = semanticindex[vectorquerybag]
-	# print('vectorquerylsi', vectorquerylsi)
-
-	vectorindex = similarities.MatrixSimilarity(semanticindex[lsicorpus])
-
-	similis = vectorindex[vectorquerylsi]
-	print('similis', similis)
-
-	sims = sorted(enumerate(similis), key=lambda item: -item[1])
-	for s in sims:
-		if s[1] > .5:
-			print(s, ' '.join(sentences[s[0]]), bagsofwords[s[0]])
-			# print(s, ' '.join(sentences[s[0]]))
-
-	return
-
 
 
 """

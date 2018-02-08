@@ -54,6 +54,7 @@ $(document).ready( function () {
         $('#termonecheckbox').toggle();
         $('#cosinedistancesentencecheckbox').toggle();
         $('#cosinedistancelineorwordcheckbox').toggle();
+        $('#semanticvectorquerycheckbox').toggle();
         });
 
     $('#executesearch').click( function(){
@@ -156,7 +157,7 @@ $(document).ready( function () {
     $('#wordisnear').click( function(){ setoptions('nearornot', 'T'); });
     $('#wordisnotnear').click( function(){ setoptions('nearornot', 'F'); });
 
-    $( "#proximityspinner" ).spinner({
+    $( '#proximityspinner' ).spinner({
         min: 1,
         value: 1,
         step: 1,
@@ -182,7 +183,8 @@ $(document).ready( function () {
 
     var tohideonfirstload = Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur',
         '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform',
-        '#termonecheckbox', '#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox');
+        '#termonecheckbox', '#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox',
+        '#semanticvectorquerycheckbox');
     bulkhider(tohideonfirstload);
 
     //

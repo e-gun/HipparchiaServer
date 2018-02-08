@@ -208,6 +208,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 
 			query = qtemplate.format(db=uid, co=so.usecolumn, whr=whr, lim=lim)
 			data = (sp,)
+			# print('subqueryphrasesearch() q,d:',query, data)
 			curs.execute(query, data)
 			indices = [i[0] for i in curs.fetchall()]
 			# this will yield a bunch of windows: you need to find the centers; see 'while...' below
@@ -241,7 +242,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 				else:
 					try:
 						nextline = locallineobjects[0]
-					except:
+					except IndexError:
 						nextline = makeablankline('gr0000w000', -1)
 
 					if lo.wkuinversalid != nextline.wkuinversalid or lo.index != (nextline.index - 1):

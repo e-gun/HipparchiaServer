@@ -134,7 +134,7 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 	actually one of the most basic search types: look for a string/substring
 
 	the whereclause is built conditionally:
-	
+
 	sample 'unrestricted':
 		SELECT * FROM gr0059 WHERE  ( stripped_line ~* %s )  LIMIT 200 ('βαλλ',)
 	sample 'between':
@@ -142,11 +142,12 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 	sample 'temptable':
 		[create the temptable]
 		SELECT * FROM in1204 WHERE EXISTS (SELECT 1 FROM in1204_includelist incl WHERE incl.includeindex = in1204.index AND in1204.accented_line ~* %s)  LIMIT 200 ('τούτου',)
-			
+
 	:param seeking:
+	:param authortable:
+	:param searchobject:
 	:param cursor:
-	:param workdbname:
-	:param authors:
+	:param templimit:
 	:return:
 	"""
 

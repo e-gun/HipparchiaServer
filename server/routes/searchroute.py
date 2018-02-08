@@ -25,7 +25,7 @@ from server.listsandsession.listmanagement import calculatewholeauthorsearches, 
 	sortresultslist
 from server.listsandsession.sessionfunctions import justlatin
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.routes.vectorroutes import findvectorsbysentence, findvectorsfromhits
+from server.routes.vectorroutes import findlatentsemanticindex, findvectorsbysentence, findvectorsfromhits
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildsearchobject
 from server.startup import authordict, listmapper, poll, workdict
@@ -100,6 +100,14 @@ def executesearch(timestamp):
 			so.proximate = ''
 			so.proximatelemma = ''
 			output = findvectorsbysentence(activepoll, so)
+			del poll[ts]
+			return output
+
+		if frozensession['semanticvectorquery'] == 'yes':
+			# print('cosdistbysentence')
+			so.proximate = ''
+			so.proximatelemma = ''
+			output = findlatentsemanticindex(activepoll, so)
 			del poll[ts]
 			return output
 

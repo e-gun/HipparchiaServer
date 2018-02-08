@@ -73,6 +73,7 @@ def sessionvariables():
 
 def modifysessionvar(param, val):
 	"""
+
 	set session variables after checking them for validity
 
 	:param param:
@@ -106,6 +107,7 @@ def modifysessionvar(param, val):
 		'proximity',
 		'quotesummary',
 		'searchscope',
+		'semanticvectorquery',
 		'sensesummary',
 		'sortorder',
 		'spuria',
@@ -142,16 +144,22 @@ def modifysessionvar(param, val):
 	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
 					'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary', 'authorssummary',
 					'quotesummary', 'bracketsquare', 'bracketround', 'bracketangled', 'bracketcurly',
-					'indexbyfrequency', 'cosdistbysentence', 'cosdistbylineorword']:
+					'indexbyfrequency', 'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 
-	# both can't be active at once
+	# only one of these can be active at one time
 	if param == 'cosdistbysentence' and val == 'yes':
 		session['cosdistbylineorword'] = 'no'
+		session['semanticvectorquery'] = 'no'
 
 	if param == 'cosdistbylineorword' and val == 'yes':
 		session['cosdistbysentence'] = 'no'
+		session['semanticvectorquery'] = 'no'
+
+	if param == 'semanticvectorquery' and val == 'yes':
+		session['cosdistbysentence'] = 'no'
+		session['cosdistbylineorword'] = 'no'
 
 	if session['nearornot'] not in ['T', 'F']:
 		session['nearornot'] = 'T'
@@ -204,7 +212,7 @@ def modifysessionvar(param, val):
 	if session['sortorder'] not in ['universalid', 'shortname', 'genres', 'converted_date', 'location']:
 		session['sortorder'] = 'shortname'
 
-	if session['searchscope'] not in ['L','W']:
+	if session['searchscope'] not in ['L', 'W']:
 		session['searchscope'] = 'L'
 
 	if int(session['browsercontext']) < 5 or int(session['browsercontext']) > 100:

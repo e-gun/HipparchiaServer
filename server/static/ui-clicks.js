@@ -377,6 +377,7 @@ $('#bracketcurly').change(function() {
 $('#cosdistbysentence').change(function() {
     if(this.checked) {
         $('#cosdistbylineorword').prop('checked', false);
+        $('#semanticvectorquery').prop('checked', false);
         $('#complexsearching').hide();
         $('#proximatesearchform').val('');
         setoptions('cosdistbysentence', 'yes');
@@ -389,11 +390,35 @@ $('#cosdistbysentence').change(function() {
 $('#cosdistbylineorword').change(function() {
     if(this.checked) {
         $('#cosdistbysentence').prop('checked', false);
+        $('#semanticvectorquery').prop('checked', false);
         $('#complexsearching').show();
         $('#proximatesearchform').val('');
         setoptions('cosdistbylineorword', 'yes');
         } else {
         setoptions('cosdistbylineorword', 'no');
+        }
+    });
+
+$('#semanticvectorquery').change(function() {
+    if(this.checked) {
+        $('#cosdistbysentence').prop('checked', false);
+        $('#cosdistbylineorword').prop('checked', false);
+        $('#complexsearching').show();
+        var wsf = $('#wordsearchform');
+        var lsf = $('#lemmatasearchform');
+        var psf = $('#proximatesearchform');
+        var plsf = $('#proximatelemmatasearchform');
+        wsf.hide();
+        wsf.val('');
+        lsf.show();
+        psf.hide();
+        psf.val('');
+        plsf.show();
+        $('#termoneisalemma').prop('checked', true);
+        $('#termtwoisalemma').prop('checked', true);
+        setoptions('semanticvectorquery', 'yes');
+        } else {
+        setoptions('semanticvectorquery', 'no');
         }
     });
 
@@ -429,7 +454,7 @@ $('#termtwoisalemma').change(function() {
 // spinners
 //
 
-$( "#linesofcontextspinner" ).spinner({
+$('#linesofcontextspinner').spinner({
     max: 20,
     min: 0,
     value: 2,
@@ -445,7 +470,7 @@ $( "#linesofcontextspinner" ).spinner({
         });
 
 
-$( "#browserspinner" ).spinner({
+$('#browserspinner').spinner({
     max: 50,
     min: 5,
     value: 1,
@@ -546,7 +571,7 @@ $('#load05').click( function(){ $.getJSON('/getcookie/05').always( function() { 
 /// selectmenu
 ///
 
-$( '#sortresults' ).selectmenu()
+$('#sortresults').selectmenu();
 $(function() {
         $('#sortresults').selectmenu({
             change: function() {
@@ -571,14 +596,15 @@ $('#authinfo').click(function(){
 
 
 $('#searchinfo').click(function(){
-        if (  $('#searchlistcontents').is(':visible') === true ) {
-            $('#searchlistcontents').hide();
-            $('#searchlistcontents').html('<p class="center"><span class="small>(this might take a second...)</span></p>');
+        var slc = $('#searchlistcontents');
+        if ( slc.is(':visible') === true ) {
+            slc.hide();
+            slc.html('<p class="center"><span class="small>(this might take a second...)</span></p>');
         } else {
-            $('#searchlistcontents').html('');
-            $('#searchlistcontents').show();
+            slc.html('');
+            slc.show();
             $.getJSON('/getsearchlistcontents', function (selectiondata) {
-                $('#searchlistcontents').html(selectiondata);
+                slc.html(selectiondata);
                 });
             }
     });

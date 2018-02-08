@@ -282,7 +282,7 @@ RESTOREMEDIALANDFINALSIGMA = 'no'
 #   execute and so you if you allow a full corpora search you will
 #   bring your system to it knees for a long, long time. 7548165 is
 #   all of Latin. If you search for a common word you can easily
-#   chew up >24GB of RAM. Your sytem will hang unless/until Hipparchia
+#   chew up >24GB of RAM. Your system will hang unless/until Hipparchia
 #   receives more memory optimizations
 #
 # VECTORDISTANCECUTOFF: how close Word A needs to be to Word B for the associative matrix
