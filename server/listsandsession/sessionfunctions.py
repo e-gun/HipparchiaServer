@@ -56,6 +56,7 @@ def sessionvariables():
 		session['psgselections'] = list()
 		session['quotesummary'] = hipparchia.config['DEFAULTSHOWLEXICALQUOTES']
 		session['searchscope'] = 'L'
+		session['semanticvectorquery'] = 'no'
 		session['sensesummary'] = hipparchia.config['DEFAULTSHOWLEXICALSENSES']
 		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
 		session['spuria'] = hipparchia.config['DEFAULTSPURIA']

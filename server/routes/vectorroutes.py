@@ -623,7 +623,7 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 	else:
 		all = ''
 	if so.proximatelemma:
-		near = ' all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.proximatelemma.formlist), skg=pr)
+		near = ' and all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.proximatelemma.formlist), skg=pr)
 	else:
 		near = ''
 	output['htmlsearch'] = '{all}{near}'.format(all=all, near=near)
