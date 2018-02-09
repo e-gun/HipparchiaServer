@@ -48,6 +48,7 @@ def sessionvariables():
 		session['latincorpus'] = hipparchia.config['DEFAULTLATINCORPUSVALUE']
 		session['linesofcontext'] = int(hipparchia.config['DEFAULTLINESOFCONTEXT'])
 		session['maxresults'] = str(int(hipparchia.config['DEFAULTMAXRESULTS']))
+		session['nearestneighborsquery'] = 'no'
 		session['nearornot'] = 'T'
 		session['onehit'] = hipparchia.config['DEFAULTONEHIT']
 		session['papyruscorpus'] = hipparchia.config['DEFAULTPAPYRUSCORPUSVALUE']
@@ -102,6 +103,7 @@ def modifysessionvar(param, val):
 		'latincorpus',
 		'linesofcontext',
 		'maxresults',
+		'nearestneighborsquery',
 		'nearornot',
 		'onehit',
 		'papyruscorpus',
@@ -145,7 +147,8 @@ def modifysessionvar(param, val):
 	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
 					'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary', 'authorssummary',
 					'quotesummary', 'bracketsquare', 'bracketround', 'bracketangled', 'bracketcurly',
-					'indexbyfrequency', 'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery']:
+					'indexbyfrequency', 'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery',
+					'nearestneighborsquery']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 
@@ -153,14 +156,22 @@ def modifysessionvar(param, val):
 	if param == 'cosdistbysentence' and val == 'yes':
 		session['cosdistbylineorword'] = 'no'
 		session['semanticvectorquery'] = 'no'
+		session['nearestneighborsquery'] = 'no'
 
 	if param == 'cosdistbylineorword' and val == 'yes':
 		session['cosdistbysentence'] = 'no'
 		session['semanticvectorquery'] = 'no'
+		session['nearestneighborsquery'] = 'no'
 
 	if param == 'semanticvectorquery' and val == 'yes':
 		session['cosdistbysentence'] = 'no'
 		session['cosdistbylineorword'] = 'no'
+		session['nearestneighborsquery'] = 'no'
+
+	if param == 'nearestneighborsquery' and val == 'yes':
+		session['cosdistbysentence'] = 'no'
+		session['cosdistbylineorword'] = 'no'
+		session['semanticvectorquery'] = 'no'
 
 	if session['nearornot'] not in ['T', 'F']:
 		session['nearornot'] = 'T'

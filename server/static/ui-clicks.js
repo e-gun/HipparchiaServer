@@ -39,7 +39,9 @@ function loadoptions() {
             'papyruscorpus': $('#papyruscorpus'),
             'christiancorpus': $('#christiancorpus'),
             'cosdistbysentence': $('#cosdistbysentence'),
-            'cosdistbylineorword': $('#cosdistbylineorword')
+            'cosdistbylineorword': $('#cosdistbylineorword'),
+            'semanticvectorquery': $('#semanticvectorquery'),
+            'nearestneighborsquery': $('#nearestneighborsquery')
         };
 
         Object.keys(simpletoggles).forEach(function(key) {
@@ -378,6 +380,7 @@ $('#cosdistbysentence').change(function() {
     if(this.checked) {
         $('#cosdistbylineorword').prop('checked', false);
         $('#semanticvectorquery').prop('checked', false);
+        $('#nearestneighborsquery').prop('checked', false);
         $('#complexsearching').hide();
         $('#proximatesearchform').val('');
         setoptions('cosdistbysentence', 'yes');
@@ -391,6 +394,7 @@ $('#cosdistbylineorword').change(function() {
     if(this.checked) {
         $('#cosdistbysentence').prop('checked', false);
         $('#semanticvectorquery').prop('checked', false);
+        $('#nearestneighborsquery').prop('checked', false);
         $('#complexsearching').show();
         $('#proximatesearchform').val('');
         setoptions('cosdistbylineorword', 'yes');
@@ -403,6 +407,7 @@ $('#semanticvectorquery').change(function() {
     if(this.checked) {
         $('#cosdistbysentence').prop('checked', false);
         $('#cosdistbylineorword').prop('checked', false);
+        $('#nearestneighborsquery').prop('checked', false);
         $('#complexsearching').show();
         var wsf = $('#wordsearchform');
         var lsf = $('#lemmatasearchform');
@@ -419,6 +424,30 @@ $('#semanticvectorquery').change(function() {
         setoptions('semanticvectorquery', 'yes');
         } else {
         setoptions('semanticvectorquery', 'no');
+        }
+    });
+
+$('#nearestneighborsquery').change(function() {
+    if(this.checked) {
+        $('#cosdistbysentence').prop('checked', false);
+        $('#cosdistbylineorword').prop('checked', false);
+        $('#semanticvectorquery').prop('checked', false);
+        $('#complexsearching').show();
+        var wsf = $('#wordsearchform');
+        var lsf = $('#lemmatasearchform');
+        var psf = $('#proximatesearchform');
+        var plsf = $('#proximatelemmatasearchform');
+        wsf.hide();
+        wsf.val('');
+        lsf.show();
+        psf.hide();
+        psf.val('');
+        plsf.show();
+        $('#termoneisalemma').prop('checked', true);
+        $('#termtwoisalemma').prop('checked', true);
+        setoptions('nearestneighborsquery', 'yes');
+        } else {
+        setoptions('nearestneighborsquery', 'no');
         }
     });
 

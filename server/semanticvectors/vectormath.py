@@ -386,16 +386,20 @@ def findapproximatenearestneighbors(query, morphdict, sentences):
 	bagsofwords = buildbagsofwords(morphdict, sentences)
 
 	workers = setthreadcount()
+	dimensions = 300
+	window = 10
+	trainingiterations = 5
 
 	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
-	model = Word2Vec(bagsofwords, min_count=1, seed=1, workers=workers)
+	model = Word2Vec(bagsofwords, min_count=1, seed=1, iter=trainingiterations, size=dimensions, window=window, workers=workers)
+
 	indexer = AnnoyIndexer(model, 2)
 	mostsimilar = model.most_similar(query, topn=10, indexer=indexer)
 
 	return mostsimilar
 
 
-def findword2vecsimilarities(query, morphdict, sentences):
+def findword2vecsimilarities(termone, termtwo, morphdict, sentences):
 	"""
 
 	:param query:
@@ -411,12 +415,16 @@ def findword2vecsimilarities(query, morphdict, sentences):
 
 	workers = setthreadcount()
 
+	dimensions = 300
+	window = 10
+	trainingiterations = 5
+
 	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
-	model = Word2Vec(bagsofwords, min_count=1, seed=1, workers=workers)
+	model = Word2Vec(bagsofwords, min_count=1, seed=1, iter=trainingiterations, size=dimensions, window=window, workers=workers)
 
+	similarity = model.wv.similarity(termone, termtwo)
 
-
-	return
+	return similarity
 
 
 

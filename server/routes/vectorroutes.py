@@ -30,7 +30,8 @@ from server.searching.searchfunctions import buildsearchobject, cleaninitialquer
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
 from server.semanticvectors.vectorhelpers import findverctorenvirons, \
 	findwordvectorset, tidyupmophdict, finddblinefromsentence
-from server.semanticvectors.vectormath import buildvectorspace, caclulatecosinevalues, lsibuildspace
+from server.semanticvectors.vectormath import buildvectorspace, caclulatecosinevalues, lsibuildspace, \
+	findapproximatenearestneighbors, findword2vecsimilarities
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
 """
@@ -64,7 +65,7 @@ from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
 
 @hipparchia.route('/findvectors/<timestamp>', methods=['GET'])
-def findvectors(timestamp):
+def findabsolutevectors(timestamp):
 	"""
 
 
@@ -96,14 +97,14 @@ def findvectors(timestamp):
 	# don't know how to enter executesearch() properly to handle the other option
 	# print('cosdistbysentence')
 
-	output = findvectorsbysentence(activepoll, so)
+	output = findabsolutevectorsbysentence(activepoll, so)
 
 	del poll[ts]
 
 	return output
 
 
-def findvectorsbysentence(activepoll, searchobject):
+def findabsolutevectorsbysentence(activepoll, searchobject):
 	"""
 
 	use the searchlist to grab a collection of sentences
@@ -195,7 +196,7 @@ def findvectorsbysentence(activepoll, searchobject):
 	return output
 
 
-def findvectorsfromhits(searchobject, hitdict, activepoll, starttime, workssearched):
+def findabsolutevectorsfromhits(searchobject, hitdict, activepoll, starttime, workssearched):
 	"""
 	a pseudo-route: the Δ option was checked and executesearch() branced over to this function
 
@@ -390,7 +391,20 @@ def emptyvectoroutput(searchobject, reasons=list()):
 ## TESTING
 ##
 
-def findlatentsemanticindex(activepoll, searchobject):
+def findnearestneighbors(activepoll, searchobject):
+	"""
+
+	pass-through to findlatentsemanticindex()
+
+	:param activepoll:
+	:param searchobject:
+	:return:
+	"""
+
+	return findlatentsemanticindex(activepoll, searchobject, nn=True)
+
+
+def findlatentsemanticindex(activepoll, searchobject, nn=False):
 	"""
 
 	use the searchlist to grab a collection of sentences
@@ -401,6 +415,11 @@ def findlatentsemanticindex(activepoll, searchobject):
 	:param vtype:
 	:return:
 	"""
+
+	if not nn:
+		outputfunction = lsigenerateoutput
+	else:
+		outputfunction = nearestneighborgenerateoutput
 
 	starttime = time.time()
 
@@ -485,7 +504,7 @@ def findlatentsemanticindex(activepoll, searchobject):
 			so.seeking = r'.'
 			sentences = vectorsentencedispatching(so, activepoll)
 			so.lemma = restorelemma
-			output = lsigenerateoutput(sentences, workssearched, so, activepoll, starttime, 'sentences')
+			output = outputfunction(sentences, workssearched, so, activepoll, starttime)
 		else:
 			return emptyvectoroutput(so)
 	else:
@@ -494,7 +513,7 @@ def findlatentsemanticindex(activepoll, searchobject):
 	return output
 
 
-def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, starttime, vtype):
+def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, starttime):
 	"""
 
 
@@ -599,7 +618,7 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 	if lm and pr:
 		output['title'] = 'Semantic index for all forms of »{skg}« and »{pr}«'.format(skg=lm, pr=pr)
 	else:
-		output['title'] = 'Semantic index for all forms of »{skg}« and »{pr}«'.format(skg=lm, pr=pr)
+		output['title'] = 'Semantic index for all forms of »{skg}«'.format(skg=lm, pr=pr)
 	output['found'] = findshtml
 	# ultimately the js should let you clock on any top word to find its associations...
 	output['js'] = findsjs
@@ -637,6 +656,117 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 	output = json.dumps(output)
 
 	return output
+
+
+def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, activepoll, starttime):
+	"""
+
+	:param listsofwords:
+	:param workssearched:
+	:param searchobject:
+	:param activepoll:
+	:param starttime:
+	:return:
+	"""
+
+	so = searchobject
+	dmin, dmax = bcedating(so.session)
+
+	# find all words in use
+	allwords = findwordvectorset(listsofwords)
+
+	# find all possible forms of all the words we used
+	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
+	wl = locale.format('%d', len(listsofwords), grouping=True)
+	activepoll.statusis('Finding headwords for {n} sentences'.format(n=wl))
+
+	morphdict = findheadwords(allwords)
+	morphdict = tidyupmophdict(morphdict)
+
+	# find all possible headwords of all of the forms in use
+	# note that we will not know what we did not know: count unparsed words too and deliver that as info at the end?
+	allheadwords = dict()
+	for m in morphdict.keys():
+		for h in morphdict[m]:
+			allheadwords[h] = m
+
+	hw = locale.format('%d', len(allheadwords.keys()), grouping=True)
+	activepoll.statusis('Building vectors for {h} headwords in {n} sentences'.format(h=hw, n=wl))
+
+	# TESTING
+	termone = so.lemma.dictionaryentry
+	try:
+		termtwo = so.proximatelemma.dictionaryentry
+	except AttributeError:
+		termtwo = None
+
+	if termone and termtwo:
+		similarity = findword2vecsimilarities(termone, termtwo, morphdict, listsofwords)
+		# print('similarity of {a} and {b} is {c}'.format(a=termone, b=termtwo, c=similarity))
+		html = similarity
+	else:
+		mostsimilar = findapproximatenearestneighbors(termone, morphdict, listsofwords)
+		# print('mostsimilar', mostsimilar)
+		html = mostsimilar
+
+	findshtml = '<pre>{h}</pre>'.format(h=html)
+
+	findsjs = generatevectorjs()
+
+	searchtime = time.time() - starttime
+	searchtime = round(searchtime, 2)
+	workssearched = locale.format('%d', workssearched, grouping=True)
+
+	lm = so.lemma.dictionaryentry
+	try:
+		pr = so.proximatelemma.dictionaryentry
+	except AttributeError:
+		# proximatelemma is None
+		pr = None
+
+	output = dict()
+	if lm and pr:
+		output['title'] = '[TESTING] Word2Vec of »{skg}« and »{pr}«'.format(skg=lm, pr=pr)
+	else:
+		output['title'] = '[TESTING] Neighbors for all forms of »{skg}«'.format(skg=lm, pr=pr)
+	output['found'] = findshtml
+	# ultimately the js should let you clock on any top word to find its associations...
+	output['js'] = findsjs
+	output['resultcount'] = ''
+	output['scope'] = workssearched
+	output['searchtime'] = str(searchtime)
+	output['proximate'] = ''
+
+	if so.lemma:
+		all = 'all forms of »{skg}«'.format(skg=lm)
+	else:
+		all = ''
+	if so.proximatelemma:
+		near = ' all forms of »{skg}«'.format(skg=pr)
+	else:
+		near = ''
+	output['thesearch'] = '{all}{near}'.format(all=all, near=near)
+
+	if so.lemma:
+		all = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
+	else:
+		all = ''
+	if so.proximatelemma:
+		near = ' and all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.proximatelemma.formlist), skg=pr)
+	else:
+		near = ''
+	output['htmlsearch'] = '{all}{near}'.format(all=all, near=near)
+	output['hitmax'] = ''
+	output['onehit'] = ''
+	output['sortby'] = 'proximity'
+	output['dmin'] = dmin
+	output['dmax'] = dmax
+	activepoll.deactivate()
+
+	output = json.dumps(output)
+
+	return output
+
 
 
 """
