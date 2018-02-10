@@ -17,7 +17,11 @@ try:
 except ModuleNotFoundError:
 	print('tensorflow unavailable')
 	tf = None
-from sklearn.manifold import TSNE
+try:
+	from sklearn.manifold import TSNE
+except ModuleNotFoundError:
+	print('sklearn unavailable')
+	TSNE = None
 
 from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions

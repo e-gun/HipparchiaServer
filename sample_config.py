@@ -274,8 +274,10 @@ REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
 FORCELUNATESIGMANOMATTERWHAT = 'no'
 RESTOREMEDIALANDFINALSIGMA = 'no'
 
-# [7] semantic vectors: experimental
-
+# [7] semantic vectors: experimental and in-progress
+#   many extra packages need to be configured and installed
+#   the results are not well explained; they cannot necessarily be trusted
+#
 # MAXVECTORSPACE: what is the largest set of words you are willing
 #   to vectorize in order to find the association network of a given
 #   lemmatized term? This sort of query get exponentially harder to
