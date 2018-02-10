@@ -28,6 +28,7 @@ from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildsearchobject
 from server.semanticvectors.gensimvectors import findlatentsemanticindex, findnearestneighbors
+from server.semanticvectors.tensorflowvectors import tensorgraphelectedworks
 from server.semanticvectors.vectorpseudoroutes import findabsolutevectorsbysentence, findabsolutevectorsfromhits
 from server.startup import authordict, listmapper, poll, workdict
 
@@ -69,7 +70,7 @@ def executesearch(timestamp):
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	activecorpora = [c for c in allcorpora if frozensession[c] == 'yes']
 
-	if (len(so.seeking) > 0 or so.lemma) and activecorpora:
+	if (len(so.seeking) > 0 or so.lemma or frozensession['tensorflowgraph'] == 'yes') and activecorpora:
 		activepoll.statusis('Compiling the list of works to search')
 		searchlist = compilesearchlist(listmapper, frozensession)
 
@@ -111,7 +112,11 @@ def executesearch(timestamp):
 
 		if frozensession['nearestneighborsquery'] == 'yes':
 			output = findnearestneighbors(activepoll, so)
-			# output = tensorgraphelectedworks(activepoll, so)
+			del poll[ts]
+			return output
+
+		if frozensession['tensorflowgraph'] == 'yes':
+			output = tensorgraphelectedworks(activepoll, so)
 			del poll[ts]
 			return output
 

@@ -41,7 +41,8 @@ function loadoptions() {
             'cosdistbysentence': $('#cosdistbysentence'),
             'cosdistbylineorword': $('#cosdistbylineorword'),
             'semanticvectorquery': $('#semanticvectorquery'),
-            'nearestneighborsquery': $('#nearestneighborsquery')
+            'nearestneighborsquery': $('#nearestneighborsquery'),
+            'tensorflowgraph': $('#tensorflowgraph')
         };
 
         Object.keys(simpletoggles).forEach(function(key) {
@@ -381,6 +382,7 @@ $('#cosdistbysentence').change(function() {
         $('#cosdistbylineorword').prop('checked', false);
         $('#semanticvectorquery').prop('checked', false);
         $('#nearestneighborsquery').prop('checked', false);
+        $('#tensorflowgraph').prop('checked', false);
         $('#complexsearching').hide();
         $('#proximatesearchform').val('');
         setoptions('cosdistbysentence', 'yes');
@@ -395,6 +397,7 @@ $('#cosdistbylineorword').change(function() {
         $('#cosdistbysentence').prop('checked', false);
         $('#semanticvectorquery').prop('checked', false);
         $('#nearestneighborsquery').prop('checked', false);
+        $('#tensorflowgraph').prop('checked', false);
         $('#complexsearching').show();
         $('#proximatesearchform').val('');
         setoptions('cosdistbylineorword', 'yes');
@@ -409,6 +412,7 @@ $('#semanticvectorquery').change(function() {
         $('#cosdistbylineorword').prop('checked', false);
         $('#nearestneighborsquery').prop('checked', false);
         $('#complexsearching').show();
+        $('#tensorflowgraph').prop('checked', false);
         var wsf = $('#wordsearchform');
         var lsf = $('#lemmatasearchform');
         var psf = $('#proximatesearchform');
@@ -432,6 +436,7 @@ $('#nearestneighborsquery').change(function() {
         $('#cosdistbysentence').prop('checked', false);
         $('#cosdistbylineorword').prop('checked', false);
         $('#semanticvectorquery').prop('checked', false);
+        $('#tensorflowgraph').prop('checked', false);
         $('#complexsearching').show();
         var wsf = $('#wordsearchform');
         var lsf = $('#lemmatasearchform');
@@ -448,6 +453,32 @@ $('#nearestneighborsquery').change(function() {
         setoptions('nearestneighborsquery', 'yes');
         } else {
         setoptions('nearestneighborsquery', 'no');
+        }
+    });
+
+$('#tensorflowgraph').change(function() {
+    if(this.checked) {
+        $('#cosdistbysentence').prop('checked', false);
+        $('#cosdistbylineorword').prop('checked', false);
+        $('#semanticvectorquery').prop('checked', false);
+        $('#nearestneighborsquery').prop('checked', false);
+        $('#complexsearching').show();
+        var wsf = $('#wordsearchform');
+        var lsf = $('#lemmatasearchform');
+        var psf = $('#proximatesearchform');
+        var plsf = $('#proximatelemmatasearchform');
+        wsf.hide();
+        wsf.val('');
+        lsf.show();
+        lsf.val('(unused for tensorflow graph)');
+        psf.hide();
+        psf.val('');
+        plsf.show();
+        $('#termoneisalemma').prop('checked', true);
+        $('#termtwoisalemma').prop('checked', true);
+        setoptions('tensorflowgraph', 'yes');
+        } else {
+        setoptions('tensorflowgraph', 'no');
         }
     });
 

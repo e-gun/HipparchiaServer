@@ -21,7 +21,7 @@ from server.semanticvectors.vectordispatcher import findheadwords, vectorsentenc
 from server.semanticvectors.vectorhelpers import convertmophdicttodict, tfbuilddataset, tfgeneratetrainingbatch, \
 	tfplotwithlabels
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
-from server.startup import authordict, lemmatadict, listmapper, workdict
+from server.startup import authordict, listmapper, workdict
 
 
 def tensorgraphelectedworks(activepoll, searchobject):
@@ -38,26 +38,6 @@ def tensorgraphelectedworks(activepoll, searchobject):
 
 	so = searchobject
 
-	try:
-		validlemma = lemmatadict[so.lemma.dictionaryentry]
-	except KeyError:
-		validlemma = None
-	except AttributeError:
-		# 'NoneType' object has no attribute 'dictionaryentry'
-		validlemma = None
-
-	so.lemma = validlemma
-
-	try:
-		validlemmatwo = lemmatadict[so.proximatelemma.dictionaryentry]
-	except KeyError:
-		validlemmatwo = None
-	except AttributeError:
-		# 'NoneType' object has no attribute 'dictionaryentry'
-		validlemmatwo = None
-
-	so.proximatelemma = validlemmatwo
-
 	activepoll.statusis('Preparing to search')
 
 	so.usecolumn = 'marked_up_line'
@@ -65,7 +45,7 @@ def tensorgraphelectedworks(activepoll, searchobject):
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	activecorpora = [c for c in allcorpora if so.session[c] == 'yes']
 
-	if (so.lemma or so.seeking) and activecorpora:
+	if activecorpora:
 		activepoll.statusis('Compiling the list of works to search')
 		searchlist = compilesearchlist(listmapper, so.session)
 	else:
@@ -107,19 +87,11 @@ def tensorgraphelectedworks(activepoll, searchobject):
 		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 		so.indexrestrictions = indexrestrictions
 
-		if validlemma:
-			# find all sentences
-			activepoll.statusis('Finding all sentences')
-			# blanking out the search term will really return every last sentence...
-			# otherwise you only return sentences with the search term in them
-			restorelemma = lemmatadict[so.lemma.dictionaryentry]
-			so.lemma = None
-			so.seeking = r'.'
-			sentences = vectorsentencedispatching(so, activepoll)
-			so.lemma = restorelemma
-			output = tftrainondata(sentences, activepoll)
-		else:
-			return emptyvectoroutput(so)
+		# find all sentences
+		activepoll.statusis('Finding all sentences')
+		so.seeking = r'.'
+		sentences = vectorsentencedispatching(so, activepoll)
+		output = tftrainondata(sentences, activepoll)
 	else:
 		return emptyvectoroutput(so)
 
@@ -225,7 +197,7 @@ def tftrainondata(sentences, activepoll):
 
 	# Step 5: Begin training.
 	numsteps = 100001
-	numsteps = 50001
+	# numsteps = 50001
 
 	activepoll.statusis('Training on the data')
 	with tf.Session(graph=graph) as tensorflowsession:

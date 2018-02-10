@@ -61,6 +61,7 @@ def sessionvariables():
 		session['sensesummary'] = hipparchia.config['DEFAULTSHOWLEXICALSENSES']
 		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
 		session['spuria'] = hipparchia.config['DEFAULTSPURIA']
+		session['tensorflowgraph'] = 'no'
 		session['varia'] = hipparchia.config['DEFAULTVARIA']
 		session['wkexclusions'] = list()
 		session['wkgnexclusions'] = list()
@@ -114,6 +115,7 @@ def modifysessionvar(param, val):
 		'sensesummary',
 		'sortorder',
 		'spuria',
+		'tensorflowgraph',
 		'varia'
 		]
 
@@ -153,25 +155,14 @@ def modifysessionvar(param, val):
 			session[variable] = 'no'
 
 	# only one of these can be active at one time
-	if param == 'cosdistbysentence' and val == 'yes':
-		session['cosdistbylineorword'] = 'no'
-		session['semanticvectorquery'] = 'no'
-		session['nearestneighborsquery'] = 'no'
 
-	if param == 'cosdistbylineorword' and val == 'yes':
-		session['cosdistbysentence'] = 'no'
-		session['semanticvectorquery'] = 'no'
-		session['nearestneighborsquery'] = 'no'
+	exclusive = {'cosdistbysentence', 'cosdistbysentence', 'semanticvectorquery', 'nearestneighborsquery', 'tensorflowgraph'}
 
-	if param == 'semanticvectorquery' and val == 'yes':
-		session['cosdistbysentence'] = 'no'
-		session['cosdistbylineorword'] = 'no'
-		session['nearestneighborsquery'] = 'no'
-
-	if param == 'nearestneighborsquery' and val == 'yes':
-		session['cosdistbysentence'] = 'no'
-		session['cosdistbylineorword'] = 'no'
-		session['semanticvectorquery'] = 'no'
+	for e in exclusive:
+		if param == e and val == 'yes':
+			others = exclusive - {e}
+			for o in others:
+				session[o] = 'no'
 
 	if session['nearornot'] not in ['T', 'F']:
 		session['nearornot'] = 'T'
