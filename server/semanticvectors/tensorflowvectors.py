@@ -11,7 +11,12 @@ import os
 import time
 
 import numpy as np
-import tensorflow as tf
+
+try:
+	import tensorflow as tf
+except ModuleNotFoundError:
+	print('tensorflow unavailable')
+	tf = None
 from sklearn.manifold import TSNE
 
 from server import hipparchia
