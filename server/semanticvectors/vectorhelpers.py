@@ -6,9 +6,14 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import collections
+import random
 import re
 import time
 from string import punctuation
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 from server.dbsupport.dbfunctions import resultiterator, setconnection
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
@@ -74,7 +79,6 @@ def findsentences(authortable, searchobject, cursor):
 	so = searchobject
 
 	r = so.indexrestrictions[authortable]
-	whereextensions = ''
 
 	if r['type'] == 'temptable':
 		# make the table
@@ -124,6 +128,9 @@ def findsentences(authortable, searchobject, cursor):
 		lookingfor = so.seeking
 
 	matches = [s for s in allsentences if re.search(lookingfor, s)]
+
+	# hyphenated line-ends are a problem
+	matches = [re.sub(r'-', '', m) for m in matches]
 
 	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
 	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
@@ -344,6 +351,116 @@ def mostcommonwords():
 
 	return wordstoskip
 
+
+# TESTING TENSORFLOW
+
+def tfbuilddataset(words, vocabularysize):
+	"""
+
+	adapted from the tensorflow tutorial
+
+	:param words:
+	:param vocabularysize:
+	:return:
+	"""
+
+	count = [['UNK', -1]]
+	count.extend(collections.Counter(words).most_common(vocabularysize - 1))
+	dictionary = dict()
+	for word, _ in count:
+		dictionary[word] = len(dictionary)
+
+	data = list()
+	unk_count = 0
+	for word in words:
+		index = dictionary.get(word, 0)
+		if index == 0:  # dictionary['UNK']
+			unk_count += 1
+		data.append(index)
+	count[0][1] = unk_count
+	reverseddictionary = dict(zip(dictionary.values(), dictionary.keys()))
+
+	dataset = dict()
+	dataset['listofcodes'] = data
+	dataset['wordsandoccurrences'] = count
+	dataset['wordsmappedtocodes'] = dictionary
+	dataset['codesmappedtowords'] = reverseddictionary
+
+	return dataset
+
+
+def tfgeneratetrainingbatch(batchsize, numberofskips, skipwindow, thedata, dataindex):
+	"""
+
+	adapted from the tensorflow tutorial
+
+	:param batchsize:
+	:param numberofskips:
+	:param skipwindow:
+	:return:
+	"""
+
+	assert batchsize % numberofskips == 0
+	assert numberofskips <= 2 * skipwindow
+	batch = np.ndarray(shape=(batchsize), dtype=np.int32)
+	labels = np.ndarray(shape=(batchsize, 1), dtype=np.int32)
+	span = 2 * skipwindow + 1  # [ skipwindow target skipwindow ]
+	buffer = collections.deque(maxlen=span)
+	if dataindex + span > len(thedata):
+		dataindex = 0
+	buffer.extend(thedata[dataindex:dataindex + span])
+	dataindex += span
+	for i in range(batchsize // numberofskips):
+		context_words = [w for w in range(span) if w != skipwindow]
+		words_to_use = random.sample(context_words, numberofskips)
+		for j, context_word in enumerate(words_to_use):
+			batch[i * numberofskips + j] = buffer[skipwindow]
+			labels[i * numberofskips + j, 0] = buffer[context_word]
+		if dataindex == len(thedata):
+			# buffer[:] = thedata[:span]
+			# TypeError: sequence index must be integer, not 'slice'
+			buffer = collections.deque(thedata[:span], maxlen=span)
+			dataindex = span
+		else:
+			buffer.append(thedata[dataindex])
+			dataindex += 1
+	# Backtrack a little bit to avoid skipping words in the end of a batch
+	dataindex = (dataindex + len(thedata) - span) % len(thedata)
+
+	trainingbatch = dict()
+	trainingbatch['batch'] = batch
+	trainingbatch['labels'] = labels
+	trainingbatch['data'] = thedata
+	trainingbatch['dataindex'] = dataindex
+
+	return trainingbatch
+
+
+def tfplotwithlabels(low_dim_embs, labels, filename):
+	"""
+
+	also lifted from the tensorflow example code
+
+	:param low_dim_embs:
+	:param labels:
+	:param filename:
+	:return:
+	"""
+	assert low_dim_embs.shape[0] >= len(labels), 'More labels than embeddings'
+	plt.figure(figsize=(18, 18))  # in inches
+	for i, label in enumerate(labels):
+		x, y = low_dim_embs[i, :]
+		plt.scatter(x, y)
+		plt.annotate(label,
+		             xy=(x, y),
+		             xytext=(5, 2),
+		             textcoords='offset points',
+		             ha='right',
+		             va='bottom')
+
+	plt.savefig(filename)
+
+	return
 
 """
 qui¹ - 252258

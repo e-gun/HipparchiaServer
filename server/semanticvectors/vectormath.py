@@ -408,6 +408,8 @@ def findword2vecsimilarities(termone, termtwo, morphdict, sentences):
 	:return:
 	"""
 
+	# print('findword2vecsimilarities()')
+
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
@@ -417,7 +419,7 @@ def findword2vecsimilarities(termone, termtwo, morphdict, sentences):
 
 	dimensions = 300
 	window = 10
-	trainingiterations = 5
+	trainingiterations = 10
 
 	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
 	model = Word2Vec(bagsofwords, min_count=1, seed=1, iter=trainingiterations, size=dimensions, window=window, workers=workers)
@@ -425,7 +427,6 @@ def findword2vecsimilarities(termone, termtwo, morphdict, sentences):
 	similarity = model.wv.similarity(termone, termtwo)
 
 	return similarity
-
 
 
 def buildbagsofwords(morphdict, sentences):

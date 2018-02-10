@@ -111,6 +111,7 @@ def executesearch(timestamp):
 
 		if frozensession['nearestneighborsquery'] == 'yes':
 			output = findnearestneighbors(activepoll, so)
+			# output = tensorgraphelectedworks(activepoll, so)
 			del poll[ts]
 			return output
 
