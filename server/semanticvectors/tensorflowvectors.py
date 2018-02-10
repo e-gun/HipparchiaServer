@@ -275,6 +275,7 @@ def tftrainondata(sentences, activepoll):
 
 		finalembeddings = normalizedembeddings.eval()
 
+	activepoll.statusis('Graphing the data')
 	tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000, method='exact')
 	plotonly = min(500, vocabularysize)
 	lowdimembs = tsne.fit_transform(finalembeddings[:plotonly, :])

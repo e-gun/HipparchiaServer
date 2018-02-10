@@ -12,8 +12,14 @@ import re
 import time
 from string import punctuation
 
-import matplotlib.pyplot as plt
-import numpy as np
+try:
+	import matplotlib.pyplot as plt
+except ModuleNotFoundError:
+	print('matplotlib.pyplot is not available')
+try:
+	import numpy as np
+except ImportError:
+	pass
 
 from server.dbsupport.dbfunctions import resultiterator, setconnection
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
