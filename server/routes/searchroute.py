@@ -25,10 +25,10 @@ from server.listsandsession.listmanagement import calculatewholeauthorsearches, 
 	sortresultslist
 from server.listsandsession.sessionfunctions import justlatin
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.routes.vectorroutes import findabsolutevectorsbysentence, findabsolutevectorsfromhits, \
-	findlatentsemanticindex, findnearestneighbors
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildsearchobject
+from server.semanticvectors.gensimvectors import findlatentsemanticindex, findnearestneighbors
+from server.semanticvectors.vectorpseudoroutes import findabsolutevectorsbysentence, findabsolutevectorsfromhits
 from server.startup import authordict, listmapper, poll, workdict
 
 

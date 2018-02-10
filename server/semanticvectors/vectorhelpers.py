@@ -169,7 +169,7 @@ def findwordvectorset(listofwordclusters):
 	return allwords
 
 
-def tidyupmophdict(morphdict):
+def convertmophdicttodict(morphdict):
 	"""
 
 	:return:
