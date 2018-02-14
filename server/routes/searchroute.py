@@ -117,6 +117,7 @@ def executesearch(timestamp):
 
 		if frozensession['tensorflowgraph'] == 'yes':
 			output = tensorgraphelectedworks(activepoll, so)
+			# output = sklearnselectedworks(activepoll, so)
 			del poll[ts]
 			return output
 

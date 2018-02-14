@@ -10,15 +10,9 @@ import re
 from collections import defaultdict
 from multiprocessing import Manager, Process
 
-from gensim import corpora, models
-from gensim.models import Word2Vec
-from gensim.similarities.index import AnnoyIndexer
-
 from server.dbsupport.dbfunctions import setthreadcount
-from server.hipparchiaobjects.helperobjects import SemanticVectorCorpus
 
 try:
-	# import THROWEXCEPTION
 	import numpy as np
 	from scipy.spatial.distance import cosine as cosinedist
 except ImportError:
@@ -310,123 +304,6 @@ def vectorcosineworker(headwords, workpiledict, resultdict):
 			resultdict[headword] = cv
 
 	return resultdict
-
-
-def lsibuildspace(morphdict, sentences):
-	"""
-
-	:param allheadwords:
-	:param morphdict:
-	:param sentences:
-	:return:
-	"""
-
-	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
-	sentences = [s for s in sentences if s]
-
-	bagsofwords = buildbagsofwords(morphdict, sentences)
-
-	lsidictionary = corpora.Dictionary(bagsofwords)
-
-	lsicorpus = [lsidictionary.doc2bow(bag) for bag in bagsofwords]
-
-	termfreqinversedocfreq = models.TfidfModel(lsicorpus)
-
-	corpustfidf = termfreqinversedocfreq[lsicorpus]
-
-	semanticindex = models.LsiModel(corpustfidf, id2word=lsidictionary, num_topics=350)
-
-	"""	
-	"An empirical study of required dimensionality for large-scale latent semantic indexing applications"
-	Bradford 2008
-	
-	For a term-document matrix that has been decomposed via SVD with a non-zero diagonal... 
-	
-	Dimensionality is reduced by deleting all but the k largest values on 
-	this diagonal, together with the corresponding columns in the
-	other two matrices. This truncation process is used to generate a
-	k-dimensional vector space. Both terms and documents are represented
-	by k-dimensional vectors in this vector space.
-	
-	Landauer and Dumais in 1997: They found that the degree of match 
-	between cosine measures in the LSI space and human judgment
-	was strongly dependent on k, with a maximum for k = 300
-	
-	It is clear that there will be a growing degradation of representational
-	fidelity as the dimensionality is increased beyond 400. Depending
-	upon the application, such behavior may preclude use of
-	dimensionality greater than 400.  
-	
-	recommendations:
-	300: thousands to 10s of thousands
-
-	"""
-
-	corpus = SemanticVectorCorpus(semanticindex, corpustfidf, lsidictionary, lsicorpus, bagsofwords, sentences)
-
-	return corpus
-
-
-def findapproximatenearestneighbors(query, morphdict, sentences):
-	"""
-
-	search for points in space that are close to a given query point
-
-	the query should be a dictionary headword
-
-	:param query:
-	:param morphdict:
-	:param sentences:
-	:return:
-	"""
-
-	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
-	sentences = [s for s in sentences if s]
-
-	bagsofwords = buildbagsofwords(morphdict, sentences)
-
-	workers = setthreadcount()
-	dimensions = 300
-	window = 10
-	trainingiterations = 5
-
-	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
-	model = Word2Vec(bagsofwords, min_count=1, seed=1, iter=trainingiterations, size=dimensions, window=window, workers=workers)
-
-	indexer = AnnoyIndexer(model, 2)
-	mostsimilar = model.most_similar(query, topn=10, indexer=indexer)
-
-	return mostsimilar
-
-
-def findword2vecsimilarities(termone, termtwo, morphdict, sentences):
-	"""
-
-	:param query:
-	:param morphdict:
-	:param sentences:
-	:return:
-	"""
-
-	# print('findword2vecsimilarities()')
-
-	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
-	sentences = [s for s in sentences if s]
-
-	bagsofwords = buildbagsofwords(morphdict, sentences)
-
-	workers = setthreadcount()
-
-	dimensions = 300
-	window = 10
-	trainingiterations = 10
-
-	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
-	model = Word2Vec(bagsofwords, min_count=1, seed=1, iter=trainingiterations, size=dimensions, window=window, workers=workers)
-
-	similarity = model.wv.similarity(termone, termtwo)
-
-	return similarity
 
 
 def buildbagsofwords(morphdict, sentences):

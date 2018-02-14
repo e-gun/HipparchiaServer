@@ -27,7 +27,7 @@ from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, tfbuilddataset, tfgeneratetrainingbatch, \
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, builddatasetdict, tfgeneratetrainingbatch, \
 	tfplotwithlabels
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, listmapper, workdict
@@ -137,7 +137,7 @@ def tftrainondata(sentences, activepoll):
 	vocabularysize = min(10000, len(set(headwordsinorder)))
 
 	activepoll.statusis('Constructing dataset')
-	dataset = tfbuilddataset(headwordsinorder, vocabularysize)
+	dataset = builddatasetdict(headwordsinorder, vocabularysize)
 
 	batchsize = 8
 	skipwindow = 1

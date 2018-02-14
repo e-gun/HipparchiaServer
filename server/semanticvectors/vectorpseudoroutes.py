@@ -10,21 +10,6 @@ import json
 import locale
 import time
 
-try:
-	import numpy as np
-except ImportError:
-	print('numpy not installed')
-
-try:
-	import tensorflow as tf
-except ImportError:
-	print('tensorflow not installed')
-
-try:
-	from gensim import corpora, models, similarities
-except ImportError:
-	print('gensim not installed')
-
 from flask import request, session
 
 from server import hipparchia
@@ -35,9 +20,9 @@ from server.listsandsession.listmanagement import calculatewholeauthorsearches, 
 	polytonicsort
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
+from server.semanticvectors.rudimentaryvectormath import buildvectorspace, caclulatecosinevalues
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
-from server.semanticvectors.vectorhelpers import findverctorenvirons, findwordvectorset, convertmophdicttodict
-from server.semanticvectors.vectormath import buildvectorspace, caclulatecosinevalues
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, findverctorenvirons, findwordvectorset
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
 """

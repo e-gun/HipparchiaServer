@@ -10,17 +10,20 @@ import locale
 import time
 from copy import deepcopy
 
-from gensim import similarities
+from gensim import corpora, models, similarities
+from gensim.models import Word2Vec
 
 from server import hipparchia
+from server.dbsupport.dbfunctions import setthreadcount
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.jsformatting import generatevectorjs
-from server.formatting.vectorformatting import formatlsimatches
+from server.formatting.vectorformatting import formatlsimatches, formatnnmatches
+from server.hipparchiaobjects.helperobjects import SemanticVectorCorpus
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
+from server.semanticvectors.rudimentaryvectormath import buildbagsofwords
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
 from server.semanticvectors.vectorhelpers import convertmophdicttodict, finddblinefromsentence, findwordvectorset
-from server.semanticvectors.vectormath import findapproximatenearestneighbors, findword2vecsimilarities, lsibuildspace
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, lemmatadict, listmapper, workdict
 
@@ -341,7 +344,8 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 	else:
 		mostsimilar = findapproximatenearestneighbors(termone, morphdict, listsofwords)
 		# print('mostsimilar', mostsimilar)
-		html = mostsimilar
+		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
+		html = formatnnmatches(mostsimilar)
 
 	findshtml = '<pre>{h}</pre>'.format(h=html)
 
@@ -400,3 +404,145 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 	output = json.dumps(output)
 
 	return output
+
+
+def lsibuildspace(morphdict, sentences):
+	"""
+
+	:param allheadwords:
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
+	sentences = [s for s in sentences if s]
+
+	bagsofwords = buildbagsofwords(morphdict, sentences)
+
+	lsidictionary = corpora.Dictionary(bagsofwords)
+
+	lsicorpus = [lsidictionary.doc2bow(bag) for bag in bagsofwords]
+
+	termfreqinversedocfreq = models.TfidfModel(lsicorpus)
+
+	corpustfidf = termfreqinversedocfreq[lsicorpus]
+
+	semanticindex = models.LsiModel(corpustfidf, id2word=lsidictionary, num_topics=350)
+
+	"""	
+	"An empirical study of required dimensionality for large-scale latent semantic indexing applications"
+	Bradford 2008
+	
+	For a term-document matrix that has been decomposed via SVD with a non-zero diagonal... 
+	
+	Dimensionality is reduced by deleting all but the k largest values on 
+	this diagonal, together with the corresponding columns in the
+	other two matrices. This truncation process is used to generate a
+	k-dimensional vector space. Both terms and documents are represented
+	by k-dimensional vectors in this vector space.
+	
+	Landauer and Dumais in 1997: They found that the degree of match 
+	between cosine measures in the LSI space and human judgment
+	was strongly dependent on k, with a maximum for k = 300
+	
+	It is clear that there will be a growing degradation of representational
+	fidelity as the dimensionality is increased beyond 400. Depending
+	upon the application, such behavior may preclude use of
+	dimensionality greater than 400.  
+	
+	recommendations:
+	300: thousands to 10s of thousands
+
+	"""
+
+	corpus = SemanticVectorCorpus(semanticindex, corpustfidf, lsidictionary, lsicorpus, bagsofwords, sentences)
+
+	return corpus
+
+
+def findapproximatenearestneighbors(query, morphdict, sentences):
+	"""
+
+	search for points in space that are close to a given query point
+
+	the query should be a dictionary headword
+
+	:param query:
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
+	sentences = [s for s in sentences if s]
+
+	bagsofwords = buildbagsofwords(morphdict, sentences)
+
+	workers = setthreadcount()
+	dimensions = 300
+	window = 10
+	trainingiterations = 12
+	minimumnumberofhits = 5
+	downsample = 0.05
+
+	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
+	mymodel = Word2Vec(bagsofwords,
+						min_count=minimumnumberofhits,
+						seed=1,
+						iter=trainingiterations,
+						sample=downsample,
+						size=dimensions,
+						sg=1,
+						window=window,
+						workers=workers)
+
+	# indexer = AnnoyIndexer(mymodel, 2)
+	# mostsimilar = mymodel.most_similar(query, topn=10, indexer=indexer)
+
+	# needed if you will graph
+	# thewords = mymodel[mymodel.wv.vocab]
+
+	mostsimilar = mymodel.most_similar(query)
+
+	return mostsimilar
+
+
+def findword2vecsimilarities(termone, termtwo, morphdict, sentences):
+	"""
+
+	:param query:
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	# print('findword2vecsimilarities()')
+
+	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
+	sentences = [s for s in sentences if s]
+
+	bagsofwords = buildbagsofwords(morphdict, sentences)
+
+	workers = setthreadcount()
+
+	dimensions = 300
+	window = 10
+	trainingiterations = 12
+	minimumnumberofhits = 1
+	downsample = 0.05
+
+	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
+	model = Word2Vec(bagsofwords,
+					min_count=minimumnumberofhits,
+					seed=1,
+					iter=trainingiterations,
+					size=dimensions,
+					sample=downsample,
+					sg=1,
+					window=window,
+					workers=workers)
+
+	similarity = model.wv.similarity(termone, termtwo)
+
+	return similarity

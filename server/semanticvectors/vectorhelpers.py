@@ -360,7 +360,7 @@ def mostcommonwords():
 
 # TESTING TENSORFLOW
 
-def tfbuilddataset(words, vocabularysize):
+def builddatasetdict(words, vocabularysize):
 	"""
 
 	adapted from the tensorflow tutorial

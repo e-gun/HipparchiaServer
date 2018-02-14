@@ -46,7 +46,40 @@ def formatlsimatches(listofmatches):
 			r = re.sub(r'class="vectorrow"', 'class="nthrow"', r)
 		newrows.append(r)
 
-	rows = ['<table>'] + newrows + ['</table>']
+	rows = ['<table class="vectortable">'] + newrows + ['</table>']
+
+	thehtml = '\n'.join(rows)
+
+	return thehtml
+
+
+def formatnnmatches(listofneighbors):
+	"""
+
+	each neighbor is a tuple: [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ...]
+
+	:param listofneighbors:
+	:return:
+	"""
+
+	rowtemplate = """
+	<tr class="vectorrow">
+		<td class="vectorscore">{s}</td>
+		<td class="vectorword">{w}</td>
+	</tr>
+	"""
+
+	rows = [rowtemplate.format(s=round(n[1], 3), w=n[0]) for n in listofneighbors]
+
+	newrows = list()
+	count = 0
+	for r in rows:
+		count += 1
+		if count % 3 == 0:
+			r = re.sub(r'class="vectorrow"', 'class="nthrow"', r)
+		newrows.append(r)
+
+	rows = ['<table class="vectortable">'] + newrows + ['</table>']
 
 	thehtml = '\n'.join(rows)
 
