@@ -613,3 +613,48 @@ def probefordatabases():
 	curs.close()
 
 	return available
+
+def createvectorstable():
+	"""
+
+	zap and reconstitute the storedvectors table
+
+	:return:
+	"""
+
+	print('resetting the storedvectors table')
+
+	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	cursor = dbconnection.cursor()
+
+	query = """
+	DROP TABLE IF EXISTS public.storedvectors;
+
+	CREATE TABLE public.storedvectors
+	(
+	    ts timestamp without time zone,
+	    versionstamp character varying(6) COLLATE pg_catalog."default",
+	    uidlist text[] COLLATE pg_catalog."default",
+	    vectortype character varying(10) COLLATE pg_catalog."default",
+	    calculatedvectorspace bytea
+	)
+	WITH (
+	    OIDS = FALSE
+	)
+	TABLESPACE pg_default;
+	
+	ALTER TABLE public.storedvectors
+	    OWNER to hippa_wr;
+	
+	GRANT SELECT ON TABLE public.storedvectors TO {reader};
+	
+	GRANT ALL ON TABLE public.storedvectors TO {writer};
+	"""
+
+	query = query.format(reader=hipparchia.config['DBUSER'], wirter=hipparchia.config['DBWRITEUSER'])
+
+	cursor.execute(query)
+	cursor.close()
+	del dbconnection
+
+	return

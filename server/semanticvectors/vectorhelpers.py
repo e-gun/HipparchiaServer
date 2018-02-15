@@ -16,6 +16,8 @@ import time
 from datetime import datetime
 from string import punctuation
 
+import psycopg2
+
 try:
 	import matplotlib.pyplot as plt
 except ModuleNotFoundError:
@@ -25,7 +27,7 @@ try:
 except ImportError:
 	pass
 
-from server.dbsupport.dbfunctions import resultiterator, setconnection
+from server.dbsupport.dbfunctions import resultiterator, setconnection, createvectorstable
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
 	tidyupterm
 from server.hipparchiaobjects.helperobjects import ProgressPoll
@@ -486,10 +488,10 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 	:return:
 	"""
 
-	pickledvectors = pickle.dumps(vectorspace)
-
 	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
+
+	pickledvectors = pickle.dumps(vectorspace)
 
 	q = 'DELETE FROM public.storedvectors WHERE uidlist = %s'
 	d = (uidlist,)
@@ -533,13 +535,18 @@ def checkforstoredvector(uidlist, indextype, justcareaboutcommit=True):
 
 	q = """
 	SELECT {crit}, calculatedvectorspace 
-		FROM public.storedvectors 
+		FROM public.ZZZstoredvectors 
 		WHERE uidlist=%s AND vectortype=%s
 	"""
 	d = (uidlist, indextype)
 
-	cursor.execute(q.format(crit=criterion), d)
-	result = cursor.fetchone()
+	try:
+		cursor.execute(q.format(crit=criterion), d)
+		result = cursor.fetchone()
+	except psycopg2.ProgrammingError:
+		# psycopg2.ProgrammingError: relation "public.storedvectors" does not exist
+		createvectorstable()
+		result = False
 
 	if not result:
 		return False
@@ -551,16 +558,16 @@ def checkforstoredvector(uidlist, indextype, justcareaboutcommit=True):
 		t = os.path.getmtime(thefile)
 		outdated = (t > result[0])
 
-	dbconnection.commit()
-	cursor.close()
-	del dbconnection
-
 	print('checkforstoredvector()', uidlist, result[0], 'outdated=', outdated)
 
 	if outdated:
 		returnval = False
 	else:
 		returnval = pickle.loads(result[1])
+
+	dbconnection.commit()
+	cursor.close()
+	del dbconnection
 
 	return returnval
 
