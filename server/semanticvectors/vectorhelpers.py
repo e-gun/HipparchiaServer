@@ -7,9 +7,13 @@
 """
 
 import collections
+import os
+import pickle
 import random
 import re
+import sys
 import time
+from datetime import datetime
 from string import punctuation
 
 try:
@@ -136,7 +140,7 @@ def findsentences(authortable, searchobject, cursor):
 	matches = [s for s in allsentences if re.search(lookingfor, s)]
 
 	# hyphenated line-ends are a problem
-	matches = [re.sub(r'-', '', m) for m in matches]
+	matches = [re.sub(r'-(|\s)', '', m) for m in matches]
 
 	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
 	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
@@ -325,7 +329,7 @@ def mostcommonwords():
 		'ἄναξ', 'λόγοϲ'
 	}
 
-	dbconnection = setconnection('not_autocommit', readonlyconnection=False)
+	dbconnection = setconnection('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	qtemplate = """
@@ -354,6 +358,7 @@ def mostcommonwords():
 
 	dbconnection.commit()
 	cursor.close()
+	del dbconnection
 
 	return wordstoskip
 
@@ -467,6 +472,126 @@ def tfplotwithlabels(low_dim_embs, labels, filename):
 	plt.savefig(filename)
 
 	return
+
+
+def storevectorindatabase(uidlist, vectortype, vectorspace):
+	"""
+
+	you have just calculated a new vectorpace, store it so you do not need to recalculate it
+	later
+
+	:param vectorspace:
+	:param uidlist:
+	:param vectortype:
+	:return:
+	"""
+
+	pickledvectors = pickle.dumps(vectorspace)
+
+	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	cursor = dbconnection.cursor()
+
+	q = 'DELETE FROM public.storedvectors WHERE uidlist = %s'
+	d = (uidlist,)
+	cursor.execute(q, d)
+
+	q = """
+	INSERT INTO public.storedvectors 
+		(ts, versionstamp, uidlist, vectortype, calculatedvectorspace)
+		VALUES (%s, %s, %s, %s, %s)
+	"""
+	ts = datetime.now().strftime("%Y-%m-%d %H:%M")
+	versionstamp = readgitdata()[:6]
+
+	d = (ts, versionstamp, uidlist, vectortype, pickledvectors)
+	cursor.execute(q, d)
+
+	return
+
+
+def checkforstoredvector(uidlist, indextype, justcareaboutcommit=True):
+	"""
+
+	the stored vector might not reflect the current math rules
+
+	return False if you are 'outdated'
+
+	:param uidlist:
+	:return:
+	"""
+
+	now = datetime.now().strftime("%Y-%m-%d %H:%M")
+	version = readgitdata()
+
+	dbconnection = setconnection('autocommit')
+	cursor = dbconnection.cursor()
+
+	if justcareaboutcommit:
+		criterion = 'versionstamp'
+	else:
+		criterion = 'ts'
+
+	q = """
+	SELECT {crit}, calculatedvectorspace 
+		FROM public.storedvectors 
+		WHERE uidlist=%s AND vectortype=%s
+	"""
+	d = (uidlist, indextype)
+
+	cursor.execute(q.format(crit=criterion), d)
+	result = cursor.fetchone()
+
+	if not result:
+		return False
+
+	if justcareaboutcommit:
+		outdated = (version[:6] != result[0])
+	else:
+		thefile = 'blankfornow'
+		t = os.path.getmtime(thefile)
+		outdated = (t > result[0])
+
+	dbconnection.commit()
+	cursor.close()
+	del dbconnection
+
+	print('checkforstoredvector()', uidlist, result[0], 'outdated=', outdated)
+
+	if outdated:
+		returnval = False
+	else:
+		returnval = pickle.loads(result[1])
+
+	return returnval
+
+
+def readgitdata():
+	"""
+
+	find the commit value for the code in use
+
+	a sample lastline:
+
+		'3b0c66079f7337928b02df429f4a024dafc80586 63e01ae988d2d720b65c1bf7db54236b7ad6efa7 EG <egun@antisigma> 1510756108 -0500\tcommit: variable name changes; code tidy-ups\n'
+
+	:return:
+	"""
+
+	basepath = os.path.dirname(sys.argv[0])
+
+	gitfile = '/.git/logs/HEAD'
+	line = ''
+
+	with open(basepath+gitfile) as fh:
+		for line in fh:
+			pass
+		lastline = line
+
+	gitdata = lastline.split(' ')
+	commit = gitdata[1]
+
+	return commit
+
 
 """
 qui¹ - 252258

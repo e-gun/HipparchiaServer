@@ -57,10 +57,10 @@ def setthreadcount(startup=False):
 	return w
 
 
-def setconnection(autocommit='n', readonlyconnection=True):
-	dbconnection = psycopg2.connect(user=hipparchia.config['DBUSER'], host=hipparchia.config['DBHOST'],
+def setconnection(autocommit='n', readonlyconnection=True, u='DBUSER', p='DBPASS'):
+	dbconnection = psycopg2.connect(user=hipparchia.config[u], host=hipparchia.config['DBHOST'],
 	                                port=hipparchia.config['DBPORT'], database=hipparchia.config['DBNAME'],
-	                                password=hipparchia.config['DBPASS'])
+	                                password=hipparchia.config[p])
 	if autocommit == 'autocommit':
 		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
@@ -470,7 +470,7 @@ def returnfirstwork(authorid, cursor):
 	"""
 
 	# print('panic and grab first work of',authorid)
-	query = 'SELECT universalid FROM  works WHERE universalid LIKE %s ORDER BY universalid'
+	query = 'SELECT universalid FROM works WHERE universalid LIKE %s ORDER BY universalid'
 	data = (authorid+'%',)
 	cursor.execute(query, data)
 	found = cursor.fetchone()

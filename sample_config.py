@@ -292,7 +292,13 @@ RESTOREMEDIALANDFINALSIGMA = 'no'
 #   1 --> identical;
 #   0 --> completely unrelated
 #
+# DBWRITEUSER & DBWRITEPASS should match the values in config.ini for HipparchiaBuilder
+#   unless you want a third user. These varaibles allow the vector infrastructure to stor
+#   calculated vector spaces and then to fetch them so that the very time-consuming task
+#   of mapping out the space does not have to be repeated more than necessary.
 
 SEMANTICVECTORSENABLED = 'no'
 MAXVECTORSPACE = 7548165
 VECTORDISTANCECUTOFF = .2
+DBWRITEUSER = '(consider re-using HipparchiaBuilder user)'
+DBWRITEPASS = '(consider re-using HipparchiaBuilder pass)'

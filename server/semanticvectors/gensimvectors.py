@@ -23,7 +23,8 @@ from server.listsandsession.listmanagement import calculatewholeauthorsearches, 
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.rudimentaryvectormath import buildbagsofwords
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, finddblinefromsentence, findwordvectorset
+from server.semanticvectors.vectorhelpers import checkforstoredvector, convertmophdicttodict, finddblinefromsentence, \
+	findwordvectorset, storevectorindatabase
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, lemmatadict, listmapper, workdict
 
@@ -55,8 +56,10 @@ def findlatentsemanticindex(activepoll, searchobject, nn=False):
 
 	if not nn:
 		outputfunction = lsigenerateoutput
+		indextype = 'lsi'
 	else:
 		outputfunction = nearestneighborgenerateoutput
+		indextype = 'nn'
 
 	starttime = time.time()
 
@@ -131,6 +134,8 @@ def findlatentsemanticindex(activepoll, searchobject, nn=False):
 		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 		so.indexrestrictions = indexrestrictions
 
+		vectorspace = checkforstoredvector(searchlist, indextype)
+
 		if validlemma:
 			# find all sentences
 			activepoll.statusis('Finding all sentences')
@@ -141,7 +146,7 @@ def findlatentsemanticindex(activepoll, searchobject, nn=False):
 			so.seeking = r'.'
 			sentences = vectorsentencedispatching(so, activepoll)
 			so.lemma = restorelemma
-			output = outputfunction(sentences, workssearched, so, activepoll, starttime)
+			output = outputfunction(sentences, workssearched, so, activepoll, starttime, vectorspace)
 		else:
 			return emptyvectoroutput(so)
 	else:
@@ -150,7 +155,7 @@ def findlatentsemanticindex(activepoll, searchobject, nn=False):
 	return output
 
 
-def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, starttime):
+def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, starttime, lsispace):
 	"""
 
 
@@ -160,40 +165,35 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 	so = searchobject
 	dmin, dmax = bcedating(so.session)
 
-	# find all words in use
-	allwords = findwordvectorset(listsofwords)
+	if not lsispace:
+		# find all words in use
+		allwords = findwordvectorset(listsofwords)
 
-	# find all possible forms of all the words we used
-	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
-	wl = locale.format('%d', len(listsofwords), grouping=True)
-	activepoll.statusis('Finding headwords for {n} sentences'.format(n=wl))
+		# find all possible forms of all the words we used
+		# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
+		wl = locale.format('%d', len(listsofwords), grouping=True)
+		activepoll.statusis('Finding headwords for {n} sentences'.format(n=wl))
 
-	morphdict = findheadwords(allwords)
-	morphdict = convertmophdicttodict(morphdict)
+		morphdict = findheadwords(allwords)
+		morphdict = convertmophdicttodict(morphdict)
 
-	# find all possible headwords of all of the forms in use
-	# note that we will not know what we did not know: count unparsed words too and deliver that as info at the end?
-	allheadwords = dict()
-	for m in morphdict.keys():
-		for h in morphdict[m]:
-			allheadwords[h] = m
+		# find all possible headwords of all of the forms in use
+		# note that we will not know what we did not know: count unparsed words too and deliver that as info at the end?
+		allheadwords = dict()
+		for m in morphdict.keys():
+			for h in morphdict[m]:
+				allheadwords[h] = m
 
-	hw = locale.format('%d', len(allheadwords.keys()), grouping=True)
-	activepoll.statusis('Building vectors for {h} headwords in {n} sentences'.format(h=hw, n=wl))
+		hw = locale.format('%d', len(allheadwords.keys()), grouping=True)
+		activepoll.statusis('Building vectors for {h} headwords in {n} sentences'.format(h=hw, n=wl))
 
-	# TESTING
-	# mostsimilar = findapproximatenearestneighbors(so.lemma.dictionaryentry, morphdict, listsofwords)
-	# print('mostsimilar',mostsimilar)
-	# throwexception
+		# TESTING
+		# mostsimilar = findapproximatenearestneighbors(so.lemma.dictionaryentry, morphdict, listsofwords)
+		# print('mostsimilar',mostsimilar)
+		# throwexception
 
-	corpus = lsibuildspace(morphdict, listsofwords)
-	c = corpus
-
-	# print('tokens', c.lsidictionary)
-	# print('cshape', c.lsicorpus)
-	# for d in c.lsicorpus:
-	# 	print('doc:', d)
-	# print('10 topics', corpus.showtopics(10))
+		lsispace = lsibuildspace(morphdict, listsofwords)
+		storevectorindatabase(so.searchlist, 'lsi', lsispace)
 
 	try:
 		vq = ' '.join([so.lemma.dictionaryentry, so.proximatelemma.dictionaryentry])
@@ -201,9 +201,9 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 		# there was no second lemma & you cant join None
 		vq = so.lemma.dictionaryentry
 
-	vectorquerylsi = c.findquerylsi(vq)
+	vectorquerylsi = lsispace.findquerylsi(vq)
 
-	vectorindex = similarities.MatrixSimilarity(c.semantics)
+	vectorindex = similarities.MatrixSimilarity(lsispace.semantics)
 
 	similis = vectorindex[vectorquerylsi]
 	# print('similis', similis)
@@ -218,7 +218,7 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 
 	for s in sims:
 		if s[1] > threshold:
-			thissentence = c.sentences[s[0]]
+			thissentence = lsispace.sentences[s[0]]
 			# this part is slow and needs MP refactoring?
 			dblines = finddblinefromsentence(thissentence, subsearchobject)
 			if dblines:
@@ -233,7 +233,7 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 				thismatch['score'] = float(s[1])  # s[1] comes back as <class 'numpy.float32'>
 				thismatch['line'] = dbline
 				thismatch['sentence'] = '{s}{x}'.format(s=' '.join(thissentence), x=xtra)
-				thismatch['words'] = c.bagsofwords[s[0]]
+				thismatch['words'] = lsispace.bagsofwords[s[0]]
 				matches.append(thismatch)
 
 	findshtml = formatlsimatches(matches)
@@ -295,7 +295,7 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 	return output
 
 
-def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, activepoll, starttime):
+def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, activepoll, starttime, vectorspace):
 	"""
 
 	:param listsofwords:
@@ -337,12 +337,15 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 	except AttributeError:
 		termtwo = None
 
+	if not vectorspace:
+		vectorspace = buildgensimmodel(so, morphdict, listsofwords)
+
 	if termone and termtwo:
-		similarity = findword2vecsimilarities(termone, termtwo, morphdict, listsofwords)
+		similarity = findword2vecsimilarities(termone, termtwo, vectorspace)
 		# print('similarity of {a} and {b} is {c}'.format(a=termone, b=termtwo, c=similarity))
 		html = similarity
 	else:
-		mostsimilar = findapproximatenearestneighbors(termone, morphdict, listsofwords)
+		mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
 		# print('mostsimilar', mostsimilar)
 		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
 		html = formatnnmatches(mostsimilar)
@@ -461,7 +464,7 @@ def lsibuildspace(morphdict, sentences):
 	return corpus
 
 
-def findapproximatenearestneighbors(query, morphdict, sentences):
+def findapproximatenearestneighbors(query, mymodel):
 	"""
 
 	search for points in space that are close to a given query point
@@ -474,41 +477,12 @@ def findapproximatenearestneighbors(query, morphdict, sentences):
 	:return:
 	"""
 
-	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
-	sentences = [s for s in sentences if s]
-
-	bagsofwords = buildbagsofwords(morphdict, sentences)
-
-	workers = setthreadcount()
-	dimensions = 300
-	window = 10
-	trainingiterations = 12
-	minimumnumberofhits = 5
-	downsample = 0.05
-
-	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
-	mymodel = Word2Vec(bagsofwords,
-						min_count=minimumnumberofhits,
-						seed=1,
-						iter=trainingiterations,
-						sample=downsample,
-						size=dimensions,
-						sg=1,
-						window=window,
-						workers=workers)
-
-	# indexer = AnnoyIndexer(mymodel, 2)
-	# mostsimilar = mymodel.most_similar(query, topn=10, indexer=indexer)
-
-	# needed if you will graph
-	# thewords = mymodel[mymodel.wv.vocab]
-
 	mostsimilar = mymodel.most_similar(query)
 
 	return mostsimilar
 
 
-def findword2vecsimilarities(termone, termtwo, morphdict, sentences):
+def findword2vecsimilarities(termone, termtwo, mymodel):
 	"""
 
 	:param query:
@@ -517,7 +491,18 @@ def findword2vecsimilarities(termone, termtwo, morphdict, sentences):
 	:return:
 	"""
 
-	# print('findword2vecsimilarities()')
+	similarity = mymodel.wv.similarity(termone, termtwo)
+
+	return similarity
+
+
+
+def buildgensimmodel(searchobject, morphdict, sentences):
+	"""
+
+
+	:return:
+	"""
 
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
@@ -543,6 +528,6 @@ def findword2vecsimilarities(termone, termtwo, morphdict, sentences):
 					window=window,
 					workers=workers)
 
-	similarity = model.wv.similarity(termone, termtwo)
+	storevectorindatabase(searchobject.searchlist, 'nn', model)
 
-	return similarity
+	return model
