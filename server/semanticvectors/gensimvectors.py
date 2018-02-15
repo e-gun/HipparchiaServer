@@ -504,7 +504,10 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
-	bagsofwords = buildbagsofwordswithalternates(morphdict, sentences)
+	bagofwordsfunction = buildflatbagsofwords
+	# bagofwordsfunction = buildbagsofwordswithalternates
+
+	bagsofwords = bagofwordsfunction(morphdict, sentences)
 
 	# print('bagsofwords')
 	# for b in bagsofwords:
