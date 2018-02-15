@@ -21,7 +21,7 @@ from server.formatting.vectorformatting import formatlsimatches, formatnnmatches
 from server.hipparchiaobjects.helperobjects import SemanticVectorCorpus
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.semanticvectors.rudimentaryvectormath import buildbagsofwords
+from server.semanticvectors.rudimentaryvectormath import buildflatbagsofwords
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
 from server.semanticvectors.vectorhelpers import checkforstoredvector, convertmophdicttodict, finddblinefromsentence, \
 	findwordvectorset, storevectorindatabase
@@ -190,11 +190,6 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 		hw = locale.format('%d', len(allheadwords.keys()), grouping=True)
 		activepoll.statusis('Building vectors for {h} headwords in {n} sentences'.format(h=hw, n=wl))
 
-		# TESTING
-		# mostsimilar = findapproximatenearestneighbors(so.lemma.dictionaryentry, morphdict, listsofwords)
-		# print('mostsimilar',mostsimilar)
-		# throwexception
-
 		lsispace = lsibuildspace(morphdict, listsofwords)
 		storevectorindatabase(so.searchlist, 'lsi', lsispace)
 
@@ -312,28 +307,6 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 	so = searchobject
 	dmin, dmax = bcedating(so.session)
 
-	# find all words in use
-	allwords = findwordvectorset(listsofwords)
-
-	# find all possible forms of all the words we used
-	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
-	wl = locale.format('%d', len(listsofwords), grouping=True)
-	activepoll.statusis('Finding headwords for {n} sentences'.format(n=wl))
-
-	morphdict = findheadwords(allwords)
-	morphdict = convertmophdicttodict(morphdict)
-
-	# find all possible headwords of all of the forms in use
-	# note that we will not know what we did not know: count unparsed words too and deliver that as info at the end?
-	allheadwords = dict()
-	for m in morphdict.keys():
-		for h in morphdict[m]:
-			allheadwords[h] = m
-
-	hw = locale.format('%d', len(allheadwords.keys()), grouping=True)
-	activepoll.statusis('Building vectors for {h} headwords in {n} sentences'.format(h=hw, n=wl))
-
-	# TESTING
 	termone = so.lemma.dictionaryentry
 	try:
 		termtwo = so.proximatelemma.dictionaryentry
@@ -341,6 +314,19 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 		termtwo = None
 
 	if not vectorspace:
+		# find all words in use
+		allwords = findwordvectorset(listsofwords)
+
+		# find all possible forms of all the words we used
+		# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
+		wl = locale.format('%d', len(listsofwords), grouping=True)
+		activepoll.statusis('Finding headwords for {n} sentences'.format(n=wl))
+
+		morphdict = findheadwords(allwords)
+		morphdict = convertmophdicttodict(morphdict)
+		# morphdict = {t: '·'.join(morphdict[t]) for t in morphdict}
+
+		activepoll.statusis('Building vectors for the headwords in the {n} sentences'.format(n=wl))
 		vectorspace = buildgensimmodel(so, morphdict, listsofwords)
 
 	if termone and termtwo:
@@ -351,9 +337,12 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 		mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
 		# print('mostsimilar', mostsimilar)
 		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
-		html = formatnnmatches(mostsimilar)
+		if mostsimilar:
+			html = formatnnmatches(mostsimilar)
+		else:
+			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
 
-	findshtml = '<pre>{h}</pre>'.format(h=html)
+	findshtml = '{h}'.format(h=html)
 
 	findsjs = generatevectorjs()
 
@@ -424,7 +413,7 @@ def lsibuildspace(morphdict, sentences):
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
-	bagsofwords = buildbagsofwords(morphdict, sentences)
+	bagsofwords = buildflatbagsofwords(morphdict, sentences)
 
 	lsidictionary = corpora.Dictionary(bagsofwords)
 
@@ -474,13 +463,19 @@ def findapproximatenearestneighbors(query, mymodel):
 
 	the query should be a dictionary headword
 
+	this returns a list of tuples: (word, distance)
+
 	:param query:
 	:param morphdict:
 	:param sentences:
 	:return:
 	"""
 
-	mostsimilar = mymodel.most_similar(query)
+	try:
+		mostsimilar = mymodel.most_similar(query)
+	except KeyError:
+		# keyedvectors.py: raise KeyError("word '%s' not in vocabulary" % word)
+		mostsimilar = None
 
 	return mostsimilar
 
@@ -499,7 +494,6 @@ def findword2vecsimilarities(termone, termtwo, mymodel):
 	return similarity
 
 
-
 def buildgensimmodel(searchobject, morphdict, sentences):
 	"""
 
@@ -510,7 +504,12 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
-	bagsofwords = buildbagsofwords(morphdict, sentences)
+	#
+	bagsofwords = buildflatbagsofwords(morphdict, sentences)
+
+	# print('bagsofwords')
+	# for b in bagsofwords:
+	# 	print(b)
 
 	workers = setthreadcount()
 
@@ -534,3 +533,33 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	storevectorindatabase(searchobject.searchlist, 'nn', model)
 
 	return model
+
+
+def buildbagsofwordswithalternates(morphdict, sentences):
+	"""
+
+	buildbagsofwords() in rudimentaryvectormath.py does this but flattens rather than
+	joining multiple possibilities
+
+	here we have one 'word':
+		ϲυγγενεύϲ·ϲυγγενήϲ
+
+	there we have two:
+		ϲυγγενεύϲ ϲυγγενήϲ
+
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	bagsofwords = list()
+	for s in sentences:
+		lemmatizedsentence = list()
+		for word in s:
+			try:
+				lemmatizedsentence.append('·'.join(morphdict[word]))
+			except KeyError:
+				pass
+		bagsofwords.append(lemmatizedsentence)
+
+	return bagsofwords

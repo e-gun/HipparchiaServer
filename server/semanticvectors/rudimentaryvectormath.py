@@ -7,7 +7,6 @@
 """
 
 import re
-from collections import defaultdict
 from multiprocessing import Manager, Process
 
 from server.dbsupport.dbfunctions import setthreadcount
@@ -306,11 +305,10 @@ def vectorcosineworker(headwords, workpiledict, resultdict):
 	return resultdict
 
 
-def buildbagsofwords(morphdict, sentences):
+
+def buildflatbagsofwords(morphdict, sentences):
 	"""
-
 	turn a list of sentences into a list of list of headwords
-
 	:param morphdict:
 	:param sentences:
 	:return:
@@ -330,11 +328,14 @@ def buildbagsofwords(morphdict, sentences):
 		# flatten
 		bagsofwords.append([item for sublist in lemattized for item in sublist])
 
-	prevalence = defaultdict(int)
-	for bag in bagsofwords:
-		for word in bag:
-			prevalence[word] += 1
+	# drop words that appear only once
 
-	bagsofwords = [[w for w in bag if prevalence[w] > 1] for bag in bagsofwords]
+	# prevalence = defaultdict(int)
+	# for bag in bagsofwords:
+	# 	for word in bag:
+	# 		prevalence[word] += 1
+	#
+	# bagsofwords = [[w for w in bag if prevalence[w] > 1] for bag in bagsofwords]
 
 	return bagsofwords
+
