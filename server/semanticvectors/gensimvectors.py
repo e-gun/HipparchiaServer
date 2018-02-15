@@ -138,7 +138,10 @@ def findlatentsemanticindex(activepoll, searchobject, nn=False):
 
 		if validlemma:
 			# find all sentences
-			activepoll.statusis('Finding all sentences')
+			if not vectorspace:
+				activepoll.statusis('Finding all sentences')
+			else:
+				activepoll.statusis('Finding neighbors')
 			# blanking out the search term will really return every last sentence...
 			# otherwise you only return sentences with the search term in them
 			restorelemma = lemmatadict[so.lemma.dictionaryentry]
@@ -511,11 +514,11 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 
 	workers = setthreadcount()
 
-	dimensions = 300
-	window = 10
-	trainingiterations = 12
-	minimumnumberofhits = 1
-	downsample = 0.05
+	dimensions = hipparchia.config['VECTORDIMENSIONS']
+	window = hipparchia.config['VECTORWINDOW']
+	trainingiterations = hipparchia.config['VECTORTRAININGITERATIONS']
+	minimumnumberofhits = hipparchia.config['VECTORMINIMALPRESENCE']
+	downsample = hipparchia.config['VECTORDOWNSAMPLE'] 
 
 	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
 	model = Word2Vec(bagsofwords,
@@ -524,7 +527,7 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 					iter=trainingiterations,
 					size=dimensions,
 					sample=downsample,
-					sg=1,
+					sg=1,  # the results seem terrible if you say sg=0
 					window=window,
 					workers=workers)
 

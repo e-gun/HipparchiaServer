@@ -518,6 +518,13 @@ def checkforstoredvector(uidlist, indextype, justcareaboutcommit=True):
 
 	return False if you are 'outdated'
 
+	hipparchiaDB=# select ts,versionstamp,uidlist from storedvectors;
+	        ts          | versionstamp |   uidlist
+	---------------------+--------------+--------------
+	2018-02-14 20:49:00 | 7e1c1b       | {lt0474w011}
+	2018-02-14 20:50:00 | 7e1c1b       | {lt0474w057}
+	(2 rows)
+
 	:param uidlist:
 	:return:
 	"""
@@ -535,7 +542,7 @@ def checkforstoredvector(uidlist, indextype, justcareaboutcommit=True):
 
 	q = """
 	SELECT {crit}, calculatedvectorspace 
-		FROM public.ZZZstoredvectors 
+		FROM public.storedvectors 
 		WHERE uidlist=%s AND vectortype=%s
 	"""
 	d = (uidlist, indextype)

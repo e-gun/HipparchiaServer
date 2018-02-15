@@ -651,7 +651,7 @@ def createvectorstable():
 	GRANT ALL ON TABLE public.storedvectors TO {writer};
 	"""
 
-	query = query.format(reader=hipparchia.config['DBUSER'], wirter=hipparchia.config['DBWRITEUSER'])
+	query = query.format(reader=hipparchia.config['DBUSER'], writer=hipparchia.config['DBWRITEUSER'])
 
 	cursor.execute(query)
 	cursor.close()
