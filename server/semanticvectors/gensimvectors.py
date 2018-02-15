@@ -22,6 +22,7 @@ from server.hipparchiaobjects.helperobjects import SemanticVectorCorpus
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
+from server.semanticvectors.vectorgraphing import graphmatches
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, checkforstoredvector, convertmophdicttodict, \
 	finddblinefromsentence, findwordvectorset, storevectorindatabase
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
@@ -339,6 +340,7 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
 		if mostsimilar:
 			html = formatnnmatches(mostsimilar)
+			png = graphmatches(termone, mostsimilar, vectorspace)
 		else:
 			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
 
@@ -474,8 +476,11 @@ def findapproximatenearestneighbors(query, mymodel):
 	:return:
 	"""
 
+	cap = 15
+
 	try:
-		mostsimilar = mymodel.most_similar(query)
+		mostsimilar = mymodel.most_similar(query, topn=cap)
+		mostsimilar = [s for s in mostsimilar if s[1] > hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']]
 	except KeyError:
 		# keyedvectors.py: raise KeyError("word '%s' not in vocabulary" % word)
 		mostsimilar = None
@@ -492,10 +497,7 @@ def findword2vecsimilarities(termone, termtwo, mymodel):
 	:return:
 	"""
 
-	cap = 15
-
-	similarity = mymodel.wv.similarity(termone, termtwo, topn=cap)
-	similarity = [s for s in similarity if s[0] > hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']]
+	similarity = mymodel.wv.similarity(termone, termtwo)
 
 	return similarity
 
