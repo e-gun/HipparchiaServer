@@ -11,11 +11,10 @@ import time
 from os import path
 from sys import argv
 
-from flask import redirect, render_template, request, session, url_for
+from flask import redirect, render_template, url_for
 
 from server import hipparchia
 from server.hipparchiaobjects.helperobjects import ProgressPoll
-from server.searching.searchfunctions import buildsearchobject
 from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \
 	workprovenancedict
 from server.startup import poll
@@ -129,10 +128,10 @@ def testroute():
 	activepoll.activate()
 	activepoll.statusis('executing testroute()')
 
-	from server.routes.vectorroutes import findlatentsemanticindex
-
-	so = buildsearchobject(ts, request, session)
-
-	doimportedfunction = findlatentsemanticindex(activepoll, so)
+	# from server.routes.vectorroutes import findlatentsemanticindex
+	#
+	# so = buildsearchobject(ts, request, session)
+	#
+	# doimportedfunction = findlatentsemanticindex(activepoll, so)
 
 	return redirect(url_for('frontpage'))

@@ -5,12 +5,15 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+import collections
 import locale
 import math
 import os
+import random
 import time
 
 import numpy as np
+from matplotlib import pyplot as plt
 
 try:
 	import tensorflow as tf
@@ -27,8 +30,7 @@ from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, builddatasetdict, tfgeneratetrainingbatch, \
-	tfplotwithlabels
+from server.semanticvectors.vectorhelpers import convertmophdicttodict
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, listmapper, workdict
 
@@ -262,5 +264,114 @@ def tftrainondata(sentences, activepoll):
 	lowdimembs = tsne.fit_transform(finalembeddings[:plotonly, :])
 	labels = [dataset['codesmappedtowords'][i] for i in range(plotonly)]
 	tfplotwithlabels(lowdimembs, labels, os.path.join('.', 'testplot.png'))
+
+	return
+
+
+def builddatasetdict(words, vocabularysize):
+	"""
+
+	adapted from the tensorflow tutorial
+
+	:param words:
+	:param vocabularysize:
+	:return:
+	"""
+
+	count = [['UNK', -1]]
+	count.extend(collections.Counter(words).most_common(vocabularysize - 1))
+	dictionary = dict()
+	for word, _ in count:
+		dictionary[word] = len(dictionary)
+
+	data = list()
+	unk_count = 0
+	for word in words:
+		index = dictionary.get(word, 0)
+		if index == 0:  # dictionary['UNK']
+			unk_count += 1
+		data.append(index)
+	count[0][1] = unk_count
+	reverseddictionary = dict(zip(dictionary.values(), dictionary.keys()))
+
+	dataset = dict()
+	dataset['listofcodes'] = data
+	dataset['wordsandoccurrences'] = count
+	dataset['wordsmappedtocodes'] = dictionary
+	dataset['codesmappedtowords'] = reverseddictionary
+
+	return dataset
+
+
+def tfgeneratetrainingbatch(batchsize, numberofskips, skipwindow, thedata, dataindex):
+	"""
+
+	adapted from the tensorflow tutorial
+
+	:param batchsize:
+	:param numberofskips:
+	:param skipwindow:
+	:return:
+	"""
+
+	assert batchsize % numberofskips == 0
+	assert numberofskips <= 2 * skipwindow
+	batch = np.ndarray(shape=(batchsize), dtype=np.int32)
+	labels = np.ndarray(shape=(batchsize, 1), dtype=np.int32)
+	span = 2 * skipwindow + 1  # [ skipwindow target skipwindow ]
+	buffer = collections.deque(maxlen=span)
+	if dataindex + span > len(thedata):
+		dataindex = 0
+	buffer.extend(thedata[dataindex:dataindex + span])
+	dataindex += span
+	for i in range(batchsize // numberofskips):
+		context_words = [w for w in range(span) if w != skipwindow]
+		words_to_use = random.sample(context_words, numberofskips)
+		for j, context_word in enumerate(words_to_use):
+			batch[i * numberofskips + j] = buffer[skipwindow]
+			labels[i * numberofskips + j, 0] = buffer[context_word]
+		if dataindex == len(thedata):
+			# buffer[:] = thedata[:span]
+			# TypeError: sequence index must be integer, not 'slice'
+			buffer = collections.deque(thedata[:span], maxlen=span)
+			dataindex = span
+		else:
+			buffer.append(thedata[dataindex])
+			dataindex += 1
+	# Backtrack a little bit to avoid skipping words in the end of a batch
+	dataindex = (dataindex + len(thedata) - span) % len(thedata)
+
+	trainingbatch = dict()
+	trainingbatch['batch'] = batch
+	trainingbatch['labels'] = labels
+	trainingbatch['data'] = thedata
+	trainingbatch['dataindex'] = dataindex
+
+	return trainingbatch
+
+
+def tfplotwithlabels(low_dim_embs, labels, filename):
+	"""
+
+	also lifted from the tensorflow example code
+
+	:param low_dim_embs:
+	:param labels:
+	:param filename:
+	:return:
+	"""
+	assert low_dim_embs.shape[0] >= len(labels), 'More labels than embeddings'
+	plt.figure(figsize=(18, 18))  # in inches
+	for i, label in enumerate(labels):
+		x, y = low_dim_embs[i, :]
+		plt.scatter(x, y)
+		plt.annotate(label,
+		             xy=(x, y),
+		             xytext=(5, 2),
+		             textcoords='offset points',
+		             ha='right',
+		             va='bottom')
+
+	plt.savefig(filename)
 
 	return

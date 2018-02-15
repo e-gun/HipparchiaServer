@@ -518,6 +518,10 @@ body {
     font-style: italic;
 	}
 
+.indented {
+	padding-left: 10px;
+}
+
 .infocell {
 	vertical-align: top;
 	}
@@ -704,7 +708,6 @@ keeping (for now) the non-span version of this
 	color: var(--midgrey);
 	}
 
-
 .searchsel:hover {
 	/* inactive color: #993354;
 	text-shadow: 1px 1px var(--midgrey);
@@ -787,7 +790,6 @@ keeping (for now) the non-span version of this
 	color: var(--brtblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
-
 
 .undocumentedfontshift{
     text-decoration: underline;
@@ -1291,7 +1293,6 @@ ul.roman {
 	padding-left: 25px;
 	padding-bottom: 5px;
 	}
-
 
 unclickablebibl {
     color: var(--black);

@@ -12,6 +12,7 @@ import re
 from flask import redirect, request, session, url_for
 
 from server import hipparchia
+from server.dbsupport.dbfunctions import createvectorstable
 from server.formatting.wordformatting import depunct
 from server.listsandsession.listmanagement import dropdupes, tidyuplist
 from server.listsandsession.sessionfunctions import modifysessionvar, rationalizeselections, returnactivelist, \
@@ -199,4 +200,21 @@ def clearsession():
 	"""
 
 	session.clear()
+
+	return redirect(url_for('frontpage'))
+
+
+@hipparchia.route('/resetvectors')
+def resetsemanticvectors():
+	"""
+
+	empty out the vectors table
+
+	then reload the front page
+
+	:return:
+	"""
+
+	createvectorstable()
+
 	return redirect(url_for('frontpage'))

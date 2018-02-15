@@ -17,14 +17,13 @@ from server import hipparchia
 from server.dbsupport.dbfunctions import setthreadcount
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.jsformatting import generatevectorjs
-from server.formatting.vectorformatting import formatlsimatches, formatnnmatches
+from server.formatting.vectorformatting import formatlsimatches, formatnnmatches, formatnnsimilarity
 from server.hipparchiaobjects.helperobjects import SemanticVectorCorpus
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.semanticvectors.rudimentaryvectormath import buildflatbagsofwords
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
-from server.semanticvectors.vectorhelpers import checkforstoredvector, convertmophdicttodict, finddblinefromsentence, \
-	findwordvectorset, storevectorindatabase
+from server.semanticvectors.vectorhelpers import buildflatbagsofwords, checkforstoredvector, convertmophdicttodict, \
+	finddblinefromsentence, findwordvectorset, storevectorindatabase
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, lemmatadict, listmapper, workdict
 
@@ -206,7 +205,7 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 	similis = vectorindex[vectorquerylsi]
 	# print('similis', similis)
 
-	threshold = hipparchia.config['VECTORDISTANCECUTOFF']
+	threshold = hipparchia.config['VECTORDISTANCECUTOFFLEMMAPAIR']
 
 	matches = list()
 	sims = sorted(enumerate(similis), key=lambda item: -item[1])
@@ -331,7 +330,8 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 
 	if termone and termtwo:
 		similarity = findword2vecsimilarities(termone, termtwo, vectorspace)
-		# print('similarity of {a} and {b} is {c}'.format(a=termone, b=termtwo, c=similarity))
+		similarity = formatnnsimilarity(termone, termtwo, similarity)
+		mostsimilar = ['placeholder']
 		html = similarity
 	else:
 		mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
@@ -365,7 +365,7 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 	output['found'] = findshtml
 	# ultimately the js should let you clock on any top word to find its associations...
 	output['js'] = findsjs
-	output['resultcount'] = ''
+	output['resultcount'] = '{n} items'.format(n=len(mostsimilar))
 	output['scope'] = workssearched
 	output['searchtime'] = str(searchtime)
 	output['proximate'] = ''
@@ -391,7 +391,10 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 	output['htmlsearch'] = '{all}{near}'.format(all=all, near=near)
 	output['hitmax'] = ''
 	output['onehit'] = ''
-	output['sortby'] = 'proximity'
+	if lm and pr:
+		output['sortby'] = ''
+	else:
+		output['sortby'] = 'proximity'
 	output['dmin'] = dmin
 	output['dmax'] = dmax
 	activepoll.deactivate()
@@ -489,7 +492,10 @@ def findword2vecsimilarities(termone, termtwo, mymodel):
 	:return:
 	"""
 
-	similarity = mymodel.wv.similarity(termone, termtwo)
+	cap = 15
+
+	similarity = mymodel.wv.similarity(termone, termtwo, topn=cap)
+	similarity = [s for s in similarity if s[0] > hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']]
 
 	return similarity
 
@@ -504,14 +510,14 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
+	# 'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ'
+	# the former seems less bad than the latter
+	# if might be possible to vectorize in unlemmatized form and then to search via the lemma
+	# here you would need to invoke mymodel.wv.n_similarity(self, ws1, ws2) where ws is a list of words
 	bagofwordsfunction = buildflatbagsofwords
 	# bagofwordsfunction = buildbagsofwordswithalternates
 
 	bagsofwords = bagofwordsfunction(morphdict, sentences)
-
-	# print('bagsofwords')
-	# for b in bagsofwords:
-	# 	print(b)
 
 	workers = setthreadcount()
 
@@ -535,33 +541,3 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	storevectorindatabase(searchobject.searchlist, 'nn', model)
 
 	return model
-
-
-def buildbagsofwordswithalternates(morphdict, sentences):
-	"""
-
-	buildbagsofwords() in rudimentaryvectormath.py does this but flattens rather than
-	joining multiple possibilities
-
-	here we have one 'word':
-		ϲυγγενεύϲ·ϲυγγενήϲ
-
-	there we have two:
-		ϲυγγενεύϲ ϲυγγενήϲ
-
-	:param morphdict:
-	:param sentences:
-	:return:
-	"""
-
-	bagsofwords = list()
-	for s in sentences:
-		lemmatizedsentence = list()
-		for word in s:
-			try:
-				lemmatizedsentence.append('·'.join(morphdict[word]))
-			except KeyError:
-				pass
-		bagsofwords.append(lemmatizedsentence)
-
-	return bagsofwords

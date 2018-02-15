@@ -20,7 +20,7 @@ from server.listsandsession.listmanagement import calculatewholeauthorsearches, 
 	polytonicsort
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
-from server.semanticvectors.rudimentaryvectormath import buildvectorspace, caclulatecosinevalues
+from server.semanticvectors.rudimentaryvectormath import buildrudimentaryvectorspace, caclulatecosinevalues
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
 from server.semanticvectors.vectorhelpers import convertmophdicttodict, findverctorenvirons, findwordvectorset
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
@@ -140,21 +140,6 @@ def findabsolutevectorsbysentence(activepoll, searchobject):
 		reasons = ['the vector scope max exceeded: {a} > {b} '.format(a=locale.format('%d', wordstotal, grouping=True), b=locale.format('%d', maxwords, grouping=True))]
 		return emptyvectoroutput(so, reasons)
 
-	# DEBUGGING
-	# Frogs and mice
-	# so.lemma = lemmatadict['βάτραχοϲ']
-	# searchlist = ['gr1220']
-
-	# Euripides
-	# so.lemma = lemmatadict['ἄτη']
-	# print(so.lemma.formlist)
-	# so.lemma.formlist = ['ἄτῃ', 'ἄταν', 'ἄτηϲ', 'ἄτηι']
-	# searchlist = ['gr0006']
-
-	# Vergil
-	# so.lemma = lemmatadict['flos']
-	# searchlist = ['lt0690']
-
 	if len(searchlist) > 0:
 		searchlist = flagexclusions(searchlist, so.session)
 		workssearched = len(searchlist)
@@ -235,7 +220,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 		subtractterm = so.seeking
 
 	activepoll.statusis('Building vectors')
-	vectorspace = buildvectorspace(allheadwords, morphdict, listsofwords, subtractterm=subtractterm)
+	vectorspace = buildrudimentaryvectorspace(allheadwords, morphdict, listsofwords, subtractterm=subtractterm)
 
 	# for k in vectorspace.keys():
 	# 	print(k, vectorspace[k])
@@ -251,7 +236,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	# cosinevalues = vectorcosinedispatching(focus, vectorspace, allheadwords.keys())
 
 	# apply the threshold and drop the 'None' items
-	threshold = 1.0 - hipparchia.config['VECTORDISTANCECUTOFF']
+	threshold = 1.0 - hipparchia.config['VECTORDISTANCECUTOFFLOCAL']
 	falseidentity = .02
 	cosinevalues = {c: cosinevalues[c] for c in cosinevalues if cosinevalues[c] and falseidentity < cosinevalues[c] < threshold}
 

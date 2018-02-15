@@ -142,7 +142,7 @@ def caclulatecosinevalues(focusword, vectorspace, headwords):
 	return cosinevals
 
 
-def buildvectorspace(allheadwords, morphdict, sentences, subtractterm=None):
+def buildrudimentaryvectorspace(allheadwords, morphdict, sentences, subtractterm=None):
 	"""
 
 	build a vector space of all headwords for all words in all sentences
@@ -303,39 +303,3 @@ def vectorcosineworker(headwords, workpiledict, resultdict):
 			resultdict[headword] = cv
 
 	return resultdict
-
-
-
-def buildflatbagsofwords(morphdict, sentences):
-	"""
-	turn a list of sentences into a list of list of headwords
-	:param morphdict:
-	:param sentences:
-	:return:
-	"""
-
-	bagsofwords = list()
-	for s in sentences:
-		lemattized = list()
-		for word in s:
-			try:
-				# WARNING: we are treating homonymns as if 2+ words were there instead of just one
-				# 'rectum' will give you 'rectus' and 'rego'; 'res' will give you 'reor' and 'res'
-				# this necessarily distorts the vector space
-				lemattized.append([item for item in morphdict[word]])
-			except KeyError:
-				pass
-		# flatten
-		bagsofwords.append([item for sublist in lemattized for item in sublist])
-
-	# drop words that appear only once
-
-	# prevalence = defaultdict(int)
-	# for bag in bagsofwords:
-	# 	for word in bag:
-	# 		prevalence[word] += 1
-	#
-	# bagsofwords = [[w for w in bag if prevalence[w] > 1] for bag in bagsofwords]
-
-	return bagsofwords
-

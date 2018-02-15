@@ -79,11 +79,31 @@ def formatnnmatches(listofneighbors):
 			r = re.sub(r'class="vectorrow"', 'class="nthrow"', r)
 		newrows.append(r)
 
-	rows = ['<table class="vectortable">'] + newrows + ['</table>']
+	rows = ['<table class="indented">'] + newrows + ['</table>']
 
 	thehtml = '\n'.join(rows)
 
 	return thehtml
+
+
+def formatnnsimilarity(termone, termtwo, similarityscore):
+	"""
+
+
+	:param similarityscore:
+	:return:
+	"""
+
+	template = """
+	<p class="indented">
+	the similarity of forms of <code>{a}</code>  
+	and forms of <code>{b}</code> is <code>{c}</code>.
+	</p>
+	"""
+
+	similarity = template.format(a=termone, b=termtwo, c=round(similarityscore, 3))
+
+	return similarity
 
 
 def locusformat(dblineobject):

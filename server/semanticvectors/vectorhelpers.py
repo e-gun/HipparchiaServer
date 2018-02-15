@@ -6,10 +6,8 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import collections
 import os
 import pickle
-import random
 import re
 import sys
 import time
@@ -18,16 +16,7 @@ from string import punctuation
 
 import psycopg2
 
-try:
-	import matplotlib.pyplot as plt
-except ModuleNotFoundError:
-	print('matplotlib.pyplot is not available')
-try:
-	import numpy as np
-except ImportError:
-	pass
-
-from server.dbsupport.dbfunctions import resultiterator, setconnection, createvectorstable
+from server.dbsupport.dbfunctions import createvectorstable, resultiterator, setconnection
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
 	tidyupterm
 from server.hipparchiaobjects.helperobjects import ProgressPoll
@@ -313,6 +302,70 @@ def finddblinefromsentence(thissentence, modifiedsearchobject):
 	return hits
 
 
+def buildflatbagsofwords(morphdict, sentences):
+	"""
+	turn a list of sentences into a list of list of headwords
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	bagsofwords = list()
+	for s in sentences:
+		lemattized = list()
+		for word in s:
+			try:
+				# WARNING: we are treating homonymns as if 2+ words were there instead of just one
+				# 'rectum' will give you 'rectus' and 'rego'; 'res' will give you 'reor' and 'res'
+				# this necessarily distorts the vector space
+				lemattized.append([item for item in morphdict[word]])
+			except KeyError:
+				pass
+		# flatten
+		bagsofwords.append([item for sublist in lemattized for item in sublist])
+
+	# drop words that appear only once
+
+	# prevalence = defaultdict(int)
+	# for bag in bagsofwords:
+	# 	for word in bag:
+	# 		prevalence[word] += 1
+	#
+	# bagsofwords = [[w for w in bag if prevalence[w] > 1] for bag in bagsofwords]
+
+	return bagsofwords
+
+
+def buildbagsofwordswithalternates(morphdict, sentences):
+	"""
+
+	buildbagsofwords() in rudimentaryvectormath.py does this but flattens rather than
+	joining multiple possibilities
+
+	here we have one 'word':
+		ϲυγγενεύϲ·ϲυγγενήϲ
+
+	there we have two:
+		ϲυγγενεύϲ ϲυγγενήϲ
+
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	bagsofwords = list()
+	for s in sentences:
+		lemmatizedsentence = list()
+		for word in s:
+			try:
+				lemmatizedsentence.append('·'.join(morphdict[word]))
+			except KeyError:
+				pass
+		bagsofwords.append(lemmatizedsentence)
+
+	return bagsofwords
+
+
 def mostcommonwords():
 	"""
 
@@ -365,117 +418,6 @@ def mostcommonwords():
 	return wordstoskip
 
 
-# TESTING TENSORFLOW
-
-def builddatasetdict(words, vocabularysize):
-	"""
-
-	adapted from the tensorflow tutorial
-
-	:param words:
-	:param vocabularysize:
-	:return:
-	"""
-
-	count = [['UNK', -1]]
-	count.extend(collections.Counter(words).most_common(vocabularysize - 1))
-	dictionary = dict()
-	for word, _ in count:
-		dictionary[word] = len(dictionary)
-
-	data = list()
-	unk_count = 0
-	for word in words:
-		index = dictionary.get(word, 0)
-		if index == 0:  # dictionary['UNK']
-			unk_count += 1
-		data.append(index)
-	count[0][1] = unk_count
-	reverseddictionary = dict(zip(dictionary.values(), dictionary.keys()))
-
-	dataset = dict()
-	dataset['listofcodes'] = data
-	dataset['wordsandoccurrences'] = count
-	dataset['wordsmappedtocodes'] = dictionary
-	dataset['codesmappedtowords'] = reverseddictionary
-
-	return dataset
-
-
-def tfgeneratetrainingbatch(batchsize, numberofskips, skipwindow, thedata, dataindex):
-	"""
-
-	adapted from the tensorflow tutorial
-
-	:param batchsize:
-	:param numberofskips:
-	:param skipwindow:
-	:return:
-	"""
-
-	assert batchsize % numberofskips == 0
-	assert numberofskips <= 2 * skipwindow
-	batch = np.ndarray(shape=(batchsize), dtype=np.int32)
-	labels = np.ndarray(shape=(batchsize, 1), dtype=np.int32)
-	span = 2 * skipwindow + 1  # [ skipwindow target skipwindow ]
-	buffer = collections.deque(maxlen=span)
-	if dataindex + span > len(thedata):
-		dataindex = 0
-	buffer.extend(thedata[dataindex:dataindex + span])
-	dataindex += span
-	for i in range(batchsize // numberofskips):
-		context_words = [w for w in range(span) if w != skipwindow]
-		words_to_use = random.sample(context_words, numberofskips)
-		for j, context_word in enumerate(words_to_use):
-			batch[i * numberofskips + j] = buffer[skipwindow]
-			labels[i * numberofskips + j, 0] = buffer[context_word]
-		if dataindex == len(thedata):
-			# buffer[:] = thedata[:span]
-			# TypeError: sequence index must be integer, not 'slice'
-			buffer = collections.deque(thedata[:span], maxlen=span)
-			dataindex = span
-		else:
-			buffer.append(thedata[dataindex])
-			dataindex += 1
-	# Backtrack a little bit to avoid skipping words in the end of a batch
-	dataindex = (dataindex + len(thedata) - span) % len(thedata)
-
-	trainingbatch = dict()
-	trainingbatch['batch'] = batch
-	trainingbatch['labels'] = labels
-	trainingbatch['data'] = thedata
-	trainingbatch['dataindex'] = dataindex
-
-	return trainingbatch
-
-
-def tfplotwithlabels(low_dim_embs, labels, filename):
-	"""
-
-	also lifted from the tensorflow example code
-
-	:param low_dim_embs:
-	:param labels:
-	:param filename:
-	:return:
-	"""
-	assert low_dim_embs.shape[0] >= len(labels), 'More labels than embeddings'
-	plt.figure(figsize=(18, 18))  # in inches
-	for i, label in enumerate(labels):
-		x, y = low_dim_embs[i, :]
-		plt.scatter(x, y)
-		plt.annotate(label,
-		             xy=(x, y),
-		             xytext=(5, 2),
-		             textcoords='offset points',
-		             ha='right',
-		             va='bottom')
-
-	plt.savefig(filename)
-
-	return
-
-
 def storevectorindatabase(uidlist, vectortype, vectorspace):
 	"""
 
@@ -507,6 +449,8 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 
 	d = (ts, versionstamp, uidlist, vectortype, pickledvectors)
 	cursor.execute(q, d)
+
+	print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))
 
 	return
 
@@ -565,7 +509,7 @@ def checkforstoredvector(uidlist, indextype, justcareaboutcommit=True):
 		t = os.path.getmtime(thefile)
 		outdated = (t > result[0])
 
-	print('checkforstoredvector()', uidlist, result[0], 'outdated=', outdated)
+	# print('checkforstoredvector()', uidlist, result[0], 'outdated=', outdated)
 
 	if outdated:
 		returnval = False
