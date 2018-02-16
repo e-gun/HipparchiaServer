@@ -614,6 +614,7 @@ def probefordatabases():
 
 	return available
 
+
 def createvectorstable():
 	"""
 
@@ -649,6 +650,49 @@ def createvectorstable():
 	GRANT SELECT ON TABLE public.storedvectors TO {reader};
 	
 	GRANT ALL ON TABLE public.storedvectors TO {writer};
+	"""
+
+	query = query.format(reader=hipparchia.config['DBUSER'], writer=hipparchia.config['DBWRITEUSER'])
+
+	cursor.execute(query)
+	cursor.close()
+	del dbconnection
+
+	return
+
+
+def createstoredimagestable():
+	"""
+
+	zap and reconstitute the storedimages table
+
+	:return:
+	"""
+
+	print('resetting the storedimages table')
+
+	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	cursor = dbconnection.cursor()
+
+	query = """
+	DROP TABLE IF EXISTS public.storedvectorimages;
+	
+	CREATE TABLE public.storedvectorimages
+	(
+		imagename character varying(12),
+	    imagedata bytea
+	)
+	WITH (
+	    OIDS = FALSE
+	)
+	TABLESPACE pg_default;
+	
+	ALTER TABLE public.storedvectorimages
+	    OWNER to hippa_wr;
+	
+	GRANT SELECT ON TABLE public.storedvectorimages TO {reader};
+	
+	GRANT ALL ON TABLE public.storedvectorimages TO {writer};
 	"""
 
 	query = query.format(reader=hipparchia.config['DBUSER'], writer=hipparchia.config['DBWRITEUSER'])

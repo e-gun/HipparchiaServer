@@ -22,7 +22,7 @@ from server.hipparchiaobjects.helperobjects import SemanticVectorCorpus
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
-from server.semanticvectors.vectorgraphing import graphmatches
+from server.semanticvectors.vectorgraphing import graphnnmatches
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, checkforstoredvector, convertmophdicttodict, \
 	finddblinefromsentence, findwordvectorset, storevectorindatabase
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
@@ -306,6 +306,7 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 
 	so = searchobject
 	dmin, dmax = bcedating(so.session)
+	imagename = ''
 
 	termone = so.lemma.dictionaryentry
 	try:
@@ -336,11 +337,10 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 		html = similarity
 	else:
 		mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
-		# print('mostsimilar', mostsimilar)
 		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
 		if mostsimilar:
 			html = formatnnmatches(mostsimilar)
-			png = graphmatches(termone, mostsimilar, vectorspace)
+			imagename = graphnnmatches(termone, mostsimilar, vectorspace)
 		else:
 			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
 
@@ -402,6 +402,7 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 		output['sortby'] = 'proximity'
 	output['dmin'] = dmin
 	output['dmax'] = dmax
+	output['image'] = imagename
 	activepoll.deactivate()
 
 	output = json.dumps(output)

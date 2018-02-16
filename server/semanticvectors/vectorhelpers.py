@@ -450,7 +450,7 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 	d = (ts, versionstamp, uidlist, vectortype, pickledvectors)
 	cursor.execute(q, d)
 
-	print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))
+	# print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))
 
 	return
 

@@ -866,6 +866,13 @@ keeping (for now) the non-span version of this
 	right: 10px;
 	}
 
+#imagearea {
+	text-align: center;
+	padding: 10px;
+	margin: auto;
+	width: 100%;
+}
+
 #languageradio, #modeeradio {
 	text-align: center;
 	margin: auto;

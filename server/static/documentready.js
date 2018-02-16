@@ -116,6 +116,7 @@ $(document).ready( function () {
         //		output['sortby'] = session['sortorder']
         //		output['dmin'] = dmin
         //		output['dmax'] = dmax
+        //      output['image'] = imagenameindatabase
 
         document.title = output['title'];
 
@@ -133,6 +134,25 @@ $(document).ready( function () {
         if (output['onehit'] === 'yes') { summaryhtml += '<br />Only allowing one match per item searched (either a whole author or a specified work)'; }
         summaryhtml += '<br />Sorted by '+output['sortby'];
         if (output['hitmax'] === 'true') { summaryhtml += '<br />[Search suspended: result cap reached.]';}
+
+        var imagetarget = $('#imagearea');
+        if (typeof output['image'] !== 'undefined' && output['image'] !== '') {
+            imagetarget.prepend('[testing] img id="insertedfigure" src="/getstoredfigure/' + output['image'] + '">');
+            var w = window.innerWidth * .9;
+            var h = window.innerHeight * .9;
+            imagetarget.empty();
+            //imagetarget.prepend('<img id="insertedfigure" src="/getstoredfigure/' + output['image'] + '">');
+            // $('insertedfigure').width(w);
+            //$('insertedfigure').height(h);
+            jQuery('<img/>').prependTo(imagetarget).attr({
+                src: '/getstoredfigure/' + output['image'],
+                alt: '[vector graph]',
+                id: 'insertedfigure',
+                height: h
+            });
+        } else {
+            imagetarget.empty();
+        }
 
         $('#searchsummary').html(summaryhtml);
 
@@ -158,7 +178,7 @@ $(document).ready( function () {
     $('#wordisnear').click( function(){ setoptions('nearornot', 'T'); });
     $('#wordisnotnear').click( function(){ setoptions('nearornot', 'F'); });
 
-    $( '#proximityspinner' ).spinner({
+    $('#proximityspinner').spinner({
         min: 1,
         value: 1,
         step: 1,

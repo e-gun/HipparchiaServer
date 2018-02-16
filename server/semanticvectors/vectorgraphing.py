@@ -6,11 +6,17 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import random
+from io import BytesIO
+
 import matplotlib.pyplot as plt
 import networkx as nx
+import psycopg2
+
+from server.dbsupport.dbfunctions import createstoredimagestable, setconnection
 
 
-def graphmatches(searchterm, mostsimilartuples, vectorspace):
+def graphnnmatches(searchterm, mostsimilartuples, vectorspace):
 	"""
 
 	tuples come in a list and look like:
@@ -47,31 +53,109 @@ def graphmatches(searchterm, mostsimilartuples, vectorspace):
 
 	edgelist = list()
 	for t in mostsimilartuples:
-		edgelist.append((searchterm, t[0], round(t[1]*10, 3)))
+		edgelist.append((searchterm, t[0], round(t[1]*10, 2)))
 
 	for r in relevantconnections:
 		for c in relevantconnections[r]:
-			edgelist.append((r, c[0], round(c[1]*10, 3)))
+			edgelist.append((r, c[0], round(c[1]*10, 2)))
 
 	graph.add_weighted_edges_from(edgelist)
 	edgelabels = {(u, v): d['weight'] for u, v, d in graph.edges(data=True)}
 
 	pos = nx.fruchterman_reingold_layout(graph)
 
+	# colors: https://matplotlib.org/examples/color/colormaps_reference.html
+
 	# nodes
-	# https://matplotlib.org/examples/color/colormaps_reference.html
 	nx.draw_networkx_nodes(graph, pos, node_size=6000, node_color=range(len(terms)), cmap='Pastel1')
 	nx.draw_networkx_labels(graph, pos, font_size=20, font_family='sans-serif', font_color='Black')
 
 	# edges
-	nx.draw_networkx_edges(graph, pos, width=4, alpha=0.5, edge_color='black')
+	nx.draw_networkx_edges(graph, pos, width=4, alpha=0.8, edge_color='Black')
 	nx.draw_networkx_edge_labels(graph, pos, edgelabels, font_size=12, label_pos=0.3)
 
 	plt.axis('off')
-	plt.savefig('matchesgraph.png')
+	# plt.savefig('matchesgraph.png')
+	graphobject = BytesIO()
+	plt.savefig(graphobject)
 	plt.clf()
 
-	return
+	# getvalue(): Return bytes containing the entire contents of the buffer
+	# everybody from here on out want bytes and not '_io.BytesIO'
+	graphobject = graphobject.getvalue()
+
+	imagename = storevectorgraph(graphobject)
+
+	return imagename
 
 
+def storevectorgraph(figureasbytes):
+	"""
+
+
+	:param figureasbytes:
+	:return:
+	"""
+
+	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	cursor = dbconnection.cursor()
+
+	randomid = ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(12)])
+
+	q = """
+	INSERT INTO public.storedvectorimages 
+		(imagename, imagedata)
+		VALUES (%s, %s)
+	"""
+
+	d = (randomid, figureasbytes)
+	try:
+		cursor.execute(q, d)
+	except psycopg2.ProgrammingError:
+		# psycopg2.ProgrammingError: relation "public.storedvectorimages" does not exist
+		createstoredimagestable()
+		cursor.execute(q, d)
+
+	# print('stored {n} in vector image table'.format(n=randomid))
+
+	dbconnection.commit()
+	cursor.close()
+	del dbconnection
+
+	return randomid
+
+
+def fetchvectorgraph(imagename):
+	"""
+
+	:param imagename:
+	:return:
+	"""
+
+	dbconnection = setconnection('autocommit')
+	cursor = dbconnection.cursor()
+
+	q = 'SELECT imagedata FROM public.storedvectorimages WHERE imagename=%s'
+	d = (imagename,)
+
+	cursor.execute(q, d)
+
+	imagedata = cursor.fetchone()
+	# need to convert to bytes, otherwise:
+	# AttributeError: 'memoryview' object has no attribute 'read'
+	imagedata = bytes(imagedata[0])
+
+	# print('fetched {n} from vector image table'.format(n=randomid))
+
+	# now we should delete the image because we are done with it
+
+	q = 'DELETE FROM public.storedvectorimages WHERE imagename=%s'
+	d = (imagename,)
+	cursor.execute(q, d)
+
+	dbconnection.commit()
+	cursor.close()
+	del dbconnection
+
+	return imagedata
 

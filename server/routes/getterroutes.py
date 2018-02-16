@@ -8,7 +8,7 @@
 
 import json
 
-from flask import redirect, request, session, url_for
+from flask import make_response, redirect, request, session, url_for
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
@@ -18,6 +18,7 @@ from server.formatting.bibliographicformatting import formatauthinfo, formatauth
 from server.formatting.wordformatting import depunct
 from server.listsandsession.listmanagement import compilesearchlist, sortsearchlist
 from server.listsandsession.sessionfunctions import modifysessionselections, modifysessionvar, parsejscookie
+from server.semanticvectors.vectorgraphing import fetchvectorgraph
 from server.startup import authordict, authorgenresdict, authorlocationdict, listmapper, workdict, workgenresdict, \
 	workprovenancedict
 
@@ -218,6 +219,8 @@ def getauthinfo(authorid):
 	authinfo = json.dumps('\n'.join(authinfo))
 
 	cur.close()
+	dbc.close()
+	del dbc
 
 	return authinfo
 
@@ -309,3 +312,24 @@ def getgenrelistcontents():
 	genres = json.dumps(genres)
 
 	return genres
+
+
+@hipparchia.route('/getstoredfigure/<figurename>')
+def fetchstoredimage(figurename):
+	"""
+
+	smeantic vector graphs are stored in the DB after generation
+
+	now we fetch them for display in the page
+
+	:param figurename:
+	:return:
+	"""
+
+	graph = fetchvectorgraph(figurename)
+
+	response = make_response(graph)
+	response.headers.set('Content-Type', 'image/png')
+	response.headers.set('Content-Disposition', 'attachment', filename='graph.png')
+
+	return response

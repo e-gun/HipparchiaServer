@@ -12,7 +12,7 @@ import re
 from flask import redirect, request, session, url_for
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import createvectorstable
+from server.dbsupport.dbfunctions import createstoredimagestable, createvectorstable
 from server.formatting.wordformatting import depunct
 from server.listsandsession.listmanagement import dropdupes, tidyuplist
 from server.listsandsession.sessionfunctions import modifysessionvar, rationalizeselections, returnactivelist, \
@@ -216,5 +216,21 @@ def resetsemanticvectors():
 	"""
 
 	createvectorstable()
+
+	return redirect(url_for('frontpage'))
+
+
+@hipparchia.route('/resetvectorimages')
+def resetsemanticvectors():
+	"""
+
+	empty out the vector images table
+
+	then reload the front page
+
+	:return:
+	"""
+
+	createstoredimagestable()
 
 	return redirect(url_for('frontpage'))
