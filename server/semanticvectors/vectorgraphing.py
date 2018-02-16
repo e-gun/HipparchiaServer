@@ -22,6 +22,8 @@ def graphmatches(searchterm, mostsimilartuples, vectorspace):
 	:return:
 	"""
 
+	plt.figure(figsize=(18, 18))
+
 	terms = [searchterm] + [t[0] for t in mostsimilartuples]
 
 	graph = nx.Graph()
@@ -43,24 +45,31 @@ def graphmatches(searchterm, mostsimilartuples, vectorspace):
 	for r in relevantconnections:
 		graph.add_node(r)
 
+	edgelist = list()
 	for t in mostsimilartuples:
-		graph.add_edge(searchterm, t[0], weight=round(t[1], 3))
-		# graph[searchterm][t[0]]['weight'] = t[1]
+		edgelist.append((searchterm, t[0], round(t[1]*10, 3)))
 
 	for r in relevantconnections:
 		for c in relevantconnections[r]:
-			graph.add_edge(r, c[0], weight=round(c[1], 3))
-			# graph[r][c[0]]['weight'] = c[1]
+			edgelist.append((r, c[0], round(c[1]*10, 3)))
 
-	edgelabels = dict([((u, v,), d['weight']) for u, v, d in graph.edges(data=True)])
+	graph.add_weighted_edges_from(edgelist)
+	edgelabels = {(u, v): d['weight'] for u, v, d in graph.edges(data=True)}
 
 	pos = nx.fruchterman_reingold_layout(graph)
-	nx.draw(graph, with_labels=True)
-	nx.draw_networkx_edge_labels(graph, pos, font_size=9, edge_labels=edgelabels)
 
-	plt.savefig("matchesgraph.png")
+	# nodes
+	# https://matplotlib.org/examples/color/colormaps_reference.html
+	nx.draw_networkx_nodes(graph, pos, node_size=6000, node_color=range(len(terms)), cmap='Pastel1')
+	nx.draw_networkx_labels(graph, pos, font_size=20, font_family='sans-serif', font_color='Black')
 
-	del graph
+	# edges
+	nx.draw_networkx_edges(graph, pos, width=4, alpha=0.5, edge_color='black')
+	nx.draw_networkx_edge_labels(graph, pos, edgelabels, font_size=12, label_pos=0.3)
+
+	plt.axis('off')
+	plt.savefig('matchesgraph.png')
+	plt.clf()
 
 	return
 
