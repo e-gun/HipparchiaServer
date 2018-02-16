@@ -409,7 +409,7 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 	# ultimately the js should let you clock on any top word to find its associations...
 	output['js'] = findsjs
 	try:
-		output['resultcount'] = '{n} items'.format(n=len(mostsimilar))
+		output['resultcount'] = '{n} proximate terms'.format(n=len(mostsimilar))
 	except TypeError:
 		output['resultcount'] = ''
 	output['scope'] = workssearched

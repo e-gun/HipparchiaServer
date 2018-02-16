@@ -75,10 +75,10 @@ def generatevectorjs(path):
 		$('lemmaheadword').click( function(e) { 
 		var searchid = Date.now();
 		var url = '/REGEXREPLACE/'+searchid+'?lem='+this.id;
+		$('#imagearea').empty();
 		$('#searchsummary').html(''); 
 		$('#displayresults').html('');
 		$('#wordsearchform').hide();
-		$('#imagearea').empty();
 		// $.getJSON( {url: '/setsessionvariable?cosdistbylineorword=no', async: false, success: function (resultdata) { } });
 		// $.getJSON( {url: '/setsessionvariable?cosdistbysentence=yes', async: false, success: function (resultdata) { } });
 		$('#cosdistbysentence').prop('checked', true);
@@ -114,6 +114,10 @@ def generatevectorjs(path):
 				if (output['hitmax'] == 'true') { 
 					summaryhtml += '<br />[Search suspended: result cap reached.]';
 					}
+									
+				$('#searchsummary').html(summaryhtml);
+				
+				$('#displayresults').html(output['found']);
 				
 				var imagetarget = $('#imagearea');
 				if (typeof output['image'] !== 'undefined' && output['image'] !== '') {
@@ -124,10 +128,6 @@ def generatevectorjs(path):
 						height: h
 					});
 				}
-					
-				$('#searchsummary').html(summaryhtml);
-				
-				$('#displayresults').html(output['found']);
 				
 				var browserclickscript = document.createElement("script");
 				browserclickscript.innerHTML = output['js'];

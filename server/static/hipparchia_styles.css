@@ -334,7 +334,6 @@ body {
     font-weight: normal;
     }
 
-
 .editorialmarker_squarebrackets {
     color: var(--huedgrey);
     }
@@ -620,7 +619,6 @@ keeping (for now) the non-span version of this
 	font-size: 85%;
 	color: var(--huedgrey);
 	}
-
 
 .match, .proximate {
 	color: var(--red);
@@ -961,7 +959,7 @@ keeping (for now) the non-span version of this
 	}
 
 #vectortable {
-	width: 50%;
+	padding: 10px;
 	margin: auto;
 }
 

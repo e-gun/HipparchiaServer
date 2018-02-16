@@ -62,6 +62,14 @@ def formatnnmatches(listofneighbors):
 	:return:
 	"""
 
+	firstrowtemplate = """
+	<tr class="vectorrow">
+		<td class="vectorscore">{s}</td>
+		<td class="vectorword"><lemmaheadword id="{w}">{w}</lemmaheadword></td>
+		<td class="imageholder" rowspan="{n}"><p id="imagearea"></p></td>
+	</tr>
+	"""
+
 	rowtemplate = """
 	<tr class="vectorrow">
 		<td class="vectorscore">{s}</td>
@@ -69,7 +77,9 @@ def formatnnmatches(listofneighbors):
 	</tr>
 	"""
 
-	rows = [rowtemplate.format(s=round(n[1], 3), w=n[0]) for n in listofneighbors]
+	firstrow = firstrowtemplate.format(s=round(listofneighbors[0][1], 3), w=listofneighbors[0][0], n=len(listofneighbors))
+
+	rows = [firstrow] + [rowtemplate.format(s=round(n[1], 3), w=n[0]) for n in listofneighbors[1:]]
 
 	newrows = list()
 	count = 0

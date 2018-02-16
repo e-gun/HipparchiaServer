@@ -136,6 +136,20 @@ $(document).ready( function () {
         summaryhtml += '<br />Sorted by '+output['sortby'];
         if (output['hitmax'] === 'true') { summaryhtml += '<br />[Search suspended: result cap reached.]';}
 
+        $('#searchsummary').html(summaryhtml);
+
+        //
+        // THE FINDS: each find should come as a lump of HTML formated by htmlifysearchfinds()
+        //
+
+        $('#displayresults').html(output['found']);
+
+
+        //
+        // THE GRAPH: if there is one... Note that if it is embedded in the output table, then
+        // that table has to be created and  $('#imagearea') with it before you do any of the following
+        //
+
         var imagetarget = $('#imagearea');
         if (typeof output['image'] !== 'undefined' && output['image'] !== '') {
             var w = window.innerWidth * .9;
@@ -147,14 +161,6 @@ $(document).ready( function () {
                 height: h
             });
         }
-
-        $('#searchsummary').html(summaryhtml);
-
-        //
-        // THE FINDS: each find should come as a lump of HTML formated by htmlifysearchfinds()
-        //
-
-        $('#displayresults').html(output['found']);
 
         //
         // JS UPDATE

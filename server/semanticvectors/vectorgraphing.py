@@ -91,7 +91,7 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchlist):
 
 	# edges
 	nx.draw_networkx_edges(graph, pos, width=3, alpha=0.8, edge_color='Black')
-	nx.draw_networkx_edge_labels(graph, pos, edgelabels, font_size=10, alpha=0.8, label_pos=0.5)
+	nx.draw_networkx_edge_labels(graph, pos, edgelabels, font_size=12, alpha=0.8, label_pos=0.5, font_family='sans-serif')
 
 	plt.axis('off')
 	# plt.savefig('matchesgraph.png')
