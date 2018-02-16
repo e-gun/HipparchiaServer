@@ -88,6 +88,9 @@ def caclulatecosinevalues(focusword, vectorspace, headwords):
 	||α|| = sqrt(α · α)
 	α = sum([a1, a2, ... ai])
 
+	returns a dict:
+		{'facultas': 0.7418011102528389, 'frater': 0.7418011102528389, 'superus': 0.6535898384862247, ...}
+
 	:param focusword:
 	:param vectorspace:
 	:param headwords:

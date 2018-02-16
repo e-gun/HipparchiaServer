@@ -17,6 +17,29 @@ from server.dbsupport.dbfunctions import createstoredimagestable, setconnection
 from server.startup import authordict, workdict
 
 
+def graphbliteraldistancematches(searchterm, mostsimilartuples, vectorspace, searchlist):
+	"""
+
+
+	:param searchterm:
+	:param mostsimilartuples:
+	:param vectorspace:
+	:param searchlist:
+	:return:
+	"""
+
+	terms = [searchterm] + [t[0] for t in mostsimilartuples]
+
+	# interrelationships = {t: caclulatecosinevalues(t, vectorspace, terms) for t in terms}
+
+	relevantconnections = dict()
+
+	title = givetitletograph('Words most concretely connected with', searchterm, searchlist)
+	imagename = graphmatches(title, searchterm, mostsimilartuples, searchlist, terms, relevantconnections)
+
+	return imagename
+
+
 def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchlist):
 	"""
 
@@ -29,39 +52,43 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchlist):
 	:return:
 	"""
 
-	# print('searchterm, mostsimilartuples, vectorspace, searchlist', searchterm, mostsimilartuples, vectorspace, searchlist)
-
-	plt.figure(figsize=(18, 18))
-
-	if len(searchlist) > 1:
-		wasitalllatin = [x for x in searchlist if x[:2] == 'lt' and len(x) == 6]
-		if len(wasitalllatin) == 362:
-			source = 'all Latin authors'
-		else:
-			source = 'multiple authors and/or works'
-	else:
-		searched = searchlist[0]
-		if searched[:10] == searched[:6]:
-			source = '{au}'.format(au=authordict[searched[:6]].shortname)
-		else:
-			source = '{au}, {wk}'.format(au=authordict[searched[:6]].shortname, wk=workdict[searched[:10]].title)
-
-	plt.title('Conceptual neighborhood of »{t}«\nin {s}'.format(t=searchterm, s=source), fontsize=20)
-
 	terms = [searchterm] + [t[0] for t in mostsimilartuples]
-
-	graph = nx.Graph()
 
 	interrelationships = {t: vectorspace.most_similar(t) for t in terms}
 
 	relevantconnections = dict()
 	for i in interrelationships:
 		relevantconnections[i] = [sim for sim in interrelationships[i] if sim[0] in terms]
-	del interrelationships
 
-	# print('relevantconnections')
-	# for r in relevantconnections:
-	# 	print(r, relevantconnections[r])
+	title = givetitletograph('Conceptual neighborhood of', searchterm, searchlist)
+
+	imagename = graphmatches(title, searchterm, mostsimilartuples, searchlist, terms, relevantconnections)
+
+	return imagename
+
+
+def graphmatches(graphtitle, searchterm, mostsimilartuples, searchlist, terms, relevantconnections):
+	"""
+
+	mostsimilartuples come in a list and look like:
+		[('ὁμολογέω', 0.8400295972824097), ('θέα', 0.8328431844711304), ('θεά', 0.8282027244567871), ...]
+
+	relevantconnections is a dict each of whose keyed entreis unpacks into a mostsimilartuples-like list
+
+	:param searchterm:
+	:param mostsimilartuples:
+	:param vectorspace:
+	:param searchlist:
+	:return:
+	"""
+
+	# print('searchterm, mostsimilartuples, vectorspace, searchlist', searchterm, mostsimilartuples, vectorspace, searchlist)
+
+	plt.figure(figsize=(18, 18))
+
+	plt.title(graphtitle, fontsize=24)
+
+	graph = nx.Graph()
 
 	for t in terms:
 		graph.add_node(t)
@@ -178,3 +205,27 @@ def fetchvectorgraph(imagename):
 
 	return imagedata
 
+
+def givetitletograph(topic, searchterm, searchlist):
+	"""
+
+	generate a title for the graph
+
+	:return:
+	"""
+	if len(searchlist) > 1:
+		wasitalllatin = [x for x in searchlist if x[:2] == 'lt' and len(x) == 6]
+		if len(wasitalllatin) == 362:
+			source = 'all Latin authors'
+		else:
+			source = 'multiple authors and/or works'
+	else:
+		searched = searchlist[0]
+		if searched[:10] == searched[:6]:
+			source = '{au}'.format(au=authordict[searched[:6]].shortname)
+		else:
+			source = '{au}, {wk}'.format(au=authordict[searched[:6]].shortname, wk=workdict[searched[:10]].title)
+
+	title = '{t} »{w}«\nin {s}'.format(t=topic, w=searchterm, s=source)
+
+	return title

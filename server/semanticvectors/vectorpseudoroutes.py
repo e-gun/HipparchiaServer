@@ -15,13 +15,14 @@ from flask import request, session
 from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.jsformatting import generatevectorjs
+from server.formatting.vectorformatting import formatnnmatches
 from server.hipparchiaobjects.helperobjects import ProgressPoll
-from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
-	polytonicsort
+from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
 from server.semanticvectors.rudimentaryvectormath import buildrudimentaryvectorspace, caclulatecosinevalues
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
+from server.semanticvectors.vectorgraphing import graphbliteraldistancematches
 from server.semanticvectors.vectorhelpers import convertmophdicttodict, findverctorenvirons, findwordvectorset
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
@@ -239,46 +240,14 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	# apply the threshold and drop the 'None' items
 	threshold = 1.0 - hipparchia.config['VECTORDISTANCECUTOFFLOCAL']
 	falseidentity = .02
-	cosinevalues = {c: cosinevalues[c] for c in cosinevalues if cosinevalues[c] and falseidentity < cosinevalues[c] < threshold}
-
-	# now we have the relationship of everybody to our lemmatized word
-
-	# print('CORE COSINE VALUES')
-	# for v in polytonicsort(cosinevalues):
-	# 	print(v, cosinevalues[v])
-	ccv = [(cosinevalues[v], v) for v in cosinevalues]
-	ccv = sorted(ccv, key=lambda t: t[0])
-	ccv = ['\t{a}\t<lemmaheadword id="{b}">{b}</lemmaheadword>'.format(a=round(c[0], 3), b=c[1]) for c in ccv]
-	ccv = '\n'.join(ccv)
+	cosinevalues = {c: 1 - cosinevalues[c] for c in cosinevalues if cosinevalues[c] and falseidentity < cosinevalues[c] < threshold}
+	mostsimilar = [(c, cosinevalues[c]) for c in cosinevalues]
+	mostsimilar = sorted(mostsimilar, key=lambda t: t[1], reverse=True)
+	findshtml = formatnnmatches(mostsimilar)
 
 	# next we look for the interrelationships of the words that are above the threshold
 	activepoll.statusis('Calculating metacosine distances')
-	metacosinevals = dict()
-	metacosinevals[focus] = cosinevalues
-	for v in cosinevalues:
-		metac = caclulatecosinevalues(v, vectorspace, cosinevalues.keys())
-		# metac = vectorcosinedispatching(v, vectorspace, cosinevalues.keys())
-		metac = {c: metac[c] for c in metac if metac[c] and falseidentity < metac[c] < threshold}
-		metacosinevals[v] = metac
-
-	mcv = list(['\nrelationships of these terms to one another\n'])
-	for headword in polytonicsort(metacosinevals.keys()):
-		# print(headword)
-		# for word in metacosinevals[headword]:
-		# 	print('\t', word, metacosinevals[headword][word])
-		if headword != focus:
-			insetvals = [(metacosinevals[headword][word], word) for word in metacosinevals[headword]]
-			insetvals = sorted(insetvals, key=lambda t: t[0])
-			insetvals = ['\t{a}\t<lemmaheadword id="{b}">{b}</lemmaheadword>'.format(a=round(c[0], 3), b=c[1]) for c in insetvals]
-			if insetvals:
-				mcv.append('<lemmaheadword id="{h}">{h}</lemmaheadword>'.format(h=headword))
-			mcv += insetvals
-	if len(mcv) > 1:
-		mcv = '\n'.join(mcv)
-	else:
-		mcv = ''
-
-	findshtml = '<pre>{ccv}</pre>\n\n<pre>{mcv}</pre>'.format(ccv=ccv, mcv=mcv)
+	imagename = graphbliteraldistancematches(focus, mostsimilar, vectorspace, so.searchlist)
 
 	findsjs = generatevectorjs('findvectors')
 
@@ -306,6 +275,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	output['sortby'] = 'distance with a cutoff of {c}'.format(c=1 - hipparchia.config['VECTORDISTANCECUTOFFLOCAL'])
 	output['dmin'] = dmin
 	output['dmax'] = dmax
+	output['image'] = imagename
 	activepoll.deactivate()
 
 	output = json.dumps(output)
