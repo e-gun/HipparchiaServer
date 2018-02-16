@@ -132,7 +132,7 @@ def fetchvectorgraph(imagename):
 	:return:
 	"""
 
-	dbconnection = setconnection('autocommit')
+	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
 
 	q = 'SELECT imagedata FROM public.storedvectorimages WHERE imagename=%s'

@@ -9,10 +9,9 @@
 import json
 import re
 
-from flask import redirect, request, session, url_for
+from flask import request, session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import createstoredimagestable, createvectorstable
 from server.formatting.wordformatting import depunct
 from server.listsandsession.listmanagement import dropdupes, tidyuplist
 from server.listsandsession.sessionfunctions import modifysessionvar, rationalizeselections, returnactivelist, \
@@ -189,48 +188,3 @@ def getcurrentselections():
 	htmlbundles = json.dumps(htmlbundles)
 
 	return htmlbundles
-
-
-@hipparchia.route('/resetsession')
-def clearsession():
-	"""
-	clear the session
-	this will reset all settings and reload the front page
-	:return:
-	"""
-
-	session.clear()
-
-	return redirect(url_for('frontpage'))
-
-
-@hipparchia.route('/resetvectors')
-def resetsemanticvectors():
-	"""
-
-	empty out the vectors table
-
-	then reload the front page
-
-	:return:
-	"""
-
-	createvectorstable()
-
-	return redirect(url_for('frontpage'))
-
-
-@hipparchia.route('/resetvectorimages')
-def resetsemanticvectors():
-	"""
-
-	empty out the vector images table
-
-	then reload the front page
-
-	:return:
-	"""
-
-	createstoredimagestable()
-
-	return redirect(url_for('frontpage'))

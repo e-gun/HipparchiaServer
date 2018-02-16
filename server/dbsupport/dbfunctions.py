@@ -623,7 +623,7 @@ def createvectorstable():
 	:return:
 	"""
 
-	print('resetting the storedvectors table')
+	print('resetting the stored vectors table')
 
 	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
@@ -669,7 +669,7 @@ def createstoredimagestable():
 	:return:
 	"""
 
-	print('resetting the storedimages table')
+	print('resetting the stored images table')
 
 	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
