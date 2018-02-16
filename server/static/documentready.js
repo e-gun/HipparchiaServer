@@ -59,6 +59,7 @@ $(document).ready( function () {
         });
 
     $('#executesearch').click( function(){
+        $('#imagearea').empty();
         $('#searchsummary').html('');
         $('#displayresults').html('');
 
@@ -137,10 +138,8 @@ $(document).ready( function () {
 
         var imagetarget = $('#imagearea');
         if (typeof output['image'] !== 'undefined' && output['image'] !== '') {
-            imagetarget.prepend('[testing] img id="insertedfigure" src="/getstoredfigure/' + output['image'] + '">');
             var w = window.innerWidth * .9;
             var h = window.innerHeight * .9;
-            imagetarget.empty();
             //imagetarget.prepend('<img id="insertedfigure" src="/getstoredfigure/' + output['image'] + '">');
             // $('insertedfigure').width(w);
             //$('insertedfigure').height(h);
@@ -150,8 +149,6 @@ $(document).ready( function () {
                 id: 'insertedfigure',
                 height: h
             });
-        } else {
-            imagetarget.empty();
         }
 
         $('#searchsummary').html(summaryhtml);
