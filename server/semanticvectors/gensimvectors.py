@@ -340,7 +340,7 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
 		if mostsimilar:
 			html = formatnnmatches(mostsimilar)
-			imagename = graphnnmatches(termone, mostsimilar, vectorspace)
+			imagename = graphnnmatches(termone, mostsimilar, vectorspace, so.searchlist)
 		else:
 			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
 

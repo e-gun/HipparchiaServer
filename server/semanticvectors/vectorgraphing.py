@@ -14,9 +14,10 @@ import networkx as nx
 import psycopg2
 
 from server.dbsupport.dbfunctions import createstoredimagestable, setconnection
+from server.startup import authordict, workdict
 
 
-def graphnnmatches(searchterm, mostsimilartuples, vectorspace):
+def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchlist):
 	"""
 
 	tuples come in a list and look like:
@@ -29,6 +30,17 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace):
 	"""
 
 	plt.figure(figsize=(18, 18))
+
+	if len(searchlist) > 1:
+		source = 'multiple works'
+	else:
+		searched = searchlist[0]
+		if searched[:10] == searched[:6]:
+			source = '{au}'.format(au=authordict[searched[:6]].shortname)
+		else:
+			source = '{au}, {wk}'.format(au=authordict[searched[:6]].shortname, wk=workdict[searched[:10]].title)
+
+	plt.title('Conceptual neighborhood of »{t}«\nin {s}'.format(t=searchterm, s=source), fontsize=20)
 
 	terms = [searchterm] + [t[0] for t in mostsimilartuples]
 
@@ -71,8 +83,8 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace):
 	nx.draw_networkx_labels(graph, pos, font_size=20, font_family='sans-serif', font_color='Black')
 
 	# edges
-	nx.draw_networkx_edges(graph, pos, width=4, alpha=0.8, edge_color='Black')
-	nx.draw_networkx_edge_labels(graph, pos, edgelabels, font_size=12, label_pos=0.3)
+	nx.draw_networkx_edges(graph, pos, width=3, alpha=0.8, edge_color='Black')
+	nx.draw_networkx_edge_labels(graph, pos, edgelabels, font_size=10, alpha=0.8, label_pos=0.5)
 
 	plt.axis('off')
 	# plt.savefig('matchesgraph.png')
