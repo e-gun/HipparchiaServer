@@ -47,8 +47,9 @@ from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 def findabsolutevectors(timestamp):
 	"""
 
+	meant to be called via a click from a result from a prior search
 
-	:param headword:
+	:param timestamp:
 	:return:
 	"""
 
@@ -279,7 +280,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 
 	findshtml = '<pre>{ccv}</pre>\n\n<pre>{mcv}</pre>'.format(ccv=ccv, mcv=mcv)
 
-	findsjs = generatevectorjs()
+	findsjs = generatevectorjs('findvectors')
 
 	searchtime = time.time() - starttime
 	searchtime = round(searchtime, 2)
@@ -302,7 +303,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	output['htmlsearch'] = '{x}<span class="sought">»{skg}«</span>'.format(x=xtra, skg=focus)
 	output['hitmax'] = ''
 	output['onehit'] = ''
-	output['sortby'] = 'distance with a cutoff of {c}'.format(c=1 - hipparchia.config['VECTORDISTANCECUTOFF'])
+	output['sortby'] = 'distance with a cutoff of {c}'.format(c=1 - hipparchia.config['VECTORDISTANCECUTOFFLOCAL'])
 	output['dmin'] = dmin
 	output['dmax'] = dmax
 	activepoll.deactivate()

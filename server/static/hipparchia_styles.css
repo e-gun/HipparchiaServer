@@ -960,6 +960,11 @@ keeping (for now) the non-span version of this
 	font-size: 85%;
 	}
 
+#vectortable {
+	width: 50%;
+	margin: auto;
+}
+
 #wordsearchform {
 	position: float;
 	}

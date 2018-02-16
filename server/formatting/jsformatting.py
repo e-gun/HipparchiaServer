@@ -6,6 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import re
 
 def insertbrowserclickjs(tagname):
 	"""
@@ -60,29 +61,33 @@ def insertlexicalbrowserjs(htmlentry):
 	return newhtml
 
 
-def generatevectorjs():
+def generatevectorjs(path):
 	"""
 
-
+	this JS is mainly a copy of material from documentready.js
 
 	:param headwordwordlist:
 	:return:
 	"""
 
+
 	jstemplate = """
 		$('lemmaheadword').click( function(e) { 
 		var searchid = Date.now();
-		var url = '/findvectors/'+searchid+'?lem='+this.id;
+		var url = '/REGEXREPLACE/'+searchid+'?lem='+this.id;
 		$('#searchsummary').html(''); 
 		$('#displayresults').html('');
 		$('#wordsearchform').hide();
-		$.getJSON( {url: '/setsessionvariable?cosdistbylineorword=no', async: false, success: function (resultdata) { } });
-		$.getJSON( {url: '/setsessionvariable?cosdistbysentence=yes', async: false, success: function (resultdata) { } });
+		$('#imagearea').empty();
+		// $.getJSON( {url: '/setsessionvariable?cosdistbylineorword=no', async: false, success: function (resultdata) { } });
+		// $.getJSON( {url: '/setsessionvariable?cosdistbysentence=yes', async: false, success: function (resultdata) { } });
 		$('#cosdistbysentence').prop('checked', true);
 		$('#cosdistbylineorword').prop('checked', false);
 		$('#complexsearching').hide();
 		$('#lemmatasearchform').show();
 		$('#lemmatasearchform').val(this.id);
+		var w = window.innerWidth * .9;
+		var h = window.innerHeight * .9;
 		$.getJSON(url, function (output) { 
 				document.title = output['title'];
 
@@ -110,6 +115,16 @@ def generatevectorjs():
 					summaryhtml += '<br />[Search suspended: result cap reached.]';
 					}
 				
+				var imagetarget = $('#imagearea');
+				if (typeof output['image'] !== 'undefined' && output['image'] !== '') {
+					jQuery('<img/>').prependTo(imagetarget).attr({
+						src: '/getstoredfigure/' + output['image'],
+						alt: '[vector graph]',
+						id: 'insertedfigure',
+						height: h
+					});
+				}
+					
 				$('#searchsummary').html(summaryhtml);
 				
 				$('#displayresults').html(output['found']);
@@ -121,4 +136,6 @@ def generatevectorjs():
 		});
 	"""
 
-	return jstemplate
+	js = re.sub('REGEXREPLACE', path, jstemplate)
+
+	return js

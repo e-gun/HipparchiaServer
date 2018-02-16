@@ -29,10 +29,16 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchlist):
 	:return:
 	"""
 
+	# print('searchterm, mostsimilartuples, vectorspace, searchlist', searchterm, mostsimilartuples, vectorspace, searchlist)
+
 	plt.figure(figsize=(18, 18))
 
 	if len(searchlist) > 1:
-		source = 'multiple works'
+		wasitalllatin = [x for x in searchlist if x[:2] == 'lt' and len(x) == 6]
+		if len(wasitalllatin) == 362:
+			source = 'all Latin authors'
+		else:
+			source = 'multiple authors and/or works'
 	else:
 		searched = searchlist[0]
 		if searched[:10] == searched[:6]:
@@ -77,6 +83,7 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchlist):
 	pos = nx.fruchterman_reingold_layout(graph)
 
 	# colors: https://matplotlib.org/examples/color/colormaps_reference.html
+	# cmap='tab20c' or 'Pastel1' is nice
 
 	# nodes
 	nx.draw_networkx_nodes(graph, pos, node_size=6000, node_color=range(len(terms)), cmap='Pastel1')

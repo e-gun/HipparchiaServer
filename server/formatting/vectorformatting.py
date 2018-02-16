@@ -65,7 +65,7 @@ def formatnnmatches(listofneighbors):
 	rowtemplate = """
 	<tr class="vectorrow">
 		<td class="vectorscore">{s}</td>
-		<td class="vectorword">{w}</td>
+		<td class="vectorword"><lemmaheadword id="{w}">{w}</lemmaheadword></td>
 	</tr>
 	"""
 

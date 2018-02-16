@@ -285,7 +285,8 @@ RESTOREMEDIALANDFINALSIGMA = 'no'
 #   bring your system to it knees for a long, long time. 7548165 is
 #   all of Latin. If you search for a common word you can easily
 #   chew up >24GB of RAM. Your system will hang unless/until Hipparchia
-#   receives more memory optimizations
+#   receives more memory optimizations. Gensim NN vectorization of all
+#   of Latin will take 554.08s on a 6-threaded 3.6GHz machine.
 #
 # VECTORDISTANCECUTOFF: how close Word A needs to be to Word B for the associative matrix
 #   calculations to decide that there is a relationship worth pursuing: a value between 1 and 0

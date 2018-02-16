@@ -10,6 +10,7 @@ import locale
 import time
 from copy import deepcopy
 
+from flask import request, session
 from gensim import corpora, models, similarities
 from gensim.models import Word2Vec
 
@@ -18,15 +19,54 @@ from server.dbsupport.dbfunctions import setthreadcount
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.jsformatting import generatevectorjs
 from server.formatting.vectorformatting import formatlsimatches, formatnnmatches, formatnnsimilarity
+from server.hipparchiaobjects.helperobjects import ProgressPoll
 from server.hipparchiaobjects.helperobjects import SemanticVectorCorpus
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
+from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
 from server.semanticvectors.vectorgraphing import graphnnmatches
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, checkforstoredvector, convertmophdicttodict, \
 	finddblinefromsentence, findwordvectorset, storevectorindatabase
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
-from server.startup import authordict, lemmatadict, listmapper, workdict
+from server.startup import authordict, lemmatadict, listmapper, poll, workdict
+
+
+@hipparchia.route('/findneighbors/<timestamp>', methods=['GET'])
+def findnearestneighborvectors(timestamp):
+	"""
+
+	meant to be called via a click from a result from a prior search
+
+	:param timestamp:
+	:return:
+	"""
+
+	try:
+		ts = str(int(timestamp))
+	except ValueError:
+		ts = str(int(time.time()))
+
+	so = buildsearchobject(ts, request, session)
+	so.seeking = ''
+	so.proximate = ''
+	so.proximatelemma = ''
+
+	try:
+		so.lemma = lemmatadict[cleaninitialquery(request.args.get('lem', ''))]
+	except KeyError:
+		so.lemma = None
+
+	poll[ts] = ProgressPoll(ts)
+	activepoll = poll[ts]
+	activepoll.activate()
+	activepoll.statusis('Preparing to search')
+
+	output = findlatentsemanticindex(activepoll, so, nn=True)
+
+	del poll[ts]
+
+	return output
 
 
 def findnearestneighbors(activepoll, searchobject):
@@ -309,6 +349,7 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 	imagename = ''
 
 	termone = so.lemma.dictionaryentry
+
 	try:
 		termtwo = so.proximatelemma.dictionaryentry
 	except AttributeError:
@@ -346,7 +387,7 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 
 	findshtml = '{h}'.format(h=html)
 
-	findsjs = generatevectorjs()
+	findsjs = generatevectorjs('findneighbors')
 
 	searchtime = time.time() - starttime
 	searchtime = round(searchtime, 2)

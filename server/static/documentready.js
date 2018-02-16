@@ -140,9 +140,6 @@ $(document).ready( function () {
         if (typeof output['image'] !== 'undefined' && output['image'] !== '') {
             var w = window.innerWidth * .9;
             var h = window.innerHeight * .9;
-            //imagetarget.prepend('<img id="insertedfigure" src="/getstoredfigure/' + output['image'] + '">');
-            // $('insertedfigure').width(w);
-            //$('insertedfigure').height(h);
             jQuery('<img/>').prependTo(imagetarget).attr({
                 src: '/getstoredfigure/' + output['image'],
                 alt: '[vector graph]',
