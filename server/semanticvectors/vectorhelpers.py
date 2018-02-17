@@ -101,10 +101,18 @@ def findsentences(authortable, searchobject, cursor):
 		print('error in substringsearch(): unknown whereclause type', r['type'])
 		whr = ''
 
-	# need to add to the whereclause something that skips titles
-
+	# vanilla grab-it-all
 	query = 'SELECT {c} FROM {db} {whr}'.format(c=so.usecolumn, db=authortable, whr=whr)
-	cursor.execute(query)
+
+	# vs. something that skips titles (but might drop the odd other thing or two...)
+	# but this noes not play nicely with 'temptalbe'
+	# if re.search('WHERE', whr):
+	# 	whr = whr + ' AND'
+	# else:
+	# 	whr = 'WHERE'
+	# query = 'SELECT {c} FROM {db} {whr} level_00_value != %s'.format(c=so.usecolumn, db=authortable, whr=whr)
+	data = ('t',)
+	cursor.execute(query, data)
 	results = resultiterator(cursor)
 
 	wholetext = ' '.join([r[0] for r in results])

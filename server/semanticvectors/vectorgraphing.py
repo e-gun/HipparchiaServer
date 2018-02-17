@@ -120,7 +120,9 @@ def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconne
 	nx.draw_networkx_edge_labels(graph, pos, edgelabels, font_size=12, alpha=0.8, label_pos=0.5, font_family='sans-serif')
 
 	# the fine print
-	plt.text(0, -1.2, generatethefindprint(), ha='center', va='bottom')
+	plt.text(0, -1, generatethefineprint(), ha='center', va='bottom')
+	# plt.text(1, -1, 'gensim', ha='center', va='bottom')
+	# plt.text(-1, -1, '@commit {v}'.format(v=readgitdata()[0:5]), ha='center', va='bottom')
 
 	plt.axis('off')
 	# plt.savefig('matchesgraph.png')
@@ -233,7 +235,7 @@ def givetitletograph(topic, searchterm, searchlist):
 	return title
 
 
-def generatethefindprint():
+def generatethefineprint():
 	"""
 
 	label graphs with setting values

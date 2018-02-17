@@ -78,16 +78,6 @@ def tensorgraphelectedworks(activepoll, searchobject):
 		reasons = ['the vector scope max exceeded: {a} > {b} '.format(a=locale.format('%d', wordstotal, grouping=True), b=locale.format('%d', maxwords, grouping=True))]
 		return emptyvectoroutput(so, reasons)
 
-	# DEBUGGING
-	# Frogs and mice
-	# so.lemma = lemmatadict['βάτραχοϲ']
-	# searchlist = ['gr1220']
-
-	# Euripides
-	# so.lemma = lemmatadict['ἄτη']
-	# print(so.lemma.formlist)
-	# so.lemma.formlist = ['ἄτῃ', 'ἄταν', 'ἄτηϲ', 'ἄτηι']
-	# searchlist = ['gr0006']
 
 	if len(searchlist) > 0:
 		searchlist = flagexclusions(searchlist, so.session)
