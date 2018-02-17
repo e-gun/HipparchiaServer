@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import psycopg2
 
+from server import hipparchia
 from server.dbsupport.dbfunctions import createstoredimagestable, setconnection
 from server.startup import authordict, workdict
 
@@ -35,7 +36,7 @@ def graphbliteraldistancematches(searchterm, mostsimilartuples, vectorspace, sea
 	relevantconnections = dict()
 
 	title = givetitletograph('Words most concretely connected with', searchterm, searchlist)
-	imagename = graphmatches(title, searchterm, mostsimilartuples, searchlist, terms, relevantconnections)
+	imagename = graphmatches(title, searchterm, mostsimilartuples, terms, relevantconnections)
 
 	return imagename
 
@@ -62,12 +63,12 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchlist):
 
 	title = givetitletograph('Conceptual neighborhood of', searchterm, searchlist)
 
-	imagename = graphmatches(title, searchterm, mostsimilartuples, searchlist, terms, relevantconnections)
+	imagename = graphmatches(title, searchterm, mostsimilartuples, terms, relevantconnections)
 
 	return imagename
 
 
-def graphmatches(graphtitle, searchterm, mostsimilartuples, searchlist, terms, relevantconnections):
+def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconnections):
 	"""
 
 	mostsimilartuples come in a list and look like:
@@ -81,8 +82,6 @@ def graphmatches(graphtitle, searchterm, mostsimilartuples, searchlist, terms, r
 	:param searchlist:
 	:return:
 	"""
-
-	# print('searchterm, mostsimilartuples, vectorspace, searchlist', searchterm, mostsimilartuples, vectorspace, searchlist)
 
 	plt.figure(figsize=(18, 18))
 
@@ -119,6 +118,9 @@ def graphmatches(graphtitle, searchterm, mostsimilartuples, searchlist, terms, r
 	# edges
 	nx.draw_networkx_edges(graph, pos, width=3, alpha=0.8, edge_color='Black')
 	nx.draw_networkx_edge_labels(graph, pos, edgelabels, font_size=12, alpha=0.8, label_pos=0.5, font_family='sans-serif')
+
+	# the fine print
+	plt.text(0, -1.2, generatethefindprint(), ha='center', va='bottom')
 
 	plt.axis('off')
 	# plt.savefig('matchesgraph.png')
@@ -229,3 +231,23 @@ def givetitletograph(topic, searchterm, searchlist):
 	title = '{t} »{w}«\nin {s}'.format(t=topic, w=searchterm, s=source)
 
 	return title
+
+
+def generatethefindprint():
+	"""
+
+	label graphs with setting values
+
+	:return:
+	"""
+
+	d = hipparchia.config['VECTORDIMENSIONS']
+	w = hipparchia.config['VECTORWINDOW']
+	i = hipparchia.config['VECTORTRAININGITERATIONS']
+	p = hipparchia.config['VECTORMINIMALPRESENCE']
+	s = hipparchia.config['VECTORDOWNSAMPLE']
+
+	fineprint = 'dimensions: {d} · window: {w} · minimum presence: {p} · training runs: {i} · downsample: {s}'
+	fineprint = fineprint.format(d=d, w=w, p=p, i=i, s=s)
+
+	return fineprint
