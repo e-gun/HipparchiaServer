@@ -16,7 +16,8 @@ from string import punctuation
 
 import psycopg2
 
-from server.dbsupport.dbfunctions import createvectorstable, dblineintolineobject, resultiterator, setconnection
+from server.dbsupport.dbfunctions import createvectorstable, dblineintolineobject, grabonelinefromwork, resultiterator, \
+	setconnection
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
 	tidyupterm
 from server.hipparchiaobjects.helperobjects import ProgressPoll
@@ -164,7 +165,11 @@ def parsevectorsentences(searchobject, lineobjects):
 		matches = allsentences
 
 	# hyphenated line-ends are a problem
-	matches = [re.sub(r'-(|\s)', '', m) for m in matches]
+	matches = [re.sub(r'-\s{1,2}', '', m) for m in matches]
+
+	# more cleanup
+	matches = [m.lower() for m in matches]
+	matches = [' '.join(m.split()) for m in matches]
 
 	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
 	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
@@ -325,7 +330,7 @@ def bulklinegrabber(table, column, criterion, setofcriteria, cursor):
 	return contents
 
 
-def finddblinefromsentence(thissentence, modifiedsearchobject):
+def bruteforcefinddblinefromsentence(thissentence, modifiedsearchobject):
 	"""
 
 	get a locus from a random sentence coughed up by the vector corpus
@@ -352,6 +357,41 @@ def finddblinefromsentence(thissentence, modifiedsearchobject):
 	# 	print('findlocusfromsentence() found {h} hits when looking for {s}'.format(h=len(hits), s=mso.seeking))
 
 	return hits
+
+
+def finddblinesfromsentences(thissentence, sentencestuples, cursor):
+	"""
+
+	given a sentencelist ['word1', 'word2', word3', ...] , look for a match in a sentence tuple collection:
+		[(universalid1, text1), (universalid2, text2), ...]
+
+	returns a list of matches, but this list most likely has only a single member unless there are 3 copies
+	of a formulaic senctence in your data, e.g.
+
+		matches ['lt0588w001_ln_1321']
+
+	:param thissentence:
+	:param sentencestuples:
+	:return:
+	"""
+
+	thissentence = ' '.join(thissentence)
+
+	matches = list()
+	for s in sentencestuples:
+		cleans = s[1].strip()
+		if cleans == thissentence:
+			matches.append(s[0])
+
+	fetchedlines = list()
+	for m in matches:
+		db = m.split('_')[0][:6]
+		ln = m.split('_')[-1]
+
+		myline = grabonelinefromwork(db, ln, cursor)
+		fetchedlines.append(dblineintolineobject(myline))
+
+	return fetchedlines
 
 
 def buildflatbagsofwords(morphdict, sentences):

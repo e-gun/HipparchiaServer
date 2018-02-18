@@ -8,14 +8,13 @@
 import json
 import locale
 import time
-from copy import deepcopy
 
 from flask import request, session
 from gensim import corpora, models, similarities
 from gensim.models import Word2Vec
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setthreadcount
+from server.dbsupport.dbfunctions import setconnection, setthreadcount
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.jsformatting import generatevectorjs
 from server.formatting.vectorformatting import formatlsimatches, formatnnmatches, formatnnsimilarity
@@ -27,7 +26,7 @@ from server.searching.searchfunctions import buildsearchobject, cleaninitialquer
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
 from server.semanticvectors.vectorgraphing import graphnnmatches
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, checkforstoredvector, convertmophdicttodict, \
-	finddblinefromsentence, findwordvectorset, storevectorindatabase
+	finddblinesfromsentences, findwordvectorset, storevectorindatabase
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
@@ -253,13 +252,15 @@ def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, 
 	sims = sorted(enumerate(similis), key=lambda item: -item[1])
 	count = 0
 	activepoll.statusis('Sifting results')
-	subsearchobject = deepcopy(so)
 
+	dbconnection = setconnection('autocommit')
+	cursor = dbconnection.cursor()
 	for s in sims:
 		if s[1] > threshold:
 			thissentence = lsispace.sentences[s[0]]
 			# this part is slow and needs MP refactoring?
-			dblines = finddblinefromsentence(thissentence, subsearchobject)
+			# dblines = finddblinefromsentence(thissentence, subsearchobject)
+			dblines = finddblinesfromsentences(thissentence, sentencestuples, cursor)
 			if dblines:
 				if len(dblines) > 1:
 					xtra = ' <span class="small">[1 of {n} occurrences]</span>'.format(n=len(dblines))
@@ -274,6 +275,9 @@ def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, 
 				thismatch['sentence'] = '{s}{x}'.format(s=' '.join(thissentence), x=xtra)
 				thismatch['words'] = lsispace.bagsofwords[s[0]]
 				matches.append(thismatch)
+
+	cursor.close()
+	del dbconnection
 
 	findshtml = formatlsimatches(matches)
 
