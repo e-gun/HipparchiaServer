@@ -16,7 +16,7 @@ from string import punctuation
 
 import psycopg2
 
-from server.dbsupport.dbfunctions import createvectorstable, resultiterator, setconnection
+from server.dbsupport.dbfunctions import createvectorstable, dblineintolineobject, resultiterator, setconnection
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
 	tidyupterm
 from server.hipparchiaobjects.helperobjects import ProgressPoll
@@ -67,10 +67,6 @@ def findsentences(authortable, searchobject, cursor):
 
 	turn it into a collection of sentences
 
-	look for the relevant lemma in them
-
-	return those sentences that contain the lemmatized word
-
 	:param authortable:
 	:param searchobject:
 	:param cursor:
@@ -102,7 +98,7 @@ def findsentences(authortable, searchobject, cursor):
 		whr = ''
 
 	# vanilla grab-it-all
-	query = 'SELECT {c} FROM {db} {whr}'.format(c=so.usecolumn, db=authortable, whr=whr)
+	query = 'SELECT * FROM {db} {whr}'.format(db=authortable, whr=whr)
 
 	# vs. something that skips titles (but might drop the odd other thing or two...)
 	# but this noes not play nicely with 'temptalbe'
@@ -114,8 +110,34 @@ def findsentences(authortable, searchobject, cursor):
 	data = ('t',)
 	cursor.execute(query, data)
 	results = resultiterator(cursor)
+	results = [dblineintolineobject(line) for line in results]
 
-	wholetext = ' '.join([r[0] for r in results])
+	results = parsevectorsentences(so, results)
+	return results
+
+
+def parsevectorsentences(searchobject, lineobjects):
+	"""
+
+	take raw lines, join them together, clean them and then return tuples of lines and ids
+
+	the ids may or may not be needed later
+
+	:param searchobject:
+	:param lineobjects:
+	:return:
+	"""
+	so = searchobject
+
+	requiresids = ['semanticvectorquery']
+
+	columnmap = {'marked_up_line': 'accented', 'accented_line': 'polytonic', 'stripped_line': 'stripped'}
+	col = columnmap[so.usecolumn]
+
+	if so.vectortype in requiresids:
+		wholetext = ' '.join(['⊏{i}⊐{t}'.format(i=l.universalid, t=getattr(l, col)) for l in lineobjects])
+	else:
+		wholetext = ' '.join([getattr(l, col) for l in lineobjects])
 
 	htmlstrip = re.compile(r'<.*?>')
 	wholetext = re.sub(htmlstrip, '', wholetext)
@@ -136,7 +158,10 @@ def findsentences(authortable, searchobject, cursor):
 	else:
 		lookingfor = so.seeking
 
-	matches = [s for s in allsentences if re.search(lookingfor, s)]
+	if lookingfor != '.':
+		matches = [s for s in allsentences if re.search(lookingfor, s)]
+	else:
+		matches = allsentences
 
 	# hyphenated line-ends are a problem
 	matches = [re.sub(r'-(|\s)', '', m) for m in matches]
@@ -144,10 +169,22 @@ def findsentences(authortable, searchobject, cursor):
 	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
 	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
 
-	cleanedmatches = [tidyupterm(m, punct) for m in matches]
+	if so.vectortype in requiresids:
+		# now we mark the source of every sentence by turning it into a tuple: (location, text)
+		previousid = lineobjects[0].universalid
+		idfinder = re.compile(r'⊏(.*?)⊐')
+		taggedmatches = list()
+		for m in matches:
+			ids = re.findall(idfinder, m)
+			if ids:
+				taggedmatches.append((ids[0], re.sub(idfinder, '', m)))
+				previousid = ids[-1]
+			else:
+				taggedmatches.append((previousid, m))
 
-	# for m in enumerate(cleanedmatches):
-	# 	print(m[0], m[1])
+		cleanedmatches = [(lineid, tidyupterm(m, punct)) for lineid, m in taggedmatches]
+	else:
+		cleanedmatches = [(n, tidyupterm(m, punct)) for n, m in enumerate(matches)]
 
 	return cleanedmatches
 

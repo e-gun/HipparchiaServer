@@ -93,17 +93,17 @@ def findlatentsemanticindex(activepoll, searchobject, nn=False):
 	:param vtype:
 	:return:
 	"""
+	so = searchobject
 
 	if not nn:
 		outputfunction = lsigenerateoutput
 		indextype = 'lsi'
+		so.vectortype = 'semanticvectorquery'
 	else:
 		outputfunction = nearestneighborgenerateoutput
 		indextype = 'nn'
 
 	starttime = time.time()
-
-	so = searchobject
 
 	try:
 		validlemma = lemmatadict[so.lemma.dictionaryentry]
@@ -187,9 +187,9 @@ def findlatentsemanticindex(activepoll, searchobject, nn=False):
 			restorelemma = lemmatadict[so.lemma.dictionaryentry]
 			so.lemma = None
 			so.seeking = r'.'
-			sentences = vectorsentencedispatching(so, activepoll)
+			sentencestuples = vectorsentencedispatching(so, activepoll)
 			so.lemma = restorelemma
-			output = outputfunction(sentences, workssearched, so, activepoll, starttime, vectorspace)
+			output = outputfunction(sentencestuples, workssearched, so, activepoll, starttime, vectorspace)
 		else:
 			return emptyvectoroutput(so)
 	else:
@@ -198,7 +198,7 @@ def findlatentsemanticindex(activepoll, searchobject, nn=False):
 	return output
 
 
-def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, starttime, lsispace):
+def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, starttime, lsispace):
 	"""
 
 
@@ -210,6 +210,7 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 
 	if not lsispace:
 		# find all words in use
+		listsofwords = [s[1] for s in sentencestuples]
 		allwords = findwordvectorset(listsofwords)
 
 		# find all possible forms of all the words we used
@@ -333,7 +334,7 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 	return output
 
 
-def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, activepoll, starttime, vectorspace):
+def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, activepoll, starttime, vectorspace):
 	"""
 
 	:param listsofwords:
@@ -357,6 +358,7 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 
 	if not vectorspace:
 		# find all words in use
+		listsofwords = [s[1] for s in sentencetuples]
 		allwords = findwordvectorset(listsofwords)
 
 		# find all possible forms of all the words we used

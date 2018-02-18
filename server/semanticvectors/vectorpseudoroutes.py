@@ -153,7 +153,8 @@ def findabsolutevectorsbysentence(activepoll, searchobject):
 
 		# find all sentences
 		activepoll.statusis('Finding all sentences')
-		sentences = vectorsentencedispatching(so, activepoll)
+		sentencetuples = vectorsentencedispatching(so, activepoll)
+		sentences = [s[1] for s in sentencetuples]
 
 		output = generatevectoroutput(sentences, workssearched, so, activepoll, starttime, 'sentences')
 	else:

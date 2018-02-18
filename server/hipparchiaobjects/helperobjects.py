@@ -301,6 +301,7 @@ class SearchObject(object):
 		self.originalseeking = re.sub(r'>', '&gt;', self.originalseeking)
 		self.originalproximate = re.sub(r'<', '&lt;', self.originalproximate)
 		self.originalproximate = re.sub(r'>', '&gt;', self.originalproximate)
+		self.vectortype = None
 
 		# searchtermcharactersubstitutions() logic has moved here
 
