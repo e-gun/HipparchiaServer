@@ -129,6 +129,7 @@ def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconne
 	graphobject = BytesIO()
 	plt.savefig(graphobject)
 	plt.clf()
+	plt.close()
 
 	# getvalue(): Return bytes containing the entire contents of the buffer
 	# everybody from here on out want bytes and not '_io.BytesIO'
@@ -219,8 +220,13 @@ def givetitletograph(topic, searchterm, searchlist):
 	"""
 	if len(searchlist) > 1:
 		wasitalllatin = [x for x in searchlist if x[:2] == 'lt' and len(x) == 6]
+		wasitallgreek = [x for x in searchlist if x[:2] == 'gr' and len(x) == 6]
 		if len(wasitalllatin) == 362:
+			# select count(universalid) from authors where universalid like 'lt%';
 			source = 'all Latin authors'
+		elif len(wasitallgreek) == 1823:
+			# select count(universalid) from authors where universalid like 'gr%';
+			source = 'all Greek authors'
 		else:
 			source = 'multiple authors and/or works'
 	else:

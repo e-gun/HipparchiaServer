@@ -279,6 +279,7 @@ def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, 
 	cursor.close()
 	del dbconnection
 
+	matches = [m for m in matches if len(m['sentence'].split(' ')) > 2]
 	findshtml = formatlsimatches(matches)
 
 	# findsjs = generatevectorjs('therewillbenoreclicks')
@@ -480,7 +481,7 @@ def lsibuildspace(morphdict, sentences):
 
 	corpustfidf = termfreqinversedocfreq[lsicorpus]
 
-	semanticindex = models.LsiModel(corpustfidf, id2word=lsidictionary, num_topics=350)
+	semanticindex = models.LsiModel(corpustfidf, id2word=lsidictionary, num_topics=250)
 
 	"""	
 	"An empirical study of required dimensionality for large-scale latent semantic indexing applications"
