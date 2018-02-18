@@ -134,8 +134,9 @@ def locusformat(dblineobject):
 	au = authordict[dblineobject.authorid].name
 	wk = workdict[dblineobject.wkuinversalid].title
 	loc = dblineobject.locus()
+	uid = dblineobject.universalid
 
-	citationtext = '{a}, <span class="italic">{w}</span>, {l}'.format(a=au, w=wk, l=loc)
+	citationtext = '{a}, <span class="italic">{w}</span>, <browser id="{d}">{l}</browser>'.format(a=au, w=wk, l=loc, d=uid)
 
 	return citationtext
 

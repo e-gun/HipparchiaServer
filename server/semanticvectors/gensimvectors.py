@@ -16,7 +16,7 @@ from gensim.models import Word2Vec
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection, setthreadcount
 from server.formatting.bibliographicformatting import bcedating
-from server.formatting.jsformatting import generatevectorjs
+from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
 from server.formatting.vectorformatting import formatlsimatches, formatnnmatches, formatnnsimilarity
 from server.hipparchiaobjects.helperobjects import ProgressPoll
 from server.hipparchiaobjects.helperobjects import SemanticVectorCorpus
@@ -281,7 +281,8 @@ def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, 
 
 	findshtml = formatlsimatches(matches)
 
-	findsjs = generatevectorjs('therewillbenoreclicks')
+	# findsjs = generatevectorjs('therewillbenoreclicks')
+	findsjs = insertbrowserclickjs('browser')
 
 	searchtime = time.time() - starttime
 	searchtime = round(searchtime, 2)
