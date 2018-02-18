@@ -397,13 +397,25 @@ def tfnlptraining(sentences, activepoll):
 	morphdict = convertmophdicttodict(morphdict)
 
 	setofallheadwords = list()
-	for w in setofallwords:
-		# note that we are warping the shape of the sentences by doing this
-		# an alternative is to '·'.join() the items
-		try:
-			setofallheadwords.extend([w for w in morphdict[w]])
-		except KeyError:
-			pass
+	joined = True
+	if not joined:
+		# FLATTENED lemmata
+		for w in setofallwords:
+			# note that we are warping the shape of the sentences by doing this
+			# an alternative is to '·'.join() the items
+			try:
+				setofallheadwords.extend([w for w in morphdict[w]])
+			except KeyError:
+				pass
+	else:
+		# JOINED lemmata
+		for w in setofallwords:
+			# note that we are warping the shape of the sentences by doing this
+			# an alternative is to '·'.join() the items
+			try:
+				setofallheadwords.append('·'.join(morphdict[w]))
+			except KeyError:
+				pass
 
 	vocabularysize = min(10000, len(setofallheadwords))
 
@@ -462,7 +474,7 @@ def converttexttoinexvalues(sentences, morphdict):
 # Generate data randomly (N words behind, target, N words ahead)
 
 
-def generatetfbatch(sentences, batchsize, windowsize, method='skipgram'):
+def generatetfbatch(sentences, batchsize, windowsize, method='cbow'):
 	"""
 
 	:param sentences:
@@ -497,7 +509,7 @@ def generatetfbatch(sentences, batchsize, windowsize, method='skipgram'):
 		try:
 			batch, labels = [list(x) for x in zip(*tupledata)]
 		except ValueError:
-			# tupledata was []
+			# tupledata was empty
 			batch = list()
 			labels = list()
 		batchdata.extend(batch[:batchsize])
@@ -531,17 +543,21 @@ def tfnlpwork(textasvals, wordsmappedtocodes, codesmappedtowords, activepoll):
 	valid_examples = [wordsmappedtocodes[x] for x in valid_words]
 	print(valid_words)
 
-	# Declare model parameters
+	# Declare model parameters: first value is taken from the example code
+	# An embedding is a mapping from discrete objects, such as words, to vectors of real numbers. For example, a 300-dimensional embedding for English words could include:...
 	batchsize = 100
+	batchsize = 50
 	embeddingsize = 200
-	vocabularysize = 10000
+	vocabularysize = min(10000, len(codesmappedtowords))
 	generations = 100000
 	generations = 25000
 	print_loss_every = 2000
 	print_valid_every = 5000
+	learning_rate = 1.0
+	learning_rate = 0.1
 
 	numsampled = int(batchsize / 2)  # Number of negative examples to sample.
-	windowsize = 2  # How many words to consider left and right.
+	windowsize = 3  # How many words to consider left and right.
 	
 	# Define Embeddings:
 	embeddings = tf.Variable(tf.random_uniform([vocabularysize, embeddingsize], -1.0, 1.0))
@@ -567,7 +583,7 @@ def tfnlpwork(textasvals, wordsmappedtocodes, codesmappedtowords, activepoll):
 	                                     num_classes=vocabularysize))
 
 	# Create optimizer
-	optimizer = tf.train.GradientDescentOptimizer(learning_rate=1.0).minimize(loss)
+	optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(loss)
 
 	# Cosine similarity between words
 	norm = tf.sqrt(tf.reduce_sum(tf.square(embeddings), 1, keepdims=True))
@@ -692,5 +708,410 @@ BUT, gensim says the following of the neighborhood of consul:
 0.833 	tribuo
 0.829 	imperium
 0.82 	lego²
+
+
+a JOINED run:
+
+['aedifico', 'adversarius·adversaria', 'quidem', 'coagmento·coagmentum', 'circumvenio']
+Loss at step 2000 : 3.7477598190307617
+Loss at step 4000 : 2.1834375858306885
+Nearest to aedifico: pertineo, invitus, sacerdotium, praesidium, praecludo,
+Nearest to adversarius·adversaria: fu, dius·divus, biennium, adsum, considero,
+Nearest to quidem: defensio, potis, nullus, memini, mercenarius,
+failed to find key for 3
+failed to find key for 4
+Nearest to coagmento·coagmentum: littera, navus·no¹·navis, concedo,
+Nearest to circumvenio: aqua, deligo², adjuvo, seni, faveo,
+Loss at step 6000 : 2.0464587211608887
+Loss at step 8000 : 1.3909521102905273
+Loss at step 10000 : 3.307637929916382
+Nearest to aedifico: invitus, infestus, pertineo, claudo¹, praestolor,
+Nearest to adversarius·adversaria: fu, dius·divus, biennium, considero, sedeo,
+Nearest to quidem: defensio, mercenarius, potis, nullus, memini,
+failed to find key for 2
+failed to find key for 3
+Nearest to coagmento·coagmentum: navus·no¹·navis, littera, concedo,
+Nearest to circumvenio: seni, aqua, deligo², adjuvo, faveo,
+Loss at step 12000 : 1.9680907726287842
+Loss at step 14000 : 1.7793277502059937
+Nearest to aedifico: invitus, infestus, pertineo, praestolor, apparatus²,
+Nearest to adversarius·adversaria: fu, dius·divus, biennium, considero, sedeo,
+Nearest to quidem: mercenarius, defensio, potis, memini, dens,
+failed to find key for 2
+failed to find key for 3
+failed to find key for 4
+Nearest to coagmento·coagmentum: navus·no¹·navis, littera,
+Nearest to circumvenio: seni, deligo², adjuvo, aqua, faveo,
+Loss at step 16000 : 1.7202776670455933
+Loss at step 18000 : 2.041233539581299
+Loss at step 20000 : 3.3179919719696045
+Nearest to aedifico: invitus, vimineus, infestus, praestolor, claudo¹,
+Nearest to adversarius·adversaria: fu, sedeo, biennium, dius·divus, considero,
+Nearest to quidem: mercenarius, defensio, memini, potis, dens,
+failed to find key for 2
+failed to find key for 3
+failed to find key for 4
+Nearest to coagmento·coagmentum: navus·no¹·navis, littera,
+Nearest to circumvenio: seni, adjuvo, deligo², aqua, rostrum,
+Loss at step 22000 : 1.8857903480529785
+Loss at step 24000 : 1.4803756475448608
+Nearest to aedifico: invitus, praestolor, vimineus, infestus, apparatus²,
+Nearest to adversarius·adversaria: fu, sedeo, biennium, dius·divus, considero,
+Nearest to quidem: mercenarius, defensio, memini, dens, nullus,
+failed to find key for 2
+failed to find key for 3
+Nearest to coagmento·coagmentum: navus·no¹·navis, littera, reduco,
+Nearest to circumvenio: seni, deligo², adjuvo, faveo, rostrum,
+similarities [[ 1.9295411e-03  1.8730892e-01  2.0729756e-01 ...  1.3278409e-02
+  -6.0417712e-02 -2.0446607e-01]
+ [ 4.0547360e-02  7.2905677e-05  3.9064221e-02 ...  3.7155230e-02
+  -5.0242592e-02 -9.1756515e-02]
+ [ 1.6467479e-01  2.4846146e-01  1.6734241e-01 ...  1.3284846e-01
+   1.5371240e-02 -1.4059354e-01]
+ [ 8.2497887e-02  8.5548811e-02  4.2694062e-02 ...  1.1676947e-02
+  -3.1849176e-02 -1.1821497e-01]
+ [ 5.7438657e-02  2.7344361e-01  2.4401173e-01 ... -7.1074270e-02
+  -6.3520081e-02 -3.3145533e-03]]
+
+gensim says of circumvenio:
+
+0.821 	refugio 	
+
+[vector graph]
+0.809 	procurro
+0.799 	expedio
+0.794 	antecedo
+0.793 	sinister
+0.787 	sagittarius
+0.774 	sagittarii
+0.773 	cornus¹
+0.772 	subsequor
+0.771 	cornu
+0.771 	appropinquo
+0.757 	sinistrum
+0.753 	impono
+0.748 	medius
+0.747 	cratis
+
+
+
+adjust batch size and learning rate
+
+['responsus²·respondeo·responsum', 'creditor', 'pecunia', 'verbum', 'mobilitas·mobilito']
+2018-02-17 23:32:21.979190: I tensorflow/core/platform/cpu_feature_guard.cc:137] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.2 AVX
+Loss at step 2000 : 26.524118423461914
+Loss at step 4000 : 13.660235404968262
+Nearest to responsus²·respondeo·responsum: duoviri·duumvira, praepono, sentina, incendo, intervallum·intervallo,
+Nearest to creditor: siquando, peritus·peritissimus·pereo, propinquus·propinqua, inclino, custos,
+Nearest to pecunia: praesidium, provincia, impedio, teneo, dimitto,
+Nearest to verbum: artificium, exercio, celeriter, urbs, procurro,
+Nearest to mobilitas·mobilito: protectum·protego, heres, vulgo¹·vulgo²·vulgus, totidem, tenue·tenuis,
+Loss at step 6000 : 8.003875732421875
+Loss at step 8000 : 5.492268085479736
+Loss at step 10000 : 3.49160099029541
+Nearest to responsus²·respondeo·responsum: praepono, duoviri·duumvira, sentina, incendo, intervallum·intervallo,
+Nearest to creditor: siquando, altitudo, peritus·peritissimus·pereo, propinquus·propinqua, inclino,
+Nearest to pecunia: praesidium, impedio, existimatio, provincia, teneo,
+Nearest to verbum: artificium, exercio, celeriter, urbs, procurro,
+Nearest to mobilitas·mobilito: protectum·protego, heres, vulgo¹·vulgo²·vulgus, totidem, tenue·tenuis,
+Loss at step 12000 : 4.995999336242676
+Loss at step 14000 : 3.8147058486938477
+Nearest to responsus²·respondeo·responsum: praepono, sentina, duoviri·duumvira, diluo, incendo,
+Nearest to creditor: siquando, altitudo, propius, inclino, navigium,
+Nearest to pecunia: existimatio, impedio, praesidium, filius, provincia,
+Nearest to verbum: artificium, exercio, celeriter, hospitium, quattuor,
+Nearest to mobilitas·mobilito: protectum·protego, vulgo¹·vulgo²·vulgus, totidem, heres, tenue·tenuis,
+Loss at step 16000 : 2.5549161434173584
+Loss at step 18000 : 2.640185832977295
+Loss at step 20000 : 2.1628966331481934
+Nearest to responsus²·respondeo·responsum: praepono, sentina, duoviri·duumvira, diluo, incendo,
+Nearest to creditor: siquando, altitudo, propius, inclino, navigium,
+Nearest to pecunia: existimatio, impedio, praesidium, erigo, filius,
+Nearest to verbum: artificium, exercio, quattuor, hospitium, celeriter,
+Nearest to mobilitas·mobilito: protectum·protego, vulgo¹·vulgo²·vulgus, totidem, tenue·tenuis, heres,
+Loss at step 22000 : 2.5759263038635254
+Loss at step 24000 : 2.1635682582855225
+Nearest to responsus²·respondeo·responsum: praepono, sentina, duoviri·duumvira, diluo, intervallum·intervallo,
+Nearest to creditor: siquando, altitudo, propius, navigium, inclino,
+Nearest to pecunia: existimatio, impedio, erigo, praesidium, filius,
+Nearest to verbum: artificium, quattuor, hospitium, exercio, celeriter,
+Nearest to mobilitas·mobilito: protectum·protego, vulgo¹·vulgo²·vulgus, tenue·tenuis, totidem, heres,
+similarities [[ 0.05868693  0.10331594  0.0624117  ...  0.1866371   0.0187183
+   0.0290859 ]
+ [ 0.06022784  0.1057726   0.01363345 ... -0.02199721 -0.00560955
+  -0.03184037]
+ [ 0.01173329  0.10875327  0.25501138 ...  0.01903673  0.07664359
+  -0.03135491]
+ [ 0.22421081  0.15741768  0.19507284 ... -0.0823223   0.10735729
+  -0.02112347]
+ [ 0.06104147 -0.03684769  0.06346136 ... -0.06775664  0.1211601
+  -0.10587066]]
+
+
+['voveo', 'digredior', 'acer²', 'versor', 'exaedifico']
+Loss at step 2000 : 45.394344329833984
+Loss at step 4000 : 23.24372100830078
+Nearest to voveo: merces¹, excursus², dispersero¹, quini, amico,
+Nearest to digredior: andrius, triduum, coeptum, innascor, necessitudo,
+Nearest to acer²: indo, pauci, gloria, pulsus², barbarus,
+Nearest to versor: turris, facio, praeficio, no¹, eques,
+Nearest to exaedifico: timidus, neco, elices, intervallo, noto,
+Loss at step 6000 : 12.286938667297363
+Loss at step 8000 : 6.055044651031494
+Loss at step 10000 : 4.871432304382324
+Nearest to voveo: merces¹, excursus², quini, dispersero¹, amico,
+Nearest to digredior: absum, fortis, necessitudo, triduum, andrius,
+Nearest to acer²: pauci, indo, parvus, barbarus, permoveo,
+Nearest to versor: turris, praeficio, facio, no¹, sus,
+Nearest to exaedifico: timidus, neco, elices, intervallo, noto,
+Loss at step 12000 : 2.7527472972869873
+Loss at step 14000 : 6.896480083465576
+Nearest to voveo: merces¹, excursus², quini, dispersero¹, profero,
+Nearest to digredior: absum, fortis, triduum, angustum, necessitudo,
+Nearest to acer²: indo, pauci, barbarus, pulsus², parvus,
+Nearest to versor: praeficio, turris, facio, no¹, corpus,
+Nearest to exaedifico: timidus, locum, neco, levis¹, noto,
+Loss at step 16000 : 3.1658027172088623
+Loss at step 18000 : 2.5402045249938965
+Loss at step 20000 : 2.8434066772460938
+Nearest to voveo: merces¹, excursus², quini, profero, amico,
+Nearest to digredior: fortis, absum, angustum, triduum, necessitudo,
+Nearest to acer²: indo, pauci, pulsus², barbarus, regia,
+Nearest to versor: praeficio, turris, facio, no¹, corpus,
+Nearest to exaedifico: locum, timidus, levis¹, neco, noto,
+Loss at step 22000 : 1.186185359954834
+Loss at step 24000 : 1.6347655057907104
+Nearest to voveo: merces¹, excursus², quini, profero, dispersero¹,
+Nearest to digredior: triduum, angustum, fortis, absum, necessitudo,
+Nearest to acer²: indo, pauci, pulsus², regia, barbarus,
+Nearest to versor: praeficio, turris, facio, iniquitas, no¹,
+Nearest to exaedifico: timidus, locum, levis¹, neco, noto,
+similarities [[ 0.06946201  0.0188651   0.13538174 ...  0.02524121  0.10198931
+  -0.06715611]
+ [ 0.07158905  0.17657521  0.10853659 ...  0.00163822  0.06703465
+   0.19781666]
+ [-0.087439    0.16681887  0.06178586 ...  0.16035926 -0.02021601
+   0.05312629]
+ [ 0.12657799  0.07908393  0.2619318  ...  0.11901414 -0.05133739
+   0.17418306]
+ [ 0.10359956  0.00798041  0.11965031 ...  0.09680425 -0.0171023
+   0.02591592]]
+[2018-02-17 23:38:17,219] ERROR in app: Exception on /executesearch/1518928617927 [GET]
+Traceback (most recent call last):
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/flask/app.py", line 1615, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/flask/app.py", line 1630, in finalize_request
+    response = self.make_response(rv)
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/flask/app.py", line 1725, in make_response
+    raise ValueError('View function did not return a response')
+ValueError: View function did not return a response
+
+
+Verrine orations
+
+['reservo', 'stultus', 'animadversio', 'barbarus', 'orator']
+2018-02-18 07:58:10.575131: I tensorflow/core/platform/cpu_feature_guard.cc:137] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.2 AVX
+Loss at step 2000 : 51.33185958862305
+Loss at step 4000 : 29.942792892456055
+Nearest to reservo: conicio, corruptela, nummulus, neglegentia, duo,
+Nearest to stultus: hibernum, dacius, addictus, oleum, aedificatio,
+Nearest to animadversio: turibulum, humanus, aro, pertinax, planus²,
+Nearest to barbarus: aversor², liberalis¹, rapina¹, columna, puto,
+Nearest to orator: intestatus², glaeba, captivus, centiens, reticeo,
+Loss at step 6000 : 22.848176956176758
+Loss at step 8000 : 3.9753808975219727
+Loss at step 10000 : 4.402499198913574
+Nearest to reservo: conicio, duo, cella, pecunia, mirandus,
+Nearest to stultus: hibernum, mirus, addictus, dacius, oleum,
+Nearest to animadversio: turibulum, humanus, aro, pertinax, planus²,
+Nearest to barbarus: aversor², puto, liberalis¹, columna, rapina¹,
+Nearest to orator: intestatus², glaeba, captivus, centiens, reticeo,
+Loss at step 12000 : 9.873517990112305
+Loss at step 14000 : 10.272629737854004
+Nearest to reservo: conicio, duo, cella, pecunia, civis,
+Nearest to stultus: hibernum, mirus, debeo, restituo, publicus,
+Nearest to animadversio: turibulum, aro, humanus, pertinax, planus²,
+Nearest to barbarus: liberalis¹, aversor², puto, columna, rapina¹,
+Nearest to orator: glaeba, intestatus², captivus, reticeo, centiens,
+Loss at step 16000 : 2.162527561187744
+Loss at step 18000 : 2.5864920616149902
+Loss at step 20000 : 4.323953628540039
+Nearest to reservo: duo, conicio, cella, pecunia, mirandus,
+Nearest to stultus: hibernum, mirus, restituo, debeo, praesens,
+Nearest to animadversio: aro, turibulum, humanus, planus², pertinax,
+Nearest to barbarus: liberalis¹, columna, puto, morior, aversor²,
+Nearest to orator: glaeba, intestatus², captivus, reticeo, centiens,
+Loss at step 22000 : 5.008556842803955
+Loss at step 24000 : 2.7152037620544434
+Nearest to reservo: conicio, duo, cella, mirandus, pecunia,
+Nearest to stultus: hibernum, mirus, restituo, praesens, debeo,
+Nearest to animadversio: aro, turibulum, humanus, planus², pars,
+Nearest to barbarus: liberalis¹, columna, puto, morior, aversor²,
+Nearest to orator: glaeba, intestatus², captivus, reticeo, centiens,
+similarities [[ 0.02465165  0.0539796   0.12021755 ...  0.13269116  0.06007751
+  -0.01891185]
+ [ 0.1109712   0.10961493  0.2815597  ...  0.09188539  0.11949956
+  -0.1075343 ]
+ [ 0.05473766  0.01427753  0.04326814 ... -0.06925254  0.04596263
+  -0.058966  ]
+ [ 0.01056252  0.09540829  0.07056317 ...  0.01720598  0.1845353
+  -0.02027962]
+ [-0.03540321  0.04929211 -0.05362207 ...  0.11060964  0.02615426
+   0.06637716]]
+[2018-02-18 08:01:12,323] ERROR in app: Exception on /executesearch/1518958681950 [GET]
+Traceback (most recent call last):
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/flask/app.py", line 1615, in full_dispatch_request
+    return self.finalize_request(rv)
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/flask/app.py", line 1630, in finalize_request
+    response = self.make_response(rv)
+  File "/Users/erik/hipparchia_venv/lib/python3.6/site-packages/flask/app.py", line 1725, in make_response
+    raise ValueError('View function did not return a response')
+ValueError: View function did not return a response
+
+
+CBOW in Cicero's ad atticum
+
+['spolio', 'desertum', 'verro', 'praetorius', 'gravitas']
+2018-02-18 08:13:54.283609: I tensorflow/core/platform/cpu_feature_guard.cc:137] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.2 AVX
+Loss at step 2000 : 50.167720794677734
+Loss at step 4000 : 35.51740646362305
+Nearest to spolio: animo, μεθαρμόζω, lacerta, hostio¹, dormio,
+Nearest to desertum: scitus², corpus, avis, resido, asspico,
+Nearest to verro: questus², recognosco, prosum, optime, fastus¹,
+Nearest to praetorius: capio, sortitus, struma¹, quaero, discrepo,
+Nearest to gravitas: πάτρα, obtego, τεχνολογία, aris², accido²,
+Loss at step 6000 : 28.08907699584961
+Loss at step 8000 : 12.777727127075195
+Loss at step 10000 : 12.256503105163574
+Nearest to spolio: animo, μεθαρμόζω, acte², hostio¹, lacerta,
+Nearest to desertum: scitus², corpus, avis, resido, asspico,
+Nearest to verro: questus², recognosco, prosum, igitur, asscribo,
+Nearest to praetorius: capio, quaero, sortitus, struma¹, impedio,
+Nearest to gravitas: πάτρα, obtego, accido², rescribo, locum,
+Loss at step 12000 : 19.29497718811035
+Loss at step 14000 : 11.959770202636719
+Nearest to spolio: animo, μεθαρμόζω, acte², conturbo, hostio¹,
+Nearest to desertum: scitus², corpus, avis, resido, acervus,
+Nearest to verro: questus², prosum, igitur, conficio, asscribo,
+Nearest to praetorius: capio, quaero, sortitus, struma¹, impedio,
+Nearest to gravitas: πάτρα, accido², rescribo, locum, nosco,
+Loss at step 16000 : 4.654924392700195
+Loss at step 18000 : 5.507625579833984
+Loss at step 20000 : 6.700153350830078
+Nearest to spolio: animo, μεθαρμόζω, acte², conturbo, hostio¹,
+Nearest to desertum: scitus², corpus, avis, resido, praesens,
+Nearest to verro: prosum, questus², conficio, optime, accido²,
+Nearest to praetorius: capio, quaero, impedio, amicus², delibero,
+Nearest to gravitas: accido², rescribo, locum, πάτρα, nosco,
+Loss at step 22000 : 3.191617965698242
+Loss at step 24000 : 5.831408500671387
+Nearest to spolio: animo, μεθαρμόζω, acte², conturbo, duco,
+Nearest to desertum: scitus², corpus, avis, praesens, resido,
+Nearest to verro: prosum, questus², optime, conficio, accido²,
+Nearest to praetorius: capio, quaero, impedio, amicus², delibero,
+Nearest to gravitas: accido², rescribo, locum, lectus, rectum,
+similarities [[-0.01589521  0.17148384  0.12973797 ...  0.02516987 -0.07128377
+  -0.02328461]
+ [ 0.01277893  0.03365164  0.05617415 ...  0.03673007  0.19661224
+  -0.06634295]
+ [ 0.00991528  0.24858929  0.17016412 ...  0.06293859  0.01890729
+  -0.16503449]
+ [ 0.00711736  0.21280469  0.14851825 ...  0.07084265 -0.03677169
+   0.07868067]
+ [-0.09484798  0.1269372   0.03407417 ... -0.00843405  0.07157806
+   0.01010384]]
+
+vs gensim on gravitas:
+
+0.729 	praecipio 	
+0.675 	perpetuus
+0.668 	revoco
+0.661 	offex
+0.66 	plenum
+0.659 	conservo
+0.654 	perpetuum
+0.648 	decretum
+0.647 	plenus
+0.644 	forensis
+0.64 	auctoro
+0.631 	existimatio
+0.627 	imperator
+0.625 	concurro
+0.624 	honor
+
+
+CBOW + joined on Cicero, Ad Atticum
+
+['cano', 'nauta', 'abjungo', 'peccatum·pecco', 'pertimeo·pertimesco']
+2018-02-18 08:21:40.194598: I tensorflow/core/platform/cpu_feature_guard.cc:137] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.2 AVX
+Loss at step 2000 : 32.10240173339844
+Loss at step 4000 : 13.151476860046387
+Nearest to cano: placeo·placo, contubernalis, aliter, ϲεμνόϲ, eloquentia,
+Nearest to nauta: locus·locum·loco, copis¹·copia¹, aliquis·aliqui, minuo, illustro,
+Nearest to abjungo: secunda·secundus¹·secundo², paro¹·paro²·paratus², vicis·vicus, volito, custodia,
+Nearest to peccatum·pecco: exsolvo, verro·versus³·versum·verto, avello, funditus, monstrum·monstro,
+Nearest to pertimeo·pertimesco: βουλεύω, caelus·caelum¹·caelum², labo, calidus, singillatim,
+Loss at step 6000 : 18.458942413330078
+Loss at step 8000 : 4.209968566894531
+Loss at step 10000 : 7.159870147705078
+Nearest to cano: placeo·placo, contubernalis, aliter, ϲεμνόϲ, eloquentia,
+Nearest to nauta: locus·locum·loco, copis¹·copia¹, aliquis·aliqui, illustro, labefacto,
+Nearest to abjungo: secunda·secundus¹·secundo², paro¹·paro²·paratus², vicis·vicus, volito, reconcilio,
+Nearest to peccatum·pecco: exsolvo, verro·versus³·versum·verto, avello, monstrum·monstro, frustro·frustra,
+Nearest to pertimeo·pertimesco: βουλεύω, caelus·caelum¹·caelum², labo, singillatim, iambus,
+Loss at step 12000 : 8.852496147155762
+Loss at step 14000 : 5.321883678436279
+Nearest to cano: placeo·placo, contubernalis, aliter, ϲεμνόϲ, eloquentia,
+Nearest to nauta: locus·locum·loco, copis¹·copia¹, aliquis·aliqui, illustro, labefacto,
+Nearest to abjungo: secunda·secundus¹·secundo², paro¹·paro²·paratus², reconcilio, custodia, pacificatio,
+Nearest to peccatum·pecco: exsolvo, verro·versus³·versum·verto, avello, monstrum·monstro, frustro·frustra,
+Nearest to pertimeo·pertimesco: βουλεύω, caelus·caelum¹·caelum², iambus, singillatim, ὑπόϲταϲιϲ,
+Loss at step 16000 : 7.495054721832275
+Loss at step 18000 : 5.299540996551514
+Loss at step 20000 : 4.432943344116211
+Nearest to cano: placeo·placo, contubernalis, aliter, ϲεμνόϲ, eloquentia,
+Nearest to nauta: locus·locum·loco, copis¹·copia¹, aliquis·aliqui, illustro, labefacto,
+Nearest to abjungo: secunda·secundus¹·secundo², paro¹·paro²·paratus², reconcilio, vicis·vicus, volito,
+Nearest to peccatum·pecco: exsolvo, verro·versus³·versum·verto, avello, monstrum·monstro, frustro·frustra,
+Nearest to pertimeo·pertimesco: βουλεύω, caelus·caelum¹·caelum², ὑπόϲταϲιϲ, hortulus, iambus,
+Loss at step 22000 : 4.634878635406494
+Loss at step 24000 : 4.9213972091674805
+Nearest to cano: placeo·placo, aliter, contubernalis, ϲεμνόϲ, eloquentia,
+Nearest to nauta: locus·locum·loco, copis¹·copia¹, aliquis·aliqui, labefacto, illustro,
+Nearest to abjungo: secunda·secundus¹·secundo², paro¹·paro²·paratus², reconcilio, pacificatio, acerbum·acerbus,
+Nearest to peccatum·pecco: exsolvo, verro·versus³·versum·verto, avello, monstrum·monstro, frustro·frustra,
+Nearest to pertimeo·pertimesco: βουλεύω, caelus·caelum¹·caelum², ὑπόϲταϲιϲ, iambus, hortulus,
+similarities [[-0.07444538  0.00016824  0.05655763 ... -0.00711618 -0.03579539
+   0.01444323]
+ [ 0.02131999  0.01714435 -0.03222964 ...  0.00023356  0.07354401
+  -0.11851147]
+ [-0.04277072  0.06155002 -0.06350119 ...  0.07324563  0.11557309
+  -0.01381822]
+ [ 0.01624409  0.04151002 -0.03002328 ...  0.0027299   0.03504315
+  -0.06000794]
+ [ 0.1432774  -0.05004353 -0.04265362 ... -0.01479933  0.12889808
+  -0.01326656]]
+  
+vs pecco in gensim
+
+0.907 	peccatum 	
+0.693 	dedecus
+0.654 	vitium
+0.653 	affligo
+0.651 	desino
+0.631 	consolor
+0.617 	consolo
+0.617 	socius
+0.608 	vitio
+0.602 	impono
+0.596 	invidia
+0.594 	suspicio²
+0.594 	luctus
+0.592 	domestici
+0.59 	lugeo
 
 """

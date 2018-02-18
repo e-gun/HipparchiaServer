@@ -78,7 +78,10 @@ def formatnnmatches(listofneighbors):
 	</tr>
 	"""
 
-	firstrow = firstrowtemplate.format(s=round(listofneighbors[0][1], 3), w=listofneighbors[0][0], n=len(listofneighbors))
+	try:
+		firstrow = firstrowtemplate.format(s=round(listofneighbors[0][1], 3), w=listofneighbors[0][0], n=len(listofneighbors))
+	except IndexError:
+		firstrow = firstrowtemplate.format(s='', w='no most common neighbors found', n=1)
 
 	rows = [firstrow] + [rowtemplate.format(s=round(n[1], 3), w=n[0]) for n in listofneighbors[1:]]
 
