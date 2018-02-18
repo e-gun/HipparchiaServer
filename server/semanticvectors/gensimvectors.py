@@ -579,7 +579,8 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	window = hipparchia.config['VECTORWINDOW']
 	trainingiterations = hipparchia.config['VECTORTRAININGITERATIONS']
 	minimumnumberofhits = hipparchia.config['VECTORMINIMALPRESENCE']
-	downsample = hipparchia.config['VECTORDOWNSAMPLE'] 
+	downsample = hipparchia.config['VECTORDOWNSAMPLE']
+	computeloss = False
 
 	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
 	model = Word2Vec(bagsofwords,
@@ -590,7 +591,11 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 					sample=downsample,
 					sg=1,  # the results seem terrible if you say sg=0
 					window=window,
-					workers=workers)
+					workers=workers,
+					compute_loss=computeloss)
+
+	if computeloss:
+		print('loss after {n} iterations was: {l}'.format(n=trainingiterations, l=model.get_latest_training_loss()))
 
 	storevectorindatabase(searchobject.searchlist, 'nn', model)
 

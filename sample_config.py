@@ -274,9 +274,37 @@ REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
 FORCELUNATESIGMANOMATTERWHAT = 'no'
 RESTOREMEDIALANDFINALSIGMA = 'no'
 
-# [7] semantic vectors: experimental and in-progress
+# [7] SEMANTIC VECTORS: experimental and in-progress
 #   many extra packages need to be configured and installed
-#   the results are not well explained; they cannot necessarily be trusted
+#   the results are not well explained; they cannot necessarily be trusted.
+#   Changing any value below even by a small amount can produce large shifts
+#   in your results. That should make you at least a little anxious.
+#
+#   All of this is useful for exploring ideas, but it should NOT be confused
+#   with "knowledge". The more one reads up on semantic vectors, the more
+#   one comes to appreciate that human tastes, judgement, and decisions
+#   are all key factors in determining what makes for a sensible set of
+#   values to use. Some will inevitably yield very flawed results. For example,
+#   a dimensionality of 1000 is known to be worse than 300 in most cases...
+#   Please consider researching the topic before making any arguments based
+#   on the results that this code will generate.
+#
+# LITERALCOSINEDISTANCEENABLED allows you to seek the concrete neighbors of words.
+#   In all of the instances of X, what other terms also show up nearby? This
+#   is not necessarily the most interesting search.
+#
+# CONCEPTMAPPINGENABLED allows you to generate graphs of the relationships between
+#   a lemmatized term and all of the other terms that "neighbor" it in the vector
+#   space.
+#
+# CONCEPTSEARCHINGENABLED allows you to search for sentences related to a lemmatized
+#   term or terms. What sentences are about "men"? Which sentences are related to the
+#   relationship that subsists between "good" and "man"?
+#
+# TENSORFLOWVECTORSENABLED will let you dig into the deeply broken tensorflow code.
+#   Results only go to the console or filesystem. It is very slow to execute. The
+#   neigbors it identifies make very little sense. See the notes ad loc. Only enable
+#   if you are debugging/coding.
 #
 # MAXVECTORSPACE: what is the largest set of words you are willing
 #   to vectorize in order to find the association network of a given
@@ -297,6 +325,21 @@ RESTOREMEDIALANDFINALSIGMA = 'no'
 #   unless you want a third user. These varaibles allow the vector infrastructure to stor
 #   calculated vector spaces and then to fetch them so that the very time-consuming task
 #   of mapping out the space does not have to be repeated more than necessary.
+#
+# VECTORTRAININGITERATIONS sets the number of training passes; this is a tricky one
+#   over-training Livy with 15 passes will destroy the results for "auctoritas"
+#
+# VECTORDOWNSAMPLE is the threshold for configuring which higher-frequency words are randomly
+#   downsampled, useful range is (0, 1e-5).
+#
+# VECTORMINIMALPRESENCE is the number of times you must be found before you are ranked as a
+#   significant word
+#
+# VECTORDIMENSIONS is the number of features you want to keep track of. More is better, until
+#   it isn't. The classic numbers are 100, 200, and 300.
+#
+# VECTORDISTANCECUTOFFs set the value at which something is no longer going to be considered
+#   "related" to what you are looking for.
 
 SEMANTICVECTORSENABLED = 'no'
 LITERALCOSINEDISTANCEENABLED = 'no'
