@@ -181,15 +181,21 @@ def findwordvectorset(listofwordclusters):
 def convertmophdicttodict(morphdict):
 	"""
 
+	return a dict of dicts of possibilities for all of the words we will be using
+
+	key = word-in-use
+	value = { maybeA, maybeB, maybeC}
+
+	{'θεῶν': {'θεόϲ', 'θέα', 'θεάω', 'θεά'}, 'πώ': {'πω'}, 'πολλά': {'πολύϲ'}, 'πατήρ': {'πατήρ'}, ... }
+
 	:return:
 	"""
 
 	morphdict = {k: v for k, v in morphdict.items() if v is not None}
 	morphdict = {k: set([p.getbaseform() for p in morphdict[k].getpossible()]) for k in morphdict.keys()}
 
-	# {'θεῶν': {'θεόϲ', 'θέα', 'θεάω', 'θεά'}, 'πώ': {'πω'}, 'πολλά': {'πολύϲ'}, 'πατήρ': {'πατήρ'}, ... }
-
 	# over-aggressive? more thought/care might be required here
+	# the definitely changes the shape of the bags of words...
 	delenda = mostcommonwords()
 	morphdict = {k: v for k, v in morphdict.items() if v - delenda == v}
 
@@ -263,6 +269,7 @@ def findverctorenvirons(hitdict, searchobject):
 def bulklinegrabber(table, column, criterion, setofcriteria, cursor):
 	"""
 
+	snarf up a huge number of lines
 
 	:param table:
 	:param setofindices:
