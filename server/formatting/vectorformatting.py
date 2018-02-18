@@ -8,6 +8,7 @@
 
 import re
 
+from server import hipparchia
 from server.startup import authordict, workdict
 
 
@@ -134,3 +135,58 @@ def locusformat(dblineobject):
 	citationtext = '{a}, <span class="italic">{w}</span>, {l}'.format(a=au, w=wk, l=loc)
 
 	return citationtext
+
+
+def vectorhtmlforfrontpage():
+	"""
+
+	read the config and generate the html
+
+	:return:
+	"""
+
+	cdc = """
+		<span id="cosinedistancesentencecheckbox">
+			<span class="small">Word environs:</span>
+			<span class="small">by sentence</span><input type="checkbox" id="cosdistbysentence" value="yes" title="Cosine distances: words in the same sentence">
+		</span>
+		<span id="cosinedistancelineorwordcheckbox">
+			<span class="small">within N lines/words</span><input type="checkbox" id="cosdistbylineorword" value="yes" title="Cosine distances within N lines or words">
+		</span>
+		"""
+
+	cs = """
+		<span id="semanticvectorquerycheckbox">
+			<span class="small">&nbsp;&middot;&nbsp;Concept search</span><input type="checkbox" id="semanticvectorquery" value="yes" title="Make a latent semantic analysis query">
+		</span>
+		"""
+
+	cm = """
+		<span id="semanticvectornnquerycheckbox">
+			<span class="small">&nbsp;&middot;&nbsp;Concept map</span><input type="checkbox" id="nearestneighborsquery" value="yes" title="Make a nearest neighbor query">
+		</span>
+		"""
+
+	tf = """
+		<span id="tensorflowgraphcheckbox">
+			<span class="small">&nbsp;&middot;&nbsp;tensor flow graph:</span>
+			<span class="small">tf</span><input type="checkbox" id="tensorflowgraph" value="yes" title="Make an associative graph of all the selected words">
+		</span>
+		"""
+
+	if hipparchia.config['SEMANTICVECTORSENABLED'] != 'yes':
+		return ''
+
+	textmapper = {'LITERALCOSINEDISTANCEENABLED': cdc,
+	              'CONCEPTSEARCHINGENABLED': cs,
+	              'CONCEPTMAPPINGENABLED': cm,
+	              'TENSORFLOWVECTORSENABLED': tf }
+
+	vectorhtml = list()
+	for conf in textmapper:
+		if hipparchia.config[conf] == 'yes':
+			vectorhtml.append(textmapper[conf])
+
+	vectorhtml = '\n'.join(vectorhtml)
+
+	return vectorhtml

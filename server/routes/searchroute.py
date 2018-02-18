@@ -41,6 +41,8 @@ def executesearch(timestamp):
 
 	the results are returned in a json bundle that will be used to update the html on the page
 
+	note that vector queries also flow through here
+
 	:return:
 	"""
 

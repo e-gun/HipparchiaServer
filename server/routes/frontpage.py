@@ -14,6 +14,7 @@ from flask import render_template, send_file, session
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import versionchecking
+from server.formatting.vectorformatting import vectorhtmlforfrontpage
 from server.listsandsession.sessionfunctions import sessionvariables
 from server.startup import listmapper
 
@@ -31,7 +32,7 @@ def frontpage():
 	expectedsqltemplateversion = 1082018
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
 
-	icandovectors = hipparchia.config['SEMANTICVECTORSENABLED']
+	vectorhtml = vectorhtmlforfrontpage()
 
 	sessionvariables()
 
@@ -54,7 +55,7 @@ def frontpage():
 	page = render_template('search.html', activelists=activelists, activecorpora=activecorpora, clab=corporalabels,
 	                       css=stylesheet, buildinfo=buildinfo, onehit=session['onehit'],
 	                       hwindexing=session['headwordindexing'], indexbyfrequency=session['indexbyfrequency'],
-						   spuria=session['spuria'], varia=session['varia'], undated=session['incerta'], icandovectors=icandovectors)
+						   spuria=session['spuria'], varia=session['varia'], undated=session['incerta'], vectorhtml=vectorhtml)
 
 	return page
 

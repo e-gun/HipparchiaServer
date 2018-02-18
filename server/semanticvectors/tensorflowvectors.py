@@ -78,7 +78,6 @@ def tensorgraphelectedworks(activepoll, searchobject):
 		reasons = ['the vector scope max exceeded: {a} > {b} '.format(a=locale.format('%d', wordstotal, grouping=True), b=locale.format('%d', maxwords, grouping=True))]
 		return emptyvectoroutput(so, reasons)
 
-
 	if len(searchlist) > 0:
 		searchlist = flagexclusions(searchlist, so.session)
 		workssearched = len(searchlist)

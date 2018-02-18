@@ -299,6 +299,10 @@ RESTOREMEDIALANDFINALSIGMA = 'no'
 #   of mapping out the space does not have to be repeated more than necessary.
 
 SEMANTICVECTORSENABLED = 'no'
+LITERALCOSINEDISTANCEENABLED = 'no'
+CONCEPTSEARCHINGENABLED = 'no'
+CONCEPTMAPPINGENABLED = 'no'
+TENSORFLOWVECTORSENABLED = 'no'
 MAXVECTORSPACE = 7548165
 DBWRITEUSER = '(consider re-using HipparchiaBuilder user)'
 DBWRITEPASS = '(consider re-using HipparchiaBuilder pass)'

@@ -276,7 +276,7 @@ def lsigenerateoutput(listsofwords, workssearched, searchobject, activepoll, sta
 
 	findshtml = formatlsimatches(matches)
 
-	findsjs = generatevectorjs()
+	findsjs = generatevectorjs('therewillbenoreclicks')
 
 	searchtime = time.time() - starttime
 	searchtime = round(searchtime, 2)
@@ -404,7 +404,7 @@ def nearestneighborgenerateoutput(listsofwords, workssearched, searchobject, act
 	if lm and pr:
 		output['title'] = '[TESTING] Word2Vec of »{skg}« and »{pr}«'.format(skg=lm, pr=pr)
 	else:
-		output['title'] = '[TESTING] Neighbors for all forms of »{skg}«'.format(skg=lm, pr=pr)
+		output['title'] = 'Neighbors for all forms of »{skg}«'.format(skg=lm, pr=pr)
 	output['found'] = findshtml
 	# ultimately the js should let you clock on any top word to find its associations...
 	output['js'] = findsjs

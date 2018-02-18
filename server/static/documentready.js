@@ -55,6 +55,7 @@ $(document).ready( function () {
         $('#cosinedistancesentencecheckbox').toggle();
         $('#cosinedistancelineorwordcheckbox').toggle();
         $('#semanticvectorquerycheckbox').toggle();
+        $('#semanticvectornnquerycheckbox').toggle();
         $('#tensorflowgraphcheckbox').toggle();
         });
 
@@ -205,7 +206,7 @@ $(document).ready( function () {
     var tohideonfirstload = Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur',
         '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform',
         '#termonecheckbox', '#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox',
-        '#semanticvectorquerycheckbox', '#tensorflowgraphcheckbox');
+        '#semanticvectorquerycheckbox', '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox');
     bulkhider(tohideonfirstload);
 
     //

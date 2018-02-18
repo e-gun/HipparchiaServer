@@ -112,15 +112,15 @@ def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconne
 	# cmap='tab20c' or 'Pastel1' is nice
 
 	# nodes
-	nx.draw_networkx_nodes(graph, pos, node_size=6000, node_color=range(len(terms)), cmap='Pastel1')
+	nx.draw_networkx_nodes(graph, pos, node_size=6500, node_color=range(len(terms)), cmap='Pastel1')
 	nx.draw_networkx_labels(graph, pos, font_size=20, font_family='sans-serif', font_color='Black')
 
 	# edges
-	nx.draw_networkx_edges(graph, pos, width=3, alpha=0.8, edge_color='Black')
+	nx.draw_networkx_edges(graph, pos, width=3, alpha=0.8, edge_color='dimgrey')
 	nx.draw_networkx_edge_labels(graph, pos, edgelabels, font_size=12, alpha=0.8, label_pos=0.5, font_family='sans-serif')
 
 	# the fine print
-	plt.text(0, -1, generatethefineprint(), ha='center', va='bottom')
+	plt.text(0, -1.1, generatethefineprint(), ha='center', va='bottom')
 	# plt.text(1, -1, 'gensim', ha='center', va='bottom')
 	# plt.text(-1, -1, '@commit {v}'.format(v=readgitdata()[0:5]), ha='center', va='bottom')
 
