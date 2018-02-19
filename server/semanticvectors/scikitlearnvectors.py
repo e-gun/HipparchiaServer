@@ -10,10 +10,18 @@ import locale
 from pprint import pprint
 from time import time
 
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.linear_model import SGDClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import Pipeline
+try:
+	from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
+	from sklearn.linear_model import SGDClassifier
+	from sklearn.model_selection import GridSearchCV
+	from sklearn.pipeline import Pipeline
+except ImportError:
+	print('sklearn is unavailable')
+	CountVectorizer = None
+	TfidfTransformer = None
+	SGDClassifier = None
+	GridSearchCV = None
+	Pipeline = None
 
 from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
@@ -31,6 +39,9 @@ def sklearnselectedworks(activepoll, searchobject):
 	:param searchobject:
 	:return:
 	"""
+
+	skfunctiontotest = sklearntextfeatureextractionandevaluation
+	skfunctiontotest = simplesktextcomparison
 
 	starttime = time()
 
@@ -78,7 +89,7 @@ def sklearnselectedworks(activepoll, searchobject):
 		activepoll.statusis('Finding all sentences')
 		so.seeking = r'.'
 		sentences = vectorsentencedispatching(so, activepoll)
-		output = sklearntextfeatureextractionandevaluation(sentences, activepoll)
+		output = skfunctiontotest(sentences, activepoll)
 	else:
 		return emptyvectoroutput(so)
 
@@ -165,6 +176,53 @@ def sklearntextfeatureextractionandevaluation(sentences, activepoll):
 	best_parameters = grid_search.best_estimator_.get_params()
 	for param_name in sorted(parameters.keys()):
 		print("\t%s: %r" % (param_name, best_parameters[param_name]))
+
+	return
+
+
+def simplesktextcomparison(sentences, activepoll):
+	"""
+
+	sentences come in as numbered tuples [(id, text), (id2, text2), ...]
+
+	if id is a uid, then you can check matches between works...
+
+	in its simple form this will chack a work against itself (and any other work that
+	was on the original searchlist)
+
+	:param sentences:
+	:param activepoll:
+	:return:
+	"""
+
+	sentences = [s[1] for s in sentences if len(s[1].strip().split(' ')) > 1]
+	print(sentences)
+	tfidf = TfidfVectorizer().fit_transform(sentences)
+	pairwisesimilarity = tfidf * tfidf.T  # <class 'scipy.sparse.csr.csr_matrix'>
+	# print('pairwisesimilarity', pairwisesimilarity)
+
+	pairwisesimilarity = pairwisesimilarity.tocoo()
+	# pwd = {(pairwisesimilarity.row[i], pairwisesimilarity.col[i]): pairwisesimilarity.data[i] for i in range(len(pairwisesimilarity.data))}
+	tuples = zip(pairwisesimilarity.row, pairwisesimilarity.col)
+	pwd = {t: d for t, d in zip(tuples, pairwisesimilarity.data)}
+
+	pairwise = dict()
+	for p in pwd:
+		# (1, 3) has the same value in it as does (3, 1)
+		# (2, 2) is a comparison of something to itself
+		if (p[1], p[0]) not in pairwise.keys() and p[1] != p[0]:
+			pairwise[p] = pwd[p]
+
+	mostsimilar = list()
+	for pair in sorted(pairwise, key=pairwise.get, reverse=True):
+		mostsimilar.append((pair, pairwise[pair]))
+
+	print(mostsimilar[:50])
+
+	for m in mostsimilar[:50]:
+		print('score=',m[1])
+		print(m[0][0],'s1=', sentences[m[0][0]])
+		print(m[0][1],'s2=', sentences[m[0][1]])
 
 	return
 
