@@ -267,6 +267,9 @@ def simplesktextcomparison(sentencetuples, activepoll):
 	cap = 50
 	mustbelongerthan = 2
 	cutoff = .2
+	antianaphora = 3
+	avoidinternalxrefs = True
+	avoidauthorxrefs = False
 
 	sentencetuples = [s for s in sentencetuples if len(s[1].strip().split(' ')) > mustbelongerthan]
 	sentences = [s[1] for s in sentencetuples]
@@ -313,4 +316,30 @@ def simplesktextcomparison(sentencetuples, activepoll):
 	dbconnection.close()
 	del dbconnection
 
-	return similaritiesdict
+
+	if avoidinternalxrefs:
+		similaritiesdict = {s: similaritiesdict[s] for s in similaritiesdict
+		                    if similaritiesdict[s][1].wkuinversalid != similaritiesdict[s][3].wkuinversalid}
+
+	if avoidauthorxrefs:
+		similaritiesdict = {s: similaritiesdict[s] for s in similaritiesdict
+		                    if similaritiesdict[s][1].authorid != similaritiesdict[s][3].authorid}
+
+	if antianaphora > 0:
+		anaphoratracker = set()
+		trimmedsd = dict()
+		for s in similaritiesdict:
+			for item in [similaritiesdict[s][1], similaritiesdict[s][3]]:
+				wk = item.wkuinversalid
+				testzone = range(item.index - antianaphora, item.index + antianaphora)
+				test = set(['{w}_LN_{i}'.format(w=wk, i=t) for t in testzone])
+				if anaphoratracker - test != anaphoratracker:
+					pass
+				else:
+					trimmedsd[s] = similaritiesdict[s]
+					anaphoratracker.add(item.universalid)
+	else:
+		trimmedsd = similaritiesdict
+
+
+	return trimmedsd

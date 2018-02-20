@@ -131,19 +131,20 @@ def skformatmostimilar(similaritiesdict):
 
 	rowtemplate = """
 	<tr class="vectorrow">
-		<td class="vectornumber">{n}</td>
+		<td class="vectornumber">[{n}]</td>
 		<td class="vectorscore">{s}</td>
+		<td class="vectoronelocus">{locone}</td>	
 		<td class="vectoronesentence">{sentone}</td>
-		<td class="vectoronelocus">{locone}</td>
-		<td class="vectortwolocus">{loctwo}</td>
 		<td class="vectortwosentence">{senttwo}</td>
+		<td class="vectortwolocus">{loctwo}</td>
+		
 	</tr>
 	"""
 
 	rows = list()
 	for key in sorted(similaritiesdict.keys()):
 		rows.append(rowtemplate.format(n=key,
-		                               s=round(similaritiesdict[key][0], 3),
+		                               s=round(similaritiesdict[key][0], 2),
 		                               sentone= similaritiesdict[key][2],
 		                               locone=locusformat(similaritiesdict[key][1]),
 		                               loctwo=locusformat(similaritiesdict[key][3]),
