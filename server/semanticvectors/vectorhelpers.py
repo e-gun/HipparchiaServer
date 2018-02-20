@@ -130,7 +130,7 @@ def parsevectorsentences(searchobject, lineobjects):
 	"""
 	so = searchobject
 
-	requiresids = ['semanticvectorquery']
+	requiresids = ['semanticvectorquery', 'sentencesimilarity']
 
 	columnmap = {'marked_up_line': 'accented', 'accented_line': 'polytonic', 'stripped_line': 'stripped'}
 	col = columnmap[so.usecolumn]
@@ -304,6 +304,8 @@ def findverctorenvirons(hitdict, searchobject):
 						pass
 
 	cursor.close()
+	dbconnection.close()
+	del dbconnection
 
 	return environs
 
@@ -365,10 +367,7 @@ def finddblinesfromsentences(thissentence, sentencestuples, cursor):
 	given a sentencelist ['word1', 'word2', word3', ...] , look for a match in a sentence tuple collection:
 		[(universalid1, text1), (universalid2, text2), ...]
 
-	returns a list of matches, but this list most likely has only a single member unless there are 3 copies
-	of a formulaic senctence in your data, e.g.
-
-		matches ['lt0588w001_ln_1321']
+	returns a list of dblines
 
 	:param thissentence:
 	:param sentencestuples:
@@ -383,15 +382,49 @@ def finddblinesfromsentences(thissentence, sentencestuples, cursor):
 		if cleans == thissentence:
 			matches.append(s[0])
 
-	fetchedlines = list()
-	for m in matches:
-		db = m.split('_')[0][:6]
-		ln = m.split('_')[-1]
-
-		myline = grabonelinefromwork(db, ln, cursor)
-		fetchedlines.append(dblineintolineobject(myline))
+	fetchedlines = convertlineuidstolineobject(matches, cursor)
 
 	return fetchedlines
+
+
+def convertlineuidstolineobject(listoflines, cursor):
+	"""
+
+	given a list of universalids, fetch the relevant lines
+
+	would be more efficient if you grabbed all of them at once
+	for any given table.
+
+	but note that these lists are usually just one item long
+
+	:return:
+	"""
+
+	fetchedlines = list()
+	for uid in listoflines:
+		fetchedlines.append(convertsingleuidtodblineobject(uid, cursor))
+
+	return fetchedlines
+
+
+def convertsingleuidtodblineobject(lineuid, cursor):
+	"""
+
+	:param lineuid:
+	:param cursor:
+	:return:
+	"""
+
+	db = lineuid.split('_')[0][:6]
+	ln = lineuid.split('_')[-1]
+	try:
+		myline = grabonelinefromwork(db, ln, cursor)
+		fetchedline = dblineintolineobject(myline)
+	except psycopg2.ProgrammingError:
+		# psycopg2.ProgrammingError: relation "l" does not exist
+		fetchedline = None
+
+	return fetchedline
 
 
 def buildflatbagsofwords(morphdict, sentences):

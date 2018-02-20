@@ -59,6 +59,7 @@ def sessionvariables():
 		session['searchscope'] = 'L'
 		session['semanticvectorquery'] = 'no'
 		session['sensesummary'] = hipparchia.config['DEFAULTSHOWLEXICALSENSES']
+		session['sentencesimilarity'] = 'no'
 		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
 		session['spuria'] = hipparchia.config['DEFAULTSPURIA']
 		session['tensorflowgraph'] = 'no'
@@ -113,6 +114,7 @@ def modifysessionvar(param, val):
 		'searchscope',
 		'semanticvectorquery',
 		'sensesummary',
+		'sentencesimilarity',
 		'sortorder',
 		'spuria',
 		'tensorflowgraph',
@@ -150,12 +152,12 @@ def modifysessionvar(param, val):
 					'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary', 'authorssummary',
 					'quotesummary', 'bracketsquare', 'bracketround', 'bracketangled', 'bracketcurly',
 					'indexbyfrequency', 'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery',
-					'nearestneighborsquery']:
+					'nearestneighborsquery', 'sentencesimilarity']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 
 	# only one of these can be active at one time
-	exclusive = {'cosdistbysentence', 'cosdistbysentence', 'semanticvectorquery', 'nearestneighborsquery', 'tensorflowgraph'}
+	exclusive = {'cosdistbysentence', 'cosdistbysentence', 'semanticvectorquery', 'nearestneighborsquery', 'tensorflowgraph', 'sentencesimilarity'}
 
 	for e in exclusive:
 		if param == e and val == 'yes':

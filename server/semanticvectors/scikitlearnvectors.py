@@ -6,6 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import json
 import locale
 from pprint import pprint
 from time import time
@@ -27,9 +28,13 @@ from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
-from server.semanticvectors.vectorhelpers import convertmophdicttodict
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, convertsingleuidtodblineobject
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
+from server.formatting.vectorformatting import skformatmostimilar
+from server.formatting.jsformatting import insertbrowserclickjs
 from server.startup import authordict, listmapper, workdict
+from server.dbsupport.dbfunctions import setconnection
+from server.formatting.bibliographicformatting import bcedating
 
 
 def sklearnselectedworks(activepoll, searchobject):
@@ -50,6 +55,7 @@ def sklearnselectedworks(activepoll, searchobject):
 	activepoll.statusis('Preparing to search')
 
 	so.usecolumn = 'marked_up_line'
+	so.vectortype = 'sentencesimilarity'
 
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	activecorpora = [c for c in allcorpora if so.session[c] == 'yes']
@@ -88,10 +94,73 @@ def sklearnselectedworks(activepoll, searchobject):
 		# find all sentences
 		activepoll.statusis('Finding all sentences')
 		so.seeking = r'.'
-		sentences = vectorsentencedispatching(so, activepoll)
-		output = skfunctiontotest(sentences, activepoll)
+		sentencetuples = vectorsentencedispatching(so, activepoll)
+		similaritiesdict = skfunctiontotest(sentencetuples, activepoll)
+		# similaritiesdict: {id: (scoreA, lindobjectA1, sentA1, lindobjectA2, sentA2), id2: (scoreB, lindobjectB1, sentB1, lindobjectB2, sentB2), ... }
+		corehtml = skformatmostimilar(similaritiesdict)
+		output = generatesimilarsentenceoutput(corehtml, so, activepoll, starttime, workssearched, len(similaritiesdict))
 	else:
 		return emptyvectoroutput(so)
+
+	return output
+
+
+def generatesimilarsentenceoutput(corehtml, searchobject, activepoll, starttime, workssearched, matches):
+	"""
+
+	:param corehtml:
+	:param searchobject:
+	:return:
+	"""
+
+	so = searchobject
+	dmin, dmax = bcedating(so.session)
+
+	# findsjs = generatevectorjs('therewillbenoreclicks')
+	findsjs = insertbrowserclickjs('browser')
+
+	searchtime = time() - starttime
+	searchtime = round(searchtime, 2)
+	workssearched = locale.format('%d', workssearched, grouping=True)
+
+	output = dict()
+	output['title'] = 'Similar sentences'
+	output['found'] = corehtml
+	# ultimately the js should let you clock on any top word to find its associations...
+	output['js'] = findsjs
+	output['resultcount'] = '{n} sentences above the cutoff'.format(n=matches)
+	output['scope'] = workssearched
+	output['searchtime'] = str(searchtime)
+	output['proximate'] = ''
+
+	if so.lemma:
+		all = 'all forms of »{skg}«'.format(skg=lm)
+	else:
+		all = ''
+	if so.proximatelemma:
+		near = ' all forms of »{skg}«'.format(skg=pr)
+	else:
+		near = ''
+	output['thesearch'] = '{all}{near}'.format(all=all, near=near)
+
+	if so.lemma:
+		all = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
+	else:
+		all = ''
+	if so.proximatelemma:
+		near = ' and all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.proximatelemma.formlist), skg=pr)
+	else:
+		near = ''
+	output['htmlsearch'] = '{all}{near}'.format(all=all, near=near)
+	output['hitmax'] = ''
+	output['onehit'] = ''
+	output['sortby'] = 'proximity'
+	output['dmin'] = dmin
+	output['dmax'] = dmax
+
+	activepoll.deactivate()
+
+	output = json.dumps(output)
 
 	return output
 
@@ -180,14 +249,14 @@ def sklearntextfeatureextractionandevaluation(sentences, activepoll):
 	return
 
 
-def simplesktextcomparison(sentences, activepoll):
+def simplesktextcomparison(sentencetuples, activepoll):
 	"""
 
 	sentences come in as numbered tuples [(id, text), (id2, text2), ...]
 
 	if id is a uid, then you can check matches between works...
 
-	in its simple form this will chack a work against itself (and any other work that
+	in its simple form this will check a work against itself (and any other work that
 	was on the original searchlist)
 
 	:param sentences:
@@ -195,8 +264,14 @@ def simplesktextcomparison(sentences, activepoll):
 	:return:
 	"""
 
-	sentences = [s[1] for s in sentences if len(s[1].strip().split(' ')) > 1]
-	print(sentences)
+	cap = 50
+	mustbelongerthan = 2
+	cutoff = .2
+
+	sentencetuples = [s for s in sentencetuples if len(s[1].strip().split(' ')) > mustbelongerthan]
+	sentences = [s[1] for s in sentencetuples]
+
+	activepoll.statusis('Calculating tfidf for {n} sentences'.format(n=len(sentences)))
 	tfidf = TfidfVectorizer().fit_transform(sentences)
 	pairwisesimilarity = tfidf * tfidf.T  # <class 'scipy.sparse.csr.csr_matrix'>
 	# print('pairwisesimilarity', pairwisesimilarity)
@@ -217,12 +292,25 @@ def simplesktextcomparison(sentences, activepoll):
 	for pair in sorted(pairwise, key=pairwise.get, reverse=True):
 		mostsimilar.append((pair, pairwise[pair]))
 
-	print(mostsimilar[:50])
+	mostsimilar = [m for m in mostsimilar if m[1] > cutoff]
+	mostsimilar = mostsimilar[:cap]
 
-	for m in mostsimilar[:50]:
-		print('score=',m[1])
-		print(m[0][0],'s1=', sentences[m[0][0]])
-		print(m[0][1],'s2=', sentences[m[0][1]])
+	# for m in mostsimilar[:50]:
+	# 	print('score=', m[1])
+	# 	print(sentencetuples[m[0][0]][0],'s1=', sentences[m[0][0]])
+	# 	print(sentencetuples[m[0][1]][0],'s2=', sentences[m[0][1]])
 
-	return
+	dbconnection = setconnection('autocommit', readonlyconnection=False)
+	cursor = dbconnection.cursor()
 
+	similaritiesdict = {id: (m[1], convertsingleuidtodblineobject(sentencetuples[m[0][0]][0], cursor), sentences[m[0][0]],
+	                         convertsingleuidtodblineobject(sentencetuples[m[0][1]][0], cursor), sentences[m[0][1]])
+	               for id, m in enumerate(mostsimilar)}
+
+	# {id: (scoreA, lineobjectA1, sentA1, lineobjectA2, sentA2), id2: (scoreB, lineobjectB1, sentB1, lineobjectB2, sentB2), ... }
+
+	cursor.close()
+	dbconnection.close()
+	del dbconnection
+
+	return similaritiesdict

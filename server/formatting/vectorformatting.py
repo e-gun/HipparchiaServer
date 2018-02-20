@@ -120,6 +120,49 @@ def formatnnsimilarity(termone, termtwo, similarityscore):
 	return similarity
 
 
+def skformatmostimilar(similaritiesdict):
+	"""
+
+	{id: (scoreA, lineobjectA1, sentA1, lindebjectA2, sentA2), id2: (scoreB, lineobjectB1, sentB1, lineobjectB2, sentB2), ... }
+	         0          1          2         3          4
+	:param similaritiesdict:
+	:return:
+	"""
+
+	rowtemplate = """
+	<tr class="vectorrow">
+		<td class="vectornumber">{n}</td>
+		<td class="vectorscore">{s}</td>
+		<td class="vectoronesentence">{sentone}</td>
+		<td class="vectoronelocus">{locone}</td>
+		<td class="vectortwolocus">{loctwo}</td>
+		<td class="vectortwosentence">{senttwo}</td>
+	</tr>
+	"""
+
+	rows = list()
+	for key in sorted(similaritiesdict.keys()):
+		rows.append(rowtemplate.format(n=key,
+		                               s=round(similaritiesdict[key][0], 3),
+		                               sentone= similaritiesdict[key][2],
+		                               locone=locusformat(similaritiesdict[key][1]),
+		                               loctwo=locusformat(similaritiesdict[key][3]),
+		                               senttwo=similaritiesdict[key][4]))
+
+	newrows = list()
+	count = 0
+	for r in rows:
+		count += 1
+		if count % 3 == 0:
+			r = re.sub(r'class="vectorrow"', 'class="nthrow"', r)
+		newrows.append(r)
+
+	rows = ['<table class="indented">'] + newrows + ['</table>']
+
+	thehtml = '\n'.join(rows)
+
+	return thehtml
+
 def locusformat(dblineobject):
 	"""
 
@@ -161,22 +204,29 @@ def vectorhtmlforfrontpage():
 
 	cs = """
 		<span id="semanticvectorquerycheckbox">
-			<span class="small">&nbsp;&middot;&nbsp;Concept search</span><input type="checkbox" id="semanticvectorquery" value="yes" title="Make a latent semantic analysis query">
+			<span class="small">Concept search</span><input type="checkbox" id="semanticvectorquery" value="yes" title="Make a latent semantic analysis query">
 		</span>
 		"""
 
 	cm = """
 		<span id="semanticvectornnquerycheckbox">
-			<span class="small">&nbsp;&middot;&nbsp;Concept map</span><input type="checkbox" id="nearestneighborsquery" value="yes" title="Make a nearest neighbor query">
+			<span class="small">Concept map</span><input type="checkbox" id="nearestneighborsquery" value="yes" title="Make a nearest neighbor query">
 		</span>
 		"""
 
 	tf = """
 		<span id="tensorflowgraphcheckbox">
 			<span class="small">&nbsp;&middot;&nbsp;tensor flow graph:</span>
-			<span class="small">tf</span><input type="checkbox" id="tensorflowgraph" value="yes" title="Make an associative graph of all the selected words">
+			<input type="checkbox" id="tensorflowgraph" value="yes" title="Make an associative graph of all the selected words">
 		</span>
 		"""
+
+	ss = """
+		<span id="sentencesimilaritycheckbox">
+			<span class="small">sentence similarities</span>
+			<input type="checkbox" id="sentencesimilarity" value="yes" title="Find sentence similarities in and between works">
+		</span>
+	"""
 
 	if hipparchia.config['SEMANTICVECTORSENABLED'] != 'yes':
 		return ''
@@ -184,13 +234,14 @@ def vectorhtmlforfrontpage():
 	textmapper = {'LITERALCOSINEDISTANCEENABLED': cdc,
 	              'CONCEPTSEARCHINGENABLED': cs,
 	              'CONCEPTMAPPINGENABLED': cm,
-	              'TENSORFLOWVECTORSENABLED': tf }
+	              'TENSORFLOWVECTORSENABLED': tf,
+	              'SENTENCESIMILARITYENABLED': ss}
 
 	vectorhtml = list()
 	for conf in textmapper:
 		if hipparchia.config[conf] == 'yes':
 			vectorhtml.append(textmapper[conf])
 
-	vectorhtml = '\n'.join(vectorhtml)
+	vectorhtml = '\n&nbsp;&middot;&nbsp;\n'.join(vectorhtml)
 
 	return vectorhtml

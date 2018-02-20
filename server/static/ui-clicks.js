@@ -42,7 +42,8 @@ function loadoptions() {
             'cosdistbylineorword': $('#cosdistbylineorword'),
             'semanticvectorquery': $('#semanticvectorquery'),
             'nearestneighborsquery': $('#nearestneighborsquery'),
-            'tensorflowgraph': $('#tensorflowgraph')
+            'tensorflowgraph': $('#tensorflowgraph'),
+            'sentencesimilarity': $('#sentencesimilarity')
         };
 
         Object.keys(simpletoggles).forEach(function(key) {
@@ -377,12 +378,23 @@ $('#bracketcurly').change(function() {
     loadoptions();
     });
 
+// but see how stupid set subtraction is in js...
+var xoredoptions = [
+    $('#cosdistbysentence'),
+    $('#cosdistbylineorword'),
+    $('#semanticvectorquery'),
+    $('#nearestneighborsquery'),
+    $('#tensorflowgraph'),
+    $('#sentencesimilarity')
+    ];
+
 $('#cosdistbysentence').change(function() {
     if(this.checked) {
         $('#cosdistbylineorword').prop('checked', false);
         $('#semanticvectorquery').prop('checked', false);
         $('#nearestneighborsquery').prop('checked', false);
         $('#tensorflowgraph').prop('checked', false);
+        $('#sentencesimilarity').prop('checked', false);
         $('#complexsearching').hide();
         $('#proximatesearchform').val('');
         setoptions('cosdistbysentence', 'yes');
@@ -398,6 +410,7 @@ $('#cosdistbylineorword').change(function() {
         $('#semanticvectorquery').prop('checked', false);
         $('#nearestneighborsquery').prop('checked', false);
         $('#tensorflowgraph').prop('checked', false);
+        $('#sentencesimilarity').prop('checked', false);
         $('#complexsearching').show();
         $('#proximatesearchform').val('');
         setoptions('cosdistbylineorword', 'yes');
@@ -411,8 +424,9 @@ $('#semanticvectorquery').change(function() {
         $('#cosdistbysentence').prop('checked', false);
         $('#cosdistbylineorword').prop('checked', false);
         $('#nearestneighborsquery').prop('checked', false);
-        $('#complexsearching').show();
         $('#tensorflowgraph').prop('checked', false);
+        $('#sentencesimilarity').prop('checked', false);
+        $('#complexsearching').show();
         var wsf = $('#wordsearchform');
         var lsf = $('#lemmatasearchform');
         var psf = $('#proximatesearchform');
@@ -437,6 +451,7 @@ $('#nearestneighborsquery').change(function() {
         $('#cosdistbylineorword').prop('checked', false);
         $('#semanticvectorquery').prop('checked', false);
         $('#tensorflowgraph').prop('checked', false);
+        $('#sentencesimilarity').prop('checked', false);
         $('#complexsearching').show();
         var wsf = $('#wordsearchform');
         var lsf = $('#lemmatasearchform');
@@ -462,6 +477,7 @@ $('#tensorflowgraph').change(function() {
         $('#cosdistbylineorword').prop('checked', false);
         $('#semanticvectorquery').prop('checked', false);
         $('#nearestneighborsquery').prop('checked', false);
+        $('#sentencesimilarity').prop('checked', false);
         $('#complexsearching').show();
         var wsf = $('#wordsearchform');
         var lsf = $('#lemmatasearchform');
@@ -481,6 +497,34 @@ $('#tensorflowgraph').change(function() {
         setoptions('tensorflowgraph', 'no');
         }
     });
+
+$('#sentencesimilarity').change(function() {
+    if(this.checked) {
+        $('#cosdistbysentence').prop('checked', false);
+        $('#cosdistbylineorword').prop('checked', false);
+        $('#semanticvectorquery').prop('checked', false);
+        $('#nearestneighborsquery').prop('checked', false);
+        $('#tensorflowgraph').prop('checked', false);
+        $('#complexsearching').show();
+        var wsf = $('#wordsearchform');
+        var lsf = $('#lemmatasearchform');
+        var psf = $('#proximatesearchform');
+        var plsf = $('#proximatelemmatasearchform');
+        wsf.hide();
+        wsf.val('');
+        lsf.show();
+        lsf.val('(unused for tensorflow graph)');
+        psf.hide();
+        psf.val('');
+        plsf.show();
+        $('#termoneisalemma').prop('checked', true);
+        $('#termtwoisalemma').prop('checked', true);
+        setoptions('sentencesimilarity', 'yes');
+        } else {
+        setoptions('sentencesimilarity', 'no');
+        }
+    });
+
 
 $('#termoneisalemma').change(function() {
     var wsf = $('#wordsearchform');
