@@ -119,7 +119,6 @@ def generatesimilarsentenceoutput(corehtml, searchobject, activepoll, starttime,
 	so = searchobject
 	dmin, dmax = bcedating(so.session)
 
-	# findsjs = generatevectorjs('therewillbenoreclicks')
 	findsjs = insertbrowserclickjs('browser')
 
 	searchtime = time() - starttime
@@ -129,7 +128,6 @@ def generatesimilarsentenceoutput(corehtml, searchobject, activepoll, starttime,
 	output = dict()
 	output['title'] = 'Similar sentences'
 	output['found'] = corehtml
-	# ultimately the js should let you clock on any top word to find its associations...
 	output['js'] = findsjs
 	output['resultcount'] = '{n} sentences above the cutoff'.format(n=matches)
 	output['scope'] = workssearched
@@ -279,6 +277,7 @@ def simplesktextcomparison(sentencetuples, activepoll):
 
 	activepoll.statusis('Calculating tfidf for {n} sentences'.format(n=len(sentences)))
 	tfidf = TfidfVectorizer().fit_transform(sentences)
+	activepoll.statusis('Calculating pairwise similarity for {n} sentences'.format(n=len(sentences)))
 	pairwisesimilarity = tfidf * tfidf.T  # <class 'scipy.sparse.csr.csr_matrix'>
 	# print('pairwisesimilarity', pairwisesimilarity)
 
@@ -287,6 +286,7 @@ def simplesktextcomparison(sentencetuples, activepoll):
 	tuples = zip(pairwisesimilarity.row, pairwisesimilarity.col)
 	pwd = {t: d for t, d in zip(tuples, pairwisesimilarity.data)}
 
+	activepoll.statusis('Fetching and sifting results'.format(n=len(sentences)))
 	pairwise = dict()
 	for p in pwd:
 		# (1, 3) has the same value in it as does (3, 1)
