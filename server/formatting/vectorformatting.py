@@ -164,6 +164,7 @@ def skformatmostimilar(similaritiesdict):
 
 	return thehtml
 
+
 def locusformat(dblineobject):
 	"""
 
@@ -217,7 +218,7 @@ def vectorhtmlforfrontpage():
 
 	tf = """
 		<span id="tensorflowgraphcheckbox">
-			<span class="small">&nbsp;&middot;&nbsp;tensor flow graph:</span>
+			<span class="small">tensor flow graph:</span>
 			<input type="checkbox" id="tensorflowgraph" value="yes" title="Make an associative graph of all the selected words">
 		</span>
 		"""
@@ -243,6 +244,6 @@ def vectorhtmlforfrontpage():
 		if hipparchia.config[conf] == 'yes':
 			vectorhtml.append(textmapper[conf])
 
-	vectorhtml = '\n&nbsp;&middot;&nbsp;\n'.join(vectorhtml)
+	vectorhtml = '\n'.join(vectorhtml)
 
 	return vectorhtml
