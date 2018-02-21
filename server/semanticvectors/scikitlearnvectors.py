@@ -95,6 +95,9 @@ def sklearnselectedworks(activepoll, searchobject):
 		activepoll.statusis('Finding all sentences')
 		so.seeking = r'.'
 		sentencetuples = vectorsentencedispatching(so, activepoll)
+		if len(sentencetuples) > hipparchia.config['MAXSENTENCECOMPARISONSPACE']:
+			reasons = ['scope of search exceeded allowed maximum: {a} > {b}'.format(a=len(sentencetuples), b=hipparchia.config['MAXSENTENCECOMPARISONSPACE'])]
+			return emptyvectoroutput(so, reasons)
 		similaritiesdict = skfunctiontotest(sentencetuples, activepoll)
 		# similaritiesdict: {id: (scoreA, lindobjectA1, sentA1, lindobjectA2, sentA2), id2: (scoreB, lindobjectB1, sentB1, lindobjectB2, sentB2), ... }
 		corehtml = skformatmostimilar(similaritiesdict)

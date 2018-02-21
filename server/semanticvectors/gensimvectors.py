@@ -529,7 +529,7 @@ def findapproximatenearestneighbors(query, mymodel):
 	:return:
 	"""
 
-	cap = 15
+	cap = hipparchia.config['NEARESTNEIGHBORSCAP']
 
 	try:
 		mostsimilar = mymodel.most_similar(query, topn=cap)

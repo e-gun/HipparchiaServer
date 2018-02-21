@@ -284,8 +284,11 @@ RESTOREMEDIALANDFINALSIGMA = 'no'
 #   with "knowledge". The more one reads up on semantic vectors, the more
 #   one comes to appreciate that human tastes, judgement, and decisions
 #   are all key factors in determining what makes for a sensible set of
-#   values to use. Some will inevitably yield very flawed results. For example,
-#   a dimensionality of 1000 is known to be worse than 300 in most cases...
+#   values to use. Some choices will inevitably yield very flawed results.
+#   For example, a dimensionality of 1000 is known to be worse than 300 in most
+#   cases... Similarly, these tools are supposed to able a dumb machine to make
+#   a good guess about something it does not understand. They are not supposed
+#   to make smart people so foolish as to assume that the dumb machine knows best.
 #   Please consider researching the topic before making any arguments based
 #   on the results that this code will generate.
 #
@@ -338,8 +341,11 @@ RESTOREMEDIALANDFINALSIGMA = 'no'
 # VECTORDIMENSIONS is the number of features you want to keep track of. More is better, until
 #   it isn't. The classic numbers are 100, 200, and 300.
 #
-# VECTORDISTANCECUTOFFs set the value at which something is no longer going to be considered
+# VECTORDISTANCECUTOFFS set the value at which something is no longer going to be considered
 #   "related" to what you are looking for.
+#
+# NEARESTNEIGHBORSCAP says when to stop looking for neighbors
+#
 
 SEMANTICVECTORSENABLED = 'no'
 LITERALCOSINEDISTANCEENABLED = 'no'
@@ -348,8 +354,9 @@ CONCEPTMAPPINGENABLED = 'no'
 TENSORFLOWVECTORSENABLED = 'no'
 SENTENCESIMILARITYENABLED = 'yes'
 MAXVECTORSPACE = 7548165
-DBWRITEUSER = '(consider re-using HipparchiaBuilder user)'
-DBWRITEPASS = '(consider re-using HipparchiaBuilder pass)'
+MAXSENTENCECOMPARISONSPACE = 20000
+DBWRITEUSER = 'consider_re-using_HipparchiaBuilder_user'
+DBWRITEPASS = 'consider_re-using_HipparchiaBuilder_pass'
 VECTORDIMENSIONS = 300
 VECTORWINDOW = 10
 VECTORTRAININGITERATIONS = 12
@@ -358,3 +365,4 @@ VECTORDOWNSAMPLE = 0.05
 VECTORDISTANCECUTOFFLOCAL = .3
 VECTORDISTANCECUTOFFNEARESTNEIGHBOR = .4
 VECTORDISTANCECUTOFFLEMMAPAIR = .5
+NEARESTNEIGHBORSCAP = 15
