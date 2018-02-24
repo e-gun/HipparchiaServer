@@ -16,6 +16,7 @@ from string import punctuation
 
 import psycopg2
 
+from server import hipparchia
 from server.dbsupport.dbfunctions import createvectorstable, dblineintolineobject, grabonelinefromwork, resultiterator, \
 	setconnection
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
@@ -140,9 +141,10 @@ def parsevectorsentences(searchobject, lineobjects):
 	else:
 		wholetext = ' '.join([getattr(l, col) for l in lineobjects])
 
-	htmlstrip = re.compile(r'<.*?>')
-	wholetext = re.sub(htmlstrip, '', wholetext)
-	wholetext = re.sub('&nbsp;', '', wholetext)
+	if so.usecolumn == 'marked_up_line':
+		htmlstrip = re.compile(r'<.*?>')
+		wholetext = re.sub(htmlstrip, '', wholetext)
+		wholetext = re.sub('&nbsp;', '', wholetext)
 
 	# need to split at all possible sentence ends
 	# need to turn off semicolon in latin...
@@ -170,6 +172,13 @@ def parsevectorsentences(searchobject, lineobjects):
 	# more cleanup
 	matches = [m.lower() for m in matches]
 	matches = [' '.join(m.split()) for m in matches]
+
+	# how many sentences per document?
+	# do values >1 make sense? Perhaps in dramatists...
+	bundlesize = hipparchia.config['SENTENCESPERDOCUMENT']
+	if bundlesize > 1:
+		# https://stackoverflow.com/questions/44104729/grouping-every-three-items-together-in-list-python
+		matches = [' '.join(bundle) for bundle in zip(*[iter(matches)] * bundlesize)]
 
 	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
 	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))

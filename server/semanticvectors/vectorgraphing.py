@@ -59,7 +59,9 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchlist):
 
 	relevantconnections = dict()
 	for i in interrelationships:
+		# keep the network focussed
 		relevantconnections[i] = [sim for sim in interrelationships[i] if sim[0] in terms]
+		# relevantconnections[i] = [s for s in interrelationships[i] if s[1] > hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']]
 
 	title = givetitletograph('Conceptual neighborhood of', searchterm, searchlist)
 
@@ -74,7 +76,7 @@ def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconne
 	mostsimilartuples come in a list and look like:
 		[('ὁμολογέω', 0.8400295972824097), ('θέα', 0.8328431844711304), ('θεά', 0.8282027244567871), ...]
 
-	relevantconnections is a dict each of whose keyed entreis unpacks into a mostsimilartuples-like list
+	relevantconnections is a dict each of whose keyed entries unpacks into a mostsimilartuples-like list
 
 	:param searchterm:
 	:param mostsimilartuples:
@@ -111,8 +113,10 @@ def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconne
 	# colors: https://matplotlib.org/examples/color/colormaps_reference.html
 	# cmap='tab20c' or 'Pastel1' is nice
 
+	scalednodes = [1200*t[1]*10 for t in mostsimilartuples]
+
 	# nodes
-	nx.draw_networkx_nodes(graph, pos, node_size=6500, node_color=range(len(terms)), cmap='Pastel1')
+	nx.draw_networkx_nodes(graph, pos, node_size=scalednodes, alpha=0.8, node_color=range(len(terms)), cmap='Pastel1')
 	nx.draw_networkx_labels(graph, pos, font_size=20, font_family='sans-serif', font_color='Black')
 
 	# edges
@@ -254,8 +258,9 @@ def generatethefineprint():
 	i = hipparchia.config['VECTORTRAININGITERATIONS']
 	p = hipparchia.config['VECTORMINIMALPRESENCE']
 	s = hipparchia.config['VECTORDOWNSAMPLE']
+	n = hipparchia.config['SENTENCESPERDOCUMENT']
 
-	fineprint = 'dimensions: {d} · window: {w} · minimum presence: {p} · training runs: {i} · downsample: {s}'
-	fineprint = fineprint.format(d=d, w=w, p=p, i=i, s=s)
+	fineprint = 'dimensions: {d} · sentences per document: {n} · window: {w} · minimum presence: {p} · training runs: {i} · downsample: {s}'
+	fineprint = fineprint.format(d=d, n=n, w=w, p=p, i=i, s=s)
 
 	return fineprint
