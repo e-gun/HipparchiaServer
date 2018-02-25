@@ -534,7 +534,7 @@ def buildbagsofwordswithalternates(morphdict, sentences):
 	return bagsofwords
 
 
-def mostcommonheadwords():
+def mostcommonheadwords(cheat=True):
 	"""
 
 	fetch N most common Greek and Latin
@@ -546,42 +546,62 @@ def mostcommonheadwords():
 	:return: wordstoskip
 	"""
 
-	wordswecareabout = {
-		'facio', 'possum', 'video', 'dico²', 'vaco', 'volo¹', 'habeo', 'do', 'vis',
-		'ἔδω', 'δέω¹', 'δεῖ', 'δέομαι', 'ἔχω', 'λέγω¹', 'φημί', 'θεόϲ', 'ποιέω', 'πολύϲ',
-		'ἄναξ', 'λόγοϲ'
-	}
+	if cheat:
+		# this is what you will get if you calculate
+		# since it tends not to change, you can cheat unless/until you modify
+		# either the dictionaries or wordswecareabout or the cutoff...
+		wordstoskip = {'sui', 'ὅτι²', 'ἄλλοϲ', 'ὅτι¹', 'ut', 'διά', 'οὗτοϲ', 'ἄτερ', 'ἀμφί', 'προϲάμβ', 'prior', 'ὑπέκ', 'quis¹', 'πηρόϲ', 'οὕτωϲ', 'ἐξέτι', 'sine', 'venio', 'de²', 'tu', 'δέ', 'cum¹', 'ἐκ', 'res', 'b', 'cata', 'verus', 'ἐπί', 'sum¹', 'verum', 'καί', 'γάροϲ', 'ἀπέκ', 'ἐν', 'Q', 'εἰϲ', 'κατά¹', 'ad', 'ὅϲ', 'οὐδείϲ', 'ἐκάϲ', 'ἐγώ', 'παρά', 'sub', 'hic', 'ito', 'cis', 'ἤ¹', 'ὑπό', 'ipse', 'penes', 'μένω', 'ἄνω¹', 'quam', 'τίϲ', 'ob', 'idem', 'tenus²', 'in¹', 'atque', 'non', 'ἀνά', 'ἄνα', 'ϲύν', 'πρόϲ', 'de', 'τήιοϲ', 'abs', 'ὁ', 'γάρον', 'abusque', 'ex', 'περί', 'ἕ', 'τε', 'in', 'uls', 'per1', 'ἐπί²', 'ζεύϲ', 'alius²', 'edo¹', 'ἐάν', 'τῇ', 'for', 'γάρ', 'omne', 'μέν', 'trans', 'ego', 'ille', 'ἀπό', 'ambi', 'neque', 'magnus', 'τῷ', 'am', 'aut', 'si', 'προπάροιθε', 'ambe', 'ἡμόϲ', 'αὐτόϲ', 'ἄν¹', 'et', 'κατά', 'ὡϲ', 'ἤ²', 'ϲύ', 'is', 'ab', 'πᾶϲ', 'cum', 'εἰ', 'ἔτι', 'a', 'οὖν', 'εἰμί', 'ἀλλά', 'eo¹', 'vel', 'μετά', 'huc', 'ὅϲτιϲ', 'sed', 'γίγνομαι', 'a²', 'μή', 'praeterpropter', 'οὐ', 'τιϲ', 'αὐτοῦ', 'ἄν²', 'incircum', 'qui¹'}
+	else:
+		wordswecareabout = {
+			'facio', 'possum', 'video', 'dico²', 'vaco', 'volo¹', 'habeo', 'do', 'vis',
+			'ἔδω', 'δέω¹', 'δεῖ', 'δέομαι', 'ἔχω', 'λέγω¹', 'φημί', 'θεόϲ', 'ποιέω', 'πολύϲ',
+			'ἄναξ', 'λόγοϲ'
+		}
 
-	dbconnection = setconnection('not_autocommit')
-	cursor = dbconnection.cursor()
+		dbconnection = setconnection('not_autocommit')
+		cursor = dbconnection.cursor()
 
-	qtemplate = """
-	SELECT entry_name,total_count FROM dictionary_headword_wordcounts 
-		WHERE entry_name ~ '[{yesorno}a-zA-Z]' ORDER BY total_count DESC LIMIT {lim};
-	"""
+		qtemplate = """
+		SELECT entry_name,total_count FROM dictionary_headword_wordcounts 
+			WHERE entry_name ~ '[{yesorno}a-zA-Z]' ORDER BY total_count DESC LIMIT {lim}
+		"""
 
-	counts = dict()
+		counts = dict()
 
-	# grab the raw data: a greek query and a latin query
-	# note that different limits have been set for each language
-	for gl in {('', 50), ('^', 75)}:
-		yesorno = gl[0]
-		lim = gl[1]
-		cursor.execute(qtemplate.format(yesorno=yesorno, lim=lim))
-		tophits = resultiterator(cursor)
-		tophits = {t[0]: t[1] for t in tophits}
-		counts.update(tophits)
+		# grab the raw data: a greek query and a latin query
+		# note that different limits have been set for each language
+		for gl in {('', 50), ('^', 75)}:
+			yesorno = gl[0]
+			lim = gl[1]
+			cursor.execute(qtemplate.format(yesorno=yesorno, lim=lim))
+			tophits = resultiterator(cursor)
+			tophits = {t[0]: t[1] for t in tophits}
+			counts.update(tophits)
 
-	# results = ['{wd} - {ct}'.format(wd=c, ct=counts[c]) for c in counts]
-	#
-	# for r in results:
-	# 	print(r)
+		# results = ['{wd} - {ct}'.format(wd=c, ct=counts[c]) for c in counts]
+		#
+		# for r in results:
+		# 	print(r)
 
-	wordstoskip = counts.keys() - wordswecareabout
+		wordstoskip = list(counts.keys() - wordswecareabout)
 
-	dbconnection.commit()
-	cursor.close()
-	del dbconnection
+		qtemplate = """
+		SELECT entry_name FROM {d} WHERE pos='prep.'
+		"""
+
+		prepositions = list()
+		for d in ['greek_dictionary', 'latin_dictionary']:
+			cursor.execute(qtemplate.format(d=d))
+			finds = resultiterator(cursor)
+			prepositions += [f[0] for f in finds]
+
+		wordstoskip = set(wordstoskip + prepositions)
+
+		dbconnection.commit()
+		cursor.close()
+		del dbconnection
+
+	# print('wordstoskip =', wordstoskip)
 
 	return wordstoskip
 
