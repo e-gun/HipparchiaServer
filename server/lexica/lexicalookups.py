@@ -340,8 +340,8 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	else:
 		extracolumn = 'unaccented_entry'
 
-	qtemplate = """SELECT entry_name, metrical_entry, id_number, entry_type, entry_options, 
-					translations, entry_body, {ec}
+	qtemplate = """SELECT entry_name, metrical_entry, id_number, pos, translations, 
+					entry_body, {ec}
 					FROM {d} WHERE {col} {sy} %s ORDER BY id_number ASC"""
 	query = qtemplate.format(ec=extracolumn, d=dictionary, col=usecolumn, sy=syntax)
 	data = (seeking,)
@@ -433,7 +433,7 @@ def convertdictionaryfindintoobject(foundline, dictionary, cursor):
 		wordobject = dbLatinWord(*foundline)
 	else:
 		# you actually want a hollow object
-		wordobject = dbGreekWord(None, None, None, None, None, None, None, None)
+		wordobject = dbGreekWord(None, None, None, None, None, None, None)
 
 	ntemplate = 'SELECT entry_name, id_number FROM {d} WHERE id_number > %s ORDER BY id_number ASC LIMIT 1;'
 
@@ -445,7 +445,8 @@ def convertdictionaryfindintoobject(foundline, dictionary, cursor):
 	try:
 		wordobject.nextentry = e[0]
 		wordobject.nextentryid = e[1]
-	except:
+	except TypeError:
+		# TypeError: 'NoneType' object is not subscriptable
 		pass
 
 	ptemplate = 'SELECT entry_name, id_number FROM {d} WHERE id_number < %s ORDER BY id_number DESC LIMIT 1;'
@@ -458,7 +459,8 @@ def convertdictionaryfindintoobject(foundline, dictionary, cursor):
 	try:
 		wordobject.preventry = e[0]
 		wordobject.preventryid = e[1]
-	except:
+	except TypeError:
+		# TypeError: 'NoneType' object is not subscriptable
 		pass
 
 	return wordobject

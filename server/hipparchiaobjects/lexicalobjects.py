@@ -619,23 +619,23 @@ class dbDictionaryEntry(object):
 	an object that corresponds to a db line
 
 	CREATE TABLE greek_dictionary (
-		entry_name character varying(64),
-		metrical_entry character varying(64),
-		unaccented_entry character varying(64),
-		id_number integer,
-		entry_type character varying(8),
-		entry_options "char",
-		entry_body text
+	    entry_name character varying(64),
+	    metrical_entry character varying(64),
+	    unaccented_entry character varying(64),
+	    id_number integer,
+		pos character varying(32),
+	    translations text,
+	    entry_body text
 	);
 
 	CREATE TABLE latin_dictionary (
-		entry_name character varying(64),
-		metrical_entry character varying(64),
-		id_number integer,
-		entry_type character varying(8),
-		entry_key character varying(64),
-		entry_options "char",
-		entry_body text
+	    entry_name character varying(64),
+	    metrical_entry character varying(64),
+	    id_number integer,
+	    entry_key character varying(64),
+	    pos character varying(32),
+	    translations text,
+	    entry_body text
 	);
 
 	Latin only: entry_key
@@ -643,13 +643,12 @@ class dbDictionaryEntry(object):
 
 	"""
 
-	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body):
+	def __init__(self, entry_name, metrical_entry, id_number, pos, translations, entry_body):
 		self.entry = entry_name
 		self.metricalentry = metrical_entry
 		self.id = id_number
-		self.type = entry_type
-		self.options = entry_options
 		self.translations = translations.split(' ‖ ')
+		self.pos = pos.split(' ‖ ')
 		self.body = entry_body
 		self.nextentryid = -1
 		self.preventryid = -1
@@ -666,10 +665,10 @@ class dbGreekWord(dbDictionaryEntry):
 
 	"""
 
-	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body, unaccented_entry):
+	def __init__(self, entry_name, metrical_entry, id_number, pos, translations, entry_body, unaccented_entry):
 		self.language = 'Greek'
 		self.unaccented_entry = unaccented_entry
-		super().__init__(entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body)
+		super().__init__(entry_name, metrical_entry, id_number, pos, translations, entry_body)
 		self.entry_key = None
 
 	@staticmethod
@@ -690,10 +689,10 @@ class dbLatinWord(dbDictionaryEntry):
 
 	"""
 
-	def __init__(self, entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body, entry_key):
+	def __init__(self, entry_name, metrical_entry, id_number, pos, translations, entry_body, entry_key):
 		self.language = 'Latin'
 		self.unaccented_entry = None
-		super().__init__(entry_name, metrical_entry, id_number, entry_type, entry_options, translations, entry_body)
+		super().__init__(entry_name, metrical_entry, id_number, pos, translations, entry_body)
 		self.entry_key = entry_key
 
 	@staticmethod
