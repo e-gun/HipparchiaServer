@@ -25,13 +25,14 @@ from server.hipparchiaobjects.helperobjects import ProgressPoll
 from server.searching.proximitysearching import grableadingandlagging
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildbetweenwhereextension
+from server.startup import lemmatadict
 
 
 # bleh: numpy and scipy will fail to install on FreeBSD 11.x
 # the work-around functions below might be needed instead: presumably there are markedly slower...
 
 
-def cleansentence(sentence):
+def cleantext(texttostrip):
 	"""
 
 	if we are using the marked up line, then a lot of gunk needs to go
@@ -40,7 +41,11 @@ def cleansentence(sentence):
 	:return:
 	"""
 
-	return sentence
+	htmlstrip = re.compile(r'<.*?>')
+	wholetext = re.sub(htmlstrip, '', texttostrip)
+	wholetext = re.sub('&nbsp;', '', wholetext)
+
+	return wholetext
 
 
 def recursivesplit(tosplit, listofsplitlerms):
@@ -142,9 +147,7 @@ def parsevectorsentences(searchobject, lineobjects):
 		wholetext = ' '.join([getattr(l, col) for l in lineobjects])
 
 	if so.usecolumn == 'marked_up_line':
-		htmlstrip = re.compile(r'<.*?>')
-		wholetext = re.sub(htmlstrip, '', wholetext)
-		wholetext = re.sub('&nbsp;', '', wholetext)
+		wholetext = cleantext(wholetext)
 
 	# need to split at all possible sentence ends
 	# need to turn off semicolon in latin...
@@ -247,7 +250,7 @@ def convertmophdicttodict(morphdict):
 
 	# over-aggressive? more thought/care might be required here
 	# the definitely changes the shape of the bags of words...
-	delenda = mostcommonwords()
+	delenda = mostcommonheadwords()
 	morphdict = {k: v for k, v in morphdict.items() if v - delenda == v}
 
 	return morphdict
@@ -339,6 +342,37 @@ def bulklinegrabber(table, column, criterion, setofcriteria, cursor):
 	contents = {'{t}@{i}'.format(t=table, i=l[0]): l[1] for l in lines}
 
 	return contents
+
+
+def grablistoflines(table, uidlist):
+	"""
+
+	fetch many lines at once
+
+	select shortname from authors where universalid = ANY('{lt0860,gr1139}');
+
+	:param uidlist:
+	:return:
+	"""
+
+	dbconnection = setconnection('autocommit', readonlyconnection=False)
+	cursor = dbconnection.cursor()
+
+	lines = [int(uid.split('_ln_')[1]) for uid in uidlist]
+
+	qtemplate = 'SELECT * from {t} WHERE index = ANY(%s)'
+	q = qtemplate.format(t=table)
+	d = (lines,)
+	cursor.execute(q, d)
+	lines = cursor.fetchall()
+
+	cursor.close()
+	dbconnection.close()
+	del dbconnection
+
+	lines = [dblineintolineobject(l) for l in lines]
+
+	return lines
 
 
 def bruteforcefinddblinefromsentence(thissentence, modifiedsearchobject):
@@ -500,7 +534,7 @@ def buildbagsofwordswithalternates(morphdict, sentences):
 	return bagsofwords
 
 
-def mostcommonwords():
+def mostcommonheadwords():
 	"""
 
 	fetch N most common Greek and Latin
@@ -548,6 +582,26 @@ def mostcommonwords():
 	dbconnection.commit()
 	cursor.close()
 	del dbconnection
+
+	return wordstoskip
+
+
+def mostcommonwords():
+	"""
+
+	use mostcommonheadwords to return the most common declined forms
+
+	:return:
+	"""
+
+	headwords = mostcommonheadwords()
+
+	wordstoskip = list()
+	for h in headwords:
+		try:
+			wordstoskip.append(lemmatadict[h].formlist)
+		except KeyError:
+			pass
 
 	return wordstoskip
 

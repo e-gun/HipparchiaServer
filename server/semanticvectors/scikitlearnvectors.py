@@ -28,12 +28,11 @@ from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, convertsingleuidtodblineobject
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, mostcommonwords, grablistoflines
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.formatting.vectorformatting import skformatmostimilar
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.startup import authordict, listmapper, workdict
-from server.dbsupport.dbfunctions import setconnection
 from server.formatting.bibliographicformatting import bcedating
 
 
@@ -171,6 +170,9 @@ def sklearntextfeatureextractionandevaluation(sentences, activepoll):
 
 	see http://scikit-learn.org/stable/auto_examples/model_selection/grid_search_text_feature_extraction.html#sphx-glr-auto-examples-model-selection-grid-search-text-feature-extraction-py
 
+	and
+
+	http://scikit-learn.org/stable/modules/feature_extraction.html#text-feature-extraction
 
 	:return:
 	"""
@@ -269,14 +271,26 @@ def simplesktextcomparison(sentencetuples, activepoll):
 	mustbelongerthan = 2
 	cutoff = .2
 	antianaphora = 3
-	avoidinternalxrefs = True
+	avoidinternalxrefs = False
 	avoidauthorxrefs = False
+	avoidcommonwords = True
 
 	sentencetuples = [s for s in sentencetuples if len(s[1].strip().split(' ')) > mustbelongerthan]
 	sentences = [s[1] for s in sentencetuples]
 
+	if avoidcommonwords:
+		stopwords = mostcommonwords()
+		cleanedsentences = list()
+		for s in sentences:
+			swords = s.split(' ')
+			cleanedsentences.append(' '.join([s for s in swords if s not in stopwords]))
+	else:
+		cleanedsentences = sentences
+
 	activepoll.statusis('Calculating tfidf for {n} sentences'.format(n=len(sentences)))
-	tfidf = TfidfVectorizer().fit_transform(sentences)
+	#vectorizer = TfidfVectorizer(stop_words=stopwords)
+	vectorizer = TfidfVectorizer()
+	tfidf = vectorizer.fit_transform(cleanedsentences)
 	activepoll.statusis('Calculating pairwise similarity for {n} sentences'.format(n=len(sentences)))
 	pairwisesimilarity = tfidf * tfidf.T  # <class 'scipy.sparse.csr.csr_matrix'>
 	# print('pairwisesimilarity', pairwisesimilarity)
@@ -306,19 +320,26 @@ def simplesktextcomparison(sentencetuples, activepoll):
 	# 	print(sentencetuples[m[0][0]][0],'s1=', sentences[m[0][0]])
 	# 	print(sentencetuples[m[0][1]][0],'s2=', sentences[m[0][1]])
 
-	dbconnection = setconnection('autocommit', readonlyconnection=False)
-	cursor = dbconnection.cursor()
+	# this is slow if you do one-by-one db transactions
+	# should find out all the lines you need from a table and fetch all at once...
+	needlines = [sentencetuples[m[0][0]][0] for m in mostsimilar]
+	needlines += [sentencetuples[m[0][1]][0] for m in mostsimilar]
+	needtables = set([uid[:6] for uid in needlines])
 
-	similaritiesdict = {id: (m[1], convertsingleuidtodblineobject(sentencetuples[m[0][0]][0], cursor), sentences[m[0][0]],
-	                         convertsingleuidtodblineobject(sentencetuples[m[0][1]][0], cursor), sentences[m[0][1]])
+	activepoll.statusis('Fetching...'.format(n=len(sentences)))
+	gabbedlineobjects = list()
+	for t in needtables:
+		fetchlines = [l for l in needlines if l[:6] == t]
+		gabbedlineobjects += grablistoflines(t, fetchlines)
+
+	activepoll.statusis('Sifting...'.format(n=len(sentences)))
+	linemapper = {l.universalid.lower(): l for l in gabbedlineobjects}
+
+	similaritiesdict = {id: (m[1], linemapper[sentencetuples[m[0][0]][0]], sentences[m[0][0]],
+	                         linemapper[sentencetuples[m[0][1]][0]], sentences[m[0][1]])
 	               for id, m in enumerate(mostsimilar)}
 
 	# {id: (scoreA, lineobjectA1, sentA1, lineobjectA2, sentA2), id2: (scoreB, lineobjectB1, sentB1, lineobjectB2, sentB2), ... }
-
-	cursor.close()
-	dbconnection.close()
-	del dbconnection
-
 
 	if avoidinternalxrefs:
 		similaritiesdict = {s: similaritiesdict[s] for s in similaritiesdict
@@ -343,6 +364,5 @@ def simplesktextcomparison(sentencetuples, activepoll):
 					anaphoratracker.add(item.universalid)
 	else:
 		trimmedsd = similaritiesdict
-
 
 	return trimmedsd
