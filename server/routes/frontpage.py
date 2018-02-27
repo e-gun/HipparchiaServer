@@ -29,7 +29,7 @@ def frontpage():
 	:return:
 	"""
 
-	expectedsqltemplateversion = 1082018
+	expectedsqltemplateversion = 2242018
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
 
 	vectorhtml = vectorhtmlforfrontpage()

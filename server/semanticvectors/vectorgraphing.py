@@ -111,16 +111,16 @@ def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconne
 	pos = nx.fruchterman_reingold_layout(graph)
 
 	# colors: https://matplotlib.org/examples/color/colormaps_reference.html
-	# cmap='tab20c' or 'Pastel1' is nice
+	# cmap='tab20c' or 'Pastel1' is nice; lower alpha makes certain others more appealing
 
 	scalednodes = [1200*t[1]*10 for t in mostsimilartuples]
 
 	# nodes
-	nx.draw_networkx_nodes(graph, pos, node_size=scalednodes, alpha=0.8, node_color=range(len(terms)), cmap='Pastel1')
+	nx.draw_networkx_nodes(graph, pos, node_size=scalednodes, alpha=0.75, node_color=range(len(terms)), cmap='Pastel1')
 	nx.draw_networkx_labels(graph, pos, font_size=20, font_family='sans-serif', font_color='Black')
 
 	# edges
-	nx.draw_networkx_edges(graph, pos, width=3, alpha=0.8, edge_color='dimgrey')
+	nx.draw_networkx_edges(graph, pos, width=3, alpha=0.85, edge_color='dimgrey')
 	nx.draw_networkx_edge_labels(graph, pos, edgelabels, font_size=12, alpha=0.8, label_pos=0.5, font_family='sans-serif')
 
 	# the fine print
