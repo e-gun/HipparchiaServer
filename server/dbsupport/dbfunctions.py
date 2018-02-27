@@ -574,6 +574,7 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 
 	dbconnection.commit()
 	curs.close()
+	del dbconnection
 
 	return buildinfo
 
@@ -611,6 +612,7 @@ def probefordatabases():
 
 	dbconnection.commit()
 	curs.close()
+	del dbconnection
 
 	return available
 

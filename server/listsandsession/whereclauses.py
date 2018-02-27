@@ -267,4 +267,7 @@ def partialworkbetweenclausecontents(workobject, searchobject):
 
 	endpoints = (workobject.universalid, {'listofboundaries': blist, 'listofomissions': olist})
 
+	curs.close()
+	del dbconnection
+
 	return endpoints
