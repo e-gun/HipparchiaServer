@@ -279,6 +279,8 @@ RESTOREMEDIALANDFINALSIGMA = 'no'
 #   the results are not well explained; they cannot necessarily be trusted.
 #   Changing any value below even by a small amount can produce large shifts
 #   in your results. That should make you at least a little anxious.
+#   [see also mostcommonheadwords() in vectorhelpers.py: a number of deletions
+#   occur there]
 #
 #   All of this is useful for exploring ideas, but it should NOT be confused
 #   with "knowledge". The more one reads up on semantic vectors, the more

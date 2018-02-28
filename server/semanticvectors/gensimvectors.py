@@ -403,7 +403,7 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	if computeloss:
 		print('loss after {n} iterations was: {l}'.format(n=trainingiterations, l=model.get_latest_training_loss()))
 
-	model.delete_temporary_training_data()
+	model.delete_temporary_training_data(replace_word_vectors_with_normalized=True)
 	storevectorindatabase(searchobject.searchlist, 'nn', model)
 
 	return model

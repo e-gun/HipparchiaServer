@@ -550,7 +550,35 @@ def mostcommonheadwords(cheat=True):
 		# this is what you will get if you calculate
 		# since it tends not to change, you can cheat unless/until you modify
 		# either the dictionaries or wordswecareabout or the cutoff...
-		wordstoskip = {'sui', 'ὅτι²', 'ἄλλοϲ', 'ὅτι¹', 'ut', 'διά', 'οὗτοϲ', 'ἄτερ', 'ἀμφί', 'προϲάμβ', 'prior', 'ὑπέκ', 'quis¹', 'πηρόϲ', 'οὕτωϲ', 'ἐξέτι', 'sine', 'venio', 'de²', 'tu', 'δέ', 'cum¹', 'ἐκ', 'res', 'b', 'cata', 'verus', 'ἐπί', 'sum¹', 'verum', 'καί', 'γάροϲ', 'ἀπέκ', 'ἐν', 'Q', 'εἰϲ', 'κατά¹', 'ad', 'ὅϲ', 'οὐδείϲ', 'ἐκάϲ', 'ἐγώ', 'παρά', 'sub', 'hic', 'ito', 'cis', 'ἤ¹', 'ὑπό', 'ipse', 'penes', 'μένω', 'ἄνω¹', 'quam', 'τίϲ', 'ob', 'idem', 'tenus²', 'in¹', 'atque', 'non', 'ἀνά', 'ἄνα', 'ϲύν', 'πρόϲ', 'de', 'τήιοϲ', 'abs', 'ὁ', 'γάρον', 'abusque', 'ex', 'περί', 'ἕ', 'τε', 'in', 'uls', 'per1', 'ἐπί²', 'ζεύϲ', 'alius²', 'edo¹', 'ἐάν', 'τῇ', 'for', 'γάρ', 'omne', 'μέν', 'trans', 'ego', 'ille', 'ἀπό', 'ambi', 'neque', 'magnus', 'τῷ', 'am', 'aut', 'si', 'προπάροιθε', 'ambe', 'ἡμόϲ', 'αὐτόϲ', 'ἄν¹', 'et', 'κατά', 'ὡϲ', 'ἤ²', 'ϲύ', 'is', 'ab', 'πᾶϲ', 'cum', 'εἰ', 'ἔτι', 'a', 'οὖν', 'εἰμί', 'ἀλλά', 'eo¹', 'vel', 'μετά', 'huc', 'ὅϲτιϲ', 'sed', 'γίγνομαι', 'a²', 'μή', 'praeterpropter', 'οὐ', 'τιϲ', 'αὐτοῦ', 'ἄν²', 'incircum', 'qui¹'}
+		wordstoskip = {'omne', 'νωδόϲ', 'aut', 'eccere', 'quin', 'tu', 'ambi',
+			'fue', 'hau¹', 'ἠμέν', 'eu', 'διό', 'πρόϲ', 'μέχριπερ', 'αὐτόϲ',
+			'περί', 'ἀτάρ', 'ὄφρα', 'ῥά¹', 'πω²', 'cata', 'apage', 'τίϲ',
+			'per1', 'ne³', 'αὐτοῦ', 'ἕ', 'de²', 'chaere', 'ἄν²', 'ἤ¹', 'euoe',
+			'for', 'neque', 'εἶἑν', 'b', 'ab', 'vaha', 'ἐπί²', 'ὅτι', 'Juno',
+			'euhoe', 'sum¹', 'au', 'μένω', 'sine', 'oho', 'sui', 'ὡϲ', 'ehem',
+			'istic¹', 'τοι¹', 'pro²', 'ἤ²', 'io¹', 'τήιοϲ', 'em³', 'ohe',
+			'abusque', 'ἆρα²', 'alius²', 'μέϲφι', 'atque', 'fu', 'em²', 'γοῦν',
+			'proh', 'ἔτι', 'cis', 'vel', 'παι', 'bombax', 'τίη', 'πηρόϲ',
+			'babae', 'en', 'edo¹', 'θην', 'δέ', 'si', 'ai¹', 'in', 'γάρον',
+			'ἐάν', 'heia', 'οὐδείϲ', 'hui', 'eho', 'quis¹', 'οὐ', 'τῇ',
+			'alleluja', 'κατά¹', 'οὗτοϲ', 'καί', 'huc', 'tatae', 'heus!', 'ad',
+			'non', 'ille', 'verus', 'κατά', 'γίγνομαι', 'ἄν¹', 'ζεύϲ', 'ἄνω¹',
+			'ὁτιή', 'ἐν', 'πῃ', 'δέ¹', 'cum', 'γάροϲ', 'μετά', 'ἐκάϲ', 'ἀλλά',
+			'hallelujah', 'eheu', 'ἐξέτι', 'incircum', 'mu', 'eo¹', 'προϲάμβ',
+			'a', 'praeterpropter', 'et', 'qui¹', 'tat', 'evax', 'venio',
+			'ὅϲτιϲ', 'penes', 'νή²', 'εἰϲ', 'παρά', 'γάρ', 'ἀμφί', 'ἤγουν',
+			'oh', 'ἰδέ¹', 'trans', 'idem', 'ἐπάν', 'o²', 'ἐκ', 'ὅϲ', 'ito',
+			'res', 'ἀνά', 'ἠτε', 'tenus²', 'τοίνυν', 'ἐπί', 'papae', 'ἄτερ',
+			'atat', 'verum', 'τιϲ', 'ἀπέκ', 'st', 'heu!', 'ah', 'εἰ', 'εἰμί',
+			'πᾶϲ', 'buttuti', 'am', 'a²', 'hem', 'τοιγάρ', 'ἄλλοϲ', 'cum¹',
+			'οὖν', 'ambe', 'μή', 'vah', 'is', 'οὐ²', 'ὑπέκ', 'hic', 'sub', 'τε',
+			'μήν¹', 'μά¹', 'καὶ¹', 'ἐρι²', 'οὕτωϲ', 'euax', 'ὑπό', 'ipse',
+			'an¹', 'quam', 'vae', 'Q', 'ἄνα', 'τε¹', 'de', 'prior', 'magnus',
+			'phu²', 'προπάροιθε', 'hehae', 'eia', 'oiei', 'εἰ¹', 'uls', 'aha',
+			'in¹', 'Pollux', 'abs', 'πλήν', 'δή¹', 'ce', 'ὅτι¹', 'μέν', 'sed',
+			'ἀπό', 'θωρακοί', 'hei', 'τῷ', 'πότε', 'ego', 'ha!', 'a³', 'prox',
+			'pol', 'ex', 'ei²', 'dudum', 'διά', 'ὁ', 'ut', 'ὅτι²', 'phy', 'fi¹',
+			'ἐπεί¹', 'ἐγώ', 'ϲύ', 'ϲύν', 'euge', 'ho!', 'ὁΐ', 'oi', 'γε', 'ἡμόϲ'}
 	else:
 		wordswecareabout = {
 			'facio', 'possum', 'video', 'dico²', 'vaco', 'volo¹', 'habeo', 'do', 'vis',
@@ -586,22 +614,25 @@ def mostcommonheadwords(cheat=True):
 		wordstoskip = list(counts.keys() - wordswecareabout)
 
 		qtemplate = """
-		SELECT entry_name FROM {d} WHERE pos='prep.'
+		SELECT entry_name FROM {d} WHERE pos=ANY(%s)
 		"""
 
-		prepositions = list()
-		for d in ['greek_dictionary', 'latin_dictionary']:
-			cursor.execute(qtemplate.format(d=d))
-			finds = resultiterator(cursor)
-			prepositions += [f[0] for f in finds]
+		exclude = ['interj.', 'prep.', 'conj.', 'partic.']
+		x = (exclude,)
 
-		wordstoskip = set(wordstoskip + prepositions)
+		uninteresting = list()
+		for d in ['greek_dictionary', 'latin_dictionary']:
+			cursor.execute(qtemplate.format(d=d), x)
+			finds = resultiterator(cursor)
+			uninteresting += [f[0] for f in finds]
+
+		wordstoskip = set(wordstoskip + uninteresting)
 
 		dbconnection.commit()
 		cursor.close()
 		del dbconnection
 
-	# print('wordstoskip =', wordstoskip)
+		# print('wordstoskip =', wordstoskip)
 
 	return wordstoskip
 
