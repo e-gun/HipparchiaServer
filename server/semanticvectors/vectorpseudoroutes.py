@@ -248,7 +248,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 
 	# next we look for the interrelationships of the words that are above the threshold
 	activepoll.statusis('Calculating metacosine distances')
-	imagename = graphbliteraldistancematches(focus, mostsimilar, vectorspace, so.searchlist)
+	imagename = graphbliteraldistancematches(focus, mostsimilar, so.searchlist)
 
 	findsjs = generatevectorjs('findvectors')
 

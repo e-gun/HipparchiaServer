@@ -18,7 +18,7 @@ from server.dbsupport.dbfunctions import createstoredimagestable, setconnection
 from server.startup import authordict, workdict
 
 
-def graphbliteraldistancematches(searchterm, mostsimilartuples, vectorspace, searchlist):
+def graphbliteraldistancematches(searchterm, mostsimilartuples, searchlist):
 	"""
 
 
@@ -36,7 +36,7 @@ def graphbliteraldistancematches(searchterm, mostsimilartuples, vectorspace, sea
 	relevantconnections = dict()
 
 	title = givetitletograph('Words most concretely connected with', searchterm, searchlist)
-	imagename = graphmatches(title, searchterm, mostsimilartuples, terms, relevantconnections)
+	imagename = graphmatches(title, searchterm, mostsimilartuples, terms, relevantconnections, vtype='rudimentary')
 
 	return imagename
 
@@ -65,12 +65,12 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchlist):
 
 	title = givetitletograph('Conceptual neighborhood of', searchterm, searchlist)
 
-	imagename = graphmatches(title, searchterm, mostsimilartuples, terms, relevantconnections)
+	imagename = graphmatches(title, searchterm, mostsimilartuples, terms, relevantconnections, vtype='nn')
 
 	return imagename
 
 
-def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconnections):
+def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconnections, vtype):
 	"""
 
 	mostsimilartuples come in a list and look like:
@@ -124,7 +124,7 @@ def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconne
 	nx.draw_networkx_edge_labels(graph, pos, edgelabels, font_size=12, alpha=0.8, label_pos=0.5, font_family='sans-serif')
 
 	# the fine print
-	plt.text(0, -1.1, generatethefineprint(), ha='center', va='bottom')
+	plt.text(0, -1.1, generatethefineprint(vtype), ha='center', va='bottom')
 	# plt.text(1, -1, 'gensim', ha='center', va='bottom')
 	# plt.text(-1, -1, '@commit {v}'.format(v=readgitdata()[0:5]), ha='center', va='bottom')
 
@@ -245,7 +245,7 @@ def givetitletograph(topic, searchterm, searchlist):
 	return title
 
 
-def generatethefineprint():
+def generatethefineprint(vtype):
 	"""
 
 	label graphs with setting values
@@ -253,6 +253,16 @@ def generatethefineprint():
 	:return:
 	"""
 
+	cutofffinder = {
+		'rudimentary': 'VECTORDISTANCECUTOFFLOCAL',
+		'nn': 'VECTORDISTANCECUTOFFNEARESTNEIGHBOR',
+		'unused': 'VECTORDISTANCECUTOFFLEMMAPAIR'
+	}
+
+	try:
+		c = hipparchia.config[cutofffinder[vtype]]
+	except KeyError:
+		c = '[unknown]'
 	d = hipparchia.config['VECTORDIMENSIONS']
 	w = hipparchia.config['VECTORWINDOW']
 	i = hipparchia.config['VECTORTRAININGITERATIONS']
@@ -260,7 +270,7 @@ def generatethefineprint():
 	s = hipparchia.config['VECTORDOWNSAMPLE']
 	n = hipparchia.config['SENTENCESPERDOCUMENT']
 
-	fineprint = 'dimensions: {d} · sentences per document: {n} · window: {w} · minimum presence: {p} · training runs: {i} · downsample: {s}'
-	fineprint = fineprint.format(d=d, n=n, w=w, p=p, i=i, s=s)
+	fineprint = 'dimensions: {d} · sentences per document: {n} · window: {w} · minimum presence: {p} · training runs: {i} · downsample: {s} · cutoff: {c}'
+	fineprint = fineprint.format(d=d, n=n, w=w, p=p, i=i, s=s, c=c)
 
 	return fineprint

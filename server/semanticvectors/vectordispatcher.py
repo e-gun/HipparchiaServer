@@ -120,6 +120,7 @@ def breaktextsintosentences(foundsentences, searchlist, activepoll, searchobject
 
 	dbconnection.commit()
 	curs.close()
+	del dbconnection
 
 	return foundsentences
 

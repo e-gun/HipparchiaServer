@@ -6,7 +6,6 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 import json
-import locale
 import time
 
 from flask import request, session
@@ -150,7 +149,9 @@ def findlatentsemanticindex(activepoll, searchobject, nn=False):
 			pass
 
 	if wordstotal > maxwords:
-		reasons = ['the vector scope max exceeded: {a} > {b} '.format(a=locale.format('%d', wordstotal, grouping=True), b=locale.format('%d', maxwords, grouping=True))]
+		wt = '{:,}'.format(wordstotal)
+		mw = '{:,}'.format(maxwords)
+		reasons = ['the vector scope max exceeded: {a} > {b} '.format(a=wt, b=mw)]
 		return emptyvectoroutput(so, reasons)
 
 	# DEBUGGING
@@ -226,14 +227,14 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 
 		# find all possible forms of all the words we used
 		# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
-		wl = locale.format('%d', len(listsofwords), grouping=True)
-		activepoll.statusis('Finding headwords for {n} sentences'.format(n=wl))
+		wl = '{:,}'.format(len(listsofwords))
+		activepoll.statusis('No stored model for this search. Generating a new one.<br />Finding headwords for {n} sentences'.format(n=wl))
 
 		morphdict = findheadwords(allwords)
 		morphdict = convertmophdicttodict(morphdict)
 		# morphdict = {t: '·'.join(morphdict[t]) for t in morphdict}
 
-		activepoll.statusis('Building vectors for the headwords in the {n} sentences'.format(n=wl))
+		activepoll.statusis('No stored model for this search. Generating a new one.<br />Building vectors for the headwords in the {n} sentences'.format(n=wl))
 		vectorspace = buildgensimmodel(so, morphdict, listsofwords)
 
 	if termone and termtwo:
@@ -242,10 +243,12 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 		mostsimilar = ['placeholder']
 		html = similarity
 	else:
+		activepoll.statusis('Calculating the nearest neighbors')
 		mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
 		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
 		if mostsimilar:
 			html = formatnnmatches(mostsimilar)
+			activepoll.statusis('Building the graph')
 			imagename = graphnnmatches(termone, mostsimilar, vectorspace, so.searchlist)
 		else:
 			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
@@ -256,7 +259,7 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 
 	searchtime = time.time() - starttime
 	searchtime = round(searchtime, 2)
-	workssearched = locale.format('%d', workssearched, grouping=True)
+	workssearched = '{:,}'.format(workssearched)
 
 	lm = so.lemma.dictionaryentry
 	try:
@@ -400,6 +403,7 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	if computeloss:
 		print('loss after {n} iterations was: {l}'.format(n=trainingiterations, l=model.get_latest_training_loss()))
 
+	model.delete_temporary_training_data()
 	storevectorindatabase(searchobject.searchlist, 'nn', model)
 
 	return model
@@ -422,7 +426,7 @@ def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, 
 
 		# find all possible forms of all the words we used
 		# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
-		wl = locale.format('%d', len(listsofwords), grouping=True)
+		wl = '{:,}'.format(len(listsofwords))
 		activepoll.statusis('Finding headwords for {n} sentences'.format(n=wl))
 
 		morphdict = findheadwords(allwords)
@@ -435,7 +439,7 @@ def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, 
 			for h in morphdict[m]:
 				allheadwords[h] = m
 
-		hw = locale.format('%d', len(allheadwords.keys()), grouping=True)
+		hw = '{:,}'.format(len(allheadwords.keys()))
 		activepoll.statusis('Building vectors for {h} headwords in {n} sentences'.format(h=hw, n=wl))
 
 		lsispace = lsibuildspace(morphdict, listsofwords)
@@ -495,7 +499,7 @@ def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, 
 
 	searchtime = time.time() - starttime
 	searchtime = round(searchtime, 2)
-	workssearched = locale.format('%d', workssearched, grouping=True)
+	workssearched = '{:,}'.format(workssearched)
 
 	lm = so.lemma.dictionaryentry
 	try:
