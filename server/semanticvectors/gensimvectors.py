@@ -187,7 +187,10 @@ def findlatentsemanticindex(activepoll, searchobject, nn=False):
 			restorelemma = lemmatadict[so.lemma.dictionaryentry]
 			so.lemma = None
 			so.seeking = r'.'
-			sentencestuples = vectorsentencedispatching(so, activepoll)
+			if not vectorspace:
+				sentencestuples = vectorsentencedispatching(so, activepoll)
+			else:
+				sentencestuples = None
 			so.lemma = restorelemma
 			output = outputfunction(sentencestuples, workssearched, so, activepoll, starttime, vectorspace)
 		else:
@@ -274,7 +277,6 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 	else:
 		output['title'] = 'Neighbors for all forms of »{skg}«'.format(skg=lm, pr=pr)
 	output['found'] = findshtml
-	# ultimately the js should let you clock on any top word to find its associations...
 	output['js'] = findsjs
 	try:
 		output['resultcount'] = '{n} proximate terms'.format(n=len(mostsimilar))
