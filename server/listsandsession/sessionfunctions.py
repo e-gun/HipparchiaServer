@@ -298,8 +298,9 @@ def parsejscookie(cookiestring):
 	# {'agnselections': '%22Alchemistae%22%2C%22Biographi%22', 'wkselections': '%22gr1908w003%22%2C%22gr2612w001%22', 'psgselections': '', 'auselections': '%22gr0116%22%2C%22gr0199%22', 'wkgnselections': '%22Caten.%22%2C%22Doxogr.%22'}
 	
 	for sel in selectiondictionary:
-		selectiondictionary[sel] = re.sub(r'%20', '', selectiondictionary[sel])
+		selectiondictionary[sel] = re.sub(r'%20', ' ', selectiondictionary[sel])
 		selectiondictionary[sel] = re.sub(r'%22', '', selectiondictionary[sel])
+		selectiondictionary[sel] = selectiondictionary[sel].strip()
 		selectiondictionary[sel] = selectiondictionary[sel].split('%2C')
 	
 	nonselections = cookiestring
