@@ -78,12 +78,35 @@ def formatnnmatches(listofneighbors):
 	</tr>
 	"""
 
+	xtrarowtemplate = """
+	<tr class="vectorrow">
+		<td class="vectorscore"></td>
+		<td class="vectorword"><spance class="small">(not showing {n} {wtw} above the cutoff of {c})</span></td>
+	</tr>
+	"""
+
+	cap = hipparchia.config['NEARESTNEIGHBORSCAP']
+	numberofungraphedtodisplay = 10
+	surplus = len(listofneighbors) - cap
+	ungraphed = listofneighbors[cap:cap + numberofungraphedtodisplay]
+	listofneighbors = listofneighbors[:cap]
+
 	try:
-		firstrow = firstrowtemplate.format(s=round(listofneighbors[0][1], 3), w=listofneighbors[0][0], n=len(listofneighbors))
+		firstrow = firstrowtemplate.format(s=round(listofneighbors[0][1], 3), w=listofneighbors[0][0], n=len(listofneighbors)+len(ungraphed))
 	except IndexError:
 		firstrow = firstrowtemplate.format(s='', w='no most common neighbors found', n=1)
 
 	rows = [firstrow] + [rowtemplate.format(s=round(n[1], 3), w=n[0]) for n in listofneighbors[1:]]
+	if ungraphed:
+		rows.append(rowtemplate.format(s='', w='(next {n} words)'.format(n=numberofungraphedtodisplay)))
+		rows += [rowtemplate.format(s=round(n[1], 3), w=n[0]) for n in ungraphed]
+
+	if surplus > 0:
+		wtw = 'word that was'
+		if surplus > 1:
+			wtw = 'words that were'
+		cut = hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']
+		rows.append(xtrarowtemplate.format(n=surplus, wtw=wtw, c=cut))
 
 	newrows = list()
 	count = 0

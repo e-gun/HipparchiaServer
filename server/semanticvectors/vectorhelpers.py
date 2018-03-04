@@ -473,6 +473,7 @@ def convertsingleuidtodblineobject(lineuid, cursor):
 def buildflatbagsofwords(morphdict, sentences):
 	"""
 	turn a list of sentences into a list of list of headwords
+
 	:param morphdict:
 	:param sentences:
 	:return:

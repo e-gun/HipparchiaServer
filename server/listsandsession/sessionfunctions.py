@@ -314,7 +314,7 @@ def parsejscookie(cookiestring):
 	allotheroptions = nonselections.split('%2C')
 	allotheroptions[:] = [x for x in allotheroptions if x != '']
 	
-	optiondict = {}
+	optiondict = dict()
 	for o in allotheroptions:
 		halves = o.split(':')
 		if halves[0] != 'selections':
@@ -849,7 +849,7 @@ def reducetosessionselections(listmapper, criterion):
 		if a == '1':
 			toactivate.append(corpora[position])
 
-	d = {}
+	d = dict()
 
 	# print('active corpora',toactivate)
 

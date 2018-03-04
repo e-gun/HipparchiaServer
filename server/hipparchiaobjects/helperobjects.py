@@ -255,7 +255,7 @@ class QueryCombinator(object):
 		return combinations
 
 
-class SemanticVectorCorpus(object):
+class LSIVectorCorpus(object):
 	"""
 
 	something to hold LSI results
@@ -278,6 +278,22 @@ class SemanticVectorCorpus(object):
 		vectorquerybag = self.lsidictionary.doc2bow(query.lower().split())
 		vectorquerylsi = self.semanticindex[vectorquerybag]
 		return vectorquerylsi
+
+
+class LogEntropyVectorCorpus(object):
+	"""
+
+	something to hold LogEntropy results
+
+	"""
+
+	def __init__(self, lsixform, logentropyxform, logentropydictionary, logentropycorpus, bagsofwords, sentences):
+		self.lsixform = lsixform
+		self.lexform = logentropyxform
+		self.dictionary = logentropydictionary
+		self.lsicorpus = logentropycorpus
+		self.bagsofwords = bagsofwords
+		self.sentences = sentences
 
 
 class SearchObject(object):

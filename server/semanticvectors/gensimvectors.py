@@ -9,16 +9,17 @@ import json
 import time
 
 from flask import request, session
-from gensim import corpora, models, similarities
-from gensim.models import Word2Vec
+from gensim import corpora
+from gensim.models import LogEntropyModel, LsiModel, TfidfModel, Word2Vec
+from gensim.similarities import MatrixSimilarity
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection, setthreadcount
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
 from server.formatting.vectorformatting import formatlsimatches, formatnnmatches, formatnnsimilarity
+from server.hipparchiaobjects.helperobjects import LSIVectorCorpus, LogEntropyVectorCorpus
 from server.hipparchiaobjects.helperobjects import ProgressPoll
-from server.hipparchiaobjects.helperobjects import SemanticVectorCorpus
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
@@ -179,7 +180,7 @@ def findlatentsemanticindex(activepoll, searchobject, nn=False):
 		if validlemma:
 			# find all sentences
 			if not vectorspace:
-				activepoll.statusis('Finding all sentences')
+				activepoll.statusis('No stored model for this search. Finding all sentences')
 			else:
 				activepoll.statusis('Finding neighbors')
 			# blanking out the search term will really return every last sentence...
@@ -252,6 +253,7 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 		if mostsimilar:
 			html = formatnnmatches(mostsimilar)
 			activepoll.statusis('Building the graph')
+			mostsimilar = mostsimilar[:hipparchia.config['NEARESTNEIGHBORSCAP']]
 			imagename = graphnnmatches(termone, mostsimilar, vectorspace, so.searchlist)
 		else:
 			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
@@ -279,7 +281,7 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 	output['found'] = findshtml
 	output['js'] = findsjs
 	try:
-		output['resultcount'] = '{n} proximate terms'.format(n=len(mostsimilar))
+		output['resultcount'] = '{n} proximate terms to graph'.format(n=len(mostsimilar))
 	except TypeError:
 		output['resultcount'] = ''
 	output['scope'] = workssearched
@@ -336,10 +338,10 @@ def findapproximatenearestneighbors(query, mymodel):
 	:return:
 	"""
 
-	cap = hipparchia.config['NEARESTNEIGHBORSCAP']
+	explore = max(2500, hipparchia.config['NEARESTNEIGHBORSCAP'])
 
 	try:
-		mostsimilar = mymodel.most_similar(query, topn=cap)
+		mostsimilar = mymodel.most_similar(query, topn=explore)
 		mostsimilar = [s for s in mostsimilar if s[1] > hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']]
 	except KeyError:
 		# keyedvectors.py: raise KeyError("word '%s' not in vocabulary" % word)
@@ -372,7 +374,9 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
-	# 'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ'
+	# going forward we we need a list of lists of headwords
+	# there are two ways to do this:
+	#   'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ'
 	# the former seems less bad than the latter
 	# if might be possible to vectorize in unlemmatized form and then to search via the lemma
 	# here you would need to invoke mymodel.wv.n_similarity(self, ws1, ws2) where ws is a list of words
@@ -455,7 +459,7 @@ def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, 
 
 	vectorquerylsi = lsispace.findquerylsi(vq)
 
-	vectorindex = similarities.MatrixSimilarity(lsispace.semantics)
+	vectorindex = MatrixSimilarity(lsispace.semantics)
 
 	similis = vectorindex[vectorquerylsi]
 	# print('similis', similis)
@@ -554,6 +558,38 @@ def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, 
 	return output
 
 
+def logentropybuildspace(morphdict, sentences):
+	"""
+
+	currently unused
+
+	:param allheadwords:
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
+	sentences = [s for s in sentences if s]
+
+	# going forward we we need a list of lists of headwords
+	# homonymns are adjacent, not joined: 'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ'
+	bagsofwords = buildflatbagsofwords(morphdict, sentences)
+
+	logentropydictionary = corpora.Dictionary(bagsofwords)
+	logentropycorpus = [logentropydictionary.doc2bow(bag) for bag in bagsofwords]
+	logentropyxform = LogEntropyModel(logentropycorpus)
+	lsixform = LsiModel(corpus=logentropycorpus,
+						id2word=logentropydictionary,
+						onepass=False,
+						num_topics=400)
+
+	corpus = LogEntropyVectorCorpus(lsixform, logentropyxform, logentropydictionary, logentropycorpus, bagsofwords, sentences)
+
+
+	return corpus
+
+
 def lsibuildspace(morphdict, sentences):
 	"""
 
@@ -566,17 +602,15 @@ def lsibuildspace(morphdict, sentences):
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
+	# going forward we we need a list of lists of headwords
+	# homonymns are adjacent, not joined: 'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ'
 	bagsofwords = buildflatbagsofwords(morphdict, sentences)
 
 	lsidictionary = corpora.Dictionary(bagsofwords)
-
 	lsicorpus = [lsidictionary.doc2bow(bag) for bag in bagsofwords]
-
-	termfreqinversedocfreq = models.TfidfModel(lsicorpus)
-
+	termfreqinversedocfreq = TfidfModel(lsicorpus)
 	corpustfidf = termfreqinversedocfreq[lsicorpus]
-
-	semanticindex = models.LsiModel(corpustfidf, id2word=lsidictionary, num_topics=250)
+	semanticindex = LsiModel(corpustfidf, id2word=lsidictionary, num_topics=250)
 
 	"""	
 	"An empirical study of required dimensionality for large-scale latent semantic indexing applications"
@@ -604,7 +638,7 @@ def lsibuildspace(morphdict, sentences):
 
 	"""
 
-	corpus = SemanticVectorCorpus(semanticindex, corpustfidf, lsidictionary, lsicorpus, bagsofwords, sentences)
+	corpus = LSIVectorCorpus(semanticindex, corpustfidf, lsidictionary, lsicorpus, bagsofwords, sentences)
 
 	return corpus
 
