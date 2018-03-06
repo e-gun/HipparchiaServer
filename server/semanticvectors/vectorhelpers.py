@@ -673,7 +673,10 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
 
-	pickledvectors = pickle.dumps(vectorspace)
+	if vectorspace:
+		pickledvectors = pickle.dumps(vectorspace)
+	else:
+		pickledvectors = pickle.dumps('failed to build model')
 	settings = determinesettings()
 
 	q = 'DELETE FROM public.storedvectors WHERE uidlist = %s'
@@ -693,10 +696,13 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 
 	# print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))
 
+	cursor.close()
+	del dbconnection
+
 	return
 
 
-def checkforstoredvector(uidlist, indextype, justcareaboutcommit=True):
+def checkforstoredvector(uidlist, indextype, careabout='settings'):
 	"""
 
 	the stored vector might not reflect the current math rules
@@ -720,11 +726,6 @@ def checkforstoredvector(uidlist, indextype, justcareaboutcommit=True):
 	dbconnection = setconnection('autocommit')
 	cursor = dbconnection.cursor()
 
-	if justcareaboutcommit:
-		criterion = 'versionstamp'
-	else:
-		criterion = 'ts'
-
 	q = """
 	SELECT {crit}, calculatedvectorspace 
 		FROM public.storedvectors 
@@ -733,7 +734,7 @@ def checkforstoredvector(uidlist, indextype, justcareaboutcommit=True):
 	d = (uidlist, indextype)
 
 	try:
-		cursor.execute(q.format(crit=criterion), d)
+		cursor.execute(q.format(crit=careabout), d)
 		result = cursor.fetchone()
 	except psycopg2.ProgrammingError:
 		# psycopg2.ProgrammingError: relation "public.storedvectors" does not exist
@@ -743,12 +744,13 @@ def checkforstoredvector(uidlist, indextype, justcareaboutcommit=True):
 	if not result:
 		return False
 
-	if justcareaboutcommit:
+	if careabout == 'versionstamp':
 		outdated = (version[:6] != result[0])
+	elif careabout == 'settings':
+		current = determinesettings()
+		outdated = (current != result[0])
 	else:
-		thefile = 'blankfornow'
-		t = os.path.getmtime(thefile)
-		outdated = (t > result[0])
+		outdated = True
 
 	# print('checkforstoredvector()', uidlist, result[0], 'outdated=', outdated)
 

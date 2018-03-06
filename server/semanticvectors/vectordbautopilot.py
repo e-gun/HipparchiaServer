@@ -52,14 +52,22 @@ def startvectorizing():
 			sentencetuples = vectorsentencedispatching(so, emptypoll)
 			vectorspace = buildnnvectorspace(sentencetuples, emptypoll, so)
 			# the vectorspace is stored in the db at the end of the call to buildnnvectorspace()
-			if len(searchlist) > 1:
+
+			if vectorspace and len(searchlist) > 1:
 				v = '{i}+ {n} more items vectorized ({w} words)'
 			else:
 				v = '{i} vectorized ({w} words)'
-			print(v.format(i=searchlist[0], w=wordcount))
-			del vectorspace
-			if len(workpile) % 25 == 0:
+			if vectorspace and wordcount > 5000:
+				print(v.format(i=searchlist[0], w=wordcount))
+
+			if vectorspace and len(workpile) % 25 == 0:
 				print('{n} items remain to vectorize'.format(n=len(workpile)))
+
+			if not vectorspace and len(workpile) % 100 == 0:
+				print('{n} items remain to vectorize, but vectors are not returned with shorter authors'.format(n=len(workpile)))
+				print('aborting vectorization')
+				workpile = list()
+			del vectorspace
 
 	print('vectorbot finished')
 
@@ -97,12 +105,26 @@ def determinevectorworkpile():
 	# note that we are turning these into one-item lists: genre lists, etc are multi-author lists
 	authortuples = [([a], authors[a]) for a in authorsbylength]
 
+	corporasizes = dict()
+	for r in results:
+		c = r[0][:2]
+		wd = r[1]
+		try:
+			corporasizes[c] += wd
+		except KeyError:
+			corporasizes[c] = wd
+
+	corpustuples = list()
+	for k in corporasizes.keys():
+		authors = [a for a in authorsbylength if a[:2] == k]
+		corpustuples.append((authors, corporasizes[k]))
+
 	# print('authortuples[:10]', authortuples[:10])
 	# [(['gr2062'], 4182615), (['gr0057'], 2594166), (['gr4090'], 2202504), ...]
 	cursor.close()
 	del dbconnection
 
-	workpile = authortuples
+	workpile = authortuples + corpustuples
 	workpile = [w for w in workpile if w[1] < hipparchia.config['MAXVECTORSPACE']]
 	return workpile
 

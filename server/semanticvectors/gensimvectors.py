@@ -226,6 +226,9 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 
 	if not vectorspace:
 		vectorspace = buildnnvectorspace(sentencetuples, activepoll, so)
+		if vectorspace == 'failed to build model':
+			reasons = [vectorspace]
+			return emptyvectoroutput(so, reasons)
 
 	if termone and termtwo:
 		similarity = findword2vecsimilarities(termone, termtwo, vectorspace)
@@ -426,12 +429,14 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	except RuntimeError:
 		# RuntimeError: you must first build vocabulary before training the model
 		# this will happen if you have a tiny author with too few words
-		return None
+		model = None
 
 	if computeloss:
 		print('loss after {n} iterations was: {l}'.format(n=trainingiterations, l=model.get_latest_training_loss()))
 
-	model.delete_temporary_training_data(replace_word_vectors_with_normalized=True)
+	if model:
+		model.delete_temporary_training_data(replace_word_vectors_with_normalized=True)
+
 	storevectorindatabase(searchobject.searchlist, 'nn', model)
 
 	return model
