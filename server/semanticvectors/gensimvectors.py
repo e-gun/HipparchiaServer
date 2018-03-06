@@ -225,21 +225,7 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 		termtwo = None
 
 	if not vectorspace:
-		# find all words in use
-		listsofwords = [s[1] for s in sentencetuples]
-		allwords = findwordvectorset(listsofwords)
-
-		# find all possible forms of all the words we used
-		# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
-		wl = '{:,}'.format(len(listsofwords))
-		activepoll.statusis('No stored model for this search. Generating a new one.<br />Finding headwords for {n} sentences'.format(n=wl))
-
-		morphdict = findheadwords(allwords)
-		morphdict = convertmophdicttodict(morphdict)
-		# morphdict = {t: '·'.join(morphdict[t]) for t in morphdict}
-
-		activepoll.statusis('No stored model for this search. Generating a new one.<br />Building vectors for the headwords in the {n} sentences'.format(n=wl))
-		vectorspace = buildgensimmodel(so, morphdict, listsofwords)
+		vectorspace = buildnnvectorspace(sentencetuples, activepoll, so)
 
 	if termone and termtwo:
 		similarity = findword2vecsimilarities(termone, termtwo, vectorspace)
@@ -323,6 +309,34 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 	return output
 
 
+def buildnnvectorspace(sentencetuples, activepoll, searchobject):
+	"""
+
+	:return:
+	"""
+
+	# find all words in use
+	listsofwords = [s[1] for s in sentencetuples]
+	allwords = findwordvectorset(listsofwords)
+
+	# find all possible forms of all the words we used
+	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
+	wl = '{:,}'.format(len(listsofwords))
+	activepoll.statusis(
+		'No stored model for this search. Generating a new one.<br />Finding headwords for {n} sentences'.format(n=wl))
+
+	morphdict = findheadwords(allwords)
+	morphdict = convertmophdicttodict(morphdict)
+	# morphdict = {t: '·'.join(morphdict[t]) for t in morphdict}
+
+	activepoll.statusis(
+		'No stored model for this search. Generating a new one.<br />Building vectors for the headwords in the {n} sentences'.format(
+			n=wl))
+	vectorspace = buildgensimmodel(searchobject, morphdict, listsofwords)
+
+	return vectorspace
+
+
 def findapproximatenearestneighbors(query, mymodel):
 	"""
 
@@ -345,6 +359,9 @@ def findapproximatenearestneighbors(query, mymodel):
 		mostsimilar = [s for s in mostsimilar if s[1] > hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']]
 	except KeyError:
 		# keyedvectors.py: raise KeyError("word '%s' not in vocabulary" % word)
+		mostsimilar = None
+	except AttributeError:
+		# 'NoneType' object has no attribute 'most_similar'
 		mostsimilar = None
 
 	return mostsimilar
@@ -395,16 +412,21 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	computeloss = False
 
 	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
-	model = Word2Vec(bagsofwords,
-					min_count=minimumnumberofhits,
-					seed=1,
-					iter=trainingiterations,
-					size=dimensions,
-					sample=downsample,
-					sg=1,  # the results seem terrible if you say sg=0
-					window=window,
-					workers=workers,
-					compute_loss=computeloss)
+	try:
+		model = Word2Vec(bagsofwords,
+						min_count=minimumnumberofhits,
+						seed=1,
+						iter=trainingiterations,
+						size=dimensions,
+						sample=downsample,
+						sg=1,  # the results seem terrible if you say sg=0
+						window=window,
+						workers=workers,
+						compute_loss=computeloss)
+	except RuntimeError:
+		# RuntimeError: you must first build vocabulary before training the model
+		# this will happen if you have a tiny author with too few words
+		return None
 
 	if computeloss:
 		print('loss after {n} iterations was: {l}'.format(n=trainingiterations, l=model.get_latest_training_loss()))

@@ -674,6 +674,7 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 	cursor = dbconnection.cursor()
 
 	pickledvectors = pickle.dumps(vectorspace)
+	settings = determinesettings()
 
 	q = 'DELETE FROM public.storedvectors WHERE uidlist = %s'
 	d = (uidlist,)
@@ -681,13 +682,13 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 
 	q = """
 	INSERT INTO public.storedvectors 
-		(ts, versionstamp, uidlist, vectortype, calculatedvectorspace)
-		VALUES (%s, %s, %s, %s, %s)
+		(ts, versionstamp, settings, uidlist, vectortype, calculatedvectorspace)
+		VALUES (%s, %s, %s, %s, %s, %s)
 	"""
 	ts = datetime.now().strftime("%Y-%m-%d %H:%M")
 	versionstamp = readgitdata()[:6]
 
-	d = (ts, versionstamp, uidlist, vectortype, pickledvectors)
+	d = (ts, versionstamp, settings, uidlist, vectortype, pickledvectors)
 	cursor.execute(q, d)
 
 	# print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))
@@ -789,6 +790,34 @@ def readgitdata():
 	commit = gitdata[1]
 
 	return commit
+
+
+def determinesettings():
+	"""
+
+	what values were set in config.py?
+
+	:return:
+	"""
+
+	wecareabout = ['VECTORDIMENSIONS',
+					'VECTORWINDOW',
+					'VECTORTRAININGITERATIONS',
+					'VECTORMINIMALPRESENCE',
+					'VECTORDOWNSAMPLE',
+					'VECTORDISTANCECUTOFFLOCAL',
+					'VECTORDISTANCECUTOFFNEARESTNEIGHBOR',
+					'VECTORDISTANCECUTOFFLEMMAPAIR',
+					'NEARESTNEIGHBORSCAP',
+					'SENTENCESPERDOCUMENT']
+
+	settinglist = list()
+	for c in wecareabout:
+		settinglist.append('{a}={b}'.format(a=c, b=hipparchia.config[c]))
+
+	settingstring = ' · '.join(settinglist)
+
+	return settingstring
 
 
 """

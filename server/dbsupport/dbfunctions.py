@@ -637,6 +637,7 @@ def createvectorstable():
 	(
 	    ts timestamp without time zone,
 	    versionstamp character varying(6) COLLATE pg_catalog."default",
+	    settings character varying (512) COLLATE pg_catalog."default",
 	    uidlist text[] COLLATE pg_catalog."default",
 	    vectortype character varying(10) COLLATE pg_catalog."default",
 	    calculatedvectorspace bytea

@@ -348,6 +348,9 @@ RESTOREMEDIALANDFINALSIGMA = 'no'
 #
 # NEARESTNEIGHBORSCAP says when to stop looking for neighbors
 #
+# AUTOVECTORIZE will fill the vector db in the background; this will chew up a TON of resources:
+#   both drive space and CPU time; do not set this to 'yes' unless you are ready for the commitment
+#
 
 SEMANTICVECTORSENABLED = 'no'
 LITERALCOSINEDISTANCEENABLED = 'no'
@@ -369,3 +372,4 @@ VECTORDISTANCECUTOFFNEARESTNEIGHBOR = .33
 VECTORDISTANCECUTOFFLEMMAPAIR = .5
 NEARESTNEIGHBORSCAP = 15
 SENTENCESPERDOCUMENT = 1
+AUTOVECTORIZE = 'no'

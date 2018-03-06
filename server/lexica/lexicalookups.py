@@ -34,7 +34,16 @@ def lookformorphologymatches(word, cursor, trialnumber=0):
 	else:
 		usedictionary = 'greek'
 
-	if not session['available'][usedictionary + '_morphology']:
+	ihavesession = True
+	try:
+		session['available'][usedictionary + '_morphology']
+	except RuntimeError:
+		# vectorbot thread does not have access to the session...
+		# we will *dangerously guess* that we can skip the next check because vectorbotters
+		# are quite likely to have beefy installations...
+		ihavesession = False
+
+	if ihavesession and not session['available'][usedictionary + '_morphology']:
 		return None
 
 	trialnumber += 1
