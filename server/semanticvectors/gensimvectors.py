@@ -367,6 +367,8 @@ def findapproximatenearestneighbors(query, mymodel):
 		# 'NoneType' object has no attribute 'most_similar'
 		mostsimilar = None
 
+	#print('mostsimilar', mostsimilar)
+
 	return mostsimilar
 
 

@@ -22,6 +22,12 @@ from server.startup import poll, workdict
 def startvectorizing():
 	"""
 
+	BUGGY at the moment; it looks like we are doing only one training run, or something like that
+	.999 distances instead of .777, etc.
+
+	quite odd since we should be following identical logic through the functions but we
+	are not getting consonant vectors at the other end...
+
 	:return:
 	"""
 
@@ -126,6 +132,10 @@ def determinevectorworkpile():
 
 	workpile = authortuples + corpustuples
 	workpile = [w for w in workpile if w[1] < hipparchia.config['MAXVECTORSPACE']]
+
+	# test caesar
+	workpile = [(['lt0448'], 999)]
+
 	return workpile
 
 
