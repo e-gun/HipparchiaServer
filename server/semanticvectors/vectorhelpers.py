@@ -120,6 +120,7 @@ def findsentences(authortable, searchobject, cursor):
 	results = [dblineintolineobject(line) for line in results]
 
 	results = parsevectorsentences(so, results)
+
 	return results
 
 

@@ -34,12 +34,12 @@ def vectorsentencedispatching(searchobject, activepoll):
 
 	manager = Manager()
 	foundsentences = manager.list()
-	searchlist = manager.list(so.indexrestrictions.keys())
+	listofitemstosearch = manager.list(so.indexrestrictions.keys())
 
 	workers = setthreadcount()
 
 	targetfunction = breaktextsintosentences
-	argumentuple = (foundsentences, searchlist, activepoll, so)
+	argumentuple = (foundsentences, listofitemstosearch, activepoll, so)
 
 	jobs = [Process(target=targetfunction, args=argumentuple) for i in range(workers)]
 

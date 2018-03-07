@@ -50,6 +50,7 @@ def startvectorizing():
 		searchlist = searching[0]
 		wordcount = searching[1]
 		so = buildfakesearchobject()
+
 		vectorspace = checkforstoredvector(searchlist, indextype)
 		if not vectorspace:
 			so.searchlist = searchlist
@@ -134,7 +135,7 @@ def determinevectorworkpile():
 	workpile = [w for w in workpile if w[1] < hipparchia.config['MAXVECTORSPACE']]
 
 	# test caesar
-	workpile = [(['lt0448'], 999)]
+	# workpile = [(['lt0448'], 999)]
 
 	return workpile
 
@@ -161,6 +162,10 @@ def buildfakesearchobject():
 		frozensession[z] = 0
 
 	so = SearchObject(1, '', '', None, None, frozensession)
+
+	# parsevectorsentences() needs the following:
+	so.vectortype = 'semanticvectorquery'
+	so.usecolumn = 'marked_up_line'
 
 	return so
 
