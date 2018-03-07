@@ -80,6 +80,10 @@ DBPASS = 'yourpassheretrytomakeitstrongplease'
 ### [4] Hipparchia debug variables ###
 ##  [only change this if you know why you are doing it] ##
 #
+# SUPPRESSWARNINGS will turn of various messages like:
+#   MorphPossibilityObject.getbaseform() is confused ἐνέρριψε, ἐν, ἐν-ῥίπτω ['ἐνέρριψε', 'ἐν', 'ἐν-ῥίπτω']
+#   These are not of much interest unless you are debugging the source code
+#
 # DBDEBUGMODE and HTMLDEBUGMODE will show DB locations of hits and/or
 # 	the raw HTML markup inside the DB there are no security
 # 	implications here; these can only be set at launch; any changes
@@ -103,6 +107,7 @@ DBPASS = 'yourpassheretrytomakeitstrongplease'
 #   relative to 'run.py' and so to 'HipparchiaServer'
 #
 
+SUPPRESSWARNINGS = 'yes'
 DBDEBUGMODE = 'no'
 HTMLDEBUGMODE = 'no'
 CALCULATEWORDWEIGHTS = 'no'

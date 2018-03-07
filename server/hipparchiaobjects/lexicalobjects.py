@@ -535,12 +535,18 @@ class MorphPossibilityObject(object):
 			return False
 
 	def getbaseform(self):
+		if hipparchia.config['SUPPRESSWARNINGS'] == 'no':
+			warn = True
+		else:
+			warn = False
+
 		if self.amgreek():
 			return self.getgreekbaseform()
 		elif self.amlatin():
 			return self.getlatinbaseform()
 		else:
-			print('MorphPossibilityObject failed to determine its own language', self.entry)
+			if warn:
+				print('MorphPossibilityObject failed to determine its own language', self.entry)
 			return None
 
 	def getgreekbaseform(self):
@@ -560,6 +566,10 @@ class MorphPossibilityObject(object):
 
 		:return:
 		"""
+		if hipparchia.config['SUPPRESSWARNINGS'] == 'no':
+			warn = True
+		else:
+			warn = False
 
 		# need an aspiration check; incl εκ -⟩ εξ
 
@@ -583,9 +593,15 @@ class MorphPossibilityObject(object):
 			# print('segments',segments)
 			for i in range(self.prefixcount - 2, -1, -1):
 				baseform = gkattemptelision(segments[-1])
-				baseform = segments[i] + '-' + baseform
+				try:
+					baseform = segments[i] + '-' + baseform
+				except IndexError:
+					if warn:
+						print('abandoning efforts to parse', self.entry)
+					baseform = segments[-1]
 		else:
-			print('MorphPossibilityObject.getbaseform() is confused', self.entry, segments)
+			if warn:
+				print('MorphPossibilityObject.getbaseform() is confused', self.entry, segments)
 
 		# not sure this ever happens with the greek data
 		baseform = re.sub(r'^\s', '', baseform)
