@@ -19,8 +19,8 @@ from server.hipparchiaobjects.searchobjects import OutputObject, ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
+from server.semanticvectors.preparetextforvectorization import findheadwords, vectorprepdispatcher
 from server.semanticvectors.rudimentaryvectormath import buildrudimentaryvectorspace, caclulatecosinevalues
-from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
 from server.semanticvectors.vectorgraphing import graphbliteraldistancematches
 from server.semanticvectors.vectorhelpers import convertmophdicttodict, findverctorenvirons, findwordvectorset
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
@@ -152,7 +152,7 @@ def findabsolutevectorsbysentence(activepoll, searchobject):
 
 		# find all sentences
 		activepoll.statusis('Finding all sentences')
-		sentencetuples = vectorsentencedispatching(so, activepoll)
+		sentencetuples = vectorprepdispatcher(so, activepoll)
 		sentences = [s[1] for s in sentencetuples]
 
 		output = generatevectoroutput(sentences, workssearched, so, activepoll, starttime, 'sentences')

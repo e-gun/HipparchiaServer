@@ -27,7 +27,7 @@ except ImportError:
 from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
+from server.semanticvectors.preparetextforvectorization import findheadwords, vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import convertmophdicttodict, mostcommonwords, grablistoflines
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.formatting.vectorformatting import skformatmostimilar
@@ -93,7 +93,7 @@ def sklearnselectedworks(activepoll, searchobject):
 		# find all sentences
 		activepoll.statusis('Finding all sentences')
 		so.seeking = r'.'
-		sentencetuples = vectorsentencedispatching(so, activepoll)
+		sentencetuples = vectorprepdispatcher(so, activepoll)
 		if len(sentencetuples) > hipparchia.config['MAXSENTENCECOMPARISONSPACE']:
 			reasons = ['scope of search exceeded allowed maximum: {a} > {b}'.format(a=len(sentencetuples), b=hipparchia.config['MAXSENTENCECOMPARISONSPACE'])]
 			return emptyvectoroutput(so, reasons)

@@ -15,10 +15,10 @@ from server.semanticvectors.vectorhelpers import findsentences
 from server.textsandindices.indexmaker import mpmorphology
 
 
-def vectorsentencedispatching(searchobject, activepoll):
+def vectorprepdispatcher(searchobject, activepoll):
 	"""
 
-	assign the vectorization to multiprocessing workers
+	assign the vector prep to multiprocessing workers
 		searchobject:
 			<server.hipparchiaclasses.SearchObject object at 0x1102c15f8>
 		activepoll:

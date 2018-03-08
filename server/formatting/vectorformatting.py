@@ -5,10 +5,14 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
-
+import json
 import re
+import time
 
 from server import hipparchia
+from server.formatting.bibliographicformatting import bcedating
+from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
+from server.hipparchiaobjects.searchobjects import OutputObject
 from server.startup import authordict, workdict
 
 
@@ -270,3 +274,149 @@ def vectorhtmlforfrontpage():
 	vectorhtml = '\n'.join(vectorhtml)
 
 	return vectorhtml
+
+
+def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject, activepoll, starttime):
+	"""
+
+	:param findshtml:
+	:param mostsimilar:
+	:param imagename:
+	:param workssearched:
+	:param searchobject:
+	:param activepoll:
+	:param starttime:
+	:return:
+	"""
+
+	so = searchobject
+	output = OutputObject(so, so.session)
+	output.image = imagename
+
+	findsjs = generatevectorjs('findneighbors')
+
+	lm = so.lemma.dictionaryentry
+	try:
+		pr = so.proximatelemma.dictionaryentry
+	except AttributeError:
+		# proximatelemma is None
+		pr = None
+
+	if lm and pr:
+		output.title = '[TESTING] Word2Vec of »{skg}« and »{pr}«'.format(skg=lm, pr=pr)
+	else:
+		output.title = 'Neighbors for all forms of »{skg}«'.format(skg=lm, pr=pr)
+	output.found = findshtml
+	output.js = findsjs
+	try:
+		output.setresultcount(len(mostsimilar), 'proximate terms to graph')
+	except TypeError:
+		pass
+	output.setscope(workssearched)
+	output.searchtime = str(round(time.time() - starttime, 2))
+
+	if so.lemma:
+		all = 'all forms of »{skg}«'.format(skg=lm)
+	else:
+		all = ''
+	if so.proximatelemma:
+		near = ' all forms of »{skg}«'.format(skg=pr)
+	else:
+		near = ''
+	output.thesearch = '{all}{near}'.format(all=all, near=near)
+
+	if so.lemma:
+		all = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
+	else:
+		all = ''
+	if so.proximatelemma:
+		near = ' and all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.proximatelemma.formlist), skg=pr)
+	else:
+		near = ''
+	output.htmlsearch = '{all}{near}'.format(all=all, near=near)
+
+	if lm and pr:
+		output.sortby = ''
+	else:
+		output.sortby = 'proximity'
+
+	output.image = imagename
+	activepoll.deactivate()
+
+	jsonoutput = json.dumps(output.generateoutput())
+
+	return jsonoutput
+
+
+def lsiformatoutput(findshtml, workssearched, matches, searchobject, activepoll, starttime):
+	"""
+
+	should use OutputObject() instead
+
+	:param findshtml:
+	:param workssearched:
+	:param searchobject:
+	:param activepoll:
+	:param starttime:
+	:return:
+	"""
+
+	so = searchobject
+	dmin, dmax = bcedating(so.session)
+
+	# findsjs = generatevectorjs('therewillbenoreclicks')
+	findsjs = insertbrowserclickjs('browser')
+
+	searchtime = time.time() - starttime
+	searchtime = round(searchtime, 2)
+	workssearched = '{:,}'.format(workssearched)
+
+	lm = so.lemma.dictionaryentry
+	try:
+		pr = so.proximatelemma.dictionaryentry
+	except AttributeError:
+		# proximatelemma is None
+		pr = None
+
+	output = dict()
+	if lm and pr:
+		output['title'] = 'Semantic index for all forms of »{skg}« and »{pr}«'.format(skg=lm, pr=pr)
+	else:
+		output['title'] = 'Semantic index for all forms of »{skg}«'.format(skg=lm, pr=pr)
+	output['found'] = findshtml
+	# ultimately the js should let you clock on any top word to find its associations...
+	output['js'] = findsjs
+	output['resultcount'] = '{n} sentences above the cutoff'.format(n=len(matches))
+	output['scope'] = workssearched
+	output['searchtime'] = str(searchtime)
+	output['proximate'] = ''
+
+	if so.lemma:
+		all = 'all forms of »{skg}«'.format(skg=lm)
+	else:
+		all = ''
+	if so.proximatelemma:
+		near = ' all forms of »{skg}«'.format(skg=pr)
+	else:
+		near = ''
+	output['thesearch'] = '{all}{near}'.format(all=all, near=near)
+
+	if so.lemma:
+		all = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
+	else:
+		all = ''
+	if so.proximatelemma:
+		near = ' and all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.proximatelemma.formlist), skg=pr)
+	else:
+		near = ''
+	output['htmlsearch'] = '{all}{near}'.format(all=all, near=near)
+	output['hitmax'] = ''
+	output['onehit'] = ''
+	output['sortby'] = 'proximity'
+	output['dmin'] = dmin
+	output['dmax'] = dmax
+	activepoll.deactivate()
+
+	output = json.dumps(output)
+
+	return output

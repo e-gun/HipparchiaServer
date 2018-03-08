@@ -13,8 +13,8 @@ from server import hipparchia
 from server.dbsupport.dbfunctions import resultiterator, setconnection
 from server.hipparchiaobjects.searchobjects import ProgressPoll, SearchObject
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.semanticvectors.gensimvectors import buildnnvectorspace
-from server.semanticvectors.vectordispatcher import vectorsentencedispatching
+from server.semanticvectors.gensimnearestneighbors import buildnnvectorspace
+from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import checkforstoredvector
 from server.startup import poll, workdict
 
@@ -56,7 +56,7 @@ def startvectorizing():
 			so.searchlist = searchlist
 			indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 			so.indexrestrictions = indexrestrictions
-			sentencetuples = vectorsentencedispatching(so, emptypoll)
+			sentencetuples = vectorprepdispatcher(so, emptypoll)
 			vectorspace = buildnnvectorspace(sentencetuples, emptypoll, so)
 			# the vectorspace is stored in the db at the end of the call to buildnnvectorspace()
 

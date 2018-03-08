@@ -313,7 +313,7 @@ RESTOREMEDIALANDFINALSIGMA = 'no'
 #
 # TENSORFLOWVECTORSENABLED will let you dig into the deeply broken tensorflow code.
 #   Results only go to the console or filesystem. It is very slow to execute. The
-#   neigbors it identifies make very little sense. See the notes ad loc. Only enable
+#   neighbors it identifies make very little sense. See the notes ad loc. Only enable
 #   if you are debugging/coding.
 #
 # MAXVECTORSPACE: what is the largest set of words you are willing

@@ -13,6 +13,8 @@ import time
 from flask import request, session
 
 from server import hipparchia
+from server.experimental.scikitlearnvectors import sklearnselectedworks
+from server.experimental.tensorflowvectors import tensorgraphelectedworks
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
@@ -24,9 +26,7 @@ from server.listsandsession.listmanagement import calculatewholeauthorsearches, 
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildsearchobject
-from server.semanticvectors.gensimvectors import findlatentsemanticindex, findnearestneighbors
-from server.semanticvectors.scikitlearnvectors import sklearnselectedworks
-from server.semanticvectors.tensorflowvectors import tensorgraphelectedworks
+from server.semanticvectors.gensimvectors import executegensimsearch, findnearestneighbors
 from server.semanticvectors.vectorpseudoroutes import findabsolutevectorsbysentence, findabsolutevectorsfromhits
 from server.startup import authordict, listmapper, poll, workdict
 
@@ -105,12 +105,12 @@ def executesearch(timestamp):
 			return output
 
 		if frozensession['semanticvectorquery'] == 'yes':
-			output = findlatentsemanticindex(activepoll, so)
+			output = executegensimsearch(activepoll, so)
 			del poll[ts]
 			return output
 
 		if frozensession['nearestneighborsquery'] == 'yes':
-			output = findnearestneighbors(activepoll, so)
+			output = findnearestneighbors(activepoll, so, request)
 			del poll[ts]
 			return output
 

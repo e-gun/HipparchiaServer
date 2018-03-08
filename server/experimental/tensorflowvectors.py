@@ -31,7 +31,7 @@ from random import randint
 from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.semanticvectors.vectordispatcher import findheadwords, vectorsentencedispatching
+from server.semanticvectors.preparetextforvectorization import findheadwords, vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import convertmophdicttodict
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, listmapper, workdict
@@ -95,7 +95,7 @@ def tensorgraphelectedworks(activepoll, searchobject):
 		# find all sentences
 		activepoll.statusis('Finding all sentences')
 		so.seeking = r'.'
-		sentences = vectorsentencedispatching(so, activepoll)
+		sentences = vectorprepdispatcher(so, activepoll)
 		output = tffunctiontocall(sentences, activepoll)
 	else:
 		return emptyvectoroutput(so)
