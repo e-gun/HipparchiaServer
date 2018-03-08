@@ -19,7 +19,7 @@ from server.formatting.bibliographicformatting import bcedating
 from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
 from server.formatting.vectorformatting import formatlsimatches, formatnnmatches, formatnnsimilarity
 from server.hipparchiaobjects.helperobjects import LSIVectorCorpus, LogEntropyVectorCorpus
-from server.hipparchiaobjects.searchobjects import ProgressPoll
+from server.hipparchiaobjects.searchobjects import OutputObject, ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
@@ -214,9 +214,8 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 	"""
 
 	so = searchobject
-	dmin, dmax = bcedating(so.session)
+	output = OutputObject(so, so.session)
 	imagename = ''
-
 	termone = so.lemma.dictionaryentry
 
 	try:
@@ -251,10 +250,6 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 
 	findsjs = generatevectorjs('findneighbors')
 
-	searchtime = time.time() - starttime
-	searchtime = round(searchtime, 2)
-	workssearched = '{:,}'.format(workssearched)
-
 	lm = so.lemma.dictionaryentry
 	try:
 		pr = so.proximatelemma.dictionaryentry
@@ -262,20 +257,18 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 		# proximatelemma is None
 		pr = None
 
-	output = dict()
 	if lm and pr:
-		output['title'] = '[TESTING] Word2Vec of »{skg}« and »{pr}«'.format(skg=lm, pr=pr)
+		output.title = '[TESTING] Word2Vec of »{skg}« and »{pr}«'.format(skg=lm, pr=pr)
 	else:
-		output['title'] = 'Neighbors for all forms of »{skg}«'.format(skg=lm, pr=pr)
-	output['found'] = findshtml
-	output['js'] = findsjs
+		output.title = 'Neighbors for all forms of »{skg}«'.format(skg=lm, pr=pr)
+	output.found = findshtml
+	output.js = findsjs
 	try:
-		output['resultcount'] = '{n} proximate terms to graph'.format(n=len(mostsimilar))
+		output.setresultcount(len(mostsimilar), 'proximate terms to graph')
 	except TypeError:
-		output['resultcount'] = ''
-	output['scope'] = workssearched
-	output['searchtime'] = str(searchtime)
-	output['proximate'] = ''
+		pass
+	output.setscope(workssearched)
+	output.searchtime = str(round(time.time() - starttime, 2))
 
 	if so.lemma:
 		all = 'all forms of »{skg}«'.format(skg=lm)
@@ -285,7 +278,7 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 		near = ' all forms of »{skg}«'.format(skg=pr)
 	else:
 		near = ''
-	output['thesearch'] = '{all}{near}'.format(all=all, near=near)
+	output.thesearch = thesearch = '{all}{near}'.format(all=all, near=near)
 
 	if so.lemma:
 		all = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
@@ -295,21 +288,19 @@ def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, a
 		near = ' and all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.proximatelemma.formlist), skg=pr)
 	else:
 		near = ''
-	output['htmlsearch'] = '{all}{near}'.format(all=all, near=near)
-	output['hitmax'] = ''
-	output['onehit'] = ''
+	output.htmlsearch = '{all}{near}'.format(all=all, near=near)
+
 	if lm and pr:
-		output['sortby'] = ''
+		output.sortby = ''
 	else:
-		output['sortby'] = 'proximity'
-	output['dmin'] = dmin
-	output['dmax'] = dmax
-	output['image'] = imagename
+		output.sortby = 'proximity'
+
+	output.image = imagename
 	activepoll.deactivate()
 
-	output = json.dumps(output)
+	jsonoutput = json.dumps(output.generateoutput())
 
-	return output
+	return jsonoutput
 
 
 def buildnnvectorspace(sentencetuples, activepoll, searchobject):

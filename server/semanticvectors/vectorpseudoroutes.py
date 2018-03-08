@@ -289,7 +289,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	return jsonoutput
 
 
-def emptyvectoroutput(searchobject):
+def emptyvectoroutput(searchobject, reasons=list()):
 	"""
 
 	no results; say as much
@@ -300,6 +300,7 @@ def emptyvectoroutput(searchobject):
 	so = searchobject
 
 	output = OutputObject(so, so.session)
+	output.reasons = reasons
 
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	activecorpora = [c for c in allcorpora if so.session[c] == 'yes']
