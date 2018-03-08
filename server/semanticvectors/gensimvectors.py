@@ -81,6 +81,164 @@ def findnearestneighbors(activepoll, searchobject):
 	return findlatentsemanticindex(activepoll, searchobject, nn=True)
 
 
+def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, activepoll, starttime, vectorspace):
+	"""
+
+	:param listsofwords:
+	:param workssearched:
+	:param searchobject:
+	:param activepoll:
+	:param starttime:
+	:return:
+	"""
+
+	so = searchobject
+	output = OutputObject(so, so.session)
+	imagename = ''
+	termone = so.lemma.dictionaryentry
+
+	try:
+		termtwo = so.proximatelemma.dictionaryentry
+	except AttributeError:
+		termtwo = None
+
+	if not vectorspace:
+		vectorspace = buildnnvectorspace(sentencetuples, activepoll, so)
+		if vectorspace == 'failed to build model':
+			reasons = [vectorspace]
+			return emptyvectoroutput(so, reasons)
+
+	if termone and termtwo:
+		similarity = findword2vecsimilarities(termone, termtwo, vectorspace)
+		similarity = formatnnsimilarity(termone, termtwo, similarity)
+		mostsimilar = ['placeholder']
+		html = similarity
+	else:
+		activepoll.statusis('Calculating the nearest neighbors')
+		mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
+		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
+		if mostsimilar:
+			html = formatnnmatches(mostsimilar)
+			activepoll.statusis('Building the graph')
+			mostsimilar = mostsimilar[:hipparchia.config['NEARESTNEIGHBORSCAP']]
+			imagename = graphnnmatches(termone, mostsimilar, vectorspace, so.searchlist)
+		else:
+			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
+
+	findshtml = '{h}'.format(h=html)
+
+	findsjs = generatevectorjs('findneighbors')
+
+	lm = so.lemma.dictionaryentry
+	try:
+		pr = so.proximatelemma.dictionaryentry
+	except AttributeError:
+		# proximatelemma is None
+		pr = None
+
+	if lm and pr:
+		output.title = '[TESTING] Word2Vec of »{skg}« and »{pr}«'.format(skg=lm, pr=pr)
+	else:
+		output.title = 'Neighbors for all forms of »{skg}«'.format(skg=lm, pr=pr)
+	output.found = findshtml
+	output.js = findsjs
+	try:
+		output.setresultcount(len(mostsimilar), 'proximate terms to graph')
+	except TypeError:
+		pass
+	output.setscope(workssearched)
+	output.searchtime = str(round(time.time() - starttime, 2))
+
+	if so.lemma:
+		all = 'all forms of »{skg}«'.format(skg=lm)
+	else:
+		all = ''
+	if so.proximatelemma:
+		near = ' all forms of »{skg}«'.format(skg=pr)
+	else:
+		near = ''
+	output.thesearch = '{all}{near}'.format(all=all, near=near)
+
+	if so.lemma:
+		all = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
+	else:
+		all = ''
+	if so.proximatelemma:
+		near = ' and all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.proximatelemma.formlist), skg=pr)
+	else:
+		near = ''
+	output.htmlsearch = '{all}{near}'.format(all=all, near=near)
+
+	if lm and pr:
+		output.sortby = ''
+	else:
+		output.sortby = 'proximity'
+
+	output.image = imagename
+	activepoll.deactivate()
+
+	jsonoutput = json.dumps(output.generateoutput())
+
+	return jsonoutput
+
+
+def buildnnvectorspace(sentencetuples, activepoll, searchobject):
+	"""
+
+	:return:
+	"""
+
+	# find all words in use
+	listsofwords = [s[1] for s in sentencetuples]
+	allwords = findwordvectorset(listsofwords)
+
+	# find all possible forms of all the words we used
+	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
+	wl = '{:,}'.format(len(listsofwords))
+	activepoll.statusis(
+		'No stored model for this search. Generating a new one.<br />Finding headwords for {n} sentences'.format(n=wl))
+	morphdict = findheadwords(allwords)
+	morphdict = convertmophdicttodict(morphdict)
+	# morphdict = {t: '·'.join(morphdict[t]) for t in morphdict}
+
+	activepoll.statusis('No stored model for this search. Generating a new one.<br />Building vectors for the headwords in the {n} sentences'.format(n=wl))
+	vectorspace = buildgensimmodel(searchobject, morphdict, listsofwords)
+
+	return vectorspace
+
+
+def findapproximatenearestneighbors(query, mymodel):
+	"""
+
+	search for points in space that are close to a given query point
+
+	the query should be a dictionary headword
+
+	this returns a list of tuples: (word, distance)
+
+	:param query:
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	explore = max(2500, hipparchia.config['NEARESTNEIGHBORSCAP'])
+
+	try:
+		mostsimilar = mymodel.most_similar(query, topn=explore)
+		mostsimilar = [s for s in mostsimilar if s[1] > hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']]
+	except KeyError:
+		# keyedvectors.py: raise KeyError("word '%s' not in vocabulary" % word)
+		mostsimilar = None
+	except AttributeError:
+		# 'NoneType' object has no attribute 'most_similar'
+		mostsimilar = None
+
+	#print('mostsimilar', mostsimilar)
+
+	return mostsimilar
+
+
 def findlatentsemanticindex(activepoll, searchobject, nn=False):
 	"""
 
@@ -202,169 +360,13 @@ def findlatentsemanticindex(activepoll, searchobject, nn=False):
 	return output
 
 
-def nearestneighborgenerateoutput(sentencetuples, workssearched, searchobject, activepoll, starttime, vectorspace):
-	"""
-
-	:param listsofwords:
-	:param workssearched:
-	:param searchobject:
-	:param activepoll:
-	:param starttime:
-	:return:
-	"""
-
-	so = searchobject
-	output = OutputObject(so, so.session)
-	imagename = ''
-	termone = so.lemma.dictionaryentry
-
-	try:
-		termtwo = so.proximatelemma.dictionaryentry
-	except AttributeError:
-		termtwo = None
-
-	if not vectorspace:
-		vectorspace = buildnnvectorspace(sentencetuples, activepoll, so)
-		if vectorspace == 'failed to build model':
-			reasons = [vectorspace]
-			return emptyvectoroutput(so, reasons)
-
-	if termone and termtwo:
-		similarity = findword2vecsimilarities(termone, termtwo, vectorspace)
-		similarity = formatnnsimilarity(termone, termtwo, similarity)
-		mostsimilar = ['placeholder']
-		html = similarity
-	else:
-		activepoll.statusis('Calculating the nearest neighbors')
-		mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
-		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
-		if mostsimilar:
-			html = formatnnmatches(mostsimilar)
-			activepoll.statusis('Building the graph')
-			mostsimilar = mostsimilar[:hipparchia.config['NEARESTNEIGHBORSCAP']]
-			imagename = graphnnmatches(termone, mostsimilar, vectorspace, so.searchlist)
-		else:
-			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
-
-	findshtml = '{h}'.format(h=html)
-
-	findsjs = generatevectorjs('findneighbors')
-
-	lm = so.lemma.dictionaryentry
-	try:
-		pr = so.proximatelemma.dictionaryentry
-	except AttributeError:
-		# proximatelemma is None
-		pr = None
-
-	if lm and pr:
-		output.title = '[TESTING] Word2Vec of »{skg}« and »{pr}«'.format(skg=lm, pr=pr)
-	else:
-		output.title = 'Neighbors for all forms of »{skg}«'.format(skg=lm, pr=pr)
-	output.found = findshtml
-	output.js = findsjs
-	try:
-		output.setresultcount(len(mostsimilar), 'proximate terms to graph')
-	except TypeError:
-		pass
-	output.setscope(workssearched)
-	output.searchtime = str(round(time.time() - starttime, 2))
-
-	if so.lemma:
-		all = 'all forms of »{skg}«'.format(skg=lm)
-	else:
-		all = ''
-	if so.proximatelemma:
-		near = ' all forms of »{skg}«'.format(skg=pr)
-	else:
-		near = ''
-	output.thesearch = thesearch = '{all}{near}'.format(all=all, near=near)
-
-	if so.lemma:
-		all = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
-	else:
-		all = ''
-	if so.proximatelemma:
-		near = ' and all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.proximatelemma.formlist), skg=pr)
-	else:
-		near = ''
-	output.htmlsearch = '{all}{near}'.format(all=all, near=near)
-
-	if lm and pr:
-		output.sortby = ''
-	else:
-		output.sortby = 'proximity'
-
-	output.image = imagename
-	activepoll.deactivate()
-
-	jsonoutput = json.dumps(output.generateoutput())
-
-	return jsonoutput
-
-
-def buildnnvectorspace(sentencetuples, activepoll, searchobject):
-	"""
-
-	:return:
-	"""
-
-	# find all words in use
-	listsofwords = [s[1] for s in sentencetuples]
-	allwords = findwordvectorset(listsofwords)
-
-	# find all possible forms of all the words we used
-	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
-	wl = '{:,}'.format(len(listsofwords))
-	activepoll.statusis(
-		'No stored model for this search. Generating a new one.<br />Finding headwords for {n} sentences'.format(n=wl))
-
-	morphdict = findheadwords(allwords)
-	morphdict = convertmophdicttodict(morphdict)
-	# morphdict = {t: '·'.join(morphdict[t]) for t in morphdict}
-
-	activepoll.statusis(
-		'No stored model for this search. Generating a new one.<br />Building vectors for the headwords in the {n} sentences'.format(
-			n=wl))
-	vectorspace = buildgensimmodel(searchobject, morphdict, listsofwords)
-
-	return vectorspace
-
-
-def findapproximatenearestneighbors(query, mymodel):
-	"""
-
-	search for points in space that are close to a given query point
-
-	the query should be a dictionary headword
-
-	this returns a list of tuples: (word, distance)
-
-	:param query:
-	:param morphdict:
-	:param sentences:
-	:return:
-	"""
-
-	explore = max(2500, hipparchia.config['NEARESTNEIGHBORSCAP'])
-
-	try:
-		mostsimilar = mymodel.most_similar(query, topn=explore)
-		mostsimilar = [s for s in mostsimilar if s[1] > hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']]
-	except KeyError:
-		# keyedvectors.py: raise KeyError("word '%s' not in vocabulary" % word)
-		mostsimilar = None
-	except AttributeError:
-		# 'NoneType' object has no attribute 'most_similar'
-		mostsimilar = None
-
-	#print('mostsimilar', mostsimilar)
-
-	return mostsimilar
-
-
 def findword2vecsimilarities(termone, termtwo, mymodel):
 	"""
+
+	WordEmbeddingsKeyedVectors in keyedvectors.py gives the methods
+
+		similarity(w1, w2)
+			[similarity('woman', 'man')]
 
 	:param query:
 	:param morphdict:
@@ -380,6 +382,45 @@ def findword2vecsimilarities(termone, termtwo, mymodel):
 def buildgensimmodel(searchobject, morphdict, sentences):
 	"""
 
+	returns a Word2Vec model
+
+	then you use one of the many ill-documented class functions that come with
+	the model to make queries against it
+
+	WordEmbeddingsKeyedVectors in keyedvectors.py is your friend here for learning what you can really do
+		most_similar(positive=None, negative=None, topn=10, restrict_vocab=None, indexer=None)
+			[analogies; most_similar(positive=['woman', 'king'], negative=['man']) --> queen]
+
+			similar_by_word(word, topn=10, restrict_vocab=None)
+			[the top-N most similar words]
+
+		similar_by_vector(vector, topn=10, restrict_vocab=None)
+
+		similarity_matrix(dictionary, tfidf=None, threshold=0.0, exponent=2.0, nonzero_limit=100, dtype=REAL)
+
+		wmdistance(document1, document2)
+			[Word Mover's Distance between two documents]
+
+		most_similar_cosmul(positive=None, negative=None, topn=10)
+			[analogy finder; most_similar_cosmul(positive=['baghdad', 'england'], negative=['london']) --> iraq]
+
+		cosine_similarities(vector_1, vectors_all)
+
+		distances(word_or_vector, other_words=())
+
+		distance(w1, w2)
+			[distance('woman', 'man')]
+
+		similarity(w1, w2)
+			[similarity('woman', 'man')]
+
+		n_similarity(ws1, ws2)
+			[sets of words: n_similarity(['sushi', 'shop'], ['japanese', 'restaurant'])]
+
+
+	FYI: Doc2VecKeyedVectors
+		doesnt_match(docs)
+			[Which doc from the given list doesn't go with the others?]
 
 	:return:
 	"""
