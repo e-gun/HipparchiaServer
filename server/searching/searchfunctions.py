@@ -16,7 +16,7 @@ from server import hipparchia
 from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, resultiterator
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import removegravity, wordlistintoregex
-from server.hipparchiaobjects.helperobjects import SearchObject
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.lexica.lexicalookups import findcountsviawordcountstable
 from server.listsandsession.sessionfunctions import justtlg
 from server.listsandsession.sessionfunctions import sessionvariables

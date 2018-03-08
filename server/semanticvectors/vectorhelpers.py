@@ -21,7 +21,7 @@ from server.dbsupport.dbfunctions import createvectorstable, dblineintolineobjec
 	setconnection
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
 	tidyupterm
-from server.hipparchiaobjects.helperobjects import ProgressPoll
+from server.hipparchiaobjects.searchobjects import ProgressPoll
 from server.searching.proximitysearching import grableadingandlagging
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildbetweenwhereextension

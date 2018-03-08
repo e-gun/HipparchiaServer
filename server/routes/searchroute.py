@@ -7,23 +7,20 @@
 """
 
 import json
-import locale
 import re
 import time
 
 from flask import request, session
 
 from server import hipparchia
-from server.formatting.bibliographicformatting import bcedating
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds
 from server.formatting.wordformatting import universalregexequivalent, wordlistintoregex
-from server.hipparchiaobjects.helperobjects import ProgressPoll
+from server.hipparchiaobjects.searchobjects import OutputObject, ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
 	sortresultslist
-from server.listsandsession.sessionfunctions import justlatin
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildsearchobject
@@ -66,10 +63,9 @@ def executesearch(timestamp):
 	activepoll.statusis('Preparing to search')
 
 	searchlist = list()
-	output = ''
 	nosearch = True
+	output = OutputObject(so, frozensession)
 
-	dmin, dmax = bcedating(frozensession)
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	activecorpora = [c for c in allcorpora if frozensession[c] == 'yes']
 
@@ -243,75 +239,31 @@ def executesearch(timestamp):
 		else:
 			hitmax = 'true'
 
-		# prepare the output
-		searchtime = time.time() - starttime
-		searchtime = round(searchtime, 2)
-
-		sortorderdecoder = {
-			'universalid': 'ID',
-			'shortname': 'name',
-			'genres': 'author genre',
-			'converted_date': 'date',
-			'location': 'location'
-		}
-		try:
-			locale.setlocale(locale.LC_ALL, 'en_US')
-		except locale.Error:
-			pass
-
-		resultcount = locale.format('%d', resultcount, grouping=True)
-		workssearched = locale.format('%d', workssearched, grouping=True)
-
-		output = dict()
-		output['title'] = thesearch
-		output['found'] = findshtml
-		output['js'] = findsjs
-		output['resultcount'] = '{r} passages'.format(r=resultcount)
-		output['scope'] = workssearched
-		output['searchtime'] = str(searchtime)
-		output['proximate'] = so.proximate
-		output['thesearch'] = thesearch
-		output['htmlsearch'] = htmlsearch
-		output['hitmax'] = hitmax
-		output['onehit'] = frozensession['onehit']
-		output['sortby'] = sortorderdecoder[frozensession['sortorder']]
-		output['dmin'] = dmin
-		output['dmax'] = dmax
-		if justlatin() is False:
-			output['icandodates'] = 'yes'
-		else:
-			output['icandodates'] = 'no'
-		activepoll.deactivate()
+		output.title = thesearch
+		output.found = findshtml
+		output.js = findsjs
+		output.setresultcount(resultcount, 'passages')
+		output.setscope(workssearched)
+		output.searchtime = str(round(time.time() - starttime, 2))
+		output.thesearch = thesearch
+		output.htmlsearch = htmlsearch
+		output.hitmax = hitmax
 
 	if nosearch:
-		reasons = list()
 		if not activecorpora:
-			reasons.append('there are no active databases')
+			output.reasons.append('there are no active databases')
 		if len(so.seeking) == 0:
-			reasons.append('there is no search term')
+			output.reasons.append('there is no search term')
 		if len(so.seeking) > 0 and len(searchlist) == 0:
-			reasons.append('zero works match the search criteria')
-		output = dict()
-		output['title'] = '(empty query)'
-		output['found'] = ''
-		output['resultcount'] = '0 passages'
-		output['scope'] = 0
-		output['searchtime'] = '0.00'
-		output['proximate'] = so.proximate
-		output['thesearch'] = ''
-		output['htmlsearch'] = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=' and '.join(reasons))
-		output['hitmax'] = 0
-		output['dmin'] = dmin
-		output['dmax'] = dmax
-		if justlatin() is False:
-			output['icandodates'] = 'yes'
-		else:
-			output['icandodates'] = 'no'
-		output['sortby'] = frozensession['sortorder']
-		output['onehit'] = frozensession['onehit']
+			output.reasons.append('zero works match the search criteria')
 
-	output = json.dumps(output)
+		output.title = '(empty query)'
+		output.setresultcount(0, 'passages')
+		output.explainemptysearch()
+
+	activepoll.deactivate()
+	jsonoutput = json.dumps(output.generateoutput())
 
 	del poll[ts]
 
-	return output
+	return jsonoutput

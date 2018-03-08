@@ -684,7 +684,7 @@ def rationalizeselections(newselectionuid, selectorexclude):
 	return
 
 
-def corpusselectionsasavalue():
+def corpusselectionsasavalue(thesession=session):
 	"""
 
 	represent the active corpora as a pseudo-binary value: '10101' for ON/OFF/ON/OFF/ON
@@ -697,7 +697,7 @@ def corpusselectionsasavalue():
 	binarystring = '0b'
 
 	for s in ['latincorpus', 'greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']:
-		if session[s] == 'yes':
+		if thesession[s] == 'yes':
 			binarystring += '1'
 		else:
 			binarystring += '0'
@@ -707,7 +707,7 @@ def corpusselectionsasavalue():
 	return binaryvalue
 
 
-def corpusselectionsaspseudobinarystring():
+def corpusselectionsaspseudobinarystring(thesession=session):
 	"""
 
 	represent the active corpora as a pseudo-binary value: '10101' for ON/OFF/ON/OFF/ON
@@ -720,7 +720,7 @@ def corpusselectionsaspseudobinarystring():
 	binarystring = ''
 
 	for s in ['latincorpus', 'greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']:
-		if session[s] == 'yes':
+		if thesession[s] == 'yes':
 			binarystring += '1'
 		else:
 			binarystring += '0'
@@ -728,7 +728,7 @@ def corpusselectionsaspseudobinarystring():
 	return binarystring
 
 
-def justlatin():
+def justlatin(thesession=session):
 	"""
 
 	probe the session to see if we are working in a latin-only environment: '10000' = 16
@@ -736,13 +736,13 @@ def justlatin():
 	:return: True or False
 	"""
 
-	if corpusselectionsasavalue() == 16:
+	if corpusselectionsasavalue(thesession) == 16:
 		return True
 	else:
 		return False
 
 
-def justtlg():
+def justtlg(thesession=session):
 	"""
 
 	probe the session to see if we are working in a tlg authors only environment: '01000' = 8
@@ -750,13 +750,13 @@ def justtlg():
 	:return: True or False
 	"""
 
-	if corpusselectionsasavalue() == 8:
+	if corpusselectionsasavalue(thesession) == 8:
 		return True
 	else:
 		return False
 
 
-def justinscriptions():
+def justinscriptions(thesession=session):
 	"""
 
 	probe the session to see if we are working in a inscriptions-only environment: '00100' = 2
@@ -765,13 +765,13 @@ def justinscriptions():
 	:return: True or False
 	"""
 
-	if corpusselectionsasavalue() == 4:
+	if corpusselectionsasavalue(thesession) == 4:
 		return True
 	else:
 		return False
 
 
-def justpapyri():
+def justpapyri(thesession=session):
 	"""
 
 	probe the session to see if we are working in a papyrus-only environment: '00010' = 2
@@ -780,13 +780,13 @@ def justpapyri():
 	:return: True or False
 	"""
 
-	if corpusselectionsasavalue() == 2:
+	if corpusselectionsasavalue(thesession) == 2:
 		return True
 	else:
 		return False
 
 
-def justlit():
+def justlit(thesession=session):
 	"""
 
 	probe the session to see if we are working in a TLG + LAT environment: '11000' = 24
@@ -794,13 +794,13 @@ def justlit():
 	:return: True or False
 	"""
 
-	if corpusselectionsasavalue() == 24:
+	if corpusselectionsasavalue(thesession) == 24:
 		return True
 	else:
 		return False
 
 
-def justdoc():
+def justdoc(thesession=session):
 	"""
 
 	probe the session to see if we are working in a DDP + INS environment: '00110' = 6
@@ -808,7 +808,7 @@ def justdoc():
 	:return: True or False
 	"""
 
-	if corpusselectionsasavalue() == 6:
+	if corpusselectionsasavalue(thesession) == 6:
 		return True
 	else:
 		return False
@@ -859,7 +859,7 @@ def reducetosessionselections(listmapper, criterion):
 	return d
 
 
-def returnactivedbs():
+def returnactivedbs(thesession=session):
 	"""
 
 	what dbs are currently active?
@@ -869,15 +869,15 @@ def returnactivedbs():
 	"""
 
 	keys = list()
-	if session['latincorpus'] == 'yes':
+	if thesession['latincorpus'] == 'yes':
 		keys.append('lt')
-	if session['greekcorpus'] == 'yes':
+	if thesession['greekcorpus'] == 'yes':
 		keys.append('gr')
-	if session['inscriptioncorpus'] == 'yes':
+	if thesession['inscriptioncorpus'] == 'yes':
 		keys.append('in')
-	if session['papyruscorpus'] == 'yes':
+	if thesession['papyruscorpus'] == 'yes':
 		keys.append('dp')
-	if session['christiancorpus'] == 'yes':
+	if thesession['christiancorpus'] == 'yes':
 		keys.append('ch')
 
 	return keys

@@ -13,10 +13,9 @@ import time
 from flask import request, session
 
 from server import hipparchia
-from server.formatting.bibliographicformatting import bcedating
 from server.formatting.jsformatting import generatevectorjs
 from server.formatting.vectorformatting import formatnnmatches
-from server.hipparchiaobjects.helperobjects import ProgressPoll
+from server.hipparchiaobjects.searchobjects import OutputObject, ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
@@ -198,7 +197,6 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	:return:
 	"""
 	so = searchobject
-	dmin, dmax = bcedating(so.session)
 
 	# find all words in use
 	allwords = findwordvectorset(listsofwords)
@@ -252,39 +250,46 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 
 	findsjs = generatevectorjs('findvectors')
 
-	searchtime = time.time() - starttime
-	searchtime = round(searchtime, 2)
-	workssearched = locale.format('%d', workssearched, grouping=True)
+	output = OutputObject(so, so.session)
 
-	output = dict()
-	output['title'] = 'Cosine distances to »{skg}«'.format(skg=focus)
-	output['found'] = findshtml
-	# ultimately the js should let you clock on any top word to find its associations...
-	output['js'] = findsjs
-	output['resultcount'] = '{c} related terms in {s} {t}'.format(c=len(cosinevalues), s=len(listsofwords), t=vtype)
-	output['scope'] = workssearched
-	output['searchtime'] = str(searchtime)
-	output['proximate'] = ''
+	output.title = 'Cosine distances to »{skg}«'.format(skg=focus)
+	output.found = findshtml
+	output.js = findsjs
+
+	if so.session['cosdistbylineorword'] == 'no':
+		space = 'related terms in {s} {t}'.format(s=len(listsofwords), t=vtype)
+	else:
+		dist = so.session['proximity']
+		scale = {'W': 'word', 'L': 'line'}
+		if int(dist) > 1:
+			plural = 's'
+		else:
+			plural = ''
+		space = 'related terms within {a} {b}{s}'.format(a=dist, b=scale[so.session['searchscope']], s=plural)
+
+	found = max(hipparchia.config['NEARESTNEIGHBORSCAP'], len(cosinevalues))
+	output.setresultcount(found, space)
+	output.setscope(workssearched)
+	output.searchtime = str(round(time.time() - starttime, 2))
+
 	if so.lemma:
 		xtra = 'all forms of '
 	else:
 		xtra = ''
-	output['thesearch'] = '{x}»{skg}«'.format(x=xtra, skg=focus)
-	output['htmlsearch'] = '{x}<span class="sought">»{skg}«</span>'.format(x=xtra, skg=focus)
-	output['hitmax'] = ''
-	output['onehit'] = ''
-	output['sortby'] = 'distance with a cutoff of {c}'.format(c=1 - hipparchia.config['VECTORDISTANCECUTOFFLOCAL'])
-	output['dmin'] = dmin
-	output['dmax'] = dmax
-	output['image'] = imagename
+	output.thesearch = '{x}»{skg}«'.format(x=xtra, skg=focus)
+	output.htmlsearch = '{x}<span class="sought">»{skg}«</span>'.format(x=xtra, skg=focus)
+
+	output.sortby = 'distance with a cutoff of {c}'.format(c=1 - hipparchia.config['VECTORDISTANCECUTOFFLOCAL'])
+	output.image = imagename
+
 	activepoll.deactivate()
 
-	output = json.dumps(output)
+	jsonoutput = json.dumps(output.generateoutput())
 
-	return output
+	return jsonoutput
 
 
-def emptyvectoroutput(searchobject, reasons=list()):
+def emptyvectoroutput(searchobject):
 	"""
 
 	no results; say as much
@@ -293,32 +298,20 @@ def emptyvectoroutput(searchobject, reasons=list()):
 	"""
 
 	so = searchobject
-	output = dict()
-	dmin, dmax = bcedating(so.session)
+
+	output = OutputObject(so, so.session)
 
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	activecorpora = [c for c in allcorpora if so.session[c] == 'yes']
 
 	if not activecorpora:
-		reasons.append('there are no active databases')
+		output.reasons.append('there are no active databases')
 	if not (so.lemma or so.seeking):
-		reasons.append('no search term was provided')
+		output.reasons.append('no search term was provided')
 
-	output['title'] = '(empty query)'
-	output['found'] = ''
-	output['resultcount'] = 0
-	output['scope'] = 0
-	output['searchtime'] = '0.00'
-	output['proximate'] = so.proximate
-	output['thesearch'] = ''
-	output['htmlsearch'] = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=' and '.join(reasons))
-	output['hitmax'] = 0
-	output['dmin'] = dmin
-	output['dmax'] = dmax
-	output['sortby'] = so.session['sortorder']
-	output['onehit'] = so.session['onehit']
+	output.explainemptysearch()
 
-	output = json.dumps(output)
+	jsonoutput = json.dumps(output.generateoutput())
 
-	return output
+	return jsonoutput
 

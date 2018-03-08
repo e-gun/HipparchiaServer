@@ -21,6 +21,8 @@ from server.startup import authordict, workdict
 def graphbliteraldistancematches(searchterm, mostsimilartuples, searchlist):
 	"""
 
+	mostsimilartuples [('γράφω', 0.6708203932499369), ('εἰκών', 0.447213595499958), ('τρέχω', 0.447213595499958), ...]
+
 
 	:param searchterm:
 	:param mostsimilartuples:
@@ -28,6 +30,9 @@ def graphbliteraldistancematches(searchterm, mostsimilartuples, searchlist):
 	:param searchlist:
 	:return:
 	"""
+
+	mostsimilartuples = [t for t in mostsimilartuples if t[1] > hipparchia.config['VECTORDISTANCECUTOFFLOCAL']]
+	mostsimilartuples = mostsimilartuples[:hipparchia.config['NEARESTNEIGHBORSCAP']]
 
 	terms = [searchterm] + [t[0] for t in mostsimilartuples]
 

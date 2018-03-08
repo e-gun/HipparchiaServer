@@ -16,7 +16,7 @@ from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.wordformatting import avoidsmallvariants
-from server.hipparchiaobjects.helperobjects import ProgressPoll
+from server.hipparchiaobjects.searchobjects import ProgressPoll
 from server.startup import authordict, poll, workdict
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import supplementalindexjs, tcparserequest, \

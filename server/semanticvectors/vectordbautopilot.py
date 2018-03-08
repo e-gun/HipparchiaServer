@@ -11,7 +11,7 @@ import time
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import resultiterator, setconnection
-from server.hipparchiaobjects.helperobjects import ProgressPoll, SearchObject
+from server.hipparchiaobjects.searchobjects import ProgressPoll, SearchObject
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.gensimvectors import buildnnvectorspace
 from server.semanticvectors.vectordispatcher import vectorsentencedispatching
@@ -22,11 +22,11 @@ from server.startup import poll, workdict
 def startvectorizing():
 	"""
 
-	BUGGY at the moment; it looks like we are doing only one training run, or something like that
-	.999 distances instead of .777, etc.
+	figure out what vectors are not available in the db
 
-	quite odd since we should be following identical logic through the functions but we
-	are not getting consonant vectors at the other end...
+	calculate and add them in the background
+
+	exit when there are none that are out of date or blank
 
 	:return:
 	"""
@@ -76,7 +76,8 @@ def startvectorizing():
 				workpile = list()
 			del vectorspace
 
-	print('vectorbot finished')
+	if hipparchia.config['AUTOVECTORIZE'] == 'yes':
+		print('vectorbot finished')
 
 	return
 
@@ -161,11 +162,16 @@ def buildfakesearchobject():
 	for z in zeroes:
 		frozensession[z] = 0
 
+	yn = ['onehit', 'icandodates']
+	for n in yn:
+		frozensession[n] = 'no'
+
 	so = SearchObject(1, '', '', None, None, frozensession)
 
 	# parsevectorsentences() needs the following:
 	so.vectortype = 'semanticvectorquery'
 	so.usecolumn = 'marked_up_line'
+	so.sortorder = 'shortname'
 
 	return so
 

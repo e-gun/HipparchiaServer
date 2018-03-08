@@ -19,7 +19,7 @@ from server.formatting.bibliographicformatting import bcedating
 from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
 from server.formatting.vectorformatting import formatlsimatches, formatnnmatches, formatnnsimilarity
 from server.hipparchiaobjects.helperobjects import LSIVectorCorpus, LogEntropyVectorCorpus
-from server.hipparchiaobjects.helperobjects import ProgressPoll
+from server.hipparchiaobjects.searchobjects import ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
