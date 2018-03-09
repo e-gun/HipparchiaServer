@@ -275,18 +275,30 @@ $('#lexicalsearch').click(function(){
 // the radio options
 //
 
-$('#headwordindexing_y').click( function(){ setoptions('headwordindexing', 'yes'); $('#headwordindexingactive').show(); $('#headwordindexinginactive').hide(); });
+$('#headwordindexing_y').click( function(){
+    setoptions('headwordindexing', 'yes'); $('#headwordindexingactive').show(); $('#headwordindexinginactive').hide();
+});
 
-$('#headwordindexing_n').click( function(){ setoptions('headwordindexing', 'no'); $('#headwordindexinginactive').show(); $('#headwordindexingactive').hide(); });
+$('#headwordindexing_n').click( function(){
+    setoptions('headwordindexing', 'no'); $('#headwordindexinginactive').show(); $('#headwordindexingactive').hide();
+});
 
-$('#frequencyindexing_y').click( function(){ setoptions('indexbyfrequency', 'yes'); $('#frequencyindexingactive').show(); $('#frequencyindexinginactive').hide(); });
+$('#frequencyindexing_y').click( function(){
+    setoptions('indexbyfrequency', 'yes'); $('#frequencyindexingactive').show(); $('#frequencyindexinginactive').hide();
+});
 
-$('#frequencyindexing_n').click( function(){ setoptions('indexbyfrequency', 'no'); $('#frequencyindexinginactive').show(); $('#frequencyindexingactive').hide(); });
+$('#frequencyindexing_n').click( function(){
+    setoptions('indexbyfrequency', 'no'); $('#frequencyindexinginactive').show(); $('#frequencyindexingactive').hide();
+});
 
 
-$('#onehit_y').click( function(){ setoptions('onehit', 'yes'); $('#onehitistrue').show(); $('#onehitisfalse').hide(); });
+$('#onehit_y').click( function(){
+    setoptions('onehit', 'yes'); $('#onehitistrue').show(); $('#onehitisfalse').hide();
+});
 
-$('#onehit_n').click( function(){ setoptions('onehit', 'no'); $('#onehitisfalse').show(); $('#onehitistrue').hide(); });
+$('#onehit_n').click( function(){
+    setoptions('onehit', 'no'); $('#onehitisfalse').show(); $('#onehitistrue').hide();
+});
 
 $('#includespuria').change(function() {
     if(this.checked) { setoptions('spuria', 'yes'); } else { setoptions('spuria', 'no'); }
@@ -431,14 +443,15 @@ $('#semanticvectorquery').change(function() {
         var lsf = $('#lemmatasearchform');
         var psf = $('#proximatesearchform');
         var plsf = $('#proximatelemmatasearchform');
-        wsf.hide();
+        wsf.show();
         wsf.val('');
-        lsf.show();
-        psf.hide();
-        psf.val('');
-        plsf.show();
-        $('#termoneisalemma').prop('checked', true);
-        $('#termtwoisalemma').prop('checked', true);
+        wsf.attr('placeholder', '(concept search: enter a word or phrase)');
+        lsf.hide();
+        // psf.hide();
+        // psf.val('');
+        // plsf.hide();
+        $('#termoneisalemma').prop('checked', false);
+        $('#termtwoisalemma').prop('checked', false);
         setoptions('semanticvectorquery', 'yes');
         } else {
         setoptions('semanticvectorquery', 'no');
@@ -460,6 +473,8 @@ $('#nearestneighborsquery').change(function() {
         wsf.hide();
         wsf.val('');
         lsf.show();
+        lsf.val('');
+        lsf.attr('placeholder', '(concept map: pick a lemma)');
         psf.hide();
         psf.val('');
         plsf.show();
@@ -486,7 +501,8 @@ $('#tensorflowgraph').change(function() {
         wsf.hide();
         wsf.val('');
         lsf.show();
-        lsf.val('(unused for tensorflow graph)');
+        lsf.val('');
+        lsf.attr('placeholder', '(unused for tensorflowgraph)');
         psf.hide();
         psf.val('');
         plsf.show();
@@ -513,7 +529,8 @@ $('#sentencesimilarity').change(function() {
         wsf.hide();
         wsf.val('');
         lsf.show();
-        lsf.val('(unused for tensorflow graph)');
+        lsf.val('');
+        lsf.attr('placeholder', '(unused for sentencesimilarity)');
         psf.hide();
         psf.val('');
         plsf.show();

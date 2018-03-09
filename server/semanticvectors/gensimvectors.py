@@ -17,9 +17,46 @@ from server.searching.searchfunctions import buildsearchobject, cleaninitialquer
 from server.semanticvectors.gensimlsi import lsigenerateoutput
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import checkforstoredvector
+from server.semanticvectors.vectorhelpers import buildlemmatizesearchphrase, checkforstoredvector
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
+
+
+@hipparchia.route('/findneighbors/<timestamp>', methods=['GET'])
+def findnearestneighborvectors(timestamp):
+	"""
+
+	meant to be called via a click from a result from a prior search
+
+	:param timestamp:
+	:return:
+	"""
+
+	try:
+		ts = str(int(timestamp))
+	except ValueError:
+		ts = str(int(time.time()))
+
+	so = buildsearchobject(ts, request, session)
+	so.seeking = ''
+	so.proximate = ''
+	so.proximatelemma = ''
+
+	try:
+		so.lemma = lemmatadict[cleaninitialquery(request.args.get('lem', ''))]
+	except KeyError:
+		so.lemma = None
+
+	poll[ts] = ProgressPoll(ts)
+	activepoll = poll[ts]
+	activepoll.activate()
+	activepoll.statusis('Preparing to search')
+
+	output = executegensimsearch(activepoll, so, nn=True)
+
+	del poll[ts]
+
+	return output
 
 
 def executegensimsearch(activepoll, searchobject, nn=False):
@@ -35,35 +72,42 @@ def executegensimsearch(activepoll, searchobject, nn=False):
 	"""
 	so = searchobject
 
+	starttime = time.time()
+
 	if not nn:
 		outputfunction = lsigenerateoutput
 		indextype = 'lsi'
 		so.vectortype = 'semanticvectorquery'
+		so.lemma = buildlemmatizesearchphrase(so.seeking)
+		if not so.lemma:
+			reasons = ['unable to lemmatize the search term(s) [nb: whole words required and accents matter]']
+			return emptyvectoroutput(so, reasons)
+		else:
+			validlemma = True
 	else:
 		outputfunction = generatenearestneighbordata
 		indextype = 'nn'
 
-	starttime = time.time()
+		try:
+			validlemma = lemmatadict[so.lemma.dictionaryentry]
+		except KeyError:
+			validlemma = None
+		except AttributeError:
+			# 'NoneType' object has no attribute 'dictionaryentry'
+			validlemma = None
 
-	try:
-		validlemma = lemmatadict[so.lemma.dictionaryentry]
-	except KeyError:
-		validlemma = None
-	except AttributeError:
-		# 'NoneType' object has no attribute 'dictionaryentry'
-		validlemma = None
+		so.lemma = validlemma
 
-	so.lemma = validlemma
+		try:
+			validlemmatwo = lemmatadict[so.proximatelemma.dictionaryentry]
+		except KeyError:
+			validlemmatwo = None
+		except AttributeError:
+			# 'NoneType' object has no attribute 'dictionaryentry'
+			validlemmatwo = None
 
-	try:
-		validlemmatwo = lemmatadict[so.proximatelemma.dictionaryentry]
-	except KeyError:
-		validlemmatwo = None
-	except AttributeError:
-		# 'NoneType' object has no attribute 'dictionaryentry'
-		validlemmatwo = None
+		so.proximatelemma = validlemmatwo
 
-	so.proximatelemma = validlemmatwo
 
 	activepoll.statusis('Preparing to search')
 
@@ -126,7 +170,11 @@ def executegensimsearch(activepoll, searchobject, nn=False):
 				activepoll.statusis('Finding neighbors')
 			# blanking out the search term will really return every last sentence...
 			# otherwise you only return sentences with the search term in them
-			restorelemma = lemmatadict[so.lemma.dictionaryentry]
+			try:
+				restorelemma = lemmatadict[so.lemma.dictionaryentry]
+			except AttributeError:
+				# we are doing an lsi search and actually holding a string in so.lemma
+				restorelemma = so.lemma
 			so.lemma = None
 			so.seeking = r'.'
 			if not vectorspace:
@@ -139,43 +187,6 @@ def executegensimsearch(activepoll, searchobject, nn=False):
 			return emptyvectoroutput(so)
 	else:
 		return emptyvectoroutput(so)
-
-	return output
-
-
-@hipparchia.route('/findneighbors/<timestamp>', methods=['GET'])
-def findnearestneighborvectors(timestamp):
-	"""
-
-	meant to be called via a click from a result from a prior search
-
-	:param timestamp:
-	:return:
-	"""
-
-	try:
-		ts = str(int(timestamp))
-	except ValueError:
-		ts = str(int(time.time()))
-
-	so = buildsearchobject(ts, request, session)
-	so.seeking = ''
-	so.proximate = ''
-	so.proximatelemma = ''
-
-	try:
-		so.lemma = lemmatadict[cleaninitialquery(request.args.get('lem', ''))]
-	except KeyError:
-		so.lemma = None
-
-	poll[ts] = ProgressPoll(ts)
-	activepoll = poll[ts]
-	activepoll.activate()
-	activepoll.statusis('Preparing to search')
-
-	output = executegensimsearch(activepoll, so, nn=True)
-
-	del poll[ts]
 
 	return output
 

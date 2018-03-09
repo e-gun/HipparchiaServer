@@ -371,7 +371,12 @@ def lsiformatoutput(findshtml, workssearched, matches, searchobject, activepoll,
 	searchtime = round(searchtime, 2)
 	workssearched = '{:,}'.format(workssearched)
 
-	lm = so.lemma.dictionaryentry
+	try:
+		lm = so.lemma.dictionaryentry
+	except AttributeError:
+		# we are now using a phrase generated from a list of headwords
+		lm = so.lemma
+
 	try:
 		pr = so.proximatelemma.dictionaryentry
 	except AttributeError:
@@ -402,9 +407,14 @@ def lsiformatoutput(findshtml, workssearched, matches, searchobject, activepoll,
 	output['thesearch'] = '{all}{near}'.format(all=all, near=near)
 
 	if so.lemma:
-		all = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
+		try:
+			fl = so.lemma.formlist
+		except AttributeError:
+			fl = so.originalseeking
+		all = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(fl), skg=lm)
 	else:
 		all = ''
+
 	if so.proximatelemma:
 		near = ' and all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.proximatelemma.formlist), skg=pr)
 	else:

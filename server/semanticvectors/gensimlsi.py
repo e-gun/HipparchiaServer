@@ -8,15 +8,15 @@
 
 from gensim import corpora
 from gensim.models import LsiModel, TfidfModel
-from gensim.similarities import MatrixSimilarity
+from gensim.similarities import Similarity
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
 from server.formatting.vectorformatting import formatlsimatches, lsiformatoutput
 from server.hipparchiaobjects.helperobjects import LSIVectorCorpus
-from server.semanticvectors.preparetextforvectorization import findheadwords, vectorprepdispatcher
+from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, finddblinesfromsentences, \
-	findwordvectorset, storevectorindatabase
+	findheadwords, findwordvectorset, storevectorindatabase
 
 
 def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, starttime, lsispace):
@@ -76,14 +76,15 @@ def lsifindmatches(sentencestuples, searchobject, activepoll, lsispace):
 		storevectorindatabase(so.searchlist, 'lsi', lsispace)
 
 	try:
-		vq = ' '.join([so.lemma.dictionaryentry, so.proximatelemma.dictionaryentry])
-	except AttributeError:
-		# there was no second lemma & you cant join None
 		vq = so.lemma.dictionaryentry
+	except AttributeError:
+		# no longer using so.lemma to hold a lemma object; instead we have a phrase built of headwords
+		# this tyre... except... should disappear soon/eventually
+		vq = so.lemma
 
 	vectorquerylsi = lsispace.findquerylsi(vq)
 
-	vectorindex = MatrixSimilarity(lsispace.semantics)
+	vectorindex = Similarity(lsispace.semantics)
 
 	similis = vectorindex[vectorquerylsi]
 	# print('similis', similis)

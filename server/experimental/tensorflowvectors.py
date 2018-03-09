@@ -31,8 +31,8 @@ from random import randint
 from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.semanticvectors.preparetextforvectorization import findheadwords, vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import convertmophdicttodict
+from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, findheadwords
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, listmapper, workdict
 

@@ -10,9 +10,7 @@ from multiprocessing import Manager, Process
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection, setthreadcount
-from server.hipparchiaobjects.helperobjects import MPCounter
 from server.semanticvectors.vectorhelpers import findsentences
-from server.textsandindices.indexmaker import mpmorphology
 
 
 def vectorprepdispatcher(searchobject, activepoll):
@@ -49,35 +47,6 @@ def vectorprepdispatcher(searchobject, activepoll):
 		j.join()
 
 	return list(foundsentences)
-
-
-def findheadwords(wordlist):
-	"""
-
-	return a dict of morpholog objects
-
-	:param wordlist:
-	:param activepoll:
-	:return:
-	"""
-
-	manager = Manager()
-	commitcount = MPCounter()
-	terms = manager.list(wordlist)
-	morphobjects = manager.dict()
-	workers = setthreadcount()
-
-	targetfunction = mpmorphology
-	argumentuple = (terms, morphobjects, commitcount)
-
-	jobs = [Process(target=targetfunction, args=argumentuple) for i in range(workers)]
-
-	for j in jobs:
-		j.start()
-	for j in jobs:
-		j.join()
-
-	return morphobjects
 
 
 def breaktextsintosentences(foundsentences, searchlist, activepoll, searchobject):

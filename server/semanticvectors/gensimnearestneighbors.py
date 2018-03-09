@@ -11,10 +11,9 @@ from gensim.models import Word2Vec
 from server import hipparchia
 from server.dbsupport.dbfunctions import setthreadcount
 from server.formatting.vectorformatting import formatnnmatches, formatnnsimilarity, nearestneighborgenerateoutput
-from server.semanticvectors.preparetextforvectorization import findheadwords
 from server.semanticvectors.vectorgraphing import graphnnmatches
-from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, findwordvectorset, \
-	storevectorindatabase
+from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, findheadwords, \
+	findwordvectorset, storevectorindatabase
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 
 
@@ -106,7 +105,7 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 		most_similar(positive=None, negative=None, topn=10, restrict_vocab=None, indexer=None)
 			[analogies; most_similar(positive=['woman', 'king'], negative=['man']) --> queen]
 
-			similar_by_word(word, topn=10, restrict_vocab=None)
+		similar_by_word(word, topn=10, restrict_vocab=None)
 			[the top-N most similar words]
 
 		similar_by_vector(vector, topn=10, restrict_vocab=None)

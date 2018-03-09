@@ -12,24 +12,25 @@ import re
 import sys
 import time
 from datetime import datetime
+from multiprocessing import Manager, Process
 from string import punctuation
 
 import psycopg2
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import createvectorstable, dblineintolineobject, grabonelinefromwork, resultiterator, \
-	setconnection
+	setconnection, setthreadcount
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
 	tidyupterm
+from server.hipparchiaobjects.helperobjects import MPCounter
 from server.hipparchiaobjects.searchobjects import ProgressPoll
 from server.searching.proximitysearching import grableadingandlagging
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildbetweenwhereextension
 from server.startup import lemmatadict
-
-
 # bleh: numpy and scipy will fail to install on FreeBSD 11.x
 # the work-around functions below might be needed instead: presumably there are markedly slower...
+from server.textsandindices.indexmaker import mpmorphology
 
 
 def cleantext(texttostrip):
@@ -158,7 +159,7 @@ def parsevectorsentences(searchobject, lineobjects):
 	terminations = ['.', '?', '!', '·', ';']
 	allsentences = recursivesplit([wholetext], terminations)
 
-	if so.lemma:
+	if so.session['nearestneighborsquery'] == 'yes':
 		terms = [acuteorgrav(t) for t in so.lemma.formlist]
 		lookingfor = "|".join(terms)
 		lookingfor = '({lf})'.format(lf=lookingfor)
@@ -255,6 +256,31 @@ def convertmophdicttodict(morphdict):
 	morphdict = {k: v for k, v in morphdict.items() if v - delenda == v}
 
 	return morphdict
+
+
+def buildlemmatizesearchphrase(phrase):
+	"""
+
+	turn a search into a collection of headwords
+
+	:param phrase:
+	:return:
+	"""
+
+	# phrase = 'vias urbis munera'
+	words = phrase.split(' ')
+
+	morphdict = findheadwords(words)
+	morphdict = convertmophdicttodict(morphdict)
+	# morphdict {'munera': {'munero', 'munus'}, 'urbis': {'urbs'}, 'uias': {'via', 'vio'}}
+
+	listoflistofheadwords = buildflatbagsofwords(morphdict, [words])
+	# [['via', 'vio', 'urbs', 'munero', 'munus']]
+
+	lemmatizesearchphrase = ' '.join(listoflistofheadwords[0])
+	# lemmatizesearchphrase = 'via vio urbs munus munero'
+
+	return lemmatizesearchphrase
 
 
 def findverctorenvirons(hitdict, searchobject):
@@ -949,3 +975,32 @@ idem - 24600
 ἔτι - 197966
 ὑπό - 194308
 """
+
+
+def findheadwords(wordlist):
+	"""
+
+	return a dict of morpholog objects
+
+	:param wordlist:
+	:param activepoll:
+	:return:
+	"""
+
+	manager = Manager()
+	commitcount = MPCounter()
+	terms = manager.list(wordlist)
+	morphobjects = manager.dict()
+	workers = setthreadcount()
+
+	targetfunction = mpmorphology
+	argumentuple = (terms, morphobjects, commitcount)
+
+	jobs = [Process(target=targetfunction, args=argumentuple) for i in range(workers)]
+
+	for j in jobs:
+		j.start()
+	for j in jobs:
+		j.join()
+
+	return morphobjects
