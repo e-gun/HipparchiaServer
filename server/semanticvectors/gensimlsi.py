@@ -8,7 +8,7 @@
 
 from gensim import corpora
 from gensim.models import LsiModel, TfidfModel
-from gensim.similarities import Similarity
+from gensim.similarities import MatrixSimilarity
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
@@ -75,16 +75,9 @@ def lsifindmatches(sentencestuples, searchobject, activepoll, lsispace):
 		lsispace = lsibuildspace(morphdict, listsofwords)
 		storevectorindatabase(so.searchlist, 'lsi', lsispace)
 
-	try:
-		vq = so.lemma.dictionaryentry
-	except AttributeError:
-		# no longer using so.lemma to hold a lemma object; instead we have a phrase built of headwords
-		# this tyre... except... should disappear soon/eventually
-		vq = so.lemma
+	vectorquerylsi = lsispace.findquerylsi(so.tovectorize)
 
-	vectorquerylsi = lsispace.findquerylsi(vq)
-
-	vectorindex = Similarity(lsispace.semantics)
+	vectorindex = MatrixSimilarity(lsispace.semantics)
 
 	similis = vectorindex[vectorquerylsi]
 	# print('similis', similis)

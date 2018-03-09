@@ -141,7 +141,7 @@ def determinevectorworkpile():
 	return workpile
 
 
-def buildfakesearchobject():
+def buildfakesearchobject(qtype='nearestneighborsquery'):
 	"""
 
 	do what it takes to build a hollow searchobject
@@ -162,14 +162,14 @@ def buildfakesearchobject():
 	for z in zeroes:
 		frozensession[z] = 0
 
-	yn = ['onehit', 'icandodates']
+	yn = ['onehit', 'icandodates', 'nearestneighborsquery']
 	for n in yn:
 		frozensession[n] = 'no'
 
 	so = SearchObject(1, '', '', None, None, frozensession)
 
 	# parsevectorsentences() needs the following:
-	so.vectortype = 'semanticvectorquery'
+	so.vectorquerytype = qtype
 	so.usecolumn = 'marked_up_line'
 	so.sortorder = 'shortname'
 

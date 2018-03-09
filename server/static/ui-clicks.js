@@ -448,7 +448,7 @@ $('#semanticvectorquery').change(function() {
         wsf.attr('placeholder', '(concept search: enter a word or phrase)');
         lsf.hide();
         // psf.hide();
-        // psf.val('');
+        psf.val('');
         // plsf.hide();
         $('#termoneisalemma').prop('checked', false);
         $('#termtwoisalemma').prop('checked', false);

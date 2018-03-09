@@ -138,12 +138,12 @@ def parsevectorsentences(searchobject, lineobjects):
 	"""
 	so = searchobject
 
-	requiresids = ['semanticvectorquery', 'sentencesimilarity']
+	requiresids = ['semanticvectorquery', 'nearestneighborsquery']
 
 	columnmap = {'marked_up_line': 'accented', 'accented_line': 'polytonic', 'stripped_line': 'stripped'}
 	col = columnmap[so.usecolumn]
 
-	if so.vectortype in requiresids:
+	if so.vectorquerytype in requiresids:
 		wholetext = ' '.join(['⊏{i}⊐{t}'.format(i=l.universalid, t=getattr(l, col)) for l in lineobjects])
 	else:
 		wholetext = ' '.join([getattr(l, col) for l in lineobjects])
@@ -152,14 +152,15 @@ def parsevectorsentences(searchobject, lineobjects):
 		wholetext = cleantext(wholetext)
 
 	# need to split at all possible sentence ends
-	# need to turn off semicolon in latin...
+	# need to turn off semicolon in latin...170 St. George Street
 	# latin: ['.', '?', '!']
 	# greek: ['.', ';', '!', '·']
 
 	terminations = ['.', '?', '!', '·', ';']
 	allsentences = recursivesplit([wholetext], terminations)
 
-	if so.session['nearestneighborsquery'] == 'yes':
+	# print('type(so.lemma)', type(so.lemma))
+	if so.vectorquerytype == 'cosdistbysentence':
 		terms = [acuteorgrav(t) for t in so.lemma.formlist]
 		lookingfor = "|".join(terms)
 		lookingfor = '({lf})'.format(lf=lookingfor)
@@ -188,7 +189,7 @@ def parsevectorsentences(searchobject, lineobjects):
 	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
 	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
 
-	if so.vectortype in requiresids:
+	if so.vectorquerytype in requiresids:
 		# now we mark the source of every sentence by turning it into a tuple: (location, text)
 		previousid = lineobjects[0].universalid
 		idfinder = re.compile(r'⊏(.*?)⊐')
@@ -388,6 +389,7 @@ def grablistoflines(table, uidlist):
 	lines = [int(uid.split('_ln_')[1]) for uid in uidlist]
 
 	qtemplate = 'SELECT * from {t} WHERE index = ANY(%s)'
+
 	q = qtemplate.format(t=table)
 	d = (lines,)
 	cursor.execute(q, d)
@@ -485,8 +487,11 @@ def convertsingleuidtodblineobject(lineuid, cursor):
 	:return:
 	"""
 
+	# print('convertsingleuidtodblineobject() lineuid', lineuid)
+
 	db = lineuid.split('_')[0][:6]
 	ln = lineuid.split('_')[-1]
+
 	try:
 		myline = grabonelinefromwork(db, ln, cursor)
 		fetchedline = dblineintolineobject(myline)
@@ -706,8 +711,8 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 		pickledvectors = pickle.dumps('failed to build model')
 	settings = determinesettings()
 
-	q = 'DELETE FROM public.storedvectors WHERE uidlist = %s'
-	d = (uidlist,)
+	q = 'DELETE FROM public.storedvectors WHERE (uidlist = %s and vectortype = %s)'
+	d = (uidlist, vectortype)
 	cursor.execute(q, d)
 
 	q = """
@@ -849,6 +854,35 @@ def determinesettings():
 	return settingstring
 
 
+def findheadwords(wordlist):
+	"""
+
+	return a dict of morpholog objects
+
+	:param wordlist:
+	:param activepoll:
+	:return:
+	"""
+
+	manager = Manager()
+	commitcount = MPCounter()
+	terms = manager.list(wordlist)
+	morphobjects = manager.dict()
+	workers = setthreadcount()
+
+	targetfunction = mpmorphology
+	argumentuple = (terms, morphobjects, commitcount)
+
+	jobs = [Process(target=targetfunction, args=argumentuple) for i in range(workers)]
+
+	for j in jobs:
+		j.start()
+	for j in jobs:
+		j.join()
+
+	return morphobjects
+
+
 """
 qui¹ - 252258
 et - 227461
@@ -975,32 +1009,3 @@ idem - 24600
 ἔτι - 197966
 ὑπό - 194308
 """
-
-
-def findheadwords(wordlist):
-	"""
-
-	return a dict of morpholog objects
-
-	:param wordlist:
-	:param activepoll:
-	:return:
-	"""
-
-	manager = Manager()
-	commitcount = MPCounter()
-	terms = manager.list(wordlist)
-	morphobjects = manager.dict()
-	workers = setthreadcount()
-
-	targetfunction = mpmorphology
-	argumentuple = (terms, morphobjects, commitcount)
-
-	jobs = [Process(target=targetfunction, args=argumentuple) for i in range(workers)]
-
-	for j in jobs:
-		j.start()
-	for j in jobs:
-		j.join()
-
-	return morphobjects

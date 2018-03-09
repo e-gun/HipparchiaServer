@@ -290,7 +290,7 @@ def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearch
 	"""
 
 	so = searchobject
-	output = OutputObject(so, so.session)
+	output = OutputObject(so)
 	output.image = imagename
 
 	findsjs = generatevectorjs('findneighbors')

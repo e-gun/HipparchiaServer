@@ -26,7 +26,7 @@ from server.listsandsession.listmanagement import calculatewholeauthorsearches, 
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildsearchobject
-from server.semanticvectors.gensimvectors import executegensimsearch, findnearestneighbors
+from server.semanticvectors.gensimvectors import executegensimsearch
 from server.semanticvectors.vectorpseudoroutes import findabsolutevectorsbysentence, findabsolutevectorsfromhits
 from server.startup import authordict, listmapper, poll, workdict
 
@@ -64,7 +64,7 @@ def executesearch(timestamp):
 
 	searchlist = list()
 	nosearch = True
-	output = OutputObject(so, frozensession)
+	output = OutputObject(so)
 
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	activecorpora = [c for c in allcorpora if frozensession[c] == 'yes']
@@ -96,31 +96,18 @@ def executesearch(timestamp):
 
 		isgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
 
-		if frozensession['cosdistbysentence'] == 'yes':
-			# print('cosdistbysentence')
-			so.proximate = ''
-			so.proximatelemma = ''
-			output = findabsolutevectorsbysentence(activepoll, so)
-			del poll[ts]
-			return output
+		so.vectorquerytype = so.infervectorquerytype()
 
-		if frozensession['semanticvectorquery'] == 'yes':
-			output = executegensimsearch(activepoll, so)
-			del poll[ts]
-			return output
+		# note that cosdistbylineorword requires a hitdict and so has to come later
+		vectorfunctions = {'cosdistbysentence': findabsolutevectorsbysentence,
+		                   'semanticvectorquery': executegensimsearch,
+		                   'nearestneighborsquery': executegensimsearch,
+		                   'tensorflowgraph': tensorgraphelectedworks,
+		                   'sentencesimilarity': sklearnselectedworks}
 
-		if frozensession['nearestneighborsquery'] == 'yes':
-			output = findnearestneighbors(activepoll, so, request)
-			del poll[ts]
-			return output
-
-		if frozensession['tensorflowgraph'] == 'yes':
-			output = tensorgraphelectedworks(activepoll, so)
-			del poll[ts]
-			return output
-
-		if frozensession['sentencesimilarity'] == 'yes':
-			output = sklearnselectedworks(activepoll, so)
+		if so.vectorquerytype in vectorfunctions:
+			fnc = vectorfunctions[so.vectorquerytype]
+			output = fnc(activepoll, so)
 			del poll[ts]
 			return output
 
@@ -187,7 +174,7 @@ def executesearch(timestamp):
 		# hits [<server.hipparchiaclasses.dbWorkLine object at 0x10d952da0>, <server.hipparchiaclasses.dbWorkLine object at 0x10d952c50>, ... ]
 		hitdict = sortresultslist(hits, so, authordict, workdict)
 
-		if frozensession['cosdistbylineorword'] == 'yes':
+		if so.vectorquerytype == 'cosdistbylineorword':
 			# print('cosdistbylineorword')
 			# take these hits and head on over to the vector worker
 			output = findabsolutevectorsfromhits(so, hitdict, activepoll, starttime, workssearched)

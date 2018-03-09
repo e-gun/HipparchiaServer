@@ -9,8 +9,6 @@ import re
 import time
 from multiprocessing import Array, Value
 
-from flask import session
-
 from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.wordformatting import avoidsmallvariants
@@ -118,6 +116,8 @@ class SearchObject(object):
 		self.originalproximate = re.sub(r'<', '&lt;', self.originalproximate)
 		self.originalproximate = re.sub(r'>', '&gt;', self.originalproximate)
 		self.vectortype = None
+		self.tovectorize = None
+		self.vectorquerytype = None
 
 		# searchtermcharactersubstitutions() logic has moved here
 
@@ -205,6 +205,22 @@ class SearchObject(object):
 
 		self.distance = int(frozensession['proximity'])
 
+	def getactivecorpora(self):
+		allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
+		activecorpora = [c for c in allcorpora if self.session[c] == 'yes']
+		return activecorpora
+
+	def infervectorquerytype(self):
+		exclusive = {'cosdistbysentence', 'cosdistbysentence', 'semanticvectorquery', 'nearestneighborsquery',
+		             'tensorflowgraph', 'sentencesimilarity'}
+
+		qtype = None
+		for e in exclusive:
+			if self.session[e] == 'yes':
+				qtype = e
+
+		return qtype
+
 
 class OutputObject(object):
 	"""
@@ -213,7 +229,7 @@ class OutputObject(object):
 
 	"""
 
-	def __init__(self, searchobject, mysession=session):
+	def __init__(self, searchobject):
 		self.title = str()
 		self.found = str()
 		self.js = str()
@@ -224,10 +240,10 @@ class OutputObject(object):
 		self.thesearch = str()
 		self.htmlsearch = str()
 		self.hitmax = 'false'
-		self.onehit = mysession['onehit']
+		self.onehit = searchobject.session['onehit']
 
 		self.icandodates = 'no'
-		if justlatin(mysession) is False:
+		if justlatin(searchobject.session) is False:
 			self.icandodates = 'yes'
 
 		sortorderdecoder = {
@@ -237,9 +253,9 @@ class OutputObject(object):
 			'converted_date': 'date',
 			'location': 'location'
 		}
-		self.sortby = sortorderdecoder[mysession['sortorder']]
+		self.sortby = sortorderdecoder[searchobject.session['sortorder']]
 
-		dmin, dmax = bcedating(mysession)
+		dmin, dmax = bcedating(searchobject.session)
 		self.dmin = dmin
 		self.dmax = dmax
 

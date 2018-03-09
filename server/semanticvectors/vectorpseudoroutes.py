@@ -183,6 +183,9 @@ def findabsolutevectorsfromhits(searchobject, hitdict, activepoll, starttime, wo
 
 	so = searchobject
 
+	so.proximate = ''
+	so.proximatelemma = ''
+
 	activepoll.statusis('Compiling proximite wordlists')
 	environs = findverctorenvirons(hitdict, so)
 
@@ -251,7 +254,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 
 	findsjs = generatevectorjs('findvectors')
 
-	output = OutputObject(so, so.session)
+	output = OutputObject(so)
 
 	output.title = 'Cosine distances to »{skg}«'.format(skg=focus)
 	output.found = findshtml
@@ -300,7 +303,7 @@ def emptyvectoroutput(searchobject, reasons=list()):
 
 	so = searchobject
 
-	output = OutputObject(so, so.session)
+	output = OutputObject(so)
 	output.reasons = reasons
 
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']

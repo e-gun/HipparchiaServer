@@ -47,19 +47,21 @@ def findnearestneighborvectors(timestamp):
 	except KeyError:
 		so.lemma = None
 
+	so.vectorquerytype = 'nearestneighborsquery'
+
 	poll[ts] = ProgressPoll(ts)
 	activepoll = poll[ts]
 	activepoll.activate()
 	activepoll.statusis('Preparing to search')
 
-	output = executegensimsearch(activepoll, so, nn=True)
+	output = executegensimsearch(activepoll, so)
 
 	del poll[ts]
 
 	return output
 
 
-def executegensimsearch(activepoll, searchobject, nn=False):
+def executegensimsearch(activepoll, searchobject):
 	"""
 
 	use the searchlist to grab a collection of sentences
@@ -74,53 +76,32 @@ def executegensimsearch(activepoll, searchobject, nn=False):
 
 	starttime = time.time()
 
-	if not nn:
+	if so.vectorquerytype != 'nearestneighborsquery':
 		outputfunction = lsigenerateoutput
 		indextype = 'lsi'
-		so.vectortype = 'semanticvectorquery'
-		so.lemma = buildlemmatizesearchphrase(so.seeking)
-		if not so.lemma:
+		so.lemma = None
+		so.tovectorize = buildlemmatizesearchphrase(so.seeking)
+		if not so.tovectorize:
 			reasons = ['unable to lemmatize the search term(s) [nb: whole words required and accents matter]']
 			return emptyvectoroutput(so, reasons)
-		else:
-			validlemma = True
 	else:
 		outputfunction = generatenearestneighbordata
 		indextype = 'nn'
-
-		try:
-			validlemma = lemmatadict[so.lemma.dictionaryentry]
-		except KeyError:
-			validlemma = None
-		except AttributeError:
-			# 'NoneType' object has no attribute 'dictionaryentry'
-			validlemma = None
-
-		so.lemma = validlemma
-
-		try:
-			validlemmatwo = lemmatadict[so.proximatelemma.dictionaryentry]
-		except KeyError:
-			validlemmatwo = None
-		except AttributeError:
-			# 'NoneType' object has no attribute 'dictionaryentry'
-			validlemmatwo = None
-
-		so.proximatelemma = validlemmatwo
-
 
 	activepoll.statusis('Preparing to search')
 
 	so.usecolumn = 'marked_up_line'
 
-	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
-	activecorpora = [c for c in allcorpora if so.session[c] == 'yes']
+	activecorpora = so.getactivecorpora()
 
-	if (so.lemma or so.seeking) and activecorpora:
+	if (so.lemma or so.tovectorize) and activecorpora:
 		activepoll.statusis('Compiling the list of works to search')
 		searchlist = compilesearchlist(listmapper, so.session)
+	elif not activecorpora:
+		reasons = ['no active corpora']
+		return emptyvectoroutput(so, reasons)
 	else:
-		reasons = ['search list contained zero items']
+		reasons = ['there was no search term']
 		return emptyvectoroutput(so, reasons)
 
 	# make sure you don't go nuts
@@ -160,51 +141,32 @@ def executegensimsearch(activepoll, searchobject, nn=False):
 		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 		so.indexrestrictions = indexrestrictions
 
+		# 'False' if there is no vectorspace; 'failed' if there can never be one; otherwise vectors
 		vectorspace = checkforstoredvector(searchlist, indextype)
 
-		if validlemma:
-			# find all sentences
-			if not vectorspace:
-				activepoll.statusis('No stored model for this search. Finding all sentences')
-			else:
-				activepoll.statusis('Finding neighbors')
-			# blanking out the search term will really return every last sentence...
-			# otherwise you only return sentences with the search term in them
-			try:
-				restorelemma = lemmatadict[so.lemma.dictionaryentry]
-			except AttributeError:
-				# we are doing an lsi search and actually holding a string in so.lemma
-				restorelemma = so.lemma
-			so.lemma = None
-			so.seeking = r'.'
-			if not vectorspace:
-				sentencestuples = vectorprepdispatcher(so, activepoll)
-			else:
-				sentencestuples = None
-			so.lemma = restorelemma
-			output = outputfunction(sentencestuples, workssearched, so, activepoll, starttime, vectorspace)
+		if vectorspace == 'failed to build model':
+			reasons = ['failed to build vector model (too few words?)']
+			return emptyvectoroutput(so, reasons)
+
+		# find all sentences
+		if not vectorspace:
+			activepoll.statusis('No stored model for this search. Finding all sentences')
 		else:
-			return emptyvectoroutput(so)
+			activepoll.statusis('Finding neighbors')
+		# blanking out the search term will return every last sentence...
+		# otherwise you only return sentences with the search term in them (i.e. rudimentaryvectorsearch)
+		if not vectorspace:
+			so.seeking = r'.'
+			sentencestuples = vectorprepdispatcher(so, activepoll)
+		else:
+			sentencestuples = None
+
+		output = outputfunction(sentencestuples, workssearched, so, activepoll, starttime, vectorspace)
+
 	else:
-		return emptyvectoroutput(so)
+		reasons = ['search list contained zero items']
+		return emptyvectoroutput(so, reasons)
 
 	return output
 
 
-def findnearestneighbors(activepoll, searchobject, req):
-	"""
-
-	pass-through to findlatentsemanticindex()
-
-	:param activepoll:
-	:param searchobject:
-	:return:
-	"""
-	so = searchobject
-
-	try:
-		so.lemma = lemmatadict[cleaninitialquery(req.args.get('lem', ''))]
-	except KeyError:
-		so.lemma = None
-
-	return executegensimsearch(activepoll, so, nn=True)
