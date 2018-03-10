@@ -22,28 +22,29 @@ function refreshselections() {
 
 function loadoptions() {
     $.getJSON('/getsessionvariables', function (data) {
-        var simpletoggles = {
-            'spuria': $('#includespuria'),
-            'varia': $('#includevaria'),
-            'incerta': $('#includeincerta'),
-            'sensesummary': $('#sensesummary'),
-            'bracketsquare': $('#bracketsquare'),
-            'bracketround': $('#bracketround'),
+        // console.log(data);
+        const simpletoggles = {
+            'authorssummary': $('#authorssummary'),
             'bracketangled': $('#bracketangled'),
             'bracketcurly': $('#bracketcurly'),
-            'authorssummary': $('#authorssummary'),
-            'quotesummary': $('#quotesummary'),
-            'greekcorpus': $('#greekcorpus'),
-            'latincorpus': $('#latincorpus'),
-            'inscriptioncorpus': $('#inscriptioncorpus'),
-            'papyruscorpus': $('#papyruscorpus'),
+            'bracketround': $('#bracketround'),
+            'bracketsquare': $('#bracketsquare'),
             'christiancorpus': $('#christiancorpus'),
-            'cosdistbysentence': $('#cosdistbysentence'),
             'cosdistbylineorword': $('#cosdistbylineorword'),
-            'semanticvectorquery': $('#semanticvectorquery'),
+            'cosdistbysentence': $('#cosdistbysentence'),
+            'greekcorpus': $('#greekcorpus'),
+            'incerta': $('#includeincerta'),
+            'inscriptioncorpus': $('#inscriptioncorpus'),
+            'latincorpus': $('#latincorpus'),
             'nearestneighborsquery': $('#nearestneighborsquery'),
+            'papyruscorpus': $('#papyruscorpus'),
+            'quotesummary': $('#quotesummary'),
+            'semanticvectorquery': $('#semanticvectorquery'),
+            'sensesummary': $('#sensesummary'),
+            'sentencesimilarity': $('#sentencesimilarity'),
+            'spuria': $('#includespuria'),
             'tensorflowgraph': $('#tensorflowgraph'),
-            'sentencesimilarity': $('#sentencesimilarity')
+            'varia': $('#includevaria')
         };
 
         Object.keys(simpletoggles).forEach(function(key) {
@@ -54,7 +55,7 @@ function loadoptions() {
             }
         });
 
-        var sidebaricontoggles = {
+        const sidebaricontoggles = {
             'greekcorpus': {'t': $('#grkisactive'), 'f': $('#grkisnotactive')},
             'latincorpus': {'t': $('#latisactive'), 'f': $('#latisnotactive')},
             'inscriptioncorpus': {'t': $('#insisactive'), 'f': $('#insnotisactive')},
@@ -110,13 +111,9 @@ function loadoptions() {
         $('#sortresults').val(data.sortorder);
         $('#sortresults').selectmenu('refresh');
    
-        if (data.cosdistbysentence === 'yes') {
-            $('#complexsearching').show();
-            $('#proximatesearchform').val('');
-            }
-        if (data.cosdistbylineorword === 'yes') {
-            $('#complexsearching').show();
-            $('#proximatesearchform').val('');
+        if (data.cosdistbysentence === 'yes' || data.cosdistbylineorword === 'yes' || data.semanticvectorquery === 'yes' ||
+            data.nearestneighborsquery === 'yes' || data.tensorflowgraph === 'yes' || data.sentencesimilarity === 'yes') {
+            showextendedsearch();
             }
         });
 }
@@ -131,7 +128,7 @@ function browsetopassage() {
     var l2 = $('#level02').val();
     var l1 = $('#level01').val();
     var l0 = $('#level00').val();
-    var lvls = [ l5,l4,l3,l2,l1,l0];
+    var lvls = [ l5, l4, l3, l2, l1, l0];
     var loc = '';
     for (var i = 5; i > -1; i-- ) {
         if (lvls[i] !== '') {
@@ -161,7 +158,7 @@ $('#browseto').click(function(){ browsetopassage(); });
 
 $('#fewerchoices').click(function(){
     $('#morechoices').show();
-    var ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
+    const ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
         '#provenanceautocomplete', '#pickgenre', '#excludegenre', '#genreinfo', '#genrelistcontents', '#edts',
         '#ldts', '#spur');
     bulkhider(ids);
@@ -170,12 +167,18 @@ $('#fewerchoices').click(function(){
 
 $('#morechoices').click(function(){
     $('#morechoices').hide();
-    var ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
+    const ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
         '#provenanceautocomplete', '#pickgenre', '#excludegenre', '#genreinfo', '#edts', '#ldts', '#spur');
     bulkshow(ids);
     loadoptions();
     });
 
+
+function showextendedsearch() {
+        const ids = Array('#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox', '#semanticvectorquerycheckbox',
+            '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox', '#sentencesimilaritycheckbox', '#complexsearching');
+        bulkshow(ids);
+}
 
 $('#moretools').click(function(){ $('#lexica').toggle(); });
 
@@ -395,12 +398,12 @@ $('#bracketcurly').change(function() {
 //
 
 const thesearchforms = ['#wordsearchform', '#lemmatasearchform', '#proximatesearchform', '#proximatelemmatasearchform']
+const wsf = $('#wordsearchform');
+const lsf = $('#lemmatasearchform');
+const plsf = $('#proximatelemmatasearchform');
+const psf = $('#proximatesearchform');
 
 function restoreplaceholders() {
-    var wsf = $('#wordsearchform');
-    var lsf = $('#lemmatasearchform');
-    var psf = $('#proximatesearchform');
-    var plsf = $('#proximatelemmatasearchform');
     wsf.attr('placeholder', '(looking for...)');
     psf.attr('placeholder', '(near... and within...)');
     lsf.attr('placeholder', '(all forms of...)');
@@ -409,15 +412,15 @@ function restoreplaceholders() {
 
 function clearsearchboxvalues() {
     for (var i = 0; i < thesearchforms.length; i++) {
-        var b = $(thesearchforms[i]);
-        b.val('');
+        var box = $(thesearchforms[i]);
+        box.val('');
     }
 }
 
 function hideallboxes() {
     for (var i = 0; i < thesearchforms.length; i++) {
-        var b = $(thesearchforms[i]);
-        b.hide();
+        var box = $(thesearchforms[i]);
+        box.hide();
     }
 }
 
@@ -425,8 +428,8 @@ function findotheroptions(thisoption) {
     const xoredoptions = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity'];
     var xor = [];
     for (var i = 0; i < xoredoptions.length; i++) {
-        var o = $(xoredoptions[i]);
-        if (o.attr('id') !== thisoption) {
+        var opt = $(xoredoptions[i]);
+        if (opt.attr('id') !== thisoption) {
             xor.push(xoredoptions[i]);
         }
     }
@@ -440,18 +443,13 @@ function activatethisbox(toactivate, placeholder) {
     toactivate.attr('placeholder', placeholder);
 }
 
-
 $('#cosdistbysentence').change(function() {
     restoreplaceholders();
     if(this.checked) {
         clearsearchboxvalues();
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
-        var wsf = $('#wordsearchform');
-        var lsf = $('#lemmatasearchform');
-        var plsf = $('#proximatelemmatasearchform');
-        var psf = $('#proximatesearchform');
-        activatethisbox(lsf, '(pick a lemma)');
+        activatethisbox(lsf, '(pick a headword)');
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
         psf.hide();
@@ -467,11 +465,7 @@ $('#cosdistbylineorword').change(function() {
         clearsearchboxvalues();
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
-        var wsf = $('#wordsearchform');
-        var lsf = $('#lemmatasearchform');
-        var plsf = $('#proximatelemmatasearchform');
-        var psf = $('#proximatesearchform');
-        activatethisbox(lsf, '(pick a lemma)');
+        activatethisbox(lsf, '(pick a headword)');
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
         psf.hide();
@@ -487,7 +481,6 @@ $('#semanticvectorquery').change(function() {
         clearsearchboxvalues();
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
-        var wsf = $('#wordsearchform');
         wsf.show();
         wsf.attr('placeholder', '(enter a word or phrase)');
         $('#lemmatasearchform').hide();
@@ -508,11 +501,7 @@ $('#nearestneighborsquery').change(function() {
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
-        var wsf = $('#wordsearchform');
-        var lsf = $('#lemmatasearchform');
-        var plsf = $('#proximatelemmatasearchform');
-        var psf = $('#proximatesearchform');
-        activatethisbox(lsf, '(pick a lemma)');
+        activatethisbox(lsf, '(pick a headword)');
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
         psf.hide();
@@ -531,10 +520,6 @@ $('#tensorflowgraph').change(function() {
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
-        var wsf = $('#wordsearchform');
-        var lsf = $('#lemmatasearchform');
-        var psf = $('#proximatesearchform');
-        var plsf = $('#proximatelemmatasearchform');
         activatethisbox(lsf, '(unused for tensorflowgraph)');
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
@@ -554,10 +539,6 @@ $('#sentencesimilarity').change(function() {
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
-        var wsf = $('#wordsearchform');
-        var lsf = $('#lemmatasearchform');
-        var psf = $('#proximatesearchform');
-        var plsf = $('#proximatelemmatasearchform');
         activatethisbox(lsf, '(unused for sentencesimilarity)');
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
@@ -572,8 +553,6 @@ $('#sentencesimilarity').change(function() {
 
 
 $('#termoneisalemma').change(function() {
-    var wsf = $('#wordsearchform');
-    var lsf = $('#lemmatasearchform');
     if(this.checked) {
         wsf.hide();
         wsf.val('');
@@ -586,8 +565,6 @@ $('#termoneisalemma').change(function() {
     });
 
 $('#termtwoisalemma').change(function() {
-    var psf = $('#proximatesearchform');
-    var plsf = $('#proximatelemmatasearchform');
     if(this.checked) {
         psf.hide();
         psf.val('');

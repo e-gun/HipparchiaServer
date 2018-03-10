@@ -157,7 +157,7 @@ def modifysessionvar(param, val):
 			session[variable] = 'no'
 
 	# only one of these can be active at one time
-	exclusive = {'cosdistbysentence', 'cosdistbysentence', 'semanticvectorquery', 'nearestneighborsquery', 'tensorflowgraph', 'sentencesimilarity'}
+	exclusive = {'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery', 'tensorflowgraph', 'sentencesimilarity'}
 
 	for e in exclusive:
 		if param == e and val == 'yes':
