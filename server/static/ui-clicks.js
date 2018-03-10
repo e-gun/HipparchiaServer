@@ -390,155 +390,183 @@ $('#bracketcurly').change(function() {
     loadoptions();
     });
 
-// but see how stupid set subtraction is in js...
-var xoredoptions = [
-    $('#cosdistbysentence'),
-    $('#cosdistbylineorword'),
-    $('#semanticvectorquery'),
-    $('#nearestneighborsquery'),
-    $('#tensorflowgraph'),
-    $('#sentencesimilarity')
-    ];
+//
+// vector checkboxes
+//
+
+const thesearchforms = ['#wordsearchform', '#lemmatasearchform', '#proximatesearchform', '#proximatelemmatasearchform']
+
+function restoreplaceholders() {
+    var wsf = $('#wordsearchform');
+    var lsf = $('#lemmatasearchform');
+    var psf = $('#proximatesearchform');
+    var plsf = $('#proximatelemmatasearchform');
+    wsf.attr('placeholder', '(looking for...)');
+    psf.attr('placeholder', '(near... and within...)');
+    lsf.attr('placeholder', '(all forms of...)');
+    plsf.attr('placeholder', '(near all forms of... and within...)');
+}
+
+function clearsearchboxvalues() {
+    for (var i = 0; i < thesearchforms.length; i++) {
+        var b = $(thesearchforms[i]);
+        b.val('');
+    }
+}
+
+function hideallboxes() {
+    for (var i = 0; i < thesearchforms.length; i++) {
+        var b = $(thesearchforms[i]);
+        b.hide();
+    }
+}
+
+function findotheroptions(thisoption) {
+    const xoredoptions = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity'];
+    var xor = [];
+    for (var i = 0; i < xoredoptions.length; i++) {
+        var o = $(xoredoptions[i]);
+        if (o.attr('id') !== thisoption) {
+            xor.push(xoredoptions[i]);
+        }
+    }
+    xor = xor.join(',');
+    return xor;
+}
+
+function activatethisbox(toactivate, placeholder) {
+    toactivate.show();
+    toactivate.val('');
+    toactivate.attr('placeholder', placeholder);
+}
+
 
 $('#cosdistbysentence').change(function() {
+    restoreplaceholders();
     if(this.checked) {
-        $('#cosdistbylineorword').prop('checked', false);
-        $('#semanticvectorquery').prop('checked', false);
-        $('#nearestneighborsquery').prop('checked', false);
-        $('#tensorflowgraph').prop('checked', false);
-        $('#sentencesimilarity').prop('checked', false);
-        $('#complexsearching').hide();
-        $('#proximatesearchform').val('');
-        setoptions('cosdistbysentence', 'yes');
-        } else {
-        $('#complexsearching').show();
-        setoptions('cosdistbysentence', 'no');
+        clearsearchboxvalues();
+        var others = findotheroptions(this.id);
+        $(others).prop('checked', false);
+        var wsf = $('#wordsearchform');
+        var lsf = $('#lemmatasearchform');
+        var plsf = $('#proximatelemmatasearchform');
+        var psf = $('#proximatesearchform');
+        activatethisbox(lsf, '(pick a lemma)');
+        activatethisbox(plsf, '(unused for this type of query)');
+        wsf.hide();
+        psf.hide();
+        setoptions(this.id, 'yes');
+    } else {
+        setoptions(this.id, 'no');
         }
     });
 
 $('#cosdistbylineorword').change(function() {
+    restoreplaceholders();
     if(this.checked) {
-        $('#cosdistbysentence').prop('checked', false);
-        $('#semanticvectorquery').prop('checked', false);
-        $('#nearestneighborsquery').prop('checked', false);
-        $('#tensorflowgraph').prop('checked', false);
-        $('#sentencesimilarity').prop('checked', false);
-        $('#complexsearching').show();
-        $('#proximatesearchform').val('');
-        setoptions('cosdistbylineorword', 'yes');
-        } else {
-        setoptions('cosdistbylineorword', 'no');
+        clearsearchboxvalues();
+        var others = findotheroptions(this.id);
+        $(others).prop('checked', false);
+        var wsf = $('#wordsearchform');
+        var lsf = $('#lemmatasearchform');
+        var plsf = $('#proximatelemmatasearchform');
+        var psf = $('#proximatesearchform');
+        activatethisbox(lsf, '(pick a lemma)');
+        activatethisbox(plsf, '(unused for this type of query)');
+        wsf.hide();
+        psf.hide();
+        setoptions(this.id, 'yes');
+    } else {
+        setoptions(this.id, 'no');
         }
     });
 
 $('#semanticvectorquery').change(function() {
+    restoreplaceholders();
     if(this.checked) {
-        $('#cosdistbysentence').prop('checked', false);
-        $('#cosdistbylineorword').prop('checked', false);
-        $('#nearestneighborsquery').prop('checked', false);
-        $('#tensorflowgraph').prop('checked', false);
-        $('#sentencesimilarity').prop('checked', false);
-        $('#complexsearching').show();
+        clearsearchboxvalues();
+        var others = findotheroptions(this.id);
+        $(others).prop('checked', false);
         var wsf = $('#wordsearchform');
-        var lsf = $('#lemmatasearchform');
-        var psf = $('#proximatesearchform');
-        var plsf = $('#proximatelemmatasearchform');
         wsf.show();
-        wsf.val('');
-        wsf.attr('placeholder', '(concept search: enter a word or phrase)');
-        lsf.hide();
-        // psf.hide();
-        psf.val('');
-        // plsf.hide();
+        wsf.attr('placeholder', '(enter a word or phrase)');
+        $('#lemmatasearchform').hide();
+        $('#proximatelemmatasearchform').attr('placeholder', '(unused for this type of query)');
+        $('#proximatesearchform').attr('placeholder', '(unused for this type of query)');
         $('#termoneisalemma').prop('checked', false);
         $('#termtwoisalemma').prop('checked', false);
-        setoptions('semanticvectorquery', 'yes');
-        } else {
-        setoptions('semanticvectorquery', 'no');
+        setoptions(this.id, 'yes');
+    } else {
+        setoptions(this.id, 'no');
         }
     });
 
 $('#nearestneighborsquery').change(function() {
+    restoreplaceholders();
     if(this.checked) {
-        $('#cosdistbysentence').prop('checked', false);
-        $('#cosdistbylineorword').prop('checked', false);
-        $('#semanticvectorquery').prop('checked', false);
-        $('#tensorflowgraph').prop('checked', false);
-        $('#sentencesimilarity').prop('checked', false);
+        clearsearchboxvalues();
+        var others = findotheroptions(this.id);
+        $(others).prop('checked', false);
         $('#complexsearching').show();
         var wsf = $('#wordsearchform');
         var lsf = $('#lemmatasearchform');
-        var psf = $('#proximatesearchform');
         var plsf = $('#proximatelemmatasearchform');
+        var psf = $('#proximatesearchform');
+        activatethisbox(lsf, '(pick a lemma)');
+        activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
-        wsf.val('');
-        lsf.show();
-        lsf.val('');
-        lsf.attr('placeholder', '(concept map: pick a lemma)');
         psf.hide();
-        psf.val('');
-        plsf.show();
         $('#termoneisalemma').prop('checked', true);
         $('#termtwoisalemma').prop('checked', true);
-        setoptions('nearestneighborsquery', 'yes');
-        } else {
-        setoptions('nearestneighborsquery', 'no');
+        setoptions(this.id, 'yes');
+    } else {
+        setoptions(this.id, 'no');
         }
     });
 
 $('#tensorflowgraph').change(function() {
+    restoreplaceholders();
     if(this.checked) {
-        $('#cosdistbysentence').prop('checked', false);
-        $('#cosdistbylineorword').prop('checked', false);
-        $('#semanticvectorquery').prop('checked', false);
-        $('#nearestneighborsquery').prop('checked', false);
-        $('#sentencesimilarity').prop('checked', false);
+        clearsearchboxvalues();
+        var others = findotheroptions(this.id);
+        $(others).prop('checked', false);
         $('#complexsearching').show();
         var wsf = $('#wordsearchform');
         var lsf = $('#lemmatasearchform');
         var psf = $('#proximatesearchform');
         var plsf = $('#proximatelemmatasearchform');
+        activatethisbox(lsf, '(unused for tensorflowgraph)');
+        activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
-        wsf.val('');
-        lsf.show();
-        lsf.val('');
-        lsf.attr('placeholder', '(unused for tensorflowgraph)');
         psf.hide();
-        psf.val('');
-        plsf.show();
         $('#termoneisalemma').prop('checked', true);
         $('#termtwoisalemma').prop('checked', true);
-        setoptions('tensorflowgraph', 'yes');
-        } else {
-        setoptions('tensorflowgraph', 'no');
+        setoptions(this.id, 'yes');
+    } else {
+        setoptions(this.id, 'no');
         }
     });
 
 $('#sentencesimilarity').change(function() {
+    restoreplaceholders();
     if(this.checked) {
-        $('#cosdistbysentence').prop('checked', false);
-        $('#cosdistbylineorword').prop('checked', false);
-        $('#semanticvectorquery').prop('checked', false);
-        $('#nearestneighborsquery').prop('checked', false);
-        $('#tensorflowgraph').prop('checked', false);
+        clearsearchboxvalues();
+        var others = findotheroptions(this.id);
+        $(others).prop('checked', false);
         $('#complexsearching').show();
         var wsf = $('#wordsearchform');
         var lsf = $('#lemmatasearchform');
         var psf = $('#proximatesearchform');
         var plsf = $('#proximatelemmatasearchform');
+        activatethisbox(lsf, '(unused for sentencesimilarity)');
+        activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
-        wsf.val('');
-        lsf.show();
-        lsf.val('');
-        lsf.attr('placeholder', '(unused for sentencesimilarity)');
         psf.hide();
-        psf.val('');
-        plsf.show();
         $('#termoneisalemma').prop('checked', true);
         $('#termtwoisalemma').prop('checked', true);
-        setoptions('sentencesimilarity', 'yes');
-        } else {
-        setoptions('sentencesimilarity', 'no');
+        setoptions(this.id, 'yes');
+    } else {
+        setoptions(this.id, 'no');
         }
     });
 
