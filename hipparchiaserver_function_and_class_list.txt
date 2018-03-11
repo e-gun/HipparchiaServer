@@ -19,6 +19,7 @@ SUM:                           109           5354           6724          17768
 
 
 server/ $ grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
+
 hipparchiaobjects/dbtextobjects.py:class dbAuthor(object):
 hipparchiaobjects/dbtextobjects.py:class dbOpus(object):
 hipparchiaobjects/dbtextobjects.py:class dbWorkLine(object):
@@ -54,6 +55,10 @@ browsing/browserfunctions.py:def insertparserids(lineobject, continuationdict):
 browsing/browserfunctions.py:def bracketcheck(word):
 browsing/browserfunctions.py:def addobservedtags(word, lastword, hyphenated):
 browsing/browserfunctions.py:def buildmetadatarow(label, css, metadata):
+dbsupport/bulkdboperations.py:def loadallauthorsasobjects():
+dbsupport/bulkdboperations.py:def loadallworksasobjects():
+dbsupport/bulkdboperations.py:def loadlemmataasobjects():
+dbsupport/bulkdboperations.py:def loadallworksintoallauthors(authorsdict, worksdict):
 dbsupport/citationfunctions.py:def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 dbsupport/citationfunctions.py:def locusintocitation(workobject, lineobject):
 dbsupport/citationfunctions.py:def prolixlocus(workobject, citationtuple):
@@ -67,26 +72,27 @@ dbsupport/dbfunctions.py:def setthreadcount(startup=False):
 dbsupport/dbfunctions.py:def setconnection(autocommit='n', readonlyconnection=True, u='DBUSER', p='DBPASS'):
 dbsupport/dbfunctions.py:def tablenamer(authorobject, thework):
 dbsupport/dbfunctions.py:def resultiterator(cursor, chunksize=5000):
-dbsupport/dbfunctions.py:def loadallauthorsasobjects():
-dbsupport/dbfunctions.py:def loadallworksasobjects():
-dbsupport/dbfunctions.py:def loadlemmataasobjects():
 dbsupport/dbfunctions.py:def dbloadasingleworkobject(workuniversalid):
-dbsupport/dbfunctions.py:def loadallworksintoallauthors(authorsdict, worksdict):
-dbsupport/dbfunctions.py:def dblineintolineobject(dbline):
 dbsupport/dbfunctions.py:def findtoplevelofwork(workuid, cursor):
 dbsupport/dbfunctions.py:def findselectionboundaries(workobject, selection, cursor):
 dbsupport/dbfunctions.py:def simplecontextgrabber(authortable, focusline, linesofcontext, cursor):
-dbsupport/dbfunctions.py:def grabonelinefromwork(workdbname, lineindex, cursor):
-dbsupport/dbfunctions.py:def returnfirstlinenumber(workid, cursor):
 dbsupport/dbfunctions.py:def perseusidmismatch(badworkdbnumber, cursor):
 dbsupport/dbfunctions.py:def returnfirstwork(authorid, cursor):
-dbsupport/dbfunctions.py:def makeablankline(work, fakelinenumber):
 dbsupport/dbfunctions.py:def makeanemptyauthor(universalid):
 dbsupport/dbfunctions.py:def makeanemptywork(universalid):
 dbsupport/dbfunctions.py:def versionchecking(activedbs, expectedsqltemplateversion):
 dbsupport/dbfunctions.py:def probefordatabases():
-dbsupport/dbfunctions.py:def createvectorstable():
-dbsupport/dbfunctions.py:def createstoredimagestable():
+dbsupport/dblinefunctions.py:def dblineintolineobject(dbline):
+dbsupport/dblinefunctions.py:def grabonelinefromwork(workdbname, lineindex, cursor):
+dbsupport/dblinefunctions.py:def returnfirstlinenumber(workid, cursor):
+dbsupport/dblinefunctions.py:def makeablankline(work, fakelinenumber):
+dbsupport/dblinefunctions.py:def bulklinegrabber(table, column, criterion, setofcriteria, cursor):
+dbsupport/dblinefunctions.py:def grablistoflines(table, uidlist):
+dbsupport/vectordbfunctions.py:def createvectorstable():
+dbsupport/vectordbfunctions.py:def createstoredimagestable():
+dbsupport/vectordbfunctions.py:def storevectorindatabase(uidlist, vectortype, vectorspace):
+dbsupport/vectordbfunctions.py:def checkforstoredvector(uidlist, indextype, careabout='settings'):
+dbsupport/vectordbfunctions.py:def fetchverctorenvirons(hitdict, searchobject):
 experimental/gensimexperiments.py:def logentropybuildspace(morphdict, sentences):
 experimental/gensimexperiments.py:def doc2vecbuildspace(morphdict, sentences):
 experimental/scikitlearnvectors.py:def sklearnselectedworks(activepoll, searchobject):
@@ -359,9 +365,6 @@ semanticvectors/vectorhelpers.py:def parsevectorsentences(searchobject, lineobje
 semanticvectors/vectorhelpers.py:def findwordvectorset(listofwordclusters):
 semanticvectors/vectorhelpers.py:def convertmophdicttodict(morphdict):
 semanticvectors/vectorhelpers.py:def buildlemmatizesearchphrase(phrase):
-semanticvectors/vectorhelpers.py:def findverctorenvirons(hitdict, searchobject):
-semanticvectors/vectorhelpers.py:def bulklinegrabber(table, column, criterion, setofcriteria, cursor):
-semanticvectors/vectorhelpers.py:def grablistoflines(table, uidlist):
 semanticvectors/vectorhelpers.py:def bruteforcefinddblinefromsentence(thissentence, modifiedsearchobject):
 semanticvectors/vectorhelpers.py:def finddblinesfromsentences(thissentence, sentencestuples, cursor):
 semanticvectors/vectorhelpers.py:def convertlineuidstolineobject(listoflines, cursor):
@@ -370,8 +373,6 @@ semanticvectors/vectorhelpers.py:def buildflatbagsofwords(morphdict, sentences):
 semanticvectors/vectorhelpers.py:def buildbagsofwordswithalternates(morphdict, sentences):
 semanticvectors/vectorhelpers.py:def mostcommonheadwords(cheat=True):
 semanticvectors/vectorhelpers.py:def mostcommonwords():
-semanticvectors/vectorhelpers.py:def storevectorindatabase(uidlist, vectortype, vectorspace):
-semanticvectors/vectorhelpers.py:def checkforstoredvector(uidlist, indextype, careabout='settings'):
 semanticvectors/vectorhelpers.py:def readgitdata():
 semanticvectors/vectorhelpers.py:def determinesettings():
 semanticvectors/vectorhelpers.py:def findheadwords(wordlist):

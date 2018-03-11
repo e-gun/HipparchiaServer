@@ -5,6 +5,7 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
 from server.dbsupport.dbfunctions import resultiterator, setconnection
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 from server.hipparchiaobjects.lexicalobjects import dbLemmaObject

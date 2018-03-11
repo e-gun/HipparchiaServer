@@ -8,6 +8,7 @@
 
 import re
 
+
 def insertbrowserclickjs(tagname):
 	"""
 	the clickable urls don't work without inserting new js into the page to catch the clicks
@@ -81,7 +82,7 @@ def generatevectorjs(path):
 			$('#wordsearchform').hide();
 			$('#lemmatasearchform').show();
 			$('#lemmatasearchform').val(this.id);
-			$('#lexicon').val(this.id);
+			$('#lexicon').val(' '+this.id+' ');
 			var w = window.innerWidth * .9;
 			var h = window.innerHeight * .9;
 			$.getJSON(url, function (output) { 
