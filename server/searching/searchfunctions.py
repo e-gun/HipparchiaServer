@@ -13,7 +13,8 @@ from string import punctuation
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, resultiterator
+from server.dbsupport.dbfunctions import resultiterator
+from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import removegravity, wordlistintoregex
 from server.hipparchiaobjects.searchobjects import SearchObject

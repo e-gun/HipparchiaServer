@@ -164,13 +164,14 @@ def modifysessionvar(param, val):
 			others = exclusive - {e}
 			for o in others:
 				session[o] = 'no'
+		break
 
 	if session['nearornot'] not in ['T', 'F']:
 		session['nearornot'] = 'T'
 
 	try:
 		int(session['maxresults'])
-	except:
+	except ValueError:
 		session['maxresults'] = '500'
 
 	try:

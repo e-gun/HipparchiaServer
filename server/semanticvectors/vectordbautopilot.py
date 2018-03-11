@@ -11,11 +11,11 @@ import time
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import resultiterator, setconnection
+from server.dbsupport.vectordbfunctions import checkforstoredvector
 from server.hipparchiaobjects.searchobjects import ProgressPoll, SearchObject
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.gensimnearestneighbors import buildnnvectorspace
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import checkforstoredvector
 from server.startup import poll, workdict
 
 

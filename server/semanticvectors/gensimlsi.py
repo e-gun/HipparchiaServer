@@ -12,11 +12,12 @@ from gensim.similarities import MatrixSimilarity
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.vectordbfunctions import storevectorindatabase
 from server.formatting.vectorformatting import formatlsimatches, lsiformatoutput
 from server.hipparchiaobjects.helperobjects import LSIVectorCorpus
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, finddblinesfromsentences, \
-	findheadwords, findwordvectorset, storevectorindatabase
+	findheadwords, findwordvectorset
 
 
 def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, starttime, lsispace):

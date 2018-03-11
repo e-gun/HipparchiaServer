@@ -8,8 +8,9 @@
 
 from server import hipparchia
 from server.calculatewordweights import findccorporaweights, findtemporalweights, workobjectgeneraweights
-from server.dbsupport.dbfunctions import loadallauthorsasobjects, loadallworksasobjects, loadallworksintoallauthors, \
-	loadlemmataasobjects, probefordatabases, setthreadcount
+from server.dbsupport.bulkdboperations import loadallauthorsasobjects, loadallworksasobjects, \
+	loadallworksintoallauthors, loadlemmataasobjects
+from server.dbsupport.dbfunctions import probefordatabases, setthreadcount
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
 	buildworkgenresdict, buildworkprovenancedict
 

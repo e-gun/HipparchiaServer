@@ -10,6 +10,7 @@ import time
 from flask import request, session
 
 from server import hipparchia
+from server.dbsupport.vectordbfunctions import checkforstoredvector
 from server.hipparchiaobjects.searchobjects import ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
@@ -17,7 +18,7 @@ from server.searching.searchfunctions import buildsearchobject, cleaninitialquer
 from server.semanticvectors.gensimlsi import lsigenerateoutput
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import buildlemmatizesearchphrase, checkforstoredvector
+from server.semanticvectors.vectorhelpers import buildlemmatizesearchphrase
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 

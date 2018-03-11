@@ -9,7 +9,7 @@
 import re
 from collections import deque
 
-from server.dbsupport.dbfunctions import makeablankline
+from server.dbsupport.dblinefunctions import makeablankline
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 

@@ -255,6 +255,17 @@ class OutputObject(object):
 		}
 		self.sortby = sortorderdecoder[searchobject.session['sortorder']]
 
+		# currently unused
+		if searchobject.lemma:
+			self.lemma = searchobject.lemma.dictionaryentry
+		else:
+			self.lemma = ''
+
+		if searchobject.termone:
+			self.headword = searchobject.termone
+		else:
+			self.headword = ''
+
 		dmin, dmax = bcedating(searchobject.session)
 		self.dmin = dmin
 		self.dmax = dmax

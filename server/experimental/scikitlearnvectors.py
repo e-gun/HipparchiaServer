@@ -28,7 +28,8 @@ from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, mostcommonwords, grablistoflines, findheadwords
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, mostcommonwords, findheadwords
+from server.dbsupport.dblinefunctions import grablistoflines
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.formatting.vectorformatting import skformatmostimilar
 from server.formatting.jsformatting import insertbrowserclickjs

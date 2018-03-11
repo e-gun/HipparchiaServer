@@ -9,7 +9,8 @@
 import re
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, setconnection
+from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline, substringsearch
 

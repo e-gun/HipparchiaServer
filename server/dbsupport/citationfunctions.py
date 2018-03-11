@@ -8,7 +8,8 @@
 
 import re
 
-from server.dbsupport.dbfunctions import dblineintolineobject, findtoplevelofwork, returnfirstlinenumber
+from server.dbsupport.dbfunctions import findtoplevelofwork
+from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.helperobjects import LowandHighInfo
 

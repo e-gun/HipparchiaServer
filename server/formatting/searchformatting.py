@@ -12,7 +12,8 @@ from copy import deepcopy
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
-from server.dbsupport.dbfunctions import dblineintolineobject, setconnection
+from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.formatting.bibliographicformatting import formatname
 from server.formatting.bracketformatting import brackethtmlifysearchfinds
 from server.hipparchiaobjects.searchobjects import SearchResult

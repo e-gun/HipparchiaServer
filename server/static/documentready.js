@@ -146,7 +146,6 @@ $(document).ready( function () {
 
         $('#displayresults').html(output['found']);
 
-
         //
         // THE GRAPH: if there is one... Note that if it is embedded in the output table, then
         // that table has to be created and  $('#imagearea') with it before you do any of the following

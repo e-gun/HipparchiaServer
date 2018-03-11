@@ -9,7 +9,8 @@
 import re
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import dblineintolineobject, grabonelinefromwork, makeablankline, setconnection
+from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
 from server.formatting.wordformatting import wordlistintoregex
 from server.searching.searchfunctions import dblooknear, substringsearch
 

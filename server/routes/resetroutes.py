@@ -9,7 +9,7 @@
 from flask import redirect, session, url_for
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import createstoredimagestable, createvectorstable
+from server.dbsupport.vectordbfunctions import createstoredimagestable, createvectorstable
 
 
 @hipparchia.route('/resetsession')

@@ -9,7 +9,7 @@
 import re
 
 from server.browsing.browserfunctions import checkfordocumentmetadata
-from server.dbsupport.dbfunctions import dblineintolineobject
+from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.startup import workdict
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue

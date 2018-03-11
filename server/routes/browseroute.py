@@ -14,8 +14,8 @@ from flask import session
 from server import hipparchia
 from server.browsing.browserfunctions import getandformatbrowsercontext
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus, finddblinefromlocus, perseusdelabeler
-from server.dbsupport.dbfunctions import makeanemptyauthor, makeanemptywork, perseusidmismatch, returnfirstlinenumber, \
-	setconnection
+from server.dbsupport.dbfunctions import makeanemptyauthor, makeanemptywork, perseusidmismatch, setconnection
+from server.dbsupport.dblinefunctions import returnfirstlinenumber
 from server.formatting.lexicaformatting import dbquickfixes
 from server.formatting.wordformatting import depunct
 from server.startup import authordict, workdict

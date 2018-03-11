@@ -12,7 +12,8 @@ from collections import deque
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
-from server.dbsupport.dbfunctions import dblineintolineobject, simplecontextgrabber
+from server.dbsupport.dbfunctions import simplecontextgrabber
+from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.formatting.bibliographicformatting import avoidlonglines, getpublicationinfo
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.wordformatting import avoidsmallvariants, forcelunates

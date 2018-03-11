@@ -14,7 +14,8 @@ import networkx as nx
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import createstoredimagestable, setconnection
+from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.vectordbfunctions import createstoredimagestable
 from server.startup import authordict, workdict
 
 

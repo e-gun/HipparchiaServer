@@ -14,8 +14,9 @@ from string import punctuation
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import dblineintolineobject, makeablankline, resultiterator, setconnection, \
+from server.dbsupport.dbfunctions import resultiterator, setconnection, \
 	setthreadcount
+from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
 from server.formatting.wordformatting import tidyupterm
 from server.hipparchiaobjects.helperobjects import MPCounter
 from server.lexica.lexicalookups import lookformorphologymatches

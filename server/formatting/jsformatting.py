@@ -79,13 +79,9 @@ def generatevectorjs(path):
 			$('#searchsummary').html(''); 
 			$('#displayresults').html('');
 			$('#wordsearchform').hide();
-			// $.getJSON( {url: '/setsessionvariable?cosdistbylineorword=no', async: false, success: function (resultdata) { } });
-			// $.getJSON( {url: '/setsessionvariable?cosdistbysentence=yes', async: false, success: function (resultdata) { } });
-			$('#cosdistbysentence').prop('checked', true);
-			$('#cosdistbylineorword').prop('checked', false);
-			$('#complexsearching').hide();
 			$('#lemmatasearchform').show();
 			$('#lemmatasearchform').val(this.id);
+			$('#lexicon').val(this.id);
 			var w = window.innerWidth * .9;
 			var h = window.innerHeight * .9;
 			$.getJSON(url, function (output) { 

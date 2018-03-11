@@ -12,8 +12,7 @@ from os import cpu_count
 import psycopg2
 
 from server import hipparchia
-from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus, dbWorkLine
-from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
+from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
 # to fiddle with some day:
 # 'In our testing asyncpg is, on average, 3x faster than psycopg2 (and its asyncio variant -- aiopg).'
@@ -125,101 +124,6 @@ def resultiterator(cursor, chunksize=5000):
 			yield result
 
 
-def loadallauthorsasobjects():
-	"""
-
-	return a dict of all possible author objects
-
-	:return:
-	"""
-
-	print('loading all authors...')
-
-	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
-
-	q = 'SELECT * FROM authors'
-
-	curs.execute(q)
-	results = resultiterator(curs)
-
-	authorsdict = {r[0]: dbAuthor(*r) for r in results}
-
-	print('\t', len(authorsdict), 'authors loaded')
-
-	dbconnection.commit()
-	curs.close()
-
-	return authorsdict
-
-
-def loadallworksasobjects():
-	"""
-
-	return a dict of all possible work objects
-
-	:return:
-	"""
-
-	print('loading all works...')
-
-	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
-
-	q = """
-	SELECT universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02,
-		levellabels_03, levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance, 
-		recorded_date, converted_date, wordcount, firstline, lastline, authentic FROM works
-	"""
-
-	curs.execute(q)
-	results = resultiterator(curs)
-
-	worksdict = {r[0]: dbOpus(*r) for r in results}
-
-	print('\t', len(worksdict), 'works loaded')
-
-	dbconnection.commit()
-	curs.close()
-
-	return worksdict
-
-
-def loadlemmataasobjects():
-	"""
-
-	return a dict of all possible lemmataobjects
-
-	:return:
-	"""
-
-	print('loading all lemmata...')
-	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
-
-	q = """
-	SELECT dictionary_entry, xref_number, derivative_forms FROM {lang}_lemmata
-	"""
-
-	lemmatadict = dict()
-
-	languages = {1: 'greek', 2: 'latin'}
-
-	for key in languages:
-		curs.execute(q.format(lang=languages[key]))
-		results = resultiterator(curs)
-		lemmatadict = {**{r[0]: dbLemmaObject(*r) for r in results}, **lemmatadict}
-
-	print('\t', len(lemmatadict), 'lemmata loaded')
-	# print('lemmatadict["laudo"]', lemmatadict['laudo'].formlist)
-	# print('lemmatadict["λύω"]', lemmatadict['λύω'].formlist)
-
-	dbconnection.commit()
-	curs.close()
-
-	return lemmatadict
-
-
 def dbloadasingleworkobject(workuniversalid):
 	"""
 
@@ -250,41 +154,6 @@ def dbloadasingleworkobject(workuniversalid):
 	curs.close()
 
 	return workobject
-
-
-def loadallworksintoallauthors(authorsdict, worksdict):
-	"""
-
-	add the right work objects to the proper author objects
-
-	:param authorsdict:
-	:param worksdict:
-	:return:
-	"""
-
-	for wkid in worksdict.keys():
-		auid = wkid[0:6]
-		authorsdict[auid].addwork(worksdict[wkid])
-
-	return authorsdict
-
-
-def dblineintolineobject(dbline):
-	"""
-	convert a db result into a db object
-
-	basically all columns pushed straight into the object with *one* twist: 1, 0, 2, 3, ...
-
-	:param dbline:
-	:return:
-	"""
-
-	# WARNING: be careful about the [1], [0], [2], order: wkuinversalid, index, level_05_value, ...
-
-	lineobject = dbWorkLine(dbline[1], dbline[0], dbline[2], dbline[3], dbline[4], dbline[5], dbline[6], dbline[7],
-	                        dbline[8], dbline[9], dbline[10], dbline[11], dbline[12])
-
-	return lineobject
 
 
 def findtoplevelofwork(workuid, cursor):
@@ -385,46 +254,6 @@ def simplecontextgrabber(authortable, focusline, linesofcontext, cursor):
 	return foundlines
 
 
-def grabonelinefromwork(workdbname, lineindex, cursor):
-	"""
-	grab a line and return its contents
-	"""
-	
-	query = 'SELECT * FROM {wk} WHERE index = %s'.format(wk=workdbname)
-	data = (lineindex,)
-	cursor.execute(query, data)
-	foundline = cursor.fetchone()
-	
-	return foundline
-
-
-def returnfirstlinenumber(workid, cursor):
-	"""
-	return the lowest index value
-	used to handle exceptions
-
-	:param workid:
-	:param cursor:
-	:return:
-	"""
-
-	db = workid[0:6]
-
-	firstline = -1
-	while firstline == -1:
-		query = 'SELECT min(index) FROM {db} WHERE wkuniversalid=%s'.format(db=db)
-		data = (workid,)
-		try:
-			cursor.execute(query, data)
-			found = cursor.fetchone()
-			firstline = found[0]
-		except IndexError:
-			workid = perseusidmismatch(workid, cursor)
-			firstline = returnfirstlinenumber(workid, cursor)
-
-	return firstline
-
-
 def perseusidmismatch(badworkdbnumber, cursor):
 	"""
 	exception handling
@@ -483,19 +312,6 @@ def returnfirstwork(authorid, cursor):
 		found = returnfirstwork('gr0012w001', cursor)
 	
 	return found
-
-
-def makeablankline(work, fakelinenumber):
-	"""
-	sometimes (like in lookoutsidetheline()) you need a dummy line
-	this will build one
-	:param work:
-	:return:
-	"""
-	
-	lineobject = dbWorkLine(work, fakelinenumber, '-1', '-1', '-1', '-1', '-1', '-1', '', '', '', '', '')
-	
-	return lineobject
 
 
 def makeanemptyauthor(universalid):
@@ -615,93 +431,3 @@ def probefordatabases():
 	del dbconnection
 
 	return available
-
-
-def createvectorstable():
-	"""
-
-	zap and reconstitute the storedvectors table
-
-	:return:
-	"""
-
-	print('resetting the stored vectors table')
-
-	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
-	cursor = dbconnection.cursor()
-
-	query = """
-	DROP TABLE IF EXISTS public.storedvectors;
-
-	CREATE TABLE public.storedvectors
-	(
-	    ts timestamp without time zone,
-	    versionstamp character varying(6) COLLATE pg_catalog."default",
-	    settings character varying (512) COLLATE pg_catalog."default",
-	    uidlist text[] COLLATE pg_catalog."default",
-	    vectortype character varying(10) COLLATE pg_catalog."default",
-	    calculatedvectorspace bytea
-	)
-	WITH (
-	    OIDS = FALSE
-	)
-	TABLESPACE pg_default;
-	
-	ALTER TABLE public.storedvectors
-	    OWNER to hippa_wr;
-	
-	GRANT SELECT ON TABLE public.storedvectors TO {reader};
-	
-	GRANT ALL ON TABLE public.storedvectors TO {writer};
-	"""
-
-	query = query.format(reader=hipparchia.config['DBUSER'], writer=hipparchia.config['DBWRITEUSER'])
-
-	cursor.execute(query)
-	cursor.close()
-	del dbconnection
-
-	return
-
-
-def createstoredimagestable():
-	"""
-
-	zap and reconstitute the storedimages table
-
-	:return:
-	"""
-
-	print('resetting the stored images table')
-
-	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
-	cursor = dbconnection.cursor()
-
-	query = """
-	DROP TABLE IF EXISTS public.storedvectorimages;
-	
-	CREATE TABLE public.storedvectorimages
-	(
-		imagename character varying(12),
-	    imagedata bytea
-	)
-	WITH (
-	    OIDS = FALSE
-	)
-	TABLESPACE pg_default;
-	
-	ALTER TABLE public.storedvectorimages
-	    OWNER to hippa_wr;
-	
-	GRANT SELECT ON TABLE public.storedvectorimages TO {reader};
-	
-	GRANT ALL ON TABLE public.storedvectorimages TO {writer};
-	"""
-
-	query = query.format(reader=hipparchia.config['DBUSER'], writer=hipparchia.config['DBWRITEUSER'])
-
-	cursor.execute(query)
-	cursor.close()
-	del dbconnection
-
-	return

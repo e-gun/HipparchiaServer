@@ -7,24 +7,22 @@
 """
 
 import os
-import pickle
 import re
 import sys
 import time
-from datetime import datetime
 from multiprocessing import Manager, Process
 from string import punctuation
 
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import createvectorstable, dblineintolineobject, grabonelinefromwork, resultiterator, \
+from server.dbsupport.dbfunctions import resultiterator, \
 	setconnection, setthreadcount
+from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
 	tidyupterm
 from server.hipparchiaobjects.helperobjects import MPCounter
 from server.hipparchiaobjects.searchobjects import ProgressPoll
-from server.searching.proximitysearching import grableadingandlagging
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildbetweenwhereextension
 from server.startup import lemmatadict
@@ -282,126 +280,6 @@ def buildlemmatizesearchphrase(phrase):
 	# lemmatizesearchphrase = 'via vio urbs munus munero'
 
 	return lemmatizesearchphrase
-
-
-def findverctorenvirons(hitdict, searchobject):
-	"""
-
-	grab the stuff around the term you were looking for and return that as the environs
-
-	:param hitdict:
-	:param searchobject:
-	:return:
-	"""
-
-	dbconnection = setconnection('autocommit', readonlyconnection=False)
-	cursor = dbconnection.cursor()
-
-	so = searchobject
-
-	if so.lemma:
-		supplement = so.lemma.dictionaryentry
-	else:
-		supplement = so.termone
-
-	environs = list()
-	if so.session['searchscope'] == 'W':
-		for h in hitdict:
-			leadandlag = grableadingandlagging(hitdict[h], searchobject, cursor)
-			environs.append('{a} {b} {c}'.format(a=leadandlag['lead'], b=supplement, c=leadandlag['lag']))
-
-	else:
-		# there is a double-count issue if you get a word 2x in 2 lines and then grab the surrounding lines
-
-		distance = int(so.proximity)
-		# note that you can slowly iterate through it all or more quickly grab just what you need at one gulp...
-		tables = dict()
-		for h in hitdict:
-			if hitdict[h].authorid not in tables:
-				tables[hitdict[h].authorid] = list()
-			if hitdict[h].index not in tables[hitdict[h].authorid]:
-				tables[hitdict[h].authorid] += list(range(hitdict[h].index-distance, hitdict[h].index+distance))
-
-		tables = {t: set(tables[t]) for t in tables}
-		# print('tables', tables)
-
-		# grab all of the lines from all of the tables
-		linesdict = dict()
-		for t in tables:
-			linesdict[t] = bulklinegrabber(t, so.usecolumn, 'index', tables[t], cursor)
-
-		# generate the environs
-		dropdupes = set()
-
-		for h in hitdict:
-			need = ['{t}@{i}'.format(t=hitdict[h].authorid, i=i) for i in range(hitdict[h].index-distance, hitdict[h].index+distance)]
-			for n in need:
-				if n not in dropdupes:
-					dropdupes.add(n)
-					try:
-						environs.append(linesdict[hitdict[h].authorid][n])
-					except KeyError:
-						pass
-
-	cursor.close()
-	dbconnection.close()
-	del dbconnection
-
-	return environs
-
-
-def bulklinegrabber(table, column, criterion, setofcriteria, cursor):
-	"""
-
-	snarf up a huge number of lines
-
-	:param table:
-	:param setofindices:
-	:return:
-	"""
-
-	qtemplate = 'SELECT {cri}, {col} FROM {t} WHERE {cri} = ANY(%s)'
-	q = qtemplate.format(col=column, t=table, cri=criterion)
-	d = (list(setofcriteria),)
-
-	cursor.execute(q, d)
-	lines = resultiterator(cursor)
-
-	contents = {'{t}@{i}'.format(t=table, i=l[0]): l[1] for l in lines}
-
-	return contents
-
-
-def grablistoflines(table, uidlist):
-	"""
-
-	fetch many lines at once
-
-	select shortname from authors where universalid = ANY('{lt0860,gr1139}');
-
-	:param uidlist:
-	:return:
-	"""
-
-	dbconnection = setconnection('autocommit', readonlyconnection=False)
-	cursor = dbconnection.cursor()
-
-	lines = [int(uid.split('_ln_')[1]) for uid in uidlist]
-
-	qtemplate = 'SELECT * from {t} WHERE index = ANY(%s)'
-
-	q = qtemplate.format(t=table)
-	d = (lines,)
-	cursor.execute(q, d)
-	lines = cursor.fetchall()
-
-	cursor.close()
-	dbconnection.close()
-	del dbconnection
-
-	lines = [dblineintolineobject(l) for l in lines]
-
-	return lines
 
 
 def bruteforcefinddblinefromsentence(thissentence, modifiedsearchobject):
@@ -688,114 +566,6 @@ def mostcommonwords():
 			pass
 
 	return wordstoskip
-
-
-def storevectorindatabase(uidlist, vectortype, vectorspace):
-	"""
-
-	you have just calculated a new vectorpace, store it so you do not need to recalculate it
-	later
-
-	:param vectorspace:
-	:param uidlist:
-	:param vectortype:
-	:return:
-	"""
-
-	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
-	cursor = dbconnection.cursor()
-
-	if vectorspace:
-		pickledvectors = pickle.dumps(vectorspace)
-	else:
-		pickledvectors = pickle.dumps('failed to build model')
-	settings = determinesettings()
-
-	q = 'DELETE FROM public.storedvectors WHERE (uidlist = %s and vectortype = %s)'
-	d = (uidlist, vectortype)
-	cursor.execute(q, d)
-
-	q = """
-	INSERT INTO public.storedvectors 
-		(ts, versionstamp, settings, uidlist, vectortype, calculatedvectorspace)
-		VALUES (%s, %s, %s, %s, %s, %s)
-	"""
-	ts = datetime.now().strftime("%Y-%m-%d %H:%M")
-	versionstamp = readgitdata()[:6]
-
-	d = (ts, versionstamp, settings, uidlist, vectortype, pickledvectors)
-	cursor.execute(q, d)
-
-	# print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))
-
-	cursor.close()
-	del dbconnection
-
-	return
-
-
-def checkforstoredvector(uidlist, indextype, careabout='settings'):
-	"""
-
-	the stored vector might not reflect the current math rules
-
-	return False if you are 'outdated'
-
-	hipparchiaDB=# select ts,versionstamp,uidlist from storedvectors;
-	        ts          | versionstamp |   uidlist
-	---------------------+--------------+--------------
-	2018-02-14 20:49:00 | 7e1c1b       | {lt0474w011}
-	2018-02-14 20:50:00 | 7e1c1b       | {lt0474w057}
-	(2 rows)
-
-	:param uidlist:
-	:return:
-	"""
-
-	now = datetime.now().strftime("%Y-%m-%d %H:%M")
-	version = readgitdata()
-
-	dbconnection = setconnection('autocommit')
-	cursor = dbconnection.cursor()
-
-	q = """
-	SELECT {crit}, calculatedvectorspace 
-		FROM public.storedvectors 
-		WHERE uidlist=%s AND vectortype=%s
-	"""
-	d = (uidlist, indextype)
-
-	try:
-		cursor.execute(q.format(crit=careabout), d)
-		result = cursor.fetchone()
-	except psycopg2.ProgrammingError:
-		# psycopg2.ProgrammingError: relation "public.storedvectors" does not exist
-		createvectorstable()
-		result = False
-
-	if not result:
-		return False
-
-	if careabout == 'versionstamp':
-		outdated = (version[:6] != result[0])
-	elif careabout == 'settings':
-		current = determinesettings()
-		outdated = (current != result[0])
-	else:
-		outdated = True
-
-	# print('checkforstoredvector()', uidlist, result[0], 'outdated=', outdated)
-
-	if outdated:
-		returnval = False
-	else:
-		returnval = pickle.loads(result[1])
-
-	dbconnection.commit()
-	cursor.close()
-	del dbconnection
-
-	return returnval
 
 
 def readgitdata():

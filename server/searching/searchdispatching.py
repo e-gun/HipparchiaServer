@@ -10,7 +10,8 @@ import re
 from multiprocessing import Manager, Process
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import dblineintolineobject, setconnection, setthreadcount
+from server.dbsupport.dbfunctions import setconnection, setthreadcount
+from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.formatting.wordformatting import wordlistintoregex
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords

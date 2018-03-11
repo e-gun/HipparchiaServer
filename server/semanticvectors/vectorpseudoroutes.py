@@ -13,6 +13,7 @@ import time
 from flask import request, session
 
 from server import hipparchia
+from server.dbsupport.vectordbfunctions import fetchverctorenvirons
 from server.formatting.jsformatting import generatevectorjs
 from server.formatting.vectorformatting import formatnnmatches
 from server.hipparchiaobjects.searchobjects import OutputObject, ProgressPoll
@@ -22,8 +23,7 @@ from server.searching.searchfunctions import buildsearchobject, cleaninitialquer
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.rudimentaryvectormath import buildrudimentaryvectorspace, caclulatecosinevalues
 from server.semanticvectors.vectorgraphing import graphbliteraldistancematches
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, findheadwords, findverctorenvirons, \
-	findwordvectorset
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, findheadwords, findwordvectorset
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
 """
@@ -187,7 +187,7 @@ def findabsolutevectorsfromhits(searchobject, hitdict, activepoll, starttime, wo
 	so.proximatelemma = ''
 
 	activepoll.statusis('Compiling proximite wordlists')
-	environs = findverctorenvirons(hitdict, so)
+	environs = fetchverctorenvirons(hitdict, so)
 
 	output = generatevectoroutput(environs, workssearched, so, activepoll, starttime, 'passages')
 
