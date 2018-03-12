@@ -77,6 +77,8 @@ def executegensimsearch(activepoll, searchobject):
 
 	starttime = time.time()
 
+	# print('so.vectorquerytype', so.vectorquerytype)
+
 	if so.vectorquerytype != 'nearestneighborsquery':
 		outputfunction = lsigenerateoutput
 		indextype = 'lsi'

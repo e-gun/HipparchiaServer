@@ -369,8 +369,8 @@ def unbalancedspancleaner(html):
 	o = re.compile(r'<span')
 	c = re.compile(r'</span>')
 
-	opened = len(re.findall(o,html))
-	closed = len(re.findall(c,html))
+	opened = len(re.findall(o, html))
+	closed = len(re.findall(c, html))
 
 	supplement = str()
 

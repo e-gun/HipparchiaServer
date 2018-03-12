@@ -71,7 +71,6 @@ def generatevectorjs(path):
 	:return:
 	"""
 
-
 	jstemplate = """
 		$('lemmaheadword').click( function(e) { 
 			var searchid = Date.now();
