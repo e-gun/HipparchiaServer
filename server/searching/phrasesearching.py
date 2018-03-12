@@ -177,7 +177,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 		try:
 			uid = tablestosearch.pop()
 			activepoll.remain(len(tablestosearch))
-		except:
+		except IndexError:
 			uid = None
 			tablestosearch = None
 
@@ -185,7 +185,6 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 			if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
 				dbconnection.commit()
 
-			indices = None
 			qtemplate = """
 				SELECT secondpass.index, secondpass.{co} FROM 
 					(SELECT firstpass.index, firstpass.linebundle, firstpass.{co} FROM
@@ -272,6 +271,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 	del dbconnection
 
 	return foundlineobjects
+
 
 """
 

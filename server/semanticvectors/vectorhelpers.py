@@ -267,6 +267,7 @@ def buildlemmatizesearchphrase(phrase):
 	"""
 
 	# phrase = 'vias urbis munera'
+	phrase = phrase.strip()
 	words = phrase.split(' ')
 
 	morphdict = findheadwords(words)

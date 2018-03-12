@@ -148,8 +148,9 @@ def grableadingandlagging(hitline, searchobject, cursor):
 
 	take a dbline and grab the N words in front of it and after it
 
-	:param litline:
+	:param hitline:
 	:param searchobject:
+	:param cursor:
 	:return:
 	"""
 

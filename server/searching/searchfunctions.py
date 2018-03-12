@@ -94,6 +94,7 @@ def massagesearchtermsforwhitespace(query):
 
 def atsignwhereclauses(uidwithatsign, operand, authors):
 	"""
+
 	in order to restrict a search to a portion of a work, you will need a where clause
 	this builds it out of something like 'gr0003w001_AT_3|12' (Thuc., Bk 3, Ch 12)
 
@@ -101,8 +102,9 @@ def atsignwhereclauses(uidwithatsign, operand, authors):
 		[('level_02_value=%s ', '1'), ('level_01_value=%s ', '3')]
 
 	:param uidwithatsign:
-	:param operand: this should be either '=' or '!='
-	:return: a tuple consisting of the SQL string and the value to be passed via %s
+	:param operand:
+	:param authors:
+	:return:
 	"""
 
 	whereclausetuples = list()
@@ -121,7 +123,7 @@ def atsignwhereclauses(uidwithatsign, operand, authors):
 	index = -1
 	for l in locus:
 		index += 1
-		lvstr = 'level_0{l}_value{o}%s '.format(l=wklvls[index],o=operand)
+		lvstr = 'level_0{lvl}_value{o}%s '.format(lvl=wklvls[index], o=operand)
 		whereclausetuples.append((lvstr, l))
 
 	# print('whereclausetuples',whereclausetuples)
@@ -232,7 +234,8 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		forms = [forms[i:i + n] for i in range(0, len(forms), n)]
 		forms = [wordlistintoregex(f) for f in forms]
 
-		q = 'CREATE TEMPORARY TABLE IF NOT EXISTS lemmatizedforms_{wd} AS SELECT term FROM unnest(%s) term;'.format(wd=so.lemma.dictionaryentry)
+		qtemplate = 'CREATE TEMPORARY TABLE IF NOT EXISTS lemmatizedforms_{wd} AS SELECT term FROM unnest(%s) term;'
+		q = qtemplate.format(wd=so.lemma.dictionaryentry)
 		d = (forms,)
 		cursor.execute(q, d)
 
@@ -317,6 +320,7 @@ def buildbetweenwhereextension(authortable, searchobject):
 
 def lookoutsideoftheline(linenumber, numberofextrawords, workid, searchobject, cursor):
 	"""
+
 	grab a line and add the N words at the tail and head of the previous and next lines
 	this will let you search for phrases that fall along a line break "και δη | και"
 
@@ -328,7 +332,8 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, searchobject, c
 
 	:param linenumber:
 	:param numberofextrawords:
-	:param workdbname:
+	:param workid:
+	:param searchobject:
 	:param cursor:
 	:return:
 	"""
@@ -383,9 +388,11 @@ def findleastcommonterm(searchphrase, accentsneeded):
 	might need to institute a check to make sure an accented letter is in a word, but is this starting to be
 	too much trouble for too little gain?
 
-	:param listofterms:
+	:param searchphrase:
+	:param accentsneeded:
 	:return:
 	"""
+
 	stillneedtofindterm = True
 	searchterms = searchphrase.split(' ')
 	searchterms = [x for x in searchterms if x]
