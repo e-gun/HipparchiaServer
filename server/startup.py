@@ -30,8 +30,8 @@ Public License version 3.
 """
 
 if hipparchia.config['ENOUGHALREADYWITHTHECOPYRIGHTNOTICE'] != 'yes':
-	print(terminaltext.format(project='HipparchiaServer', year='2016-17', fullname='E. Gunderson',
-	                          mail='Department of Classics, 125 Queen’s Park, Toronto, ON M5S 2C7 Canada'))
+	print(terminaltext.format(project='HipparchiaServer', year='2016-18', fullname='E. Gunderson',
+	                          mail='Department of Classics, 125 Queen’s Park, Toronto, ON  M5S 2C7 Canada'))
 
 
 available = probefordatabases()

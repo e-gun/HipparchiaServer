@@ -215,7 +215,7 @@ def checkfordocumentmetadata(line, workobject):
 	:return:
 	"""
 
-	metadata = []
+	metadata = list()
 
 	datefinder = re.compile(r'<hmu_metadata_date value="(.*?)" />')
 	regionfinder = re.compile(r'<hmu_metadata_region value="(.*?)" />')
@@ -295,7 +295,7 @@ def insertparserids(lineobject, continuationdict):
 		continuationdict = {e: continuationdict[e] for e in brackettypes}
 		theline = lineobject.markeditorialinsersions(continuationdict)
 
-	theline = re.sub(r'(<.*?>)', r'*snip*\1*snip*',theline)
+	theline = re.sub(r'(<.*?>)', r'*snip*\1*snip*', theline)
 	hyphenated = lineobject.hyphenated
 	segments = deque([s for s in theline.split('*snip*') if s])
 	

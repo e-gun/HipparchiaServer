@@ -87,7 +87,7 @@ def textsegmentfindstartandstop(authorobject, workobject, passageaslist, cursor)
 	# build a where clause
 	passageaslist.reverse()
 	atloc = '|'.join(passageaslist)
-	selection = workobject.universalid + '_AT_' + atloc
+	selection = '{uid}_AT_{line}'.format(uid=workobject.universalid, line=atloc)
 	
 	w = atsignwhereclauses(selection, '=', {authorobject.universalid: authorobject})
 	d = [workobject.universalid]
@@ -219,67 +219,6 @@ def dictmerger(masterdict, targetdict):
 			masterdict[item] = targetdict[item]
 
 	return masterdict
-
-
-def supplementalindexjs():
-	"""
-	
-	insert a js block to handle observed forms
-	
-	:return: 
-	"""
-
-	js = """
-		<script>
-			$('indexobserved').click( function(e) {
-				e.preventDefault();
-				var windowWidth = $(window).width();
-				var windowHeight = $(window).height();
-				$( '#lexicadialogtext' ).dialog({
-					closeOnEscape: true, 
-					autoOpen: false,
-					minWidth: windowWidth*.33,
-					maxHeight: windowHeight*.9,
-					// position: { my: "left top", at: "left top", of: window },
-					title: this.id,
-					draggable: true,
-					icons: { primary: 'ui-icon-close' },
-					click: function() { $( this ).dialog( 'close' ); }
-					});
-				$( '#lexicadialogtext' ).dialog( 'open' );
-				$( '#lexicadialogtext' ).html('[searching...]');
-				$.getJSON('/parse/'+this.id, function (definitionreturned) {
-					$( '#lexicon').val(definitionreturned[0]['trylookingunder']);
-					var dLen = definitionreturned.length;
-					var linesreturned = []
-					for (i = 0; i < dLen; i++) { linesreturned.push(definitionreturned[i]['value']); }
-					$( '#lexicadialogtext' ).html(linesreturned);
-				});
-			return false;
-		});
-
-			$('indexedlocation').click( function(e) {
-				e.preventDefault();
-				$.getJSON('/browse/'+this.id, function (passagereturned) {
-				$('#browseforward').unbind('click');
-				$('#browseback').unbind('click');
-				var fb = parsepassagereturned(passagereturned)
-					// left and right arrow keys
-					$('#browserdialogtext').keydown(function(e) {
-						switch(e.which) {
-							case 37: browseuponclick(fb[1]); break;
-							case 39: browseuponclick(fb[0]); break;
-							}
-					});
-				$('#browseforward').bind('click', function(){ browseuponclick(fb[0]); });
-				$('#browseback').bind('click', function(){ browseuponclick(fb[1]); });
-				});
-			});
-
-		</script>
-	"""
-
-	return js
 
 
 def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationvalue, brktype, openfinder=None, closefinder=None):

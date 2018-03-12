@@ -300,9 +300,7 @@ def mpmorphology(terms, morphobjects, commitcount):
 			t = None
 
 		if t:
-
 			mo = lookformorphologymatches(t, curs)
-
 			if mo:
 				morphobjects[t] = mo
 			else:

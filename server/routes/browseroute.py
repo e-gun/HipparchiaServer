@@ -48,7 +48,7 @@ def grabtextforbrowsing(locus):
 
 	try:
 		ao = authordict[workdb[:6]]
-	except:
+	except KeyError:
 		ao = makeanemptyauthor('gr0000')
 
 	try:
@@ -147,8 +147,8 @@ def grabtextforbrowsing(locus):
 		browserdata['browserhtml'] = viewing + '\n'.join(table)
 		browserdata['authornumber'] = ao.universalid
 		browserdata['workid'] = wo.universalid
-		browserdata['authorboxcontents'] = ao.cleanname + ' [' + ao.universalid + ']'
-		browserdata['workboxcontents'] = wo.title + ' (' + wo.universalid[-4:] + ')'
+		browserdata['authorboxcontents'] = '{n} [{uid}]'.format(n=ao.cleanname, uid=ao.universalid)
+		browserdata['workboxcontents'] = '{t} ({wkid})'.format(t=wo.title, wkid=wo.universalid[-4:])
 
 	if resultmessage != 'success':
 		resultmessage = '<span class="small">({rc})</span>'.format(rc=resultmessage)
