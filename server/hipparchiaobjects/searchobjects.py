@@ -214,12 +214,17 @@ class SearchObject(object):
 		exclusive = {'cosdistbysentence', 'cosdistbysentence', 'semanticvectorquery', 'nearestneighborsquery',
 		             'tensorflowgraph', 'sentencesimilarity'}
 
-		qtype = None
+		qtype = list()
 		for e in exclusive:
 			if self.session[e] == 'yes':
-				qtype = e
+				qtype.append(e)
 
-		return qtype
+		if len(qtype) > 1:
+			# obviously we should never see this unless there is a bug in sessionfunctions.py, vel sim.
+			print('error: too many query types have been set:', qtype)
+			return None
+		else:
+			return qtype[0]
 
 
 class OutputObject(object):
