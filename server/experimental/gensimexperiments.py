@@ -5,12 +5,72 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
-
 from gensim import corpora
 from gensim.models import LogEntropyModel, LsiModel
 
 from server.hipparchiaobjects.helperobjects import LogEntropyVectorCorpus
+from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
+from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, findheadwords, findwordvectorset
+from server.startup import authordict, listmapper
+
+
+def gensimexperiment(activepoll, so):
+	"""
+
+	:param activepoll:
+	:param so:
+	:return:
+	"""
+
+	starttime = time.time()
+	activecorpora = so.getactivecorpora()
+	searchlist = flagexclusions(searchlist, so.session)
+	workssearched = len(searchlist)
+	searchlist = compilesearchlist(listmapper, so.session)
+	searchlist = calculatewholeauthorsearches(searchlist, authordict)
+	so.searchlist = searchlist
+	sentencetuples = vectorprepdispatcher(so, activepoll)
+	# find all words in use
+	listsofwords = [s[1] for s in sentencetuples]
+	allwords = findwordvectorset(listsofwords)
+
+	# find all possible forms of all the words we used
+	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
+	wl = '{:,}'.format(len(listsofwords))
+	activepoll.statusis('Finding headwords for {n} sentences'.format(n=wl))
+
+	morphdict = findheadwords(allwords)
+	morphdict = convertmophdicttodict(morphdict)
+
+	# find all possible headwords of all of the forms in use
+	# note that we will not know what we did not know: count unparsed words too and deliver that as info at the end?
+	allheadwords = dict()
+	for m in morphdict.keys():
+		for h in morphdict[m]:
+			allheadwords[h] = m
+
+	vectorspace = logentropybuildspace(morphdict, listsofwords)
+
+	return output
+
+
+def doc2vecbuildspace(morphdict, sentences):
+	"""
+
+	hollow shell for testing...
+
+	https://github.com/RaRe-Technologies/gensim/blob/develop/docs/notebooks/doc2vec-lee.ipynb
+
+	https://rare-technologies.com/word2vec-in-python-part-two-optimizing/
+
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	return
 
 
 def logentropybuildspace(morphdict, sentences):
@@ -41,22 +101,4 @@ def logentropybuildspace(morphdict, sentences):
 
 	corpus = LogEntropyVectorCorpus(lsixform, logentropyxform, logentropydictionary, logentropycorpus, bagsofwords, sentences)
 
-
 	return corpus
-
-
-def doc2vecbuildspace(morphdict, sentences):
-	"""
-
-	hollow shell for testing...
-
-	https://github.com/RaRe-Technologies/gensim/blob/develop/docs/notebooks/doc2vec-lee.ipynb
-
-	https://rare-technologies.com/word2vec-in-python-part-two-optimizing/
-
-	:param morphdict:
-	:param sentences:
-	:return:
-	"""
-
-	return

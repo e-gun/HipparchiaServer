@@ -101,14 +101,14 @@ def sklearnselectedworks(activepoll, searchobject):
 		similaritiesdict = skfunctiontotest(sentencetuples, activepoll)
 		# similaritiesdict: {id: (scoreA, lindobjectA1, sentA1, lindobjectA2, sentA2), id2: (scoreB, lindobjectB1, sentB1, lindobjectB2, sentB2), ... }
 		corehtml = skformatmostimilar(similaritiesdict)
-		output = generatesimilarsentenceoutput(corehtml, so, activepoll, starttime, workssearched, len(similaritiesdict))
+		output = generatesimilarsentenceoutput(corehtml, so, activepoll, workssearched, len(similaritiesdict))
 	else:
 		return emptyvectoroutput(so)
 
 	return output
 
 
-def generatesimilarsentenceoutput(corehtml, searchobject, activepoll, starttime, workssearched, matches):
+def generatesimilarsentenceoutput(corehtml, searchobject, activepoll, workssearched, matches):
 	"""
 
 	:param corehtml:
@@ -121,8 +121,7 @@ def generatesimilarsentenceoutput(corehtml, searchobject, activepoll, starttime,
 
 	findsjs = insertbrowserclickjs('browser')
 
-	searchtime = time() - starttime
-	searchtime = round(searchtime, 2)
+	searchtime = so.getelapsedtime()
 	workssearched = locale.format('%d', workssearched, grouping=True)
 
 	output = dict()
@@ -135,11 +134,11 @@ def generatesimilarsentenceoutput(corehtml, searchobject, activepoll, starttime,
 	output['proximate'] = ''
 
 	if so.lemma:
-		all = 'all forms of »{skg}«'.format(skg=lm)
+		all = 'all forms of »{skg}«'.format(skg=so.lemma)
 	else:
 		all = ''
 	if so.proximatelemma:
-		near = ' all forms of »{skg}«'.format(skg=pr)
+		near = ' all forms of »{skg}«'.format(skg=so.proximatelemma)
 	else:
 		near = ''
 	output['thesearch'] = '{all}{near}'.format(all=all, near=near)

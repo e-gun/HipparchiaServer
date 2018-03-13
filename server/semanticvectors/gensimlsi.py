@@ -20,7 +20,7 @@ from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmo
 	findheadwords, findwordvectorset
 
 
-def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, starttime, lsispace):
+def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, lsispace):
 	"""
 
 	:param sentencestuples:
@@ -36,7 +36,7 @@ def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, 
 
 	findshtml = formatlsimatches(matches)
 
-	output = lsiformatoutput(findshtml, workssearched, matches, searchobject, activepoll, starttime)
+	output = lsiformatoutput(findshtml, workssearched, matches, searchobject, activepoll)
 
 	return output
 

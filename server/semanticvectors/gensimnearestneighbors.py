@@ -193,7 +193,7 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	return model
 
 
-def generatenearestneighbordata(sentencetuples, workssearched, searchobject, activepoll, starttime, vectorspace):
+def generatenearestneighbordata(sentencetuples, workssearched, searchobject, activepoll, vectorspace):
 	"""
 
 	:param searchobject:
@@ -239,7 +239,7 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, act
 
 	findshtml = '{h}'.format(h=html)
 
-	output = nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject, activepoll, starttime)
+	output = nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject, activepoll)
 
 	return output
 

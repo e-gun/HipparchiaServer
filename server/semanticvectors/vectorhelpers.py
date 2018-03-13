@@ -136,7 +136,7 @@ def parsevectorsentences(searchobject, lineobjects):
 	"""
 	so = searchobject
 
-	requiresids = ['semanticvectorquery', 'nearestneighborsquery']
+	requiresids = ['semanticvectorquery', 'nearestneighborsquery', 'sentencesimilarity']
 
 	columnmap = {'marked_up_line': 'accented', 'accented_line': 'polytonic', 'stripped_line': 'stripped'}
 	col = columnmap[so.usecolumn]

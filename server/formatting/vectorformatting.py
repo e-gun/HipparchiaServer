@@ -7,7 +7,6 @@
 """
 import json
 import re
-import time
 
 from server import hipparchia
 from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
@@ -275,7 +274,7 @@ def vectorhtmlforfrontpage():
 	return vectorhtml
 
 
-def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject, activepoll, starttime):
+def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject, activepoll):
 	"""
 
 	:param findshtml:
@@ -311,12 +310,11 @@ def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearch
 		pass
 
 	output.setscope(workssearched)
-	output.searchtime = str(round(time.time() - starttime, 2))
 	output.thesearch = 'all forms of »{skg}«'.format(skg=lm)
 	output.htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
 	output.sortby = 'proximity'
 	output.image = imagename
-
+	output.searchtime = so.getelapsedtime()
 	activepoll.deactivate()
 
 	jsonoutput = json.dumps(output.generateoutput())
@@ -324,7 +322,7 @@ def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearch
 	return jsonoutput
 
 
-def lsiformatoutput(findshtml, workssearched, matches, searchobject, activepoll, starttime):
+def lsiformatoutput(findshtml, workssearched, matches, searchobject, activepoll):
 	"""
 
 	should use OutputObject() instead
@@ -343,11 +341,11 @@ def lsiformatoutput(findshtml, workssearched, matches, searchobject, activepoll,
 	output.found = findshtml
 	output.js = insertbrowserclickjs('browser')
 	output.setscope(workssearched)
-	output.searchtime = str(round(time.time() - starttime, 2))
 	output.title = 'Sentences that are reminiscent of »{skg}«'.format(skg=so.seeking)
 	output.thesearch = output.title
 	output.htmlsearch = 'sentences that are reminiscent of <span class="sought">»{skg}«</span>'.format(skg=so.seeking)
 	output.resultcount = '{n} sentences above the cutoff'.format(n=len(matches))
+	output.searchtime = so.getelapsedtime()
 
 	activepoll.deactivate()
 

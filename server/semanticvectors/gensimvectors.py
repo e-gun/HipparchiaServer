@@ -75,8 +75,6 @@ def executegensimsearch(activepoll, searchobject):
 	"""
 	so = searchobject
 
-	starttime = time.time()
-
 	# print('so.vectorquerytype', so.vectorquerytype)
 
 	if so.vectorquerytype != 'nearestneighborsquery':
@@ -164,7 +162,7 @@ def executegensimsearch(activepoll, searchobject):
 		else:
 			sentencestuples = None
 
-		output = outputfunction(sentencestuples, workssearched, so, activepoll, starttime, vectorspace)
+		output = outputfunction(sentencestuples, workssearched, so, activepoll, vectorspace)
 
 	else:
 		reasons = ['search list contained zero items']
