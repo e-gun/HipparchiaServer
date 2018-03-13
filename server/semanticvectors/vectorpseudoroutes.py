@@ -163,7 +163,7 @@ def findabsolutevectorsbysentence(activepoll, searchobject):
 	return output
 
 
-def findabsolutevectorsfromhits(searchobject, hitdict, activepoll, starttime, workssearched):
+def findabsolutevectorsfromhits(searchobject, hitdict, activepoll, workssearched):
 	"""
 	a pseudo-route: the Δ option was checked and executesearch() branced over to this function
 
@@ -189,12 +189,12 @@ def findabsolutevectorsfromhits(searchobject, hitdict, activepoll, starttime, wo
 	activepoll.statusis('Compiling proximite wordlists')
 	environs = fetchverctorenvirons(hitdict, so)
 
-	output = generatevectoroutput(environs, workssearched, so, activepoll, starttime, 'passages')
+	output = generatevectoroutput(environs, workssearched, so, activepoll, 'passages')
 
 	return output
 
 
-def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, starttime, vtype):
+def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, vtype):
 	"""
 
 
@@ -274,7 +274,6 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 	found = max(hipparchia.config['NEARESTNEIGHBORSCAP'], len(cosinevalues))
 	output.setresultcount(found, space)
 	output.setscope(workssearched)
-	output.searchtime = str(round(time.time() - starttime, 2))
 
 	if so.lemma:
 		xtra = 'all forms of '
@@ -285,6 +284,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, 
 
 	output.sortby = 'distance with a cutoff of {c}'.format(c=1 - hipparchia.config['VECTORDISTANCECUTOFFLOCAL'])
 	output.image = imagename
+	output.searchtime = so.getelapsedtime()
 
 	activepoll.deactivate()
 

@@ -85,6 +85,8 @@ def startvectorizing():
 def determinevectorworkpile():
 	"""
 
+	probe the db for potential vectorization targets
+
 	:return:
 	"""
 

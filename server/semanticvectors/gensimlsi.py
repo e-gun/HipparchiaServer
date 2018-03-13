@@ -50,6 +50,8 @@ def lsifindmatches(sentencestuples, searchobject, activepoll, lsispace):
 
 	so = searchobject
 
+	makespace = lsibuildspace
+
 	if not lsispace:
 		# find all words in use
 		listsofwords = [s[1] for s in sentencestuples]
@@ -73,7 +75,7 @@ def lsifindmatches(sentencestuples, searchobject, activepoll, lsispace):
 		hw = '{:,}'.format(len(allheadwords.keys()))
 		activepoll.statusis('Building vectors for {h} headwords in {n} sentences'.format(h=hw, n=wl))
 
-		lsispace = lsibuildspace(morphdict, listsofwords)
+		lsispace = makespace(morphdict, listsofwords)
 		storevectorindatabase(so.searchlist, 'lsi', lsispace)
 
 	vectorquerylsi = lsispace.findquerylsi(so.tovectorize)

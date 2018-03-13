@@ -24,7 +24,6 @@ def graphbliteraldistancematches(searchterm, mostsimilartuples, searchlist):
 
 	mostsimilartuples [('γράφω', 0.6708203932499369), ('εἰκών', 0.447213595499958), ('τρέχω', 0.447213595499958), ...]
 
-
 	:param searchterm:
 	:param mostsimilartuples:
 	:param vectorspace:
@@ -153,6 +152,12 @@ def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconne
 def storevectorgraph(figureasbytes):
 	"""
 
+	store a graph in the image table so that you can subsequently display it in the browser
+
+	note that images get deleted after use
+
+	also note that we hand the data to the db and then immediatel grab it out of the db because of
+	constraints imposed by the way flask works
 
 	:param figureasbytes:
 	:return:
@@ -189,9 +194,18 @@ def storevectorgraph(figureasbytes):
 def fetchvectorgraph(imagename):
 	"""
 
+	grab a graph in the image table so that you can subsequently display it in the browser
+
+	note that images get deleted after use
+
+	also note that we hand the data to the db and then immediatel grab it out of the db because of
+	constraints imposed by the way flask works
+
 	:param imagename:
 	:return:
 	"""
+
+	deletewhendone = True
 
 	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
@@ -210,9 +224,10 @@ def fetchvectorgraph(imagename):
 
 	# now we should delete the image because we are done with it
 
-	q = 'DELETE FROM public.storedvectorimages WHERE imagename=%s'
-	d = (imagename,)
-	cursor.execute(q, d)
+	if deletewhendone:
+		q = 'DELETE FROM public.storedvectorimages WHERE imagename=%s'
+		d = (imagename,)
+		cursor.execute(q, d)
 
 	dbconnection.commit()
 	cursor.close()

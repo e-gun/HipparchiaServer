@@ -118,6 +118,7 @@ class SearchObject(object):
 		self.vectortype = None
 		self.tovectorize = None
 		self.vectorquerytype = None
+		self.starttime = time.time()
 
 		# searchtermcharactersubstitutions() logic has moved here
 
@@ -224,7 +225,13 @@ class SearchObject(object):
 			print('error: too many query types have been set:', qtype)
 			return None
 		else:
-			return qtype[0]
+			try:
+				return qtype[0]
+			except IndexError:
+				return None
+
+	def getelapsedtime(self):
+		return str(round(time.time() - self.starttime, 2))
 
 
 class OutputObject(object):

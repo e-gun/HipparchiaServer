@@ -44,8 +44,6 @@ def executesearch(timestamp):
 	:return:
 	"""
 
-	starttime = time.time()
-
 	try:
 		ts = str(int(timestamp))
 	except ValueError:
@@ -104,6 +102,9 @@ def executesearch(timestamp):
 		                   'nearestneighborsquery': executegensimsearch,
 		                   'tensorflowgraph': tensorgraphelectedworks,
 		                   'sentencesimilarity': sklearnselectedworks}
+
+		# for TESTING purposes rewrite one of the definitions
+		# vectorfunctions['tensorflowgraph'] = gensimexperiment
 
 		if so.vectorquerytype in vectorfunctions:
 			fnc = vectorfunctions[so.vectorquerytype]
@@ -177,7 +178,7 @@ def executesearch(timestamp):
 		if so.vectorquerytype == 'cosdistbylineorword':
 			# print('cosdistbylineorword')
 			# take these hits and head on over to the vector worker
-			output = findabsolutevectorsfromhits(so, hitdict, activepoll, starttime, workssearched)
+			output = findabsolutevectorsfromhits(so, hitdict, activepoll, workssearched)
 			del poll[ts]
 			return output
 
@@ -231,7 +232,7 @@ def executesearch(timestamp):
 		output.js = findsjs
 		output.setresultcount(resultcount, 'passages')
 		output.setscope(workssearched)
-		output.searchtime = str(round(time.time() - starttime, 2))
+		output.searchtime = so.getelapsedtime()
 		output.thesearch = thesearch
 		output.htmlsearch = htmlsearch
 		output.hitmax = hitmax
