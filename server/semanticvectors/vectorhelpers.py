@@ -17,10 +17,11 @@ import psycopg2
 
 from server import hipparchia
 from server.dbsupport.dbfunctions import resultiterator, \
-	setconnection, setthreadcount
+	setthreadcount
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
 	tidyupterm
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import MPCounter
 from server.hipparchiaobjects.searchobjects import ProgressPoll
 from server.searching.searchdispatching import searchdispatcher
@@ -498,7 +499,7 @@ def mostcommonheadwords(cheat=True):
 			'ἄναξ', 'λόγοϲ'
 		}
 
-		dbconnection = setconnection('not_autocommit')
+		dbconnection = ConnectionObject('not_autocommit')
 		cursor = dbconnection.cursor()
 
 		qtemplate = """

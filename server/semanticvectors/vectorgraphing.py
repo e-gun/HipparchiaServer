@@ -14,8 +14,8 @@ import networkx as nx
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.dbsupport.vectordbfunctions import createstoredimagestable
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.startup import authordict, workdict
 
 
@@ -163,7 +163,7 @@ def storevectorgraph(figureasbytes):
 	:return:
 	"""
 
-	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
 
 	randomid = ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(12)])
@@ -184,7 +184,7 @@ def storevectorgraph(figureasbytes):
 
 	# print('stored {n} in vector image table'.format(n=randomid))
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return randomid
 
@@ -205,7 +205,7 @@ def fetchvectorgraph(imagename):
 
 	deletewhendone = True
 
-	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
 
 	q = 'SELECT imagedata FROM public.storedvectorimages WHERE imagename=%s'
@@ -227,7 +227,7 @@ def fetchvectorgraph(imagename):
 		d = (imagename,)
 		cursor.execute(q, d)
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return imagedata
 

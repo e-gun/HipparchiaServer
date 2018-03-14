@@ -12,8 +12,8 @@ from datetime import datetime
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.dbsupport.dblinefunctions import bulklinegrabber
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.searching.proximitysearching import grableadingandlagging
 from server.semanticvectors.vectorhelpers import determinesettings, readgitdata
 
@@ -28,7 +28,7 @@ def createvectorstable():
 
 	print('resetting the stored vectors table')
 
-	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
 
 	query = """
@@ -60,7 +60,7 @@ def createvectorstable():
 
 	cursor.execute(query)
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return
 
@@ -75,7 +75,7 @@ def createstoredimagestable():
 
 	print('resetting the stored images table')
 
-	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
 
 	query = """
@@ -103,7 +103,7 @@ def createstoredimagestable():
 
 	cursor.execute(query)
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return
 
@@ -122,7 +122,7 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 
 	uidlist = sorted(uidlist)
 
-	dbconnection = setconnection('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
 
 	if vectorspace:
@@ -150,7 +150,7 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 
 	cursor.close()
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return
 
@@ -176,7 +176,7 @@ def checkforstoredvector(uidlist, indextype, careabout='settings'):
 	now = datetime.now().strftime("%Y-%m-%d %H:%M")
 	version = readgitdata()
 
-	dbconnection = setconnection('autocommit')
+	dbconnection = ConnectionObject('autocommit')
 	cursor = dbconnection.cursor()
 
 	q = """
@@ -212,7 +212,7 @@ def checkforstoredvector(uidlist, indextype, careabout='settings'):
 	else:
 		returnval = pickle.loads(result[1])
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return returnval
 
@@ -227,7 +227,7 @@ def fetchverctorenvirons(hitdict, searchobject):
 	:return:
 	"""
 
-	dbconnection = setconnection('autocommit', readonlyconnection=False)
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	so = searchobject
@@ -276,6 +276,6 @@ def fetchverctorenvirons(hitdict, searchobject):
 					except KeyError:
 						pass
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return environs

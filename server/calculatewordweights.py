@@ -8,7 +8,7 @@
 
 import re
 
-from server.dbsupport.dbfunctions import setconnection
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 
 
 def findtemporalweights(language):
@@ -345,7 +345,7 @@ def findchronologicalweights(era, language):
 	:return:
 	"""
 
-	dbconnection = setconnection('autocommit')
+	dbconnection = ConnectionObject('autocommit')
 	curs = dbconnection.cursor()
 
 	eramap = {
@@ -425,7 +425,7 @@ def findcorpusweight(corpus, language):
 	:return:
 	"""
 
-	dbconnection = setconnection('autocommit')
+	dbconnection = ConnectionObject('autocommit')
 	curs = dbconnection.cursor()
 
 	q = 'SELECT SUM({c}) FROM dictionary_headword_wordcounts'.format(c=corpus)

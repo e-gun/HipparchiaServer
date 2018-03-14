@@ -10,9 +10,10 @@ import re
 from multiprocessing import Manager, Process
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import connectioncleanup, setconnection, setthreadcount
+from server.dbsupport.dbfunctions import setthreadcount
 from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.formatting.wordformatting import wordlistintoregex
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, \
@@ -157,7 +158,7 @@ def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
 	# print('workonsimplesearch() - searchlist', searchlist)
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	dbconnection = setconnection('not_autocommit', readonlyconnection=False)
+	dbconnection = ConnectionObject('not_autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 	so = searchobject
 
@@ -197,7 +198,7 @@ def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
 		except TypeError:
 			pass
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return foundlineobjects
 
@@ -230,7 +231,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchob
 	# print('workonsimplesearch() - searchlist', searchlist)
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	dbconnection = setconnection('not_autocommit', readonlyconnection=False)
+	dbconnection = ConnectionObject('not_autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	commitcount = 0
@@ -264,7 +265,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchob
 		except TypeError:
 			pass
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return foundlineobjects
 
@@ -288,7 +289,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobje
 
 	so = searchobject
 
-	dbconnection = setconnection('autocommit', readonlyconnection=False)
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	commitcount = 0
@@ -311,7 +312,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobje
 		except TypeError:
 			pass
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return foundlineobjects
 

@@ -9,8 +9,8 @@
 import re
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline, substringsearch
 
@@ -152,7 +152,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 	so = searchobject
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	dbconnection = setconnection('autocommit', readonlyconnection=False)
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
 
 	qcomb = QueryCombinator(searchphrase)
@@ -267,7 +267,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 							if so.onehit:
 								gotmyonehit = True
 
-	connectioncleanup(curs, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return foundlineobjects
 

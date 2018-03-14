@@ -12,6 +12,7 @@ from os import cpu_count
 import psycopg2
 
 from server import hipparchia
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
 # to fiddle with some day:
@@ -54,35 +55,6 @@ def setthreadcount(startup=False):
 		print('\nWARNING: threadcount exceeds total available number of threads: {a} vs {b}'.format(a=w, b=cpu_count()))
 
 	return w
-
-
-def setconnection(autocommit='n', readonlyconnection=True, u='DBUSER', p='DBPASS'):
-	"""
-
-	open a connection to the db: we'll use this one a lot
-
-	:param autocommit:
-	:param readonlyconnection:
-	:param u:
-	:param p:
-	:return:
-	"""
-
-	dbconnection = psycopg2.connect(user=hipparchia.config[u],
-	                                host=hipparchia.config['DBHOST'],
-	                                port=hipparchia.config['DBPORT'],
-	                                database=hipparchia.config['DBNAME'],
-	                                password=hipparchia.config[p])
-
-	if autocommit == 'autocommit':
-		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-
-	# would be great to set readonly to True in all cases, but 'CREATE TEMPORARY TABLE...' will not let you
-	# limiting the privileges of hippa_rd is the best you can do
-
-	dbconnection.set_session(readonly=readonlyconnection)
-
-	return dbconnection
 
 
 def tablenamer(authorobject, thework):
@@ -148,7 +120,7 @@ def dbloadasingleworkobject(workuniversalid):
 	:return:
 	"""
 
-	dbconnection = setconnection('not_autocommit')
+	dbconnection = ConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	q = """
@@ -164,7 +136,7 @@ def dbloadasingleworkobject(workuniversalid):
 
 	workobject = dbOpus(*r)
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return workobject
 
@@ -365,7 +337,7 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 	:return:
 	"""
 
-	dbconnection = setconnection('not_autocommit')
+	dbconnection = ConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	activedbs += ['lx', 'lm']
@@ -401,7 +373,7 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 				for c in sorted(corpora.keys())]
 	buildinfo = '\n'.join(buildinfo)
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return buildinfo
 
@@ -414,7 +386,7 @@ def probefordatabases():
 	:return:
 	"""
 
-	dbconnection = setconnection()
+	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
 	available = dict()
@@ -437,24 +409,35 @@ def probefordatabases():
 		else:
 			available[p] = False
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return available
 
 
-def connectioncleanup(cursor, dbconnection):
+def oldsetconnection(autocommit='n', readonlyconnection=True, u='DBUSER', p='DBPASS'):
 	"""
 
-	close a connection down
+	open a connection to the db: we'll use this one a lot
 
-	:param cursor:
-	:param dbconnection:
+	:param autocommit:
+	:param readonlyconnection:
+	:param u:
+	:param p:
 	:return:
 	"""
 
-	dbconnection.commit()
-	cursor.close()
-	dbconnection.close()
-	del dbconnection
+	dbconnection = psycopg2.connect(user=hipparchia.config[u],
+	                                host=hipparchia.config['DBHOST'],
+	                                port=hipparchia.config['DBPORT'],
+	                                database=hipparchia.config['DBNAME'],
+	                                password=hipparchia.config[p])
 
-	return
+	if autocommit == 'autocommit':
+		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+
+	# would be great to set readonly to True in all cases, but 'CREATE TEMPORARY TABLE...' will not let you
+	# limiting the privileges of hippa_rd is the best you can do
+
+	dbconnection.set_session(readonly=readonlyconnection)
+
+	return dbconnection

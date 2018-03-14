@@ -13,10 +13,10 @@ import time
 from flask import request, session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.wordformatting import avoidsmallvariants
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import ProgressPoll
 from server.startup import authordict, poll, workdict
 from server.textsandindices.indexmaker import buildindextowork
@@ -43,7 +43,7 @@ def completeindex():
 	poll[ts] = ProgressPoll(ts)
 	poll[ts].activate()
 
-	dbc = setconnection('autocommit')
+	dbc = ConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	req = tcparserequest(request, authordict, workdict)
@@ -118,7 +118,7 @@ def completeindex():
 
 	results = json.dumps(results)
 
-	connectioncleanup(cur, dbc)
+	dbc.connectioncleanup()
 	del poll[ts]
 
 	return results
@@ -131,7 +131,7 @@ def textmaker():
 	:return:
 	"""
 
-	dbc = setconnection('autocommit')
+	dbc = ConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	linesevery = hipparchia.config['SHOWLINENUMBERSEVERY']
@@ -172,6 +172,6 @@ def textmaker():
 
 	results = json.dumps(results)
 
-	connectioncleanup(cur, dbc)
+	dbc.connectioncleanup()
 
 	return results

@@ -11,11 +11,11 @@ import re
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
 from server.formatting.lexicaformatting import entrysummary, formatdictionarysummary, formateconsolidatedgrammarentry, \
 	formatgloss, formatmicroentry, grabheadmaterial, grabsenses, insertbrowserlookups
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbHeadwordObject, dbLatinWord, dbLemmaObject, \
 	dbMorphologyObject, dbWordCountObject
 
@@ -531,7 +531,7 @@ def findcountsviawordcountstable(wordtocheck):
 	:param wordtocheck:
 	:return:
 	"""
-	dbconnection = setconnection('not_autocommit')
+	dbconnection = ConnectionObject('not_autocommit')
 	curs = dbconnection.cursor()
 
 	initial = stripaccents(wordtocheck[0])
@@ -554,7 +554,7 @@ def findcountsviawordcountstable(wordtocheck):
 		# you did not build the wordcounts at all?
 		result = None
 
-	connectioncleanup(curs, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return result
 

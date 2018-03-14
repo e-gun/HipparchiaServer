@@ -10,8 +10,9 @@ import threading
 import time
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import resultiterator, setconnection
+from server.dbsupport.dbfunctions import resultiterator
 from server.dbsupport.vectordbfunctions import checkforstoredvector
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import ProgressPoll, SearchObject
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.gensimnearestneighbors import buildnnvectorspace
@@ -92,7 +93,7 @@ def determinevectorworkpile():
 
 	print('the vectorbot is active\n\tdetermining which vectors we might need to calculate\n')
 
-	dbconnection = setconnection('autocommit')
+	dbconnection = ConnectionObject('autocommit')
 	cursor = dbconnection.cursor()
 
 	workquery = """

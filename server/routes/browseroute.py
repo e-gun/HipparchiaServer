@@ -14,11 +14,11 @@ from flask import session
 from server import hipparchia
 from server.browsing.browserfunctions import getandformatbrowsercontext
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus, finddblinefromlocus, perseusdelabeler
-from server.dbsupport.dbfunctions import connectioncleanup, makeanemptyauthor, makeanemptywork, perseusidmismatch, \
-	setconnection
+from server.dbsupport.dbfunctions import makeanemptyauthor, makeanemptywork, perseusidmismatch
 from server.dbsupport.dblinefunctions import returnfirstlinenumber
 from server.formatting.lexicaformatting import dbquickfixes
 from server.formatting.wordformatting import depunct
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.startup import authordict, workdict
 
 
@@ -36,7 +36,7 @@ def grabtextforbrowsing(locus):
 	:return:
 	"""
 
-	dbc = setconnection('autocommit')
+	dbc = ConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	workdb = depunct(locus)[:10]
@@ -157,6 +157,6 @@ def grabtextforbrowsing(locus):
 
 	browserdata = json.dumps(browserdata)
 
-	connectioncleanup(cur, dbc)
+	dbc.connectioncleanup()
 
 	return browserdata

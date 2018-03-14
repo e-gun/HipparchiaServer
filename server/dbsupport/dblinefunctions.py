@@ -5,7 +5,8 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
-from server.dbsupport.dbfunctions import connectioncleanup, perseusidmismatch, resultiterator, setconnection
+from server.dbsupport.dbfunctions import perseusidmismatch, resultiterator
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 
 
@@ -113,7 +114,7 @@ def grablistoflines(table, uidlist):
 	:return:
 	"""
 
-	dbconnection = setconnection('autocommit', readonlyconnection=False)
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	lines = [int(uid.split('_ln_')[1]) for uid in uidlist]
@@ -125,7 +126,7 @@ def grablistoflines(table, uidlist):
 	cursor.execute(q, d)
 	lines = cursor.fetchall()
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	lines = [dblineintolineobject(l) for l in lines]
 

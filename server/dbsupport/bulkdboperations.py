@@ -6,7 +6,8 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-from server.dbsupport.dbfunctions import connectioncleanup, resultiterator, setconnection
+from server.dbsupport.dbfunctions import resultiterator
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
 
@@ -21,7 +22,7 @@ def loadallauthorsasobjects():
 
 	print('loading all authors...')
 
-	dbconnection = setconnection('not_autocommit')
+	dbconnection = ConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	q = 'SELECT * FROM authors'
@@ -33,7 +34,7 @@ def loadallauthorsasobjects():
 
 	print('\t', len(authorsdict), 'authors loaded')
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return authorsdict
 
@@ -48,7 +49,7 @@ def loadallworksasobjects():
 
 	print('loading all works...')
 
-	dbconnection = setconnection('not_autocommit')
+	dbconnection = ConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	q = """
@@ -64,7 +65,7 @@ def loadallworksasobjects():
 
 	print('\t', len(worksdict), 'works loaded')
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return worksdict
 
@@ -78,7 +79,7 @@ def loadlemmataasobjects():
 	"""
 
 	print('loading all lemmata...')
-	dbconnection = setconnection('not_autocommit')
+	dbconnection = ConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	q = """
@@ -98,7 +99,7 @@ def loadlemmataasobjects():
 	# print('lemmatadict["laudo"]', lemmatadict['laudo'].formlist)
 	# print('lemmatadict["λύω"]', lemmatadict['λύω'].formlist)
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return lemmatadict
 

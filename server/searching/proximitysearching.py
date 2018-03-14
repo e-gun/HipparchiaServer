@@ -9,9 +9,9 @@
 import re
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
 from server.formatting.wordformatting import wordlistintoregex
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.searching.searchfunctions import dblooknear, substringsearch
 
 
@@ -37,7 +37,7 @@ def withinxlines(workdbname, searchobject):
 	so = searchobject
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	dbconnection = setconnection('autocommit', readonlyconnection=False)
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
@@ -69,7 +69,7 @@ def withinxlines(workdbname, searchobject):
 				fullmatches.append(hit)
 		break
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return fullmatches
 
@@ -98,7 +98,7 @@ def withinxwords(workdbname, searchobject):
 	so = searchobject
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	dbconnection = setconnection('autocommit', readonlyconnection=False)
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
@@ -132,7 +132,7 @@ def withinxwords(workdbname, searchobject):
 		elif not so.near and not re.search(so.termtwo, leading) and not re.search(so.termtwo, lagging):
 			fullmatches.append(hit)
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return fullmatches
 

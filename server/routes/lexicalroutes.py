@@ -12,10 +12,10 @@ import re
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import depunct
 from server.formatting.wordformatting import removegravity, stripaccents, tidyupterm
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.lexica.lexicalookups import browserdictionarylookup, findtotalcounts, getobservedwordprevalencedata, \
 	lexicalmatchesintohtml, lookformorphologymatches
 from server.listsandsession.listmanagement import polytonicsort
@@ -33,7 +33,7 @@ def findbyform(observedword):
 	:return:
 	"""
 
-	dbc = setconnection('autocommit')
+	dbc = ConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	# the next is pointless because: 'po/lemon' will generate a URL '/parse/po/lemon'
@@ -107,7 +107,7 @@ def findbyform(observedword):
 	returnarray = [{'observed': cleanedword}] + returnarray
 	returnarray = json.dumps(returnarray)
 
-	connectioncleanup(cur, dbc)
+	dbc.connectioncleanup()
 
 	return returnarray
 
@@ -121,7 +121,7 @@ def dictsearch(searchterm):
 	:return:
 	"""
 
-	dbc = setconnection('autocommit')
+	dbc = ConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
@@ -189,7 +189,7 @@ def dictsearch(searchterm):
 
 	returnarray = json.dumps(returnarray)
 
-	connectioncleanup(cur, dbc)
+	dbc.connectioncleanup()
 
 	return returnarray
 
@@ -206,7 +206,7 @@ def reverselexiconsearch(searchterm):
 	:return:
 	"""
 
-	dbc = setconnection('autocommit')
+	dbc = ConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	entries = list()
@@ -279,6 +279,6 @@ def reverselexiconsearch(searchterm):
 
 	returnarray = json.dumps(returnarray)
 
-	connectioncleanup(cur, dbc)
+	dbc.connectioncleanup()
 
 	return returnarray

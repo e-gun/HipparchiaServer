@@ -12,10 +12,11 @@ from copy import deepcopy
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
-from server.dbsupport.dbfunctions import connectioncleanup, resultiterator, setconnection
+from server.dbsupport.dbfunctions import resultiterator
 from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.formatting.bibliographicformatting import formatname
 from server.formatting.bracketformatting import brackethtmlifysearchfinds
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchResult
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 
@@ -101,7 +102,7 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 	:return:
 	"""
 
-	dbconnection = setconnection('autocommit', readonlyconnection=False)
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	curs = dbconnection.cursor()
 
 	tosearch = deque()
@@ -139,7 +140,7 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 				# so there was no result and the key will not match a find
 				pass
 
-	connectioncleanup(curs, dbconnection)
+	dbconnection.connectioncleanup()
 
 	return searchresultlist
 

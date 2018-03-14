@@ -11,9 +11,9 @@ from gensim.models import LsiModel, TfidfModel
 from gensim.similarities import MatrixSimilarity
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.dbsupport.vectordbfunctions import storevectorindatabase
 from server.formatting.vectorformatting import formatlsimatches, lsiformatoutput
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import LSIVectorCorpus
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, finddblinesfromsentences, \
@@ -95,7 +95,7 @@ def lsifindmatches(sentencestuples, searchobject, activepoll, lsispace):
 	if not sentencestuples:
 		sentencestuples = vectorprepdispatcher(so, activepoll)
 
-	dbconnection = setconnection('autocommit')
+	dbconnection = ConnectionObject('autocommit')
 	cursor = dbconnection.cursor()
 	for s in sims:
 		if s[1] > threshold:
@@ -118,7 +118,7 @@ def lsifindmatches(sentencestuples, searchobject, activepoll, lsispace):
 				thismatch['words'] = lsispace.bagsofwords[s[0]]
 				matches.append(thismatch)
 
-	connectioncleanup(cursor, dbconnection)
+	dbconnection.connectioncleanup()
 
 	matches = [m for m in matches if len(m['sentence'].split(' ')) > 2]
 

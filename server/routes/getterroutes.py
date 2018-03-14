@@ -12,10 +12,11 @@ from flask import make_response, redirect, request, session, url_for
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
-from server.dbsupport.dbfunctions import connectioncleanup, makeanemptyauthor, setconnection
+from server.dbsupport.dbfunctions import makeanemptyauthor
 from server.formatting.bibliographicformatting import formatauthinfo, formatauthorandworkinfo, formatname, \
 	woformatworkinfo
 from server.formatting.wordformatting import depunct
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.listsandsession.listmanagement import compilesearchlist, sortsearchlist
 from server.listsandsession.sessionfunctions import modifysessionselections, modifysessionvar, parsejscookie
 from server.semanticvectors.vectorgraphing import fetchvectorgraph
@@ -132,7 +133,7 @@ def workstructure(locus):
 	:return:
 	"""
 
-	dbc = setconnection('autocommit')
+	dbc = ConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	workid = locus.split('_AT_')[0]
@@ -181,7 +182,7 @@ def workstructure(locus):
 		ws['range'] = ['error', 'select', 'the', 'work', 'again']
 	results = json.dumps(ws)
 
-	connectioncleanup(cur, dbc)
+	dbc.connectioncleanup()
 
 	return results
 
@@ -193,7 +194,7 @@ def getauthinfo(authorid):
 	:return:
 	"""
 
-	dbc = setconnection('autocommit')
+	dbc = ConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	authorid = depunct(authorid)
@@ -218,7 +219,7 @@ def getauthinfo(authorid):
 
 	authinfo = json.dumps('\n'.join(authinfo))
 
-	connectioncleanup(cur, dbc)
+	dbc.connectioncleanup()
 
 	return authinfo
 
