@@ -12,7 +12,7 @@ from copy import deepcopy
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
-from server.dbsupport.dbfunctions import connectioncleanup, setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, resultiterator, setconnection
 from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.formatting.bibliographicformatting import formatname
 from server.formatting.bracketformatting import brackethtmlifysearchfinds
@@ -43,7 +43,7 @@ def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
 
 	so = searchobject
 
-	hitdict = {h: hitdict[h] for h in hitdict if h < int(so.session['maxresults'])}
+	hitdict = {h: hitdict[h] for h in hitdict if h < so.cap}
 
 	resultlist = list()
 	for h in hitdict:
@@ -124,7 +124,8 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 
 	q = 'SELECT * FROM {au} WHERE EXISTS (SELECT 1 FROM {au}_includelist incl WHERE incl.includeindex = {au}.index)'.format(au=table)
 	curs.execute(q)
-	results = curs.fetchall()
+	results = resultiterator(curs)
+
 	lines = [dblineintolineobject(r) for r in results]
 	indexedlines = {l.index: l for l in lines}
 
@@ -228,8 +229,8 @@ def highlightsearchterm(lineobject, regexequivalent, spanname):
 		hyph = lineobject.hyphenated
 		find = re.search(regexequivalent, hyph)
 		try:
-			newline = '{l}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;{hs}<span class="{sn}">{fg}</span>{he}&nbsp;)'.format(
-				l=line, hs=hyph[0:find.start()], sn=spanname, fg=find.group(), he=hyph[find.end():])
+			newline = '{ln}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;{hs}<span class="{sn}">{fg}</span>{he}&nbsp;)'.format(
+				ln=line, hs=hyph[0:find.start()], sn=spanname, fg=find.group(), he=hyph[find.end():])
 			return newline
 		except:
 			return line

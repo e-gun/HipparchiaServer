@@ -207,3 +207,52 @@ def supplementalindexjs():
 	"""
 
 	return js
+
+
+def dictionaryentryjs():
+	"""
+
+	return js to insert
+
+	ensure exact matches, otherwise ἔρδω will pull up ὑπερδώριοϲ too
+
+	and so:
+		'/dictsearch/^'+this.id+'$'
+
+	:return:
+	"""
+
+	template = """
+	<script>
+	$('dictionaryentry').click( function(e) {
+            e.preventDefault();
+            var windowWidth = $(window).width();
+            var windowHeight = $(window).height();
+            $( '#lexicadialogtext' ).dialog({
+                    closeOnEscape: true,
+                    autoOpen: false,
+                    minWidth: windowWidth*.33,
+                    maxHeight: windowHeight*.9,
+                    // position: { my: "left top", at: "left top", of: window },
+                    title: this.id,
+                    draggable: true,
+                    icons: { primary: 'ui-icon-close' },
+                    click: function() { $( this ).dialog( 'close' ); }
+                    });
+            $( '#lexicadialogtext' ).dialog( 'open' );
+            $( '#lexicadialogtext' ).html('[searching...]');
+            $.getJSON('/dictsearch/^'+this.id+'$', function (definitionreturned) {
+                $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
+                var dLen = definitionreturned.length;
+                var linesreturned = []
+                for (i = 0; i < dLen; i++) {
+                    linesreturned.push(definitionreturned[i]['value']);
+                    }
+                $( '#lexicadialogtext' ).html(linesreturned);
+            });
+            return false;
+        });
+    </script>
+	"""
+
+	return template

@@ -1,7 +1,7 @@
 import re
 from collections import deque
 
-from server.dbsupport.dbfunctions import findselectionboundaries, setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, findselectionboundaries, setconnection
 
 
 def configurewhereclausedata(searchlist, workdict, searchobject):
@@ -267,7 +267,6 @@ def partialworkbetweenclausecontents(workobject, searchobject):
 
 	endpoints = (workobject.universalid, {'listofboundaries': blist, 'listofomissions': olist})
 
-	curs.close()
-	del dbconnection
+	connectioncleanup(curs, dbconnection)
 
 	return endpoints

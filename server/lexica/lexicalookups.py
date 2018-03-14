@@ -11,8 +11,8 @@ import re
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection
-from server.formatting.jsformatting import insertlexicalbrowserjs
+from server.dbsupport.dbfunctions import connectioncleanup, setconnection
+from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
 from server.formatting.lexicaformatting import entrysummary, formatdictionarysummary, formateconsolidatedgrammarentry, \
 	formatgloss, formatmicroentry, grabheadmaterial, grabsenses, insertbrowserlookups
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
@@ -554,7 +554,7 @@ def findcountsviawordcountstable(wordtocheck):
 		# you did not build the wordcounts at all?
 		result = None
 
-	dbconnection.commit()
+	connectioncleanup(curs, dbconnection)
 
 	return result
 
@@ -681,55 +681,6 @@ def grablemmataobjectfor(entryname, db, cursor):
 		lemmaobject = dbLemmaObject('[entry not found]', -1, '')
 
 	return lemmaobject
-
-
-def dictionaryentryjs():
-	"""
-
-	return js to insert
-
-	ensure exact matches, otherwise ἔρδω will pull up ὑπερδώριοϲ too
-
-	and so:
-		'/dictsearch/^'+this.id+'$'
-
-	:return:
-	"""
-
-	template = """
-	<script>
-	$('dictionaryentry').click( function(e) {
-            e.preventDefault();
-            var windowWidth = $(window).width();
-            var windowHeight = $(window).height();
-            $( '#lexicadialogtext' ).dialog({
-                    closeOnEscape: true,
-                    autoOpen: false,
-                    minWidth: windowWidth*.33,
-                    maxHeight: windowHeight*.9,
-                    // position: { my: "left top", at: "left top", of: window },
-                    title: this.id,
-                    draggable: true,
-                    icons: { primary: 'ui-icon-close' },
-                    click: function() { $( this ).dialog( 'close' ); }
-                    });
-            $( '#lexicadialogtext' ).dialog( 'open' );
-            $( '#lexicadialogtext' ).html('[searching...]');
-            $.getJSON('/dictsearch/^'+this.id+'$', function (definitionreturned) {
-                $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
-                var dLen = definitionreturned.length;
-                var linesreturned = []
-                for (i = 0; i < dLen; i++) {
-                    linesreturned.push(definitionreturned[i]['value']);
-                    }
-                $( '#lexicadialogtext' ).html(linesreturned);
-            });
-            return false;
-        });
-    </script>
-	"""
-
-	return template
 
 
 """

@@ -14,7 +14,7 @@ import networkx as nx
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.dbsupport.vectordbfunctions import createstoredimagestable
 from server.startup import authordict, workdict
 
@@ -184,9 +184,7 @@ def storevectorgraph(figureasbytes):
 
 	# print('stored {n} in vector image table'.format(n=randomid))
 
-	dbconnection.commit()
-	cursor.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	return randomid
 
@@ -229,9 +227,7 @@ def fetchvectorgraph(imagename):
 		d = (imagename,)
 		cursor.execute(q, d)
 
-	dbconnection.commit()
-	cursor.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	return imagedata
 
