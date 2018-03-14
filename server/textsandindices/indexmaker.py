@@ -14,8 +14,7 @@ from string import punctuation
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import resultiterator, setconnection, \
-	setthreadcount
+from server.dbsupport.dbfunctions import connectioncleanup, resultiterator, setconnection, setthreadcount
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
 from server.formatting.wordformatting import tidyupterm
 from server.hipparchiaobjects.helperobjects import MPCounter
@@ -291,7 +290,7 @@ def mpmorphology(terms, morphobjects, commitcount):
 	"""
 
 	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	while terms:
 		try:
@@ -300,7 +299,7 @@ def mpmorphology(terms, morphobjects, commitcount):
 			t = None
 
 		if t:
-			mo = lookformorphologymatches(t, curs)
+			mo = lookformorphologymatches(t, cursor)
 			if mo:
 				morphobjects[t] = mo
 			else:
@@ -310,7 +309,7 @@ def mpmorphology(terms, morphobjects, commitcount):
 		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
 			dbconnection.commit()
 
-	dbconnection.commit()
+	connectioncleanup(cursor, dbconnection)
 
 	return morphobjects
 

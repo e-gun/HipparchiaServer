@@ -10,7 +10,7 @@ import re
 from multiprocessing import Manager, Process
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection, setthreadcount
+from server.dbsupport.dbfunctions import connectioncleanup, setconnection, setthreadcount
 from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.formatting.wordformatting import wordlistintoregex
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
@@ -158,7 +158,7 @@ def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
 	dbconnection = setconnection('not_autocommit', readonlyconnection=False)
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 	so = searchobject
 
 	# print('workonsimplesearch() - so.termone', so.termone)
@@ -180,7 +180,7 @@ def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
 			searchlist = None
 			
 		if authortable:
-			foundlines = substringsearch(so.termone, authortable, so, curs)
+			foundlines = substringsearch(so.termone, authortable, so, cursor)
 			lineobjects = [dblineintolineobject(f) for f in foundlines]
 			foundlineobjects.extend(lineobjects)
 
@@ -197,10 +197,7 @@ def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
 		except TypeError:
 			pass
 
-	dbconnection.commit()
-	curs.close()
-	dbconnection.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	return foundlineobjects
 
@@ -234,7 +231,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchob
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
 	dbconnection = setconnection('not_autocommit', readonlyconnection=False)
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	commitcount = 0
 	while searchtuples and activepoll.hitcount.value <= so.cap:
@@ -251,7 +248,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchob
 			searchtuples = None
 
 		if authortable:
-			foundlines = substringsearch(searchingfor, authortable, so, curs)
+			foundlines = substringsearch(searchingfor, authortable, so, cursor)
 			lineobjects = [dblineintolineobject(f) for f in foundlines]
 			foundlineobjects.extend(lineobjects)
 
@@ -267,10 +264,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchob
 		except TypeError:
 			pass
 
-	dbconnection.commit()
-	curs.close()
-	dbconnection.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	return foundlineobjects
 
@@ -295,7 +289,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobje
 	so = searchobject
 
 	dbconnection = setconnection('autocommit', readonlyconnection=False)
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	commitcount = 0
 	while searchinginside and len(foundlineobjects) < so.cap:
@@ -310,17 +304,14 @@ def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobje
 			dbconnection.commit()
 
 		if wkid:
-			foundlines = phrasesearch(wkid, activepoll, so, curs)
+			foundlines = phrasesearch(wkid, activepoll, so, cursor)
 			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
 		try:
 			activepoll.remain(len(searchinginside))
 		except TypeError:
 			pass
 
-	dbconnection.commit()
-	curs.close()
-	dbconnection.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	return foundlineobjects
 

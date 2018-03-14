@@ -57,9 +57,23 @@ def setthreadcount(startup=False):
 
 
 def setconnection(autocommit='n', readonlyconnection=True, u='DBUSER', p='DBPASS'):
-	dbconnection = psycopg2.connect(user=hipparchia.config[u], host=hipparchia.config['DBHOST'],
-	                                port=hipparchia.config['DBPORT'], database=hipparchia.config['DBNAME'],
+	"""
+
+	open a connection to the db: we'll use this one a lot
+
+	:param autocommit:
+	:param readonlyconnection:
+	:param u:
+	:param p:
+	:return:
+	"""
+
+	dbconnection = psycopg2.connect(user=hipparchia.config[u],
+	                                host=hipparchia.config['DBHOST'],
+	                                port=hipparchia.config['DBPORT'],
+	                                database=hipparchia.config['DBNAME'],
 	                                password=hipparchia.config[p])
+
 	if autocommit == 'autocommit':
 		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
@@ -135,7 +149,7 @@ def dbloadasingleworkobject(workuniversalid):
 	"""
 
 	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	q = """
 	SELECT universalid, title, language, publication_info, 
@@ -145,13 +159,12 @@ def dbloadasingleworkobject(workuniversalid):
 	"""
 
 	d = (workuniversalid,)
-	curs.execute(q, d)
-	r = curs.fetchone()
+	cursor.execute(q, d)
+	r = cursor.fetchone()
 
 	workobject = dbOpus(*r)
 
-	dbconnection.commit()
-	curs.close()
+	connectioncleanup(cursor, dbconnection)
 
 	return workobject
 
@@ -353,7 +366,7 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 	"""
 
 	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	activedbs += ['lx', 'lm']
 	labeldecoder = {
@@ -367,8 +380,8 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 	}
 
 	q = 'SELECT corpusname, templateversion, corpusbuilddate FROM builderversion'
-	curs.execute(q)
-	results = curs.fetchall()
+	cursor.execute(q)
+	results = cursor.fetchall()
 
 	corpora = {r[0]: (r[1], r[2]) for r in results}
 
@@ -388,9 +401,7 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 				for c in sorted(corpora.keys())]
 	buildinfo = '\n'.join(buildinfo)
 
-	dbconnection.commit()
-	curs.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	return buildinfo
 
@@ -404,7 +415,7 @@ def probefordatabases():
 	"""
 
 	dbconnection = setconnection()
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	available = dict()
 
@@ -415,8 +426,8 @@ def probefordatabases():
 	for p in possible:
 		q = 'SELECT * FROM {table} LIMIT 1'.format(table=p)
 		try:
-			curs.execute(q)
-			results = curs.fetchall()
+			cursor.execute(q)
+			results = cursor.fetchall()
 		except psycopg2.ProgrammingError:
 			# psycopg2.ProgrammingError: relation "greek_morphology" does not exist
 			results = False
@@ -426,8 +437,24 @@ def probefordatabases():
 		else:
 			available[p] = False
 
-	dbconnection.commit()
-	curs.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	return available
+
+
+def connectioncleanup(cursor, dbconnection):
+	"""
+
+	close a connection down
+
+	:param cursor:
+	:param dbconnection:
+	:return:
+	"""
+
+	dbconnection.commit()
+	cursor.close()
+	dbconnection.close()
+	del dbconnection
+
+	return

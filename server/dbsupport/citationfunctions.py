@@ -155,10 +155,22 @@ def prolixlocus(workobject, citationtuple):
 
 
 def finddblinefromlocus(workid, citationtuple, cursor):
-	# citationtuple ('9','109','8') to focus on line 9, section 109, book 8
-	# finddblinefromlocus(h, 1, ('130', '24')) ---> 15033
+	"""
 
-	lmap = {0: 'level_00_value', 1: 'level_01_value', 2: 'level_02_value', 3: 'level_03_value', 4: 'level_04_value',
+	citationtuple ('9','109','8') to focus on line 9, section 109, book 8
+	finddblinefromlocus(h, 1, ('130', '24')) ---> 15033
+
+	:param workid:
+	:param citationtuple:
+	:param cursor:
+	:return:
+	"""
+
+	lmap = {0: 'level_00_value',
+	        1: 'level_01_value',
+	        2: 'level_02_value',
+	        3: 'level_03_value',
+	        4: 'level_04_value',
 	        5: 'level_05_value'}
 
 	workdb = workid[0:6]
@@ -175,7 +187,7 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 
 	# step one: find the index number of the passage
 	query = 'SELECT index FROM {w} WHERE ( wkuniversalid=%s ) AND '.format(w=workdb)
-	lq = []
+	lq = list()
 	for level in range(0, len(citationtuple)):
 		lq.append('{l}=%s'.format(l=lmap[level]))
 
@@ -478,6 +490,7 @@ def perseuscitationsintohipparchiacitations(citationlist):
 	:param citationlist:
 	:return:
 	"""
+
 	newcitationlist = list()
 	
 	for item in citationlist:

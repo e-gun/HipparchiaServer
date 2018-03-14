@@ -5,7 +5,7 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
-from server.dbsupport.dbfunctions import perseusidmismatch, resultiterator, setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, perseusidmismatch, resultiterator, setconnection
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 
 
@@ -125,9 +125,7 @@ def grablistoflines(table, uidlist):
 	cursor.execute(q, d)
 	lines = cursor.fetchall()
 
-	cursor.close()
-	dbconnection.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	lines = [dblineintolineobject(l) for l in lines]
 

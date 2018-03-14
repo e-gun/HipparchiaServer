@@ -9,7 +9,7 @@
 import re
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline, substringsearch
@@ -267,8 +267,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 							if so.onehit:
 								gotmyonehit = True
 
-	curs.close()
-	del dbconnection
+	connectioncleanup(curs, dbconnection)
 
 	return foundlineobjects
 

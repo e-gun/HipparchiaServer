@@ -12,7 +12,7 @@ from copy import deepcopy
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
-from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.formatting.bibliographicformatting import formatname
 from server.formatting.bracketformatting import brackethtmlifysearchfinds
@@ -138,9 +138,7 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 				# so there was no result and the key will not match a find
 				pass
 
-	curs.close()
-	dbconnection.close()
-	del dbconnection
+	connectioncleanup(curs, dbconnection)
 
 	return searchresultlist
 

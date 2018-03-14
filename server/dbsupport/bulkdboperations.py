@@ -6,7 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-from server.dbsupport.dbfunctions import resultiterator, setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, resultiterator, setconnection
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
 
@@ -22,19 +22,18 @@ def loadallauthorsasobjects():
 	print('loading all authors...')
 
 	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	q = 'SELECT * FROM authors'
 
-	curs.execute(q)
-	results = resultiterator(curs)
+	cursor.execute(q)
+	results = resultiterator(cursor)
 
 	authorsdict = {r[0]: dbAuthor(*r) for r in results}
 
 	print('\t', len(authorsdict), 'authors loaded')
 
-	dbconnection.commit()
-	curs.close()
+	connectioncleanup(cursor, dbconnection)
 
 	return authorsdict
 
@@ -50,7 +49,7 @@ def loadallworksasobjects():
 	print('loading all works...')
 
 	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	q = """
 	SELECT universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02,
@@ -58,15 +57,14 @@ def loadallworksasobjects():
 		recorded_date, converted_date, wordcount, firstline, lastline, authentic FROM works
 	"""
 
-	curs.execute(q)
-	results = resultiterator(curs)
+	cursor.execute(q)
+	results = resultiterator(cursor)
 
 	worksdict = {r[0]: dbOpus(*r) for r in results}
 
 	print('\t', len(worksdict), 'works loaded')
 
-	dbconnection.commit()
-	curs.close()
+	connectioncleanup(cursor, dbconnection)
 
 	return worksdict
 
@@ -81,7 +79,7 @@ def loadlemmataasobjects():
 
 	print('loading all lemmata...')
 	dbconnection = setconnection('not_autocommit')
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	q = """
 	SELECT dictionary_entry, xref_number, derivative_forms FROM {lang}_lemmata
@@ -92,16 +90,15 @@ def loadlemmataasobjects():
 	languages = {1: 'greek', 2: 'latin'}
 
 	for key in languages:
-		curs.execute(q.format(lang=languages[key]))
-		results = resultiterator(curs)
+		cursor.execute(q.format(lang=languages[key]))
+		results = resultiterator(cursor)
 		lemmatadict = {**{r[0]: dbLemmaObject(*r) for r in results}, **lemmatadict}
 
 	print('\t', len(lemmatadict), 'lemmata loaded')
 	# print('lemmatadict["laudo"]', lemmatadict['laudo'].formlist)
 	# print('lemmatadict["λύω"]', lemmatadict['λύω'].formlist)
 
-	dbconnection.commit()
-	curs.close()
+	connectioncleanup(cursor, dbconnection)
 
 	return lemmatadict
 

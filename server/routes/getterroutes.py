@@ -12,7 +12,7 @@ from flask import make_response, redirect, request, session, url_for
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
-from server.dbsupport.dbfunctions import makeanemptyauthor, setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, makeanemptyauthor, setconnection
 from server.formatting.bibliographicformatting import formatauthinfo, formatauthorandworkinfo, formatname, \
 	woformatworkinfo
 from server.formatting.wordformatting import depunct
@@ -129,9 +129,9 @@ def workstructure(locus):
 		'/getstructure/gr0008w001_AT_-1'
 		'/getstructure/gr0008w001_AT_13|22'
 
-
 	:return:
 	"""
+
 	dbc = setconnection('autocommit')
 	cur = dbc.cursor()
 
@@ -181,7 +181,7 @@ def workstructure(locus):
 		ws['range'] = ['error', 'select', 'the', 'work', 'again']
 	results = json.dumps(ws)
 
-	cur.close()
+	connectioncleanup(cur, dbc)
 
 	return results
 
@@ -218,9 +218,7 @@ def getauthinfo(authorid):
 
 	authinfo = json.dumps('\n'.join(authinfo))
 
-	cur.close()
-	dbc.close()
-	del dbc
+	connectioncleanup(cur, dbc)
 
 	return authinfo
 

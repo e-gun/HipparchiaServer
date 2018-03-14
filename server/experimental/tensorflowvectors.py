@@ -389,7 +389,7 @@ def tfnlptraining(sentences, activepoll):
 	:return:
 	"""
 
-	sentencesaslists = [s.split(' ') for s in sentences]
+	sentencesaslists = [s[1].split(' ') for s in sentences]
 	allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]
 
 	setofallwords = set(allwordsinorder)
@@ -614,8 +614,7 @@ def tfnlpwork(textasvals, wordsmappedtocodes, codesmappedtowords, activepoll):
 			loss_val = sess.run(loss, feed_dict=feeddict)
 			loss_vec.append(loss_val)
 			loss_x_vec.append(i + 1)
-			activepoll.statusis('Loss at step {} : {}'.format(i + 1, loss_val))
-			print("Loss at step {} : {}".format(i + 1, loss_val))
+			activepoll.statusis('Loss at step {} of {}: {}'.format(i + 1, generations, loss_val))
 
 		# Validation: Print some random words and top 5 related words
 		if (i + 1) % print_valid_every == 0:

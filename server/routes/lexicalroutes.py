@@ -12,7 +12,7 @@ import re
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import depunct
 from server.formatting.wordformatting import removegravity, stripaccents, tidyupterm
@@ -107,7 +107,7 @@ def findbyform(observedword):
 	returnarray = [{'observed': cleanedword}] + returnarray
 	returnarray = json.dumps(returnarray)
 
-	cur.close()
+	connectioncleanup(cur, dbc)
 
 	return returnarray
 
@@ -189,7 +189,7 @@ def dictsearch(searchterm):
 
 	returnarray = json.dumps(returnarray)
 
-	cur.close()
+	connectioncleanup(cur, dbc)
 
 	return returnarray
 
@@ -279,7 +279,6 @@ def reverselexiconsearch(searchterm):
 
 	returnarray = json.dumps(returnarray)
 
-	dbc.commit()
-	cur.close()
+	connectioncleanup(cur, dbc)
 
 	return returnarray

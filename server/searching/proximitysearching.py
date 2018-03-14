@@ -9,7 +9,7 @@
 import re
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
 from server.formatting.wordformatting import wordlistintoregex
 from server.searching.searchfunctions import dblooknear, substringsearch
@@ -69,10 +69,7 @@ def withinxlines(workdbname, searchobject):
 				fullmatches.append(hit)
 		break
 
-	dbconnection.commit()
-	cursor.close()
-	dbconnection.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	return fullmatches
 
@@ -135,10 +132,7 @@ def withinxwords(workdbname, searchobject):
 		elif not so.near and not re.search(so.termtwo, leading) and not re.search(so.termtwo, lagging):
 			fullmatches.append(hit)
 
-	dbconnection.commit()
-	cursor.close()
-	dbconnection.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	return fullmatches
 

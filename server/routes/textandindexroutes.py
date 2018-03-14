@@ -13,7 +13,7 @@ import time
 from flask import request, session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.wordformatting import avoidsmallvariants
@@ -118,7 +118,7 @@ def completeindex():
 
 	results = json.dumps(results)
 
-	cur.close()
+	connectioncleanup(cur, dbc)
 	del poll[ts]
 
 	return results
@@ -172,6 +172,6 @@ def textmaker():
 
 	results = json.dumps(results)
 
-	cur.close()
+	connectioncleanup(cur, dbc)
 
 	return results

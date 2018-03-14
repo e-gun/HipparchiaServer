@@ -11,7 +11,7 @@ from gensim.models import LsiModel, TfidfModel
 from gensim.similarities import MatrixSimilarity
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.dbsupport.vectordbfunctions import storevectorindatabase
 from server.formatting.vectorformatting import formatlsimatches, lsiformatoutput
 from server.hipparchiaobjects.helperobjects import LSIVectorCorpus
@@ -118,8 +118,7 @@ def lsifindmatches(sentencestuples, searchobject, activepoll, lsispace):
 				thismatch['words'] = lsispace.bagsofwords[s[0]]
 				matches.append(thismatch)
 
-	cursor.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	matches = [m for m in matches if len(m['sentence'].split(' ')) > 2]
 

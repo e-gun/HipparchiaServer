@@ -9,7 +9,7 @@
 from multiprocessing import Manager, Process
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection, setthreadcount
+from server.dbsupport.dbfunctions import connectioncleanup, setconnection, setthreadcount
 from server.semanticvectors.vectorhelpers import findsentences
 
 
@@ -66,7 +66,7 @@ def breaktextsintosentences(foundsentences, searchlist, activepoll, searchobject
 	commitcount = 0
 
 	dbconnection = setconnection('not_autocommit', readonlyconnection=False)
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 	so = searchobject
 
 	while searchlist:
@@ -77,7 +77,7 @@ def breaktextsintosentences(foundsentences, searchlist, activepoll, searchobject
 			authortable = None
 
 		if authortable:
-			foundsentences += findsentences(authortable, so, curs)
+			foundsentences += findsentences(authortable, so, cursor)
 
 			if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
 				dbconnection.commit()
@@ -87,9 +87,7 @@ def breaktextsintosentences(foundsentences, searchlist, activepoll, searchobject
 		except TypeError:
 			pass
 
-	dbconnection.commit()
-	curs.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	return foundsentences
 

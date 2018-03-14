@@ -12,7 +12,7 @@ from datetime import datetime
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setconnection
+from server.dbsupport.dbfunctions import connectioncleanup, setconnection
 from server.dbsupport.dblinefunctions import bulklinegrabber
 from server.searching.proximitysearching import grableadingandlagging
 from server.semanticvectors.vectorhelpers import determinesettings, readgitdata
@@ -59,8 +59,8 @@ def createvectorstable():
 	query = query.format(reader=hipparchia.config['DBUSER'], writer=hipparchia.config['DBWRITEUSER'])
 
 	cursor.execute(query)
-	cursor.close()
-	del dbconnection
+
+	connectioncleanup(cursor, dbconnection)
 
 	return
 
@@ -102,8 +102,8 @@ def createstoredimagestable():
 	query = query.format(reader=hipparchia.config['DBUSER'], writer=hipparchia.config['DBWRITEUSER'])
 
 	cursor.execute(query)
-	cursor.close()
-	del dbconnection
+
+	connectioncleanup(cursor, dbconnection)
 
 	return
 
@@ -149,7 +149,8 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 	# print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))
 
 	cursor.close()
-	del dbconnection
+
+	connectioncleanup(cursor, dbconnection)
 
 	return
 
@@ -211,9 +212,7 @@ def checkforstoredvector(uidlist, indextype, careabout='settings'):
 	else:
 		returnval = pickle.loads(result[1])
 
-	dbconnection.commit()
-	cursor.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	return returnval
 
@@ -277,8 +276,6 @@ def fetchverctorenvirons(hitdict, searchobject):
 					except KeyError:
 						pass
 
-	cursor.close()
-	dbconnection.close()
-	del dbconnection
+	connectioncleanup(cursor, dbconnection)
 
 	return environs
