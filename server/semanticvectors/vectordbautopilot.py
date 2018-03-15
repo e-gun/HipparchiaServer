@@ -51,10 +51,11 @@ def startvectorizing():
 		searchlist = searching[0]
 		wordcount = searching[1]
 		so = buildfakesearchobject()
+		so.searchlist = searchlist
 
 		vectorspace = checkforstoredvector(so, indextype)
+
 		if not vectorspace:
-			so.searchlist = searchlist
 			indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 			so.indexrestrictions = indexrestrictions
 			sentencetuples = vectorprepdispatcher(so, emptypoll)
