@@ -412,32 +412,3 @@ def probefordatabases():
 	dbconnection.connectioncleanup()
 
 	return available
-
-
-def oldsetconnection(autocommit='n', readonlyconnection=True, u='DBUSER', p='DBPASS'):
-	"""
-
-	open a connection to the db: we'll use this one a lot
-
-	:param autocommit:
-	:param readonlyconnection:
-	:param u:
-	:param p:
-	:return:
-	"""
-
-	dbconnection = psycopg2.connect(user=hipparchia.config[u],
-	                                host=hipparchia.config['DBHOST'],
-	                                port=hipparchia.config['DBPORT'],
-	                                database=hipparchia.config['DBNAME'],
-	                                password=hipparchia.config[p])
-
-	if autocommit == 'autocommit':
-		dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-
-	# would be great to set readonly to True in all cases, but 'CREATE TEMPORARY TABLE...' will not let you
-	# limiting the privileges of hippa_rd is the best you can do
-
-	dbconnection.set_session(readonly=readonlyconnection)
-
-	return dbconnection
