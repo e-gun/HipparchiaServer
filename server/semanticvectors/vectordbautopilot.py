@@ -117,7 +117,10 @@ def determinevectorworkpile():
 	# note that we are turning these into one-item lists: genre lists, etc are multi-author lists
 	authortuples = [([a], authors[a]) for a in authorsbylength]
 
+	# TODO
+	# placeholder for eventually adding auto-generation of genre lists, etc
 	corporasizes = dict()
+	results = list()
 	for r in results:
 		c = r[0][:2]
 		wd = r[1]
@@ -133,8 +136,8 @@ def determinevectorworkpile():
 
 	# print('authortuples[:10]', authortuples[:10])
 	# [(['gr2062'], 4182615), (['gr0057'], 2594166), (['gr4090'], 2202504), ...]
-	cursor.close()
-	del dbconnection
+
+	dbconnection.connectioncleanup()
 
 	workpile = authortuples + corpustuples
 	workpile = [w for w in workpile if w[1] < hipparchia.config['MAXVECTORSPACE']]
