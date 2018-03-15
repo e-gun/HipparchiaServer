@@ -119,6 +119,7 @@ class SearchObject(object):
 		self.tovectorize = None
 		self.vectorquerytype = None
 		self.starttime = time.time()
+		self.usedcorpora = list()
 
 		# searchtermcharactersubstitutions() logic has moved here
 
@@ -233,6 +234,42 @@ class SearchObject(object):
 	def getelapsedtime(self):
 		return str(round(time.time() - self.starttime, 2))
 
+	def fullcorpussearch(self, corpus):
+		# this is a cheat that assumes a static body of texts
+		# sql check is: 'SELECT COUNT(universalid) FROM authors WHERE universalid LIKE 'dp%';'
+		corpora = {
+			'lt': 362,
+			'gr': 1823,
+			'ch': 291,
+			'in': 463,
+			'dp': 516
+		}
+
+		assert corpus in corpora, 'SearchObject.fullcorpussearch() was sent a corpus not in known corpora'
+
+		test = [x for x in self.searchlist if x[:2] == corpus and len(x) == 6]
+		if len(test) == corpora[corpus]:
+			return True
+		else:
+			return False
+
+	def wholecorporasearched(self):
+		# note that the searchroute.py searchlist might be empty by the time you check this: searchlist.pop()
+		corpora = {
+			'lt': 'Latin',
+			'gr': 'Greek',
+			'ch': 'Christian',
+			'in': 'Inscriptional',
+			'dp': 'Papyrus'
+		}
+
+		whole = list()
+		for c in corpora:
+			if self.fullcorpussearch(c):
+				whole.append(corpora[c])
+
+		return whole
+
 
 class OutputObject(object):
 	"""
@@ -253,6 +290,7 @@ class OutputObject(object):
 		self.htmlsearch = str()
 		self.hitmax = 'false'
 		self.onehit = searchobject.session['onehit']
+		self.usedcorpora = searchobject.usedcorpora
 
 		self.icandodates = 'no'
 		if justlatin(searchobject.session) is False:
@@ -298,6 +336,9 @@ class OutputObject(object):
 
 	def setscope(self, value):
 		self.scope = '{:,}'.format(value)
+		if self.usedcorpora:
+			w = ' and '.join(self.usedcorpora)
+			self.scope = 'all {w} authors in {s}'.format(w=w, s=self.scope)
 
 	def explainemptysearch(self):
 		self.htmlsearch = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=' and '.join(self.reasons))

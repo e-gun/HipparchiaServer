@@ -143,7 +143,7 @@ def executegensimsearch(activepoll, searchobject):
 		so.indexrestrictions = indexrestrictions
 
 		# 'False' if there is no vectorspace; 'failed' if there can never be one; otherwise vectors
-		vectorspace = checkforstoredvector(searchlist, indextype)
+		vectorspace = checkforstoredvector(so, indextype)
 
 		if vectorspace == 'failed to build model':
 			reasons = ['failed to build vector model (too few words?)']

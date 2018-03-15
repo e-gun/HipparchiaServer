@@ -85,6 +85,8 @@ def executesearch(timestamp):
 		searchlist = calculatewholeauthorsearches(searchlist, authordict)
 
 		so.searchlist = searchlist
+		so.usedcorpora = so.wholecorporasearched()
+
 		activepoll.statusis('Configuring the search restrictions')
 		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 		so.indexrestrictions = indexrestrictions

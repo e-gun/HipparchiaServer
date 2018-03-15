@@ -108,7 +108,7 @@ def createstoredimagestable():
 	return
 
 
-def storevectorindatabase(uidlist, vectortype, vectorspace):
+def storevectorindatabase(searchobject, vectortype, vectorspace):
 	"""
 
 	you have just calculated a new vectorpace, store it so you do not need to recalculate it
@@ -120,7 +120,10 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 	:return:
 	"""
 
-	uidlist = sorted(uidlist)
+	if searchobject.wholecorporasearched():
+		uidlist = searchobject.wholecorporasearched()
+	else:
+		uidlist = sorted(searchobject.searchlist)
 
 	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
@@ -155,7 +158,7 @@ def storevectorindatabase(uidlist, vectortype, vectorspace):
 	return
 
 
-def checkforstoredvector(uidlist, indextype, careabout='settings'):
+def checkforstoredvector(searchobject, indextype, careabout='settings'):
 	"""
 
 	the stored vector might not reflect the current math rules
@@ -173,7 +176,11 @@ def checkforstoredvector(uidlist, indextype, careabout='settings'):
 	:return:
 	"""
 
-	now = datetime.now().strftime("%Y-%m-%d %H:%M")
+	if searchobject.wholecorporasearched():
+		uidlist = searchobject.wholecorporasearched()
+	else:
+		uidlist = sorted(searchobject.searchlist)
+
 	version = readgitdata()
 
 	dbconnection = ConnectionObject('autocommit')

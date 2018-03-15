@@ -19,7 +19,7 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.startup import authordict, workdict
 
 
-def graphbliteraldistancematches(searchterm, mostsimilartuples, searchlist):
+def graphbliteraldistancematches(searchterm, mostsimilartuples, searchobject):
 	"""
 
 	mostsimilartuples [('γράφω', 0.6708203932499369), ('εἰκών', 0.447213595499958), ('τρέχω', 0.447213595499958), ...]
@@ -40,13 +40,13 @@ def graphbliteraldistancematches(searchterm, mostsimilartuples, searchlist):
 
 	relevantconnections = dict()
 
-	title = givetitletograph('Words most concretely connected with', searchterm, searchlist)
+	title = givetitletograph('Words most concretely connected with', searchterm, searchobject)
 	imagename = graphmatches(title, searchterm, mostsimilartuples, terms, relevantconnections, vtype='rudimentary')
 
 	return imagename
 
 
-def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchlist):
+def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchobject):
 	"""
 
 	tuples come in a list and look like:
@@ -68,7 +68,7 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchlist):
 		relevantconnections[i] = [sim for sim in interrelationships[i] if sim[0] in terms]
 		# relevantconnections[i] = [s for s in interrelationships[i] if s[1] > hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']]
 
-	title = givetitletograph('Conceptual neighborhood of', searchterm, searchlist)
+	title = givetitletograph('Conceptual neighborhood of', searchterm, searchobject)
 
 	imagename = graphmatches(title, searchterm, mostsimilartuples, terms, relevantconnections, vtype='nn')
 
@@ -232,26 +232,30 @@ def fetchvectorgraph(imagename):
 	return imagedata
 
 
-def givetitletograph(topic, searchterm, searchlist):
+def givetitletograph(topic, searchterm, searchobject):
 	"""
 
 	generate a title for the graph
 
 	:return:
 	"""
-	if len(searchlist) > 1:
-		wasitalllatin = [x for x in searchlist if x[:2] == 'lt' and len(x) == 6]
-		wasitallgreek = [x for x in searchlist if x[:2] == 'gr' and len(x) == 6]
-		if len(wasitalllatin) == 362:
-			# select count(universalid) from authors where universalid like 'lt%';
-			source = 'all Latin authors'
-		elif len(wasitallgreek) == 1823:
-			# select count(universalid) from authors where universalid like 'gr%';
-			source = 'all Greek authors'
+
+	so = searchobject
+
+	if len(so.searchlist) > 1:
+		wholes = so.wholecorporasearched()
+		if wholes:
+			wholes = ' and '.join(wholes)
+			source = 'all {w} authors'.format(w=wholes)
 		else:
-			source = 'multiple authors and/or works'
+			first = so.searchlist[0]
+			if first[:10] == first[:6]:
+				source = '{au}'.format(au=authordict[first[:6]].shortname)
+			else:
+				source = '{au}, {wk}'.format(au=authordict[first[:6]].shortname, wk=workdict[first[:10]].title)
+			source = '{s} and {n} other item(s)'.format(s=source, n=len(so.searchlist)-1)
 	else:
-		searched = searchlist[0]
+		searched = so.searchlist[0]
 		if searched[:10] == searched[:6]:
 			source = '{au}'.format(au=authordict[searched[:6]].shortname)
 		else:

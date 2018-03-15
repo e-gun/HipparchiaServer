@@ -188,7 +188,7 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 
 	# print(model.wv['puer'])
 
-	storevectorindatabase(searchobject.searchlist, 'nn', model)
+	storevectorindatabase(searchobject, 'nn', model)
 
 	return model
 
@@ -233,7 +233,7 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, act
 			html = formatnnmatches(mostsimilar)
 			activepoll.statusis('Building the graph')
 			mostsimilar = mostsimilar[:hipparchia.config['NEARESTNEIGHBORSCAP']]
-			imagename = graphnnmatches(termone, mostsimilar, vectorspace, so.searchlist)
+			imagename = graphnnmatches(termone, mostsimilar, vectorspace, so)
 		else:
 			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
 

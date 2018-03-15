@@ -52,7 +52,7 @@ def startvectorizing():
 		wordcount = searching[1]
 		so = buildfakesearchobject()
 
-		vectorspace = checkforstoredvector(searchlist, indextype)
+		vectorspace = checkforstoredvector(so, indextype)
 		if not vectorspace:
 			so.searchlist = searchlist
 			indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
