@@ -120,6 +120,7 @@ def determinevectorworkpile(tempcap=False):
 	# ch 1053646
 
 	# you can do the same exercise for genres and time slices
+	# gr up to 300BCE: 13,518,315
 
 	workpile = authortuples + corpustuples
 	workpile = [w for w in workpile if w[1] < cap]

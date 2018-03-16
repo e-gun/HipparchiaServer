@@ -141,14 +141,14 @@ def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specif
 			cd = int(w.converted_date)
 			if cd == specificdate:
 				datematches.append(aw)
-		except:
+		except TypeError:
 			# no work date? then we will look inside the author for the date
 			aid = aw[0:6]
 			try:
 				cd = int(authorobjectdict[aid].converted_date)
 				if cd == specificdate:
 					datematches.append(aw)
-			except:
+			except TypeError:
 				# the author can't tell you his date; i guess it is incerta by definition
 				datematches.append(aw)
 

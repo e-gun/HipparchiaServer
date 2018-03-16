@@ -492,7 +492,7 @@ class dbWorkLine(object):
 		:param version:
 		:return:
 		"""
-		wordlist = []
+		wordlist = list()
 
 		if version in ['polytonic', 'stripped']:
 			line = getattr(self, version)
@@ -632,7 +632,7 @@ class dbWorkLine(object):
 		for t in editorialcontinuationdict.keys():
 			try:
 				bracketfinder[t]
-			except:
+			except IndexError:
 				return theline
 
 			o = bracketfinder[t]['o']

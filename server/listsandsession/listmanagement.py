@@ -532,4 +532,3 @@ def foundindict(searchdict, element, mustbein, exactmatch=True):
 		         if getattr(searchdict[x], element) and re.search(mustbein, getattr(searchdict[x], element))]
 
 	return finds
-

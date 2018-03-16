@@ -50,6 +50,8 @@ class ConnectionObject(object):
 
 		close a connection down in the most tedious way possible
 
+		this overkill is mostly part of the FreeBSD bug-hunt
+
 		:param cursor:
 		:param dbconnection:
 		:return:

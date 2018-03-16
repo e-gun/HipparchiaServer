@@ -287,7 +287,7 @@ def parsejscookie(cookiestring):
 						   'auexclusions', 'wkexclusions', 'agnexclusions', 'wkgnexclusions', 'psgexclusions',
 						   'alocselections', 'alocexclusions', 'wlocselections', 'wlocexclusions' ]
 
-	selectiondictionary = {}
+	selectiondictionary = dict()
 	for sel in selectioncategories:
 		try:
 			selectiondictionary[sel] = re.search(r'%22' + sel + r'%22:\[(.*?)\]', cookiestring).group(1)
@@ -947,4 +947,3 @@ def returnactivelist(selectiondict):
 	activelist = list(set(activelist))
 
 	return activelist
-
