@@ -10,14 +10,12 @@ import threading
 import time
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import resultiterator
 from server.dbsupport.vectordbfunctions import checkforstoredvector
-from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import ProgressPoll, SearchObject
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.gensimnearestneighbors import buildnnvectorspace
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.startup import poll, workdict
+from server.startup import authordict, listmapper, poll, workdict
 
 
 def startvectorizing():
@@ -67,7 +65,7 @@ def startvectorizing():
 			else:
 				v = '{i} vectorized ({w} words)'
 			if vectorspace and wordcount > 5000:
-				print(v.format(i=searchlist[0], w=wordcount))
+				print(v.format(i=searchlist[0], w=wordcount, n=len(searchlist)-1))
 
 			if vectorspace and len(workpile) % 25 == 0:
 				print('{n} items remain to vectorize'.format(n=len(workpile)))
@@ -84,7 +82,7 @@ def startvectorizing():
 	return
 
 
-def determinevectorworkpile():
+def determinevectorworkpile(tempcap=False):
 	"""
 
 	probe the db for potential vectorization targets
@@ -92,57 +90,41 @@ def determinevectorworkpile():
 	:return:
 	"""
 
-	print('the vectorbot is active\n\tdetermining which vectors we might need to calculate\n')
+	if not tempcap:
+		cap = hipparchia.config['MAXVECTORSPACE']
+	else:
+		# real number is just over 93596456
+		cap = 94000000
 
-	dbconnection = ConnectionObject('autocommit')
-	cursor = dbconnection.cursor()
+	print('the vectorbot is active and searching for items that need to be vectorized')
 
-	workquery = """
-	SELECT universalid, wordcount FROM works ORDER BY universalid
-	"""
-
-	cursor.execute(workquery)
-	results = resultiterator(cursor)
-
-	authors = dict()
-	for r in results:
-		au = r[0][:6]
-		wd = r[1]
-		try:
-			authors[au] += wd
-		except KeyError:
-			authors[au] = wd
-
-	authorsbylength = sorted(authors.keys(), key=lambda x: authors[x])
+	authors = [(authordict[a].universalid, authordict[a].countwordsinworks()) for a in authordict]
+	authorsbylength = sorted(authors, key=lambda x: x[1])
 	# note that we are turning these into one-item lists: genre lists, etc are multi-author lists
-	authortuples = [([a], authors[a]) for a in authorsbylength]
+	authortuples = [([a[0]], a[1]) for a in authorsbylength]
 
-	# TODO
-	# placeholder for eventually adding auto-generation of genre lists, etc
-	corporasizes = dict()
-	results = list()
-	for r in results:
-		c = r[0][:2]
-		wd = r[1]
-		try:
-			corporasizes[c] += wd
-		except KeyError:
-			corporasizes[c] = wd
+	# print('authortuples[-10:]', authortuples[-10:])
+	# [(['gr2042'], 1145288), (['gr4013'], 1177392), (['lt0474'], 1207760), (['gr2018'], 1271700), (['gr4089'], 1343587), (['gr4015'], 1422513), (['gr4083'], 1765800), (['gr4090'], 2202504), (['gr0057'], 2594166), (['gr2062'], 4182615)]
+
+	activelists = [l for l in listmapper if len(listmapper[l]['a']) > 0]
 
 	corpustuples = list()
-	for k in corporasizes.keys():
-		authors = [a for a in authorsbylength if a[:2] == k]
-		corpustuples.append((authors, corporasizes[k]))
+	for item in activelists:
+		corpustuples.append(([authordict[a].universalid for a in authordict if authordict[a].universalid[:2] == item],
+		                     sum([authordict[a].countwordsinworks() for a in authordict if authordict[a].universalid[:2] == item])))
 
-	# print('authortuples[:10]', authortuples[:10])
-	# [(['gr2062'], 4182615), (['gr0057'], 2594166), (['gr4090'], 2202504), ...]
+	# gk 75233496
+	# lt 7548164
+	# db 4276074
+	# in 5485166
+	# ch 1053646
 
-	dbconnection.connectioncleanup()
+	# you can do the same exercise for genres and time slices
 
 	workpile = authortuples + corpustuples
-	workpile = [w for w in workpile if w[1] < hipparchia.config['MAXVECTORSPACE']]
+	workpile = [w for w in workpile if w[1] < cap]
 
-	# test caesar
+	# test: just caesar
 	# workpile = [(['lt0448'], 999)]
 
 	return workpile

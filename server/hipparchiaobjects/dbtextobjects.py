@@ -84,6 +84,13 @@ class dbAuthor(object):
 
 		return workids
 
+	def countwordsinworks(self):
+		words = 0
+		for w in self.listofworks:
+			words += w.wordcount
+
+		return words
+
 
 class dbOpus(object):
 	"""

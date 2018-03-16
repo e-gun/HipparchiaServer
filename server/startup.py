@@ -104,6 +104,7 @@ def dictitemstartswith(originaldict, element, muststartwith):
 
 	return newdict
 
+
 listmapper = {
 	'gr': {'a': dictitemstartswith(authordict, 'universalid', 'gr'), 'w': dictitemstartswith(workdict, 'universalid', 'gr')},
 	'lt': {'a': dictitemstartswith(authordict, 'universalid', 'lt'), 'w': dictitemstartswith(workdict, 'universalid', 'lt')},
