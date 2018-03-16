@@ -253,7 +253,11 @@ def givetitletograph(topic, searchterm, searchobject):
 				source = '{au}'.format(au=authordict[first[:6]].shortname)
 			else:
 				source = '{au}, {wk}'.format(au=authordict[first[:6]].shortname, wk=workdict[first[:10]].title)
-			source = '{s} and {n} other item(s)'.format(s=source, n=len(so.searchlist)-1)
+			if len(so.searchlist) == 2:
+				pl = ''
+			else:
+				pl = 's'
+			source = '{s} and {n} other location{pl}'.format(s=source, n=len(so.searchlist)-1, pl=pl)
 	else:
 		searched = so.searchlist[0]
 		if searched[:10] == searched[:6]:
