@@ -131,6 +131,12 @@ def parsevectorsentences(searchobject, lineobjects):
 
 	the ids may or may not be needed later
 
+	sentencetuples:
+		[('lt0588w001_ln_8', 'sed ii erunt fere qui expertes litterarum graecarum nihil rectum nisi quod ipsorum moribus conueniat putabunt'),
+		('lt0588w001_ln_10', 'hi si didicerint non eadem omnibus esse honesta atque turpia sed omnia maiorum institutis iudicari non admirabuntur nos in graiorum uirtutibus exponendis mores eorum secutos'),
+		('lt0588w001_ln_13', 'neque enim cimoni fuit turpe atheniensium summo uiro sororem germanam habere in matrimonio quippe cum ciues eius eodem uterentur instituto'),
+		(id, text), ...]
+
 	:param searchobject:
 	:param lineobjects:
 	:return:
@@ -386,6 +392,12 @@ def buildflatbagsofwords(morphdict, sentences):
 	"""
 	turn a list of sentences into a list of list of headwords
 
+	here we put homonymns next to one another:
+		ϲυγγενεύϲ ϲυγγενήϲ
+
+	in buildbagsofwordswithalternates() we have one 'word':
+		ϲυγγενεύϲ·ϲυγγενήϲ
+
 	:param morphdict:
 	:param sentences:
 	:return:
@@ -404,15 +416,6 @@ def buildflatbagsofwords(morphdict, sentences):
 				pass
 		# flatten
 		bagsofwords.append([item for sublist in lemattized for item in sublist])
-
-	# drop words that appear only once
-
-	# prevalence = defaultdict(int)
-	# for bag in bagsofwords:
-	# 	for word in bag:
-	# 		prevalence[word] += 1
-	#
-	# bagsofwords = [[w for w in bag if prevalence[w] > 1] for bag in bagsofwords]
 
 	return bagsofwords
 

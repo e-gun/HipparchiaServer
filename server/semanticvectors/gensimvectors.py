@@ -158,11 +158,11 @@ def executegensimsearch(activepoll, searchobject):
 		# otherwise you only return sentences with the search term in them (i.e. rudimentaryvectorsearch)
 		if not vectorspace:
 			so.seeking = r'.'
-			sentencestuples = vectorprepdispatcher(so, activepoll)
+			sentencetuples = vectorprepdispatcher(so, activepoll)
 		else:
-			sentencestuples = None
+			sentencetuples = None
 
-		output = outputfunction(sentencestuples, workssearched, so, activepoll, vectorspace)
+		output = outputfunction(sentencetuples, workssearched, so, activepoll, vectorspace)
 
 	else:
 		reasons = ['search list contained zero items']

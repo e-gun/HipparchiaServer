@@ -16,6 +16,8 @@ try:
 	from sklearn.linear_model import SGDClassifier
 	from sklearn.model_selection import GridSearchCV
 	from sklearn.pipeline import Pipeline
+	from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
+
 except ImportError:
 	print('sklearn is unavailable')
 	CountVectorizer = None
@@ -28,7 +30,7 @@ from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, mostcommonwords, findheadwords
+from server.semanticvectors.vectorhelpers import buildflatbagsofwords, buildbagsofwordswithalternates, convertmophdicttodict, mostcommonwords, findheadwords
 from server.dbsupport.dblinefunctions import grablistoflines
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.formatting.vectorformatting import skformatmostimilar
@@ -47,6 +49,7 @@ def sklearnselectedworks(activepoll, searchobject):
 
 	skfunctiontotest = sklearntextfeatureextractionandevaluation
 	skfunctiontotest = simplesktextcomparison
+	# skfunctiontotest = ldatopicmodeling
 
 	starttime = time()
 
@@ -366,3 +369,192 @@ def simplesktextcomparison(sentencetuples, activepoll):
 		trimmedsd = similaritiesdict
 
 	return trimmedsd
+
+
+
+def print_top_words(model, feature_names, n_top_words):
+	for topic_idx, topic in enumerate(model.components_):
+		message = "Topic #%d: " % topic_idx
+		message += " ".join([feature_names[i]
+		                     for i in topic.argsort()[:-n_top_words - 1:-1]])
+		print(message)
+	print()
+
+	return
+
+
+def ldatopicmodeling(sentencetuples, activepoll):
+	"""
+
+	see:
+		http://scikit-learn.org/stable/auto_examples/applications/plot_topics_extraction_with_nmf_lda.html#sphx-glr-auto-examples-applications-plot-topics-extraction-with-nmf-lda-py
+
+	CountVectorizer:
+	max_df : float in range [0.0, 1.0] or int, default=1.0
+	    When building the vocabulary ignore terms that have a document frequency strictly higher than the given threshold (corpus-specific stop words).
+
+	min_df : float in range [0.0, 1.0] or int, default=1
+	    When building the vocabulary ignore terms that have a document frequency strictly lower than the given threshold. This value is also called cut-off in the literature.
+
+	:param sentencetuples:
+	:param activepoll:
+	:return:
+	"""
+
+	maxfeatures = 1000
+	components = 10
+	topwords = 10
+
+
+	mustbelongerthan = 2
+
+	sentencetuples = [s for s in sentencetuples if len(s[1].strip().split(' ')) > mustbelongerthan]
+	sentences = [s[1] for s in sentencetuples]
+
+	sentencesaslists = [s.split(' ') for s in sentences]
+	allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]
+
+	morphdict = findheadwords(set(allwordsinorder))
+	morphdict = convertmophdicttodict(morphdict)
+
+	# going forward we we need a list of lists of headwords
+	# there are two ways to do this:
+	#   'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ'
+
+	bagofwordsfunction = buildflatbagsofwords
+	# bagofwordsfunction = buildbagsofwordswithalternates
+
+	bagsofwordlists = bagofwordsfunction(morphdict, sentencesaslists)
+	bagsofsentences = [' '.join(b) for b in bagsofwordlists]
+
+	# Use tf (raw term count) features for LDA.
+	ldavectorizer = CountVectorizer(max_df=0.95,
+	                             min_df=2,
+	                             max_features=maxfeatures)
+
+	ldavectorized = ldavectorizer.fit_transform(bagsofsentences)
+
+	lda = LatentDirichletAllocation(n_components=components,
+	                                max_iter=5,
+	                                learning_method='online',
+	                                learning_offset=50.,
+	                                random_state=0)
+
+	lda.fit(ldavectorized)
+
+	print("\nTopics in LDA model:")
+	tf_feature_names = ldavectorizer.get_feature_names()
+	print_top_words(lda, tf_feature_names, topwords)
+
+	# Use tf-idf features for NMF.
+	tfidfvectorizer = TfidfVectorizer(max_df=0.95, min_df=2,
+	                                   max_features=maxfeatures)
+
+	tfidf = tfidfvectorizer.fit_transform(bagsofsentences)
+
+	# Fit the NMF model
+	nmf = NMF(n_components=components, random_state=1,
+	          alpha=.1, l1_ratio=.5).fit(tfidf)
+
+	print("\nTopics in NMF model (Frobenius norm):")
+	tfidffeaturenames = tfidfvectorizer.get_feature_names()
+	print_top_words(nmf, tfidffeaturenames, topwords)
+
+	# Fit the NMF model
+	print("Fitting the NMF model (generalized Kullback-Leibler divergence) with "
+	      "tf-idf features, n_samples=%d and n_features=%d..."
+	      % (len(sentences), maxfeatures))
+
+	nmf = NMF(n_components=components, random_state=1,
+	          beta_loss='kullback-leibler', solver='mu', max_iter=1000, alpha=.1,
+	          l1_ratio=.5).fit(tfidf)
+
+	print("\nTopics in NMF model (generalized Kullback-Leibler divergence):")
+	tfidffeaturenames = tfidfvectorizer.get_feature_names()
+	print_top_words(nmf, tfidffeaturenames, topwords)
+
+	"""
+	Cornelius Nepos
+	Topics in LDA model:
+	Topic #0: suus suum sua suo possum patrius² patrius¹ nam sus patria
+	Topic #1: superus summus tantus omnis summum summa utor omnes atticus sero¹
+	Topic #2: parvus liber¹ lego¹ alius¹ liberi legatus volo¹ pars video mitto
+	Topic #3: malus malus¹ malus² malus³ malum malum² nisi nitor¹ fides¹ fides²
+	Topic #4: proficiscor proficisco forum¹ forum forus forus¹ noster statua setius exeo
+	Topic #5: modus modo magis magus² magis² vita do vivo quidem tantus
+	Topic #6: multus possum rex publicus multi multa rego publica multa¹ publicum
+	Topic #7: capio¹ capio primus interficio interfacio prima mille dico² milium possum
+	Topic #8: bellus bellum facio exercitus² exerceo exercio factum atheniensis athenienses adverto
+	Topic #9: facio locum locus habeo dies proficio proficiscor divus dius profectus³
+	
+	
+	Topics in NMF model (Frobenius norm):
+	Topic #0: nam possum rex habeo enim rego lacedaemonius atheniensis lacedaemonii athenienses
+	Topic #1: suus suum sua suo sus civis adventus advenio pars video
+	Topic #2: facio factum factus² timor opprimo tempus brevis celer¹ classis imprudens
+	Topic #3: multus multa multi multa¹ multo² valeo plurimus post bonum tamen
+	Topic #4: bellus bellum gero¹ athenienses atheniensis pax pario³ pario² persequor indico²
+	Topic #5: exercitus² exerceo exercio mitto praesum apud miles praetor filius occaedes
+	Topic #6: solus¹ solus solum¹ sol etiam timor plurimus efficio defendo princeps
+	Topic #7: adverto adverro adversus adversus² adversum² datames copia¹ fortuna miles italia
+	Topic #8: patrius² patrius¹ patria patrium fero nam libero tamen tyrannus possum
+	Topic #9: locum locus loco hostis dies castrum castra rogo castro uno
+	
+	Fitting the NMF model (generalized Kullback-Leibler divergence) with tf-idf features, n_samples=1560 and n_features=1000...
+	done in 0.599s.
+	
+	Topics in NMF model (generalized Kullback-Leibler divergence):
+	Topic #0: nam tempus omnis utor tantus enim omnes tum rex gero¹
+	Topic #1: suus suum sua suo enim sus possum amicus¹ amicus civis
+	Topic #2: facio factum factus² pervenio quare volo¹ tempus possum uter licet
+	Topic #3: multus possum tamen unus parvus puto consilium virtus nam pater
+	Topic #4: multus bellum bellus multo² multa multa¹ multi gero¹ valeo post
+	Topic #5: exercitus² rex exerceo proficiscor mitto exercio apud nam interfacio rego
+	Topic #6: atheniensis athenienses lacedaemonius lacedaemonii superus etiam summus solus¹ solus solum¹
+	Topic #7: adverro adverto adversus adversus² hostis copia¹ volo¹ castrum eumenes arma
+	Topic #8: publicus patrius² patrius¹ possum patria publicum publica dico² populus¹ populus²
+	Topic #9: locus locum possum habeo primus loco video prima urbs sero¹
+	
+	
+	Julius Caesar
+	Topics in LDA model:
+	Topic #0: reliquus relinquo legio cohors reliquum caesar praesidium cohorto facio reliqua
+	Topic #1: primus noster prima mille milium acies signum hostis circito circiter
+	Topic #2: multus pompejus multi proficiscor multa caesar totus² totus¹ gallius² gallia
+	Topic #3: mitto caesar bellus bellum equitatus¹ equitatus² lego¹ equito legatus omnis
+	Topic #4: navis oppidum navo opus¹ pars murus porta portus miles reliquus
+	Topic #5: castra castrum suus locum locus sua suum suo castro utor
+	Topic #6: interficio interfacio animus publicus pompejus cado publica animo aliquis casus¹
+	Topic #7: superus summus video summa summum miles caesar dico² habeo enim
+	Topic #8: eques proelium facio alius¹ caesar proelior proelio equito factum equio
+	Topic #9: exercitus² exerceo exercio arma conficio confacio capio capio¹ milito miles
+	
+	Topics in NMF model (Frobenius norm):
+	Topic #0: caesar possum facio miles bellum bellus omnis navis omnes pars
+	Topic #1: suus sua suum suo sus finis salus copia¹ habeo auxilium
+	Topic #2: castra castrum castro legio pono munitio hostis relinquo copia¹ passus³
+	Topic #3: locum locus loco natura iniquus pugno superus noster idoneus deligo¹
+	Topic #4: exercitus² exerceo exercio traduco copia¹ dimitto copis¹ duco incolumis caesar
+	Topic #5: equito equitatus¹ equitatus² eques mitto noster proelium caesar jubeo omnis
+	Topic #6: lego¹ legatus legatum mitto lego² missum caesar legio fabius praeficio
+	Topic #7: reliquus reliquum reliqua relinquo fuga civitas paro¹ paro² pars fugo
+	Topic #8: dies dius divus posterus postero paucus pauci pauca dico² nox
+	Topic #9: superus summus summa summum imperium voluntas trado uter contendo habeo
+	
+	Fitting the NMF model (generalized Kullback-Leibler divergence) with tf-idf features, n_samples=4490 and n_features=1000...
+	
+	Topics in NMF model (generalized Kullback-Leibler divergence):
+	Topic #0: caesar facio tempus cognosco utor possum causa per video uto
+	Topic #1: suus suum sua suo sus romanus habeo populus² populus¹ civitas
+	Topic #2: castra castrum castro munitio vallus¹ vallus² vallum copia¹ suus pono
+	Topic #3: locus locum possum multus loco video multi multa noster pugno
+	Topic #4: exercitus² exerceo exercio gallius² gallia proficiscor consilium totus¹ totus² bellus
+	Topic #5: equito eques proelium equitatus² equitatus¹ omnis hostis omnes proelior proelio
+	Topic #6: mitto caesar lego¹ legatus legio pompejus legatum missum pompeji praeficio
+	Topic #7: reliquus navis reliquum relinquo reliqua interficio interfacio navo paucus numerus
+	Topic #8: miles dies milito mille primus oppidum milium divus dius passus³
+	Topic #9: pars superus unus summus noster summa summum pario² fero hostis
+	
+	"""
+
+	return
