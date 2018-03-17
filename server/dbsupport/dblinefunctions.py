@@ -166,3 +166,56 @@ def grabbundlesoflines(worksandboundaries, cursor):
 		lineobjects.extend(thiswork)
 
 	return list(lineobjects)
+
+
+def bulkenvironsfetcher(table, searchresultlist, context):
+	"""
+
+	given a list of SearchResult objects, populate the lineobjects of each SearchResult with their contexts
+
+	:param hitlocations:
+	:param context:
+	:return:
+	"""
+
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
+	curs = dbconnection.cursor()
+
+	tosearch = deque()
+	reversemap = dict()
+
+	for r in searchresultlist:
+		resultnumber = r.hitnumber
+		focusline = r.getindex()
+		environs = list(range(int(focusline - (context / 2)), int(focusline + (context / 2)) + 1))
+		tosearch.extend(environs)
+		rmap = {e: resultnumber for e in environs}
+		reversemap.update(rmap)
+		r.lineobjects = list()
+
+	tosearch = [str(x) for x in tosearch]
+
+	tempquery = 'CREATE TEMPORARY TABLE {au}_includelist AS SELECT values AS includeindex FROM unnest(ARRAY[{lines}]) values'.format(
+		au=table, lines=','.join(tosearch))
+	curs.execute(tempquery)
+
+	q = 'SELECT * FROM {au} WHERE EXISTS (SELECT 1 FROM {au}_includelist incl WHERE incl.includeindex = {au}.index)'.format(au=table)
+	curs.execute(q)
+	results = resultiterator(curs)
+
+	lines = [dblineintolineobject(r) for r in results]
+	indexedlines = {l.index: l for l in lines}
+
+	for r in searchresultlist:
+		environs = list(range(int(r.getindex() - (context / 2)), int(r.getindex() + (context / 2)) + 1))
+		for e in environs:
+			try:
+				r.lineobjects.append(indexedlines[e])
+			except KeyError:
+				# you requested a line that was outside of the scope of the table
+				# so there was no result and the key will not match a find
+				pass
+
+	dbconnection.connectioncleanup()
+
+	return searchresultlist

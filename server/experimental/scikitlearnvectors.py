@@ -515,7 +515,6 @@ def ldatopicmodeling(sentencetuples, activepoll):
 	Topic #8: publicus patrius² patrius¹ possum patria publicum publica dico² populus¹ populus²
 	Topic #9: locus locum possum habeo primus loco video prima urbs sero¹
 	
-	
 	Julius Caesar
 	Topics in LDA model:
 	Topic #0: reliquus relinquo legio cohors reliquum caesar praesidium cohorto facio reliqua

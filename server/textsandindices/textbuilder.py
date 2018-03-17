@@ -141,7 +141,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 				columna = ''
 			try:
 				linenumber = int(thisline.l0)
-			except:
+			except ValueError:
 				# 973b is not your friend
 				linenumber = 0
 			if linenumber % linesevery == 0 and not avoiddoubletap:

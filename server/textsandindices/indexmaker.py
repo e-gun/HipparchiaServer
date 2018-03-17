@@ -119,8 +119,11 @@ def generatesortedoutputbyword(completeindexdict, onework, alphabetical):
 
 	return sortedoutput
 
+
 def generatesortedoutputbyheadword(completeindexdict, onework, alphabetical, activepoll):
 	"""
+
+	arrange the index by headword
 
 	:return:
 	"""
@@ -136,8 +139,7 @@ def generatesortedoutputbyheadword(completeindexdict, onework, alphabetical, act
 	morphobjects = manager.dict()
 	workers = setthreadcount()
 
-	jobs = [Process(target=mpmorphology, args=(terms, morphobjects, commitcount))
-	        for i in range(workers)]
+	jobs = [Process(target=mpmorphology, args=(terms, morphobjects, commitcount)) for i in range(workers)]
 	for j in jobs:
 		j.start()
 	for j in jobs:
