@@ -5,6 +5,9 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
+from collections import deque
+
 from server.dbsupport.dbfunctions import perseusidmismatch, resultiterator
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
@@ -131,3 +134,35 @@ def grablistoflines(table, uidlist):
 	lines = [dblineintolineobject(l) for l in lines]
 
 	return lines
+
+
+def grabbundlesoflines(worksandboundaries, cursor):
+	"""
+	grab and return lots of lines
+	this is very generic
+	typical uses are
+		one work + a line range (which may or may not be the whole work: {'work1: (start,stop)}
+		multiple (whole) works: {'work1': (start,stop), 'work2': (start,stop), ...}
+	but you could one day use this to mix-and-match:
+		a completeindex of Thuc + Hdt 3 + all Epic...
+	this is, you could use compileauthorandworklist() to feed this function
+	the resulting concorances would be massive
+
+	:param worksandboundaries:
+	:param cursor:
+	:return:
+	"""
+
+	lineobjects = deque()
+
+	for w in worksandboundaries:
+		db = w[0:6]
+		query = 'SELECT * FROM {db} WHERE (index >= %s AND index <= %s)'.format(db=db)
+		data = (worksandboundaries[w][0], worksandboundaries[w][1])
+		cursor.execute(query, data)
+		lines = resultiterator(cursor)
+
+		thiswork = [dblineintolineobject(l) for l in lines]
+		lineobjects.extend(thiswork)
+
+	return list(lineobjects)
