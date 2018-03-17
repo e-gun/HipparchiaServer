@@ -186,7 +186,8 @@ def parsevectorsentences(searchobject, lineobjects):
 
 	# how many sentences per document?
 	# do values >1 make sense? Perhaps in dramatists...
-	bundlesize = hipparchia.config['SENTENCESPERDOCUMENT']
+	bundlesize = so.sentencebundlesize
+
 	if bundlesize > 1:
 		# https://stackoverflow.com/questions/44104729/grouping-every-three-items-together-in-list-python
 		matches = [' '.join(bundle) for bundle in zip(*[iter(matches)] * bundlesize)]

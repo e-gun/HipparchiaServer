@@ -120,6 +120,7 @@ class SearchObject(object):
 		self.vectorquerytype = None
 		self.starttime = time.time()
 		self.usedcorpora = list()
+		self.sentencebundlesize = hipparchia.config['SENTENCESPERDOCUMENT']
 
 		# searchtermcharactersubstitutions() logic has moved here
 

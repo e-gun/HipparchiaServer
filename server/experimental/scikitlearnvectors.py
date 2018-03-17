@@ -26,6 +26,14 @@ except ImportError:
 	GridSearchCV = None
 	Pipeline = None
 
+try:
+	import pyLDAvis
+	import pyLDAvis.sklearn as ldavis
+except ImportError:
+	print('pyLDAvis is not available')
+	pyLDAvis = None
+	ldavis = None
+
 from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
@@ -50,6 +58,7 @@ def sklearnselectedworks(activepoll, searchobject):
 	skfunctiontotest = sklearntextfeatureextractionandevaluation
 	skfunctiontotest = simplesktextcomparison
 	# skfunctiontotest = ldatopicmodeling
+	# skfunctiontotest = ldatopicgraphing
 
 	starttime = time()
 
@@ -97,6 +106,9 @@ def sklearnselectedworks(activepoll, searchobject):
 		# find all sentences
 		activepoll.statusis('Finding all sentences')
 		so.seeking = r'.'
+
+		if skfunctiontotest == ldatopicgraphing:
+			so.sentencebundlesize = 3
 		sentencetuples = vectorprepdispatcher(so, activepoll)
 		if len(sentencetuples) > hipparchia.config['MAXSENTENCECOMPARISONSPACE']:
 			reasons = ['scope of search exceeded allowed maximum: {a} > {b}'.format(a=len(sentencetuples), b=hipparchia.config['MAXSENTENCECOMPARISONSPACE'])]
@@ -371,7 +383,6 @@ def simplesktextcomparison(sentencetuples, activepoll):
 	return trimmedsd
 
 
-
 def print_top_words(model, feature_names, n_top_words):
 	for topic_idx, topic in enumerate(model.components_):
 		message = "Topic #%d: " % topic_idx
@@ -555,5 +566,73 @@ def ldatopicmodeling(sentencetuples, activepoll):
 	Topic #9: pars superus unus summus noster summa summum pario² fero hostis
 	
 	"""
+
+	return
+
+
+def ldatopicgraphing(sentencetuples, activepoll):
+	"""
+
+	see:
+		http://scikit-learn.org/stable/auto_examples/applications/plot_topics_extraction_with_nmf_lda.html#sphx-glr-auto-examples-applications-plot-topics-extraction-with-nmf-lda-py
+
+	CountVectorizer:
+	max_df : float in range [0.0, 1.0] or int, default=1.0
+	    When building the vocabulary ignore terms that have a document frequency strictly higher than the given threshold (corpus-specific stop words).
+
+	min_df : float in range [0.0, 1.0] or int, default=1
+	    When building the vocabulary ignore terms that have a document frequency strictly lower than the given threshold. This value is also called cut-off in the literature.
+
+	see also:
+	
+		https://nlpforhackers.io/topic-modeling/
+
+	:param sentencetuples:
+	:param activepoll:
+	:return:
+	"""
+
+	maxfeatures = 2000
+	components = 15  # 'topics'
+	iterations = 15
+
+	mustbelongerthan = 2
+
+	sentencetuples = [s for s in sentencetuples if len(s[1].strip().split(' ')) > mustbelongerthan]
+	sentences = [s[1] for s in sentencetuples]
+
+	sentencesaslists = [s.split(' ') for s in sentences]
+	allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]
+
+	morphdict = findheadwords(set(allwordsinorder))
+	morphdict = convertmophdicttodict(morphdict)
+
+	# going forward we we need a list of lists of headwords
+	# there are two ways to do this:
+	#   'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ'
+
+	# bagofwordsfunction = buildflatbagsofwords
+	bagofwordsfunction = buildbagsofwordswithalternates
+
+	bagsofwordlists = bagofwordsfunction(morphdict, sentencesaslists)
+	bagsofsentences = [' '.join(b) for b in bagsofwordlists]
+
+	# Use tf (raw term count) features for LDA.
+	ldavectorizer = CountVectorizer(max_df=0.95,
+									min_df=5,
+									max_features=maxfeatures)
+
+	ldavectorized = ldavectorizer.fit_transform(bagsofsentences)
+
+	ldamodel = LatentDirichletAllocation(n_components=components,
+										max_iter=iterations,
+										learning_method='online',
+										learning_offset=50.,
+										random_state=0)
+
+	ldamodel.fit(ldavectorized)
+
+	visualisation = ldavis.prepare(ldamodel, ldavectorized, ldavectorizer)
+	pyLDAvis.save_html(visualisation, 'ldavis.html')
 
 	return
