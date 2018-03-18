@@ -85,7 +85,7 @@ def findabsolutevectors(timestamp):
 	return output
 
 
-def findabsolutevectorsbysentence(activepoll, searchobject):
+def findabsolutevectorsbysentence(searchobject):
 	"""
 
 	use the searchlist to grab a collection of sentences
@@ -97,9 +97,8 @@ def findabsolutevectorsbysentence(activepoll, searchobject):
 	:return:
 	"""
 
-	starttime = time.time()
-
 	so = searchobject
+	activepoll = so.poll
 
 	# we are not really a route at the moment, but instead being called by execute search
 	# when the δ option is checked; hence the commenting out of the following
@@ -153,17 +152,17 @@ def findabsolutevectorsbysentence(activepoll, searchobject):
 
 		# find all sentences
 		activepoll.statusis('Finding all sentences')
-		sentencetuples = vectorprepdispatcher(so, activepoll)
+		sentencetuples = vectorprepdispatcher(so)
 		sentences = [s[1] for s in sentencetuples]
 
-		output = generatevectoroutput(sentences, workssearched, so, activepoll, 'sentences')
+		output = generatevectoroutput(sentences, workssearched, so, 'sentences')
 	else:
 		return emptyvectoroutput(so)
 
 	return output
 
 
-def findabsolutevectorsfromhits(searchobject, hitdict, activepoll, workssearched):
+def findabsolutevectorsfromhits(searchobject, hitdict, workssearched):
 	"""
 	a pseudo-route: the Δ option was checked and executesearch() branced over to this function
 
@@ -182,6 +181,7 @@ def findabsolutevectorsfromhits(searchobject, hitdict, activepoll, workssearched
 	"""
 
 	so = searchobject
+	activepoll = so.poll
 
 	so.proximate = ''
 	so.proximatelemma = ''
@@ -189,18 +189,19 @@ def findabsolutevectorsfromhits(searchobject, hitdict, activepoll, workssearched
 	activepoll.statusis('Compiling proximite wordlists')
 	environs = fetchverctorenvirons(hitdict, so)
 
-	output = generatevectoroutput(environs, workssearched, so, activepoll, 'passages')
+	output = generatevectoroutput(environs, workssearched, so, 'passages')
 
 	return output
 
 
-def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, vtype):
+def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
 	"""
 
 
 	:return:
 	"""
 	so = searchobject
+	activepoll = so.poll
 
 	# find all words in use
 	allwords = findwordvectorset(listsofwords)

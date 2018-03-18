@@ -59,6 +59,7 @@ def executesearch(timestamp):
 	activepoll = poll[ts]
 	activepoll.activate()
 	activepoll.statusis('Preparing to search')
+	so.poll = activepoll
 
 	searchlist = list()
 	nosearch = True
@@ -110,7 +111,7 @@ def executesearch(timestamp):
 
 		if so.vectorquerytype in vectorfunctions:
 			fnc = vectorfunctions[so.vectorquerytype]
-			output = fnc(activepoll, so)
+			output = fnc(so)
 			del poll[ts]
 			return output
 
@@ -180,7 +181,7 @@ def executesearch(timestamp):
 		if so.vectorquerytype == 'cosdistbylineorword':
 			# print('cosdistbylineorword')
 			# take these hits and head on over to the vector worker
-			output = findabsolutevectorsfromhits(so, hitdict, activepoll, workssearched)
+			output = findabsolutevectorsfromhits(so, hitdict, workssearched)
 			del poll[ts]
 			return output
 

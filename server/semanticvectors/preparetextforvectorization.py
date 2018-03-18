@@ -14,7 +14,7 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.semanticvectors.vectorhelpers import findsentences
 
 
-def vectorprepdispatcher(searchobject, activepoll):
+def vectorprepdispatcher(searchobject):
 	"""
 
 	assign the vector prep to multiprocessing workers
@@ -38,7 +38,7 @@ def vectorprepdispatcher(searchobject, activepoll):
 	workers = setthreadcount()
 
 	targetfunction = breaktextsintosentences
-	argumentuple = (foundsentences, listofitemstosearch, activepoll, so)
+	argumentuple = (foundsentences, listofitemstosearch, so)
 
 	jobs = [Process(target=targetfunction, args=argumentuple) for i in range(workers)]
 
@@ -50,7 +50,7 @@ def vectorprepdispatcher(searchobject, activepoll):
 	return list(foundsentences)
 
 
-def breaktextsintosentences(foundsentences, searchlist, activepoll, searchobject):
+def breaktextsintosentences(foundsentences, searchlist, searchobject):
 	"""
 
 	break a text into sentences that contain the term we are looking for
@@ -63,6 +63,8 @@ def breaktextsintosentences(foundsentences, searchlist, activepoll, searchobject
 	:param searchobject:
 	:return:
 	"""
+
+	activepoll = searchobject.poll
 
 	commitcount = 0
 

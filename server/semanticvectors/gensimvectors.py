@@ -55,14 +55,16 @@ def findnearestneighborvectors(timestamp):
 	activepoll.activate()
 	activepoll.statusis('Preparing to search')
 
-	output = executegensimsearch(activepoll, so)
+	so.poll = activepoll
+
+	output = executegensimsearch(so)
 
 	del poll[ts]
 
 	return output
 
 
-def executegensimsearch(activepoll, searchobject):
+def executegensimsearch(searchobject):
 	"""
 
 	use the searchlist to grab a collection of sentences
@@ -74,6 +76,7 @@ def executegensimsearch(activepoll, searchobject):
 	:return:
 	"""
 	so = searchobject
+	activepoll = so.poll
 
 	# print('so.vectorquerytype', so.vectorquerytype)
 
@@ -158,11 +161,11 @@ def executegensimsearch(activepoll, searchobject):
 		# otherwise you only return sentences with the search term in them (i.e. rudimentaryvectorsearch)
 		if not vectorspace:
 			so.seeking = r'.'
-			sentencetuples = vectorprepdispatcher(so, activepoll)
+			sentencetuples = vectorprepdispatcher(so)
 		else:
 			sentencetuples = None
 
-		output = outputfunction(sentencetuples, workssearched, so, activepoll, vectorspace)
+		output = outputfunction(sentencetuples, workssearched, so, vectorspace)
 
 	else:
 		reasons = ['search list contained zero items']

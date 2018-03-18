@@ -346,7 +346,7 @@ def findchronologicalweights(era, language):
 	"""
 
 	dbconnection = ConnectionObject('autocommit')
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	eramap = {
 		'early': 'early_occurrences',
@@ -366,8 +366,8 @@ def findchronologicalweights(era, language):
 	else:
 		d = ('^[a-z]',)
 
-	curs.execute(q, d)
-	thesum = curs.fetchall()
+	cursor.execute(q, d)
+	thesum = cursor.fetchall()
 	thesum = thesum[0][0]
 
 	return thesum
@@ -426,7 +426,7 @@ def findcorpusweight(corpus, language):
 	"""
 
 	dbconnection = ConnectionObject('autocommit')
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	q = 'SELECT SUM({c}) FROM dictionary_headword_wordcounts'.format(c=corpus)
 
@@ -451,10 +451,10 @@ def findcorpusweight(corpus, language):
 		d = ('',)
 
 	if language == 'B':
-		curs.execute(q)
+		cursor.execute(q)
 	else:
-		curs.execute(q+w, d)
-	thesum = curs.fetchall()
+		cursor.execute(q+w, d)
+	thesum = cursor.fetchall()
 	thesum = thesum[0][0]
 
 	# w = "{:,}".format(thesum)

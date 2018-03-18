@@ -18,11 +18,13 @@ from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmo
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 
 
-def buildnnvectorspace(sentencetuples, activepoll, searchobject):
+def buildnnvectorspace(sentencetuples, searchobject):
 	"""
 
 	:return:
 	"""
+
+	activepoll = searchobject.poll
 
 	# find all words in use
 	listsofwords = [s[1] for s in sentencetuples]
@@ -61,7 +63,7 @@ def findapproximatenearestneighbors(query, mymodel):
 	explore = max(2500, hipparchia.config['NEARESTNEIGHBORSCAP'])
 
 	try:
-		mostsimilar = mymodel.most_similar(query, topn=explore)
+		mostsimilar = mymodel.wv.most_similar(query, topn=explore)
 		mostsimilar = [s for s in mostsimilar if s[1] > hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']]
 	except KeyError:
 		# keyedvectors.py: raise KeyError("word '%s' not in vocabulary" % word)
@@ -193,7 +195,7 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	return model
 
 
-def generatenearestneighbordata(sentencetuples, workssearched, searchobject, activepoll, vectorspace):
+def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vectorspace):
 	"""
 
 	:param searchobject:
@@ -206,6 +208,7 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, act
 	"""
 
 	so = searchobject
+	activepoll = so.poll
 	termone = so.lemma.dictionaryentry
 	imagename = ''
 
@@ -215,7 +218,7 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, act
 		termtwo = None
 
 	if not vectorspace:
-		vectorspace = buildnnvectorspace(sentencetuples, activepoll, so)
+		vectorspace = buildnnvectorspace(sentencetuples, so)
 		if vectorspace == 'failed to build model':
 			reasons = [vectorspace]
 			return emptyvectoroutput(so, reasons)
@@ -239,7 +242,7 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, act
 
 	findshtml = '{h}'.format(h=html)
 
-	output = nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject, activepoll)
+	output = nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject)
 
 	return output
 

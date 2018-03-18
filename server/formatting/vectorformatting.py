@@ -274,7 +274,7 @@ def vectorhtmlforfrontpage():
 	return vectorhtml
 
 
-def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject, activepoll):
+def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject):
 	"""
 
 	:param findshtml:
@@ -288,6 +288,7 @@ def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearch
 	"""
 
 	so = searchobject
+	activepoll = so.poll
 	output = OutputObject(so)
 	output.image = imagename
 
@@ -322,7 +323,7 @@ def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearch
 	return jsonoutput
 
 
-def lsiformatoutput(findshtml, workssearched, matches, searchobject, activepoll):
+def lsiformatoutput(findshtml, workssearched, matches, searchobject):
 	"""
 
 	should use OutputObject() instead
@@ -336,6 +337,7 @@ def lsiformatoutput(findshtml, workssearched, matches, searchobject, activepoll)
 	"""
 
 	so = searchobject
+	activepoll = so.poll
 	output = OutputObject(so)
 
 	output.found = findshtml

@@ -48,7 +48,7 @@ from server.startup import authordict, listmapper, workdict
 from server.formatting.bibliographicformatting import bcedating
 
 
-def sklearnselectedworks(activepoll, searchobject):
+def sklearnselectedworks(searchobject):
 	"""
 
 	:param activepoll:
@@ -62,6 +62,7 @@ def sklearnselectedworks(activepoll, searchobject):
 	skfunctiontotest = ldatopicgraphing
 
 	so = searchobject
+	activepoll = so.poll
 
 	activepoll.statusis('Preparing to search')
 
@@ -109,11 +110,11 @@ def sklearnselectedworks(activepoll, searchobject):
 		# if skfunctiontotest == ldatopicgraphing:
 		# 	so.sentencebundlesize = 2
 
-		sentencetuples = vectorprepdispatcher(so, activepoll)
+		sentencetuples = vectorprepdispatcher(so)
 		if len(sentencetuples) > hipparchia.config['MAXSENTENCECOMPARISONSPACE']:
 			reasons = ['scope of search exceeded allowed maximum: {a} > {b}'.format(a=len(sentencetuples), b=hipparchia.config['MAXSENTENCECOMPARISONSPACE'])]
 			return emptyvectoroutput(so, reasons)
-		similaritiesdict = skfunctiontotest(sentencetuples, activepoll)
+		similaritiesdict = skfunctiontotest(sentencetuples, so)
 
 		if skfunctiontotest == ldatopicgraphing:
 			# kludge for now: this is already html
@@ -122,14 +123,14 @@ def sklearnselectedworks(activepoll, searchobject):
 
 		# similaritiesdict: {id: (scoreA, lindobjectA1, sentA1, lindobjectA2, sentA2), id2: (scoreB, lindobjectB1, sentB1, lindobjectB2, sentB2), ... }
 		corehtml = skformatmostimilar(similaritiesdict)
-		output = generatesimilarsentenceoutput(corehtml, so, activepoll, workssearched, len(similaritiesdict))
+		output = generatesimilarsentenceoutput(corehtml, so, workssearched, len(similaritiesdict))
 	else:
 		return emptyvectoroutput(so)
 
 	return output
 
 
-def generatesimilarsentenceoutput(corehtml, searchobject, activepoll, workssearched, matches):
+def generatesimilarsentenceoutput(corehtml, searchobject, workssearched, matches):
 	"""
 
 	:param corehtml:
@@ -138,6 +139,7 @@ def generatesimilarsentenceoutput(corehtml, searchobject, activepoll, workssearc
 	"""
 
 	so = searchobject
+	activepoll = so.poll
 	dmin, dmax = bcedating(so.session)
 
 	findsjs = insertbrowserclickjs('browser')
@@ -155,24 +157,24 @@ def generatesimilarsentenceoutput(corehtml, searchobject, activepoll, workssearc
 	output['proximate'] = ''
 
 	if so.lemma:
-		all = 'all forms of »{skg}«'.format(skg=so.lemma)
+		allforms = 'all forms of »{skg}«'.format(skg=so.lemma)
 	else:
-		all = ''
+		allforms = ''
 	if so.proximatelemma:
 		near = ' all forms of »{skg}«'.format(skg=so.proximatelemma)
 	else:
 		near = ''
-	output['thesearch'] = '{all}{near}'.format(all=all, near=near)
+	output['thesearch'] = '{af}{near}'.format(af=allforms, near=near)
 
 	if so.lemma:
-		all = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
+		allforms = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
 	else:
-		all = ''
+		allforms = ''
 	if so.proximatelemma:
 		near = ' and all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.proximatelemma.formlist), skg=pr)
 	else:
 		near = ''
-	output['htmlsearch'] = '{all}{near}'.format(all=all, near=near)
+	output['htmlsearch'] = '{af}{near}'.format(af=allforms, near=near)
 	output['hitmax'] = ''
 	output['onehit'] = ''
 	output['sortby'] = 'proximity'
@@ -186,7 +188,7 @@ def generatesimilarsentenceoutput(corehtml, searchobject, activepoll, workssearc
 	return output
 
 
-def sklearntextfeatureextractionandevaluation(sentences, activepoll):
+def sklearntextfeatureextractionandevaluation(sentences, searchobject):
 	"""
 
 	see http://scikit-learn.org/stable/auto_examples/model_selection/grid_search_text_feature_extraction.html#sphx-glr-auto-examples-model-selection-grid-search-text-feature-extraction-py
@@ -273,7 +275,7 @@ def sklearntextfeatureextractionandevaluation(sentences, activepoll):
 	return
 
 
-def simplesktextcomparison(sentencetuples, activepoll):
+def simplesktextcomparison(sentencetuples, searchobject):
 	"""
 
 	sentences come in as numbered tuples [(id, text), (id2, text2), ...]
@@ -287,6 +289,8 @@ def simplesktextcomparison(sentencetuples, activepoll):
 	:param activepoll:
 	:return:
 	"""
+
+	activepoll = searchobject.poll
 
 	cap = 50
 	mustbelongerthan = 2
@@ -400,7 +404,7 @@ def print_top_words(model, feature_names, n_top_words):
 	return
 
 
-def ldatopicmodeling(sentencetuples, activepoll):
+def ldatopicmodeling(sentencetuples, searchobject):
 	"""
 
 	see:
@@ -498,7 +502,7 @@ def ldatopicmodeling(sentencetuples, activepoll):
 	return
 
 
-def ldatopicgraphing(sentencetuples, activepoll):
+def ldatopicgraphing(sentencetuples, searchobject):
 	"""
 
 	see:
@@ -541,6 +545,7 @@ def ldatopicgraphing(sentencetuples, activepoll):
 	:param activepoll:
 	:return:
 	"""
+	activepoll = searchobject.poll
 
 	maxfeatures = 2000
 	components = 15  # topics

@@ -20,7 +20,7 @@ from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmo
 	findheadwords, findwordvectorset
 
 
-def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, lsispace):
+def lsigenerateoutput(sentencestuples, workssearched, searchobject, lsispace):
 	"""
 
 	:param sentencestuples:
@@ -32,16 +32,16 @@ def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, 
 	:return:
 	"""
 
-	matches = lsifindmatches(sentencestuples, searchobject, activepoll, lsispace)
+	matches = lsifindmatches(sentencestuples, searchobject, lsispace)
 
 	findshtml = formatlsimatches(matches)
 
-	output = lsiformatoutput(findshtml, workssearched, matches, searchobject, activepoll)
+	output = lsiformatoutput(findshtml, workssearched, matches, searchobject)
 
 	return output
 
 
-def lsifindmatches(sentencestuples, searchobject, activepoll, lsispace):
+def lsifindmatches(sentencestuples, searchobject, lsispace):
 	"""
 
 
@@ -49,6 +49,7 @@ def lsifindmatches(sentencestuples, searchobject, activepoll, lsispace):
 	"""
 
 	so = searchobject
+	activepoll = so.poll
 
 	makespace = lsibuildspace
 
@@ -93,7 +94,7 @@ def lsifindmatches(sentencestuples, searchobject, activepoll, lsispace):
 	activepoll.statusis('Sifting results')
 
 	if not sentencestuples:
-		sentencestuples = vectorprepdispatcher(so, activepoll)
+		sentencestuples = vectorprepdispatcher(so)
 
 	dbconnection = ConnectionObject('autocommit')
 	cursor = dbconnection.cursor()

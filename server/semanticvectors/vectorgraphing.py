@@ -60,7 +60,7 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchobject):
 
 	terms = [searchterm] + [t[0] for t in mostsimilartuples]
 
-	interrelationships = {t: vectorspace.most_similar(t) for t in terms}
+	interrelationships = {t: vectorspace.wv.most_similar(t) for t in terms}
 
 	relevantconnections = dict()
 	for i in interrelationships:

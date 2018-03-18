@@ -121,6 +121,7 @@ class SearchObject(object):
 		self.starttime = time.time()
 		self.usedcorpora = list()
 		self.sentencebundlesize = hipparchia.config['SENTENCESPERDOCUMENT']
+		self.poll = None
 
 		# searchtermcharactersubstitutions() logic has moved here
 
