@@ -267,9 +267,9 @@ $(document).ready( function () {
         var thehtml = '';
 
         if (t !== -1) {
-            thehtml += m + ': <span class="progress">' + pct+'%</span> completed ('+e+'s)';
+            thehtml += m + ': <span class="progress">' + pct + '%</span> completed&nbsp;(' + e + 's)';
         } else {
-            thehtml += m;
+            thehtml += m + '&nbsp;(' + e + 's)';
             }
 
        if ( h > 0) { thehtml += '<br />(<span class="progress">'+h+'</span> found)'; }

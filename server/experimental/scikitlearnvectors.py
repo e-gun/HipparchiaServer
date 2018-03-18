@@ -27,6 +27,7 @@ except ImportError:
 	Pipeline = None
 
 try:
+	# will hurl out a bunch of DeprecationWarning messages at the moment...
 	import pyLDAvis
 	import pyLDAvis.sklearn as ldavis
 except ImportError:
@@ -57,10 +58,8 @@ def sklearnselectedworks(activepoll, searchobject):
 
 	skfunctiontotest = sklearntextfeatureextractionandevaluation
 	skfunctiontotest = simplesktextcomparison
-	# skfunctiontotest = ldatopicmodeling
-	# skfunctiontotest = ldatopicgraphing
-
-	starttime = time()
+	skfunctiontotest = ldatopicmodeling
+	skfunctiontotest = ldatopicgraphing
 
 	so = searchobject
 
@@ -107,13 +106,20 @@ def sklearnselectedworks(activepoll, searchobject):
 		activepoll.statusis('Finding all sentences')
 		so.seeking = r'.'
 
-		if skfunctiontotest == ldatopicgraphing:
-			so.sentencebundlesize = 3
+		# if skfunctiontotest == ldatopicgraphing:
+		# 	so.sentencebundlesize = 2
+
 		sentencetuples = vectorprepdispatcher(so, activepoll)
 		if len(sentencetuples) > hipparchia.config['MAXSENTENCECOMPARISONSPACE']:
 			reasons = ['scope of search exceeded allowed maximum: {a} > {b}'.format(a=len(sentencetuples), b=hipparchia.config['MAXSENTENCECOMPARISONSPACE'])]
 			return emptyvectoroutput(so, reasons)
 		similaritiesdict = skfunctiontotest(sentencetuples, activepoll)
+
+		if skfunctiontotest == ldatopicgraphing:
+			# kludge for now: this is already html
+			corehtml = similaritiesdict
+			return corehtml
+
 		# similaritiesdict: {id: (scoreA, lindobjectA1, sentA1, lindobjectA2, sentA2), id2: (scoreB, lindobjectB1, sentB1, lindobjectB2, sentB2), ... }
 		corehtml = skformatmostimilar(similaritiesdict)
 		output = generatesimilarsentenceoutput(corehtml, so, activepoll, workssearched, len(similaritiesdict))
@@ -407,15 +413,20 @@ def ldatopicmodeling(sentencetuples, activepoll):
 	min_df : float in range [0.0, 1.0] or int, default=1
 	    When building the vocabulary ignore terms that have a document frequency strictly lower than the given threshold. This value is also called cut-off in the literature.
 
+	see sample results at end of file
+
 	:param sentencetuples:
 	:param activepoll:
 	:return:
 	"""
 
-	maxfeatures = 1000
-	components = 10
-	topwords = 10
+	maxfeatures = 2000
+	components = 15
+	topwords = 15
 
+	maxfreq = .60
+	minfreq = 5
+	iterations = 12
 
 	mustbelongerthan = 2
 
@@ -439,14 +450,14 @@ def ldatopicmodeling(sentencetuples, activepoll):
 	bagsofsentences = [' '.join(b) for b in bagsofwordlists]
 
 	# Use tf (raw term count) features for LDA.
-	ldavectorizer = CountVectorizer(max_df=0.95,
-	                             min_df=2,
+	ldavectorizer = CountVectorizer(max_df=maxfreq,
+	                             min_df=minfreq,
 	                             max_features=maxfeatures)
 
 	ldavectorized = ldavectorizer.fit_transform(bagsofsentences)
 
 	lda = LatentDirichletAllocation(n_components=components,
-	                                max_iter=5,
+	                                max_iter=iterations,
 	                                learning_method='online',
 	                                learning_offset=50.,
 	                                random_state=0)
@@ -484,89 +495,6 @@ def ldatopicmodeling(sentencetuples, activepoll):
 	tfidffeaturenames = tfidfvectorizer.get_feature_names()
 	print_top_words(nmf, tfidffeaturenames, topwords)
 
-	"""
-	Cornelius Nepos
-	Topics in LDA model:
-	Topic #0: suus suum sua suo possum patrius² patrius¹ nam sus patria
-	Topic #1: superus summus tantus omnis summum summa utor omnes atticus sero¹
-	Topic #2: parvus liber¹ lego¹ alius¹ liberi legatus volo¹ pars video mitto
-	Topic #3: malus malus¹ malus² malus³ malum malum² nisi nitor¹ fides¹ fides²
-	Topic #4: proficiscor proficisco forum¹ forum forus forus¹ noster statua setius exeo
-	Topic #5: modus modo magis magus² magis² vita do vivo quidem tantus
-	Topic #6: multus possum rex publicus multi multa rego publica multa¹ publicum
-	Topic #7: capio¹ capio primus interficio interfacio prima mille dico² milium possum
-	Topic #8: bellus bellum facio exercitus² exerceo exercio factum atheniensis athenienses adverto
-	Topic #9: facio locum locus habeo dies proficio proficiscor divus dius profectus³
-	
-	
-	Topics in NMF model (Frobenius norm):
-	Topic #0: nam possum rex habeo enim rego lacedaemonius atheniensis lacedaemonii athenienses
-	Topic #1: suus suum sua suo sus civis adventus advenio pars video
-	Topic #2: facio factum factus² timor opprimo tempus brevis celer¹ classis imprudens
-	Topic #3: multus multa multi multa¹ multo² valeo plurimus post bonum tamen
-	Topic #4: bellus bellum gero¹ athenienses atheniensis pax pario³ pario² persequor indico²
-	Topic #5: exercitus² exerceo exercio mitto praesum apud miles praetor filius occaedes
-	Topic #6: solus¹ solus solum¹ sol etiam timor plurimus efficio defendo princeps
-	Topic #7: adverto adverro adversus adversus² adversum² datames copia¹ fortuna miles italia
-	Topic #8: patrius² patrius¹ patria patrium fero nam libero tamen tyrannus possum
-	Topic #9: locum locus loco hostis dies castrum castra rogo castro uno
-	
-	Fitting the NMF model (generalized Kullback-Leibler divergence) with tf-idf features, n_samples=1560 and n_features=1000...
-	done in 0.599s.
-	
-	Topics in NMF model (generalized Kullback-Leibler divergence):
-	Topic #0: nam tempus omnis utor tantus enim omnes tum rex gero¹
-	Topic #1: suus suum sua suo enim sus possum amicus¹ amicus civis
-	Topic #2: facio factum factus² pervenio quare volo¹ tempus possum uter licet
-	Topic #3: multus possum tamen unus parvus puto consilium virtus nam pater
-	Topic #4: multus bellum bellus multo² multa multa¹ multi gero¹ valeo post
-	Topic #5: exercitus² rex exerceo proficiscor mitto exercio apud nam interfacio rego
-	Topic #6: atheniensis athenienses lacedaemonius lacedaemonii superus etiam summus solus¹ solus solum¹
-	Topic #7: adverro adverto adversus adversus² hostis copia¹ volo¹ castrum eumenes arma
-	Topic #8: publicus patrius² patrius¹ possum patria publicum publica dico² populus¹ populus²
-	Topic #9: locus locum possum habeo primus loco video prima urbs sero¹
-	
-	Julius Caesar
-	Topics in LDA model:
-	Topic #0: reliquus relinquo legio cohors reliquum caesar praesidium cohorto facio reliqua
-	Topic #1: primus noster prima mille milium acies signum hostis circito circiter
-	Topic #2: multus pompejus multi proficiscor multa caesar totus² totus¹ gallius² gallia
-	Topic #3: mitto caesar bellus bellum equitatus¹ equitatus² lego¹ equito legatus omnis
-	Topic #4: navis oppidum navo opus¹ pars murus porta portus miles reliquus
-	Topic #5: castra castrum suus locum locus sua suum suo castro utor
-	Topic #6: interficio interfacio animus publicus pompejus cado publica animo aliquis casus¹
-	Topic #7: superus summus video summa summum miles caesar dico² habeo enim
-	Topic #8: eques proelium facio alius¹ caesar proelior proelio equito factum equio
-	Topic #9: exercitus² exerceo exercio arma conficio confacio capio capio¹ milito miles
-	
-	Topics in NMF model (Frobenius norm):
-	Topic #0: caesar possum facio miles bellum bellus omnis navis omnes pars
-	Topic #1: suus sua suum suo sus finis salus copia¹ habeo auxilium
-	Topic #2: castra castrum castro legio pono munitio hostis relinquo copia¹ passus³
-	Topic #3: locum locus loco natura iniquus pugno superus noster idoneus deligo¹
-	Topic #4: exercitus² exerceo exercio traduco copia¹ dimitto copis¹ duco incolumis caesar
-	Topic #5: equito equitatus¹ equitatus² eques mitto noster proelium caesar jubeo omnis
-	Topic #6: lego¹ legatus legatum mitto lego² missum caesar legio fabius praeficio
-	Topic #7: reliquus reliquum reliqua relinquo fuga civitas paro¹ paro² pars fugo
-	Topic #8: dies dius divus posterus postero paucus pauci pauca dico² nox
-	Topic #9: superus summus summa summum imperium voluntas trado uter contendo habeo
-	
-	Fitting the NMF model (generalized Kullback-Leibler divergence) with tf-idf features, n_samples=4490 and n_features=1000...
-	
-	Topics in NMF model (generalized Kullback-Leibler divergence):
-	Topic #0: caesar facio tempus cognosco utor possum causa per video uto
-	Topic #1: suus suum sua suo sus romanus habeo populus² populus¹ civitas
-	Topic #2: castra castrum castro munitio vallus¹ vallus² vallum copia¹ suus pono
-	Topic #3: locus locum possum multus loco video multi multa noster pugno
-	Topic #4: exercitus² exerceo exercio gallius² gallia proficiscor consilium totus¹ totus² bellus
-	Topic #5: equito eques proelium equitatus² equitatus¹ omnis hostis omnes proelior proelio
-	Topic #6: mitto caesar lego¹ legatus legio pompejus legatum missum pompeji praeficio
-	Topic #7: reliquus navis reliquum relinquo reliqua interficio interfacio navo paucus numerus
-	Topic #8: miles dies milito mille primus oppidum milium divus dius passus³
-	Topic #9: pars superus unus summus noster summa summum pario² fero hostis
-	
-	"""
-
 	return
 
 
@@ -576,6 +504,10 @@ def ldatopicgraphing(sentencetuples, activepoll):
 	see:
 		http://scikit-learn.org/stable/auto_examples/applications/plot_topics_extraction_with_nmf_lda.html#sphx-glr-auto-examples-applications-plot-topics-extraction-with-nmf-lda-py
 
+	see also:
+
+		https://nlpforhackers.io/topic-modeling/
+
 	CountVectorizer:
 	max_df : float in range [0.0, 1.0] or int, default=1.0
 	    When building the vocabulary ignore terms that have a document frequency strictly higher than the given threshold (corpus-specific stop words).
@@ -583,9 +515,27 @@ def ldatopicgraphing(sentencetuples, activepoll):
 	min_df : float in range [0.0, 1.0] or int, default=1
 	    When building the vocabulary ignore terms that have a document frequency strictly lower than the given threshold. This value is also called cut-off in the literature.
 
-	see also:
-	
-		https://nlpforhackers.io/topic-modeling/
+
+	see:
+		https://stackoverflow.com/questions/27697766/understanding-min-df-and-max-df-in-scikit-countvectorizer#35615151
+
+	max_df is used for removing terms that appear too frequently, also known as "corpus-specific stop words". For example:
+
+	    max_df = 0.50 means "ignore terms that appear in more than 50% of the documents".
+	    max_df = 25 means "ignore terms that appear in more than 25 documents".
+
+	The default max_df is 1.0, which means "ignore terms that appear in more than 100% of the documents". Thus, the default setting does not ignore any terms.
+
+	min_df is used for removing terms that appear too infrequently. For example:
+
+	    min_df = 0.01 means "ignore terms that appear in less than 1% of the documents".
+	    min_df = 5 means "ignore terms that appear in less than 5 documents".
+
+	The default min_df is 1, which means "ignore terms that appear in less than 1 document". Thus, the default setting does not ignore any terms.
+
+	notes:
+		maxfreq of 1 will give you a lot of excessively common words: 'this', 'that', etc.
+		maxfreq of
 
 	:param sentencetuples:
 	:param activepoll:
@@ -593,10 +543,13 @@ def ldatopicgraphing(sentencetuples, activepoll):
 	"""
 
 	maxfeatures = 2000
-	components = 15  # 'topics'
-	iterations = 15
+	components = 15  # topics
 
-	mustbelongerthan = 2
+	maxfreq = .60
+	minfreq = 5
+	iterations = 12
+
+	mustbelongerthan = 3
 
 	sentencetuples = [s for s in sentencetuples if len(s[1].strip().split(' ')) > mustbelongerthan]
 	sentences = [s[1] for s in sentencetuples]
@@ -604,22 +557,27 @@ def ldatopicgraphing(sentencetuples, activepoll):
 	sentencesaslists = [s.split(' ') for s in sentences]
 	allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]
 
+	activepoll.statusis('Finding all headwords')
 	morphdict = findheadwords(set(allwordsinorder))
 	morphdict = convertmophdicttodict(morphdict)
 
+	activepoll.statusis('Building bags of words')
 	# going forward we we need a list of lists of headwords
 	# there are two ways to do this:
 	#   'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ'
 
-	# bagofwordsfunction = buildflatbagsofwords
-	bagofwordsfunction = buildbagsofwordswithalternates
+	bagofwordsfunction = buildflatbagsofwords
+	# bagofwordsfunction = buildbagsofwordswithalternates
 
 	bagsofwordlists = bagofwordsfunction(morphdict, sentencesaslists)
 	bagsofsentences = [' '.join(b) for b in bagsofwordlists]
 
+	# print('bagsofsentences[:3]', bagsofsentences[3:])
+
+	activepoll.statusis('Running the LDA vectorizer')
 	# Use tf (raw term count) features for LDA.
-	ldavectorizer = CountVectorizer(max_df=0.95,
-									min_df=5,
+	ldavectorizer = CountVectorizer(max_df=maxfreq,
+									min_df=minfreq,
 									max_features=maxfeatures)
 
 	ldavectorized = ldavectorizer.fit_transform(bagsofsentences)
@@ -634,5 +592,205 @@ def ldatopicgraphing(sentencetuples, activepoll):
 
 	visualisation = ldavis.prepare(ldamodel, ldavectorized, ldavectorizer)
 	pyLDAvis.save_html(visualisation, 'ldavis.html')
+	ldavishtml = pyLDAvis.prepared_data_to_html(visualisation)
 
-	return
+	return ldavishtml
+
+
+"""
+
+ldatopicmodeling() sample results
+
+===
+
+maxfeatures = 1000
+components = 15
+topwords = 15
+
+maxfreq = .66
+minfreq = 5
+iterations = 15
+
+Topics in LDA model:
+Topic #0: superus summus amicus¹ summum summa amicus² amicus possum tantus habeo autem vir dedo dico² nam
+Topic #1: suus suum sua bellum bellus suo rex possum nam lacedaemonius lacedaemonii volo¹ atheniensis athenienses omnis
+Topic #2: habeo adverto adverro filius adversus populus¹ populus² natus natus¹ adversus² utor nascor pater natus² bellus
+Topic #3: malus malus¹ malus³ malus² fortuna malum malum² fortuno desero² per ante paucus pauci gero¹ desertus
+Topic #4: proficiscor proficio profectus³ lego¹ legatus proficisco pervenio mitto advenio adventus fio legatum dico² epaminondas fallo
+Topic #5: possum statuo forus¹ forum¹ forus forum statua potens noster potentia¹ convenio pono corrumpo sepelio memoria
+Topic #6: publicus publica publicum publico licet liceo¹ liceor possum persequor familia conicio quisquam polliceor diu vinculum
+Topic #7: pario² modus par modo parus¹ pario³ pareo morior mortuus talis paro² paro¹ ubi talus respondeo
+Topic #8: locum locus loco sero¹ facio arma dies satis sata satum armo hostis possum reliquus adversarius
+Topic #9: multus multa multi multo² multa¹ mille potis possum milium post annus duco dio dux privo
+Topic #10: exercitus² exerceo exercio capio capio¹ interficio interfacio castra castrum jam hostis castro navis adeo² adeo¹
+Topic #11: primus prima nitor¹ proelium nisi apud proelio proelior nam regius communis audeo cado liber¹ commune
+Topic #12: magus² magis magis² vita versor perpetuus verso perpetuum tantus perpetuo² plerus pleo consul do consulo
+Topic #13: confacio conficio quaero setius nihilum poena quare vix aedes concito quidem multitudo tantus afficio patrium
+Topic #14: facio factum factus² capio¹ capio caput capitum tempus pecunia damno classis oppugno¹ oppugno² judicium oppidum
+
+
+Topics in NMF model (Frobenius norm):
+Topic #0: possum habeo nam enim tantus autem utor video dico² modus tempus omnis capio capio¹ parvus
+Topic #1: suus suum sua suo sus civis proficiscor adventus advenio pars domus video do tueor potestas
+Topic #2: facio factum factus² timor opprimo classis tempus brevis deduco imprudens celer¹ lego² imperator coepio ullus
+Topic #3: multus multa multi multa¹ multo² valeo plurimus post tamen bonum virtus pars bonus societas mille
+Topic #4: bellus bellum gero¹ pax persequor pario³ pario² gesta indico² inter proficisco proficiscor administro tempus coepio
+Topic #5: exercitus² exerceo exercio mitto apud praesum praetor miles interficio interfacio filius proelium occaedes occido¹ hostis
+Topic #6: solus¹ solus solum¹ sol etiam timor plurimus efficio defendo princeps graecia athenae quisquam atticus regio
+Topic #7: patrius¹ patrius² patria patrium fero nam libero tamen tyrannus duco possum restituo expello revoco civis
+Topic #8: locum locus loco hostis dies castrum castra rogo castro uno urbs copia¹ manus¹ pono idoneus
+Topic #9: publicus publica publicum publico carthago possum quisquam totus¹ totus² vinclum vinculum civitas populus¹ populus² numquam
+Topic #10: rex rego lacedaemonius lacedaemonii regius mitto imperium agesilaus permulceo datames ops¹ artaxerxes praefectus¹ praefectus ceter
+Topic #11: atheniensis athenienses lacedaemonii lacedaemonius filius chabrias themistocles alcibiades restituo apud civitas classis lysander socius timotheus
+Topic #12: superus summus summa summum imperium sic laus apud defero aurum seleucus dimico trado fero milito
+Topic #13: sero¹ sata satis satum reliquus audio tutum praesidium unus inquam gratia tueor admiror thebani thebanus
+Topic #14: adverto adverro adversus adversus² adversum² datames copia¹ miles fortuna italia suscipio secundus¹ antigonus milito fortuno
+
+Fitting the NMF model (generalized Kullback-Leibler divergence) with tf-idf features, n_samples=1560 and n_features=1000...
+
+Topics in NMF model (generalized Kullback-Leibler divergence):
+Topic #0: tempus tantus tum nam video nullus nitor¹ tam nisi parvus possum nemo quidem quantus peto
+Topic #1: suus suum sua suo sus possum civis vivo tueor video tamen advenio enim adventus vinco
+Topic #2: facio factum factus² possum volo¹ quare imperator uter lego² pervenio studeo timor athenae forus¹ utrum
+Topic #3: multus multi possum multa multo² multa¹ parvus vivo eumenes dionysius cicero vir plurimus liber¹ dio
+Topic #4: bellum bellus gero¹ persequor valeo multus paucus facio pauci gesta peloponnesius indico² dux pauca setius
+Topic #5: exercitus² exerceo mitto exercio interfacio interficio navis classis jam praeficio praesum navo consul duco barbarus
+Topic #6: atheniensis athenienses lacedaemonius lacedaemonii etiam solus¹ solus solum¹ sol graecia atticus opera propter alcibiades opus¹
+Topic #7: patrius² patrius¹ patria possum hostis pugno tamen arma castrum libero castra fero armo adversarius audeo
+Topic #8: locus locum utor usus² loco volo¹ uto par divus video dies manus¹ modus urbs parus¹
+Topic #9: publicus publicum publica possum populus¹ populus² capio ibi capio¹ publico redeo indo inde revorto totus¹
+Topic #10: proficiscor dico² habeo autem proficio magus² rex enim magis² magis proficisco profectus³ video morior volo¹
+Topic #11: nam rex rego ceter consilium ceterus regius pario² capio¹ ceterum capio consilior jubeo sequor talis
+Topic #12: superus summus omnis omnes sic unus summa summum nemo modus virtus uno modo fides¹ vita
+Topic #13: primus filius prima sero¹ natus natus¹ natus² animus satum satis sata nascor annus pater fortuna
+Topic #14: apud proelium adverro adverto amicus¹ adversus amicus amicus² adversus² proelior proelio accido² accido¹ secundus¹ liceor
+
+
+===
+
+components = 15
+topwords = 15
+
+maxfreq = .50
+minfreq = 5
+iterations = 15
+
+Topics in LDA model:
+Topic #0: superus summus amicus¹ summum summa amicus² amicus possum tantus habeo autem vir dedo dico² nam
+Topic #1: suus suum sua bellum bellus suo rex possum nam lacedaemonius lacedaemonii volo¹ atheniensis athenienses omnis
+Topic #2: habeo adverto adverro filius adversus populus¹ populus² natus natus¹ adversus² utor nascor pater natus² bellus
+Topic #3: malus malus¹ malus³ malus² fortuna malum malum² fortuno desero² per ante paucus pauci gero¹ desertus
+Topic #4: proficiscor proficio profectus³ lego¹ legatus proficisco pervenio mitto advenio adventus fio legatum dico² epaminondas fallo
+Topic #5: possum statuo forus¹ forum¹ forus forum statua potens noster potentia¹ convenio pono corrumpo sepelio memoria
+Topic #6: publicus publica publicum publico licet liceo¹ liceor possum persequor familia conicio quisquam polliceor diu vinculum
+Topic #7: pario² modus par modo parus¹ pario³ pareo morior mortuus talis paro² paro¹ ubi talus respondeo
+Topic #8: locum locus loco sero¹ facio arma dies satis sata satum armo hostis possum reliquus adversarius
+Topic #9: multus multa multi multo² multa¹ mille potis possum milium post annus duco dio dux privo
+Topic #10: exercitus² exerceo exercio capio capio¹ interficio interfacio castra castrum jam hostis castro navis adeo² adeo¹
+Topic #11: primus prima nitor¹ proelium nisi apud proelio proelior nam regius communis audeo cado liber¹ commune
+Topic #12: magus² magis magis² vita versor perpetuus verso perpetuum tantus perpetuo² plerus pleo consul do consulo
+Topic #13: confacio conficio quaero setius nihilum poena quare vix aedes concito quidem multitudo tantus afficio patrium
+Topic #14: facio factum factus² capio¹ capio caput capitum tempus pecunia damno classis oppugno¹ oppugno² judicium oppidum
+
+
+Topics in NMF model (Frobenius norm):
+Topic #0: possum habeo nam enim tantus autem utor video dico² modus tempus omnis capio capio¹ parvus
+Topic #1: suus suum sua suo sus civis proficiscor adventus advenio pars domus video do tueor potestas
+Topic #2: facio factum factus² timor opprimo classis tempus brevis deduco imprudens celer¹ lego² imperator coepio ullus
+Topic #3: multus multa multi multa¹ multo² valeo plurimus post tamen bonum virtus pars bonus societas mille
+Topic #4: bellus bellum gero¹ pax persequor pario³ pario² gesta indico² inter proficisco proficiscor administro tempus coepio
+Topic #5: exercitus² exerceo exercio mitto apud praesum praetor miles interficio interfacio filius proelium occaedes occido¹ hostis
+Topic #6: solus¹ solus solum¹ sol etiam timor plurimus efficio defendo princeps graecia athenae quisquam atticus regio
+Topic #7: patrius¹ patrius² patria patrium fero nam libero tamen tyrannus duco possum restituo expello revoco civis
+Topic #8: locum locus loco hostis dies castrum castra rogo castro uno urbs copia¹ manus¹ pono idoneus
+Topic #9: publicus publica publicum publico carthago possum quisquam totus¹ totus² vinclum vinculum civitas populus¹ populus² numquam
+Topic #10: rex rego lacedaemonius lacedaemonii regius mitto imperium agesilaus permulceo datames ops¹ artaxerxes praefectus¹ praefectus ceter
+Topic #11: atheniensis athenienses lacedaemonii lacedaemonius filius chabrias themistocles alcibiades restituo apud civitas classis lysander socius timotheus
+Topic #12: superus summus summa summum imperium sic laus apud defero aurum seleucus dimico trado fero milito
+Topic #13: sero¹ sata satis satum reliquus audio tutum praesidium unus inquam gratia tueor admiror thebani thebanus
+Topic #14: adverto adverro adversus adversus² adversum² datames copia¹ miles fortuna italia suscipio secundus¹ antigonus milito fortuno
+
+Fitting the NMF model (generalized Kullback-Leibler divergence) with tf-idf features, n_samples=1560 and n_features=1000...
+
+Topics in NMF model (generalized Kullback-Leibler divergence):
+Topic #0: tempus tantus nam tum video nullus nitor¹ tam nisi possum parvus nemo quidem quantus causa
+Topic #1: suus suum sua suo sus possum vivo civis tueor video advenio enim adventus tamen vinco
+Topic #2: facio factum factus² possum volo¹ quare imperator lego² uter pervenio studeo timor athenae forus¹ utrum
+Topic #3: multus multi possum multa multo² multa¹ parvus vivo eumenes dionysius cicero vir plurimus liber¹ dio
+Topic #4: bellum bellus gero¹ persequor valeo multus facio gesta dux peloponnesius indico² pax setius persuadeo confugio
+Topic #5: exercitus² exerceo mitto exercio interfacio interficio navis classis consul jam praeficio praesum navo duco barbarus
+Topic #6: atheniensis athenienses lacedaemonius lacedaemonii etiam solus¹ solus solum¹ sol graecia atticus propter opera alcibiades opus¹
+Topic #7: patrius² patrius¹ patria hostis possum pugno tamen adversarius castrum arma libero castra armo copia¹ fero
+Topic #8: locus locum utor usus² loco volo¹ uto par divus manus¹ video modus urbs parus¹ dius
+Topic #9: publicus publicum publica possum populus¹ populus² capio capio¹ ibi publico indo redeo inde revorto totus¹
+Topic #10: dico² habeo proficiscor autem proficio rex magus² enim magis² magis proficisco profectus³ do volo¹ video
+Topic #11: nam rex rego consilium ceter ceterus regius pario² capio¹ ceterum capio consilior jubeo sequor talis
+Topic #12: superus summus omnis omnes sic unus summa summum nemo modus virtus uno modo fides¹ do
+Topic #13: primus filius prima sero¹ natus¹ natus natus² animus satum satis sata nascor annus pater fortuna
+Topic #14: apud proelium adverro adverto amicus¹ adversus amicus amicus² adversus² proelior proelio accido² accido¹ secundus¹ liceor
+
+===
+
+maxfeatures = 2000
+components = 15
+topwords = 15
+
+maxfreq = .60
+minfreq = 5
+iterations = 12
+
+Topics in LDA model:
+Topic #0: capio capio¹ filius nam interficio interfacio facio proelium alius¹ alii brevis extremus parens² parens barbarum²
+Topic #1: romanus consul consulo eumenes cornelius finis imperator scipio¹ prudens prudentia adjutus² adjuvo obvius hamilcar pello
+Topic #2: locum locus magis magus² magis² loco castra castrum hostis facio conficio confacio castro adversarius copia¹
+Topic #3: mos fortuna secundus¹ graecus morus¹ fero fortuno morum graece morus² morus secunda cado graecum secundo²
+Topic #4: praeficio lego¹ liber¹ legatus praefectus praefectus¹ liberi populus¹ populus² eques autem libet libo¹ legatum nam
+Topic #5: nitor¹ nisi rex morior mortuus nam rego paro² paro¹ mitto intereo possum scribo ubi interficio
+Topic #6: multus facio multa multi multo² etiam multa¹ possum solus¹ solus tempus solum¹ sol proficiscor bonum
+Topic #7: divus dius dio dies totus¹ totus² dionysius acies no¹ acieris nemo syracusae locum audio posterus
+Topic #8: mille milium adeo¹ adeo² perpetuus perpetuum decem perpetuo² appello nemo annus fio centum circiter circito
+Topic #9: amicus¹ amicus amicus² malus malus¹ malus² malus³ malum malum² fides¹ fides² diligens amica diligo fido
+Topic #10: memoria memor¹ forum¹ forum forus¹ forus statuo statua foro abstinentia imperatum chabrias impero decedo nullus
+Topic #11: atticus attici caesar antonius brutus¹ constituo attice attica attice² felicitas¹ felicito constitutum contemno potestas aedes
+Topic #12: publicus publica publicum publico liceo¹ licet liceor possum noster desino apud communis profligo¹ commune video
+Topic #13: par modus parus¹ pario³ pario² modo possum nonnullus parum tantus claudius nonnulli numero¹ numerus apud
+Topic #14: suus suum sua facio bellum bellus habeo possum nam suo enim tantus unus utor rex
+
+
+Topics in NMF model (Frobenius norm):
+Topic #0: possum habeo nam enim locum locus superus omnis omnes video autem summus do dico² utor
+Topic #1: suus suum sua suo sus civis pars video potestas domus tueor adventus advenio voluntas constituo
+Topic #2: facio factum factus² timor imprudens classis tempus celer¹ coepio offendo¹ deduco miltiades opprimo sentio salamina
+Topic #3: multus multa multi multa¹ multo² valeo bonum plurimus post societas virtus tamen mille bonus gero¹
+Topic #4: bellus bellum gero¹ pax persequor gesta indico² inter peloponnesius tempus coepio dux gestus² nam administro
+Topic #5: solus¹ solus solum¹ sol etiam timor defendo plurimus atticus princeps prodo quisquam periculum habeo prosum
+Topic #6: atheniensis athenienses filius chabrias themistocles alcibiades restituo lacedaemonii lacedaemonius oppugno² oppugno¹ socius celer¹ apud lysander
+Topic #7: exercitus² exerceo exercio mitto praesum filius apud praetor imperium miles occaedes occido¹ nam praeficio paro²
+Topic #8: patrius¹ patrius² patria patrium caritas libero fero tyrannus tamen revoco nam expello restituo possum duco
+Topic #9: rex lacedaemonius lacedaemonii rego regius imperium mitto agesilaus permulceo praefectus praefectus¹ artaxerxes praeficio praesum societas
+Topic #10: pario³ pario² par parus¹ modus modo ceter ceterus felicito felicitas¹ marcellus apud castellum claudius jubeo
+Topic #11: capio capio¹ consilium capitum caput talus talis captus consilior captus² damno judicium absolvo antigonus amicitia
+Topic #12: proficiscor proficio profectus³ proficisco iter phocion pervenio dico² insidior insidiae domus duco sponte fallo pugno
+Topic #13: natus¹ natus nascor natus² dico² filius annus uxor relinquo morior nato amplus gener sic filia
+Topic #14: adverto adverro adversus adversus² adversum² copia¹ datames adversum adversa italia antigonus miles suscipio proelior proelio
+
+Fitting the NMF model (generalized Kullback-Leibler divergence) with tf-idf features, n_samples=1560 and n_features=2000...
+
+Topics in NMF model (generalized Kullback-Leibler divergence):
+Topic #0: do nemo nam omnis video tempus omnes tum enim tantus sic habeo autem scribo adeo¹
+Topic #1: suus suum sua suo sus video tamen tueor voluntas fortuna possum civis vivo domus dico²
+Topic #2: facio factum factus² possum volo¹ uter pervenio tempus quare potis lego² opprimo imperator sentio homo
+Topic #3: multus possum superus multi multo² multa vivo habeo summus vita multa¹ unus virtus graecus sic
+Topic #4: bellum bellus multus gero¹ multi multa multa¹ valeo multo² persequor facio dux paucus duco post
+Topic #5: utor etiam solus¹ solus usus² solum¹ sol tantus possum uto atticus nullus bonus judico quisquam
+Topic #6: atheniensis athenienses lacedaemonius lacedaemonii graecia alcibiades filius urbs potestas morus¹ peto morus² apud mos morus
+Topic #7: exercitus² exerceo exercio superus hostis proelium apud summus summa copia¹ miles summum mitto interficio interfacio
+Topic #8: publicus possum publicum publica unus castra sto castrum publico indo inde revorto populus² transeo oppugno²
+Topic #9: rex locus locum rego volo¹ habeo regius loco vello video trado eumenes praeficio datames praefectus
+Topic #10: primus navis dies talis prima dio navo divus quidem talus dius consilium possum modo modus
+Topic #11: nam patrius¹ patrius² pario² patria capio par tamen capio¹ parus¹ pario³ nitor¹ nisi malus malus¹
+Topic #12: proficiscor proficio mitto parvus profectus³ pervenio proficisco dico² tempus domus cognosco lego¹ redeo fallo puto
+Topic #13: filius annus sero¹ pater natus¹ natus natus² nascor satum satis primus dico² relinquo duco magus²
+Topic #14: ceterus adverro ceter adverto adversus amicus amicus¹ amicus² ceterum adversus² propter populus² populus¹ romanus enim
+
+"""
