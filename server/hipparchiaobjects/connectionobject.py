@@ -48,8 +48,13 @@ class ConnectionObject(object):
 		getattr(self.dbconnection, 'close')()
 		return
 
-	def checkneedtocommit(self, value):
-		if value % self.commitcount == 0:
+	def checkneedtocommit(self, commitcountervalue):
+		# commitcountervalue is an MPCounter?
+		try:
+			v = commitcountervalue.value
+		except:
+			v = commitcountervalue
+		if v % self.commitcount == 0:
 			self.dbconnection.commit()
 		return
 
