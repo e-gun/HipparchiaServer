@@ -153,7 +153,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
 	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	qcomb = QueryCombinator(searchphrase)
 	# the last time is the full phrase:  ('one two three four five', '')
@@ -182,8 +182,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 			tablestosearch = None
 
 		if uid:
-			if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
-				dbconnection.commit()
+			dbconnection.checkneedtocommit(commitcount)
 
 			qtemplate = """
 				SELECT secondpass.index, secondpass.{co} FROM 
@@ -203,14 +202,14 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 					whr = 'WHERE {iw}'.format(iw=indexwedwhere)
 			elif r['type'] == 'temptable':
 				q = r['where']['tempquery']
-				curs.execute(q)
+				cursor.execute(q)
 				whr = 'WHERE EXISTS (SELECT 1 FROM {tbl}_includelist incl WHERE incl.includeindex = {tbl}.index)'.format(tbl=uid)
 
 			query = qtemplate.format(db=uid, co=so.usecolumn, whr=whr, lim=lim)
 			data = (sp,)
 			# print('subqueryphrasesearch() q,d:',query, data)
-			curs.execute(query, data)
-			indices = [i[0] for i in curs.fetchall()]
+			cursor.execute(query, data)
+			indices = [i[0] for i in cursor.fetchall()]
 			# this will yield a bunch of windows: you need to find the centers; see 'while...' below
 
 			locallineobjects = list()
@@ -218,8 +217,8 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 				for i in indices:
 					query = 'SELECT * FROM {tb} WHERE index=%s'.format(tb=uid)
 					data = (i,)
-					curs.execute(query, data)
-					locallineobjects.append(dblineintolineobject(curs.fetchone()))
+					cursor.execute(query, data)
+					locallineobjects.append(dblineintolineobject(cursor.fetchone()))
 
 			locallineobjects.reverse()
 			# debugging
@@ -250,9 +249,9 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 						# usually you won't get a hit by grabbing the next db line, but sometimes you do...
 						query = 'SELECT * FROM {tb} WHERE index=%s'.format(tb=uid)
 						data = (lo.index + 1,)
-						curs.execute(query, data)
+						cursor.execute(query, data)
 						try:
-							nextline = dblineintolineobject(curs.fetchone())
+							nextline = dblineintolineobject(cursor.fetchone())
 						except:
 							nextline = makeablankline('gr0000w000', -1)
 

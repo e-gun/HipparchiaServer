@@ -54,9 +54,8 @@ def lookformorphologymatches(word, cursor, trialnumber=0):
 	matchingobject = None
 
 	# syntax = '~' if you have to deal with '[uv]' problems, e.g.
-	syntax = '='
 
-	query = 'SELECT * FROM {d}_morphology WHERE observed_form {sy} %s'.format(d=usedictionary, sy=syntax)
+	query = 'SELECT * FROM {d}_morphology WHERE observed_form = %s'.format(d=usedictionary)
 	data = (word,)
 
 	cursor.execute(query, data)
@@ -532,7 +531,7 @@ def findcountsviawordcountstable(wordtocheck):
 	:return:
 	"""
 	dbconnection = ConnectionObject('not_autocommit')
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	initial = stripaccents(wordtocheck[0])
 	# alternatives = re.sub(r'[uv]','[uv]',c)
@@ -547,8 +546,8 @@ def findcountsviawordcountstable(wordtocheck):
 
 	d = (wordtocheck,)
 	try:
-		curs.execute(q, d)
-		result = curs.fetchone()
+		cursor.execute(q, d)
+		result = cursor.fetchone()
 	except:
 		# psycopg2.ProgrammingError: relation "wordcounts_ε" does not exist
 		# you did not build the wordcounts at all?
@@ -672,10 +671,10 @@ def grablemmataobjectfor(entryname, db, cursor):
 	q = 'SELECT * FROM {db} WHERE dictionary_entry=%s'.format(db=db)
 	d = (entryname,)
 	cursor.execute(q, d)
-	l = cursor.fetchone()
+	lem = cursor.fetchone()
 
 	try:
-		lemmaobject = dbLemmaObject(*l)
+		lemmaobject = dbLemmaObject(*lem)
 	except TypeError:
 		# 'NoneType' object is not subscriptable
 		lemmaobject = dbLemmaObject('[entry not found]', -1, '')

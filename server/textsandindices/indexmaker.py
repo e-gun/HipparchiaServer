@@ -342,8 +342,7 @@ def mpmorphology(terms, morphobjects, commitcount):
 				morphobjects[t] = None
 
 		commitcount.increment()
-		if commitcount.value % hipparchia.config['MPCOMMITCOUNT'] == 0:
-			dbconnection.commit()
+		dbconnection.checkneedtocommit(commitcount)
 
 	dbconnection.connectioncleanup()
 

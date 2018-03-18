@@ -35,15 +35,23 @@ class ConnectionObject(object):
 
 		self.dbconnection.set_session(readonly=readonlyconnection)
 		self.connectioncursor = self.dbconnection.cursor()
+		self.commitcount = hipparchia.config['MPCOMMITCOUNT']
 
 	def cursor(self):
 		return self.connectioncursor
 
 	def commit(self):
 		getattr(self.dbconnection, 'commit')()
+		return
 
 	def close(self):
 		getattr(self.dbconnection, 'close')()
+		return
+
+	def checkneedtocommit(self, value):
+		if value % self.commitcount == 0:
+			self.dbconnection.commit()
+		return
 
 	def connectioncleanup(self):
 		"""

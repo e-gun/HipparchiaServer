@@ -190,8 +190,7 @@ def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
 				numberoffinds = len(lineobjects)
 				activepoll.addhits(numberoffinds)
 
-		if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
-			dbconnection.commit()
+		dbconnection.checkneedtocommit(commitcount)
 
 		try:
 			activepoll.remain(len(searchlist))
@@ -257,8 +256,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchob
 				numberoffinds = len(lineobjects)
 				activepoll.addhits(numberoffinds)
 
-		if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
-			dbconnection.commit()
+		dbconnection.checkneedtocommit(commitcount)
 
 		try:
 			activepoll.remain(len(searchtuples))
@@ -301,8 +299,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobje
 			wkid = None
 			searchinginside = None
 
-		if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
-			dbconnection.commit()
+		dbconnection.checkneedtocommit(commitcount)
 
 		if wkid:
 			foundlines = phrasesearch(wkid, activepoll, so, cursor)

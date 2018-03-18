@@ -80,8 +80,7 @@ def breaktextsintosentences(foundsentences, searchlist, activepoll, searchobject
 		if authortable:
 			foundsentences += findsentences(authortable, so, cursor)
 
-			if commitcount % hipparchia.config['MPCOMMITCOUNT'] == 0:
-				dbconnection.commit()
+			dbconnection.checkneedtocommit(commitcount)
 
 		try:
 			activepoll.remain(len(searchlist))
