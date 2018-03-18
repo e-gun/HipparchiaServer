@@ -127,13 +127,13 @@ class SearchObject(object):
 
 		seeking = re.sub('[σς]', 'ϲ', seeking)
 		seeking = re.sub(r'\\ϲ', ' ', seeking)
-		seeking = re.sub(r'^\s', '(^|\s)', seeking)
-		seeking = re.sub(r'\s$', '(\s|$)', seeking)
+		seeking = re.sub(r'^\s', r'(^|\s)', seeking)
+		seeking = re.sub(r'\s$', r'(\s|$)', seeking)
 		seeking = seeking.lower()
 		proximate = re.sub('[σς]', 'ϲ', proximate)
 		proximate = re.sub(r'\\ϲ', ' ', proximate)
-		proximate = re.sub(r'^\s', '(^|\s)', proximate)
-		proximate = re.sub(r'\s$', '(\s|$)', proximate)
+		proximate = re.sub(r'^\s', r'(^|\s)', proximate)
+		proximate = re.sub(r'\s$', r'(\s|$)', proximate)
 		proximate = proximate.lower()
 
 		# print ('seeking,proximate',seeking,proximate)
@@ -343,7 +343,8 @@ class OutputObject(object):
 			self.scope = 'all {w} authors in {s}'.format(w=w, s=self.scope)
 
 	def explainemptysearch(self):
-		self.htmlsearch = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=' and '.join(self.reasons))
+		r = ' and '.join(self.reasons)
+		self.htmlsearch = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=r)
 
 
 class ProgressPoll(object):
