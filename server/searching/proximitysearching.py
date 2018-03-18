@@ -162,12 +162,19 @@ def grableadingandlagging(hitline, searchobject, cursor):
 	match = re.search(r'{s}'.format(s=seeking), searchzone)
 	# but what if you just found 'paucitate' inside of 'paucitatem'?
 	# you will have 'm' left over and this will throw off your distance-in-words count
-	past = searchzone[match.end():]
-	while past and past[0] != ' ':
+	try:
+		past = searchzone[match.end():]
+	except AttributeError:
+		# AttributeError: 'NoneType' object has no attribute 'end'
+		past = None
+	if past and past[0] != ' ':
 		past = past[1:]
 
-	upto = searchzone[:match.start()]
-	while upto and upto[-1] != ' ':
+	try:
+		upto = searchzone[:match.start()]
+	except AttributeError:
+		upto = None
+	if upto and upto[-1] != ' ':
 		upto = upto[:-1]
 
 	ucount = len([x for x in upto.split(' ') if x])

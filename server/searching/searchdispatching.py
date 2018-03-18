@@ -20,7 +20,7 @@ from server.searching.searchfunctions import findleastcommonterm, findleastcommo
 	massagesearchtermsforwhitespace, substringsearch
 
 
-def searchdispatcher(searchobject, activepoll):
+def searchdispatcher(searchobject):
 	"""
 
 	assign the search to multiprocessing workers
@@ -35,6 +35,7 @@ def searchdispatcher(searchobject, activepoll):
 	"""
 
 	so = searchobject
+	activepoll = so.poll
 
 	# recompose 'searchingfor' (if it exists)
 	# note that 'proximate' does not need as many checks
@@ -67,7 +68,7 @@ def searchdispatcher(searchobject, activepoll):
 	if so.searchtype == 'simple':
 		activepoll.statusis('Executing a simple word search...')
 		targetfunction = workonsimplesearch
-		argumentuple = (foundlineobjects, searchlist, activepoll, so)
+		argumentuple = (foundlineobjects, searchlist, so)
 	elif so.searchtype == 'simplelemma':
 		activepoll.statusis('Executing a lemmatized word search for the {n} known forms of {w}...'.format(n=len(so.lemma.formlist), w=so.lemma.dictionaryentry))
 		chunksize = hipparchia.config['LEMMACHUNKSIZE']
@@ -81,7 +82,7 @@ def searchdispatcher(searchobject, activepoll):
 				searchtuples.append((c, item))
 		activepoll.allworkis(len(searchtuples))
 		targetfunction = workonsimplelemmasearch
-		argumentuple = (foundlineobjects, searchtuples, activepoll, so)
+		argumentuple = (foundlineobjects, searchtuples, so)
 	elif so.searchtype == 'phrase':
 		activepoll.statusis('Executing a phrase search.')
 		so.leastcommon = findleastcommonterm(so.termone, so.accented)
@@ -102,10 +103,10 @@ def searchdispatcher(searchobject, activepoll):
 		if 0 < lccount < 500:
 			# print('workonphrasesearch()', searchingfor)
 			targetfunction = workonphrasesearch
-			argumentuple = (foundlineobjects, searchlist, activepoll, so)
+			argumentuple = (foundlineobjects, searchlist, so)
 		else:
 			targetfunction = subqueryphrasesearch
-			argumentuple = (foundlineobjects, so.termone, searchlist, activepoll, so)
+			argumentuple = (foundlineobjects, so.termone, searchlist, so)
 			# print('subqueryphrasesearch()', searchingfor)
 	elif so.searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
@@ -125,7 +126,7 @@ def searchdispatcher(searchobject, activepoll):
 			so.termone = so.termtwo
 			so.termtwo = tmp
 		targetfunction = workonproximitysearch
-		argumentuple = (foundlineobjects, searchlist, activepoll, so)
+		argumentuple = (foundlineobjects, searchlist, so)
 	else:
 		# impossible, but...
 		workers = 0
@@ -140,7 +141,7 @@ def searchdispatcher(searchobject, activepoll):
 	return foundlineobjects
 
 
-def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
+def workonsimplesearch(foundlineobjects, searchlist, searchobject):
 	"""
 
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
@@ -155,12 +156,14 @@ def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
 	:return:
 	"""
 
+	so = searchobject
+	activepoll = so.poll
+
 	# print('workonsimplesearch() - searchlist', searchlist)
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
 	dbconnection = ConnectionObject('not_autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
-	so = searchobject
 
 	# print('workonsimplesearch() - so.termone', so.termone)
 
@@ -202,7 +205,7 @@ def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
 	return foundlineobjects
 
 
-def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchobject):
+def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject):
 	"""
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
@@ -226,6 +229,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchob
 	"""
 
 	so = searchobject
+	activepoll = so.poll
 
 	# print('workonsimplesearch() - searchlist', searchlist)
 
@@ -268,7 +272,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchob
 	return foundlineobjects
 
 
-def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobject):
+def workonphrasesearch(foundlineobjects, searchinginside, searchobject):
 	"""
 
 	a multiprocessor aware function that hands off bits of a phrase search to multiple searchers
@@ -286,6 +290,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobje
 	"""
 
 	so = searchobject
+	activepoll = so.poll
 
 	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
@@ -302,7 +307,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobje
 		dbconnection.checkneedtocommit(commitcount)
 
 		if wkid:
-			foundlines = phrasesearch(wkid, activepoll, so, cursor)
+			foundlines = phrasesearch(wkid, so, cursor)
 			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
 		try:
 			activepoll.remain(len(searchinginside))
@@ -314,7 +319,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobje
 	return foundlineobjects
 
 
-def workonproximitysearch(foundlineobjects, searchinginside, activepoll, searchobject):
+def workonproximitysearch(foundlineobjects, searchinginside, searchobject):
 	"""
 
 	a multiprocessor aware function that hands off bits of a proximity search to multiple searchers
@@ -336,6 +341,7 @@ def workonproximitysearch(foundlineobjects, searchinginside, activepoll, searcho
 	"""
 
 	so = searchobject
+	activepoll = so.poll
 
 	while searchinginside and activepoll.hitcount.value <= so.cap:
 		try:

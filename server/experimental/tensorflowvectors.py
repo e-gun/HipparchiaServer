@@ -37,7 +37,7 @@ from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, listmapper, workdict
 
 
-def tensorgraphelectedworks(activepoll, searchobject):
+def tensorgraphelectedworks(searchobject):
 	"""
 
 	adapted from https://raw.githubusercontent.com/tensorflow/tensorflow/r1.5/tensorflow/examples/tutorials/word2vec/word2vec_basic.py
@@ -46,13 +46,11 @@ def tensorgraphelectedworks(activepoll, searchobject):
 	:param searchobject:
 	:return:
 	"""
-
-	starttime = time.time()
+	so = searchobject
+	activepoll = so.poll
 
 	tffunctiontocall = tftrainondata
 	tffunctiontocall = tfnlptraining
-
-	so = searchobject
 
 	activepoll.statusis('Preparing to search')
 
@@ -95,15 +93,15 @@ def tensorgraphelectedworks(activepoll, searchobject):
 		# find all sentences
 		activepoll.statusis('Finding all sentences')
 		so.seeking = r'.'
-		sentences = vectorprepdispatcher(so, activepoll)
-		output = tffunctiontocall(sentences, activepoll)
+		sentences = vectorprepdispatcher(so)
+		output = tffunctiontocall(sentences, searchobject)
 	else:
 		return emptyvectoroutput(so)
 
 	return output
 
 
-def tftrainondata(sentences, activepoll):
+def tftrainondata(sentences, searchobject):
 	"""
 
 	adapted from the tensorflow tutorial
@@ -113,6 +111,8 @@ def tftrainondata(sentences, activepoll):
 	:param sentences:
 	:return:
 	"""
+
+	activepoll = searchobject.poll
 
 	sentencesaslists = [s.split(' ') for s in sentences]
 	allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]
@@ -380,7 +380,7 @@ def tfplotwithlabels(low_dim_embs, labels, filename):
 
 # build dictionary of words: {integerindex0: word0, integerindex1: word1, ...}
 
-def tfnlptraining(sentences, activepoll):
+def tfnlptraining(sentences, searchobject):
 	"""
 
 
@@ -388,6 +388,8 @@ def tfnlptraining(sentences, activepoll):
 	:param activepoll:
 	:return:
 	"""
+
+	activepoll = searchobject.poll
 
 	sentencesaslists = [s[1].split(' ') for s in sentences]
 	allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]

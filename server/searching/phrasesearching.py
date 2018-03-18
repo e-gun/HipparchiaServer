@@ -15,7 +15,7 @@ from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline, substringsearch
 
 
-def phrasesearch(wkid, activepoll, searchobject, cursor):
+def phrasesearch(wkid, searchobject, cursor):
 	"""
 
 	a whitespace might mean things are on a new line
@@ -33,6 +33,7 @@ def phrasesearch(wkid, activepoll, searchobject, cursor):
 
 	so = searchobject
 	searchphrase = so.termone
+	activepoll = so.poll
 
 	# print('so.leastcommon', so.leastcommon)
 
@@ -70,7 +71,7 @@ def phrasesearch(wkid, activepoll, searchobject, cursor):
 	return fullmatches
 
 
-def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activepoll, searchobject):
+def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searchobject):
 	"""
 	foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll
 
@@ -150,6 +151,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activep
 	"""
 
 	so = searchobject
+	activepoll = so.poll
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
 	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)

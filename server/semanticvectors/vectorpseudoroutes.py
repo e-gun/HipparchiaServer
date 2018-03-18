@@ -78,7 +78,7 @@ def findabsolutevectors(timestamp):
 	# don't know how to enter executesearch() properly to handle the other option
 	# print('cosdistbysentence')
 
-	output = findabsolutevectorsbysentence(activepoll, so)
+	output = findabsolutevectorsbysentence(so)
 
 	del poll[ts]
 

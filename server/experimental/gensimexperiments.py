@@ -16,7 +16,7 @@ from server.semanticvectors.vectorhelpers import convertmophdicttodict, findhead
 from server.startup import authordict, listmapper
 
 
-def gensimexperiment(activepoll, so):
+def gensimexperiment(so):
 	"""
 
 	:param activepoll:
@@ -24,14 +24,15 @@ def gensimexperiment(activepoll, so):
 	:return:
 	"""
 
-	starttime = time.time()
+	activepoll = so.poll
+
 	activecorpora = so.getactivecorpora()
 	searchlist = flagexclusions(searchlist, so.session)
 	workssearched = len(searchlist)
 	searchlist = compilesearchlist(listmapper, so.session)
 	searchlist = calculatewholeauthorsearches(searchlist, authordict)
 	so.searchlist = searchlist
-	sentencetuples = vectorprepdispatcher(so, activepoll)
+	sentencetuples = vectorprepdispatcher(so)
 	# find all words in use
 	listsofwords = [s[1] for s in sentencetuples]
 	allwords = findwordvectorset(listsofwords)

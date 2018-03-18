@@ -88,24 +88,29 @@ dbsupport/dblinefunctions.py:def returnfirstlinenumber(workid, cursor):
 dbsupport/dblinefunctions.py:def makeablankline(work, fakelinenumber):
 dbsupport/dblinefunctions.py:def bulklinegrabber(table, column, criterion, setofcriteria, cursor):
 dbsupport/dblinefunctions.py:def grablistoflines(table, uidlist):
+dbsupport/dblinefunctions.py:def grabbundlesoflines(worksandboundaries, cursor):
+dbsupport/dblinefunctions.py:def bulkenvironsfetcher(table, searchresultlist, context):
 dbsupport/vectordbfunctions.py:def createvectorstable():
 dbsupport/vectordbfunctions.py:def createstoredimagestable():
 dbsupport/vectordbfunctions.py:def storevectorindatabase(searchobject, vectortype, vectorspace):
 dbsupport/vectordbfunctions.py:def checkforstoredvector(searchobject, indextype, careabout='settings'):
 dbsupport/vectordbfunctions.py:def fetchverctorenvirons(hitdict, searchobject):
-experimental/gensimexperiments.py:def gensimexperiment(activepoll, so):
+experimental/gensimexperiments.py:def gensimexperiment(so):
 experimental/gensimexperiments.py:def doc2vecbuildspace(morphdict, sentences):
 experimental/gensimexperiments.py:def logentropybuildspace(morphdict, sentences):
-experimental/scikitlearnvectors.py:def sklearnselectedworks(activepoll, searchobject):
-experimental/scikitlearnvectors.py:def generatesimilarsentenceoutput(corehtml, searchobject, activepoll, workssearched, matches):
-experimental/scikitlearnvectors.py:def sklearntextfeatureextractionandevaluation(sentences, activepoll):
-experimental/scikitlearnvectors.py:def simplesktextcomparison(sentencetuples, activepoll):
-experimental/tensorflowvectors.py:def tensorgraphelectedworks(activepoll, searchobject):
-experimental/tensorflowvectors.py:def tftrainondata(sentences, activepoll):
+experimental/scikitlearnvectors.py:def sklearnselectedworks(searchobject):
+experimental/scikitlearnvectors.py:def generatesimilarsentenceoutput(corehtml, searchobject, workssearched, matches):
+experimental/scikitlearnvectors.py:def sklearntextfeatureextractionandevaluation(sentences, searchobject):
+experimental/scikitlearnvectors.py:def simplesktextcomparison(sentencetuples, searchobject):
+experimental/scikitlearnvectors.py:def print_top_words(model, feature_names, n_top_words):
+experimental/scikitlearnvectors.py:def ldatopicmodeling(sentencetuples, searchobject):
+experimental/scikitlearnvectors.py:def ldatopicgraphing(sentencetuples, searchobject):
+experimental/tensorflowvectors.py:def tensorgraphelectedworks(searchobject):
+experimental/tensorflowvectors.py:def tftrainondata(sentences, searchobject):
 experimental/tensorflowvectors.py:def builddatasetdict(words, vocabularysize):
 experimental/tensorflowvectors.py:def tfgeneratetrainingbatch(batchsize, numberofskips, skipwindow, thedata, dataindex):
 experimental/tensorflowvectors.py:def tfplotwithlabels(low_dim_embs, labels, filename):
-experimental/tensorflowvectors.py:def tfnlptraining(sentences, activepoll):
+experimental/tensorflowvectors.py:def tfnlptraining(sentences, searchobject):
 experimental/tensorflowvectors.py:def converttexttoinexvalues(sentences, morphdict):
 experimental/tensorflowvectors.py:def generatetfbatch(sentences, batchsize, windowsize, method='cbow'):
 experimental/tensorflowvectors.py:def tfnlpwork(textasvals, wordsmappedtocodes, codesmappedtowords, activepoll):
@@ -186,8 +191,7 @@ formatting/lexicaformatting.py:def insertbrowserlookups(htmlentry):
 formatting/lexicaformatting.py:def dbquickfixes(listofnames):
 formatting/lexicaformatting.py:def deabrevviategreekauthors():
 formatting/lexicaformatting.py:def deabrevviatelatinauthors():
-formatting/searchformatting.py:def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
-formatting/searchformatting.py:def bulkenvironsfetcher(table, searchresultlist, context):
+formatting/searchformatting.py:def buildresultobjects(hitdict, authordict, workdict, searchobject):
 formatting/searchformatting.py:def flagsearchterms(searchresultobject, skg, prx, searchobject):
 formatting/searchformatting.py:def highlightsearchterm(lineobject, regexequivalent, spanname):
 formatting/searchformatting.py:def htmlifysearchfinds(listofsearchresultobjects, searchobject):
@@ -199,8 +203,8 @@ formatting/vectorformatting.py:def formatnnsimilarity(termone, termtwo, similari
 formatting/vectorformatting.py:def skformatmostimilar(similaritiesdict):
 formatting/vectorformatting.py:def locusformat(dblineobject):
 formatting/vectorformatting.py:def vectorhtmlforfrontpage():
-formatting/vectorformatting.py:def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject, activepoll):
-formatting/vectorformatting.py:def lsiformatoutput(findshtml, workssearched, matches, searchobject, activepoll):
+formatting/vectorformatting.py:def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject):
+formatting/vectorformatting.py:def lsiformatoutput(findshtml, workssearched, matches, searchobject):
 formatting/wordformatting.py:def removegravity(accentedword):
 formatting/wordformatting.py:def forceterminalacute(matchgroup):
 formatting/wordformatting.py:def stripaccents(texttostrip, transtable=None):
@@ -311,16 +315,16 @@ routes/textandindexroutes.py:def completeindex():
 routes/textandindexroutes.py:def textmaker():
 routes/websocketroutes.py:def checkforactivesearch(ts):
 routes/websocketroutes.py:def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
-searching/phrasesearching.py:def phrasesearch(wkid, activepoll, searchobject, cursor):
-searching/phrasesearching.py:def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, activepoll, searchobject):
+searching/phrasesearching.py:def phrasesearch(wkid, searchobject, cursor):
+searching/phrasesearching.py:def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searchobject):
 searching/proximitysearching.py:def withinxlines(workdbname, searchobject):
 searching/proximitysearching.py:def withinxwords(workdbname, searchobject):
 searching/proximitysearching.py:def grableadingandlagging(hitline, searchobject, cursor):
-searching/searchdispatching.py:def searchdispatcher(searchobject, activepoll):
-searching/searchdispatching.py:def workonsimplesearch(foundlineobjects, searchlist, activepoll, searchobject):
-searching/searchdispatching.py:def workonsimplelemmasearch(foundlineobjects, searchtuples, activepoll, searchobject):
-searching/searchdispatching.py:def workonphrasesearch(foundlineobjects, searchinginside, activepoll, searchobject):
-searching/searchdispatching.py:def workonproximitysearch(foundlineobjects, searchinginside, activepoll, searchobject):
+searching/searchdispatching.py:def searchdispatcher(searchobject):
+searching/searchdispatching.py:def workonsimplesearch(foundlineobjects, searchlist, searchobject):
+searching/searchdispatching.py:def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject):
+searching/searchdispatching.py:def workonphrasesearch(foundlineobjects, searchinginside, searchobject):
+searching/searchdispatching.py:def workonproximitysearch(foundlineobjects, searchinginside, searchobject):
 searching/searchfunctions.py:def cleaninitialquery(seeking):
 searching/searchfunctions.py:def massagesearchtermsforwhitespace(query):
 searching/searchfunctions.py:def atsignwhereclauses(uidwithatsign, operand, authors):
@@ -331,18 +335,18 @@ searching/searchfunctions.py:def findleastcommonterm(searchphrase, accentsneeded
 searching/searchfunctions.py:def findleastcommontermcount(searchphrase, accentsneeded):
 searching/searchfunctions.py:def dblooknear(index, distanceinlines, secondterm, workid, usecolumn, cursor):
 searching/searchfunctions.py:def buildsearchobject(ts, request, session):
-semanticvectors/gensimlsi.py:def lsigenerateoutput(sentencestuples, workssearched, searchobject, activepoll, lsispace):
-semanticvectors/gensimlsi.py:def lsifindmatches(sentencestuples, searchobject, activepoll, lsispace):
+semanticvectors/gensimlsi.py:def lsigenerateoutput(sentencestuples, workssearched, searchobject, lsispace):
+semanticvectors/gensimlsi.py:def lsifindmatches(sentencestuples, searchobject, lsispace):
 semanticvectors/gensimlsi.py:def lsibuildspace(morphdict, sentences):
-semanticvectors/gensimnearestneighbors.py:def buildnnvectorspace(sentencetuples, activepoll, searchobject):
+semanticvectors/gensimnearestneighbors.py:def buildnnvectorspace(sentencetuples, searchobject):
 semanticvectors/gensimnearestneighbors.py:def findapproximatenearestneighbors(query, mymodel):
 semanticvectors/gensimnearestneighbors.py:def findword2vecsimilarities(termone, termtwo, mymodel):
 semanticvectors/gensimnearestneighbors.py:def buildgensimmodel(searchobject, morphdict, sentences):
-semanticvectors/gensimnearestneighbors.py:def generatenearestneighbordata(sentencetuples, workssearched, searchobject, activepoll, vectorspace):
+semanticvectors/gensimnearestneighbors.py:def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vectorspace):
 semanticvectors/gensimvectors.py:def findnearestneighborvectors(timestamp):
-semanticvectors/gensimvectors.py:def executegensimsearch(activepoll, searchobject):
-semanticvectors/preparetextforvectorization.py:def vectorprepdispatcher(searchobject, activepoll):
-semanticvectors/preparetextforvectorization.py:def breaktextsintosentences(foundsentences, searchlist, activepoll, searchobject):
+semanticvectors/gensimvectors.py:def executegensimsearch(searchobject):
+semanticvectors/preparetextforvectorization.py:def vectorprepdispatcher(searchobject):
+semanticvectors/preparetextforvectorization.py:def breaktextsintosentences(foundsentences, searchlist, searchobject):
 semanticvectors/rudimentaryvectormath.py:def finddotproduct(listofavalues, listofbvalues):
 semanticvectors/rudimentaryvectormath.py:def findvectorlength(listofvalues):
 semanticvectors/rudimentaryvectormath.py:def findcosinedist(avalues, lemmavalues, lemmavaluelength):
@@ -379,12 +383,15 @@ semanticvectors/vectorhelpers.py:def readgitdata():
 semanticvectors/vectorhelpers.py:def determinesettings():
 semanticvectors/vectorhelpers.py:def findheadwords(wordlist):
 semanticvectors/vectorpseudoroutes.py:def findabsolutevectors(timestamp):
-semanticvectors/vectorpseudoroutes.py:def findabsolutevectorsbysentence(activepoll, searchobject):
-semanticvectors/vectorpseudoroutes.py:def findabsolutevectorsfromhits(searchobject, hitdict, activepoll, workssearched):
-semanticvectors/vectorpseudoroutes.py:def generatevectoroutput(listsofwords, workssearched, searchobject, activepoll, vtype):
+semanticvectors/vectorpseudoroutes.py:def findabsolutevectorsbysentence(searchobject):
+semanticvectors/vectorpseudoroutes.py:def findabsolutevectorsfromhits(searchobject, hitdict, workssearched):
+semanticvectors/vectorpseudoroutes.py:def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
 semanticvectors/vectorpseudoroutes.py:def emptyvectoroutput(searchobject, reasons=list()):
-textsandindices/indexmaker.py:def compilewordlists(worksandboundaries, cursor):
 textsandindices/indexmaker.py:def buildindextowork(cdict, activepoll, headwords, cursor):
+textsandindices/indexmaker.py:def generatesortedoutputbyword(completeindexdict, onework, alphabetical):
+textsandindices/indexmaker.py:def generatesortedoutputbyheadword(completeindexdict, onework, alphabetical, activepoll):
+textsandindices/indexmaker.py:def findindexbaseforms(completeindexdict, morphobjects, activepoll):
+textsandindices/indexmaker.py:def generateheadwordindexdict(augmentedindexdict):
 textsandindices/indexmaker.py:def mpmorphology(terms, morphobjects, commitcount):
 textsandindices/indexmaker.py:def htmlifysimpleindex(completeindexdict, onework):
 textsandindices/indexmaker.py:def linesintoindex(lineobjects, activepoll):

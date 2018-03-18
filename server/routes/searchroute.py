@@ -172,7 +172,7 @@ def executesearch(timestamp):
 			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'.format(
 				skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximate)
 
-		hits = searchdispatcher(so, activepoll)
+		hits = searchdispatcher(so)
 		activepoll.statusis('Putting the results in context')
 
 		# hits [<server.hipparchiaclasses.dbWorkLine object at 0x10d952da0>, <server.hipparchiaclasses.dbWorkLine object at 0x10d952c50>, ... ]
@@ -185,7 +185,7 @@ def executesearch(timestamp):
 			del poll[ts]
 			return output
 
-		resultlist = buildresultobjects(hitdict, authordict, workdict, so, activepoll)
+		resultlist = buildresultobjects(hitdict, authordict, workdict, so)
 
 		activepoll.statusis('Converting results to HTML')
 

@@ -19,7 +19,7 @@ from server.hipparchiaobjects.searchobjects import SearchResult
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 
 
-def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
+def buildresultobjects(hitdict, authordict, workdict, searchobject):
 	"""
 	build result objects for the lines you have found
 
@@ -41,6 +41,7 @@ def buildresultobjects(hitdict, authordict, workdict, searchobject, activepoll):
 	#	print(h,hitdict[h].universalid, hitdict[h].accented)
 
 	so = searchobject
+	activepoll = so.poll
 
 	hitdict = {h: hitdict[h] for h in hitdict if h < so.cap}
 
