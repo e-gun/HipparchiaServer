@@ -1091,6 +1091,11 @@ legend {
 	text-align: center;
 	}
 
+lemmaheadword:hover{
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	 }
+
 li {
 	padding-top: 1px;
 	}

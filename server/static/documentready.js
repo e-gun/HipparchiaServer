@@ -91,7 +91,6 @@ $(document).ready( function () {
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
 
         checkactivityviawebsocket(searchid);
-
         });
 
     function setoptions(sessionvar,value){
@@ -199,7 +198,6 @@ $(document).ready( function () {
     		$('#browseforward').unbind('click');
     		}
 		);
-
 	});
 
 
@@ -272,9 +270,9 @@ $(document).ready( function () {
             thehtml += m + '&nbsp;(' + e + 's)';
             }
 
-       if ( h > 0) { thehtml += '<br />(<span class="progress">'+h+'</span> found)'; }
+       if ( h > 0) { thehtml += '<br />(<span class="progress">' + h + '</span> found)'; }
 
-       thehtml += '<br />'+x;
+       thehtml += '<br />' + x;
 
        $('#pollingdata').html(thehtml);
     }
