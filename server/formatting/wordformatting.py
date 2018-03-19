@@ -455,6 +455,8 @@ def universalregexequivalent(searchterm):
 	searchtermequivalent = re.sub(r'👽', '\w', searchtermequivalent)
 	searchtermequivalent = '({s})'.format(s=searchtermequivalent)
 
+	# print('searchtermequivalent', searchtermequivalent)
+
 	try:
 		searchtermequivalent = searchtermequivalent
 	except:

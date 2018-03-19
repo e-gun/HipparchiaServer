@@ -53,7 +53,7 @@ def executesearch(timestamp):
 
 	frozensession = so.session
 
-	phrasefinder = re.compile('[^\s]\s[^\s]')
+	phrasefinder = re.compile(r'[^\s]\s[^\s]')
 
 	poll[ts] = ProgressPoll(ts)
 	activepoll = poll[ts]
@@ -130,20 +130,20 @@ def executesearch(timestamp):
 				so.usecolumn = 'accented_line'
 
 		if so.lemma and not (so.proximatelemma or so.proximate):
-			# print('executesearch(): a')
+			# print('executesearch(): a - simplelemma')
 			so.searchtype = 'simplelemma'
 			so.usewordlist = 'polytonic'
 			thesearch = 'all forms of »{skg}«'.format(skg=so.lemma.dictionaryentry)
 			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry)
 		elif so.lemma and so.proximatelemma:
-			# print('executesearch(): b')
+			# print('executesearch(): b - proximity of lemma to lemma')
 			so.searchtype = 'proximity'
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximatelemma.dictionaryentry)
 			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of all {pn} known forms of <span class="sought">»{pskg}«</span>'.format(
 				n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pn=len(so.proximatelemma.formlist), pskg=so.proximatelemma.dictionaryentry
 			)
 		elif (so.lemma or so.proximatelemma) and (so.seeking or so.proximate):
-			# print('executesearch(): c')
+			# print('executesearch(): c - procimity of lemma to word')
 			so.searchtype = 'proximity'
 			if so.lemma:
 				lm = so.lemma
@@ -156,17 +156,17 @@ def executesearch(timestamp):
 				n=len(lm.formlist), skg=lm.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pskg=t
 			)
 		elif len(so.proximate) < 1 and re.search(phrasefinder, so.seeking) is None:
-			# print('executesearch(): d')
+			# print('executesearch(): d - basic wordsearch')
 			so.searchtype = 'simple'
 			thesearch = so.originalseeking
 			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=so.originalseeking)
 		elif re.search(phrasefinder, so.seeking):
-			# print('executesearch(): e')
+			# print('executesearch(): e - phrase search')
 			so.searchtype = 'phrase'
 			thesearch = so.originalseeking
 			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=so.originalseeking)
 		else:
-			# print('executesearch(): f')
+			# print('executesearch(): f - proximity of two terms')
 			so.searchtype = 'proximity'
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximate)
 			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'.format(

@@ -83,6 +83,10 @@ def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconne
 
 	relevantconnections is a dict each of whose keyed entries unpacks into a mostsimilartuples-like list
 
+	consider shifting to bokeh? can have clickable bubbles, etc
+
+		https://github.com/bokeh/bokeh/blob/master/examples/models/file/graphs.py
+
 	:param searchterm:
 	:param mostsimilartuples:
 	:param vectorspace:

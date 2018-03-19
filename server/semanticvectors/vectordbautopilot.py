@@ -50,14 +50,15 @@ def startvectorizing():
 		wordcount = searching[1]
 		so = buildfakesearchobject()
 		so.searchlist = searchlist
+		so.poll = emptypoll
 
 		vectorspace = checkforstoredvector(so, indextype)
 
 		if not vectorspace:
 			indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 			so.indexrestrictions = indexrestrictions
-			sentencetuples = vectorprepdispatcher(so, emptypoll)
-			vectorspace = buildnnvectorspace(sentencetuples, emptypoll, so)
+			sentencetuples = vectorprepdispatcher(so)
+			vectorspace = buildnnvectorspace(sentencetuples, so)
 			# the vectorspace is stored in the db at the end of the call to buildnnvectorspace()
 
 			if vectorspace and len(searchlist) > 1:

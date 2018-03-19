@@ -19,6 +19,11 @@ class ConnectionObject(object):
 
 	add connectioncleanup() to the mix
 
+	consider implementing a connection pool
+
+	example:
+		https://github.com/gevent/gevent/blob/master/examples/psycopg2_pool.py
+
 	"""
 
 	def __init__(self, autocommit='n', readonlyconnection=True, u='DBUSER', p='DBPASS'):

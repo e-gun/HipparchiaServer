@@ -9,6 +9,7 @@
 import os
 import re
 
+
 def loadconfig(filepath):
 	"""
 	simple simon: a read of the file to prepare it for the  parse

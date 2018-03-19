@@ -180,7 +180,7 @@
 @font-face {
 	font-family: 'hipparchiamonostatic';
 	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
-	src: url('/static/ttf/DejaVuSansMono.ttf') format('truetype');
+	src: url('/static/ttf/RobotoMono-Medium.ttf') format('truetype');
 	}
 
 @font-face {
@@ -287,7 +287,7 @@ body {
 	text-align: left;
 	font-weight: bold;
 	color: var(--brtblue);
-	padding-bottom: 0px;
+	padding-bottom: 0;
 	}
 
 .date{
@@ -409,7 +409,7 @@ body {
     }
 
 .hmu_blank_quarter_spaces {
-	margin-left: 0px;
+	margin-left: 0;
 	}
 
 .hmu_date_or_numeric_equivalent_of_date {
@@ -535,14 +535,14 @@ body {
 
 .label {
 	font-weight: 600;
-	font-color: var(--vdkteal);
+	color: var(--vdkteal);
 	padding-left: 25px;
 	padding-right: 10px;
 	}
 
 .labelcell {
 	font-weight: 600;
-	font-color: var(--vdkteal);
+	color: var(--vdkteal);
 	vertical-align: top;
 	text-align: center;
 	}
