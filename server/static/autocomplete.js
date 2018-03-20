@@ -184,11 +184,11 @@ function locusdataloader() {
     var l2 = $('#level02').val();
     var l1 = $('#level01').val();
     var l0 = $('#level00').val();
-    var lvls = [ l5,l4,l3,l2,l1,l0];
+    var lvls = [ l5, l4, l3, l2, l1, l0];
     var locusdata = '';
     for (var i = 0; i < 6; i++ ) {
         if (lvls[i] !== '') { locusdata += lvls[i]+'|' } }
-    locusdata = locusdata.slice(0,(locusdata.length)-1);
+    locusdata = locusdata.slice(0, (locusdata.length)-1);
 
     return locusdata;
     }
@@ -235,7 +235,7 @@ function loadLevellist(workid,pariallocus){
                 var wrk = workid.slice(7,10);
                 var loc = locusdataloader();
 
-                loadLevellist(auth+'w'+wrk,String(loc));
+                loadLevellist(auth+'w'+wrk, String(loc));
 
             }});
     });
