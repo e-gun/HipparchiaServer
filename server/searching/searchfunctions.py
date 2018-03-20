@@ -13,7 +13,7 @@ from string import punctuation
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import resultiterator
+from server.dbsupport.dbfunctions import resultiterator, uniquetablename
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import removegravity, wordlistintoregex
@@ -175,10 +175,15 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 	if r['type'] == 'temptable':
 		# make the table
 		q = r['where']['tempquery']
+		avoidcollisions = uniquetablename()
+		q = re.sub('_includelist', '_includelist_{a}'.format(a=avoidcollisions), q)
 		cursor.execute(q)
 		# now you can work with it
-		whereextensions = 'EXISTS (SELECT 1 FROM {tbl}_includelist incl WHERE incl.includeindex = {tbl}.index'.format(
-			tbl=authortable)
+		wtempate = """
+		EXISTS
+			(SELECT 1 FROM {tbl}_includelist_{a} incl WHERE incl.includeindex = {tbl}.index
+		"""
+		whereextensions = wtempate.format(a=avoidcollisions, tbl=authortable)
 		whr = 'WHERE {xtn} AND {au}.{col} {sy} %s)'.format(au=authortable, col=so.usecolumn, sy=mysyntax, xtn=whereextensions)
 	elif r['type'] == 'between':
 		whereextensions = buildbetweenwhereextension(authortable, so)
@@ -234,7 +239,11 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		forms = [forms[i:i + n] for i in range(0, len(forms), n)]
 		forms = [wordlistintoregex(f) for f in forms]
 
-		qtemplate = 'CREATE TEMPORARY TABLE IF NOT EXISTS lemmatizedforms_{wd} AS SELECT term FROM unnest(%s) term;'
+		qtemplate = """
+		DROP TABLE IF EXISTS lemmatizedforms_{wd};
+		CREATE TEMPORARY TABLE IF NOT EXISTS lemmatizedforms_{wd} AS 
+			SELECT term FROM unnest(%s) term
+		"""
 		q = qtemplate.format(wd=so.lemma.dictionaryentry)
 		d = (forms,)
 		cursor.execute(q, d)

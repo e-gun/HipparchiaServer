@@ -89,8 +89,7 @@ def executesearch(timestamp):
 		so.usedcorpora = so.wholecorporasearched()
 
 		activepoll.statusis('Configuring the search restrictions')
-		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
-		so.indexrestrictions = indexrestrictions
+		so.indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 
 		# fork over to the associative vectors framework if that option we checked
 		# return the data derived therefrom instead of "search result" data

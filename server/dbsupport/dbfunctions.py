@@ -10,6 +10,7 @@ import configparser
 from os import cpu_count
 
 import psycopg2
+import random
 
 from server import hipparchia
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -44,17 +45,17 @@ def setthreadcount(startup=False):
 	"""
 
 	if hipparchia.config['AUTOCONFIGWORKERS'] != 'yes':
-		w = hipparchia.config['WORKERS']
+		workers = hipparchia.config['WORKERS']
 	else:
-		w = int(cpu_count() / 2) + 1
+		workers = int(cpu_count() / 2) + 1
 
-	if w < 1:
-		w = 1
+	if workers < 1:
+		workers = 1
 
-	if w > cpu_count() and startup:
-		print('\nWARNING: threadcount exceeds total available number of threads: {a} vs {b}'.format(a=w, b=cpu_count()))
+	if workers > cpu_count() and startup:
+		print('\nWARNING: threadcount exceeds total available number of threads: {a} vs {b}'.format(a=workers, b=cpu_count()))
 
-	return w
+	return workers
 
 
 def tablenamer(authorobject, thework):
@@ -88,6 +89,17 @@ def tablenamer(authorobject, thework):
 	return workdbname
 
 
+def uniquetablename():
+	"""
+
+	random name for temporary tables
+
+	:return:
+	"""
+
+	return ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(12)])
+
+
 def resultiterator(cursor, chunksize=5000):
 	"""
 
@@ -103,7 +115,12 @@ def resultiterator(cursor, chunksize=5000):
 	"""
 
 	while True:
-		results = cursor.fetchmany(chunksize)
+		try:
+			results = cursor.fetchmany(chunksize)
+		except psycopg2.ProgrammingError:
+			# psycopg2.ProgrammingError: no results to fetch
+			# you only see this when using the PooledConnectionObject (which is itself buggy)
+			results = None
 		if not results:
 			break
 		for result in results:

@@ -7,8 +7,9 @@
 """
 
 from collections import deque
+import random
 
-from server.dbsupport.dbfunctions import perseusidmismatch, resultiterator
+from server.dbsupport.dbfunctions import perseusidmismatch, resultiterator, uniquetablename
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 
@@ -179,7 +180,7 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 	"""
 
 	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
-	curs = dbconnection.cursor()
+	cursor = dbconnection.cursor()
 
 	tosearch = deque()
 	reversemap = dict()
@@ -195,13 +196,26 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 
 	tosearch = [str(x) for x in tosearch]
 
-	tempquery = 'CREATE TEMPORARY TABLE {au}_includelist AS SELECT values AS includeindex FROM unnest(ARRAY[{lines}]) values'.format(
-		au=table, lines=','.join(tosearch))
-	curs.execute(tempquery)
+	tqtemplate = """
+	CREATE TEMPORARY TABLE {au}_includelist_{ac} AS
+		SELECT values AS 
+			includeindex FROM unnest(ARRAY[{lines}]) values
+	"""
 
-	q = 'SELECT * FROM {au} WHERE EXISTS (SELECT 1 FROM {au}_includelist incl WHERE incl.includeindex = {au}.index)'.format(au=table)
-	curs.execute(q)
-	results = resultiterator(curs)
+	# avoidcollisions instead of DROP TABLE IF EXISTS; the table disappears at the end of the connection
+	avoidcollisions = uniquetablename()
+
+	tempquery = tqtemplate.format(au=table, ac=avoidcollisions, lines=','.join(tosearch))
+	cursor.execute(tempquery)
+
+	qtemplate = """
+	SELECT * FROM {au} WHERE EXISTS 
+		(SELECT 1 FROM {au}_includelist_{ac} incl WHERE incl.includeindex = {au}.index)
+	"""
+
+	q = qtemplate.format(au=table, ac=avoidcollisions)
+	cursor.execute(q)
+	results = resultiterator(cursor)
 
 	lines = [dblineintolineobject(r) for r in results]
 	indexedlines = {l.index: l for l in lines}

@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+	HipparchiaServer: an interface to a database of Greek and Latin texts
+	Copyright: E Gunderson 2016-18
+	License: GNU GENERAL PUBLIC LICENSE 3
+		(see LICENSE in the top level directory of the distribution)
+"""
+
 import re
 from collections import deque
 
@@ -224,8 +232,13 @@ def wholeworktemptablecontents(authorid, setoflinenumbers):
 	else:
 		lines = '-1'
 
-	tempquery = 'CREATE TEMPORARY TABLE {au}_includelist AS SELECT values AS includeindex FROM unnest(ARRAY[{lines}]) values'.format(
-		au=authorid, lines=lines)
+	tqtemplate = """
+	CREATE TEMPORARY TABLE {au}_includelist AS 
+		SELECT values 
+			AS includeindex FROM unnest(ARRAY[{lines}]) values
+	"""
+
+	tempquery = tqtemplate.format(au=authorid, lines=lines)
 	returndict = {'tempquery': tempquery}
 
 	return returndict

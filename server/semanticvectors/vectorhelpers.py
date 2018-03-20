@@ -16,8 +16,7 @@ from string import punctuation
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import resultiterator, \
-	setthreadcount
+from server.dbsupport.dbfunctions import resultiterator, setthreadcount, uniquetablename
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
 	tidyupterm
@@ -87,10 +86,15 @@ def findsentences(authortable, searchobject, cursor):
 	if r['type'] == 'temptable':
 		# make the table
 		q = r['where']['tempquery']
+		avoidcollisions = uniquetablename()
+		q = re.sub('_includelist', '_includelist_{a}'.format(a=avoidcollisions), q)
 		cursor.execute(q)
 		# now you can work with it
-		whereextensions = 'EXISTS (SELECT 1 FROM {tbl}_includelist incl WHERE incl.includeindex = {tbl}.index'.format(
-			tbl=authortable)
+		wtempate = """
+		EXISTS
+			(SELECT 1 FROM {tbl}_includelist_{a} incl WHERE incl.includeindex = {tbl}.index
+		"""
+		whereextensions = wtempate.format(a=avoidcollisions, tbl=authortable)
 		whr = 'WHERE {xtn} )'.format(xtn=whereextensions)
 	elif r['type'] == 'between':
 		whereextensions = buildbetweenwhereextension(authortable, so)

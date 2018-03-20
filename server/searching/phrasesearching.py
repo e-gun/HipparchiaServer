@@ -8,8 +8,8 @@
 
 import re
 
-from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
+from server.dbsupport.dbfunctions import uniquetablename
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline, substringsearch
@@ -203,9 +203,15 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 					indexwedwhere = indexwedwhere[:-4]
 					whr = 'WHERE {iw}'.format(iw=indexwedwhere)
 			elif r['type'] == 'temptable':
+				avoidcollisions = uniquetablename()
 				q = r['where']['tempquery']
+				q = re.sub('_includelist', '_includelist_{a}'.format(a=avoidcollisions), q)
 				cursor.execute(q)
-				whr = 'WHERE EXISTS (SELECT 1 FROM {tbl}_includelist incl WHERE incl.includeindex = {tbl}.index)'.format(tbl=uid)
+				wtempate = """
+				WHERE EXISTS
+					(SELECT 1 FROM {tbl}_includelist_{a} incl WHERE incl.includeindex = {tbl}.index)
+				"""
+				whr = wtempate.format(tbl=uid, a=avoidcollisions)
 
 			query = qtemplate.format(db=uid, co=so.usecolumn, whr=whr, lim=lim)
 			data = (sp,)

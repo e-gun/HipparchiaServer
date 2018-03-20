@@ -36,20 +36,20 @@ def createvectorstable():
 
 	CREATE TABLE public.storedvectors
 	(
-	    ts timestamp without time zone,
-	    versionstamp character varying(6) COLLATE pg_catalog."default",
-	    settings character varying (512) COLLATE pg_catalog."default",
-	    uidlist text[] COLLATE pg_catalog."default",
-	    vectortype character varying(10) COLLATE pg_catalog."default",
-	    calculatedvectorspace bytea
+		ts timestamp without time zone,
+		versionstamp character varying(6) COLLATE pg_catalog."default",
+		settings character varying (512) COLLATE pg_catalog."default",
+		uidlist text[] COLLATE pg_catalog."default",
+		vectortype character varying(10) COLLATE pg_catalog."default",
+		calculatedvectorspace bytea
 	)
 	WITH (
-	    OIDS = FALSE
+		OIDS = FALSE
 	)
 	TABLESPACE pg_default;
 	
 	ALTER TABLE public.storedvectors
-	    OWNER to hippa_wr;
+		OWNER to hippa_wr;
 	
 	GRANT SELECT ON TABLE public.storedvectors TO {reader};
 	
@@ -84,15 +84,15 @@ def createstoredimagestable():
 	CREATE TABLE public.storedvectorimages
 	(
 		imagename character varying(12),
-	    imagedata bytea
+		imagedata bytea
 	)
 	WITH (
-	    OIDS = FALSE
+		OIDS = FALSE
 	)
 	TABLESPACE pg_default;
 	
 	ALTER TABLE public.storedvectorimages
-	    OWNER to hippa_wr;
+		OWNER to hippa_wr;
 	
 	GRANT SELECT ON TABLE public.storedvectorimages TO {reader};
 	
