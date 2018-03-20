@@ -541,6 +541,13 @@ def ldatopicgraphing(sentencetuples, searchobject):
 		maxfreq of 1 will give you a lot of excessively common words: 'this', 'that', etc.
 		maxfreq of
 
+	on the general issue of graphing see also:
+		https://speakerdeck.com/bmabey/visualizing-topic-models
+		https://de.dariah.eu/tatom/topic_model_visualization.html
+
+	on the axes:
+		https://stats.stackexchange.com/questions/222/what-are-principal-component-scores
+
 	:param sentencetuples:
 	:param activepoll:
 	:return:

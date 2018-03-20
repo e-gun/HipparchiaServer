@@ -5,7 +5,6 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
-import random
 
 import psycopg2
 import psycopg2.pool as connectionpool
@@ -37,7 +36,7 @@ class PooledConnectionObject(object):
 
 		psycopg2.DatabaseError: error with status PGRES_TUPLES_OK and no message from the libpq
 
-	it looks like there are serious threading issues
+	it looks like there are serious threading issues: WORKERS = 1 fixes the problem; WORKERS = 2 generates is
 
 	and it seems that the temp tables are not getting deleted when one expects them to vanish:
 
@@ -59,6 +58,11 @@ class PooledConnectionObject(object):
 
 	the interesting thing is that you can get something like the BDS stuck thread
 	behavior on MacOS by pounding at this...
+
+	you can eliminate the behavior by giving substringsearch(), etc its own ConnectionObject()
+	this will slow you down plenty, though
+
+	troubled connections have STATUS_BEGIN assigned to them when the disaster strikes
 
 	"""
 
