@@ -1,52 +1,105 @@
-EXPERIMENTAL semantic vector searching can be enabled by clicking on the box next to <code>δ</code>
-or <code>Δ</code> once <span class="emph">complex searching</span> is selected.
-<br />
-<br />
-<code>δ</code> will execute the following sequence of operations:
-<ul>
-    <li>find all <span class="emph">sentences</span> containing the matching term or lemmatized wordlist in all texts on the active searchlist</li>
-    <li>calculate the <code>cosine distance</code> from this word to all other words that appear in these sentences</li>
-    <li>generate a ranked list of associated words that are above a certain threshold</li>
-</ul>
-<code>Δ</code> will execute the following sequence of operations:
-<ul>
-    <li>find all <span class="emph">passages</span> containing the matching term or lemmatized wordlist in all texts on the active searchlist</li>
-    <li>grab the relevant <span class="emph">context</span> around the word: N lines or N words</li>
-    <li>calculate the <code>cosine distance</code> from this word to all other words that appear in these passages</li>
-    <li>generate a ranked list of associated words that are above a certain threshold</li>
-</ul>
+EXPERIMENTAL semantic vector searching can be enabled by properly
+	configuring <code>config.py</code>. 
+<ul class="forexample"><li>Checking
+	<code>Word environs: by sentence</code> will execute the following
+	sequence of operations: <ul> <li>find all <span
+	class="emph">sentences</span> containing the matching term or
+	lemmatized wordlist in all texts on the active searchlist</li>
+	<li>calculate the <code>cosine distance</code> from this word to all
+	other words that appear in these sentences</li> <li>generate a
+	ranked list of associated words that are above a certain
+	threshold</li> </ul> A search with <code>Word environs: within N
+	lines/words</code> checked will execute the following sequence of
+	operations: <ul> <li>find all <span class="emph">passages</span>
+	containing the matching term or lemmatized wordlist in all texts on
+	the active searchlist</li> <li>grab the relevant <span
+	class="emph">context</span> around the word: N lines or N words</li>
+	<li>calculate the <code>cosine distance</code> from this word to all
+	other words that appear in these passages</li> <li>generate a ranked
+	list of associated words that are above a certain threshold</li>
+	</ul>
 
-<code>0</code> indicates identity: that is, there is no distance. <code>1</code> is maximal distance, i.e., no significant relationship between the terms.
+<code>0</code> indicates identity: that is, there is no distance.
+	<code>1</code> is maximal distance, i.e., no significant
+	relationship between the terms.
 
-<br />
-<br />
-The <span class="emph">math</span> behind the cosine distances:
-<br />
-<br />
-<code>cos(α, β) = α · β / ||α|| ||β||</code>
-<br />
-<br />
-<code>||α|| = sqrt(α · α)</code>
-<br />
-<br />
-where <code>α</code> and <code>β</code> are vectors whose dimension is the N distinct lemmatized
-terms that can be derived from all terms found in all the passages acquired.
-<br />
-<br />
-Notes:
-<ul>
-    <li>not every word can be lemmatized</li>
-    <li>homonymns cannot be avoided</li>
-    <li>more context means more terms: a <code>.4</code> association in a small set of words becomes
-        something like a <code>.6</code> if you have too many words. Beyond a certain point you will
-        never have any strong associations.</li>
-</ul>
-What is NOT (yet) happening:
-<br />
-<br />
-"Latent Semantic Indexing, LSI (or sometimes LSA) transforms documents from either bag-of-words or (preferably)
-TfIdf-weighted space into a latent space of a lower dimensionality."
-<br />
-<br />
-The hooks are in the code, and certain "secret routes" will build a vectorspace and executa a query against it,
-but a number of theoretical issues still need to be worked out, especially the question of <code>dimensionality</code>.
+
+<br /> <br /> The <span class="emph">math</span> behind the cosine
+	distances: 
+<br /> <br /> <code>cos(α, β) = α · β / ||α|| ||β||</code>
+<br /> <br /> <code>||α|| = sqrt(α · α)</code> <br />
+	<br /> where <code>α</code> and <code>β</code> are vectors whose
+	dimension is the N distinct lemmatized terms that can be derived
+	from all terms found in all the passages acquired. 
+<br /> <br />
+	Notes: <ul> <li>not every word can be lemmatized</li> <li>homonymns
+	cannot be avoided</li> <li>more context means more terms: a
+	<code>.4</code> association in a small set of words becomes
+	something like a <code>.6</code> if you have too many words. Beyond
+	a certain point you will never have any strong associations.</li>
+	</ul> </li>
+<li>The <code>Concept search</code> option will turn
+	your query into a vector and match it to similar vectors in the
+	search space. "Latent Semantic Indexing, LSI (or sometimes LSA)
+	transforms documents from either bag-of-words or (preferably)
+	TfIdf-weighted space into a latent space of a lower dimensionality."
+	That is, what sentences have a similar "mathematical shape" to your
+	query? 
+<li>The <code>Concept map</code> option will look for all forms of some
+        headword in the search space. Then it will graph the words that
+        are most strongly associated with that term as well as the
+        interrelationships among these terms. This is a <code>nearest
+        neighbors</code> search inside of a <code>Word2Vec</code> space.
+    </li>
+<li>Latent Dirichlet Allocation [LDA] (misleadingly under 'sentence
+	similarities' ATM) 
+<br /> <br /> The “topics” are algorithmically
+	generated. Before running the data through the equations, you say,
+	“break it into N topics”. Then N topics emerge on the other side.
+	Obviously the choice of N matters a lot, but at the moment there is
+	more art than science to the choice. It is clear that forcing some
+	datasets into a number of topics that is either too large or too
+	small will not be so hot: What Ns are good picks for W words in D
+	documents? The main thing seems to be to find an N that achieves the
+	most bubbles that are discretely positioned across the graph without
+	excessive overlap or clustering. 
+<br /> <br /> The other very
+	important choices the human operator makes: maxfreq; minfreq; and
+	iterations. Maxfreq makes the most difference amid my trials:
+	eliminate words that appear in > X% of the sentences. I.e., kill of
+	“ubiquitous” topics (which tend to be super-common words like “the”
+	[although I already toss articles at an earlier step]). <br /> <br
+	/> A lot of this NLP stuff has a “human element” at at least some
+	juncture: “supervised” vs “unsupervised” learning, etc. <br /> <br
+	/> OK, the method after you pick N, maxfreq, minfreq, and
+	iterations: LDA is an iterative algorithm. Here are the two main
+	steps: 
+<br /> <br /> In the initialization stage, each word is
+	assigned to a random topic. Iteratively, the algorithm goes through
+	each word and reassigns the word to a topic taking into
+	consideration: What’s the probability of the word belonging to a
+	topic What’s the probability of the document to be generated by a
+	topic The graph axes: 
+<br /> <br /> Principal Component analysis is
+	a form of multidimensional scaling. It is a linear transformation of
+	the variables into a lower dimensional space which retain maximal
+	amount of information about the variables. 
+<br /> <br /> PC1 and PC2
+	are the 2d space into which the higher dimensionality vectorized
+	data has been projected. As such these axes are themselves abstract
+	mathematical constructions and do not correspond to any of the
+	original N-dimensional qualities or to any immediately identifiable
+	“real” thing. 
+<br /> <br /> I found the following description to be
+	helpful for my own understanding: Say you have a cloud of N points
+	in, say, 3D (which can be listed in a 100x3 array). Then, the
+	principal components analysis (PCA) fits an arbitrarily oriented
+	ellipsoid into the data. The principal component score is the length
+	of the diameters of the ellipsoid. 
+<br /> <br /> In the direction in
+	which the diameter is large, the data varies a lot, while in the
+	direction in which the diameter is small, the data varies litte. If
+	you wanted to project N-d data into a 2-d scatter plot, you plot
+	them along the two largest principal components, because with that
+	approach you display most of the variance in the data.
+</li></ul>

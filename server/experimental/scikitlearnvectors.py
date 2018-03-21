@@ -285,8 +285,8 @@ def simplesktextcomparison(sentencetuples, searchobject):
 	in its simple form this will check a work against itself (and any other work that
 	was on the original searchlist)
 
-	:param sentences:
-	:param activepoll:
+	:param sentencetuples:
+	:param searchobject:
 	:return:
 	"""
 
@@ -361,18 +361,18 @@ def simplesktextcomparison(sentencetuples, searchobject):
 	linemapper = {l.universalid.lower(): l for l in gabbedlineobjects}
 
 	similaritiesdict = {id: (m[1], linemapper[sentencetuples[m[0][0]][0]], sentences[m[0][0]],
-	                         linemapper[sentencetuples[m[0][1]][0]], sentences[m[0][1]])
-	               for id, m in enumerate(mostsimilar)}
+						linemapper[sentencetuples[m[0][1]][0]], sentences[m[0][1]])
+						for id, m in enumerate(mostsimilar)}
 
 	# {id: (scoreA, lineobjectA1, sentA1, lineobjectA2, sentA2), id2: (scoreB, lineobjectB1, sentB1, lineobjectB2, sentB2), ... }
 
 	if avoidinternalxrefs:
 		similaritiesdict = {s: similaritiesdict[s] for s in similaritiesdict
-		                    if similaritiesdict[s][1].wkuinversalid != similaritiesdict[s][3].wkuinversalid}
+							if similaritiesdict[s][1].wkuinversalid != similaritiesdict[s][3].wkuinversalid}
 
 	if avoidauthorxrefs:
 		similaritiesdict = {s: similaritiesdict[s] for s in similaritiesdict
-		                    if similaritiesdict[s][1].authorid != similaritiesdict[s][3].authorid}
+							if similaritiesdict[s][1].authorid != similaritiesdict[s][3].authorid}
 
 	if antianaphora > 0:
 		anaphoratracker = set()
@@ -412,10 +412,10 @@ def ldatopicmodeling(sentencetuples, searchobject):
 
 	CountVectorizer:
 	max_df : float in range [0.0, 1.0] or int, default=1.0
-	    When building the vocabulary ignore terms that have a document frequency strictly higher than the given threshold (corpus-specific stop words).
+		When building the vocabulary ignore terms that have a document frequency strictly higher than the given threshold (corpus-specific stop words).
 
 	min_df : float in range [0.0, 1.0] or int, default=1
-	    When building the vocabulary ignore terms that have a document frequency strictly lower than the given threshold. This value is also called cut-off in the literature.
+		When building the vocabulary ignore terms that have a document frequency strictly lower than the given threshold. This value is also called cut-off in the literature.
 
 	see sample results at end of file
 
@@ -455,16 +455,16 @@ def ldatopicmodeling(sentencetuples, searchobject):
 
 	# Use tf (raw term count) features for LDA.
 	ldavectorizer = CountVectorizer(max_df=maxfreq,
-	                             min_df=minfreq,
-	                             max_features=maxfeatures)
+									min_df=minfreq,
+									max_features=maxfeatures)
 
 	ldavectorized = ldavectorizer.fit_transform(bagsofsentences)
 
 	lda = LatentDirichletAllocation(n_components=components,
-	                                max_iter=iterations,
-	                                learning_method='online',
-	                                learning_offset=50.,
-	                                random_state=0)
+									max_iter=iterations,
+									learning_method='online',
+									learning_offset=50.,
+									random_state=0)
 
 	lda.fit(ldavectorized)
 
@@ -479,8 +479,10 @@ def ldatopicmodeling(sentencetuples, searchobject):
 	tfidf = tfidfvectorizer.fit_transform(bagsofsentences)
 
 	# Fit the NMF model
-	nmf = NMF(n_components=components, random_state=1,
-	          alpha=.1, l1_ratio=.5).fit(tfidf)
+	nmf = NMF(n_components=components,
+				random_state=1,
+				alpha=.1,
+				l1_ratio=.5).fit(tfidf)
 
 	print("\nTopics in NMF model (Frobenius norm):")
 	tfidffeaturenames = tfidfvectorizer.get_feature_names()
@@ -491,9 +493,13 @@ def ldatopicmodeling(sentencetuples, searchobject):
 	      "tf-idf features, n_samples=%d and n_features=%d..."
 	      % (len(sentences), maxfeatures))
 
-	nmf = NMF(n_components=components, random_state=1,
-	          beta_loss='kullback-leibler', solver='mu', max_iter=1000, alpha=.1,
-	          l1_ratio=.5).fit(tfidf)
+	nmf = NMF(n_components=components,
+				random_state=1,
+				beta_loss='kullback-leibler',
+				solver='mu',
+				max_iter=1000,
+				alpha=.1,
+				l1_ratio=.5).fit(tfidf)
 
 	print("\nTopics in NMF model (generalized Kullback-Leibler divergence):")
 	tfidffeaturenames = tfidfvectorizer.get_feature_names()
@@ -525,15 +531,15 @@ def ldatopicgraphing(sentencetuples, searchobject):
 
 	max_df is used for removing terms that appear too frequently, also known as "corpus-specific stop words". For example:
 
-	    max_df = 0.50 means "ignore terms that appear in more than 50% of the documents".
-	    max_df = 25 means "ignore terms that appear in more than 25 documents".
+		max_df = 0.50 means "ignore terms that appear in more than 50% of the documents".
+		max_df = 25 means "ignore terms that appear in more than 25 documents".
 
 	The default max_df is 1.0, which means "ignore terms that appear in more than 100% of the documents". Thus, the default setting does not ignore any terms.
 
 	min_df is used for removing terms that appear too infrequently. For example:
 
-	    min_df = 0.01 means "ignore terms that appear in less than 1% of the documents".
-	    min_df = 5 means "ignore terms that appear in less than 5 documents".
+		min_df = 0.01 means "ignore terms that appear in less than 1% of the documents".
+		min_df = 5 means "ignore terms that appear in less than 5 documents".
 
 	The default min_df is 1, which means "ignore terms that appear in less than 1 document". Thus, the default setting does not ignore any terms.
 
@@ -557,7 +563,7 @@ def ldatopicgraphing(sentencetuples, searchobject):
 	maxfeatures = 2000
 	components = 15  # topics
 
-	maxfreq = .60
+	maxfreq = .75   # but .60 seems nice...
 	minfreq = 5
 	iterations = 12
 
