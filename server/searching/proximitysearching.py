@@ -36,10 +36,8 @@ def withinxlines(workdbname, searchobject, dbconnection):
 	"""
 
 	so = searchobject
-
-	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	# dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
-	cursor = dbconnection.cursor()
+	dbcursor = dbconnection.cursor()
+	dbconnection.setautocommit()
 
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
@@ -53,9 +51,9 @@ def withinxlines(workdbname, searchobject, dbconnection):
 		chunked = [wordlistintoregex(c) for c in chunked]
 		hits = list()
 		for c in chunked:
-			hits += list(substringsearch(c, workdbname, so, cursor, templimit))
+			hits += list(substringsearch(c, workdbname, so, dbcursor, templimit))
 	else:
-		hits = list(substringsearch(so.termone, workdbname, so, cursor, templimit))
+		hits = list(substringsearch(so.termone, workdbname, so, dbcursor, templimit))
 
 	fullmatches = list()
 
@@ -63,14 +61,12 @@ def withinxlines(workdbname, searchobject, dbconnection):
 		for hit in hits:
 			if len(fullmatches) > so.cap:
 				break
-			isnear = dblooknear(hit[0], so.distance, so.termtwo, hit[1], so.usecolumn, cursor)
+			isnear = dblooknear(hit[0], so.distance, so.termtwo, hit[1], so.usecolumn, dbcursor)
 			if so.near and isnear:
 				fullmatches.append(hit)
 			elif not so.near and not isnear:
 				fullmatches.append(hit)
 		break
-
-	dbconnection.connectioncleanup()
 
 	return fullmatches
 
@@ -96,11 +92,10 @@ def withinxwords(workdbname, searchobject, dbconnection):
 	:param searchobject:
 	:return:
 	"""
-	so = searchobject
 
-	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	# dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
-	cursor = dbconnection.cursor()
+	so = searchobject
+	dbcursor = dbconnection.cursor()
+	dbconnection.setautocommit()
 
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
@@ -112,19 +107,20 @@ def withinxwords(workdbname, searchobject, dbconnection):
 		terms = so.lemma.formlist
 		chunked = [terms[i:i + chunksize] for i in range(0, len(terms), chunksize)]
 		chunked = [wordlistintoregex(c) for c in chunked]
+
 		hits = list()
 		for c in chunked:
-			hits += list(substringsearch(c, workdbname, so, cursor, templimit))
+			hits += list(substringsearch(c, workdbname, so, dbcursor, templimit))
 		so.usewordlist = 'polytonic'
 	else:
-		hits = list(substringsearch(so.termone, workdbname, so, cursor, templimit))
+		hits = list(substringsearch(so.termone, workdbname, so, dbcursor, templimit))
 
 	fullmatches = list()
 
 	for hit in hits:
 		hitline = dblineintolineobject(hit)
 
-		leadandlag = grableadingandlagging(hitline, so, cursor)
+		leadandlag = grableadingandlagging(hitline, so, dbcursor)
 		lagging = leadandlag['lag']
 		leading = leadandlag['lead']
 
@@ -133,8 +129,6 @@ def withinxwords(workdbname, searchobject, dbconnection):
 		elif not so.near and not re.search(so.termtwo, leading) and not re.search(so.termtwo, lagging):
 			fullmatches.append(hit)
 
-	dbconnection.connectioncleanup()
-
 	return fullmatches
 
 
@@ -142,6 +136,8 @@ def grableadingandlagging(hitline, searchobject, cursor):
 	"""
 
 	take a dbline and grab the N words in front of it and after it
+
+	it would be a good idea to have an autocommit connection here?
 
 	:param hitline:
 	:param searchobject:

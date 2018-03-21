@@ -97,16 +97,22 @@ class PooledConnectionObject(object):
 			self.dbconection = SimpleConnectionObject(autocommit, readonlyconnection=self.readonlyconnection, u=u, p=p)
 
 		if self.autocommit == 'autocommit':
-			# other possible values are:
-			# psycopg2.extensions.ISOLATION_LEVEL_DEFAULT
-			# psycopg2.extensions.ISOLATION_LEVEL_SERIALIZABLE
-			# psycopg2.extensions.ISOLATION_LEVEL_REPEATABLE_READ
-			# psycopg2.extensions.ISOLATION_LEVEL_READ_COMMITTED
-			self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+			self.setautocommit()
 
 		self.dbconnection.set_session(readonly=self.readonlyconnection)
 		self.connectioncursor = getattr(self.dbconnection, 'cursor')()
 		self.commitcount = hipparchia.config['MPCOMMITCOUNT']
+
+	def setautocommit(self):
+		# other possible values are:
+		# psycopg2.extensions.ISOLATION_LEVEL_DEFAULT
+		# psycopg2.extensions.ISOLATION_LEVEL_SERIALIZABLE
+		# psycopg2.extensions.ISOLATION_LEVEL_REPEATABLE_READ
+		# psycopg2.extensions.ISOLATION_LEVEL_READ_COMMITTED
+		self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+
+	def setdefaultisolation(self):
+		self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_DEFAULT)
 
 	def cursor(self):
 		return self.connectioncursor
@@ -149,9 +155,9 @@ class PooledConnectionObject(object):
 
 		self.commit()
 		self.dbconnection.set_session(readonly=False)
-		self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_DEFAULT)
+		self.setdefaultisolation()
 		self.pool.putconn(self.dbconnection, key=self.uniquename, close=False)
-		print('connection returned to pool:', self.uniquename)
+		# print('connection returned to pool:', self.uniquename)
 
 		return
 
@@ -182,7 +188,7 @@ class SimpleConnectionObject(object):
 											password=hipparchia.config[p])
 
 		if self.autocommit == 'autocommit':
-			self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+			self.setautocommit()
 
 		self.dbconnection.set_session(readonly=readonlyconnection)
 		self.connectioncursor = self.dbconnection.cursor()
@@ -198,6 +204,17 @@ class SimpleConnectionObject(object):
 	def close(self):
 		getattr(self.dbconnection, 'close')()
 		return
+
+	def setautocommit(self):
+		# other possible values are:
+		# psycopg2.extensions.ISOLATION_LEVEL_DEFAULT
+		# psycopg2.extensions.ISOLATION_LEVEL_SERIALIZABLE
+		# psycopg2.extensions.ISOLATION_LEVEL_REPEATABLE_READ
+		# psycopg2.extensions.ISOLATION_LEVEL_READ_COMMITTED
+		self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+
+	def setdefaultisolation(self):
+		self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_DEFAULT)
 
 	def connectionisclosed(self):
 		return self.dbconnection.closed
