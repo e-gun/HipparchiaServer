@@ -6,6 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import multiprocessing
 import re
 import time
 from string import punctuation
@@ -264,7 +265,11 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 	except psycopg2.InternalError:
 		# current transaction is aborted, commands ignored until end of transaction block
 		print('psycopg2.InternalError; did not execute', q, d)
-		pass
+	except psycopg2.DatabaseError:
+		# psycopg2.DatabaseError: error with status PGRES_TUPLES_OK and no message from the libpq
+		# added to track PooledConnection issues
+		# will see: 'DatabaseError for <cursor object at 0x136bab520; closed: 0> @ Process-4'
+		print('DatabaseError for {c} @ {p}'.format(c=cursor, p=multiprocessing.current_process().name))
 
 	return found
 

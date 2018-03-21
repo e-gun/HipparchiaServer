@@ -151,8 +151,6 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 
 	# print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))
 
-	cursor.close()
-
 	dbconnection.connectioncleanup()
 
 	return

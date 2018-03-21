@@ -549,9 +549,7 @@ def mostcommonheadwords(cheat=True):
 
 		wordstoskip = set(wordstoskip + uninteresting)
 
-		dbconnection.commit()
-		cursor.close()
-		del dbconnection
+		dbconnection.connectioncleanup()
 
 		# print('wordstoskip =', wordstoskip)
 
