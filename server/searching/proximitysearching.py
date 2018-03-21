@@ -12,10 +12,11 @@ from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.searching.searchfunctions import dblooknear, substringsearch
+from server.searching.searchfunctions import dblooknear
+from server.searching.substringsearching import substringsearch
 
 
-def withinxlines(workdbname, searchobject):
+def withinxlines(workdbname, searchobject, dbconnection):
 	"""
 
 	after finding x, look for y within n lines of x
@@ -37,7 +38,7 @@ def withinxlines(workdbname, searchobject):
 	so = searchobject
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
+	# dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
@@ -74,7 +75,7 @@ def withinxlines(workdbname, searchobject):
 	return fullmatches
 
 
-def withinxwords(workdbname, searchobject):
+def withinxwords(workdbname, searchobject, dbconnection):
 	"""
 
 	int(session['proximity']), searchingfor, proximate, curs, wkid, whereclauseinfo
@@ -98,7 +99,7 @@ def withinxwords(workdbname, searchobject):
 	so = searchobject
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
+	# dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap

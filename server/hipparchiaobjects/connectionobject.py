@@ -94,7 +94,7 @@ class SimpleConnectionObject(object):
 
 ConnectionObject = SimpleConnectionObject
 
-pools = False
+pools = True
 if pools:
 	from server.experimental.pooledconnectionexperiment import *
 	ConnectionObject = PooledConnectionObject

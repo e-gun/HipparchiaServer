@@ -7,7 +7,6 @@
 """
 
 from collections import deque
-import random
 
 from server.dbsupport.dbfunctions import perseusidmismatch, resultiterator, uniquetablename
 from server.hipparchiaobjects.connectionobject import ConnectionObject

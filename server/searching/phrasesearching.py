@@ -12,7 +12,8 @@ from server.dbsupport.dblinefunctions import dblineintolineobject, makeablanklin
 from server.dbsupport.dbfunctions import uniquetablename
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
-from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline, substringsearch
+from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline
+from server.searching.substringsearching import substringsearch
 
 
 def phrasesearch(wkid, searchobject, cursor):
@@ -71,7 +72,7 @@ def phrasesearch(wkid, searchobject, cursor):
 	return fullmatches
 
 
-def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searchobject):
+def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searchobject, dbconnection):
 	"""
 	foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll
 
@@ -159,7 +160,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 	activepoll = so.poll
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
+	# dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	qcomb = QueryCombinator(searchphrase)
@@ -278,8 +279,6 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 							activepoll.addhits(1)
 							if so.onehit:
 								gotmyonehit = True
-
-	dbconnection.connectioncleanup()
 
 	return foundlineobjects
 

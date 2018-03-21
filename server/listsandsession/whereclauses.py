@@ -79,8 +79,7 @@ def configurewhereclausedata(searchlist, workdict, searchobject):
 	# sample:
 	# literaryinclusionmapper {'gr0019': {'listofboundaries': [(12799, 14613), (1, 1347)], 'listofomissions': None}, 'gr0085': {'listofboundaries': [(3417, 4561), (1, 1156)], 'listofomissions': None}}
 
-	literaryinclusionmapper = {l: {'listofboundaries': wholeworkbetweenclausecontents(literyauthors[l]),
-	                               'listofomissions': []}
+	literaryinclusionmapper = {l: {'listofboundaries': wholeworkbetweenclausecontents(literyauthors[l]), 'listofomissions': list()}
 	                           for l in literyauthors}
 
 	# [B] NON-LITERARY AUTHORS
@@ -221,6 +220,10 @@ def wholeworktemptablecontents(authorid, setoflinenumbers):
 		WHERE NOT EXISTS syntax is too cumbersome to implement in light of all of the other issues in the air
 		(inclusion lists, etc)? It is not clear that the speed gains are going to justify trying to do this.
 
+	'DROP TABLE IF EXISTS' or 'DELETE ON COMMIT' can be used to avoid collisions with temp tables, but we are using
+	a uniqueid instead in most places; here it is tough to pass that name back up the chain; it might be necessary
+	to re.sub() tempquery at the last second in the function that actually connects to the db
+
 	:param authorid:
 	:param setoflinenumbers:
 	:return:
@@ -257,17 +260,17 @@ def partialworkbetweenclausecontents(workobject, searchobject):
 	hasselections = [p[0:10] for p in searchobject.psgselections if p]
 
 	dbconnection = ConnectionObject('autocommit')
-	curs = dbconnection.cursor()
+	dbcursor = dbconnection.cursor()
 
 	blist = list()
 	olist = list()
 	for sel in searchobject.psgselections:
 		if workobject.universalid == sel[0:10]:
-			boundariestuple = findselectionboundaries(workobject, sel, curs)
+			boundariestuple = findselectionboundaries(workobject, sel, dbcursor)
 			blist.append(boundariestuple)
 	for sel in searchobject.psgexclusions:
 		if workobject.universalid == sel[0:10]:
-			boundariestuple = findselectionboundaries(workobject, sel, curs)
+			boundariestuple = findselectionboundaries(workobject, sel, dbcursor)
 			olist.append(boundariestuple)
 			if workobject.universalid not in hasselections:
 				# if you exclude a subsection, then you implicitly include the whole

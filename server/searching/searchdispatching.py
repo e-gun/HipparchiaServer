@@ -17,7 +17,8 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, \
-	massagesearchtermsforwhitespace, substringsearch
+	massagesearchtermsforwhitespace
+from server.searching.substringsearching import substringsearch
 
 
 def searchdispatcher(searchobject):
@@ -131,17 +132,26 @@ def searchdispatcher(searchobject):
 		# impossible, but...
 		workers = 0
 
-	jobs = [Process(target=targetfunction, args=argumentuple) for i in range(workers)]
+	# you need to give each job its own connection if you use a connection pool
+	# otherwise there will be problems with threading
+	# note that we are not yet taking care of connection types: 'autocommit', etc
+
+	oneconnectionperworker = {i: ConnectionObject(readonlyconnection=False) for i in range(workers)}
+	argumentswithconnections = [tuple(list(argumentuple) + [oneconnectionperworker[i]]) for i in range(workers)]
+	jobs = [Process(target=targetfunction, args=argumentswithconnections[i]) for i in range(workers)]
 
 	for j in jobs:
 		j.start()
 	for j in jobs:
 		j.join()
 
+	for c in oneconnectionperworker:
+		oneconnectionperworker[c].connectioncleanup()
+
 	return foundlineobjects
 
 
-def workonsimplesearch(foundlineobjects, searchlist, searchobject):
+def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection):
 	"""
 
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
@@ -162,7 +172,7 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject):
 	# print('workonsimplesearch() - searchlist', searchlist)
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	dbconnection = ConnectionObject('not_autocommit', readonlyconnection=False)
+	# dbconnection = ConnectionObject('not_autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	# print('workonsimplesearch() - so.termone', so.termone)
@@ -199,12 +209,10 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject):
 		except TypeError:
 			pass
 
-	dbconnection.connectioncleanup()
-
 	return foundlineobjects
 
 
-def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject):
+def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconnection):
 	"""
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
@@ -233,7 +241,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject):
 	# print('workonsimplesearch() - searchlist', searchlist)
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	dbconnection = ConnectionObject('not_autocommit', readonlyconnection=False)
+	# dbconnection = ConnectionObject('not_autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	commitcount = 0
@@ -266,12 +274,10 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject):
 		except TypeError:
 			pass
 
-	dbconnection.connectioncleanup()
-
 	return foundlineobjects
 
 
-def workonphrasesearch(foundlineobjects, searchinginside, searchobject):
+def workonphrasesearch(foundlineobjects, searchinginside, searchobject, dbconnection):
 	"""
 
 	a multiprocessor aware function that hands off bits of a phrase search to multiple searchers
@@ -291,7 +297,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, searchobject):
 	so = searchobject
 	activepoll = so.poll
 
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
+	# dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 	commitcount = 0
 	while searchinginside and len(foundlineobjects) < so.cap:
@@ -312,12 +318,10 @@ def workonphrasesearch(foundlineobjects, searchinginside, searchobject):
 		except TypeError:
 			pass
 
-	dbconnection.connectioncleanup()
-
 	return foundlineobjects
 
 
-def workonproximitysearch(foundlineobjects, searchinginside, searchobject):
+def workonproximitysearch(foundlineobjects, searchinginside, searchobject, dbconnection):
 	"""
 
 	a multiprocessor aware function that hands off bits of a proximity search to multiple searchers
@@ -350,9 +354,9 @@ def workonproximitysearch(foundlineobjects, searchinginside, searchobject):
 
 		if wkid:
 			if so.scope == 'lines':
-				foundlines = withinxlines(wkid, so)
+				foundlines = withinxlines(wkid, so, dbconnection)
 			else:
-				foundlines = withinxwords(wkid, so)
+				foundlines = withinxwords(wkid, so, dbconnection)
 
 			if foundlines:
 				activepoll.addhits(len(foundlines))
