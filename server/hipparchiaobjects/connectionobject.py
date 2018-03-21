@@ -53,6 +53,12 @@ class SimpleConnectionObject(object):
 		getattr(self.dbconnection, 'close')()
 		return
 
+	def connectionisclosed(self):
+		return self.dbconnection.closed
+
+	def cursorisclosed(self):
+		return self.connectioncursor.closed
+
 	def checkneedtocommit(self, commitcountervalue):
 		# commitcountervalue is an MPCounter?
 		try:

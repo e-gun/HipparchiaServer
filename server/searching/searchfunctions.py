@@ -270,7 +270,7 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		# added to track PooledConnection issues
 		# will see: 'DatabaseError for <cursor object at 0x136bab520; closed: 0> @ Process-4'
 		print('DatabaseError for {c} @ {p}'.format(c=cursor, p=multiprocessing.current_process().name))
-
+		print('\tq, d', q, d)
 	return found
 
 

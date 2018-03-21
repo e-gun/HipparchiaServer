@@ -14,8 +14,8 @@ from server import hipparchia
 from server.dbsupport.dbfunctions import uniquetablename
 
 poolsize = 20
-pooltype = connectionpool.SimpleConnectionPool
-# pooltype = connectionpool.ThreadedConnectionPool
+# pooltype = connectionpool.SimpleConnectionPool
+pooltype = connectionpool.ThreadedConnectionPool
 # pooltype = connectionpool.PersistentConnectionPool
 
 kwds = {'user': hipparchia.config['DBUSER'],
@@ -92,12 +92,12 @@ class PooledConnectionObject(object):
 		while not self.open:
 			self.dippedintopool += 1
 			self.id = '{a} - {b}'.format(a=uniquetablename(), b=multiprocessing.current_process().name)
-			print('PooledConnectionObject init', self.id)
+			# print('PooledConnectionObject init', self.id)
 			self.dbconnection = self.pool.getconn(key=self.id)
 			self.open = not self.dbconnection.closed
 			if not self.open:
 				self.pool.putconn(self.dbconnection, key=self.id, close=True)
-		print('PooledConnectionObject getconn {me} after {n} tries'.format(me=self.id, n=self.dippedintopool))
+		# print('PooledConnectionObject getconn {me} after {n} tries'.format(me=self.id, n=self.dippedintopool))
 		# status = self.dbconnection.get_transaction_status()
 		# print('PooledConnectionObject {me} status is {s}'.format(me=self.id, s=status))
 
@@ -117,11 +117,17 @@ class PooledConnectionObject(object):
 		return self.connectioncursor
 
 	def commit(self):
-		getattr(self.dbconnection, 'commit')()
+		if not self.connectioncursor.closed and not self.dbconnection.closed:
+			getattr(self.dbconnection, 'commit')()
+		else:
+			print('not committing because closed:', self.id)
 		return
 
 	def close(self):
 		return self.connectioncleanup()
+
+	def isclosed(self):
+		return self.dbconnection.closed
 
 	def checkneedtocommit(self, commitcountervalue):
 		# commitcountervalue is an MPCounter?
@@ -134,7 +140,7 @@ class PooledConnectionObject(object):
 				getattr(self.dbconnection, 'commit')()
 			except psycopg2.DatabaseError:
 				# psycopg2.DatabaseError: error with status PGRES_TUPLES_OK and no message from the libpq
-				# will return '2' as the status: i.e., STATUS_IN_TRANSACTION
+				# will return often-but-not-always '2' as the status: i.e., STATUS_IN_TRANSACTION
 				print(self.id, 'failed to commit()')
 				status = self.dbconnection.get_transaction_status()
 				print('PooledConnectionObject {me} status is {s}'.format(me=self.id, s=status))
@@ -150,10 +156,14 @@ class PooledConnectionObject(object):
 		:return:
 		"""
 
-		self.commit()
-		self.dbconnection.set_session(readonly=False)
-		self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_DEFAULT)
-		self.pool.putconn(self.dbconnection, key=self.id, close=False)
-		print('PooledConnectionObject putconn', self.id)
+		if not self.dbconnection.closed:
+			self.commit()
+			self.dbconnection.set_session(readonly=False)
+			self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_DEFAULT)
+			self.pool.putconn(self.dbconnection, key=self.id, close=False)
+			print('PooledConnectionObject putconn', self.id)
+		else:
+			print('putting away closed', self.id)
+			self.pool.putconn(self.dbconnection, key=self.id, close=True)
 
 		return
