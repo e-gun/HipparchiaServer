@@ -6,8 +6,8 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-from server.dbsupport.dbfunctions import resultiterator
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.dbsupport.miscdbfunctions import resultiterator
+from server.hipparchiaobjects.connectionobject import PooledConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
 
@@ -22,7 +22,7 @@ def loadallauthorsasobjects():
 
 	print('loading all authors...')
 
-	dbconnection = ConnectionObject('not_autocommit')
+	dbconnection = PooledConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	q = 'SELECT * FROM authors'
@@ -49,7 +49,7 @@ def loadallworksasobjects():
 
 	print('loading all works...')
 
-	dbconnection = ConnectionObject('not_autocommit')
+	dbconnection = PooledConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	q = """
@@ -79,7 +79,7 @@ def loadlemmataasobjects():
 	"""
 
 	print('loading all lemmata...')
-	dbconnection = ConnectionObject('not_autocommit')
+	dbconnection = PooledConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	q = """

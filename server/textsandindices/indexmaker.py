@@ -13,10 +13,10 @@ from string import punctuation
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setthreadcount
+from server.threading.mpthreadcount import setthreadcount
 from server.dbsupport.dblinefunctions import makeablankline, grabbundlesoflines
 from server.formatting.wordformatting import tidyupterm
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.connectionobject import PooledConnectionObject
 from server.hipparchiaobjects.helperobjects import MPCounter
 from server.lexica.lexicalookups import lookformorphologymatches
 from server.listsandsession.listmanagement import polytonicsort
@@ -325,7 +325,7 @@ def mpmorphology(terms, morphobjects, commitcount):
 	:return:
 	"""
 
-	dbconnection = ConnectionObject('not_autocommit')
+	dbconnection = PooledConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	while terms:

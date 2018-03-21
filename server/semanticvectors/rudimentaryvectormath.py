@@ -9,7 +9,7 @@
 import re
 from multiprocessing import Manager, Process
 
-from server.dbsupport.dbfunctions import setthreadcount
+from server.threading.mpthreadcount import setthreadcount
 
 try:
 	import numpy as np

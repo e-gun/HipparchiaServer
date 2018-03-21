@@ -13,7 +13,7 @@ from gensim.similarities import MatrixSimilarity
 from server import hipparchia
 from server.dbsupport.vectordbfunctions import storevectorindatabase
 from server.formatting.vectorformatting import formatlsimatches, lsiformatoutput
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.connectionobject import PooledConnectionObject
 from server.hipparchiaobjects.helperobjects import LSIVectorCorpus
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, finddblinesfromsentences, \
@@ -96,7 +96,7 @@ def lsifindmatches(sentencestuples, searchobject, lsispace):
 	if not sentencestuples:
 		sentencestuples = vectorprepdispatcher(so)
 
-	dbconnection = ConnectionObject('autocommit')
+	dbconnection = PooledConnectionObject('autocommit')
 	cursor = dbconnection.cursor()
 	for s in sims:
 		if s[1] > threshold:

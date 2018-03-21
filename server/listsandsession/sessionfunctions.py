@@ -12,7 +12,7 @@ from flask import session
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import prolixlocus
-from server.dbsupport.dbfunctions import probefordatabases
+from server.dbsupport.miscdbfunctions import probefordatabases
 from server.startup import authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict
 
 

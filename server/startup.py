@@ -10,7 +10,8 @@ from server import hipparchia
 from server.calculatewordweights import findccorporaweights, findtemporalweights, workobjectgeneraweights
 from server.dbsupport.bulkdboperations import loadallauthorsasobjects, loadallworksasobjects, \
 	loadallworksintoallauthors, loadlemmataasobjects
-from server.dbsupport.dbfunctions import probefordatabases, setthreadcount
+from server.dbsupport.miscdbfunctions import probefordatabases
+from server.threading.mpthreadcount import setthreadcount
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
 	buildworkgenresdict, buildworkprovenancedict
 

@@ -16,11 +16,13 @@ from string import punctuation
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import resultiterator, setthreadcount, uniquetablename
+from server.dbsupport.miscdbfunctions import resultiterator
+from server.threading.mpthreadcount import setthreadcount
+from server.dbsupport.tablefunctions import uniquetablename
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
 	tidyupterm
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.connectionobject import PooledConnectionObject
 from server.hipparchiaobjects.helperobjects import MPCounter
 from server.hipparchiaobjects.searchobjects import ProgressPoll
 from server.searching.searchdispatching import searchdispatcher
@@ -507,7 +509,7 @@ def mostcommonheadwords(cheat=True):
 			'ἄναξ', 'λόγοϲ'
 		}
 
-		dbconnection = ConnectionObject('not_autocommit')
+		dbconnection = PooledConnectionObject('not_autocommit')
 		cursor = dbconnection.cursor()
 
 		qtemplate = """

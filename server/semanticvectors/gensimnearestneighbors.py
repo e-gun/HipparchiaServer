@@ -9,7 +9,7 @@
 from gensim.models import Word2Vec
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setthreadcount
+from server.threading.mpthreadcount import setthreadcount
 from server.dbsupport.vectordbfunctions import storevectorindatabase
 from server.formatting.vectorformatting import formatnnmatches, formatnnsimilarity, nearestneighborgenerateoutput
 from server.semanticvectors.vectorgraphing import graphnnmatches

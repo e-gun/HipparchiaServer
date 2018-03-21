@@ -13,7 +13,7 @@ from sys import argv
 from flask import render_template, send_file, session
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import versionchecking
+from server.dbsupport.miscdbfunctions import versionchecking
 from server.formatting.vectorformatting import vectorhtmlforfrontpage
 from server.listsandsession.sessionfunctions import sessionvariables
 from server.startup import listmapper

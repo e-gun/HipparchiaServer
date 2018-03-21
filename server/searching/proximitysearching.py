@@ -11,7 +11,7 @@ import re
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
 from server.formatting.wordformatting import wordlistintoregex
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.connectionobject import PooledConnectionObject
 from server.searching.searchfunctions import dblooknear
 from server.searching.substringsearching import substringsearch
 

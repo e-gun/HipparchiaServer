@@ -8,8 +8,9 @@
 
 from collections import deque
 
-from server.dbsupport.dbfunctions import perseusidmismatch, resultiterator, uniquetablename
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.dbsupport.miscdbfunctions import perseusidmismatch, resultiterator
+from server.dbsupport.tablefunctions import uniquetablename
+from server.hipparchiaobjects.connectionobject import PooledConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 
 
@@ -117,7 +118,7 @@ def grablistoflines(table, uidlist):
 	:return:
 	"""
 
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
+	dbconnection = PooledConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	lines = [int(uid.split('_ln_')[1]) for uid in uidlist]
@@ -178,7 +179,7 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 	:return:
 	"""
 
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
+	dbconnection = PooledConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	tosearch = deque()

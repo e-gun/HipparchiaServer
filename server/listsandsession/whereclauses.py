@@ -9,8 +9,8 @@
 import re
 from collections import deque
 
-from server.dbsupport.dbfunctions import findselectionboundaries
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.dbsupport.miscdbfunctions import findselectionboundaries
+from server.hipparchiaobjects.connectionobject import PooledConnectionObject
 
 
 def configurewhereclausedata(searchlist, workdict, searchobject):
@@ -259,7 +259,7 @@ def partialworkbetweenclausecontents(workobject, searchobject):
 
 	hasselections = [p[0:10] for p in searchobject.psgselections if p]
 
-	dbconnection = ConnectionObject('autocommit')
+	dbconnection = PooledConnectionObject('autocommit')
 	dbcursor = dbconnection.cursor()
 
 	blist = list()

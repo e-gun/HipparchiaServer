@@ -10,10 +10,10 @@ import re
 from multiprocessing import Manager, Process
 
 from server import hipparchia
-from server.dbsupport.dbfunctions import setthreadcount
+from server.threading.mpthreadcount import setthreadcount
 from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.formatting.wordformatting import wordlistintoregex
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.connectionobject import PooledConnectionObject
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, \
@@ -136,7 +136,7 @@ def searchdispatcher(searchobject):
 	# otherwise there will be problems with threading
 	# note that we are not yet taking care of connection types: 'autocommit', etc
 
-	oneconnectionperworker = {i: ConnectionObject(readonlyconnection=False) for i in range(workers)}
+	oneconnectionperworker = {i: PooledConnectionObject(readonlyconnection=False) for i in range(workers)}
 	argumentswithconnections = [tuple(list(argumentuple) + [oneconnectionperworker[i]]) for i in range(workers)]
 	jobs = [Process(target=targetfunction, args=argumentswithconnections[i]) for i in range(workers)]
 

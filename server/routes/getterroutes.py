@@ -12,11 +12,11 @@ from flask import make_response, redirect, request, session, url_for
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
-from server.dbsupport.dbfunctions import makeanemptyauthor
+from server.dbsupport.miscdbfunctions import makeanemptyauthor
 from server.formatting.bibliographicformatting import formatauthinfo, formatauthorandworkinfo, formatname, \
 	woformatworkinfo
 from server.formatting.wordformatting import depunct
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.connectionobject import PooledConnectionObject
 from server.listsandsession.listmanagement import compilesearchlist, sortsearchlist
 from server.listsandsession.sessionfunctions import modifysessionselections, modifysessionvar, parsejscookie
 from server.semanticvectors.vectorgraphing import fetchvectorgraph
@@ -133,7 +133,7 @@ def workstructure(locus):
 	:return:
 	"""
 
-	dbc = ConnectionObject('autocommit')
+	dbc = PooledConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	workid = locus.split('_AT_')[0]
@@ -194,7 +194,7 @@ def getauthinfo(authorid):
 	:return:
 	"""
 
-	dbc = ConnectionObject('autocommit')
+	dbc = PooledConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	authorid = depunct(authorid)

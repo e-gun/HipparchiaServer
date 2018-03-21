@@ -10,7 +10,8 @@ import re
 
 import psycopg2
 
-from server.dbsupport.dbfunctions import uniquetablename, resultiterator
+from server.dbsupport.miscdbfunctions import resultiterator
+from server.dbsupport.tablefunctions import uniquetablename
 from server.formatting.wordformatting import wordlistintoregex
 from server.searching.searchfunctions import buildbetweenwhereextension
 
@@ -48,7 +49,7 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 	if so.onehit:
 		mylimit = ' LIMIT 1'
 	else:
-		mylimit = ' LIMIT ' + lim
+		mylimit = ' LIMIT {lim}'.format(lim=lim)
 
 	mysyntax = '~*'
 	found = list()
@@ -79,62 +80,6 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		print('error in substringsearch(): unknown whereclause type', r['type'])
 		whr = 'WHERE ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax)
 
-	if so.searchtype == 'zz_never_meet_condition_simplelemma':
-		# lemmatized searching gets very slow if the number of forms is large
-		# faster to use arrays? nope...: see below
-		# mix and match? [array of items that look like ['a|b|c', 'd|e|f', ...] nope...
-
-		# Sample SQL:
-		# CREATE TEMPORARY TABLE lemmatizedforms AS SELECT term FROM unnest(ARRAY['hospitium', 'hospitio']) term;
-		# SELECT index, stripped_line FROM lt1212 WHERE stripped_line ~* ANY (SELECT term FROM lemmatizedforms);
-
-		"""
-		ARRAYS + TEMP TABLE VERSION
-		
-		Sought all 12 known forms of »hospitium«
-		Searched 7,461 texts and found 250 passages (31.64s)
-		Sorted by name
-		[Search suspended: result cap reached.]
-		
-		"""
-
-		"""
-		MIXANDMATCH: ARRAYS of REREGEX
-		
-		Sought all 12 known forms of »hospitium«
-		Searched 7,461 texts and found 250 passages (15.73s)
-		Sorted by name
-		[Search suspended: result cap reached.]
-
-		"""
-
-		"""
-		GIANTREGEX VERSION
-		
-		Sought all 12 known forms of »hospitium«
-		Searched 7,461 texts and found 250 passages (1.72s)
-		Sorted by name
-		[Search suspended: result cap reached.]
-		"""
-
-		forms = so.lemma.formlist
-		# MIXANDMATCH if the next three lines are enabled
-		n = 3
-		forms = [forms[i:i + n] for i in range(0, len(forms), n)]
-		forms = [wordlistintoregex(f) for f in forms]
-
-		qtemplate = """
-		DROP TABLE IF EXISTS lemmatizedforms_{wd};
-		CREATE TEMPORARY TABLE IF NOT EXISTS lemmatizedforms_{wd} AS 
-			SELECT term FROM unnest(%s) term
-		"""
-		q = qtemplate.format(wd=so.lemma.dictionaryentry)
-		d = (forms,)
-		cursor.execute(q, d)
-
-		# now modify the '%s' that we have from above
-		whr = re.sub(r'%s', 'ANY (SELECT term FROM lemmatizedforms_{wd})'.format(wd=so.lemma.dictionaryentry), whr)
-
 	qtemplate = 'SELECT * FROM {db} {whr} {lm}'
 	q = qtemplate.format(db=authortable, whr=whr, lm=mylimit)
 	d = (seeking,)
@@ -155,3 +100,62 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		print('DatabaseError for {c} @ {p}'.format(c=cursor, p=multiprocessing.current_process().name))
 		print('\tq, d', q, d)
 	return found
+
+
+# DEAD CODE KEPT AROUND SO THAT A BAD WHEEL IS NOT REINVENTED
+#
+# if so.searchtype == 'zz_never_meet_condition_simplelemma':
+# 	# lemmatized searching gets very slow if the number of forms is large
+# 	# faster to use arrays? nope...: see below
+# 	# mix and match? [array of items that look like ['a|b|c', 'd|e|f', ...] nope...
+#
+# 	# Sample SQL:
+# 	# CREATE TEMPORARY TABLE lemmatizedforms AS SELECT term FROM unnest(ARRAY['hospitium', 'hospitio']) term;
+# 	# SELECT index, stripped_line FROM lt1212 WHERE stripped_line ~* ANY (SELECT term FROM lemmatizedforms);
+#
+# 	"""
+# 	ARRAYS + TEMP TABLE VERSION
+#
+# 	Sought all 12 known forms of »hospitium«
+# 	Searched 7,461 texts and found 250 passages (31.64s)
+# 	Sorted by name
+# 	[Search suspended: result cap reached.]
+#
+# 	"""
+#
+# 	"""
+# 	MIXANDMATCH: ARRAYS of REREGEX
+#
+# 	Sought all 12 known forms of »hospitium«
+# 	Searched 7,461 texts and found 250 passages (15.73s)
+# 	Sorted by name
+# 	[Search suspended: result cap reached.]
+#
+# 	"""
+#
+# 	"""
+# 	GIANTREGEX VERSION
+#
+# 	Sought all 12 known forms of »hospitium«
+# 	Searched 7,461 texts and found 250 passages (1.72s)
+# 	Sorted by name
+# 	[Search suspended: result cap reached.]
+# 	"""
+#
+# 	forms = so.lemma.formlist
+# 	# MIXANDMATCH if the next three lines are enabled
+# 	n = 3
+# 	forms = [forms[i:i + n] for i in range(0, len(forms), n)]
+# 	forms = [wordlistintoregex(f) for f in forms]
+#
+# 	qtemplate = """
+# 	DROP TABLE IF EXISTS lemmatizedforms_{wd};
+# 	CREATE TEMPORARY TABLE IF NOT EXISTS lemmatizedforms_{wd} AS
+# 		SELECT term FROM unnest(%s) term
+# 	"""
+# 	q = qtemplate.format(wd=so.lemma.dictionaryentry)
+# 	d = (forms,)
+# 	cursor.execute(q, d)
+#
+# 	# now modify the '%s' that we have from above
+# 	whr = re.sub(r'%s', 'ANY (SELECT term FROM lemmatizedforms_{wd})'.format(wd=so.lemma.dictionaryentry), whr)

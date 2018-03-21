@@ -10,7 +10,7 @@ from collections import deque
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
-from server.dbsupport.dbfunctions import makeanemptyauthor, makeanemptywork
+from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
 from server.formatting.wordformatting import depunct
 from server.searching.searchfunctions import atsignwhereclauses

@@ -7,13 +7,10 @@
 """
 
 import configparser
-from os import cpu_count
 
 import psycopg2
-import random
 
-from server import hipparchia
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.connectionobject import PooledConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
 # to fiddle with some day:
@@ -33,71 +30,6 @@ from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
 config = configparser.ConfigParser()
 config.read('config.ini')
-
-
-def setthreadcount(startup=False):
-	"""
-
-	used to set worker count on multithreaded functions
-	return either the manual config value or determine it algorithmically
-
-	:return:
-	"""
-
-	if hipparchia.config['AUTOCONFIGWORKERS'] != 'yes':
-		workers = hipparchia.config['WORKERS']
-	else:
-		workers = int(cpu_count() / 2) + 1
-
-	if workers < 1:
-		workers = 1
-
-	if workers > cpu_count() and startup:
-		print('\nWARNING: threadcount exceeds total available number of threads: {a} vs {b}'.format(a=workers, b=cpu_count()))
-
-	return workers
-
-
-def tablenamer(authorobject, thework):
-	"""
-
-	tell me the name of your table
-	work 1 is stored as 0: try not to create a table 0; lots of unexpected results can stem from this off-by-one slip
-
-	:param authorobject:
-	:param thework:
-	:return:
-	"""
-
-	wk = authorobject.listofworks[thework - 1]
-	# wk = authorobject.listworks()[thework - 1]
-	nm = authorobject.authornumber
-	wn = wk.worknumber
-
-	lg = wk.language
-	# how many bilingual authors are there again?
-	if lg == 'G':
-		pr = 'gr'
-	elif lg == 'L':
-		pr = 'lt'
-	else:
-		pr = ''
-		print('oh, I do not speak {lg} and I will be unable to access a DB'.format(lg=lg))
-
-	workdbname = pr + nm + 'w' + wn
-
-	return workdbname
-
-
-def uniquetablename():
-	"""
-
-	random name for temporary tables
-
-	:return:
-	"""
-
-	return ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(12)])
 
 
 def resultiterator(cursor, chunksize=5000):
@@ -137,7 +69,7 @@ def dbloadasingleworkobject(workuniversalid):
 	:return:
 	"""
 
-	dbconnection = ConnectionObject('not_autocommit')
+	dbconnection = PooledConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	q = """
@@ -354,7 +286,7 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 	:return:
 	"""
 
-	dbconnection = ConnectionObject('not_autocommit')
+	dbconnection = PooledConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	activedbs += ['lx', 'lm']
@@ -403,7 +335,7 @@ def probefordatabases():
 	:return:
 	"""
 
-	dbconnection = ConnectionObject()
+	dbconnection = PooledConnectionObject()
 	cursor = dbconnection.cursor()
 
 	available = dict()
