@@ -147,6 +147,11 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 
 		very disturbing until the root cause of the trouble is made clear.
 
+		WTF, several months later:
+
+			you can skip the kludge; it works fine now...
+			upgrades to the underlying stack? python, psycopg2, and esp psql are all different now
+
 	:return:
 	"""
 
@@ -165,7 +170,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 	sp = re.sub(r'^\s', '(^|\s)', searchphrase)
 	sp = re.sub(r'\s$', '(\s|$)', sp)
 	# on the reasoning behind the following substitution see 'DEBUGGING notes: SQL oddities' above
-	sp = re.sub(r' ', r'\s', sp)
+	# sp = re.sub(r' ', r'\s', sp)
 
 	if not so.onehit:
 		lim = ' LIMIT ' + str(so.cap)

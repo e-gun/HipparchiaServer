@@ -172,7 +172,6 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject):
 
 	while searchlist and activepoll.hitcount.value <= so.cap:
 		commitcount += 1
-
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		# that's not supposed to happen with the pool, but somehow it does
@@ -294,17 +293,16 @@ def workonphrasesearch(foundlineobjects, searchinginside, searchobject):
 
 	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
-
 	commitcount = 0
 	while searchinginside and len(foundlineobjects) < so.cap:
 		commitcount += 1
+		dbconnection.checkneedtocommit(commitcount)
+
 		try:
 			wkid = searchinginside.pop()
 		except IndexError:
 			wkid = None
 			searchinginside = None
-
-		dbconnection.checkneedtocommit(commitcount)
 
 		if wkid:
 			foundlines = phrasesearch(wkid, so, cursor)

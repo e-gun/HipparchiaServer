@@ -38,3 +38,18 @@ then you will fail
 then you can do more searches on top of this
 this will leave you with two zombie threads and two eternally updating polls
 
+[Ε] DeprecationWarning
+
+this is emerging from one of the installed packages?
+
+/usr/local/Cellar/python/3.6.4_4/Frameworks/Python.framework/Versions/3.6/lib/python3.6/re.py:191: DeprecationWarning: bad escape \s
+  return _compile(pattern, flags).sub(repl, string, count)
+/usr/local/Cellar/python/3.6.4_4/Frameworks/Python.framework/Versions/3.6/lib/python3.6/re.py:191: DeprecationWarning: bad escape \s
+  return _compile(pattern, flags).sub(repl, string, count)
+/usr/local/Cellar/python/3.6.4_4/Frameworks/Python.framework/Versions/3.6/lib/python3.6/re.py:191: DeprecationWarning: bad escape \s
+  return _compile(pattern, flags).sub(repl, string, count)
+/usr/local/Cellar/python/3.6.4_4/Frameworks/Python.framework/Versions/3.6/lib/python3.6/re.py:191: DeprecationWarning: bad escape \s
+  return _compile(pattern, flags).sub(repl, string, count)
+/usr/local/Cellar/python/3.6.4_4/Frameworks/Python.framework/Versions/3.6/lib/python3.6/re.py:191: DeprecationWarning: bad escape \s
+  return _compile(pattern, flags).sub(repl, string, count)
+
