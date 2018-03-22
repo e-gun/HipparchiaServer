@@ -35,15 +35,7 @@ class PooledConnectionObject(object):
 	# This is a useful mnemonic to check if the connection is in a transaction
 	STATUS_IN_TRANSACTION = STATUS_BEGIN
 
-	the interesting thing is that you can get something like the BSD stuck thread
-	behavior on MacOS by pounding at this...
-
-	you can eliminate the behavior by giving substringsearch(), etc its own ConnectionObject()
-	this will slow you down plenty, though
-
-	troubled connections have STATUS_BEGIN assigned to them when the disaster strikes
-
-	some messages:
+	some error messages if you misthread:
 		xgkhgwsadbuu - Process-3 failed to commit()
 		PooledConnectionObject xgkhgwsadbuu - Process-3 status is 2
 		DatabaseError for <cursor object at 0x13ba55428; closed: 0> @ Process-3
@@ -173,11 +165,6 @@ class SimpleConnectionObject(object):
 	mirror psycopg2 methods
 
 	add connectioncleanup() to the mix
-
-	consider implementing a connection pool
-
-	example:
-		https://github.com/gevent/gevent/blob/master/examples/psycopg2_pool.py
 
 	"""
 

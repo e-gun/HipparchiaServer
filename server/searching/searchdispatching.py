@@ -145,6 +145,8 @@ def searchdispatcher(searchobject):
 	for j in jobs:
 		j.join()
 
+	foundlineobjects = list(foundlineobjects)
+
 	for c in oneconnectionperworker:
 		oneconnectionperworker[c].connectioncleanup()
 
