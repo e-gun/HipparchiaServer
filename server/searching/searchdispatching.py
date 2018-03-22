@@ -146,7 +146,6 @@ def searchdispatcher(searchobject):
 		j.join()
 
 	for c in oneconnectionperworker:
-		print('cleaning', c)
 		oneconnectionperworker[c].connectioncleanup()
 
 	return foundlineobjects
@@ -204,8 +203,6 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 			activepoll.remain(len(searchlist))
 		except TypeError:
 			pass
-
-		print('looping; cc=',commitcount)
 
 	return foundlineobjects
 
