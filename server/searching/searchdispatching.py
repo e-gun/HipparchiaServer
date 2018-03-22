@@ -146,6 +146,7 @@ def searchdispatcher(searchobject):
 		j.join()
 
 	for c in oneconnectionperworker:
+		print('cleaning', c)
 		oneconnectionperworker[c].connectioncleanup()
 
 	return foundlineobjects
@@ -159,6 +160,8 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 
 	searchlist: ['gr0461', 'gr0489', 'gr0468', ...]
 
+	substringsearch() called herein needs ability to CREATE TEMPORARY TABLE
+
 	:param foundlineobjects:
 	:param searchlist:
 	:param activepoll:
@@ -169,15 +172,8 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 	so = searchobject
 	activepoll = so.poll
 
-	# print('workonsimplesearch() - searchlist', searchlist)
-
-	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	# dbconnection = ConnectionObject('not_autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
-	# print('workonsimplesearch() - so.termone', so.termone)
-
-	# note that each worker has a copy of this; you will need to set MPCOMMITCOUNT accordingly
 	commitcount = 0
 
 	while searchlist and activepoll.hitcount.value <= so.cap:
