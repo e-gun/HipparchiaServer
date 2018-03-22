@@ -69,7 +69,7 @@ def dbloadasingleworkobject(workuniversalid):
 	:return:
 	"""
 
-	dbconnection = PooledConnectionObject('not_autocommit')
+	dbconnection = PooledConnectionObject()
 	cursor = dbconnection.cursor()
 
 	q = """
@@ -286,7 +286,7 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 	:return:
 	"""
 
-	dbconnection = PooledConnectionObject('not_autocommit')
+	dbconnection = PooledConnectionObject()
 	cursor = dbconnection.cursor()
 
 	activedbs += ['lx', 'lm']
