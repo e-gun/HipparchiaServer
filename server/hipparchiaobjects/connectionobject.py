@@ -96,7 +96,8 @@ class PooledConnectionObject(object):
 		except psycopg2.pool.PoolError:
 			# this will probably get you in trouble eventually
 			print('PoolError: fallback to SimpleConnectionObject()')
-			self.dbconnection = SimpleConnectionObject(autocommit, readonlyconnection=self.readonlyconnection, u=u, p=p)
+			c = SimpleConnectionObject(autocommit, readonlyconnection=self.readonlyconnection, u=u, p=p)
+			self.dbconnection = c.dbconnection
 
 		if self.autocommit == 'autocommit':
 			self.setautocommit()
