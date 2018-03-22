@@ -205,6 +205,8 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 		except TypeError:
 			pass
 
+		print('looping; cc=',commitcount)
+
 	return foundlineobjects
 
 
