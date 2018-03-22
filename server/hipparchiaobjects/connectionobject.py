@@ -54,10 +54,10 @@ class PooledConnectionObject(object):
 
 	def __init__(self, autocommit='nope', readonlyconnection=True, u='DBUSER', p='DBPASS'):
 		# note that only autocommit='autocommit' will make a difference
-		if not ConnectionObject.__pools:
+		if not PooledConnectionObject.__pools:
 			# initialize the borg
 			# note that poolsize is implicitly a claim about how many concurrent users you imagine having
-			poolsize = setthreadcount()
+			poolsize = setthreadcount() + 2
 
 			# three known pool types; simple should be faster as you are avoiding locking
 			pooltype = connectionpool.SimpleConnectionPool
@@ -70,21 +70,21 @@ class PooledConnectionObject(object):
 			        'database': hipparchia.config['DBNAME'],
 			        'password': hipparchia.config['DBPASS']}
 
-			readonlypool = pooltype(poolsize + 2, (poolsize + 2) * 2, **kwds)
+			readonlypool = pooltype(poolsize, poolsize * 2, **kwds)
 
 			kwds['user'] = hipparchia.config['DBWRITEUSER']
 			kwds['password'] = hipparchia.config['DBWRITEPASS']
 
-			readandwritepool = pooltype(poolsize + 2, (poolsize + 2) * 2, **kwds)
-			ConnectionObject.__pools['ro'] = readonlypool
-			ConnectionObject.__pools['rw'] = readandwritepool
+			readandwritepool = pooltype(poolsize, poolsize * 2, **kwds)
+			PooledConnectionObject.__pools['ro'] = readonlypool
+			PooledConnectionObject.__pools['rw'] = readandwritepool
 
 		self.autocommit = autocommit
 		self.readonlyconnection = readonlyconnection
 		if u == 'DBUSER':
-			self.pool = ConnectionObject.__pools['ro']
+			self.pool = PooledConnectionObject.__pools['ro']
 		elif u == 'DBWRITEUSER':
-			self.pool = ConnectionObject.__pools['rw']
+			self.pool = PooledConnectionObject.__pools['rw']
 		else:
 			print('unknown dbuser: no connection made')
 			self.pool = None
