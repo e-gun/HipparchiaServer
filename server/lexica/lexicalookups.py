@@ -530,8 +530,8 @@ def findcountsviawordcountstable(wordtocheck):
 	:param wordtocheck:
 	:return:
 	"""
-	dbconnection = PooledConnectionObject('not_autocommit')
-	cursor = dbconnection.cursor()
+	dbconnection = PooledConnectionObject()
+	dbcursor = dbconnection.cursor()
 
 	initial = stripaccents(wordtocheck[0])
 	# alternatives = re.sub(r'[uv]','[uv]',c)
@@ -546,8 +546,8 @@ def findcountsviawordcountstable(wordtocheck):
 
 	d = (wordtocheck,)
 	try:
-		cursor.execute(q, d)
-		result = cursor.fetchone()
+		dbcursor.execute(q, d)
+		result = dbcursor.fetchone()
 	except:
 		# psycopg2.ProgrammingError: relation "wordcounts_ε" does not exist
 		# you did not build the wordcounts at all?

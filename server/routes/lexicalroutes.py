@@ -33,8 +33,8 @@ def findbyform(observedword):
 	:return:
 	"""
 
-	dbc = PooledConnectionObject('autocommit')
-	cur = dbc.cursor()
+	dbconnection = PooledConnectionObject()
+	dbcursor = dbconnection.cursor()
 
 	# the next is pointless because: 'po/lemon' will generate a URL '/parse/po/lemon'
 	# that will 404 before you can get to replacegreekbetacode()
@@ -69,14 +69,14 @@ def findbyform(observedword):
 	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
 	returnarray = list()
 
-	morphologyobject = lookformorphologymatches(cleanedword, cur)
+	morphologyobject = lookformorphologymatches(cleanedword, dbcursor)
 	# print('findbyform() mm',morphologyobject.getpossible()[0].transandanal)
 	# φέρεται --> morphologymatches [('<possibility_1>', '1', 'φέρω', '122883104', '<transl>fero</transl><analysis>pres ind mp 3rd sg</analysis>')]
 
 	if morphologyobject:
 		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
 			returnarray.append(getobservedwordprevalencedata(cleanedword))
-		returnarray += lexicalmatchesintohtml(cleanedword, morphologyobject, cur)
+		returnarray += lexicalmatchesintohtml(cleanedword, morphologyobject, dbcursor)
 	else:
 		if isgreek and not session['available']['greek_morphology']:
 			returnarray = [
@@ -107,7 +107,7 @@ def findbyform(observedword):
 	returnarray = [{'observed': cleanedword}] + returnarray
 	returnarray = json.dumps(returnarray)
 
-	dbc.connectioncleanup()
+	dbconnection.connectioncleanup()
 
 	return returnarray
 
@@ -121,8 +121,8 @@ def dictsearch(searchterm):
 	:return:
 	"""
 
-	dbc = PooledConnectionObject('autocommit')
-	cur = dbc.cursor()
+	dbconnection = PooledConnectionObject()
+	dbcursor = dbconnection.cursor()
 
 	if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
 		searchterm = replacegreekbetacode(searchterm.upper())
@@ -156,12 +156,12 @@ def dictsearch(searchterm):
 	else:
 		data = ('.*?' + seeking + '.*?',)
 
-	cur.execute(query, data)
+	dbcursor.execute(query, data)
 
 	# note that the dictionary db has a problem with vowel lengths vs accents
 	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
 	try:
-		found = cur.fetchall()
+		found = dbcursor.fetchall()
 	except:
 		found = list()
 
@@ -183,13 +183,13 @@ def dictsearch(searchterm):
 
 		for entry in sortedfinds:
 			count += 1
-			returnarray.append({'value': browserdictionarylookup(count, entry[0], cur)})
+			returnarray.append({'value': browserdictionarylookup(count, entry[0], dbcursor)})
 	else:
 		returnarray.append({'value': '[nothing found]'})
 
 	returnarray = json.dumps(returnarray)
 
-	dbc.connectioncleanup()
+	dbconnection.connectioncleanup()
 
 	return returnarray
 
@@ -206,8 +206,8 @@ def reverselexiconsearch(searchterm):
 	:return:
 	"""
 
-	dbc = PooledConnectionObject('autocommit')
-	cur = dbc.cursor()
+	dbconnection = PooledConnectionObject()
+	dbcursor = dbconnection.cursor()
 
 	entries = list()
 	returnarray = list()
@@ -228,16 +228,16 @@ def reverselexiconsearch(searchterm):
 		# first see if your term is mentioned at all
 		query = 'SELECT entry_name FROM {d}_dictionary WHERE translations ~ %s'.format(d=usedict)
 		data = ('{s}'.format(s=seeking),)
-		cur.execute(query, data)
+		dbcursor.execute(query, data)
 
-		matches = cur.fetchall()
+		matches = dbcursor.fetchall()
 		entries = [m[0] for m in matches]
 
 	entries = list(set(entries))
 
 	# we have the matches; now we will sort them either by frequency or by initial letter
 	if hipparchia.config['REVERSELEXICONRESULTSBYFREQUENCY'] == 'yes':
-		unsortedentries = [(findtotalcounts(e, cur), e) for e in entries]
+		unsortedentries = [(findtotalcounts(e, dbcursor), e) for e in entries]
 		entries = list()
 		for e in unsortedentries:
 			hwcountobject = e[0]
@@ -253,7 +253,7 @@ def reverselexiconsearch(searchterm):
 	# now we retrieve and format the entries
 	if entries:
 		# summary of entry values first
-		countobjectdict = {e: findtotalcounts(e, cur) for e in entries}
+		countobjectdict = {e: findtotalcounts(e, dbcursor) for e in entries}
 		summary = list()
 		count = 0
 		for c in countobjectdict.keys():
@@ -273,12 +273,12 @@ def reverselexiconsearch(searchterm):
 		count = 0
 		for entry in entries:
 			count += 1
-			returnarray.append({'value': browserdictionarylookup(count, entry, cur)})
+			returnarray.append({'value': browserdictionarylookup(count, entry, dbcursor)})
 	else:
 		returnarray.append({'value': '<br />[nothing found under "{skg}"]'.format(skg=seeking)})
 
 	returnarray = json.dumps(returnarray)
 
-	dbc.connectioncleanup()
+	dbconnection.connectioncleanup()
 
 	return returnarray

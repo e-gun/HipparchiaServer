@@ -52,7 +52,8 @@ class PooledConnectionObject(object):
 
 	__pools = dict()
 
-	def __init__(self, autocommit='n', readonlyconnection=True, u='DBUSER', p='DBPASS'):
+	def __init__(self, autocommit='nope', readonlyconnection=True, u='DBUSER', p='DBPASS'):
+		# note that only autocommit='autocommit' will make a difference
 		if not PooledConnectionObject.__pools:
 			# initialize the borg
 			# note that poolsize is implicitly a claim about how many concurrent users you imagine having
@@ -94,6 +95,7 @@ class PooledConnectionObject(object):
 			self.dbconnection = self.pool.getconn(key=self.uniquename)
 		except psycopg2.pool.PoolError:
 			# this will probably get you in trouble eventually
+			print('PoolError: fallback to SimpleConnectionObject()')
 			self.dbconection = SimpleConnectionObject(autocommit, readonlyconnection=self.readonlyconnection, u=u, p=p)
 
 		if self.autocommit == 'autocommit':
@@ -178,7 +180,7 @@ class SimpleConnectionObject(object):
 
 	"""
 
-	def __init__(self, autocommit='n', readonlyconnection=True, u='DBUSER', p='DBPASS'):
+	def __init__(self, autocommit='nope', readonlyconnection=True, u='DBUSER', p='DBPASS'):
 		self.autocommit = autocommit
 		self.readonlyconnection = readonlyconnection
 		self.dbconnection = psycopg2.connect(user=hipparchia.config[u],

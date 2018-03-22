@@ -509,8 +509,8 @@ def mostcommonheadwords(cheat=True):
 			'ἄναξ', 'λόγοϲ'
 		}
 
-		dbconnection = PooledConnectionObject('not_autocommit')
-		cursor = dbconnection.cursor()
+		dbconnection = PooledConnectionObject()
+		dbcursor = dbconnection.cursor()
 
 		qtemplate = """
 		SELECT entry_name,total_count FROM dictionary_headword_wordcounts 
@@ -524,8 +524,8 @@ def mostcommonheadwords(cheat=True):
 		for gl in {('', 50), ('^', 75)}:
 			yesorno = gl[0]
 			lim = gl[1]
-			cursor.execute(qtemplate.format(yesorno=yesorno, lim=lim))
-			tophits = resultiterator(cursor)
+			dbcursor.execute(qtemplate.format(yesorno=yesorno, lim=lim))
+			tophits = resultiterator(dbcursor)
 			tophits = {t[0]: t[1] for t in tophits}
 			counts.update(tophits)
 
@@ -545,8 +545,8 @@ def mostcommonheadwords(cheat=True):
 
 		uninteresting = list()
 		for d in ['greek_dictionary', 'latin_dictionary']:
-			cursor.execute(qtemplate.format(d=d), x)
-			finds = resultiterator(cursor)
+			dbcursor.execute(qtemplate.format(d=d), x)
+			finds = resultiterator(dbcursor)
 			uninteresting += [f[0] for f in finds]
 
 		wordstoskip = set(wordstoskip + uninteresting)

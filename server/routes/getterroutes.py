@@ -133,8 +133,8 @@ def workstructure(locus):
 	:return:
 	"""
 
-	dbc = PooledConnectionObject('autocommit')
-	cur = dbc.cursor()
+	dbconnection = PooledConnectionObject()
+	dbcursor = dbconnection.cursor()
 
 	workid = locus.split('_AT_')[0]
 	workid = depunct(workid)
@@ -164,7 +164,7 @@ def workstructure(locus):
 
 	ws = dict()
 	if structure:
-		lowandhigh = findvalidlevelvalues(workid, structure, safepassage, cur)
+		lowandhigh = findvalidlevelvalues(workid, structure, safepassage, dbcursor)
 		# example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
 		ws['totallevels'] = lowandhigh.levelsavailable
 		ws['level'] = lowandhigh.currentlevel
@@ -182,7 +182,7 @@ def workstructure(locus):
 		ws['range'] = ['error', 'select', 'the', 'work', 'again']
 	results = json.dumps(ws)
 
-	dbc.connectioncleanup()
+	dbconnection.connectioncleanup()
 
 	return results
 
@@ -193,9 +193,6 @@ def getauthinfo(authorid):
 	show local info about the author one is considering in the selection box
 	:return:
 	"""
-
-	dbc = PooledConnectionObject('autocommit')
-	cur = dbc.cursor()
 
 	authorid = depunct(authorid)
 
@@ -218,8 +215,6 @@ def getauthinfo(authorid):
 		authinfo.append(woformatworkinfo(sortedworks[work]))
 
 	authinfo = json.dumps('\n'.join(authinfo))
-
-	dbc.connectioncleanup()
 
 	return authinfo
 
