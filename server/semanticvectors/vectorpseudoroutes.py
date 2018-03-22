@@ -23,8 +23,10 @@ from server.searching.searchfunctions import buildsearchobject, cleaninitialquer
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.rudimentaryvectormath import buildrudimentaryvectorspace, caclulatecosinevalues
 from server.semanticvectors.vectorgraphing import graphbliteraldistancematches
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, findheadwords, findwordvectorset
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, findwordvectorset
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
+from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
+
 
 """
 	THE BASIC MATH
@@ -209,7 +211,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
 	# find all possible forms of all the words we used
 	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
 	activepoll.statusis('Finding headwords')
-	morphdict = findheadwords(allwords)
+	morphdict = getrequiredmorphobjects(allwords)
 	morphdict = convertmophdicttodict(morphdict)
 
 	# find all possible headwords of all of the forms in use

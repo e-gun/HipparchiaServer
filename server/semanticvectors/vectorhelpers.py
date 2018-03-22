@@ -10,27 +10,23 @@ import os
 import re
 import sys
 import time
-from multiprocessing import Manager, Process
 from string import punctuation
 
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.miscdbfunctions import resultiterator
-from server.threading.mpthreadcount import setthreadcount
-from server.dbsupport.tablefunctions import uniquetablename
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
-from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, \
-	tidyupterm
+from server.dbsupport.miscdbfunctions import resultiterator
+from server.dbsupport.tablefunctions import uniquetablename
+from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import PooledConnectionObject
-from server.hipparchiaobjects.helperobjects import MPCounter
 from server.hipparchiaobjects.searchobjects import ProgressPoll
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildbetweenwhereextension
 from server.startup import lemmatadict
 # bleh: numpy and scipy will fail to install on FreeBSD 11.x
 # the work-around functions below might be needed instead: presumably there are markedly slower...
-from server.textsandindices.indexmaker import mpmorphology
+from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
 
 def cleantext(texttostrip):
@@ -114,7 +110,7 @@ def findsentences(authortable, searchobject, cursor):
 	query = 'SELECT * FROM {db} {whr}'.format(db=authortable, whr=whr)
 
 	# vs. something that skips titles (but might drop the odd other thing or two...)
-	# but this noes not play nicely with 'temptalbe'
+	# but this noes not play nicely with 'temptable'
 	# if re.search('WHERE', whr):
 	# 	whr = whr + ' AND'
 	# else:
@@ -163,7 +159,7 @@ def parsevectorsentences(searchobject, lineobjects):
 		wholetext = cleantext(wholetext)
 
 	# need to split at all possible sentence ends
-	# need to turn off semicolon in latin...170 St. George Street
+	# need to turn off semicolon in latin...
 	# latin: ['.', '?', '!']
 	# greek: ['.', ';', '!', '·']
 
@@ -284,7 +280,7 @@ def buildlemmatizesearchphrase(phrase):
 	phrase = phrase.strip()
 	words = phrase.split(' ')
 
-	morphdict = findheadwords(words)
+	morphdict = getrequiredmorphobjects(words)
 	morphdict = convertmophdicttodict(morphdict)
 	# morphdict {'munera': {'munero', 'munus'}, 'urbis': {'urbs'}, 'uias': {'via', 'vio'}}
 
@@ -632,35 +628,6 @@ def determinesettings():
 	settingstring = ' · '.join(settinglist)
 
 	return settingstring
-
-
-def findheadwords(wordlist):
-	"""
-
-	return a dict of morpholog objects
-
-	:param wordlist:
-	:param activepoll:
-	:return:
-	"""
-
-	manager = Manager()
-	commitcount = MPCounter()
-	terms = manager.list(wordlist)
-	morphobjects = manager.dict()
-	workers = setthreadcount()
-
-	targetfunction = mpmorphology
-	argumentuple = (terms, morphobjects, commitcount)
-
-	jobs = [Process(target=targetfunction, args=argumentuple) for i in range(workers)]
-
-	for j in jobs:
-		j.start()
-	for j in jobs:
-		j.join()
-
-	return morphobjects
 
 
 """

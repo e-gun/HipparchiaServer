@@ -32,9 +32,10 @@ from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, findheadwords
+from server.semanticvectors.vectorhelpers import convertmophdicttodict
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, listmapper, workdict
+from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
 
 def tensorgraphelectedworks(searchobject):
@@ -117,7 +118,7 @@ def tftrainondata(sentences, searchobject):
 	sentencesaslists = [s.split(' ') for s in sentences]
 	allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]
 
-	morphdict = findheadwords(set(allwordsinorder))
+	morphdict = getrequiredmorphobjects(set(allwordsinorder))
 	morphdict = convertmophdicttodict(morphdict)
 
 	headwordsinorder = list()
@@ -395,7 +396,7 @@ def tfnlptraining(sentences, searchobject):
 	allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]
 
 	setofallwords = set(allwordsinorder)
-	morphdict = findheadwords(setofallwords)
+	morphdict = getrequiredmorphobjects(setofallwords)
 	morphdict = convertmophdicttodict(morphdict)
 
 	setofallheadwords = list()

@@ -7,7 +7,7 @@
 """
 
 import re
-from multiprocessing import Manager, Pool, Process
+from multiprocessing import Pool
 from string import punctuation
 
 from flask import session
@@ -16,11 +16,8 @@ from server import hipparchia
 from server.threading.mpthreadcount import setthreadcount
 from server.dbsupport.dblinefunctions import makeablankline, grabbundlesoflines
 from server.formatting.wordformatting import tidyupterm
-from server.hipparchiaobjects.connectionobject import PooledConnectionObject
-from server.hipparchiaobjects.helperobjects import MPCounter
-from server.lexica.lexicalookups import lookformorphologymatches
 from server.listsandsession.listmanagement import polytonicsort
-from server.textsandindices.textandindiceshelperfunctions import dictmerger
+from server.textsandindices.textandindiceshelperfunctions import dictmerger, getrequiredmorphobjects
 
 
 def buildindextowork(cdict, activepoll, headwords, cursor):
@@ -133,17 +130,7 @@ def generatesortedoutputbyheadword(completeindexdict, onework, alphabetical, act
 	activepoll.statusis('Finding headwords for entries')
 	activepoll.notes = '({r} entries found)'.format(r=remaining)
 
-	manager = Manager()
-	commitcount = MPCounter()
-	terms = manager.list(completeindexdict.keys())
-	morphobjects = manager.dict()
-	workers = setthreadcount()
-
-	jobs = [Process(target=mpmorphology, args=(terms, morphobjects, commitcount)) for i in range(workers)]
-	for j in jobs:
-		j.start()
-	for j in jobs:
-		j.join()
+	morphobjects = getrequiredmorphobjects(completeindexdict.keys())
 
 	activepoll.statusis('Assigning headwords to entries')
 	remaining = len(completeindexdict)
@@ -312,41 +299,6 @@ def generateheadwordindexdict(augmentedindexdict):
 					headwordindexdict[bf][observed].append(l)
 
 	return headwordindexdict
-
-
-def mpmorphology(terms, morphobjects, commitcount):
-	"""
-
-	build a dict of morphology objects
-
-	:param terms:
-	:param morphobjects:
-	:param commitcount:
-	:return:
-	"""
-
-	dbconnection = PooledConnectionObject('not_autocommit')
-	cursor = dbconnection.cursor()
-
-	while terms:
-		try:
-			t = terms.pop()
-		except IndexError:
-			t = None
-
-		if t:
-			mo = lookformorphologymatches(t, cursor)
-			if mo:
-				morphobjects[t] = mo
-			else:
-				morphobjects[t] = None
-
-		commitcount.increment()
-		dbconnection.checkneedtocommit(commitcount)
-
-	dbconnection.connectioncleanup()
-
-	return morphobjects
 
 
 def htmlifysimpleindex(completeindexdict, onework):

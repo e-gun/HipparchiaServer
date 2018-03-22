@@ -39,14 +39,14 @@ from server import hipparchia
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import buildflatbagsofwords, buildbagsofwordswithalternates, convertmophdicttodict, mostcommonwords, findheadwords
+from server.semanticvectors.vectorhelpers import buildflatbagsofwords, buildbagsofwordswithalternates, convertmophdicttodict, mostcommonwords
 from server.dbsupport.dblinefunctions import grablistoflines
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.formatting.vectorformatting import skformatmostimilar
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.startup import authordict, listmapper, workdict
 from server.formatting.bibliographicformatting import bcedating
-
+from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
 def sklearnselectedworks(searchobject):
 	"""
@@ -203,7 +203,7 @@ def sklearntextfeatureextractionandevaluation(sentences, searchobject):
 	sentencesaslists = [s.split(' ') for s in sentences]
 	allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]
 
-	morphdict = findheadwords(set(allwordsinorder))
+	morphdict = getrequiredmorphobjects(set(allwordsinorder))
 	morphdict = convertmophdicttodict(morphdict)
 
 	headwordsinorder = list()
@@ -440,7 +440,7 @@ def ldatopicmodeling(sentencetuples, searchobject):
 	sentencesaslists = [s.split(' ') for s in sentences]
 	allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]
 
-	morphdict = findheadwords(set(allwordsinorder))
+	morphdict = getrequiredmorphobjects(set(allwordsinorder))
 	morphdict = convertmophdicttodict(morphdict)
 
 	# going forward we we need a list of lists of headwords
@@ -576,7 +576,7 @@ def ldatopicgraphing(sentencetuples, searchobject):
 	allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]
 
 	activepoll.statusis('Finding all headwords')
-	morphdict = findheadwords(set(allwordsinorder))
+	morphdict = getrequiredmorphobjects(set(allwordsinorder))
 	morphdict = convertmophdicttodict(morphdict)
 
 	activepoll.statusis('Building bags of words')

@@ -13,9 +13,9 @@ from server.threading.mpthreadcount import setthreadcount
 from server.dbsupport.vectordbfunctions import storevectorindatabase
 from server.formatting.vectorformatting import formatnnmatches, formatnnsimilarity, nearestneighborgenerateoutput
 from server.semanticvectors.vectorgraphing import graphnnmatches
-from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, findheadwords, \
-	findwordvectorset
+from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, findwordvectorset
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
+from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
 
 def buildnnvectorspace(sentencetuples, searchobject):
@@ -35,7 +35,7 @@ def buildnnvectorspace(sentencetuples, searchobject):
 	wl = '{:,}'.format(len(listsofwords))
 	activepoll.statusis(
 		'No stored model for this search. Generating a new one.<br />Finding headwords for {n} sentences'.format(n=wl))
-	morphdict = findheadwords(allwords)
+	morphdict = getrequiredmorphobjects(allwords)
 	morphdict = convertmophdicttodict(morphdict)
 	# morphdict = {t: '·'.join(morphdict[t]) for t in morphdict}
 

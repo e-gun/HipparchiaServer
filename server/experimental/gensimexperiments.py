@@ -12,9 +12,9 @@ from server.hipparchiaobjects.helperobjects import LogEntropyVectorCorpus
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, findheadwords, findwordvectorset
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, findwordvectorset
 from server.startup import authordict, listmapper
-
+from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
 def gensimexperiment(so):
 	"""
@@ -42,7 +42,7 @@ def gensimexperiment(so):
 	wl = '{:,}'.format(len(listsofwords))
 	activepoll.statusis('Finding headwords for {n} sentences'.format(n=wl))
 
-	morphdict = findheadwords(allwords)
+	morphdict = getrequiredmorphobjects(allwords)
 	morphdict = convertmophdicttodict(morphdict)
 
 	# find all possible headwords of all of the forms in use

@@ -17,7 +17,8 @@ from server.hipparchiaobjects.connectionobject import PooledConnectionObject
 from server.hipparchiaobjects.helperobjects import LSIVectorCorpus
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, finddblinesfromsentences, \
-	findheadwords, findwordvectorset
+	findwordvectorset
+from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
 
 def lsigenerateoutput(sentencestuples, workssearched, searchobject, lsispace):
@@ -63,7 +64,7 @@ def lsifindmatches(sentencestuples, searchobject, lsispace):
 		wl = '{:,}'.format(len(listsofwords))
 		activepoll.statusis('Finding headwords for {n} sentences'.format(n=wl))
 
-		morphdict = findheadwords(allwords)
+		morphdict = getrequiredmorphobjects(allwords)
 		morphdict = convertmophdicttodict(morphdict)
 
 		# find all possible headwords of all of the forms in use
