@@ -16,7 +16,7 @@ from server.dbsupport.miscdbfunctions import makeanemptyauthor
 from server.formatting.bibliographicformatting import formatauthinfo, formatauthorandworkinfo, formatname, \
 	woformatworkinfo
 from server.formatting.wordformatting import depunct
-from server.hipparchiaobjects.connectionobject import PooledConnectionObject
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.listsandsession.listmanagement import compilesearchlist, sortsearchlist
 from server.listsandsession.sessionfunctions import modifysessionselections, modifysessionvar, parsejscookie
 from server.semanticvectors.vectorgraphing import fetchvectorgraph
@@ -133,7 +133,7 @@ def workstructure(locus):
 	:return:
 	"""
 
-	dbconnection = PooledConnectionObject()
+	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
 	workid = locus.split('_AT_')[0]

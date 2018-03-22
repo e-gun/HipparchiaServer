@@ -16,7 +16,7 @@ from server import hipparchia
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.wordformatting import avoidsmallvariants
-from server.hipparchiaobjects.connectionobject import PooledConnectionObject
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import ProgressPoll
 from server.startup import authordict, poll, workdict
 from server.textsandindices.indexmaker import buildindextowork
@@ -43,7 +43,7 @@ def completeindex():
 	poll[ts] = ProgressPoll(ts)
 	poll[ts].activate()
 
-	dbc = PooledConnectionObject('autocommit')
+	dbc = ConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	req = tcparserequest(request, authordict, workdict)
@@ -131,7 +131,7 @@ def textmaker():
 	:return:
 	"""
 
-	dbc = PooledConnectionObject('autocommit')
+	dbc = ConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	linesevery = hipparchia.config['SHOWLINENUMBERSEVERY']

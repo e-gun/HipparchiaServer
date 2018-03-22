@@ -18,7 +18,7 @@ from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork,
 from server.dbsupport.dblinefunctions import returnfirstlinenumber
 from server.formatting.lexicaformatting import dbquickfixes
 from server.formatting.wordformatting import depunct
-from server.hipparchiaobjects.connectionobject import PooledConnectionObject
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.startup import authordict, workdict
 
 
@@ -36,7 +36,7 @@ def grabtextforbrowsing(locus):
 	:return:
 	"""
 
-	dbc = PooledConnectionObject('autocommit')
+	dbc = ConnectionObject('autocommit')
 	cur = dbc.cursor()
 
 	workdb = depunct(locus)[:10]

@@ -10,7 +10,7 @@ import configparser
 
 import psycopg2
 
-from server.hipparchiaobjects.connectionobject import PooledConnectionObject
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
 # to fiddle with some day:
@@ -69,7 +69,7 @@ def dbloadasingleworkobject(workuniversalid):
 	:return:
 	"""
 
-	dbconnection = PooledConnectionObject()
+	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
 	q = """
@@ -286,7 +286,7 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 	:return:
 	"""
 
-	dbconnection = PooledConnectionObject()
+	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
 	activedbs += ['lx', 'lm']
@@ -335,7 +335,7 @@ def probefordatabases():
 	:return:
 	"""
 
-	dbconnection = PooledConnectionObject()
+	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
 	available = dict()

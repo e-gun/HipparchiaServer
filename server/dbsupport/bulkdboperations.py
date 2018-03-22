@@ -7,7 +7,7 @@
 """
 
 from server.dbsupport.miscdbfunctions import resultiterator
-from server.hipparchiaobjects.connectionobject import PooledConnectionObject
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
 
@@ -22,7 +22,7 @@ def loadallauthorsasobjects():
 
 	print('loading all authors...')
 
-	dbconnection = PooledConnectionObject('not_autocommit')
+	dbconnection = ConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	q = 'SELECT * FROM authors'
@@ -49,7 +49,7 @@ def loadallworksasobjects():
 
 	print('loading all works...')
 
-	dbconnection = PooledConnectionObject('not_autocommit')
+	dbconnection = ConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	q = """
@@ -79,7 +79,7 @@ def loadlemmataasobjects():
 	"""
 
 	print('loading all lemmata...')
-	dbconnection = PooledConnectionObject('not_autocommit')
+	dbconnection = ConnectionObject('not_autocommit')
 	cursor = dbconnection.cursor()
 
 	q = """

@@ -10,7 +10,7 @@ from multiprocessing import Manager, Process
 
 from server import hipparchia
 from server.threading.mpthreadcount import setthreadcount
-from server.hipparchiaobjects.connectionobject import PooledConnectionObject
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.semanticvectors.vectorhelpers import findsentences
 
 
@@ -39,7 +39,7 @@ def vectorprepdispatcher(searchobject):
 
 	targetfunction = breaktextsintosentences
 
-	oneconnectionperworker = {i: PooledConnectionObject(readonlyconnection=False) for i in range(workers)}
+	oneconnectionperworker = {i: ConnectionObject(readonlyconnection=False) for i in range(workers)}
 
 	jobs = [Process(target=targetfunction, args=(foundsentences, listofitemstosearch, so, oneconnectionperworker[i]))
 			for i in range(workers)]

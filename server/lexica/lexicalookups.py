@@ -15,7 +15,7 @@ from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrows
 from server.formatting.lexicaformatting import entrysummary, formatdictionarysummary, formateconsolidatedgrammarentry, \
 	formatgloss, formatmicroentry, grabheadmaterial, grabsenses, insertbrowserlookups
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
-from server.hipparchiaobjects.connectionobject import PooledConnectionObject
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbHeadwordObject, dbLatinWord, dbLemmaObject, \
 	dbMorphologyObject, dbWordCountObject
 
@@ -530,7 +530,7 @@ def findcountsviawordcountstable(wordtocheck):
 	:param wordtocheck:
 	:return:
 	"""
-	dbconnection = PooledConnectionObject()
+	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
 	initial = stripaccents(wordtocheck[0])

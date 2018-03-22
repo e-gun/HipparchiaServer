@@ -19,7 +19,7 @@ from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefr
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import uniquetablename
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, tidyupterm
-from server.hipparchiaobjects.connectionobject import PooledConnectionObject
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import ProgressPoll
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildbetweenwhereextension
@@ -505,7 +505,7 @@ def mostcommonheadwords(cheat=True):
 			'ἄναξ', 'λόγοϲ'
 		}
 
-		dbconnection = PooledConnectionObject()
+		dbconnection = ConnectionObject()
 		dbcursor = dbconnection.cursor()
 
 		qtemplate = """

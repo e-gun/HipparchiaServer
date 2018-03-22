@@ -15,7 +15,7 @@ from server import hipparchia
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import depunct
 from server.formatting.wordformatting import removegravity, stripaccents, tidyupterm
-from server.hipparchiaobjects.connectionobject import PooledConnectionObject
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.lexica.lexicalookups import browserdictionarylookup, findtotalcounts, getobservedwordprevalencedata, \
 	lexicalmatchesintohtml, lookformorphologymatches
 from server.listsandsession.listmanagement import polytonicsort
@@ -33,7 +33,7 @@ def findbyform(observedword):
 	:return:
 	"""
 
-	dbconnection = PooledConnectionObject()
+	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
 	# the next is pointless because: 'po/lemon' will generate a URL '/parse/po/lemon'
@@ -121,7 +121,7 @@ def dictsearch(searchterm):
 	:return:
 	"""
 
-	dbconnection = PooledConnectionObject()
+	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
 	if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
@@ -206,7 +206,7 @@ def reverselexiconsearch(searchterm):
 	:return:
 	"""
 
-	dbconnection = PooledConnectionObject()
+	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
 	entries = list()

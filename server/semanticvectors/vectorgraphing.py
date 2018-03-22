@@ -26,7 +26,7 @@ except ImportError:
 from server import hipparchia
 from server.dbsupport.tablefunctions import uniquetablename
 from server.dbsupport.vectordbfunctions import createstoredimagestable
-from server.hipparchiaobjects.connectionobject import PooledConnectionObject
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.startup import authordict, workdict
 
 
@@ -253,7 +253,7 @@ def storevectorgraph(figureasbytes):
 	:return:
 	"""
 
-	dbconnection = PooledConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
 
 	randomid = uniquetablename()
@@ -295,7 +295,7 @@ def fetchvectorgraph(imagename):
 
 	deletewhendone = True
 
-	dbconnection = PooledConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
 	cursor = dbconnection.cursor()
 
 	q = 'SELECT imagedata FROM public.storedvectorimages WHERE imagename=%s'

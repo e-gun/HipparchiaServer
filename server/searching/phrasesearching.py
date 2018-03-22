@@ -10,7 +10,7 @@ import re
 
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
 from server.dbsupport.tablefunctions import uniquetablename
-from server.hipparchiaobjects.connectionobject import PooledConnectionObject
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline
 from server.searching.substringsearching import substringsearch
