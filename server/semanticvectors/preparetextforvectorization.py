@@ -38,19 +38,24 @@ def vectorprepdispatcher(searchobject):
 	workers = setthreadcount()
 
 	targetfunction = breaktextsintosentences
-	argumentuple = (foundsentences, listofitemstosearch, so)
 
-	jobs = [Process(target=targetfunction, args=argumentuple) for i in range(workers)]
+	oneconnectionperworker = {i: PooledConnectionObject(readonlyconnection=False) for i in range(workers)}
+
+	jobs = [Process(target=targetfunction, args=(foundsentences, listofitemstosearch, so, oneconnectionperworker[i]))
+			for i in range(workers)]
 
 	for j in jobs:
 		j.start()
 	for j in jobs:
 		j.join()
 
+	for c in oneconnectionperworker:
+		oneconnectionperworker[c].connectioncleanup()
+
 	return list(foundsentences)
 
 
-def breaktextsintosentences(foundsentences, searchlist, searchobject):
+def breaktextsintosentences(foundsentences, searchlist, searchobject, dbconnection):
 	"""
 
 	break a text into sentences that contain the term we are looking for
@@ -64,14 +69,12 @@ def breaktextsintosentences(foundsentences, searchlist, searchobject):
 	:return:
 	"""
 
-	activepoll = searchobject.poll
+	so = searchobject
+	activepoll = so.poll
+
+	dbcursor = dbconnection.cursor()
 
 	commitcount = 0
-
-	dbconnection = PooledConnectionObject('not_autocommit', readonlyconnection=False)
-	cursor = dbconnection.cursor()
-	so = searchobject
-
 	while searchlist:
 		commitcount += 1
 		try:
@@ -80,7 +83,7 @@ def breaktextsintosentences(foundsentences, searchlist, searchobject):
 			authortable = None
 
 		if authortable:
-			foundsentences += findsentences(authortable, so, cursor)
+			foundsentences += findsentences(authortable, so, dbcursor)
 
 			dbconnection.checkneedtocommit(commitcount)
 
@@ -89,8 +92,4 @@ def breaktextsintosentences(foundsentences, searchlist, searchobject):
 		except TypeError:
 			pass
 
-	dbconnection.connectioncleanup()
-
 	return foundsentences
-
-

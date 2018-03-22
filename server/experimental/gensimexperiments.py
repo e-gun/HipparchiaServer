@@ -5,6 +5,7 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
 from gensim import corpora
 from gensim.models import LogEntropyModel, LsiModel
 
@@ -15,6 +16,7 @@ from server.semanticvectors.vectorhelpers import buildflatbagsofwords
 from server.semanticvectors.vectorhelpers import convertmophdicttodict, findwordvectorset
 from server.startup import authordict, listmapper
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
+
 
 def gensimexperiment(so):
 	"""
