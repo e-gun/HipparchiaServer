@@ -67,7 +67,7 @@ class PooledConnectionObject(object):
 			kwds['user'] = hipparchia.config['DBWRITEUSER']
 			kwds['password'] = hipparchia.config['DBWRITEPASS']
 
-			readandwritepool = pooltype(poolsize, poolsize * 2, **kwds)
+			readandwritepool = pooltype(poolsize, poolsize, **kwds)
 			PooledConnectionObject.__pools['ro'] = readonlypool
 			PooledConnectionObject.__pools['rw'] = readandwritepool
 
@@ -245,7 +245,7 @@ class SimpleConnectionObject(object):
 		return
 
 
-if hipparchia.config['CONNECTIONTYPE'] != 'pooled':
+if hipparchia.config['CONNECTIONTYPE'] == 'simple':
 	class ConnectionObject(SimpleConnectionObject):
 		pass
 else:

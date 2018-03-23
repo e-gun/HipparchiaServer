@@ -57,13 +57,20 @@ SECRET_KEY = 'yourkeyhereitshouldbelongandlooklikecryptographicgobbledygook'
 #
 # FLASKSEENATPORT might diverge from this if you are feeding flask
 # 	through uWSGI + nginx
+#
+# CONNECTIONTYPE determines whether you generate a series of one-off connections to the
+#   database or if you use a persistent pool of connections instead. 'simple' gives you
+#   the former. Anything else gives you the latter which is faster. But with a pool you
+#   will have more memory allocated all of the time and you run the risk of exhausting
+#   the pool if you have too many concurrent searches (but simple connections are supposed
+#   to be made as a fallback when a pooled one is not available).
 
 FLASKSERVEDFROMPORT = 5000
 FLASKSEENATPORT = 5000
 PROGRESSPOLLDEFAULTPORT = 5010
 LISTENINGADDRESS = '127.0.0.1'
 MYEXTERNALIPADDRESS = '127.0.0.1'
-
+CONNECTIONTYPE = 'pool'
 
 ### [3] DB variables ###
 ##  [set once and forget: DBPASS] ##
@@ -75,7 +82,7 @@ DBHOST = '127.0.0.1'
 DBPORT = 5432
 DBNAME = 'hipparchiaDB'
 DBPASS = 'yourpassheretrytomakeitstrongplease'
-CONNECTIONTYPE = 'pool'
+
 
 ### [4] Hipparchia debug variables ###
 ##  [only change this if you know why you are doing it] ##
@@ -153,7 +160,6 @@ HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 #   the query is a regex 'or' that can have > 400 variations; this
 #   makes for slow faster; 40 tries of 10 variants is faster
 #
-
 
 AUTOCONFIGWORKERS = 'yes'
 WORKERS = 3
@@ -354,7 +360,7 @@ RESTOREMEDIALANDFINALSIGMA = 'no'
 #
 # NEARESTNEIGHBORSCAP says when to stop looking for neighbors
 #
-# AUTOVECTORIZE will fill the vector db in the background; this will chew up a TON of resources:
+# AUTOVECTORIZE will fill the vector db in the background; this will chew up plenty of resources:
 #   both drive space and CPU time; do not set this to 'yes' unless you are ready for the commitment
 #
 

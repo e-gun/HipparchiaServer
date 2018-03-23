@@ -18,7 +18,9 @@ a second click will clear the display
 js async timing issue, it seems
 irritating to avoid "return redirect(url_for('frontpage'))" which is so simple and easy to call
 
-[D] platform specific bug? FreeBSD vs threads
+[D] platform specific bug? Ryzen vs FreeBSD vs threads
+
+[resolved? enabled virtualization in the BIOS when playing with bhyve and the problem went away]
 
 workonsimplesearch() (and probably its kin)
 
