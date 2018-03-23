@@ -19,4 +19,4 @@ hipparchia.wsgi_app = ProfilerMiddleware(hipparchia.wsgi_app, restrictions=[25])
 
 d = False
 
-hipparchia.run(debug=d, threaded=True)
+hipparchia.run(debug=d, threaded=True, host=hipparchia.config['LISTENINGADDRESS'], port=hipparchia.config['FLASKSERVEDFROMPORT'])
