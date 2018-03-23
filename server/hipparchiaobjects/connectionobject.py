@@ -245,5 +245,9 @@ class SimpleConnectionObject(object):
 		return
 
 
-class ConnectionObject(PooledConnectionObject):
-	pass
+if hipparchia.config['CONNECTIONTYPE'] != 'pooled':
+	class ConnectionObject(SimpleConnectionObject):
+		pass
+else:
+	class ConnectionObject(PooledConnectionObject):
+		pass

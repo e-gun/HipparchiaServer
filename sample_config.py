@@ -75,7 +75,7 @@ DBHOST = '127.0.0.1'
 DBPORT = 5432
 DBNAME = 'hipparchiaDB'
 DBPASS = 'yourpassheretrytomakeitstrongplease'
-
+CONNECTIONTYPE = 'pool'
 
 ### [4] Hipparchia debug variables ###
 ##  [only change this if you know why you are doing it] ##
