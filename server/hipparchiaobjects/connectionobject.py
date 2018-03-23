@@ -44,7 +44,7 @@ class PooledConnectionObject(object):
 
 	__pools = dict()
 
-	def __init__(self, autocommit='nope', readonlyconnection=True, u='DBUSER', p='DBPASS'):
+	def __init__(self, autocommit='nope', readonlyconnection=False, u='DBUSER', p='DBPASS'):
 		# note that only autocommit='autocommit' will make a difference
 		if not PooledConnectionObject.__pools:
 			# initialize the borg
@@ -94,7 +94,7 @@ class PooledConnectionObject(object):
 		if self.autocommit == 'autocommit':
 			self.setautocommit()
 
-		self.dbconnection.set_session(readonly=self.readonlyconnection)
+		getattr(self.dbconnection, 'set_session')(readonly=self.readonlyconnection)
 		self.connectioncursor = getattr(self.dbconnection, 'cursor')()
 		self.commitcount = hipparchia.config['MPCOMMITCOUNT']
 
@@ -105,6 +105,9 @@ class PooledConnectionObject(object):
 		# psycopg2.extensions.ISOLATION_LEVEL_REPEATABLE_READ
 		# psycopg2.extensions.ISOLATION_LEVEL_READ_COMMITTED
 		self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+
+	def getautocommit(self):
+		return getattr(self.dbconnection, 'autocommit')
 
 	def setdefaultisolation(self):
 		self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_DEFAULT)
@@ -120,7 +123,11 @@ class PooledConnectionObject(object):
 
 	def setreadonly(self, value):
 		assert value in [True, False], 'setreadonly() accepts only "True" or "False"'
-		self.dbconnection.set_session(readonly=value)
+		self.commit()
+		getattr(self.dbconnection, 'set_session')(readonly=value)
+
+	def getreadonly(self):
+		getattr(self.dbconnection, 'readonly')
 
 	def connectionisclosed(self):
 		return self.dbconnection.closed
