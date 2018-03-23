@@ -118,7 +118,7 @@ def grablistoflines(table, uidlist):
 	:return:
 	"""
 
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
+	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
 	lines = [int(uid.split('_ln_')[1]) for uid in uidlist]

@@ -253,7 +253,8 @@ def storevectorgraph(figureasbytes):
 	:return:
 	"""
 
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	dbconnection = ConnectionObject(ctype='rw')
+	dbconnection.setautocommit()
 	cursor = dbconnection.cursor()
 
 	randomid = uniquetablename()
@@ -295,7 +296,8 @@ def fetchvectorgraph(imagename):
 
 	deletewhendone = True
 
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	dbconnection = ConnectionObject(ctype='rw')
+	dbconnection.setautocommit()
 	cursor = dbconnection.cursor()
 
 	q = 'SELECT imagedata FROM public.storedvectorimages WHERE imagename=%s'

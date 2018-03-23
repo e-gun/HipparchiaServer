@@ -44,7 +44,7 @@ class PooledConnectionObject(object):
 
 	__pools = dict()
 
-	def __init__(self, autocommit='nope', readonlyconnection=False, u='DBUSER', p='DBPASS'):
+	def __init__(self, autocommit='nope', readonlyconnection=False, ctype='ro'):
 		# note that only autocommit='autocommit' will make a difference
 		if not PooledConnectionObject.__pools:
 			# initialize the borg
@@ -73,13 +73,8 @@ class PooledConnectionObject(object):
 
 		self.autocommit = autocommit
 		self.readonlyconnection = readonlyconnection
-		if u == 'DBUSER':
-			self.pool = PooledConnectionObject.__pools['ro']
-		elif u == 'DBWRITEUSER':
-			self.pool = PooledConnectionObject.__pools['rw']
-		else:
-			print('unknown dbuser: no connection made')
-			self.pool = None
+		assert ctype in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
+		self.pool = PooledConnectionObject.__pools[ctype]
 
 		# used for the key for getconn() and putconn(); but unneeded if PersistentConnectionPool
 		self.uniquename = uniquetablename()
@@ -179,14 +174,21 @@ class SimpleConnectionObject(object):
 
 	"""
 
-	def __init__(self, autocommit='nope', readonlyconnection=True, u='DBUSER', p='DBPASS'):
+	def __init__(self, autocommit='nope', readonlyconnection=True, ctype='ro'):
+		assert ctype in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
+		if ctype == 'ro':
+			u = hipparchia.config['DBUSER']
+			p = hipparchia.config['DBPASS']
+		else:
+			u = hipparchia.config['DBWRITEUSER']
+			p = hipparchia.config['DBWRITEPASS']
 		self.autocommit = autocommit
 		self.readonlyconnection = readonlyconnection
-		self.dbconnection = psycopg2.connect(user=hipparchia.config[u],
+		self.dbconnection = psycopg2.connect(user=u,
 											host=hipparchia.config['DBHOST'],
 											port=hipparchia.config['DBPORT'],
 											database=hipparchia.config['DBNAME'],
-											password=hipparchia.config[p])
+											password=p)
 
 		if self.autocommit == 'autocommit':
 			self.setautocommit()

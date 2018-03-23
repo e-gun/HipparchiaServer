@@ -22,7 +22,7 @@ def loadallauthorsasobjects():
 
 	print('loading all authors...')
 
-	dbconnection = ConnectionObject('not_autocommit')
+	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
 	q = 'SELECT * FROM authors'
@@ -49,7 +49,7 @@ def loadallworksasobjects():
 
 	print('loading all works...')
 
-	dbconnection = ConnectionObject('not_autocommit')
+	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
 	q = """
@@ -79,7 +79,7 @@ def loadlemmataasobjects():
 	"""
 
 	print('loading all lemmata...')
-	dbconnection = ConnectionObject('not_autocommit')
+	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
 	q = """

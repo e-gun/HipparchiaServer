@@ -28,7 +28,7 @@ def createvectorstable():
 
 	print('resetting the stored vectors table')
 
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	dbconnection = ConnectionObject(ctype='rw')
 	cursor = dbconnection.cursor()
 
 	query = """
@@ -75,7 +75,7 @@ def createstoredimagestable():
 
 	print('resetting the stored images table')
 
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	dbconnection = ConnectionObject(ctype='rw')
 	cursor = dbconnection.cursor()
 
 	query = """
@@ -125,7 +125,7 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 	else:
 		uidlist = sorted(searchobject.searchlist)
 
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False, u='DBWRITEUSER', p='DBWRITEPASS')
+	dbconnection = ConnectionObject(ctype='rw')
 	cursor = dbconnection.cursor()
 
 	if vectorspace:
@@ -181,7 +181,7 @@ def checkforstoredvector(searchobject, indextype, careabout='settings'):
 
 	version = readgitdata()
 
-	dbconnection = ConnectionObject('autocommit')
+	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
 	q = """
@@ -232,7 +232,7 @@ def fetchverctorenvirons(hitdict, searchobject):
 	:return:
 	"""
 
-	dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
+	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
 	so = searchobject

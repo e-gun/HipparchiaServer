@@ -235,11 +235,6 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 
 	so = searchobject
 	activepoll = so.poll
-
-	# print('workonsimplesearch() - searchlist', searchlist)
-
-	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	# dbconnection = ConnectionObject('not_autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
 
 	commitcount = 0
@@ -294,9 +289,8 @@ def workonphrasesearch(foundlineobjects, searchinginside, searchobject, dbconnec
 
 	so = searchobject
 	activepoll = so.poll
-
-	# dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	cursor = dbconnection.cursor()
+
 	commitcount = 0
 	while searchinginside and len(foundlineobjects) < so.cap:
 		commitcount += 1
