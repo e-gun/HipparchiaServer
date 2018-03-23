@@ -136,7 +136,7 @@ def searchdispatcher(searchobject):
 	# otherwise there will be problems with threading
 	# note that we are not yet taking care of connection types: 'autocommit', etc
 
-	oneconnectionperworker = {i: ConnectionObject(readonlyconnection=False) for i in range(workers)}
+	oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
 	argumentswithconnections = [tuple(list(argumentuple) + [oneconnectionperworker[i]]) for i in range(workers)]
 	jobs = [Process(target=targetfunction, args=argumentswithconnections[i]) for i in range(workers)]
 
@@ -173,6 +173,7 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 	so = searchobject
 	activepoll = so.poll
 
+	dbconnection.setreadonly(False)
 	cursor = dbconnection.cursor()
 
 	commitcount = 0

@@ -118,6 +118,10 @@ class PooledConnectionObject(object):
 	def close(self):
 		return self.connectioncleanup()
 
+	def setreadonly(self, value):
+		assert value in [True, False], 'setreadonly() accepts only "True" or "False"'
+		self.dbconnection.set_session(readonly=value)
+
 	def connectionisclosed(self):
 		return self.dbconnection.closed
 
@@ -205,6 +209,10 @@ class SimpleConnectionObject(object):
 
 	def setdefaultisolation(self):
 		self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_DEFAULT)
+
+	def setreadonly(self, value):
+		assert value in [True, False], 'setreadonly() accepts only "True" or "False"'
+		self.dbconnection.set_session(readonly=value)
 
 	def connectionisclosed(self):
 		return self.dbconnection.closed
