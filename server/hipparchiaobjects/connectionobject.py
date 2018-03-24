@@ -14,83 +14,25 @@ from server.threading.mpthreadcount import setthreadcount
 from server.dbsupport.tablefunctions import uniquetablename
 
 
-class PooledConnectionObject(object):
+class GenericConnectionObject(object):
 	"""
 
-	it looks like there are serious threading issues if you use this:
-
-	a connection must be assigned to each worker *before* you join the MP jobs
-
-	otherwise the different threads will not share the connections properly and you will end
-	up with a lot of closed/broken connections
-
-	psycopg connection status values.
-	STATUS_SETUP = 0
-	STATUS_READY = 1
-	STATUS_BEGIN = 2
-	STATUS_SYNC = 3  # currently unused
-	STATUS_ASYNC = 4  # currently unused
-	STATUS_PREPARED = 5
-
-	# This is a useful mnemonic to check if the connection is in a transaction
-	STATUS_IN_TRANSACTION = STATUS_BEGIN
-
-	some error messages if you misthread:
-		xgkhgwsadbuu - Process-3 failed to commit()
-		PooledConnectionObject xgkhgwsadbuu - Process-3 status is 2
-		DatabaseError for <cursor object at 0x13ba55428; closed: 0> @ Process-3
+	generic template for the specific connection types
+	
+	provides the basic functions less the actual connection and the
+	specific connectioncleanup()
 
 	"""
 
-	__pools = dict()
-
-	def __init__(self, autocommit='nope', readonlyconnection=False, ctype='ro'):
+	def __init__(self, autocommit='nope', readonlyconnection=False):
 		# note that only autocommit='autocommit' will make a difference
-		if not PooledConnectionObject.__pools:
-			# initialize the borg
-			# note that poolsize is implicitly a claim about how many concurrent users you imagine having
-			poolsize = setthreadcount() + 2
-
-			# three known pool types; simple should be faster as you are avoiding locking
-			pooltype = connectionpool.SimpleConnectionPool
-			# pooltype = connectionpool.ThreadedConnectionPool
-			# pooltype = connectionpool.PersistentConnectionPool
-
-			kwds = {'user': hipparchia.config['DBUSER'],
-			        'host': hipparchia.config['DBHOST'],
-			        'port': hipparchia.config['DBPORT'],
-			        'database': hipparchia.config['DBNAME'],
-			        'password': hipparchia.config['DBPASS']}
-
-			readonlypool = pooltype(poolsize, poolsize * 2, **kwds)
-
-			kwds['user'] = hipparchia.config['DBWRITEUSER']
-			kwds['password'] = hipparchia.config['DBWRITEPASS']
-
-			readandwritepool = pooltype(poolsize, poolsize, **kwds)
-			PooledConnectionObject.__pools['ro'] = readonlypool
-			PooledConnectionObject.__pools['rw'] = readandwritepool
-
 		self.autocommit = autocommit
 		self.readonlyconnection = readonlyconnection
-		assert ctype in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
-		self.pool = PooledConnectionObject.__pools[ctype]
-
 		# used for the key for getconn() and putconn(); but unneeded if PersistentConnectionPool
+		# also useful to have on hand for debugging
 		self.uniquename = uniquetablename()
-		try:
-			self.dbconnection = self.pool.getconn(key=self.uniquename)
-		except psycopg2.pool.PoolError:
-			# this will probably get you in trouble eventually
-			print('PoolError: fallback to SimpleConnectionObject()')
-			c = SimpleConnectionObject(autocommit, readonlyconnection=self.readonlyconnection, u=u, p=p)
-			self.dbconnection = c.dbconnection
-
-		if self.autocommit == 'autocommit':
-			self.setautocommit()
-
-		getattr(self.dbconnection, 'set_session')(readonly=self.readonlyconnection)
-		self.connectioncursor = getattr(self.dbconnection, 'cursor')()
+		self.dbconnection = None
+		self.curs = None
 		self.commitcount = hipparchia.config['MPCOMMITCOUNT']
 
 	def setautocommit(self):
@@ -108,13 +50,13 @@ class PooledConnectionObject(object):
 		self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_DEFAULT)
 
 	def cursor(self):
-		return self.connectioncursor
+		return self.curs
 
 	def commit(self):
 		getattr(self.dbconnection, 'commit')()
 
 	def close(self):
-		return self.connectioncleanup()
+		return getattr(self, 'connectioncleanup')()
 
 	def setreadonly(self, value):
 		assert value in [True, False], 'setreadonly() accepts only "True" or "False"'
@@ -141,8 +83,85 @@ class PooledConnectionObject(object):
 				# will return often-but-not-always '2' as the status: i.e., STATUS_IN_TRANSACTION
 				print(self.uniquename, 'failed its commit()')
 				status = self.dbconnection.get_transaction_status()
-				print('\tPooledConnectionObject {me} status is {s}'.format(me=self.uniquename, s=status))
+				print('\tConnectionObject {me} status is {s}'.format(me=self.uniquename, s=status))
 		return
+
+
+class PooledConnectionObject(GenericConnectionObject):
+	"""
+
+	there can be serious threading issues if you use this:
+
+	a connection must be assigned to each worker *before* you join the MP jobs
+
+	otherwise the different threads will not share the connections properly and you will end
+	up with a lot of closed/broken connections
+
+	psycopg connection status values.
+		STATUS_SETUP = 0
+		STATUS_READY = 1
+		STATUS_BEGIN = 2
+		STATUS_SYNC = 3  # currently unused
+		STATUS_ASYNC = 4  # currently unused
+		STATUS_PREPARED = 5
+
+	# This is a useful mnemonic to check if the connection is in a transaction
+		STATUS_IN_TRANSACTION = STATUS_BEGIN
+
+	some error messages if you misthread:
+		xgkhgwsadbuu - Process-3 failed to commit()
+		PooledConnectionObject xgkhgwsadbuu - Process-3 status is 2
+		DatabaseError for <cursor object at 0x13ba55428; closed: 0> @ Process-3
+
+	"""
+
+	__pools = dict()
+
+	def __init__(self, autocommit='nope', readonlyconnection=False, ctype='ro'):
+		super().__init__(autocommit='nope', readonlyconnection=False)
+		if not PooledConnectionObject.__pools:
+			# initialize the borg
+			# note that poolsize is implicitly a claim about how many concurrent users you imagine having
+			poolsize = setthreadcount() + 2
+
+			# three known pool types; simple should be faster as you are avoiding locking
+			# but the vectobot lives in a thread...
+			pooltype = connectionpool.SimpleConnectionPool
+			# pooltype = connectionpool.ThreadedConnectionPool
+			# pooltype = connectionpool.PersistentConnectionPool
+
+			kwds = {'user': hipparchia.config['DBUSER'],
+			        'host': hipparchia.config['DBHOST'],
+			        'port': hipparchia.config['DBPORT'],
+			        'database': hipparchia.config['DBNAME'],
+			        'password': hipparchia.config['DBPASS']}
+
+			readonlypool = pooltype(poolsize, poolsize * 2, **kwds)
+
+			kwds['user'] = hipparchia.config['DBWRITEUSER']
+			kwds['password'] = hipparchia.config['DBWRITEPASS']
+
+			readandwritepool = pooltype(poolsize, poolsize * 2, **kwds)
+			PooledConnectionObject.__pools['ro'] = readonlypool
+			PooledConnectionObject.__pools['rw'] = readandwritepool
+		assert ctype in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
+		self.pool = PooledConnectionObject.__pools[ctype]
+		
+		try:
+			self.dbconnection = self.pool.getconn(key=self.uniquename)
+		except psycopg2.pool.PoolError:
+			# the pool is exhausted: try a basic connection instead
+			# but in the long run should probably make a bigger pool/debug something
+			print('PoolError: fallback to SimpleConnectionObject()')
+			c = SimpleConnectionObject(autocommit=self.autocommit, readonlyconnection=self.readonlyconnection, ctype=ctype)
+			self.dbconnection = c.dbconnection
+			self.connectioncleanup = c.connectioncleanup
+
+		if self.autocommit == 'autocommit':
+			self.setautocommit()
+
+		getattr(self.dbconnection, 'set_session')(readonly=self.readonlyconnection)
+		self.curs = getattr(self.dbconnection, 'cursor')()
 
 	def connectioncleanup(self):
 		"""
@@ -150,7 +169,7 @@ class PooledConnectionObject(object):
 		close a connection down in the most tedious way possible
 
 		:param cursor:
-		:param dbconnection:
+		:param dbconnectiononnection:
 		:return:
 		"""
 
@@ -163,7 +182,7 @@ class PooledConnectionObject(object):
 		return
 
 
-class SimpleConnectionObject(object):
+class SimpleConnectionObject(GenericConnectionObject):
 	"""
 
 	open a connection to the db
@@ -175,6 +194,7 @@ class SimpleConnectionObject(object):
 	"""
 
 	def __init__(self, autocommit='nope', readonlyconnection=True, ctype='ro'):
+		super().__init__(autocommit='nope', readonlyconnection=False)
 		assert ctype in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
 		if ctype == 'ro':
 			u = hipparchia.config['DBUSER']
@@ -182,62 +202,18 @@ class SimpleConnectionObject(object):
 		else:
 			u = hipparchia.config['DBWRITEUSER']
 			p = hipparchia.config['DBWRITEPASS']
-		self.autocommit = autocommit
-		self.readonlyconnection = readonlyconnection
+
 		self.dbconnection = psycopg2.connect(user=u,
-											host=hipparchia.config['DBHOST'],
-											port=hipparchia.config['DBPORT'],
-											database=hipparchia.config['DBNAME'],
-											password=p)
+		                            host=hipparchia.config['DBHOST'],
+		                            port=hipparchia.config['DBPORT'],
+		                            database=hipparchia.config['DBNAME'],
+		                            password=p)
 
 		if self.autocommit == 'autocommit':
 			self.setautocommit()
 
 		self.dbconnection.set_session(readonly=readonlyconnection)
-		self.connectioncursor = self.dbconnection.cursor()
-		self.commitcount = hipparchia.config['MPCOMMITCOUNT']
-
-	def cursor(self):
-		return self.connectioncursor
-
-	def commit(self):
-		getattr(self.dbconnection, 'commit')()
-		return
-
-	def close(self):
-		getattr(self.dbconnection, 'close')()
-		return
-
-	def setautocommit(self):
-		# other possible values are:
-		# psycopg2.extensions.ISOLATION_LEVEL_DEFAULT
-		# psycopg2.extensions.ISOLATION_LEVEL_SERIALIZABLE
-		# psycopg2.extensions.ISOLATION_LEVEL_REPEATABLE_READ
-		# psycopg2.extensions.ISOLATION_LEVEL_READ_COMMITTED
-		self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-
-	def setdefaultisolation(self):
-		self.dbconnection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_DEFAULT)
-
-	def setreadonly(self, value):
-		assert value in [True, False], 'setreadonly() accepts only "True" or "False"'
-		self.dbconnection.set_session(readonly=value)
-
-	def connectionisclosed(self):
-		return self.dbconnection.closed
-
-	def cursorisclosed(self):
-		return self.connectioncursor.closed
-
-	def checkneedtocommit(self, commitcountervalue):
-		# commitcountervalue is an MPCounter?
-		try:
-			v = commitcountervalue.value
-		except:
-			v = commitcountervalue
-		if v % self.commitcount == 0:
-			self.dbconnection.commit()
-		return
+		self.curs = getattr(self.dbconnection, 'cursor')()
 
 	def connectioncleanup(self):
 		"""
@@ -247,17 +223,18 @@ class SimpleConnectionObject(object):
 		this overkill is mostly part of the FreeBSD bug-hunt
 
 		:param cursor:
-		:param dbconnection:
+		:param dbconnectiononnection:
 		:return:
 		"""
 
 		self.commit()
 
-		self.connectioncursor.close()
-		del self.connectioncursor
+		getattr(self.curs, 'close')()
+		del self.curs
 
-		self.close()
+		getattr(self.dbconnection, 'close')()
 		del self.dbconnection
+		# print('deleted connection', self.uniquename)
 
 		return
 
