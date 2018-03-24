@@ -8,6 +8,7 @@
 
 import psycopg2
 import psycopg2.pool as connectionpool
+import threading
 
 from server import hipparchia
 from server.threading.mpthreadcount import setthreadcount
@@ -119,13 +120,13 @@ class PooledConnectionObject(GenericConnectionObject):
 
 	def __init__(self, autocommit='nope', readonlyconnection=False, ctype='ro'):
 		super().__init__(autocommit='nope', readonlyconnection=False)
+		self.cytpe = ctype
 		if not PooledConnectionObject.__pools:
 			# initialize the borg
 			# note that poolsize is implicitly a claim about how many concurrent users you imagine having
 			poolsize = setthreadcount() + 2
 
 			# three known pool types; simple should be faster as you are avoiding locking
-			# but the vectobot lives in a thread...
 			pooltype = connectionpool.SimpleConnectionPool
 			# pooltype = connectionpool.ThreadedConnectionPool
 			# pooltype = connectionpool.PersistentConnectionPool
@@ -144,24 +145,34 @@ class PooledConnectionObject(GenericConnectionObject):
 			readandwritepool = pooltype(poolsize, poolsize * 2, **kwds)
 			PooledConnectionObject.__pools['ro'] = readonlypool
 			PooledConnectionObject.__pools['rw'] = readandwritepool
-		assert ctype in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
-		self.pool = PooledConnectionObject.__pools[ctype]
-		
-		try:
-			self.dbconnection = self.pool.getconn(key=self.uniquename)
-		except psycopg2.pool.PoolError:
-			# the pool is exhausted: try a basic connection instead
-			# but in the long run should probably make a bigger pool/debug something
-			print('PoolError: fallback to SimpleConnectionObject()')
-			c = SimpleConnectionObject(autocommit=self.autocommit, readonlyconnection=self.readonlyconnection, ctype=ctype)
-			self.dbconnection = c.dbconnection
-			self.connectioncleanup = c.connectioncleanup
+
+		assert self.cytpe in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
+		self.pool = PooledConnectionObject.__pools[self.cytpe]
+
+		# print(self.uniquename, 'threading.name', threading.current_thread().name)
+		if threading.current_thread().name == 'vectorbot':
+			self.simpleconnectionfallback()
+		else:
+			try:
+				self.dbconnection = self.pool.getconn(key=self.uniquename)
+			except psycopg2.pool.PoolError:
+				# the pool is exhausted: try a basic connection instead
+				# but in the long run should probably make a bigger pool/debug something
+				# the vectobot lives in a thread and it will exhaust the pool
+				print('PoolError: fallback to SimpleConnectionObject()')
+				self.simpleconnectionfallback()
 
 		if self.autocommit == 'autocommit':
 			self.setautocommit()
 
 		getattr(self.dbconnection, 'set_session')(readonly=self.readonlyconnection)
 		self.curs = getattr(self.dbconnection, 'cursor')()
+
+	def simpleconnectionfallback(self):
+		# print('SimpleConnectionObject', self.uniquename)
+		c = SimpleConnectionObject(autocommit=self.autocommit, readonlyconnection=self.readonlyconnection, ctype=self.cytpe)
+		self.dbconnection = c.dbconnection
+		self.connectioncleanup = c.connectioncleanup
 
 	def connectioncleanup(self):
 		"""
@@ -176,7 +187,7 @@ class PooledConnectionObject(GenericConnectionObject):
 		self.commit()
 		self.dbconnection.set_session(readonly=False)
 		self.setdefaultisolation()
-		self.pool.putconn(self.dbconnection, key=self.uniquename, close=False)
+		self.pool.putconn(self.dbconnection, key=self.uniquename)
 		# print('connection returned to pool:', self.uniquename)
 
 		return

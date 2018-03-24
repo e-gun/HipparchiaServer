@@ -167,5 +167,5 @@ def buildfakesearchobject(qtype='nearestneighborsquery'):
 	return so
 
 
-vectorbot = threading.Thread(target=startvectorizing, args=())
+vectorbot = threading.Thread(target=startvectorizing, name='vectorbot', args=())
 vectorbot.start()

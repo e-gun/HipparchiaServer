@@ -29,7 +29,7 @@ def createvectorstable():
 	print('resetting the stored vectors table')
 
 	dbconnection = ConnectionObject(ctype='rw')
-	cursor = dbconnection.cursor()
+	dbcursor = dbconnection.cursor()
 
 	query = """
 	DROP TABLE IF EXISTS public.storedvectors;
@@ -58,7 +58,7 @@ def createvectorstable():
 
 	query = query.format(reader=hipparchia.config['DBUSER'], writer=hipparchia.config['DBWRITEUSER'])
 
-	cursor.execute(query)
+	dbcursor.execute(query)
 
 	dbconnection.connectioncleanup()
 
@@ -76,7 +76,7 @@ def createstoredimagestable():
 	print('resetting the stored images table')
 
 	dbconnection = ConnectionObject(ctype='rw')
-	cursor = dbconnection.cursor()
+	dbcursor = dbconnection.cursor()
 
 	query = """
 	DROP TABLE IF EXISTS public.storedvectorimages;
@@ -101,7 +101,7 @@ def createstoredimagestable():
 
 	query = query.format(reader=hipparchia.config['DBUSER'], writer=hipparchia.config['DBWRITEUSER'])
 
-	cursor.execute(query)
+	dbcursor.execute(query)
 
 	dbconnection.connectioncleanup()
 
@@ -126,7 +126,7 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 		uidlist = sorted(searchobject.searchlist)
 
 	dbconnection = ConnectionObject(ctype='rw')
-	cursor = dbconnection.cursor()
+	dbcursor = dbconnection.cursor()
 
 	if vectorspace:
 		pickledvectors = pickle.dumps(vectorspace)
@@ -136,7 +136,7 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 
 	q = 'DELETE FROM public.storedvectors WHERE (uidlist = %s and vectortype = %s)'
 	d = (uidlist, vectortype)
-	cursor.execute(q, d)
+	dbcursor.execute(q, d)
 
 	q = """
 	INSERT INTO public.storedvectors 
@@ -147,7 +147,7 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 	versionstamp = readgitdata()[:6]
 
 	d = (ts, versionstamp, settings, uidlist, vectortype, pickledvectors)
-	cursor.execute(q, d)
+	dbcursor.execute(q, d)
 
 	# print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))
 
