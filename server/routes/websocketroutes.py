@@ -162,5 +162,5 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	return
 
 
-pollstart = threading.Thread(target=startwspolling, args=())
+pollstart = threading.Thread(target=startwspolling, name='websocketpoll', args=())
 pollstart.start()

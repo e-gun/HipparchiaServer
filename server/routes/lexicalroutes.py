@@ -207,6 +207,7 @@ def reverselexiconsearch(searchterm):
 	"""
 
 	dbconnection = ConnectionObject()
+	dbconnection.setautocommit()
 	dbcursor = dbconnection.cursor()
 
 	entries = list()
@@ -221,6 +222,7 @@ def reverselexiconsearch(searchterm):
 	else:
 		searchunder = [('greek', 'tr'), ('latin', 'hi')]
 
+	entries = list()
 	for s in searchunder:
 		usedict = s[0]
 		translationlabel = s[1]
@@ -231,7 +233,7 @@ def reverselexiconsearch(searchterm):
 		dbcursor.execute(query, data)
 
 		matches = dbcursor.fetchall()
-		entries = [m[0] for m in matches]
+		entries += [m[0] for m in matches]
 
 	entries = list(set(entries))
 

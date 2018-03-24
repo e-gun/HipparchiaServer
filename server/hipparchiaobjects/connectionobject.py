@@ -29,12 +29,13 @@ class GenericConnectionObject(object):
 		# note that only autocommit='autocommit' will make a difference
 		self.autocommit = autocommit
 		self.readonlyconnection = readonlyconnection
+		self.commitcount = hipparchia.config['MPCOMMITCOUNT']
 		# used for the key for getconn() and putconn(); but unneeded if PersistentConnectionPool
 		# also useful to have on hand for debugging
 		self.uniquename = uniquetablename()
+		# the next two must get filled out when the actual connection is made
 		self.dbconnection = None
 		self.curs = None
-		self.commitcount = hipparchia.config['MPCOMMITCOUNT']
 
 	def setautocommit(self):
 		# other possible values are:
@@ -142,14 +143,14 @@ class PooledConnectionObject(GenericConnectionObject):
 			kwds['user'] = hipparchia.config['DBWRITEUSER']
 			kwds['password'] = hipparchia.config['DBWRITEPASS']
 
-			readandwritepool = pooltype(poolsize, poolsize * 2, **kwds)
+			# this can be smaller because only vectors to rw and the vectorbot is not allowed in the pool
+			readandwritepool = pooltype(poolsize, poolsize, **kwds)
 			PooledConnectionObject.__pools['ro'] = readonlypool
 			PooledConnectionObject.__pools['rw'] = readandwritepool
 
 		assert self.cytpe in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
 		self.pool = PooledConnectionObject.__pools[self.cytpe]
 
-		# print(self.uniquename, 'threading.name', threading.current_thread().name)
 		if threading.current_thread().name == 'vectorbot':
 			self.simpleconnectionfallback()
 		else:
@@ -231,7 +232,7 @@ class SimpleConnectionObject(GenericConnectionObject):
 
 		close a connection down in the most tedious way possible
 
-		this overkill is mostly part of the FreeBSD bug-hunt
+		this overkill is mostly a legacy of the FreeBSD bug-hunt
 
 		:param cursor:
 		:param dbconnectiononnection:
