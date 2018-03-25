@@ -63,7 +63,7 @@ class GenericConnectionObject(object):
 	def setreadonly(self, value):
 		assert value in [True, False], 'setreadonly() accepts only "True" or "False"'
 		self.commit()
-		getattr(self.dbconnection, 'set_session')(readonly=value)
+		getattr(self.dbconnection, 'set_session')(readonly=value, autocommit=True)
 
 	def getreadonly(self):
 		getattr(self.dbconnection, 'readonly')
@@ -122,7 +122,7 @@ class PooledConnectionObject(GenericConnectionObject):
 
 	_pools = dict()
 
-	def __init__(self, autocommit='nope', readonlyconnection=False, ctype='ro'):
+	def __init__(self, autocommit='defaultisno', readonlyconnection=True, ctype='ro'):
 		super().__init__(autocommit, readonlyconnection)
 		self.cytpe = ctype
 		if not PooledConnectionObject._pools:
@@ -156,6 +156,9 @@ class PooledConnectionObject(GenericConnectionObject):
 		assert self.cytpe in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
 		self.pool = PooledConnectionObject._pools[self.cytpe]
 
+		if self.cytpe == 'rw':
+			self.readonlyconnection = False
+
 		if threading.current_thread().name == 'vectorbot':
 			# the vectobot lives in a thread and it will exhaust the pool
 			self.simpleconnectionfallback()
@@ -171,7 +174,7 @@ class PooledConnectionObject(GenericConnectionObject):
 		if self.autocommit == 'autocommit':
 			self.setautocommit()
 
-		getattr(self.dbconnection, 'set_session')(readonly=self.readonlyconnection)
+		self.setreadonly(self.readonlyconnection)
 		self.curs = getattr(self.dbconnection, 'cursor')()
 
 	def simpleconnectionfallback(self):
@@ -210,7 +213,7 @@ class SimpleConnectionObject(GenericConnectionObject):
 
 	"""
 
-	def __init__(self, autocommit='nope', readonlyconnection=True, ctype='ro'):
+	def __init__(self, autocommit='defaultisno', readonlyconnection=True, ctype='ro'):
 		super().__init__(autocommit, readonlyconnection)
 		assert ctype in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
 		if ctype != 'rw':
@@ -219,6 +222,7 @@ class SimpleConnectionObject(GenericConnectionObject):
 		else:
 			u = hipparchia.config['DBWRITEUSER']
 			p = hipparchia.config['DBWRITEPASS']
+			self.readonlyconnection = False
 
 		self.dbconnection = psycopg2.connect(user=u,
 		                            host=hipparchia.config['DBHOST'],
@@ -229,7 +233,7 @@ class SimpleConnectionObject(GenericConnectionObject):
 		if self.autocommit == 'autocommit':
 			self.setautocommit()
 
-		self.dbconnection.set_session(readonly=readonlyconnection)
+		self.setreadonly(self.readonlyconnection)
 		self.curs = getattr(self.dbconnection, 'cursor')()
 
 	def connectioncleanup(self):

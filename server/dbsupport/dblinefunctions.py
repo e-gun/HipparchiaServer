@@ -179,7 +179,7 @@ def bulkenvironsfetcher(table, searchresultlist, context):
 	:return:
 	"""
 
-	dbconnection = ConnectionObject()
+	dbconnection = ConnectionObject(readonlyconnection=False)
 	dbconnection.setautocommit()
 	cursor = dbconnection.cursor()
 
