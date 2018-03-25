@@ -62,7 +62,7 @@ key features:
 			click on index words to get lexical information [excessive index size will disable this]
 			click on index passages to browse to that passage [excessive index size will disable this]
 		semantic vectors
-		    claculate the relationship between words on any arbitary searchlist using linear algebra
+		    calculate the relationship between words on any arbitrary search list using linear algebra
 		    various algorithms available: literal proximity, word2vec nearest neighbors, lsi matrix-similarity, ...
 		    configurable settings for key variable like training runs and downsampling
 

@@ -25,7 +25,7 @@ class GenericConnectionObject(object):
 
 	"""
 
-	def __init__(self, autocommit='nope', readonlyconnection=False):
+	def __init__(self, autocommit, readonlyconnection):
 		# note that only autocommit='autocommit' will make a difference
 		self.autocommit = autocommit
 		self.readonlyconnection = readonlyconnection
@@ -88,6 +88,9 @@ class GenericConnectionObject(object):
 				print('\tConnectionObject {me} status is {s}'.format(me=self.uniquename, s=status))
 		return
 
+	def connectioncleanup(self):
+		raise NotImplementedError
+
 
 class PooledConnectionObject(GenericConnectionObject):
 	"""
@@ -117,12 +120,12 @@ class PooledConnectionObject(GenericConnectionObject):
 
 	"""
 
-	__pools = dict()
+	_pools = dict()
 
 	def __init__(self, autocommit='nope', readonlyconnection=False, ctype='ro'):
-		super().__init__(autocommit='nope', readonlyconnection=False)
+		super().__init__(autocommit, readonlyconnection)
 		self.cytpe = ctype
-		if not PooledConnectionObject.__pools:
+		if not PooledConnectionObject._pools:
 			# initialize the borg
 			# note that poolsize is implicitly a claim about how many concurrent users you imagine having
 			poolsize = setthreadcount() + 2
@@ -132,6 +135,7 @@ class PooledConnectionObject(GenericConnectionObject):
 			# pooltype = connectionpool.ThreadedConnectionPool
 			# pooltype = connectionpool.PersistentConnectionPool
 
+			# [A] 'ro' pool
 			kwds = {'user': hipparchia.config['DBUSER'],
 			        'host': hipparchia.config['DBHOST'],
 			        'port': hipparchia.config['DBPORT'],
@@ -140,18 +144,20 @@ class PooledConnectionObject(GenericConnectionObject):
 
 			readonlypool = pooltype(poolsize, poolsize * 2, **kwds)
 
+			# [B] 'rw' pool
 			kwds['user'] = hipparchia.config['DBWRITEUSER']
 			kwds['password'] = hipparchia.config['DBWRITEPASS']
-
 			# this can be smaller because only vectors to rw and the vectorbot is not allowed in the pool
 			readandwritepool = pooltype(poolsize, poolsize, **kwds)
-			PooledConnectionObject.__pools['ro'] = readonlypool
-			PooledConnectionObject.__pools['rw'] = readandwritepool
+
+			PooledConnectionObject._pools['ro'] = readonlypool
+			PooledConnectionObject._pools['rw'] = readandwritepool
 
 		assert self.cytpe in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
-		self.pool = PooledConnectionObject.__pools[self.cytpe]
+		self.pool = PooledConnectionObject._pools[self.cytpe]
 
 		if threading.current_thread().name == 'vectorbot':
+			# the vectobot lives in a thread and it will exhaust the pool
 			self.simpleconnectionfallback()
 		else:
 			try:
@@ -159,7 +165,6 @@ class PooledConnectionObject(GenericConnectionObject):
 			except psycopg2.pool.PoolError:
 				# the pool is exhausted: try a basic connection instead
 				# but in the long run should probably make a bigger pool/debug something
-				# the vectobot lives in a thread and it will exhaust the pool
 				print('PoolError: fallback to SimpleConnectionObject()')
 				self.simpleconnectionfallback()
 
@@ -206,9 +211,9 @@ class SimpleConnectionObject(GenericConnectionObject):
 	"""
 
 	def __init__(self, autocommit='nope', readonlyconnection=True, ctype='ro'):
-		super().__init__(autocommit='nope', readonlyconnection=False)
+		super().__init__(autocommit, readonlyconnection)
 		assert ctype in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
-		if ctype == 'ro':
+		if ctype != 'rw':
 			u = hipparchia.config['DBUSER']
 			p = hipparchia.config['DBPASS']
 		else:
