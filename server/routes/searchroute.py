@@ -20,7 +20,7 @@ from server.formatting.jsformatting import insertbrowserclickjs
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds
 from server.formatting.wordformatting import universalregexequivalent, wordlistintoregex
-from server.hipparchiaobjects.searchobjects import OutputObject, ProgressPoll
+from server.hipparchiaobjects.searchobjects import ProgressPoll, SearchOutputObject
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
 	sortresultslist
 from server.listsandsession.whereclauses import configurewhereclausedata
@@ -63,7 +63,7 @@ def executesearch(timestamp):
 
 	searchlist = list()
 	nosearch = True
-	output = OutputObject(so)
+	output = SearchOutputObject(so)
 
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	activecorpora = [c for c in allcorpora if frozensession[c] == 'yes']

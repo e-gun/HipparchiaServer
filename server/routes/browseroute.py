@@ -36,8 +36,8 @@ def grabtextforbrowsing(locus):
 	:return:
 	"""
 
-	dbc = ConnectionObject('autocommit')
-	cur = dbc.cursor()
+	dbconnection = ConnectionObject()
+	dbcursor = dbconnection.cursor()
 
 	workdb = depunct(locus)[:10]
 
@@ -61,7 +61,7 @@ def grabtextforbrowsing(locus):
 			# you have only selected an author, but not a work: 'gr7000w_AT_1' will fail because we need 'wNNN'
 			# so send line 1 of work 1
 			wo = ao.listofworks[0]
-			locus = wo.universalid + '_LN_' + str(wo.starts)
+			locus = '{w}_LN_{s}'.format(w=wo.universalid, s=wo.starts)
 
 	ctx = int(session['browsercontext'])
 	numbersevery = hipparchia.config['SHOWLINENUMBERSEVERY']
@@ -87,9 +87,9 @@ def grabtextforbrowsing(locus):
 		cleanedp = [depunct(level, allowedpunct) for level in p]
 		cleanedp = tuple(cleanedp[:5])
 		if len(cleanedp) == wo.availablelevels:
-			passage = finddblinefromlocus(wo.universalid, cleanedp, cur)
+			passage = finddblinefromlocus(wo.universalid, cleanedp, dbcursor)
 		else:
-			p = finddblinefromincompletelocus(wo, cleanedp, cur)
+			p = finddblinefromincompletelocus(wo, cleanedp, dbcursor)
 			resultmessage = p['code']
 			passage = p['line']
 	elif passage[0:4] == '_PE_':
@@ -98,11 +98,11 @@ def grabtextforbrowsing(locus):
 			# do an imperfect test for this by inviting the exception
 			# you can still get a valid but wrong work, of course,
 			# but if you ask for w001 and only w003 exists, this is supposed to take care of that
-			returnfirstlinenumber(workdb, cur)
+			returnfirstlinenumber(workdb, dbcursor)
 		except:
 			# dict did not agree with our ids...: euripides, esp
 			# what follows is a 'hope for the best' approach
-			workid = perseusidmismatch(workdb, cur)
+			workid = perseusidmismatch(workdb, dbcursor)
 			wo = workdict[workid]
 			# print('dictionary lookup id remap',workdb,workid,wo.title)
 
@@ -124,7 +124,7 @@ def grabtextforbrowsing(locus):
 		# meaningful only in the context of someone purposefully submitting bad data...
 		citation = [depunct(level, allowedpunct) for level in citation]
 
-		p = finddblinefromincompletelocus(wo, citation, cur)
+		p = finddblinefromincompletelocus(wo, citation, dbcursor)
 		resultmessage = p['code']
 		passage = p['line']
 	else:
@@ -132,7 +132,7 @@ def grabtextforbrowsing(locus):
 		ao = makeanemptyauthor('gr0000')
 
 	if passage and ao.universalid != 'gr0000':
-		browserdata = getandformatbrowsercontext(ao, wo, int(passage), ctx, numbersevery, cur)
+		browserdata = getandformatbrowsercontext(ao, wo, int(passage), ctx, numbersevery, dbcursor)
 	else:
 		browserdata = dict()
 		browserdata['browseforwards'] = wo.ends
@@ -142,7 +142,7 @@ def grabtextforbrowsing(locus):
 			passage = ''
 		try:
 			table = [str(passage), workdb, ' '.join(citation)]
-		except:
+		except NameError:
 			table = [str(passage), workdb]
 
 		browserdata['browserhtml'] = viewing + '\n'.join(table)
@@ -157,6 +157,6 @@ def grabtextforbrowsing(locus):
 
 	browserdata = json.dumps(browserdata)
 
-	dbc.connectioncleanup()
+	dbconnection.connectioncleanup()
 
 	return browserdata
