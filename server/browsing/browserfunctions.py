@@ -8,6 +8,8 @@
 
 import re
 
+from flask import session
+
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation, finddblinefromlocus, finddblinefromincompletelocus, \
 	perseusdelabeler
@@ -22,7 +24,7 @@ from server.startup import workdict
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
 
-def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, linesofcontext, numbersevery, cursor):
+def buildbrowseroutputobject(authorobject, workobject, locusindexvalue, cursor):
 	"""
 	this function does a lot of work via a number of subfunctions
 	lots of refactoring required if you change anything...
@@ -40,6 +42,8 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	"""
 
 	thiswork = workobject.universalid
+	linesofcontext = int(session['browsercontext'])
+	numbersevery = hipparchia.config['SHOWLINENUMBERSEVERY']
 
 	# [a] acquire the lines we need to display
 	surroundinglines = simplecontextgrabber(workobject.authorid, locusindexvalue, linesofcontext, cursor)
@@ -280,6 +284,7 @@ def findlinenumberfromlocus(locus, workobject, dbcursor):
 			resultmessage = p['code']
 			thelocus = p['line']
 	elif thelocus[0:4] == '_PE_':
+		# here comes the fun part: alien format; inconsistent citation style; incorrect data...
 		try:
 			# dict does not always agree with our ids...
 			# do an imperfect test for this by inviting the exception

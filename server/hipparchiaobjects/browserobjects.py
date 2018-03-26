@@ -32,7 +32,6 @@ class BrowserOutputObject(object):
 		self.authorboxcontents = '{n} [{uid}]'.format(n=authorobject.cleanname, uid=authorobject.universalid)
 		self.workboxcontents = '{t} ({wkid})'.format(t=workobject.title, wkid=workobject.universalid[-4:])
 		self.linesofcontext = int(session['browsercontext'])
-		self.numbersevery = hipparchia.config['SHOWLINENUMBERSEVERY']
 
 		if locusindexvalue:
 			self.psgends = locusindexvalue + self.linesofcontext

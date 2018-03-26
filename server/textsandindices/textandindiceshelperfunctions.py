@@ -301,6 +301,7 @@ def mpmorphology(terms, morphobjects, dbconnection):
 	commitcount = 0
 	while terms:
 		commitcount += 1
+		dbconnection.checkneedtocommit(commitcount)
 		try:
 			term = terms.pop()
 		except IndexError:
@@ -312,7 +313,5 @@ def mpmorphology(terms, morphobjects, dbconnection):
 				morphobjects[term] = mo
 			else:
 				morphobjects[term] = None
-
-		dbconnection.checkneedtocommit(commitcount)
 
 	return morphobjects

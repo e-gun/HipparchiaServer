@@ -11,7 +11,7 @@ import json
 from flask import session
 
 from server import hipparchia
-from server.browsing.browserfunctions import findlinenumberfromlocus, getandformatbrowsercontext
+from server.browsing.browserfunctions import findlinenumberfromlocus, buildbrowseroutputobject
 from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
 from server.formatting.lexicaformatting import dbquickfixes
 from server.formatting.wordformatting import depunct
@@ -64,13 +64,10 @@ def grabtextforbrowsing(locus):
 			wo = ao.listofworks[0]
 			locus = '{w}_LN_{s}'.format(w=wo.universalid, s=wo.starts)
 
-	ctx = int(session['browsercontext'])
-	numbersevery = hipparchia.config['SHOWLINENUMBERSEVERY']
-
 	passage, resultmessage = findlinenumberfromlocus(locus, wo, dbcursor)
 
 	if passage and ao.universalid != 'gr0000':
-		passageobject = getandformatbrowsercontext(ao, wo, int(passage), ctx, numbersevery, dbcursor)
+		passageobject = buildbrowseroutputobject(ao, wo, int(passage), dbcursor)
 	else:
 		passageobject = BrowserOutputObject(ao, wo, passage)
 		viewing = '<p class="currentlyviewing">error in fetching the browser data.<br />I was sent a citation that returned nothing: {c}</p><br /><br />'.format(c=locus)
