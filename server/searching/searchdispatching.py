@@ -180,6 +180,7 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 
 	while searchlist and activepoll.hitcount.value <= so.cap:
 		commitcount += 1
+		dbconnection.checkneedtocommit(commitcount)
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		# that's not supposed to happen with the pool, but somehow it does
@@ -199,8 +200,6 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 				# print(authortable, len(lineobjects))
 				numberoffinds = len(lineobjects)
 				activepoll.addhits(numberoffinds)
-
-		dbconnection.checkneedtocommit(commitcount)
 
 		try:
 			activepoll.remain(len(searchlist))
@@ -240,6 +239,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 	commitcount = 0
 	while searchtuples and activepoll.hitcount.value <= so.cap:
 		commitcount += 1
+		dbconnection.checkneedtocommit(commitcount)
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		# that's not supposed to happen with the pool, but somehow it does
@@ -259,8 +259,6 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 			if lineobjects:
 				numberoffinds = len(lineobjects)
 				activepoll.addhits(numberoffinds)
-
-		dbconnection.checkneedtocommit(commitcount)
 
 		try:
 			activepoll.remain(len(searchtuples))
@@ -337,6 +335,11 @@ def workonproximitysearch(foundlineobjects, searchinginside, searchobject, dbcon
 	so = searchobject
 	activepoll = so.poll
 
+	if so.scope == 'lines':
+		searchfunction = withinxlines
+	else:
+		searchfunction = withinxwords
+
 	while searchinginside and activepoll.hitcount.value <= so.cap:
 		try:
 			wkid = searchinginside.pop()
@@ -345,10 +348,7 @@ def workonproximitysearch(foundlineobjects, searchinginside, searchobject, dbcon
 			searchinginside = None
 
 		if wkid:
-			if so.scope == 'lines':
-				foundlines = withinxlines(wkid, so, dbconnection)
-			else:
-				foundlines = withinxwords(wkid, so, dbconnection)
+			foundlines = searchfunction(wkid, so, dbconnection)
 
 			if foundlines:
 				activepoll.addhits(len(foundlines))
