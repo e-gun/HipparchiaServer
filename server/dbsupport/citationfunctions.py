@@ -28,9 +28,9 @@ def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
 	availablelevels = len(workstructure)
 
 	atlevel = availablelevels-len(partialcitation)
-	# cheat in the case where you want to find the top by sending a 'noncitation': '-1'
-	# e.g.: /getstructure?locus=gr0003w001_AT_-1
-	if partialcitationtuple[0] == '-1':
+	# cheat in the case where you want to find the top by sending a 'noncitation': 'top'
+	# e.g.: /getstructure?locus=gr0003w001_AT_top
+	if partialcitationtuple[0] == 'top':
 		atlevel = availablelevels
 	if atlevel < 1:
 		# i am confused; threatening to probe for level "-1"

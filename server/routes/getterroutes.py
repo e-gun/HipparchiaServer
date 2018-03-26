@@ -142,10 +142,10 @@ def workstructure(locus):
 	try:
 		passage = locus.split('_AT_')[1]
 	except IndexError:
-		passage = '-1'
+		passage = 'top'
 
 	unsafepassage = passage.split('|')
-	# this list will need to match the one in '/browse': '-' is absolutely necessry to catch '-1'
+	# this list will need to match the one in '/browse': '-' is absolutely necessary to catch '-1'
 	allowed = ',;-'
 	safepassage = [depunct(p, allowed) for p in unsafepassage]
 	safepassage = tuple(safepassage[:5])

@@ -270,7 +270,7 @@ def findlinenumberfromlocus(locus, workobject, dbcursor):
 	if thelocus[0:4] == '_LN_':
 		# you were sent here either by the hit list or a forward/back button in the passage browser
 		thelocus = re.sub('[\D]', '', thelocus[4:])
-	elif thelocus == '_AT_-1':
+	elif thelocus == '_AT_top':
 		thelocus = wo.starts
 	elif thelocus[0:4] == '_AT_':
 		# you were sent here by the citation builder autofill boxes
