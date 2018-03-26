@@ -137,10 +137,10 @@ class PooledConnectionObject(GenericConnectionObject):
 
 			# [A] 'ro' pool
 			kwds = {'user': hipparchia.config['DBUSER'],
-			        'host': hipparchia.config['DBHOST'],
-			        'port': hipparchia.config['DBPORT'],
-			        'database': hipparchia.config['DBNAME'],
-			        'password': hipparchia.config['DBPASS']}
+					'host': hipparchia.config['DBHOST'],
+					'port': hipparchia.config['DBPORT'],
+					'database': hipparchia.config['DBNAME'],
+					'password': hipparchia.config['DBPASS']}
 
 			readonlypool = pooltype(poolsize, poolsize * 2, **kwds)
 
@@ -225,10 +225,10 @@ class SimpleConnectionObject(GenericConnectionObject):
 			self.readonlyconnection = False
 
 		self.dbconnection = psycopg2.connect(user=u,
-		                            host=hipparchia.config['DBHOST'],
-		                            port=hipparchia.config['DBPORT'],
-		                            database=hipparchia.config['DBNAME'],
-		                            password=p)
+											host=hipparchia.config['DBHOST'],
+											port=hipparchia.config['DBPORT'],
+											database=hipparchia.config['DBNAME'],
+											password=p)
 
 		if self.autocommit == 'autocommit':
 			self.setautocommit()

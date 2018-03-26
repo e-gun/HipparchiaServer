@@ -10,7 +10,7 @@ import re
 
 from server import hipparchia
 from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
-from server.hipparchiaobjects.searchobjects import OutputObject
+from server.hipparchiaobjects.searchobjects import SearchOutputObject
 from server.startup import authordict, workdict
 
 
@@ -289,7 +289,7 @@ def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearch
 
 	so = searchobject
 	activepoll = so.poll
-	output = OutputObject(so)
+	output = SearchOutputObject(so)
 	output.image = imagename
 
 	findsjs = generatevectorjs('findneighbors')
@@ -338,7 +338,7 @@ def lsiformatoutput(findshtml, workssearched, matches, searchobject):
 
 	so = searchobject
 	activepoll = so.poll
-	output = OutputObject(so)
+	output = SearchOutputObject(so)
 
 	output.found = findshtml
 	output.js = insertbrowserclickjs('browser')

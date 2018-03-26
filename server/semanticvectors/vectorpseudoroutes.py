@@ -16,7 +16,7 @@ from server import hipparchia
 from server.dbsupport.vectordbfunctions import fetchverctorenvirons
 from server.formatting.jsformatting import generatevectorjs
 from server.formatting.vectorformatting import formatnnmatches
-from server.hipparchiaobjects.searchobjects import OutputObject, ProgressPoll
+from server.hipparchiaobjects.searchobjects import ProgressPoll, SearchOutputObject
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
@@ -257,7 +257,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
 
 	findsjs = generatevectorjs('findvectors')
 
-	output = OutputObject(so)
+	output = SearchOutputObject(so)
 
 	output.title = 'Cosine distances to »{skg}«'.format(skg=focus)
 	output.found = findshtml
@@ -306,7 +306,7 @@ def emptyvectoroutput(searchobject, reasons=list()):
 
 	so = searchobject
 
-	output = OutputObject(so)
+	output = SearchOutputObject(so)
 	output.reasons = reasons
 
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']

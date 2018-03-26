@@ -72,8 +72,10 @@ class dbWordCountObject(object):
 			}
 		try:
 			return ldict[element]
-		except:
+		except KeyError:
 			return ''
+
+
 
 
 class dbHeadwordObject(dbWordCountObject):
@@ -670,6 +672,12 @@ class dbDictionaryEntry(object):
 		self.preventryid = -1
 		self.nextentry = '(none)'
 		self.preventry = '(none)'
+
+	def isgreek():
+		raise NotImplementedError
+
+	def islatin():
+		raise NotImplementedError
 
 
 class dbGreekWord(dbDictionaryEntry):

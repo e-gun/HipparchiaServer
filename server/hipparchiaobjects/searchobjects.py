@@ -273,80 +273,6 @@ class SearchObject(object):
 		return whole
 
 
-class OutputObject(object):
-	"""
-
-	basically a dict to help hold and format the html output of a search
-
-	"""
-
-	def __init__(self, searchobject):
-		self.title = str()
-		self.found = str()
-		self.js = str()
-		self.resultcount = str()
-		self.scope = '0'
-		self.searchtime = '0.00'
-		self.proximate = searchobject.proximate
-		self.thesearch = str()
-		self.htmlsearch = str()
-		self.hitmax = 'false'
-		self.onehit = searchobject.session['onehit']
-		self.usedcorpora = searchobject.usedcorpora
-
-		self.icandodates = 'no'
-		if justlatin(searchobject.session) is False:
-			self.icandodates = 'yes'
-
-		sortorderdecoder = {
-			'universalid': 'ID',
-			'shortname': 'name',
-			'genres': 'author genre',
-			'converted_date': 'date',
-			'location': 'location'
-		}
-		self.sortby = sortorderdecoder[searchobject.session['sortorder']]
-
-		# currently unused
-		if searchobject.lemma:
-			self.lemma = searchobject.lemma.dictionaryentry
-		else:
-			self.lemma = ''
-
-		if searchobject.termone:
-			self.headword = searchobject.termone
-		else:
-			self.headword = ''
-
-		dmin, dmax = bcedating(searchobject.session)
-		self.dmin = dmin
-		self.dmax = dmax
-
-		self.image = str()
-		self.reasons = list()
-
-	def generateoutput(self):
-		outputdict = dict()
-		for item in vars(self):
-			outputdict[item] = getattr(self, item)
-
-		return outputdict
-
-	def setresultcount(self, value, string):
-		rc = '{:,}'.format(value)
-		self.resultcount = '{r} {s}'.format(r=rc, s=string)
-
-	def setscope(self, value):
-		self.scope = '{:,}'.format(value)
-		if self.usedcorpora:
-			w = ' and '.join(self.usedcorpora)
-			self.scope = 'all {w} authors in {s}'.format(w=w, s=self.scope)
-
-	def explainemptysearch(self):
-		r = ' and '.join(self.reasons)
-		self.htmlsearch = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=r)
-
-
 class ProgressPoll(object):
 	"""
 
@@ -430,3 +356,77 @@ class ProgressPoll(object):
 			m = ''
 
 		return message.format(msg=m)
+
+
+class SearchOutputObject(object):
+	"""
+
+	basically a dict to help hold and format the html output of a search
+
+	"""
+
+	def __init__(self, searchobject):
+		self.title = str()
+		self.found = str()
+		self.js = str()
+		self.resultcount = str()
+		self.scope = '0'
+		self.searchtime = '0.00'
+		self.proximate = searchobject.proximate
+		self.thesearch = str()
+		self.htmlsearch = str()
+		self.hitmax = 'false'
+		self.onehit = searchobject.session['onehit']
+		self.usedcorpora = searchobject.usedcorpora
+
+		self.icandodates = 'no'
+		if justlatin(searchobject.session) is False:
+			self.icandodates = 'yes'
+
+		sortorderdecoder = {
+			'universalid': 'ID',
+			'shortname': 'name',
+			'genres': 'author genre',
+			'converted_date': 'date',
+			'location': 'location'
+		}
+		self.sortby = sortorderdecoder[searchobject.session['sortorder']]
+
+		# currently unused
+		if searchobject.lemma:
+			self.lemma = searchobject.lemma.dictionaryentry
+		else:
+			self.lemma = ''
+
+		if searchobject.termone:
+			self.headword = searchobject.termone
+		else:
+			self.headword = ''
+
+		dmin, dmax = bcedating(searchobject.session)
+		self.dmin = dmin
+		self.dmax = dmax
+
+		self.image = str()
+		self.reasons = list()
+
+	def generateoutput(self):
+		outputdict = dict()
+		for item in vars(self):
+			outputdict[item] = getattr(self, item)
+
+		return outputdict
+
+	def setresultcount(self, value, string):
+		rc = '{:,}'.format(value)
+		self.resultcount = '{r} {s}'.format(r=rc, s=string)
+
+	def setscope(self, value):
+		self.scope = '{:,}'.format(value)
+		if self.usedcorpora:
+			w = ' and '.join(self.usedcorpora)
+			self.scope = 'all {w} authors in {s}'.format(w=w, s=self.scope)
+
+	def explainemptysearch(self):
+		r = ' and '.join(self.reasons)
+		self.htmlsearch = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=r)
