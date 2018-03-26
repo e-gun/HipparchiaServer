@@ -47,7 +47,7 @@ class BrowserOutputObject(object):
 			self.psgstarts = workobject.starts
 
 		# defaults that will change later
-		self.browserhtml = '[blankuponinitialization]'
+		self.browserhtml = '[nothing found]'
 		self.browseforwards = ''
 		self.browseback = ''
 

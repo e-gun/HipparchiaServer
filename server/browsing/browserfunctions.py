@@ -9,13 +9,16 @@
 import re
 
 from server import hipparchia
-from server.dbsupport.citationfunctions import locusintocitation
-from server.dbsupport.dblinefunctions import dblineintolineobject
-from server.dbsupport.miscdbfunctions import simplecontextgrabber
+from server.dbsupport.citationfunctions import locusintocitation, finddblinefromlocus, finddblinefromincompletelocus, \
+	perseusdelabeler
+from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber
+from server.dbsupport.miscdbfunctions import simplecontextgrabber, perseusidmismatch
 from server.formatting.bibliographicformatting import getpublicationinfo
 from server.formatting.browserformatting import insertparserids
+from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject, BrowserPassageObject
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
+from server.startup import workdict
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
 
@@ -38,6 +41,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 
 	thiswork = workobject.universalid
 
+	# [a] acquire the lines we need to display
 	surroundinglines = simplecontextgrabber(workobject.authorid, locusindexvalue, linesofcontext, cursor)
 	lines = [dblineintolineobject(l) for l in surroundinglines]
 	lines = [l for l in lines if l.wkuinversalid == thiswork]
@@ -61,6 +65,7 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 	if hipparchia.config['DBDEBUGMODE'] == 'yes':
 		lineprefix = '<smallcode>{id}&nbsp;&nbsp;&nbsp;</smallcode>&nbsp;'
 
+	# [b] format the lines and insert them into the BrowserPassageObject
 	for line in lines:
 		if workobject.isnotliterary() and line.index == workobject.starts:
 			# line.index == workobject.starts added as a check because
@@ -107,11 +112,12 @@ def getandformatbrowsercontext(authorobject, workobject, locusindexvalue, lineso
 		passage.browsedlines.append(linehtml)
 		previousline = line
 
-	output = BrowserOutputObject(authorobject, workobject, locusindexvalue)
+	# [c] build the output
+	outputobject = BrowserOutputObject(authorobject, workobject, locusindexvalue)
 
-	output.browserhtml = passage.generatepassagehtml()
+	outputobject.browserhtml = passage.generatepassagehtml()
 
-	return output.generateoutput()
+	return outputobject
 
 
 def checkfordocumentmetadata(line, workobject):
@@ -227,3 +233,74 @@ def fetchhtmltemplateforlinerow(shownotes = True):
 		"""
 
 	return linetemplate
+
+
+def findlinenumberfromlocus(locus, workobject, dbcursor):
+
+	workdb = depunct(locus)[:10]
+	thelocus = locus[10:]
+	wo = workobject
+	resultmessage = 'success'
+
+	# unfortunately you might need to find '300,19' as in 'Democritus, Fragmenta: Fragment 300,19, line 4'
+	# '-' is used for '-1' (which really means 'first available line at this level')
+	# ( ) and / should be converted to equivalents in the builder: they do us no good here
+	# see dbswapoutbadcharsfromciations() in HipparchiaBuilder
+	allowedpunct = ',-'
+
+	if thelocus[0:4] == '_LN_':
+		# you were sent here either by the hit list or a forward/back button in the passage browser
+		thelocus = re.sub('[\D]', '', thelocus[4:])
+	elif thelocus == '_AT_-1':
+		thelocus = wo.starts
+	elif thelocus[0:4] == '_AT_':
+		# you were sent here by the citation builder autofill boxes
+		p = locus[14:].split('|')
+		cleanedp = [depunct(level, allowedpunct) for level in p]
+		cleanedp = tuple(cleanedp[:5])
+		if len(cleanedp) == wo.availablelevels:
+			thelocus = finddblinefromlocus(wo.universalid, cleanedp, dbcursor)
+		else:
+			p = finddblinefromincompletelocus(wo, cleanedp, dbcursor)
+			resultmessage = p['code']
+			thelocus = p['line']
+	elif thelocus[0:4] == '_PE_':
+		try:
+			# dict does not always agree with our ids...
+			# do an imperfect test for this by inviting the exception
+			# you can still get a valid but wrong work, of course,
+			# but if you ask for w001 and only w003 exists, this is supposed to take care of that
+			returnfirstlinenumber(workdb, dbcursor)
+		except:
+			# dict did not agree with our ids...: euripides, esp
+			# what follows is a 'hope for the best' approach
+			workid = perseusidmismatch(workdb, dbcursor)
+			wo = workdict[workid]
+			# print('dictionary lookup id remap',workdb,workid,wo.title)
+
+		citation = thelocus[4:].split(':')
+		citation.reverse()
+
+		# life=cal. or section=32
+		needscleaning = [True for c in citation if len(c.split('=')) > 1]
+		if True in needscleaning:
+			citation = perseusdelabeler(citation, wo)
+
+		# another problem 'J. ' in sallust <bibl id="lt0631w001_PE_J. 79:3" default="NO" valid="yes"><author>Sall.</author> J. 79, 3</bibl>
+		# lt0631w002_PE_79:3 is what you need to send to finddblinefromincompletelocus()
+		# note that the work number is wrong, so the next is only a partial fix and valid only if wNNN has been set right
+
+		if ' ' in citation[-1]:
+			citation[-1] = citation[-1].split(' ')[-1]
+
+		# meaningful only in the context of someone purposefully submitting bad data...
+		citation = [depunct(level, allowedpunct) for level in citation]
+
+		p = finddblinefromincompletelocus(wo, citation, dbcursor)
+		resultmessage = p['code']
+		thelocus = p['line']
+	else:
+		# you sent me passage in an impossible format
+		thelocus = None
+
+	return thelocus, resultmessage
