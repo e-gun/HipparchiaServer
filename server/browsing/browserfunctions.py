@@ -236,6 +236,21 @@ def fetchhtmltemplateforlinerow(shownotes = True):
 
 
 def findlinenumberfromlocus(locus, workobject, dbcursor):
+	"""
+
+	you have been given a locus in one of THREE possible formats
+
+		_LN_ : already a line number
+		_AT_ : a locus that corresponds to a hipparchia level-list
+		_PE_ : a locus embdeed in the dictionary data; these are regularly wonky
+
+	try to turn what you have into a line number in a database table
+
+	:param locus:
+	:param workobject:
+	:param dbcursor:
+	:return:
+	"""
 
 	workdb = depunct(locus)[:10]
 	thelocus = locus[10:]

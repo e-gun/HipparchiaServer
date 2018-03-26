@@ -141,7 +141,7 @@ def wordindextohtmltable(indexingoutput, useheadwords):
 	if useheadwords:
 		boilerplate = """
 		[nb: <span class="word"><span class="homonym">homonyms</span></span> 
-		are listed under every known headword and their <span class="word">
+		are listed under every possible headword and their <span class="word">
 		<span class="homonym">display differs</span></span> from that of 
 		<span class="word">unambiguous entries</span>]
 		<br>
