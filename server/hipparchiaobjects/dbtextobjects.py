@@ -7,6 +7,7 @@
 """
 
 import re
+from string import punctuation
 
 from server import hipparchia
 from server.formatting.betacodeescapes import andsubstitutes
@@ -284,6 +285,8 @@ class dbWorkLine(object):
 			self.accented = attemptsigmadifferentiation(self.accented)
 		if hipparchia.config['FORCELUNATESIGMANOMATTERWHAT'] == 'yes':
 			self.accented = forcelunates(self.accented)
+		if hipparchia.config['DISTINCTGREEKANDLATINFONTS'] == 'yes':
+			self.accented = self.separategreekandlatinfonts()
 
 	def uncleanlocus(self):
 		"""
@@ -451,6 +454,9 @@ class dbWorkLine(object):
 	def unformattedline(self):
 		"""
 		remove markup from contents
+
+		currently unused
+
 		:return:
 		"""
 
@@ -649,6 +655,52 @@ class dbWorkLine(object):
 				theline = '<span class="{cl}">{sa}</span>'.format(cl=cl, sa=theline)
 
 		return theline
+
+	def separategreekandlatinfonts(self):
+		"""
+
+		convert:
+			'Ἀϲίᾳ ἐπιγραφομένῃ (FHG I 25)· ‘γυναῖκεϲ δ’ ἐπὶ τῆϲ'
+
+		into
+			'<greekfont>Ἀϲίᾳ ἐπιγραφομένῃ (</greekfont><latinfont>FHG I 25)· ‘</latinfont><greekfont>γυναῖκεϲ δ’ ἐπὶ τῆϲ</greekfont>'
+
+		you might want to adjust the definition of punct to avoid too much mix-and-match of fonts
+
+		:return:
+		"""
+		# unicode space: greek and coptic 370-400; greek extended 1f00, 2000
+		greekset = set(range(int(0x370), int(0x400))).union(set(range(int(0x1f00), int(0x2000))))
+		punct = punctuation + ' ’'
+		tagging = {'g': {'open': '<greekfont>', 'close': '</greekfont>'},
+		           'l': {'open': '<latinfont>', 'close': '</latinfont>'},
+		           'x': {'open': '', 'close': ''}}
+
+		linechars = list(self.accented)
+		linechars.reverse()
+		newline = list()
+		currently = self.determinecharacterset(linechars[-1], greekset, punct)
+		# prevsiously = self.determinecharacterset(linechars[-1], greekset)
+		newline.append(tagging[currently]['open'])
+		while linechars:
+			thischar = linechars.pop()
+			if self.determinecharacterset(thischar, greekset, punct) != currently and self.determinecharacterset(thischar, greekset, punct) != 'x':
+				newline.append(tagging[currently]['close'])
+				currently = self.determinecharacterset(thischar, greekset, punct)
+				newline.append(tagging[currently]['open'])
+			newline.append(thischar)
+		newline.append(tagging[currently]['close'])
+		newline = ''.join(newline)
+		return newline
+
+	@staticmethod
+	def determinecharacterset(character, greekset, punct):
+		if character in punct:
+			return 'x'
+		if ord(character) in greekset:
+			return 'g'
+		else:
+			return 'l'
 
 	def bracketopenedbutnotclosed(self, btype='square', bracketfinder=None):
 		"""

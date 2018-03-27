@@ -225,6 +225,17 @@ LEMMACHUNKSIZE = 10
 # INSISTUPONSTANDARDANGLEBRACKETS: 'no' means you will see ⟨ and ⟩;
 #   'yes' means you will see < and >
 #
+# FORCELUNATESIGMANOMATTERWHAT: 'yes' means you will override σ and ς
+#  	in the data and instead print ϲ; this is only
+# 	meaningful if the HipparchiaBuilder (lamentably) had the 'lunates = n' option set to begin with
+#
+# RESTOREMEDIALANDFINALSIGMA: 'yes' means you will, alas, override ϲ
+#  	and try to print σ or ς as needed; this is only meaningful if the
+#  	HipparchiaBuilder had the 'lunates = y' option set to begin with.
+#   NB: if both FORCELUNATESIGMANOMATTERWHAT and RESTOREMEDIALANDFINALSIGMA
+#  	are set to 'yes' lunates win (and you
+#   waste CPU cycles).
+#
 # EXCLUDEMINORGENRECOUNTS will mitigate spikes in the genre counts
 # 	when a word appears in a sparsely populated genre by ignoring
 # 	all 'small' genres whose word values will give them more than a
@@ -248,17 +259,6 @@ LEMMACHUNKSIZE = 10
 # 	results in alphabetical order ('no') or in descending order by
 # 	frequency of occurrence ('yes')
 #
-# FORCELUNATESIGMANOMATTERWHAT: 'yes' means you will override σ and ς
-#  	in the data and instead print ϲ; this is only
-# 	meaningful if the HipparchiaBuilder (lamentably) had the 'lunates = n' option set to begin with
-#
-# RESTOREMEDIALANDFINALSIGMA: 'yes' means you will, alas, override ϲ
-#  	and try to print σ or ς as needed; this is only meaningful if the
-#  	HipparchiaBuilder had the 'lunates = y' option set to begin with.
-#   NB: if both FORCELUNATESIGMANOMATTERWHAT and RESTOREMEDIALANDFINALSIGMA
-#  	are set to 'yes' lunates win (and you
-#   waste CPU cycles).
-#
 
 CSSSTYLESHEET = '/static/hipparchia_styles.css'
 TLGASSUMESBETACODE = 'yes'
@@ -272,7 +272,9 @@ SUPPRESSLONGREQUESTMESSAGE = 'no'
 ENOUGHALREADYWITHTHECOPYRIGHTNOTICE = 'no'
 HOBBLEREGEX = 'no'
 INSISTUPONSTANDARDANGLEBRACKETS = 'no'
-
+FORCELUNATESIGMANOMATTERWHAT = 'no'
+RESTOREMEDIALANDFINALSIGMA = 'no'
+DISTINCTGREEKANDLATINFONTS = 'no'
 
 # lexical output settings
 SHOWGLOBALWORDCOUNTS = 'yes'
@@ -282,8 +284,7 @@ NUMBEROFGENRESTOTRACK = 8
 AVOIDCIRCLEDLETTERS = 'no'
 FALLBACKTODOUBLESTRIKES = 'yes'
 REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
-FORCELUNATESIGMANOMATTERWHAT = 'no'
-RESTOREMEDIALANDFINALSIGMA = 'no'
+
 
 # [7] SEMANTIC VECTORS: experimental and in-progress
 #   many extra packages need to be configured and installed
