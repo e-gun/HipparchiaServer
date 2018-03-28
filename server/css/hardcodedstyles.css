@@ -1061,6 +1061,11 @@ gramm {
     color: var(--dkgrey);
     }
 
+greekfont {
+	font-family: var(--greekfont), 'hipparchiasansstatic', sans-serif;
+}
+
+
 hi {
     font-family: var(--installedfontbold);
     color: var(--vdkteal);
@@ -1086,6 +1091,10 @@ itype {
     font-family: var(--installedfontitalic);
 	color: var(--blue);
 	}
+
+latinfont {
+	font-family: var(--latinfont), 'hipparchiasansstatic', sans-serif;
+}
 
 legend {
 	text-align: center;

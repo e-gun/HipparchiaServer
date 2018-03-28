@@ -13,8 +13,8 @@ from flask import make_response
 from server import hipparchia
 
 
-@hipparchia.route('/css/<cssfile>', methods=['GET'])
-def loadcssfile(cssfile):
+@hipparchia.route('/css/<ignoredvariable>', methods=['GET'])
+def loadcssfile(ignoredvariable):
 	"""
 
 	send the CSS, but insert config-based fonts, etc. into it first
@@ -23,10 +23,7 @@ def loadcssfile(cssfile):
 	"""
 
 	# extremely unsafe to allow user to supply a path and cssfile should have been fed to the html template via config.py
-	safefiles = ['hipparchiastyles.css', 'hardcodedstyles.css', 'custom.css']
-
-	if cssfile not in safefiles:
-		cssfile = safefiles[0]
+	cssfile = hipparchia.config['CSSSTYLESHEET']
 
 	substitutes = ['DEFAULTFONT', 'DEFAULTNONGREEKFONT', 'DEFAULTGREEKFONT']
 
@@ -34,7 +31,7 @@ def loadcssfile(cssfile):
 		css = f.read()
 
 	for s in substitutes:
-		searchfor = re.compile('HIPPARCHIA'+s)
+		searchfor = re.compile(s+'WILLBESUPPLIEDFROMCONFIGFILE')
 		css = re.sub(searchfor, hipparchia.config[s], css)
 
 	# return send_from_directory('css', cssfile)
@@ -44,4 +41,3 @@ def loadcssfile(cssfile):
 	response.headers.set('Content-Disposition', 'attachment', filename=cssfile)
 
 	return response
-
