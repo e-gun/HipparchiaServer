@@ -672,7 +672,8 @@ class dbWorkLine(object):
 		"""
 		# unicode space: greek and coptic 370-400; greek extended 1f00, 2000
 		greekset = set(range(int(0x370), int(0x400))).union(set(range(int(0x1f00), int(0x2000))))
-		ignore = ' '
+
+		ignore = '· “”’.'
 		tagging = {'g': {'open': '<greekfont>', 'close': '</greekfont>'},
 		           'l': {'open': '<latinfont>', 'close': '</latinfont>'},
 		           'x': {'open': '', 'close': ''}}

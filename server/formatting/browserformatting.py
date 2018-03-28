@@ -131,6 +131,8 @@ def insertparserids(lineobject, continuationdict):
 					newline.append(addobservedtags(lastword, lastword, hyphenated))
 
 	newline = ''.join(newline)
+	cleaner = re.compile(r'<observed id=""></observed>')
+	newline = re.sub(cleaner, '', newline)
 
 	return newline
 
