@@ -270,7 +270,6 @@ LEMMACHUNKSIZE = 10
 #   In that case all non-Greek characters will display in this font.
 #
 
-
 CSSSTYLESHEET = 'hipparchiastyles.css'
 TLGASSUMESBETACODE = 'yes'
 UNIVERSALASSUMESBETACODE = 'no'
@@ -286,9 +285,9 @@ INSISTUPONSTANDARDANGLEBRACKETS = 'no'
 FORCELUNATESIGMANOMATTERWHAT = 'no'
 RESTOREMEDIALANDFINALSIGMA = 'no'
 DISTINCTGREEKANDLATINFONTS = 'no'
-DEFAULTFONT = 'Arial'
-DEFAULTGREEKFONT = 'Arial'
-DEFAULTNONGREEKFONT = 'Arial'
+DEFAULTFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
+DEFAULTGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
+DEFAULTNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 
 # lexical output settings
 SHOWGLOBALWORDCOUNTS = 'yes'

@@ -503,8 +503,8 @@ body {
 	}
 
 .hmu_textual_lemma {
-	text-style: italic;
-	text-color: var(--blue);
+	font-style: italic;
+	color: var(--blue);
 	}
 
 .hmu_title {
@@ -765,13 +765,13 @@ keeping (for now) the non-span version of this
 	}
 
 .textuallemma, .interlineartext, .interlinearmarginalia, .marginaltext {
-	text-style: italic;
-	text-color: var(--blue);
+	font-style: italic;
+	color: var(--blue);
 	}
 
 .translation {
     font-size: 85%;
-    text-style: italic;
+    font-style: italic;
     }
 
 .ui-button {
@@ -1162,7 +1162,7 @@ smallcode {
 
 span.lat {
 	font-style: italic;
-	font-color: var(--vdkteal);
+	color: var(--vdkteal);
 	}
 
 speaker {
