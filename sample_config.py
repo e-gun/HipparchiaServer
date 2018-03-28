@@ -259,8 +259,19 @@ LEMMACHUNKSIZE = 10
 # 	results in alphabetical order ('no') or in descending order by
 # 	frequency of occurrence ('yes')
 #
+# DEFAULTFONT sets the global font. A genric unicode font with good coverage
+#   is what you want to pick. You are also responsible for getting the name
+#   right
+#
+# DEFAULTGREEKFONT is meaningful only if DISTINCTGREEKANDLATINFONTS is 'yes'.
+#   In that case Greek characters will display in this font
+#
+# DEFAULTNONGREEKFONT is meaningful only if DISTINCTGREEKANDLATINFONTS is 'yes'.
+#   In that case all non-Greek characters will display in this font.
+#
 
-CSSSTYLESHEET = '/static/hipparchia_styles.css'
+
+CSSSTYLESHEET = 'hipparchiastyles.css'
 TLGASSUMESBETACODE = 'yes'
 UNIVERSALASSUMESBETACODE = 'no'
 CLICKABLEINDEXEDPASSAGECAP = 1500   # -1, 0, or N
@@ -275,6 +286,9 @@ INSISTUPONSTANDARDANGLEBRACKETS = 'no'
 FORCELUNATESIGMANOMATTERWHAT = 'no'
 RESTOREMEDIALANDFINALSIGMA = 'no'
 DISTINCTGREEKANDLATINFONTS = 'no'
+DEFAULTFONT = 'Arial'
+DEFAULTGREEKFONT = 'Arial'
+DEFAULTNONGREEKFONT = 'Arial'
 
 # lexical output settings
 SHOWGLOBALWORDCOUNTS = 'yes'
