@@ -3,7 +3,7 @@
 	that are delivered via @font-face below. NB: only Arial is likely to be pre-installed.
 	The others can be downloaded from various locations. Arial is available on >95% of MacOS and PC systems? */
 	--systemdefaultfont: Arial;
-	--greekfont: GFSOrpheusSans;
+	--greekfont: Arial;
 	--latinfont: Arial;
 	/* --systemdefaultfont: ArialUnicodeMS; */
 	/* --systemdefaultfont: Alexander; */

@@ -19,8 +19,8 @@ class dbAuthor(object):
 	"""
 	Created out of the DB info, not the IDT or the AUTHTAB
 	Initialized straight out of a DB read
-	
-		
+
+
 	CREATE TABLE public.authors (
 	    universalid character(6) COLLATE pg_catalog."default",
 	    language character varying(10) COLLATE pg_catalog."default",
@@ -33,11 +33,11 @@ class dbAuthor(object):
 	    converted_date integer,
 	    location character varying(128) COLLATE pg_catalog."default"
 	)
-	
+
 	"""
 
 	def __init__(self, universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date,
-				 converted_date, location):
+	             converted_date, location):
 
 		self.universalid = universalid
 		self.language = language
@@ -99,7 +99,7 @@ class dbOpus(object):
 	Initialized straight out of a DB read
 	note the efforts to match a simple Opus, but the fit is potentially untidy
 	it is always going to be important to know exactly what kind of object you are handling
-	
+
 	CREATE TABLE public.works (
 		universalid character(10) COLLATE pg_catalog."default",
 		title character varying(512) COLLATE pg_catalog."default",
@@ -122,13 +122,13 @@ class dbOpus(object):
 		lastline integer,
 		authentic boolean
 	)
-	
-	
+
+
 	"""
 
 	def __init__(self, universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02,
-				 levellabels_03, levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance,
-				 recorded_date, converted_date, wordcount, firstline, lastline, authentic):
+	             levellabels_03, levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance,
+	             recorded_date, converted_date, wordcount, firstline, lastline, authentic):
 		self.universalid = universalid
 		self.worknumber = universalid[7:]
 		self.authorid = universalid[0:6]
@@ -164,7 +164,8 @@ class dbOpus(object):
 				self.structure[idx] = label
 
 		availablelevels = 1
-		for level in [self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04, self.levellabels_05]:
+		for level in [self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04,
+		              self.levellabels_05]:
 			if level and level != '':
 				availablelevels += 1
 		self.availablelevels = availablelevels
@@ -173,7 +174,7 @@ class dbOpus(object):
 		if self.universalid[0:2] not in ['in', 'dp', 'ch']:
 			cit = []
 			levels = [self.levellabels_00, self.levellabels_01, self.levellabels_02, self.levellabels_03,
-					  self.levellabels_04, self.levellabels_05]
+			          self.levellabels_04, self.levellabels_05]
 			for l in range(0, self.availablelevels):
 				cit.append(levels[l])
 			cit.reverse()
@@ -208,7 +209,7 @@ class dbOpus(object):
 	def isnotliterary(self):
 		"""
 		a check to see if you come from something other than 'gr' or 'lt'
-		:return: 
+		:return:
 		"""
 
 		if self.universalid[0:2] in ['in', 'dp', 'ch']:
@@ -219,7 +220,7 @@ class dbOpus(object):
 	def isliterary(self):
 		"""
 		a check to see if you come from 'gr' or 'lt'
-		:return: 
+		:return:
 		"""
 
 		if self.universalid[0:2] in ['gr', 'lt']:
@@ -228,13 +229,13 @@ class dbOpus(object):
 			return False
 
 	def lines(self):
-		return set(range(self.starts, self.ends+1))
+		return set(range(self.starts, self.ends + 1))
 
 
 class dbWorkLine(object):
 	"""
 	an object that corresponds to a db line
-	
+
 	CREATE TABLE public.in0207 (
 		index integer NOT NULL UNIQUE DEFAULT nextval('in0207'::regclass),
 		wkuniversalid character varying(10) COLLATE pg_catalog."default",
@@ -250,12 +251,12 @@ class dbWorkLine(object):
 		hyphenated_words character varying(128) COLLATE pg_catalog."default",
 		annotations character varying(256) COLLATE pg_catalog."default"
 	)
-	
+
 	"""
 
 	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value,
-				 level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words,
-				 annotations):
+	             level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words,
+	             annotations):
 
 		self.wkuinversalid = wkuinversalid[:10]
 		self.authorid = wkuinversalid[:6]
@@ -270,7 +271,7 @@ class dbWorkLine(object):
 		self.polytonic = accented_line
 		self.stripped = stripped_line
 		self.annotations = annotations
-		self.universalid = self.wkuinversalid+'_LN_'+str(index)
+		self.universalid = self.wkuinversalid + '_LN_' + str(index)
 		self.hyphenated = hyphenated_words
 		if len(self.hyphenated) > 1:
 			self.hashyphenated = True
@@ -421,7 +422,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 		if self.wkuinversalid == other.wkuinversalid and self.l5 == other.l5 and self.l4 == other.l4 and \
-						self.l3 == other.l3 and self.l2 == other.l2 and self.l1 == other.l1:
+				self.l3 == other.l3 and self.l2 == other.l2 and self.l1 == other.l1:
 			return True
 		else:
 			return False
@@ -435,7 +436,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 		if self.l5 == other.l5 and self.l4 == other.l4 and self.l3 == other.l3 and self.l2 == other.l2 and \
-						self.l1 == other.l1:
+				self.l1 == other.l1:
 			return True
 		else:
 			return False
@@ -480,7 +481,7 @@ class dbWorkLine(object):
 		left = '<smallcode>&lt;'
 		right = '&gt;</smallcode>'
 
-		visiblehtml = re.sub(markup, left+r'\2'+right, self.accented)
+		visiblehtml = re.sub(markup, left + r'\2' + right, self.accented)
 
 		return visiblehtml
 
@@ -610,7 +611,7 @@ class dbWorkLine(object):
 					'class': 'editorialmarker_squarebrackets',
 					'o': '[',
 					'c': ']'
-					},
+				},
 				'round': {
 					'ocreg': re.compile(r'\((.*?)(\)|$)'),
 					'coreg': re.compile(r'(^|\()(.*?)\)'),
@@ -671,31 +672,48 @@ class dbWorkLine(object):
 		"""
 		# unicode space: greek and coptic 370-400; greek extended 1f00, 2000
 		greekset = set(range(int(0x370), int(0x400))).union(set(range(int(0x1f00), int(0x2000))))
-		punct = punctuation + ' ’'
+		ignore = ' '
 		tagging = {'g': {'open': '<greekfont>', 'close': '</greekfont>'},
 		           'l': {'open': '<latinfont>', 'close': '</latinfont>'},
 		           'x': {'open': '', 'close': ''}}
 
 		linechars = list(self.accented)
 		linechars.reverse()
+		if not linechars:
+			# otherwise you will throw exceptions in a second
+			linechars = [' ']
+
 		newline = list()
-		currently = self.determinecharacterset(linechars[-1], greekset, punct)
+		currently = self.determinecharacterset(linechars[-1], greekset, ignore)
 		# prevsiously = self.determinecharacterset(linechars[-1], greekset)
-		newline.append(tagging[currently]['open'])
+		if linechars[-1] != '<':
+			newline.append(tagging[currently]['open'])
+			insideofmarkup = False
+		else:
+			insideofmarkup = True
+			newline.append(linechars[-1])
+			linechars.pop()
+
 		while linechars:
 			thischar = linechars.pop()
-			if self.determinecharacterset(thischar, greekset, punct) != currently and self.determinecharacterset(thischar, greekset, punct) != 'x':
-				newline.append(tagging[currently]['close'])
-				currently = self.determinecharacterset(thischar, greekset, punct)
-				newline.append(tagging[currently]['open'])
+			if thischar == '<':
+				insideofmarkup = True
+			if not insideofmarkup:
+				if self.determinecharacterset(thischar, greekset, ignore) != currently and self.determinecharacterset(thischar, greekset, ignore) != 'x':
+					newline.append(tagging[currently]['close'])
+					currently = self.determinecharacterset(thischar, greekset, ignore)
+					newline.append(tagging[currently]['open'])
 			newline.append(thischar)
+			if thischar == '>':
+				insideofmarkup = False
+
 		newline.append(tagging[currently]['close'])
 		newline = ''.join(newline)
 		return newline
 
 	@staticmethod
-	def determinecharacterset(character, greekset, punct):
-		if character in punct:
+	def determinecharacterset(character, greekset, ignore):
+		if character in ignore:
 			return 'x'
 		if ord(character) in greekset:
 			return 'g'
@@ -716,11 +734,11 @@ class dbWorkLine(object):
 		if not bracketfinder:
 			bracketfinder = {
 				'square': {'regex': re.compile(r'\[[^\]]{0,}$'),
-				            'exceptions': [re.compile(r'\[(ϲτρ|ἀντ)\. .\.'), re.compile(r'\[ἐπῳδόϲ')]},
+				           'exceptions': [re.compile(r'\[(ϲτρ|ἀντ)\. .\.'), re.compile(r'\[ἐπῳδόϲ')]},
 				'round': {'regex': re.compile(r'\([^\)]{0,}$')},
 				'angled': {'regex': re.compile(r'⟨[^⟩]{0,}$')},
 				'curly': {'regex': re.compile(r'\{[^\}]{0,}$')},
-				}
+			}
 
 		openandnotclose = bracketfinder[btype]['regex']
 
