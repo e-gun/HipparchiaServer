@@ -555,20 +555,11 @@ body {
 	font-size: 115%;
 	}
 
-/*
-
-latin is problematic: the data often turns this on and then fails to turn it off at the right time
-the net result is visibly unbalanced spans
-
-furthermore in the hybrid world of the CHR data, you see walls of this
-
-keeping (for now) the non-span version of this
-
-*/
-
 .latin {
 	font-size: 100%;
+	/* font-family: var(--latinfont), 'hipparchiacondensedstatic', sans-serif; */
 	font-family: 'hipparchiacondensedstatic', sans-serif;
+	font-stretch: condensed;
 	color: var(--blue);
 	}
 
@@ -1206,6 +1197,7 @@ td.browserembeddedannotations {
 	padding-bottom: 8px;
     color: var(--huedgrey);
     font-family: 'hipparchiacondensedstatic', sans-serif;
+	font-stretch: condensed;
     font-size: 80%;
     vertical-align: middle;
     }
@@ -1219,6 +1211,7 @@ td.textmakerembeddedannotations {
 	padding-left: 15px;
     color: var(--huedgrey);
     font-family: 'hipparchiacondensedstatic', sans-serif;
+	font-stretch: condensed;
     font-size: 80%;
     vertical-align: middle;
     }

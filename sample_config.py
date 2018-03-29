@@ -276,7 +276,7 @@ LEMMACHUNKSIZE = 10
 #   In that case all non-Greek characters will display in this font.
 #
 
-CSSSTYLESHEET = 'hipparchiastyles.css'
+
 TLGASSUMESBETACODE = 'yes'
 UNIVERSALASSUMESBETACODE = 'no'
 CLICKABLEINDEXEDPASSAGECAP = 1500   # -1, 0, or N
@@ -287,14 +287,17 @@ MINIMUMBROWSERWIDTH = 100
 SUPPRESSLONGREQUESTMESSAGE = 'no'
 ENOUGHALREADYWITHTHECOPYRIGHTNOTICE = 'no'
 HOBBLEREGEX = 'no'
-INSISTUPONSTANDARDANGLEBRACKETS = 'no'
-FORCELUNATESIGMANOMATTERWHAT = 'no'
-RESTOREMEDIALANDFINALSIGMA = 'no'
+
+# styling
+CSSSTYLESHEET = 'hipparchiastyles.css'
 DISTINCTGREEKANDLATINFONTS = 'no'
-HOSTEDFONTFAMILY = 'Noto'  # DejaVu, IBMPlex, Noto, and Roboto should be pre-installed by Hipparchia
+HOSTEDFONTFAMILY = 'Roboto'  # DejaVu, IBMPlex, Noto, and Roboto should be pre-installed by Hipparchia
 DEFAULTLOCALFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
+INSISTUPONSTANDARDANGLEBRACKETS = 'no'
+FORCELUNATESIGMANOMATTERWHAT = 'no'
+RESTOREMEDIALANDFINALSIGMA = 'no'
 
 # lexical output settings
 SHOWGLOBALWORDCOUNTS = 'yes'
