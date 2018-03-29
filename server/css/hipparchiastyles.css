@@ -2,9 +2,9 @@
 	/* define the default FONTS that will have precedence over the served-if-necessary fonts
 	that are delivered via @font-face below. NB: only Arial is likely to be pre-installed.
 	The others can be downloaded from various locations. Arial is available on >95% of MacOS and PC systems? */
-	--systemdefaultfont: DEFAULTFONTWILLBESUPPLIEDFROMCONFIGFILE;
-	--greekfont: DEFAULTGREEKFONTWILLBESUPPLIEDFROMCONFIGFILE;
-	--latinfont: DEFAULTNONGREEKFONTWILLBESUPPLIEDFROMCONFIGFILE;
+	--systemdefaultfont: DEFAULTLOCALFONTWILLBESUPPLIEDFROMCONFIGFILE;
+	--greekfont: DEFAULTLOCALGREEKFONTWILLBESUPPLIEDFROMCONFIGFILE;
+	--latinfont: DEFAULTLOCALNONGREEKFONTWILLBESUPPLIEDFROMCONFIGFILE;
 	/* --systemdefaultfont: ArialUnicodeMS; */
 	/* --systemdefaultfont: Alexander; */
 	/* --systemdefaultfont: Arimo; */
@@ -178,43 +178,43 @@
 @font-face {
 	font-family: 'hipparchiasansstatic';
 	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
-	src: url('/static/ttf/NotoSans-Regular.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_REGULAR.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiamonostatic';
 	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
-	src: url('/static/ttf/RobotoMono-Medium.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_MONO.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiaobliquestatic';
 	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
-	src: url('/static/ttf/NotoSans-Italic.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_OBLIQUE.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiacondensedstatic';
 	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
-	src: url('/static/ttf/RobotoCondensed-Regular.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_CONDENSED.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiaboldstatic';
 	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
-	src: url('/static/ttf/NotoSans-Bold.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_BOLD.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiathinstatic';
 	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
-	src: url('/static/ttf/Roboto-Thin.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_THIN.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchialightstatic';
 	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
-	src: url('/static/ttf/Roboto-Light.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_LIGHT.ttf') format('truetype');
 	}
 
 body {

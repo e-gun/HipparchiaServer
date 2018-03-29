@@ -259,14 +259,20 @@ LEMMACHUNKSIZE = 10
 # 	results in alphabetical order ('no') or in descending order by
 # 	frequency of occurrence ('yes')
 #
-# DEFAULTFONT sets the global font. A genric unicode font with good coverage
-#   is what you want to pick. You are also responsible for getting the name
-#   right
+# HOSTEDFONTFAMILY sets which of the font families that Hipparchia downloads upon
+#   installation will be served to clients. Any of them should ensure full
+#   coverage for both Greek and Latin without any need to have a special font
+#   installed at the system level by people who visit.
 #
-# DEFAULTGREEKFONT is meaningful only if DISTINCTGREEKANDLATINFONTS is 'yes'.
+# DEFAULTLOCALFONT sets the global font. A generic unicode font with good coverage
+#   is what you want to pick. You are also responsible for getting the name
+#   right. And, most importantly, it should be installed at the system-level for
+#   anyone who visits.
+#
+# DEFAULTLOCALGREEKFONT is meaningful only if DISTINCTGREEKANDLATINFONTS is 'yes'.
 #   In that case Greek characters will display in this font
 #
-# DEFAULTNONGREEKFONT is meaningful only if DISTINCTGREEKANDLATINFONTS is 'yes'.
+# DEFAULTLOCALNONGREEKFONT is meaningful only if DISTINCTGREEKANDLATINFONTS is 'yes'.
 #   In that case all non-Greek characters will display in this font.
 #
 
@@ -285,9 +291,10 @@ INSISTUPONSTANDARDANGLEBRACKETS = 'no'
 FORCELUNATESIGMANOMATTERWHAT = 'no'
 RESTOREMEDIALANDFINALSIGMA = 'no'
 DISTINCTGREEKANDLATINFONTS = 'no'
-DEFAULTFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
-DEFAULTGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
-DEFAULTNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
+HOSTEDFONTFAMILY = 'Noto'  # DejaVu, IBMPlex, Noto, and Roboto should be pre-installed by Hipparchia
+DEFAULTLOCALFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
+DEFAULTLOCALGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
+DEFAULTLOCALNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 
 # lexical output settings
 SHOWGLOBALWORDCOUNTS = 'yes'

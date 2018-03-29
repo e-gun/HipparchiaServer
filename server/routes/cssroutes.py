@@ -25,7 +25,7 @@ def loadcssfile(ignoredvariable):
 	# extremely unsafe to allow user to supply a path and cssfile should have been fed to the html template via config.py
 	cssfile = hipparchia.config['CSSSTYLESHEET']
 
-	substitutes = ['DEFAULTFONT', 'DEFAULTNONGREEKFONT', 'DEFAULTGREEKFONT']
+	substitutes = ['DEFAULTLOCALFONT', 'DEFAULTLOCALGREEKFONT', 'DEFAULTLOCALNONGREEKFONT']
 
 	with open(hipparchia.root_path+'/css/'+cssfile) as f:
 		css = f.read()
@@ -33,6 +33,49 @@ def loadcssfile(ignoredvariable):
 	for s in substitutes:
 		searchfor = re.compile(s+'WILLBESUPPLIEDFROMCONFIGFILE')
 		css = re.sub(searchfor, hipparchia.config[s], css)
+
+	d = {'REGULAR': 'DejaVuSans',
+	     'MONO': 'DejaVuSansMono',
+	     'OBLIQUE': 'DejaVuSans-Oblique',
+	     'CONDENSED': 'DejaVuSansCondensed',
+	     'BOLD': 'DejaVuSans-Bold',
+	     'THIN': 'DejaVuSans-ExtraLight',
+	     'LIGHT': 'DejaVuSans-ExtraLight'}
+
+	n = {'REGULAR': 'NotoSans-Regular',
+	     'MONO': 'NotoMono-Regular',
+	     'OBLIQUE': 'NotoSans-Italic',
+	     'CONDENSED': 'NotoSansDisplay-Condensed',
+	     'BOLD': 'NotoSans-Bold',
+	     'THIN': 'NotoSansDisplay-Thin',
+	     'LIGHT': 'NotoSansDisplay-Light'}
+
+	i = {'REGULAR': 'IBMPlexSans-Regular',
+	     'MONO': 'IBMPlexMono-Regular',
+	     'OBLIQUE': 'IBMPlexSans-Italic',
+	     'CONDENSED': 'IBMPlexSansCondensed-Regular',
+	     'BOLD': 'IBMPlexSans-Bold',
+	     'THIN': 'IBMPlexSans-Thin',
+	     'LIGHT': 'IBMPlexSans-Light'}
+
+	r = {'REGULAR': 'Roboto-Regular',
+	     'MONO': 'RobotoMono-Medium',
+	     'OBLIQUE': 'Roboto-Italic',
+	     'CONDENSED': 'RobotoCondensed-Regular',
+	     'BOLD': 'Roboto-Bold',
+	     'THIN': 'Roboto-Thin',
+	     'LIGHT': 'Roboto-Light'}
+
+	hostedfontfamilies = {'DejaVu': d, 'Noto': n, 'IBMPlex': i, 'Roboto': r}
+
+	try:
+		family = hostedfontfamilies[hipparchia.config['HOSTEDFONTFAMILY']]
+	except KeyError:
+		family = hostedfontfamilies['DejaVu']
+
+	for face in family:
+		searchfor = re.compile('HOSTEDFONTFAMILY_'+face)
+		css = re.sub(searchfor, family[face], css)
 
 	# return send_from_directory('css', cssfile)
 
