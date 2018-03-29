@@ -220,13 +220,13 @@ def sortresultslist(hits, searchobject, authorsdict, worksdict):
 		else:
 			crit = hit.wkuinversalid+str(hit.index)
 
-		templist.append([crit, sortablestring, hit])
+		templist.append([crit, sortablestring, hit.index, hit])
 
 	# http://stackoverflow.com/questions/5212870/sorting-a-python-list-by-two-criteria#17109098
 
-	templist = sorted(templist, key=lambda x: (x[0], x[1]))
+	templist = sorted(templist, key=lambda x: (x[0], x[1], x[2]))
 
-	hitsdict = {idx: temp[2] for idx, temp in enumerate(templist)}
+	hitsdict = {idx: temp[3] for idx, temp in enumerate(templist)}
 
 	return hitsdict
 
