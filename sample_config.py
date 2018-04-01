@@ -352,7 +352,7 @@ REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
 #   execute and so you if you allow a full corpora search you will
 #   bring your system to it knees for a long, long time. 7548165 is
 #   all of Latin. 13518316 is all Greek literature up to 300 BCE.
-#   If you search for a common word you can easily
+#   If you search for the literal cosine distances of a common word you can easily
 #   chew up >24GB of RAM. Your system will hang unless/until Hipparchia
 #   receives more memory optimizations. Gensim NN vectorization of all
 #   of Latin will take 554.08s on a 6-threaded 3.6GHz machine.

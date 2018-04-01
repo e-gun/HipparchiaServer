@@ -225,5 +225,12 @@ What you will see:
 ![one_hit_zero_context](screenshots/18_one_hit_zero_context.png)
 
 1. lemmatized search
-![lemmatized search](screenshots/19_lemmatized_search.png)
+![lemmatized_search](screenshots/19_lemmatized_search.png)
+
+1. conceptual neighborhood in an author
+![neighborhood_author](screenshots/20_heurisko_in_plato)
+
+1. conceptual neighborhood in a corpus / multiple authors
+![neighborhood_corpus](screenshots/21_gladiators)
+
 
