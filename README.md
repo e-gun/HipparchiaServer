@@ -228,9 +228,9 @@ What you will see:
 ![lemmatized_search](screenshots/19_lemmatized_search.png)
 
 1. conceptual neighborhood in an author
-![neighborhood_author](screenshots/20_heurisko_in_plato)
+![neighborhood_author](screenshots/20_heurisko_in_plato.png)
 
 1. conceptual neighborhood in a corpus / multiple authors
-![neighborhood_corpus](screenshots/21_gladiators)
+![neighborhood_corpus](screenshots/21_gladiators.png)
 
 
