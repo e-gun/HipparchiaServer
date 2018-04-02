@@ -75,6 +75,7 @@ def findabsolutevectors(timestamp):
 	activepoll = poll[ts]
 	activepoll.activate()
 	activepoll.statusis('Preparing to search')
+	so.poll = activepoll
 
 	# nb: basically forcing so.session['cosdistbysentence'] == 'yes'
 	# don't know how to enter executesearch() properly to handle the other option
