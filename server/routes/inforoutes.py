@@ -75,9 +75,8 @@ def styesheetsamples():
 
 	excludes = ['td', 'th', 'table']
 
-	currentpath = path.dirname(argv[0])
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
-	stylefile = currentpath+'/server'+stylesheet
+	stylefile = hipparchia.root_path+'/css/'+stylesheet
 
 	stylecontents = list()
 	if path.isfile(stylefile):

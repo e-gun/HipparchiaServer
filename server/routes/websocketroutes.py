@@ -38,8 +38,8 @@ def checkforactivesearch(ts):
 
 	pollport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
-	active = [t.name for t in threading.enumerate()]
-	if 'websocketpoll' not in active:
+	activethreads = [t.name for t in threading.enumerate()]
+	if 'websocketpoll' not in activethreads:
 		pollstart = threading.Thread(target=startwspolling, name='websocketpoll', args=())
 		pollstart.start()
 

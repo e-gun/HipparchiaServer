@@ -417,6 +417,8 @@ body {
 	}
 
 .hmu_date_or_numeric_equivalent_of_date {
+	/* Sought »hmu_date_or_numeric_equivalent_of_date«
+	Searched 229,374 texts and found 0 passages (2.72s) */
 	}
 
 .hmu_discarded_form {
@@ -424,15 +426,20 @@ body {
     }
 
 .hmu_emendation_by_editor_of_text_not_obviously_incorrect {
+	/* Sought »hmu_emendation_by_editor_of_text_not_obviously_incorrect«
+	Searched 229,374 texts and found 0 passages (2.81s) */
 	-webkit-text-decoration-style: wavy;
 	-moz-text-decoration-style: wavy;
 	text-decoration-style: wavy;
 	}
 
 .hmu_epigraphical_text_after_correction {
+	color: var(--red);
+	font-style: italic;
 	}
 
 .hmu_epigraphical_text_inserted_after_erasure {
+	color: var(--red);
 	}
 
 .hmu_expanded_text {
@@ -468,17 +475,24 @@ body {
 	}
 
 .hmu_overline_and_underline {
+	/* Sought »hmu_overline_and_underline«
+	Searched 235,999 texts and found 0 passages (21.62s)*/
 	border-bottom: 1px var(--black);
 	border-top: 1px var(--black);
 	}
 
-.hmu_papyrological_fraction{ }
+.hmu_papyrological_fraction{
+	color: var(--red);
+	font-style: italic;
+}
 
 .hmu_parenthesis_deletion_marker {
     text-decoration: line-through;
     }
 
 .hmu_preferred_epigraphical_text_used {
+	/* Sought »hmu_preferred_epigraphical_text_used«
+	Searched 229,374 texts and found 0 passages (3.14s) */
 	}
 
 .hmu_rectified_form {
@@ -486,6 +500,8 @@ body {
 	}
 
 .hmu_scholium {
+	/* Sought »hmu_scholium«
+	Searched 229,374 texts and found 0 passages (2.26s) */
 	font-style: italic;
 	}
 
@@ -495,11 +511,13 @@ body {
 	}
 
 .hmu_stacked_text_lower {
-
+	font-size: 80%;
+    vertical-align: sub;
 	}
 
 .hmu_stacked_text_upper {
-
+    vertical-align: super;
+	font-size: 80%;
 	}
 
 .hmu_textual_lemma {

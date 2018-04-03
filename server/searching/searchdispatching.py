@@ -173,6 +173,9 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 	so = searchobject
 	activepoll = so.poll
 
+	# TESTING: probe the marked up data; good for finding rare/missing markup like 'hmu_scholium'
+	# so.usecolumn = 'marked_up_line'
+
 	dbconnection.setreadonly(False)
 	cursor = dbconnection.cursor()
 
