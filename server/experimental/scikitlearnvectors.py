@@ -10,6 +10,7 @@ import json
 import locale
 from pprint import pprint
 from time import time
+import re
 
 try:
 	from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
@@ -47,8 +48,11 @@ from server.formatting.jsformatting import insertbrowserclickjs
 from server.startup import authordict, listmapper, workdict
 from server.formatting.bibliographicformatting import bcedating
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
+from server.dbsupport.vectordbfunctions import storevectorindatabase, checkforstoredvector
+from server.hipparchiaobjects.searchobjects import SearchOutputObject
 
-def sklearnselectedworks(searchobject):
+
+def fortestingpurposessklearnselectedworks(searchobject):
 	"""
 
 	:param activepoll:
@@ -124,6 +128,74 @@ def sklearnselectedworks(searchobject):
 		# similaritiesdict: {id: (scoreA, lindobjectA1, sentA1, lindobjectA2, sentA2), id2: (scoreB, lindobjectB1, sentB1, lindobjectB2, sentB2), ... }
 		corehtml = skformatmostimilar(similaritiesdict)
 		output = generatesimilarsentenceoutput(corehtml, so, workssearched, len(similaritiesdict))
+	else:
+		return emptyvectoroutput(so)
+
+	return output
+
+
+def sklearnselectedworks(searchobject):
+	"""
+
+	:param activepoll:
+	:param searchobject:
+	:return:
+	"""
+
+	skfunctiontotest = ldatopicgraphing
+
+	so = searchobject
+	activepoll = so.poll
+
+	activepoll.statusis('Preparing to search')
+
+	so.usecolumn = 'marked_up_line'
+	so.vectortype = 'sentencesimilarity'
+
+	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
+	activecorpora = [c for c in allcorpora if so.session[c] == 'yes']
+
+	if activecorpora:
+		activepoll.statusis('Compiling the list of works to search')
+		searchlist = compilesearchlist(listmapper, so.session)
+	else:
+		reasons = ['search list contained zero items']
+		return emptyvectoroutput(so, reasons)
+
+	# make sure you don't go nuts
+	maxwords = hipparchia.config['MAXVECTORSPACE']
+	wordstotal = 0
+	for work in searchlist:
+		work = work[:10]
+		try:
+			wordstotal += workdict[work].wordcount
+		except TypeError:
+			# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
+			pass
+
+	if wordstotal > maxwords:
+		reasons = ['the vector scope max exceeded: {a} > {b} '.format(a=locale.format('%d', wordstotal, grouping=True), b=locale.format('%d', maxwords, grouping=True))]
+		return emptyvectoroutput(so, reasons)
+
+	if len(searchlist) > 0:
+		searchlist = flagexclusions(searchlist, so.session)
+		workssearched = len(searchlist)
+		searchlist = calculatewholeauthorsearches(searchlist, authordict)
+		so.searchlist = searchlist
+
+		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
+		so.indexrestrictions = indexrestrictions
+
+		# find all sentences
+		activepoll.statusis('Finding all sentences')
+		so.seeking = r'.'
+
+		sentencetuples = vectorprepdispatcher(so)
+		if len(sentencetuples) > hipparchia.config['MAXSENTENCECOMPARISONSPACE']:
+			reasons = ['scope of search exceeded allowed maximum: {a} > {b}'.format(a=len(sentencetuples), b=hipparchia.config['MAXSENTENCECOMPARISONSPACE'])]
+			return emptyvectoroutput(so, reasons)
+		output = skfunctiontotest(sentencetuples, workssearched, so)
+
 	else:
 		return emptyvectoroutput(so)
 
@@ -508,7 +580,7 @@ def ldatopicmodeling(sentencetuples, searchobject):
 	return
 
 
-def ldatopicgraphing(sentencetuples, searchobject):
+def ldatopicgraphing(sentencetuples, workssearched, searchobject):
 	"""
 
 	see:
@@ -560,16 +632,19 @@ def ldatopicgraphing(sentencetuples, searchobject):
 	"""
 	activepoll = searchobject.poll
 
-	maxfeatures = 2000
-	components = 15  # topics
+	settings = {
+		'maxfeatures': 2000,
+		'components': 15,  # topics
+		'maxfreq': .75,  # fewer than n% of sentences should have this word (i.e., purge common words)
+		'minfreq': 5,  # word must be found >n times
+		'iterations': 12,
+		'mustbelongerthan': 3
+	}
 
-	maxfreq = .75   # but .60 seems nice...
-	minfreq = 5
-	iterations = 12
+	# not easy to store/fetch since you need both ldavectorizer and ldamodel
+	# ldamodel = checkforstoredvector(searchobject, 'lda')
 
-	mustbelongerthan = 3
-
-	sentencetuples = [s for s in sentencetuples if len(s[1].strip().split(' ')) > mustbelongerthan]
+	sentencetuples = [s for s in sentencetuples if len(s[1].strip().split(' ')) > settings['mustbelongerthan']]
 	sentences = [s[1] for s in sentencetuples]
 
 	sentencesaslists = [s.split(' ') for s in sentences]
@@ -594,14 +669,14 @@ def ldatopicgraphing(sentencetuples, searchobject):
 
 	activepoll.statusis('Running the LDA vectorizer')
 	# Use tf (raw term count) features for LDA.
-	ldavectorizer = CountVectorizer(max_df=maxfreq,
-									min_df=minfreq,
-									max_features=maxfeatures)
+	ldavectorizer = CountVectorizer(max_df=settings['maxfreq'],
+									min_df=settings['minfreq'],
+									max_features=settings['maxfeatures'])
 
 	ldavectorized = ldavectorizer.fit_transform(bagsofsentences)
 
-	ldamodel = LatentDirichletAllocation(n_components=components,
-										max_iter=iterations,
+	ldamodel = LatentDirichletAllocation(n_components=settings['components'],
+										max_iter=settings['iterations'],
 										learning_method='online',
 										learning_offset=50.,
 										random_state=0)
@@ -610,9 +685,109 @@ def ldatopicgraphing(sentencetuples, searchobject):
 
 	visualisation = ldavis.prepare(ldamodel, ldavectorized, ldavectorizer)
 	pyLDAvis.save_html(visualisation, 'ldavis.html')
-	ldavishtml = pyLDAvis.prepared_data_to_html(visualisation)
+	ldavishtmlandjs = pyLDAvis.prepared_data_to_html(visualisation)
 
-	return ldavishtml
+	# storevectorindatabase(searchobject, 'lda', ldamodel)
+
+	jsonoutput = ldagenerateoutput(ldavishtmlandjs, workssearched, settings, searchobject)
+
+	return jsonoutput
+
+
+def ldagenerateoutput(ldavishtmlandjs, workssearched, settings, searchobject):
+	"""
+
+	pyLDAvis.prepared_data_to_html() outputs something that is almost pure JS and looks like this:
+
+		<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/bmabey/pyLDAvis/files/ldavis.v1.0.0.css">
+
+
+		<div id="ldavis_el7428760626948328485476648"></div>
+		<script type="text/javascript">
+
+		var ldavis_el7428760626948328485476648_data = {"mdsDat": ...
+
+		}
+		</script>
+
+
+	settings = {
+		'maxfeatures': 2000,
+		'components': 15,  # topics
+		'maxfreq': .75,  # fewer than n% of sentences should have this word (i.e., purge common words)
+		'minfreq': 5,  # word must be found >n times
+		'iterations': 12,
+		'mustbelongerthan': 3
+	}
+
+	:param findshtml:
+	:param mostsimilar:
+	:param imagename:
+	:param workssearched:
+	:param searchobject:
+	:param activepoll:
+	:param starttime:
+	:return:
+	"""
+
+	so = searchobject
+	activepoll = so.poll
+	output = SearchOutputObject(so)
+
+	lines = ldavishtmlandjs.split('\n')
+	lines = [re.sub(r'\t', '', l) for l in lines if l]
+
+	lines.reverse()
+
+	thisline = ''
+	html = list()
+
+	while not re.search(r'<script type="text/javascript">', thisline):
+		html.append(thisline)
+		try:
+			thisline = lines.pop()
+		except IndexError:
+			# oops, we never found the script...
+			thisline = '<script type="text/javascript">'
+
+	# we cut '<script>'; now drop '</script>'
+	lines.reverse()
+	js = lines[:-1]
+
+	findshtml = '\n'.join(html)
+	findsjs = '\n'.join(js)
+
+	who = ''
+	where = '{n} authors'.format(n=searchobject.numberofauthorssearched())
+
+	if searchobject.numberofauthorssearched() == 1:
+		a = authordict[searchobject.searchlist[0][:6]]
+		who = a.shortname
+		where = who
+
+	if workssearched == 1:
+		try:
+			w = workdict[searchobject.searchlist[0]]
+			w = w.title
+		except KeyError:
+			w = ''
+		where = '{a}, {w}'.format(a=who, w=w)
+
+	output.title = 'Latent Dirichlet Allocation for {w}'.format(w=where)
+	output.found = findshtml
+	output.js = findsjs
+
+	output.setscope(workssearched)
+	output.sortby = 'weight'
+	output.thesearch = 'thesearch'.format(skg='')
+	output.resultcount = 'the following topics'
+	output.htmlsearch = '{n} topics in {w}'.format(n=settings['components'], w=where)
+	output.searchtime = so.getelapsedtime()
+	activepoll.deactivate()
+
+	jsonoutput = json.dumps(output.generateoutput())
+
+	return jsonoutput
 
 
 """

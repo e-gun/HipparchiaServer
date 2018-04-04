@@ -76,8 +76,6 @@ class dbWordCountObject(object):
 			return ''
 
 
-
-
 class dbHeadwordObject(dbWordCountObject):
 	"""
 	an extended wordcount object

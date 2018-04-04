@@ -128,12 +128,6 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 	dbconnection = ConnectionObject(ctype='rw')
 	dbcursor = dbconnection.cursor()
 
-	if vectorspace:
-		pickledvectors = pickle.dumps(vectorspace)
-	else:
-		pickledvectors = pickle.dumps('failed to build model')
-	settings = determinesettings()
-
 	q = 'DELETE FROM public.storedvectors WHERE (uidlist = %s and vectortype = %s)'
 	d = (uidlist, vectortype)
 	dbcursor.execute(q, d)
@@ -143,6 +137,9 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 		(ts, versionstamp, settings, uidlist, vectortype, calculatedvectorspace)
 		VALUES (%s, %s, %s, %s, %s, %s)
 	"""
+
+	pickledvectors = pickle.dumps(vectorspace)
+	settings = determinesettings()
 	ts = datetime.now().strftime("%Y-%m-%d %H:%M")
 	versionstamp = readgitdata()[:6]
 
@@ -156,7 +153,7 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 	return
 
 
-def checkforstoredvector(searchobject, indextype, careabout='settings'):
+def checkforstoredvector(searchobject, vectortype, careabout='settings'):
 	"""
 
 	the stored vector might not reflect the current math rules
@@ -189,7 +186,7 @@ def checkforstoredvector(searchobject, indextype, careabout='settings'):
 		FROM public.storedvectors 
 		WHERE uidlist=%s AND vectortype=%s
 	"""
-	d = (uidlist, indextype)
+	d = (uidlist, vectortype)
 
 	try:
 		cursor.execute(q.format(crit=careabout), d)

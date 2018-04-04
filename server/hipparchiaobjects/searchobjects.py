@@ -272,6 +272,9 @@ class SearchObject(object):
 
 		return whole
 
+	def numberofauthorssearched(self):
+		authors = set([a[:6] for a in self.searchlist])
+		return len(authors)
 
 class ProgressPoll(object):
 	"""
@@ -414,7 +417,6 @@ class SearchOutputObject(object):
 		outputdict = dict()
 		for item in vars(self):
 			outputdict[item] = getattr(self, item)
-
 		return outputdict
 
 	def setresultcount(self, value, string):
