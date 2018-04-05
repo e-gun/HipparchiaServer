@@ -341,10 +341,7 @@ REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
 #   term or terms. What sentences are about "men"? Which sentences are related to the
 #   relationship that subsists between "good" and "man"?
 #
-# TENSORFLOWVECTORSENABLED will let you dig into the deeply broken tensorflow code.
-#   Results only go to the console or filesystem. It is very slow to execute. The
-#   neighbors it identifies make very little sense. See the notes ad loc. Only enable
-#   if you are debugging/coding.
+# TOPICMODELINGENABLED allows you to build graphs of topic clusters via Latent Dirichlet Allocation.
 #
 # MAXVECTORSPACE: what is the largest set of words you are willing
 #   to vectorize in order to find the association network of a given
@@ -392,8 +389,7 @@ SEMANTICVECTORSENABLED = 'no'
 LITERALCOSINEDISTANCEENABLED = 'no'
 CONCEPTSEARCHINGENABLED = 'no'
 CONCEPTMAPPINGENABLED = 'no'
-TENSORFLOWVECTORSENABLED = 'no'
-SENTENCESIMILARITYENABLED = 'no'
+TOPICMODELINGENABLED = 'no'
 MAXVECTORSPACE = 7548165
 MAXSENTENCECOMPARISONSPACE = 50000
 DBWRITEUSER = 'consider_re-using_HipparchiaBuilder_user'

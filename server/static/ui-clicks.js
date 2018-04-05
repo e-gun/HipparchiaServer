@@ -44,6 +44,7 @@ function loadoptions() {
             'sentencesimilarity': $('#sentencesimilarity'),
             'spuria': $('#includespuria'),
             'tensorflowgraph': $('#tensorflowgraph'),
+            'topicmodel': $('#topicmodel'),
             'varia': $('#includevaria')
         };
 
@@ -112,7 +113,8 @@ function loadoptions() {
         $('#sortresults').selectmenu('refresh');
    
         if (data.cosdistbysentence === 'yes' || data.cosdistbylineorword === 'yes' || data.semanticvectorquery === 'yes' ||
-            data.nearestneighborsquery === 'yes' || data.tensorflowgraph === 'yes' || data.sentencesimilarity === 'yes') {
+            data.nearestneighborsquery === 'yes' || data.tensorflowgraph === 'yes' || data.sentencesimilarity === 'yes' ||
+            data.topicmodel === 'yes') {
             showextendedsearch();
             }
         });
@@ -176,7 +178,7 @@ $('#morechoices').click(function(){
 
 function showextendedsearch() {
         const ids = Array('#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox', '#semanticvectorquerycheckbox',
-            '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox', '#sentencesimilaritycheckbox', '#complexsearching');
+            '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox', '#sentencesimilaritycheckbox', '#complexsearching', '#topicmodelcheckbox');
         bulkshow(ids);
 }
 
@@ -425,7 +427,7 @@ function hideallboxes() {
 }
 
 function findotheroptions(thisoption) {
-    const xoredoptions = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity'];
+    const xoredoptions = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity', '#topicmodel'];
     var xor = [];
     for (var i = 0; i < xoredoptions.length; i++) {
         var opt = $(xoredoptions[i]);
@@ -551,6 +553,24 @@ $('#sentencesimilarity').change(function() {
         }
     });
 
+$('#topicmodel').change(function() {
+    restoreplaceholders();
+    if(this.checked) {
+        clearsearchboxvalues();
+        var others = findotheroptions(this.id);
+        $(others).prop('checked', false);
+        $('#complexsearching').show();
+        activatethisbox(lsf, '(unused for topic models)');
+        activatethisbox(plsf, '(unused for this type of query)');
+        wsf.hide();
+        psf.hide();
+        $('#termoneisalemma').prop('checked', true);
+        $('#termtwoisalemma').prop('checked', true);
+        setoptions(this.id, 'yes');
+    } else {
+        setoptions(this.id, 'no');
+        }
+    });
 
 $('#termoneisalemma').change(function() {
     if(this.checked) {

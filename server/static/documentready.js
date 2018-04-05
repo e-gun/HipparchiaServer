@@ -58,6 +58,7 @@ $(document).ready( function () {
         $('#semanticvectornnquerycheckbox').toggle();
         $('#tensorflowgraphcheckbox').toggle();
         $('#sentencesimilaritycheckbox').toggle();
+        $('#topicmodelcheckbox').toggle();
         });
 
     $('#executesearch').click( function(){
@@ -205,7 +206,7 @@ $(document).ready( function () {
         '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform',
         '#termonecheckbox', '#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox',
         '#semanticvectorquerycheckbox', '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox',
-        '#sentencesimilaritycheckbox');
+        '#sentencesimilaritycheckbox', '#topicmodelcheckbox');
     bulkhider(tohideonfirstload);
 
     //

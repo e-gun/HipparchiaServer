@@ -68,7 +68,7 @@ def executesearch(timestamp):
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	activecorpora = [c for c in allcorpora if frozensession[c] == 'yes']
 
-	if (len(so.seeking) > 0 or so.lemma or frozensession['tensorflowgraph'] == 'yes' or frozensession['sentencesimilarity'] == 'yes') and activecorpora:
+	if (len(so.seeking) > 0 or so.lemma or frozensession['tensorflowgraph'] == 'yes' or frozensession['topicmodel'] == 'yes') and activecorpora:
 		activepoll.statusis('Compiling the list of works to search')
 		searchlist = compilesearchlist(listmapper, frozensession)
 
@@ -103,7 +103,7 @@ def executesearch(timestamp):
 		                   'semanticvectorquery': executegensimsearch,
 		                   'nearestneighborsquery': executegensimsearch,
 		                   'tensorflowgraph': tensorgraphelectedworks,
-		                   'sentencesimilarity': sklearnselectedworks}
+		                   'topicmodel': sklearnselectedworks}
 
 		# for TESTING purposes rewrite one of the definitions
 		# vectorfunctions['tensorflowgraph'] = gensimexperiment

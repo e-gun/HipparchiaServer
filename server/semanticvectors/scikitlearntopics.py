@@ -65,7 +65,7 @@ def sklearnselectedworks(searchobject):
 	activepoll.statusis('Preparing to search')
 
 	so.usecolumn = 'marked_up_line'
-	so.vectortype = 'sentencesimilarity'
+	so.vectortype = 'topicmodel'
 
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 	activecorpora = [c for c in allcorpora if so.session[c] == 'yes']
@@ -301,7 +301,7 @@ def ldatopicsgenerateoutput(ldavishtmlandjs, workssearched, settings, searchobje
 
 	if searchobject.numberofauthorssearched() == 1:
 		a = authordict[searchobject.searchlist[0][:6]]
-		who = a.shortname
+		who = a.akaname
 		where = who
 
 	if workssearched == 1:
@@ -310,7 +310,7 @@ def ldatopicsgenerateoutput(ldavishtmlandjs, workssearched, settings, searchobje
 			w = w.title
 		except KeyError:
 			w = ''
-		where = '{a}, {w}'.format(a=who, w=w)
+		where = '{a}, <span class="title">{w}</span>'.format(a=who, w=w)
 
 	output.title = 'Latent Dirichlet Allocation for {w}'.format(w=where)
 	output.found = findshtml

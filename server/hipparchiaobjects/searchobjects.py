@@ -216,7 +216,7 @@ class SearchObject(object):
 
 	def infervectorquerytype(self):
 		exclusive = {'cosdistbysentence', 'cosdistbysentence', 'semanticvectorquery', 'nearestneighborsquery',
-		             'tensorflowgraph', 'sentencesimilarity'}
+		             'tensorflowgraph', 'sentencesimilarity', 'topicmodel'}
 
 		qtype = list()
 		for e in exclusive:

@@ -60,6 +60,7 @@ def sessionvariables():
 		session['semanticvectorquery'] = 'no'
 		session['sensesummary'] = hipparchia.config['DEFAULTSHOWLEXICALSENSES']
 		session['sentencesimilarity'] = 'no'
+		session['topicmodel'] = 'no'
 		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
 		session['spuria'] = hipparchia.config['DEFAULTSPURIA']
 		session['tensorflowgraph'] = 'no'
@@ -118,6 +119,7 @@ def modifysessionvar(param, val):
 		'sortorder',
 		'spuria',
 		'tensorflowgraph',
+		'topicmodel',
 		'varia'
 		]
 
@@ -148,16 +150,15 @@ def modifysessionvar(param, val):
 			session[l] = [item for item in session[l] if item in returnactivelist(checkagainst[l])]
 
 	# our yes/no options
-	for variable in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus',
-					'varia', 'incerta', 'spuria', 'onehit', 'headwordindexing', 'sensesummary', 'authorssummary',
-					'quotesummary', 'bracketsquare', 'bracketround', 'bracketangled', 'bracketcurly',
-					'indexbyfrequency', 'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery',
-					'nearestneighborsquery', 'sentencesimilarity']:
+	for variable in ['authorssummary', 'bracketangled', 'bracketcurly', 'bracketround', 'bracketsquare', 'christiancorpus', 'cosdistbylineorword',
+	                 'cosdistbysentence', 'greekcorpus', 'headwordindexing', 'incerta', 'indexbyfrequency', 'inscriptioncorpus', 'latincorpus',
+	                 'nearestneighborsquery', 'onehit', 'papyruscorpus', 'quotesummary', 'semanticvectorquery', 'sensesummary', 'sentencesimilarity',
+	                 'spuria', 'topicmodel', 'varia']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 
 	# only one of these can be active at one time
-	exclusive = {'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery', 'tensorflowgraph', 'sentencesimilarity'}
+	exclusive = {'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery', 'tensorflowgraph', 'sentencesimilarity', 'topicmodel'}
 
 	for e in exclusive:
 		if param == e and val == 'yes':

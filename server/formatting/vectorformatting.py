@@ -255,6 +255,13 @@ def vectorhtmlforfrontpage():
 		</span>
 	"""
 
+	lda = """
+		<span id="topicmodelcheckbox">
+			<span class="small">topic map</span>
+			<input type="checkbox" id="topicmodel" value="yes" title="Find topics within a search zone">
+		</span>
+	"""
+
 	if hipparchia.config['SEMANTICVECTORSENABLED'] != 'yes':
 		return ''
 
@@ -262,7 +269,8 @@ def vectorhtmlforfrontpage():
 	              'CONCEPTSEARCHINGENABLED': cs,
 	              'CONCEPTMAPPINGENABLED': cm,
 	              'TENSORFLOWVECTORSENABLED': tf,
-	              'SENTENCESIMILARITYENABLED': ss}
+	              'SENTENCESIMILARITYENABLED': ss,
+	              'TOPICMODELINGENABLED': lda}
 
 	vectorhtml = list()
 	for conf in textmapper:
