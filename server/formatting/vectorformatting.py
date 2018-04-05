@@ -363,3 +363,116 @@ def lsiformatoutput(findshtml, workssearched, matches, searchobject):
 
 	return jsonoutput
 
+
+def ldatopicsgenerateoutput(ldavishtmlandjs, workssearched, settings, searchobject):
+	"""
+
+	pyLDAvis.prepared_data_to_html() outputs something that is almost pure JS and looks like this:
+
+		<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/bmabey/pyLDAvis/files/ldavis.v1.0.0.css">
+
+
+		<div id="ldavis_el7428760626948328485476648"></div>
+		<script type="text/javascript">
+
+		var ldavis_el7428760626948328485476648_data = {"mdsDat": ...
+
+		}
+		</script>
+
+
+	settings = {
+		'maxfeatures': 2000,
+		'components': 15,  # topics
+		'maxfreq': .75,  # fewer than n% of sentences should have this word (i.e., purge common words)
+		'minfreq': 5,  # word must be found >n times
+		'iterations': 12,
+		'mustbelongerthan': 3
+	}
+
+	:param findshtml:
+	:param mostsimilar:
+	:param imagename:
+	:param workssearched:
+	:param searchobject:
+	:param activepoll:
+	:param starttime:
+	:return:
+	"""
+
+	so = searchobject
+	activepoll = so.poll
+	output = SearchOutputObject(so)
+
+	lines = ldavishtmlandjs.split('\n')
+	lines = [re.sub(r'\t', '', l) for l in lines if l]
+
+	lines.reverse()
+
+	thisline = ''
+	html = list()
+
+	while not re.search(r'<script type="text/javascript">', thisline):
+		html.append(thisline)
+		try:
+			thisline = lines.pop()
+		except IndexError:
+			# oops, we never found the script...
+			thisline = '<script type="text/javascript">'
+
+	# we cut '<script>'; now drop '</script>'
+	lines.reverse()
+	js = lines[:-1]
+
+	findshtml = '\n'.join(html)
+	findsjs = '\n'.join(js)
+
+	ldacssurl = r'https://cdn.rawgit.com/bmabey/pyLDAvis/files/ldavis.v1.0.0.css'
+	ldacsslocal = '/css/ldavis.css'
+	findshtml = re.sub(ldacssurl, ldacsslocal, findshtml)
+
+	# brittle: ldavis might change its URLs between versions, etc.
+	# should probably make this conditional upon the presence of the file locally...
+	ldajsurl = r'https://cdn.rawgit.com/bmabey/pyLDAvis/files/ldavis.v1.0.0.js'
+	ldajslocal = '/static/jsforldavis.js'
+	findsjs = re.sub(ldajsurl, ldajslocal, findsjs)
+
+	# this next will break the reloaded figure: hm...
+	# d3jsurl = r'https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min'
+	# d3jslocal = '/static/jsd3'
+	# findsjs = re.sub(d3jsurl, d3jslocal, findsjs)
+	#
+	# print('findsjs',findsjs)
+
+	who = ''
+	where = '{n} authors'.format(n=searchobject.numberofauthorssearched())
+
+	if searchobject.numberofauthorssearched() == 1:
+		a = authordict[searchobject.searchlist[0][:6]]
+		who = a.akaname
+		where = who
+
+	if workssearched == 1:
+		try:
+			w = workdict[searchobject.searchlist[0]]
+			w = w.title
+		except KeyError:
+			w = ''
+		where = '{a}, <worktitle">{w}</worktitle>'.format(a=who, w=w)
+
+	output.title = 'Latent Dirichlet Allocation for {w}'.format(w=where)
+	output.found = findshtml
+	output.js = findsjs
+
+	output.setscope(workssearched)
+	output.sortby = 'weight'
+	output.thesearch = 'thesearch'.format(skg='')
+	output.resultcount = 'the following topics'
+	output.htmlsearch = '{n} topics in {w}'.format(n=settings['components'], w=where)
+	output.searchtime = so.getelapsedtime()
+	activepoll.deactivate()
+
+	jsonoutput = json.dumps(output.generateoutput())
+
+	return jsonoutput
+

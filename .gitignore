@@ -1,12 +1,10 @@
 # python
 *.pyc
 config.py
-config.ini
 
 # 3rd party projects
-jquery*
+j*js
 ui-icons*
-js.cookie.js
 DejaVu*
 Noto*
 Roboto*
