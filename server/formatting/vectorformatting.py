@@ -460,7 +460,7 @@ def ldatopicsgenerateoutput(ldavishtmlandjs, workssearched, settings, searchobje
 			w = ''
 		where = '{a}, <worktitle>{w}</worktitle>'.format(a=who, w=w)
 
-	output.title = 'Latent Dirichlet Allocation for {w}'.format(w=where)
+	output.title = 'Latent Dirichlet Allocation'
 	output.found = findshtml
 	output.js = findsjs
 

@@ -222,7 +222,7 @@ def ldatopicgraphing(sentencetuples, workssearched, searchobject):
 		ldamodel.fit(ldavectorized)
 
 		visualisation = ldavis.prepare(ldamodel, ldavectorized, ldavectorizer)
-		pyLDAvis.save_html(visualisation, 'ldavis.html')
+		# pyLDAvis.save_html(visualisation, 'ldavis.html')
 
 		ldavishtmlandjs = pyLDAvis.prepared_data_to_html(visualisation)
 		storevectorindatabase(searchobject, 'lda', ldavishtmlandjs)
