@@ -13,7 +13,7 @@ import time
 from flask import request, session
 
 from server import hipparchia
-from server.experimental.scikitlearnvectors import sklearnselectedworks
+from server.semanticvectors.scikitlearntopics import sklearnselectedworks
 from server.experimental.tensorflowvectors import tensorgraphelectedworks
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
