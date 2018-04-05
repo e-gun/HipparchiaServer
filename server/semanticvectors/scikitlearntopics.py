@@ -35,6 +35,7 @@ except ImportError:
 
 try:
 	# will hurl out a bunch of DeprecationWarning messages at the moment...
+	# lib/python3.6/re.py:191: DeprecationWarning: bad escape \s
 	import pyLDAvis
 	import pyLDAvis.sklearn as ldavis
 except ImportError:
@@ -52,7 +53,7 @@ def sklearnselectedworks(searchobject):
 	"""
 
 	if not ldavis or not CountVectorizer:
-		reasons = ['requisite software not installed: sklearn is unavailable']
+		reasons = ['requisite software not installed: sklearn and/or ldavis is unavailable']
 		return emptyvectoroutput(searchobject, reasons)
 
 	skfunctiontotest = ldatopicgraphing
@@ -169,7 +170,7 @@ def ldatopicgraphing(sentencetuples, workssearched, searchobject):
 
 	settings = {
 		'maxfeatures': 2000,
-		'components': 15,  # topics
+		'components': 12,  # topics
 		'maxfreq': .75,  # fewer than n% of sentences should have this word (i.e., purge common words)
 		'minfreq': 5,  # word must be found >n times
 		'iterations': 12,

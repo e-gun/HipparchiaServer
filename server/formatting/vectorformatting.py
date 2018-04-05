@@ -458,7 +458,7 @@ def ldatopicsgenerateoutput(ldavishtmlandjs, workssearched, settings, searchobje
 			w = w.title
 		except KeyError:
 			w = ''
-		where = '{a}, <worktitle">{w}</worktitle>'.format(a=who, w=w)
+		where = '{a}, <worktitle>{w}</worktitle>'.format(a=who, w=w)
 
 	output.title = 'Latent Dirichlet Allocation for {w}'.format(w=where)
 	output.found = findshtml
