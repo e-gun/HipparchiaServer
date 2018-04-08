@@ -12,6 +12,7 @@ from server.dbsupport.miscdbfunctions import findtoplevelofwork
 from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.helperobjects import LowandHighInfo
+from server.startup import workdict
 
 
 def findvalidlevelvalues(workid, workstructure, partialcitationtuple, cursor):
@@ -204,7 +205,13 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 		query = re.sub(r'level_00_value=%s AND ', '', query)
 		citation = citation[1:]
 
+	if not citation:
+		# '_AT_-1' turned into ['-1'] and then into []
+		indexvalue = workdict[workid].starts
+		return indexvalue
+
 	data = tuple([workid] + citation)
+
 	try:
 		cursor.execute(query, data)
 		found = cursor.fetchone()
