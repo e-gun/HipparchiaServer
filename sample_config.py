@@ -391,6 +391,7 @@ CONCEPTSEARCHINGENABLED = 'no'
 CONCEPTMAPPINGENABLED = 'no'
 SENTENCESIMILARITYENABLED = 'no'  # inactive code / a dead end at the moment
 TOPICMODELINGENABLED = 'no'
+TENSORFLOWVECTORSENABLED = 'no'  # inactive code / a dead end at the moment
 MAXVECTORSPACE = 7548165
 MAXSENTENCECOMPARISONSPACE = 50000
 DBWRITEUSER = 'consider_re-using_HipparchiaBuilder_user'
