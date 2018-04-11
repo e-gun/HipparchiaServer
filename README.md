@@ -63,7 +63,11 @@ key features:
 			click on index passages to browse to that passage [excessive index size will disable this]
 		semantic vectors
 		    calculate the relationship between words on any arbitrary search list using linear algebra
-		    various algorithms available: literal proximity, word2vec nearest neighbors, lsi matrix-similarity, ...
+		    various algorithms available:
+		        literal proximity,
+		        word2vec nearest neighbors
+		        lsi matrix-similarity
+		        lda topic maps
 		    configurable settings for key variable like training runs and downsampling
 
 	local/contextual information
@@ -233,4 +237,5 @@ What you will see:
 1. conceptual neighborhood in a corpus / multiple authors
 ![neighborhood_corpus](screenshots/21_gladiators.png)
 
-
+1. topic models via latent dirichlet allocation
+![neighborhood_corpus](screenshots/22_lda_topics.png)

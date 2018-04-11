@@ -82,14 +82,12 @@ class dbAuthor(object):
 		workids = list()
 		for w in self.listofworks:
 			workids.append(w.universalid)
-
 		return workids
 
 	def countwordsinworks(self):
 		words = 0
 		for w in self.listofworks:
 			words += w.wordcount
-
 		return words
 
 

@@ -155,7 +155,7 @@ def prolixlocus(workobject, citationtuple):
 	return citation
 
 
-def finddblinefromlocus(workid, citationtuple, cursor):
+def finddblinefromlocus(workid, citationtuple, dbcursor):
 	"""
 
 	citationtuple ('9','109','8') to focus on line 9, section 109, book 8
@@ -163,7 +163,7 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 
 	:param workid:
 	:param citationtuple:
-	:param cursor:
+	:param dbcursor:
 	:return:
 	"""
 
@@ -179,7 +179,7 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 	if workid[0:2] in ['in', 'dp', 'ch']:
 		wklvs = 2
 	else:
-		wklvs = findtoplevelofwork(workid, cursor)
+		wklvs = findtoplevelofwork(workid, dbcursor)
 
 	if wklvs != len(citationtuple):
 		print('mismatch between shape of work and browsing request: impossible citation of'+workid+'.')
@@ -213,12 +213,12 @@ def finddblinefromlocus(workid, citationtuple, cursor):
 	data = tuple([workid] + citation)
 
 	try:
-		cursor.execute(query, data)
-		found = cursor.fetchone()
+		dbcursor.execute(query, data)
+		found = dbcursor.fetchone()
 		indexvalue = found[0]
 	except TypeError:
 		# TypeError: 'NoneType' object is not subscriptable
-		indexvalue = returnfirstlinenumber(workdb, cursor)
+		indexvalue = returnfirstlinenumber(workdb, dbcursor)
 
 	# print('finddblinefromlocus() - indexvalue:',indexvalue)
 
