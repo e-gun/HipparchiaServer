@@ -6,7 +6,11 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-from gensim.models import Word2Vec
+try:
+	from gensim.models import Word2Vec
+except ImportError:
+	print('gensim not available')
+	Word2Vec = None
 
 from server import hipparchia
 from server.threading.mpthreadcount import setthreadcount

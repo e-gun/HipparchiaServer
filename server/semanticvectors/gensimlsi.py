@@ -6,9 +6,16 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-from gensim import corpora
-from gensim.models import LsiModel, TfidfModel
-from gensim.similarities import MatrixSimilarity
+try:
+	from gensim import corpora
+	from gensim.models import LsiModel, TfidfModel
+	from gensim.similarities import MatrixSimilarity
+except ImportError:
+	print('gensim not available')
+	corpora = None
+	LsiModel = None
+	TfidfModel = None
+	MatrixSimilarity = None
 
 from server import hipparchia
 from server.dbsupport.vectordbfunctions import storevectorindatabase

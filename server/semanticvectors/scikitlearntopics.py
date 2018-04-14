@@ -24,7 +24,6 @@ try:
 	from sklearn.model_selection import GridSearchCV
 	from sklearn.pipeline import Pipeline
 	from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
-
 except ImportError:
 	print('sklearn is unavailable')
 	CountVectorizer = None

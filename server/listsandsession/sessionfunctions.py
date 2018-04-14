@@ -875,20 +875,20 @@ def returnactivedbs(thesession=session):
 		# your session disappeared because you aged out of it?
 		sessionvariables()
 
-	adctivedbs = list()
+	activedbs = list()
 
 	if thesession['latincorpus'] == 'yes':
-		adctivedbs.append('lt')
+		activedbs.append('lt')
 	if thesession['greekcorpus'] == 'yes':
-		adctivedbs.append('gr')
+		activedbs.append('gr')
 	if thesession['inscriptioncorpus'] == 'yes':
-		adctivedbs.append('in')
+		activedbs.append('in')
 	if thesession['papyruscorpus'] == 'yes':
-		adctivedbs.append('dp')
+		activedbs.append('dp')
 	if thesession['christiancorpus'] == 'yes':
-		adctivedbs.append('ch')
+		activedbs.append('ch')
 
-	return adctivedbs
+	return activedbs
 
 
 def findactivebrackethighlighting(s=session):
