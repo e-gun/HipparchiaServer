@@ -869,19 +869,26 @@ def returnactivedbs(thesession=session):
 	:return:
 	"""
 
-	keys = list()
-	if thesession['latincorpus'] == 'yes':
-		keys.append('lt')
-	if thesession['greekcorpus'] == 'yes':
-		keys.append('gr')
-	if thesession['inscriptioncorpus'] == 'yes':
-		keys.append('in')
-	if thesession['papyruscorpus'] == 'yes':
-		keys.append('dp')
-	if thesession['christiancorpus'] == 'yes':
-		keys.append('ch')
+	try:
+		thesession['latincorpus']
+	except KeyError:
+		# your session disappeared because you aged out of it?
+		sessionvariables()
 
-	return keys
+	adctivedbs = list()
+
+	if thesession['latincorpus'] == 'yes':
+		adctivedbs.append('lt')
+	if thesession['greekcorpus'] == 'yes':
+		adctivedbs.append('gr')
+	if thesession['inscriptioncorpus'] == 'yes':
+		adctivedbs.append('in')
+	if thesession['papyruscorpus'] == 'yes':
+		adctivedbs.append('dp')
+	if thesession['christiancorpus'] == 'yes':
+		adctivedbs.append('ch')
+
+	return adctivedbs
 
 
 def findactivebrackethighlighting(s=session):
