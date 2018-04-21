@@ -257,7 +257,7 @@ def vectorhtmlforfrontpage():
 
 	lda = """
 		<span id="topicmodelcheckbox">
-			<span class="small">topic map</span>
+			<span class="small">Topic map</span>
 			<input type="checkbox" id="topicmodel" value="yes" title="Find topics within a search zone">
 		</span>
 	"""

@@ -8,6 +8,7 @@
 
 import re
 
+import psycopg2
 from flask import session
 
 from server import hipparchia
@@ -418,7 +419,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	return foundobjects
 
 
-def convertdictionaryfindintoobject(foundline, dictionary, cursor):
+def convertdictionaryfindintoobject(foundline, dictionary, dbcursor):
 	"""
 
 	dictionary = greek_dictionary or latin_dictionary
@@ -447,8 +448,8 @@ def convertdictionaryfindintoobject(foundline, dictionary, cursor):
 
 	q = ntemplate.format(d=dictionary)
 	d = (wordobject.id,)
-	cursor.execute(q, d)
-	e = cursor.fetchone()
+	dbcursor.execute(q, d)
+	e = dbcursor.fetchone()
 
 	try:
 		wordobject.nextentry = e[0]
@@ -461,8 +462,8 @@ def convertdictionaryfindintoobject(foundline, dictionary, cursor):
 
 	q = ptemplate.format(d=dictionary)
 	d = (wordobject.id,)
-	cursor.execute(q, d)
-	e = cursor.fetchone()
+	dbcursor.execute(q, d)
+	e = dbcursor.fetchone()
 
 	try:
 		wordobject.preventry = e[0]
@@ -530,6 +531,7 @@ def findcountsviawordcountstable(wordtocheck):
 	:param wordtocheck:
 	:return:
 	"""
+
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
@@ -548,7 +550,7 @@ def findcountsviawordcountstable(wordtocheck):
 	try:
 		dbcursor.execute(q, d)
 		result = dbcursor.fetchone()
-	except:
+	except psycopg2.ProgrammingError:
 		# psycopg2.ProgrammingError: relation "wordcounts_ε" does not exist
 		# you did not build the wordcounts at all?
 		result = None

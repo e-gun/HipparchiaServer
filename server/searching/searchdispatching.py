@@ -177,7 +177,7 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 	# so.usecolumn = 'marked_up_line'
 
 	dbconnection.setreadonly(False)
-	cursor = dbconnection.cursor()
+	dbcursor = dbconnection.cursor()
 
 	commitcount = 0
 
@@ -195,7 +195,7 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 			searchlist = None
 			
 		if authortable:
-			foundlines = substringsearch(so.termone, authortable, so, cursor)
+			foundlines = substringsearch(so.termone, authortable, so, dbcursor)
 			lineobjects = [dblineintolineobject(f) for f in foundlines]
 			foundlineobjects.extend(lineobjects)
 
@@ -237,7 +237,8 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 
 	so = searchobject
 	activepoll = so.poll
-	cursor = dbconnection.cursor()
+
+	dbcursor = dbconnection.cursor()
 
 	commitcount = 0
 	while searchtuples and activepoll.hitcount.value <= so.cap:
@@ -255,7 +256,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 			searchtuples = None
 
 		if authortable:
-			foundlines = substringsearch(searchingfor, authortable, so, cursor)
+			foundlines = substringsearch(searchingfor, authortable, so, dbcursor)
 			lineobjects = [dblineintolineobject(f) for f in foundlines]
 			foundlineobjects.extend(lineobjects)
 
@@ -290,7 +291,8 @@ def workonphrasesearch(foundlineobjects, searchinginside, searchobject, dbconnec
 
 	so = searchobject
 	activepoll = so.poll
-	cursor = dbconnection.cursor()
+
+	dbcursor = dbconnection.cursor()
 
 	commitcount = 0
 	while searchinginside and len(foundlineobjects) < so.cap:
@@ -304,7 +306,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, searchobject, dbconnec
 			searchinginside = None
 
 		if wkid:
-			foundlines = phrasesearch(wkid, so, cursor)
+			foundlines = phrasesearch(wkid, so, dbcursor)
 			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
 		try:
 			activepoll.remain(len(searchinginside))
