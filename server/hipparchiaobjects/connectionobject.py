@@ -144,11 +144,13 @@ class PooledConnectionObject(GenericConnectionObject):
 
 			readonlypool = pooltype(poolsize, poolsize * 2, **kwds)
 
-			# [B] 'rw' pool
+			# [B] 'rw' pool: only used by the vector graphing functions
+			# and these are always going to be single-threaded
+			littlepool = max(setthreadcount() / 2, 2)
 			kwds['user'] = hipparchia.config['DBWRITEUSER']
 			kwds['password'] = hipparchia.config['DBWRITEPASS']
 			# this can be smaller because only vectors to rw and the vectorbot is not allowed in the pool
-			readandwritepool = pooltype(poolsize, poolsize, **kwds)
+			readandwritepool = pooltype(littlepool, littlepool, **kwds)
 
 			PooledConnectionObject._pools['ro'] = readonlypool
 			PooledConnectionObject._pools['rw'] = readandwritepool
