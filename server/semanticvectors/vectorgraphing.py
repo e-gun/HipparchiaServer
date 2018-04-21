@@ -6,8 +6,14 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import random
 from io import BytesIO
+
+# https://matplotlib.org/faq/howto_faq.html#matplotlib-in-a-web-application-server
+# do this before importing pylab or pyplot: otherwise you will see:
+#   RuntimeError: main thread is not in main loop
+#   Tcl_AsyncDelete: async handler deleted by the wrong thread
+import matplotlib
+matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import networkx as nx
