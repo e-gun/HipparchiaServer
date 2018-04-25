@@ -658,6 +658,22 @@ body {
 	padding-right: -10px;
 	}
 
+.optionlabel {
+	border-top: 1px dotted var(--dkgrey);
+	font-size: 70%;
+	font-weight: 600;
+	padding-left: 5px;
+	padding-right: 10px;
+	margin: 3px;
+}
+
+.optionitem {
+	font-size: 70%;
+	padding-left: 20px;
+	padding-right: 10px;
+	margin: 3px;
+}
+
 .overline {
 	border-top: 1px var(--black);
 	}
@@ -733,6 +749,26 @@ body {
 .serviusformatting {
 	font-style: italic;
 	}
+
+.sidenavigation {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: var(--ltgrey);
+    overflow-x: hidden;
+    transition: 0.05s;
+}
+
+.sidenavigation .closebutton {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 18px;
+    margin-left: 50px;
+}
 
 .small {
 	font-size: 60%;
@@ -972,6 +1008,18 @@ body {
 	font-size: 85%;
 	}
 
+#setoptionbutton, #closeoptionbutton {
+	position: fixed;
+	top: 5px;
+	left: 5px;
+	font-size: 75%;
+	}
+
+#sortresults-menu li{
+	font-size: 70%;
+	font-family: var(--systemdefaultfont), 'hipparchiasansstatic', sans-serif;
+}
+
 #vectortable {
 	padding: 10px;
 	margin: auto;
@@ -1043,7 +1091,7 @@ etym {
 fieldset {
 	display: inline-block;
 	border-width: 1px;
-	font-size: 80%;
+	font-size: 75%;
     color: var(--dkteal);
 	background-color: hsla(0, 0%, 98%, 1);
 	}

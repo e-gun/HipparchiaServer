@@ -202,7 +202,7 @@ $(document).ready( function () {
 	});
 
 
-    var tohideonfirstload = Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur',
+    var tohideonfirstload = Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur', '#closeoptions',
         '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform',
         '#termonecheckbox', '#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox',
         '#semanticvectorquerycheckbox', '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox',

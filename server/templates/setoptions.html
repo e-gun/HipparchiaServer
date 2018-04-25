@@ -1,33 +1,40 @@
-<div id="setoptions" class="center">
+<div id="setoptionsnavigator" class="sidenavigation">
+    <div id="closeoptionbutton">
+        <span class="ui-icon ui-icon-gear" id="closeoptions" title="Configuration options"></span>
+    </div>
     <br />
-    <fieldset>
-      <legend>Corpora to search</legend>
-      {% for list in activelists %}
+    <p class="optionlabel">Corpora to search</p>
+    <p class="optionitem">
+        {% for list in activelists %}
         {% if list == 'gr' %}{{clab['g']}} <input type="checkbox" id="greekcorpus" value="no" title="Greek authors ">{% endif %}
-        {% if list == 'lt' %}&nbsp;&middot;&nbsp;{{clab['l']}} <input type="checkbox" id="latincorpus" value="no" title="Latin authors">{% endif %}
-        {% if list == 'dp' %}&nbsp;&middot;&nbsp;{{clab['d']}} <input type="checkbox" id="papyruscorpus" value="no" title="Documentary papyri">{% endif %}
-        {% if list == 'in' %}&nbsp;&middot;&nbsp;{{clab['i']}} <input type="checkbox" id="inscriptioncorpus" value="no" title="Inscriptions I (IG, SEG, etc.)">{% endif %}
-        {% if list == 'ch' %}&nbsp;&middot;&nbsp;{{clab['c']}} <input type="checkbox" id="christiancorpus" value="no" title="Inscriptions II (Cla., Lt. Antiq., Med.; Christ.)">{% endif %}
+        {% if list == 'lt' %}&middot;&nbsp;{{clab['l']}}&nbsp;<input type="checkbox" id="latincorpus" value="no" title="Latin authors">{% endif %}
+        {% if list == 'dp' %}&middot;&nbsp;{{clab['d']}}&nbsp;<input type="checkbox" id="papyruscorpus" value="no" title="Documentary papyri">{% endif %}
+        {% if list == 'in' %}&middot;&nbsp;{{clab['i']}}&nbsp;<input type="checkbox" id="inscriptioncorpus" value="no" title="Inscriptions I (IG, SEG, etc.)">{% endif %}
+        {% if list == 'ch' %}&middot;&nbsp;{{clab['c']}}&nbsp;<input type="checkbox" id="christiancorpus" value="no" title="Inscriptions II (Cla., Lt. Antiq., Med.; Christ.)">{% endif %}
       {% endfor %}
-    </fieldset>
-    <fieldset>
-        <legend>Maximum number of search results to return</legend>
+    </p>
+
+    <p class="optionlabel">Maximum number of search results to return</p>
+    <p class="optionitem">
         <input id="hitlimitspinner" type="text" value="500" width="20px;">
-    </fieldset>
-    <fieldset>
-        <legend>Limit to one hit per author</legend>
+    </p>
+
+    <p class="optionlabel">Limit to one hit per author</p>
+    <p class="optionitem">
         <label for="onehit_y">yes
-        <input type="radio" name="onehit" id="onehit_y" value="yes"></label>
+        <input name="onehit" id="onehit_y" value="yes" type="radio"></label>
         <label for="onehit_n">no
-        <input type="radio" name="onehit" id="onehit_n" value="no"></label>
-    </fieldset>
-    <fieldset>
-        <legend>Lines of context to accompany search results</legend>
+        <input name="onehit" id="onehit_n" value="no" type="radio"></label>
+    </p>
+
+    <p class="optionlabel">Lines of context to accompany search results</p>
+    <p class="optionitem">
         <input id="linesofcontextspinner" type="text" value="6" width="20px;">
-    </fieldset>
-    <fieldset>
-      <legend>Sort results by</legend>
-        <select name="sortresults" id="sortresults">
+    </p>
+
+    <p class="optionlabel">Sort results by</p>
+    <p class="optionitem">
+         <select name="sortresults" id="sortresults">
             <option value="shortname">Name</option>
             <option value="converted_date">Date</option>
             <option value="authgenre">Author Genre</option>
@@ -35,37 +42,41 @@
             <option value="provenance">Work Provenance</option>
             <option value="universalid">ID Number</option>
         </select>
-    </fieldset>
-    <fieldset>
-        <legend>Lines of context in the browser window</legend>
+    </p>
+
+    <p class="optionlabel">Lines of context in the browser window</p>
+    <p class="optionitem">
         <input id="browserspinner" type="text" value="20" width="20px;">
-    </fieldset>
-    <fieldset>
-        <legend>Index by headword</legend>
+    </p>
+
+    <p class="optionlabel">Index by headword</p>
+    <p class="optionitem">
         <label for="headwordindexing_y">yes
         <input type="radio" name="hwindex" id="headwordindexing_y" value="yes"></label>
         <label for="headwordindexing_n">no
         <input type="radio" name="hwindex" id="headwordindexing_n" value="no"></label>
-    </fieldset>
-    <fieldset>
-        <legend>Index by frequency</legend>
+    </p>
+
+    <p class="optionlabel">Index by frequency</p>
+    <p class="optionitem">
         <label for="frequencyindexing_y">yes
         <input type="radio" name="frqindex" id="frequencyindexing_y" value="yes"></label>
         <label for="frequencyindexing_n">no
         <input type="radio" name="frqindex" id="frequencyindexing_n" value="no"></label>
-    </fieldset>
-    <fieldset>
-        <legend>Lexical entries will show summaries of...</legend>
-        senses <input type="checkbox" id="sensesummary" value="yes">&nbsp;&middot;&nbsp;
-        authors <input type="checkbox" id="authorssummary" value="yes">&nbsp;&middot;&nbsp;
-        quotes <input type="checkbox" id="quotesummary" value="yes">
-    </fieldset>
-    <fieldset>
-        <legend>Display color shifted text inside of brackets that are...</legend>
-        square <input type="checkbox" id="bracketsquare" value="yes">&nbsp;&middot;&nbsp;
-        rounded <input type="checkbox" id="bracketround" value="yes">&nbsp;&middot;&nbsp;
-        angled <input type="checkbox" id="bracketangled" value="yes">&nbsp;&middot;&nbsp;
-        curly <input type="checkbox" id="bracketcurly" value="yes">
-    </fieldset>
-    <br />
+    </p>
+
+    <p class="optionlabel">Lexical entries will show summaries of...</p>
+    <p class="optionitem">
+        senses&nbsp;<input type="checkbox" id="sensesummary" value="yes">
+        &middot;&nbsp;authors&nbsp;<input type="checkbox" id="authorssummary" value="yes">
+        &middot;&nbsp;quotes&nbsp;<input type="checkbox" id="quotesummary" value="yes">
+    </p>
+
+    <p class="optionlabel">Display color shifted text inside of brackets:</p>
+    <p class="optionitem">
+        [&nbsp;]&nbsp;<input type="checkbox" id="bracketsquare" value="yes">
+        &middot;&nbsp;(&nbsp;)&nbsp;<input type="checkbox" id="bracketround" value="yes">
+        &middot;&nbsp;&lt;&nbsp;&gt;&nbsp;<input type="checkbox" id="bracketangled" value="yes">
+        &middot;&nbsp;{&nbsp;}&nbsp;<input type="checkbox" id="bracketcurly" value="yes">
+    </p>
 </div>

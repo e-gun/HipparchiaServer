@@ -2,11 +2,13 @@
 
 {% block content %}
 <!-- extend from base layout -->
+    {% include "setoptions.html" ignore missing %}
 
+<div id="mainbody">
+    <!-- "mainbody" allows the option sidebar to push the page contents right -->
     {% include "uiclickfield.html" ignore missing %}
     {% include "searchfield.html" ignore missing %}
     {% include "lexica.html" ignore missing %}
-    {% include "setoptions.html" ignore missing %}
     {% include "outputbox.html" ignore missing %}
     {% include "saveslots.html" ignore missing %}
     {% include "activeoptions.html" ignore missing %}
@@ -14,39 +16,43 @@
     {% include "hipparchiahelp.html" ignore missing %}
     {% include "wordsearchfields.html" ignore missing %}
 
-<div id="lexicadialog">
-    <div id="lexicadialogtext"></div>
-</div>
-
-<div id="browserdialog">
-    <div id="browserdialogtext"></div>
-    <div id="browsernavigationbuttons">
-        <button id="browseback" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse backwards (click or press the &#8592; key)">
-            <span class="ui-icon ui-icon-arrowthick-1-w">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-        <button id="browserclose" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Close the browser">
-            <span class="ui-icon ui-icon-close">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
-        <button id="browseforward" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse forwards (click or press the &#8594; key)">
-            <span class="ui-icon ui-icon-arrowthick-1-e">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+    <div id="lexicadialog">
+        <div id="lexicadialogtext"></div>
     </div>
+
+    <div id="browserdialog">
+        <div id="browserdialogtext"></div>
+        <div id="browsernavigationbuttons">
+            <button id="browseback" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse backwards (click or press the &#8592; key)">
+                <span class="ui-icon ui-icon-arrowthick-1-w">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+            <button id="browserclose" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Close the browser">
+                <span class="ui-icon ui-icon-close">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+            <button id="browseforward" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse forwards (click or press the &#8594; key)">
+                <span class="ui-icon ui-icon-arrowthick-1-e">&nbsp;</span><span class="ui-button-icon-space"> </span>&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+        </div>
+    </div>
+
+    <div id="searchsummary"></div>
+    <div id="pollingdata"></div>
+    <!--
+    <div id="imagearea"></div>
+        off because this div is added by vectorformatting.py when it sends the table to #displayresults
+    -->
+    <div id="displayresults"></div>
+
+    <div id="clickforhelp">
+         <button id="helpbutton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Help">
+             <span class="ui-icon ui-icon-help"></span>
+             <span class="ui-button-icon-space"> </span>&nbsp;</button>
+    </div>
+
+    <!-- blank divs just to hold scripts for injection later -->
+    <div id="browserclickscriptholder"> </div>
+    <div id="indexclickscriptholder"> </div>
+    <div id="selectionscriptholder"> </div>
+
+<!-- end of "mainbody" -->
 </div>
-
-<div id="searchsummary"></div>
-<div id="pollingdata"></div>
-<!--
-<div id="imagearea"></div>
-    off because this div is added by vectorformatting.py when it sends the table to #displayresults
--->
-<div id="displayresults"></div>
-
-<div id="clickforhelp">
-     <button id="helpbutton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Help">
-         <span class="ui-icon ui-icon-help"></span>
-         <span class="ui-button-icon-space"> </span>&nbsp;</button>
-</div>
-
-<div id="browserclickscriptholder"> </div>
-<div id="indexclickscriptholder"> </div>
-<div id="selectionscriptholder"> </div>
 
 <script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
 <script src="{{ url_for('static', filename='indexandtextmaker.js') }}"></script>

@@ -148,9 +148,60 @@ function browsetopassage() {
 }
 
 
+// the simple version...
+// $('#openoptions').click(function(){
+//     loadoptions();
+//     $('#setoptions').toggle();
+// });
+
+// the jquery dialog version: for display purposes only; the clicks won't work yet
+// $('#openoptions').click(function() {
+//     loadoptions();
+//     var windowHeight = $(window).height();
+//     var windowWidth = $(window).width();
+//     var optionsdialog = $('#setoptionsdialog');
+//     optionsdialog.dialog({
+//         closeOnEscape: true,
+//         autoOpen: false,
+//         maxHeight: windowHeight*.9,
+//         maxWidth: windowHeight*.9,
+//         minWidth: windowWidth*.40,
+//         position: { my: "left top", at: "left top", of: window },
+//         title: "Options",
+//         draggable: true,
+//         icons: { primary: 'ui-icon-close' },
+//         click: function() { $( this ).dialog( 'close' ); }
+//         });
+//     optionsdialog.dialog( 'open' );
+//     var optionshtml = document.getElementById('setoptions');
+//     optionsdialog.html(optionshtml.innerHTML);
+// });
+
+// sidenav version: https://www.w3schools.com/howto/howto_js_sidenav.asp
+
+function openoptionsslider() {
+    var windowWidth = $(window).width();
+    var w = Math.min(windowWidth*.30, 250);
+    document.getElementById("setoptionsnavigator").style.width = w+"px";
+    document.getElementById("mainbody").style.marginLeft = w+"px";
+    $('#closeoptions').show();
+    $('#openoptions').hide();
+}
+
+function closeoptionsslider() {
+    document.getElementById("setoptionsnavigator").style.width = "0";
+    document.getElementById("mainbody").style.marginLeft = "0";
+    $('#openoptions').show();
+    $('#closeoptions').hide();
+}
+
 $('#openoptions').click(function(){
     loadoptions();
-    $('#setoptions').toggle();
+    openoptionsslider();
+});
+
+$('#closeoptions').click(function(){
+    closeoptionsslider();
 });
 
 
@@ -615,7 +666,6 @@ $('#linesofcontextspinner').spinner({
         }
         });
 
-
 $('#browserspinner').spinner({
     max: 50,
     min: 5,
@@ -631,7 +681,7 @@ $('#browserspinner').spinner({
         });
 
 
-$( "#hitlimitspinner" ).spinner({
+$( '#hitlimitspinner' ).spinner({
     min: 1,
     value: 1000,
     step: 50,
@@ -646,7 +696,7 @@ $( "#hitlimitspinner" ).spinner({
         });
 
 
-$( "#latestdate" ).spinner({
+$( '#latestdate' ).spinner({
     min: -850,
     max: 1500,
     value: 1500,
@@ -664,7 +714,7 @@ $( "#latestdate" ).spinner({
         });
 
 
-$( "#earliestdate" ).spinner({
+$( '#earliestdate' ).spinner({
     min: -850,
     max: 1500,
     value: -850,
@@ -680,6 +730,15 @@ $( "#earliestdate" ).spinner({
         refreshselections();
         }
         });
+
+
+// 'width' property not working when you define the spinners
+const spinners = ["#earliestdate", "#latestdate", "#hitlimitspinner", "#linesofcontextspinner", "#browserspinner"];
+for (var i = 0; i < spinners.length; i++) {
+    const mywidth = 70;
+    $(spinners[i]).width(mywidth);
+}
+
 
 //
 // cookies + options
@@ -717,7 +776,8 @@ $('#load05').click( function(){ $.getJSON('/getcookie/05').always( function() { 
 /// selectmenu
 ///
 
-$('#sortresults').selectmenu();
+$('#sortresults').selectmenu({ width: 100});
+
 $(function() {
         $('#sortresults').selectmenu({
             change: function() {
