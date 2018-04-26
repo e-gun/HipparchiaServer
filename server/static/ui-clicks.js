@@ -214,7 +214,7 @@ $('#fewerchoices').click(function(){
     const ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
         '#provenanceautocomplete', '#pickgenre', '#excludegenre', '#genreinfo', '#genrelistcontents', '#edts',
         '#ldts', '#spur');
-    bulkhider(ids);
+    hidemany(ids);
     });
 
 
@@ -735,7 +735,7 @@ $( '#earliestdate' ).spinner({
 // 'width' property not working when you define the spinners
 const spinners = ["#earliestdate", "#latestdate", "#hitlimitspinner", "#linesofcontextspinner", "#browserspinner"];
 for (var i = 0; i < spinners.length; i++) {
-    const mywidth = 70;
+    const mywidth = 90;
     $(spinners[i]).width(mywidth);
 }
 
@@ -776,7 +776,7 @@ $('#load05').click( function(){ $.getJSON('/getcookie/05').always( function() { 
 /// selectmenu
 ///
 
-$('#sortresults').selectmenu({ width: 100});
+$('#sortresults').selectmenu({ width: 120});
 
 $(function() {
         $('#sortresults').selectmenu({

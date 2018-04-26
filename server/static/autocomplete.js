@@ -8,6 +8,19 @@
 // AUTHORS
 //
 
+// these next two are repeats from documentready.js, but Safari would load this before documentready and so lack access to the functions
+function hidemany(arrayofelements) {
+    for (var i = 0; i < arrayofelements.length; i++) {
+        $(arrayofelements[i]).hide();
+        }
+}
+
+function clearmany(arrayofelements) {
+    for (var i = 0; i < arrayofelements.length; i++) {
+        $(arrayofelements[i]).val('');
+        }
+}
+
 function reloadselections(selectiondata){
     // the data comes back from the server as a dict with three keys: timeexclusions, selections, exclusions
 
@@ -33,14 +46,14 @@ function reloadAuthorlist(){
             '#genrelistcontents', '#workgenresautocomplete', '#locationsautocomplete', '#provenanceautocomplete',
             '#pickgenre', '#excludegenre', '#setoptions', '#lexica', '#authinfo', '#authorholdings', '#searchlistcontents',
             '#loadslots', '#saveslots');
-        bulkhider(ids);
+        hidemany(ids);
     });
 }
 
 function resetworksautocomplete(){
     var ids = Array('#level05', '#level04', '#level03', '#level02', '#level01', '#level00');
-    bulkhider(ids);
-    bulkclear(ids);
+    hidemany(ids);
+    clearmany(ids);
 }
 
 
