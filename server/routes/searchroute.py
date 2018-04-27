@@ -14,7 +14,6 @@ from flask import request, session
 
 from server import hipparchia
 from server.semanticvectors.scikitlearntopics import sklearnselectedworks
-from server.experimental.tensorflowvectors import tensorgraphelectedworks
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
@@ -102,7 +101,6 @@ def executesearch(timestamp):
 		vectorfunctions = {'cosdistbysentence': findabsolutevectorsbysentence,
 		                   'semanticvectorquery': executegensimsearch,
 		                   'nearestneighborsquery': executegensimsearch,
-		                   'tensorflowgraph': tensorgraphelectedworks,
 		                   'topicmodel': sklearnselectedworks}
 
 		# for TESTING purposes rewrite one of the definitions

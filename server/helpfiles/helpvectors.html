@@ -1,5 +1,5 @@
-EXPERIMENTAL semantic vector searching can be enabled by properly
-	configuring <code>config.py</code>. 
+Semantic vector searching can be enabled by properly
+	editing and configuring <code>config.py</code>.
 <ul class="forexample"><li>Checking
 	<code>Word environs: by sentence</code> will execute the following
 	sequence of operations: <ul> <li>find all <span
@@ -51,13 +51,12 @@ EXPERIMENTAL semantic vector searching can be enabled by properly
         interrelationships among these terms. This is a <code>nearest
         neighbors</code> search inside of a <code>Word2Vec</code> space.
     </li>
-<li>Latent Dirichlet Allocation [LDA] (misleadingly under 'sentence
-	similarities' ATM) 
+<li>The <code>Topic map</code> option will analyze the selected texts and
+    generate N topics relative to that space via Latent Dirichlet Allocation [LDA].
 <br /> <br /> The “topics” are algorithmically
-	generated. Before running the data through the equations, you say,
+	generated. Before running the data through the equations, the software is asked to
 	“break it into N topics”. Then N topics emerge on the other side.
-	Obviously the choice of N matters a lot, but at the moment there is
-	more art than science to the choice. It is clear that forcing some
+	Obviously the choice of N matters a lot. It is clear that forcing some
 	datasets into a number of topics that is either too large or too
 	small will not be so hot: What Ns are good picks for W words in D
 	documents? The main thing seems to be to find an N that achieves the
