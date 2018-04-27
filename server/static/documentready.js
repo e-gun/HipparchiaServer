@@ -18,6 +18,7 @@ $(document).ready( function () {
         });
 
     $('#clear_button').click( function() { window.location.href = '/resetsession'; });
+    $('#alt_clear_button').click( function() { window.location.href = '/resetsession'; });
     $('#helptabs').tabs();
     $('#helpbutton').click( function() {
         if (document.getElementById('Interface').innerHTML === '<!-- placeholder -->') {
@@ -202,7 +203,7 @@ $(document).ready( function () {
 	});
 
 
-    var tohideonfirstload = Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur', '#closeoptions',
+    var tohideonfirstload = Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur', '#alt_upperleftbuttons',
         '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform',
         '#termonecheckbox', '#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox',
         '#semanticvectorquerycheckbox', '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox',

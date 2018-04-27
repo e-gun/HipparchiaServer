@@ -14,11 +14,25 @@ function setoptions(sessionvar, value){
 	    });
 }
 
-
 function refreshselections() {
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
 }
 
+function openoptionsslider() {
+    var windowWidth = $(window).width();
+    var w = Math.min(windowWidth*.30, 250);
+    document.getElementById("setoptionsnavigator").style.width = w+"px";
+    document.getElementById("mainbody").style.marginLeft = w+"px";
+    $('#alt_upperleftbuttons').show();
+    $('#upperleftbuttons').hide();
+}
+
+function closeoptionsslider() {
+    document.getElementById("setoptionsnavigator").style.width = "0";
+    document.getElementById("mainbody").style.marginLeft = "0";
+    $('#alt_upperleftbuttons').hide();
+    $('#upperleftbuttons').show();
+}
 
 function loadoptions() {
     $.getJSON('/getsessionvariables', function (data) {
@@ -120,6 +134,14 @@ function loadoptions() {
         });
 }
 
+$('#openoptionsbutton').click(function(){
+    loadoptions();
+    openoptionsslider();
+});
+
+$('#closeoptionsbutton').click(function(){
+    closeoptionsslider();
+});
 
 function browsetopassage() {
     var auth = $('#authorsautocomplete').val().slice(-7, -1);
@@ -146,64 +168,6 @@ function browsetopassage() {
     loc = auth+'w'+wrk+'_AT_'+loc.slice(0, (loc.length)-1);
     browseuponclick(loc);
 }
-
-
-// the simple version...
-// $('#openoptions').click(function(){
-//     loadoptions();
-//     $('#setoptions').toggle();
-// });
-
-// the jquery dialog version: for display purposes only; the clicks won't work yet
-// $('#openoptions').click(function() {
-//     loadoptions();
-//     var windowHeight = $(window).height();
-//     var windowWidth = $(window).width();
-//     var optionsdialog = $('#setoptionsdialog');
-//     optionsdialog.dialog({
-//         closeOnEscape: true,
-//         autoOpen: false,
-//         maxHeight: windowHeight*.9,
-//         maxWidth: windowHeight*.9,
-//         minWidth: windowWidth*.40,
-//         position: { my: "left top", at: "left top", of: window },
-//         title: "Options",
-//         draggable: true,
-//         icons: { primary: 'ui-icon-close' },
-//         click: function() { $( this ).dialog( 'close' ); }
-//         });
-//     optionsdialog.dialog( 'open' );
-//     var optionshtml = document.getElementById('setoptions');
-//     optionsdialog.html(optionshtml.innerHTML);
-// });
-
-// sidenav version: https://www.w3schools.com/howto/howto_js_sidenav.asp
-
-function openoptionsslider() {
-    var windowWidth = $(window).width();
-    var w = Math.min(windowWidth*.30, 250);
-    document.getElementById("setoptionsnavigator").style.width = w+"px";
-    document.getElementById("mainbody").style.marginLeft = w+"px";
-    $('#closeoptions').show();
-    $('#openoptions').hide();
-}
-
-function closeoptionsslider() {
-    document.getElementById("setoptionsnavigator").style.width = "0";
-    document.getElementById("mainbody").style.marginLeft = "0";
-    $('#openoptions').show();
-    $('#closeoptions').hide();
-}
-
-$('#openoptions').click(function(){
-    loadoptions();
-    openoptionsslider();
-});
-
-$('#closeoptions').click(function(){
-    closeoptionsslider();
-});
-
 
 $('#addtolist').click(function(){ addtosearchlist(); });
 
@@ -234,6 +198,7 @@ function showextendedsearch() {
 }
 
 $('#moretools').click(function(){ $('#lexica').toggle(); });
+$('#alt_moretools').click(function(){ $('#lexica').toggle(); });
 
 // not working as expected
 // supposed to clear out the other boxes and restore the placeholder; only clears the boxes
@@ -496,6 +461,16 @@ function activatethisbox(toactivate, placeholder) {
     toactivate.attr('placeholder', placeholder);
 }
 
+function restorecheckboxestodefault() {
+    $('#termoneisalemma').prop('checked', false);
+    $('#termtwoisalemma').prop('checked', false);
+    restoreplaceholders();
+    wsf.show();
+    psf.show();
+    lsf.hide();
+    plsf.hide();
+}
+
 $('#cosdistbysentence').change(function() {
     restoreplaceholders();
     if(this.checked) {
@@ -506,9 +481,11 @@ $('#cosdistbysentence').change(function() {
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
         psf.hide();
+        $('#termoneisalemma').prop('checked', true);
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
+        restorecheckboxestodefault();
         }
     });
 
@@ -522,9 +499,11 @@ $('#cosdistbylineorword').change(function() {
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
         psf.hide();
+        $('#termoneisalemma').prop('checked', true);
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
+        restorecheckboxestodefault();
         }
     });
 
@@ -544,6 +523,7 @@ $('#semanticvectorquery').change(function() {
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
+        restorecheckboxestodefault();
         }
     });
 
@@ -563,6 +543,7 @@ $('#nearestneighborsquery').change(function() {
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
+        restorecheckboxestodefault();
         }
     });
 
@@ -582,6 +563,7 @@ $('#tensorflowgraph').change(function() {
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
+        restorecheckboxestodefault();
         }
     });
 
@@ -601,6 +583,7 @@ $('#sentencesimilarity').change(function() {
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
+        restorecheckboxestodefault();
         }
     });
 
@@ -620,6 +603,7 @@ $('#topicmodel').change(function() {
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
+        restorecheckboxestodefault();
         }
     });
 
