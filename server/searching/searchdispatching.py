@@ -238,6 +238,8 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 	so = searchobject
 	activepoll = so.poll
 
+	# substringsearch will be creating a temp table
+	dbconnection.setreadonly(False)
 	dbcursor = dbconnection.cursor()
 
 	commitcount = 0
