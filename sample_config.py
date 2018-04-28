@@ -337,11 +337,11 @@ REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
 #   a lemmatized term and all of the other terms that "neighbor" it in the vector
 #   space.
 #
+# TOPICMODELINGENABLED allows you to build graphs of topic clusters via Latent Dirichlet Allocation.
+#
 # CONCEPTSEARCHINGENABLED allows you to search for sentences related to a lemmatized
 #   term or terms. What sentences are about "men"? Which sentences are related to the
 #   relationship that subsists between "good" and "man"?
-#
-# TOPICMODELINGENABLED allows you to build graphs of topic clusters via Latent Dirichlet Allocation.
 #
 # MAXVECTORSPACE: what is the largest set of words you are willing
 #   to vectorize in order to find the association network of a given
@@ -387,11 +387,9 @@ REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
 
 SEMANTICVECTORSENABLED = 'no'
 LITERALCOSINEDISTANCEENABLED = 'no'
-CONCEPTSEARCHINGENABLED = 'no'
 CONCEPTMAPPINGENABLED = 'no'
-SENTENCESIMILARITYENABLED = 'no'  # inactive code / a dead end at the moment
 TOPICMODELINGENABLED = 'no'
-TENSORFLOWVECTORSENABLED = 'no'  # inactive code / a dead end at the moment
+CONCEPTSEARCHINGENABLED = 'no'  # of dubious value as currently implemented
 MAXVECTORSPACE = 7548165
 MAXSENTENCECOMPARISONSPACE = 50000
 DBWRITEUSER = 'consider_re-using_HipparchiaBuilder_user'

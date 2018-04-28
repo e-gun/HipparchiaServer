@@ -268,8 +268,8 @@ def vectorhtmlforfrontpage():
 	textmapper = {'LITERALCOSINEDISTANCEENABLED': cdc,
 	              'CONCEPTSEARCHINGENABLED': cs,
 	              'CONCEPTMAPPINGENABLED': cm,
-	              'TENSORFLOWVECTORSENABLED': tf,
-	              'SENTENCESIMILARITYENABLED': ss,
+	              # 'TENSORFLOWVECTORSENABLED': tf,
+	              # 'SENTENCESIMILARITYENABLED': ss,
 	              'TOPICMODELINGENABLED': lda}
 
 	vectorhtml = list()
