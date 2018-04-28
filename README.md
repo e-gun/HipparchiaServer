@@ -155,14 +155,12 @@ minimum software requirements:
         jquery
         jquery-ui
         js-cookie
-        dejavu fonts [strongly recommended, not a hard requirement]
+        a fully stocked unicode font [arial, dejavu, noto, roboto, ...]
 
     javascript must be enabled in the browser
     the browser must accept cookies if you wish to save searches
 
 ```
-
-please see HipparchiaBSD and/or HipparchiaMacOS about setting up python and postgresql.
 
 the project pages for the other dependencies:
 
@@ -175,11 +173,7 @@ jquery-ui:
 js-cookie:
     https://github.com/js-cookie/js-cookie/releases
 
-dejavu fonts:
-    https://github.com/dejavu-fonts/dejavu-fonts/releases
-
-see HipparchiaBSD for details on how to acquire and to install these items.
-[details in 00_FreeBSD_initial_setup.txt or 01_macOS_hipparchia_installation.txt]
+see **HipparchiaBSD** and/or **HipparchiaMacOS** for details on how to acquire and to install these items.
 
 
 What you will see:
