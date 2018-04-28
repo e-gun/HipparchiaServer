@@ -134,12 +134,22 @@ minimum software requirements:
 
     to launch HipparchiaServer
         python 3.6
-            pip
             flask
-            psycopg2
+            psycopg2-binary
             bs4
             websockets
         postgresql 9.6+ / 10.0+
+
+    to run the vectorizing functions
+        python 3.6
+            cython
+            scipy
+            numpy
+            gensim
+            sklearn
+            pyLDAvis
+            matplotlib
+            networkx
 
     to properly interact with HipparchiaServer via a browser
         jquery
@@ -152,7 +162,7 @@ minimum software requirements:
 
 ```
 
-please see HipparchiaBSD about setting up python and postgresql9.
+please see HipparchiaBSD and/or HipparchiaMacOS about setting up python and postgresql.
 
 the project pages for the other dependencies:
 
