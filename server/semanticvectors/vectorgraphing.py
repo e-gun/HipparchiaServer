@@ -13,6 +13,7 @@ from io import BytesIO
 #   RuntimeError: main thread is not in main loop
 #   Tcl_AsyncDelete: async handler deleted by the wrong thread
 import matplotlib
+
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
@@ -70,7 +71,7 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchobject):
 
 	relevantconnections = dict()
 	for i in interrelationships:
-		# keep the network focussed
+		# keep the network focused
 		relevantconnections[i] = [sim for sim in interrelationships[i] if sim[0] in terms]
 		# relevantconnections[i] = [s for s in interrelationships[i] if s[1] > hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']]
 
@@ -82,6 +83,12 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchobject):
 
 
 def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconnections, vtype):
+	# fnc = bokehgraphmatches
+	fnc = matplotgraphmatches
+	return fnc(graphtitle, searchterm, mostsimilartuples, terms, relevantconnections, vtype)
+
+
+def matplotgraphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconnections, vtype):
 	"""
 
 	mostsimilartuples come in a list and look like:

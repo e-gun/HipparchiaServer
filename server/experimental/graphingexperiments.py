@@ -1,15 +1,25 @@
-import networkx as nx
-try:
-	from bokeh.embed import file_html
-	from bokeh.plotting import figure
-	from bokeh.models.graphs import from_networkx
-except ImportError:
-	print('bokeh is not available')
-	file_html = None
-	figure = None
-	from_networkx = None
+# -*- coding: utf-8 -*-
+"""
+	HipparchiaServer: an interface to a database of Greek and Latin texts
+	Copyright: E Gunderson 2016-18
+	License: GNU GENERAL PUBLIC LICENSE 3
+		(see LICENSE in the top level directory of the distribution)
+"""
 
-from server.semanticvectors.vectorgraphing import figure, from_networkx, file_html, storevectorgraph
+import networkx as nx
+from bokeh.io import output_file, show
+from bokeh.models import Circle, MultiLine, LabelSet, Label, ColumnDataSource
+from bokeh.models.graphs import EdgesAndLinkedNodes, NodesAndLinkedEdges, from_networkx
+from bokeh.plotting import figure
+from bokeh.palettes import Spectral4
+
+# except ImportError:
+# 	print('bokeh is not available')
+# 	file_html = None
+# 	figure = None
+# 	from_networkx = None
+
+# from server.semanticvectors.vectorgraphing import storevectorgraph
 
 
 def bokehgraphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconnections, vtype):
@@ -22,11 +32,10 @@ def bokehgraphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevant
 
 	relevantconnections is a dict each of whose keyed entries unpacks into a mostsimilartuples-like list
 
-	consider shifting to bokeh? can have clickable bubbles, etc
 
-		https://github.com/bokeh/bokeh/blob/master/examples/models/file/graphs.py
+	from_networkx is quite limited
 
-		http://bokeh.pydata.org/en/latest/docs/user_guide/graph.html#userguide-graph
+	would need to
 
 	:param searchterm:
 	:param mostsimilartuples:
@@ -35,6 +44,9 @@ def bokehgraphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevant
 	:return:
 	"""
 
+	print('mostsimilartuples:', mostsimilartuples)
+	print('terms:', terms)
+	print('relevantconnections', relevantconnections)
 	# the nx part
 
 	graph = nx.Graph()
@@ -73,12 +85,33 @@ def bokehgraphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevant
 
 	# the bokeh part
 	plot = figure(title="Networkx Integration Demonstration", x_range=(-1.1, 1.1), y_range=(-1.1, 1.1), tools="", toolbar_location=None)
-	bokehgraph = from_networkx(graph, nx.spring_layout, scale=2, center=(0, 0))
+	bokehgraph = from_networkx(graph, nx.spring_layout, scale=1, center=(0, 0))
+
+	bokehgraph.node_renderer.glyph = Circle(size=15, fill_color=Spectral4[0])
+	bokehgraph.node_renderer.selection_glyph = Circle(size=15, fill_color=Spectral4[2])
+	bokehgraph.node_renderer.hover_glyph = Circle(size=15, fill_color=Spectral4[1])
+	bokehgraph.node_renderer.glyph.properties_with_values()
+
+	bokehgraph.edge_renderer.glyph = MultiLine(line_color="#CCCCCC", line_alpha=0.8, line_width=5)
+	bokehgraph.edge_renderer.selection_glyph = MultiLine(line_color=Spectral4[2], line_width=5)
+	bokehgraph.edge_renderer.hover_glyph = MultiLine(line_color=Spectral4[1], line_width=5)
+
+	bokehgraph.selection_policy = NodesAndLinkedEdges()
+	bokehgraph.inspection_policy = EdgesAndLinkedNodes()
+
+	# broken atm
+
+	# source = ColumnDataSource(data=dict(terms=terms))
+	# labels = LabelSet(x_offset=0, y_offset=0, source=source, render_mode='canvas')
+	# plot.add_layout(labels)
 
 	plot.renderers.append(bokehgraph)
 
-	graphobject = file_html(bokehgraph)
+	# graphobject = file_html(bokehgraph)
 
-	imagename = storevectorgraph(graphobject)
+	output_file("interactive_graphs.html")
+	show(plot)
+	imagename = None
+	# imagename = storevectorgraph(graphobject)
 
 	return imagename
