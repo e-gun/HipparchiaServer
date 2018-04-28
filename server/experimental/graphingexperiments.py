@@ -44,9 +44,10 @@ def bokehgraphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevant
 	:return:
 	"""
 
-	print('mostsimilartuples:', mostsimilartuples)
-	print('terms:', terms)
-	print('relevantconnections', relevantconnections)
+	# print('mostsimilartuples:', mostsimilartuples)
+	# print('terms:', terms)
+	# print('relevantconnections', relevantconnections)
+
 	# the nx part
 
 	graph = nx.Graph()

@@ -421,18 +421,19 @@ const lsf = $('#lemmatasearchform');
 const plsf = $('#proximatelemmatasearchform');
 const psf = $('#proximatesearchform');
 
-function restoreplaceholders() {
-    wsf.attr('placeholder', '(looking for...)');
-    psf.attr('placeholder', '(near... and within...)');
-    lsf.attr('placeholder', '(all forms of...)');
-    plsf.attr('placeholder', '(near all forms of... and within...)');
-}
-
 function clearsearchboxvalues() {
     for (var i = 0; i < thesearchforms.length; i++) {
         var box = $(thesearchforms[i]);
         box.val('');
     }
+}
+
+function restoreplaceholders() {
+    wsf.attr('placeholder', '(looking for...)');
+    psf.attr('placeholder', '(near... and within...)');
+    lsf.attr('placeholder', '(all forms of...)');
+    plsf.attr('placeholder', '(near all forms of... and within...)');
+    clearsearchboxvalues();
 }
 
 function hideallboxes() {
@@ -474,7 +475,6 @@ function restorecheckboxestodefault() {
 $('#cosdistbysentence').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        clearsearchboxvalues();
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
         activatethisbox(lsf, '(pick a headword)');
@@ -492,7 +492,6 @@ $('#cosdistbysentence').change(function() {
 $('#cosdistbylineorword').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        clearsearchboxvalues();
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
         activatethisbox(lsf, '(pick a headword)');
@@ -510,7 +509,6 @@ $('#cosdistbylineorword').change(function() {
 $('#semanticvectorquery').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        clearsearchboxvalues();
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
         wsf.show();
@@ -530,7 +528,6 @@ $('#semanticvectorquery').change(function() {
 $('#nearestneighborsquery').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        clearsearchboxvalues();
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
@@ -550,7 +547,6 @@ $('#nearestneighborsquery').change(function() {
 $('#tensorflowgraph').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        clearsearchboxvalues();
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
@@ -570,7 +566,6 @@ $('#tensorflowgraph').change(function() {
 $('#sentencesimilarity').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        clearsearchboxvalues();
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
@@ -590,7 +585,6 @@ $('#sentencesimilarity').change(function() {
 $('#topicmodel').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        clearsearchboxvalues();
         var others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
@@ -663,7 +657,6 @@ $('#browserspinner').spinner({
         setoptions('browsercontext', String(result));
         }
         });
-
 
 $( '#hitlimitspinner' ).spinner({
     min: 1,
