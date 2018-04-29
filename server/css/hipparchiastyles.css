@@ -815,6 +815,11 @@ body {
 	color: var(--blue);
 	}
 
+.title {
+	font-style: italic;
+	font-weight: bold;
+	}
+
 .translation {
     font-size: 85%;
     font-style: italic;
@@ -860,7 +865,7 @@ body {
     font-size: 85%;
     }
 
-.work, .title {
+.work {
 	font-style: italic;
 	font-weight: bold;
 	}

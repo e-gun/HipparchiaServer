@@ -15,7 +15,7 @@ key features:
 			add/exclude individual work provenances
 			include/exclude spuria
 			include/exclude undateable works
-			remove items from the list by "dragging to trash"
+			remove items from the list by double-clicking
 			store and load search lists between sessions
 			reset sessions to configurable defaults
 		search syntax
@@ -45,7 +45,7 @@ key features:
 			get a morphological analysis of a Greek or Latin word
 			get per corpus counts of the use of the word and its derivatives
 			get a weighted chronological distribution of the word's use: mostly 'early', etc.
-			get a weighted distribution by top 5 genres: show if a word predominantly 'epic', etc.
+			get a weighted distribution by top N genres: show if a word predominantly 'epic', etc.
 			get a summary of uses, senses, and quotes
 			reverse lookup: 'unexpected' returns ἀδευκήϲ, ἀδόκητοϲ, ἀδόξαϲτοϲ, ἀελπτία, ...
 			    by default results return in order of word frequency
@@ -64,7 +64,7 @@ key features:
 		semantic vectors
 		    calculate the relationship between words on any arbitrary search list using linear algebra
 		    various algorithms available:
-		        literal proximity,
+		        literal proximity
 		        word2vec nearest neighbors
 		        lsi matrix-similarity
 		        lda topic maps
@@ -177,6 +177,8 @@ see **HipparchiaBSD** and/or **HipparchiaMacOS** for details on how to acquire a
 
 
 What you will see:
+1. help screen
+![help_screen](screenshots/00_help_screen.png)
 
 1. interface overview
 ![interface_overview](screenshots/01_interface_overview.png)
