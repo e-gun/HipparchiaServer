@@ -634,6 +634,14 @@ class dbWorkLine(object):
 			}
 
 		theline = self.accented
+
+		# the brackets in the metadata will throw off the bracketfinder:
+		#   <hmu_metadata_publicationinfo value="BSA 47.1952.187,3 [SEG 12.419]" />
+		# but we do not need that info when (merely) displaying the line: it is extracted elsewhere
+		insetfinder = re.compile(r'value=".*?" ')
+
+		theline = re.sub(insetfinder, r'value="" ', theline)
+
 		for t in editorialcontinuationdict.keys():
 			try:
 				bracketfinder[t]
