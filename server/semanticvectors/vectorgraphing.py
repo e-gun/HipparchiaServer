@@ -224,7 +224,10 @@ def fetchvectorgraph(imagename):
 	:return:
 	"""
 
-	deletewhendone = True
+	if hipparchia.config['RETAINFIGURES'] == 'yes':
+		deletewhendone = False
+	else:
+		deletewhendone = True
 
 	dbconnection = ConnectionObject(ctype='rw')
 	dbconnection.setautocommit()

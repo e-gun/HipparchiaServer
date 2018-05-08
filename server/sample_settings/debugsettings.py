@@ -27,6 +27,10 @@
 # HIPPARCHIALOGFILE is the log file; pick your path wisely: it is
 #   relative to 'run.py' and so to 'HipparchiaServer'
 #
+# RETAINREDISPOLLS will prevent redis-based progress polls from being deleted after use
+#
+# RETAINFIGURES will prevent graphs from being deleted after display
+#
 
 SUPPRESSWARNINGS = 'yes'
 DBDEBUGMODE = 'no'
@@ -34,3 +38,6 @@ HTMLDEBUGMODE = 'no'
 CALCULATEWORDWEIGHTS = 'no'
 ENABLELOGGING = 'no'
 HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
+RETAINREDISPOLLS = 'no'
+RETAINFIGURES = 'no'
+

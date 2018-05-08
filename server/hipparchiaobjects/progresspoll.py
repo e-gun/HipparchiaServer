@@ -149,7 +149,8 @@ class RedisProgressPoll(object):
 		self.initializeredispoll()
 
 	def __del__(self):
-		self.deleteredispoll()
+		if hipparchia.config['RETAINREDISPOLLS'] != 'yes':
+			self.deleteredispoll()
 
 	def setkeytypes(self):
 		keytypes = {'launchtime': float,
