@@ -93,7 +93,7 @@ def selectionmade():
 		session['au' + suffix] = tidyuplist(session['au' + suffix])
 		rationalizeselections(uid, suffix)
 
-	# if vs elif: allow multiple simultaneous settings
+	# if vs elif: allow multiple simultaneous instance
 	if genre != '':
 		# add to the +/- genre list and then subtract from the -/+ list
 		session['agn' + suffix].append(genre)

@@ -1,6 +1,7 @@
 # python
 *.pyc
-config.py
+server/settings/
+zz_*
 
 # 3rd party projects
 j*js

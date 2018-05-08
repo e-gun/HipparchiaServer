@@ -381,7 +381,7 @@ def ldatopicsgenerateoutput(ldavishtmlandjs, workssearched, settings, searchobje
 		</script>
 
 
-	settings = {
+	instance = {
 		'maxfeatures': 2000,
 		'components': 15,  # topics
 		'maxfreq': .75,  # fewer than n% of sentences should have this word (i.e., purge common words)

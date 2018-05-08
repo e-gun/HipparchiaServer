@@ -38,7 +38,7 @@ def createvectorstable():
 	(
 		ts timestamp without time zone,
 		versionstamp character varying(6) COLLATE pg_catalog."default",
-		settings character varying (512) COLLATE pg_catalog."default",
+		instance character varying (512) COLLATE pg_catalog."default",
 		uidlist text[] COLLATE pg_catalog."default",
 		vectortype character varying(10) COLLATE pg_catalog."default",
 		calculatedvectorspace bytea
@@ -134,7 +134,7 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 
 	q = """
 	INSERT INTO public.storedvectors 
-		(ts, versionstamp, settings, uidlist, vectortype, calculatedvectorspace)
+		(ts, versionstamp, instance, uidlist, vectortype, calculatedvectorspace)
 		VALUES (%s, %s, %s, %s, %s, %s)
 	"""
 
@@ -153,7 +153,7 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 	return
 
 
-def checkforstoredvector(searchobject, vectortype, careabout='settings'):
+def checkforstoredvector(searchobject, vectortype, careabout='instance'):
 	"""
 
 	the stored vector might not reflect the current math rules
@@ -201,7 +201,7 @@ def checkforstoredvector(searchobject, vectortype, careabout='settings'):
 
 	if careabout == 'versionstamp':
 		outdated = (version[:6] != result[0])
-	elif careabout == 'settings':
+	elif careabout == 'instance':
 		current = determinesettings()
 		outdated = (current != result[0])
 	else:

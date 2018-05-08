@@ -46,7 +46,7 @@ def getsessionvariables():
 @hipparchia.route('/getcookie/<cookienum>')
 def cookieintosession(cookienum):
 	"""
-	take a stored cookie and convert its values into the current session settings
+	take a stored cookie and convert its values into the current session instance
 
 	:return:
 	"""

@@ -16,7 +16,7 @@ from server.dbsupport.vectordbfunctions import createstoredimagestable, createve
 def clearsession():
 	"""
 	clear the session
-	this will reset all settings and reload the front page
+	this will reset all instance and reload the front page
 	:return:
 	"""
 
