@@ -64,6 +64,20 @@ SECRET_KEY = 'yourkeyhereitshouldbelongandlooklikecryptographicgobbledygook'
 #   will have more memory allocated all of the time and you run the risk of exhausting
 #   the pool if you have too many concurrent searches (but simple connections are supposed
 #   to be made as a fallback when a pooled one is not available).
+#
+# POLLCONNECTIONTYPE will either use a shared memory ProgressPoll() or one that saves
+#   information in a redis database. The latter option is set by setting the value to 'redis'.
+#   If Hipparchia is served via WSGI you cannot save the polls in shared memory.
+#
+# REDISPORT says where to look for redis; 0 means use a (faster) UnixDomainSocketConnection.
+#   redis does not enable this by default. Instead redis defaults to TCP connections at 6379.
+#   redis.conf should be edited accordingly.
+#
+# REDISCOCKET defines where to look for the socket file; this needs to match the value in redis.conf.
+#
+# REDISDBID sets the numerical value of the database we will use; 0 is a typical default; if your machine
+#   has other things going on with redis, then it is possible to generate conflicts is you leave this as '0'
+#
 
 FLASKSERVEDFROMPORT = 5000
 FLASKSEENATPORT = 5000
@@ -71,6 +85,10 @@ PROGRESSPOLLDEFAULTPORT = 5010
 LISTENINGADDRESS = '127.0.0.1'
 MYEXTERNALIPADDRESS = '127.0.0.1'
 CONNECTIONTYPE = 'pool'
+POLLCONNECTIONTYPE = 'notredis'
+REDISPORT = 6379
+REDISCOCKET = '/tmp/redis.sock'
+REDISDBID = 0
 
 ### [3] DB variables ###
 ##  [set once and forget: DBPASS] ##

@@ -181,7 +181,7 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 
 	commitcount = 0
 
-	while searchlist and activepoll.hitcount.value <= so.cap:
+	while searchlist and activepoll.gethits() <= so.cap:
 		commitcount += 1
 		dbconnection.checkneedtocommit(commitcount)
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
@@ -243,7 +243,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 	dbcursor = dbconnection.cursor()
 
 	commitcount = 0
-	while searchtuples and activepoll.hitcount.value <= so.cap:
+	while searchtuples and activepoll.gethits() <= so.cap:
 		commitcount += 1
 		dbconnection.checkneedtocommit(commitcount)
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
@@ -347,7 +347,7 @@ def workonproximitysearch(foundlineobjects, searchinginside, searchobject, dbcon
 	else:
 		searchfunction = withinxwords
 
-	while searchinginside and activepoll.hitcount.value <= so.cap:
+	while searchinginside and activepoll.gethits() <= so.cap:
 		try:
 			wkid = searchinginside.pop()
 		except IndexError:

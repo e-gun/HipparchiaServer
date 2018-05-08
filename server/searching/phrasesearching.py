@@ -180,7 +180,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 		lim = ' LIMIT 5'
 
 	commitcount = 0
-	while tablestosearch and activepoll.hitcount.value <= so.cap:
+	while tablestosearch and activepoll.gethits() <= so.cap:
 		commitcount += 1
 		try:
 			uid = tablestosearch.pop()
@@ -240,7 +240,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 			#	print(l.universalid, l.locus(), getattr(l,so.usewordlist))
 
 			gotmyonehit = False
-			while locallineobjects and activepoll.hitcount.value <= so.cap and not gotmyonehit:
+			while locallineobjects and activepoll.gethits() <= so.cap and not gotmyonehit:
 				# windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]
 				# figure out which line is really the line with the goods
 				# it is not nearly so simple as picking the 2nd element in any run of 3: no always runs of 3 + matches in
