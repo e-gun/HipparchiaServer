@@ -9,6 +9,20 @@
 // COMPLETE INDEX TO
 //
 
+// https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
+// dec2hex :: Integer -> String
+function dec2hex (dec) {
+  return ('0' + dec.toString(16)).substr(-2);
+}
+
+// generateId :: Integer -> String
+function generateId (len) {
+  var arr = new Uint8Array((len || 40) / 2);
+  window.crypto.getRandomValues(arr);
+  return Array.from(arr, dec2hex).join('');
+}
+
+
 $('#makeanindex').click( function() {
         var name = $('#authorsautocomplete').val();
         var authorid = name.slice(-7, -1);
@@ -19,13 +33,14 @@ $('#makeanindex').click( function() {
 
         if (authorid !== '') {
             $('#clearpick').show();
-            var searchid = Date.now();
+            // var searchid = Date.now();
+            var searchid = generateId(8);
             var url = '';
             if (wrk === '') { url = '/indexto?auth=' + authorid+'&id='+searchid; }
             else if (locus === '') { url = '/indexto?auth=' + authorid + '&work=' + wrk +'&id='+searchid; }
             else { url = '/indexto?auth=' + authorid + '&work=' + wrk + '&locus=' + locus +'&id='+searchid; }
 
-            $.getJSON( url, function (indexdata) { loadindexintodisplayresults(indexdata); });
+            $.getJSON(url, function (indexdata) { loadindexintodisplayresults(indexdata); });
             checkactivityviawebsocket(searchid);
         }
 });

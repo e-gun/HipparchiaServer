@@ -7,6 +7,7 @@
 """
 import asyncio
 import json
+import re
 
 import websockets
 
@@ -20,29 +21,39 @@ async def wscheckpoll(websocket, path):
 	a poll checker started by startwspolling(): the client sends the name of a poll and this will output
 	the status of the poll continuously while the poll remains active
 
+	example:
+		progress {'active': True, 'total': -1, 'remaining': -1, 'hits': -1, 'message': 'Executing a phrase search.', 'elapsed': 0.0, 'extrainfo': '<span class="small"></span>'}
+		progress {'active': True, 'total': -1, 'remaining': -1, 'hits': -1, 'message': 'Executing a phrase search.', 'elapsed': 1.0, 'extrainfo': '<span class="small"></span>'}
+		progress {'active': True, 'total': -1, 'remaining': -1, 'hits': 1, 'message': 'Executing a phrase search.', 'elapsed': 1.0, 'extrainfo': '<span class="small"></span>'}
+		progress {'active': True, 'total': -1, 'remaining': -1, 'hits': 1, 'message': 'Executing a phrase search.', 'elapsed': 2.0, 'extrainfo': '<span class="small"></span>'}
+		...
+
 	:param websocket:
 	:param path:
 	:return:
 	"""
 
 	try:
-		ts = await websocket.recv()
+		pollid = await websocket.recv()
 	except websockets.exceptions.ConnectionClosed:
 		# you reloaded the page
 		return
 
+	# comes to us with quotes: "eb91fb11" --> eb91fb11
+	pollid = re.sub(r'\W', '', pollid)
+
 	while True:
 		progress = dict()
 		try:
-			progress['active'] = poll[ts].getactivity()
-			progress['total'] = poll[ts].worktotal()
-			progress['remaining'] = poll[ts].getremaining()
-			progress['hits'] = poll[ts].gethits()
-			progress['message'] = poll[ts].getstatus()
-			progress['elapsed'] = poll[ts].getelapsed()
+			progress['active'] = poll[pollid].getactivity()
+			progress['total'] = poll[pollid].worktotal()
+			progress['remaining'] = poll[pollid].getremaining()
+			progress['hits'] = poll[pollid].gethits()
+			progress['message'] = poll[pollid].getstatus()
+			progress['elapsed'] = poll[pollid].getelapsed()
 			if hipparchia.config['SUPPRESSLONGREQUESTMESSAGE'] == 'no':
-				if poll[ts].getnotes():
-					progress['extrainfo'] = poll[ts].getnotes()
+				if poll[pollid].getnotes():
+					progress['extrainfo'] = poll[pollid].getnotes()
 			else:
 				progress['extrainfo'] = ''
 		except KeyError:
@@ -54,8 +65,11 @@ async def wscheckpoll(websocket, path):
 				# you reloaded the page in the middle of a search and both the poll and the socket vanished
 				pass
 			break
+
 		await asyncio.sleep(.4)
-		# print('progress',progress)
+
+		# print('progress', progress)
+
 		try:
 			await websocket.send(json.dumps(progress))
 		except websockets.exceptions.ConnectionClosed:

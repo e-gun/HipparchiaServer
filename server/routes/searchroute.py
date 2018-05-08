@@ -31,8 +31,8 @@ from server.semanticvectors.vectorpseudoroutes import findabsolutevectorsbysente
 from server.startup import authordict, listmapper, poll, workdict
 
 
-@hipparchia.route('/executesearch/<timestamp>', methods=['GET'])
-def executesearch(timestamp):
+@hipparchia.route('/executesearch/<searchid>', methods=['GET'])
+def executesearch(searchid):
 	"""
 	the interface to all of the other search functions
 	tell me what you are looking for and i'll try to find it
@@ -44,19 +44,19 @@ def executesearch(timestamp):
 	:return:
 	"""
 
-	try:
-		ts = str(int(timestamp))
-	except ValueError:
-		ts = str(int(time.time()))
+	pollid = re.sub(r'\W', '', searchid)
 
-	so = buildsearchobject(ts, request, session)
+	if pollid != searchid:
+		pollid = 'this_poll_will_never_be_found'
+
+	so = buildsearchobject(pollid, request, session)
 
 	frozensession = so.session
 
 	phrasefinder = re.compile(r'[^\s]\s[^\s]')
 
-	poll[ts] = ProgressPoll(ts)
-	activepoll = poll[ts]
+	poll[pollid] = ProgressPoll(pollid)
+	activepoll = poll[pollid]
 	activepoll.activate()
 	activepoll.statusis('Preparing to search')
 	so.poll = activepoll
@@ -110,7 +110,7 @@ def executesearch(timestamp):
 		if so.vectorquerytype in vectorfunctions:
 			fnc = vectorfunctions[so.vectorquerytype]
 			output = fnc(so)
-			del poll[ts]
+			del poll[pollid]
 			return output
 
 		if so.lemma:
@@ -180,7 +180,7 @@ def executesearch(timestamp):
 			# print('cosdistbylineorword')
 			# take these hits and head on over to the vector worker
 			output = findabsolutevectorsfromhits(so, hitdict, workssearched)
-			del poll[ts]
+			del poll[pollid]
 			return output
 
 		resultlist = buildresultobjects(hitdict, authordict, workdict, so)
@@ -253,6 +253,6 @@ def executesearch(timestamp):
 	activepoll.deactivate()
 	jsonoutput = json.dumps(output.generateoutput())
 
-	del poll[ts]
+	del poll[pollid]
 
 	return jsonoutput

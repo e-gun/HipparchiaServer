@@ -7,6 +7,7 @@
 """
 
 import json
+import re
 import threading
 import time
 
@@ -15,8 +16,8 @@ from server.startup import poll
 from server.threading.websocketthread import startwspolling
 
 
-@hipparchia.route('/confirm/<ts>')
-def checkforactivesearch(ts):
+@hipparchia.route('/confirm/<searchid>')
+def checkforactivesearch(searchid):
 	"""
 
 	test the activity of a poll so you don't start conjuring a bunch of key errors if you use wscheckpoll() prematurely
@@ -27,14 +28,14 @@ def checkforactivesearch(ts):
 
 	at a minimum you can count on uWSGI giving you a KeyError when you ask for poll[ts]
 
-	:param ts:
+	:param searchid:
 	:return:
 	"""
 
-	try:
-		ts = str(int(ts))
-	except ValueError:
-		ts = str(int(time.time()))
+	pollid = re.sub(r'\W', '', searchid)
+
+	if pollid != searchid:
+		pollid = 'this_poll_will_never_be_found'
 
 	pollport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
@@ -44,12 +45,12 @@ def checkforactivesearch(ts):
 		pollstart.start()
 
 	try:
-		if poll[ts].getactivity():
+		if poll[pollid].getactivity():
 			return json.dumps(pollport)
 	except KeyError:
 		time.sleep(.10)
 		try:
-			if poll[ts].getactivity():
+			if poll[pollid].getactivity():
 				return json.dumps(pollport)
 			else:
 				print('checkforactivesearch() reports that the websocket is still inactive: there is a serious problem?')

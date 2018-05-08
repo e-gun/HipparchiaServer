@@ -73,7 +73,8 @@ def generatevectorjs(path):
 
 	jstemplate = """
 		$('lemmaheadword').click( function(e) { 
-			var searchid = Date.now();
+			// var searchid = Date.now();
+			var searchid = generateId(8);
 			var url = '/REGEXREPLACE/'+searchid+'?lem='+this.id;
 			$('#imagearea').empty();
 			$('#searchsummary').html(''); 
