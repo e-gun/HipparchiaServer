@@ -14,7 +14,7 @@ from sys import argv
 from flask import redirect, render_template, url_for
 
 from server import hipparchia
-from server.hipparchiaobjects.searchobjects import ProgressPoll
+from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \
 	workprovenancedict
 from server.startup import poll

@@ -11,7 +11,7 @@ from flask import request, session
 
 from server import hipparchia
 from server.dbsupport.vectordbfunctions import checkforstoredvector
-from server.hipparchiaobjects.searchobjects import ProgressPoll
+from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery

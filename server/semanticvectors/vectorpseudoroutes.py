@@ -16,7 +16,8 @@ from server import hipparchia
 from server.dbsupport.vectordbfunctions import fetchverctorenvirons
 from server.formatting.jsformatting import generatevectorjs
 from server.formatting.vectorformatting import formatnnmatches
-from server.hipparchiaobjects.searchobjects import ProgressPoll, SearchOutputObject
+from server.hipparchiaobjects.searchobjects import SearchOutputObject
+from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery

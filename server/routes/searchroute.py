@@ -19,7 +19,8 @@ from server.formatting.jsformatting import insertbrowserclickjs
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds
 from server.formatting.wordformatting import universalregexequivalent, wordlistintoregex
-from server.hipparchiaobjects.searchobjects import ProgressPoll, SearchOutputObject
+from server.hipparchiaobjects.searchobjects import SearchOutputObject
+from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
 	sortresultslist
 from server.listsandsession.whereclauses import configurewhereclausedata

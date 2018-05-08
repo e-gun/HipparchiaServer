@@ -17,7 +17,7 @@ from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.hipparchiaobjects.searchobjects import ProgressPoll
+from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.startup import authordict, poll, workdict
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import tcparserequest, \

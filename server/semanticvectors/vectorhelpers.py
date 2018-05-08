@@ -20,7 +20,7 @@ from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import uniquetablename
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.hipparchiaobjects.searchobjects import ProgressPoll
+from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildbetweenwhereextension
 from server.startup import lemmatadict
