@@ -224,6 +224,24 @@ $(document).ready( function () {
         '#sentencesimilaritycheckbox', '#topicmodelcheckbox');
     bulkhider(tohideonfirstload);
 
+
+    function checkCookie(){
+        var cookieEnabled = navigator.cookieEnabled;
+        if (!cookieEnabled){
+            document.cookie = "testcookie";
+            cookieEnabled = document.cookie.indexOf("testcookie")!=-1;
+            document.cookie = "testcookie=1; expires=Thu, 01-Jan-1970 00:00:01 GMT";
+        }
+
+        if (cookieEnabled) {
+            $('#cookiemessage').hide();
+        } else {
+            $('#cookiemessage').show();
+        }
+    }
+
+    checkCookie();
+
     //
     // BULK OPERATIONS ON ARRAYS OF ELEMENTS
     //

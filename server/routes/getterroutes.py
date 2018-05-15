@@ -51,6 +51,14 @@ def cookieintosession(cookienum):
 	:return:
 	"""
 
+	response = redirect(url_for('frontpage'))
+
+	try:
+		session['authorssummary']
+	except KeyError:
+		# cookies are not enabled
+		return response
+
 	cookienum = cookienum[0:2]
 
 	thecookie = request.cookies.get('session' + cookienum)
@@ -84,8 +92,6 @@ def cookieintosession(cookienum):
 	workprovenancelist = list(set(workprovenancelist))
 
 	modifysessionselections(cookiedict, authorgenreslist, workgenreslist, authorlocationlist, workprovenancelist)
-
-	response = redirect(url_for('frontpage'))
 
 	return response
 

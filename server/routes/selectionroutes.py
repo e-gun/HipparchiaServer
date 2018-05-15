@@ -139,6 +139,12 @@ def setsessionvariable():
 	validpunct = '-_'
 	val = depunct(val, validpunct)
 
+	try:
+		session['authorssummary']
+	except KeyError:
+		# cookies are not enabled
+		return json.dumps([{'none': 'none'}])
+
 	modifysessionvar(param, val)
 
 	result = json.dumps([{param: val}])
