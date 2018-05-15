@@ -36,7 +36,8 @@ def resetsemanticvectors():
 	:return:
 	"""
 
-	createvectorstable()
+	if hipparchia.config['BLOCKRESETPATHS'] == 'no':
+		createvectorstable()
 
 	return redirect(url_for('frontpage'))
 
@@ -52,6 +53,7 @@ def resetvectorgraphs():
 	:return:
 	"""
 
-	createstoredimagestable()
+	if hipparchia.config['BLOCKRESETPATHS'] == 'no':
+		createstoredimagestable()
 
 	return redirect(url_for('frontpage'))

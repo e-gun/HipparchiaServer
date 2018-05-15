@@ -1,0 +1,15 @@
+
+The following could be coded up on a preliminary basis without much trouble.
+How many of them would actually yield useful results in the end?
+How much trouble would it be to move from rudimentary "proof of concept" code to code that did yield those useful results?
+
+    homonymn disambiguation via guessing the neighbors
+        assign probabilities to homonymns: 'est' from 'sum' vs 'est' from 'edo', etc.
+    unknown form guesser: letter overlap with know forms list + neighborhood awareness
+    automated scansion
+    sentence similarities --> autoindexing of xrefs in works
+        'allusions and intertexts' robot [same as above, mostly]
+    emendation of emendations via critique of supplenda/delenda
+    project gutenberg POC code: 'database of all free knowledge'
+
+

@@ -31,6 +31,8 @@
 #
 # RETAINFIGURES will prevent graphs from being deleted after display
 #
+# BLOCKRESETPATHS if not 'no', then you cannot access 'resetvectors/' or 'resetvectorimages/'
+#
 
 SUPPRESSWARNINGS = 'yes'
 DBDEBUGMODE = 'no'
@@ -40,4 +42,4 @@ ENABLELOGGING = 'no'
 HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 RETAINREDISPOLLS = 'no'
 RETAINFIGURES = 'no'
-
+BLOCKRESETPATHS = 'yes'
