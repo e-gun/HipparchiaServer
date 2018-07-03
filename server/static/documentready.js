@@ -226,14 +226,14 @@ $(document).ready( function () {
 
 
     function checkCookie(){
-        var cookieEnabled = navigator.cookieEnabled;
-        if (!cookieEnabled){
+        var c = navigator.cookieEnabled;
+        if (!c){
             document.cookie = "testcookie";
-            cookieEnabled = document.cookie.indexOf("testcookie")!=-1;
+            c = document.cookie.indexOf("testcookie")!=-1;
             document.cookie = "testcookie=1; expires=Thu, 01-Jan-1970 00:00:01 GMT";
         }
 
-        if (cookieEnabled) {
+        if (c) {
             $('#cookiemessage').hide();
         } else {
             $('#cookiemessage').show();
