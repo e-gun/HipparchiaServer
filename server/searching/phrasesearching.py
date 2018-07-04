@@ -168,10 +168,10 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 	combinations = qcomb.combinations()
 	combinations.pop()
 	# lines start/end
-	sp = re.sub(r'^\s', '(^|\s)', searchphrase)
-	sp = re.sub(r'\s$', '(\s|$)', sp)
+	sp = re.sub(r'^\s', r'(^|\\s)', searchphrase)
+	sp = re.sub(r'\s$', r'(\\s|$)', sp)
 	# on the reasoning behind the following substitution see 'DEBUGGING notes: SQL oddities' above
-	# sp = re.sub(r' ', r'\s', sp)
+	# sp = re.sub(r' ', r'\\s', sp)
 
 	if not so.onehit:
 		lim = ' LIMIT ' + str(so.cap)

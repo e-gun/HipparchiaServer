@@ -591,13 +591,16 @@ def readgitdata():
 	gitfile = '/.git/logs/HEAD'
 	line = ''
 
-	with open(basepath+gitfile) as fh:
-		for line in fh:
-			pass
-		lastline = line
+	try:
+		with open(basepath+gitfile) as fh:
+			for line in fh:
+				pass
+			lastline = line
 
-	gitdata = lastline.split(' ')
-	commit = gitdata[1]
+		gitdata = lastline.split(' ')
+		commit = gitdata[1]
+	except FileNotFoundError:
+		commit = 'unknowncommit'
 
 	return commit
 

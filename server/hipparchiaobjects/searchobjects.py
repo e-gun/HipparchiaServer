@@ -127,14 +127,14 @@ class SearchObject(object):
 		# searchtermcharactersubstitutions() logic has moved here
 
 		seeking = re.sub('[σς]', 'ϲ', seeking)
-		seeking = re.sub(r'\\ϲ', ' ', seeking)
-		seeking = re.sub(r'^\s', r'(^|\s)', seeking)
-		seeking = re.sub(r'\s$', r'(\s|$)', seeking)
+		seeking = re.sub(r'\\ϲ', r'\\s', seeking)
+		seeking = re.sub(r'^ ', r'(^|\\s)', seeking)
+		seeking = re.sub(r' $', r'(\\s|$)', seeking)
 		seeking = seeking.lower()
 		proximate = re.sub('[σς]', 'ϲ', proximate)
 		proximate = re.sub(r'\\ϲ', ' ', proximate)
-		proximate = re.sub(r'^\s', r'(^|\s)', proximate)
-		proximate = re.sub(r'\s$', r'(\s|$)', proximate)
+		proximate = re.sub(r'^ ', r'(^|\\s)', proximate)
+		proximate = re.sub(r' $', r'(\\s|$)', proximate)
 		proximate = proximate.lower()
 
 		# print ('seeking,proximate',seeking,proximate)
