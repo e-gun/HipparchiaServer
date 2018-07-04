@@ -451,8 +451,8 @@ def universalregexequivalent(searchterm):
 			pass
 		searchtermequivalent += c
 	# searchtermequivalent = '(^|)('+searchtermequivalent+')($|)'
-	searchtermequivalent = re.sub(r'😀', r'\s', searchtermequivalent)
-	searchtermequivalent = re.sub(r'👽', r'\w', searchtermequivalent)
+	searchtermequivalent = re.sub(r'😀', r'\\s', searchtermequivalent)
+	searchtermequivalent = re.sub(r'👽', r'\\w', searchtermequivalent)
 	searchtermequivalent = '({s})'.format(s=searchtermequivalent)
 
 	# print('searchtermequivalent', searchtermequivalent)

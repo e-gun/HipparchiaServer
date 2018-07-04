@@ -12,12 +12,17 @@ from io import BytesIO
 # do this before importing pylab or pyplot: otherwise you will see:
 #   RuntimeError: main thread is not in main loop
 #   Tcl_AsyncDelete: async handler deleted by the wrong thread
-import matplotlib
 
-matplotlib.use('Agg')
+try:
+	import matplotlib
+	matplotlib.use('Agg')
+	import matplotlib.pyplot as plt
+	import networkx as nx
+except ModuleNotFoundError:
+	matplotlib = None
+	plt = None
+	nx = None
 
-import matplotlib.pyplot as plt
-import networkx as nx
 import psycopg2
 from server import hipparchia
 from server.dbsupport.tablefunctions import uniquetablename
