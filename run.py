@@ -8,6 +8,9 @@
 
 from server import hipparchia
 
+hipparchiaversion = 'MASTER'
+print('\nVersion: {v}\n'.format(v=hipparchiaversion))
+
 if __name__ == '__main__':
 
 	if hipparchia.config['ENABLELOGGING'] == 'yes':
