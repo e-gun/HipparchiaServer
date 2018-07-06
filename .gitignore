@@ -1,6 +1,5 @@
 # python
 *.pyc
-config.py
 
 # 3rd party projects
 j*js
