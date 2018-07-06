@@ -18,6 +18,7 @@ try:
 	import matplotlib.pyplot as plt
 	import networkx as nx
 except ModuleNotFoundError:
+	print('matplotlib is not available')
 	matplotlib = None
 	plt = None
 	nx = None

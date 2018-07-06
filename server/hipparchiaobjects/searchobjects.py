@@ -132,7 +132,7 @@ class SearchObject(object):
 		seeking = re.sub(r' $', r'(\\s|$)', seeking)
 		seeking = seeking.lower()
 		proximate = re.sub('[σς]', 'ϲ', proximate)
-		proximate = re.sub(r'\\ϲ', ' ', proximate)
+		proximate = re.sub(r'\\ϲ', r'\\s', proximate)
 		proximate = re.sub(r'^ ', r'(^|\\s)', proximate)
 		proximate = re.sub(r' $', r'(\\s|$)', proximate)
 		proximate = proximate.lower()
