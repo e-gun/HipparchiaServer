@@ -8,7 +8,7 @@
 
 from server import hipparchia
 
-hipparchiaversion = 'MASTER'
+hipparchiaversion = '1.0.1'
 print('\nVersion: {v}\n'.format(v=hipparchiaversion))
 
 if __name__ == '__main__':
