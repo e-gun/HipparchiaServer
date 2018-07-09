@@ -133,7 +133,7 @@ Instructions on how to use Hipparchia can be found by clicking on the '?' button
 minimum software requirements:
 
     to launch HipparchiaServer
-        python 3.6
+        python 3.6+
             flask
             psycopg2-binary
             bs4

@@ -96,7 +96,7 @@ def completeindex():
 	count = len(output)
 	try:
 		locale.setlocale(locale.LC_ALL, 'en_US')
-		count = locale.format("%d", count, grouping=True)
+		count = locale.format_string('%d', count, grouping=True)
 	except locale.Error:
 		count = str(count)
 
