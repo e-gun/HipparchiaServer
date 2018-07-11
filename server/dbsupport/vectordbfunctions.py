@@ -14,6 +14,7 @@ import psycopg2
 from server import hipparchia
 from server.dbsupport.dblinefunctions import bulklinegrabber
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.proximitysearching import grableadingandlagging
 from server.semanticvectors.vectorhelpers import determinesettings, readgitdata
 
@@ -108,11 +109,13 @@ def createstoredimagestable():
 	return
 
 
-def storevectorindatabase(searchobject, vectortype, vectorspace):
+def storevectorindatabase(searchobject: SearchObject, vectortype: str, vectorspace):
 	"""
 
 	you have just calculated a new vectorpace, store it so you do not need to recalculate it
 	later
+
+	vectorspace will be something like '<class 'gensim.models.word2vec.Word2Vec'>'
 
 	:param vectorspace:
 	:param uidlist:
@@ -153,7 +156,7 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 	return
 
 
-def checkforstoredvector(searchobject, vectortype, careabout='instance'):
+def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout='instance'):
 	"""
 
 	the stored vector might not reflect the current math rules
@@ -219,7 +222,7 @@ def checkforstoredvector(searchobject, vectortype, careabout='instance'):
 	return returnval
 
 
-def fetchverctorenvirons(hitdict, searchobject):
+def fetchverctorenvirons(hitdict: dict, searchobject: SearchObject) -> list:
 	"""
 
 	grab the stuff around the term you were looking for and return that as the environs

@@ -12,7 +12,7 @@ from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
 
 
-def loadallauthorsasobjects():
+def loadallauthorsasobjects() -> dict:
 	"""
 
 	return a dict of all possible author objects
@@ -39,7 +39,7 @@ def loadallauthorsasobjects():
 	return authorsdict
 
 
-def loadallworksasobjects():
+def loadallworksasobjects() -> dict:
 	"""
 
 	return a dict of all possible work objects
@@ -70,7 +70,7 @@ def loadallworksasobjects():
 	return worksdict
 
 
-def loadlemmataasobjects():
+def loadlemmataasobjects() -> dict:
 	"""
 
 	return a dict of all possible lemmataobjects
@@ -104,7 +104,7 @@ def loadlemmataasobjects():
 	return lemmatadict
 
 
-def loadallworksintoallauthors(authorsdict, worksdict):
+def loadallworksintoallauthors(authorsdict, worksdict) -> dict:
 	"""
 
 	add the right work objects to the proper author objects

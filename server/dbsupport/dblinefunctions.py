@@ -14,7 +14,7 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 
 
-def dblineintolineobject(dbline):
+def dblineintolineobject(dbline: tuple) -> dbWorkLine:
 	"""
 	convert a db result into a db object
 
@@ -32,7 +32,7 @@ def dblineintolineobject(dbline):
 	return lineobject
 
 
-def grabonelinefromwork(workdbname, lineindex, cursor):
+def grabonelinefromwork(workdbname: str, lineindex: int, cursor) -> tuple:
 	"""
 	grab a line and return its contents
 	"""
@@ -45,7 +45,7 @@ def grabonelinefromwork(workdbname, lineindex, cursor):
 	return foundline
 
 
-def returnfirstlinenumber(workid, cursor):
+def returnfirstlinenumber(workid: str, cursor) -> int:
 	"""
 	return the lowest index value
 	used to handle exceptions
@@ -72,11 +72,14 @@ def returnfirstlinenumber(workid, cursor):
 	return firstline
 
 
-def makeablankline(work, fakelinenumber):
+def makeablankline(work: str, fakelinenumber: int) -> dbWorkLine:
 	"""
+
 	sometimes (like in lookoutsidetheline()) you need a dummy line
 	this will build one
+
 	:param work:
+	:param fakelinenumber:
 	:return:
 	"""
 
@@ -85,13 +88,16 @@ def makeablankline(work, fakelinenumber):
 	return lineobject
 
 
-def bulklinegrabber(table, column, criterion, setofcriteria, cursor):
+def bulklinegrabber(table: str, column: str, criterion: str, setofcriteria, cursor) -> dict:
 	"""
 
 	snarf up a huge number of lines
 
 	:param table:
-	:param setofindices:
+	:param column:
+	:param criterion:
+	:param setofcriteria:
+	:param cursor:
 	:return:
 	"""
 
@@ -107,7 +113,7 @@ def bulklinegrabber(table, column, criterion, setofcriteria, cursor):
 	return contents
 
 
-def grablistoflines(table, uidlist):
+def grablistoflines(table: str, uidlist: list) -> list:
 	"""
 
 	fetch many lines at once
@@ -137,7 +143,7 @@ def grablistoflines(table, uidlist):
 	return lines
 
 
-def grabbundlesoflines(worksandboundaries, cursor):
+def grabbundlesoflines(worksandboundaries: dict, cursor) -> list:
 	"""
 	grab and return lots of lines
 	this is very generic
@@ -169,12 +175,13 @@ def grabbundlesoflines(worksandboundaries, cursor):
 	return list(lineobjects)
 
 
-def bulkenvironsfetcher(table, searchresultlist, context):
+def bulkenvironsfetcher(table: str, searchresultlist: list, context: int) -> list:
 	"""
 
 	given a list of SearchResult objects, populate the lineobjects of each SearchResult with their contexts
 
-	:param hitlocations:
+	:param table:
+	:param searchresultlist:
 	:param context:
 	:return:
 	"""

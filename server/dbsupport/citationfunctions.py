@@ -12,11 +12,13 @@ from server.dbsupport.miscdbfunctions import findtoplevelofwork
 from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.helperobjects import LowandHighInfo
+from server.hipparchiaobjects.dbtextobjects import dbOpus, dbWorkLine
 from server.startup import workdict
 
 
 def findvalidlevelvalues(workid: str, workstructure: dict, partialcitationtuple: tuple, cursor) -> LowandHighInfo:
 	"""
+
 	tell me some of a citation and i can tell you what is a valid choice at the next step
 	i expect the lowest level to be stored at position 0 in the tuple
 	note that you should not send me a full citation because i will look at lowestlevel-1
@@ -25,10 +27,11 @@ def findvalidlevelvalues(workid: str, workstructure: dict, partialcitationtuple:
 		lt0474w015 {0: 'line', 1: 'section'} ('13',)
 		(Cicero, Pro Sulla 13)
 
-	:param workdb:
-	:param atlevel:
-	:return: a tuple with the available levels, current level, level label, low and high value, and a list of valid values:
-		example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
+	:param workid:
+	:param workstructure:
+	:param partialcitationtuple:
+	:param cursor:
+	:return:
 	"""
 
 	partialcitation = list(partialcitationtuple)
@@ -100,7 +103,7 @@ def findvalidlevelvalues(workid: str, workstructure: dict, partialcitationtuple:
 	return lowandhighobject
 
 
-def locusintocitation(workobject, lineobject) -> str:
+def locusintocitation(workobject: dbOpus, lineobject: dbWorkLine) -> str:
 	"""
 
 	generate a prolix citation like "Book 8, section 108, line 9"
@@ -133,7 +136,7 @@ def locusintocitation(workobject, lineobject) -> str:
 	return citation
 
 
-def prolixlocus(workobject, citationtuple: tuple) -> str:
+def prolixlocus(workobject: dbOpus, citationtuple: tuple) -> str:
 	"""
 	transform something like ('9','109','8') into a citation like "Book 8, section 108, line 9"
 	differs from the preceding because it does not have access to the lineobject: sessionselectionsinfo()
@@ -231,7 +234,7 @@ def finddblinefromlocus(workid: str, citationtuple: tuple, dbcursor) -> int:
 	return indexvalue
 
 
-def finddblinefromincompletelocus(workobject, citationlist: list, cursor, trialnumber=0) -> dict:
+def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, cursor, trialnumber=0) -> dict:
 	"""
 
 	this is used both by the browser selection boxes and by perseus passage lookups
@@ -376,7 +379,7 @@ def finddblinefromincompletelocus(workobject, citationlist: list, cursor, trialn
 	return results
 
 
-def perseuslookupleveltrimmer(workobject, citationlist: list, cursor, trialnumber: int) -> dict:
+def perseuslookupleveltrimmer(workobject: dbOpus, citationlist: list, cursor, trialnumber: int) -> dict:
 	"""
 
 	you had a valid looking citation, but it was not in fact valid
@@ -440,7 +443,7 @@ def perseuslookupchangecase(citationlist: list) -> list:
 	return newcitationlist
 
 
-def perseusdelabeler(citationlist: list, workobject) -> list:
+def perseusdelabeler(citationlist: list, workobject: dbOpus) -> list:
 	"""
 
 	the dictionary will send you things like 'life=cl.' or 'section=7'
