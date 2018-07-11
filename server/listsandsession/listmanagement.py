@@ -11,11 +11,12 @@ import re
 from flask import session
 
 from server.formatting.wordformatting import buildhipparchiatranstable, stripaccents
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.sessionfunctions import justlatin, reducetosessionselections
 from server.startup import allincerta, allvaria
 
 
-def compilesearchlist(listmapper, s=session):
+def compilesearchlist(listmapper: dict, s=session) -> list:
 	"""
 	master author dict + session selctions into a list of dbs to search
 
@@ -137,7 +138,7 @@ def compilesearchlist(listmapper, s=session):
 	return searchlist
 
 
-def sortsearchlist(searchlist, authorsdict):
+def sortsearchlist(searchlist: list, authorsdict: dict) -> list:
 	"""
 	send me a list of workuniversalids and i will resort it via the session sortorder
 	:param searchlist:
@@ -173,7 +174,7 @@ def sortsearchlist(searchlist, authorsdict):
 	return newlist
 
 
-def sortresultslist(hits, searchobject, authorsdict, worksdict):
+def sortresultslist(hits: list, searchobject: SearchObject, authorsdict: dict, worksdict: dict) -> dict:
 	"""
 
 	take a list of hits (which is a list of line objects)
@@ -231,7 +232,7 @@ def sortresultslist(hits, searchobject, authorsdict, worksdict):
 	return hitsdict
 
 
-def calculatewholeauthorsearches(searchlist, authordict):
+def calculatewholeauthorsearches(searchlist: list, authordict: dict) -> list:
 	"""
 
 	we have applied all of our inclusions and exclusions by this point and we might well be sitting on a pile of authorsandworks
@@ -296,7 +297,7 @@ def calculatewholeauthorsearches(searchlist, authordict):
 	return prunedlist
 
 
-def flagexclusions(searchlist, s=session):
+def flagexclusions(searchlist: list, s=session) -> list:
 	"""
 
 	some works should only be searched partially
@@ -328,7 +329,7 @@ def flagexclusions(searchlist, s=session):
 		return modifiedsearchlist
 
 
-def prunebydate(searchlist, authorobjectdict, workobjectdict, s=session):
+def prunebydate(searchlist: list, authorobjectdict: dict, workobjectdict: dict, s=session) -> list:
 	"""
 
 	send me a list of authorsandworks and i will trim it via the session date limit variables
@@ -383,7 +384,7 @@ def prunebydate(searchlist, authorobjectdict, workobjectdict, s=session):
 	return trimmedlist
 
 
-def removespuria(searchlist, worksdict):
+def removespuria(searchlist: list, worksdict: dict) -> list:
 	"""
 
 	at the moment pretty crude: just look for [Sp.] or [sp.] at the end of a title
@@ -417,7 +418,7 @@ def removespuria(searchlist, worksdict):
 	return trimmedlist
 
 
-def buildhintlist(seeking, listofposiblities):
+def buildhintlist(seeking: str, listofposiblities: list) -> list:
 	"""
 
 	:param seeking:
@@ -437,7 +438,7 @@ def buildhintlist(seeking, listofposiblities):
 #
 
 
-def tidyuplist(untidylist):
+def tidyuplist(untidylist: list) -> list:
 	"""
 	sort and remove duplicates
 	:param untidylist:
@@ -454,7 +455,7 @@ def tidyuplist(untidylist):
 	return tidylist
 
 
-def dropdupes(checklist, matchlist):
+def dropdupes(checklist: list, matchlist: list) -> list:
 	"""
 	
 	clean up a list
@@ -473,7 +474,7 @@ def dropdupes(checklist, matchlist):
 	return c
 
 
-def polytonicsort(unsortedwords):
+def polytonicsort(unsortedwords: list) -> list:
 	"""
 	sort() looks at your numeric value, but α and ά and ᾶ need not have neighboring numerical values
 	stripping diacriticals can help this, but then you get words that collide
@@ -503,7 +504,7 @@ def polytonicsort(unsortedwords):
 	return sortedversion
 
 
-def foundindict(searchdict, element, mustbein, exactmatch=True):
+def foundindict(searchdict: dict, element: str, mustbein: str, exactmatch=True) -> list:
 	"""
 
 	search for an element in a dict
