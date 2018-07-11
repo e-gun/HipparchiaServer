@@ -9,7 +9,7 @@ import re
 from string import punctuation
 
 
-def removegravity(accentedword):
+def removegravity(accentedword: str) -> str:
 	"""
 	turn all graves into accutes so you can match the dictionary form
 	:param accentedword:
@@ -37,13 +37,13 @@ def removegravity(accentedword):
 	return accentedword
 
 
-def forceterminalacute(matchgroup):
+def forceterminalacute(matchgroup: re.match) -> str:
 	"""
 	θαμά and θαμὰ need to be stored in the same place
 
 	otherwise you will click on θαμὰ, search for θαμά and get prevalence data that is not what you really wanted
 
-	:param match:
+	:param matchgroup:
 	:return:
 	"""
 
@@ -80,7 +80,7 @@ def forceterminalacute(matchgroup):
 	return substitute
 
 
-def stripaccents(texttostrip, transtable=None):
+def stripaccents(texttostrip: str, transtable=None) -> str:
 	"""
 
 	turn ᾶ into α, etc
@@ -104,7 +104,7 @@ def stripaccents(texttostrip, transtable=None):
 	return stripped
 
 
-def buildhipparchiatranstable():
+def buildhipparchiatranstable() -> dict:
 	"""
 
 	pulled this out of stripaccents() so you do not maketrans 200k times when
@@ -160,7 +160,7 @@ def buildhipparchiatranstable():
 	return transtable
 
 
-def gkattemptelision(hypenatedgreekheadword):
+def gkattemptelision(hypenatedgreekheadword: str) -> str:
 	"""
 
 	useful debug query:
@@ -240,7 +240,7 @@ def gkattemptelision(hypenatedgreekheadword):
 	return entry
 
 
-def latattemptelision(hypenatedlatinheadword):
+def latattemptelision(hypenatedlatinheadword: str) -> str:
 	"""
 
 	useful debug query:
@@ -329,7 +329,7 @@ def latattemptelision(hypenatedlatinheadword):
 	return entry
 
 
-def tidyupterm(word, punct=None):
+def tidyupterm(word: str, punct=None) -> str:
 	"""
 
 	remove gunk that should not be present in a cleaned line
@@ -366,7 +366,7 @@ def tidyupterm(word, punct=None):
 	return word
 
 
-def universalregexequivalent(searchterm):
+def universalregexequivalent(searchterm: str) -> str:
 	"""
 
 	in order to properly highlight a polytonic word that you found via a unaccented search you need to convert:
@@ -488,7 +488,7 @@ def depunct(stringtoclean, allowedpunctuationsting=None):
 	return cleaned
 
 
-def avoidsmallvariants(text):
+def avoidsmallvariants(text: str) -> str:
 	"""
 
 	get rid of small variants of '+', etc.
@@ -503,7 +503,7 @@ def avoidsmallvariants(text):
 	return cleantext
 
 
-def forcelunates(text):
+def forcelunates(text: str) -> str:
 	"""
 
 	override σ and ς in the data and instead print ϲ
@@ -520,7 +520,7 @@ def forcelunates(text):
 	return cleantext
 
 
-def basiclemmacleanup(text):
+def basiclemmacleanup(text: str) -> str:
 	"""
 
 	swap out sigmas and 'v', etc.
@@ -539,7 +539,7 @@ def basiclemmacleanup(text):
 	return cleantext
 
 
-def attemptsigmadifferentiation(text):
+def attemptsigmadifferentiation(text: str) -> str:
 	"""
 
 	override ϲ and try to print σ or ς as needed
@@ -565,7 +565,7 @@ def attemptsigmadifferentiation(text):
 	return cleantext
 
 
-def wordlistintoregex(wordlist):
+def wordlistintoregex(wordlist: list) -> str:
 	"""
 
 	turn
@@ -595,7 +595,7 @@ def wordlistintoregex(wordlist):
 	return searchterm
 
 
-def upperorlowerregex(word):
+def upperorlowerregex(word: str) -> str:
 	"""
 
 	turn
@@ -614,7 +614,7 @@ def upperorlowerregex(word):
 	return reg
 
 
-def acuteorgrav(word):
+def acuteorgrav(word: str) -> str:
 	"""
 
 	turn

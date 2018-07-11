@@ -9,17 +9,23 @@
 import re
 from collections import deque
 from copy import deepcopy
+from typing import List
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dblinefunctions import bulkenvironsfetcher
 from server.formatting.bibliographicformatting import formatname
 from server.formatting.bracketformatting import brackethtmlifysearchfinds
-from server.hipparchiaobjects.searchobjects import SearchResult
+from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.searchobjects import SearchResult, SearchObject
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 
 
-def buildresultobjects(hitdict, authordict, workdict, searchobject):
+LineList = List[dbWorkLine]
+ResultList = List[SearchResult]
+
+
+def buildresultobjects(hitdict: dict, authordict: dict, workdict: dict, searchobject: SearchObject) -> ResultList:
 	"""
 	build result objects for the lines you have found
 
@@ -91,7 +97,7 @@ def buildresultobjects(hitdict, authordict, workdict, searchobject):
 		return updatedresultlist
 
 
-def flagsearchterms(searchresultobject, skg, prx, searchobject):
+def flagsearchterms(searchresultobject: SearchResult, skg: str, prx: str, searchobject: SearchObject) -> LineList:
 	"""
 
 	take the list of lineobjects inside a searchresultobject and highlight the search terms
@@ -127,7 +133,7 @@ def flagsearchterms(searchresultobject, skg, prx, searchobject):
 	return newlineobjects
 
 
-def highlightsearchterm(lineobject, regexequivalent, spanname):
+def highlightsearchterm(lineobject: dbWorkLine, regexequivalent: re.Pattern, spanname) -> str:
 	"""
 
 	html markup for the search term in the line so it can jump out at you
@@ -197,7 +203,7 @@ def highlightsearchterm(lineobject, regexequivalent, spanname):
 	return newline
 
 
-def htmlifysearchfinds(listofsearchresultobjects, searchobject):
+def htmlifysearchfinds(listofsearchresultobjects: ResultList, searchobject: SearchObject) -> str:
 	"""
 
 	send me a list of SearchResult objects
@@ -205,6 +211,7 @@ def htmlifysearchfinds(listofsearchresultobjects, searchobject):
 	return some html
 
 	:param listofsearchresultobjects:
+	:param searchobject:
 	:return:
 	"""
 
@@ -235,7 +242,7 @@ def htmlifysearchfinds(listofsearchresultobjects, searchobject):
 	return html
 
 
-def nocontexthtmlifysearchfinds(listofsearchresultobjects):
+def nocontexthtmlifysearchfinds(listofsearchresultobjects: ResultList) -> str:
 	"""
 
 	send me a list of SearchResult objects
@@ -287,7 +294,7 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects):
 	return html
 
 
-def unbalancedspancleaner(html):
+def unbalancedspancleaner(html: str) -> str:
 	"""
 
 	unbalanced spans inside of result chunks: ask for 4 lines of context and search for »ἀδύνατον γ[άὰ]ρ«

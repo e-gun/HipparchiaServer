@@ -11,10 +11,11 @@ from collections import deque
 
 from server import hipparchia
 from server.formatting.wordformatting import forcelunates
+from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 
 
-def insertparserids(lineobject, continuationdict):
+def insertparserids(lineobject: dbWorkLine, continuationdict: dict) -> str:
 	"""
 	set up the clickable thing for the browser by bracketing every word with something the JS can respond to:
 		<observed id="ἐπειδὲ">ἐπειδὲ</observed>
@@ -137,7 +138,7 @@ def insertparserids(lineobject, continuationdict):
 	return newline
 
 
-def bracketcheck(word):
+def bracketcheck(word: str) -> bool:
 	"""
 
 	true if there are brackets in the word
@@ -154,7 +155,7 @@ def bracketcheck(word):
 		return False
 
 
-def addobservedtags(word, lastword, hyphenated):
+def addobservedtags(word: str, lastword: str, hyphenated: str) -> str:
 	"""
 
 	take a word and sandwich it with a tag

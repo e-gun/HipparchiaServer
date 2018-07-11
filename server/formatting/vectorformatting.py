@@ -8,13 +8,16 @@
 import json
 import re
 
+from typing import List
+
 from server import hipparchia
 from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
-from server.hipparchiaobjects.searchobjects import SearchOutputObject
+from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.searchobjects import SearchOutputObject, SearchObject
 from server.startup import authordict, workdict
 
 
-def formatlsimatches(listofmatches):
+def formatlsimatches(listofmatches: List[dict]) -> str:
 	"""
 
 	generate html for the matches
@@ -56,7 +59,7 @@ def formatlsimatches(listofmatches):
 	return thehtml
 
 
-def formatnnmatches(listofneighbors):
+def formatnnmatches(listofneighbors: List[tuple]):
 	"""
 
 	each neighbor is a tuple: [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ...]
@@ -125,7 +128,7 @@ def formatnnmatches(listofneighbors):
 	return thehtml
 
 
-def formatnnsimilarity(termone, termtwo, similarityscore):
+def formatnnsimilarity(termone: str, termtwo: str, similarityscore: float) -> str:
 	"""
 
 
@@ -145,7 +148,7 @@ def formatnnsimilarity(termone, termtwo, similarityscore):
 	return similarity
 
 
-def skformatmostimilar(similaritiesdict):
+def skformatmostimilar(similaritiesdict: dict) -> str:
 	"""
 
 	{id: (scoreA, lineobjectA1, sentA1, lindebjectA2, sentA2), id2: (scoreB, lineobjectB1, sentB1, lineobjectB2, sentB2), ... }
@@ -190,7 +193,7 @@ def skformatmostimilar(similaritiesdict):
 	return thehtml
 
 
-def locusformat(dblineobject):
+def locusformat(dblineobject: dbWorkLine) -> str:
 	"""
 
 	return a prolix citation from a dblineobject
@@ -211,7 +214,7 @@ def locusformat(dblineobject):
 	return citationtext
 
 
-def vectorhtmlforfrontpage():
+def vectorhtmlforfrontpage() -> str:
 	"""
 
 	read the config and generate the html
@@ -282,7 +285,7 @@ def vectorhtmlforfrontpage():
 	return vectorhtml
 
 
-def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject):
+def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: str, workssearched: int, searchobject: SearchObject) -> str:
 	"""
 
 	:param findshtml:
@@ -331,7 +334,7 @@ def nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearch
 	return jsonoutput
 
 
-def lsiformatoutput(findshtml, workssearched, matches, searchobject):
+def lsiformatoutput(findshtml: str, workssearched: int, matches: list, searchobject: SearchObject) -> str:
 	"""
 
 	should use OutputObject() instead
@@ -364,7 +367,7 @@ def lsiformatoutput(findshtml, workssearched, matches, searchobject):
 	return jsonoutput
 
 
-def ldatopicsgenerateoutput(ldavishtmlandjs, workssearched, settings, searchobject):
+def ldatopicsgenerateoutput(ldavishtmlandjs: str, workssearched: int, settings: dict, searchobject: SearchObject):
 	"""
 
 	pyLDAvis.prepared_data_to_html() outputs something that is almost pure JS and looks like this:
@@ -390,13 +393,10 @@ def ldatopicsgenerateoutput(ldavishtmlandjs, workssearched, settings, searchobje
 		'mustbelongerthan': 3
 	}
 
-	:param findshtml:
-	:param mostsimilar:
-	:param imagename:
+	:param ldavishtmlandjs:
 	:param workssearched:
+	:param settings:
 	:param searchobject:
-	:param activepoll:
-	:param starttime:
 	:return:
 	"""
 

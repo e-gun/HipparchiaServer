@@ -9,7 +9,7 @@
 import re
 
 
-def insertbrowserclickjs(tagname):
+def insertbrowserclickjs(tagname: str) -> str:
 	"""
 	the clickable urls don't work without inserting new js into the page to catch the clicks
 	need to match the what we used to get via the flask template
@@ -41,7 +41,7 @@ def insertbrowserclickjs(tagname):
 	return js
 
 
-def insertlexicalbrowserjs(htmlentry):
+def insertlexicalbrowserjs(htmlentry: str) -> str:
 	"""
 
 	supplement the html with some js that can see the new objects
@@ -62,12 +62,12 @@ def insertlexicalbrowserjs(htmlentry):
 	return newhtml
 
 
-def generatevectorjs(path):
+def generatevectorjs(path: str) -> str:
 	"""
 
 	this JS is mainly a copy of material from documentready.js
 
-	:param headwordwordlist:
+	:param path:
 	:return:
 	"""
 
@@ -149,7 +149,7 @@ def generatevectorjs(path):
 	return js
 
 
-def supplementalindexjs():
+def supplementalindexjs() -> str:
 	"""
 
 	insert a js block to handle observed forms
@@ -210,7 +210,7 @@ def supplementalindexjs():
 	return js
 
 
-def dictionaryentryjs():
+def dictionaryentryjs() -> str:
 	"""
 
 	return js to insert
