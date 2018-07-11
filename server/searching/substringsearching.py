@@ -10,13 +10,15 @@ import re
 
 import psycopg2
 
+from typing import Generator
+
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import uniquetablename
-from server.formatting.wordformatting import wordlistintoregex
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.searchfunctions import buildbetweenwhereextension
 
 
-def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
+def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, cursor, templimit=None) -> Generator:
 	"""
 
 	actually one of the most basic search types: look for a string/substring
@@ -99,6 +101,7 @@ def substringsearch(seeking, authortable, searchobject, cursor, templimit=None):
 		# will see: 'DatabaseError for <cursor object at 0x136bab520; closed: 0> @ Process-4'
 		print('DatabaseError for {c} @ {p}'.format(c=cursor, p=multiprocessing.current_process().name))
 		print('\tq, d', q, d)
+
 	return found
 
 

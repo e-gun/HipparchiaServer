@@ -8,12 +8,16 @@
 
 import re
 from multiprocessing import Manager, Process
+from multiprocessing.managers import ListProxy
+from typing import List
 
 from server import hipparchia
 from server.threading.mpthreadcount import setthreadcount
 from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, \
@@ -21,7 +25,7 @@ from server.searching.searchfunctions import findleastcommonterm, findleastcommo
 from server.searching.substringsearching import substringsearch
 
 
-def searchdispatcher(searchobject):
+def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	"""
 
 	assign the search to multiprocessing workers
@@ -145,6 +149,7 @@ def searchdispatcher(searchobject):
 	for j in jobs:
 		j.join()
 
+	# generator needs to turn into a list
 	foundlineobjects = list(foundlineobjects)
 
 	for c in oneconnectionperworker:
@@ -153,21 +158,21 @@ def searchdispatcher(searchobject):
 	return foundlineobjects
 
 
-def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection):
+def workonsimplesearch(foundlineobjects: ListProxy, searchlist: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
-
+	
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
 
 	searchlist: ['gr0461', 'gr0489', 'gr0468', ...]
 
 	substringsearch() called herein needs ability to CREATE TEMPORARY TABLE
-
-	:param foundlineobjects:
-	:param searchlist:
-	:param activepoll:
-	:param searchobject:
-	:return:
+	
+	:param foundlineobjects: 
+	:param searchlist: 
+	:param searchobject: 
+	:param dbconnection: 
+	:return: 
 	"""
 
 	so = searchobject
@@ -212,8 +217,9 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 	return foundlineobjects
 
 
-def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconnection):
+def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
+	
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
 
@@ -227,12 +233,12 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 
 	these searches go very slowly of you seek "all 429 known forms of »εὑρίϲκω«"; so they have been broken up
 	you will search N forms in all tables; then another N forms in all tables; ...
-
-	:param foundlineobjects:
-	:param searchtuples:
-	:param activepoll:
-	:param searchobject:
-	:return:
+	
+	:param foundlineobjects: 
+	:param searchtuples: 
+	:param searchobject: 
+	:param dbconnection: 
+	:return: 
 	"""
 
 	so = searchobject
@@ -274,7 +280,7 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 	return foundlineobjects
 
 
-def workonphrasesearch(foundlineobjects, searchinginside, searchobject, dbconnection):
+def workonphrasesearch(foundlineobjects: ListProxy, searchinginside: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
 
 	a multiprocessor aware function that hands off bits of a phrase search to multiple searchers
@@ -318,7 +324,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, searchobject, dbconnec
 	return foundlineobjects
 
 
-def workonproximitysearch(foundlineobjects, searchinginside, searchobject, dbconnection):
+def workonproximitysearch(foundlineobjects: ListProxy, searchinginside: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
 
 	a multiprocessor aware function that hands off bits of a proximity search to multiple searchers

@@ -7,16 +7,19 @@
 """
 
 import re
+from multiprocessing.managers import ListProxy
+from typing import List
 
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
 from server.dbsupport.tablefunctions import uniquetablename
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline
 from server.searching.substringsearching import substringsearch
 
 
-def phrasesearch(wkid, searchobject, cursor):
+def phrasesearch(wkid: str, searchobject: SearchObject, cursor) -> List[dbWorkLine]:
 	"""
 
 	a whitespace might mean things are on a new line
@@ -72,7 +75,7 @@ def phrasesearch(wkid, searchobject, cursor):
 	return fullmatches
 
 
-def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searchobject, dbconnection):
+def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, tablestosearch: str, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
 	foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll
 
