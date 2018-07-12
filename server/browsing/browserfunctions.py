@@ -175,9 +175,8 @@ def checkfordocumentmetadata(line, workobject):
 	return metadatahtml
 
 
-def fetchhtmltemplateformetadatarow(shownotes = True):
+def fetchhtmltemplateformetadatarow(shownotes=True):
 	"""
-
 	inscriptions and papyri have relevant bibliographic information that needs to be displayed
 
 	example:
@@ -187,9 +186,7 @@ def fetchhtmltemplateformetadatarow(shownotes = True):
 		label, css, metadata: Additional publication info pubinfo SEG 16.476+
 		label, css, metadata: Editor's date textdate 182a
 
-	:param label:
-	:param css:
-	:param metadata:
+	:param shownotes:
 	:return:
 	"""
 
@@ -218,7 +215,14 @@ def fetchhtmltemplateformetadatarow(shownotes = True):
 	return linetemplate
 
 
-def fetchhtmltemplateforlinerow(shownotes = True):
+def fetchhtmltemplateforlinerow(shownotes=True):
+	"""
+
+	return a template
+
+	:param shownotes:
+	:return:
+	"""
 
 	if shownotes:
 		linetemplate = """
@@ -258,6 +262,7 @@ def findlinenumberfromlocus(locus, workobject, dbcursor):
 
 	workdb = depunct(locus)[:10]
 	thelocus = locus[10:]
+	citationformat = thelocus[0:4]
 	wo = workobject
 	resultmessage = 'success'
 
@@ -267,12 +272,12 @@ def findlinenumberfromlocus(locus, workobject, dbcursor):
 	# see dbswapoutbadcharsfromciations() in HipparchiaBuilder
 	allowedpunct = ',-'
 
-	if thelocus[0:4] == '_LN_':
+	if citationformat == '_LN_':
 		# you were sent here either by the hit list or a forward/back button in the passage browser
 		thelocus = re.sub('[\D]', '', thelocus[4:])
 	elif thelocus == '_AT_top':
 		thelocus = wo.starts
-	elif thelocus[0:4] == '_AT_':
+	elif citationformat == '_AT_':
 		# you were sent here by the citation builder autofill boxes
 		p = locus[14:].split('|')
 		cleanedp = [depunct(level, allowedpunct) for level in p]
@@ -283,7 +288,7 @@ def findlinenumberfromlocus(locus, workobject, dbcursor):
 			p = finddblinefromincompletelocus(wo, cleanedp, dbcursor)
 			resultmessage = p['code']
 			thelocus = p['line']
-	elif thelocus[0:4] == '_PE_':
+	elif citationformat == '_PE_':
 		# here comes the fun part: alien format; inconsistent citation style; incorrect data...
 		try:
 			# dict does not always agree with our ids...

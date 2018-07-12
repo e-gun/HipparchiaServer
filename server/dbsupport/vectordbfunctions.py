@@ -170,7 +170,9 @@ def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout=
 	2018-02-14 20:50:00 | 7e1c1b       | {lt0474w057}
 	(2 rows)
 
-	:param uidlist:
+	:param searchobject:
+	:param vectortype:
+	:param careabout:
 	:return:
 	"""
 
