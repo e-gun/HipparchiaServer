@@ -56,7 +56,7 @@ def buildworkgenresdict(workdict: dict) -> dict:
 	"""
 	load up the list of work genres: [ g1, g2, ...]
 	this will see heavy use throughout the world of 'views.py'
-	:param authordict:
+	:param workdict:
 	:return:
 	"""
 
