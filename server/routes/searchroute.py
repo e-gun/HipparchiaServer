@@ -190,12 +190,15 @@ def executesearch(searchid):
 		if not skg:
 			skg = re.compile(universalregexequivalent(so.termone))
 		else:
+			# 'doloreq[uv]e' will turn into 'doloreq[[UVuv]v]e' if you don't debracket
+			skg = re.sub(r'\[uv\]', 'u', skg)
 			skg = re.sub(r'u', '[UVuv]', skg)
 			skg = re.sub(r'i', '[IJij]', skg)
 
 		if not prx and so.proximate != '' and so.searchtype == 'proximity':
 			prx = re.compile(universalregexequivalent(so.termtwo))
 		elif prx:
+			prx = re.sub(r'\[uv\]', 'u', prx)
 			prx = re.sub(r'u', '[UVuv]', prx)
 			prx = re.sub(r'i', '[IJij]', prx)
 
