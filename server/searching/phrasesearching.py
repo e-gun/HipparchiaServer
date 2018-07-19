@@ -277,7 +277,19 @@ def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, tablest
 						head = '^' + c[1]
 						# debugging
 						# print('re',getattr(lo,so.usewordlist),tail, head, getattr(next,so.usewordlist))
-						if re.search(tail, getattr(lo, so.usewordlist)) and re.search(head, getattr(nextline, so.usewordlist)):
+
+						t = False
+						h = False
+						try:
+							t = re.search(tail, getattr(lo, so.usewordlist))
+						except re.error:
+							pass
+						try:
+							h = re.search(head, getattr(nextline, so.usewordlist))
+						except re.error:
+							pass
+
+						if t and h:
 							foundlineobjects.append(lo)
 							activepoll.addhits(1)
 							if so.onehit:
