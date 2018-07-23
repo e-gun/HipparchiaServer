@@ -74,17 +74,68 @@ freeze: 8 connections return; there are 10 workers...
 the choke seems more likely when you get many results really fast: some sort of problem with the lock on the managed list?
 
 
-[Ε] DeprecationWarning
+[E] bad search results
 
-this is emerging from one of the installed packages: pyLDAvis
+[e1] Base Search
 
-/usr/local/Cellar/python/3.6.4_4/Frameworks/Python.framework/Versions/3.6/lib/python3.6/re.py:191: DeprecationWarning: bad escape \s
-  return _compile(pattern, flags).sub(repl, string, count)
-/usr/local/Cellar/python/3.6.4_4/Frameworks/Python.framework/Versions/3.6/lib/python3.6/re.py:191: DeprecationWarning: bad escape \s
-  return _compile(pattern, flags).sub(repl, string, count)
-/usr/local/Cellar/python/3.6.4_4/Frameworks/Python.framework/Versions/3.6/lib/python3.6/re.py:191: DeprecationWarning: bad escape \s
-  return _compile(pattern, flags).sub(repl, string, count)
-/usr/local/Cellar/python/3.6.4_4/Frameworks/Python.framework/Versions/3.6/lib/python3.6/re.py:191: DeprecationWarning: bad escape \s
-  return _compile(pattern, flags).sub(repl, string, count)
-/usr/local/Cellar/python/3.6.4_4/Frameworks/Python.framework/Versions/3.6/lib/python3.6/re.py:191: DeprecationWarning: bad escape \s
-  return _compile(pattern, flags).sub(repl, string, count)
+[e1a] [lt1017w015_LN_31316]
+Sought »quod quae fecere patiuntur«
+Searched 1 text and found 1 passages (0.27s)
+Sorted by name
+
+[1]   Seneca, Lucius Annaeus iunior, Epistulae Morales ad Lucilium: 39.5.4 	unum possis ignoscere, quod quae fecere patiuntur. Nec
+
+[e1b] Sought »fecere« within 2 words of »patiuntur«
+Searched 1 text and found 1 passages (0.12s)
+Sorted by name
+[1]   Seneca, Lucius Annaeus iunior, Epistulae Morales ad Lucilium: 39.5.4 	unum possis ignoscere, quod quae fecere patiuntur. Nec
+
+[e2] Fail to find "within 2 words" when you lemmatize "facio"
+
+[e2a] [WRONG] Sought all 212 known forms of »facio« within 2 words of all 117 known forms of »patior«
+Searched 1 text and found 4 passages (5.26s)
+Sorted by name
+[1]   Seneca, Lucius Annaeus iunior, Epistulae Morales ad Lucilium: 22.8.2 	habebit perseverantia, si nihil indignum bono viro faciendum
+[2]   Seneca, Lucius Annaeus iunior, Epistulae Morales ad Lucilium: 24.5.2 	inposuit. Acerbum est uri: quanto acerbius si id te faciente
+[3]   Seneca, Lucius Annaeus iunior, Epistulae Morales ad Lucilium: 74.5.1 	passis tristitiam facit pati posse. Omnium animos mala aliena
+[4]   Seneca, Lucius Annaeus iunior, Epistulae Morales ad Lucilium: 76.35.2 	futuris malis, et quae alii diu patiendo levia faciunt hic levia
+
+[e2b] [WRONG] Sought all 212 known forms of »facio« within 2 words of »patiuntur«
+Searched 1 text and found 0 passages (2.77s)
+Sorted by name
+
+[e2c] [RIGHT] Sought all 117 known forms of »patior« within 2 words of »fecere«
+Searched 1 text and found 1 passages (0.89s)
+Sorted by name
+[1]   Seneca, Lucius Annaeus iunior, Epistulae Morales ad Lucilium: 39.5.4 	unum possis ignoscere, quod quae fecere patiuntur. Nec
+
+[e2d] [RIGHT] Sought all 212 known forms of »facio« within 1 lines of »patiuntur«
+Searched 1 text and found 4 passages (1.78s)
+Sorted by name
+[1]   Seneca, Lucius Annaeus iunior, Epistulae Morales ad Lucilium: 39.5.4 	unum possis ignoscere, quod quae fecere patiuntur. Nec
+[2]   Seneca, Lucius Annaeus iunior, Epistulae Morales ad Lucilium: 76.35.2 	futuris malis, et quae alii diu patiendo levia faciunt hic levia
+[3]   Seneca, Lucius Annaeus iunior, Epistulae Morales ad Lucilium: 81.19.8 	tingit iis qui patiuntur iniurias quas posse fieri faciendo
+[4]   Seneca, Lucius Annaeus iunior, Epistulae Morales ad Lucilium: 92.20.7 	miserum non faciunt, beatum esse patiuntur; nam quibus
+
+the problem is with lemmatization and its interaction with grableadingandlagging()?
+
+If you search "Sought all 212 known forms of »facio« within 2 words of »patiunt«" inside EM 39 you will see:
+lt1017w015_LN_31316 patiunt
+	[lead] atiuntur nec
+	[lag]  quod qua
+lt1017w015_LN_31293 patiunt
+	[lead] u a
+	[lag]  tibi copiam
+lt1017w015_LN_31323 patiunt
+	[lead] int necessaria
+	[lag]  supervacua fueran
+
+
+Here is what you see if "Sought »fec« within 2 words of »patiunt«"
+lt1017w015_LN_31311 patiunt
+	[lead] nditas idem
+	[lag]  peruenit nimia
+lt1017w015_LN_31316 patiunt
+	[lead] re patiuntur
+	[lag]  quod quae
+
