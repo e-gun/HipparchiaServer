@@ -123,6 +123,7 @@ def withinxwords(workdbname, searchobject, dbconnection):
 		leadandlag = grableadingandlagging(hitline, so, dbcursor)
 		lagging = leadandlag['lag']
 		leading = leadandlag['lead']
+		# print(hitline.universalid, so.termtwo, '\n\t[lag] ', lagging, '\n\t[lead]', leading)
 
 		if so.near and (re.search(so.termtwo, leading) or re.search(so.termtwo, lagging)):
 			fullmatches.append(hit)
@@ -156,23 +157,20 @@ def grableadingandlagging(hitline, searchobject, cursor):
 		seeking = so.termone
 
 	searchzone = getattr(hitline, so.usewordlist)
+
 	match = re.search(r'{s}'.format(s=seeking), searchzone)
 	# but what if you just found 'paucitate' inside of 'paucitatem'?
 	# you will have 'm' left over and this will throw off your distance-in-words count
 	try:
-		past = searchzone[match.end():]
+		past = searchzone[match.end():].strip()
 	except AttributeError:
 		# AttributeError: 'NoneType' object has no attribute 'end'
 		past = None
-	if past and past[0] != ' ':
-		past = past[1:]
 
 	try:
-		upto = searchzone[:match.start()]
+		upto = searchzone[:match.start()].strip()
 	except AttributeError:
 		upto = None
-	if upto and upto[-1] != ' ':
-		upto = upto[:-1]
 
 	ucount = len([x for x in upto.split(' ') if x])
 	pcount = len([x for x in past.split(' ') if x])
