@@ -22,6 +22,7 @@ How much trouble would it be to move from rudimentary "proof of concept" code to
 
 misc
     buttons to swap 'u' for 'v' and sigma types on the fly
+    constrain results by part of speech: -eres searches that just return the subjunctives and not the nouns, etc.
     suppress results and just return counts
         useful if you want to know that "to be" is used 25000x in some span but are not interested in watching your browser crash trying to display them
 
