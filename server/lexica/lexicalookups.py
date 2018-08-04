@@ -709,7 +709,6 @@ def findparserxref(wordobject) -> str:
 	:param entryname:
 	:return:
 	"""
-	xrefvalues = ''
 
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
@@ -720,7 +719,6 @@ def findparserxref(wordobject) -> str:
 		lang = 'latin'
 
 	e = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹]', '', wordobject.entry)
-	print('entry: >{e}<'.format(e=e))
 
 	q = 'SELECT * FROM {lang}_lemmata WHERE dictionary_entry=%s'.format(lang=lang)
 	d = (e,)
