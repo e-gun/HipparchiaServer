@@ -718,13 +718,20 @@ def findparserxref(wordobject) -> str:
 	else:
 		lang = 'latin'
 
-	e = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹]', '', wordobject.entry)
+	trimmedentry = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹]', '', wordobject.entry)
 
 	q = 'SELECT * FROM {lang}_lemmata WHERE dictionary_entry=%s'.format(lang=lang)
-	d = (e,)
+	d = (wordobject.entry,)
 	dbcursor.execute(q, d)
 	results = dbcursor.fetchall()
 
+	if not results:
+		d = (trimmedentry,)
+		dbcursor.execute(q, d)
+		results = dbcursor.fetchall()
+
+	# it is not clear that more than one item will ever be returned
+	# but if that happened, you need to be ready to deal with it
 	lemmaobjects = [dbLemmaObject(*r) for r in results]
 	xrefs = [str(l.xref) for l in lemmaobjects]
 
