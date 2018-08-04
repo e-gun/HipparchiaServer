@@ -215,7 +215,7 @@ def formateconsolidatedgrammarentry(consolidatedentry: dict) -> str:
 	"""
 
 	if hipparchia.config['PARSERDEBUGMODE'] == 'yes':
-		xrefinfo = '<code> [{x}]</code>'.format(x=consolidatedentry['xref'])
+		xrefinfo = '<code>[{x}]</code>'.format(x=consolidatedentry['xref'])
 	else:
 		xrefinfo = ''
 
@@ -227,7 +227,7 @@ def formateconsolidatedgrammarentry(consolidatedentry: dict) -> str:
 	if len(consolidatedentry['transl']) > 1:
 		wordandtranslation = ', '.join([wordandtranslation, consolidatedentry['transl']])
 
-	outputlist.append('<span class="dictionaryform">{df}</span> (from {wt}{x}): &nbsp;'.format(df=consolidatedentry['form'], wt=wordandtranslation, x=xrefinfo))
+	outputlist.append('<span class="dictionaryform">{df}</span> (from {wt}){x}: &nbsp;'.format(df=consolidatedentry['form'], wt=wordandtranslation, x=xrefinfo))
 	if len(analysislist) == 1:
 		outputlist.append('<br /><span class="possibility">{pos}</span>&nbsp;'.format(pos=analysislist[0]))
 	else:

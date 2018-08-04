@@ -247,7 +247,9 @@ def browserdictionarylookup(count, seekingentry, cursor):
 				if u'\u0304' in w.metricalentry or u'\u0306' in w.metricalentry:
 					outputlist.append('&nbsp;<span class="metrics">[{me}]</span>'.format(me=w.metricalentry))
 				if hipparchia.config['LEXDEBUGMODE'] == 'yes':
-					outputlist.append('<code> [{x}]</code>'.format(x=w.id))
+					outputlist.append('&nbsp;<code>[ID: {x}]</code>'.format(x=w.id))
+					xref = findparserxref(w)
+					outputlist.append('&nbsp;<code>[XREF: {x}]</code>'.format(x=xref))
 				outputlist.append('</p>')
 
 				if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
@@ -698,6 +700,41 @@ def grablemmataobjectfor(entryname, db, cursor):
 
 	return lemmaobject
 
+
+def findparserxref(wordobject) -> str:
+	"""
+
+	used in LEXDEBUGMODE to find the parser xrefvalue for a headword
+
+	:param entryname:
+	:return:
+	"""
+	xrefvalues = ''
+
+	dbconnection = ConnectionObject()
+	dbcursor = dbconnection.cursor()
+
+	if wordobject.isgreek():
+		lang = 'greek'
+	else:
+		lang = 'latin'
+
+	e = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹]', '', wordobject.entry)
+	print('entry: >{e}<'.format(e=e))
+
+	q = 'SELECT * FROM {lang}_lemmata WHERE dictionary_entry=%s'.format(lang=lang)
+	d = (e,)
+	dbcursor.execute(q, d)
+	results = dbcursor.fetchall()
+
+	lemmaobjects = [dbLemmaObject(*r) for r in results]
+	xrefs = [str(l.xref) for l in lemmaobjects]
+
+	xrefvalues = ', '.join(xrefs)
+
+	dbconnection.connectioncleanup()
+
+	return xrefvalues
 
 """
 [probably not] TODO: clickable INS or DDP xrefs in dictionary entries

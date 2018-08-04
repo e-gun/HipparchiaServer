@@ -89,7 +89,7 @@ workprovenancedict = buildworkprovenancedict(workdict)
 print('building specialized sublists\n')
 
 
-def dictitemstartswith(originaldict, element, muststartwith):
+def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
 	"""
 
 	trim a dict via a criterion: muststartwith must begin the item to survive the check
