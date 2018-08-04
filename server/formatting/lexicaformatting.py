@@ -12,6 +12,7 @@ from typing import Dict, List
 
 from bs4 import BeautifulSoup
 
+from server import hipparchia
 from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
 from server.listsandsession.listmanagement import polytonicsort
 
@@ -204,14 +205,19 @@ def formateconsolidatedgrammarentry(consolidatedentry: dict) -> str:
 	"""
 	send me hit from findbyform() in the results browser
 
-	consolidatedentry = {'count': count, 'form': wordandform[0], 'word': wordandform[1], 'transl': thetransl, 'anal': analysislist}
+	consolidatedentry = {'count': count, 'form': wordandform[0], 'word': wordandform[1], 'transl': thetransl, 'anal': analysislist, 'xref': xref}
 
 	example:
-		 {'count': 1, 'form': 'ἀϲήμου', 'word': 'ἄϲημοϲ', 'transl': 'without mark', 'anal': ['masc/fem/neut gen sg']}
+		 {'count': 1, 'form': 'ἀϲήμου', 'word': 'ἄϲημοϲ', 'transl': 'without mark', 'anal': ['masc/fem/neut gen sg'], 'xref': 16808356}
 
 	:param consolidatedentry:
 	:return:
 	"""
+
+	if hipparchia.config['PARSERDEBUGMODE'] == 'yes':
+		xrefinfo = '<code> [{x}]</code>'.format(x=consolidatedentry['xref'])
+	else:
+		xrefinfo = ''
 
 	analysislist = consolidatedentry['anal']
 
@@ -221,7 +227,7 @@ def formateconsolidatedgrammarentry(consolidatedentry: dict) -> str:
 	if len(consolidatedentry['transl']) > 1:
 		wordandtranslation = ', '.join([wordandtranslation, consolidatedentry['transl']])
 
-	outputlist.append('<span class="dictionaryform">{df}</span> (from {wt}): &nbsp;'.format(df=consolidatedentry['form'], wt=wordandtranslation))
+	outputlist.append('<span class="dictionaryform">{df}</span> (from {wt}{x}): &nbsp;'.format(df=consolidatedentry['form'], wt=wordandtranslation, x=xrefinfo))
 	if len(analysislist) == 1:
 		outputlist.append('<br /><span class="possibility">{pos}</span>&nbsp;'.format(pos=analysislist[0]))
 	else:
@@ -252,14 +258,14 @@ def formatgloss(entrybody: str) -> str:
 	sources[:] = [value.string for value in sources]
 
 	glosshtml.append('<span class="highlight">Reported by:</span><br />')
-	ss = []
+	ss = list()
 	for s in sources:
 		ss.append(s) + ', '
 	ss = ', '.join(ss)
 	glosshtml.append(ss)
 
 	glosshtml.append('<br /><br />\n<span class="highlight">Senses:</span><br />')
-	ss = []
+	ss = list()
 	for s in senses:
 		ss.append(s)
 	ss = '<br />\n'.join(ss)

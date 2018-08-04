@@ -12,6 +12,10 @@
 # 	think there is some sort of glitch in the data and/or its
 # 	representation that you want to check
 #
+# LEXDEBUGMODE will show the dictionary ID number after the entry name
+#
+# PARSERBUGMODE will show the xref value after the match
+#
 # CALCULATEWORDWEIGHTS will recalibrate the weighting constants: only
 # 	useful after a new DB build with new corpora definitions.
 # 	this can take a couple of minutes to calculate, so leaving it
@@ -36,6 +40,8 @@
 
 SUPPRESSWARNINGS = 'yes'
 DBDEBUGMODE = 'no'
+LEXDEBUGMODE = 'no'
+PARSERDEBUGMODE = 'no'
 HTMLDEBUGMODE = 'no'
 CALCULATEWORDWEIGHTS = 'no'
 ENABLELOGGING = 'no'

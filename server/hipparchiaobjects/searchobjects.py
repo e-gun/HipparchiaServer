@@ -103,8 +103,8 @@ class SearchObject(object):
 
 	"""
 
-	def __init__(self, ts, seeking, proximate, lemmaobject, proximatelemmaobject, frozensession):
-		self.ts = ts
+	def __init__(self, searchid, seeking, proximate, lemmaobject, proximatelemmaobject, frozensession):
+		self.searchid = searchid
 
 		self.originalseeking = seeking
 		self.originalproximate = proximate

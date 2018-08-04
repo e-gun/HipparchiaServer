@@ -75,6 +75,11 @@ def loadlemmataasobjects() -> dict:
 
 	return a dict of all possible lemmataobjects
 
+	hipparchiaDB=# select * from greek_lemmata limit 1;
+	 dictionary_entry | xref_number |    derivative_forms
+	------------------+-------------+------------------------
+	 ζῳοτροφία        |    49550639 | {ζῳοτροφίᾳ,ζῳοτροφίαϲ}
+
 	:return:
 	"""
 

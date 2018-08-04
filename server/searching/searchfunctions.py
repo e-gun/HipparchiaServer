@@ -365,19 +365,19 @@ def dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, u
 		return False
 
 
-def buildsearchobject(ts: str, therequest: request, thesession: session) -> SearchObject:
+def buildsearchobject(searchid: str, therequest: request, thesession: session) -> SearchObject:
 	"""
 
 	generic searchobject builder
 
-	:param ts:
+	:param searchid:
 	:param therequest:
 	:param thesession:
 	:return:
 	"""
 
-	if not ts:
-		ts = str(int(time.time()))
+	if not searchid:
+		searchid = str(int(time.time()))
 
 	sessionvariables()
 
@@ -429,6 +429,6 @@ def buildsearchobject(ts: str, therequest: request, thesession: session) -> Sear
 		proximate = replacegreekbetacode(proximate)
 		proximate = proximate.lower()
 
-	so = SearchObject(ts, seeking, proximate, lemma, proximatelemma, frozensession)
+	so = SearchObject(searchid, seeking, proximate, lemma, proximatelemma, frozensession)
 
 	return so

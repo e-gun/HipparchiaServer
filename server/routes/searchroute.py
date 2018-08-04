@@ -8,25 +8,24 @@
 
 import json
 import re
-import time
 
 from flask import request, session
 
 from server import hipparchia
-from server.semanticvectors.scikitlearntopics import sklearnselectedworks
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds
 from server.formatting.wordformatting import universalregexequivalent, wordlistintoregex
-from server.hipparchiaobjects.searchobjects import SearchOutputObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
+from server.hipparchiaobjects.searchobjects import SearchOutputObject
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
 	sortresultslist
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildsearchobject
 from server.semanticvectors.gensimvectors import executegensimsearch
+from server.semanticvectors.scikitlearntopics import sklearnselectedworks
 from server.semanticvectors.vectorpseudoroutes import findabsolutevectorsbysentence, findabsolutevectorsfromhits
 from server.startup import authordict, listmapper, poll, workdict
 
@@ -108,6 +107,7 @@ def executesearch(searchid):
 		# vectorfunctions['tensorflowgraph'] = gensimexperiment
 
 		if so.vectorquerytype in vectorfunctions:
+			# print('executesearch(): a - vectorquery ({t})'.format(t=so.vectorquerytype))
 			fnc = vectorfunctions[so.vectorquerytype]
 			output = fnc(so)
 			del poll[pollid]
@@ -128,20 +128,19 @@ def executesearch(searchid):
 				so.usecolumn = 'accented_line'
 
 		if so.lemma and not (so.proximatelemma or so.proximate):
-			# print('executesearch(): a - simplelemma')
+			# print('executesearch(): b - simplelemma')
 			so.searchtype = 'simplelemma'
 			so.usewordlist = 'polytonic'
 			thesearch = 'all forms of »{skg}«'.format(skg=so.lemma.dictionaryentry)
 			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry)
 		elif so.lemma and so.proximatelemma:
-			# print('executesearch(): b - proximity of lemma to lemma')
+			# print('executesearch(): c - proximity of lemma to lemma')
 			so.searchtype = 'proximity'
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximatelemma.dictionaryentry)
-			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of all {pn} known forms of <span class="sought">»{pskg}«</span>'.format(
-				n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pn=len(so.proximatelemma.formlist), pskg=so.proximatelemma.dictionaryentry
-			)
+			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of all {pn} known forms of <span class="sought">»{pskg}«</span>'
+			htmlsearch = htmlsearch.format(n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pn=len(so.proximatelemma.formlist), pskg=so.proximatelemma.dictionaryentry)
 		elif (so.lemma or so.proximatelemma) and (so.seeking or so.proximate):
-			# print('executesearch(): c - procimity of lemma to word')
+			# print('executesearch(): d - procimity of lemma to word')
 			so.searchtype = 'proximity'
 			if so.lemma:
 				lm = so.lemma
@@ -150,25 +149,24 @@ def executesearch(searchid):
 				lm = so.proximatelemma
 				t = so.seeking
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=lm.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=t)
-			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pskg}«</span>'.format(
-				n=len(lm.formlist), skg=lm.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pskg=t
-			)
+			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pskg}«</span>'
+			htmlsearch = htmlsearch.format(n=len(lm.formlist), skg=lm.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pskg=t)
 		elif len(so.proximate) < 1 and re.search(phrasefinder, so.seeking) is None:
-			# print('executesearch(): d - basic wordsearch')
+			# print('executesearch(): e - basic wordsearch')
 			so.searchtype = 'simple'
 			thesearch = so.originalseeking
 			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=so.originalseeking)
 		elif re.search(phrasefinder, so.seeking):
-			# print('executesearch(): e - phrase search')
+			# print('executesearch(): f - phrase search')
 			so.searchtype = 'phrase'
 			thesearch = so.originalseeking
 			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=so.originalseeking)
 		else:
-			# print('executesearch(): f - proximity of two terms')
+			# print('executesearch(): g - proximity of two terms')
 			so.searchtype = 'proximity'
 			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximate)
-			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'.format(
-				skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximate)
+			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'
+			htmlsearch = htmlsearch.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximate)
 
 		hits = searchdispatcher(so)
 		activepoll.statusis('Putting the results in context')
@@ -177,7 +175,7 @@ def executesearch(searchid):
 		hitdict = sortresultslist(hits, so, authordict, workdict)
 
 		if so.vectorquerytype == 'cosdistbylineorword':
-			# print('cosdistbylineorword')
+			# print('executesearch(): h - cosdistbylineorword')
 			# take these hits and head on over to the vector worker
 			output = findabsolutevectorsfromhits(so, hitdict, workssearched)
 			del poll[pollid]
