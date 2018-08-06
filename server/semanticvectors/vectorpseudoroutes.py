@@ -96,6 +96,10 @@ def findabsolutevectorsbysentence(searchobject):
 
 	then take a lemmatized search term and build association semanticvectors around that term in those passages
 
+	generators are tempting, but dealing with generators+MP is a trick:
+
+		TypeError: can't pickle generator objects
+
 	:param searchitem:
 	:param vtype:
 	:return:

@@ -331,7 +331,43 @@ class SearchOutputObject(object):
 		self.image = str()
 		self.reasons = list()
 
+	def setresultcount(self, value, string):
+		rc = '{:,}'.format(value)
+		self.resultcount = '{r} {s}'.format(r=rc, s=string)
+
+	def setscope(self, value):
+		self.scope = '{:,}'.format(value)
+		if self.usedcorpora:
+			w = ' and '.join(self.usedcorpora)
+			self.scope = 'all {w} authors in {s}'.format(w=w, s=self.scope)
+
+	def explainemptysearch(self):
+		r = ' and '.join(self.reasons)
+		self.htmlsearch = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=r)
+
 	def generatesummary(self):
+		"""
+
+		generate the summary info.
+
+		example of what the browser will see:
+
+			<div id="searchsummary">
+			Sought <span class="sought">»εναντ«</span>
+			<br>
+			Searched 3,844 texts and found 50 passages (0.21s)
+			<br>
+			Searched between 850 B.C.E. and 1 C.E.
+			<br>
+			Only allowing one match per item searched (either a whole author or a specified work)
+			<br>
+			Sorted by date
+			<br>
+			[Search suspended: result cap reached.]
+			</div>
+
+		:return:
+		"""
 		stemplate = """
 		Sought {hs}
 		<br>
@@ -358,11 +394,11 @@ class SearchOutputObject(object):
 
 		if self.icandodates:
 			if self.dmin != '850 B.C.E.' or self.dmax != '1500 C.E.':
-				betw = 'Searched between {a} and {b}\n<br>'.format(a=self.dmin, b=self.dmax)
+				betw = 'Searched between {a} and {b}\n\t<br>'.format(a=self.dmin, b=self.dmax)
 
 		onehit = '<!-- unlimited hits per author -->\n'
 		if self.onehit == 'yes':
-			onehit = 'Only allowing one match per item searched (either a whole author or a specified work)\n<br>'
+			onehit = 'Only allowing one match per item searched (either a whole author or a specified work)\n\t<br>'
 
 		hitmax = '<!-- did not hit the results cap -->\n'
 		if self.hitmax:
@@ -374,22 +410,20 @@ class SearchOutputObject(object):
 		return summary
 
 	def generateoutput(self):
+		"""
+
+		this is the one we really care about:
+
+		generate everything that we send to the JS so that it can update the browser display via the contents of outputdict
+
+		note that these attributes start out empty and need to be updated before you can get here
+
+		for example, self.generatesummary() needs to set self.searchsummary before we call generateoutput()
+
+		:return:
+		"""
 		outputdict = dict()
 		itemsweuse = ['title', 'searchsummary', 'found', 'image', 'js']
 		for item in itemsweuse:
 			outputdict[item] = getattr(self, item)
 		return outputdict
-
-	def setresultcount(self, value, string):
-		rc = '{:,}'.format(value)
-		self.resultcount = '{r} {s}'.format(r=rc, s=string)
-
-	def setscope(self, value):
-		self.scope = '{:,}'.format(value)
-		if self.usedcorpora:
-			w = ' and '.join(self.usedcorpora)
-			self.scope = 'all {w} authors in {s}'.format(w=w, s=self.scope)
-
-	def explainemptysearch(self):
-		r = ' and '.join(self.reasons)
-		self.htmlsearch = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=r)
