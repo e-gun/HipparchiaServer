@@ -44,6 +44,7 @@ class SharedMemoryProgressPoll(object):
 		self.hitcount = MPCounter()
 		self.hitcount.increment(-1)
 		self.notes = ''
+		self.polltype = 'SharedMemoryProgressPoll'
 
 	def getstatus(self):
 		return self.statusmessage.decode('utf-8')
@@ -138,6 +139,7 @@ class RedisProgressPoll(object):
 		self.hitcount = -1
 		self.notes = str()
 		self.keytypes = self.setkeytypes()
+		self.polltype = 'RedisProgressPoll'
 
 		dbid = hipparchia.config['REDISDBID']
 		if hipparchia.config['REDISPORT'] != 0:

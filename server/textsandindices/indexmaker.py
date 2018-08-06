@@ -68,8 +68,12 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		# 2x as fast to produce the final result; even faster inside the relevant loop
 		# the drawback is the problem sending the poll object into the pool
 		activepoll.statusis('Compiling the index')
-		activepoll.allworkis(-1)
-		activepoll.setnotes('(progress information unavailable)')
+		if activepoll.polltype == 'RedisProgressPoll':
+			activepoll.allworkis(len(lineobjects))
+			activepoll.remain(len(lineobjects))
+		else:
+			activepoll.allworkis(-1)
+			activepoll.setnotes('(progress information unavailable)')
 		completeindexdict = pooledindexmaker(lineobjects)
 	else:
 		# index to aristotle: 28.587s
