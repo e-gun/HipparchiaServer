@@ -225,9 +225,9 @@ def executesearch(searchid):
 		resultcount = len(resultlist)
 
 		if resultcount < so.cap:
-			hitmax = 'false'
+			hitmax = False
 		else:
-			hitmax = 'true'
+			hitmax = True
 
 		output.title = thesearch
 		output.found = findshtml
@@ -238,6 +238,7 @@ def executesearch(searchid):
 		output.thesearch = thesearch
 		output.htmlsearch = htmlsearch
 		output.hitmax = hitmax
+		output.searchsummary = output.generatesummary()
 
 	if nosearch:
 		if not activecorpora:

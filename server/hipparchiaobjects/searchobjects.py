@@ -295,13 +295,14 @@ class SearchOutputObject(object):
 		self.proximate = searchobject.proximate
 		self.thesearch = str()
 		self.htmlsearch = str()
-		self.hitmax = 'false'
+		self.hitmax = False
 		self.onehit = searchobject.session['onehit']
 		self.usedcorpora = searchobject.usedcorpora
+		self.searchsummary = str()
 
-		self.icandodates = 'no'
+		self.icandodates = False
 		if justlatin(searchobject.session) is False:
-			self.icandodates = 'yes'
+			self.icandodates = True
 
 		sortorderdecoder = {
 			'universalid': 'ID',
@@ -330,9 +331,52 @@ class SearchOutputObject(object):
 		self.image = str()
 		self.reasons = list()
 
+	def generatesummary(self):
+		stemplate = """
+		Sought {hs}
+		<br>
+		{tx} and found {fd} ({tm}s)
+		<br>
+		{betw}
+		{onehit}
+		Sorted by {sb}
+		<br>
+		{hitmax}
+		"""
+
+		# pluralization check
+		tx = 'Searched 1 text'
+		if self.scope != 1:
+			tx = 'Searched {t} texts'.format(t=self.scope)
+
+		# pluralization check
+		fd = '1 passage'
+		if self.resultcount != '1 passages':
+			fd = self.resultcount
+
+		betw = '<!-- dates did not matter -->\n'
+
+		if self.icandodates:
+			if self.dmin != '850 B.C.E.' or self.dmax != '1500 C.E.':
+				betw = 'Searched between {a} and {b}\n<br>'.format(a=self.dmin, b=self.dmax)
+
+		onehit = '<!-- unlimited hits per author -->\n'
+		if self.onehit == 'yes':
+			onehit = 'Only allowing one match per item searched (either a whole author or a specified work)\n<br>'
+
+		hitmax = '<!-- did not hit the results cap -->\n'
+		if self.hitmax:
+			hitmax = '[Search suspended: result cap reached.]'
+
+		summary = stemplate.format(hs=self.htmlsearch, tx=tx, fd=fd, tm=self.searchtime, betw=betw,
+		                           onehit=onehit, sb=self.sortby, hitmax=hitmax)
+
+		return summary
+
 	def generateoutput(self):
 		outputdict = dict()
-		for item in vars(self):
+		itemsweuse = ['title', 'searchsummary', 'found', 'image', 'js']
+		for item in itemsweuse:
 			outputdict[item] = getattr(self, item)
 		return outputdict
 

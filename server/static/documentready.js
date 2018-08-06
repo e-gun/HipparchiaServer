@@ -117,47 +117,10 @@ $(document).ready( function () {
         }
 
     function loadsearchresultsintodisplayresults(output) {
-        //  THE DATA YOU RECEIVE
-        //
-        //		output['title'] = thesearch
-        //		output['found'] = findshtml
-		//      output['js'] = findsjs
-        //		output['resultcount'] = resultcount
-        //		output['scope'] = str(len(indexedworklist))
-        //		output['searchtime'] = str(searchtime)
-        //		output['proximate'] = proximate
-        //		output['thesearch'] = thesearch
-        //		output['htmlsearch'] = htmlsearch
-        //		output['hitmax'] = hitmax
-        //      output['onehit'] = session['onehit']
-        //		output['icandodates'] = yes/no
-        //		output['sortby'] = session['sortorder']
-        //		output['dmin'] = dmin
-        //		output['dmax'] = dmax
-        //      output['image'] = imagenameindatabase
 
         document.title = output['title'];
 
-        //
-        // THE SUMMARY INFORMATION
-        //
-
-        var summaryhtml = '';
-
-        summaryhtml += 'Sought '+output['htmlsearch']+'<br />\n';
-        if ( output['scope'] !== '1') { summaryhtml += 'Searched ' + output['scope'] + ' texts '; } else { summaryhtml += 'Searched 1 text '; }
-        summaryhtml += 'and found ' + output['resultcount'];
-        summaryhtml += ' (' + output['searchtime'] + 's)';
-        if (output['icandodates'] === 'yes' ) { if (output['dmin'] !== '850 B.C.E.' || output['dmax'] !== '1500 C.E.') { summaryhtml += '<br />Searched between '+output['dmin']+' and '+output['dmax']; } }
-        if (output['onehit'] === 'yes') { summaryhtml += '<br />Only allowing one match per item searched (either a whole author or a specified work)'; }
-        summaryhtml += '<br />Sorted by '+output['sortby'];
-        if (output['hitmax'] === 'true') { summaryhtml += '<br />[Search suspended: result cap reached.]';}
-
-        $('#searchsummary').html(summaryhtml);
-
-        //
-        // THE FINDS: each find should come as a lump of HTML formated by htmlifysearchfinds()
-        //
+        $('#searchsummary').html(output['searchsummary']);
 
         $('#displayresults').html(output['found']);
 
@@ -183,7 +146,7 @@ $(document).ready( function () {
         // [http://stackoverflow.com/questions/9413737/how-to-append-script-script-in-javascript#9413803]
         //
 
-        var browserclickscript = document.createElement("script");
+        var browserclickscript = document.createElement('script');
         browserclickscript.innerHTML = output['js'];
         document.getElementById('browserclickscriptholder').appendChild(browserclickscript);
     }
