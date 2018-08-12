@@ -8,6 +8,7 @@
 
 import psycopg2
 import psycopg2.pool as connectionpool
+import sys
 import threading
 
 from server import hipparchia
@@ -23,6 +24,28 @@ class GenericConnectionObject(object):
 	provides the basic functions less the actual connection and the
 	specific connectioncleanup()
 
+	"""
+
+	postgresproblem = """
+	You have a FATAL problem with the database connection
+
+	EITHER 
+		the database server is not running
+	OR
+		you do not have the right username and password combination in your 
+		Hipparchia configuration file
+
+	[NB if postgresql was not shut down cleanly it might fail to restart properly, and, worse
+	it might not notify you that it has failed to restart properly...
+	
+	On macOS you can try the following:
+		$ psql
+	If you see:
+		psql: could not connect to server: Connection refused
+	Then:
+		$ rm /usr/local/var/postgres/postmaster.pid
+		$ brew services restart postgres
+	]
 	"""
 
 	def __init__(self, autocommit, readonlyconnection):
@@ -142,7 +165,11 @@ class PooledConnectionObject(GenericConnectionObject):
 					'database': hipparchia.config['DBNAME'],
 					'password': hipparchia.config['DBPASS']}
 
-			readonlypool = pooltype(poolsize, poolsize * 2, **kwds)
+			try:
+				readonlypool = pooltype(poolsize, poolsize * 2, **kwds)
+			except psycopg2.OperationalError:
+				print(GenericConnectionObject.postgresproblem)
+				sys.exit(0)
 
 			# [B] 'rw' pool: only used by the vector graphing functions
 			# and these are always going to be single-threaded
@@ -226,11 +253,15 @@ class SimpleConnectionObject(GenericConnectionObject):
 			p = hipparchia.config['DBWRITEPASS']
 			self.readonlyconnection = False
 
-		self.dbconnection = psycopg2.connect(user=u,
-											host=hipparchia.config['DBHOST'],
-											port=hipparchia.config['DBPORT'],
-											database=hipparchia.config['DBNAME'],
-											password=p)
+		try:
+			self.dbconnection = psycopg2.connect(user=u,
+												host=hipparchia.config['DBHOST'],
+												port=hipparchia.config['DBPORT'],
+												database=hipparchia.config['DBNAME'],
+												password=p)
+		except psycopg2.OperationalError:
+			print(GenericConnectionObject.postgresproblem)
+			sys.exit(0)
 
 		if self.autocommit == 'autocommit':
 			self.setautocommit()
