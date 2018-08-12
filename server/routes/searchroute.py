@@ -238,7 +238,6 @@ def executesearch(searchid):
 		output.thesearch = thesearch
 		output.htmlsearch = htmlsearch
 		output.hitmax = hitmax
-		output.searchsummary = output.generatesummary()
 
 	if nosearch:
 		if not activecorpora:

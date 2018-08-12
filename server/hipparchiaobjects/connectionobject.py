@@ -35,14 +35,18 @@ class GenericConnectionObject(object):
 		you do not have the right username and password combination in your 
 		Hipparchia configuration file
 
-	[NB if postgresql was not shut down cleanly it might fail to restart properly, and, worse
-	it might not notify you that it has failed to restart properly...
+	[NB if postgresql was not shut down cleanly it might fail to restart properly, 
+	and, worse it might not notify you that it has failed to restart properly...
 	
 	On macOS you can try the following:
 		$ psql
+	
 	If you see:
 		psql: could not connect to server: Connection refused
-	Then:
+			Is the server running locally and accepting
+			connections on Unix domain socket "/tmp/.s.PGSQL.5432"?
+	
+	Then execute the next two commands:
 		$ rm /usr/local/var/postgres/postmaster.pid
 		$ brew services restart postgres
 	]

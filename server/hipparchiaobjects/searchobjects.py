@@ -416,12 +416,15 @@ class SearchOutputObject(object):
 
 		generate everything that we send to the JS so that it can update the browser display via the contents of outputdict
 
-		note that these attributes start out empty and need to be updated before you can get here
+		note that these attributes start out empty and need to be updated before you can get what you want here
 
-		for example, self.generatesummary() needs to set self.searchsummary before we call generateoutput()
+		for example, self.generatesummary() needs to set self.searchsummary before we will have a summary
 
 		:return:
 		"""
+
+		self.searchsummary = self.generatesummary()
+
 		outputdict = dict()
 		itemsweuse = ['title', 'searchsummary', 'found', 'image', 'js']
 		for item in itemsweuse:
