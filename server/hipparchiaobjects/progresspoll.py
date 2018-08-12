@@ -33,8 +33,8 @@ class SharedMemoryProgressPoll(object):
 
 	polltcpport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
-	def __init__(self, timestamp, portnumber=polltcpport):
-		self.searchid = str(timestamp)
+	def __init__(self, searchid, portnumber=polltcpport):
+		self.searchid = str(searchid)
 		self.launchtime = time.time()
 		self.portnumber = portnumber
 		self.active = Value('b', False)
@@ -128,8 +128,8 @@ class RedisProgressPoll(object):
 
 	polltcpport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
-	def __init__(self, timestamp, pollservedfromportnumber=polltcpport):
-		self.searchid = str(timestamp)
+	def __init__(self, searchid, pollservedfromportnumber=polltcpport):
+		self.searchid = str(searchid)
 		self.launchtime = time.time()
 		self.portnumber = pollservedfromportnumber
 		self.active = False
@@ -183,6 +183,7 @@ class RedisProgressPoll(object):
 
 	def setredisvalue(self, key, value):
 		k = self.returnrediskey(key)
+		# print('setredisvalue({k}): {v}'.format(k=k, v=value))
 		self.redisconnection.set(k, value)
 
 	def getredisvalue(self, key):
@@ -212,28 +213,23 @@ class RedisProgressPoll(object):
 		self.setredisvalue('statusmessage', message)
 
 	def allworkis(self, amount):
-		k = self.returnrediskey('poolofwork')
-		self.setredisvalue(k, amount)
+		self.setredisvalue('poolofwork', amount)
 
 	def remain(self, remaining):
-		k = self.returnrediskey('remaining')
-		self.setredisvalue(k, remaining)
+		self.setredisvalue('remaining', remaining)
 
 	def sethits(self, found):
-		k = self.returnrediskey('hitcount')
-		self.setredisvalue(k, found)
+		self.setredisvalue('hitcount', found)
 
 	def addhits(self, hits):
 		k = self.returnrediskey('hitcount')
 		self.redisconnection.incrby(k, hits)
 
 	def activate(self):
-		k = self.returnrediskey('active')
-		self.setredisvalue(k, True)
+		self.setredisvalue('active', True)
 
 	def deactivate(self):
-		k = self.returnrediskey('active')
-		self.setredisvalue(k, False)
+		self.setredisvalue('active', False)
 
 	def getactivity(self):
 		return self.getredisvalue('active')
