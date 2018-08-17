@@ -79,16 +79,10 @@ class dbAuthor(object):
 		self.listofworks.append(work)
 
 	def listworkids(self):
-		workids = list()
-		for w in self.listofworks:
-			workids.append(w.universalid)
-		return workids
+		return [w.universalid for w in self.listofworks]
 
 	def countwordsinworks(self):
-		words = 0
-		for w in self.listofworks:
-			words += w.wordcount
-		return words
+		return sum([w.wordcount for w in self.listofworks])
 
 
 class dbOpus(object):
