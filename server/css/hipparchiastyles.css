@@ -1231,6 +1231,7 @@ p.level4 {
 
 pre {
     font-family: 'hipparchiamonostatic', monospace;
+	color: var(--skyblue);
     }
 
 pron {

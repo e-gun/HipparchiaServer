@@ -185,8 +185,22 @@ def executesearch(searchid):
 
 		activepoll.statusis('Converting results to HTML')
 
+		failtext = """
+		<br>
+		<pre>
+		Search Failed: invalid regular expression:
+		
+			{x}
+			
+		check for unbalanced parentheses, etc.</pre>
+		"""
+
 		if not skg:
-			skg = re.compile(universalregexequivalent(so.termone))
+			try:
+				skg = re.compile(universalregexequivalent(so.termone))
+			except re.error:
+				skg = 're.error: BAD REGULAR EXPRESSION'
+				htmlsearch = htmlsearch + failtext.format(x=so.termone)
 		else:
 			# 'doloreq[uv]e' will turn into 'doloreq[[UVuv]v]e' if you don't debracket
 			skg = re.sub(r'\[uv\]', 'u', skg)
@@ -194,7 +208,11 @@ def executesearch(searchid):
 			skg = re.sub(r'i', '[IJij]', skg)
 
 		if not prx and so.proximate != '' and so.searchtype == 'proximity':
-			prx = re.compile(universalregexequivalent(so.termtwo))
+			try:
+				prx = re.compile(universalregexequivalent(so.termtwo))
+			except re.error:
+				prx = 're.error: BAD REGULAR EXPRESSION'
+				htmlsearch = htmlsearch + failtext.format(x=so.termtwo)
 		elif prx:
 			prx = re.sub(r'\[uv\]', 'u', prx)
 			prx = re.sub(r'u', '[UVuv]', prx)
