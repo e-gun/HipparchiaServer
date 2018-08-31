@@ -188,7 +188,7 @@ def executesearch(searchid):
 		failtext = """
 		<br>
 		<pre>
-		Search Failed: invalid regular expression:
+		Search Failed: an invalid regular expression is present in
 		
 			{x}
 			

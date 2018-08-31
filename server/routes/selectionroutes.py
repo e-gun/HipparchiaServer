@@ -171,7 +171,10 @@ def clearselections():
 	try:
 		session[category].pop(item)
 	except IndexError:
-		print('clearselections() failed to pop', category, str(item))
+		print('\tclearselections() IndexError when popping {c}[{i}]'.format(c=category, i=str(item)))
+		pass
+	except KeyError:
+		print('\tclearselections() KeyError when popping {c}[{i}]'.format(c=category, i=str(item)))
 		pass
 
 	session.modified = True
