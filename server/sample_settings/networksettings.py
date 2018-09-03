@@ -58,4 +58,4 @@ REDISCOCKET = '/tmp/redis.sock'
 REDISDBID = 0
 
 # use redis instead of a managed list to store the searchlist?
-SEARCHLISTCONNECTIONTYPE = 'redis'
+SEARCHLISTCONNECTIONTYPE = 'notredis'

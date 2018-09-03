@@ -11,6 +11,37 @@ from typing import List
 import redis
 
 from server import hipparchia
+from server.threading.mpthreadcount import setthreadcount
+
+
+class PooledRedisBorg(object):
+	"""
+
+	set up a connection pool to redis
+
+	we are preventing the destruction of the link to avoid startup costs
+	[unfortunately this is not actually yielding increased speed]
+
+	will always use the first item in a list with only one element
+
+	"""
+
+	_pool = list()
+
+	def __init__(self):
+		if not PooledRedisBorg._pool:
+			poolsize = setthreadcount() + 2
+			dbid = hipparchia.config['REDISDBID']
+			if hipparchia.config['REDISPORT'] != 0:
+				port = hipparchia.config['REDISPORT']
+				redisconnection = redis.ConnectionPool(host='localhost', port=port, db=dbid, max_connections=poolsize)
+			else:
+				sock = hipparchia.config['REDISCOCKET']
+				redisconnection = redis.ConnectionPool(connection_class=redis.UnixDomainSocketConnection, path=sock, db=dbid, max_connections=poolsize)
+			PooledRedisBorg._pool.append(redisconnection)
+			print('PooledRedisBorg initialized')
+		self.pool = PooledRedisBorg._pool[0]
+		self.connection = redis.Redis(connection_pool=self.pool)
 
 
 def establishredisconnection() -> redis.client.Redis:
@@ -21,13 +52,19 @@ def establishredisconnection() -> redis.client.Redis:
 	:return:
 	"""
 
-	dbid = hipparchia.config['REDISDBID']
-	if hipparchia.config['REDISPORT'] != 0:
-		port = hipparchia.config['REDISPORT']
-		redisconnection = redis.Redis(host='localhost', port=port, db=dbid)
-	else:
-		sock = hipparchia.config['REDISCOCKET']
-		redisconnection = redis.Redis(unix_socket_path=sock, db=dbid)
+	# do it the simple way
+	# dbid = hipparchia.config['REDISDBID']
+	# if hipparchia.config['REDISPORT'] != 0:
+	# 	port = hipparchia.config['REDISPORT']
+	# 	redisconnection = redis.Redis(host='localhost', port=port, db=dbid)
+	# else:
+	# 	sock = hipparchia.config['REDISCOCKET']
+	# 	redisconnection = redis.Redis(unix_socket_path=sock, db=dbid)
+
+	# do it the borg way
+	redisobject = PooledRedisBorg()
+
+	redisconnection = redisobject.connection
 
 	return redisconnection
 
