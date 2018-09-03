@@ -51,11 +51,9 @@ DBHOST = '127.0.0.1'
 DBPORT = 5432
 CONNECTIONTYPE = 'pool'
 
-# polling connection instance
-POLLCONNECTIONTYPE = 'notredis'
+# you might be using redis...
 REDISPORT = 6379
 REDISCOCKET = '/tmp/redis.sock'
 REDISDBID = 0
-
-# use redis instead of a managed list to store the searchlist?
+POLLCONNECTIONTYPE = 'notredis'
 SEARCHLISTCONNECTIONTYPE = 'notredis'

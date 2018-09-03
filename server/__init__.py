@@ -16,10 +16,18 @@ settingfiles = {'debugsettings.py',
 
 here = os.path.dirname(os.path.realpath(__file__))
 settingsdir = os.path.join(here, 'settings')
+serverdir = os.path.normpath(os.path.join(here, '..'))
 
 if not os.path.exists(settingsdir):
-	print('"settings" directory not found; using "sample_settings" instead')
-	settingsdir = os.path.join(here, 'sample_settings')
+	print('"settings" directory not found; searching for old-style "config.py"')
+	settingsfile = os.path.join(serverdir, 'config.py')
+	try:
+		hipparchia.config.from_pyfile(settingsfile)
+	except FileNotFoundError:
+		print('could not find old-style "config.py"')
+	print('\tplease use the "sample_settings" folder to build a "settings" folder')
+	print('\tthere might be new/different settings of which your old configuration is unaware\n')
+	settingfiles = list()
 
 for f in settingfiles:
 	filepath = os.path.join(settingsdir, f)
