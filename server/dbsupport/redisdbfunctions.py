@@ -18,8 +18,6 @@ def establishredisconnection() -> redis.client.Redis:
 
 	make a connection to redis
 
-
-
 	:return:
 	"""
 
