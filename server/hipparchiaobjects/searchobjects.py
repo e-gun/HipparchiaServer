@@ -6,14 +6,11 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 import re
-import redis
 import time
-from multiprocessing import Array, Value
 
 from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.wordformatting import avoidsmallvariants
-from server.hipparchiaobjects.helperobjects import MPCounter
 from server.listsandsession.sessionfunctions import justlatin
 
 
@@ -123,6 +120,10 @@ class SearchObject(object):
 		self.usedcorpora = list()
 		self.sentencebundlesize = hipparchia.config['SENTENCESPERDOCUMENT']
 		self.poll = None
+		if hipparchia.config['SEARCHLISTCONNECTIONTYPE'] == 'redis':
+			self.redissearchlist = True
+		else:
+			self.redissearchlist = False
 
 		# searchtermcharactersubstitutions() logic has moved here
 

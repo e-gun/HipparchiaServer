@@ -32,6 +32,10 @@
 # REDISDBID sets the numerical value of the database we will use; 0 is a typical default; if your machine
 #   has other things going on with redis, then it is possible to generate conflicts is you leave this as '0'
 #
+# SEARCHLISTCONNECTIONTYPE if set to 'redis' will not use Manager() to manage the searchlists but redis
+#   instead. At the moment this is all about tracking down a memory management oddity. Do not use this
+#   unless searches are hanging and you are desperate to find a fix...
+#
 
 # hipparchia itself as a server
 FLASKSERVEDFROMPORT = 5000
@@ -51,3 +55,6 @@ POLLCONNECTIONTYPE = 'notredis'
 REDISPORT = 6379
 REDISCOCKET = '/tmp/redis.sock'
 REDISDBID = 0
+
+# use redis instead of a managed list to store the searchlist?
+SEARCHLISTCONNECTIONTYPE = 'notredis'

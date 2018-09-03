@@ -7,11 +7,10 @@
 """
 import re
 import time
-from multiprocessing import Value, Array
-
-import redis
+from multiprocessing import Array, Value
 
 from server import hipparchia
+from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.hipparchiaobjects.helperobjects import MPCounter
 
 
@@ -140,14 +139,7 @@ class RedisProgressPoll(object):
 		self.notes = str()
 		self.keytypes = self.setkeytypes()
 		self.polltype = 'RedisProgressPoll'
-
-		dbid = hipparchia.config['REDISDBID']
-		if hipparchia.config['REDISPORT'] != 0:
-			port = hipparchia.config['REDISPORT']
-			self.redisconnection = redis.Redis(host='localhost', port=port, db=dbid)
-		else:
-			sock = hipparchia.config['REDISCOCKET']
-			self.redisconnection = redis.Redis(unix_socket_path=sock, db=dbid)
+		self.redisconnection = establishredisconnection()
 		self.initializeredispoll()
 
 	def __del__(self):
