@@ -39,6 +39,7 @@ class PooledRedisBorg(object):
 				sock = hipparchia.config['REDISCOCKET']
 				redisconnection = redis.ConnectionPool(connection_class=redis.UnixDomainSocketConnection, path=sock, db=dbid, max_connections=poolsize)
 			PooledRedisBorg._pool.append(redisconnection)
+			print('initialized PooledRedisBorg')
 		self.pool = PooledRedisBorg._pool[0]
 		self.connection = redis.Redis(connection_pool=self.pool)
 

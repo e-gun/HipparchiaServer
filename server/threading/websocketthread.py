@@ -109,12 +109,12 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	asyncio.set_event_loop(loop)
 
 	wspolling = websockets.serve(wscheckpoll, theip, port=theport, loop=loop)
-	print('websocket at {p} opened'.format(p=theport))
+	print('opening websocket at {p}'.format(p=theport))
 
 	try:
 		loop.run_until_complete(wspolling)
 	except OSError:
-		print('websocket could not be launched: port {p} is busy'.format(p=theport))
+		print('websocket could not be launched: cannot get access to {i}:{p}'.format(p=theport, i=theip))
 		pass
 
 	try:

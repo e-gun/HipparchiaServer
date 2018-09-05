@@ -83,7 +83,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 		argumentuple = (foundlineobjects, listofplacestosearch, so)
 	elif so.searchtype == 'simplelemma':
 		activepoll.statusis('Executing a lemmatized word search for the {n} known forms of {w}...'.format(n=len(so.lemma.formlist), w=so.lemma.dictionaryentry))
-		# don't search for every form at once (100+)?
+		# don't search for every form at once (100+?)
 		# instead build a list of tuples: [(ORed_regex_forms_part_01, authortable1), ...]
 		chunksize = hipparchia.config['LEMMACHUNKSIZE']
 		terms = so.lemma.formlist
@@ -203,10 +203,13 @@ def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 		rc = establishredisconnection()
 		argument = '{id}_searchlist'.format(id=so.searchid)
 		getnetxitem = rc.spop
+		remainder = rc.smembers(argument)
+		errortype = AttributeError
 	else:
-		rc = None
 		getnetxitem = listofplacestosearch.pop
 		argument = 0
+		remainder = listofplacestosearch
+		errortype = TypeError
 
 	while listofplacestosearch and activepoll.gethits() <= so.cap:
 		commitcount += 1
@@ -239,16 +242,10 @@ def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 			# redis will return None for authortable if the set is now empty
 			listofplacestosearch = None
 
-		if not so.redissearchlist:
-			try:
-				activepoll.remain(len(listofplacestosearch))
-			except TypeError:
-				pass
-		else:
-			try:
-				activepoll.remain(len(rc.smembers(argument)))
-			except AttributeError:
-				pass
+		try:
+			activepoll.remain(len(remainder))
+		except errortype:
+			pass
 
 	return foundlineobjects
 
@@ -289,10 +286,13 @@ def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy
 		rc = establishredisconnection()
 		argument = '{id}_searchlist'.format(id=so.searchid)
 		getnetxitem = rc.spop
+		remainder = rc.smembers(argument)
+		errortype = AttributeError
 	else:
-		rc = None
 		getnetxitem = searchtuples.pop
 		argument = 0
+		remainder = searchtuples
+		errortype = TypeError
 
 	commitcount = 0
 	while searchtuples and activepoll.gethits() <= so.cap:
@@ -325,16 +325,10 @@ def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy
 			# redis will return None for authortable if the set is now empty
 			searchtuples = None
 
-		if not so.redissearchlist:
-			try:
-				activepoll.remain(len(searchtuples))
-			except TypeError:
-				pass
-		else:
-			try:
-				activepoll.remain(len(rc.smembers(argument)))
-			except AttributeError:
-				pass
+		try:
+			activepoll.remain(len(remainder))
+		except errortype:
+			pass
 
 	return foundlineobjects
 
@@ -368,10 +362,13 @@ def workonphrasesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 		rc = establishredisconnection()
 		argument = '{id}_searchlist'.format(id=so.searchid)
 		getnetxitem = rc.spop
+		remainder = rc.smembers(argument)
+		errortype = AttributeError
 	else:
-		rc = None
 		getnetxitem = listofplacestosearch.pop
 		argument = 0
+		remainder = listofplacestosearch
+		errortype = TypeError
 
 	while listofplacestosearch and len(foundlineobjects) < so.cap:
 		commitcount += 1
@@ -390,16 +387,10 @@ def workonphrasesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 			foundlines = phrasesearch(authortable, so, dbcursor)
 			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
 
-			if not so.redissearchlist:
-				try:
-					activepoll.remain(len(listofplacestosearch))
-				except TypeError:
-					pass
-			else:
-				try:
-					activepoll.remain(len(rc.smembers(argument)))
-				except AttributeError:
-					pass
+			try:
+				activepoll.remain(len(remainder))
+			except errortype:
+				pass
 
 		else:
 			# redis will return None for authortable if the set is now empty
@@ -437,10 +428,13 @@ def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: Lis
 		rc = establishredisconnection()
 		argument = '{id}_searchlist'.format(id=so.searchid)
 		getnetxitem = rc.spop
+		remainder = rc.smembers(argument)
+		errortype = AttributeError
 	else:
-		rc = None
 		getnetxitem = listofplacestosearch.pop
 		argument = 0
+		remainder = listofplacestosearch
+		errortype = TypeError
 
 	if so.scope == 'lines':
 		searchfunction = withinxlines
@@ -468,15 +462,9 @@ def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: Lis
 			# redis will return None for authortable if the set is now empty
 			listofplacestosearch = None
 
-		if not so.redissearchlist:
-			try:
-				activepoll.remain(len(listofplacestosearch))
-			except TypeError:
-				pass
-		else:
-			try:
-				activepoll.remain(len(rc.smembers(argument)))
-			except AttributeError:
-				pass
+		try:
+			activepoll.remain(len(remainder))
+		except errortype:
+			pass
 
 	return foundlineobjects

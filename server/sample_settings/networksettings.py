@@ -35,7 +35,8 @@
 # SEARCHLISTCONNECTIONTYPE if set to 'redis' you will not use Manager() to manage the searchlists but redis
 #   instead. At the moment this is all about tracking down a memory management oddity. Do not use this
 #   unless searches are hanging and you are desperate to find a fix... This code is significantly slower.
-#   Waiting for redis to do a SPOP is not nearly as fast as accessing memory directly.
+#   Waiting for redis to do a SPOP is not nearly as fast as accessing memory directly. The longer the searchlist
+#   the greater the penalty: a search of 236,835 texts is quite costly.
 #
 
 # hipparchia itself as a server
