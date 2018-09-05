@@ -202,14 +202,15 @@ def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 		listofplacestosearch = True
 		rc = establishredisconnection()
 		argument = '{id}_searchlist'.format(id=so.searchid)
-		getnetxitem = rc.spop
+		getnetxitem = lambda x: rc.spop(argument).decode()
 		remainder = rc.smembers(argument)
-		errortype = AttributeError
+		emptyerror = AttributeError
+		remaindererror = AttributeError
 	else:
 		getnetxitem = listofplacestosearch.pop
-		argument = 0
 		remainder = listofplacestosearch
-		errortype = TypeError
+		emptyerror = IndexError
+		remaindererror = TypeError
 
 	while listofplacestosearch and activepoll.gethits() <= so.cap:
 		commitcount += 1
@@ -221,15 +222,12 @@ def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 		# and this irregularity justifies exploring the redis alternative...
 
 		try:
-			authortable = getnetxitem(argument)
-		except IndexError:
+			authortable = getnetxitem(0)
+		except emptyerror:
 			authortable = None
 			listofplacestosearch = None
 			
 		if authortable:
-			if so.redissearchlist:
-				# b'lt0908' --> 'lt0908'
-				authortable = authortable.decode()
 			foundlines = substringsearch(so.termone, authortable, so, dbcursor)
 			lineobjects = [dblineintolineobject(f) for f in foundlines]
 			foundlineobjects.extend(lineobjects)
@@ -239,12 +237,11 @@ def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 				numberoffinds = len(lineobjects)
 				activepoll.addhits(numberoffinds)
 		else:
-			# redis will return None for authortable if the set is now empty
 			listofplacestosearch = None
 
 		try:
 			activepoll.remain(len(remainder))
-		except errortype:
+		except remaindererror:
 			pass
 
 	return foundlineobjects
@@ -285,14 +282,16 @@ def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy
 		searchtuples = True
 		rc = establishredisconnection()
 		argument = '{id}_searchlist'.format(id=so.searchid)
-		getnetxitem = rc.spop
+		# note that this lambda is not like the lambda in the other parallel functions: a pickled tuple is coming back
+		getnetxitem = lambda x: rc.spop(argument)
 		remainder = rc.smembers(argument)
-		errortype = AttributeError
+		emptyerror = AttributeError
+		remaindererror = AttributeError
 	else:
 		getnetxitem = searchtuples.pop
-		argument = 0
 		remainder = searchtuples
-		errortype = TypeError
+		emptyerror = IndexError
+		remaindererror = TypeError
 
 	commitcount = 0
 	while searchtuples and activepoll.gethits() <= so.cap:
@@ -303,8 +302,8 @@ def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy
 		# that's not supposed to happen with the pool, but somehow it does
 
 		try:
-			tup = getnetxitem(argument)
-		except IndexError:
+			tup = getnetxitem(0)
+		except emptyerror:
 			tup = None
 			searchtuples = None
 
@@ -322,12 +321,11 @@ def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy
 				numberoffinds = len(lineobjects)
 				activepoll.addhits(numberoffinds)
 		else:
-			# redis will return None for authortable if the set is now empty
 			searchtuples = None
 
 		try:
 			activepoll.remain(len(remainder))
-		except errortype:
+		except remaindererror:
 			pass
 
 	return foundlineobjects
@@ -361,39 +359,35 @@ def workonphrasesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 		listofplacestosearch = True
 		rc = establishredisconnection()
 		argument = '{id}_searchlist'.format(id=so.searchid)
-		getnetxitem = rc.spop
+		getnetxitem = lambda x: rc.spop(argument).decode()
 		remainder = rc.smembers(argument)
-		errortype = AttributeError
+		emptyerror = AttributeError
+		remaindererror = AttributeError
 	else:
 		getnetxitem = listofplacestosearch.pop
-		argument = 0
 		remainder = listofplacestosearch
-		errortype = TypeError
+		emptyerror = IndexError
+		remaindererror = TypeError
 
 	while listofplacestosearch and len(foundlineobjects) < so.cap:
 		commitcount += 1
 		dbconnection.checkneedtocommit(commitcount)
 
 		try:
-			authortable = getnetxitem(argument)
-		except IndexError:
+			authortable = getnetxitem(0)
+		except emptyerror:
 			authortable = None
 			listofplacestosearch = None
 
 		if authortable:
-			if so.redissearchlist:
-				# b'lt0908' --> 'lt0908'
-				authortable = authortable.decode()
 			foundlines = phrasesearch(authortable, so, dbcursor)
 			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
 
 			try:
 				activepoll.remain(len(remainder))
-			except errortype:
+			except remaindererror:
 				pass
-
 		else:
-			# redis will return None for authortable if the set is now empty
 			listofplacestosearch = None
 
 	return foundlineobjects
@@ -427,14 +421,15 @@ def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: Lis
 		listofplacestosearch = True
 		rc = establishredisconnection()
 		argument = '{id}_searchlist'.format(id=so.searchid)
-		getnetxitem = rc.spop
+		getnetxitem = lambda x: rc.spop(argument).decode()
 		remainder = rc.smembers(argument)
-		errortype = AttributeError
+		emptyerror = AttributeError
+		remaindererror = AttributeError
 	else:
 		getnetxitem = listofplacestosearch.pop
-		argument = 0
 		remainder = listofplacestosearch
-		errortype = TypeError
+		emptyerror = IndexError
+		remaindererror = TypeError
 
 	if so.scope == 'lines':
 		searchfunction = withinxlines
@@ -443,28 +438,22 @@ def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: Lis
 
 	while listofplacestosearch and activepoll.gethits() <= so.cap:
 		try:
-			authortable = getnetxitem(argument)
-		except IndexError:
+			authortable = getnetxitem(0)
+		except emptyerror:
 			authortable = None
 			listofplacestosearch = None
 
 		if authortable:
-			if so.redissearchlist:
-				# b'lt0908' --> 'lt0908'
-				authortable = authortable.decode()
 			foundlines = searchfunction(authortable, so, dbconnection)
 
 			if foundlines:
 				activepoll.addhits(len(foundlines))
 
 			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
-		else:
-			# redis will return None for authortable if the set is now empty
-			listofplacestosearch = None
 
 		try:
 			activepoll.remain(len(remainder))
-		except errortype:
+		except remaindererror:
 			pass
 
 	return foundlineobjects
