@@ -40,6 +40,7 @@ def sessionvariables():
 		session['cosdistbysentence'] = 'no'
 		session['cosdistbylineorword'] = 'no'
 		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
+		session['fontchoice'] = hipparchia.config['HOSTEDFONTFAMILY']
 		session['greekcorpus'] = hipparchia.config['DEFAULTGREEKCORPUSVALUE']
 		session['headwordindexing'] = hipparchia.config['DEFAULTINDEXBYHEADWORDS']
 		session['incerta'] = hipparchia.config['DEFAULTINCERTA']
@@ -98,6 +99,7 @@ def modifysessionvar(param, val):
 		'cosdistbylineorword',
 		'cosdistbysentence',
 		'earliestdate',
+		'fontchoice',
 		'greekcorpus',
 		'headwordindexing',
 		'incerta',
@@ -223,6 +225,12 @@ def modifysessionvar(param, val):
 
 	if int(session['browsercontext']) < 5 or int(session['browsercontext']) > 100:
 		session['browsercontext'] = '20'
+
+	if hipparchia.config['ENBALEFONTPICKER'] == 'yes' and session['fontchoice'] in hipparchia.config['FONTPICKERLIST']:
+		# print('chose', session['fontchoice'])
+		pass
+	else:
+		session['fontchoice'] = hipparchia.config['HOSTEDFONTFAMILY']
 
 	# print('set',param,'to',session[param])
 	session.modified = True

@@ -125,6 +125,9 @@ function loadoptions() {
 
         $('#sortresults').val(data.sortorder);
         $('#sortresults').selectmenu('refresh');
+
+        $('#fontchoice').val(data.fontchoice);
+        $('#fontchoice').selectmenu('refresh');
    
         if (data.cosdistbysentence === 'yes' || data.cosdistbylineorword === 'yes' || data.semanticvectorquery === 'yes' ||
             data.nearestneighborsquery === 'yes' || data.tensorflowgraph === 'yes' || data.sentencesimilarity === 'yes' ||
@@ -764,6 +767,17 @@ $(function() {
         });
 });
 
+
+$('#fontchoice').selectmenu({ width: 120});
+$(function() {
+        $('#fontchoice').selectmenu({
+            change: function() {
+                var result = $('#fontchoice').val();
+                setoptions('fontchoice', String(result));
+                window.location.reload();
+            }
+        });
+});
 
 //
 // info

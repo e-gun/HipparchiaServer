@@ -8,7 +8,7 @@
 
 import re
 
-from flask import make_response
+from flask import make_response, session
 
 from server import hipparchia
 
@@ -35,6 +35,10 @@ def loadcssfile(cssrequest):
 
 	with open(hipparchia.root_path+'/css/'+cssfile) as f:
 		css = f.read()
+
+	if hipparchia.config['ENBALEFONTPICKER'] == 'yes':
+		searchfor = re.compile('DEFAULTLOCALFONTWILLBESUPPLIEDFROMCONFIGFILE')
+		css = re.sub(searchfor, session['fontchoice'], css)
 
 	for s in substitutes:
 		searchfor = re.compile(s+'WILLBESUPPLIEDFROMCONFIGFILE')

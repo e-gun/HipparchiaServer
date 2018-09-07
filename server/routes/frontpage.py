@@ -31,6 +31,13 @@ def frontpage():
 
 	expectedsqltemplateversion = 2242018
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
+	fonts = hipparchia.config['FONTPICKERLIST']
+	fonts.sort()
+	if fonts:
+		picker = hipparchia.config['ENBALEFONTPICKER']
+	else:
+		# anythong other then 'yes' disables the picker
+		picker = 'nofontstopick'
 
 	vectorhtml = vectorhtmlforfrontpage()
 
@@ -53,7 +60,7 @@ def frontpage():
 		corporalabels = {'g': 'G', 'l': 'L', 'd': 'D', 'i': 'I', 'c': 'C'}
 
 	page = render_template('search.html', activelists=activelists, activecorpora=activecorpora, clab=corporalabels,
-	                       css=stylesheet, buildinfo=buildinfo, onehit=session['onehit'],
+	                       css=stylesheet, buildinfo=buildinfo, onehit=session['onehit'], picker=picker, fonts=fonts,
 	                       hwindexing=session['headwordindexing'], indexbyfrequency=session['indexbyfrequency'],
 						   spuria=session['spuria'], varia=session['varia'], undated=session['incerta'], vectorhtml=vectorhtml)
 
