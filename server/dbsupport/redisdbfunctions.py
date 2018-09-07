@@ -8,10 +8,27 @@
 
 from typing import List
 
-import redis
+try:
+	import redis
+except ImportError:
+	print('redis unavailable')
+	redis = None
 
 from server import hipparchia
 from server.threading.mpthreadcount import setthreadcount
+
+
+class NullRedis(object):
+	def __init__(self):
+		pass
+
+	class client():
+		def Redis(self):
+			pass
+
+
+if not redis:
+	redis = NullRedis()
 
 
 class PooledRedisBorg(object):
