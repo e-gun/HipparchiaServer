@@ -33,5 +33,5 @@ HOSTEDFONTFAMILY = 'Roboto'  # DejaVu, IBMPlex, Noto, and Roboto should be pre-i
 DEFAULTLOCALFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
-ENBALEFONTPICKER = 'yes'
+ENBALEFONTPICKER = 'no'
 FONTPICKERLIST = ['Noto', 'DejaVu', 'IBMPlex', 'Roboto']
