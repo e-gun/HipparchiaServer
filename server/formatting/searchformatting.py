@@ -133,7 +133,7 @@ def flagsearchterms(searchresultobject: SearchResult, skg: str, prx: str, search
 	return newlineobjects
 
 
-def highlightsearchterm(lineobject: dbWorkLine, regexequivalent: re.Pattern, spanname) -> str:
+def highlightsearchterm(lineobject: dbWorkLine, regexequivalent, spanname) -> str:
 	"""
 
 	html markup for the search term in the line so it can jump out at you
@@ -146,7 +146,7 @@ def highlightsearchterm(lineobject: dbWorkLine, regexequivalent: re.Pattern, spa
 		([πΠ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][τΤ][αἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάᾈᾉᾊᾋᾌᾍᾎᾏἈἉἊἋἌἍἎἏΑ][μΜ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][νΝ])
 
 	:param lineobject:
-	:param searchterm:
+	:param regexequivalent:
 	:param spanname:
 	:return:
 	"""
