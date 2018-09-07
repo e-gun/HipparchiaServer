@@ -133,15 +133,15 @@ Instructions on how to use Hipparchia can be found by clicking on the '?' button
 minimum software requirements:
 
     to launch HipparchiaServer
-        python 3.6+
+        python 3.7+ [as of v.1.1; earlier versions require python 3.6+]
             flask
-            psycopg2-binary
+            psycopg2 or psycopg2-binary
             bs4
             websockets
         postgresql 9.6+ / 10.0+
 
     to run the vectorizing functions
-        python 3.6
+        python 3.6+
             cython
             scipy
             numpy
@@ -155,7 +155,7 @@ minimum software requirements:
         jquery
         jquery-ui
         js-cookie
-        a fully stocked unicode font [arial, dejavu, noto, roboto, ...]
+        a fully stocked unicode font [Arial, DejaVu, Noto, Roboto, ...]
 
     javascript must be enabled in the browser
     the browser must accept cookies if you wish to save searches
