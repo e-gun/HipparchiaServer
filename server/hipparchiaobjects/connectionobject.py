@@ -180,8 +180,12 @@ class PooledConnectionObject(GenericConnectionObject):
 			littlepool = max(setthreadcount() / 2, 2)
 			kwds['user'] = hipparchia.config['DBWRITEUSER']
 			kwds['password'] = hipparchia.config['DBWRITEPASS']
-			# this can be smaller because only vectors to rw and the vectorbot is not allowed in the pool
-			readandwritepool = pooltype(littlepool, littlepool, **kwds)
+			# this can be smaller because only vectors do rw and the vectorbot is not allowed in the pool
+			# but you also need to be free to leave rw unset
+			try:
+				readandwritepool = pooltype(littlepool, littlepool, **kwds)
+			except psycopg2.OperationalError:
+				readandwritepool = None
 
 			PooledConnectionObject._pools['ro'] = readonlypool
 			PooledConnectionObject._pools['rw'] = readandwritepool
