@@ -8,7 +8,9 @@
 
 import re
 import time
+from flask import request, session
 from string import punctuation
+from typing import List
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
@@ -21,7 +23,7 @@ from server.listsandsession.sessionfunctions import sessionvariables
 from server.startup import lemmatadict
 
 
-def cleaninitialquery(seeking):
+def cleaninitialquery(seeking: str) -> str:
 	"""
 
 	there is a problem: all of the nasty injection strings are also rexeg strings
@@ -51,7 +53,7 @@ def cleaninitialquery(seeking):
 	return seeking
 
 
-def massagesearchtermsforwhitespace(query):
+def massagesearchtermsforwhitespace(query: str) -> str:
 	"""
 
 	fiddle with the query before execution to handle whitespace start/end of line issues
@@ -89,7 +91,7 @@ def massagesearchtermsforwhitespace(query):
 	return query
 
 
-def atsignwhereclauses(uidwithatsign, operand, authors):
+def atsignwhereclauses(uidwithatsign, operand, authors) -> List[tuple]:
 	"""
 
 	in order to restrict a search to a portion of a work, you will need a where clause
@@ -128,7 +130,7 @@ def atsignwhereclauses(uidwithatsign, operand, authors):
 	return whereclausetuples
 
 
-def buildbetweenwhereextension(authortable, searchobject):
+def buildbetweenwhereextension(authortable: str, searchobject: SearchObject) -> str:
 	"""
 	
 	sample return if you are doing a 'between' search (typically a subset of a literary author):
@@ -186,7 +188,7 @@ def buildbetweenwhereextension(authortable, searchobject):
 	return whereclauseadditions
 
 
-def lookoutsideoftheline(linenumber, numberofextrawords, workid, searchobject, cursor):
+def lookoutsideoftheline(linenumber: int, numberofextrawords: int, workid: str, searchobject: SearchObject, cursor) -> str:
 	"""
 
 	grab a line and add the N words at the tail and head of the previous and next lines
@@ -241,7 +243,7 @@ def lookoutsideoftheline(linenumber, numberofextrawords, workid, searchobject, c
 	return aggregate
 
 
-def findleastcommonterm(searchphrase, accentsneeded):
+def findleastcommonterm(searchphrase: str, accentsneeded: bool) -> str:
 	"""
 
 	use the wordcounts to determine the best word to pick first
@@ -303,7 +305,7 @@ def findleastcommonterm(searchphrase, accentsneeded):
 	return leastcommonterm
 
 
-def findleastcommontermcount(searchphrase, accentsneeded):
+def findleastcommontermcount(searchphrase: str, accentsneeded: bool) -> int:
 	"""
 
 	use the wordcounts to determine the best word to pick first
@@ -336,7 +338,7 @@ def findleastcommontermcount(searchphrase, accentsneeded):
 	return fewesthits
 
 
-def dblooknear(index, distanceinlines, secondterm, workid, usecolumn, cursor):
+def dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, cursor) -> bool:
 	"""
 
 	search for a term within a range of lines
@@ -363,35 +365,35 @@ def dblooknear(index, distanceinlines, secondterm, workid, usecolumn, cursor):
 		return False
 
 
-def buildsearchobject(ts, request, session):
+def buildsearchobject(searchid: str, therequest: request, thesession: session) -> SearchObject:
 	"""
 
 	generic searchobject builder
 
-	:param ts:
-	:param request:
-	:param session:
+	:param searchid:
+	:param therequest:
+	:param thesession:
 	:return:
 	"""
 
-	if not ts:
-		ts = str(int(time.time()))
+	if not searchid:
+		searchid = str(int(time.time()))
 
 	sessionvariables()
 
 	# a search can take 30s or more and the user might alter the session while the search is running
 	# by toggling onehit, etc that can be a problem, so freeze the values now and rely on this instead
 	# of some moving target
-	frozensession = session.copy()
+	frozensession = thesession.copy()
 
 	# need to sanitize input at least a bit: remove digits and punctuation
 	# dispatcher will do searchtermcharactersubstitutions() and massagesearchtermsforwhitespace() to take
 	# care of lunate sigma, etc.
 
-	seeking = cleaninitialquery(request.args.get('skg', ''))
-	proximate = cleaninitialquery(request.args.get('prx', ''))
-	lemma = cleaninitialquery(request.args.get('lem', ''))
-	proximatelemma = cleaninitialquery(request.args.get('plm', ''))
+	seeking = cleaninitialquery(therequest.args.get('skg', ''))
+	proximate = cleaninitialquery(therequest.args.get('prx', ''))
+	lemma = cleaninitialquery(therequest.args.get('lem', ''))
+	proximatelemma = cleaninitialquery(therequest.args.get('plm', ''))
 
 	try:
 		lemma = lemmatadict[lemma]
@@ -427,6 +429,6 @@ def buildsearchobject(ts, request, session):
 		proximate = replacegreekbetacode(proximate)
 		proximate = proximate.lower()
 
-	so = SearchObject(ts, seeking, proximate, lemma, proximatelemma, frozensession)
+	so = SearchObject(searchid, seeking, proximate, lemma, proximatelemma, frozensession)
 
 	return so

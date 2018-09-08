@@ -8,15 +8,18 @@
 
 import re
 
+from typing import List
+
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
 from server.formatting.wordformatting import wordlistintoregex
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.searchfunctions import dblooknear
 from server.searching.substringsearching import substringsearch
 
 
-def withinxlines(workdbname, searchobject, dbconnection):
+def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> List[dbWorkLine]:
 	"""
 
 	after finding x, look for y within n lines of x
@@ -71,7 +74,7 @@ def withinxlines(workdbname, searchobject, dbconnection):
 	return fullmatches
 
 
-def withinxwords(workdbname, searchobject, dbconnection):
+def withinxwords(workdbname: str, searchobject: SearchObject, dbconnection) -> List[dbWorkLine]:
 	"""
 
 	int(session['proximity']), searchingfor, proximate, curs, wkid, whereclauseinfo
@@ -133,7 +136,7 @@ def withinxwords(workdbname, searchobject, dbconnection):
 	return fullmatches
 
 
-def grableadingandlagging(hitline, searchobject, cursor):
+def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, cursor) -> dict:
 	"""
 
 	take a dbline and grab the N words in front of it and after it

@@ -19,7 +19,7 @@ for commonly used info
 """
 
 
-def buildaugenresdict(authordict):
+def buildaugenresdict(authordict: dict) -> dict:
 	"""
 	build lists of author genres: [ g1, g2, ...]
 
@@ -52,11 +52,11 @@ def buildaugenresdict(authordict):
 	return genresdict
 
 
-def buildworkgenresdict(workdict):
+def buildworkgenresdict(workdict: dict) -> dict:
 	"""
 	load up the list of work genres: [ g1, g2, ...]
 	this will see heavy use throughout the world of 'views.py'
-	:param authordict:
+	:param workdict:
 	:return:
 	"""
 
@@ -82,7 +82,7 @@ def buildworkgenresdict(workdict):
 	return genresdict
 
 
-def buildauthorlocationdict(authordict):
+def buildauthorlocationdict(authordict: dict) -> dict:
 	"""
 	build lists of author locations: [ g1, g2, ...]
 
@@ -117,7 +117,7 @@ def buildauthorlocationdict(authordict):
 	return locationdict
 
 
-def buildworkprovenancedict(workdict):
+def buildworkprovenancedict(workdict: dict) -> dict:
 	"""
 	load up the list of work provenances
 	used in offerprovenancehints()
@@ -148,7 +148,7 @@ def buildworkprovenancedict(workdict):
 	return locationdict
 
 
-def buildkeyedlemmata(listofentries):
+def buildkeyedlemmata(listofentries: dict) -> defaultdict:
 	"""
 
 	a list of 140k words is too long to send to 'getlemmahint' without offering quicker access

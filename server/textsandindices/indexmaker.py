@@ -68,8 +68,12 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 		# 2x as fast to produce the final result; even faster inside the relevant loop
 		# the drawback is the problem sending the poll object into the pool
 		activepoll.statusis('Compiling the index')
-		activepoll.allworkis(-1)
-		activepoll.notes = '(progress information unavailable)'
+		if activepoll.polltype == 'RedisProgressPoll':
+			activepoll.allworkis(len(lineobjects))
+			activepoll.remain(len(lineobjects))
+		else:
+			activepoll.allworkis(-1)
+			activepoll.setnotes('(progress information unavailable)')
 		completeindexdict = pooledindexmaker(lineobjects)
 	else:
 		# index to aristotle: 28.587s
@@ -83,7 +87,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 
 	if not headwords:
 		activepoll.statusis('Sifting the index')
-		activepoll.notes = ''
+		activepoll.setnotes('')
 		activepoll.allworkis(-1)
 		sortedoutput = generatesortedoutputbyword(completeindexdict, onework, alphabetical)
 	else:
@@ -128,13 +132,13 @@ def generatesortedoutputbyheadword(completeindexdict, onework, alphabetical, act
 	# [a] find the morphologyobjects needed
 	remaining = len(completeindexdict)
 	activepoll.statusis('Finding headwords for entries')
-	activepoll.notes = '({r} entries found)'.format(r=remaining)
+	activepoll.setnotes('({r} entries found)'.format(r=remaining))
 
 	morphobjects = getrequiredmorphobjects(completeindexdict.keys())
 
 	activepoll.statusis('Assigning headwords to entries')
 	remaining = len(completeindexdict)
-	activepoll.notes = '({bf} baseforms found)'.format(bf=remaining)
+	activepoll.setnotes('({bf} baseforms found)'.format(bf=remaining))
 	activepoll.allworkis(remaining)
 
 	# [b] find the baseforms

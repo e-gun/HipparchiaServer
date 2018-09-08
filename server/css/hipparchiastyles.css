@@ -890,6 +890,16 @@ body {
 	margin: auto;
 	}
 
+#bottommessage {
+	position: fixed;
+	width: 300px;
+	margin-left: -150px;
+	bottom: 5px;
+	text-align: center;
+	font-size: 75%;
+	left: 50%;
+}
+
 #browserdialog {
 	position: fixed;
 	border-style: solid;
@@ -1221,6 +1231,7 @@ p.level4 {
 
 pre {
     font-family: 'hipparchiamonostatic', monospace;
+	color: var(--skyblue);
     }
 
 pron {

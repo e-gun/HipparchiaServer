@@ -8,10 +8,10 @@
 
 import re
 
-
 # lifted from HipparchiaBuilder
+# need this to accept betacode input for searches
 
-def replacegreekbetacode(texttoclean):
+def replacegreekbetacode(texttoclean: str) -> str:
 	"""
 	swap betacode for unicode values
 	:param texttoclean:
@@ -28,7 +28,7 @@ def replacegreekbetacode(texttoclean):
 	return texttoclean
 
 
-def capitalletters(betacode):
+def capitalletters(betacode: str) -> str:
 	# needs to be done in order of length of regex string
 	# capital + breathing + accent + adscript
 	csga = re.compile(r'[*]\)\\\|([AHW])')
@@ -91,7 +91,7 @@ def capitalletters(betacode):
 
 
 # capital + breathing + accent + adscript
-def capitalsmoothgraveadscript(match, g=1):
+def capitalsmoothgraveadscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -109,7 +109,7 @@ def capitalsmoothgraveadscript(match, g=1):
 	return substitute
 
 
-def capitalroughgraveadscript(match, g=1):
+def capitalroughgraveadscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -127,7 +127,7 @@ def capitalroughgraveadscript(match, g=1):
 	return substitute
 
 
-def capitalsmoothacuteadscript(match, g=1):
+def capitalsmoothacuteadscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -145,7 +145,7 @@ def capitalsmoothacuteadscript(match, g=1):
 	return substitute
 
 
-def capitalroughacuteadscript(match, g=1):
+def capitalroughacuteadscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -163,7 +163,7 @@ def capitalroughacuteadscript(match, g=1):
 	return substitute
 
 
-def capitalsmoothcircumflexadscript(match, g=1):
+def capitalsmoothcircumflexadscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -181,7 +181,7 @@ def capitalsmoothcircumflexadscript(match, g=1):
 	return substitute
 
 
-def capitalroughcircumflexadscript(match, g=1):
+def capitalroughcircumflexadscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -200,7 +200,7 @@ def capitalroughcircumflexadscript(match, g=1):
 
 
 # capital + breathing + accent
-def capitalsmoothgrave(match, g=1):
+def capitalsmoothgrave(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -218,7 +218,7 @@ def capitalsmoothgrave(match, g=1):
 	return substitute
 
 
-def capitalroughgrave(match, g=1):
+def capitalroughgrave(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -236,7 +236,7 @@ def capitalroughgrave(match, g=1):
 	return substitute
 
 
-def capitalsmoothacute(match, g=1):
+def capitalsmoothacute(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -254,7 +254,7 @@ def capitalsmoothacute(match, g=1):
 	return substitute
 
 
-def capitalroughacute(match, g=1):
+def capitalroughacute(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -272,7 +272,7 @@ def capitalroughacute(match, g=1):
 	return substitute
 
 
-def capitalsmoothcircumflex(match, g=1):
+def capitalsmoothcircumflex(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -290,7 +290,7 @@ def capitalsmoothcircumflex(match, g=1):
 	return substitute
 
 
-def capitalroughcircumflex(match, g=1):
+def capitalroughcircumflex(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -309,7 +309,7 @@ def capitalroughcircumflex(match, g=1):
 
 
 # capital + breathing
-def capitalsmooth(match, g=1):
+def capitalsmooth(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -328,7 +328,7 @@ def capitalsmooth(match, g=1):
 	return substitute
 
 
-def capitalrough(match, g=1):
+def capitalrough(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -348,7 +348,7 @@ def capitalrough(match, g=1):
 
 
 # capital + accent
-def capitalgrave(match, g=1):
+def capitalgrave(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -366,7 +366,7 @@ def capitalgrave(match, g=1):
 	return substitute
 
 
-def capitalacute(match, g=1):
+def capitalacute(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -384,7 +384,7 @@ def capitalacute(match, g=1):
 	return substitute
 
 
-def capitaladscript(match, g=1):
+def capitaladscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -402,7 +402,7 @@ def capitaladscript(match, g=1):
 	return substitute
 
 
-def capitals(match, g=1):
+def capitals(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -440,7 +440,7 @@ def capitals(match, g=1):
 	return substitute
 
 
-def lowercaseletters(betacode):
+def lowercaseletters(betacode: str) -> str:
 	"""
 	swap betacode for unicode values
 
@@ -561,7 +561,7 @@ def lowercaseletters(betacode):
 
 
 # lowercase + breathing + accent + subscript
-def lowercasesmoothgravesubscript(match, g=1):
+def lowercasesmoothgravesubscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -579,7 +579,7 @@ def lowercasesmoothgravesubscript(match, g=1):
 	return substitute
 
 
-def lowercaseroughgravesubscript(match, g=1):
+def lowercaseroughgravesubscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -597,7 +597,7 @@ def lowercaseroughgravesubscript(match, g=1):
 	return substitute
 
 
-def lowercasesmoothacutesubscript(match, g=1):
+def lowercasesmoothacutesubscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -615,7 +615,7 @@ def lowercasesmoothacutesubscript(match, g=1):
 	return substitute
 
 
-def lowercaseroughacutesubscript(match, g=1):
+def lowercaseroughacutesubscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -633,7 +633,7 @@ def lowercaseroughacutesubscript(match, g=1):
 	return substitute
 
 
-def lowercasesmoothcircumflexsubscript(match, g=1):
+def lowercasesmoothcircumflexsubscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -651,7 +651,7 @@ def lowercasesmoothcircumflexsubscript(match, g=1):
 	return substitute
 
 
-def lowercaseroughcircumflexsubscript(match, g=1):
+def lowercaseroughcircumflexsubscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -670,7 +670,7 @@ def lowercaseroughcircumflexsubscript(match, g=1):
 
 
 # lowercase + breathing + accent
-def lowercasesmoothgrave(match, g=1):
+def lowercasesmoothgrave(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -688,7 +688,7 @@ def lowercasesmoothgrave(match, g=1):
 	return substitute
 
 
-def lowercaseroughgrave(match, g=1):
+def lowercaseroughgrave(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -706,7 +706,7 @@ def lowercaseroughgrave(match, g=1):
 	return substitute
 
 
-def lowercasesmoothacute(match, g=1):
+def lowercasesmoothacute(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -724,7 +724,7 @@ def lowercasesmoothacute(match, g=1):
 	return substitute
 
 
-def lowercaseroughacute(match, g=1):
+def lowercaseroughacute(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -742,7 +742,7 @@ def lowercaseroughacute(match, g=1):
 	return substitute
 
 
-def lowercasesmoothcircumflex(match, g=1):
+def lowercasesmoothcircumflex(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -760,7 +760,7 @@ def lowercasesmoothcircumflex(match, g=1):
 	return substitute
 
 
-def lowercaseroughcircumflex(match, g=1):
+def lowercaseroughcircumflex(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -779,7 +779,7 @@ def lowercaseroughcircumflex(match, g=1):
 
 
 # lowercase + accent + subscript
-def lowercasegravesub(match, g=1):
+def lowercasegravesub(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -793,7 +793,7 @@ def lowercasegravesub(match, g=1):
 	return substitute
 
 
-def lowercaseacutedsub(match, g=1):
+def lowercaseacutedsub(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -807,7 +807,7 @@ def lowercaseacutedsub(match, g=1):
 	return substitute
 
 
-def lowercasesircumflexsub(match, g=1):
+def lowercasesircumflexsub(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -823,7 +823,7 @@ def lowercasesircumflexsub(match, g=1):
 
 # lowercase + breathing + subscript
 
-def lowercasesmoothsub(match, g=1):
+def lowercasesmoothsub(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -837,7 +837,7 @@ def lowercasesmoothsub(match, g=1):
 	return substitute
 
 
-def lowercaseroughsub(match, g=1):
+def lowercaseroughsub(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -852,7 +852,7 @@ def lowercaseroughsub(match, g=1):
 
 
 # lowercase + accent + diaresis
-def lowercasegravediaresis(match, g=1):
+def lowercasegravediaresis(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -870,7 +870,7 @@ def lowercasegravediaresis(match, g=1):
 	return substitute
 
 
-def lowercaseacutediaresis(match, g=1):
+def lowercaseacutediaresis(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -888,7 +888,7 @@ def lowercaseacutediaresis(match, g=1):
 	return substitute
 
 
-def lowercasesircumflexdiaresis(match, g=1):
+def lowercasesircumflexdiaresis(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -907,7 +907,7 @@ def lowercasesircumflexdiaresis(match, g=1):
 
 
 # lowercase + breathing
-def lowercasesmooth(match, g=1):
+def lowercasesmooth(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -926,7 +926,7 @@ def lowercasesmooth(match, g=1):
 	return substitute
 
 
-def lowercaserough(match, g=1):
+def lowercaserough(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -946,7 +946,7 @@ def lowercaserough(match, g=1):
 
 
 # lowercase + accent
-def lowercasegrave(match, g=1):
+def lowercasegrave(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -964,7 +964,7 @@ def lowercasegrave(match, g=1):
 	return substitute
 
 
-def lowercaseacute(match, g=1):
+def lowercaseacute(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -982,7 +982,7 @@ def lowercaseacute(match, g=1):
 	return substitute
 
 
-def lowercascircumflex(match, g=1):
+def lowercascircumflex(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -1003,7 +1003,7 @@ def lowercascircumflex(match, g=1):
 
 
 # lowercase + diaresis
-def lowercasediaresis(match, g=1):
+def lowercasediaresis(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -1022,7 +1022,7 @@ def lowercasediaresis(match, g=1):
 
 
 # lowercase + subscript
-def lowercasesubscript(match, g=1):
+def lowercasesubscript(match: re.match, g=1) -> str:
 	val = match.group(g)
 
 	substitutions = {
@@ -1041,7 +1041,7 @@ def lowercasesubscript(match, g=1):
 
 
 # lowercases
-def lowercases(match, g=0):
+def lowercases(match: re.match, g=0) -> str:
 	val = match.group(g)
 
 	substitutions = {

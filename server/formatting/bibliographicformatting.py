@@ -10,8 +10,10 @@ import re
 
 from flask import session
 
+from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
-def bcedating(s=session):
+
+def bcedating(s=session) -> tuple:
 	"""
 	return the English equivalents for session['earliestdate'] and session['latestdate']
 	:return:
@@ -32,7 +34,7 @@ def bcedating(s=session):
 	return dmin, dmax
 
 
-def formatauthinfo(authorobject):
+def formatauthinfo(authorobject: dbAuthor) -> str:
 	"""
 
 	called by getauthinfo()
@@ -74,7 +76,7 @@ def formatauthinfo(authorobject):
 	return authinfo
 
 
-def woformatworkinfo(workobject):
+def woformatworkinfo(workobject: dbOpus) -> str:
 	"""
 
 	called by getauthinfo()
@@ -122,7 +124,7 @@ def woformatworkinfo(workobject):
 	return workinfo
 
 
-def formatname(workobject, authorobject):
+def formatname(workobject: dbOpus, authorobject: dbAuthor) -> str:
 	"""
 
 	shift name depending on type of hit
@@ -144,7 +146,7 @@ def formatname(workobject, authorobject):
 	return name
 
 
-def getpublicationinfo(workobject, cursor):
+def getpublicationinfo(workobject: dbAuthor, cursor) -> str:
 	"""
 
 	what's in a name?
@@ -166,7 +168,7 @@ def getpublicationinfo(workobject, cursor):
 	return publicationhtml
 
 
-def formatpublicationinfo(pubinfo):
+def formatpublicationinfo(pubinfo: str) -> str:
 	"""
 	in:
 		<volumename>FHG </volumename>4 <press>Didot </press><city>Paris </city><year>1841–1870</year><pages>371 </pages><pagesintocitations>Frr. 1–2</pagesintocitations><editor>Müller, K. </editor>
@@ -204,7 +206,7 @@ def formatpublicationinfo(pubinfo):
 	return publicationhtml
 
 
-def avoidlonglines(string, maxlen, splitval, stringlist=list()):
+def avoidlonglines(string: str, maxlen: int, splitval: str, stringlist=list()) -> str:
 	"""
 
 	Authors like Livy can swallow the browser window by sending 351 characters worth of editors to one of the lines
@@ -240,7 +242,7 @@ def avoidlonglines(string, maxlen, splitval, stringlist=list()):
 	return newstringhtml
 
 
-def formatauthorandworkinfo(authorname, workobject):
+def formatauthorandworkinfo(authorname: str, workobject: dbOpus) -> str:
 	"""
 
 	dbdata into html
@@ -251,7 +253,8 @@ def formatauthorandworkinfo(authorname, workobject):
 	"""
 
 	if workobject.wordcount:
-		c = '[' + format(workobject.wordcount, ',d') + ' wds]'
+		wc = format(workobject.wordcount, ',d')
+		c = '[{wc} wds]'.format(wc=wc)
 	else:
 		c = ''
 

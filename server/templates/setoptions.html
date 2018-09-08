@@ -74,11 +74,21 @@
         &middot;&nbsp;quotes&nbsp;<input type="checkbox" id="quotesummary" value="yes">
     </p>
 
-    <p class="optionlabel">Display color shifted text inside of brackets:</p>
+    <p class="optionlabel">Display color shifted text inside of brackets?</p>
     <p class="optionitem">
         [&nbsp;]&nbsp;<input type="checkbox" id="bracketsquare" value="yes">
         &middot;&nbsp;(&nbsp;)&nbsp;<input type="checkbox" id="bracketround" value="yes">
         &middot;&nbsp;&lt;&nbsp;&gt;&nbsp;<input type="checkbox" id="bracketangled" value="yes">
         &middot;&nbsp;{&nbsp;}&nbsp;<input type="checkbox" id="bracketcurly" value="yes">
     </p>
+
+    {% if picker == 'yes' %}
+    <p class="optionlabel">Font for display</p>
+    <p class="optionitem">
+        <select name="fontchoice" id="fontchoice">
+        {% for f in fonts %}<option value="{{ f }}">{{ f }}</option>{% endfor %}
+        </select>
+    </p>
+    {% endif %}
+
 </div>

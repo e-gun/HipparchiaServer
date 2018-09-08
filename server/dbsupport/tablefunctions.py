@@ -8,8 +8,10 @@
 
 import random
 
+from server.hipparchiaobjects.dbtextobjects import dbAuthor
 
-def tablenamer(authorobject, thework):
+
+def tablenamer(authorobject: dbAuthor, thework: int) -> str:
 	"""
 
 	tell me the name of your table
@@ -40,7 +42,7 @@ def tablenamer(authorobject, thework):
 	return workdbname
 
 
-def uniquetablename():
+def uniquetablename(numberofletters=12) -> str:
 	"""
 
 	random name for temporary tables
@@ -48,4 +50,4 @@ def uniquetablename():
 	:return:
 	"""
 
-	return ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(12)])
+	return ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(numberofletters)])

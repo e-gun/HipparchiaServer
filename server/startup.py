@@ -43,13 +43,13 @@ if warning == 0:
 		if not available[key]:
 			print('\t{d} is unavailable'.format(d=key))
 	print()
+del warning
+del available
 
-t = setthreadcount(startup=True)
-s = 's'
-if t < 2:
-	s = ''
-print('queries will be dispatched to {t} thread{s}\n'.format(t=setthreadcount(), s=s))
-
+if setthreadcount(startup=True) == 1:
+	print('queries will be dispatched to 1 thread\n')
+else:
+	print('queries will be dispatched to {t} threads\n'.format(t=setthreadcount()))
 
 """
 this stuff gets loaded up front so you have access to all author and work info all the time
@@ -89,7 +89,7 @@ workprovenancedict = buildworkprovenancedict(workdict)
 print('building specialized sublists\n')
 
 
-def dictitemstartswith(originaldict, element, muststartwith):
+def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
 	"""
 
 	trim a dict via a criterion: muststartwith must begin the item to survive the check

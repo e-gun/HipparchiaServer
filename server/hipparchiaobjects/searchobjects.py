@@ -7,12 +7,10 @@
 """
 import re
 import time
-from multiprocessing import Array, Value
 
 from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.wordformatting import avoidsmallvariants
-from server.hipparchiaobjects.helperobjects import MPCounter
 from server.listsandsession.sessionfunctions import justlatin
 
 
@@ -102,8 +100,8 @@ class SearchObject(object):
 
 	"""
 
-	def __init__(self, ts, seeking, proximate, lemmaobject, proximatelemmaobject, frozensession):
-		self.ts = ts
+	def __init__(self, searchid, seeking, proximate, lemmaobject, proximatelemmaobject, frozensession):
+		self.searchid = searchid
 
 		self.originalseeking = seeking
 		self.originalproximate = proximate
@@ -122,6 +120,10 @@ class SearchObject(object):
 		self.usedcorpora = list()
 		self.sentencebundlesize = hipparchia.config['SENTENCESPERDOCUMENT']
 		self.poll = None
+		if hipparchia.config['SEARCHLISTCONNECTIONTYPE'] == 'redis':
+			self.redissearchlist = True
+		else:
+			self.redissearchlist = False
 
 		# searchtermcharactersubstitutions() logic has moved here
 
@@ -131,7 +133,7 @@ class SearchObject(object):
 		seeking = re.sub(r' $', r'(\\s|$)', seeking)
 		seeking = seeking.lower()
 		proximate = re.sub('[σς]', 'ϲ', proximate)
-		proximate = re.sub(r'\\ϲ', ' ', proximate)
+		proximate = re.sub(r'\\ϲ', r'\\s', proximate)
 		proximate = re.sub(r'^ ', r'(^|\\s)', proximate)
 		proximate = re.sub(r' $', r'(\\s|$)', proximate)
 		proximate = proximate.lower()
@@ -276,90 +278,6 @@ class SearchObject(object):
 		authors = set([a[:6] for a in self.searchlist])
 		return len(authors)
 
-class ProgressPoll(object):
-	"""
-
-	a dictionary of Values that can be shared between processes
-	the items and their methods build a polling package for progress reporting
-
-	general scheme:
-		create the object
-		set up some shareable variables
-		hand them to the search functions
-		report on their fate
-		delete when done
-
-	locking checks mostly unimportant: not esp worried about race conditions; most of this is simple fyi
-	"""
-
-	polltcpport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
-
-	def __init__(self, timestamp, portnumber=polltcpport):
-		self.searchid = str(timestamp)
-		self.launchtime = time.time()
-		self.portnumber = portnumber
-		self.active = Value('b', False)
-		self.remaining = Value('i', -1)
-		self.poolofwork = Value('i', -1)
-		self.statusmessage = Array('c', b'')
-		self.hitcount = MPCounter()
-		self.hitcount.increment(-1)
-		self.notes = ''
-
-	def getstatus(self):
-		return self.statusmessage.decode('utf-8')
-
-	def getelapsed(self):
-		elapsed = round(time.time() - self.launchtime, 0)
-		return elapsed
-
-	def getremaining(self):
-		return self.remaining.value
-
-	def gethits(self):
-		return self.hitcount.value
-
-	def worktotal(self):
-		return self.poolofwork.value
-
-	def statusis(self, statusmessage):
-		self.statusmessage = bytes(statusmessage, encoding='UTF-8')
-
-	def allworkis(self, amount):
-		self.poolofwork.value = amount
-
-	def remain(self, remaining):
-		with self.remaining.get_lock():
-			self.remaining.value = remaining
-
-	def sethits(self, found):
-		self.hitcount.val.value = found
-
-	def addhits(self, hits):
-		self.hitcount.increment(hits)
-
-	def activate(self):
-		self.active = True
-
-	def deactivate(self):
-		self.active = False
-
-	def getactivity(self):
-		return self.active
-
-	def getnotes(self):
-		message = '<span class="small">{msg}</span>'
-		if 14 < self.getelapsed() < 21:
-			m = '(long requests can be aborted by reloading the page)'
-		elif re.search('unavailable', self.notes) and 9 < self.getelapsed() < 15:
-			m = self.notes
-		elif re.search('unavailable', self.notes) is None:
-			m = self.notes
-		else:
-			m = ''
-
-		return message.format(msg=m)
-
 
 class SearchOutputObject(object):
 	"""
@@ -378,13 +296,14 @@ class SearchOutputObject(object):
 		self.proximate = searchobject.proximate
 		self.thesearch = str()
 		self.htmlsearch = str()
-		self.hitmax = 'false'
+		self.hitmax = False
 		self.onehit = searchobject.session['onehit']
 		self.usedcorpora = searchobject.usedcorpora
+		self.searchsummary = str()
 
-		self.icandodates = 'no'
+		self.icandodates = False
 		if justlatin(searchobject.session) is False:
-			self.icandodates = 'yes'
+			self.icandodates = True
 
 		sortorderdecoder = {
 			'universalid': 'ID',
@@ -413,12 +332,6 @@ class SearchOutputObject(object):
 		self.image = str()
 		self.reasons = list()
 
-	def generateoutput(self):
-		outputdict = dict()
-		for item in vars(self):
-			outputdict[item] = getattr(self, item)
-		return outputdict
-
 	def setresultcount(self, value, string):
 		rc = '{:,}'.format(value)
 		self.resultcount = '{r} {s}'.format(r=rc, s=string)
@@ -432,3 +345,89 @@ class SearchOutputObject(object):
 	def explainemptysearch(self):
 		r = ' and '.join(self.reasons)
 		self.htmlsearch = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=r)
+
+	def generatesummary(self):
+		"""
+
+		generate the summary info.
+
+		example of what the browser will see:
+
+			<div id="searchsummary">
+			Sought <span class="sought">»εναντ«</span>
+			<br>
+			Searched 3,844 texts and found 50 passages (0.21s)
+			<br>
+			Searched between 850 B.C.E. and 1 C.E.
+			<br>
+			Only allowing one match per item searched (either a whole author or a specified work)
+			<br>
+			Sorted by date
+			<br>
+			[Search suspended: result cap reached.]
+			</div>
+
+		:return:
+		"""
+		stemplate = """
+		Sought {hs}
+		<br>
+		{tx} and found {fd} ({tm}s)
+		<br>
+		{betw}
+		{onehit}
+		Sorted by {sb}
+		<br>
+		{hitmax}
+		"""
+
+		# pluralization check
+		tx = 'Searched 1 text'
+		if self.scope != 1:
+			tx = 'Searched {t} texts'.format(t=self.scope)
+
+		# pluralization check
+		fd = '1 passage'
+		if self.resultcount != '1 passages':
+			fd = self.resultcount
+
+		betw = '<!-- dates did not matter -->\n'
+
+		if self.icandodates:
+			if self.dmin != '850 B.C.E.' or self.dmax != '1500 C.E.':
+				betw = 'Searched between {a} and {b}\n\t<br>'.format(a=self.dmin, b=self.dmax)
+
+		onehit = '<!-- unlimited hits per author -->\n'
+		if self.onehit == 'yes':
+			onehit = 'Only allowing one match per item searched (either a whole author or a specified work)\n\t<br>'
+
+		hitmax = '<!-- did not hit the results cap -->\n'
+		if self.hitmax:
+			hitmax = '[Search suspended: result cap reached.]'
+
+		summary = stemplate.format(hs=self.htmlsearch, tx=tx, fd=fd, tm=self.searchtime, betw=betw,
+		                           onehit=onehit, sb=self.sortby, hitmax=hitmax)
+
+		return summary
+
+	def generateoutput(self):
+		"""
+
+		this is the one we really care about:
+
+		generate everything that we send to the JS so that it can update the browser display via the contents of outputdict
+
+		note that these attributes start out empty and need to be updated before you can get what you want here
+
+		for example, self.generatesummary() needs to set self.searchsummary before we will have a summary
+
+		:return:
+		"""
+
+		self.searchsummary = self.generatesummary()
+
+		outputdict = dict()
+		itemsweuse = ['title', 'searchsummary', 'found', 'image', 'js']
+		for item in itemsweuse:
+			outputdict[item] = getattr(self, item)
+		return outputdict

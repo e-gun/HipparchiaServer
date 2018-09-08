@@ -7,6 +7,7 @@
 """
 
 import re
+from typing import Dict, List, Tuple
 
 from flask import session
 
@@ -39,6 +40,7 @@ def sessionvariables():
 		session['cosdistbysentence'] = 'no'
 		session['cosdistbylineorword'] = 'no'
 		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
+		session['fontchoice'] = hipparchia.config['HOSTEDFONTFAMILY']
 		session['greekcorpus'] = hipparchia.config['DEFAULTGREEKCORPUSVALUE']
 		session['headwordindexing'] = hipparchia.config['DEFAULTINDEXBYHEADWORDS']
 		session['incerta'] = hipparchia.config['DEFAULTINCERTA']
@@ -97,6 +99,7 @@ def modifysessionvar(param, val):
 		'cosdistbylineorword',
 		'cosdistbysentence',
 		'earliestdate',
+		'fontchoice',
 		'greekcorpus',
 		'headwordindexing',
 		'incerta',
@@ -223,6 +226,12 @@ def modifysessionvar(param, val):
 	if int(session['browsercontext']) < 5 or int(session['browsercontext']) > 100:
 		session['browsercontext'] = '20'
 
+	if hipparchia.config['ENBALEFONTPICKER'] == 'yes' and session['fontchoice'] in hipparchia.config['FONTPICKERLIST']:
+		# print('chose', session['fontchoice'])
+		pass
+	else:
+		session['fontchoice'] = hipparchia.config['HOSTEDFONTFAMILY']
+
 	# print('set',param,'to',session[param])
 	session.modified = True
 
@@ -270,7 +279,7 @@ def modifysessionselections(cookiedict, authorgenreslist, workgenreslist, author
 	return
 
 
-def parsejscookie(cookiestring):
+def parsejscookie(cookiestring: str) -> dict:
 	"""
 	turn the string into a dict
 	a shame this has to be written
@@ -328,11 +337,14 @@ def parsejscookie(cookiestring):
 	return optiondict
 
 
-def sessionselectionsashtml(authordict, workdict):
+def sessionselectionsashtml(authordict: dict, workdict: dict) -> dict:
 	"""
+
 	assemble the html to be fed into the json that goes to the js that fills #selectionstable
 	three chunks: time; selections; exclusions
-	:param authordict, workdict:
+
+	:param authordict:
+	:param workdict:
 	:return:
 	"""
 
@@ -358,14 +370,14 @@ def sessionselectionsashtml(authordict, workdict):
 	return selectioninfo
 
 
-def sessionselectionsjs(labeltupleslist):
+def sessionselectionsjs(labeltupleslist: List[Tuple[str, int]]) -> str:
 	"""
 	
 	build js out of something like:
 	
 		[('agnselections', 0), ('auselections', 0), ('auselections', 1)]
 	
-	:param labeltuples: 
+	:param labeltupleslist:
 	:return: 
 	"""
 
@@ -576,7 +588,7 @@ def sessionselectionsinfo(authordict, workdict):
 	return returndict
 
 
-def selectionlinehtmlandjs(v, selectionorexclusion, session):
+def selectionlinehtmlandjs(v: str, selectionorexclusion: str, thesession: session) -> Dict[str, str]:
 	"""
 	
 	generate something like:
@@ -586,7 +598,7 @@ def selectionlinehtmlandjs(v, selectionorexclusion, session):
 	:param v: 
 	:param selectionorexclusion: 
 	:param localval: 
-	:param session: 
+	:param thesession:
 	:return: 
 	"""
 
@@ -596,7 +608,7 @@ def selectionlinehtmlandjs(v, selectionorexclusion, session):
 	localval = -1
 	tit = 'title="Double-click to remove this item"'
 
-	for s in session[var]:
+	for s in thesession[var]:
 		localval += 1
 		thehtml.append('<span class="{v}{soe} selection" id="{var}_0{lv}" {tit}>{s}</span>' \
 		               '<br />'.format(v=v, soe=selectionorexclusion, var=var, lv=localval, tit=tit, s=s))
@@ -685,7 +697,7 @@ def rationalizeselections(newselectionuid, selectorexclude):
 	return
 
 
-def corpusselectionsasavalue(thesession=session):
+def corpusselectionsasavalue(thesession=session) -> int:
 	"""
 
 	represent the active corpora as a pseudo-binary value: '10101' for ON/OFF/ON/OFF/ON
@@ -703,12 +715,12 @@ def corpusselectionsasavalue(thesession=session):
 		else:
 			binarystring += '0'
 
-	binaryvalue = int(binarystring,2)
+	binaryvalue = int(binarystring, 2)
 
 	return binaryvalue
 
 
-def corpusselectionsaspseudobinarystring(thesession=session):
+def corpusselectionsaspseudobinarystring(thesession=session) -> str:
 	"""
 
 	represent the active corpora as a pseudo-binary value: '10101' for ON/OFF/ON/OFF/ON
@@ -729,7 +741,7 @@ def corpusselectionsaspseudobinarystring(thesession=session):
 	return binarystring
 
 
-def justlatin(thesession=session):
+def justlatin(thesession=session) -> bool:
 	"""
 
 	probe the session to see if we are working in a latin-only environment: '10000' = 16
@@ -743,7 +755,7 @@ def justlatin(thesession=session):
 		return False
 
 
-def justtlg(thesession=session):
+def justtlg(thesession=session) -> bool:
 	"""
 
 	probe the session to see if we are working in a tlg authors only environment: '01000' = 8
@@ -757,7 +769,7 @@ def justtlg(thesession=session):
 		return False
 
 
-def justinscriptions(thesession=session):
+def justinscriptions(thesession=session) -> bool:
 	"""
 
 	probe the session to see if we are working in a inscriptions-only environment: '00100' = 2
@@ -772,7 +784,7 @@ def justinscriptions(thesession=session):
 		return False
 
 
-def justpapyri(thesession=session):
+def justpapyri(thesession=session) -> bool:
 	"""
 
 	probe the session to see if we are working in a papyrus-only environment: '00010' = 2
@@ -787,7 +799,7 @@ def justpapyri(thesession=session):
 		return False
 
 
-def justlit(thesession=session):
+def justlit(thesession=session) -> bool:
 	"""
 
 	probe the session to see if we are working in a TLG + LAT environment: '11000' = 24
@@ -801,7 +813,7 @@ def justlit(thesession=session):
 		return False
 
 
-def justdoc(thesession=session):
+def justdoc(thesession=session) -> bool:
 	"""
 
 	probe the session to see if we are working in a DDP + INS environment: '00110' = 6
@@ -815,7 +827,7 @@ def justdoc(thesession=session):
 		return False
 
 
-def reducetosessionselections(listmapper, criterion):
+def reducetosessionselections(listmapper: dict, criterion: str) -> dict:
 	"""
 
 	drop the full universe of possibilities and include only those that meet the active session criteria
@@ -860,7 +872,7 @@ def reducetosessionselections(listmapper, criterion):
 	return d
 
 
-def returnactivedbs(thesession=session):
+def returnactivedbs(thesession=session) -> List[str]:
 	"""
 
 	what dbs are currently active?
@@ -891,7 +903,7 @@ def returnactivedbs(thesession=session):
 	return activedbs
 
 
-def findactivebrackethighlighting(s=session):
+def findactivebrackethighlighting(s=session) -> List[str]:
 	"""
 
 	what kinds of brackets are we highlighting
@@ -936,13 +948,14 @@ def selectionisactive(selected):
 	return selected
 
 
-def returnactivelist(selectiondict):
+def returnactivelist(selectiondict: dict) -> List[str]:
 	"""
 
 	what author categories, etc can you pick at the moment?
 
 	selectiondict is something like authorgenresdict or workgenresdict
 
+	:param selectiondict:
 	:return:
 	"""
 

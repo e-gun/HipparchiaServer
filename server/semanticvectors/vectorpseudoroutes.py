@@ -8,7 +8,7 @@
 
 import json
 import locale
-import time
+import re
 
 from flask import request, session
 
@@ -16,7 +16,8 @@ from server import hipparchia
 from server.dbsupport.vectordbfunctions import fetchverctorenvirons
 from server.formatting.jsformatting import generatevectorjs
 from server.formatting.vectorformatting import formatnnmatches
-from server.hipparchiaobjects.searchobjects import ProgressPoll, SearchOutputObject
+from server.hipparchiaobjects.searchobjects import SearchOutputObject
+from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
@@ -46,22 +47,22 @@ from server.textsandindices.textandindiceshelperfunctions import getrequiredmorp
 
 """
 
-@hipparchia.route('/findvectors/<timestamp>', methods=['GET'])
-def findabsolutevectors(timestamp):
+@hipparchia.route('/findvectors/<searchid>', methods=['GET'])
+def findabsolutevectors(searchid):
 	"""
 
 	meant to be called via a click from a result from a prior search
 
-	:param timestamp:
+	:param searchid:
 	:return:
 	"""
 
-	try:
-		ts = str(int(timestamp))
-	except ValueError:
-		ts = str(int(time.time()))
+	pollid = re.sub(r'\W', '', searchid)
 
-	so = buildsearchobject(ts, request, session)
+	if pollid != searchid:
+		pollid = 'this_poll_will_never_be_found'
+
+	so = buildsearchobject(pollid, request, session)
 	so.seeking = ''
 	so.proximate = ''
 	so.proximatelemma = ''
@@ -71,8 +72,8 @@ def findabsolutevectors(timestamp):
 	except KeyError:
 		so.lemma = None
 
-	poll[ts] = ProgressPoll(ts)
-	activepoll = poll[ts]
+	poll[pollid] = ProgressPoll(pollid)
+	activepoll = poll[pollid]
 	activepoll.activate()
 	activepoll.statusis('Preparing to search')
 	so.poll = activepoll
@@ -83,7 +84,7 @@ def findabsolutevectors(timestamp):
 
 	output = findabsolutevectorsbysentence(so)
 
-	del poll[ts]
+	del poll[pollid]
 
 	return output
 
@@ -94,6 +95,10 @@ def findabsolutevectorsbysentence(searchobject):
 	use the searchlist to grab a collection of sentences
 
 	then take a lemmatized search term and build association semanticvectors around that term in those passages
+
+	generators are tempting, but dealing with generators+MP is a trick:
+
+		TypeError: can't pickle generator objects
 
 	:param searchitem:
 	:param vtype:

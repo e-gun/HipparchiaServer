@@ -1,0 +1,31 @@
+
+The following could be coded up on a preliminary basis without much trouble.
+How many of them would actually yield useful results in the end?
+How much trouble would it be to move from rudimentary "proof of concept" code to code that did yield those useful results?
+
+    homonymn disambiguation via guessing the neighbors
+        assign probabilities to homonymns: 'est' from 'sum' vs 'est' from 'edo', etc.
+    guesser for latin equiv of a greek word / greek equiv of a latin word
+    unknown form guesser: letter overlap with know forms list + neighborhood awareness
+    automated scansion
+        cf http://www.mqdq.it/public/cooccorrenze/querycometri/check/started
+    position-in-verse searching
+    sentence similarities --> autoindexing of xrefs in works
+        'allusions and intertexts' robot [same as above, mostly]
+        cf http://www.mqdq.it/public/cooccorrenze/querycolex/check/started
+    apparatus criticus possibilities
+        basically the ability to take something like the texts from https://github.com/DigitalLatin and insert them into Hipparchia
+        [would need an extra column in the tables: 'apparatus', vel sim.
+    emendation of emendations via critique of supplenda/delenda
+    digilibLT text insertion
+    project gutenberg POC code: 'database of all free knowledge'
+
+misc
+    buttons to swap 'u' for 'v' and sigma types on the fly
+    constrain results by part of speech: -eres searches that just return the subjunctives and not the nouns, etc.
+    suppress results and just return counts
+        useful if you want to know that "to be" is used 25000x in some span but are not interested in watching your browser crash trying to display them
+
+bugfixes for v.1.0.0
+    if you search for all forms of X and two forms of X are in the same line, the line is returned twice. Prune?
+    proximate lemma whitespace check is displayed in output: '(\s|)'

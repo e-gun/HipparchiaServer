@@ -16,7 +16,7 @@ from server.dbsupport.vectordbfunctions import createstoredimagestable, createve
 def clearsession():
 	"""
 	clear the session
-	this will reset all settings and reload the front page
+	this will reset all instance and reload the front page
 	:return:
 	"""
 
@@ -36,7 +36,8 @@ def resetsemanticvectors():
 	:return:
 	"""
 
-	createvectorstable()
+	if hipparchia.config['BLOCKRESETPATHS'] == 'no':
+		createvectorstable()
 
 	return redirect(url_for('frontpage'))
 
@@ -52,6 +53,7 @@ def resetvectorgraphs():
 	:return:
 	"""
 
-	createstoredimagestable()
+	if hipparchia.config['BLOCKRESETPATHS'] == 'no':
+		createstoredimagestable()
 
 	return redirect(url_for('frontpage'))

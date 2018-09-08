@@ -59,7 +59,7 @@ def resultiterator(cursor, chunksize=5000):
 			yield result
 
 
-def dbloadasingleworkobject(workuniversalid):
+def dbloadasingleworkobject(workuniversalid: str) -> dbOpus:
 	"""
 
 	if you get stranded down inside a series of function calls you have no way of regaining access to the master dictionary
@@ -90,7 +90,7 @@ def dbloadasingleworkobject(workuniversalid):
 	return workobject
 
 
-def findtoplevelofwork(workuid, cursor):
+def findtoplevelofwork(workuid: str, cursor) -> int:
 	"""
 	give me a db name and I will peek into it to see what its top level is
 	a way to get around generating an author object when the lexical passages are flowing freely
@@ -125,7 +125,7 @@ def findtoplevelofwork(workuid, cursor):
 	return numberoflevels
 
 
-def findselectionboundaries(workobject, selection, cursor):
+def findselectionboundaries(workobject: dbOpus, selection: str, cursor) -> tuple:
 	"""
 	
 	ask for _AT_x|y|z
@@ -170,9 +170,11 @@ def findselectionboundaries(workobject, selection, cursor):
 	return boundaries
 
 
-def simplecontextgrabber(authortable, focusline, linesofcontext, cursor):
+def simplecontextgrabber(authortable: str, focusline: int, linesofcontext: int, cursor) -> list:
 	"""
+
 	grab a pile of lines centered around the focusline
+
 	:param authortable:
 	:param focusline:
 	:param linesofcontext:
@@ -188,7 +190,7 @@ def simplecontextgrabber(authortable, focusline, linesofcontext, cursor):
 	return foundlines
 
 
-def perseusidmismatch(badworkdbnumber, cursor):
+def perseusidmismatch(badworkdbnumber: str, cursor) -> str:
 	"""
 	exception handling
 	Perseus says you can look something up in gr0006w16: but there is no such thing
@@ -223,7 +225,7 @@ def perseusidmismatch(badworkdbnumber, cursor):
 	return newworkid
 
 
-def returnfirstwork(authorid, cursor):
+def returnfirstwork(authorid: str, cursor) -> str:
 	"""
 	more exception handling
 	this will produce bad results, but it will not kill the program
@@ -248,7 +250,7 @@ def returnfirstwork(authorid, cursor):
 	return found
 
 
-def makeanemptyauthor(universalid):
+def makeanemptyauthor(universalid: str) -> dbAuthor:
 	"""
 	avoiding an exception by evoking an empty author object temporarily
 	:param universalid:
@@ -261,7 +263,7 @@ def makeanemptyauthor(universalid):
 	return aobject
 
 
-def makeanemptywork(universalid):
+def makeanemptywork(universalid: str) -> dbOpus:
 	"""
 	avoiding an exception by evoking an empty work object temporarily
 	:param universalid:
@@ -276,7 +278,7 @@ def makeanemptywork(universalid):
 	return wkobject
 
 
-def versionchecking(activedbs, expectedsqltemplateversion):
+def versionchecking(activedbs: list, expectedsqltemplateversion: str) -> str:
 	"""
 
 	send a warning if the corpora were built from a different template than the one active on the server
@@ -327,7 +329,7 @@ def versionchecking(activedbs, expectedsqltemplateversion):
 	return buildinfo
 
 
-def probefordatabases():
+def probefordatabases() -> dict:
 	"""
 
 	figure out which non-author tables are actually installed

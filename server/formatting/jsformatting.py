@@ -9,7 +9,7 @@
 import re
 
 
-def insertbrowserclickjs(tagname):
+def insertbrowserclickjs(tagname: str) -> str:
 	"""
 	the clickable urls don't work without inserting new js into the page to catch the clicks
 	need to match the what we used to get via the flask template
@@ -41,7 +41,7 @@ def insertbrowserclickjs(tagname):
 	return js
 
 
-def insertlexicalbrowserjs(htmlentry):
+def insertlexicalbrowserjs(htmlentry: str) -> str:
 	"""
 
 	supplement the html with some js that can see the new objects
@@ -62,18 +62,19 @@ def insertlexicalbrowserjs(htmlentry):
 	return newhtml
 
 
-def generatevectorjs(path):
+def generatevectorjs(path: str) -> str:
 	"""
 
 	this JS is mainly a copy of material from documentready.js
 
-	:param headwordwordlist:
+	:param path:
 	:return:
 	"""
 
 	jstemplate = """
 		$('lemmaheadword').click( function(e) { 
-			var searchid = Date.now();
+			// var searchid = Date.now();
+			var searchid = generateId(8);
 			var url = '/REGEXREPLACE/'+searchid+'?lem='+this.id;
 			$('#imagearea').empty();
 			$('#searchsummary').html(''); 
@@ -85,46 +86,29 @@ def generatevectorjs(path):
 			var w = window.innerWidth * .9;
 			var h = window.innerHeight * .9;
 			$.getJSON(url, function (output) { 
-					document.title = output['title'];
-	
-					var summaryhtml = '';
-					
-					summaryhtml += 'Sought '+output['htmlsearch']+'<br />';
-					if ( output['scope'] != '1') { summaryhtml += 'Searched '+output['scope']+' texts '; } else { summaryhtml += 'Searched 1 text '; }
-	
-					summaryhtml += 'and found '+output['resultcount'];
-					summaryhtml += ' ('+output['searchtime']+'s)';
-					
-					if (output['icandodates'] == 'yes' ) { 
-						if (output['dmin'] != '850 B.C.E.' || output['dmax'] != '1500 C.E.') { 
-							summaryhtml += '<br />Searched between '+output['dmin']+' and '+output['dmax']; 
-							} 
-						}
-	
-					if (output['onehit'] == 'yes') { 
-						summaryhtml += '<br />Only allowing one match per item searched (either a whole author or a specified work)'; 
-						}
-						
-					summaryhtml += '<br />Sorted by '+output['sortby'];
-					
-					if (output['hitmax'] == 'true') { 
-						summaryhtml += '<br />[Search suspended: result cap reached.]';
-						}
-										
-					$('#searchsummary').html(summaryhtml);
-					
-					$('#displayresults').html(output['found']);
-					
-					var imagetarget = $('#imagearea');
-					if (typeof output['image'] !== 'undefined' && output['image'] !== '') {
-						jQuery('<img/>').prependTo(imagetarget).attr({
-							src: '/getstoredfigure/' + output['image'],
-							alt: '[vector graph]',
-							id: 'insertedfigure',
-							height: h
-						});
-					}
-					
+				document.title = output['title'];
+				
+				$('#searchsummary').html(output['searchsummary']);
+				
+				$('#displayresults').html(output['found']);
+				
+				//
+				// THE GRAPH: if there is one... Note that if it is embedded in the output table, then
+				// that table has to be created and  $('#imagearea') with it before you do any of the following
+				//
+				
+				var imagetarget = $('#imagearea');
+				if (typeof output['image'] !== 'undefined' && output['image'] !== '') {
+					var w = window.innerWidth * .9;
+					var h = window.innerHeight * .9;
+					jQuery('<img/>').prependTo(imagetarget).attr({
+						src: '/getstoredfigure/' + output['image'],
+						alt: '[vector graph]',
+						id: 'insertedfigure',
+						height: h
+					});
+				}
+								
 					var browserclickscript = document.createElement("script");
 					browserclickscript.innerHTML = output['js'];
 					document.getElementById('browserclickscriptholder').appendChild(browserclickscript);
@@ -148,7 +132,7 @@ def generatevectorjs(path):
 	return js
 
 
-def supplementalindexjs():
+def supplementalindexjs() -> str:
 	"""
 
 	insert a js block to handle observed forms
@@ -209,7 +193,7 @@ def supplementalindexjs():
 	return js
 
 
-def dictionaryentryjs():
+def dictionaryentryjs() -> str:
 	"""
 
 	return js to insert

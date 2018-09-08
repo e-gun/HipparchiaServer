@@ -93,7 +93,7 @@ def selectionmade():
 		session['au' + suffix] = tidyuplist(session['au' + suffix])
 		rationalizeselections(uid, suffix)
 
-	# if vs elif: allow multiple simultaneous settings
+	# if vs elif: allow multiple simultaneous instance
 	if genre != '':
 		# add to the +/- genre list and then subtract from the -/+ list
 		session['agn' + suffix].append(genre)
@@ -139,6 +139,12 @@ def setsessionvariable():
 	validpunct = '-_'
 	val = depunct(val, validpunct)
 
+	try:
+		session['authorssummary']
+	except KeyError:
+		# cookies are not enabled
+		return json.dumps([{'none': 'none'}])
+
 	modifysessionvar(param, val)
 
 	result = json.dumps([{param: val}])
@@ -165,7 +171,10 @@ def clearselections():
 	try:
 		session[category].pop(item)
 	except IndexError:
-		print('clearselections() failed to pop', category, str(item))
+		print('\tclearselections() IndexError when popping {c}[{i}]'.format(c=category, i=str(item)))
+		pass
+	except KeyError:
+		print('\tclearselections() KeyError when popping {c}[{i}]'.format(c=category, i=str(item)))
 		pass
 
 	session.modified = True

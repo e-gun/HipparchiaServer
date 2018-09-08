@@ -19,6 +19,7 @@ try:
 	import matplotlib.pyplot as plt
 	import networkx as nx
 except ModuleNotFoundError:
+	print('matplotlib is not available')
 	matplotlib = None
 	plt = None
 	nx = None
@@ -229,7 +230,10 @@ def fetchvectorgraph(imagename):
 	:return:
 	"""
 
-	deletewhendone = True
+	if hipparchia.config['RETAINFIGURES'] == 'yes':
+		deletewhendone = False
+	else:
+		deletewhendone = True
 
 	dbconnection = ConnectionObject(ctype='rw')
 	dbconnection.setautocommit()

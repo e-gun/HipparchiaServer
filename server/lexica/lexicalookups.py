@@ -7,6 +7,7 @@
 """
 
 import re
+from typing import List
 
 import psycopg2
 from flask import session
@@ -21,8 +22,19 @@ from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbHeadwordObjec
 	dbMorphologyObject, dbWordCountObject
 
 
-def lookformorphologymatches(word, cursor, trialnumber=0):
+def lookformorphologymatches(word: str, cursor, trialnumber=0) -> dbMorphologyObject:
 	"""
+
+	hipparchiaDB=# select * from greek_morphology limit 1;
+	 observed_form |   xrefs   | prefixrefs |                                                             possible_dictionary_forms
+	---------------+-----------+------------+---------------------------------------------------------------------------------------------------------------------------------------------------
+	 Τηνίουϲ       | 114793123 |            | <possibility_1>Τήνιοϲ<xref_value>114793123</xref_value><xref_kind>0</xref_kind><transl> </transl><analysis>masc acc pl</analysis></possibility_1>+
+               |           |            |
+
+	hipparchiaDB=# select * from greek_lemmata where xref_number=114793123;
+	 dictionary_entry | xref_number |                  derivative_forms
+	------------------+-------------+----------------------------------------------------
+	 τήνιοϲ           |   114793123 | {τηνίων,τήνια,τηνίουϲ,τήνιοι,τηνίοιϲ,τηνία,τήνιοϲ}
 
 	:param word:
 	:param cursor:
@@ -91,7 +103,7 @@ def lookformorphologymatches(word, cursor, trialnumber=0):
 	return matchingobject
 
 
-def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
+def lexicalmatchesintohtml(observedform: str, morphologyobject: dbMorphologyObject, cursor) -> List[dict]:
 	"""
 
 	you have found the word(s), now generate a collection of HTML lines to hand to the JS
@@ -138,12 +150,13 @@ def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
 		# the number of items in prefixrefs corresponds to the number of prefix checks you will need to make to recompose the verb
 
 		consolidatedentry = {'count': count, 'form': observedform, 'word': p.entry, 'transl': p.gettranslation(),
-		                     'anal': p.getanalysislist()}
+		                     'anal': p.getanalysislist(), 'xref': p.xref}
 		returnarray.append({'value': formateconsolidatedgrammarentry(consolidatedentry)})
 
 	# the next will trim the items to check by inducing key collisions
 	# p.getbaseform(), p.entry, p.xref: judicium jūdiciūm, judicium 42397893
 	# p.getbaseform(), p.entry, p.xref: judicium jūdicium, judicium 42397893
+
 	distinct = dict()
 	for p in possibilities:
 		distinct[p.xref] = p.getbaseform()
@@ -233,6 +246,10 @@ def browserdictionarylookup(count, seekingentry, cursor):
 						'<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'.format(cv=countval, ent=w.entry))
 				if u'\u0304' in w.metricalentry or u'\u0306' in w.metricalentry:
 					outputlist.append('&nbsp;<span class="metrics">[{me}]</span>'.format(me=w.metricalentry))
+				if hipparchia.config['LEXDEBUGMODE'] == 'yes':
+					outputlist.append('&nbsp;<code>[ID: {x}]</code>'.format(x=w.id))
+					xref = findparserxref(w)
+					outputlist.append('&nbsp;<code>[XREF: {x}]</code>'.format(x=xref))
 				outputlist.append('</p>')
 
 				if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
@@ -310,7 +327,7 @@ def browserdictionarylookup(count, seekingentry, cursor):
 	return entry
 
 
-def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber=0):
+def searchdictionary(cursor, usedictionary: str, usecolumn: str, seeking: str, syntax: str, trialnumber=0):
 	"""
 
 	this will make several stabs at finding a word in the dictionary
@@ -328,7 +345,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		τήθη vs τηθή; the parser has the latter, the dictionary expects the former (but knows of the latter)
 
 	:param cursor:
-	:param dictionary:
+	:param usedictionary:
 	:param usecolumn:
 	:param seeking:
 	:param syntax:
@@ -344,7 +361,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 
 	# nothingfound = convertdictionaryfindintoobject('nothing', 'nodict')
 
-	if dictionary == 'latin_dictionary':
+	if usedictionary == 'latin_dictionary':
 		extracolumn = 'entry_key'
 	else:
 		extracolumn = 'unaccented_entry'
@@ -352,7 +369,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	qtemplate = """SELECT entry_name, metrical_entry, id_number, pos, translations, 
 					entry_body, {ec}
 					FROM {d} WHERE {col} {sy} %s ORDER BY id_number ASC"""
-	query = qtemplate.format(ec=extracolumn, d=dictionary, col=usecolumn, sy=syntax)
+	query = qtemplate.format(ec=extracolumn, d=usedictionary, col=usecolumn, sy=syntax)
 	data = (seeking,)
 	cursor.execute(query, data)
 	# print('searchdictionary()',query,'\n\t',data)
@@ -367,28 +384,28 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 	foundobjects = None
 
 	if len(found) > 0:
-		foundobjects = [convertdictionaryfindintoobject(f, dictionary, cursor) for f in found]
+		foundobjects = [convertdictionaryfindintoobject(f, usedictionary, cursor) for f in found]
 	elif trialnumber == 1:
 		# failure...
 		# the word is probably there, we have just been given the wrong search term; try some other solutions
 		# [1] first guess: there were multiple possible entries, not just one
 		newword = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹]', '', seeking.lower())
-		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobjects = searchdictionary(cursor, usedictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber == 2:
 		# grab any/all variants: ⁰¹²³⁴⁵⁶⁷⁸⁹
 		newword = '^{sk}[¹²³⁴⁵⁶⁷⁸⁹]'.format(sk=seeking)
-		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
+		foundobjects = searchdictionary(cursor, usedictionary, usecolumn, newword, '~', trialnumber)
 	# elif trialnumber < maxtrials and '-' in seeking:
 	# 	newword = attemptelision(seeking)
 	# 	foundobject = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and seeking[-1] == 'ω':
 		# ὑποϲυναλείφομαι is in the dictionary, but greek_lemmata says to look for ὑπό-ϲυναλείφω
 		newword = seeking[:-1] + 'ομαι'
-		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobjects = searchdictionary(cursor, usedictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and re.search(r'ομαι$', seeking):
 		# χαρίζω is in the dictionary, but greek_lemmata says to look for χαρίζομαι
 		newword = seeking[:-4] + 'ω'
-		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobjects = searchdictionary(cursor, usedictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and re.search(accenteddiaresis, seeking):
 		# false positives very easy here, but we are getting desperate and have nothing to lose
 		diaresis = re.search(accenteddiaresis, seeking)
@@ -397,7 +414,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		vowels = diaresis.group(0)
 		vowels = vowels[0] + 'ΐ'
 		newword = head + vowels + tail
-		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobjects = searchdictionary(cursor, usedictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials and re.search(unaccenteddiaresis, seeking):
 		diaresis = re.search(unaccenteddiaresis, seeking)
 		head = seeking[:diaresis.start()]
@@ -405,7 +422,7 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		vowels = diaresis.group(0)
 		vowels = vowels[0] + 'ϊ'
 		newword = head + vowels + tail
-		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '=', trialnumber)
+		foundobjects = searchdictionary(cursor, usedictionary, usecolumn, newword, '=', trialnumber)
 	elif trialnumber < maxtrials:
 		# τήθη vs τηθή; the parser has the latter, the dictionary expects the former (but knows of the latter)
 		trialnumber = maxtrials - 1
@@ -414,12 +431,12 @@ def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber
 		newword = universalregexequivalent(newword)
 		# strip '(' and ')'
 		newword = '^{wd}$'.format(wd=newword[1:-1])
-		foundobjects = searchdictionary(cursor, dictionary, usecolumn, newword, '~', trialnumber)
+		foundobjects = searchdictionary(cursor, usedictionary, usecolumn, newword, '~', trialnumber)
 
 	return foundobjects
 
 
-def convertdictionaryfindintoobject(foundline, dictionary, dbcursor):
+def convertdictionaryfindintoobject(foundline: tuple, usedictionary: str, dbcursor):
 	"""
 
 	dictionary = greek_dictionary or latin_dictionary
@@ -431,14 +448,14 @@ def convertdictionaryfindintoobject(foundline, dictionary, dbcursor):
 		foundline ('ἑτερόφθαλμοϲ', 'ἑτερόφθαλμοϲ', '43226', 'main', 'n', '[transl]', '<orth extent="suff" lang="greek" opt="n">ἑτερόφθαλμ-οϲ</orth>, <itype lang="greek" opt="n">ον</itype>, <sense id="n43226.0" n="A" level="1" opt="n"><tr opt="n">one-eyed</tr>, <bibl n="Perseus:abo:tlg,0014,024:141" default="NO" valid="yes"><author>D.</author> <biblScope>24.141</biblScope></bibl>, <bibl n="Perseus:abo:tlg,0086,025:1023a:5" default="NO" valid="yes"><author>Arist.</author><title>Metaph.</title><biblScope>1023a5</biblScope></bibl>; <foreign lang="greek">ἑ. γενομένη ἡ Ἑλλάϲ</foreign>, metaph., of the proposed destruction of Athens, Leptines ap. <bibl n="Perseus:abo:tlg,0086,038:1411a:5" default="NO" valid="yes"><author>Arist.</author><title>Rh.</title><biblScope>1411a5</biblScope></bibl>, cf. <bibl default="NO"><author>Demad.</author><biblScope>65</biblScope></bibl> <bibl default="NO"><author>B.</author></bibl>, <bibl default="NO"><author>Plu.</author><biblScope>2.803a</biblScope></bibl>. </sense><sense n="II" id="n43226.1" level="2" opt="n"> <tr opt="n">with different-coloured eyes,</tr> <bibl n="Perseus:abo:tlg,4080,001:16:2:1" default="NO"><author>Gp.</author> <biblScope>16.2.1</biblScope></bibl>.</sense>', 'ετεροφθαλμοϲ')
 
 	:param foundline:
-	:param dictionary:
+	:param usedictionary:
 	:return:
 	"""
 	# print('foundline',foundline)
 
-	if dictionary == 'greek_dictionary':
+	if usedictionary == 'greek_dictionary':
 		wordobject = dbGreekWord(*foundline)
-	elif dictionary == 'latin_dictionary':
+	elif usedictionary == 'latin_dictionary':
 		wordobject = dbLatinWord(*foundline)
 	else:
 		# you actually want a hollow object
@@ -446,7 +463,7 @@ def convertdictionaryfindintoobject(foundline, dictionary, dbcursor):
 
 	ntemplate = 'SELECT entry_name, id_number FROM {d} WHERE id_number > %s ORDER BY id_number ASC LIMIT 1;'
 
-	q = ntemplate.format(d=dictionary)
+	q = ntemplate.format(d=usedictionary)
 	d = (wordobject.id,)
 	dbcursor.execute(q, d)
 	e = dbcursor.fetchone()
@@ -460,7 +477,7 @@ def convertdictionaryfindintoobject(foundline, dictionary, dbcursor):
 
 	ptemplate = 'SELECT entry_name, id_number FROM {d} WHERE id_number < %s ORDER BY id_number DESC LIMIT 1;'
 
-	q = ptemplate.format(d=dictionary)
+	q = ptemplate.format(d=usedictionary)
 	d = (wordobject.id,)
 	dbcursor.execute(q, d)
 	e = dbcursor.fetchone()
@@ -683,6 +700,46 @@ def grablemmataobjectfor(entryname, db, cursor):
 
 	return lemmaobject
 
+
+def findparserxref(wordobject) -> str:
+	"""
+
+	used in LEXDEBUGMODE to find the parser xrefvalue for a headword
+
+	:param entryname:
+	:return:
+	"""
+
+	dbconnection = ConnectionObject()
+	dbcursor = dbconnection.cursor()
+
+	if wordobject.isgreek():
+		lang = 'greek'
+	else:
+		lang = 'latin'
+
+	trimmedentry = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹]', '', wordobject.entry)
+
+	q = 'SELECT * FROM {lang}_lemmata WHERE dictionary_entry=%s'.format(lang=lang)
+	d = (wordobject.entry,)
+	dbcursor.execute(q, d)
+	results = dbcursor.fetchall()
+
+	if not results:
+		d = (trimmedentry,)
+		dbcursor.execute(q, d)
+		results = dbcursor.fetchall()
+
+	# it is not clear that more than one item will ever be returned
+	# but if that happened, you need to be ready to deal with it
+	lemmaobjects = [dbLemmaObject(*r) for r in results]
+	xrefs = [str(l.xref) for l in lemmaobjects]
+
+	xrefvalues = ', '.join(xrefs)
+
+	dbconnection.connectioncleanup()
+
+	return xrefvalues
 
 """
 [probably not] TODO: clickable INS or DDP xrefs in dictionary entries

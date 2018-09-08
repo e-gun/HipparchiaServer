@@ -6,22 +6,28 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import pickle
 import re
 from multiprocessing import Manager, Process
+from multiprocessing.managers import ListProxy
+from typing import List
 
 from server import hipparchia
-from server.threading.mpthreadcount import setthreadcount
 from server.dbsupport.dblinefunctions import dblineintolineobject
+from server.dbsupport.redisdbfunctions import establishredisconnection, buildredissearchlist
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, \
 	massagesearchtermsforwhitespace
 from server.searching.substringsearching import substringsearch
+from server.threading.mpthreadcount import setthreadcount
 
 
-def searchdispatcher(searchobject):
+def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	"""
 
 	assign the search to multiprocessing workers
@@ -53,7 +59,12 @@ def searchdispatcher(searchobject):
 
 	manager = Manager()
 	foundlineobjects = manager.list()
-	searchlist = manager.list(so.indexrestrictions.keys())
+
+	if not so.redissearchlist:
+		listofplacestosearch = manager.list(so.indexrestrictions.keys())
+	else:
+		listofplacestosearch = None
+		buildredissearchlist(list(so.indexrestrictions.keys()), so.searchid)
 
 	workers = setthreadcount()
 	
@@ -69,9 +80,11 @@ def searchdispatcher(searchobject):
 	if so.searchtype == 'simple':
 		activepoll.statusis('Executing a simple word search...')
 		targetfunction = workonsimplesearch
-		argumentuple = (foundlineobjects, searchlist, so)
+		argumentuple = (foundlineobjects, listofplacestosearch, so)
 	elif so.searchtype == 'simplelemma':
 		activepoll.statusis('Executing a lemmatized word search for the {n} known forms of {w}...'.format(n=len(so.lemma.formlist), w=so.lemma.dictionaryentry))
+		# don't search for every form at once (100+?)
+		# instead build a list of tuples: [(ORed_regex_forms_part_01, authortable1), ...]
 		chunksize = hipparchia.config['LEMMACHUNKSIZE']
 		terms = so.lemma.formlist
 		chunked = [terms[i:i + chunksize] for i in range(0, len(terms), chunksize)]
@@ -81,6 +94,9 @@ def searchdispatcher(searchobject):
 		for c in chunked:
 			for item in masterlist:
 				searchtuples.append((c, item))
+		if so.redissearchlist:
+			ptuples = [pickle.dumps(s) for s in searchtuples]
+			buildredissearchlist(ptuples, so.searchid)
 		activepoll.allworkis(len(searchtuples))
 		targetfunction = workonsimplelemmasearch
 		argumentuple = (foundlineobjects, searchtuples, so)
@@ -104,11 +120,11 @@ def searchdispatcher(searchobject):
 		if 0 < lccount < 500:
 			# print('workonphrasesearch()', searchingfor)
 			targetfunction = workonphrasesearch
-			argumentuple = (foundlineobjects, searchlist, so)
+			argumentuple = (foundlineobjects, listofplacestosearch, so)
 		else:
-			targetfunction = subqueryphrasesearch
-			argumentuple = (foundlineobjects, so.termone, searchlist, so)
 			# print('subqueryphrasesearch()', searchingfor)
+			targetfunction = subqueryphrasesearch
+			argumentuple = (foundlineobjects, so.termone, listofplacestosearch, so)
 	elif so.searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
 		if so.lemma or so.proximatelemma:
@@ -127,7 +143,7 @@ def searchdispatcher(searchobject):
 			so.termone = so.termtwo
 			so.termtwo = tmp
 		targetfunction = workonproximitysearch
-		argumentuple = (foundlineobjects, searchlist, so)
+		argumentuple = (foundlineobjects, listofplacestosearch, so)
 	else:
 		# impossible, but...
 		workers = 0
@@ -145,6 +161,7 @@ def searchdispatcher(searchobject):
 	for j in jobs:
 		j.join()
 
+	# generator needs to turn into a list
 	foundlineobjects = list(foundlineobjects)
 
 	for c in oneconnectionperworker:
@@ -153,21 +170,21 @@ def searchdispatcher(searchobject):
 	return foundlineobjects
 
 
-def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection):
+def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
-
+	
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
 
 	searchlist: ['gr0461', 'gr0489', 'gr0468', ...]
 
 	substringsearch() called herein needs ability to CREATE TEMPORARY TABLE
-
-	:param foundlineobjects:
-	:param searchlist:
-	:param activepoll:
-	:param searchobject:
-	:return:
+	
+	:param foundlineobjects: 
+	:param listofplacestosearch: 
+	:param searchobject: 
+	:param dbconnection: 
+	:return: 
 	"""
 
 	so = searchobject
@@ -181,18 +198,34 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 
 	commitcount = 0
 
-	while searchlist and activepoll.hitcount.value <= so.cap:
+	if so.redissearchlist:
+		listofplacestosearch = True
+		rc = establishredisconnection()
+		argument = '{id}_searchlist'.format(id=so.searchid)
+		getnetxitem = lambda x: rc.spop(argument).decode()
+		remainder = rc.smembers(argument)
+		emptyerror = AttributeError
+		remaindererror = AttributeError
+	else:
+		getnetxitem = listofplacestosearch.pop
+		remainder = listofplacestosearch
+		emptyerror = IndexError
+		remaindererror = TypeError
+
+	while listofplacestosearch and activepoll.gethits() <= so.cap:
 		commitcount += 1
 		dbconnection.checkneedtocommit(commitcount)
+
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
 		# the pop() will fail if somebody else grabbed the last available work before it could be registered
 		# that's not supposed to happen with the pool, but somehow it does
+		# and this irregularity justifies exploring the redis alternative...
 
 		try:
-			authortable = searchlist.pop()
-		except IndexError:
+			authortable = getnetxitem(0)
+		except emptyerror:
 			authortable = None
-			searchlist = None
+			listofplacestosearch = None
 			
 		if authortable:
 			foundlines = substringsearch(so.termone, authortable, so, dbcursor)
@@ -203,17 +236,20 @@ def workonsimplesearch(foundlineobjects, searchlist, searchobject, dbconnection)
 				# print(authortable, len(lineobjects))
 				numberoffinds = len(lineobjects)
 				activepoll.addhits(numberoffinds)
+		else:
+			listofplacestosearch = None
 
 		try:
-			activepoll.remain(len(searchlist))
-		except TypeError:
+			activepoll.remain(len(remainder))
+		except remaindererror:
 			pass
 
 	return foundlineobjects
 
 
-def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconnection):
+def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
+	
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
 	you need to pick the right style of search for each work you search, though
 
@@ -227,12 +263,12 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 
 	these searches go very slowly of you seek "all 429 known forms of »εὑρίϲκω«"; so they have been broken up
 	you will search N forms in all tables; then another N forms in all tables; ...
-
-	:param foundlineobjects:
-	:param searchtuples:
-	:param activepoll:
-	:param searchobject:
-	:return:
+	
+	:param foundlineobjects: 
+	:param searchtuples: 
+	:param searchobject: 
+	:param dbconnection: 
+	:return: 
 	"""
 
 	so = searchobject
@@ -242,8 +278,23 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 	dbconnection.setreadonly(False)
 	dbcursor = dbconnection.cursor()
 
+	if so.redissearchlist:
+		searchtuples = True
+		rc = establishredisconnection()
+		argument = '{id}_searchlist'.format(id=so.searchid)
+		# note that this lambda is not like the lambda in the other parallel functions: a pickled tuple is coming back
+		getnetxitem = lambda x: rc.spop(argument)
+		remainder = rc.smembers(argument)
+		emptyerror = AttributeError
+		remaindererror = AttributeError
+	else:
+		getnetxitem = searchtuples.pop
+		remainder = searchtuples
+		emptyerror = IndexError
+		remaindererror = TypeError
+
 	commitcount = 0
-	while searchtuples and activepoll.hitcount.value <= so.cap:
+	while searchtuples and activepoll.gethits() <= so.cap:
 		commitcount += 1
 		dbconnection.checkneedtocommit(commitcount)
 		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
@@ -251,13 +302,17 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 		# that's not supposed to happen with the pool, but somehow it does
 
 		try:
-			searchingfor, authortable = searchtuples.pop()
-		except IndexError:
-			authortable = None
-			searchingfor = None
+			tup = getnetxitem(0)
+		except emptyerror:
+			tup = None
 			searchtuples = None
 
-		if authortable:
+		if tup:
+			if so.redissearchlist:
+				searchingfor, authortable = pickle.loads(tup)
+			else:
+				searchingfor, authortable = tup
+
 			foundlines = substringsearch(searchingfor, authortable, so, dbcursor)
 			lineobjects = [dblineintolineobject(f) for f in foundlines]
 			foundlineobjects.extend(lineobjects)
@@ -265,16 +320,18 @@ def workonsimplelemmasearch(foundlineobjects, searchtuples, searchobject, dbconn
 			if lineobjects:
 				numberoffinds = len(lineobjects)
 				activepoll.addhits(numberoffinds)
+		else:
+			searchtuples = None
 
 		try:
-			activepoll.remain(len(searchtuples))
-		except TypeError:
+			activepoll.remain(len(remainder))
+		except remaindererror:
 			pass
 
 	return foundlineobjects
 
 
-def workonphrasesearch(foundlineobjects, searchinginside, searchobject, dbconnection):
+def workonphrasesearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
 
 	a multiprocessor aware function that hands off bits of a phrase search to multiple searchers
@@ -285,7 +342,7 @@ def workonphrasesearch(foundlineobjects, searchinginside, searchobject, dbconnec
 		['lt0400', 'lt0022', ...]
 
 	:param foundlineobjects:
-	:param searchinginside:
+	:param listofplacestosearch:
 	:param activepoll:
 	:param searchobject:
 	:return:
@@ -297,28 +354,46 @@ def workonphrasesearch(foundlineobjects, searchinginside, searchobject, dbconnec
 	dbcursor = dbconnection.cursor()
 
 	commitcount = 0
-	while searchinginside and len(foundlineobjects) < so.cap:
+
+	if so.redissearchlist:
+		listofplacestosearch = True
+		rc = establishredisconnection()
+		argument = '{id}_searchlist'.format(id=so.searchid)
+		getnetxitem = lambda x: rc.spop(argument).decode()
+		remainder = rc.smembers(argument)
+		emptyerror = AttributeError
+		remaindererror = AttributeError
+	else:
+		getnetxitem = listofplacestosearch.pop
+		remainder = listofplacestosearch
+		emptyerror = IndexError
+		remaindererror = TypeError
+
+	while listofplacestosearch and len(foundlineobjects) < so.cap:
 		commitcount += 1
 		dbconnection.checkneedtocommit(commitcount)
 
 		try:
-			wkid = searchinginside.pop()
-		except IndexError:
-			wkid = None
-			searchinginside = None
+			authortable = getnetxitem(0)
+		except emptyerror:
+			authortable = None
+			listofplacestosearch = None
 
-		if wkid:
-			foundlines = phrasesearch(wkid, so, dbcursor)
+		if authortable:
+			foundlines = phrasesearch(authortable, so, dbcursor)
 			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
-		try:
-			activepoll.remain(len(searchinginside))
-		except TypeError:
-			pass
+
+			try:
+				activepoll.remain(len(remainder))
+			except remaindererror:
+				pass
+		else:
+			listofplacestosearch = None
 
 	return foundlineobjects
 
 
-def workonproximitysearch(foundlineobjects, searchinginside, searchobject, dbconnection):
+def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
 
 	a multiprocessor aware function that hands off bits of a proximity search to multiple searchers
@@ -333,7 +408,7 @@ def workonproximitysearch(foundlineobjects, searchinginside, searchobject, dbcon
 		'patres'
 
 	:param foundlineobjects:
-	:param searchinginside:
+	:param listofplacestosearch:
 	:param activepoll:
 	:param searchobject:
 	:return:
@@ -342,20 +417,34 @@ def workonproximitysearch(foundlineobjects, searchinginside, searchobject, dbcon
 	so = searchobject
 	activepoll = so.poll
 
+	if so.redissearchlist:
+		listofplacestosearch = True
+		rc = establishredisconnection()
+		argument = '{id}_searchlist'.format(id=so.searchid)
+		getnetxitem = lambda x: rc.spop(argument).decode()
+		remainder = rc.smembers(argument)
+		emptyerror = AttributeError
+		remaindererror = AttributeError
+	else:
+		getnetxitem = listofplacestosearch.pop
+		remainder = listofplacestosearch
+		emptyerror = IndexError
+		remaindererror = TypeError
+
 	if so.scope == 'lines':
 		searchfunction = withinxlines
 	else:
 		searchfunction = withinxwords
 
-	while searchinginside and activepoll.hitcount.value <= so.cap:
+	while listofplacestosearch and activepoll.gethits() <= so.cap:
 		try:
-			wkid = searchinginside.pop()
-		except IndexError:
-			wkid = None
-			searchinginside = None
+			authortable = getnetxitem(0)
+		except emptyerror:
+			authortable = None
+			listofplacestosearch = None
 
-		if wkid:
-			foundlines = searchfunction(wkid, so, dbconnection)
+		if authortable:
+			foundlines = searchfunction(authortable, so, dbconnection)
 
 			if foundlines:
 				activepoll.addhits(len(foundlines))
@@ -363,8 +452,8 @@ def workonproximitysearch(foundlineobjects, searchinginside, searchobject, dbcon
 			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
 
 		try:
-			activepoll.remain(len(searchinginside))
-		except TypeError:
+			activepoll.remain(len(remainder))
+		except remaindererror:
 			pass
 
 	return foundlineobjects

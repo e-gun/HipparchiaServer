@@ -7,16 +7,20 @@
 """
 
 import re
+from multiprocessing.managers import ListProxy
+from typing import List
 
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
+from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.dbsupport.tablefunctions import uniquetablename
-from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline
 from server.searching.substringsearching import substringsearch
 
 
-def phrasesearch(wkid, searchobject, cursor):
+def phrasesearch(wkid: str, searchobject: SearchObject, cursor) -> List[dbWorkLine]:
 	"""
 
 	a whitespace might mean things are on a new line
@@ -72,7 +76,7 @@ def phrasesearch(wkid, searchobject, cursor):
 	return fullmatches
 
 
-def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searchobject, dbconnection):
+def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
 	foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll
 
@@ -171,7 +175,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 	sp = re.sub(r'^\s', r'(^|\\s)', searchphrase)
 	sp = re.sub(r'\s$', r'(\\s|$)', sp)
 	# on the reasoning behind the following substitution see 'DEBUGGING notes: SQL oddities' above
-	# sp = re.sub(r' ', r'\s', sp)
+	# sp = re.sub(r' ', r'\\s', sp)
 
 	if not so.onehit:
 		lim = ' LIMIT ' + str(so.cap)
@@ -180,16 +184,40 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 		lim = ' LIMIT 5'
 
 	commitcount = 0
-	while tablestosearch and activepoll.hitcount.value <= so.cap:
+
+	if so.redissearchlist:
+		listofplacestosearch = True
+		rc = establishredisconnection()
+		argument = '{id}_searchlist'.format(id=so.searchid)
+		getnetxitem = rc.spop
+	else:
+		rc = None
+		getnetxitem = listofplacestosearch.pop
+		argument = 0
+
+	while listofplacestosearch and activepoll.gethits() <= so.cap:
 		commitcount += 1
 		try:
-			uid = tablestosearch.pop()
-			activepoll.remain(len(tablestosearch))
+			authortable = getnetxitem(argument)
 		except IndexError:
-			uid = None
-			tablestosearch = None
+			authortable = None
+			listofplacestosearch = None
 
-		if uid:
+		if not so.redissearchlist:
+			try:
+				activepoll.remain(len(listofplacestosearch))
+			except TypeError:
+				pass
+		else:
+			try:
+				activepoll.remain(len(rc.smembers(argument)))
+			except AttributeError:
+				pass
+
+		if authortable:
+			if so.redissearchlist:
+				# b'lt0908' --> 'lt0908'
+				authortable = authortable.decode()
 			dbconnection.checkneedtocommit(commitcount)
 
 			qtemplate = """
@@ -201,9 +229,9 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 				WHERE secondpass.linebundle ~ %s {lim}"""
 
 			whr = ''
-			r = so.indexrestrictions[uid]
+			r = so.indexrestrictions[authortable]
 			if r['type'] == 'between':
-				indexwedwhere = buildbetweenwhereextension(uid, so)
+				indexwedwhere = buildbetweenwhereextension(authortable, so)
 				if indexwedwhere != '':
 					# indexwedwhere will come back with an extraneous ' AND'
 					indexwedwhere = indexwedwhere[:-4]
@@ -217,9 +245,9 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 				WHERE EXISTS
 					(SELECT 1 FROM {tbl}_includelist_{a} incl WHERE incl.includeindex = {tbl}.index)
 				"""
-				whr = wtempate.format(tbl=uid, a=avoidcollisions)
+				whr = wtempate.format(tbl=authortable, a=avoidcollisions)
 
-			query = qtemplate.format(db=uid, co=so.usecolumn, whr=whr, lim=lim)
+			query = qtemplate.format(db=authortable, co=so.usecolumn, whr=whr, lim=lim)
 			data = (sp,)
 			# print('subqueryphrasesearch() q,d:',query, data)
 			cursor.execute(query, data)
@@ -229,7 +257,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 			locallineobjects = list()
 			if indices:
 				for i in indices:
-					query = 'SELECT * FROM {tb} WHERE index=%s'.format(tb=uid)
+					query = 'SELECT * FROM {tb} WHERE index=%s'.format(tb=authortable)
 					data = (i,)
 					cursor.execute(query, data)
 					locallineobjects.append(dblineintolineobject(cursor.fetchone()))
@@ -240,7 +268,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 			#	print(l.universalid, l.locus(), getattr(l,so.usewordlist))
 
 			gotmyonehit = False
-			while locallineobjects and activepoll.hitcount.value <= so.cap and not gotmyonehit:
+			while locallineobjects and activepoll.gethits() <= so.cap and not gotmyonehit:
 				# windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]
 				# figure out which line is really the line with the goods
 				# it is not nearly so simple as picking the 2nd element in any run of 3: no always runs of 3 + matches in
@@ -261,7 +289,7 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 					if lo.wkuinversalid != nextline.wkuinversalid or lo.index != (nextline.index - 1):
 						# you grabbed the next line on the pile (e.g., index = 9999), not the actual next line (e.g., index = 101)
 						# usually you won't get a hit by grabbing the next db line, but sometimes you do...
-						query = 'SELECT * FROM {tb} WHERE index=%s'.format(tb=uid)
+						query = 'SELECT * FROM {tb} WHERE index=%s'.format(tb=authortable)
 						data = (lo.index + 1,)
 						cursor.execute(query, data)
 						try:
@@ -291,6 +319,9 @@ def subqueryphrasesearch(foundlineobjects, searchphrase, tablestosearch, searcho
 							activepoll.addhits(1)
 							if so.onehit:
 								gotmyonehit = True
+		else:
+			# redis will return None for authortable if the set is now empty
+			listofplacestosearch = None
 
 	return foundlineobjects
 

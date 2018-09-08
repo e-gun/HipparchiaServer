@@ -9,7 +9,7 @@
 import re
 
 
-def andsubstitutes(match):
+def andsubstitutes(match: re.match) -> str:
 	"""
 	turn &NN...& into unicode
 

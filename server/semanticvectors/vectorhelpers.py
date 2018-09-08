@@ -20,7 +20,7 @@ from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import uniquetablename
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.hipparchiaobjects.searchobjects import ProgressPoll
+from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildbetweenwhereextension
 from server.startup import lemmatadict
@@ -591,13 +591,16 @@ def readgitdata():
 	gitfile = '/.git/logs/HEAD'
 	line = ''
 
-	with open(basepath+gitfile) as fh:
-		for line in fh:
-			pass
-		lastline = line
+	try:
+		with open(basepath+gitfile) as fh:
+			for line in fh:
+				pass
+			lastline = line
 
-	gitdata = lastline.split(' ')
-	commit = gitdata[1]
+		gitdata = lastline.split(' ')
+		commit = gitdata[1]
+	except FileNotFoundError:
+		commit = 'unknowncommit'
 
 	return commit
 

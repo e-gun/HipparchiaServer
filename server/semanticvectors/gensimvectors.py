@@ -5,13 +5,13 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
-import time
+import re
 
 from flask import request, session
 
 from server import hipparchia
 from server.dbsupport.vectordbfunctions import checkforstoredvector
-from server.hipparchiaobjects.searchobjects import ProgressPoll
+from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
@@ -23,22 +23,22 @@ from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.startup import authordict, lemmatadict, listmapper, poll, workdict
 
 
-@hipparchia.route('/findneighbors/<timestamp>', methods=['GET'])
-def findnearestneighborvectors(timestamp):
+@hipparchia.route('/findneighbors/<searchid>', methods=['GET'])
+def findnearestneighborvectors(searchid):
 	"""
 
 	meant to be called via a click from a result from a prior search
 
-	:param timestamp:
+	:param searchid:
 	:return:
 	"""
 
-	try:
-		ts = str(int(timestamp))
-	except ValueError:
-		ts = str(int(time.time()))
+	pollid = re.sub(r'\W', '', searchid)
 
-	so = buildsearchobject(ts, request, session)
+	if pollid != searchid:
+		pollid = 'this_poll_will_never_be_found'
+
+	so = buildsearchobject(pollid, request, session)
 	so.seeking = ''
 	so.proximate = ''
 	so.proximatelemma = ''
@@ -50,8 +50,8 @@ def findnearestneighborvectors(timestamp):
 
 	so.vectorquerytype = 'nearestneighborsquery'
 
-	poll[ts] = ProgressPoll(ts)
-	activepoll = poll[ts]
+	poll[pollid] = ProgressPoll(pollid)
+	activepoll = poll[pollid]
 	activepoll.activate()
 	activepoll.statusis('Preparing to search')
 
@@ -59,7 +59,7 @@ def findnearestneighborvectors(timestamp):
 
 	output = executegensimsearch(so)
 
-	del poll[ts]
+	del poll[pollid]
 
 	return output
 
@@ -75,6 +75,7 @@ def executegensimsearch(searchobject):
 	:param vtype:
 	:return:
 	"""
+
 	so = searchobject
 	activepoll = so.poll
 
@@ -172,5 +173,3 @@ def executegensimsearch(searchobject):
 		return emptyvectoroutput(so, reasons)
 
 	return output
-
-

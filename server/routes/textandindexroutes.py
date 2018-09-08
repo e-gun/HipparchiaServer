@@ -8,6 +8,7 @@
 
 import json
 import locale
+import re
 import time
 
 from flask import request, session
@@ -17,7 +18,7 @@ from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.hipparchiaobjects.searchobjects import ProgressPoll
+from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.startup import authordict, poll, workdict
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import tcparserequest, \
@@ -33,18 +34,19 @@ def completeindex():
 	:return:
 	"""
 
-	try:
-		ts = str(int(request.args.get('id', '')))
-	except:
-		ts = str(int(time.time()))
+	searchid = request.args.get('id', '')
+	pollid = re.sub(r'\W', '', searchid)
+
+	if pollid != searchid:
+		pollid = 'this_poll_will_never_be_found'
 
 	starttime = time.time()
 
-	poll[ts] = ProgressPoll(ts)
-	poll[ts].activate()
+	poll[pollid] = ProgressPoll(pollid)
+	poll[pollid].activate()
 
-	dbc = ConnectionObject('autocommit')
-	cur = dbc.cursor()
+	dbconnection = ConnectionObject('autocommit')
+	dbcursor = dbconnection.cursor()
 
 	req = tcparserequest(request, authordict, workdict)
 	ao = req['authorobject']
@@ -60,27 +62,27 @@ def completeindex():
 		# we have both an author and a work, maybe we also have a subset of the work
 		if psg == ['']:
 			# whole work
-			poll[ts].statusis('Preparing an index to {t}'.format(t=wo.title))
+			poll[pollid].statusis('Preparing an index to {t}'.format(t=wo.title))
 			startline = wo.starts
 			endline = wo.ends
 		else:
 			# partial work
-			poll[ts].statusis('Preparing a partial index to {t}'.format(t=wo.title))
-			startandstop = textsegmentfindstartandstop(ao, wo, psg, cur)
+			poll[pollid].statusis('Preparing a partial index to {t}'.format(t=wo.title))
+			startandstop = textsegmentfindstartandstop(ao, wo, psg, dbcursor)
 			startline = startandstop['startline']
 			endline = startandstop['endline']
 
 		cdict = {wo.universalid: (startline, endline)}
-		output = buildindextowork(cdict, poll[ts], useheadwords, cur)
+		output = buildindextowork(cdict, poll[pollid], useheadwords, dbcursor)
 		allworks = list()
 
 	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
-		poll[ts].statusis('Preparing an index to the works of {a}'.format(a=ao.shortname))
+		poll[pollid].statusis('Preparing an index to the works of {a}'.format(a=ao.shortname))
 		# whole author
 		cdict = dict()
 		for wkid in ao.listworkids():
 			cdict[wkid] = (workdict[wkid].starts, workdict[wkid].ends)
-		output = buildindextowork(cdict, poll[ts], useheadwords, cur)
+		output = buildindextowork(cdict, poll[pollid], useheadwords, dbcursor)
 
 		allworks = ['{w}  ⇒ {t}'.format(w=w.universalid[6:10], t=w.title) for w in ao.listofworks]
 		allworks.sort()
@@ -94,16 +96,16 @@ def completeindex():
 	count = len(output)
 	try:
 		locale.setlocale(locale.LC_ALL, 'en_US')
-		count = locale.format("%d", count, grouping=True)
+		count = locale.format_string('%d', count, grouping=True)
 	except locale.Error:
 		count = str(count)
 
-	poll[ts].statusis('Preparing the index HTML')
+	poll[pollid].statusis('Preparing the index HTML')
 	indexhtml = wordindextohtmltable(output, useheadwords)
 
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)
-	poll[ts].deactivate()
+	poll[pollid].deactivate()
 
 	results = dict()
 	results['authorname'] = avoidsmallvariants(ao.shortname)
@@ -118,8 +120,8 @@ def completeindex():
 
 	results = json.dumps(results)
 
-	dbc.connectioncleanup()
-	del poll[ts]
+	dbconnection.connectioncleanup()
+	del poll[pollid]
 
 	return results
 
@@ -131,8 +133,8 @@ def textmaker():
 	:return:
 	"""
 
-	dbc = ConnectionObject('autocommit')
-	cur = dbc.cursor()
+	dbconnection = ConnectionObject('autocommit')
+	dbcursor = dbconnection.cursor()
 
 	linesevery = hipparchia.config['SHOWLINENUMBERSEVERY']
 
@@ -152,11 +154,11 @@ def textmaker():
 			startline = wo.starts
 			endline = wo.ends
 		else:
-			startandstop = textsegmentfindstartandstop(ao, wo, psg, cur)
+			startandstop = textsegmentfindstartandstop(ao, wo, psg, dbcursor)
 			startline = startandstop['startline']
 			endline = startandstop['endline']
 
-		texthtml = buildtext(wo.universalid, startline, endline, linesevery, cur)
+		texthtml = buildtext(wo.universalid, startline, endline, linesevery, dbcursor)
 	else:
 		texthtml = ''
 
@@ -172,6 +174,6 @@ def textmaker():
 
 	results = json.dumps(results)
 
-	dbc.connectioncleanup()
+	dbconnection.connectioncleanup()
 
 	return results

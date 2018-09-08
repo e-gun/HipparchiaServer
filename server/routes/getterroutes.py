@@ -50,10 +50,18 @@ def getsessionvariables():
 @hipparchia.route('/getcookie/<cookienum>')
 def cookieintosession(cookienum):
 	"""
-	take a stored cookie and convert its values into the current session settings
+	take a stored cookie and convert its values into the current session instance
 
 	:return:
 	"""
+
+	response = redirect(url_for('frontpage'))
+
+	try:
+		session['authorssummary']
+	except KeyError:
+		# cookies are not enabled
+		return response
 
 	cookienum = cookienum[0:2]
 
@@ -88,8 +96,6 @@ def cookieintosession(cookienum):
 	workprovenancelist = list(set(workprovenancelist))
 
 	modifysessionselections(cookiedict, authorgenreslist, workgenreslist, authorlocationlist, workprovenancelist)
-
-	response = redirect(url_for('frontpage'))
 
 	return response
 

@@ -10,11 +10,12 @@ import re
 from collections import deque
 
 from server.dbsupport.dblinefunctions import makeablankline
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
 
-def gtltsubstitutes(text):
+def gtltsubstitutes(text: str) -> str:
 	"""
 		&lt; for ⟨
 		&gt; for ⟩
@@ -30,7 +31,7 @@ def gtltsubstitutes(text):
 	return text
 
 
-def brackethtmlifysearchfinds(listoflineobjects, searchobject, linehtmltemplate):
+def brackethtmlifysearchfinds(listoflineobjects: list, searchobject: SearchObject, linehtmltemplate: str) -> list:
 	"""
 
 	can't do comprehensions: require a thisline/previousline structure so you can call setcontinuationvalue()

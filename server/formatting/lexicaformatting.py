@@ -8,13 +8,16 @@
 
 import re
 from string import punctuation
+from typing import Dict, List
 
 from bs4 import BeautifulSoup
 
+from server import hipparchia
+from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
 from server.listsandsession.listmanagement import polytonicsort
 
 
-def grabsenses(fullentry):
+def grabsenses(fullentry: str) -> List[str]:
 	"""
 	look for all of the senses of a work in its dictionary entry
 	:param fullentry:
@@ -53,7 +56,7 @@ def grabsenses(fullentry):
 	return numbered
 
 
-def entrysummary(fullentry, lang, translationlabel, lemmaobject):
+def entrysummary(fullentry: str, lang: str, translationlabel: str, lemmaobject: dbLemmaObject) -> dict:
 	"""
 
 	returns a collection of lists: all authors, senses, and quotes to be found in an entry
@@ -109,7 +112,7 @@ def entrysummary(fullentry, lang, translationlabel, lemmaobject):
 	return summarydict
 
 
-def grabheadmaterial(fullentry):
+def grabheadmaterial(fullentry: str) -> str:
 	"""
 	find the information at the top of a dictionary entry: used to get the basic info about the word
 	:param fullentry:
@@ -128,7 +131,7 @@ def grabheadmaterial(fullentry):
 			return ''
 
 
-def deabbreviateauthors(authorabbr, lang):
+def deabbreviateauthors(authorabbr: str, lang: str) -> str:
 	"""
 
 	just hand this off to another function via language setting
@@ -153,7 +156,7 @@ def deabbreviateauthors(authorabbr, lang):
 	return author
 
 
-def formatdictionarysummary(summarydict):
+def formatdictionarysummary(summarydict: dict) -> str:
 	"""
 	turn three lists into html formatting for the summary material that will be inserted at the top of a
 	dictionary entry
@@ -198,18 +201,23 @@ def formatdictionarysummary(summarydict):
 	return summarystring
 
 
-def formateconsolidatedgrammarentry(consolidatedentry):
+def formateconsolidatedgrammarentry(consolidatedentry: dict) -> str:
 	"""
 	send me hit from findbyform() in the results browser
 
-	consolidatedentry = {'count': count, 'form': wordandform[0], 'word': wordandform[1], 'transl': thetransl, 'anal': analysislist}
+	consolidatedentry = {'count': count, 'form': wordandform[0], 'word': wordandform[1], 'transl': thetransl, 'anal': analysislist, 'xref': xref}
 
 	example:
-		 {'count': 1, 'form': 'ἀϲήμου', 'word': 'ἄϲημοϲ', 'transl': 'without mark', 'anal': ['masc/fem/neut gen sg']}
+		 {'count': 1, 'form': 'ἀϲήμου', 'word': 'ἄϲημοϲ', 'transl': 'without mark', 'anal': ['masc/fem/neut gen sg'], 'xref': 16808356}
 
 	:param consolidatedentry:
 	:return:
 	"""
+
+	if hipparchia.config['PARSERDEBUGMODE'] == 'yes':
+		xrefinfo = '<code>[{x}]</code>'.format(x=consolidatedentry['xref'])
+	else:
+		xrefinfo = ''
 
 	analysislist = consolidatedentry['anal']
 
@@ -219,7 +227,7 @@ def formateconsolidatedgrammarentry(consolidatedentry):
 	if len(consolidatedentry['transl']) > 1:
 		wordandtranslation = ', '.join([wordandtranslation, consolidatedentry['transl']])
 
-	outputlist.append('<span class="dictionaryform">{df}</span> (from {wt}): &nbsp;'.format(df=consolidatedentry['form'], wt=wordandtranslation))
+	outputlist.append('<span class="dictionaryform">{df}</span> (from {wt}){x}: &nbsp;'.format(df=consolidatedentry['form'], wt=wordandtranslation, x=xrefinfo))
 	if len(analysislist) == 1:
 		outputlist.append('<br /><span class="possibility">{pos}</span>&nbsp;'.format(pos=analysislist[0]))
 	else:
@@ -234,7 +242,7 @@ def formateconsolidatedgrammarentry(consolidatedentry):
 	return analysisstring
 
 
-def formatgloss(entrybody):
+def formatgloss(entrybody: str) -> str:
 	"""
 	glosses don't work the same as standard dictionary entries. deal with them
 	:param entrybody:
@@ -250,14 +258,14 @@ def formatgloss(entrybody):
 	sources[:] = [value.string for value in sources]
 
 	glosshtml.append('<span class="highlight">Reported by:</span><br />')
-	ss = []
+	ss = list()
 	for s in sources:
 		ss.append(s) + ', '
 	ss = ', '.join(ss)
 	glosshtml.append(ss)
 
 	glosshtml.append('<br /><br />\n<span class="highlight">Senses:</span><br />')
-	ss = []
+	ss = list()
 	for s in senses:
 		ss.append(s)
 	ss = '<br />\n'.join(ss)
@@ -268,7 +276,7 @@ def formatgloss(entrybody):
 	return glosshtml
 
 
-def formatmicroentry(entrybody):
+def formatmicroentry(entrybody: str) -> str:
 	"""
 	some entries work like glosses but are not labeled as glosses: no quote, authors, etc. just a synonym or synonyms listed
 	deal with it
@@ -296,7 +304,7 @@ def formatmicroentry(entrybody):
 	return entryhtml
 
 
-def insertbrowserlookups(htmlentry):
+def insertbrowserlookups(htmlentry: str) -> str:
 	"""
 	there can be a big lag opening the entry for something like εχω: put off the click conversions until later...
 	but debugging is a lot easier via impatientinsertbrowserlookups()
@@ -335,7 +343,7 @@ def insertbrowserlookups(htmlentry):
 	return clickableentry
 
 
-def dbquickfixes(listofnames):
+def dbquickfixes(listofnames: list) -> Dict[str, str]:
 	"""
 	persus' euripides work numbers are wrong
 	deal with that here
@@ -406,7 +414,7 @@ def dbquickfixes(listofnames):
 
 	"""
 	
-	substitutes = {}
+	substitutes = dict()
 	dbfinder = re.compile(r'(..\d\d\d\dw\d\d\d)(.*)')
 	
 	fixer = {
@@ -444,7 +452,7 @@ def dbquickfixes(listofnames):
 	return substitutes
 
 
-def deabrevviategreekauthors():
+def deabrevviategreekauthors() -> Dict[str, str]:
 	"""
 
 	return a decoder dictionary
@@ -1499,7 +1507,7 @@ def deabrevviategreekauthors():
 	return authordict
 
 
-def deabrevviatelatinauthors():
+def deabrevviatelatinauthors() -> Dict[str, str]:
 	"""
 
 	the latin dictionary xml does not help you to generate this dict

@@ -8,12 +8,15 @@
 
 import re
 from collections import deque
+from typing import Dict, List, Tuple
 
 from server.dbsupport.miscdbfunctions import findselectionboundaries
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.dbtextobjects import dbOpus
+from server.hipparchiaobjects.searchobjects import SearchObject
 
 
-def configurewhereclausedata(searchlist, workdict, searchobject):
+def configurewhereclausedata(searchlist: list, workdict: dict, searchobject: SearchObject) -> Dict[str, dict]:
 	"""
 
 	constructs the framework for the where clauses to send to postgres when making the query
@@ -148,7 +151,7 @@ def configurewhereclausedata(searchlist, workdict, searchobject):
 	return indexedauthorlist
 
 
-def wholeworkbetweenclausecontents(listofworkobjects):
+def wholeworkbetweenclausecontents(listofworkobjects: list) -> List[Tuple[int, int]]:
 	"""
 
 	Ultimately you need this to search Aristophanes' Birds and Clouds:
@@ -170,7 +173,7 @@ def wholeworkbetweenclausecontents(listofworkobjects):
 	return listofboundaries
 
 
-def wholeworktemptablecontents(authorid, setoflinenumbers):
+def wholeworktemptablecontents(authorid: str, setoflinenumbers: set) -> Dict[str, str]:
 	"""
 	in the original paradigm we can end up searching a table 100x in the course of each search
 	inscriptions by date produces this; and these are noticeably slower searches
@@ -247,9 +250,12 @@ def wholeworktemptablecontents(authorid, setoflinenumbers):
 	return returndict
 
 
-def partialworkbetweenclausecontents(workobject, searchobject):
+def partialworkbetweenclausecontents(workobject: dbOpus, searchobject: SearchObject) -> Tuple[str, Dict[str, list]]:
 	"""
 
+	example: Xenophon, Hellenica, Book 1 less Chapter 3
+
+	endpoints ('gr0032w001', {'listofboundaries': [(1, 907)], 'listofomissions': [(257, 349)]})
 
 	:param listofworkobjects:
 	:param workswithselections:

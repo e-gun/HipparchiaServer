@@ -8,9 +8,10 @@
 
 import os
 import re
+from typing import List, Dict
 
 
-def loadconfig(filepath):
+def loadconfig(filepath) -> list:
 	"""
 	simple simon: a read of the file to prepare it for the  parse
 	:param filepath:
@@ -26,7 +27,7 @@ def loadconfig(filepath):
 	return configlist
 
 
-def parseconfig(configlist):
+def parseconfig(configlist) -> List[str]:
 	"""
 	generate a list of config options contained in the configlist
 
@@ -46,7 +47,7 @@ def parseconfig(configlist):
 	return configvariablelist
 
 
-def compareconfigs(template, model):
+def compareconfigs(template, model) -> Dict[str, set]:
 	"""
 
 	compare the options on offer in one list to those on offer in a second list

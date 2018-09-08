@@ -14,6 +14,7 @@ import psycopg2
 from server import hipparchia
 from server.dbsupport.dblinefunctions import bulklinegrabber
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.proximitysearching import grableadingandlagging
 from server.semanticvectors.vectorhelpers import determinesettings, readgitdata
 
@@ -38,7 +39,7 @@ def createvectorstable():
 	(
 		ts timestamp without time zone,
 		versionstamp character varying(6) COLLATE pg_catalog."default",
-		settings character varying (512) COLLATE pg_catalog."default",
+		instance character varying (512) COLLATE pg_catalog."default",
 		uidlist text[] COLLATE pg_catalog."default",
 		vectortype character varying(10) COLLATE pg_catalog."default",
 		calculatedvectorspace bytea
@@ -108,11 +109,13 @@ def createstoredimagestable():
 	return
 
 
-def storevectorindatabase(searchobject, vectortype, vectorspace):
+def storevectorindatabase(searchobject: SearchObject, vectortype: str, vectorspace):
 	"""
 
 	you have just calculated a new vectorpace, store it so you do not need to recalculate it
 	later
+
+	vectorspace will be something like '<class 'gensim.models.word2vec.Word2Vec'>'
 
 	:param vectorspace:
 	:param uidlist:
@@ -134,7 +137,7 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 
 	q = """
 	INSERT INTO public.storedvectors 
-		(ts, versionstamp, settings, uidlist, vectortype, calculatedvectorspace)
+		(ts, versionstamp, instance, uidlist, vectortype, calculatedvectorspace)
 		VALUES (%s, %s, %s, %s, %s, %s)
 	"""
 
@@ -153,7 +156,7 @@ def storevectorindatabase(searchobject, vectortype, vectorspace):
 	return
 
 
-def checkforstoredvector(searchobject, vectortype, careabout='settings'):
+def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout='instance'):
 	"""
 
 	the stored vector might not reflect the current math rules
@@ -167,7 +170,9 @@ def checkforstoredvector(searchobject, vectortype, careabout='settings'):
 	2018-02-14 20:50:00 | 7e1c1b       | {lt0474w057}
 	(2 rows)
 
-	:param uidlist:
+	:param searchobject:
+	:param vectortype:
+	:param careabout:
 	:return:
 	"""
 
@@ -201,7 +206,7 @@ def checkforstoredvector(searchobject, vectortype, careabout='settings'):
 
 	if careabout == 'versionstamp':
 		outdated = (version[:6] != result[0])
-	elif careabout == 'settings':
+	elif careabout == 'instance':
 		current = determinesettings()
 		outdated = (current != result[0])
 	else:
@@ -219,7 +224,7 @@ def checkforstoredvector(searchobject, vectortype, careabout='settings'):
 	return returnval
 
 
-def fetchverctorenvirons(hitdict, searchobject):
+def fetchverctorenvirons(hitdict: dict, searchobject: SearchObject) -> list:
 	"""
 
 	grab the stuff around the term you were looking for and return that as the environs
