@@ -93,13 +93,17 @@ def stripaccents(texttostrip: str, transtable=None) -> str:
 	stripaccents() look up transtable itself
 
 	:param texttostrip:
+	:param transtable:
 	:return:
 	"""
 
-	if transtable == None:
-		transtable = buildhipparchiatranstable()
+	# if transtable == None:
+	# 	transtable = buildhipparchiatranstable()
 
-	stripped = texttostrip.translate(transtable)
+	try:
+		stripped = texttostrip.translate(transtable)
+	except TypeError:
+		stripped = stripaccents(texttostrip, transtable=buildhipparchiatranstable())
 
 	return stripped
 

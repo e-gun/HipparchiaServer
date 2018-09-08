@@ -86,9 +86,7 @@
     <p class="optionlabel">Font for display</p>
     <p class="optionitem">
         <select name="fontchoice" id="fontchoice">
-        {% for f in fonts %}
-            <option value="{{ f }}">{{ f }}</option>
-        {% endfor %}
+        {% for f in fonts %}<option value="{{ f }}">{{ f }}</option>{% endfor %}
         </select>
     </p>
     {% endif %}
