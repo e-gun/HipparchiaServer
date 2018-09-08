@@ -19,7 +19,11 @@ from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.listsandsession.listmanagement import compilesearchlist, sortsearchlist
 from server.listsandsession.sessionfunctions import modifysessionselections, modifysessionvar, parsejscookie
-from server.semanticvectors.vectorgraphing import fetchvectorgraph
+try:
+	from server.semanticvectors.vectorgraphing import fetchvectorgraph
+except ImportError:
+	fetchvectorgraph = None
+	print('could not import "fetchvectorgraph": graphing will be unavailable')
 from server.startup import authordict, authorgenresdict, authorlocationdict, listmapper, workdict, workgenresdict, \
 	workprovenancedict
 

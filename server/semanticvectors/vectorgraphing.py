@@ -12,6 +12,7 @@ from io import BytesIO
 # do this before importing pylab or pyplot: otherwise you will see:
 #   RuntimeError: main thread is not in main loop
 #   Tcl_AsyncDelete: async handler deleted by the wrong thread
+
 try:
 	import matplotlib
 	matplotlib.use('Agg')
