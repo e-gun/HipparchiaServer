@@ -6,8 +6,8 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-from flask import Flask
 import os
+from flask import Flask
 
 from server import hipparchia
 

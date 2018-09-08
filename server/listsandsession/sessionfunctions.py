@@ -74,6 +74,7 @@ def sessionvariables():
 		session['wlocexclusions'] = list()
 		session['wlocselections'] = list()
 		session['xmission'] = 'Any'
+		session.modified = True
 
 	return
 
