@@ -24,9 +24,15 @@ from server.listsandsession.listmanagement import calculatewholeauthorsearches, 
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildsearchobject
-from server.semanticvectors.gensimvectors import executegensimsearch
-from server.semanticvectors.scikitlearntopics import sklearnselectedworks
-from server.semanticvectors.vectorpseudoroutes import findabsolutevectorsbysentence, findabsolutevectorsfromhits
+if hipparchia.config['SEMANTICVECTORSENABLED'] == 'yes':
+	from server.semanticvectors.gensimvectors import executegensimsearch
+	from server.semanticvectors.scikitlearntopics import sklearnselectedworks
+	from server.semanticvectors.vectorpseudoroutes import findabsolutevectorsbysentence, findabsolutevectorsfromhits
+else:
+	executegensimsearch = None
+	sklearnselectedworks = None
+	findabsolutevectorsbysentence = None
+	findabsolutevectorsfromhits = None
 from server.startup import authordict, listmapper, poll, workdict
 
 
