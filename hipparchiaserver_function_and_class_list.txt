@@ -1,25 +1,25 @@
 hipparchia_venv/ $ cloc --not-match-f='^j' HipparchiaServer/
-     139 text files.
-     135 unique files.
-      16 files ignored.
+     143 text files.
+     142 unique files.
+      14 files ignored.
 
-github.com/AlDanial/cloc v 1.76  T=1.14 s (112.8 files/s, 26410.5 lines/s)
+github.com/AlDanial/cloc v 1.78  T=1.12 s (120.3 files/s, 26978.6 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                          91           4879           7038          11706
-HTML                            26            159             22           1740
-XML                              4              0              0           1329
-JavaScript                       5            227            169           1222
-CSS                              2            252            175           1035
+Python                          97           5014           7106          12033
+HTML                            26            163             22           1751
+JavaScript                       5            234            153           1255
+CSS                              2            253            175           1045
+XML                              4              0              0            830
 Markdown                         1             54              0            193
 -------------------------------------------------------------------------------
-SUM:                           129           5571           7404          17225
--------------------------------------------------------------------------------
+SUM:                           135           5718           7456          17107
 
 
 server/ $ grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
-
+dbsupport/redisdbfunctions.py:class NullRedis(object):
+dbsupport/redisdbfunctions.py:class PooledRedisBorg(object):
 hipparchiaobjects/browserobjects.py:class BrowserOutputObject(object):
 hipparchiaobjects/browserobjects.py:class BrowserPassageObject(object):
 hipparchiaobjects/connectionobject.py:class GenericConnectionObject(object):
@@ -53,7 +53,7 @@ calculatewordweights.py:def findgeneraweights(language, collapsed=False):
 calculatewordweights.py:def findchronologicalweights(era, language):
 calculatewordweights.py:def findgenreweightfromworkobject(genre, language, workdict):
 calculatewordweights.py:def findcorpusweight(corpus, language):
-startup.py:def dictitemstartswith(originaldict, element, muststartwith):
+startup.py:def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
 startup.py:def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
 browsing/browserfunctions.py:def buildbrowseroutputobject(authorobject, workobject, locusindexvalue, cursor):
 browsing/browserfunctions.py:def checkfordocumentmetadata(line, workobject):
@@ -92,6 +92,8 @@ dbsupport/miscdbfunctions.py:def makeanemptyauthor(universalid: str) -> dbAuthor
 dbsupport/miscdbfunctions.py:def makeanemptywork(universalid: str) -> dbOpus:
 dbsupport/miscdbfunctions.py:def versionchecking(activedbs: list, expectedsqltemplateversion: str) -> str:
 dbsupport/miscdbfunctions.py:def probefordatabases() -> dict:
+dbsupport/redisdbfunctions.py:def establishredisconnection() -> redis.client.Redis:
+dbsupport/redisdbfunctions.py:def buildredissearchlist(listofsearchlocations: List, searchid: str):
 dbsupport/tablefunctions.py:def tablenamer(authorobject: dbAuthor, thework: int) -> str:
 dbsupport/tablefunctions.py:def uniquetablename(numberofletters=12) -> str:
 dbsupport/vectordbfunctions.py:def createvectorstable():
@@ -198,9 +200,10 @@ formatting/lexicaformatting.py:def insertbrowserlookups(htmlentry: str) -> str:
 formatting/lexicaformatting.py:def dbquickfixes(listofnames: list) -> Dict[str, str]:
 formatting/lexicaformatting.py:def deabrevviategreekauthors() -> Dict[str, str]:
 formatting/lexicaformatting.py:def deabrevviatelatinauthors() -> Dict[str, str]:
+formatting/miscformatting.py:def timedecorator(function):
 formatting/searchformatting.py:def buildresultobjects(hitdict: dict, authordict: dict, workdict: dict, searchobject: SearchObject) -> ResultList:
 formatting/searchformatting.py:def flagsearchterms(searchresultobject: SearchResult, skg: str, prx: str, searchobject: SearchObject) -> LineList:
-formatting/searchformatting.py:def highlightsearchterm(lineobject: dbWorkLine, regexequivalent: re.Pattern, spanname) -> str:
+formatting/searchformatting.py:def highlightsearchterm(lineobject: dbWorkLine, regexequivalent, spanname) -> str:
 formatting/searchformatting.py:def htmlifysearchfinds(listofsearchresultobjects: ResultList, searchobject: SearchObject) -> str:
 formatting/searchformatting.py:def nocontexthtmlifysearchfinds(listofsearchresultobjects: ResultList) -> str:
 formatting/searchformatting.py:def unbalancedspancleaner(html: str) -> str:
@@ -229,16 +232,17 @@ formatting/wordformatting.py:def attemptsigmadifferentiation(text: str) -> str:
 formatting/wordformatting.py:def wordlistintoregex(wordlist: list) -> str:
 formatting/wordformatting.py:def upperorlowerregex(word: str) -> str:
 formatting/wordformatting.py:def acuteorgrav(word: str) -> str:
-lexica/lexicalookups.py:def lookformorphologymatches(word, cursor, trialnumber=0):
-lexica/lexicalookups.py:def lexicalmatchesintohtml(observedform, morphologyobject, cursor):
+lexica/lexicalookups.py:def lookformorphologymatches(word: str, cursor, trialnumber=0) -> dbMorphologyObject:
+lexica/lexicalookups.py:def lexicalmatchesintohtml(observedform: str, morphologyobject: dbMorphologyObject, cursor) -> List[dict]:
 lexica/lexicalookups.py:def browserdictionarylookup(count, seekingentry, cursor):
-lexica/lexicalookups.py:def searchdictionary(cursor, dictionary, usecolumn, seeking, syntax, trialnumber=0):
-lexica/lexicalookups.py:def convertdictionaryfindintoobject(foundline, dictionary, dbcursor):
+lexica/lexicalookups.py:def searchdictionary(cursor, usedictionary: str, usecolumn: str, seeking: str, syntax: str, trialnumber=0):
+lexica/lexicalookups.py:def convertdictionaryfindintoobject(foundline: tuple, usedictionary: str, dbcursor):
 lexica/lexicalookups.py:def findtotalcounts(word, cursor):
 lexica/lexicalookups.py:def findcountsviawordcountstable(wordtocheck):
 lexica/lexicalookups.py:def getobservedwordprevalencedata(dictionaryword):
 lexica/lexicalookups.py:def formatprevalencedata(wordcountobject):
 lexica/lexicalookups.py:def grablemmataobjectfor(entryname, db, cursor):
+lexica/lexicalookups.py:def findparserxref(wordobject) -> str:
 listsandsession/listmanagement.py:def compilesearchlist(listmapper: dict, s=session) -> list:
 listsandsession/listmanagement.py:def sortsearchlist(searchlist: list, authorsdict: dict) -> list:
 listsandsession/listmanagement.py:def sortresultslist(hits: list, searchobject: SearchObject, authorsdict: dict, worksdict: dict) -> dict:
@@ -324,15 +328,15 @@ routes/textandindexroutes.py:def completeindex():
 routes/textandindexroutes.py:def textmaker():
 routes/websocketroutes.py:def checkforactivesearch(searchid):
 searching/phrasesearching.py:def phrasesearch(wkid: str, searchobject: SearchObject, cursor) -> List[dbWorkLine]:
-searching/phrasesearching.py:def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, tablestosearch: str, searchobject: SearchObject, dbconnection) -> ListProxy:
+searching/phrasesearching.py:def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 searching/proximitysearching.py:def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> List[dbWorkLine]:
 searching/proximitysearching.py:def withinxwords(workdbname: str, searchobject: SearchObject, dbconnection) -> List[dbWorkLine]:
 searching/proximitysearching.py:def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, cursor) -> dict:
 searching/searchdispatching.py:def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
-searching/searchdispatching.py:def workonsimplesearch(foundlineobjects: ListProxy, searchlist: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
+searching/searchdispatching.py:def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 searching/searchdispatching.py:def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
-searching/searchdispatching.py:def workonphrasesearch(foundlineobjects: ListProxy, searchinginside: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
-searching/searchdispatching.py:def workonproximitysearch(foundlineobjects: ListProxy, searchinginside: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
+searching/searchdispatching.py:def workonphrasesearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
+searching/searchdispatching.py:def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 searching/searchfunctions.py:def cleaninitialquery(seeking: str) -> str:
 searching/searchfunctions.py:def massagesearchtermsforwhitespace(query: str) -> str:
 searching/searchfunctions.py:def atsignwhereclauses(uidwithatsign, operand, authors) -> List[tuple]:
@@ -341,7 +345,7 @@ searching/searchfunctions.py:def lookoutsideoftheline(linenumber: int, numberofe
 searching/searchfunctions.py:def findleastcommonterm(searchphrase: str, accentsneeded: bool) -> str:
 searching/searchfunctions.py:def findleastcommontermcount(searchphrase: str, accentsneeded: bool) -> int:
 searching/searchfunctions.py:def dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, cursor) -> bool:
-searching/searchfunctions.py:def buildsearchobject(ts: str, therequest: request, thesession: session) -> SearchObject:
+searching/searchfunctions.py:def buildsearchobject(searchid: str, therequest: request, thesession: session) -> SearchObject:
 searching/substringsearching.py:def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, cursor, templimit=None) -> Generator:
 semanticvectors/gensimlsi.py:def lsigenerateoutput(sentencestuples, workssearched, searchobject, lsispace):
 semanticvectors/gensimlsi.py:def lsifindmatches(sentencestuples, searchobject, lsispace):
