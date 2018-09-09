@@ -7,11 +7,13 @@
 """
 
 from server.dbsupport.miscdbfunctions import resultiterator
+from server.formatting.miscformatting import timedecorator
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
 
 
+@timedecorator
 def loadallauthorsasobjects() -> dict:
 	"""
 
@@ -32,13 +34,14 @@ def loadallauthorsasobjects() -> dict:
 
 	authorsdict = {r[0]: dbAuthor(*r) for r in results}
 
-	print('\t', len(authorsdict), 'authors loaded')
+	print('\t', len(authorsdict), 'authors loaded', end='')
 
 	dbconnection.connectioncleanup()
 
 	return authorsdict
 
 
+@timedecorator
 def loadallworksasobjects() -> dict:
 	"""
 
@@ -63,13 +66,14 @@ def loadallworksasobjects() -> dict:
 
 	worksdict = {r[0]: dbOpus(*r) for r in results}
 
-	print('\t', len(worksdict), 'works loaded')
+	print('\t', len(worksdict), 'works loaded', end='')
 
 	dbconnection.connectioncleanup()
 
 	return worksdict
 
 
+@timedecorator
 def loadlemmataasobjects() -> dict:
 	"""
 
@@ -100,7 +104,7 @@ def loadlemmataasobjects() -> dict:
 		results = resultiterator(cursor)
 		lemmatadict = {**{r[0]: dbLemmaObject(*r) for r in results}, **lemmatadict}
 
-	print('\t', len(lemmatadict), 'lemmata loaded')
+	print('\t', len(lemmatadict), 'lemmata loaded', end='')
 	# print('lemmatadict["laudo"]', lemmatadict['laudo'].formlist)
 	# print('lemmatadict["λύω"]', lemmatadict['λύω'].formlist)
 

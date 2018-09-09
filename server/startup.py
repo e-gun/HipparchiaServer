@@ -6,6 +6,8 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import time
+
 from server import hipparchia
 from server.calculatewordweights import findccorporaweights, findtemporalweights, workobjectgeneraweights
 from server.dbsupport.bulkdboperations import loadallauthorsasobjects, loadallworksasobjects, \
@@ -80,15 +82,17 @@ lemmatadict = loadlemmataasobjects()
 # the next is too long to be used by the hinter: need quicker access via a dict
 keyedlemmata = buildkeyedlemmata(list(lemmatadict.keys()))
 
-
+print('building core dictionaries', end='')
+launchtime = time.time()
 authorgenresdict = buildaugenresdict(authordict)
 authorlocationdict = buildauthorlocationdict(authordict)
 workgenresdict = buildworkgenresdict(workdict)
 workprovenancedict = buildworkprovenancedict(workdict)
+elapsed = round(time.time() - launchtime, 1)
+print(' ({e}s)'.format(e=elapsed))
 
-print('building specialized sublists')
-
-
+print('building specialized sublists', end='')
+launchtime = time.time()
 def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
 	"""
 
@@ -164,6 +168,9 @@ allvaria = set(findspecificdate(allworks, authordict, workdict, 2000))
 allincerta = set(findspecificdate(allworks, authordict, workdict, 2500))
 
 del allworks
+
+elapsed = round(time.time() - launchtime, 1)
+print(' ({e}s)'.format(e=elapsed))
 
 if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
 	if hipparchia.config['COLLAPSEDGENRECOUNTS'] == 'yes':

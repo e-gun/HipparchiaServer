@@ -9,6 +9,7 @@
 import re
 from collections import defaultdict
 
+from server.formatting.miscformatting import timedecorator
 from server.formatting.wordformatting import stripaccents
 
 """
@@ -148,6 +149,7 @@ def buildworkprovenancedict(workdict: dict) -> dict:
 	return locationdict
 
 
+@timedecorator
 def buildkeyedlemmata(listofentries: dict) -> defaultdict:
 	"""
 
@@ -158,6 +160,8 @@ def buildkeyedlemmata(listofentries: dict) -> defaultdict:
 	:param listofentries:
 	:return:
 	"""
+
+	print('building keyedlemmata', end='')
 	invals = u'jvσς'
 	outvals = u'iuϲϲ'
 
