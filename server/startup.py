@@ -47,9 +47,9 @@ del warning
 del available
 
 if setthreadcount(startup=True) == 1:
-	print('queries will be dispatched to 1 thread\n')
+	print('queries will be dispatched to 1 thread')
 else:
-	print('queries will be dispatched to {t} threads\n'.format(t=setthreadcount()))
+	print('queries will be dispatched to {t} threads'.format(t=setthreadcount()))
 
 """
 this stuff gets loaded up front so you have access to all author and work info all the time
@@ -86,7 +86,7 @@ authorlocationdict = buildauthorlocationdict(authordict)
 workgenresdict = buildworkgenresdict(workdict)
 workprovenancedict = buildworkprovenancedict(workdict)
 
-print('building specialized sublists\n')
+print('building specialized sublists')
 
 
 def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:

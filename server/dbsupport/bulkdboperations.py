@@ -20,7 +20,7 @@ def loadallauthorsasobjects() -> dict:
 	:return:
 	"""
 
-	print('loading all authors...')
+	print('loading all authors...', end='')
 
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
@@ -47,7 +47,7 @@ def loadallworksasobjects() -> dict:
 	:return:
 	"""
 
-	print('loading all works...')
+	print('loading all works...  ', end='')
 
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
@@ -83,7 +83,7 @@ def loadlemmataasobjects() -> dict:
 	:return:
 	"""
 
-	print('loading all lemmata...')
+	print('loading all lemmata...', end='')
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
