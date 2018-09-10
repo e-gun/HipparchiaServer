@@ -6,6 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import re
 from uuid import uuid4
 
 
@@ -16,6 +17,12 @@ def assignuniquename() -> str:
 		temporary tables
 		dbconnections
 
+	FreeBSD's postgres will choke on the '-' in something like 'b3eb3e01-afe0-48ae-acb8-605ae58c9d6d'
+
+		psycopg2.ProgrammingError: syntax error at or near "="
+
+	This is not true in MacOS
+
 	:return:
 	"""
 
@@ -23,5 +30,7 @@ def assignuniquename() -> str:
 	# n = ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(numberofletters)])
 
 	n = str(uuid4())
+
+	n = re.sub(r'-', '', n)
 
 	return n
