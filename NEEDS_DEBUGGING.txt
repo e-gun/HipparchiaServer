@@ -21,6 +21,9 @@ irritating to avoid "return redirect(url_for('frontpage'))" which is so simple a
 [D] platform specific bug? Ryzen vs FreeBSD vs threads (vs C-states?)
 
 [gone as of FreeBSD 11.2-RELEASE?]
+[FreeBSD 12-ALPHA has a cousin: *regular* failure to execute the first search properly after launch]
+[FreeBSD 12-ALPHA will hang if you poke at it long enough]
+[SEARCHLISTCONNECTIONTYPE = 'redis' seems to fix this...]
 
 workonsimplesearch() (and probably its kin)
 
