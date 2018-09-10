@@ -9,12 +9,12 @@ function browseuponclick(url){
 	$.getJSON(
 	    { url: '/browse/' + url,
 	    success: function (passagereturned) {
-	        var bf = $('#browseforward');
-	        var bb = $('#browseback');
+	        let bf = $('#browseforward');
+	        let bb = $('#browseback');
             bf.unbind('click');
             bb.unbind('click');
 
-            var fb = parsepassagereturned(passagereturned);
+            let fb = parsepassagereturned(passagereturned);
             // left and right arrow keys
 
             bf.bind('click', function(){ browseuponclick(fb[0]); });
@@ -25,15 +25,15 @@ function browseuponclick(url){
     }
 
 function parsepassagereturned(passagereturned) {
-        var bdt = $('#browserdialogtext');
-        var ldt = $('#lexicadialogtext');
-        var aac = $('#authorsautocomplete');
-        var wac = $('#worksautocomplete');
+        const bdt = $('#browserdialogtext');
+        const ldt = $('#lexicadialogtext');
+        const aac = $('#authorsautocomplete');
+        const wac = $('#worksautocomplete');
 		bdt.text('');
         // the first item is info
         // {'forwardsandback': ['/browseto/lt1254w001_AT_2|2|3|6', '/browseto/lt1254w001_AT_6|9|2|6']}
-        var fwdurl = passagereturned['browseforwards'];
-        var bkdurl = passagereturned['browseback'];
+        let fwdurl = passagereturned['browseforwards'];
+        let bkdurl = passagereturned['browseback'];
 
         resetworksautocomplete();
         aac.val(passagereturned['authorboxcontents']);
@@ -45,13 +45,13 @@ function parsepassagereturned(passagereturned) {
 
         bdt.html(passagereturned['browserhtml']);
 
-        var ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo', '#browserdialog');
+        let ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo', '#browserdialog');
         bulkshow(ids);
 
         $('observed').click( function(e) {
             e.preventDefault();
-            var windowWidth = $(window).width();
-            var windowHeight = $(window).height();
+            let windowWidth = $(window).width();
+            let windowHeight = $(window).height();
             ldt.dialog({
                     closeOnEscape: true,
                     autoOpen: false,
@@ -67,9 +67,9 @@ function parsepassagereturned(passagereturned) {
             ldt.html('[searching...]');
             $.getJSON('/parse/' + this.id, function (definitionreturned) {
                 $('#lexicon').val(definitionreturned[0]['trylookingunder']);
-                var dLen = definitionreturned.length;
-                var linesreturned = Array();
-                for (var i = 0; i < dLen; i++) {
+                let dLen = definitionreturned.length;
+                let linesreturned = Array();
+                for (let i = 0; i < dLen; i++) {
                     linesreturned.push(definitionreturned[i]['value']);
                     }
                 ldt.html(linesreturned);

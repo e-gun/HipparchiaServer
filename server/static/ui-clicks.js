@@ -19,8 +19,8 @@ function refreshselections() {
 }
 
 function openoptionsslider() {
-    var windowWidth = $(window).width();
-    var w = Math.min(windowWidth*.30, 250);
+    let windowWidth = $(window).width();
+    let w = Math.min(windowWidth*.30, 250);
     document.getElementById("setoptionsnavigator").style.width = w+"px";
     document.getElementById("mainbody").style.marginLeft = w+"px";
     $('#alt_upperleftbuttons').show();
@@ -91,7 +91,7 @@ function loadoptions() {
             }
         });
 
-        var xoredtoggles = {
+        const xoredtoggles = {
             'onehit': {'y': $('#onehit_y'), 'n': $('#onehit_n'), 'f': $('#onehitisfalse'), 't': $('#onehitistrue')},
             'headwordindexing': {'y': $('#headwordindexing_y'), 'n': $('#headwordindexing_n'), 'f': $('#headwordindexinginactive'), 't': $('#headwordindexingactive')},
             'indexbyfrequency': {'y': $('#frequencyindexing_y'), 'n': $('#frequencyindexing_n'), 'f': $('#frequencyindexinginactive'), 't': $('#frequencyindexingactive')}
@@ -111,7 +111,7 @@ function loadoptions() {
             }
         });
 
-        var setspinnervalues = {
+        let setspinnervalues = {
             'earliestdate': $('#earliestdate'),
             'latestdate': $('#latestdate'),
             'linesofcontext': $('#linesofcontextspinner'),
@@ -147,17 +147,17 @@ $('#closeoptionsbutton').click(function(){
 });
 
 function browsetopassage() {
-    var auth = $('#authorsautocomplete').val().slice(-7, -1);
-    var wrk = $('#worksautocomplete').val().slice(-4, -1);
-    var l5 = $('#level05').val();
-    var l4 = $('#level04').val();
-    var l3 = $('#level03').val();
-    var l2 = $('#level02').val();
-    var l1 = $('#level01').val();
-    var l0 = $('#level00').val();
-    var lvls = [ l5, l4, l3, l2, l1, l0];
-    var loc = '';
-    for (var i = 5; i > -1; i-- ) {
+    let auth = $('#authorsautocomplete').val().slice(-7, -1);
+    let wrk = $('#worksautocomplete').val().slice(-4, -1);
+    let l5 = $('#level05').val();
+    let l4 = $('#level04').val();
+    let l3 = $('#level03').val();
+    let l2 = $('#level02').val();
+    let l1 = $('#level01').val();
+    let l0 = $('#level00').val();
+    let lvls = [ l5, l4, l3, l2, l1, l0];
+    let loc = '';
+    for (let i = 5; i > -1; i-- ) {
         if (lvls[i] !== '') {
             loc += lvls[i]+'|';
         } else {
@@ -229,18 +229,18 @@ $('#alt_moretools').click(function(){ $('#lexica').toggle(); });
 
 
 $('#lexicalsearch').click(function(){
-    var dictterm = $('#lexicon').val();
-    var restoreme = dictterm;
+    let dictterm = $('#lexicon').val();
+    let restoreme = dictterm;
     // trailing space will be lost unless you do this: ' gladiator ' --> ' gladiator' and so you can't spearch for only that word...
     if (dictterm.slice(-1) === ' ') { dictterm = dictterm.slice(0,-1) + '%20'; }
-    var parseterm = $('#parser').val();
-    var reverseterm = $('#reverselexicon').val();
-    var windowWidth = $(window).width();
-    var windowHeight = $(window).height();
-    var searchterm = '';
-    var url = '';
-    var dialogtitle = '';
-    var mydictfield = '';
+    let parseterm = $('#parser').val();
+    let reverseterm = $('#reverselexicon').val();
+    let windowWidth = $(window).width();
+    let windowHeight = $(window).height();
+    let searchterm = '';
+    let url = '';
+    let dialogtitle = '';
+    let mydictfield = '';
     if ( dictterm.length > 0) {
         searchterm = dictterm;
         url = '/dictsearch/';
@@ -253,7 +253,7 @@ $('#lexicalsearch').click(function(){
         mydictfield = '#parser';
         restoreme = searchterm;
     } else if ( reverseterm.length > 0 ) {
-        var originalterm = reverseterm;
+        let originalterm = reverseterm;
         // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
         if (reverseterm.slice(-1) === ' ') { reverseterm = reverseterm.slice(0,-1) + '%20'; }
         searchterm = reverseterm;
@@ -269,7 +269,7 @@ $('#lexicalsearch').click(function(){
 
     $(mydictfield).val('[Working on it...]');
     $.getJSON(url + searchterm, function (definitionreturned) {
-            var ldt = $('#lexicadialogtext');
+            let ldt = $('#lexicadialogtext');
            ldt.dialog({
                 closeOnEscape: true,
                 autoOpen: false,
@@ -283,9 +283,9 @@ $('#lexicalsearch').click(function(){
                 click: function() { $( this ).dialog( 'close' ); }
                 });
            ldt.dialog( 'open' );
-           var dLen = definitionreturned.length;
-           var linesreturned = [];
-            for (var i = 0; i < dLen; i++) {
+           let dLen = definitionreturned.length;
+           let linesreturned = [];
+            for (let i = 0; i < dLen; i++) {
                 linesreturned.push(definitionreturned[i]['value']);
                 }
             ldt.html(linesreturned);
@@ -425,8 +425,8 @@ const plsf = $('#proximatelemmatasearchform');
 const psf = $('#proximatesearchform');
 
 function clearsearchboxvalues() {
-    for (var i = 0; i < thesearchforms.length; i++) {
-        var box = $(thesearchforms[i]);
+    for (let i = 0; i < thesearchforms.length; i++) {
+        let box = $(thesearchforms[i]);
         box.val('');
     }
 }
@@ -440,17 +440,17 @@ function restoreplaceholders() {
 }
 
 function hideallboxes() {
-    for (var i = 0; i < thesearchforms.length; i++) {
-        var box = $(thesearchforms[i]);
+    for (let i = 0; i < thesearchforms.length; i++) {
+        let box = $(thesearchforms[i]);
         box.hide();
     }
 }
 
 function findotheroptions(thisoption) {
     const xoredoptions = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity', '#topicmodel'];
-    var xor = [];
-    for (var i = 0; i < xoredoptions.length; i++) {
-        var opt = $(xoredoptions[i]);
+    let xor = [];
+    for (let i = 0; i < xoredoptions.length; i++) {
+        let opt = $(xoredoptions[i]);
         if (opt.attr('id') !== thisoption) {
             xor.push(xoredoptions[i]);
         }
@@ -478,7 +478,7 @@ function restorecheckboxestodefault() {
 $('#cosdistbysentence').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        var others = findotheroptions(this.id);
+        let others = findotheroptions(this.id);
         $(others).prop('checked', false);
         activatethisbox(lsf, '(pick a headword)');
         activatethisbox(plsf, '(unused for this type of query)');
@@ -495,7 +495,7 @@ $('#cosdistbysentence').change(function() {
 $('#cosdistbylineorword').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        var others = findotheroptions(this.id);
+        let others = findotheroptions(this.id);
         $(others).prop('checked', false);
         activatethisbox(lsf, '(pick a headword)');
         activatethisbox(plsf, '(unused for this type of query)');
@@ -512,7 +512,7 @@ $('#cosdistbylineorword').change(function() {
 $('#semanticvectorquery').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        var others = findotheroptions(this.id);
+        let others = findotheroptions(this.id);
         $(others).prop('checked', false);
         wsf.show();
         wsf.attr('placeholder', '(enter a word or phrase)');
@@ -531,7 +531,7 @@ $('#semanticvectorquery').change(function() {
 $('#nearestneighborsquery').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        var others = findotheroptions(this.id);
+        let others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
         activatethisbox(lsf, '(pick a headword)');
@@ -550,7 +550,7 @@ $('#nearestneighborsquery').change(function() {
 $('#tensorflowgraph').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        var others = findotheroptions(this.id);
+        let others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
         activatethisbox(lsf, '(unused for tensorflowgraph)');
@@ -569,7 +569,7 @@ $('#tensorflowgraph').change(function() {
 $('#sentencesimilarity').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        var others = findotheroptions(this.id);
+        let others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
         activatethisbox(lsf, '(unused for sentencesimilarity)');
@@ -588,7 +588,7 @@ $('#sentencesimilarity').change(function() {
 $('#topicmodel').change(function() {
     restoreplaceholders();
     if(this.checked) {
-        var others = findotheroptions(this.id);
+        let others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
         activatethisbox(lsf, '(unused for topic models)');
@@ -638,11 +638,11 @@ $('#linesofcontextspinner').spinner({
     value: 2,
     step: 2,
     stop: function( event, ui ) {
-        var result = $('#linesofcontextspinner').spinner('value');
+        let result = $('#linesofcontextspinner').spinner('value');
         setoptions('linesofcontext', String(result));
         },
     spin: function( event, ui ) {
-        var result = $('#linesofcontextspinner').spinner('value');
+        let result = $('#linesofcontextspinner').spinner('value');
         setoptions('linesofcontext', String(result));
         }
         });
@@ -652,11 +652,11 @@ $('#browserspinner').spinner({
     min: 5,
     value: 1,
     stop: function( event, ui ) {
-        var result = $('#browserspinner').spinner('value');
+        let result = $('#browserspinner').spinner('value');
         setoptions('browsercontext', String(result));
         },
     spin: function( event, ui ) {
-        var result = $('#browserspinner').spinner('value');
+        let result = $('#browserspinner').spinner('value');
         setoptions('browsercontext', String(result));
         }
         });
@@ -666,11 +666,11 @@ $( '#hitlimitspinner' ).spinner({
     value: 1000,
     step: 50,
     stop: function( event, ui ) {
-        var result = $('#hitlimitspinner').spinner('value');
+        let result = $('#hitlimitspinner').spinner('value');
         setoptions('maxresults', String(result));
         },
     spin: function( event, ui ) {
-        var result = $('#hitlimitspinner').spinner('value');
+        let result = $('#hitlimitspinner').spinner('value');
         setoptions('maxresults', String(result));
         }
         });
@@ -682,12 +682,12 @@ $( '#latestdate' ).spinner({
     value: 1500,
     step: 50,
     stop: function( event, ui ) {
-        var result = $('#latestdate').spinner('value');
+        let result = $('#latestdate').spinner('value');
         setoptions('latestdate', String(result));
         refreshselections();
         },
     spin: function( event, ui ) {
-        var result = $('#latestdate').spinner('value');
+        let result = $('#latestdate').spinner('value');
         setoptions('latestdate', String(result));
         refreshselections();
         }
@@ -700,12 +700,12 @@ $( '#earliestdate' ).spinner({
     value: -850,
     step: 50,
     stop: function( event, ui ) {
-        var result = $('#earliestdate').spinner('value');
+        let result = $('#earliestdate').spinner('value');
         setoptions('earliestdate', String(result));
         refreshselections();
         },
     spin: function( event, ui ) {
-        var result = $('#earliestdate').spinner('value');
+        let result = $('#earliestdate').spinner('value');
         setoptions('earliestdate', String(result));
         refreshselections();
         }
@@ -714,7 +714,7 @@ $( '#earliestdate' ).spinner({
 
 // 'width' property not working when you define the spinners
 const spinners = ["#earliestdate", "#latestdate", "#hitlimitspinner", "#linesofcontextspinner", "#browserspinner"];
-for (var i = 0; i < spinners.length; i++) {
+for (let i = 0; i < spinners.length; i++) {
     const mywidth = 90;
     $(spinners[i]).width(mywidth);
 }
@@ -761,7 +761,7 @@ $('#sortresults').selectmenu({ width: 120});
 $(function() {
         $('#sortresults').selectmenu({
             change: function() {
-                var result = $('#sortresults').val();
+                let result = $('#sortresults').val();
                 setoptions('sortorder', String(result));
             }
         });
@@ -772,7 +772,7 @@ $('#fontchoice').selectmenu({ width: 120});
 $(function() {
         $('#fontchoice').selectmenu({
             change: function() {
-                var result = $('#fontchoice').val();
+                let result = $('#fontchoice').val();
                 setoptions('fontchoice', String(result));
                 window.location.reload();
             }
@@ -785,7 +785,7 @@ $(function() {
 
 $('#authinfo').click(function(){
         $('#authorholdings').toggle();
-        var authorid = $('#authorsautocomplete').val().slice(-7, -1);
+        let authorid = $('#authorsautocomplete').val().slice(-7, -1);
         $.getJSON('/getauthorinfo/' + authorid, function (selectiondata) {
                 $('#authorholdings').html(selectiondata);
                  });
@@ -793,7 +793,7 @@ $('#authinfo').click(function(){
 
 
 $('#searchinfo').click(function(){
-        var slc = $('#searchlistcontents');
+        let slc = $('#searchlistcontents');
         if ( slc.is(':visible') === true ) {
             slc.hide();
             slc.html('<p class="center"><span class="small>(this might take a second...)</span></p>');
