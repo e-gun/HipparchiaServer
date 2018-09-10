@@ -1,0 +1,251 @@
+pypy can't use psycopg2; it needs psycopg2cffi instead
+
+pypy can be tested by a search and replace in all of the scripts that access the database:
+
+	import psycopg2cffi as psycopg2
+
+the connectionobject also needs its autocommit and isolation syntax to be adjusted
+
+	self.dbconnection.autocommit
+	+
+	self.dbconnection.set_isolation_level(psycopg2cffi.extensions.ISOLATION_LEVEL_READ_COMMITTED)
+
+once you make those adjustments (a vectorless) HipparchiaServer v1.1 will launch
+
+but the results will show you that the DB is the overwhelming bottleneck; meanwhile pypy6 is not as fast at lock/unlock as python37
+
+
+====
+
+index to polybius:
+
+cpython
+
+PATH: '/indexto'
+         1221547 function calls (1221427 primitive calls) in 4.789 seconds
+
+   Ordered by: internal time, call count
+   List reduced from 633 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       24    2.606    0.109    2.606    0.109 {method 'acquire' of '_thread.lock' objects}
+    44640    0.267    0.000    0.382    0.000 /Users/erik/hipparchia_venv/HipparchiaServer/server/dbsupport/miscdbfunctions.py:35(resultiterator)
+    71599    0.230    0.000    0.359    0.000 {method 'sub' of 're.Pattern' objects}
+    44639    0.175    0.000    0.180    0.000 /Users/erik/hipparchia_venv/HipparchiaServer/server/hipparchiaobjects/dbtextobjects.py:249(__init__)
+       10    0.115    0.012    0.115    0.012 {method 'fetchmany' of 'psycopg2.extensions.cursor' objects}
+        1    0.110    0.110    0.110    0.110 {method 'execute' of 'psycopg2.extensions.cursor' objects}
+    71599    0.091    0.000    0.125    0.000 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/re.py:271(_compile)
+        1    0.088    0.088    0.196    0.196 /Users/erik/hipparchia_venv/HipparchiaServer/server/textsandindices/indexmaker.py:308(htmlifysimpleindex)
+   107396    0.081    0.000    0.081    0.000 {method 'format' of 'str' objects}
+        1    0.074    0.074    0.186    0.186 /Users/erik/hipparchia_venv/HipparchiaServer/server/textsandindices/textandindiceshelperfunctions.py:116(wordindextohtmltable)
+        1    0.072    0.072    4.754    4.754 /Users/erik/hipparchia_venv/HipparchiaServer/server/routes/textandindexroutes.py:29(completeindex)
+    35799    0.070    0.000    0.070    0.000 {built-in method builtins.sorted}
+        2    0.066    0.033    0.066    0.033 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/json/encoder.py:204(iterencode)
+    71598    0.061    0.000    0.544    0.000 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/re.py:185(sub)
+    44639    0.056    0.000    0.236    0.000 /Users/erik/hipparchia_venv/HipparchiaServer/server/dbsupport/dblinefunctions.py:17(dblineintolineobject)
+    35803    0.049    0.000    0.049    0.000 {method 'translate' of 'str' objects}
+    35797    0.048    0.000    0.048    0.000 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/re.py:307(_subx)
+    35797    0.047    0.000    0.060    0.000 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/sre_parse.py:1036(expand_template)
+        6    0.045    0.007    0.045    0.007 {method 'acquire' of '_multiprocessing.SemLock' objects}
+        1    0.045    0.045    0.212    0.212 /Users/erik/hipparchia_venv/HipparchiaServer/server/listsandsession/listmanagement.py:496(<listcomp>)
+    35798    0.035    0.000    0.035    0.000 /Users/erik/hipparchia_venv/HipparchiaServer/server/textsandindices/indexmaker.py:323(<listcomp>)
+    71638    0.034    0.000    0.034    0.000 {method 'join' of 'str' objects}
+        5    0.033    0.007    0.033    0.007 /Users/erik/hipparchia_venv/HipparchiaServer/server/textsandindices/textandindiceshelperfunctions.py:196(dictmerger)
+   107598    0.033    0.000    0.034    0.000 {built-in method builtins.isinstance}
+        1    0.028    0.028    4.783    4.783 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/flask/app.py:1779(dispatch_request)
+
+pypy
+
+--------------------------------------------------------------------------------
+PATH: '/indexto'
+         5807602 function calls (5807275 primitive calls) in 9.024 seconds
+
+   Ordered by: internal time, call count
+   List reduced from 870 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       24    6.746    0.281    6.746    0.281 {method 'acquire_lock' of '_thread.lock' objects}
+    44639    0.266    0.000    0.656    0.000 /Users/erik/pypy_venv/site-packages/psycopg2cffi/_impl/cursor.py:866(_build_row)
+    35800    0.182    0.000    0.182    0.000 {method 'translate' of 'str' objects}
+   535698    0.175    0.000    0.175    0.000 {built-in function _codecs.utf_8_decode}
+        1    0.144    0.144    0.200    0.200 /Users/erik/pypy_venv/HipparchiaServer/server/textsandindices/indexmaker.py:308(htmlifysimpleindex)
+       16    0.111    0.007    0.111    0.007 {built-in function _pypyjson.raw_encode_basestring_ascii}
+   107424    0.099    0.000    0.099    0.000 {method 'format' of 'str' objects}
+        1    0.089    0.089    0.090    0.090 /Users/erik/pypy_venv/site-packages/psycopg2cffi/_impl/cursor.py:677(_pq_execute)
+    71599    0.080    0.000    0.300    0.000 {method 'sub' of '_sre.SRE_Pattern' objects}
+   535699    0.069    0.000    0.258    0.000 {method 'decode' of 'bytes' objects}
+       36    0.062    0.002    0.062    0.002 {built-in function posix.waitpid}
+        1    0.049    0.049    0.183    0.183 /Users/erik/pypy_venv/HipparchiaServer/server/textsandindices/textandindiceshelperfunctions.py:116(wordindextohtmltable)
+        1    0.049    0.049    0.769    0.769 /Users/erik/pypy_venv/HipparchiaServer/server/dbsupport/dblinefunctions.py:172(<listcomp>)
+71651/71630    0.047    0.000    0.165    0.000 <frozen importlib._bootstrap>:973(_gcd_import)
+      2/1    0.045    0.022    0.046    0.046 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/json/decoder.py:135(JSONObject)
+    71651    0.039    0.000    0.041    0.000 <frozen importlib._bootstrap>:94(acquire)
+    71723    0.039    0.000    0.039    0.000 {method 'join' of 'str' objects}
+    35798    0.036    0.000    0.036    0.000 /Users/erik/pypy_venv/HipparchiaServer/server/textsandindices/indexmaker.py:323(<listcomp>)
+        2    0.035    0.017    0.035    0.017 {method 'build' of 'StringBuilder' objects}
+        5    0.033    0.007    0.033    0.007 /Users/erik/pypy_venv/HipparchiaServer/server/textsandindices/textandindiceshelperfunctions.py:196(dictmerger)
+    44639    0.032    0.000    0.033    0.000 /Users/erik/pypy_venv/HipparchiaServer/server/hipparchiaobjects/dbtextobjects.py:249(__init__)
+        2    0.031    0.016    0.031    0.016 {method 'poll' of 'select.poll' objects}
+   535668    0.031    0.000    0.344    0.000 /Users/erik/pypy_venv/site-packages/psycopg2cffi/_impl/typecasts.py:70(typecast)
+   535668    0.030    0.000    0.293    0.000 /Users/erik/pypy_venv/site-packages/psycopg2cffi/_impl/typecasts.py:87(parse_string)
+       70    0.026    0.000    0.026    0.000 {method 'append' of 'StringBuilder' objects}
+
+
+--------------------------------------------------------------------------------
+
+'μεγάλην δύναμιν'
+
+cpython:
+--------------------------------------------------------------------------------
+PATH: '/executesearch/afdd9f80'
+         44825 function calls (41876 primitive calls) in 12.916 seconds
+
+   Ordered by: internal time, call count
+   List reduced from 636 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       29   12.799    0.441   12.799    0.441 {built-in method posix.waitpid}
+        7    0.015    0.002    0.015    0.002 {built-in method posix.fork}
+      256    0.014    0.000    0.014    0.000 {built-in method posix.read}
+        4    0.005    0.001    0.005    0.001 {method 'execute' of 'psycopg2.extensions.cursor' objects}
+        1    0.004    0.004    0.004    0.004 /Users/erik/hipparchia_venv/HipparchiaServer/server/listsandsession/listmanagement.py:276(<dictcomp>)
+  2975/85    0.004    0.000    0.007    0.000 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/copy.py:132(deepcopy)
+        1    0.003    0.003    0.003    0.003 {method 'poll' of 'select.poll' objects}
+       20    0.003    0.000    0.003    0.000 {method 'set_session' of 'psycopg2.extensions.connection' objects}
+        1    0.003    0.003    0.003    0.003 /Users/erik/hipparchia_venv/HipparchiaServer/server/listsandsession/listmanagement.py:293(<listcomp>)
+        1    0.003    0.003   12.913   12.913 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/flask/app.py:1779(dispatch_request)
+      185    0.003    0.000    0.003    0.000 {method 'update' of 'dict' objects}
+       24    0.002    0.000    0.003    0.000 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/sre_compile.py:276(_optimize_charset)
+        5    0.002    0.000    0.002    0.000 /Users/erik/hipparchia_venv/HipparchiaServer/server/hipparchiaobjects/searchobjects.py:254(<listcomp>)
+        1    0.002    0.002    0.011    0.011 /Users/erik/hipparchia_venv/HipparchiaServer/server/listsandsession/listmanagement.py:235(calculatewholeauthorsearches)
+        1    0.002    0.002    0.002    0.002 /Users/erik/hipparchia_venv/HipparchiaServer/server/listsandsession/listmanagement.py:294(<listcomp>)
+        1    0.002    0.002    0.002    0.002 /Users/erik/hipparchia_venv/HipparchiaServer/server/listsandsession/listmanagement.py:272(<listcomp>)
+       98    0.001    0.000    0.001    0.000 {built-in method _pickle.loads}
+      683    0.001    0.000    0.001    0.000 {built-in method maketrans}
+      802    0.001    0.000    0.008    0.000 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/re.py:271(_compile)
+        7    0.001    0.000    0.017    0.002 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/multiprocessing/popen_fork.py:67(_launch)
+        1    0.001    0.001    0.004    0.004 /Users/erik/hipparchia_venv/HipparchiaServer/server/listsandsession/listmanagement.py:19(compilesearchlist)
+        1    0.001    0.001    0.001    0.001 /Users/erik/hipparchia_venv/HipparchiaServer/server/listsandsession/listmanagement.py:177(sortresultslist)
+        1    0.001    0.001    0.002    0.002 /Users/erik/hipparchia_venv/HipparchiaServer/server/listsandsession/whereclauses.py:19(configurewhereclausedata)
+        1    0.001    0.001   12.911   12.911 /Users/erik/hipparchia_venv/HipparchiaServer/server/routes/searchroute.py:39(executesearch)
+       85    0.001    0.000    0.003    0.000 /Users/erik/hipparchia_venv/HipparchiaServer/server/dbsupport/citationfunctions.py:106(locusintocitation)
+
+
+--------------------------------------------------------------------------------
+
+pypy:
+
+--------------------------------------------------------------------------------
+PATH: '/executesearch/95f4a7b3'
+         156272 function calls (149710 primitive calls) in 13.291 seconds
+
+   Ordered by: internal time, call count
+   List reduced from 756 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       34   12.665    0.373   12.665    0.373 {built-in function posix.waitpid}
+      232    0.193    0.001    0.193    0.001 {built-in function posix.read}
+  2390/94    0.035    0.000    0.143    0.002 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:456(save)
+        1    0.033    0.033    0.085    0.085 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:780(_batch_appends)
+       85    0.026    0.000    0.045    0.001 /Users/erik/pypy_venv/lib-python/3/copy.py:239(_deepcopy_dict)
+     2296    0.026    0.000    0.043    0.000 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:412(memoize)
+       95    0.024    0.000    0.067    0.001 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:1038(load)
+  3060/85    0.018    0.000    0.100    0.001 /Users/erik/pypy_venv/lib-python/3/copy.py:137(deepcopy)
+      501    0.017    0.000    0.049    0.000 <frozen importlib._bootstrap>:973(_gcd_import)
+     4972    0.010    0.000    0.012    0.000 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:212(write)
+        7    0.010    0.001    0.010    0.001 {built-in function posix.fork}
+     2011    0.007    0.000    0.041    0.000 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:698(save_str)
+    10773    0.007    0.000    0.007    0.000 {built-in function id}
+      501    0.006    0.000    0.007    0.000 <frozen importlib._bootstrap>:94(acquire)
+     2619    0.006    0.000    0.013    0.000 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:1220(load_binunicode)
+       85    0.006    0.000    0.007    0.000 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:1532(load_build)
+    15186    0.006    0.000    0.010    0.000 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:226(read)
+    683/0    0.006    0.000    0.000          {method 'translate' of 'str' objects}
+    11048    0.006    0.000    0.006    0.000 {method 'get' of 'dict' objects}
+      501    0.005    0.000    0.006    0.000 <frozen importlib._bootstrap>:119(release)
+      501    0.005    0.000    0.025    0.000 <frozen importlib._bootstrap>:196(_lock_unlock_module)
+     2296    0.005    0.000    0.008    0.000 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:435(put)
+     4602    0.005    0.000    0.005    0.000 {built-in function _struct.pack}
+      501    0.005    0.000    0.007    0.000 <frozen importlib._bootstrap>:176(_get_module_lock)
+    15186    0.004    0.000    0.004    0.000 {method 'read' of '_io.BytesIO' objects}
+    
+
+Sought »μεγάλην « within 1 lines of »δύναμιν«
+
+cpython:
+
+--------------------------------------------------------------------------------
+PATH: '/executesearch/5a4e2a43'
+         130412 function calls (119360 primitive calls) in 5.032 seconds
+
+   Ordered by: internal time, call count
+   List reduced from 578 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       29    4.841    0.167    4.841    0.167 {built-in method posix.waitpid}
+      736    0.031    0.000    0.031    0.000 {built-in method posix.read}
+        7    0.013    0.002    0.013    0.002 {built-in method posix.fork}
+11375/325    0.013    0.000    0.026    0.000 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/copy.py:132(deepcopy)
+     4365    0.007    0.000    0.009    0.000 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/re.py:271(_compile)
+      338    0.006    0.000    0.006    0.000 {built-in method _pickle.loads}
+     2579    0.004    0.000    0.004    0.000 {built-in method maketrans}
+     1504    0.004    0.000    0.004    0.000 {method 'format' of 'str' objects}
+      514    0.004    0.000    0.015    0.000 /Users/erik/hipparchia_venv/HipparchiaServer/server/formatting/searchformatting.py:136(highlightsearchterm)
+      325    0.004    0.000    0.018    0.000 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/copy.py:236(_deepcopy_dict)
+        1    0.003    0.003    0.003    0.003 {method 'poll' of 'select.poll' objects}
+      325    0.003    0.000    0.010    0.000 /Users/erik/hipparchia_venv/HipparchiaServer/server/dbsupport/citationfunctions.py:106(locusintocitation)
+      368    0.003    0.000    0.003    0.000 {built-in method posix.write}
+        1    0.003    0.003    0.003    0.003 /Users/erik/hipparchia_venv/HipparchiaServer/server/listsandsession/listmanagement.py:276(<dictcomp>)
+     1507    0.003    0.000    0.003    0.000 {method 'search' of 're.Pattern' objects}
+     2585    0.003    0.000    0.003    0.000 {method 'translate' of 'str' objects}
+        1    0.003    0.003    5.030    5.030 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/flask/app.py:1779(dispatch_request)
+        1    0.003    0.003    0.003    0.003 /Users/erik/hipparchia_venv/HipparchiaServer/server/listsandsession/listmanagement.py:177(sortresultslist)
+      736    0.003    0.000    0.034    0.000 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/multiprocessing/connection.py:374(_recv)
+    23107    0.002    0.000    0.002    0.000 {method 'get' of 'dict' objects}
+      665    0.002    0.000    0.002    0.000 {method 'update' of 'dict' objects}
+        1    0.002    0.002    0.002    0.002 /Users/erik/hipparchia_venv/HipparchiaServer/server/listsandsession/listmanagement.py:293(<listcomp>)
+     2577    0.002    0.000    0.009    0.000 /Users/erik/hipparchia_venv/HipparchiaServer/server/formatting/wordformatting.py:495(avoidsmallvariants)
+     7379    0.002    0.000    0.002    0.000 {built-in method builtins.isinstance}
+      325    0.002    0.000    0.044    0.000 /Users/erik/hipparchia_venv/HipparchiaServer/server/formatting/searchformatting.py:100(flagsearchterms)
+
+
+--------------------------------------------------------------------------------
+
+pypy:
+
+--------------------------------------------------------------------------------
+PATH: '/executesearch/4630fcc7'
+         458643 function calls (438797 primitive calls) in 8.886 seconds
+
+   Ordered by: internal time, call count
+   List reduced from 929 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       27    7.552    0.280    7.552    0.280 {built-in function posix.waitpid}
+      712    0.316    0.000    0.316    0.000 {built-in function posix.read}
+ 3830/334    0.070    0.000    0.267    0.001 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:456(save)
+      335    0.068    0.000    0.184    0.001 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:1038(load)
+11700/325    0.059    0.000    0.194    0.001 /Users/erik/pypy_venv/lib-python/3/copy.py:137(deepcopy)
+      325    0.048    0.000    0.089    0.000 /Users/erik/pypy_venv/lib-python/3/copy.py:239(_deepcopy_dict)
+        1    0.038    0.038    0.110    0.110 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:780(_batch_appends)
+  669/334    0.035    0.000    0.263    0.001 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:716(save_tuple)
+     3496    0.031    0.000    0.062    0.000 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:412(memoize)
+1755/1711    0.023    0.000    0.075    0.000 <frozen importlib._bootstrap>:973(_gcd_import)
+   2579/0    0.021    0.000    0.000          {method 'translate' of 'str' objects}
+     3496    0.020    0.000    0.023    0.000 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:435(put)
+      325    0.019    0.000    0.021    0.000 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:1532(load_build)
+      325    0.018    0.000    0.047    0.000 /Users/erik/pypy_venv/HipparchiaServer/server/dbsupport/citationfunctions.py:106(locusintocitation)
+      514    0.017    0.000    0.051    0.000 /Users/erik/pypy_venv/HipparchiaServer/server/formatting/searchformatting.py:136(highlightsearchterm)
+     4365    0.016    0.000    0.037    0.000 /Users/erik/pypy_venv/lib-python/3/re.py:278(_compile)
+    25169    0.016    0.000    0.016    0.000 {built-in function id}
+     1507    0.015    0.000    0.015    0.000 {method 'search' of '_sre.SRE_Pattern' objects}
+     2491    0.014    0.000    0.064    0.000 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:698(save_str)
+     1755    0.013    0.000    0.014    0.000 <frozen importlib._bootstrap>:94(acquire)
+    31583    0.012    0.000    0.012    0.000 {method 'get' of 'dict' objects}
+        7    0.012    0.002    0.012    0.002 {built-in function posix.fork}
+    57057    0.011    0.000    0.021    0.000 /usr/local/Cellar/pypy3/6.0.0/libexec/lib-python/3/pickle.py:226(read)
+    57057    0.010    0.000    0.010    0.000 {method 'read' of '_io.BytesIO' objects}
+     1533    0.010    0.000    0.010    0.000 {method 'format' of 'str' objects}
+
+
+--------------------------------------------------------------------------------

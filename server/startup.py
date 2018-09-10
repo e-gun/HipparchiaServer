@@ -79,7 +79,7 @@ authordict = loadallworksintoallauthors(authordict, workdict)
 lemmatadict = loadlemmataasobjects()
 # print('lemmatadict disabled for debugging run')
 # lemmatadict = dict()
-# the next is too long to be used by the hinter: need quicker access via a dict
+# lemmatadict too long to be used by the hinter: need quicker access; so partition it up into keyedlemmata
 keyedlemmata = buildkeyedlemmata(list(lemmatadict.keys()))
 
 print('building core dictionaries', end='')
@@ -93,6 +93,8 @@ print(' ({e}s)'.format(e=elapsed))
 
 print('building specialized sublists', end='')
 launchtime = time.time()
+
+
 def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
 	"""
 

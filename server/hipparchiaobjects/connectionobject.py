@@ -36,7 +36,7 @@ class GenericConnectionObject(object):
 		Hipparchia configuration file
 
 	[NB if postgresql was not shut down cleanly it might fail to restart properly, 
-	and, worse it might not notify you that it has failed to restart properly...
+	and, worse, it might not notify you that it has failed to restart properly...
 	
 	On macOS you can try the following:
 		$ psql
@@ -177,7 +177,7 @@ class PooledConnectionObject(GenericConnectionObject):
 
 			# [B] 'rw' pool: only used by the vector graphing functions
 			# and these are always going to be single-threaded
-			littlepool = max(setthreadcount() / 2, 2)
+			littlepool = max(int(setthreadcount() / 2), 2)
 			kwds['user'] = hipparchia.config['DBWRITEUSER']
 			kwds['password'] = hipparchia.config['DBWRITEPASS']
 			# this can be smaller because only vectors do rw and the vectorbot is not allowed in the pool
