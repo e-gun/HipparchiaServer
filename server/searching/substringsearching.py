@@ -13,7 +13,7 @@ import psycopg2
 from typing import Generator
 
 from server.dbsupport.miscdbfunctions import resultiterator
-from server.dbsupport.tablefunctions import uniquetablename
+from server.dbsupport.tablefunctions import assignuniquename
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.searchfunctions import buildbetweenwhereextension
 
@@ -62,7 +62,7 @@ def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, 
 	if r['type'] == 'temptable':
 		# make the table
 		q = r['where']['tempquery']
-		avoidcollisions = uniquetablename()
+		avoidcollisions = assignuniquename()
 		q = re.sub('_includelist', '_includelist_{a}'.format(a=avoidcollisions), q)
 		cursor.execute(q)
 		# now you can work with it

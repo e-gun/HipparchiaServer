@@ -13,7 +13,7 @@ import threading
 
 from server import hipparchia
 from server.threading.mpthreadcount import setthreadcount
-from server.dbsupport.tablefunctions import uniquetablename
+from server.dbsupport.tablefunctions import assignuniquename
 
 
 class GenericConnectionObject(object):
@@ -59,7 +59,7 @@ class GenericConnectionObject(object):
 		self.commitcount = hipparchia.config['MPCOMMITCOUNT']
 		# used for the key for getconn() and putconn(); but unneeded if PersistentConnectionPool
 		# also useful to have on hand for debugging
-		self.uniquename = uniquetablename()
+		self.uniquename = assignuniquename()
 		# the next two must get filled out when the actual connection is made
 		self.dbconnection = None
 		self.curs = None

@@ -17,7 +17,7 @@ import psycopg2
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
 from server.dbsupport.miscdbfunctions import resultiterator
-from server.dbsupport.tablefunctions import uniquetablename
+from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
@@ -84,7 +84,7 @@ def findsentences(authortable, searchobject, cursor):
 	if r['type'] == 'temptable':
 		# make the table
 		q = r['where']['tempquery']
-		avoidcollisions = uniquetablename()
+		avoidcollisions = assignuniquename()
 		q = re.sub('_includelist', '_includelist_{a}'.format(a=avoidcollisions), q)
 		cursor.execute(q)
 		# now you can work with it

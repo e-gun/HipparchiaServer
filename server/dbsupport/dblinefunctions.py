@@ -9,7 +9,7 @@
 from collections import deque
 
 from server.dbsupport.miscdbfunctions import perseusidmismatch, resultiterator
-from server.dbsupport.tablefunctions import uniquetablename
+from server.dbsupport.tablefunctions import assignuniquename
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 
@@ -210,8 +210,8 @@ def bulkenvironsfetcher(table: str, searchresultlist: list, context: int) -> lis
 			includeindex FROM unnest(ARRAY[{lines}]) values
 	"""
 
-	# avoidcollisions instead of DROP TABLE IF EXISTS; the table disappears at the end of the connection
-	avoidcollisions = uniquetablename()
+	# avoidcollisions instead of DROP TABLE IF EXISTS; the table disappears when the connection is cleaned up
+	avoidcollisions = assignuniquename()
 
 	tempquery = tqtemplate.format(au=table, ac=avoidcollisions, lines=','.join(tosearch))
 	cursor.execute(tempquery)
@@ -221,8 +221,8 @@ def bulkenvironsfetcher(table: str, searchresultlist: list, context: int) -> lis
 		(SELECT 1 FROM {au}_includelist_{ac} incl WHERE incl.includeindex = {au}.index)
 	"""
 
-	q = qtemplate.format(au=table, ac=avoidcollisions)
-	cursor.execute(q)
+	query = qtemplate.format(au=table, ac=avoidcollisions)
+	cursor.execute(query)
 	results = resultiterator(cursor)
 
 	lines = [dblineintolineobject(r) for r in results]

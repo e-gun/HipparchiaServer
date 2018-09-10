@@ -12,7 +12,7 @@ from typing import List
 
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
 from server.dbsupport.redisdbfunctions import establishredisconnection
-from server.dbsupport.tablefunctions import uniquetablename
+from server.dbsupport.tablefunctions import assignuniquename
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
@@ -237,7 +237,7 @@ def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofp
 					indexwedwhere = indexwedwhere[:-4]
 					whr = 'WHERE {iw}'.format(iw=indexwedwhere)
 			elif r['type'] == 'temptable':
-				avoidcollisions = uniquetablename()
+				avoidcollisions = assignuniquename()
 				q = r['where']['tempquery']
 				q = re.sub('_includelist', '_includelist_{a}'.format(a=avoidcollisions), q)
 				cursor.execute(q)

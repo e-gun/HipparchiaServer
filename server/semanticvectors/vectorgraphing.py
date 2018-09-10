@@ -26,7 +26,7 @@ except ModuleNotFoundError:
 
 import psycopg2
 from server import hipparchia
-from server.dbsupport.tablefunctions import uniquetablename
+from server.dbsupport.tablefunctions import assignuniquename
 from server.dbsupport.vectordbfunctions import createstoredimagestable
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.startup import authordict, workdict
@@ -193,7 +193,7 @@ def storevectorgraph(figureasbytes):
 	dbconnection.setautocommit()
 	cursor = dbconnection.cursor()
 
-	randomid = uniquetablename()
+	randomid = assignuniquename()
 
 	q = """
 	INSERT INTO public.storedvectorimages 

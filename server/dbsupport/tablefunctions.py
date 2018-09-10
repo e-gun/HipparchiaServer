@@ -8,6 +8,8 @@
 
 import random
 
+from uuid import uuid4
+
 from server.hipparchiaobjects.dbtextobjects import dbAuthor
 
 
@@ -37,17 +39,24 @@ def tablenamer(authorobject: dbAuthor, thework: int) -> str:
 		pr = ''
 		print('oh, I do not speak {lg} and I will be unable to access a DB'.format(lg=lg))
 
-	workdbname = pr + nm + 'w' + wn
+	workdbname = '{p}{n}w{w}'.format(p=pr, n=nm, w=wn)
 
 	return workdbname
 
 
-def uniquetablename(numberofletters=12) -> str:
+def assignuniquename() -> str:
 	"""
 
-	random name for temporary tables
+	random name for:
+		temporary tables
+		dbconnections
 
 	:return:
 	"""
 
-	return ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(numberofletters)])
+	# numberofletters = 12
+	# n = ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(numberofletters)])
+
+	n = str(uuid4())
+
+	return n
