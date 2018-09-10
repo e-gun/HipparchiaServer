@@ -14,11 +14,11 @@ from typing import List
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject
-from server.dbsupport.redisdbfunctions import establishredisconnection, buildredissearchlist
+from server.dbsupport.redisdbfunctions import buildredissearchlist
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
-from server.hipparchiaobjects.searchobjects import SearchObject
+from server.hipparchiaobjects.searchobjects import SearchObject, GenericSearchFunctionObject
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, \
@@ -172,228 +172,24 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 
 def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
-	
-	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
-	you need to pick the right style of search for each work you search, though
 
-	searchlist: ['gr0461', 'gr0489', 'gr0468', ...]
-
-	substringsearch() called herein needs ability to CREATE TEMPORARY TABLE
-
-	pop inside the while rather than iterate lest you get several sets of the same results as each worker grabs the whole
-	search pile
-
-	the pop() will fail if somebody else grabbed the last available work before it could be registered:
-	listofplacestosearch = None, but you are already inside the "while..." clause
-
-	this difficulty justifies exploring the redis alternative...
-
-	:param foundlineobjects: 
-	:param listofplacestosearch: 
-	:param searchobject: 
-	:param dbconnection: 
-	:return: 
-	"""
-
-	so = searchobject
-	activepoll = so.poll
-
-	# TESTING: probe the marked up data; good for finding rare/missing markup like 'hmu_scholium'
-	# so.usecolumn = 'marked_up_line'
-
-	dbconnection.setreadonly(False)
-	dbcursor = dbconnection.cursor()
-
-	commitcount = 0
-
-	if so.redissearchlist:
-		listofplacestosearch = True
-		rc = establishredisconnection()
-		argument = '{id}_searchlist'.format(id=so.searchid)
-		getnetxitem = lambda x: rc.spop(argument).decode()
-		remainder = rc.smembers(argument)
-		emptyerror = AttributeError
-		remaindererror = AttributeError
-	else:
-		getnetxitem = listofplacestosearch.pop
-		remainder = listofplacestosearch
-		emptyerror = IndexError
-		remaindererror = TypeError
-
-	while listofplacestosearch and activepoll.gethits() <= so.cap:
-		commitcount += 1
-		dbconnection.checkneedtocommit(commitcount)
-
-		try:
-			authortable = getnetxitem(0)
-		except emptyerror:
-			authortable = None
-			listofplacestosearch = None
-			
-		if authortable:
-			foundlines = substringsearch(so.termone, authortable, so, dbcursor)
-			lineobjects = [dblineintolineobject(f) for f in foundlines]
-			foundlineobjects.extend(lineobjects)
-
-			if lineobjects:
-				# print(authortable, len(lineobjects))
-				numberoffinds = len(lineobjects)
-				activepoll.addhits(numberoffinds)
-		else:
-			listofplacestosearch = None
-
-		try:
-			activepoll.remain(len(remainder))
-		except remaindererror:
-			pass
-
-	return foundlineobjects
-
-
-def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
-	"""
-	
-	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
-	you need to pick the right style of search for each work you search, though
-
-	searchlist: ['gr0461', 'gr0489', 'gr0468', ...]
-
-	lemmatized clivius:
-		(^|\s)clivi(\s|$)|(^|\s)cliviam(\s|$)|(^|\s)clivique(\s|$)|(^|\s)cliviae(\s|$)|(^|\s)cliui(\s|$)
-
-	searchtuples:
-		[(lemmatizedchunk1, tabletosearch1), (lemmatizedchunk1, tabletosearch2), ...]
-
-	these searches go very slowly of you seek "all 429 known forms of »εὑρίϲκω«"; so they have been broken up
-	you will search N forms in all tables; then another N forms in all tables; ...
-	
-	:param foundlineobjects: 
-	:param searchtuples: 
-	:param searchobject: 
-	:param dbconnection: 
-	:return: 
-	"""
-
-	so = searchobject
-	activepoll = so.poll
-
-	# substringsearch will be creating a temp table
-	dbconnection.setreadonly(False)
-	dbcursor = dbconnection.cursor()
-
-	if so.redissearchlist:
-		searchtuples = True
-		rc = establishredisconnection()
-		argument = '{id}_searchlist'.format(id=so.searchid)
-		# note that this lambda is not like the lambda in the other parallel functions: a pickled tuple is coming back
-		getnetxitem = lambda x: rc.spop(argument)
-		remainder = rc.smembers(argument)
-		emptyerror = AttributeError
-		remaindererror = AttributeError
-	else:
-		getnetxitem = searchtuples.pop
-		remainder = searchtuples
-		emptyerror = IndexError
-		remaindererror = TypeError
-
-	commitcount = 0
-	while searchtuples and activepoll.gethits() <= so.cap:
-		commitcount += 1
-		dbconnection.checkneedtocommit(commitcount)
-		# pop rather than iterate lest you get several sets of the same results as each worker grabs the whole search pile
-		# the pop() will fail if somebody else grabbed the last available work before it could be registered
-		# that's not supposed to happen with the pool, but somehow it does
-
-		try:
-			tup = getnetxitem(0)
-		except emptyerror:
-			tup = None
-			searchtuples = None
-
-		if tup:
-			if so.redissearchlist:
-				searchingfor, authortable = pickle.loads(tup)
-			else:
-				searchingfor, authortable = tup
-
-			foundlines = substringsearch(searchingfor, authortable, so, dbcursor)
-			lineobjects = [dblineintolineobject(f) for f in foundlines]
-			foundlineobjects.extend(lineobjects)
-
-			if lineobjects:
-				numberoffinds = len(lineobjects)
-				activepoll.addhits(numberoffinds)
-		else:
-			searchtuples = None
-
-		try:
-			activepoll.remain(len(remainder))
-		except remaindererror:
-			pass
-
-	return foundlineobjects
-
-
-def workonphrasesearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
-	"""
-
-	a multiprocessor aware function that hands off bits of a phrase search to multiple searchers
-	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase
-	hits the limit
-
-	searchinginside:
-		['lt0400', 'lt0022', ...]
 
 	:param foundlineobjects:
 	:param listofplacestosearch:
-	:param activepoll:
 	:param searchobject:
+	:param dbconnection:
 	:return:
 	"""
 
-	so = searchobject
-	activepoll = so.poll
+	# TESTING: probe the marked up data; good for finding rare/missing markup like 'hmu_scholium'
+	# searchobject.usecolumn = 'marked_up_line'
 
-	dbcursor = dbconnection.cursor()
+	gsfo = GenericSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, substringsearch)
+	gsfo.searchfunctionparamaters = [gsfo.so.termone, 'locationtosearch', gsfo.so, gsfo.dbcursor]
+	gsfo.dbconnection.setreadonly(False)
+	gsfo.iteratethroughsearchlist()
 
-	commitcount = 0
-
-	if so.redissearchlist:
-		listofplacestosearch = True
-		rc = establishredisconnection()
-		argument = '{id}_searchlist'.format(id=so.searchid)
-		getnetxitem = lambda x: rc.spop(argument).decode()
-		remainder = rc.smembers(argument)
-		emptyerror = AttributeError
-		remaindererror = AttributeError
-	else:
-		getnetxitem = listofplacestosearch.pop
-		remainder = listofplacestosearch
-		emptyerror = IndexError
-		remaindererror = TypeError
-
-	while listofplacestosearch and len(foundlineobjects) < so.cap:
-		commitcount += 1
-		dbconnection.checkneedtocommit(commitcount)
-
-		try:
-			authortable = getnetxitem(0)
-		except emptyerror:
-			authortable = None
-			listofplacestosearch = None
-
-		if authortable:
-			foundlines = phrasesearch(authortable, so, dbcursor)
-			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
-
-			try:
-				activepoll.remain(len(remainder))
-			except remaindererror:
-				pass
-		else:
-			listofplacestosearch = None
-
-	return foundlineobjects
+	return gsfo.foundlineobjects
 
 
 def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
@@ -417,46 +213,85 @@ def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: Lis
 	:return:
 	"""
 
-	so = searchobject
-	activepoll = so.poll
-
-	if so.redissearchlist:
-		listofplacestosearch = True
-		rc = establishredisconnection()
-		argument = '{id}_searchlist'.format(id=so.searchid)
-		getnetxitem = lambda x: rc.spop(argument).decode()
-		remainder = rc.smembers(argument)
-		emptyerror = AttributeError
-		remaindererror = AttributeError
+	if searchobject.scope == 'lines':
+		fnc = withinxlines
 	else:
-		getnetxitem = listofplacestosearch.pop
-		remainder = listofplacestosearch
-		emptyerror = IndexError
-		remaindererror = TypeError
+		fnc = withinxwords
 
-	if so.scope == 'lines':
-		searchfunction = withinxlines
-	else:
-		searchfunction = withinxwords
+	gsfo = GenericSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, fnc)
+	gsfo.searchfunctionparamaters = ['locationtosearch', gsfo.so, gsfo.dbconnection]
+	gsfo.iteratethroughsearchlist()
 
-	while listofplacestosearch and activepoll.gethits() <= so.cap:
-		try:
-			authortable = getnetxitem(0)
-		except emptyerror:
-			authortable = None
-			listofplacestosearch = None
+	return gsfo.foundlineobjects
 
-		if authortable:
-			foundlines = searchfunction(authortable, so, dbconnection)
 
-			if foundlines:
-				activepoll.addhits(len(foundlines))
+def workonphrasesearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
+	"""
 
-			foundlineobjects.extend([dblineintolineobject(ln) for ln in foundlines])
+	a multiprocessor aware function that hands off bits of a phrase search to multiple searchers
+	you need to pick temporarily reassign max hits so that you do not stop searching after one item in the phrase
+	hits the limit
 
-		try:
-			activepoll.remain(len(remainder))
-		except remaindererror:
-			pass
+	searchinginside:
+		['lt0400', 'lt0022', ...]
 
-	return foundlineobjects
+	:param foundlineobjects:
+	:param listofplacestosearch:
+	:param activepoll:
+	:param searchobject:
+	:return:
+	"""
+
+	gsfo = GenericSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, phrasesearch)
+	gsfo.searchfunctionparamaters = ['locationtosearch', gsfo.so, gsfo.dbcursor]
+	gsfo.iteratethroughsearchlist()
+
+	return gsfo.foundlineobjects
+
+
+def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
+	"""
+
+	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
+	you need to pick the right style of search for each work you search, though
+
+	searchlist: ['gr0461', 'gr0489', 'gr0468', ...]
+
+	lemmatized clivius:
+		(^|\s)clivi(\s|$)|(^|\s)cliviam(\s|$)|(^|\s)clivique(\s|$)|(^|\s)cliviae(\s|$)|(^|\s)cliui(\s|$)
+
+	searchtuples:
+		[(lemmatizedchunk1, tabletosearch1), (lemmatizedchunk1, tabletosearch2), ...]
+
+	these searches go very slowly of you seek "all 429 known forms of »εὑρίϲκω«"; so they have been broken up
+	you will search N forms in all tables; then another N forms in all tables; ...
+
+	since we swap both the search term and the location and not just the location, we can's use the generic
+	gsfo.iteratethroughsearchlist() which only swaps locations
+
+	:param foundlineobjects:
+	:param searchtuples:
+	:param searchobject:
+	:param dbconnection:
+	:return:
+	"""
+
+	gsfo = GenericSearchFunctionObject(foundlineobjects, searchtuples, searchobject, dbconnection, phrasesearch)
+	gsfo.dbconnection.setreadonly(False)
+
+	while gsfo.listofplacestosearch and gsfo.activepoll.gethits() <= gsfo.so.cap:
+		tup = gsfo.trytogetnext()
+		if tup:
+			if gsfo.so.redissearchlist:
+				searchingfor, authortable = pickle.loads(tup)
+			else:
+				searchingfor, authortable = tup
+
+			foundlines = substringsearch(searchingfor, authortable, gsfo.so, gsfo.dbcursor)
+			lineobjects = [dblineintolineobject(f) for f in foundlines]
+			gsfo.foundlineobjects.extend(lineobjects)
+			gsfo.updatepollfinds(lineobjects)
+
+		gsfo.updatepollremaining()
+
+	return gsfo.foundlineobjects

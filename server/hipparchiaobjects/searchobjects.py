@@ -7,8 +7,11 @@
 """
 import re
 import time
+from multiprocessing.managers import ListProxy
 
 from server import hipparchia
+from server.dbsupport.dblinefunctions import dblineintolineobject
+from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.wordformatting import avoidsmallvariants
 from server.listsandsession.sessionfunctions import justlatin
@@ -431,3 +434,76 @@ class SearchOutputObject(object):
 		for item in itemsweuse:
 			outputdict[item] = getattr(self, item)
 		return outputdict
+
+
+class GenericSearchFunctionObject(object):
+	"""
+
+	a class to hold repeated code for the searches
+
+	the chief difference between most search types is the number and names of the parameters passed
+	to self.searchfunction
+
+	"""
+	def __init__(self, foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection, searchfunction):
+		self.commitcount = 0
+		self.dbconnection = dbconnection
+		self.dbcursor = self.dbconnection.cursor()
+		self.so = searchobject
+		self.foundlineobjects = foundlineobjects
+		self.listofplacestosearch = listofplacestosearch
+		self.searchfunction = searchfunction
+		self.searchfunctionparamaters = None
+		self.activepoll = self.so.poll
+		self.gotmyonehit = False
+		if self.so.redissearchlist:
+			self.listofplacestosearch = True
+			self.rc = establishredisconnection()
+			argument = '{id}_searchlist'.format(id=self.so.searchid)
+			self.getnetxitem = lambda x: self.rc.spop(argument).decode()
+			self.remainder = self.rc.smembers(argument)
+			self.emptyerror = AttributeError
+			self.remaindererror = AttributeError
+		else:
+			self.getnetxitem = self.listofplacestosearch.pop
+			self.remainder = self.listofplacestosearch
+			self.emptyerror = IndexError
+			self.remaindererror = TypeError
+
+	def trytogetnext(self):
+		self.commitcount += 1
+		self.dbconnection.checkneedtocommit(self.commitcount)
+		try:
+			nextsearchlocation = self.getnetxitem(0)
+		except self.emptyerror:
+			nextsearchlocation = None
+			self.listofplacestosearch = None
+		return nextsearchlocation
+
+	def updatepollremaining(self):
+		try:
+			self.activepoll.remain(len(self.remainder))
+		except self.remaindererror:
+			pass
+
+	def updatepollfinds(self, lines):
+		if lines:
+			numberoffinds = len(lines)
+			self.activepoll.addhits(numberoffinds)
+		return
+
+	def iteratethroughsearchlist(self):
+		locationtoswap = self.searchfunctionparamaters.index('locationtosearch')
+		params = self.searchfunctionparamaters
+		while self.listofplacestosearch and self.activepoll.gethits() <= self.so.cap:
+			authortable = self.trytogetnext()
+			if authortable:
+				params[locationtoswap] = authortable
+				foundlines = self.searchfunction(*tuple(params))
+				lineobjects = [dblineintolineobject(f) for f in foundlines]
+				self.foundlineobjects.extend(lineobjects)
+				self.updatepollfinds(lineobjects)
+			self.updatepollremaining()
+		# empty return because foundlineobjects is a ListProxy:
+		# ask for self.foundlineobjects as the search result instead
+		return

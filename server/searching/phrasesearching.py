@@ -14,8 +14,8 @@ from server.dbsupport.dblinefunctions import dblineintolineobject, makeablanklin
 from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.dbsupport.tablefunctions import assignuniquename
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
-from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline
 from server.searching.substringsearching import substringsearch
 
@@ -78,6 +78,9 @@ def phrasesearch(wkid: str, searchobject: SearchObject, cursor) -> List[dbWorkLi
 
 def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
+
+	not a good candidate for GenericSearchFunctionObject() given how much custom code is in here
+
 	foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll
 
 	use subquery syntax to grab multi-line windows of text for phrase searching
