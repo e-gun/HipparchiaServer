@@ -8,13 +8,13 @@
 
 import json
 import locale
-import re
 
 from flask import request, session
 
 from server import hipparchia
 from server.dbsupport.vectordbfunctions import fetchverctorenvirons
 from server.formatting.jsformatting import generatevectorjs
+from server.formatting.miscformatting import validatepollid
 from server.formatting.vectorformatting import formatnnmatches
 from server.hipparchiaobjects.searchobjects import SearchOutputObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
@@ -57,10 +57,7 @@ def findabsolutevectors(searchid):
 	:return:
 	"""
 
-	pollid = re.sub(r'\W', '', searchid)
-
-	if pollid != searchid:
-		pollid = 'this_poll_will_never_be_found'
+	pollid = validatepollid(searchid)
 
 	so = buildsearchobject(pollid, request, session)
 	so.seeking = ''

@@ -7,11 +7,11 @@
 """
 
 import json
-import re
 import threading
 import time
 
 from server import hipparchia
+from server.formatting.miscformatting import validatepollid
 from server.startup import poll
 from server.threading.websocketthread import startwspolling
 
@@ -32,10 +32,7 @@ def checkforactivesearch(searchid):
 	:return:
 	"""
 
-	pollid = re.sub(r'\W', '', searchid)
-
-	if pollid != searchid:
-		pollid = 'this_poll_will_never_be_found'
+	pollid = validatepollid(searchid)
 
 	pollport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
@@ -48,6 +45,7 @@ def checkforactivesearch(searchid):
 		if poll[pollid].getactivity():
 			return json.dumps(pollport)
 	except KeyError:
+		# print('websocket checkforactivesearch() KeyError', pollid)
 		time.sleep(.10)
 		try:
 			if poll[pollid].getactivity():

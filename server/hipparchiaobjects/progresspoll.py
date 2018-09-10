@@ -44,6 +44,7 @@ class SharedMemoryProgressPoll(object):
 		self.hitcount.increment(-1)
 		self.notes = ''
 		self.polltype = 'SharedMemoryProgressPoll'
+		# print('SharedMemoryProgressPoll()', self.searchid)
 
 	def getstatus(self):
 		return self.statusmessage.decode('utf-8')

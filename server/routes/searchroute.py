@@ -14,6 +14,7 @@ from flask import request, session
 from server import hipparchia
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
+from server.formatting.miscformatting import validatepollid
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds
 from server.formatting.wordformatting import universalregexequivalent, wordlistintoregex
@@ -49,10 +50,7 @@ def executesearch(searchid):
 	:return:
 	"""
 
-	pollid = re.sub(r'\W', '', searchid)
-
-	if pollid != searchid:
-		pollid = 'this_poll_will_never_be_found'
+	pollid = validatepollid(searchid)
 
 	so = buildsearchobject(pollid, request, session)
 

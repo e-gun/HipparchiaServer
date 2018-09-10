@@ -23,9 +23,9 @@ $(document).ready( function () {
     $('#helpbutton').click( function() {
         if (document.getElementById('Interface').innerHTML === '<!-- placeholder -->') {
             $.getJSON('/loadhelpdata', function (data) {
-                var l = data.helpcategories.length;
-                for (var i = 0; i < l; i++) {
-                    var divname = data.helpcategories[i];
+                let l = data.helpcategories.length;
+                for (let i = 0; i < l; i++) {
+                    let divname = data.helpcategories[i];
                     if (data[divname].length > 0) {
                         document.getElementById(divname).innerHTML = data[divname];
                         }
@@ -62,6 +62,13 @@ $(document).ready( function () {
         $('#topicmodelcheckbox').toggle();
         });
 
+    // https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript#2117523
+    function uuidv4() {
+        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        )
+    }
+
     // https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
     // dec2hex :: Integer -> String
     function dec2hex (dec) {
@@ -70,7 +77,7 @@ $(document).ready( function () {
 
     // generateId :: Integer -> String
     function generateId (len) {
-      var arr = new Uint8Array((len || 40) / 2);
+      let arr = new Uint8Array((len || 40) / 2);
       window.crypto.getRandomValues(arr);
       return Array.from(arr, dec2hex).join('');
     }
@@ -81,10 +88,10 @@ $(document).ready( function () {
         $('#displayresults').html('');
 
         // the script additions can pile up: so first kill off any scripts we have already added
-        var bcsh = document.getElementById("browserclickscriptholder");
+        let bcsh = document.getElementById("browserclickscriptholder");
         if (bcsh.hasChildNodes()) { bcsh.removeChild(bcsh.firstChild); }
 
-        var terms = {
+        const terms = {
             'skg': $('#wordsearchform').val(),
             'prx': $('#proximatesearchform').val(),
             'lem': $('#lemmatasearchform').val(),
@@ -94,15 +101,15 @@ $(document).ready( function () {
         if (terms['skg'].slice(-1) === ' ') { terms['skg'] = terms['skg'].slice(0,-1) + '%20'; }
         if (terms['prx'].slice(-1) === ' ') { terms['prx'] = terms['prx'].slice(0,-1) + '%20'; }
 
-        var qstringarray = Array();
-        for (var t in terms) {
+        let qstringarray = Array();
+        for (let t in terms) {
             if (terms[t] !== '') {qstringarray.push(t+'='+terms[t]); }
             }
-        var qstring = qstringarray.join('&');
+        let qstring = qstringarray.join('&');
 
-        // var searchid = Date.now();
-        var searchid = generateId(8);
-        var url = '/executesearch/' + searchid + '?' + qstring;
+        let searchid = generateId(8);
+        // let searchid = uuidv4();
+        let url = '/executesearch/' + searchid + '?' + qstring;
 
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
 
@@ -131,8 +138,8 @@ $(document).ready( function () {
 
         var imagetarget = $('#imagearea');
         if (typeof output['image'] !== 'undefined' && output['image'] !== '') {
-            var w = window.innerWidth * .9;
-            var h = window.innerHeight * .9;
+            let w = window.innerWidth * .9;
+            let h = window.innerHeight * .9;
             jQuery('<img/>').prependTo(imagetarget).attr({
                 src: '/getstoredfigure/' + output['image'],
                 alt: '[vector graph]',
@@ -146,7 +153,7 @@ $(document).ready( function () {
         // [http://stackoverflow.com/questions/9413737/how-to-append-script-script-in-javascript#9413803]
         //
 
-        var browserclickscript = document.createElement('script');
+        let browserclickscript = document.createElement('script');
         browserclickscript.innerHTML = output['js'];
         document.getElementById('browserclickscriptholder').appendChild(browserclickscript);
     }
@@ -162,11 +169,11 @@ $(document).ready( function () {
         value: 1,
         step: 1,
         stop: function( event, ui ) {
-            var result = $('#proximityspinner').spinner('value');
+            let result = $('#proximityspinner').spinner('value');
             setoptions('proximity', String(result));
             },
         spin: function( event, ui ) {
-            var result = $('#proximityspinner').spinner('value');
+            let result = $('#proximityspinner').spinner('value');
             setoptions('proximity', String(result));
             }
         });
@@ -189,7 +196,7 @@ $(document).ready( function () {
 
 
     function checkCookie(){
-        var c = navigator.cookieEnabled;
+        let c = navigator.cookieEnabled;
         if (!c){
             document.cookie = "testcookie";
             c = document.cookie.indexOf("testcookie")!=-1;
@@ -210,19 +217,19 @@ $(document).ready( function () {
     //
 
     function bulkhider(arrayofelements) {
-        for (var i = 0; i < arrayofelements.length; i++) {
+        for (let i = 0; i < arrayofelements.length; i++) {
             $(arrayofelements[i]).hide();
             }
     }
 
     function bulkshow(arrayofelements) {
-        for (var i = 0; i < arrayofelements.length; i++) {
+        for (let i = 0; i < arrayofelements.length; i++) {
             $(arrayofelements[i]).show();
             }
     }
 
     function bulkclear(arrayofelements) {
-        for (var i = 0; i < arrayofelements.length; i++) {
+        for (let i = 0; i < arrayofelements.length; i++) {
             $(arrayofelements[i]).val('');
             }
     }
@@ -237,13 +244,13 @@ $(document).ready( function () {
             // NOTE: according to the above, you will not be able to get progress reports if you are not at localhost
             // that might be something you want to ensure
             // the following is required for remote progress reports
-            var ip = location.hostname;
-            var s = new WebSocket('ws://'+ip+':'+portnumber+'/');
-            var amready = setInterval(function(){
+            let ip = location.hostname;
+            let s = new WebSocket('ws://'+ip+':'+portnumber+'/');
+            let amready = setInterval(function(){
                 if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
                 }, 10);
             s.onmessage = function(e){
-                var progress = JSON.parse(e.data);
+                let progress = JSON.parse(e.data);
                 displayprogress(progress);
                 if  (progress['active'] === 'inactive') { $('#pollingdata').html(''); s.close(); s = null; }
                 }
@@ -251,15 +258,15 @@ $(document).ready( function () {
     }
 
     function displayprogress(progress){
-        var r = progress['remaining'];
-        var t = progress['total'];
-        var h = progress['hits'];
-        var pct = Math.round((t-r) / t * 100);
-        var m = progress['message'];
-        var e = progress['elapsed'];
-        var x = progress['extrainfo'];
+        let r = progress['remaining'];
+        let t = progress['total'];
+        let h = progress['hits'];
+        let pct = Math.round((t-r) / t * 100);
+        let m = progress['message'];
+        let e = progress['elapsed'];
+        let x = progress['extrainfo'];
 
-        var thehtml = '';
+        let thehtml = '';
 
         if (t !== -1) {
             thehtml += m + ': <span class="progress">' + pct + '%</span> completed&nbsp;(' + e + 's)';

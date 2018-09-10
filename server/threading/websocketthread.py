@@ -12,6 +12,7 @@ import re
 import websockets
 
 from server import hipparchia
+from server.formatting.miscformatting import validatepollid
 from server.startup import poll
 
 
@@ -40,7 +41,8 @@ async def wscheckpoll(websocket, path):
 		return
 
 	# comes to us with quotes: "eb91fb11" --> eb91fb11
-	pollid = re.sub(r'\W', '', pollid)
+	pollid = re.sub(r'"', '', pollid)
+	pollid = validatepollid(pollid)
 
 	while True:
 		progress = dict()

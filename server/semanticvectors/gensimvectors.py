@@ -5,12 +5,12 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
-import re
 
 from flask import request, session
 
 from server import hipparchia
 from server.dbsupport.vectordbfunctions import checkforstoredvector
+from server.formatting.miscformatting import validatepollid
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
@@ -33,10 +33,7 @@ def findnearestneighborvectors(searchid):
 	:return:
 	"""
 
-	pollid = re.sub(r'\W', '', searchid)
-
-	if pollid != searchid:
-		pollid = 'this_poll_will_never_be_found'
+	pollid = validatepollid(searchid)
 
 	so = buildsearchobject(pollid, request, session)
 	so.seeking = ''

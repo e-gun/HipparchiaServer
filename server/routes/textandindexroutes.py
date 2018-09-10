@@ -8,7 +8,6 @@
 
 import json
 import locale
-import re
 import time
 
 from flask import request, session
@@ -16,6 +15,7 @@ from flask import request, session
 from server import hipparchia
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
+from server.formatting.miscformatting import validatepollid
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
@@ -35,10 +35,8 @@ def completeindex():
 	"""
 
 	searchid = request.args.get('id', '')
-	pollid = re.sub(r'\W', '', searchid)
 
-	if pollid != searchid:
-		pollid = 'this_poll_will_never_be_found'
+	pollid = validatepollid(searchid)
 
 	starttime = time.time()
 
