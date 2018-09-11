@@ -5,6 +5,8 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
+import pickle
 import re
 import time
 from multiprocessing.managers import ListProxy
@@ -453,9 +455,10 @@ class GenericSearchFunctionObject(object):
 		self.foundlineobjects = foundlineobjects
 		self.listofplacestosearch = listofplacestosearch
 		self.searchfunction = searchfunction
-		self.searchfunctionparamaters = None
+		self.searchfunctionparameters = None
 		self.activepoll = self.so.poll
 		self.gotmyonehit = False
+		self.parameterswapper = self.simpleparamswapper
 		if self.so.redissearchlist:
 			self.listofplacestosearch = True
 			self.rc = establishredisconnection()
@@ -492,13 +495,35 @@ class GenericSearchFunctionObject(object):
 			self.activepoll.addhits(numberoffinds)
 		return
 
+	def tupleparamswapper(self, tupletoinsert, insertposition):
+		"""
+
+		somewhat brittle, but...
+
+		:param tupletoinsert:
+		:param insertposition:
+		:return:
+		"""
+		if self.so.redissearchlist:
+			tupletoinsert = pickle.loads(tupletoinsert)
+
+		parameters = self.searchfunctionparameters
+		head = parameters[:insertposition]
+		tail = parameters[insertposition+1:]
+		newparams = head + list(tupletoinsert) + tail
+		return newparams
+
+	def simpleparamswapper(self, texttoinsert, insertposition):
+		parameters = self.searchfunctionparameters
+		parameters[insertposition] = texttoinsert
+		return parameters
+
 	def iteratethroughsearchlist(self):
-		locationtoswap = self.searchfunctionparamaters.index('locationtosearch')
-		params = self.searchfunctionparamaters
+		insertposition = self.searchfunctionparameters.index('parametertoswap')
 		while self.listofplacestosearch and self.activepoll.gethits() <= self.so.cap:
-			authortable = self.trytogetnext()
-			if authortable:
-				params[locationtoswap] = authortable
+			nextitem = self.trytogetnext()
+			if nextitem:
+				params = self.parameterswapper(nextitem, insertposition)
 				foundlines = self.searchfunction(*tuple(params))
 				lineobjects = [dblineintolineobject(f) for f in foundlines]
 				self.foundlineobjects.extend(lineobjects)

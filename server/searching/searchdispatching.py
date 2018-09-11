@@ -13,12 +13,11 @@ from multiprocessing.managers import ListProxy
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.dbsupport.redisdbfunctions import buildredissearchlist
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
-from server.hipparchiaobjects.searchobjects import SearchObject, GenericSearchFunctionObject
+from server.hipparchiaobjects.searchobjects import GenericSearchFunctionObject, SearchObject
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, \
@@ -153,6 +152,9 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	# note that we are not yet taking care of connection types: 'autocommit', etc
 
 	oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
+	# note that the following (when fully implemented...) does not produce speedups
+	# operedisconnectionperworker = {i: establishredisconnection() for i in range(workers)}
+
 	argumentswithconnections = [tuple(list(argumentuple) + [oneconnectionperworker[i]]) for i in range(workers)]
 	jobs = [Process(target=targetfunction, args=argumentswithconnections[i]) for i in range(workers)]
 
@@ -173,6 +175,9 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
 
+	the simplest version: look for a term in some places
+
+	substringsearch() called herein needs ability to CREATE TEMPORARY TABLE
 
 	:param foundlineobjects:
 	:param listofplacestosearch:
@@ -185,7 +190,7 @@ def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 	# searchobject.usecolumn = 'marked_up_line'
 
 	gsfo = GenericSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, substringsearch)
-	gsfo.searchfunctionparamaters = [gsfo.so.termone, 'locationtosearch', gsfo.so, gsfo.dbcursor]
+	gsfo.searchfunctionparameters = [gsfo.so.termone, 'parametertoswap', gsfo.so, gsfo.dbcursor]
 	gsfo.dbconnection.setreadonly(False)
 	gsfo.iteratethroughsearchlist()
 
@@ -194,6 +199,8 @@ def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 
 def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
+
+	look for A near/not near B
 
 	a multiprocessor aware function that hands off bits of a proximity search to multiple searchers
 
@@ -219,7 +226,7 @@ def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: Lis
 		fnc = withinxwords
 
 	gsfo = GenericSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, fnc)
-	gsfo.searchfunctionparamaters = ['locationtosearch', gsfo.so, gsfo.dbconnection]
+	gsfo.searchfunctionparameters = ['parametertoswap', gsfo.so, gsfo.dbconnection]
 	gsfo.iteratethroughsearchlist()
 
 	return gsfo.foundlineobjects
@@ -243,7 +250,7 @@ def workonphrasesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 	"""
 
 	gsfo = GenericSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, phrasesearch)
-	gsfo.searchfunctionparamaters = ['locationtosearch', gsfo.so, gsfo.dbcursor]
+	gsfo.searchfunctionparameters = ['parametertoswap', gsfo.so, gsfo.dbcursor]
 	gsfo.iteratethroughsearchlist()
 
 	return gsfo.foundlineobjects
@@ -276,22 +283,10 @@ def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy
 	:return:
 	"""
 
-	gsfo = GenericSearchFunctionObject(foundlineobjects, searchtuples, searchobject, dbconnection, phrasesearch)
+	gsfo = GenericSearchFunctionObject(foundlineobjects, searchtuples, searchobject, dbconnection, substringsearch)
 	gsfo.dbconnection.setreadonly(False)
-
-	while gsfo.listofplacestosearch and gsfo.activepoll.gethits() <= gsfo.so.cap:
-		tup = gsfo.trytogetnext()
-		if tup:
-			if gsfo.so.redissearchlist:
-				searchingfor, authortable = pickle.loads(tup)
-			else:
-				searchingfor, authortable = tup
-
-			foundlines = substringsearch(searchingfor, authortable, gsfo.so, gsfo.dbcursor)
-			lineobjects = [dblineintolineobject(f) for f in foundlines]
-			gsfo.foundlineobjects.extend(lineobjects)
-			gsfo.updatepollfinds(lineobjects)
-
-		gsfo.updatepollremaining()
+	gsfo.parameterswapper = gsfo.tupleparamswapper
+	gsfo.searchfunctionparameters = ['parametertoswap', gsfo.so, gsfo.dbcursor]
+	gsfo.iteratethroughsearchlist()
 
 	return gsfo.foundlineobjects
