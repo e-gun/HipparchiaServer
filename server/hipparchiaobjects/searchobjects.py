@@ -462,7 +462,7 @@ class GenericSearchFunctionObject(object):
 			self.listofplacestosearch = True
 			self.rc = establishredisconnection()
 			redissearchid = '{id}_searchlist'.format(id=self.so.searchid)
-			self.getnetxitem = lambda x: self.rc.spop(redissearchid).decode()
+			self.getnetxitem = lambda x: self.rc.spop(redissearchid)
 			self.remainder = self.rc.smembers(redissearchid)
 			self.emptyerror = AttributeError
 			self.remaindererror = AttributeError
@@ -480,6 +480,16 @@ class GenericSearchFunctionObject(object):
 		except self.emptyerror:
 			nextsearchlocation = None
 			self.listofplacestosearch = None
+
+		try:
+			nextsearchlocation = nextsearchlocation.decode()
+		except AttributeError:
+			# it is only the redis value that needs decoding: spop() returns bytes
+			pass
+		except UnicodeDecodeError:
+			# you will also get an exception if nextsearchlocation is None
+			pass
+
 		return nextsearchlocation
 
 	def updatepollremaining(self):
