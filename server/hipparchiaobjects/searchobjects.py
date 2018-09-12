@@ -461,16 +461,30 @@ class GenericSearchFunctionObject(object):
 		if self.so.redissearchlist:
 			self.listofplacestosearch = True
 			self.rc = establishredisconnection()
+			self.getnextfnc = self.redistrytogetnext
 			redissearchid = '{id}_searchlist'.format(id=self.so.searchid)
 			self.getnetxitem = lambda x: self.rc.spop(redissearchid)
 			self.remainder = self.rc.smembers(redissearchid)
 			self.emptyerror = AttributeError
 			self.remaindererror = AttributeError
 		else:
+			self.getnextfnc = self.trytogetnext
 			self.getnetxitem = self.listofplacestosearch.pop
 			self.remainder = self.listofplacestosearch
 			self.emptyerror = IndexError
 			self.remaindererror = TypeError
+
+	def redistrytogetnext(self):
+		nextsearchlocation = self.trytogetnext()
+		try:
+			nextsearchlocation = nextsearchlocation.decode()
+		except AttributeError:
+			# next = None...
+			pass
+		except UnicodeDecodeError:
+			# next = None...
+			pass
+		return nextsearchlocation
 
 	def trytogetnext(self):
 		self.commitcount += 1
@@ -479,16 +493,6 @@ class GenericSearchFunctionObject(object):
 			nextsearchlocation = self.getnetxitem(0)
 		except self.emptyerror:
 			nextsearchlocation = None
-			self.listofplacestosearch = None
-
-		try:
-			nextsearchlocation = nextsearchlocation.decode()
-		except AttributeError:
-			# it is only the redis value that needs decoding: spop() returns bytes
-			pass
-		except UnicodeDecodeError:
-			# you will also get an exception if nextsearchlocation is None
-			pass
 
 		return nextsearchlocation
 
@@ -530,14 +534,17 @@ class GenericSearchFunctionObject(object):
 	def iteratethroughsearchlist(self):
 		insertposition = self.searchfunctionparameters.index('parametertoswap')
 		while self.listofplacestosearch and self.activepoll.gethits() <= self.so.cap:
-			nextitem = self.trytogetnext()
+			nextitem = self.getnextfnc()
 			if nextitem:
 				params = self.parameterswapper(nextitem, insertposition)
 				foundlines = self.searchfunction(*tuple(params))
 				lineobjects = [dblineintolineobject(f) for f in foundlines]
 				self.foundlineobjects.extend(lineobjects)
 				self.updatepollfinds(lineobjects)
-			self.updatepollremaining()
+				self.updatepollremaining()
+			else:
+				# or: self.listofplacestosearch = None
+				break
 		# empty return because foundlineobjects is a ListProxy:
 		# ask for self.foundlineobjects as the search result instead
 		return
