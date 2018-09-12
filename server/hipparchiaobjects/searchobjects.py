@@ -457,14 +457,13 @@ class GenericSearchFunctionObject(object):
 		self.searchfunction = searchfunction
 		self.searchfunctionparameters = None
 		self.activepoll = self.so.poll
-		self.gotmyonehit = False
 		self.parameterswapper = self.simpleparamswapper
 		if self.so.redissearchlist:
 			self.listofplacestosearch = True
 			self.rc = establishredisconnection()
-			argument = '{id}_searchlist'.format(id=self.so.searchid)
-			self.getnetxitem = lambda x: self.rc.spop(argument).decode()
-			self.remainder = self.rc.smembers(argument)
+			redissearchid = '{id}_searchlist'.format(id=self.so.searchid)
+			self.getnetxitem = lambda x: self.rc.spop(redissearchid).decode()
+			self.remainder = self.rc.smembers(redissearchid)
 			self.emptyerror = AttributeError
 			self.remaindererror = AttributeError
 		else:
@@ -489,13 +488,13 @@ class GenericSearchFunctionObject(object):
 		except self.remaindererror:
 			pass
 
-	def updatepollfinds(self, lines):
+	def updatepollfinds(self, lines: list):
 		if lines:
 			numberoffinds = len(lines)
 			self.activepoll.addhits(numberoffinds)
 		return
 
-	def tupleparamswapper(self, tupletoinsert, insertposition):
+	def tupleparamswapper(self, tupletoinsert: tuple, insertposition: int) -> list:
 		"""
 
 		somewhat brittle, but...
@@ -513,7 +512,7 @@ class GenericSearchFunctionObject(object):
 		newparams = head + list(tupletoinsert) + tail
 		return newparams
 
-	def simpleparamswapper(self, texttoinsert, insertposition):
+	def simpleparamswapper(self, texttoinsert: str, insertposition: int) -> list:
 		parameters = self.searchfunctionparameters
 		parameters[insertposition] = texttoinsert
 		return parameters
