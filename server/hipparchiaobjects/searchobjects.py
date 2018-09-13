@@ -446,6 +446,12 @@ class GenericSearchFunctionObject(object):
 	the chief difference between most search types is the number and names of the parameters passed
 	to self.searchfunction
 
+	one also has the option of storing the searchlist either in shared memory or in a redis set
+	the retrieval, parrsing, and ending checks for the two structures are different
+
+	handling the matrix of possibilities for search_type and list_type combinations produces the
+	somewhat tangled set of options below
+
 	"""
 	def __init__(self, foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection, searchfunction):
 		self.commitcount = 0
@@ -463,6 +469,7 @@ class GenericSearchFunctionObject(object):
 			self.rc = establishredisconnection()
 			self.getnextfnc = self.redistrytogetnext
 			redissearchid = '{id}_searchlist'.format(id=self.so.searchid)
+			# lambda this because if you define as self.rc.spop(redissearchid) you will actually pop an item..,
 			self.getnetxitem = lambda x: self.rc.spop(redissearchid)
 			self.remainder = self.rc.smembers(redissearchid)
 			self.emptyerror = AttributeError
@@ -477,6 +484,7 @@ class GenericSearchFunctionObject(object):
 	def redistrytogetnext(self):
 		nextsearchlocation = self.trytogetnext()
 		try:
+			# redis sends bytes; we need strings
 			nextsearchlocation = nextsearchlocation.decode()
 		except AttributeError:
 			# next = None...
@@ -508,10 +516,28 @@ class GenericSearchFunctionObject(object):
 			self.activepoll.addhits(numberoffinds)
 		return
 
+	def simpleparamswapper(self, texttoinsert: str, insertposition: int) -> list:
+		"""
+
+		the various searchfunctions have different interfaces
+
+		this lets you get the right collection of paramaters into the various functions
+
+		:param texttoinsert:
+		:param insertposition:
+		:return:
+		"""
+		parameters = self.searchfunctionparameters
+		parameters[insertposition] = texttoinsert
+		return parameters
+
 	def tupleparamswapper(self, tupletoinsert: tuple, insertposition: int) -> list:
 		"""
 
 		somewhat brittle, but...
+
+		this handles the non-standard case of a tuple that needs swapping instead of an individual name
+		(i.e., it works with the lemmatized search)
 
 		:param tupletoinsert:
 		:param insertposition:
@@ -526,12 +552,13 @@ class GenericSearchFunctionObject(object):
 		newparams = head + list(tupletoinsert) + tail
 		return newparams
 
-	def simpleparamswapper(self, texttoinsert: str, insertposition: int) -> list:
-		parameters = self.searchfunctionparameters
-		parameters[insertposition] = texttoinsert
-		return parameters
-
 	def iteratethroughsearchlist(self):
+		"""
+
+		this is the simple core of the whole thing; the rest is about feeding it properly
+
+		:return:
+		"""
 		insertposition = self.searchfunctionparameters.index('parametertoswap')
 		while self.listofplacestosearch and self.activepoll.gethits() <= self.so.cap:
 			nextitem = self.getnextfnc()
