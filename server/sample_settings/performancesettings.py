@@ -19,7 +19,8 @@
 #   c. 5 threads: more workers cannot grab more data. But a 12-thread
 #   Ryzen 1600x with NVMe storage is capable of going faster and
 #   faster all of the way up to 12 workers: the drive is no longer
-#   the bottleneck.
+#   the bottleneck. NB: each postgres client will use a decent sized
+#   chung of memory: 170-350MB *per worker* has been observed.
 #
 # MPCOMMITCOUNT: **do not change this** unless you are getting
 # 	deluged by messages about failed DB queries (see 'WORKERS'
@@ -35,7 +36,10 @@
 #
 # LEMMACHUNKSIZE: how many lemmatized forms to search for at once
 #   the query is a regex 'or' that can have > 400 variations; this
-#   makes for slow faster; 40 tries of 10 variants is faster
+#   makes for slow faster; 40 tries of 10 variants is faster. Again,
+#   there is no particular reason to change this other than to explore
+#   the possibility of relatively unimportant speed gains. This is
+#   an option of interest only to debuggers and hard-core optimizers.
 #
 
 AUTOCONFIGWORKERS = 'yes'
