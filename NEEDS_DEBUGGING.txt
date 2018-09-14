@@ -18,7 +18,10 @@ a second click will clear the display
 js async timing issue, it seems
 irritating to avoid "return redirect(url_for('frontpage'))" which is so simple and easy to call
 
-[D] platform specific bug? Ryzen vs FreeBSD vs threads (vs C-states?)
+[D] platform specific bug: FreeBSD %complete poll info not working with proximity search
+
+
+[E] platform specific bug? Ryzen vs FreeBSD vs threads (vs C-states?)
 
 [gone as of FreeBSD 11.2-RELEASE?]
 [FreeBSD 12-ALPHA has a cousin: *regular* failure to execute the first search properly after launch]

@@ -468,6 +468,11 @@ def universalregexequivalent(searchterm: str) -> str:
 		# sre_constants.error: missing ), unterminated subpattern at position 0
 		searchtermequivalent = None
 
+	# 'δῆμο[σν]' --> '([δΔ]ῆ[μΜ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][[σςΣϲϹ][νΝ]])'
+	# will yield: 'FutureWarning: Possible nested set at position 29'
+	# better yet, this won't find 'δῆμοϲ' anyway. the fix:
+	searchtermequivalent = re.sub(r'\[\[(.*?)\]\[(.*?)\]\]', r'[\1\2]', searchtermequivalent)
+
 	return searchtermequivalent
 
 
