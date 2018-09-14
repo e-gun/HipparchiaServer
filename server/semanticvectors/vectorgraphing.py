@@ -193,7 +193,8 @@ def storevectorgraph(figureasbytes):
 	dbconnection.setautocommit()
 	cursor = dbconnection.cursor()
 
-	randomid = assignuniquename()
+	# avoid psycopg2.DataError: value too long for type character varying(12)
+	randomid = assignuniquename(12)
 
 	q = """
 	INSERT INTO public.storedvectorimages 

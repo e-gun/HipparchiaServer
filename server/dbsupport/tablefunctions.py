@@ -10,7 +10,7 @@ import re
 from uuid import uuid4
 
 
-def assignuniquename() -> str:
+def assignuniquename(maxlength=None) -> str:
 	"""
 
 	random name for:
@@ -32,5 +32,8 @@ def assignuniquename() -> str:
 	n = str(uuid4())
 
 	n = re.sub(r'-', '', n)
+
+	if maxlength:
+		n = n[:maxlength]
 
 	return n
