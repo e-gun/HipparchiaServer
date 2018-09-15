@@ -35,7 +35,7 @@
 #
 # RETAINFIGURES will prevent graphs from being deleted after display
 #
-# BLOCKRESETPATHS if not 'no', then you cannot access 'resetvectors/' or 'resetvectorimages/'
+# BLOCKRESETPATHS if not 'no', then you cannot access (the hidden) URLs 'resetvectors/' or 'resetvectorimages/'
 #
 
 SUPPRESSWARNINGS = 'yes'

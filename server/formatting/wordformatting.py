@@ -454,6 +454,12 @@ def universalregexequivalent(searchterm: str) -> str:
 		except KeyError:
 			pass
 		searchtermequivalent += c
+
+	# 'δῆμο[σν]' --> '[δΔ]ῆ[μΜ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][[σςΣϲϹ][νΝ]]'
+	# this will subsequently yield: 'FutureWarning: Possible nested set at position 29'
+	# better yet, this also won't find 'δῆμοϲ' anyway. the fix: '[[σςΣϲϹ][νΝ]]' --> '[σςΣϲϹνΝ]'
+	searchtermequivalent = re.sub(r'\[\[(.*?)\]\[(.*?)\]\]', r'[\1\2]', searchtermequivalent)
+
 	# searchtermequivalent = '(^|)('+searchtermequivalent+')($|)'
 	searchtermequivalent = re.sub(r'😀', r'\\s', searchtermequivalent)
 	searchtermequivalent = re.sub(r'👽', r'\\w', searchtermequivalent)
@@ -467,11 +473,6 @@ def universalregexequivalent(searchterm: str) -> str:
 		# if you try something like '(Xἰ' you will produce an error:
 		# sre_constants.error: missing ), unterminated subpattern at position 0
 		searchtermequivalent = None
-
-	# 'δῆμο[σν]' --> '([δΔ]ῆ[μΜ][οὀὁὂὃὄὅόὸΟὈὉὊὋὌὍ][[σςΣϲϹ][νΝ]])'
-	# will yield: 'FutureWarning: Possible nested set at position 29'
-	# better yet, this won't find 'δῆμοϲ' anyway. the fix:
-	searchtermequivalent = re.sub(r'\[\[(.*?)\]\[(.*?)\]\]', r'[\1\2]', searchtermequivalent)
 
 	return searchtermequivalent
 
