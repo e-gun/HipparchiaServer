@@ -144,8 +144,9 @@ def dictsearch(searchterm):
 		r = [{'value': 'cannot look up {w}: {d} dictionary is not installed'.format(d=usedictionary, w=seeking)}]
 		return json.dumps(r)
 
+	limit = hipparchia.config['CAPONDICTIONARYFINDS']
 	seeking = stripaccents(seeking)
-	query = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s'.format(d=usedictionary, c=usecolumn)
+	query = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s LIMIT {lim}'.format(d=usedictionary, c=usecolumn, lim=limit)
 	if seeking[0] == ' ' and seeking[-1] == ' ':
 		data = ('^' + seeking[1:-1] + '$',)
 	elif seeking[0] == ' ' and seeking[-1] != ' ':
@@ -167,6 +168,9 @@ def dictsearch(searchterm):
 
 	# the results should be given the polytonicsort() treatment
 	returnarray = list()
+
+	if len(found) == limit:
+		returnarray.append({'value': '[stopped searching after {lim} finds]'.format(lim=limit)})
 
 	if len(found) > 0:
 		finddict = {f[0]: f for f in found}
@@ -210,7 +214,6 @@ def reverselexiconsearch(searchterm):
 	dbconnection.setautocommit()
 	dbcursor = dbconnection.cursor()
 
-	entries = list()
 	returnarray = list()
 
 	seeking = depunct(searchterm)
@@ -222,18 +225,23 @@ def reverselexiconsearch(searchterm):
 	else:
 		searchunder = [('greek', 'tr'), ('latin', 'hi')]
 
+	limit = hipparchia.config['CAPONDICTIONARYFINDS']
+
 	entries = list()
 	for s in searchunder:
 		usedict = s[0]
 		translationlabel = s[1]
 
 		# first see if your term is mentioned at all
-		query = 'SELECT entry_name FROM {d}_dictionary WHERE translations ~ %s'.format(d=usedict)
+		query = 'SELECT entry_name FROM {d}_dictionary WHERE translations ~ %s LIMIT {lim}'.format(d=usedict, lim=limit)
 		data = ('{s}'.format(s=seeking),)
 		dbcursor.execute(query, data)
 
 		matches = dbcursor.fetchall()
 		entries += [m[0] for m in matches]
+
+	if len(entries) == limit:
+		returnarray.append({'value': '[stopped searching after {lim} finds]'.format(lim=limit)})
 
 	entries = list(set(entries))
 

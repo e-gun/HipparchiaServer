@@ -11,6 +11,9 @@
 #   NB: if both FORCELUNATESIGMANOMATTERWHAT and RESTOREMEDIALANDFINALSIGMA
 #  	are set to 'yes' lunates win (and you
 #   waste CPU cycles).
+#
+# CAPONDICTIONARYFINDS: refuse to find more than N items; useful to stop searches for 'δ'
+#   from hijacking the machine
 
 INSISTUPONSTANDARDANGLEBRACKETS = 'no'
 FORCELUNATESIGMANOMATTERWHAT = 'no'
@@ -24,7 +27,7 @@ NUMBEROFGENRESTOTRACK = 8
 AVOIDCIRCLEDLETTERS = 'no'
 FALLBACKTODOUBLESTRIKES = 'yes'
 REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
-
+CAPONDICTIONARYFINDS = 50
 
 # CLICKABLEINDEXEDPASSAGECAP: you can click to browse the passage
 # 	associated with an index item. Why would you even turn
