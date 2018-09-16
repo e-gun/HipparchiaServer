@@ -88,8 +88,7 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) 
 		# need to be careful about the retries that reset the trialnumber: could infinite loop if not careful
 		# [a] something like πλακουντάριόν τι will fail because of the enclitic (greek_morphology can find πλακουντάριον and πλακουντάριοϲ)
 		# [b] something like προχοίδιόν τι will fail twice over because of the enclitic and the diaresis
-		# item [b] cannot be fully addressed here; this correction gives you an analysis, but the term can't yet be found in the dictionary
-		# greek_morphology has προχοίδιον; the greek_dictionary has προχοΐδιον
+
 		try:
 			# have to 'try...' because there might not be a word[-2]
 			if trialnumber == 1:
