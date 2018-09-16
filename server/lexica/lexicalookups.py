@@ -22,7 +22,7 @@ from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbHeadwordObjec
 	dbMorphologyObject, dbWordCountObject
 
 
-def lookformorphologymatches(word: str, cursor, trialnumber=0) -> dbMorphologyObject:
+def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) -> dbMorphologyObject:
 	"""
 
 	hipparchiaDB=# select * from greek_morphology limit 1;
@@ -35,6 +35,8 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0) -> dbMorphologyOb
 	 dictionary_entry | xref_number |                  derivative_forms
 	------------------+-------------+----------------------------------------------------
 	 τήνιοϲ           |   114793123 | {τηνίων,τήνια,τηνίουϲ,τήνιοι,τηνίοιϲ,τηνία,τήνιοϲ}
+
+	funky because we need to poke at words several times and to try combinations of fixes
 
 	:param word:
 	:param cursor:
@@ -59,6 +61,7 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0) -> dbMorphologyOb
 	if ihavesession and not session['available'][usedictionary + '_morphology']:
 		return None
 
+	maxtrials = 5
 	trialnumber += 1
 
 	# the things that can confuse me
@@ -77,7 +80,9 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0) -> dbMorphologyOb
 
 	if analysis:
 		matchingobject = dbMorphologyObject(*analysis)
-	else:
+	elif trialnumber < maxtrials:
+		if revertword:
+			word = revertword
 		# this code lets you make multiple stabs at an answer if you have already failed once
 		# [a] something like πλακουντάριόν τι will fail because of the enclitic (greek_morphology can find πλακουντάριον and πλακουντάριοϲ)
 		# [b] something like προχοίδιόν τι will fail twice over because of the enclitic and the diaresis
@@ -85,17 +90,21 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0) -> dbMorphologyOb
 		# greek_morphology has προχοίδιον; the greek_dictionary has προχοΐδιον
 		try:
 			# have to 'try' because there might not be a word[-2]
-			if re.search(terminalacute, word[-1]) and trialnumber < 4:
+			if trialnumber == 1:
+				# elided ending? you will ask for ἀλλ, but you need to look for ἀλλ'
+				newword = word + "'"
+				matchingobject = lookformorphologymatches(newword, cursor, trialnumber, revertword=word)
+			elif trialnumber == 2:
+				# a proper noun?
+				newword = word[0].upper() + word[1:]
+				matchingobject = lookformorphologymatches(newword, cursor, trialnumber, revertword=word)
+			elif re.search(terminalacute, word[-1]) and trialnumber < maxtrials:
 				sub = stripaccents(word[-1])
 				newword = word[:-1] + sub
 				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
-			elif re.search(terminalacute, word[-2]) and trialnumber < 4:
+			elif re.search(terminalacute, word[-2]) and trialnumber < maxtrials:
 				sub = stripaccents(word[-2])
 				newword = word[:-2] + sub + word[-1]
-				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
-			elif trialnumber < 4:
-				# elided ending? you will ask for ἀλλ, but you need to look for ἀλλ'
-				newword = word + chr(39)
 				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
 		except IndexError:
 			matchingobject = None

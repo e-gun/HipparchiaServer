@@ -70,9 +70,6 @@ def findbyform(observedword):
 	returnarray = list()
 
 	morphologyobject = lookformorphologymatches(cleanedword, dbcursor)
-	if not morphologyobject:
-		# δ’ will be cleaned down to δ...
-		morphologyobject = lookformorphologymatches(cleanedword + "'", dbcursor)
 	# print('findbyform() mm',morphologyobject.getpossible()[0].transandanal)
 	# φέρεται --> morphologymatches [('<possibility_1>', '1', 'φέρω', '122883104', '<transl>fero</transl><analysis>pres ind mp 3rd sg</analysis>')]
 

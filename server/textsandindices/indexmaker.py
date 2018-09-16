@@ -13,11 +13,11 @@ from string import punctuation
 from flask import session
 
 from server import hipparchia
-from server.threading.mpthreadcount import setthreadcount
-from server.dbsupport.dblinefunctions import makeablankline, grabbundlesoflines
+from server.dbsupport.dblinefunctions import grabbundlesoflines, makeablankline
 from server.formatting.wordformatting import tidyupterm
 from server.listsandsession.listmanagement import polytonicsort
 from server.textsandindices.textandindiceshelperfunctions import dictmerger, getrequiredmorphobjects
+from server.threading.mpthreadcount import setthreadcount
 
 
 def buildindextowork(cdict, activepoll, headwords, cursor):
@@ -365,9 +365,10 @@ def linesintoindex(lineobjects, activepoll):
 	gravetoacute = str.maketrans(grave, acute)
 
 	# τ’ and δ’ and the rest are a problem
-	# extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
-	# extrapunct = '\′‵‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
-	# punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
+	# note the tricky marks like: ͡
+	# extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖͡⸓͝'
+	extrapunct = '\′‵‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖͡⸓͝'
+	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
 
 	defaultwork = lineobjects[0].wkuinversalid
 
@@ -396,6 +397,7 @@ def linesintoindex(lineobjects, activepoll):
 		if line.index:
 			# don't use set() - that will yield undercounts
 			polytonicwords = line.wordlist('polytonic')
+			polytonicwords = [tidyupterm(w, punct).lower() for w in polytonicwords]
 			# need to figure out how to grab τ’ and δ’ and the rest
 			unformattedwords = set(line.wordlist('marked_up_line'))
 			words = [w for w in polytonicwords if w+'’' not in unformattedwords]
