@@ -46,8 +46,13 @@ function loadoptions() {
             'christiancorpus': $('#christiancorpus'),
             'cosdistbylineorword': $('#cosdistbylineorword'),
             'cosdistbysentence': $('#cosdistbysentence'),
+            'debughtml': $('#debughtml'),
+            'debugdb': $('#debugdb'),
+            'debuglex': $('#debuglex'),
+            'debugparse': $('#debugparse'),
             'greekcorpus': $('#greekcorpus'),
             'incerta': $('#includeincerta'),
+            'indexskipsknownwords': $('#indexskipsknownwords'),
             'inscriptioncorpus': $('#inscriptioncorpus'),
             'latincorpus': $('#latincorpus'),
             'nearestneighborsquery': $('#nearestneighborsquery'),
@@ -410,6 +415,36 @@ $('#bracketangled').change(function() {
 
 $('#bracketcurly').change(function() {
     if(this.checked) { setoptions('bracketcurly', 'yes'); } else { setoptions('bracketcurly', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#debughtml').change(function() {
+    if(this.checked) { setoptions('debughtml', 'yes'); } else { setoptions('debughtml', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#debugdb').change(function() {
+    if(this.checked) { setoptions('debugdb', 'yes'); } else { setoptions('debugdb', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#debuglex').change(function() {
+    if(this.checked) { setoptions('debuglex', 'yes'); } else { setoptions('debuglex', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#debugparse').change(function() {
+    if(this.checked) { setoptions('debugparse', 'yes'); } else { setoptions('debugparse', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#indexskipsknownwords').change(function() {
+    if(this.checked) { setoptions('indexskipsknownwords', 'yes'); } else { setoptions('indexskipsknownwords', 'no'); }
     refreshselections();
     loadoptions();
     });

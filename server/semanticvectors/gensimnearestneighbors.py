@@ -236,6 +236,10 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 		activepoll.statusis('Calculating the nearest neighbors')
 		mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
 		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
+		if not mostsimilar:
+			# proper noun? ϲωκράτηϲ --> Ϲωκράτηϲ
+			termone = termone[0].upper() + termone[1:]
+			mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
 		if mostsimilar:
 			html = formatnnmatches(mostsimilar)
 			activepoll.statusis('Building the graph')

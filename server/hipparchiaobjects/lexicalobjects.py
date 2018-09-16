@@ -468,6 +468,15 @@ class dbMorphologyObject(object):
 	 270227
 	(1 row)
 
+
+	hipparchiaDB=# select * from greek_morphology where observed_form='καταμείναντεϲ';
+	observed_form |  xrefs   | prefixrefs |                                                                       possible_dictionary_forms
+	---------------+----------+------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	καταμείναντεϲ | 58645029 |            | <possibility_1>καταμένω<xref_value>58645029</xref_value><xref_kind>9</xref_kind><transl>stay</transl><analysis>aor part act masc nom/voc pl</analysis></possibility_1>+
+	           |          |            |
+	(1 row)
+
+
 	"""
 
 	def __init__(self, observed, xrefs, prefixrefs, possibleforms):

@@ -37,15 +37,19 @@
 #
 # BLOCKRESETPATHS if not 'no', then you cannot access (the hidden) URLs 'resetvectors/' or 'resetvectorimages/'
 #
+# ALLOWUSERTOSETDEBUGMODES will enable toggles for next four options on the web interface
+#   (DBDEBUGMODE, LEXDEBUGMODE, PARSERDEBUGMODE, and HTMLDEBUGMODE)
 
 SUPPRESSWARNINGS = 'yes'
-DBDEBUGMODE = 'no'
-LEXDEBUGMODE = 'no'
-PARSERDEBUGMODE = 'no'
-HTMLDEBUGMODE = 'no'
 CALCULATEWORDWEIGHTS = 'no'
 ENABLELOGGING = 'no'
 HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 RETAINREDISPOLLS = 'no'
 RETAINFIGURES = 'no'
 BLOCKRESETPATHS = 'yes'
+
+ALLOWUSERTOSETDEBUGMODES = 'no'
+DBDEBUGMODE = 'no'
+LEXDEBUGMODE = 'yes'
+PARSERDEBUGMODE = 'yes'
+HTMLDEBUGMODE = 'no'

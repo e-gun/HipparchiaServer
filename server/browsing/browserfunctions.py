@@ -66,7 +66,7 @@ def buildbrowseroutputobject(authorobject, workobject, locusindexvalue, cursor):
 
 	linetemplate = fetchhtmltemplateforlinerow()
 	lineprefix = ''
-	if hipparchia.config['DBDEBUGMODE'] == 'yes':
+	if session['debugdb'] == 'yes':
 		lineprefix = '<smallcode>{id}&nbsp;&nbsp;&nbsp;</smallcode>&nbsp;'
 
 	# [b] format the lines and insert them into the BrowserPassageObject
@@ -79,7 +79,7 @@ def buildbrowseroutputobject(authorobject, workobject, locusindexvalue, cursor):
 			if metadata:
 				passage.browsedlines.append(metadata)
 
-		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
+		if session['debughtml'] == 'yes':
 			columnb = line.showlinehtml()
 		else:
 			columnb = insertparserids(line, continuationdict)

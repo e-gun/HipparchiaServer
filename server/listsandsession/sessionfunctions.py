@@ -39,12 +39,18 @@ def sessionvariables():
 		session['christiancorpus'] = hipparchia.config['DEFAULTCHRISTIANCORPUSVALUE']
 		session['cosdistbysentence'] = 'no'
 		session['cosdistbylineorword'] = 'no'
+		session['debugdb'] = hipparchia.config['DBDEBUGMODE']
+		session['debuglex'] = hipparchia.config['LEXDEBUGMODE']
+		session['debugparse'] = hipparchia.config['PARSERDEBUGMODE']
+		session['debughtml'] = hipparchia.config['HTMLDEBUGMODE']
+		session['debugparse'] = hipparchia.config['PARSERDEBUGMODE']
 		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
 		session['fontchoice'] = hipparchia.config['HOSTEDFONTFAMILY']
 		session['greekcorpus'] = hipparchia.config['DEFAULTGREEKCORPUSVALUE']
 		session['headwordindexing'] = hipparchia.config['DEFAULTINDEXBYHEADWORDS']
 		session['incerta'] = hipparchia.config['DEFAULTINCERTA']
 		session['indexbyfrequency'] = hipparchia.config['DEFAULTINDEXBYFREQUENCY']
+		session['indexskipsknownwords'] = 'no'
 		session['inscriptioncorpus'] = hipparchia.config['DEFAULTINSCRIPTIONCORPUSVALUE']
 		session['latestdate'] = hipparchia.config['DEFAULTLATESTDATE']
 		session['latincorpus'] = hipparchia.config['DEFAULTLATINCORPUSVALUE']
@@ -127,6 +133,11 @@ def modifysessionvar(param, val):
 		'varia'
 		]
 
+	blocakabledebugoptions = ['debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords']
+
+	if hipparchia.config['ALLOWUSERTOSETDEBUGMODES'] == 'yes':
+		availableoptions.extend(blocakabledebugoptions)
+
 	if param in availableoptions:
 		session[param] = val
 		# print('param = val:', param, session[param])
@@ -157,9 +168,13 @@ def modifysessionvar(param, val):
 	for variable in ['authorssummary', 'bracketangled', 'bracketcurly', 'bracketround', 'bracketsquare', 'christiancorpus', 'cosdistbylineorword',
 	                 'cosdistbysentence', 'greekcorpus', 'headwordindexing', 'incerta', 'indexbyfrequency', 'inscriptioncorpus', 'latincorpus',
 	                 'nearestneighborsquery', 'onehit', 'papyruscorpus', 'quotesummary', 'semanticvectorquery', 'sensesummary', 'sentencesimilarity',
-	                 'spuria', 'topicmodel', 'varia']:
+	                 'spuria', 'topicmodel', 'varia', 'debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
+
+	# A implies B
+	if session['indexskipsknownwords'] == 'yes':
+		session['headwordindexing'] = 'yes'
 
 	# only one of these can be active at one time
 	exclusive = {'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery', 'tensorflowgraph', 'sentencesimilarity', 'topicmodel'}

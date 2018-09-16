@@ -9,6 +9,7 @@
 import re
 from collections import deque
 from copy import deepcopy
+from flask import session
 from typing import List
 
 from server import hipparchia
@@ -219,13 +220,13 @@ def htmlifysearchfinds(listofsearchresultobjects: ResultList, searchobject: Sear
 
 	linehtmltemplate = '<span class="locus">{lc}</span>&nbsp;<span class="foundtext">{ft}</span><br />'
 
-	if hipparchia.config['DBDEBUGMODE'] == 'yes':
+	if session['debugdb'] == 'yes':
 		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
 
 	for ro in listofsearchresultobjects:
 		firstline = ro.lineobjects[0]
 		firstline.accented = unbalancedspancleaner(firstline.accented)
-		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
+		if session['debughtml'] == 'yes':
 			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 			           for ln in ro.lineobjects]
 		elif findactivebrackethighlighting(searchobject.session):
@@ -257,7 +258,7 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects: ResultList) -> str:
 
 	linehtmltemplate = '<span class="foundtext">{ft}</span>'
 
-	if hipparchia.config['DBDEBUGMODE'] == 'yes':
+	if session['debugdb'] == 'yes':
 		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
 
 	tabelrowtemplate = """
@@ -279,7 +280,7 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects: ResultList) -> str:
 			rowstyle = 'regular'
 		ln = ro.lineobjects[0]
 		ln.accented = unbalancedspancleaner(ln.accented)
-		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
+		if session['debughtml'] == 'yes':
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 		else:
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)

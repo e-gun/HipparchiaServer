@@ -11,8 +11,8 @@ from string import punctuation
 from typing import Dict, List
 
 from bs4 import BeautifulSoup
+from flask import session
 
-from server import hipparchia
 from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
 from server.listsandsession.listmanagement import polytonicsort
 
@@ -214,7 +214,7 @@ def formateconsolidatedgrammarentry(consolidatedentry: dict) -> str:
 	:return:
 	"""
 
-	if hipparchia.config['PARSERDEBUGMODE'] == 'yes':
+	if session['debugparse'] == 'yes':
 		xrefinfo = '<code>[{x}]</code>'.format(x=consolidatedentry['xref'])
 	else:
 		xrefinfo = ''

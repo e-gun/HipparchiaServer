@@ -13,11 +13,11 @@ from string import punctuation
 from flask import session
 
 from server import hipparchia
-from server.threading.mpthreadcount import setthreadcount
-from server.dbsupport.dblinefunctions import makeablankline, grabbundlesoflines
+from server.dbsupport.dblinefunctions import grabbundlesoflines, makeablankline
 from server.formatting.wordformatting import tidyupterm
 from server.listsandsession.listmanagement import polytonicsort
 from server.textsandindices.textandindiceshelperfunctions import dictmerger, getrequiredmorphobjects
+from server.threading.mpthreadcount import setthreadcount
 
 
 def buildindextowork(cdict, activepoll, headwords, cursor):
@@ -153,6 +153,11 @@ def generatesortedoutputbyheadword(completeindexdict, onework, alphabetical, act
 
 	activepoll.statusis('Remapping entries')
 	activepoll.allworkis(-1)
+
+	if session['indexskipsknownwords'] == 'yes':
+		# 'baseforms' is either False or a list
+		augmentedindexdict = {k: augmentedindexdict[k] for k in augmentedindexdict.keys() if not augmentedindexdict[k]['baseforms']}
+
 	headwordindexdict = generateheadwordindexdict(augmentedindexdict)
 
 	# [d] format and arrange the output
@@ -186,7 +191,13 @@ def generatesortedoutputbyheadword(completeindexdict, onework, alphabetical, act
 			elif formcount > 1:
 				sortedoutput.append((hw, '({fc})'.format(fc=formcount), '', '', False))
 
-		for form in polytonicsort(headwordindexdict[headword].keys()):
+		if alphabetical:
+			sortedforms = polytonicsort(headwordindexdict[headword].keys())
+		else:
+			sortedforms = sorted(headwordindexdict[headword].keys(), key=lambda x: len(headwordindexdict[headword][x]), reverse=True)
+
+		for form in sortedforms:
+			# print('headwordindexdict[{h}][{f}] = {x}'.format(h=headword, f=form, x=headwordindexdict[headword][form]))
 			hits = sorted(headwordindexdict[headword][form])
 			isahomonymn = hits[0][3]
 			if onework:
@@ -353,7 +364,10 @@ def linesintoindex(lineobjects, activepoll):
 	acute = 'άέίόύήώΐΰᾴῄῴἅἕἵὅὕἥὥἄἔἴὄὔἤὤ'
 	gravetoacute = str.maketrans(grave, acute)
 
-	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
+	# note the tricky combining marks like " ͡ " which can be hard to spot since they float over another special character
+	# τ’ and δ’ and the rest are a problem
+	# extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚̄⁝͜‖͡⸓͝'
+	extrapunct = '\′‵‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚̄⁝͜‖͡⸓͝'
 	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
 
 	defaultwork = lineobjects[0].wkuinversalid
@@ -369,10 +383,12 @@ def linesintoindex(lineobjects, activepoll):
 	if len(lineobjects) < hipparchia.config['CLICKABLEINDEXEDPASSAGECAP'] or hipparchia.config['CLICKABLEINDEXEDPASSAGECAP'] < 0:
 		# [a] '<indexedlocation id="gr0032w008_LN_31011">2.17.6</indexedlocation>' vs [b] just '2.17.6'
 		indexingmethod = 'anchoredlocus'
+	elif session['indexskipsknownwords'] == 'yes':
+		indexingmethod = 'anchoredlocus'
 	else:
 		indexingmethod = 'locus'
 
-	while len(lineobjects) > 0:
+	while lineobjects:
 		try:
 			line = lineobjects.pop()
 			if activepoll:
@@ -381,9 +397,14 @@ def linesintoindex(lineobjects, activepoll):
 			line = makeablankline(defaultwork, None)
 
 		if line.index:
-			words = line.wordlist('polytonic')
-			words = [tidyupterm(w, punct).lower() for w in words]
-			words = list(set(words))
+			# don't use set() - that will yield undercounts
+			polytonicwords = line.wordlist('polytonic')
+			polytonicwords = [tidyupterm(w, punct).lower() for w in polytonicwords]
+			# need to figure out how to grab τ’ and δ’ and the rest
+			unformattedwords = set(line.wordlist('marked_up_line'))
+			words = [w for w in polytonicwords if w+'’' not in unformattedwords]
+			elisions = [w+"'" for w in polytonicwords if w+'’' in unformattedwords]
+			words.extend(elisions)
 			words = [w.translate(gravetoacute) for w in words]
 			for w in words:
 				referencestyle = getattr(line, indexingmethod)

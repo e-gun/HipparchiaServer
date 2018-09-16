@@ -39,6 +39,8 @@ def frontpage():
 		# anythong other then 'yes' disables the picker
 		picker = 'nofontstopick'
 
+	debugpanel = hipparchia.config['ALLOWUSERTOSETDEBUGMODES']
+
 	vectorhtml = vectorhtmlforfrontpage()
 
 	sessionvariables()
@@ -59,10 +61,22 @@ def frontpage():
 	else:
 		corporalabels = {'g': 'G', 'l': 'L', 'd': 'D', 'i': 'I', 'c': 'C'}
 
-	page = render_template('search.html', activelists=activelists, activecorpora=activecorpora, clab=corporalabels,
-	                       css=stylesheet, buildinfo=buildinfo, onehit=session['onehit'], picker=picker, fonts=fonts,
-	                       hwindexing=session['headwordindexing'], indexbyfrequency=session['indexbyfrequency'],
-						   spuria=session['spuria'], varia=session['varia'], undated=session['incerta'], vectorhtml=vectorhtml)
+	page = render_template('search.html',
+							activelists=activelists,
+							activecorpora=activecorpora,
+							clab=corporalabels,
+							css=stylesheet,
+							buildinfo=buildinfo,
+							onehit=session['onehit'],
+							picker=picker,
+							fonts=fonts,
+							hwindexing=session['headwordindexing'],
+							indexbyfrequency=session['indexbyfrequency'],
+							spuria=session['spuria'],
+							varia=session['varia'],
+							undated=session['incerta'],
+							debug=debugpanel,
+							vectorhtml=vectorhtml)
 
 	return page
 

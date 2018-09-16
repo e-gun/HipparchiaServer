@@ -91,4 +91,19 @@
     </p>
     {% endif %}
 
+    {% if debug == 'yes' %}
+    <p class="optionlabel">Display debugging info for</p>
+    <p class="optionitem">
+        html&nbsp;<input type="checkbox" id="debughtml" value="no">
+        &middot;&nbsp;database&nbsp;<input type="checkbox" id="debugdb" value="no">
+        &middot;&nbsp;lexicon&nbsp;<input type="checkbox" id="debuglex" value="no">
+        &middot;&nbsp;parser&nbsp;<input type="checkbox" id="debugparse" value="no">
+    </p>
+    <p class="optionitem small">[some options are mutually incompatible]</p>
+    <p class="optionlabel">Omit/Drop</p>
+    <p class="optionitem">
+        from index all words known to the parser<input type="checkbox" id="indexskipsknownwords" value="no">
+    </p>
+    {% endif %}
+
 </div>
