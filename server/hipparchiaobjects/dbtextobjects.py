@@ -448,7 +448,7 @@ class dbWorkLine(object):
 		"""
 		remove markup from contents
 
-		currently unused
+		this is the only place where τ’ and δ’ are not τ and δ
 
 		:return:
 		"""
@@ -491,13 +491,17 @@ class dbWorkLine(object):
 		:param version:
 		:return:
 		"""
-		wordlist = list()
+
+		line = None
 
 		if version in ['polytonic', 'stripped']:
 			line = getattr(self, version)
 			# Non-breaking space needs to go
-			line = re.sub(r'\xa0', ' ', line)
-			wordlist = [w for w in line.split(' ') if w]
+		elif version in ['marked_up_line']:
+			line = self.unformattedline()
+
+		line = re.sub(r'\xa0', ' ', line)
+		wordlist = [w for w in line.split(' ') if w]
 
 		return wordlist
 

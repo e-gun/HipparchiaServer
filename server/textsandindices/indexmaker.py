@@ -364,8 +364,10 @@ def linesintoindex(lineobjects, activepoll):
 	acute = 'άέίόύήώΐΰᾴῄῴἅἕἵὅὕἥὥἄἔἴὄὔἤὤ'
 	gravetoacute = str.maketrans(grave, acute)
 
-	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
-	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
+	# τ’ and δ’ and the rest are a problem
+	# extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
+	# extrapunct = '\′‵‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
+	# punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
 
 	defaultwork = lineobjects[0].wkuinversalid
 
@@ -383,7 +385,7 @@ def linesintoindex(lineobjects, activepoll):
 	else:
 		indexingmethod = 'locus'
 
-	while len(lineobjects) > 0:
+	while lineobjects:
 		try:
 			line = lineobjects.pop()
 			if activepoll:
@@ -392,9 +394,12 @@ def linesintoindex(lineobjects, activepoll):
 			line = makeablankline(defaultwork, None)
 
 		if line.index:
-			words = line.wordlist('polytonic')
-			words = [tidyupterm(w, punct).lower() for w in words]
-			words = list(set(words))
+			polytonicwords = set(line.wordlist('polytonic'))
+			# need to figure out how to grab τ’ and δ’ and the rest
+			unformattedwords = set(line.wordlist('marked_up_line'))
+			words = [w for w in polytonicwords if w+'’' not in unformattedwords]
+			elisions = [w+"'" for w in polytonicwords if w+'’' in unformattedwords]
+			words.extend(elisions)
 			words = [w.translate(gravetoacute) for w in words]
 			for w in words:
 				referencestyle = getattr(line, indexingmethod)
