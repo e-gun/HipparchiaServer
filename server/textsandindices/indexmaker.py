@@ -383,6 +383,8 @@ def linesintoindex(lineobjects, activepoll):
 	if len(lineobjects) < hipparchia.config['CLICKABLEINDEXEDPASSAGECAP'] or hipparchia.config['CLICKABLEINDEXEDPASSAGECAP'] < 0:
 		# [a] '<indexedlocation id="gr0032w008_LN_31011">2.17.6</indexedlocation>' vs [b] just '2.17.6'
 		indexingmethod = 'anchoredlocus'
+	elif session['indexskipsknownwords'] == 'yes':
+		indexingmethod = 'anchoredlocus'
 	else:
 		indexingmethod = 'locus'
 

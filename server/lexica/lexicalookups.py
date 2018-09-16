@@ -61,7 +61,8 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) 
 	if ihavesession and not session['available'][usedictionary + '_morphology']:
 		return None
 
-	maxtrials = 5
+	maxtrials = 4
+	retrywithcapitalization = 1
 	trialnumber += 1
 
 	# the things that can confuse me
@@ -84,12 +85,13 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) 
 		if revertword:
 			word = revertword
 		# this code lets you make multiple stabs at an answer if you have already failed once
+		# need to be careful about the retries that reset the trialnumber: could infinite loop if not careful
 		# [a] something like πλακουντάριόν τι will fail because of the enclitic (greek_morphology can find πλακουντάριον and πλακουντάριοϲ)
 		# [b] something like προχοίδιόν τι will fail twice over because of the enclitic and the diaresis
 		# item [b] cannot be fully addressed here; this correction gives you an analysis, but the term can't yet be found in the dictionary
 		# greek_morphology has προχοίδιον; the greek_dictionary has προχοΐδιον
 		try:
-			# have to 'try' because there might not be a word[-2]
+			# have to 'try...' because there might not be a word[-2]
 			if trialnumber == 1:
 				# elided ending? you will ask for ἀλλ, but you need to look for ἀλλ'
 				newword = word + "'"
@@ -98,14 +100,25 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) 
 				# a proper noun?
 				newword = word[0].upper() + word[1:]
 				matchingobject = lookformorphologymatches(newword, cursor, trialnumber, revertword=word)
-			elif re.search(terminalacute, word[-1]) and trialnumber < maxtrials:
+			elif re.search(r'[ΐϊΰῧϋ]', word):
+				# desperate: ῥηϊδίωϲ --> ῥηιδίωϲ
+				diaresis = 'ΐϊΰῧϋ'
+				plain = 'ίιύῦυ'
+				xform = str.maketrans(diaresis, plain)
+				newword = word.translate(xform)
+				matchingobject = lookformorphologymatches(newword, cursor, trialnumber=retrywithcapitalization)
+			elif re.search(terminalacute, word[-1]):
+				# an enclitic problem?
 				sub = stripaccents(word[-1])
 				newword = word[:-1] + sub
-				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
-			elif re.search(terminalacute, word[-2]) and trialnumber < maxtrials:
+				matchingobject = lookformorphologymatches(newword, cursor, trialnumber=retrywithcapitalization)
+			elif re.search(terminalacute, word[-2]):
+				# πλακουντάριόν?
 				sub = stripaccents(word[-2])
 				newword = word[:-2] + sub + word[-1]
-				matchingobject = lookformorphologymatches(newword, cursor, trialnumber)
+				matchingobject = lookformorphologymatches(newword, cursor, trialnumber=retrywithcapitalization)
+			else:
+				return None
 		except IndexError:
 			matchingobject = None
 
