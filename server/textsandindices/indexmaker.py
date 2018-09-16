@@ -394,7 +394,8 @@ def linesintoindex(lineobjects, activepoll):
 			line = makeablankline(defaultwork, None)
 
 		if line.index:
-			polytonicwords = set(line.wordlist('polytonic'))
+			# don't use set() - that will yield undercounts
+			polytonicwords = line.wordlist('polytonic')
 			# need to figure out how to grab τ’ and δ’ and the rest
 			unformattedwords = set(line.wordlist('marked_up_line'))
 			words = [w for w in polytonicwords if w+'’' not in unformattedwords]

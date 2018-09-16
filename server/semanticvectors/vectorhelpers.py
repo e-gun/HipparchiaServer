@@ -195,6 +195,7 @@ def parsevectorsentences(searchobject, lineobjects):
 		matches = [' '.join(bundle) for bundle in zip(*[iter(matches)] * bundlesize)]
 
 	# FIXME: there is a problem with  τ’ and δ’ and the rest (refactor via indexmaker.py)
+	# nevertheless, most of these words are going to be stopwords anyway
 	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
 	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
 
