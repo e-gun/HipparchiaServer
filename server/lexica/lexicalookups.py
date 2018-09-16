@@ -246,7 +246,7 @@ def browserdictionarylookup(count, seekingentry, cursor):
 						'<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'.format(cv=countval, ent=w.entry))
 				if u'\u0304' in w.metricalentry or u'\u0306' in w.metricalentry:
 					outputlist.append('&nbsp;<span class="metrics">[{me}]</span>'.format(me=w.metricalentry))
-				if hipparchia.config['LEXDEBUGMODE'] == 'yes':
+				if session['debuglex'] == 'yes':
 					outputlist.append('&nbsp;<code>[ID: {x}]</code>'.format(x=w.id))
 					xref = findparserxref(w)
 					outputlist.append('&nbsp;<code>[XREF: {x}]</code>'.format(x=xref))

@@ -153,6 +153,11 @@ def generatesortedoutputbyheadword(completeindexdict, onework, alphabetical, act
 
 	activepoll.statusis('Remapping entries')
 	activepoll.allworkis(-1)
+
+	if session['indexskipsknownwords'] == 'yes':
+		# 'baseforms' is either False or a list
+		augmentedindexdict = {k: augmentedindexdict[k] for k in augmentedindexdict.keys() if not augmentedindexdict[k]['baseforms']}
+
 	headwordindexdict = generateheadwordindexdict(augmentedindexdict)
 
 	# [d] format and arrange the output
@@ -186,7 +191,13 @@ def generatesortedoutputbyheadword(completeindexdict, onework, alphabetical, act
 			elif formcount > 1:
 				sortedoutput.append((hw, '({fc})'.format(fc=formcount), '', '', False))
 
-		for form in polytonicsort(headwordindexdict[headword].keys()):
+		if alphabetical:
+			sortedforms = polytonicsort(headwordindexdict[headword].keys())
+		else:
+			sortedforms = sorted(headwordindexdict[headword].keys(), key=lambda x: len(headwordindexdict[headword][x]), reverse=True)
+
+		for form in sortedforms:
+			# print('headwordindexdict[{h}][{f}] = {x}'.format(h=headword, f=form, x=headwordindexdict[headword][form]))
 			hits = sorted(headwordindexdict[headword][form])
 			isahomonymn = hits[0][3]
 			if onework:
