@@ -99,11 +99,11 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) 
 				# a proper noun?
 				newword = word[0].upper() + word[1:]
 				matchingobject = lookformorphologymatches(newword, cursor, trialnumber, revertword=word)
-			elif re.search(r'[ΐϊΰῧϋ]', word):
+			elif re.search(r'[ΐϊΰῧϋî]', word):
 				# desperate: ῥηϊδίωϲ --> ῥηιδίωϲ
-				diaresis = 'ΐϊΰῧϋ'
-				plain = 'ίιύῦυ'
-				xform = str.maketrans(diaresis, plain)
+				diacritical = 'ΐϊΰῧϋî'
+				plain = 'ίιύῦυi'
+				xform = str.maketrans(diacritical, plain)
 				newword = word.translate(xform)
 				matchingobject = lookformorphologymatches(newword, cursor, trialnumber=retrywithcapitalization)
 			elif re.search(terminalacute, word[-1]):
@@ -251,6 +251,8 @@ def browserdictionarylookup(count, seekingentry, cursor):
 			includesubcounts = False
 		subcount = 0
 		for w in wordobjects:
+			w.subvidefinder()
+			w.etymologyfinder()
 			subcount += 1
 			# can't have xml in our html
 			definition = re.sub(r'<title>(.*?)</title>', r'<worktitle>\1</worktitle>', w.body)
@@ -348,7 +350,7 @@ def browserdictionarylookup(count, seekingentry, cursor):
 	return entry
 
 
-def searchdictionary(cursor, usedictionary: str, usecolumn: str, seeking: str, syntax: str, trialnumber=0):
+def searchdictionary(cursor, usedictionary: str, usecolumn: str, seeking: str, syntax: str, trialnumber=0) -> List:
 	"""
 
 	this will make several stabs at finding a word in the dictionary

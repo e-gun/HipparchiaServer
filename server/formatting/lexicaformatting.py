@@ -284,7 +284,7 @@ def formatmicroentry(entrybody: str) -> str:
 	:param entrybody:
 	:return:
 	"""
-	
+
 	entryhtml = ''
 	
 	soup = BeautifulSoup(entrybody, 'html.parser')

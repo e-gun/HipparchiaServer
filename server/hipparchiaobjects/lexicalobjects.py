@@ -686,6 +686,50 @@ class dbDictionaryEntry(object):
 	def islatin():
 		raise NotImplementedError
 
+	def subvidefinder(self):
+		"""
+
+		make "balneum" clickable if you are told to "v. balneum"
+
+		sample entries:
+
+			<orth extent="full" lang="la" opt="n">bălĭnĕum</orth>, v. balneum <sense id="n4869.0" n="I" level="1" opt="n"><hi rend="ital">init.</hi></sense>
+
+			<orth extent="full" lang="la" opt="n">balneae</orth>, v. balneum.
+
+		:return:
+		"""
+
+		xreffinder = re.compile(r'(v\. )(\w+)( <sense)')
+		sv = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
+		self.body = re.sub(xreffinder, sv, self.body)
+
+		xreffinder = re.compile(r'(v\. )(\w+)(\.)$')
+		self.body = re.sub(xreffinder, sv, self.body)
+
+
+	def etymologyfinder(self):
+		"""
+
+		make "balneum" clickable if you are told a word comes from it.
+
+		sample from entry:
+
+			<etym opt="n">balneum</etym>
+
+		note problem with:
+
+			<etym opt="n">Spanish</etym>
+
+		:return:
+		"""
+
+		xreffinder = re.compile(r'<etym opt=".">(\w+)</etym>')
+		sv = r'<dictionaryentry id="\1">\1</dictionaryentry>'
+		self.body = re.sub(xreffinder, sv, self.body)
+
+
+
 
 class dbGreekWord(dbDictionaryEntry):
 	"""
