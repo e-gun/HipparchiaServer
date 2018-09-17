@@ -9,9 +9,8 @@
 import re
 import time
 from os import path
-from sys import argv
 
-from flask import redirect, render_template, url_for
+from flask import redirect, render_template, session, url_for
 
 from server import hipparchia
 from server.hipparchiaobjects.progresspoll import ProgressPoll
@@ -108,6 +107,25 @@ def styesheetsamples():
 
 	return render_template('stylesampler.html', css=stylesheet, spans=spans, notspans=notspans,
 	                       numberfound=len(spans)+len(notspans))
+
+
+@hipparchia.route('/showsession')
+def showsessioncontents():
+	"""
+
+	dump the contents of the session to a browser page
+
+	:return:
+	"""
+	stylesheet = hipparchia.config['CSSSTYLESHEET']
+
+	output = list()
+	linetemplate = '{k}: {v}'
+
+	for k in session.keys():
+		output.append(linetemplate.format(k=k, v=session[k]))
+
+	return render_template('genericlistdumper.html', info=output, css=stylesheet)
 
 
 @hipparchia.route('/testroute')
