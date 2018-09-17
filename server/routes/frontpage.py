@@ -29,6 +29,9 @@ def frontpage():
 	:return:
 	"""
 
+	# make sure that there is a session so as to avoid throwing an exception
+	sessionvariables()
+
 	expectedsqltemplateversion = 2242018
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
 	fonts = hipparchia.config['FONTPICKERLIST']
@@ -42,8 +45,6 @@ def frontpage():
 	debugpanel = hipparchia.config['ALLOWUSERTOSETDEBUGMODES']
 
 	vectorhtml = vectorhtmlforfrontpage()
-
-	sessionvariables()
 
 	# check to see which dbs we actually own
 	activelists = [l for l in listmapper if len(listmapper[l]['a']) > 0]

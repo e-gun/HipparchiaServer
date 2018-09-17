@@ -22,6 +22,7 @@ from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchOutputObject
 from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
 	sortresultslist
+from server.listsandsession.sessionfunctions import sessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildsearchobject
@@ -49,6 +50,9 @@ def executesearch(searchid):
 
 	:return:
 	"""
+
+	# make sure that there is a session so as to avoid throwing an exception
+	sessionvariables()
 
 	pollid = validatepollid(searchid)
 
