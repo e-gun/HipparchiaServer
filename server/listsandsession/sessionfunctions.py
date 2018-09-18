@@ -29,7 +29,7 @@ def sessionvariables():
 		session['alocselections'] = list()
 		session['auexclusions'] = list()
 		session['auselections'] = list()
-		session['authorssummary'] = hipparchia.config['DEFAULTSHOWLEXICALAUTHORS']
+		session['authorssummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALAUTHORS']
 		session['available'] = probefordatabases()
 		session['bracketangled'] = hipparchia.config['DEFAULTHIGHLIGHTANGLEDBRACKETS']
 		session['bracketcurly'] = hipparchia.config['DEFAULTHIGHLIGHTCURLYBRACKETS']
@@ -63,10 +63,10 @@ def sessionvariables():
 		session['proximity'] = '1'
 		session['psgexclusions'] = list()
 		session['psgselections'] = list()
-		session['quotesummary'] = hipparchia.config['DEFAULTSHOWLEXICALQUOTES']
+		session['quotesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALQUOTES']
 		session['searchscope'] = 'L'
 		session['semanticvectorquery'] = 'no'
-		session['sensesummary'] = hipparchia.config['DEFAULTSHOWLEXICALSENSES']
+		session['sensesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALSENSES']
 		session['sentencesimilarity'] = 'no'
 		session['topicmodel'] = 'no'
 		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
