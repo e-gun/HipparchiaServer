@@ -18,7 +18,7 @@ from server.formatting.wordformatting import removegravity, stripaccents, tidyup
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.lexica.lexicalookups import browserdictionarylookup, findtotalcounts, getobservedwordprevalencedata, \
 	lexicalmatchesintohtml, lookformorphologymatches
-from server.listsandsession.listmanagement import polytonicsort
+from server.listsandsession.genericlistfunctions import polytonicsort
 from server.listsandsession.sessionfunctions import justlatin, justtlg
 
 

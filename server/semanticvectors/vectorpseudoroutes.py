@@ -18,7 +18,7 @@ from server.formatting.miscformatting import validatepollid
 from server.formatting.vectorformatting import formatnnmatches
 from server.hipparchiaobjects.searchobjects import SearchOutputObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
-from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
+from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher

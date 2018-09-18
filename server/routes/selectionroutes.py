@@ -13,7 +13,7 @@ from flask import request, session
 
 from server import hipparchia
 from server.formatting.wordformatting import depunct
-from server.listsandsession.listmanagement import dropdupes, tidyuplist
+from server.listsandsession.genericlistfunctions import tidyuplist, dropdupes
 from server.listsandsession.sessionfunctions import modifysessionvar, rationalizeselections, returnactivelist, \
 	selectionisactive, sessionselectionsashtml
 from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \

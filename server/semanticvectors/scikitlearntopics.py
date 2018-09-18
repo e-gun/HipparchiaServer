@@ -9,7 +9,7 @@ import locale
 
 from server import hipparchia
 from server.formatting.vectorformatting import ldatopicsgenerateoutput
-from server.listsandsession.listmanagement import compilesearchlist, flagexclusions, calculatewholeauthorsearches
+from server.listsandsession.searchlistmanagement import compilesearchlist, flagexclusions, calculatewholeauthorsearches
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import convertmophdicttodict, buildflatbagsofwords

@@ -38,7 +38,7 @@ except ImportError:
 	ldavis = None
 
 from server import hipparchia
-from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
+from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, mostcommonwords

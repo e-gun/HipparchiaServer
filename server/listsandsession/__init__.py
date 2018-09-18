@@ -1,1 +1,1 @@
-__all__ = ['sessionfunctions', 'listmanagement', 'sessiondicts', 'validateconfig', 'whereclauses']
+__all__ = ['sessionfunctions', 'searchlistmanagement.py', 'sessiondicts', 'validateconfig', 'whereclauses']

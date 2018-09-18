@@ -14,12 +14,13 @@ from flask import session
 
 from server import hipparchia
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
-from server.formatting.lexicaformatting import entrysummary, formatdictionarysummary, formateconsolidatedgrammarentry, \
-	formatgloss, formatmicroentry, grabheadmaterial, grabsenses, insertbrowserlookups
+from server.formatting.lexicaformatting import formatdictionarysummary, formateconsolidatedgrammarentry, \
+	formatgloss, formatmicroentry, grabheadmaterial, insertbrowserlookups
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbHeadwordObject, dbLatinWord, dbLemmaObject, \
-	dbMorphologyObject, dbWordCountObject
+from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbLatinWord
+from server.hipparchiaobjects.morphologyobjects import dbLemmaObject
+from server.hipparchiaobjects.wordcountobjects import dbWordCountObject, dbHeadwordObject, dbMorphologyObject
 
 
 def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) -> dbMorphologyObject:
@@ -253,11 +254,12 @@ def browserdictionarylookup(count, seekingentry, cursor):
 		for w in wordobjects:
 			w.subvidefinder()
 			w.etymologyfinder()
+
 			subcount += 1
 			# can't have xml in our html
 			definition = re.sub(r'<title>(.*?)</title>', r'<worktitle>\1</worktitle>', w.body)
 
-			if type != 'gloss':
+			if not w.isagloss():
 				if count == 0:
 					outputlist.append('<hr /><p class="dictionaryheading">{ent}'.format(ent=w.entry))
 				else:
@@ -285,27 +287,20 @@ def browserdictionarylookup(count, seekingentry, cursor):
 				# summarydict = dict()
 				# if session['sensesummary'] == 'yes' or session['authorssummary'] == 'yes' or session['quotesummary'] == 'yes':
 				lemmaobject = grablemmataobjectfor(w.entry, usedictionary + '_lemmata', cursor)
-				summarydict = entrysummary(definition, usedictionary, translationlabel, lemmaobject)
 
-				if session['sensesummary'] == 'no':
-					summarydict['senses'] = ['{n} senses found'.format(n=len(summarydict['senses']))]
+				w.authorlist = w.generateauthorsummary()
+				w.senselist = w.generatesensessummary()
+				w.quotelist = w.generatequotesummary(lemmaobject)
 
-				if session['authorssummary'] == 'no':
-					summarydict['authors'] = ['{n} authors'.format(n=len(summarydict['authors']))]
-
-				if session['quotesummary'] == 'no':
-					summarydict['quotes'] = ['{n} quotes found'.format(n=len(summarydict['quotes']))]
-
-				if len(summarydict['authors']) == 0 and len(summarydict['senses']) == 0 and len(summarydict['quotes']) == 0:
+				if len(w.authorlist + w.senselist + w.quotelist) == 0:
 					# either you have turned off summary info or this is basically just a gloss entry
 					outputlist.append(formatmicroentry(definition))
 				else:
-					outputlist.append(formatdictionarysummary(summarydict))
+					outputlist.append(formatdictionarysummary(w))
 					outputlist.append(grabheadmaterial(definition) + '<br />')
-					senses = grabsenses(definition)
-					if len(senses) > 0:
-						for n in senses:
-							outputlist.append(n)
+					sensehierarchy = w.returnsensehierarchy()
+					if sensehierarchy:
+						outputlist.extend(sensehierarchy)
 					else:
 						outputlist.append(formatmicroentry(definition))
 			else:

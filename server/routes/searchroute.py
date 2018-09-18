@@ -20,7 +20,7 @@ from server.formatting.searchformatting import buildresultobjects, flagsearchter
 from server.formatting.wordformatting import universalregexequivalent, wordlistintoregex
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchOutputObject
-from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
+from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
 	sortresultslist
 from server.listsandsession.sessionfunctions import sessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata

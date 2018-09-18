@@ -12,7 +12,8 @@ from flask import request
 
 from server import hipparchia
 from server.formatting.wordformatting import depunct, stripaccents
-from server.listsandsession.listmanagement import buildhintlist, polytonicsort
+from server.listsandsession.searchlistmanagement import buildhintlist
+from server.listsandsession.genericlistfunctions import polytonicsort
 from server.listsandsession.sessionfunctions import reducetosessionselections, returnactivelist
 from server.startup import authorgenresdict, authorlocationdict, keyedlemmata, listmapper, workgenresdict, \
 	workprovenancedict

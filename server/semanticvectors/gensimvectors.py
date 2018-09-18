@@ -12,7 +12,7 @@ from server import hipparchia
 from server.dbsupport.vectordbfunctions import checkforstoredvector
 from server.formatting.miscformatting import validatepollid
 from server.hipparchiaobjects.progresspoll import ProgressPoll
-from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
+from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
 from server.semanticvectors.gensimlsi import lsigenerateoutput

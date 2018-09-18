@@ -10,7 +10,7 @@ from server.dbsupport.miscdbfunctions import resultiterator
 from server.formatting.miscformatting import timedecorator
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
-from server.hipparchiaobjects.lexicalobjects import dbLemmaObject
+from server.hipparchiaobjects.morphologyobjects import dbLemmaObject
 
 
 @timedecorator

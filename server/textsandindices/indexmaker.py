@@ -15,7 +15,7 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.dblinefunctions import grabbundlesoflines, makeablankline
 from server.formatting.wordformatting import tidyupterm
-from server.listsandsession.listmanagement import polytonicsort
+from server.listsandsession.genericlistfunctions import polytonicsort
 from server.textsandindices.textandindiceshelperfunctions import dictmerger, getrequiredmorphobjects
 from server.threading.mpthreadcount import setthreadcount
 

@@ -17,7 +17,7 @@ from server.formatting.bibliographicformatting import formatauthinfo, formatauth
 	woformatworkinfo
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.listsandsession.listmanagement import compilesearchlist, sortsearchlist
+from server.listsandsession.searchlistmanagement import compilesearchlist, sortsearchlist
 from server.listsandsession.sessionfunctions import modifysessionselections, modifysessionvar, parsejscookie
 try:
 	from server.semanticvectors.vectorgraphing import fetchvectorgraph

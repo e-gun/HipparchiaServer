@@ -10,7 +10,7 @@ from gensim import corpora
 from gensim.models import LogEntropyModel, LsiModel
 
 from server.hipparchiaobjects.helperobjects import LogEntropyVectorCorpus
-from server.listsandsession.listmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
+from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords
 from server.semanticvectors.vectorhelpers import convertmophdicttodict, findwordvectorset
