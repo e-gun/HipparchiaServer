@@ -221,12 +221,38 @@ def browserdictionarylookup(count, seekingentry, cursor):
 	:return:
 	"""
 
+	outputlist = list()
+	clickableentry = str()
+
+	newheadingstr = '<hr /><p class="dictionaryheading">{ent}'
+	nextheadingstr = '<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'
+	metricsstr = '&nbsp;<span class="metrics">[{me}]</span>'
+	codestr = '&nbsp;<code>[ID: {x}]</code>'
+	xrefstr = '&nbsp;<code>[XREF: {x}]</code>'
+	glossstr = '<br />\n<p class="dictionaryheading">{ent}<span class="metrics">[gloss]</span></p>'
+	notfoundstr = '<br />\n<p class="dictionaryheading">nothing found under <span class="prevalence">{skg}</span></p>\n'
+	itemnotfoundstr = '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="prevalence">{skg}</span></p>\n'
+
+	navtemplate = """
+	<table class="navtable">
+	<tr>
+		<td class="alignleft">
+			<span class="label">Previous: </span>
+			<dictionaryentry id="{p}">{p}</dictionaryentry>
+		</td>
+		<td>&nbsp;</td>
+		<td class="alignright">
+			<span class="label">Next: </span>
+			<dictionaryentry id="{n}">{n}</dictionaryentry>
+		</td>
+	<tr>
+	</table>
+	"""
+
 	if re.search(r'[a-z]', seekingentry):
 		usedictionary = 'latin'
-		translationlabel = 'hi'
 	else:
 		usedictionary = 'greek'
-		translationlabel = 'tr'
 
 	# nothingfound = convertdictionaryfindintoobject('nothing', 'nodict')
 
@@ -238,8 +264,6 @@ def browserdictionarylookup(count, seekingentry, cursor):
 	# 	entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
 
 	wordobjects = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', seekingentry, syntax='=')
-	outputlist = list()
-	clickableentry = ''
 
 	if wordobjects:
 		if len(wordobjects) > 1:
@@ -261,20 +285,19 @@ def browserdictionarylookup(count, seekingentry, cursor):
 
 			if not w.isagloss():
 				if count == 0:
-					outputlist.append('<hr /><p class="dictionaryheading">{ent}'.format(ent=w.entry))
+					outputlist.append(newheadingstr.format(ent=w.entry))
 				else:
 					if includesubcounts:
 						countval = str(count) + chr(subcount + 96)
 					else:
 						countval = str(count)
-					outputlist.append(
-						'<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'.format(cv=countval, ent=w.entry))
+					outputlist.append(nextheadingstr.format(cv=countval, ent=w.entry))
 				if u'\u0304' in w.metricalentry or u'\u0306' in w.metricalentry:
-					outputlist.append('&nbsp;<span class="metrics">[{me}]</span>'.format(me=w.metricalentry))
+					outputlist.append(metricsstr.format(me=w.metricalentry))
 				if session['debuglex'] == 'yes':
-					outputlist.append('&nbsp;<code>[ID: {x}]</code>'.format(x=w.id))
+					outputlist.append(codestr.format(x=w.id))
 					xref = findparserxref(w)
-					outputlist.append('&nbsp;<code>[XREF: {x}]</code>'.format(x=xref))
+					outputlist.append(xrefstr.format(x=xref))
 				outputlist.append('</p>')
 
 				if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
@@ -304,26 +327,10 @@ def browserdictionarylookup(count, seekingentry, cursor):
 					else:
 						outputlist.append(formatmicroentry(definition))
 			else:
-				outputlist.append(
-					'<br />\n<p class="dictionaryheading">{ent}<span class="metrics">[gloss]</span></p>'.format(ent=w.entry))
+				outputlist.append(glossstr.format(ent=w.entry))
 				outputlist.append(formatgloss(definition))
 
 			# add in next / previous links
-			navtemplate = """
-			<table class="navtable">
-			<tr>
-				<td class="alignleft">
-					<span class="label">Previous: </span>
-					<dictionaryentry id="{p}">{p}</dictionaryentry>
-				</td>
-				<td>&nbsp;</td>
-				<td class="alignright">
-					<span class="label">Next: </span>
-					<dictionaryentry id="{n}">{n}</dictionaryentry>
-				</td>
-			<tr>
-			</table>
-			"""
 
 			outputlist.append(navtemplate.format(p=w.preventry, n=w.nextentry))
 
@@ -333,11 +340,9 @@ def browserdictionarylookup(count, seekingentry, cursor):
 
 	else:
 		if count == 0:
-			cleanedentry = '<br />\n<p class="dictionaryheading">nothing found under <span class="prevalence">{skg}</span></p>\n'.format(
-				skg=seekingentry)
+			cleanedentry = notfoundstr.format(skg=seekingentry)
 		else:
-			cleanedentry = '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="prevalence">{skg}</span></p>\n'.format(
-				ct=count, skg=seekingentry)
+			cleanedentry = itemnotfoundstr.format(ct=count, skg=seekingentry)
 		clickableentry = cleanedentry
 
 	entry = clickableentry + dictionaryentryjs()
