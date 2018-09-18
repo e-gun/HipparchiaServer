@@ -106,7 +106,7 @@ class dbDictionaryEntry(object):
 		authorlist.sort()
 		authorlist = [deabbreviateauthors(au, self.usedictionary) for au in authorlist]
 
-		if session['authorssummary'] == 'no':
+		if session['authorssummary'] == 'yes':
 			authorlist = ['{n} authors'.format(n=len(authorlist))]
 
 		return authorlist
@@ -128,7 +128,7 @@ class dbDictionaryEntry(object):
 		listofsenses = list(set(listofsenses))
 		listofsenses.sort()
 
-		if session['sensesummary'] == 'no':
+		if session['sensesummary'] == 'yes':
 			listofsenses = ['{n} senses'.format(n=len(listofsenses))]
 
 		return listofsenses
@@ -147,7 +147,7 @@ class dbDictionaryEntry(object):
 		quotelist = [x for x in quotelist if x not in morphologylist]
 		quotelist = polytonicsort(quotelist)
 
-		if session['quotesummary'] == 'no':
+		if session['quotesummary'] == 'yes':
 			quotelist = ['{n} senses'.format(n=len(quotelist))]
 
 		return quotelist
