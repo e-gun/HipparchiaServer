@@ -166,6 +166,12 @@ def dictsearch(searchterm):
 	except:
 		found = list()
 
+	if not found:
+		seeking = seeking[:-1] + '[¹²³⁴⁵⁶⁷⁸⁹]' + seeking[-1]
+		data = (seeking,)
+		dbcursor.execute(query, data)
+		found = dbcursor.fetchall()
+
 	# the results should be given the polytonicsort() treatment
 	returnarray = list()
 
