@@ -1098,21 +1098,27 @@ def deabrevviatelatinauthors() -> Dict[str, str]:
 	"""
 
 	authordict = {
+		'Amm.': 'Ammianus',
 		'Anthol. Lat.': 'Latin Anthology',
 		'Auct. Her.': 'Rhetorica ad Herennium',
 		'Caes.': 'Caesar',
 		'Cat.': 'Catullus',
+		'Cassiod.': 'Cassiodorus',
 		'Cels.': 'Celsus',
+		'Charis.': 'Charisius',
 		'Cic.': 'Cicero',
 		'Col.': 'Columella',
 		'Curt.': 'Quntus Curtius Rufus',
 		'Dig.': 'Digest of Justinian',
 		'Enn.': 'Ennius',
+		'Eutr.': 'Eutropius',
 		'Fest.': 'Festus',
 		'Flor.': 'Florus',
 		'Front.': 'Frontinus',
 		'Gell.': 'Gellius',
+		'Hirt.': 'Hirtius',
 		'Hor.': 'Horace',
+		'Hyg.': 'Hyginus',
 		'Isid.': 'Isidore',
 		'Just.': 'Justinian',
 		'Juv.': 'Juvenal',
@@ -1141,12 +1147,14 @@ def deabrevviatelatinauthors() -> Dict[str, str]:
 		'Tac.': 'Tacitus',
 		'Ter.': 'Terence',
 		'Tert.': 'Tertullian',
+		'Tib.': 'Tibullus',
 		'Val. Fl.': 'Valerius Flaccus',
 		'Val. Max.': 'Valerius Maxiumus',
 		'Varr.': 'Varro',
 		'Vell.': 'Velleius',
 		'Verg.': 'Vergil',
-		'Vitr.': 'Vitruvius'
+		'Vitr.': 'Vitruvius',
+		'Vulg.': 'Latin Vulgate Bible'
 	}
 
 	return authordict
