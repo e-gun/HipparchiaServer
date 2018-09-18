@@ -639,15 +639,20 @@ def formatprevalencedata(wordcountobject):
 	w = wordcountobject
 	thehtml = list()
 
+	prevstr = '<span class="prevalence">{a}</span> {b:,}'
+	roundedprevstr = '<span class="prevalence">{a}</span> {b:.0f}'
+	roundedemphstr = '<span class="emph">{a}</span>&nbsp;({b:.0f})'
+	relativestr = '<p class="wordcounts">Relative frequency: <span class="italic">{lb}</span></p>\n'
+
 	maxval = 0
 	for key in ['gr', 'lt', 'in', 'dp', 'ch']:
 		if w.getelement(key) > maxval:
 			maxval = w.getelement(key)
 		if w.getelement(key) > 0:
-			thehtml.append('<span class="prevalence">{a}</span> {b:,}'.format(a=w.getlabel(key), b=w.getelement(key)))
+			thehtml.append(prevstr.format(a=w.getlabel(key), b=w.getelement(key)))
 	key = 'total'
 	if w.getelement(key) != maxval:
-		thehtml.append('<span class="prevalence">{a}</span> {b:,}'.format(a=w.getlabel(key), b=w.getelement(key)))
+		thehtml.append(prevstr.format(a=w.getlabel(key), b=w.getelement(key)))
 
 	thehtml = [' / '.join(thehtml)]
 
@@ -658,7 +663,7 @@ def formatprevalencedata(wordcountobject):
 		if sum(allwts) > 0:
 			thehtml.append('\n<p class="wordcounts">Weighted distribution by corpus: ')
 			wts = sorted(wts, reverse=True)
-			wts = ['<span class="prevalence">{a}</span> {b:.0f}'.format(a=w[1], b=w[0]) for w in wts]
+			wts = [roundedprevstr.format(a=w[1], b=w[0]) for w in wts]
 			thehtml.append(' / '.join(wts))
 			thehtml.append('</p>')
 
@@ -667,7 +672,7 @@ def formatprevalencedata(wordcountobject):
 		if wts[0][0]:
 			# None was returned if there is no time data for this (Latin) word
 			thehtml.append('<p class="wordcounts">Weighted chronological distribution: ')
-			wts = ['<span class="prevalence">{a}</span> {b:.0f}'.format(a=w[1], b=w[0]) for w in wts]
+			wts = [roundedprevstr.format(a=w[1], b=w[0]) for w in wts]
 			thehtml.append(' / '.join(wts))
 			thehtml.append('</p>')
 
@@ -682,13 +687,12 @@ def formatprevalencedata(wordcountobject):
 			for g in range(0, hipparchia.config['NUMBEROFGENRESTOTRACK']):
 				git = genreinfotuples[g]
 				if git[1] > 0:
-					genres.append('<span class="emph">{a}</span>&nbsp;({b:.0f})'.format(a=git[0], b=git[1]))
+					genres.append(roundedemphstr.format(a=git[0], b=git[1]))
 			thehtml.append(', '.join(genres))
 
 		key = 'frq'
 		if w.gettimelabel(key) and re.search(r'core', w.gettimelabel(key)) is None:
-			thehtml.append('<p class="wordcounts">Relative frequency: <span class="italic">{lb}</span></p>\n'.format(
-				lb=w.gettimelabel(key)))
+			thehtml.append(relativestr.format(lb=w.gettimelabel(key)))
 
 	thehtml = '\n'.join(thehtml)
 
