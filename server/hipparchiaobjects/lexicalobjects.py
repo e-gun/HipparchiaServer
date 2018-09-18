@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 from flask import session
 
 from server.formatting.abbreviations import deabbreviateauthors
+from server.formatting.wordformatting import stripaccents
 from server.listsandsession.genericlistfunctions import polytonicsort
 
 
@@ -209,6 +210,9 @@ class dbDictionaryEntry(object):
 
 			<lbl opt="n">s.v.</lbl> <ref targOrder="U" lang="greek">ἐπευνακταί</ref>
 
+		then we have the following where you need to clean the word before searching:
+			<orth extent="full" lang="la" opt="n">fĕrē</orth>, q. v.
+
 		:return:
 		"""
 
@@ -221,6 +225,18 @@ class dbDictionaryEntry(object):
 
 		for x in xreffinder:
 			self.body = re.sub(x, sv, self.body)
+
+		findandeaccentuate = re.compile(r'<orth extent="full" lang="\w+" opt="\w">(\w+)</orth>, q. v.')
+		qv = r'<dictionaryentry id="{clean}">{dirty}</dictionaryentry>, q. v.'
+
+		self.body = re.sub(findandeaccentuate, lambda x: self.entrywordcleaner(x.group(1), qv), self.body)
+
+	@staticmethod
+	def entrywordcleaner(foundword, substitutionstring):
+		stripped = stripaccents(foundword)
+		newstring = substitutionstring.format(clean=stripped, dirty=foundword)
+		# print('entrywordcleaner()', foundword, stripped)
+		return newstring
 
 	def etymologyfinder(self):
 		"""

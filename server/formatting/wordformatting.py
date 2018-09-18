@@ -153,8 +153,8 @@ def buildhipparchiatranstable() -> dict:
 	invals.append('ΒΨΔΦΓΞΚΛΜΝΠϘΡσΣςϹΤΧΘΖ')
 	outvals.append('βψδφγξκλμνπϙρϲϲϲϲτχθζ')
 
-	invals.append('vUJjÁÄáäÉËéëÍÏíïÓÖóöÜÚüú')
-	outvals.append('uVIiaaaaeeeeiiiioooouuuu')
+	invals.append('vUJjÁÄáäÉËéëÍÏíïÓÖóöÜÚüúĕē')
+	outvals.append('uVIiaaaaeeeeiiiioooouuuuee')
 
 	invals = ''.join(invals)
 	outvals = ''.join(outvals)
