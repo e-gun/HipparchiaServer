@@ -149,7 +149,7 @@ class dbDictionaryEntry(object):
 		quotelist = polytonicsort(quotelist)
 
 		if session['quotesummary'] == 'yes':
-			quotelist = ['{n} senses'.format(n=len(quotelist))]
+			quotelist = ['{n} quotes'.format(n=len(quotelist))]
 
 		return quotelist
 
