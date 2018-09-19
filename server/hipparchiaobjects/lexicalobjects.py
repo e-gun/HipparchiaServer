@@ -219,6 +219,7 @@ class dbDictionaryEntry(object):
 		xreffinder = list()
 		xreffinder.append(re.compile(r'(v\. )(\w+)( <sense)'))
 		xreffinder.append(re.compile(r'(v\. )(\w+)(\.)$'))
+		xreffinder.append(re.compile(r'(<etym opt="\w">\d\. )(\w+)(, q\. v\.)'))
 		# xreffinder.append(re.compile(r'<lbl opt="n">(s\.v\.)</lbl> <ref targOrder="U" lang="greek">(\w+)</ref>()'))
 
 		sv = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'

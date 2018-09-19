@@ -153,8 +153,9 @@ def buildhipparchiatranstable() -> dict:
 	invals.append('ΒΨΔΦΓΞΚΛΜΝΠϘΡσΣςϹΤΧΘΖ')
 	outvals.append('βψδφγξκλμνπϙρϲϲϲϲτχθζ')
 
-	invals.append('vUJjÁÄáäÉËéëÍÏíïÓÖóöÜÚüúĕē')
-	outvals.append('uVIiaaaaeeeeiiiioooouuuuee')
+	# some of the vowels with quantities are compounds of vowel + accent: can't cut and paste them into the xformer
+	invals.append('vUJjÁÄáäÉËéëÍÏíïÓÖóöÜÚüúăāĕēĭīŏōŭū')
+	outvals.append('uVIiaaaaeeeeiiiioooouuuuaaeeiioouu')
 
 	invals = ''.join(invals)
 	outvals = ''.join(outvals)
