@@ -38,11 +38,86 @@ def cleantext(texttostrip):
 	:return:
 	"""
 
+	# PROBLEM #1: names
+	# you will get bad 'sentences' in the Latin with things like M. Tullius Cicero.
+	# could check for 'sentences' that end with a single letter: '(\s\w)\.' --> '\1'
+	# but this will still leave you with 'Ti' and similar items
+	#
+	# PROBLEM #2: dates
+	# the following is not 4 sentences: a. d. VIII Id. Nov.
+	#
+	# USEFUL FOR THE SOLUTION: marked_up_line is case sensitive
+	#
+	# Note that the case of the substitute is off; but all we really care about is getting the headword right
+
+	praenomina = {
+		'A.': 'Aulus',
+		'App.': 'Applius',
+		'C.': 'Caius',
+		'G.': 'Gaius',
+		'Cn.': 'Cnaius',
+		'Gn.': 'Gnaius',
+		'D.': 'Decimus',
+		'L.': 'Lucius',
+		'M.': 'Marcus',
+		'M.’': 'Manius',
+		'N.': 'Numerius',
+		'P.': 'Publius',
+		'Q.': 'Quintus',
+		'S.': 'Spurius',
+		'Sp.': 'Spurius',
+		'Ser.': 'Servius',
+		'Sex.': 'Sextus',
+		'T.': 'Titus',
+		'Ti': 'Tiberius',
+		'V.': 'Vibius'
+	}
+
+	datestrings = {
+		'a.': 'ante',
+		'd.': 'dies',
+		'Id.': 'Idibus',
+		'Kal.': 'Kalendas',
+		'Non.': 'Nonas',
+		'prid.': 'pridie',
+		'Ian.': 'Ianuarias',
+		'Feb.': 'Februarias',
+		'Mart.': 'Martias',
+		'Apr.': 'Aprilis',
+		'Mai.': 'Maias',
+		'Iun.': 'Iunias',
+		'Quint.': 'Quintilis',
+		'Sext.': 'Sextilis',
+		'Sept.': 'Septembris',
+		'Oct.': 'Octobris',
+		'Nov.': 'Novembris',
+		'Dec.': 'Decembris'
+	}
+
+	searchdict = {**praenomina, **datestrings}
+
 	htmlstrip = re.compile(r'<.*?>')
 	wholetext = re.sub(htmlstrip, '', texttostrip)
 	wholetext = re.sub('&nbsp;', '', wholetext)
+	wholetext = re.sub(r'\w+\.', lambda x: replaceabbreviations(x.group(0), searchdict), wholetext)
 
 	return wholetext
+
+
+def replaceabbreviations(foundstring, searchdict):
+	"""
+
+	pass lambda results through this: make sure a sentence end is not really a common abbrevation
+
+	:param foundstring:
+	:param searchdict:
+	:return:
+	"""
+
+	if foundstring in searchdict.keys():
+		foundstring = searchdict[foundstring]
+
+	return foundstring
 
 
 def recursivesplit(tosplit, listofsplitlerms):
@@ -120,6 +195,9 @@ def findsentences(authortable, searchobject, cursor):
 	cursor.execute(query, data)
 	results = resultiterator(cursor)
 	results = [dblineintolineobject(line) for line in results]
+
+	# kill off titles and salutations
+	results = [r for r in results if r.l0 not in ['t', 'sa']]
 
 	results = parsevectorsentences(so, results)
 
