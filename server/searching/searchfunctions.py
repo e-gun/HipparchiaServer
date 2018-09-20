@@ -15,7 +15,7 @@ from typing import List
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
 from server.formatting.betacodetounicode import replacegreekbetacode
-from server.formatting.wordformatting import removegravity
+from server.formatting.wordformatting import extrapunct, removegravity
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.lexica.lexicalookups import findcountsviawordcountstable
 from server.listsandsession.sessionfunctions import justtlg
@@ -37,7 +37,6 @@ def cleaninitialquery(seeking: str) -> str:
 	# things you never need to see and are not part of a (for us) possible regex expression
 	# a lot of this may be hard to type, but if you cut and paste a result to make a new search, this stuff is in there
 	badpunct = ',;#'
-	extrapunct = """‵’‘·“”„'"—†⌈⌋⌊⟫⟪❵❴⟧⟦«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝͜‖͡⸓͝"""
 
 	seeking = re.sub(r'[{p}]'.format(p=re.escape(badpunct + extrapunct)), '', seeking)
 
@@ -392,16 +391,18 @@ def buildsearchobject(searchid: str, therequest: request, thesession: session) -
 
 	seeking = cleaninitialquery(therequest.args.get('skg', ''))
 	proximate = cleaninitialquery(therequest.args.get('prx', ''))
-	lemma = cleaninitialquery(therequest.args.get('lem', ''))
-	proximatelemma = cleaninitialquery(therequest.args.get('plm', ''))
+	inputlemma = cleaninitialquery(therequest.args.get('lem', ''))
+	inputproximatelemma = cleaninitialquery(therequest.args.get('plm', ''))
 
 	try:
-		lemma = lemmatadict[lemma]
+		lemma = lemmatadict[inputlemma]
 	except KeyError:
 		lemma = None
 
+	# print('lo forms', lemma.formlist)
+
 	try:
-		proximatelemma = lemmatadict[proximatelemma]
+		proximatelemma = lemmatadict[inputproximatelemma]
 	except KeyError:
 		proximatelemma = None
 

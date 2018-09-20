@@ -18,7 +18,7 @@ from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
-from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, removegravity, stripaccents, tidyupterm
+from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, elidedextrapunct, extrapunct, removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.searching.searchdispatching import searchdispatcher
@@ -277,8 +277,7 @@ def parsevectorsentences(searchobject, lineobjects):
 
 	# FIXME: there is a problem with  τ’ and δ’ and the rest (refactor via indexmaker.py)
 	# nevertheless, most of these words are going to be stopwords anyway
-	extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
-	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
+	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + elidedextrapunct)))
 
 	if so.vectorquerytype in requiresids:
 		# now we mark the source of every sentence by turning it into a tuple: (location, text)
@@ -300,7 +299,7 @@ def parsevectorsentences(searchobject, lineobjects):
 	return cleanedmatches
 
 
-def findwordvectorset(listofwordclusters):
+def findwordvectorset(listofwordclusters: list) -> set:
 	"""
 
 	get ready to vectorize by splitting and cleaning a set of lines or sentences
@@ -321,12 +320,17 @@ def findwordvectorset(listofwordclusters):
 	latinwords = [w for w in allwords if not re.search(minimumgreek, w)]
 
 	allwords = [removegravity(w) for w in greekwords] + [stripaccents(w, trans) for w in latinwords]
+
+	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
+
+	allwords = [re.sub(punct, '', w) for w in allwords]
+
 	allwords = set(allwords) - {''}
 
 	return allwords
 
 
-def convertmophdicttodict(morphdict):
+def convertmophdicttodict(morphdict: dict) -> dict:
 	"""
 
 	return a dict of dicts of possibilities for all of the words we will be using
@@ -350,7 +354,7 @@ def convertmophdicttodict(morphdict):
 	return morphdict
 
 
-def buildlemmatizesearchphrase(phrase):
+def buildlemmatizesearchphrase(phrase: str) -> str:
 	"""
 
 	turn a search into a collection of headwords
@@ -397,7 +401,8 @@ def bruteforcefinddblinefromsentence(thissentence, modifiedsearchobject):
 	mso.seeking = ' '.join(thissentence[:6])
 	mso.termone = mso.seeking
 	mso.termtwo = ' '.join(thissentence[-5:])
-	hits = searchdispatcher(mso, nullpoll)
+	mso.poll = nullpoll
+	hits = searchdispatcher(mso)
 
 	# if len(hits) > 1:
 	# 	print('findlocusfromsentence() found {h} hits when looking for {s}'.format(h=len(hits), s=mso.seeking))

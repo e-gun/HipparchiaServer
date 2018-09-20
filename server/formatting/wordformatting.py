@@ -9,6 +9,12 @@ import re
 from string import punctuation
 
 
+# the one: because sometimes you don't want to zap τ’, δ’, κτλ.
+# the other: and sometimes you do
+elidedextrapunct = '\′‵‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⟨⟩⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚̄⁝͜‖͡⸓͝'
+extrapunct = elidedextrapunct + '’'
+
+
 def removegravity(accentedword: str) -> str:
 	"""
 	turn all graves into accutes so you can match the dictionary form
@@ -347,7 +353,6 @@ def tidyupterm(word: str, punct=None) -> str:
 	"""
 
 	if not punct:
-		extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚⁝‖⸓'
 		punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
 
 	# hard to know whether or not to do the editorial insertions stuff: ⟫⟪⌈⌋⌊

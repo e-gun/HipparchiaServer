@@ -22,11 +22,81 @@ from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
 
+def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vectorspace):
+	"""
+
+	this is where we go after executegensimsearch() makes its function pick
+
+	[a] buildnnvectorspace (if needed)
+	[b] do the right sort of search
+		findword2vecsimilarities
+		findapproximatenearestneighbors
+	[c] generate the output
+
+	:param searchobject:
+	:param activepoll:
+	:param sentencetuples:
+	:param workssearched:
+	:param starttime:
+	:param vectorspace:
+	:return:
+	"""
+
+	so = searchobject
+	activepoll = so.poll
+	termone = so.lemma.dictionaryentry
+	imagename = ''
+
+	try:
+		termtwo = so.proximatelemma.dictionaryentry
+	except AttributeError:
+		termtwo = None
+
+	if not vectorspace:
+		vectorspace = buildnnvectorspace(sentencetuples, so)
+		if vectorspace == 'failed to build model':
+			reasons = [vectorspace]
+			return emptyvectoroutput(so, reasons)
+
+	if termone and termtwo:
+		similarity = findword2vecsimilarities(termone, termtwo, vectorspace)
+		similarity = formatnnsimilarity(termone, termtwo, similarity)
+		mostsimilar = ['placeholder']
+		html = similarity
+	else:
+		activepoll.statusis('Calculating the nearest neighbors')
+		mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
+		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
+		if not mostsimilar:
+			# proper noun? Ϲωκράτηϲ --> ϲωκράτηϲ
+			termone = termone[0].lower() + termone[1:]
+			mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
+		if mostsimilar:
+			html = formatnnmatches(mostsimilar)
+			activepoll.statusis('Building the graph')
+			mostsimilar = mostsimilar[:hipparchia.config['NEARESTNEIGHBORSCAP']]
+			imagename = graphnnmatches(termone, mostsimilar, vectorspace, so)
+		else:
+			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
+
+	findshtml = '{h}'.format(h=html)
+
+	output = nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject)
+
+	return output
+
+
 def buildnnvectorspace(sentencetuples, searchobject):
 	"""
 
+	find the words
+	find the morphology objects you need for those words
+	build vectors
+
 	:return:
 	"""
+
+	wordbundler = False
 
 	activepoll = searchobject.poll
 
@@ -39,9 +109,21 @@ def buildnnvectorspace(sentencetuples, searchobject):
 	wl = '{:,}'.format(len(listsofwords))
 	activepoll.statusis(
 		'No stored model for this search. Generating a new one.<br />Finding headwords for {n} sentences'.format(n=wl))
+
 	morphdict = getrequiredmorphobjects(allwords)
+
+	# associate each word with its possible headwords
 	morphdict = convertmophdicttodict(morphdict)
-	# morphdict = {t: '·'.join(morphdict[t]) for t in morphdict}
+
+	# import re
+	# teststring = r'aesa'
+	# kvpairs = [(k,morphdict[k]) for k in morphdict.keys() if re.search(teststring, k)]
+	# print('convertmophdicttodict', kvpairs)
+	# sample selection:
+	# convertmophdicttodict [('caesare', {'caesar'}), ('caesarisque', {'caesar'}), ('caesari', {'caesar'}), ('caesar', {'caesar'}), ('caesa', {'caesum', 'caesa', 'caesus¹', 'caedo'}), ('caesaremque', {'caesar'}), ('caesaris', {'caesar'}), ('caesarem', {'caesar'})]
+
+	if wordbundler:
+		morphdict = {t: '·'.join(morphdict[t]) for t in morphdict}
 
 	activepoll.statusis('No stored model for this search. Generating a new one.<br />Building vectors for the headwords in the {n} sentences'.format(n=wl))
 	vectorspace = buildgensimmodel(searchobject, morphdict, listsofwords)
@@ -197,62 +279,6 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	storevectorindatabase(searchobject, 'nn', model)
 
 	return model
-
-
-def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vectorspace):
-	"""
-
-	:param searchobject:
-	:param activepoll:
-	:param sentencetuples:
-	:param workssearched:
-	:param starttime:
-	:param vectorspace:
-	:return:
-	"""
-
-	so = searchobject
-	activepoll = so.poll
-	termone = so.lemma.dictionaryentry
-	imagename = ''
-
-	try:
-		termtwo = so.proximatelemma.dictionaryentry
-	except AttributeError:
-		termtwo = None
-
-	if not vectorspace:
-		vectorspace = buildnnvectorspace(sentencetuples, so)
-		if vectorspace == 'failed to build model':
-			reasons = [vectorspace]
-			return emptyvectoroutput(so, reasons)
-
-	if termone and termtwo:
-		similarity = findword2vecsimilarities(termone, termtwo, vectorspace)
-		similarity = formatnnsimilarity(termone, termtwo, similarity)
-		mostsimilar = ['placeholder']
-		html = similarity
-	else:
-		activepoll.statusis('Calculating the nearest neighbors')
-		mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
-		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
-		if not mostsimilar:
-			# proper noun? ϲωκράτηϲ --> Ϲωκράτηϲ
-			termone = termone[0].upper() + termone[1:]
-			mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
-		if mostsimilar:
-			html = formatnnmatches(mostsimilar)
-			activepoll.statusis('Building the graph')
-			mostsimilar = mostsimilar[:hipparchia.config['NEARESTNEIGHBORSCAP']]
-			imagename = graphnnmatches(termone, mostsimilar, vectorspace, so)
-		else:
-			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
-
-	findshtml = '{h}'.format(h=html)
-
-	output = nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject)
-
-	return output
 
 
 """

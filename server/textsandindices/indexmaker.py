@@ -14,7 +14,7 @@ from flask import session
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import grabbundlesoflines, makeablankline
-from server.formatting.wordformatting import tidyupterm
+from server.formatting.wordformatting import elidedextrapunct, tidyupterm
 from server.listsandsession.genericlistfunctions import polytonicsort
 from server.textsandindices.textandindiceshelperfunctions import dictmerger, getrequiredmorphobjects
 from server.threading.mpthreadcount import setthreadcount
@@ -369,9 +369,8 @@ def linesintoindex(lineobjects, activepoll):
 
 	# note the tricky combining marks like " ͡ " which can be hard to spot since they float over another special character
 	# τ’ and δ’ and the rest are a problem
-	# extrapunct = '\′‵’‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚̄⁝͜‖͡⸓͝'
-	extrapunct = '\′‵‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦(«»›‹⸐„⸏⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚̄⁝͜‖͡⸓͝'
-	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
+
+	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + elidedextrapunct)))
 
 	defaultwork = lineobjects[0].wkuinversalid
 
