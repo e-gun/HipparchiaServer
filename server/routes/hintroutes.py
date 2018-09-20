@@ -172,7 +172,8 @@ def offerlemmatahints():
 	outvals = u'iuϲϲ'
 
 	if len(term) > 2:
-		query = stripaccents(term.lower())
+		# query = stripaccents(term.lower())
+		query = stripaccents(term)
 		qlen = len(query)
 		a = query[0].translate(str.maketrans(invals, outvals))
 		b = query[1].translate(str.maketrans(invals, outvals))
@@ -183,12 +184,15 @@ def offerlemmatahints():
 
 		wordlist = polytonicsort(wordlist)
 
+		# print('offerlemmatahints() wordlist', wordlist)
+
 		if qlen > 2:
 			# always true, but what if you changed 'len(term) > 2'?
 			q = a+b+query[2:]
 		else:
 			q = a+b
-		hintlist = [{'value': w} for w in wordlist if q == stripaccents(w.lower()[0:qlen])]
+		#hintlist = [{'value': w} for w in wordlist if q == stripaccents(w.lower()[0:qlen])]
+		hintlist = [{'value': w} for w in wordlist if q == stripaccents(w[0:qlen])]
 
 	if len(hintlist) > 50:
 		hintlist = hintlist[0:50]

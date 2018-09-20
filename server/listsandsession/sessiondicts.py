@@ -173,9 +173,9 @@ def buildkeyedlemmata(listofentries: dict) -> defaultdict:
 			b = stripaccents(e[1].translate(str.maketrans(invals, outvals)))
 			try:
 				keyedlemmata[a][b].append(e)
-			except:
-				keyedlemmata[a][b] = list(e)
+			except KeyError:
+				keyedlemmata[a][b] = [e]
 
-	# print('keyedlemmata[a][r]', keyedlemmata['a']['r'])
+	# print('keyedlemmata[C][a]', keyedlemmata['C']['a'])
 
 	return keyedlemmata

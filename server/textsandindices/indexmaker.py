@@ -360,6 +360,9 @@ def linesintoindex(lineobjects, activepoll):
 	:return:
 	"""
 
+	# kill off titles and salutations: dangerous as there l1='t' has not been 100% ruled out as a valid body citation
+	# lineobjects = [ln for ln in lineobjects if ln.l1 not in ['t', 'sa']]
+
 	grave = 'ὰὲὶὸὺὴὼῒῢᾲῂῲἃἓἳὃὓἣὣἂἒἲὂὒἢὢ'
 	acute = 'άέίόύήώΐΰᾴῄῴἅἕἵὅὕἥὥἄἔἴὄὔἤὤ'
 	gravetoacute = str.maketrans(grave, acute)

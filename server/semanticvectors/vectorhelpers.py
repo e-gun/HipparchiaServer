@@ -115,6 +115,9 @@ def replaceabbreviations(foundstring, searchdict):
 	"""
 
 	if foundstring in searchdict.keys():
+		# reduce ...
+		# foundstring = re.sub(r'\.', '', foundstring)
+		# or expand...
 		foundstring = searchdict[foundstring]
 
 	return foundstring
@@ -196,8 +199,8 @@ def findsentences(authortable, searchobject, cursor):
 	results = resultiterator(cursor)
 	results = [dblineintolineobject(line) for line in results]
 
-	# kill off titles and salutations
-	results = [r for r in results if r.l0 not in ['t', 'sa']]
+	# kill off titles and salutations: dangerous if there is a body l1 value of 't' out there
+	results = [r for r in results if r.l1 not in ['t', 'sa']]
 
 	results = parsevectorsentences(so, results)
 
