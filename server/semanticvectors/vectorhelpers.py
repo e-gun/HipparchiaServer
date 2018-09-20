@@ -343,15 +343,24 @@ def convertmophdicttodict(morphdict: dict) -> dict:
 	:return:
 	"""
 
-	morphdict = {k: v for k, v in morphdict.items() if v is not None}
-	morphdict = {k: set([p.getbaseform() for p in morphdict[k].getpossible()]) for k in morphdict.keys()}
+	dontskipunknowns = True
+
+	parseables = {k: v for k, v in morphdict.items() if v is not None}
+	parseables = {k: set([p.getbaseform() for p in parseables[k].getpossible()]) for k in parseables.keys()}
+
+	if dontskipunknowns:
+		# if the base for was not found, associate a word with itself
+		unparseables = {k: {k} for k, v in morphdict.items() if v is None}
+		newmorphdict = {**unparseables, **parseables}
+	else:
+		newmorphdict = parseables
 
 	# over-aggressive? more thought/care might be required here
 	# the definitely changes the shape of the bags of words...
 	delenda = mostcommonheadwords()
-	morphdict = {k: v for k, v in morphdict.items() if v - delenda == v}
+	newmorphdict = {k: v for k, v in newmorphdict.items() if v - delenda == v}
 
-	return morphdict
+	return newmorphdict
 
 
 def buildlemmatizesearchphrase(phrase: str) -> str:
