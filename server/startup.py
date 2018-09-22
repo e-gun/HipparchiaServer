@@ -77,8 +77,8 @@ authordict = loadallauthorsasobjects()
 workdict = loadallworksasobjects()
 authordict = loadallworksintoallauthors(authordict, workdict)
 lemmatadict = loadlemmataasobjects()
-print('lemmatadict disabled for debugging run')
-lemmatadict = dict()
+# print('lemmatadict disabled for debugging run')
+# lemmatadict = dict()
 # lemmatadict too long to be used by the hinter: need quicker access; so partition it up into keyedlemmata
 keyedlemmata = buildkeyedlemmata(list(lemmatadict.keys()))
 
