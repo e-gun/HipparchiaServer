@@ -48,4 +48,7 @@ if __name__ == '__main__':
 	
 	"""
 
-	hipparchia.run(threaded=True, debug=False, host=hipparchia.config['LISTENINGADDRESS'], port=hipparchia.config['FLASKSERVEDFROMPORT'])
+	host = hipparchia.config['LISTENINGADDRESS']
+	port = hipparchia.config['FLASKSERVEDFROMPORT']
+
+	hipparchia.run(threaded=True, debug=False, host=host, port=port)

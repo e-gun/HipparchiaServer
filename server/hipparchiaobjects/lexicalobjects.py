@@ -69,10 +69,16 @@ class dbDictionaryEntry(object):
 			self.usedictionary = 'greek'
 			self.translationlabel = 'tr'
 
-	def isgreek(self):
+	@staticmethod
+	def isgreek():
 		raise NotImplementedError
 
-	def islatin(self):
+	@staticmethod
+	def islatin():
+		raise NotImplementedError
+
+	def runbodyxrefsuite(self):
+		# add dictionary clicks to "cf.", etc. in the entry body
 		raise NotImplementedError
 
 	def isagloss(self):
@@ -195,7 +201,122 @@ class dbDictionaryEntry(object):
 
 		return numberedsenses
 
-	def subvidefinder(self):
+	@staticmethod
+	def entrywordcleaner(foundword, substitutionstring):
+		# example substitute: r'<dictionaryentry id="{clean}">{dirty}</dictionaryentry>'
+		stripped = stripaccents(foundword)
+		newstring = substitutionstring.format(clean=stripped, dirty=foundword)
+		# print('entrywordcleaner()', foundword, stripped)
+		return newstring
+
+
+class dbGreekWord(dbDictionaryEntry):
+	"""
+
+	an object that corresponds to a db line
+
+	differs from Latin in self.language and unaccented_entry
+
+	"""
+
+	def __init__(self, entry_name, metrical_entry, id_number, pos, translations, entry_body, unaccented_entry):
+		self.language = 'Greek'
+		self.unaccented_entry = unaccented_entry
+		super().__init__(entry_name, metrical_entry, id_number, pos, translations, entry_body)
+		self.entry_key = None
+
+	@staticmethod
+	def isgreek():
+		return True
+
+	@staticmethod
+	def islatin():
+		return False
+
+	def runbodyxrefsuite(self):
+		# modify self.body to add clicks to "cf" words, etc
+		self.greekgreaterthanlessthan()
+		self.greekxmltagwrapper('ref')
+		self.greekxmltagwrapper('etym')
+		self.greeksvfinder()
+		self.greekequivalentformfinder()
+		self.cffinder()
+
+	def greekgreaterthanlessthan(self):
+		self.body = re.sub(r'&λτ;', r'&lt;', self.body)
+		self.body = re.sub(r'&γτ;', r'&gt;', self.body)
+
+	def greekxmltagwrapper(self, tag):
+		"""
+
+		sometimes you have "<tag>WORD</tag>" and sometimes you have "<tag>WORD.</tag>"
+
+		note the potential false-positive finds with things like:
+
+			'<etym lang="greek" opt="n">ἀνα-</etym>'
+
+		The tag will generate a hit but the '-' will disqualify it.
+
+		Many tags are a mess in the XML. 'foreign' is used in all sorts of ways, etc.
+
+		bs4 screws things up if you try to use it because it can swap item order:
+			in text:    '<ref targOrder="U" lang="greek">γαιών</ref>'
+			bs4 return: '<ref lang="greek" targorder="U">γαιών</ref>'
+
+		:return:
+		"""
+
+		# don't need to strip the accents with a greek word; do need to strip longs and shorts in a latin word
+
+		markupfinder = re.compile(r'(<{t}.*?>)(\w+)(\.?<.*?{t}>)'.format(t=tag))
+
+		self.body = re.sub(markupfinder, r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3', self.body)
+
+	def greeksvfinder(self):
+		fingerprint = r'(<abbr>v\.</abbr> sub <foreign lang="greek">)(\w+)(</foreign>)'
+		replacement = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
+		self.body = re.sub(fingerprint, replacement, self.body)
+
+	def greekequivalentformfinder(self):
+		fingerprint = r'(used for <foreign lang="greek">)(\w+)(</foreign>)'
+		replacement = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
+		self.body = re.sub(fingerprint, replacement, self.body)
+
+	def cffinder(self):
+		fingerprint = r'(cf. <foreign lang="greek">)(κνημόω)(</foreign>)'
+		replacement = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
+		self.body = re.sub(fingerprint, replacement, self.body)
+
+
+class dbLatinWord(dbDictionaryEntry):
+	"""
+
+	an object that corresponds to a db line
+
+	differs from Greek in self.language and unaccented_entry
+
+	"""
+
+	def __init__(self, entry_name, metrical_entry, id_number, pos, translations, entry_body, entry_key):
+		self.language = 'Latin'
+		self.unaccented_entry = None
+		super().__init__(entry_name, metrical_entry, id_number, pos, translations, entry_body)
+		self.entry_key = entry_key
+
+	@staticmethod
+	def isgreek():
+		return False
+
+	@staticmethod
+	def islatin():
+		return True
+
+	def runbodyxrefsuite(self):
+		# modify self.body to add clicks to "cf" words, etc
+		self.latinetymologyfinder()
+		self.latinsubvidefinder()
+
+	def latinsubvidefinder(self):
 		"""
 
 		make "balneum" clickable if you are told to "v. balneum"
@@ -233,14 +354,7 @@ class dbDictionaryEntry(object):
 
 		self.body = re.sub(findandeaccentuate, lambda x: self.entrywordcleaner(x.group(1), qv), self.body)
 
-	@staticmethod
-	def entrywordcleaner(foundword, substitutionstring):
-		stripped = stripaccents(foundword)
-		newstring = substitutionstring.format(clean=stripped, dirty=foundword)
-		# print('entrywordcleaner()', foundword, stripped)
-		return newstring
-
-	def etymologyfinder(self):
+	def latinetymologyfinder(self):
 		"""
 
 		make "balneum" clickable if you are told a word comes from it.
@@ -248,6 +362,8 @@ class dbDictionaryEntry(object):
 		sample from entry:
 
 			<etym opt="n">balneum</etym>
+
+			<gen opt="n">m.</gen>, = βούβαλοϲ,
 
 		note problem with:
 
@@ -257,56 +373,10 @@ class dbDictionaryEntry(object):
 		"""
 
 		xreffinder = list()
-		xreffinder.append(re.compile(r'<etym opt=".">(\w+)</etym>'))
+		xreffinder.append(re.compile(r'(<etym opt=".">)(\w+)(</etym>)'))
+		xreffinder.append(re.compile(r'(= )(\w+)(,)'))
+		xreffinder.append(re.compile(r'(cf\. Gr\. )(\w+)(,)'))
 
-		sv = r'<dictionaryentry id="\1">\1</dictionaryentry>'
+		sv = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
 		for x in xreffinder:
 			self.body = re.sub(x, sv, self.body)
-
-
-class dbGreekWord(dbDictionaryEntry):
-	"""
-
-	an object that corresponds to a db line
-
-	differs from Latin in self.language and unaccented_entry
-
-	"""
-
-	def __init__(self, entry_name, metrical_entry, id_number, pos, translations, entry_body, unaccented_entry):
-		self.language = 'Greek'
-		self.unaccented_entry = unaccented_entry
-		super().__init__(entry_name, metrical_entry, id_number, pos, translations, entry_body)
-		self.entry_key = None
-
-	@staticmethod
-	def isgreek():
-		return True
-
-	@staticmethod
-	def islatin():
-		return False
-
-
-class dbLatinWord(dbDictionaryEntry):
-	"""
-
-	an object that corresponds to a db line
-
-	differs from Greek in self.language and unaccented_entry
-
-	"""
-
-	def __init__(self, entry_name, metrical_entry, id_number, pos, translations, entry_body, entry_key):
-		self.language = 'Latin'
-		self.unaccented_entry = None
-		super().__init__(entry_name, metrical_entry, id_number, pos, translations, entry_body)
-		self.entry_key = entry_key
-
-	@staticmethod
-	def isgreek():
-		return False
-
-	@staticmethod
-	def islatin():
-		return True

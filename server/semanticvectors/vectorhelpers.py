@@ -100,6 +100,7 @@ def cleantext(texttostrip):
 	wholetext = re.sub(htmlstrip, '', texttostrip)
 	wholetext = re.sub('&nbsp;', '', wholetext)
 	wholetext = re.sub(r'\w+\.', lambda x: replaceabbreviations(x.group(0), searchdict), wholetext)
+	# speakers in plays? need to think about catching:  'XY. (says something) AB. (replies)'
 
 	return wholetext
 

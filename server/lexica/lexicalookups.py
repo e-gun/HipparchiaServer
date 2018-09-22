@@ -20,7 +20,8 @@ from server.formatting.wordformatting import stripaccents, universalregexequival
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbLatinWord
 from server.hipparchiaobjects.morphologyobjects import dbLemmaObject
-from server.hipparchiaobjects.wordcountobjects import dbWordCountObject, dbHeadwordObject, dbMorphologyObject
+from server.hipparchiaobjects.wordcountobjects import dbWordCountObject, dbHeadwordObject
+from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject
 
 
 def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) -> dbMorphologyObject:
@@ -50,6 +51,9 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) 
 	else:
 		usedictionary = 'greek'
 
+	# βοῶ̣ντεϲ -> βοῶντεϲ
+	word = re.sub(r'̣', '', word)
+
 	ihavesession = True
 	try:
 		session['available'][usedictionary + '_morphology']
@@ -75,6 +79,8 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) 
 
 	query = 'SELECT * FROM {d}_morphology WHERE observed_form = %s'.format(d=usedictionary)
 	data = (word,)
+
+	# print('lookformorphologymatches() q/d', query, data)
 
 	cursor.execute(query, data)
 	# fetchone() because all possiblities are stored inside the analysis itself
@@ -191,19 +197,19 @@ def lexicalmatchesintohtml(observedform: str, morphologyobject: dbMorphologyObje
 	# look up and format the dictionary entries
 	if len(entriestocheck) == 1:
 		# sending 0 as the count to browserdictionarylookup() prevents enumeration
-		entryashtml = browserdictionarylookup(0, entriestocheck[1], cursor)
+		entryashtml = returnentryhtml(0, entriestocheck[1], cursor)
 		returnarray.append({'value': entryashtml})
 	else:
 		count = 0
 		for entry in entriestocheck:
 			count += 1
-			entryashtml = browserdictionarylookup(count, entriestocheck[entry], cursor)
+			entryashtml = returnentryhtml(count, entriestocheck[entry], cursor)
 			returnarray.append({'value': entryashtml})
 
 	return returnarray
 
 
-def browserdictionarylookup(count, seekingentry, cursor):
+def returnentryhtml(count, seekingentry, cursor):
 	"""
 
 	look up a word and return an htlm version of its dictionary entry
@@ -258,11 +264,6 @@ def browserdictionarylookup(count, seekingentry, cursor):
 
 	# print('browserdictionarylookup(): entry',entry)
 
-	# entry = re.sub(r'#','',entry)
-	#
-	# if re.search(r'\d$',entry):
-	# 	entry = re.sub(r'(.*?)(\d)',r'\1 (\2)',entry)
-
 	wordobjects = searchdictionary(cursor, usedictionary + '_dictionary', 'entry_name', seekingentry, syntax='=')
 
 	if wordobjects:
@@ -276,9 +277,7 @@ def browserdictionarylookup(count, seekingentry, cursor):
 			includesubcounts = False
 		subcount = 0
 		for w in wordobjects:
-			w.subvidefinder()
-			w.etymologyfinder()
-
+			w.runbodyxrefsuite()
 			subcount += 1
 			# can't have xml in our html
 			definition = re.sub(r'<title>(.*?)</title>', r'<worktitle>\1</worktitle>', w.body)

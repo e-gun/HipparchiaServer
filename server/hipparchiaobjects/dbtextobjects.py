@@ -13,6 +13,7 @@ from server import hipparchia
 from server.formatting.betacodeescapes import andsubstitutes
 from server.formatting.wordformatting import attemptsigmadifferentiation, forcelunates
 from server.formatting.wordformatting import avoidsmallvariants
+from server.hipparchiaobjects.morphologyobjects import MorphPossibilityObject
 
 
 class dbAuthor(object):
@@ -780,3 +781,58 @@ class dbWorkLine(object):
 			return True
 		else:
 			return False
+
+
+class dbMorphologyObject(object):
+	"""
+
+	an object that corresponds to a db line
+
+	CREATE TABLE public.greek_morphology (
+		observed_form character varying(64) COLLATE pg_catalog."default",
+		xrefs character varying(128) COLLATE pg_catalog."default",
+		prefixrefs character varying(128) COLLATE pg_catalog."default",
+		possible_dictionary_forms text COLLATE pg_catalog."default"
+	)
+
+	hipparchiaDB=# select count(observed_form) from greek_morphology;
+	 count
+	--------
+	 911871
+	(1 row)
+
+	hipparchiaDB=# select count(observed_form) from latin_morphology;
+	 count
+	--------
+	 270227
+	(1 row)
+
+
+	hipparchiaDB=# select * from greek_morphology where observed_form='καταμείναντεϲ';
+	observed_form |  xrefs   | prefixrefs |                                                                       possible_dictionary_forms
+	---------------+----------+------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	καταμείναντεϲ | 58645029 |            | <possibility_1>καταμένω<xref_value>58645029</xref_value><xref_kind>9</xref_kind><transl>stay</transl><analysis>aor part act masc nom/voc pl</analysis></possibility_1>+
+	           |          |            |
+	(1 row)
+
+
+	"""
+
+	def __init__(self, observed, xrefs, prefixrefs, possibleforms):
+		self.observed = observed
+		self.xrefs = xrefs.split(', ')
+		self.prefixrefs = [x for x in prefixrefs.split(', ') if x]
+		self.possibleforms = possibleforms
+		self.prefixcount = len(self.prefixrefs)
+		self.xrefcount = len(self.xrefs)
+
+	def countpossible(self):
+		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
+		thepossible = re.findall(possiblefinder, self.possibleforms)
+		return len(thepossible)
+
+	def getpossible(self):
+		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
+		thepossible = re.findall(possiblefinder, self.possibleforms)
+		listofpossibilitiesobjects = [MorphPossibilityObject(p, self.prefixcount) for p in thepossible]
+		return listofpossibilitiesobjects

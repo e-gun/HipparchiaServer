@@ -16,7 +16,7 @@ from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import depunct
 from server.formatting.wordformatting import removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.lexica.lexicalookups import browserdictionarylookup, findtotalcounts, getobservedwordprevalencedata, \
+from server.lexica.lexicalookups import returnentryhtml, findtotalcounts, getobservedwordprevalencedata, \
 	lexicalmatchesintohtml, lookformorphologymatches
 from server.listsandsession.genericlistfunctions import polytonicsort
 from server.listsandsession.sessionfunctions import justlatin, justtlg
@@ -145,17 +145,17 @@ def dictsearch(searchterm):
 		return json.dumps(r)
 
 	limit = hipparchia.config['CAPONDICTIONARYFINDS']
-	seeking = stripaccents(seeking)
+	stripped = stripaccents(seeking)
 	query = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s LIMIT {lim}'.format(d=usedictionary, c=usecolumn, lim=limit)
-	if seeking[0] == ' ' and seeking[-1] == ' ':
-		data = ('^' + seeking[1:-1] + '$',)
-	elif seeking[0] == ' ' and seeking[-1] != ' ':
-		data = ('^' + seeking[1:] + '.*?',)
-	elif seeking[0] == '^' and seeking[-1] == '$':
+	if stripped[0] == ' ' and stripped[-1] == ' ':
+		data = ('^' + stripped[1:-1] + '$',)
+	elif stripped[0] == ' ' and stripped[-1] != ' ':
+		data = ('^' + stripped[1:] + '.*?',)
+	elif stripped[0] == '^' and stripped[-1] == '$':
 		# esp if the dictionary sent this via next/previous entry
-		data = (seeking,)
+		data = (stripped,)
 	else:
-		data = ('.*?' + seeking + '.*?',)
+		data = ('.*?' + stripped + '.*?',)
 
 	dbcursor.execute(query, data)
 
@@ -167,10 +167,22 @@ def dictsearch(searchterm):
 		found = list()
 
 	if not found:
-		seeking = seeking[:-1] + '[¹²³⁴⁵⁶⁷⁸⁹]' + seeking[-1]
-		data = (seeking,)
+		variantseeker = seeking[:-1] + '[¹²³⁴⁵⁶⁷⁸⁹]' + seeking[-1]
+		data = (variantseeker,)
 		dbcursor.execute(query, data)
 		found = dbcursor.fetchall()
+
+	if not found:
+		# maybe an inflected form was requested (can happen via clicks inside of an entry)
+		morph = lookformorphologymatches(seeking, dbcursor)
+		if morph:
+			guesses = morph.getpossible()
+			firstguess = guesses[0].getbaseform()
+			stripped = stripaccents(firstguess)
+			data = ('^{s}$'.format(s=stripped),)
+			# print('lookformorphologymatches() new data=', data)
+			dbcursor.execute(query, data)
+			found = dbcursor.fetchall()
 
 	# the results should be given the polytonicsort() treatment
 	returnarray = list()
@@ -193,7 +205,7 @@ def dictsearch(searchterm):
 
 		for entry in sortedfinds:
 			count += 1
-			returnarray.append({'value': browserdictionarylookup(count, entry[0], dbcursor)})
+			returnarray.append({'value': returnentryhtml(count, entry[0], dbcursor)})
 	else:
 		returnarray.append({'value': '[nothing found]'})
 
@@ -289,7 +301,7 @@ def reverselexiconsearch(searchterm):
 		count = 0
 		for entry in entries:
 			count += 1
-			returnarray.append({'value': browserdictionarylookup(count, entry, dbcursor)})
+			returnarray.append({'value': returnentryhtml(count, entry, dbcursor)})
 	else:
 		returnarray.append({'value': '<br />[nothing found under "{skg}"]'.format(skg=seeking)})
 
