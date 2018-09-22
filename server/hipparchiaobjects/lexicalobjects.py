@@ -243,6 +243,7 @@ class dbGreekWord(dbDictionaryEntry):
 		self.cffinder()
 
 	def greekgreaterthanlessthan(self):
+		# but this is really a builder problem... [present in v.1.0 and below]
 		self.body = re.sub(r'&λτ;', r'&lt;', self.body)
 		self.body = re.sub(r'&γτ;', r'&gt;', self.body)
 

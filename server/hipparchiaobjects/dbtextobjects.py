@@ -7,7 +7,7 @@
 """
 
 import re
-from string import punctuation
+from typing import List
 
 from server import hipparchia
 from server.formatting.betacodeescapes import andsubstitutes
@@ -826,13 +826,13 @@ class dbMorphologyObject(object):
 		self.prefixcount = len(self.prefixrefs)
 		self.xrefcount = len(self.xrefs)
 
-	def countpossible(self):
+	def countpossible(self) -> int:
 		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
 		thepossible = re.findall(possiblefinder, self.possibleforms)
 		return len(thepossible)
 
-	def getpossible(self):
+	def getpossible(self) -> List[MorphPossibilityObject]:
 		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
 		thepossible = re.findall(possiblefinder, self.possibleforms)
-		listofpossibilitiesobjects = [MorphPossibilityObject(p, self.prefixcount) for p in thepossible]
+		listofpossibilitiesobjects = [MorphPossibilityObject(self.observed, p, self.prefixcount) for p in thepossible]
 		return listofpossibilitiesobjects

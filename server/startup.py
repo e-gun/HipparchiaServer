@@ -173,6 +173,8 @@ del allworks
 
 elapsed = round(time.time() - launchtime, 1)
 print(' ({e}s)'.format(e=elapsed))
+del elapsed
+del launchtime
 
 if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
 	if hipparchia.config['COLLAPSEDGENRECOUNTS'] == 'yes':

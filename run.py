@@ -37,14 +37,16 @@ if __name__ == '__main__':
 	you need to find the process that is holding the port open and kill it
 	for example
 	
-	# lsof | grep pyth | grep 5000
+	less fancy:
 	
-	python3.6 53249 hipparchia   23u    PIPE 0xfffff8017e2e5000              16384        ->0xfffff8017e2e5168
-	python3.6 77379 hipparchia   23u    PIPE 0xfffff8017e2e5000              16384        ->0xfffff8017e2e5168
-	python3.6 78871 hipparchia   23u    PIPE 0xfffff8017e2e5000              16384        ->0xfffff8017e2e5168
-	python3.6 78871 hipparchia   36u    PIPE 0xfffff8004ee15000              16384        ->0xfffff8004ee15168
-
-	# kill -15 53249 77379 78871
+		$ ps ax | grep ipparchia | grep run.py
+		$ kill -15 >>THEPID<<
+	
+	>>THEPID<< == 11980 in the following
+	
+		11980 s007  S+     0:40.40 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python /Users/erik/hipparchia_venv/HipparchiaServer/run.py
+	
+	"more fancy" requires using lsof...
 	
 	"""
 

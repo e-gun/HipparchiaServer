@@ -78,47 +78,6 @@ def formatdictionarysummary(wordentryobject) -> str:
 	return summarystring
 
 
-def formateconsolidatedgrammarentry(consolidatedentry: dict) -> str:
-	"""
-	send me hit from findbyform() in the results browser
-
-	consolidatedentry = {'count': count, 'form': wordandform[0], 'word': wordandform[1], 'transl': thetransl, 'anal': analysislist, 'xref': xref}
-
-	example:
-		 {'count': 1, 'form': 'ἀϲήμου', 'word': 'ἄϲημοϲ', 'transl': 'without mark', 'anal': ['masc/fem/neut gen sg'], 'xref': 16808356}
-
-	:param consolidatedentry:
-	:return:
-	"""
-
-	if session['debugparse'] == 'yes':
-		xrefinfo = '<code>[{x}]</code>'.format(x=consolidatedentry['xref'])
-	else:
-		xrefinfo = ''
-
-	analysislist = consolidatedentry['anal']
-
-	outputlist = list()
-	outputlist.append('<p class="obsv">({ct})&nbsp;'.format(ct=str(consolidatedentry['count'])))
-	wordandtranslation = '<span class="dictionaryform">{df}</span>'.format(df=consolidatedentry['word'])
-	if len(consolidatedentry['transl']) > 1:
-		wordandtranslation = ', '.join([wordandtranslation, consolidatedentry['transl']])
-
-	outputlist.append('<span class="dictionaryform">{df}</span> (from {wt}){x}: &nbsp;'.format(df=consolidatedentry['form'], wt=wordandtranslation, x=xrefinfo))
-	if len(analysislist) == 1:
-		outputlist.append('<br /><span class="possibility">{pos}</span>&nbsp;'.format(pos=analysislist[0]))
-	else:
-		count = 0
-		for a in analysislist:
-			count += 1
-			outputlist.append('<br />[{ct}]&nbsp;<span class="possibility">{a}</span>'.format(ct=chr(count+96), a=a))
-		outputlist.append('&nbsp;')
-
-	analysisstring = '\n'.join(outputlist)
-
-	return analysisstring
-
-
 def formatgloss(entrybody: str) -> str:
 	"""
 	glosses don't work the same as standard dictionary entries. deal with them

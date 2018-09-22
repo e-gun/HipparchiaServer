@@ -14,7 +14,7 @@ from flask import session
 
 from server import hipparchia
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
-from server.formatting.lexicaformatting import formatdictionarysummary, formateconsolidatedgrammarentry, \
+from server.formatting.lexicaformatting import formatdictionarysummary, formatconsolidatedgrammarentry, \
 	formatgloss, formatmicroentry, grabheadmaterial, insertbrowserlookups
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -73,7 +73,7 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) 
 	# the things that can confuse me
 	terminalacute = re.compile(r'[άέίόύήώ]')
 
-	matchingobject = None
+	morphobject = None
 
 	# syntax = '~' if you have to deal with '[uv]' problems, e.g.
 
@@ -87,7 +87,7 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) 
 	analysis = cursor.fetchone()
 
 	if analysis:
-		matchingobject = dbMorphologyObject(*analysis)
+		morphobject = dbMorphologyObject(*analysis)
 	elif trialnumber < maxtrials:
 		if revertword:
 			word = revertword
@@ -101,34 +101,34 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) 
 			if trialnumber == 1:
 				# elided ending? you will ask for ἀλλ, but you need to look for ἀλλ'
 				newword = word + "'"
-				matchingobject = lookformorphologymatches(newword, cursor, trialnumber, revertword=word)
+				morphobject = lookformorphologymatches(newword, cursor, trialnumber, revertword=word)
 			elif trialnumber == 2:
 				# a proper noun?
 				newword = word[0].upper() + word[1:]
-				matchingobject = lookformorphologymatches(newword, cursor, trialnumber, revertword=word)
+				morphobject = lookformorphologymatches(newword, cursor, trialnumber, revertword=word)
 			elif re.search(r'[ΐϊΰῧϋî]', word):
 				# desperate: ῥηϊδίωϲ --> ῥηιδίωϲ
 				diacritical = 'ΐϊΰῧϋî'
 				plain = 'ίιύῦυi'
 				xform = str.maketrans(diacritical, plain)
 				newword = word.translate(xform)
-				matchingobject = lookformorphologymatches(newword, cursor, trialnumber=retrywithcapitalization)
+				morphobject = lookformorphologymatches(newword, cursor, trialnumber=retrywithcapitalization)
 			elif re.search(terminalacute, word[-1]):
 				# an enclitic problem?
 				sub = stripaccents(word[-1])
 				newword = word[:-1] + sub
-				matchingobject = lookformorphologymatches(newword, cursor, trialnumber=retrywithcapitalization)
+				morphobject = lookformorphologymatches(newword, cursor, trialnumber=retrywithcapitalization)
 			elif re.search(terminalacute, word[-2]):
 				# πλακουντάριόν?
 				sub = stripaccents(word[-2])
 				newword = word[:-2] + sub + word[-1]
-				matchingobject = lookformorphologymatches(newword, cursor, trialnumber=retrywithcapitalization)
+				morphobject = lookformorphologymatches(newword, cursor, trialnumber=retrywithcapitalization)
 			else:
 				return None
 		except IndexError:
-			matchingobject = None
+			morphobject = None
 
-	return matchingobject
+	return morphobject
 
 
 def lexicalmatchesintohtml(observedform: str, morphologyobject: dbMorphologyObject, cursor) -> List[dict]:
@@ -177,9 +177,7 @@ def lexicalmatchesintohtml(observedform: str, morphologyobject: dbMorphologyObje
 		# you have to look at the full db entry for the word:
 		# the number of items in prefixrefs corresponds to the number of prefix checks you will need to make to recompose the verb
 
-		consolidatedentry = {'count': count, 'form': observedform, 'word': p.entry, 'transl': p.gettranslation(),
-		                     'anal': p.getanalysislist(), 'xref': p.xref}
-		returnarray.append({'value': formateconsolidatedgrammarentry(consolidatedentry)})
+		returnarray.append({'value': p.formatconsolidatedgrammarentry(count)})
 
 	# the next will trim the items to check by inducing key collisions
 	# p.getbaseform(), p.entry, p.xref: judicium jūdiciūm, judicium 42397893
