@@ -198,7 +198,7 @@ class MorphPossibilityObject(object):
 
 		analysisstring = '\n'.join(outputlist)
 
-		print('analysisstring\n', analysisstring)
+		# print('analysisstring\n', analysisstring)
 
 		return analysisstring
 	

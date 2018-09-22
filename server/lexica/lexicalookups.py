@@ -14,14 +14,14 @@ from flask import session
 
 from server import hipparchia
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
-from server.formatting.lexicaformatting import formatdictionarysummary, formatconsolidatedgrammarentry, \
+from server.formatting.lexicaformatting import formatdictionarysummary, \
 	formatgloss, formatmicroentry, grabheadmaterial, insertbrowserlookups
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject
 from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbLatinWord
 from server.hipparchiaobjects.morphologyobjects import dbLemmaObject
-from server.hipparchiaobjects.wordcountobjects import dbWordCountObject, dbHeadwordObject
-from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject
+from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
 
 def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) -> dbMorphologyObject:
