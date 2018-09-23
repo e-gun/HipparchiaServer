@@ -10,7 +10,7 @@ import re
 from flask import session
 
 from server import hipparchia
-from server.formatting.wordformatting import gkattemptelision, latattemptelision
+from server.formatting.wordformatting import gkattemptelision, latattemptelision, minimumgreek
 
 
 class MorphPossibilityObject(object):
@@ -45,7 +45,6 @@ class MorphPossibilityObject(object):
 		return xreflist
 
 	def amgreek(self):
-		minimumgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
 		if re.search(minimumgreek, self.entry):
 			return True
 		else:

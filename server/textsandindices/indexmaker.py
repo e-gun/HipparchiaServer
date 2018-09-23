@@ -154,6 +154,15 @@ def generatesortedoutputbyheadword(completeindexdict, onework, alphabetical, act
 	activepoll.statusis('Remapping entries')
 	activepoll.allworkis(-1)
 
+	if hipparchia.config['DELETEUNACCENTEDGREEKFROMINDEX'] == 'yes':
+		hasaccent = re.compile(r'[ἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
+		accenteddict = {k: augmentedindexdict[k] for k in augmentedindexdict.keys() if re.search(hasaccent, k)}
+		latindict = {k: augmentedindexdict[k] for k in augmentedindexdict.keys() if re.search(r'[a-z]', k)}
+		augmentedindexdict = {**accenteddict, **latindict}
+		if hipparchia.config['DROPLATININAGREEKINDEX'] == 'yes':
+			if len(latindict.keys()) * 5 < len(accenteddict.keys()):
+				augmentedindexdict = accenteddict
+
 	if session['indexskipsknownwords'] == 'yes':
 		# 'baseforms' is either False or a list
 		augmentedindexdict = {k: augmentedindexdict[k] for k in augmentedindexdict.keys() if not augmentedindexdict[k]['baseforms']}

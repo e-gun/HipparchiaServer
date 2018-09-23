@@ -18,7 +18,8 @@ from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
-from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, elidedextrapunct, extrapunct, removegravity, stripaccents, tidyupterm
+from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, elidedextrapunct, extrapunct, \
+	minimumgreek, removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.searching.searchdispatching import searchdispatcher
@@ -314,7 +315,6 @@ def findwordvectorset(listofwordclusters: list) -> set:
 	# flatten
 	allwords = [item for sublist in allwords for item in sublist]
 
-	minimumgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
 	greekwords = [w for w in allwords if re.search(minimumgreek, w)]
 
 	trans = buildhipparchiatranstable()

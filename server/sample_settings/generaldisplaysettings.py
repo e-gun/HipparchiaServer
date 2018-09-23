@@ -72,3 +72,13 @@ SHOWLINENUMBERSEVERY = 10
 MINIMUMBROWSERWIDTH = 100
 SUPPRESSLONGREQUESTMESSAGE = 'no'
 ENOUGHALREADYWITHTHECOPYRIGHTNOTICE = 'no'
+
+
+# DELETEUNACCENTEDGREEKFROMINDEX prevents fragmentary words in inscriptions, etc from being indexed
+#
+# DROPLATININAGREEKINDEX will drop Latin words from an index if they are far outnumbered by Greek
+#   words. In which case the latin words are almost all editorial comments: 'deest', etc.
+#
+
+DELETEUNACCENTEDGREEKFROMINDEX = 'yes'
+DROPLATININAGREEKINDEX = 'yes'
