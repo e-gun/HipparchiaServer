@@ -106,6 +106,10 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) 
 				# a proper noun?
 				newword = word[0].upper() + word[1:]
 				morphobject = lookformorphologymatches(newword, cursor, trialnumber, revertword=word)
+			elif re.search(r'\'$', word):
+				# the last word in a greek quotation might have a 'close quote' that was mistaken for an elision
+				newword = re.sub(r'\'', '', word)
+				morphobject = lookformorphologymatches(newword, cursor, trialnumber)
 			elif re.search(r'[ΐϊΰῧϋî]', word):
 				# desperate: ῥηϊδίωϲ --> ῥηιδίωϲ
 				diacritical = 'ΐϊΰῧϋî'

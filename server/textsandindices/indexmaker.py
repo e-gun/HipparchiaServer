@@ -14,7 +14,7 @@ from flask import session
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import grabbundlesoflines, makeablankline
-from server.formatting.wordformatting import elidedextrapunct, tidyupterm
+from server.formatting.wordformatting import elidedextrapunct, extrapunct, minimumgreek, tidyupterm
 from server.listsandsession.genericlistfunctions import polytonicsort
 from server.textsandindices.textandindiceshelperfunctions import dictmerger, getrequiredmorphobjects
 from server.threading.mpthreadcount import setthreadcount
@@ -379,7 +379,8 @@ def linesintoindex(lineobjects, activepoll):
 	# note the tricky combining marks like " ͡ " which can be hard to spot since they float over another special character
 	# τ’ and δ’ and the rest are a problem
 
-	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + elidedextrapunct)))
+	greekpunct = re.compile('[{s}]'.format(s=re.escape(punctuation + elidedextrapunct)))
+	latinpunct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
 
 	defaultwork = lineobjects[0].wkuinversalid
 
@@ -410,11 +411,14 @@ def linesintoindex(lineobjects, activepoll):
 		if line.index:
 			# don't use set() - that will yield undercounts
 			polytonicwords = line.wordlist('polytonic')
-			polytonicwords = [tidyupterm(w, punct).lower() for w in polytonicwords]
+			polytonicgreekwords = [tidyupterm(w, greekpunct).lower() for w in polytonicwords if re.search(minimumgreek, w)]
+			polytoniclatinwords = [tidyupterm(w, latinpunct).lower() for w in polytonicwords if not re.search(minimumgreek, w)]
+			polytonicwords = polytonicgreekwords + polytoniclatinwords
 			# need to figure out how to grab τ’ and δ’ and the rest
+			# but you can't decide that me is elided in a line like 'inquam, ‘teque laudo. sed quando?’ ‘nihil ad me’ inquit ‘de'
 			unformattedwords = set(line.wordlist('marked_up_line'))
-			words = [w for w in polytonicwords if w+'’' not in unformattedwords]
-			elisions = [w+"'" for w in polytonicwords if w+'’' in unformattedwords]
+			words = [w for w in polytonicwords if w+'’' not in unformattedwords or not re.search(minimumgreek, w)]
+			elisions = [w+"'" for w in polytonicwords if w+'’' in unformattedwords and re.search(minimumgreek, w)]
 			words.extend(elisions)
 			words = [w.translate(gravetoacute) for w in words]
 			for w in words:
