@@ -157,14 +157,18 @@ def findbyform(observedword):
 	# the next makes sense only in the context of pointedly invalid input
 	w = depunct(observedword)
 	w = tidyupterm(w)
+
 	# python seems to know how to do this with greek...
 	w = w.lower()
 	retainedgravity = w
 	cleanedword = removegravity(retainedgravity)
+
 	# index clicks will send you things like 'αὖ²'
 	cleanedword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]', '', cleanedword)
-	cleanedword = re.sub(r'[uv]', r'[uv]', cleanedword)
-	cleanedword = re.sub(r'[ij]', r'[ij]', cleanedword)
+
+	# the search syntax is '=' and not '~', so the next should be avoided unless a lot of refactoring will happen
+	# cleanedword = re.sub(r'[uv]', r'[uv]', cleanedword)
+	# cleanedword = re.sub(r'[ij]', r'[ij]', cleanedword)
 
 	try:
 		cleanedword[0]

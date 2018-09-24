@@ -76,6 +76,7 @@ def lookformorphologymatches(word: str, cursor, trialnumber=0, revertword=None) 
 	morphobject = None
 
 	# syntax = '~' if you have to deal with '[uv]' problems, e.g.
+	# but that opens up a whole new can of worms
 
 	query = 'SELECT * FROM {d}_morphology WHERE observed_form = %s'.format(d=usedictionary)
 	data = (word,)
