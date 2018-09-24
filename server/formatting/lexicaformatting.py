@@ -85,7 +85,6 @@ def formatgloss(entrybody: str) -> str:
 	:return:
 	"""
 
-	print('formatgloss() entrybody', entrybody)
 	glosshtml = list()
 	
 	soup = BeautifulSoup(entrybody, 'html.parser')
@@ -94,8 +93,6 @@ def formatgloss(entrybody: str) -> str:
 	
 	senses[:] = [value.string for value in senses]
 	sources[:] = [value.string for value in sources]
-
-	print('sources', sources)
 
 	if sources:
 		glosshtml.append('<span class="highlight">Reported by:</span><br />')

@@ -247,6 +247,12 @@ class dbGreekWord(dbDictionaryEntry):
 		self.body = re.sub(r'&λτ;', r'&lt;', self.body)
 		self.body = re.sub(r'&γτ;', r'&gt;', self.body)
 
+	def _greekirregularvowelquantities(self):
+		# also a builder problem: δαμευέϲϲθο_ vs δαμευέϲϲθο̄
+		# same story with ε for η in dialects/inscriptions
+		# but note that it would take a while to get all of the accent possibilities in there
+		pass
+
 	def _greekxmltagwrapper(self, tag):
 		"""
 
@@ -279,14 +285,19 @@ class dbGreekWord(dbDictionaryEntry):
 		self.body = re.sub(fingerprint, replacement, self.body)
 
 	def _greekequivalentformfinder(self):
-		fingerprint = r'(used for <foreign lang="greek">)(\w+)(</foreign>)'
+		fingerprints = [r'(used for <foreign lang="greek">)(\w+)(</foreign>)',
+		                r'(Lat. <tr opt="n">)(\w+)(</tr>)']
 		replacement = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
-		self.body = re.sub(fingerprint, replacement, self.body)
+		for f in fingerprints:
+			self.body = re.sub(f, replacement, self.body)
 
 	def _cffinder(self):
-		fingerprint = r'(cf. <foreign lang="greek">)(κνημόω)(</foreign>)'
+		# such as: <foreign lang="greek">εὐθύϲ</foreign> (q. v.).
+		fingerprints = [r'(cf. <foreign lang="greek">)(\w+)(</foreign>)',
+		                r'(<foreign lang="greek">)(\w+)(</foreign> \(q\. v\.\))']
 		replacement = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
-		self.body = re.sub(fingerprint, replacement, self.body)
+		for f in fingerprints:
+			self.body = re.sub(f, replacement, self.body)
 
 
 class dbLatinWord(dbDictionaryEntry):
