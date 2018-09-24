@@ -13,6 +13,11 @@ from io import BytesIO
 #   RuntimeError: main thread is not in main loop
 #   Tcl_AsyncDelete: async handler deleted by the wrong thread
 
+# you also want a noninteractive backend; allegedly 'agg' is one, but that behavior changed with
+# matplotlib-2.2.3 --> 3.0.0
+# now it launches IPython even though you don't want it...
+#
+
 try:
 	import matplotlib
 	matplotlib.use('Agg')

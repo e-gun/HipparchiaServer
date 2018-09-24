@@ -22,96 +22,6 @@ from server.listsandsession.genericlistfunctions import polytonicsort
 from server.listsandsession.sessionfunctions import justlatin, justtlg
 
 
-@hipparchia.route('/parse/<observedword>')
-def findbyform(observedword):
-	"""
-	this function sets of a chain of other functions
-	find dictionary form
-	find the other possible forms
-	look up the dictionary form
-	return a formatted set of info
-	:return:
-	"""
-
-	dbconnection = ConnectionObject()
-	dbcursor = dbconnection.cursor()
-
-	# the next is pointless because: 'po/lemon' will generate a URL '/parse/po/lemon'
-	# that will 404 before you can get to replacegreekbetacode()
-	# this is a bug in the interaction between Flask and the JS
-
-	# if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
-	# 	observedword = replacegreekbetacode(observedword.upper())
-
-	# the next makes sense only in the context of pointedly invalid input
-	w = depunct(observedword)
-	w = tidyupterm(w)
-	# python seems to know how to do this with greek...
-	w = w.lower()
-	retainedgravity = w
-	cleanedword = removegravity(retainedgravity)
-	# index clicks will send you things like 'αὖ²'
-	cleanedword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]', '', cleanedword)
-
-	try:
-		cleanedword[0]
-	except IndexError:
-		returnarray = [{'value': '[empty search: <span class="emph">{w}</span> was sanitized into nothingness]'.format(
-			w=observedword)}]
-		return json.dumps(returnarray)
-
-	isgreek = True
-	if re.search(r'[a-z]', cleanedword[0]):
-		cleanedword = stripaccents(cleanedword)
-		isgreek = False
-
-	cleanedword = cleanedword.lower()
-	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
-	returnarray = list()
-
-	morphologyobject = lookformorphologymatches(cleanedword, dbcursor)
-	# print('findbyform() mm',morphologyobject.getpossible()[0].transandanal)
-	# φέρεται --> morphologymatches [('<possibility_1>', '1', 'φέρω', '122883104', '<transl>fero</transl><analysis>pres ind mp 3rd sg</analysis>')]
-
-	if morphologyobject:
-		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
-			returnarray.append(getobservedwordprevalencedata(cleanedword))
-		returnarray += lexicalmatchesintohtml(cleanedword, morphologyobject, dbcursor)
-	else:
-		if isgreek and not session['available']['greek_morphology']:
-			returnarray = [
-				{'value': '<br />[the Greek morphology data has not been installed]'.format(cw=cleanedword)},
-				{'entries': '[not found]'}
-			]
-		elif not isgreek and not session['available']['latin_morphology']:
-			returnarray = [
-				{'value': '<br />[the Latin morphology data has not been installed]'.format(cw=cleanedword)},
-				{'entries': '[not found]'}
-			]
-		else:
-			returnarray = [
-				{'value':
-					 '<br />[could not find a match for <span class="emph">{cw}</span> in the morphology table]'.format(
-						 cw=cleanedword)},
-				{'entries': '[not found]'}
-			]
-
-		prev = getobservedwordprevalencedata(cleanedword)
-		if not prev:
-			prev = getobservedwordprevalencedata(retainedgravity)
-		if not prev:
-			prev = {'value': '<br /><br />no prevalence data for {w}'.format(w=retainedgravity)}
-		returnarray.append(prev)
-
-	returnarray = [r for r in returnarray if r]
-	returnarray = [{'observed': cleanedword}] + returnarray
-	returnarray = json.dumps(returnarray)
-
-	dbconnection.connectioncleanup()
-
-	return returnarray
-
-
 @hipparchia.route('/dictsearch/<searchterm>')
 def dictsearch(searchterm):
 	"""
@@ -131,9 +41,14 @@ def dictsearch(searchterm):
 	seeking = depunct(searchterm, allowedpunct)
 	seeking = seeking.lower()
 	seeking = re.sub('[σς]', 'ϲ', seeking)
-	seeking = re.sub('v', '[uvUV]', seeking)
+	stripped = stripaccents(seeking)
 
-	if re.search(r'[a-z]', seeking):
+	# don't turn 'injurius' into '[iiII]n[iiII][uuVV]r[iiII][uuVV]s'
+	# that will happen if you call stripaccents() prematurely
+	stripped = re.sub(r'[uv]', '[uvUV]', stripped)
+	stripped = re.sub(r'[ij]', '[ijIJ]', stripped)
+
+	if re.search(r'[a-z]', stripped):
 		usedictionary = 'latin'
 		usecolumn = 'entry_name'
 	else:
@@ -145,7 +60,7 @@ def dictsearch(searchterm):
 		return json.dumps(r)
 
 	limit = hipparchia.config['CAPONDICTIONARYFINDS']
-	stripped = stripaccents(seeking)
+
 	query = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s LIMIT {lim}'.format(d=usedictionary, c=usecolumn, lim=limit)
 	if stripped[0] == ' ' and stripped[-1] == ' ':
 		data = ('^' + stripped[1:-1] + '$',)
@@ -156,6 +71,8 @@ def dictsearch(searchterm):
 		data = (stripped,)
 	else:
 		data = ('.*?' + stripped + '.*?',)
+
+	# print('query, data\n\t{q}\n\t{d}\n'.format(q=query, d=data))
 
 	dbcursor.execute(query, data)
 
@@ -209,6 +126,97 @@ def dictsearch(searchterm):
 	else:
 		returnarray.append({'value': '[nothing found]'})
 
+	returnarray = json.dumps(returnarray)
+
+	dbconnection.connectioncleanup()
+
+	return returnarray
+
+
+@hipparchia.route('/parse/<observedword>')
+def findbyform(observedword):
+	"""
+	this function sets of a chain of other functions
+	find dictionary form
+	find the other possible forms
+	look up the dictionary form
+	return a formatted set of info
+	:return:
+	"""
+
+	dbconnection = ConnectionObject()
+	dbcursor = dbconnection.cursor()
+
+	# the next is pointless because: 'po/lemon' will generate a URL '/parse/po/lemon'
+	# that will 404 before you can get to replacegreekbetacode()
+	# this is a bug in the interaction between Flask and the JS
+
+	# if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
+	# 	observedword = replacegreekbetacode(observedword.upper())
+
+	# the next makes sense only in the context of pointedly invalid input
+	w = depunct(observedword)
+	w = tidyupterm(w)
+	# python seems to know how to do this with greek...
+	w = w.lower()
+	retainedgravity = w
+	cleanedword = removegravity(retainedgravity)
+	# index clicks will send you things like 'αὖ²'
+	cleanedword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]', '', cleanedword)
+	cleanedword = re.sub(r'[uv]', r'[uv]', cleanedword)
+	cleanedword = re.sub(r'[ij]', r'[ij]', cleanedword)
+
+	try:
+		cleanedword[0]
+	except IndexError:
+		returnarray = [{'value': '[empty search: <span class="emph">{w}</span> was sanitized into nothingness]'.format(
+			w=observedword)}]
+		return json.dumps(returnarray)
+
+	isgreek = True
+	if re.search(r'[a-z]', cleanedword[0]):
+		cleanedword = stripaccents(cleanedword)
+		isgreek = False
+
+	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
+	returnarray = list()
+
+	morphologyobject = lookformorphologymatches(cleanedword, dbcursor)
+	# print('findbyform() mm',morphologyobject.getpossible()[0].transandanal)
+	# φέρεται --> morphologymatches [('<possibility_1>', '1', 'φέρω', '122883104', '<transl>fero</transl><analysis>pres ind mp 3rd sg</analysis>')]
+
+	if morphologyobject:
+		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
+			returnarray.append(getobservedwordprevalencedata(cleanedword))
+		returnarray += lexicalmatchesintohtml(cleanedword, morphologyobject, dbcursor)
+	else:
+		if isgreek and not session['available']['greek_morphology']:
+			returnarray = [
+				{'value': '<br />[the Greek morphology data has not been installed]'.format(cw=cleanedword)},
+				{'entries': '[not found]'}
+			]
+		elif not isgreek and not session['available']['latin_morphology']:
+			returnarray = [
+				{'value': '<br />[the Latin morphology data has not been installed]'.format(cw=cleanedword)},
+				{'entries': '[not found]'}
+			]
+		else:
+			returnarray = [
+				{'value':
+					 '<br />[could not find a match for <span class="emph">{cw}</span> in the morphology table]'.format(
+						 cw=cleanedword)},
+				{'entries': '[not found]'}
+			]
+
+		prev = getobservedwordprevalencedata(cleanedword)
+		if not prev:
+			prev = getobservedwordprevalencedata(retainedgravity)
+		if not prev:
+			prev = {'value': '<br /><br />no prevalence data for {w}'.format(w=retainedgravity)}
+		returnarray.append(prev)
+
+	returnarray = [r for r in returnarray if r]
+	returnarray = [{'observed': cleanedword}] + returnarray
 	returnarray = json.dumps(returnarray)
 
 	dbconnection.connectioncleanup()

@@ -235,19 +235,19 @@ class dbGreekWord(dbDictionaryEntry):
 
 	def runbodyxrefsuite(self):
 		# modify self.body to add clicks to "cf" words, etc
-		self.greekgreaterthanlessthan()
-		self.greekxmltagwrapper('ref')
-		self.greekxmltagwrapper('etym')
-		self.greeksvfinder()
-		self.greekequivalentformfinder()
-		self.cffinder()
+		self._greekgreaterthanlessthan()
+		self._greekxmltagwrapper('ref')
+		self._greekxmltagwrapper('etym')
+		self._greeksvfinder()
+		self._greekequivalentformfinder()
+		self._cffinder()
 
-	def greekgreaterthanlessthan(self):
+	def _greekgreaterthanlessthan(self):
 		# but this is really a builder problem... [present in v.1.0 and below]
 		self.body = re.sub(r'&λτ;', r'&lt;', self.body)
 		self.body = re.sub(r'&γτ;', r'&gt;', self.body)
 
-	def greekxmltagwrapper(self, tag):
+	def _greekxmltagwrapper(self, tag):
 		"""
 
 		sometimes you have "<tag>WORD</tag>" and sometimes you have "<tag>WORD.</tag>"
@@ -273,17 +273,17 @@ class dbGreekWord(dbDictionaryEntry):
 
 		self.body = re.sub(markupfinder, r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3', self.body)
 
-	def greeksvfinder(self):
+	def _greeksvfinder(self):
 		fingerprint = r'(<abbr>v\.</abbr> sub <foreign lang="greek">)(\w+)(</foreign>)'
 		replacement = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
 		self.body = re.sub(fingerprint, replacement, self.body)
 
-	def greekequivalentformfinder(self):
+	def _greekequivalentformfinder(self):
 		fingerprint = r'(used for <foreign lang="greek">)(\w+)(</foreign>)'
 		replacement = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
 		self.body = re.sub(fingerprint, replacement, self.body)
 
-	def cffinder(self):
+	def _cffinder(self):
 		fingerprint = r'(cf. <foreign lang="greek">)(κνημόω)(</foreign>)'
 		replacement = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
 		self.body = re.sub(fingerprint, replacement, self.body)
@@ -314,10 +314,11 @@ class dbLatinWord(dbDictionaryEntry):
 
 	def runbodyxrefsuite(self):
 		# modify self.body to add clicks to "cf" words, etc
-		self.latinetymologyfinder()
-		self.latinsubvidefinder()
+		self._latinetymologyfinder()
+		self._latinsubvidefinder()
+		self._latinsynonymfinder()
 
-	def latinsubvidefinder(self):
+	def _latinsubvidefinder(self):
 		"""
 
 		make "balneum" clickable if you are told to "v. balneum"
@@ -341,6 +342,7 @@ class dbLatinWord(dbDictionaryEntry):
 		xreffinder = list()
 		xreffinder.append(re.compile(r'(v\. )(\w+)( <sense)'))
 		xreffinder.append(re.compile(r'(v\. )(\w+)(\.)$'))
+		xreffinder.append(re.compile(r'(\(cf\. )(\w+)(\))'))
 		xreffinder.append(re.compile(r'(<etym opt="\w">\d\. )(\w+)(, q\. v\.)'))
 		xreffinder.append(re.compile(r'(from )(\w+)(</etym>)'))
 		# xreffinder.append(re.compile(r'<lbl opt="n">(s\.v\.)</lbl> <ref targOrder="U" lang="greek">(\w+)</ref>()'))
@@ -355,7 +357,27 @@ class dbLatinWord(dbDictionaryEntry):
 
 		self.body = re.sub(findandeaccentuate, lambda x: self.entrywordcleaner(x.group(1), qv), self.body)
 
-	def latinetymologyfinder(self):
+	def _latinsynonymfinder(self):
+		fingerprint = r'(\(syn\.:{0,} )(.*?)([);])'
+		self.body = re.sub(fingerprint, lambda x: self._entrylistsplitter(x), self.body)
+
+	@staticmethod
+	def _entrylistsplitter(matchgroup):
+		entrytemplate = r'<dictionaryentry id="{clean}">{dirty}</dictionaryentry>'
+		head = matchgroup.group(1)
+		tail = matchgroup.group(3)
+
+		synonymns = matchgroup.group(2)
+		synonymns = synonymns.split(', ')
+
+		substitutes = [entrytemplate.format(clean=stripaccents(s), dirty=s) for s in synonymns]
+		substitutes = ', '.join(substitutes)
+
+		newstring = head + substitutes + tail
+
+		return newstring
+
+	def _latinetymologyfinder(self):
 		"""
 
 		make "balneum" clickable if you are told a word comes from it.
