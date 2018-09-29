@@ -119,20 +119,26 @@ class dbDictionaryEntry(object):
 		return authorlist
 
 	def generatesensessummary(self) -> List:
-		listofsenses = self.soup.find_all(self.translationlabel)
-		exclusions = ['ab', 'de', 'ex', 'ut', 'nihil', 'quam', 'quid']
-		try:
-			listofsenses = [s.string for s in listofsenses]
-			listofsenses = [s for s in listofsenses if '.' not in s]
-			listofsenses = [s for s in listofsenses if s not in exclusions]
-		except:
-			listofsenses = list()
+		### this parsing code got moved into the builder ###
 
-		# so 'go' and 'go,' are not both on the list
-		depunct = '[{p}]$'.format(p=re.escape(punctuation))
-		listofsenses = [re.sub(depunct, '', s) for s in listofsenses]
-		listofsenses = [re.sub(r'^To', 'to', s) for s in listofsenses]
-		listofsenses = list(set(listofsenses))
+		# listofsenses = self.soup.find_all(self.translationlabel)
+		# exclusions = ['ab', 'de', 'ex', 'ut', 'nihil', 'quam', 'quid']
+		# try:
+		# 	listofsenses = [s.string for s in listofsenses]
+		# 	listofsenses = [s for s in listofsenses if '.' not in s]
+		# 	listofsenses = [s for s in listofsenses if s not in exclusions]
+		# except:
+		# 	listofsenses = list()
+		#
+		# # so 'go' and 'go,' are not both on the list
+		# depunct = '[{p}]$'.format(p=re.escape(punctuation))
+		# listofsenses = [re.sub(depunct, '', s) for s in listofsenses]
+		# listofsenses = [re.sub(r'^To', 'to', s) for s in listofsenses]
+		# listofsenses = list(set(listofsenses))
+		# listofsenses.sort()
+
+		listofsenses = self.translations
+		listofsenses = [s[0].lower() + s[1:] for s in listofsenses if len(s) > 1]
 		listofsenses.sort()
 
 		if session['sensesummary'] == 'yes':
@@ -370,8 +376,11 @@ class dbLatinWord(dbDictionaryEntry):
 		self.body = re.sub(findandeaccentuate, lambda x: self.entrywordcleaner(x.group(1), qv), self.body)
 
 	def _latinsynonymfinder(self):
-		fingerprint = r'(\(syn\.:{0,} )(.*?)([);])'
-		self.body = re.sub(fingerprint, lambda x: self._entrylistsplitter(x), self.body)
+		fingerprints = [r'(\(syn\.:{0,} )(.*?)([);])']
+		# the next is dangerous because cf. might be a word or a passage: "dux" or "Pliny, Pan 12,1"
+		# r'(\(cf\.:{0,} )(.*?)([);])']
+		for f in fingerprints:
+			self.body = re.sub(f, lambda x: self._entrylistsplitter(x), self.body)
 
 	@staticmethod
 	def _entrylistsplitter(matchgroup):
@@ -400,6 +409,8 @@ class dbLatinWord(dbDictionaryEntry):
 
 			<gen opt="n">m.</gen>, = βούβαλοϲ,
 
+			i. q. εἴδωγον)   [nb: this example has a typo in the original data: εἴδωλον is meant]
+
 		note problem with:
 
 			<etym opt="n">Spanish</etym>
@@ -409,8 +420,9 @@ class dbLatinWord(dbDictionaryEntry):
 
 		xreffinder = list()
 		xreffinder.append(re.compile(r'(<etym opt=".">)(\w+)(</etym>)'))
-		xreffinder.append(re.compile(r'(= )(\w+)(,)'))
+		xreffinder.append(re.compile(r'(= )(\w+)([, ])'))
 		xreffinder.append(re.compile(r'(cf\. Gr\. )(\w+)(,)'))
+		xreffinder.append(re.compile(r'( i\. q\. )(\w+)(\))'))
 
 		sv = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
 		for x in xreffinder:

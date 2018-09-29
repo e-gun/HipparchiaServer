@@ -23,13 +23,9 @@ def grabheadmaterial(fullentry: str) -> str:
 	head = re.search(heading, fullentry)
 
 	try:
-		return head.group(0)
-	except:
-		try:
-			return ''
-		except:
-			print('failed to grabheadmaterial()\n\t', fullentry)
-			return ''
+		return head.group(1)
+	except AttributeError:
+		return str()
 
 
 def formatdictionarysummary(wordentryobject) -> str:
@@ -283,5 +279,3 @@ def dbquickfixes(listofnames: list) -> Dict[str, str]:
 			substitutes[item] = hipparchiadb+db.group(2)
 
 	return substitutes
-
-
