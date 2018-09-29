@@ -135,6 +135,9 @@ def textmaker():
 	:return:
 	"""
 
+	# make sure that there is a session so as to avoid throwing an exception
+	sessionvariables()
+
 	dbconnection = ConnectionObject('autocommit')
 	dbcursor = dbconnection.cursor()
 

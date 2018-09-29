@@ -16,10 +16,11 @@ from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import depunct
 from server.formatting.wordformatting import removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.lexica.lexicalookups import returnentryhtml, findtotalcounts, getobservedwordprevalencedata, \
-	lexicalmatchesintohtml, lookformorphologymatches
+from server.lexica.lexicalookups import findtotalcounts, getobservedwordprevalencedata, lexicalmatchesintohtml, \
+	lookformorphologymatches, returnentryhtml
 from server.listsandsession.genericlistfunctions import polytonicsort
 from server.listsandsession.sessionfunctions import justlatin, justtlg
+from server.listsandsession.sessionfunctions import sessionvariables
 
 
 @hipparchia.route('/dictsearch/<searchterm>')
@@ -30,6 +31,9 @@ def dictsearch(searchterm):
 	json packing
 	:return:
 	"""
+
+	# make sure that there is a session so as to avoid throwing an exception
+	sessionvariables()
 
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
@@ -144,6 +148,9 @@ def findbyform(observedword):
 	:return:
 	"""
 
+	# make sure that there is a session so as to avoid throwing an exception
+	sessionvariables()
+
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
@@ -239,6 +246,9 @@ def reverselexiconsearch(searchterm):
 
 	:return:
 	"""
+
+	# make sure that there is a session so as to avoid throwing an exception
+	sessionvariables()
 
 	dbconnection = ConnectionObject()
 	dbconnection.setautocommit()

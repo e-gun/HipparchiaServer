@@ -8,15 +8,14 @@
 
 import json
 
-from flask import session
-
 from server import hipparchia
-from server.browsing.browserfunctions import findlinenumberfromlocus, buildbrowseroutputobject
+from server.browsing.browserfunctions import buildbrowseroutputobject, findlinenumberfromlocus
 from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
 from server.formatting.lexicaformatting import dbquickfixes
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.listsandsession.sessionfunctions import sessionvariables
 from server.startup import authordict, workdict
 
 
@@ -33,6 +32,9 @@ def grabtextforbrowsing(locus):
 
 	:return:
 	"""
+
+	# make sure that there is a session so as to avoid throwing an exception
+	sessionvariables()
 
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
