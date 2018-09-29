@@ -15,7 +15,7 @@ from server.formatting.lexicaformatting import dbquickfixes
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.listsandsession.sessionfunctions import sessionvariables
+from server.listsandsession.sessionfunctions import probeforsessionvariables
 from server.startup import authordict, workdict
 
 
@@ -33,8 +33,7 @@ def grabtextforbrowsing(locus):
 	:return:
 	"""
 
-	# make sure that there is a session so as to avoid throwing an exception
-	sessionvariables()
+	probeforsessionvariables()
 
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()

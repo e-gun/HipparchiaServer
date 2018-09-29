@@ -15,7 +15,7 @@ from flask import render_template, send_file, session
 from server import hipparchia
 from server.dbsupport.miscdbfunctions import versionchecking
 from server.formatting.vectorformatting import vectorhtmlforfrontpage
-from server.listsandsession.sessionfunctions import sessionvariables
+from server.listsandsession.sessionfunctions import probeforsessionvariables
 from server.startup import listmapper
 
 
@@ -29,8 +29,7 @@ def frontpage():
 	:return:
 	"""
 
-	# make sure that there is a session so as to avoid throwing an exception
-	sessionvariables()
+	probeforsessionvariables()
 
 	expectedsqltemplateversion = 2242018
 	stylesheet = hipparchia.config['CSSSTYLESHEET']

@@ -19,7 +19,7 @@ from server.formatting.wordformatting import extrapunct, removegravity, minimumg
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.lexica.lexicalookups import findcountsviawordcountstable
 from server.listsandsession.sessionfunctions import justtlg
-from server.listsandsession.sessionfunctions import sessionvariables
+from server.listsandsession.sessionfunctions import probeforsessionvariables
 from server.startup import lemmatadict
 
 
@@ -378,7 +378,7 @@ def buildsearchobject(searchid: str, therequest: request, thesession: session) -
 	if not searchid:
 		searchid = str(int(time.time()))
 
-	sessionvariables()
+	probeforsessionvariables()
 
 	# a search can take 30s or more and the user might alter the session while the search is running
 	# by toggling onehit, etc that can be a problem, so freeze the values now and rely on this instead

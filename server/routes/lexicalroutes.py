@@ -20,7 +20,7 @@ from server.lexica.lexicalookups import findtotalcounts, getobservedwordprevalen
 	lookformorphologymatches, returnentryhtml
 from server.listsandsession.genericlistfunctions import polytonicsort
 from server.listsandsession.sessionfunctions import justlatin, justtlg
-from server.listsandsession.sessionfunctions import sessionvariables
+from server.listsandsession.sessionfunctions import probeforsessionvariables
 
 
 @hipparchia.route('/dictsearch/<searchterm>')
@@ -32,8 +32,7 @@ def dictsearch(searchterm):
 	:return:
 	"""
 
-	# make sure that there is a session so as to avoid throwing an exception
-	sessionvariables()
+	probeforsessionvariables()
 
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
@@ -148,8 +147,7 @@ def findbyform(observedword):
 	:return:
 	"""
 
-	# make sure that there is a session so as to avoid throwing an exception
-	sessionvariables()
+	probeforsessionvariables()
 
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
@@ -247,8 +245,7 @@ def reverselexiconsearch(searchterm):
 	:return:
 	"""
 
-	# make sure that there is a session so as to avoid throwing an exception
-	sessionvariables()
+	probeforsessionvariables()
 
 	dbconnection = ConnectionObject()
 	dbconnection.setautocommit()

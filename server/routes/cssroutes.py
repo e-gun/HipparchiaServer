@@ -11,7 +11,7 @@ import re
 from flask import make_response, session
 
 from server import hipparchia
-from server.listsandsession.sessionfunctions import sessionvariables
+from server.listsandsession.sessionfunctions import probeforsessionvariables
 
 
 @hipparchia.route('/css/<cssrequest>', methods=['GET'])
@@ -23,8 +23,7 @@ def loadcssfile(cssrequest):
 	:return:
 	"""
 
-	# make sure we still have a session: cookie killers are out there
-	sessionvariables()
+	probeforsessionvariables()
 
 	# extremely unsafe to allow user to supply a path
 

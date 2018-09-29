@@ -18,7 +18,7 @@ from server.formatting.bibliographicformatting import formatauthinfo, formatauth
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.listsandsession.searchlistmanagement import compilesearchlist, sortsearchlist
-from server.listsandsession.sessionfunctions import modifysessionselections, modifysessionvar, parsejscookie
+from server.listsandsession.sessionfunctions import modifysessionselections, modifysessionvariable, parsejscookie
 try:
 	from server.semanticvectors.vectorgraphing import fetchvectorgraph
 except ImportError:
@@ -71,7 +71,7 @@ def cookieintosession(cookienum):
 	cookiedict = parsejscookie(thecookie)
 
 	for key, value in cookiedict.items():
-		modifysessionvar(key, value)
+		modifysessionvariable(key, value)
 
 	# you need a master list out of authorgenresdict = { 'gk': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }
 

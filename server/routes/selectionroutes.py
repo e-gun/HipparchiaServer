@@ -14,9 +14,9 @@ from flask import request, session
 from server import hipparchia
 from server.formatting.wordformatting import depunct
 from server.listsandsession.genericlistfunctions import dropdupes, tidyuplist
-from server.listsandsession.sessionfunctions import modifysessionvar, rationalizeselections, returnactivelist, \
+from server.listsandsession.sessionfunctions import modifysessionvariable, rationalizeselections, returnactivelist, \
 	selectionisactive, sessionselectionsashtml
-from server.listsandsession.sessionfunctions import sessionvariables
+from server.listsandsession.sessionfunctions import probeforsessionvariables
 from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \
 	workprovenancedict
 
@@ -39,8 +39,7 @@ def selectionmade():
 	:return:
 	"""
 
-	# make sure that there is a session so as to avoid throwing an exception
-	sessionvariables()
+	probeforsessionvariables()
 
 	uid = depunct(request.args.get('auth', ''))
 	workid = depunct(request.args.get('work', ''))
@@ -149,7 +148,7 @@ def setsessionvariable():
 		# cookies are not enabled
 		return json.dumps([{'none': 'none'}])
 
-	modifysessionvar(param, val)
+	modifysessionvariable(param, val)
 
 	result = json.dumps([{param: val}])
 

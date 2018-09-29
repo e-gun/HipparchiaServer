@@ -17,7 +17,13 @@ from server.dbsupport.miscdbfunctions import probefordatabases
 from server.startup import authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict
 
 
-def sessionvariables():
+def probeforsessionvariables():
+	"""
+
+	check to see if there is a session, if not populate all of the keyed values with their defaults
+
+	:return:
+	"""
 
 	try:
 		session['greekcorpus']
@@ -85,7 +91,7 @@ def sessionvariables():
 	return
 
 
-def modifysessionvar(param, val):
+def modifysessionvariable(param, val):
 	"""
 
 	set session variables after checking them for validity
@@ -371,8 +377,6 @@ def sessionselectionsashtml(authordict: dict, workdict: dict) -> dict:
 	
 	selectioninfo['selections'] = sxhtml['selections']
 	selectioninfo['exclusions'] = sxhtml['exclusions']
-	# selectioninfo['scount'] = sxhtml['scount']
-	# selectioninfo['xcount'] = sxhtml['xcount']
 	selectioninfo['newjs'] = sessionselectionsjs(sxhtml['jstuples'])
 
 	# numberofselections is -1 if there were no selections
@@ -470,7 +474,7 @@ def sessionselectionsinfo(authordict, workdict):
 		# it is possible to hit this function before the session has been set, so...
 		session['auselections']
 	except KeyError:
-		sessionvariables()
+		probeforsessionvariables()
 
 	sessionsearchlist = session['auselections'] + session['agnselections'] + session['wkgnselections'] + \
 	                    session['psgselections'] + session['wkselections'] + session['alocselections'] + \
@@ -713,7 +717,7 @@ def rationalizeselections(newselectionuid, selectorexclude):
 	return
 
 
-def corpusselectionsasavalue(thesession=session) -> int:
+def corpusselectionsasavalue(thesession=None) -> int:
 	"""
 
 	represent the active corpora as a pseudo-binary value: '10101' for ON/OFF/ON/OFF/ON
@@ -723,6 +727,13 @@ def corpusselectionsasavalue(thesession=session) -> int:
 
 	:return: 24, etc
 	"""
+
+	try:
+		thesession['latincorpus']
+	except TypeError:
+		# you did not pass a (frozen)session: 'NoneType' object is not subscriptable
+		thesession = session
+
 	binarystring = '0b'
 
 	for s in ['latincorpus', 'greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']:
@@ -736,7 +747,7 @@ def corpusselectionsasavalue(thesession=session) -> int:
 	return binaryvalue
 
 
-def corpusselectionsaspseudobinarystring(thesession=session) -> str:
+def corpusselectionsaspseudobinarystring(thesession=None) -> str:
 	"""
 
 	represent the active corpora as a pseudo-binary value: '10101' for ON/OFF/ON/OFF/ON
@@ -746,6 +757,13 @@ def corpusselectionsaspseudobinarystring(thesession=session) -> str:
 
 	:return: '11100', etc
 	"""
+
+	try:
+		thesession['latincorpus']
+	except TypeError:
+		# you did not pass a (frozen)session: 'NoneType' object is not subscriptable
+		thesession = session
+
 	binarystring = ''
 
 	for s in ['latincorpus', 'greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']:
@@ -757,13 +775,18 @@ def corpusselectionsaspseudobinarystring(thesession=session) -> str:
 	return binarystring
 
 
-def justlatin(thesession=session) -> bool:
+def justlatin(thesession=None) -> bool:
 	"""
 
 	probe the session to see if we are working in a latin-only environment: '10000' = 16
 
 	:return: True or False
 	"""
+	try:
+		thesession['latincorpus']
+	except TypeError:
+		# you did not pass a (frozen)session: 'NoneType' object is not subscriptable
+		thesession = session
 
 	if corpusselectionsasavalue(thesession) == 16:
 		return True
@@ -771,7 +794,7 @@ def justlatin(thesession=session) -> bool:
 		return False
 
 
-def justtlg(thesession=session) -> bool:
+def justtlg(thesession=None) -> bool:
 	"""
 
 	probe the session to see if we are working in a tlg authors only environment: '01000' = 8
@@ -779,13 +802,19 @@ def justtlg(thesession=session) -> bool:
 	:return: True or False
 	"""
 
+	try:
+		thesession['latincorpus']
+	except TypeError:
+		# you did not pass a (frozen)session: 'NoneType' object is not subscriptable
+		thesession = session
+
 	if corpusselectionsasavalue(thesession) == 8:
 		return True
 	else:
 		return False
 
 
-def justinscriptions(thesession=session) -> bool:
+def justinscriptions(thesession=None) -> bool:
 	"""
 
 	probe the session to see if we are working in a inscriptions-only environment: '00100' = 2
@@ -793,14 +822,19 @@ def justinscriptions(thesession=session) -> bool:
 
 	:return: True or False
 	"""
-
+	try:
+		thesession['latincorpus']
+	except TypeError:
+		# you did not pass a (frozen)session: 'NoneType' object is not subscriptable
+		thesession = session
+		
 	if corpusselectionsasavalue(thesession) == 4:
 		return True
 	else:
 		return False
 
 
-def justpapyri(thesession=session) -> bool:
+def justpapyri(thesession=None) -> bool:
 	"""
 
 	probe the session to see if we are working in a papyrus-only environment: '00010' = 2
@@ -809,13 +843,19 @@ def justpapyri(thesession=session) -> bool:
 	:return: True or False
 	"""
 
+	try:
+		thesession['latincorpus']
+	except TypeError:
+		# you did not pass a (frozen)session: 'NoneType' object is not subscriptable
+		thesession = session
+		
 	if corpusselectionsasavalue(thesession) == 2:
 		return True
 	else:
 		return False
 
 
-def justlit(thesession=session) -> bool:
+def justlit(thesession=None) -> bool:
 	"""
 
 	probe the session to see if we are working in a TLG + LAT environment: '11000' = 24
@@ -823,19 +863,31 @@ def justlit(thesession=session) -> bool:
 	:return: True or False
 	"""
 
+	try:
+		thesession['latincorpus']
+	except TypeError:
+		# you did not pass a (frozen)session: 'NoneType' object is not subscriptable
+		thesession = session
+		
 	if corpusselectionsasavalue(thesession) == 24:
 		return True
 	else:
 		return False
 
 
-def justdoc(thesession=session) -> bool:
+def justdoc(thesession=None) -> bool:
 	"""
 
 	probe the session to see if we are working in a DDP + INS environment: '00110' = 6
 
 	:return: True or False
 	"""
+	
+	try:
+		thesession['latincorpus']
+	except TypeError:
+		# you did not pass a (frozen)session: 'NoneType' object is not subscriptable
+		thesession = session
 
 	if corpusselectionsasavalue(thesession) == 6:
 		return True
@@ -888,7 +940,7 @@ def reducetosessionselections(listmapper: dict, criterion: str) -> dict:
 	return d
 
 
-def returnactivedbs(thesession=session) -> List[str]:
+def returnactivedbs(thesession=None) -> List[str]:
 	"""
 
 	what dbs are currently active?
@@ -899,9 +951,9 @@ def returnactivedbs(thesession=session) -> List[str]:
 
 	try:
 		thesession['latincorpus']
-	except KeyError:
-		# your session disappeared because you aged out of it?
-		sessionvariables()
+	except TypeError:
+		# you did not pass a (frozen)session: 'NoneType' object is not subscriptable
+		thesession = session
 
 	activedbs = list()
 
@@ -919,7 +971,7 @@ def returnactivedbs(thesession=session) -> List[str]:
 	return activedbs
 
 
-def findactivebrackethighlighting(s=session) -> List[str]:
+def findactivebrackethighlighting(thesession=None) -> List[str]:
 	"""
 
 	what kinds of brackets are we highlighting
@@ -927,15 +979,21 @@ def findactivebrackethighlighting(s=session) -> List[str]:
 	:return:
 	"""
 
+	try:
+		thesession['latincorpus']
+	except TypeError:
+		# you did not pass a (frozen)session: 'NoneType' object is not subscriptable
+		thesession = session
+		
 	brackets = list()
 
-	if s['bracketsquare'] == 'yes':
+	if thesession['bracketsquare'] == 'yes':
 		brackets.append('square')
-	if s['bracketround'] == 'yes':
+	if thesession['bracketround'] == 'yes':
 		brackets.append('round')
-	if s['bracketangled'] == 'yes':
+	if thesession['bracketangled'] == 'yes':
 		brackets.append('angled')
-	if s['bracketcurly'] == 'yes':
+	if thesession['bracketcurly'] == 'yes':
 		brackets.append('curly')
 	return brackets
 

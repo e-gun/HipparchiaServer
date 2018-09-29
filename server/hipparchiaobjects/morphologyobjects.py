@@ -64,15 +64,15 @@ class MorphPossibilityObject(object):
 			warn = False
 
 		if self.amgreek():
-			return self.getgreekbaseform()
+			return self._getgreekbaseform()
 		elif self.amlatin():
-			return self.getlatinbaseform()
+			return self._getlatinbaseform()
 		else:
 			if warn:
 				print('MorphPossibilityObject failed to determine its own language', self.entry)
 			return None
 
-	def getgreekbaseform(self):
+	def _getgreekbaseform(self):
 		"""
 		the tricky bit:
 
@@ -131,7 +131,7 @@ class MorphPossibilityObject(object):
 
 		return baseform
 
-	def getlatinbaseform(self):
+	def _getlatinbaseform(self):
 		baseform = ''
 		segments = self.entry.split(', ')
 
@@ -178,7 +178,6 @@ class MorphPossibilityObject(object):
 
 		analysislist = self.getanalysislist()
 		
-
 		outputlist = list()
 		outputlist.append(obsvstring.format(ct=str(entrycountnumber)))
 		wordandtranslation = dfstring.format(df=self.observed)
