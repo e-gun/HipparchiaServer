@@ -53,6 +53,7 @@
 	--teal: hsla(196, 14%, 39%, 1);
 	--transparentgrey: hsla(0, 0%, 67%, .8);
 	--vdkteal: hsla(196, 27%, 20%, 1);
+	--vdkgrey: hsla(0, 0%, 20%, 1);
 }
 
 /* COLOR USE OVERVIEW
@@ -1069,16 +1070,26 @@ analysis {
 
 author {
 	color: var(--dkbabyblue);
+	font-weight: bold;
 	}
 
 bibl {
-	color: var(--limegreen);
+	color: var(--dkbabyblue);
 	}
 
 bibl:hover{
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
+
+biblscope {
+	color: var(--dkbabyblue);
+}
+
+bibtitle {
+	color: var(--dkbabyblue);
+	font-style: italic;
+}
 
 browser {
 	color: var(--brtblue);
@@ -1240,6 +1251,7 @@ pron {
 
 quote {
 	font-style: italic;
+	color: var(--vdkgrey);
 	}
 
 sense {

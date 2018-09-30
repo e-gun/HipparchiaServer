@@ -422,26 +422,27 @@ def sessiontimeexclusionsinfo():
 	build time exlusion html for #selectionstable + #timerestrictions
 	:return:
 	"""
-	timerestrictions = ''
-	
-	# managing to get here without dates already set: KeyError: 'latestdate'
+
 	try:
+		# it is possible to hit this function before the session has been set, so...
 		session['latestdate']
-	except:
-		session['latestdate'] = '1500'
-		session['earliestdate'] = '-850'
-		
+	except KeyError:
+		probeforsessionvariables()
+
+	info = 'Unless specifically listed, authors/works must come from {early}&nbspto&nbsp;{late}'
+	timerestrictions = ''
+
 	if session['latestdate'] != '1500' or session['earliestdate'] != '-850':
 		if int(session['earliestdate']) < 0:
-			e = session['earliestdate'][1:] + ' B.C.E'
+			early = session['earliestdate'][1:] + ' B.C.E'
 		else:
-			e = session['earliestdate'] + ' C.E'
+			early = session['earliestdate'] + ' C.E'
 		if int(session['latestdate']) < 0:
-			l = session['latestdate'][1:] + ' B.C.E'
+			late = session['latestdate'][1:] + ' B.C.E'
 		else:
-			l = session['latestdate'] + ' C.E'
+			late = session['latestdate'] + ' C.E'
 			
-		timerestrictions ='Unless specifically listed, authors/works must come from {e}&nbspto&nbsp;{l}'.format(e=e, l=l)
+		timerestrictions = info.format(early=early, late=late)
 
 	return timerestrictions
 
@@ -483,20 +484,19 @@ def sessionselectionsinfo(authordict, workdict):
 	for selectionorexclusion in ['selections', 'exclusions']:
 		thehtml = list()
 		# if there are no explicit selections, then
-		if len(sessionsearchlist) == 0 and selectionorexclusion == 'selections':
+		if not sessionsearchlist and selectionorexclusion == 'selections':
 			thehtml.append('<span class="picklabel">Authors</span><br />')
 			thehtml.append('[All in active corpora less exclusions]<br />')
 
-		if selectionorexclusion == 'exclusions' and len(sessionsearchlist) == 0 and session['spuria'] == 'Y' and len(
-				session['wkgnexclusions']) == 0 and len(session['agnexclusions']) == 0 and len(
-			session['auexclusions']) == 0:
+		if selectionorexclusion == 'exclusions' and not sessionsearchlist and session['spuria'] == 'Y' and \
+				not session['wkgnexclusions'] and not session['agnexclusions'] and not session['auexclusions']:
 			thehtml.append('<span class="picklabel">Authors</span><br />')
 			thehtml.append('[No exclusions]<br />')
 
 		# [a] author classes
 		v = 'agn'
 		var = v + selectionorexclusion
-		if len(session[var]) > 0:
+		if session[var]:
 			thehtml.append('<span class="picklabel">Author categories</span><br />')
 			htmlandjs = selectionlinehtmlandjs(v, selectionorexclusion, session)
 			thehtml += htmlandjs['html']
@@ -505,7 +505,7 @@ def sessionselectionsinfo(authordict, workdict):
 		# [b] work genres
 		v = 'wkgn'
 		var = v + selectionorexclusion
-		if len(session[var]) > 0:
+		if session[var]:
 			thehtml.append('<span class="picklabel">Work genres</span><br />')
 			htmlandjs = selectionlinehtmlandjs(v, selectionorexclusion, session)
 			thehtml += htmlandjs['html']
@@ -514,7 +514,7 @@ def sessionselectionsinfo(authordict, workdict):
 		# [c] author location
 		v = 'aloc'
 		var = v + selectionorexclusion
-		if len(session[var]) > 0:
+		if session[var]:
 			thehtml.append('<span class="picklabel">Author location</span><br />')
 			htmlandjs = selectionlinehtmlandjs(v, selectionorexclusion, session)
 			thehtml += htmlandjs['html']
@@ -523,7 +523,7 @@ def sessionselectionsinfo(authordict, workdict):
 		# [d] work provenance
 		v = 'wloc'
 		var = v + selectionorexclusion
-		if len(session[var]) > 0:
+		if session[var]:
 			thehtml.append('<span class="picklabel">Work provenance</span><br />')
 			htmlandjs = selectionlinehtmlandjs(v, selectionorexclusion, session)
 			thehtml += htmlandjs['html']
@@ -532,7 +532,7 @@ def sessionselectionsinfo(authordict, workdict):
 		# [e] authors
 		v = 'au'
 		var = v + selectionorexclusion
-		if len(session[var]) > 0:
+		if session[var]:
 			thehtml.append('<span class="picklabel">Authors</span><br />')
 			localval = -1
 			for s in session[var]:
@@ -545,11 +545,11 @@ def sessionselectionsinfo(authordict, workdict):
 		# [f] works
 		v = 'wk'
 		var = v + selectionorexclusion
-		if len(session[var]) == 0 and selectionorexclusion == 'exclusions' and session['spuria'] == 'N':
+		if session[var] and selectionorexclusion == 'exclusions' and session['spuria'] == 'N':
 			thehtml.append('<span class="picklabel">Works</span><br />')
 			thehtml.append('[All non-selected spurious works]<br />')
 
-		if len(session[var]) > 0:
+		if session[var]:
 			thehtml.append('<span class="picklabel">Works</span><br />')
 			if selectionorexclusion == 'exclusions' and session['spuria'] == 'N':
 				thehtml.append('[Non-selected spurious works]<br />')
@@ -568,7 +568,7 @@ def sessionselectionsinfo(authordict, workdict):
 		# [g] passages
 		v = 'psg'
 		var = v + selectionorexclusion
-		if len(session[var]) > 0:
+		if session[var]:
 			thehtml.append('<span class="picklabel">Passages</span><br />')
 			localval = -1
 			for s in session[var]:
@@ -608,7 +608,7 @@ def sessionselectionsinfo(authordict, workdict):
 	return returndict
 
 
-def selectionlinehtmlandjs(v: str, selectionorexclusion: str, thesession: session) -> Dict[str, str]:
+def selectionlinehtmlandjs(v: str, selectionorexclusion: str, thesession: session) -> dict:
 	"""
 	
 	generate something like:

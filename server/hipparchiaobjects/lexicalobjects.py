@@ -6,7 +6,6 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 import re
-from string import punctuation
 from typing import List
 
 from bs4 import BeautifulSoup
@@ -52,7 +51,7 @@ class dbDictionaryEntry(object):
 		self.id = id_number
 		self.translations = translations.split(' ‖ ')
 		self.pos = pos.split(' ‖ ')
-		self.body = entry_body
+		self.body = self._spacebetween(self._xmltohtmlconversions(entry_body))
 		self.soup = BeautifulSoup(self.body, 'html.parser')
 		self.nextentryid = -1
 		self.preventryid = -1
@@ -214,6 +213,50 @@ class dbDictionaryEntry(object):
 		newstring = substitutionstring.format(clean=stripped, dirty=foundword)
 		# print('entrywordcleaner()', foundword, stripped)
 		return newstring
+
+	@staticmethod
+	def _xmltohtmlconversions(string: str) -> str:
+		"""
+
+		some xml items should be rewritten, especially if they collide with html
+
+		:param string:
+		:return:
+		"""
+		swaps = {'title': 'bibtitle'}
+
+		for s in swaps.keys():
+			input = r'<{old}>(.*?)</{old}>'.format(old=s)
+			output = r'<{new}>\1</{new}>'.format(new=swaps[s])
+			string = re.sub(input, output, string)
+
+		string = re.sub(r'<hi rend="ital">(.*?)</hi>', r'<span class="italic">\1</span>', string)
+
+		return string
+
+	@staticmethod
+	def _spacebetween(string: str) -> str:
+		"""
+
+		some tages should have a space between them
+
+		_xmltohtmlconversions should be run first unless you want to change the fingerprints
+
+		:param string:
+		:return:
+		"""
+
+		fingerprints = [r'(</author>)(<bibtitle>)',
+		                r'(</author>)(<biblScope>)',
+		                r'(</bibtitle>)(<biblScope>)',
+		                r'(<bibl n=".*?" default="NO">)(<bibtitle>)']
+		substitute = r'\1&nbsp;\2'
+
+		for f in fingerprints:
+			string = re.sub(f, substitute, string)
+
+		return string
+
 
 
 class dbGreekWord(dbDictionaryEntry):
