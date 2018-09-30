@@ -2,10 +2,10 @@
 ##  [only change these if you know why you are doing it: you have a firewall problem, etc.] ##
 #
 # LISTENINGADDRESS sets the interface to listen on; '0.0.0.0' is
-# 	'all'
+# 	'all', i.e., anyone anywhere can reach this server at this address
 #
 # MYEXTERNALIPADDRESS needs to be set if you are going to view polls
-# 	remotely
+# 	remotely: this is basically a firewall/routing issue
 #
 # FLASKSERVEDFROMPORT is the port flask will serve from
 #

@@ -31,6 +31,7 @@
 	--brown: hsla(22, 22%, 26%, 1);
 	--brtblue: hsla(236, 44%, 40%, 1);
 	--brtgreen: hsla(120, 43%, 77%, 1);
+    --copper: hsl(11, 53%, 30%);
 	--deepblue: hsla(233, 77%, 26%, 1);
 	--dkbabyblue: hsla(237, 43%, 57%, 1);
 	--dkgreen: hsla(120, 80%, 20%, 1);
@@ -38,6 +39,7 @@
 	--dkteal: hsla(203, 22%, 26%, 1);
 	--green: hsla(120, 100%, 27%, 1);
 	--huedgrey: hsla(240, 6%, 49%, 1);
+	--invisible: hsla(0, 100%, 100%, 0);
 	--lessoffwhite: hsla(0, 0%, 98%, 1);
 	--limegreen: hsla(71, 92%, 26%, 1);
 	--ltbabyblue: hsla(200, 33%, 95%, 1);
@@ -1075,10 +1077,11 @@ author {
 
 bibl {
 	color: var(--dkbabyblue);
+	border: 1px dotted var(--invisible);
 	}
 
 bibl:hover{
-	color: var(--dkbabyblue);
+	border: 1px dotted black;
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
 
@@ -1245,13 +1248,18 @@ pre {
 	color: var(--skyblue);
     }
 
+pos {
+    color: var(--dkteal);
+    font-weight: bold;
+}
+
 pron {
     font-style: italic;
     }
 
 quote {
-	font-style: italic;
-	color: var(--vdkgrey);
+	color: var(--black);
+    font-style: italic;
 	}
 
 sense {
