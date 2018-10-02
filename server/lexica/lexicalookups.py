@@ -281,6 +281,7 @@ def returnentryhtml(count, seekingentry, cursor):
 		subcount = 0
 		for w in wordobjects:
 			w.runbodyxrefsuite()
+			sensehierarchy = w.returnsensehierarchy()
 			subcount += 1
 			# can't have xml in our html
 			definition = re.sub(r'<title>(.*?)</title>', r'<worktitle>\1</worktitle>', w.body)
@@ -323,7 +324,7 @@ def returnentryhtml(count, seekingentry, cursor):
 				else:
 					outputlist.append(formatdictionarysummary(w))
 					outputlist.append(grabheadmaterial(definition) + '<br />')
-					sensehierarchy = w.returnsensehierarchy()
+					# sensehierarchy = w.returnsensehierarchy()
 					if sensehierarchy:
 						outputlist.extend(sensehierarchy)
 					else:

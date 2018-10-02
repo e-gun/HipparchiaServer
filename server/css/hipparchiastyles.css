@@ -307,6 +307,42 @@ body {
 	font-size: 80%;
     }
 
+.dictauthor {
+	color: var(--dkbabyblue);
+	font-weight: bold;
+	}
+
+.dictbiblscope {
+	color: var(--dkbabyblue);
+}
+
+.dictbibtitle {
+	color: var(--dkbabyblue);
+	font-style: italic;
+}
+
+.dictforeign {
+    font-style: italic;
+    }
+
+.dictforeign.lang_greek {
+	font-family: 'hipparchiamonostatic', monospace;
+	}
+
+.dictquote {
+	color: var(--black);
+    font-style: italic;
+	}
+
+.dictquote.lang_greek {
+	font-family: 'hipparchiamonostatic', monospace;
+	}
+
+.dictsense {
+	padding: 10px;
+	margin-top: 20px;
+	}
+
 .dictionaryform {
 	color: var(--dkteal);
 	font-style: italic;
@@ -544,7 +580,7 @@ body {
 
 .indented {
 	padding-left: 10px;
-}
+	}
 
 .infocell {
 	vertical-align: top;

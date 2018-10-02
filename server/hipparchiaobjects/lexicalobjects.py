@@ -6,7 +6,6 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 import re
-from copy import deepcopy
 from typing import List
 
 from bs4 import BeautifulSoup
@@ -114,7 +113,11 @@ class dbDictionaryEntry(object):
 		authorlist = [deabbreviateauthors(au, self.usedictionary) for au in authorlist]
 
 		if session['authorssummary'] == 'yes':
-			authorlist = ['{n} authors'.format(n=len(authorlist))]
+			aa = len(authorlist)
+			if aa != 1:
+				authorlist = ['{n} authors'.format(n=aa)]
+			else:
+				authorlist = ['1 author']
 
 		return authorlist
 
@@ -138,11 +141,15 @@ class dbDictionaryEntry(object):
 		# listofsenses.sort()
 
 		listofsenses = self.translations
-		listofsenses = [s[0].lower() + s[1:] for s in listofsenses if len(s) > 1]
+		listofsenses = [s[0].upper() + s[1:] for s in listofsenses if len(s) > 1]
 		listofsenses.sort()
 
 		if session['sensesummary'] == 'yes':
-			listofsenses = ['{n} senses'.format(n=len(listofsenses))]
+			ss = len(listofsenses)
+			if ss != 1:
+				listofsenses = ['{n} senses'.format(n=ss)]
+			else:
+				listofsenses = ['1 sense']
 
 		return listofsenses
 
@@ -161,7 +168,11 @@ class dbDictionaryEntry(object):
 		quotelist = polytonicsort(quotelist)
 
 		if session['quotesummary'] == 'yes':
-			quotelist = ['{n} quotes'.format(n=len(quotelist))]
+			qq = len(quotelist)
+			if qq != 1:
+				quotelist = ['{n} quotes'.format(n=qq)]
+			else:
+				quotelist = ['1 quote']
 
 		return quotelist
 
@@ -174,6 +185,7 @@ class dbDictionaryEntry(object):
 			A ... A1 ... A1b ...
 
 		"""
+
 		sensing = re.compile(r'<sense.*?/sense>')
 		senses = re.findall(sensing, self.body)
 		leveler = re.compile(r'<sense\s.*?level="(.*?)".*?>')
@@ -204,6 +216,9 @@ class dbDictionaryEntry(object):
 				print('exception in grabsenses() at sense number:', i)
 				rewritten = ''
 			numberedsenses.append(rewritten)
+
+		# will not parse properly....
+		# numberedsenses = [self._bs4xmltohtmlconversions(s) for s in numberedsenses if s]
 
 		return numberedsenses
 
@@ -241,8 +256,6 @@ class dbDictionaryEntry(object):
 
 		IN PROGRESS / INACTIVE
 
-		[currently overwrites itself...]
-
 		use bs4 to do a heavy rewrite of the xml into html
 
 		latintagtypes = {'itype', 'cb', 'sense', 'etym', 'trans', 'tr', 'quote', 'number', 'pos', 'usg', 'bibl', 'hi', 'gen', 'author', 'cit', 'orth', 'pb'}
@@ -259,7 +272,7 @@ class dbDictionaryEntry(object):
 
 		tags = s.find_all(True)
 		tagtypes = set([x.name for x in tags])
-		preservetags = {'bibl', 'span', 'p'}
+		preservetags = {'bibl', 'span', 'p', 'dictionaryentry', 'biblscope'}
 		modifytags = tagtypes - preservetags
 
 		for m in modifytags:
@@ -272,23 +285,25 @@ class dbDictionaryEntry(object):
 		# attrtypes = set.union(*attrtypes)
 
 		preserveattrs = {'id'}
-		skipattrs = {'default', 'valid', 'extent'}
+		skipattrs = {'default', 'valid', 'extent', 'n', 'opt'}
 
 		for t in tags:
-			if t.name not in preservetags:
-				try:
-					c = t['class'] + ' '
-				except KeyError:
-					c = str()
-				options = set(t.attrs.keys()) - {'class'} - skipattrs - preserveattrs
-				newclassattrs = [o + '_' + t[o] for o in options]
-				if c and newclassattrs:
-					t['class'] = c + ' '.join(newclassattrs)
-				elif newclassattrs:
-					t['class'] = ' '.join(newclassattrs)
+			try:
+				c = t['class'] + ' '
+			except KeyError:
+				c = str()
+			options = set(t.attrs.keys()) - {'class'} - skipattrs - preserveattrs
+			newclassattrs = [o + '_' + t[o] for o in options]
+			if c and newclassattrs:
+				t['class'] = c + ' '.join(newclassattrs)
+			elif newclassattrs:
+				t['class'] = ' '.join(newclassattrs)
 			drops = set(t.attrs.keys()) - {'class'} - preserveattrs
 			for d in drops:
 				del t[d]
+
+		for t in tags:
+			print(t)
 
 		return repr(s)
 
