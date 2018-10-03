@@ -551,6 +551,161 @@ def buildbagsofwordswithalternates(morphdict, sentences):
 	return bagsofwords
 
 
+def mostcommoninflectedforms(cheat=True):
+	"""
+
+	figure out what gets used the most
+
+	can use this to drop items from sentences before we get to
+	headwords and their homonym problems
+
+	hipparchiaDB=# SELECT entry_name,total_count FROM wordcounts_a ORDER BY total_count DESC LIMIT 10;
+	entry_name | total_count
+	------------+-------------
+	ad         |       68000
+	a          |       65487
+	aut        |       32020
+	ab         |       26047
+	atque      |       21686
+	autem      |       20164
+	ac         |       19066
+	an         |       12405
+	ante       |        9535
+	apud       |        7399
+	(10 rows)
+
+	hipparchiaDB=# SELECT entry_name,total_count FROM wordcounts_α ORDER BY total_count DESC LIMIT 10;
+	entry_name | total_count
+	------------+-------------
+	ἀπό        |      256257
+	αὐτοῦ      |      242718
+	ἄν         |      225966
+	ἀλλά       |      219506
+	ἀλλ        |      202609
+	αὐτόν      |      163403
+	αὐτῶν      |      145216
+	αὐτῷ       |      134328
+	αἱ         |      102667
+	αὐτόϲ      |       89056
+
+	mostcommoninflectedforms()
+	('καί', 4507887)
+	('δέ', 1674979)
+	('τό', 1496102)
+	('τοῦ', 1286914)
+	('τῶν', 1127343)
+	('τήν', 1053085)
+	('τῆϲ', 935988)
+	('ὁ', 874987)
+	...
+	('οἷϲ', 40448)
+	('πολλά', 40255)
+	('δραχμαί', 40212)
+	('εἶπεν', 40154)
+	('ἄλλων', 40104)
+	...
+
+	('c', 253099)
+	('et', 227463)
+	('in', 183970)
+	('est', 105956)
+	('non', 96510)
+	('ut', 75705)
+	('ad', 68000)
+	('cum', 66544)
+	('a', 65487)
+	('si', 62655)
+	('quod', 56694)
+	...
+
+	('ipsa', 5372)
+	('inquit', 5342)
+	('nomine', 5342)
+	('sint', 5342)
+	('nobis', 5317)
+	('primum', 5297)
+	('itaque', 5271)
+	('unde', 5256)
+	('illi', 5227)
+	('siue', 5208)
+	('illud', 5206)
+	('eos', 5186)
+	('pace', 5114)
+	('parte', 5049)
+	('n', 5032)
+	('tempore', 5018)
+	('satis', 5007)
+	('rerum', 4999)
+	...
+
+	:param cheat:
+	:return:
+	"""
+
+	if not cheat:
+		dbconnection = ConnectionObject()
+		dbcursor = dbconnection.cursor()
+
+		latinletters = 'abcdefghijklmnopqrstuvwxyz'
+		greekletters = '0αβψδεφγηιξκλμνοπρϲτυωχθζ'
+
+		# needed for initial probe
+		# limit = 50
+		# qtemplate = """
+		# SELECT entry_name,total_count FROM wordcounts_{letter} ORDER BY total_count DESC LIMIT {lim}
+		# """
+
+		qtemplate = """
+		SELECT entry_name FROM wordcounts_{letter} WHERE total_count > %s ORDER BY total_count DESC 
+		"""
+
+		greekmorethan = 40000
+		latinmorethan = 5031
+		countlist = list()
+
+		for letters, cap in [(latinletters, latinmorethan), (greekletters, greekmorethan)]:
+			langlist = list()
+			for l in letters:
+				data = (cap,)
+				dbcursor.execute(qtemplate.format(letter=l), data)
+				tophits = resultiterator(dbcursor)
+				langlist.extend([t[0] for t in tophits])
+			# langlist = sorted(langlist, key=lambda x: x[1], reverse=True)
+			countlist.extend(langlist)
+
+		print('mostcommoninflectedforms()')
+		mcif = set(countlist)
+		print(mcif)
+	else:
+		mcif = {'ita', 'a', 'inquit', 'ego', 'die', 'nunc', 'nos', 'quid', 'πάντων', 'ἤ', 'με', 'θεόν', 'δεῖ', 'for',
+		        'igitur', 'ϲύν', 'b', 'uers', 'p', 'ϲου', 'τῷ', 'εἰϲ', 'ergo', 'ἐπ', 'ὥϲτε', 'sua', 'me', 'πρό', 'sic',
+		        'aut', 'nisi', 'rem', 'πάλιν', 'ἡμῶν', 'φηϲί', 'παρά', 'ἔϲτι', 'αὐτῆϲ', 'τότε', 'eos', 'αὐτούϲ',
+		        'λέγει', 'cum', 'τόν', 'quidem', 'ἐϲτιν', 'posse', 'αὐτόϲ', 'post', 'αὐτῶν', 'libro', 'm', 'hanc',
+		        'οὐδέ', 'fr', 'πρῶτον', 'μέν', 'res', 'ἐϲτι', 'αὐτῷ', 'οὐχ', 'non', 'ἐϲτί', 'modo', 'αὐτοῦ', 'sine',
+		        'ad', 'uero', 'fuit', 'τοῦ', 'ἀπό', 'ea', 'ὅτι', 'parte', 'ἔχει', 'οὔτε', 'ὅταν', 'αὐτήν', 'esse',
+		        'sub', 'τοῦτο', 'i', 'omnes', 'break', 'μή', 'ἤδη', 'ϲοι', 'sibi', 'at', 'mihi', 'τήν', 'in', 'de',
+		        'τούτου', 'ab', 'omnia', 'ὃ', 'ἦν', 'γάρ', 'οὐδέν', 'quam', 'per', 'α', 'autem', 'eius', 'item', 'ὡϲ',
+		        'sint', 'length', 'οὗ', 'λόγον', 'eum', 'ἀντί', 'ex', 'uel', 'ἐπειδή', 're', 'ei', 'quo', 'ἐξ',
+		        'δραχμαί', 'αὐτό', 'ἄρα', 'ἔτουϲ', 'ἀλλ', 'οὐκ', 'τά', 'ὑπέρ', 'τάϲ', 'μάλιϲτα', 'etiam', 'haec',
+		        'nihil', 'οὕτω', 'siue', 'nobis', 'si', 'itaque', 'uac', 'erat', 'uestig', 'εἶπεν', 'ἔϲτιν', 'tantum',
+		        'tam', 'nec', 'unde', 'qua', 'hoc', 'quis', 'iii', 'ὥϲπερ', 'semper', 'εἶναι', 'e', '½', 'is', 'quem',
+		        'τῆϲ', 'ἐγώ', 'καθ', 'his', 'θεοῦ', 'tibi', 'ubi', 'pro', 'ἄν', 'πολλά', 'τῇ', 'πρόϲ', 'l', 'ἔϲται',
+		        'οὕτωϲ', 'τό', 'ἐφ', 'ἡμῖν', 'οἷϲ', 'inter', 'idem', 'illa', 'n', 'se', 'εἰ', 'μόνον', 'ac', 'ἵνα',
+		        'ipse', 'erit', 'μετά', 'μοι', 'δι', 'γε', 'enim', 'ille', 'an', 'sunt', 'esset', 'γίνεται', 'omnibus',
+		        'ne', 'ἐπί', 'τούτοιϲ', 'ὁμοίωϲ', 'παρ', 'causa', 'neque', 'cr', 'ἐάν', 'quos', 'ταῦτα', 'h', 'ante',
+		        'ἐϲτίν', 'ἣν', 'αὐτόν', 'eo', 'ὧν', 'ἐπεί', 'οἷον', 'sed', 'ἀλλά', 'ii', 'ἡ', 't', 'te', 'ταῖϲ', 'est',
+		        'sit', 'cuius', 'καί', 'quasi', 'ἀεί', 'o', 'τούτων', 'ἐϲ', 'quae', 'τούϲ', 'minus', 'quia', 'tamen',
+		        'iam', 'd', 'διά', 'primum', 'r', 'τιϲ', 'νῦν', 'illud', 'u', 'apud', 'c', 'ἐκ', 'δ', 'quod', 'f',
+		        'quoque', 'tr', 'τί', 'ipsa', 'rei', 'hic', 'οἱ', 'illi', 'et', 'πῶϲ', 'φηϲίν', 'τοίνυν', 's', 'magis',
+		        'unknown', 'οὖν', 'dum', 'text', 'μᾶλλον', 'λόγοϲ', 'habet', 'τοῖϲ', 'qui', 'αὐτοῖϲ', 'suo', 'πάντα',
+		        'uacat', 'τίϲ', 'pace', 'ἔχειν', 'οὐ', 'κατά', 'contra', 'δύο', 'ἔτι', 'αἱ', 'uet', 'οὗτοϲ', 'deinde',
+		        'id', 'ut', 'ὑπό', 'τι', 'lin', 'ἄλλων', 'τε', 'tu', 'ὁ', 'cf', 'δή', 'potest', 'ἐν', 'eam', 'tum',
+		        'μου', 'nam', 'θεόϲ', 'κατ', 'ὦ', 'cui', 'nomine', 'περί', 'atque', 'δέ', 'quibus', 'ἡμᾶϲ', 'τῶν',
+		        'eorum'}
+
+	return mcif
+
+
 def mostcommonheadwords(cheat=True):
 	"""
 
@@ -652,7 +807,7 @@ def mostcommonheadwords(cheat=True):
 	return wordstoskip
 
 
-def mostcommonwords():
+def mostcommonwordsviaheadwords():
 	"""
 
 	use mostcommonheadwords to return the most common declined forms

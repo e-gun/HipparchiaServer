@@ -42,7 +42,7 @@ except ImportError:
 	pyLDAvis = None
 	ldavis = None
 
-from server.semanticvectors.vectorhelpers import mostcommonwords, removestopwords
+from server.semanticvectors.vectorhelpers import mostcommonwordsviaheadwords, removestopwords, mostcommoninflectedforms
 
 
 def sklearnselectedworks(searchobject):
@@ -117,7 +117,7 @@ def sklearnselectedworks(searchobject):
 	return output
 
 
-def ldatopicgraphing(sentencetuples, workssearched, searchobject):
+def ldatopicgraphing(sentencetuples, workssearched, searchobject, headwordstops=True):
 	"""
 
 	a sentence tuple looks like:
@@ -172,9 +172,13 @@ def ldatopicgraphing(sentencetuples, workssearched, searchobject):
 	"""
 
 	# clean out stopwords
-	stops = mostcommonwords()
+	if headwordstops:
+		stops = mostcommonwordsviaheadwords()
+	else:
+		stops = mostcommoninflectedforms()
+
 	sentencetuples = [(a, removestopwords(b, stops)) for a, b in sentencetuples]
-	print('sentencetuples',sentencetuples)
+
 	activepoll = searchobject.poll
 
 	settings = {

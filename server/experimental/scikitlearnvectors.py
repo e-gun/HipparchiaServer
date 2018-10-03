@@ -41,7 +41,7 @@ from server import hipparchia
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, mostcommonwords
+from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, mostcommonwordsviaheadwords, mostcommoninflectedforms
 from server.dbsupport.dblinefunctions import grablistoflines
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
 from server.formatting.vectorformatting import skformatmostimilar
@@ -278,7 +278,7 @@ def sklearntextfeatureextractionandevaluation(sentences, searchobject):
 	return
 
 
-def simplesktextcomparison(sentencetuples, searchobject):
+def simplesktextcomparison(sentencetuples, searchobject, stopwordsbyheadword=False):
 	"""
 
 	sentences come in as numbered tuples [(id, text), (id2, text2), ...]
@@ -303,11 +303,15 @@ def simplesktextcomparison(sentencetuples, searchobject):
 	avoidauthorxrefs = False
 	avoidcommonwords = True
 
+	if stopwordsbyheadword:
+		stopwords = mostcommonwordsviaheadwords()
+	else:
+		stopwords = mostcommoninflectedforms()
+
 	sentencetuples = [s for s in sentencetuples if len(s[1].strip().split(' ')) > mustbelongerthan]
 	sentences = [s[1] for s in sentencetuples]
 
 	if avoidcommonwords:
-		stopwords = mostcommonwords()
 		cleanedsentences = list()
 		for s in sentences:
 			swords = s.split(' ')
