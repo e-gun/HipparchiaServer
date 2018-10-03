@@ -42,6 +42,8 @@ except ImportError:
 	pyLDAvis = None
 	ldavis = None
 
+from server.semanticvectors.vectorhelpers import mostcommonwords, removestopwords
+
 
 def sklearnselectedworks(searchobject):
 	"""
@@ -118,6 +120,9 @@ def sklearnselectedworks(searchobject):
 def ldatopicgraphing(sentencetuples, workssearched, searchobject):
 	"""
 
+	a sentence tuple looks like:
+		('gr2397w001_ln_42', 'ποίῳ δὴ τούτων ἄξιον τὸν κόϲμον φθείρεϲθαι φάναι')
+
 	see:
 		http://scikit-learn.org/stable/auto_examples/applications/plot_topics_extraction_with_nmf_lda.html#sphx-glr-auto-examples-applications-plot-topics-extraction-with-nmf-lda-py
 
@@ -165,6 +170,11 @@ def ldatopicgraphing(sentencetuples, workssearched, searchobject):
 	:param activepoll:
 	:return:
 	"""
+
+	# clean out stopwords
+	stops = mostcommonwords()
+	sentencetuples = [(a, removestopwords(b, stops)) for a, b in sentencetuples]
+	print('sentencetuples',sentencetuples)
 	activepoll = searchobject.poll
 
 	settings = {

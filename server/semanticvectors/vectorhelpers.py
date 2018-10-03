@@ -657,6 +657,8 @@ def mostcommonwords():
 
 	use mostcommonheadwords to return the most common declined forms
 
+		... 'ὁ', 'χἤ', 'χὤ', 'τάν', 'τοῦ', 'τώϲ', ...
+
 	:return:
 	"""
 
@@ -665,11 +667,27 @@ def mostcommonwords():
 	wordstoskip = list()
 	for h in headwords:
 		try:
-			wordstoskip.append(lemmatadict[h].formlist)
+			wordstoskip.extend(lemmatadict[h].formlist)
 		except KeyError:
 			pass
 
 	return wordstoskip
+
+
+def removestopwords(sentencestring, stopwords):
+	"""
+
+	take a sentence and throw out the stopwords in it
+
+	:param sentencestring:
+	:param stopwords:
+	:return:
+	"""
+
+	wordlist = sentencestring.split(' ')
+	wordlist = [removegravity(w) for w in wordlist if removegravity(w) not in stopwords]
+	newsentence = ' '.join(wordlist)
+	return newsentence
 
 
 def readgitdata():

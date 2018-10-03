@@ -86,15 +86,15 @@ def formatgloss(entrybody: str) -> str:
 	soup = BeautifulSoup(entrybody, 'html.parser')
 	senses = soup.find_all('foreign')
 	sources = soup.find_all('author')
-	
-	senses[:] = [value.string for value in senses]
-	sources[:] = [value.string for value in sources]
 
-	if sources:
+	sources[:] = [value.string for value in sources]
+	senses[:] = [value.string for value in senses]
+
+	if len(sources) > 0:
 		glosshtml.append('<span class="highlight">Reported by:</span><br />')
 		glosshtml.append(', '.join(sources))
 
-	if senses:
+	if len(senses) > 0:
 		glosshtml.append('<br /><br />\n<span class="highlight">Senses:</span><br />')
 		glosshtml.append(', '.join(senses))
 
