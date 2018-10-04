@@ -323,7 +323,7 @@ def returnentryhtml(count, seekingentry, cursor):
 					outputlist.append(formatmicroentry(definition))
 				else:
 					outputlist.append(formatdictionarysummary(w))
-					outputlist.append(grabheadmaterial(definition) + '<br />')
+					outputlist.append(grabheadmaterial(definition))
 					# sensehierarchy = w.returnsensehierarchy()
 					if sensehierarchy:
 						outputlist.extend(sensehierarchy)

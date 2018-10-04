@@ -889,7 +889,6 @@ def relativehomonymnweight(worda, wordb, morphdict) -> float:
 	      118369
 	(1 row)
 
-
 	hipparchiaDB=# select total_count from dictionary_headword_wordcounts where entry_name='edo¹';
 	 total_count
 	-------------

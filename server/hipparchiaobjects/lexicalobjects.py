@@ -190,6 +190,7 @@ class dbDictionaryEntry(object):
 		senses = re.findall(sensing, self.body)
 		leveler = re.compile(r'<sense\s.*?level="(.*?)".*?>')
 		nummer = re.compile(r'<sense.*?\sn="(.*?)".*?>')
+		idfinder = re.compile(r'<sense.*?\sid="n\d+\.(\d+)".*?>')
 		numberedsenses = list()
 		i = 0
 
@@ -197,6 +198,7 @@ class dbDictionaryEntry(object):
 			i += 1
 			lvl = re.search(leveler, sense)
 			num = re.search(nummer, sense)
+			myid = re.search(idfinder, sense)
 			# note that the two dictionaries do not necc agree with one another (or themselves) when it comes to nesting labels
 			if re.search(r'[A-Z]', num.group(1)):
 				paragraphlevel = '1'
@@ -209,12 +211,16 @@ class dbDictionaryEntry(object):
 			else:
 				paragraphlevel = '1'
 
-			try:
-				rewritten = '<p class="level{pl}"><span class="levellabel{lv}">{nm}</span>{sn}</p>\n'.format(
-					pl=paragraphlevel, lv=lvl.group(1), nm=num.group(1), sn=sense)
-			except:
-				print('exception in grabsenses() at sense number:', i)
-				rewritten = ''
+			# id="n38520.0" is just an orthographic note...
+			if myid.group(1) != "0":
+				try:
+					rewritten = '<p class="level{pl}"><span class="levellabel{lv}">{nm}</span>{sn}</p>\n'.format(
+						pl=paragraphlevel, lv=lvl.group(1), nm=num.group(1), sn=sense)
+				except:
+					print('exception in grabsenses() at sense number:', i)
+					rewritten = ''
+			else:
+				rewritten = '{sn}'.format(sn=sense)
 			numberedsenses.append(rewritten)
 
 		# will not parse properly....
