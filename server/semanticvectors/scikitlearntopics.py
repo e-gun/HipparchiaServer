@@ -171,7 +171,6 @@ def ldatopicgraphing(sentencetuples, workssearched, searchobject, headwordstops=
 	:return:
 	"""
 
-	# clean out stopwords
 	if headwordstops:
 		stops = mostcommonwordsviaheadwords()
 	else:

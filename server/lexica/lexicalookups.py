@@ -518,7 +518,7 @@ def convertdictionaryfindintoobject(foundline: tuple, usedictionary: str, dbcurs
 	return wordobject
 
 
-def findtotalcounts(word, cursor):
+def findtotalcounts(word: str, dbcursor) -> dbHeadwordObject:
 	"""
 
 	use the dictionary_headword_wordcounts table
@@ -529,7 +529,7 @@ def findtotalcounts(word, cursor):
 	return a countobject
 
 	:param word:
-	:param cursor:
+	:param dbcursor:
 	:return:
 	"""
 
@@ -549,8 +549,8 @@ def findtotalcounts(word, cursor):
 	q = qtemplate.format(tbl=table)
 	d = (word,)
 	try:
-		cursor.execute(q, d)
-		hw = cursor.fetchone()
+		dbcursor.execute(q, d)
+		hw = dbcursor.fetchone()
 	except:
 		# psycopg2.ProgrammingError: relation "dictionary_headword_wordcounts" does not exist
 		# you have not installed the wordcounts (yet)

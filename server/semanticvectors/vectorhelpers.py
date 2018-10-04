@@ -22,6 +22,8 @@ from server.formatting.wordformatting import acuteorgrav, buildhipparchiatransta
 	minimumgreek, removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
+from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
+from server.lexica.lexicalookups import findcountsviawordcountstable, findtotalcounts
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildbetweenwhereextension
 from server.startup import lemmatadict
@@ -551,7 +553,7 @@ def buildbagsofwordswithalternates(morphdict, sentences):
 	return bagsofwords
 
 
-def mostcommoninflectedforms(cheat=True):
+def mostcommoninflectedforms(cheat=True) -> set:
 	"""
 
 	figure out what gets used the most
@@ -706,7 +708,22 @@ def mostcommoninflectedforms(cheat=True):
 	return mcif
 
 
-def mostcommonheadwords(cheat=True):
+def uselessforeignwords() -> set:
+	"""
+
+	stuff that clogs up the data, esp in the papyri, etc
+
+	quite incomplete at the moment; a little thought could derive a decent amount of it algorithmically
+
+	:return:
+	"""
+
+	useless = {'text', 'length', 'unknown', 'break', 'uestig', 'uac'}
+
+	return useless
+
+
+def mostcommonheadwords(cheat=True) -> set:
 	"""
 
 	fetch N most common Greek and Latin
@@ -804,10 +821,12 @@ def mostcommonheadwords(cheat=True):
 
 		# print('wordstoskip =', wordstoskip)
 
+	wordstoskip.union(uselessforeignwords())
+
 	return wordstoskip
 
 
-def mostcommonwordsviaheadwords():
+def mostcommonwordsviaheadwords() -> set:
 	"""
 
 	use mostcommonheadwords to return the most common declined forms
@@ -826,7 +845,11 @@ def mostcommonwordsviaheadwords():
 		except KeyError:
 			pass
 
-	return wordstoskip
+	mostcommonwords = set(wordstoskip)
+
+	mostcommonwords.union(uselessforeignwords())
+
+	return mostcommonwords
 
 
 def removestopwords(sentencestring, stopwords):
@@ -843,6 +866,72 @@ def removestopwords(sentencestring, stopwords):
 	wordlist = [removegravity(w) for w in wordlist if removegravity(w) not in stopwords]
 	newsentence = ' '.join(wordlist)
 	return newsentence
+
+
+def relativehomonymnweight(worda, wordb, morphdict) -> float:
+	"""
+
+	NOT YET CALLED BY ANY VECTOR CODE
+
+	accepto and acceptum share many forms, what is the liklihood that accepta comes from the verb and not the noun?
+
+	est: is it from esse or edere?
+
+	This is a huge problem. One way to approcimate an answer would be to take the sum of the non-overlapping forms
+	and then use this as a ratio that yields a pseudo-probability
+
+	Issues that arise: [a] perfectly convergent forms; [b] non-overlap in only one quarter; [c] corporal-sensitive
+	variations (i.e., some forms more likely in an inscriptional context)
+
+	hipparchiaDB=# select total_count from dictionary_headword_wordcounts where entry_name='sum¹';
+	 total_count
+	-------------
+	      118369
+	(1 row)
+
+
+	hipparchiaDB=# select total_count from dictionary_headword_wordcounts where entry_name='edo¹';
+	 total_count
+	-------------
+	      159481
+	(1 row)
+
+	:param worda:
+	:param wordb:
+	:param morphdict:
+	:return:
+	"""
+
+	dbconnection = ConnectionObject()
+	dbcursor = dbconnection.cursor()
+
+	aheadwordobject = findtotalcounts(worda, dbcursor)
+	bheadwordobject = findtotalcounts(wordb, dbcursor)
+	atotal = aheadwordobject.t
+	btotal = bheadwordobject.t
+	try:
+		totalratio = atotal/btotal
+	except ZeroDivisionError:
+		# how you managed to pick a zero headword would be interesting to know
+		totalratio = -1
+
+	auniqueforms = morphdict[worda] - morphdict[wordb]
+	buniqueforms = morphdict[wordb] - morphdict[worda]
+
+	auniquecounts = [dbWordCountObject(*findcountsviawordcountstable(wd)) for wd in auniqueforms]
+	buniquecounts = [dbWordCountObject(*findcountsviawordcountstable(wd)) for wd in buniqueforms]
+
+	aunique = sum([x.t for x in auniquecounts])
+	bunique = sum([x.t for x in buniquecounts])
+	try:
+		uniqueratio = aunique/bunique
+	except ZeroDivisionError:
+		uniqueratio = -1
+
+	if uniqueratio <= 0:
+		return totalratio
+	else:
+		return uniqueratio
 
 
 def readgitdata():
