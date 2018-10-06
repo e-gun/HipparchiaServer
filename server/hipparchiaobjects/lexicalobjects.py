@@ -104,11 +104,12 @@ class dbDictionaryEntry(object):
 		:param lemmaobject:
 		:return:
 		"""
-
-		authorlist = self.soup.find_all('author')
+		afinder = re.compile(r'<author>(.*?)</author>')
+		authorlist = re.findall(afinder, self.body)
+		# authorlist = self.soup.find_all('author')
 		authorlist = list(set(authorlist))
 		# the list is composed of objj. that are <class 'bs4.element.Tag'>
-		authorlist[:] = [value.string for value in authorlist]
+		# authorlist[:] = [value.string for value in authorlist]
 		notin = ['id.', 'ib.', 'Id.']
 		authorlist[:] = [value for value in authorlist if value not in notin]
 		authorlist.sort()
@@ -156,8 +157,10 @@ class dbDictionaryEntry(object):
 		return listofsenses
 
 	def generatequotesummary(self, lemmaobject=None) -> List:
-		quotelist = self.soup.find_all('quote')
-		quotelist = [q.string for q in quotelist]
+		qfinder = re.compile(r'<quote lang="\w+">(.*?)</quote>')
+		quotelist = re.findall(qfinder, self.body)
+		# quotelist = self.soup.find_all('quote')
+		# quotelist = [q.string for q in quotelist]
 
 		# many of the 'quotes' are really just forms of the word
 		# trim these
@@ -227,7 +230,7 @@ class dbDictionaryEntry(object):
 		if not self.havesensehierarchy:
 			self._bsgeneratesensehierarchy()
 		if not self.xmlhasbeenconverted:
-			self._bs4xmltohtmlconversions()
+			self._nonbs4xmltohtmlconversions()
 
 		senseparagraphs = self.soup.find_all('p')
 		sensehierarchy = [repr(p) for p in senseparagraphs]
@@ -347,6 +350,108 @@ class dbDictionaryEntry(object):
 
 		self.xmlhasbeenconverted = True
 		return
+
+	def _nonbs4xmltohtmlconversions(self):
+		"""
+
+		use bs4 to do a heavy rewrite of the xml into html
+
+		latintagtypes = {'itype', 'cb', 'sense', 'etym', 'trans', 'tr', 'quote', 'number', 'pos', 'usg', 'bibl', 'hi', 'gen', 'author', 'cit', 'orth', 'pb'}
+		greektagtypes = {'itype', 'ref', 'tr', 'quote', 'pos', 'foreign', 'xr', 'gramgrp', 'lbl', 'sense', 'etym', 'gram', 'orth', 'date', 'hi', 'abbr', 'pb', 'biblscope', 'placename', 'bibl', 'title', 'author', 'cit'}
+
+		latinattrtypes = {'extent', 'rend', 'opt', 'lang', 'level', 'id', 'valid', 'type', 'n', 'default'}
+		greekattrtypes = {'extent', 'targorder', 'rend', 'opt', 'lang', 'level', 'id', 'type', 'valid', 'n', 'default'}
+
+
+		bs4 profiles *very* slow:
+
+				   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+		  4961664    0.749    0.000    1.045    0.000 {built-in method builtins.isinstance}
+		   308972    0.697    0.000    1.375    0.000 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:1792(_matches)
+		   679678    0.677    0.000    3.214    0.000 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:1766(search)
+		     6665    0.430    0.000    0.432    0.000 {method 'sub' of 're.Pattern' objects}
+		   296982    0.426    0.000    2.179    0.000 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:1725(search_tag)
+		      244    0.352    0.001    3.983    0.016 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:571(_find_all)
+
+		:param string:
+		:return:
+		"""
+
+		tagfinder = re.compile(r'<(.*?)>')
+		# notes that dropping 'n' will ruin your ability to generate the sensehierarchy
+		dropset = {'default', 'valid', 'extent', 'n', 'opt'}
+
+		pruned = re.sub(tagfinder, lambda x: self.droptagsfromxml(x.group(1), dropset), self.body)
+
+		preservetags = {'bibl', 'span', 'p', 'dictionaryentry', 'biblscope', 'sense', 'unclickablebibl'}
+		pruned = re.sub(tagfinder, lambda x: self.converttagstoclasses(x.group(1), preservetags), self.body)
+
+		closefinder = re.compile(r'</(.*?)>')
+		self.body = re.sub(closefinder, lambda x: self.xmlclosetospanclose(x.group(1), preservetags), self.body)
+
+		self.xmlhasbeenconverted = True
+		return
+
+	@staticmethod
+	def xmlclosetospanclose(xmlstring: str, leaveuntouched: set) -> str:
+		if xmlstring in leaveuntouched:
+			newxmlstring = '</{x}>'.format(x=xmlstring)
+		else:
+			newxmlstring = '</span>'
+		return newxmlstring
+
+	@staticmethod
+	def droptagsfromxml(xmlstring: str, dropset: set) -> str:
+		"""
+
+		if
+			dropset = {opt}
+		&
+			xmlstring = 'orth extent="full" lang="greek" opt="n"'
+
+		return is
+			'orth extent="full" lang="greek"'
+
+		:param xmlstring:
+		:param dropset:
+		:return:
+		"""
+
+		finder = re.compile(r'(\w+)=".*?"')
+		components = xmlstring.split(' ')
+		combined = [components[0]]
+		preserved = [c for c in components[1:] if re.search(finder, c) and re.search(finder, c).group(1) not in dropset]
+		combined.extend(preserved)
+		newxml = '<{x}>'.format(x=' '.join(combined))
+		return newxml
+
+	@staticmethod
+	def converttagstoclasses(xmlstring: str, leaveuntouched: set) -> str:
+		"""
+		in:
+			<orth extent="full" lang="greek" opt="n">
+
+		out:
+			<span class="orth extent_full lang_greek opt_n">
+
+		skip all closings: '</orth>'
+
+		be careful about collapsing "id"
+
+		:param xmlstring:
+		:return:
+		"""
+
+		components = xmlstring.split(' ')
+		if components[0] in leaveuntouched or components[0][0] == '/':
+			return xmlstring
+		else:
+			finder = re.compile(r'(\w+)="(.*?)"')
+			combined = [components[0]]
+			collapsedtags = [re.sub(finder, r'\1_\2', t) for t in components[1:]]
+			combined.extend(collapsedtags)
+		newxml = '<span class="{x}">'.format(x=' '.join(combined))
+		return newxml
 
 	def printclasses(self):
 		"""

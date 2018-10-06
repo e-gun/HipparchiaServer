@@ -341,6 +341,13 @@ body {
 	font-style: italic;
 }
 
+.dictcase{
+    font-style: bold;
+    }
+
+.dictcit{
+    }
+
 .dictetym{
     color: var(--plum);
     }
@@ -368,13 +375,23 @@ body {
 .dictquote.lang_greek {
 	}
 
+.dictquote.lang_la {
+	}
+
 .dictsense {
 	padding: 10px;
 	margin-top: 20px;
 	}
 
+.dicttr{
+    font-weight: bold;
+    }
+
 .dicttrans{
     font-weight: bold;
+    }
+
+.dictusg{
     }
 
 .dictusg.type_style{

@@ -161,6 +161,14 @@ def dictonaryentryashtml(count, seekingentry):
 			includesubcounts = False
 		subcount = 0
 		for w in wordobjects:
+			if not w.isagloss():
+				lemmaobject = grablemmataobjectfor(w.entry, usedictionary + '_lemmata', dbcursor=blankcursor)
+				w.authorlist = w.generateauthorsummary()
+				w.senselist = w.generatesensessummary()
+				w.quotelist = w.generatequotesummary(lemmaobject)
+
+			definition = ''
+
 			w.runbodyxrefsuite()
 			w.bsinsertclickablelookups()
 			sensehierarchy = w.bsreturnsensehierarchy()
@@ -190,12 +198,6 @@ def dictonaryentryashtml(count, seekingentry):
 						outputlist.append(formatprevalencedata(countobject))
 						outputlist.append('</p>')
 
-				lemmaobject = grablemmataobjectfor(w.entry, usedictionary + '_lemmata', dbcursor=blankcursor)
-
-				w.authorlist = w.generateauthorsummary()
-				w.senselist = w.generatesensessummary()
-				w.quotelist = w.generatequotesummary(lemmaobject)
-
 				if len(w.authorlist + w.senselist + w.quotelist) == 0:
 					# either you have turned off summary info or this is basically just a gloss entry
 					outputlist.append(formatmicroentry(definition))
@@ -205,8 +207,8 @@ def dictonaryentryashtml(count, seekingentry):
 					outputlist.append('<br /><br />\n<span class="lexiconhighlight">Full entry:</span><br />')
 					if sensehierarchy:
 						outputlist.extend(sensehierarchy)
-					else:
-						outputlist.append(formatmicroentry(definition))
+					# else:
+					# 	outputlist.append(formatmicroentry(definition))
 			else:
 				outputlist.append(glossstr.format(ent=w.entry))
 				outputlist.append(formatgloss(definition))
