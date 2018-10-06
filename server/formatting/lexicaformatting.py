@@ -108,34 +108,6 @@ def formatgloss(entrybody: str) -> str:
 	return glosshtml
 
 
-def formatmicroentry(entrybody: str) -> str:
-	"""
-	some entries work like glosses but are not labeled as glosses: no quote, authors, etc. just a synonym or synonyms listed
-	deal with it
-
-	:param entrybody:
-	:return:
-	"""
-
-	entryhtml = ''
-	
-	soup = BeautifulSoup(entrybody, 'html.parser')
-	senses = soup.find_all('foreign')
-	senses[:] = [value.string for value in senses]
-	
-	entryhtml += '<span class="highlight">Senses:</span><br />'
-	for s in senses:
-		try:
-			entryhtml += s + '<br />'
-		except TypeError:
-			# s was NoneType
-			pass
-
-	entryhtml = entrybody
-	
-	return entryhtml
-
-
 def insertbrowserlookups(htmlentry: str) -> str:
 	"""
 	there can be a big lag opening the entry for something like εχω: put off the click conversions until later...

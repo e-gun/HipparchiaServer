@@ -356,15 +356,20 @@ body {
     font-style: italic;
     }
 
-.dictforeign.lang_greek {
+.dictforeign .dictlang_greek {
 	}
 
 .dictitype{
 	}
 
-.dicthi.rend_ital{
+.dicthi {
 	/* definitions in the latin dictionary */
-	font-style: bold;
+	font-weight: 600;
+	}
+
+.dicthi .dictrend_ital{
+	/* definitions in the latin dictionary */
+	font-weight: 600;
 	}
 
 .dictquote {
@@ -372,10 +377,10 @@ body {
     font-style: italic;
 	}
 
-.dictquote.lang_greek {
+.dictquote .dictlang_greek {
 	}
 
-.dictquote.lang_la {
+.dictquote .dictlang_la {
 	}
 
 .dictsense {
@@ -394,7 +399,7 @@ body {
 .dictusg{
     }
 
-.dictusg.type_style{
+.dictusg .dicttype_style{
     color: var(--dkteal);
     }
 
@@ -703,7 +708,7 @@ body {
 	}
 
 .levellabel5 {
-	font-weight: bold;
+	font-size: 85%;
 	color: var(--red);
 	}
 

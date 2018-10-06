@@ -15,7 +15,7 @@ from server import hipparchia
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, findparserxref, grablemmataobjectfor, \
 	probedictionary, querytotalwordcounts
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
-from server.formatting.lexicaformatting import formatdictionarysummary, formatgloss, formatmicroentry
+from server.formatting.lexicaformatting import formatdictionarysummary, formatgloss
 from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject
 from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
@@ -124,6 +124,7 @@ def dictonaryentryashtml(count, seekingentry):
 	glossstr = '<br />\n<p class="dictionaryheading">{ent}<span class="metrics">[gloss]</span></p>'
 	notfoundstr = '<br />\n<p class="dictionaryheading">nothing found under <span class="prevalence">{skg}</span></p>\n'
 	itemnotfoundstr = '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="prevalence">{skg}</span></p>\n'
+	fullentrystring = '<br /><br />\n<span class="lexiconhighlight">Full entry:</span><br />'
 
 	navtemplate = """
 	<table class="navtable">
@@ -149,6 +150,8 @@ def dictonaryentryashtml(count, seekingentry):
 	blankcursor = None
 	wordobjects = probedictionary(usedictionary + '_dictionary', 'entry_name', seekingentry, '=', dbcursor=blankcursor, trialnumber=0)
 
+	definition = 'NEED TO DEBUG dictonaryentryashtml() using this word'
+
 	if wordobjects:
 		if len(wordobjects) > 1:
 			# supplement count above
@@ -169,10 +172,9 @@ def dictonaryentryashtml(count, seekingentry):
 			w.constructsensehierarchy()
 			w.runbodyxrefsuite()
 			w.insertclickablelookups()
+			# next is optional, really: a good CSS file will parse what you have thus far
+			# (HipparchiaServer v.1.1.2 has the old XML CSS)
 			w.xmltohtmlconversions()
-
-			# print('w.grabheadmaterial()', w.grabheadmaterial())
-			# print('\nw.grabnonheadmaterial()', w.grabnonheadmaterial())
 
 			subcount += 1
 
@@ -200,13 +202,22 @@ def dictonaryentryashtml(count, seekingentry):
 						outputlist.append(formatprevalencedata(countobject))
 						outputlist.append('</p>')
 
-				if len(w.authorlist + w.senselist + w.quotelist) == 0:
+				awq = w.authorlist + w.senselist + w.quotelist
+				zero = ['0 authors', '0 senses', '0 quotes']
+				for z in zero:
+					try:
+						awq.remove(z)
+					except ValueError:
+						pass
+
+				if len(awq) == 0:
+					# print('zero authors, senses, quotes')
 					# either you have turned off summary info or this is basically just a gloss entry
-					outputlist.append(formatmicroentry(definition))
+					outputlist.append(w.body)
 				else:
 					outputlist.append(formatdictionarysummary(w))
 					outputlist.append(w.grabheadmaterial())
-					outputlist.append('<br /><br />\n<span class="lexiconhighlight">Full entry:</span><br />')
+					outputlist.append(fullentrystring)
 					outputlist.append(w.grabnonheadmaterial())
 			else:
 				outputlist.append(glossstr.format(ent=w.entry))

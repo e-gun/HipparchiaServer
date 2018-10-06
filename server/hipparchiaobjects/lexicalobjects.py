@@ -73,6 +73,14 @@ class dbDictionaryEntry(object):
 			self.usedictionary = 'greek'
 			self.translationlabel = 'tr'
 
+	@staticmethod
+	def isgreek():
+		raise NotImplementedError
+
+	@staticmethod
+	def islatin():
+		raise NotImplementedError
+
 	def runbodyxrefsuite(self):
 		# add dictionary clicks to "cf.", etc. in the entry body
 		raise NotImplementedError
@@ -199,10 +207,57 @@ class dbDictionaryEntry(object):
 		heading = re.compile(r'(.*?)<sense')
 		head = re.search(heading, self.body)
 
+		if not head:
+			# this is some sort of micro-entry
+			return self.body
+
 		try:
 			return self.body[head.end(1):]
 		except AttributeError:
 			return str()
+
+	def insertclickablelookups(self):
+		"""
+
+		in:
+			<bibl n="Perseus:abo:tlg,0019,003:1214" default="NO" valid="yes">
+
+		out:
+			<bibl id="gr0019w003_PE_1214" default="NO" valid="yes">
+
+		:return:
+		"""
+
+		# first retag the items that should not click-to-browse
+
+		biblios = re.compile(r'(<bibl.*?)(.*?)(</bibl>)')
+		bibs = re.findall(biblios, self.body)
+		bdict = dict()
+
+		for bib in bibs:
+			if 'Perseus:abo' not in bib[1]:
+				head = '<unclickablebibl'
+				tail = '</unclickablebibl>'
+			else:
+				head = bib[0]
+				tail = bib[2]
+			bdict[''.join(bib)] = head + bib[1] + tail
+
+		# print('here',bdict)
+		htmlentry = self.body
+		for key in bdict.keys():
+			htmlentry = re.sub(key, bdict[key], htmlentry)
+
+		# now do the work of finding the lookups
+
+		tlgfinder = re.compile(r'n="Perseus:abo:tlg,(\d\d\d\d),(\d\d\d):(.*?)"')
+		phifinder = re.compile(r'n="Perseus:abo:phi,(\d\d\d\d),(\d\d\d):(.*?)"')
+
+		clickableentry = re.sub(tlgfinder, r'id="gr\1w\2_PE_\3"', htmlentry)
+		clickableentry = re.sub(phifinder, r'id="lt\1w\2_PE_\3"', clickableentry)
+		self.body = clickableentry
+		self.haveclickablelookups = True
+		return
 
 	def constructsensehierarchy(self):
 		"""
@@ -231,24 +286,14 @@ class dbDictionaryEntry(object):
 
 		template = """
 		<p class="level{pl}">
-			<span class="levellabel{lv}">
-				{nm}
-			</span>{sn}
+			<span class="levellabel{lv}">{nm}</span>
+			{sn}
 		</p>"""
 
 		lvl = re.search(levelfinder, foundsense)
 		num = re.search(numfinder, foundsense)
-		# note that the two dictionaries do not necc agree with one another (or themselves) when it comes to nesting labels
-		if re.search(r'[A-Z]', num.group(1)):
-			paragraphlevel = '1'
-		elif re.search(r'\d', num.group(1)):
-			paragraphlevel = '3'
-		elif re.search(r'[ivx]', num.group(1)):
-			paragraphlevel = '4'
-		elif re.search(r'[a-hj-w]', num.group(1)):
-			paragraphlevel = '2'
-		else:
-			paragraphlevel = '1'
+
+		paragraphlevel = lvl.group(1)
 
 		rewritten = template.format(pl=paragraphlevel, lv=lvl.group(1), nm=num.group(1), sn=foundsense)
 
@@ -270,7 +315,7 @@ class dbDictionaryEntry(object):
 		built and then abandoned bs4 versions of the various requisite functions
 		BUT then learned that bs4 profiles as a *very* slow collection of code:
 			'search' and '_find_all' are desperately inefficient
-			they make a crazy number of calls
+			they make a crazy number of calls and you end up spending 11s on a single large entry
 
 			ncalls  tottime  percall  cumtime  percall filename:lineno(function)
 		  4961664    0.749    0.000    1.045    0.000 {built-in method builtins.isinstance}
@@ -288,19 +333,19 @@ class dbDictionaryEntry(object):
 		# notes that dropping 'n' will ruin your ability to generate the sensehierarchy
 		dropset = {'default', 'valid', 'extent', 'n', 'opt'}
 
-		pruned = re.sub(tagfinder, lambda x: self.droptagsfromxml(x.group(1), dropset), self.body)
+		pruned = re.sub(tagfinder, lambda x: self._droptagsfromxml(x.group(1), dropset), self.body)
 
 		preservetags = {'bibl', 'span', 'p', 'dictionaryentry', 'biblscope', 'sense', 'unclickablebibl'}
-		pruned = re.sub(tagfinder, lambda x: self.converttagstoclasses(x.group(1), preservetags), pruned)
+		pruned = re.sub(tagfinder, lambda x: self._converttagstoclasses(x.group(1), preservetags), pruned)
 
 		closefinder = re.compile(r'</(.*?)>')
-		self.body = re.sub(closefinder, lambda x: self.xmlclosetospanclose(x.group(1), preservetags), pruned)
+		self.body = re.sub(closefinder, lambda x: self._xmlclosetospanclose(x.group(1), preservetags), pruned)
 
 		self.xmlhasbeenconverted = True
 		return
 
 	@staticmethod
-	def xmlclosetospanclose(xmlstring: str, leaveuntouched: set) -> str:
+	def _xmlclosetospanclose(xmlstring: str, leaveuntouched: set) -> str:
 		if xmlstring in leaveuntouched:
 			newxmlstring = '</{x}>'.format(x=xmlstring)
 		else:
@@ -308,7 +353,7 @@ class dbDictionaryEntry(object):
 		return newxmlstring
 
 	@staticmethod
-	def droptagsfromxml(xmlstring: str, dropset: set) -> str:
+	def _droptagsfromxml(xmlstring: str, dropset: set) -> str:
 		"""
 
 		if
@@ -333,13 +378,13 @@ class dbDictionaryEntry(object):
 		return newxml
 
 	@staticmethod
-	def converttagstoclasses(xmlstring: str, leaveuntouched: set) -> str:
+	def _converttagstoclasses(xmlstring: str, leaveuntouched: set) -> str:
 		"""
 		in:
 			<orth extent="full" lang="greek" opt="n">
 
 		out:
-			<span class="orth extent_full lang_greek opt_n">
+			<span class="dictorth dictextent_full dictlang_greek dictopt_n">
 
 		skip all closings: '</orth>'
 
@@ -356,45 +401,14 @@ class dbDictionaryEntry(object):
 			return newxml
 		else:
 			finder = re.compile(r'(\w+)="(.*?)"')
-			combined = [components[0]]
-			collapsedtags = [re.sub(finder, r'\1_\2', t) for t in components[1:]]
+			combined = ['dict' + components[0]]
+			collapsedtags = [re.sub(finder, r'dict\1_\2', t) for t in components[1:]]
 			combined.extend(collapsedtags)
 		newxml = '<span class="{x}">'.format(x=' '.join(combined))
 		return newxml
 
-	def printclasses(self):
-		"""
-
-		a debugging function to find out what CSS styles are needed:
-
-		πρόϲ:
-		{'dicthi rend_ital', 'levellabel3', 'dictref lang_greek targorder_U', 'level1', 'level_1', 'dictquote
-		lang_greek', 'dictgram type_comp', 'dictdate', 'dictabbr', 'dictplacename', 'dicttr', 'dictpb',
-		'dictitype lang_greek', 'level_2', 'dictlbl', 'levellabel1', 'dictunclickablebibl', 'dictbibtitle',
-		'dictgramgrp', 'level2', 'dictcit', 'level_4', 'dictxr', 'dictorth lang_greek', 'level3', 'dictauthor',
-		'dictetym lang_greek', 'dictpos', 'dictgram type_dialect', 'level_3', 'levellabel2', 'levellabel4',
-		'dictforeign lang_greek'}
-
-		bonus:
-		{'dictitype', 'dicthi rend_ital', 'levellabel3', 'level1', 'dictnumber', 'level_1', 'level_5',
-		'levellabel5', 'dictusg type_style', 'dictgen', 'dictorth lang_la', 'dictetym', 'dicttrans', 'dicttr',
-		'dictquote lang_la', 'dictpb', 'level_2', 'levellabel1', 'dictunclickablebibl', 'level2', 'dictcb',
-		'dictcit', 'level_4', 'level3', 'dictauthor', 'dictpos', 'level_3', 'levellabel2', 'levellabel4'}
-
-		:return:
-		"""
-		tags = self.soup.find_all(True)
-		allclasses = list()
-		for t in tags:
-			try:
-				allclasses.append(t['class'])
-			except KeyError:
-				pass
-		print(set(allclasses))
-		return
-
 	@staticmethod
-	def entrywordcleaner(foundword, substitutionstring):
+	def _entrywordcleaner(foundword, substitutionstring):
 		# example substitute: r'<dictionaryentry id="{clean}">{dirty}</dictionaryentry>'
 		stripped = stripaccents(foundword)
 		newstring = substitutionstring.format(clean=stripped, dirty=foundword)
@@ -442,70 +456,35 @@ class dbDictionaryEntry(object):
 
 		return string
 
-	@staticmethod
-	def isgreek():
-		raise NotImplementedError
-
-	@staticmethod
-	def islatin():
-		raise NotImplementedError
-
-	def bsgrabheadmaterial(self) -> str:
-		soupitems = self.soup.find_all()
-		done = False
-		head = list()
-
-		while soupitems and not done:
-			item = soupitems.pop()
-			if item.name == 'sense':
-				done = True
-			else:
-				head.append(item)
-
-		headmaterial = '\n'.join([repr(h) for h in head])
-		return headmaterial
-
-	def insertclickablelookups(self):
+	def printclasses(self):
 		"""
 
-		in:
-			<bibl n="Perseus:abo:tlg,0019,003:1214" default="NO" valid="yes">
+		a debugging function to find out what CSS styles are needed:
 
-		out:
-			<bibl id="gr0019w003_PE_1214" default="NO" valid="yes">
+		πρόϲ:
+		{'dicthi rend_ital', 'levellabel3', 'dictref lang_greek targorder_U', 'level1', 'level_1', 'dictquote
+		lang_greek', 'dictgram type_comp', 'dictdate', 'dictabbr', 'dictplacename', 'dicttr', 'dictpb',
+		'dictitype lang_greek', 'level_2', 'dictlbl', 'levellabel1', 'dictunclickablebibl', 'dictbibtitle',
+		'dictgramgrp', 'level2', 'dictcit', 'level_4', 'dictxr', 'dictorth lang_greek', 'level3', 'dictauthor',
+		'dictetym lang_greek', 'dictpos', 'dictgram type_dialect', 'level_3', 'levellabel2', 'levellabel4',
+		'dictforeign lang_greek'}
+
+		bonus:
+		{'dictitype', 'dicthi rend_ital', 'levellabel3', 'level1', 'dictnumber', 'level_1', 'level_5',
+		'levellabel5', 'dictusg type_style', 'dictgen', 'dictorth lang_la', 'dictetym', 'dicttrans', 'dicttr',
+		'dictquote lang_la', 'dictpb', 'level_2', 'levellabel1', 'dictunclickablebibl', 'level2', 'dictcb',
+		'dictcit', 'level_4', 'level3', 'dictauthor', 'dictpos', 'level_3', 'levellabel2', 'levellabel4'}
 
 		:return:
 		"""
-
-		# first retag the items that should not click-to-browse
-
-		biblios = re.compile(r'(<bibl.*?)(.*?)(</bibl>)')
-		bibs = re.findall(biblios, self.body)
-		bdict = dict()
-
-		for bib in bibs:
-			if 'Perseus:abo' not in bib[1]:
-				head = '<unclickablebibl'
-				tail = '</unclickablebibl>'
-			else:
-				head = bib[0]
-				tail = bib[2]
-			bdict[''.join(bib)] = head + bib[1] + tail
-
-		# print('here',bdict)
-		htmlentry = self.body
-		for key in bdict.keys():
-			htmlentry = re.sub(key, bdict[key], htmlentry)
-
-		# now do the work of finding the lookups
-
-		tlgfinder = re.compile(r'n="Perseus:abo:tlg,(\d\d\d\d),(\d\d\d):(.*?)"')
-		phifinder = re.compile(r'n="Perseus:abo:phi,(\d\d\d\d),(\d\d\d):(.*?)"')
-
-		clickableentry = re.sub(tlgfinder, r'id="gr\1w\2_PE_\3"', htmlentry)
-		clickableentry = re.sub(phifinder, r'id="lt\1w\2_PE_\3"', clickableentry)
-		self.body = clickableentry
-		self.haveclickablelookups = True
+		tags = self.soup.find_all(True)
+		allclasses = list()
+		for t in tags:
+			try:
+				allclasses.append(t['class'])
+			except KeyError:
+				pass
+		print(set(allclasses))
 		return
 
 
@@ -673,7 +652,7 @@ class dbLatinWord(dbDictionaryEntry):
 		findandeaccentuate = re.compile(r'<orth extent="full" lang="\w+" opt="\w">(\w+)</orth>, q. v.')
 		qv = r'<dictionaryentry id="{clean}">{dirty}</dictionaryentry>, q. v.'
 
-		self.body = re.sub(findandeaccentuate, lambda x: self.entrywordcleaner(x.group(1), qv), self.body)
+		self.body = re.sub(findandeaccentuate, lambda x: self._entrywordcleaner(x.group(1), qv), self.body)
 
 	def _latinsynonymfinder(self):
 		fingerprints = [r'(\(syn\.:{0,} )(.*?)([);])']
