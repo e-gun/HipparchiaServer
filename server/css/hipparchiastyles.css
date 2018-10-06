@@ -702,6 +702,11 @@ body {
 	color: var(--red);
 	}
 
+.levellabel5 {
+	font-weight: bold;
+	color: var(--red);
+	}
+
 .lexiconhighlight {
     color: var(--red);
     font-weight: bold;
@@ -1272,6 +1277,10 @@ p.level3 {
 
 p.level4 {
 	padding-left: 45px;
+	}
+
+p.level5 {
+	padding-left: 60px;
 	}
 
 pre {

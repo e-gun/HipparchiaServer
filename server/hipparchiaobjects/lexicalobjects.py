@@ -190,49 +190,73 @@ class dbDictionaryEntry(object):
 		except AttributeError:
 			return str()
 
-	def returnsensehierarchy(self) -> List[str]:
+	def grabnonheadmaterial(self) -> str:
+		"""
+		find the information at the top of a dictionary entry: used to get the basic info about the word
+		:param fullentry:
+		:return:
+		"""
+		heading = re.compile(r'(.*?)<sense')
+		head = re.search(heading, self.body)
+
+		try:
+			return self.body[head.end(1):]
+		except AttributeError:
+			return str()
+
+	def constructsensehierarchy(self):
 		"""
 		look for all of the senses of a work in its dictionary entry
 		return them as a list of definitions with HTML <p> attributes that set them in their proper hierarchy:
 			A ... A1 ... A1b ...
 		"""
 
-		sensing = re.compile(r'<sense.*?/sense>')
-		senses = re.findall(sensing, self.body)
-		leveler = re.compile(r'<sense\s.*?level="(.*?)".*?>')
-		nummer = re.compile(r'<sense.*?\sn="(.*?)".*?>')
-		idfinder = re.compile(r'<sense.*?\sid="n\d+\.(\d+)".*?>')
-		numberedsenses = list()
-		i = 0
+		sensefinder = re.compile(r'<sense.*?/sense>')
+		levelfinder = re.compile(r'<sense\s.*?level="(.*?)".*?>')
+		numfinder = re.compile(r'<sense.*?\sn="(.*?)".*?>')
 
-		for sense in senses:
-			# id="n38520.0" MIGHT be just an orthographic note:  if myid.group(1) != "0":...
-			# myid = re.search(idfinder, sense)
+		self.body = re.sub(sensefinder, lambda x: self._sensewrapper(x.group(0), levelfinder, numfinder), self.body)
+		return
 
-			i += 1
-			lvl = re.search(leveler, sense)
-			num = re.search(nummer, sense)
-			# note that the two dictionaries do not necc agree with one another (or themselves) when it comes to nesting labels
-			if re.search(r'[A-Z]', num.group(1)):
-				paragraphlevel = '1'
-			elif re.search(r'[0-9]', num.group(1)):
-				paragraphlevel = '3'
-			elif re.search(r'[ivx]', num.group(1)):
-				paragraphlevel = '4'
-			elif re.search(r'[a-hj-w]', num.group(1)):
-				paragraphlevel = '2'
-			else:
-				paragraphlevel = '1'
-			try:
-				rewritten = '<p class="level{pl}"><span class="levellabel{lv}">{nm}</span>{sn}</p>\n'.format(
-					pl=paragraphlevel, lv=lvl.group(1), nm=num.group(1), sn=sense)
-			except:
-				print('exception in grabsenses() at sense number:', i)
-				rewritten = ''
-			numberedsenses.append(rewritten)
-		return numberedsenses
+	@staticmethod
+	def _sensewrapper(foundsense, levelfinder, numfinder):
+		"""
+		take a "<sense></sense>" and wrap it in a "<p><span></span><sense></sense></p>" blanket
 
-	def _xmltohtmlconversions(self):
+		pass levelfinder, numfinder to avoid re.compile inside a loop
+
+		:param self:
+		:return:
+		"""
+
+		template = """
+		<p class="level{pl}">
+			<span class="levellabel{lv}">
+				{nm}
+			</span>{sn}
+		</p>"""
+
+		lvl = re.search(levelfinder, foundsense)
+		num = re.search(numfinder, foundsense)
+		# note that the two dictionaries do not necc agree with one another (or themselves) when it comes to nesting labels
+		if re.search(r'[A-Z]', num.group(1)):
+			paragraphlevel = '1'
+		elif re.search(r'\d', num.group(1)):
+			paragraphlevel = '3'
+		elif re.search(r'[ivx]', num.group(1)):
+			paragraphlevel = '4'
+		elif re.search(r'[a-hj-w]', num.group(1)):
+			paragraphlevel = '2'
+		else:
+			paragraphlevel = '1'
+
+		rewritten = template.format(pl=paragraphlevel, lv=lvl.group(1), nm=num.group(1), sn=foundsense)
+
+		# print('wrappedsense\n', rewritten)
+
+		return rewritten
+
+	def xmltohtmlconversions(self):
 		"""
 
 		a heavy rewrite of the xml into html
@@ -243,10 +267,12 @@ class dbDictionaryEntry(object):
 		latinattrtypes = {'extent', 'rend', 'opt', 'lang', 'level', 'id', 'valid', 'type', 'n', 'default'}
 		greekattrtypes = {'extent', 'targorder', 'rend', 'opt', 'lang', 'level', 'id', 'type', 'valid', 'n', 'default'}
 
+		built and then abandoned bs4 versions of the various requisite functions
+		BUT then learned that bs4 profiles as a *very* slow collection of code:
+			'search' and '_find_all' are desperately inefficient
+			they make a crazy number of calls
 
-		bs4 profiles *very* slow: 'search' and '_find_all' are desperately inefficient
-
-				   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+			ncalls  tottime  percall  cumtime  percall filename:lineno(function)
 		  4961664    0.749    0.000    1.045    0.000 {built-in method builtins.isinstance}
 		   308972    0.697    0.000    1.375    0.000 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:1792(_matches)
 		   679678    0.677    0.000    3.214    0.000 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:1766(search)
@@ -325,7 +351,9 @@ class dbDictionaryEntry(object):
 
 		components = xmlstring.split(' ')
 		if components[0] in leaveuntouched or components[0][0] == '/':
-			return xmlstring
+			newxml = '<{x}>'.format(x=xmlstring)
+			# print('passing on', newxml)
+			return newxml
 		else:
 			finder = re.compile(r'(\w+)="(.*?)"')
 			combined = [components[0]]
@@ -465,8 +493,9 @@ class dbDictionaryEntry(object):
 			bdict[''.join(bib)] = head + bib[1] + tail
 
 		# print('here',bdict)
+		htmlentry = self.body
 		for key in bdict.keys():
-			htmlentry = re.sub(key, bdict[key], self.body)
+			htmlentry = re.sub(key, bdict[key], htmlentry)
 
 		# now do the work of finding the lookups
 
@@ -628,7 +657,7 @@ class dbDictionaryEntry(object):
 		if not self.havesensehierarchy:
 			self._bsgeneratesensehierarchy()
 		if not self.xmlhasbeenconverted:
-			self._xmltohtmlconversions()
+			self.xmltohtmlconversions()
 
 		senseparagraphs = self.soup.find_all('p')
 		sensehierarchy = [repr(p) for p in senseparagraphs]

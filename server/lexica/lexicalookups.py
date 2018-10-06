@@ -12,11 +12,10 @@ from typing import List
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.lexicaldbfunctions import querytotalwordcounts, probedictionary, findcountsviawordcountstable, \
-	grablemmataobjectfor, findparserxref
+from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, findparserxref, grablemmataobjectfor, \
+	probedictionary, querytotalwordcounts
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
-from server.formatting.lexicaformatting import formatdictionarysummary, \
-	formatgloss, formatmicroentry, grabheadmaterial, insertbrowserlookups
+from server.formatting.lexicaformatting import formatdictionarysummary, formatgloss, formatmicroentry
 from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject
 from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
@@ -167,12 +166,14 @@ def dictonaryentryashtml(count, seekingentry):
 				w.senselist = w.generatesensessummary()
 				w.quotelist = w.generatequotesummary(lemmaobject)
 
-			# this needs fixing so you don't call it below
-			definition = ''
-
+			w.constructsensehierarchy()
 			w.runbodyxrefsuite()
 			w.insertclickablelookups()
-			sensehierarchy = w.returnsensehierarchy()
+			w.xmltohtmlconversions()
+
+			# print('w.grabheadmaterial()', w.grabheadmaterial())
+			# print('\nw.grabnonheadmaterial()', w.grabnonheadmaterial())
+
 			subcount += 1
 
 			if not w.isagloss():
@@ -204,12 +205,9 @@ def dictonaryentryashtml(count, seekingentry):
 					outputlist.append(formatmicroentry(definition))
 				else:
 					outputlist.append(formatdictionarysummary(w))
-					w.grabheadmaterial()
+					outputlist.append(w.grabheadmaterial())
 					outputlist.append('<br /><br />\n<span class="lexiconhighlight">Full entry:</span><br />')
-					if sensehierarchy:
-						outputlist.extend(sensehierarchy)
-					# else:
-					# 	outputlist.append(formatmicroentry(definition))
+					outputlist.append(w.grabnonheadmaterial())
 			else:
 				outputlist.append(glossstr.format(ent=w.entry))
 				outputlist.append(formatgloss(definition))
@@ -220,8 +218,6 @@ def dictonaryentryashtml(count, seekingentry):
 			cleanedentry = '\n'.join(outputlist)
 			clickableentry = insertlexicalbrowserjs(cleanedentry)
 			# w.printclasses()
-			print('w.soup', w.soup)
-
 	else:
 		if count == 0:
 			cleanedentry = notfoundstr.format(skg=seekingentry)
