@@ -15,7 +15,7 @@ from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefr
 from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.lexica.lexicalookups import lookformorphologymatches
+from server.dbsupport.lexicaldbfunctions import lookformorphologymatches
 from server.searching.searchfunctions import atsignwhereclauses
 from server.threading.mpthreadcount import setthreadcount
 

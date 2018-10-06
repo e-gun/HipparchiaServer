@@ -329,13 +329,21 @@ body {
 	font-family: 'hipparchiamonostatic', monospace;
 	}
 
+.dictitype{
+	color: var(--rustedorange);
+	}
+
+.dicthi.rend_ital{
+	/* definitions in the latin dictionary */
+	font-style: bold;
+	}
+
 .dictquote {
 	color: var(--black);
     font-style: italic;
 	}
 
 .dictquote.lang_greek {
-	font-family: 'hipparchiamonostatic', monospace;
 	}
 
 .dictsense {
@@ -1102,15 +1110,6 @@ body {
 	position: float;
 	}
 
-analysis {
-	font-style: italic;
-	}
-
-author {
-	color: var(--dkbabyblue);
-	font-weight: bold;
-	}
-
 bibl {
 	color: var(--dkbabyblue);
 	border: 1px dotted var(--invisible);
@@ -1120,15 +1119,6 @@ bibl:hover{
 	border: 1px dotted black;
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
-
-biblscope {
-	color: var(--dkbabyblue);
-}
-
-bibtitle {
-	color: var(--dkbabyblue);
-	font-style: italic;
-}
 
 browser {
 	color: var(--brtblue);
@@ -1167,11 +1157,6 @@ div.threecolumn {
 	/* Firefox */ column-count: 3;
 	}
 
-etym {
-    /*one of many dictionary tags: foreign|orth|pron|quote|gen|itype|etym|ref */
-    color: var(--dkgrey);
-    }
-
 fieldset {
 	display: inline-block;
 	border-width: 1px;
@@ -1180,38 +1165,9 @@ fieldset {
 	background-color: hsla(0, 0%, 98%, 1);
 	}
 
-foreign {
-    font-style: italic;
-    }
-
 form {
 	display: inline;
 	}
-
-gen {
-    /* should probably match orth */
-	color: var(--blue);
-    }
-
-gramgrp {
-    color: var(--dkgrey);
-    font-weight: bold;
-    }
-
-gramm {
-    color: var(--dkgrey);
-    font-weight: bold;
-    }
-
-greekfont {
-	font-family: var(--greekfont), 'hipparchiasansstatic', sans-serif;
-}
-
-
-hi {
-    font-weight: bold;
-    color: var(--vdkteal);
-    }
 
 indexedlocation:hover{
 	color: var(--dkbabyblue);
@@ -1227,10 +1183,6 @@ input {
 	text-align: center;
 	padding: 5px;
 	display: inline;
-	}
-
-itype {
-	color: var(--blue);
 	}
 
 latinfont {
@@ -1261,10 +1213,6 @@ observed:hover{
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
 
-orth {
-	color: var(--blue);
-	}
-
 p.level1 {}
 
 p.level2 {
@@ -1283,25 +1231,6 @@ pre {
     font-family: 'hipparchiamonostatic', monospace;
 	color: var(--skyblue);
     }
-
-pos {
-    color: var(--dkteal);
-    font-weight: bold;
-}
-
-pron {
-    font-style: italic;
-    }
-
-quote {
-	color: var(--black);
-    font-style: italic;
-	}
-
-sense {
-	padding: 10px;
-	margin-top: 20px;
-	}
 
 smallcode {
 	font-size: 85%;
@@ -1476,12 +1405,3 @@ ul.roman {
 unclickablebibl {
     color: var(--black);
     }
-
-usg {
-    font-weight: bold;
-    color: var(--red);
-    }
-
-worktitle {
-	font-style: italic;
-	}

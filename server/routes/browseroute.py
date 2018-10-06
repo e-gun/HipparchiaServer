@@ -11,7 +11,7 @@ import json
 from server import hipparchia
 from server.browsing.browserfunctions import buildbrowseroutputobject, findlinenumberfromlocus
 from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
-from server.formatting.lexicaformatting import dbquickfixes
+from server.formatting.lexicaformatting import lexicaldbquickfixes
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -46,7 +46,7 @@ def grabtextforbrowsing(locus):
 	perseusauthorneedsfixing = ['gr0006']
 	if '_PE_' in locus and workdb[:6] in perseusauthorneedsfixing:
 		# perseus has mis-mapped id numbers for the works relative to tlg-e
-		remapper = dbquickfixes([workdb])
+		remapper = lexicaldbquickfixes([workdb])
 		workdb = remapper[workdb]
 
 	try:

@@ -17,7 +17,7 @@ from server.dbsupport.dblinefunctions import dblineintolineobject, makeablanklin
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import extrapunct, removegravity, minimumgreek
 from server.hipparchiaobjects.searchobjects import SearchObject
-from server.lexica.lexicalookups import findcountsviawordcountstable
+from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable
 from server.listsandsession.sessionfunctions import justtlg
 from server.listsandsession.sessionfunctions import probeforsessionvariables
 from server.startup import lemmatadict

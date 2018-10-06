@@ -42,6 +42,11 @@ def formatdictionarysummary(wordentryobject) -> str:
 	senses = wordentryobject.senselist
 	quotes = wordentryobject.quotelist
 
+	labelformultipleitems = '<div class="{cl}"><span class="lexiconhighlight">{lb}</span><br />'
+	labelforoneitem = '<span class="{cl}">{item}</span><br />'
+	itemtext = '\t<span class="{cl}">({ct})&nbsp;{item}</span><br />'
+
+
 	sections = {'authors': {'items': authors, 'classone': 'authorsummary', 'classtwo': 'authorsum', 'label': 'Used by'},
 				 'quotes': {'items': quotes, 'classone': 'quotessummary', 'classtwo': 'quotesum', 'label': 'Quotes'},
 				 'senses': {'items': senses, 'classone': 'sensesummary', 'classtwo': 'sensesum', 'label': 'Senses'}
@@ -56,18 +61,16 @@ def formatdictionarysummary(wordentryobject) -> str:
 		classtwo = sec['classtwo']
 		label = sec['label']
 		if len(items) > 0:
-			outputlist.append('<div class="{cl}"><span class="lexiconhighlight">{lb}</span><br />'.format(cl=classone, lb=label))
+			outputlist.append(labelformultipleitems.format(cl=classone, lb=label))
 		if len(items) == 1:
-			outputlist.append('<span class="{cl}">{item}</span><br />'.format(cl=classtwo, item=items[0]))
+			outputlist.append(labelforoneitem.format(cl=classtwo, item=items[0]))
 		else:
 			count = 0
 			for i in items:
 				count += 1
-				outputlist.append('\t<span class="{cl}">({ct})&nbsp;{item}</span><br />'.format(cl=classtwo, item=i, ct=count))
+				outputlist.append(itemtext.format(cl=classtwo, item=i, ct=count))
 		if len(items) > 0:
 			outputlist.append('</div>')
-
-	outputlist.append('<br /><br />\n<span class="lexiconhighlight">Full entry:</span><br />')
 
 	summarystring = '\n'.join(outputlist)
 
@@ -172,7 +175,7 @@ def insertbrowserlookups(htmlentry: str) -> str:
 	return clickableentry
 
 
-def dbquickfixes(listofnames: list) -> Dict[str, str]:
+def lexicaldbquickfixes(listofnames: list) -> Dict[str, str]:
 	"""
 	persus' euripides work numbers are wrong
 	deal with that here
