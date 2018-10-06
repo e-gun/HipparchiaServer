@@ -48,6 +48,7 @@
 	--offwhite: hsla(0, 0%, 99%, 1);
 	--orange: hsla(47, 100%, 30%, 1);
 	--pink: hsla(0, 33%, 96%, 1);
+    --plum: hsl(291, 15%, 38%);
 	--red: hsla(346, 77%, 26%, 1);
 	--rustedorange: hsla(23, 37%, 39%, 1);
 	--sicklyyellow: hsla(44, 22%, 66%, 1);
@@ -307,6 +308,25 @@ body {
 	font-size: 80%;
     }
 
+
+/*
+    stles coughed out by dictionary entries
+		πρόϲ:
+		{'dicthi rend_ital', 'levellabel3', 'dictref lang_greek targorder_U', 'level1', 'level_1', 'dictquote
+		lang_greek', 'dictgram type_comp', 'dictdate', 'dictabbr', 'dictplacename', 'dicttr', 'dictpb',
+		'dictitype lang_greek', 'level_2', 'dictlbl', 'levellabel1', 'dictunclickablebibl', 'dictbibtitle',
+		'dictgramgrp', 'level2', 'dictcit', 'level_4', 'dictxr', 'dictorth lang_greek', 'level3', 'dictauthor',
+		'dictetym lang_greek', 'dictpos', 'dictgram type_dialect', 'level_3', 'levellabel2', 'levellabel4',
+		'dictforeign lang_greek'}
+
+		bonus:
+		{'dictitype', 'dicthi rend_ital', 'levellabel3', 'level1', 'dictnumber', 'level_1', 'level_5',
+		'levellabel5', 'dictusg type_style', 'dictgen', 'dictorth lang_la', 'dictetym', 'dicttrans', 'dicttr',
+		'dictquote lang_la', 'dictpb', 'level_2', 'levellabel1', 'dictunclickablebibl', 'level2', 'dictcb',
+		'dictcit', 'level_4', 'level3', 'dictauthor', 'dictpos', 'level_3', 'levellabel2', 'levellabel4'}
+
+ */
+
 .dictauthor {
 	color: var(--dkbabyblue);
 	font-weight: bold;
@@ -321,16 +341,18 @@ body {
 	font-style: italic;
 }
 
+.dictetym{
+    color: var(--plum);
+    }
+
 .dictforeign {
     font-style: italic;
     }
 
 .dictforeign.lang_greek {
-	font-family: 'hipparchiamonostatic', monospace;
 	}
 
 .dictitype{
-	color: var(--rustedorange);
 	}
 
 .dicthi.rend_ital{
@@ -350,6 +372,14 @@ body {
 	padding: 10px;
 	margin-top: 20px;
 	}
+
+.dicttrans{
+    font-weight: bold;
+    }
+
+.dictusg.type_style{
+    color: var(--dkteal);
+    }
 
 .dictionaryform {
 	color: var(--dkteal);
@@ -1231,6 +1261,11 @@ pre {
     font-family: 'hipparchiamonostatic', monospace;
 	color: var(--skyblue);
     }
+
+sense {
+	padding: 10px;
+	margin-top: 20px;
+	}
 
 smallcode {
 	font-size: 85%;

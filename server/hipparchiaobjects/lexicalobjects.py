@@ -310,7 +310,7 @@ class dbDictionaryEntry(object):
 
 		tags = self.soup.find_all(True)
 		tagtypes = set([x.name for x in tags])
-		preservetags = {'bibl', 'span', 'p', 'dictionaryentry', 'biblscope', 'sense'}
+		preservetags = {'bibl', 'span', 'p', 'dictionaryentry', 'biblscope', 'sense', 'unclickablebibl'}
 		modifytags = tagtypes - preservetags
 
 		for m in modifytags:
@@ -425,8 +425,6 @@ class dbDictionaryEntry(object):
 			input = r'<{old}>(.*?)</{old}>'.format(old=s)
 			output = r'<{new}>\1</{new}>'.format(new=swaps[s])
 			string = re.sub(input, output, string)
-
-		# string = re.sub(r'<hi rend="ital">(.*?)</hi>', r'<span class="bold">\1</span>', string)
 
 		return string
 
