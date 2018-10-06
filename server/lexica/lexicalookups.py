@@ -167,11 +167,12 @@ def dictonaryentryashtml(count, seekingentry):
 				w.senselist = w.generatesensessummary()
 				w.quotelist = w.generatequotesummary(lemmaobject)
 
+			# this needs fixing so you don't call it below
 			definition = ''
 
 			w.runbodyxrefsuite()
-			w.bsinsertclickablelookups()
-			sensehierarchy = w.bsreturnsensehierarchy()
+			w.insertclickablelookups()
+			sensehierarchy = w.returnsensehierarchy()
 			subcount += 1
 
 			if not w.isagloss():
@@ -219,6 +220,7 @@ def dictonaryentryashtml(count, seekingentry):
 			cleanedentry = '\n'.join(outputlist)
 			clickableentry = insertlexicalbrowserjs(cleanedentry)
 			# w.printclasses()
+			print('w.soup', w.soup)
 
 	else:
 		if count == 0:

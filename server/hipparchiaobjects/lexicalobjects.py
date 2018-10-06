@@ -106,10 +106,7 @@ class dbDictionaryEntry(object):
 		"""
 		afinder = re.compile(r'<author>(.*?)</author>')
 		authorlist = re.findall(afinder, self.body)
-		# authorlist = self.soup.find_all('author')
 		authorlist = list(set(authorlist))
-		# the list is composed of objj. that are <class 'bs4.element.Tag'>
-		# authorlist[:] = [value.string for value in authorlist]
 		notin = ['id.', 'ib.', 'Id.']
 		authorlist[:] = [value for value in authorlist if value not in notin]
 		authorlist.sort()
@@ -159,8 +156,6 @@ class dbDictionaryEntry(object):
 	def generatequotesummary(self, lemmaobject=None) -> List:
 		qfinder = re.compile(r'<quote lang="\w+">(.*?)</quote>')
 		quotelist = re.findall(qfinder, self.body)
-		# quotelist = self.soup.find_all('quote')
-		# quotelist = [q.string for q in quotelist]
 
 		# many of the 'quotes' are really just forms of the word
 		# trim these
@@ -182,179 +177,65 @@ class dbDictionaryEntry(object):
 		return quotelist
 
 	def grabheadmaterial(self) -> str:
-		soupitems = self.soup.find_all()
-		done = False
-		head = list()
+		"""
+		find the information at the top of a dictionary entry: used to get the basic info about the word
+		:param fullentry:
+		:return:
+		"""
+		heading = re.compile(r'(.*?)<sense')
+		head = re.search(heading, self.body)
 
-		while soupitems and not done:
-			item = soupitems.pop()
-			if item.name == 'sense':
-				done = True
-			else:
-				head.append(item)
+		try:
+			return head.group(1)
+		except AttributeError:
+			return str()
 
-		headmaterial = '\n'.join([repr(h) for h in head])
-		return headmaterial
+	def returnsensehierarchy(self) -> List[str]:
+		"""
+		look for all of the senses of a work in its dictionary entry
+		return them as a list of definitions with HTML <p> attributes that set them in their proper hierarchy:
+			A ... A1 ... A1b ...
+		"""
 
-	def bsinsertclickablelookups(self):
-		if not self.soup:
-			self.makesoup()
-
-		tlgfinder = re.compile(r'Perseus:abo:tlg,(\d\d\d\d),(\d\d\d):(.*?)')
-		phifinder = re.compile(r'Perseus:abo:phi,(\d\d\d\d),(\d\d\d):(.*?)')
-
-		bibls = self.soup.find_all('bibl')
-		for b in bibls:
-			try:
-				newid = b['n']
-				del b['n']
-			except KeyError:
-				newid = None
-
-			if newid:
-				newid = re.sub(phifinder, r'lt\1w\2_PE_\3', newid)
-				newid = re.sub(tlgfinder, r'gr\1w\2_PE_\3', newid)
-				b['id'] = newid
-			else:
-				b.name = 'unclickablebibl'
-
-			for droptag in ['default', 'valid']:
-				try:
-					del b[droptag]
-				except KeyError:
-					pass
-		self.haveclickablelookups = True
-		return
-
-	def bsreturnsensehierarchy(self):
-		if not self.havesensehierarchy:
-			self._bsgeneratesensehierarchy()
-		if not self.xmlhasbeenconverted:
-			self._nonbs4xmltohtmlconversions()
-
-		senseparagraphs = self.soup.find_all('p')
-		sensehierarchy = [repr(p) for p in senseparagraphs]
-		return sensehierarchy
-
-	def _bsgeneratesensehierarchy(self):
-		if not self.soup:
-			self.makesoup()
-
-		senses = self.soup.find_all('sense')
-
-		# spantemplate = '<p class="level{pl}"><span class="levellabel{lv}">{nm}</span>{sn}</p>\n'
+		sensing = re.compile(r'<sense.*?/sense>')
+		senses = re.findall(sensing, self.body)
+		leveler = re.compile(r'<sense\s.*?level="(.*?)".*?>')
+		nummer = re.compile(r'<sense.*?\sn="(.*?)".*?>')
+		idfinder = re.compile(r'<sense.*?\sid="n\d+\.(\d+)".*?>')
+		numberedsenses = list()
+		i = 0
 
 		for sense in senses:
-			try:
-				num = sense['n']
-			except KeyError:
-				num = '☹️'
-			try:
-				lev = sense['level']
-			except KeyError:
-				lev = '☹️'
+			# id="n38520.0" MIGHT be just an orthographic note:  if myid.group(1) != "0":...
+			# myid = re.search(idfinder, sense)
 
-			senseid = sense['id']
-
+			i += 1
+			lvl = re.search(leveler, sense)
+			num = re.search(nummer, sense)
 			# note that the two dictionaries do not necc agree with one another (or themselves) when it comes to nesting labels
-			if re.search(r'[A-Z]', num):
+			if re.search(r'[A-Z]', num.group(1)):
 				paragraphlevel = '1'
-			elif re.search(r'[0-9]', num):
+			elif re.search(r'[0-9]', num.group(1)):
 				paragraphlevel = '3'
-			elif re.search(r'[ivx]', num):
+			elif re.search(r'[ivx]', num.group(1)):
 				paragraphlevel = '4'
-			elif re.search(r'[a-hj-w]', num):
+			elif re.search(r'[a-hj-w]', num.group(1)):
 				paragraphlevel = '2'
 			else:
 				paragraphlevel = '1'
-
-			# bracket with a '<p id="n88443.5"></p>'
-			thissense = self.soup.find('sense', {'id': senseid})
-			pid = 'p{num}'.format(num=num)
-			newptag = self.soup.new_tag('p', id=pid)
-			thissense.wrap(newptag)
-
-			# add a '<span class="levellabel{lv}">{nm}</span>'
-			newptag = self.soup.find('p', {'id': pid})
-			newstag = self.soup.new_tag('span')
-			newstag.append(num)
-			newptag.insert(0, newstag)
-			newptag['class'] = 'level{pl}'.format(pl=paragraphlevel)
-			newstag['class'] = 'levellabel{lv}'.format(lv=lev)
-			del newptag['id']
-			self.havesensehierarchy = True
-		return
-
-	def _bs4xmltohtmlconversions(self):
-		"""
-
-		use bs4 to do a heavy rewrite of the xml into html
-
-		latintagtypes = {'itype', 'cb', 'sense', 'etym', 'trans', 'tr', 'quote', 'number', 'pos', 'usg', 'bibl', 'hi', 'gen', 'author', 'cit', 'orth', 'pb'}
-		greektagtypes = {'itype', 'ref', 'tr', 'quote', 'pos', 'foreign', 'xr', 'gramgrp', 'lbl', 'sense', 'etym', 'gram', 'orth', 'date', 'hi', 'abbr', 'pb', 'biblscope', 'placename', 'bibl', 'title', 'author', 'cit'}
-
-		latinattrtypes = {'extent', 'rend', 'opt', 'lang', 'level', 'id', 'valid', 'type', 'n', 'default'}
-		greekattrtypes = {'extent', 'targorder', 'rend', 'opt', 'lang', 'level', 'id', 'type', 'valid', 'n', 'default'}
-
-
-		bs4 profiles *very* slow:
-
-				   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-		  4961664    0.749    0.000    1.045    0.000 {built-in method builtins.isinstance}
-		   308972    0.697    0.000    1.375    0.000 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:1792(_matches)
-		   679678    0.677    0.000    3.214    0.000 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:1766(search)
-		     6665    0.430    0.000    0.432    0.000 {method 'sub' of 're.Pattern' objects}
-		   296982    0.426    0.000    2.179    0.000 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:1725(search_tag)
-		      244    0.352    0.001    3.983    0.016 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:571(_find_all)
-
-		:param string:
-		:return:
-		"""
-
-		tags = self.soup.find_all(True)
-		tagtypes = set([x.name for x in tags])
-		preservetags = {'bibl', 'span', 'p', 'dictionaryentry', 'biblscope', 'sense', 'unclickablebibl'}
-		modifytags = tagtypes - preservetags
-
-		for m in modifytags:
-			xform = self.soup.find_all(m)
-			for x in xform:
-				x.name = 'span'
-				x['class'] = 'dict' + m
-
-		# attrtypes = [set(x.attrs.keys()) for x in tags]
-		# attrtypes = set.union(*attrtypes)
-
-		preserveattrs = {'id'}
-		skipattrs = {'default', 'valid', 'extent', 'n', 'opt'}
-
-		for t in tags:
 			try:
-				c = t['class'] + ' '
-			except KeyError:
-				c = str()
-			except TypeError:
-				# TypeError: can only concatenate list (not "str") to list
-				# print('t',t, t['class'])
-				# t <span class="bold">A</span> ['bold']
-				c = ' '.join(t['class']) + ' '
-			options = set(t.attrs.keys()) - {'class'} - skipattrs - preserveattrs
-			newclassattrs = [o + '_' + t[o] for o in options]
-			if c and newclassattrs:
-				t['class'] = c + ' '.join(newclassattrs)
-			elif newclassattrs:
-				t['class'] = ' '.join(newclassattrs)
-			drops = set(t.attrs.keys()) - {'class'} - preserveattrs
-			for d in drops:
-				del t[d]
+				rewritten = '<p class="level{pl}"><span class="levellabel{lv}">{nm}</span>{sn}</p>\n'.format(
+					pl=paragraphlevel, lv=lvl.group(1), nm=num.group(1), sn=sense)
+			except:
+				print('exception in grabsenses() at sense number:', i)
+				rewritten = ''
+			numberedsenses.append(rewritten)
+		return numberedsenses
 
-		self.xmlhasbeenconverted = True
-		return
-
-	def _nonbs4xmltohtmlconversions(self):
+	def _xmltohtmlconversions(self):
 		"""
 
-		use bs4 to do a heavy rewrite of the xml into html
+		a heavy rewrite of the xml into html
 
 		latintagtypes = {'itype', 'cb', 'sense', 'etym', 'trans', 'tr', 'quote', 'number', 'pos', 'usg', 'bibl', 'hi', 'gen', 'author', 'cit', 'orth', 'pb'}
 		greektagtypes = {'itype', 'ref', 'tr', 'quote', 'pos', 'foreign', 'xr', 'gramgrp', 'lbl', 'sense', 'etym', 'gram', 'orth', 'date', 'hi', 'abbr', 'pb', 'biblscope', 'placename', 'bibl', 'title', 'author', 'cit'}
@@ -363,7 +244,7 @@ class dbDictionaryEntry(object):
 		greekattrtypes = {'extent', 'targorder', 'rend', 'opt', 'lang', 'level', 'id', 'type', 'valid', 'n', 'default'}
 
 
-		bs4 profiles *very* slow:
+		bs4 profiles *very* slow: 'search' and '_find_all' are desperately inefficient
 
 				   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
 		  4961664    0.749    0.000    1.045    0.000 {built-in method builtins.isinstance}
@@ -384,10 +265,10 @@ class dbDictionaryEntry(object):
 		pruned = re.sub(tagfinder, lambda x: self.droptagsfromxml(x.group(1), dropset), self.body)
 
 		preservetags = {'bibl', 'span', 'p', 'dictionaryentry', 'biblscope', 'sense', 'unclickablebibl'}
-		pruned = re.sub(tagfinder, lambda x: self.converttagstoclasses(x.group(1), preservetags), self.body)
+		pruned = re.sub(tagfinder, lambda x: self.converttagstoclasses(x.group(1), preservetags), pruned)
 
 		closefinder = re.compile(r'</(.*?)>')
-		self.body = re.sub(closefinder, lambda x: self.xmlclosetospanclose(x.group(1), preservetags), self.body)
+		self.body = re.sub(closefinder, lambda x: self.xmlclosetospanclose(x.group(1), preservetags), pruned)
 
 		self.xmlhasbeenconverted = True
 		return
@@ -541,6 +422,217 @@ class dbDictionaryEntry(object):
 	def islatin():
 		raise NotImplementedError
 
+	def bsgrabheadmaterial(self) -> str:
+		soupitems = self.soup.find_all()
+		done = False
+		head = list()
+
+		while soupitems and not done:
+			item = soupitems.pop()
+			if item.name == 'sense':
+				done = True
+			else:
+				head.append(item)
+
+		headmaterial = '\n'.join([repr(h) for h in head])
+		return headmaterial
+
+	def insertclickablelookups(self):
+		"""
+
+		in:
+			<bibl n="Perseus:abo:tlg,0019,003:1214" default="NO" valid="yes">
+
+		out:
+			<bibl id="gr0019w003_PE_1214" default="NO" valid="yes">
+
+		:return:
+		"""
+
+		# first retag the items that should not click-to-browse
+
+		biblios = re.compile(r'(<bibl.*?)(.*?)(</bibl>)')
+		bibs = re.findall(biblios, self.body)
+		bdict = dict()
+
+		for bib in bibs:
+			if 'Perseus:abo' not in bib[1]:
+				head = '<unclickablebibl'
+				tail = '</unclickablebibl>'
+			else:
+				head = bib[0]
+				tail = bib[2]
+			bdict[''.join(bib)] = head + bib[1] + tail
+
+		# print('here',bdict)
+		for key in bdict.keys():
+			htmlentry = re.sub(key, bdict[key], self.body)
+
+		# now do the work of finding the lookups
+
+		tlgfinder = re.compile(r'n="Perseus:abo:tlg,(\d\d\d\d),(\d\d\d):(.*?)"')
+		phifinder = re.compile(r'n="Perseus:abo:phi,(\d\d\d\d),(\d\d\d):(.*?)"')
+
+		clickableentry = re.sub(tlgfinder, r'id="gr\1w\2_PE_\3"', htmlentry)
+		clickableentry = re.sub(phifinder, r'id="lt\1w\2_PE_\3"', clickableentry)
+		self.body = clickableentry
+		self.haveclickablelookups = True
+		return
+
+	def bsinsertclickablelookups(self):
+		if not self.soup:
+			self.makesoup()
+
+		tlgfinder = re.compile(r'Perseus:abo:tlg,(\d\d\d\d),(\d\d\d):(.*?)')
+		phifinder = re.compile(r'Perseus:abo:phi,(\d\d\d\d),(\d\d\d):(.*?)')
+
+		bibls = self.soup.find_all('bibl')
+		for b in bibls:
+			try:
+				newid = b['n']
+				del b['n']
+			except KeyError:
+				newid = None
+
+			if newid:
+				newid = re.sub(phifinder, r'lt\1w\2_PE_\3', newid)
+				newid = re.sub(tlgfinder, r'gr\1w\2_PE_\3', newid)
+				b['id'] = newid
+			else:
+				b.name = 'unclickablebibl'
+
+			for droptag in ['default', 'valid']:
+				try:
+					del b[droptag]
+				except KeyError:
+					pass
+		self.haveclickablelookups = True
+		return
+
+	def _bsgeneratesensehierarchy(self):
+		if not self.soup:
+			self.makesoup()
+
+		senses = self.soup.find_all('sense')
+
+		# spantemplate = '<p class="level{pl}"><span class="levellabel{lv}">{nm}</span>{sn}</p>\n'
+
+		for sense in senses:
+			try:
+				num = sense['n']
+			except KeyError:
+				num = '☹️'
+			try:
+				lev = sense['level']
+			except KeyError:
+				lev = '☹️'
+
+			senseid = sense['id']
+
+			# note that the two dictionaries do not necc agree with one another (or themselves) when it comes to nesting labels
+			if re.search(r'[A-Z]', num):
+				paragraphlevel = '1'
+			elif re.search(r'[0-9]', num):
+				paragraphlevel = '3'
+			elif re.search(r'[ivx]', num):
+				paragraphlevel = '4'
+			elif re.search(r'[a-hj-w]', num):
+				paragraphlevel = '2'
+			else:
+				paragraphlevel = '1'
+
+			# bracket with a '<p id="n88443.5"></p>'
+			thissense = self.soup.find('sense', {'id': senseid})
+			pid = 'p{num}'.format(num=num)
+			newptag = self.soup.new_tag('p', id=pid)
+			thissense.wrap(newptag)
+
+			# add a '<span class="levellabel{lv}">{nm}</span>'
+			newptag = self.soup.find('p', {'id': pid})
+			newstag = self.soup.new_tag('span')
+			newstag.append(num)
+			newptag.insert(0, newstag)
+			newptag['class'] = 'level{pl}'.format(pl=paragraphlevel)
+			newstag['class'] = 'levellabel{lv}'.format(lv=lev)
+			del newptag['id']
+			self.havesensehierarchy = True
+		return
+
+	def _bs4xmltohtmlconversions(self):
+		"""
+
+		use bs4 to do a heavy rewrite of the xml into html
+
+		latintagtypes = {'itype', 'cb', 'sense', 'etym', 'trans', 'tr', 'quote', 'number', 'pos', 'usg', 'bibl', 'hi', 'gen', 'author', 'cit', 'orth', 'pb'}
+		greektagtypes = {'itype', 'ref', 'tr', 'quote', 'pos', 'foreign', 'xr', 'gramgrp', 'lbl', 'sense', 'etym', 'gram', 'orth', 'date', 'hi', 'abbr', 'pb', 'biblscope', 'placename', 'bibl', 'title', 'author', 'cit'}
+
+		latinattrtypes = {'extent', 'rend', 'opt', 'lang', 'level', 'id', 'valid', 'type', 'n', 'default'}
+		greekattrtypes = {'extent', 'targorder', 'rend', 'opt', 'lang', 'level', 'id', 'type', 'valid', 'n', 'default'}
+
+
+		bs4 profiles *very* slow:
+
+				   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+		  4961664    0.749    0.000    1.045    0.000 {built-in method builtins.isinstance}
+		   308972    0.697    0.000    1.375    0.000 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:1792(_matches)
+		   679678    0.677    0.000    3.214    0.000 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:1766(search)
+		     6665    0.430    0.000    0.432    0.000 {method 'sub' of 're.Pattern' objects}
+		   296982    0.426    0.000    2.179    0.000 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:1725(search_tag)
+		      244    0.352    0.001    3.983    0.016 /Users/erik/hipparchia_venv/lib/python3.7/site-packages/bs4/element.py:571(_find_all)
+
+		:param string:
+		:return:
+		"""
+
+		tags = self.soup.find_all(True)
+		tagtypes = set([x.name for x in tags])
+		preservetags = {'bibl', 'span', 'p', 'dictionaryentry', 'biblscope', 'sense', 'unclickablebibl'}
+		modifytags = tagtypes - preservetags
+
+		for m in modifytags:
+			xform = self.soup.find_all(m)
+			for x in xform:
+				x.name = 'span'
+				x['class'] = 'dict' + m
+
+		# attrtypes = [set(x.attrs.keys()) for x in tags]
+		# attrtypes = set.union(*attrtypes)
+
+		preserveattrs = {'id'}
+		skipattrs = {'default', 'valid', 'extent', 'n', 'opt'}
+
+		for t in tags:
+			try:
+				c = t['class'] + ' '
+			except KeyError:
+				c = str()
+			except TypeError:
+				# TypeError: can only concatenate list (not "str") to list
+				# print('t',t, t['class'])
+				# t <span class="bold">A</span> ['bold']
+				c = ' '.join(t['class']) + ' '
+			options = set(t.attrs.keys()) - {'class'} - skipattrs - preserveattrs
+			newclassattrs = [o + '_' + t[o] for o in options]
+			if c and newclassattrs:
+				t['class'] = c + ' '.join(newclassattrs)
+			elif newclassattrs:
+				t['class'] = ' '.join(newclassattrs)
+			drops = set(t.attrs.keys()) - {'class'} - preserveattrs
+			for d in drops:
+				del t[d]
+
+		self.xmlhasbeenconverted = True
+		return
+
+	def bsreturnsensehierarchy(self):
+		if not self.havesensehierarchy:
+			self._bsgeneratesensehierarchy()
+		if not self.xmlhasbeenconverted:
+			self._xmltohtmlconversions()
+
+		senseparagraphs = self.soup.find_all('p')
+		sensehierarchy = [repr(p) for p in senseparagraphs]
+		return sensehierarchy
 
 class dbGreekWord(dbDictionaryEntry):
 	"""
