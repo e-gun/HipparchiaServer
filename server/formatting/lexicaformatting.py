@@ -379,7 +379,6 @@ def dictonaryentryashtml(count, seekingentry):
 
 			cleanedentry = '\n'.join(outputlist)
 			clickableentry = insertlexicalbrowserjs(cleanedentry)
-			# w.printclasses()
 	else:
 		if count == 0:
 			cleanedentry = notfoundstr.format(skg=seekingentry)

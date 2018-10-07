@@ -5,10 +5,10 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
 import re
 from typing import List
 
-from bs4 import BeautifulSoup
 from flask import session
 
 from server.formatting.abbreviations import deabbreviateauthors
@@ -53,7 +53,6 @@ class dbDictionaryEntry(object):
 		self.pos = pos.split(' ‖ ')
 		self.body = self._spacebetween(self._xmltohtmlquickconversions(entry_body))
 
-		self.soup = None
 		self.xrefspresent = False
 		self.xmlhasbeenconverted = False
 		self.havesensehierarchy = False
@@ -91,11 +90,6 @@ class dbDictionaryEntry(object):
 			return True
 		else:
 			return False
-
-	def makesoup(self):
-		if not self.xrefspresent:
-			self.runbodyxrefsuite()
-		self.soup = BeautifulSoup(self.body, 'html.parser')
 
 	def generateauthorsummary(self) -> List:
 		"""
@@ -451,37 +445,6 @@ class dbDictionaryEntry(object):
 			string = re.sub(input, output, string)
 
 		return string
-
-	def printclasses(self):
-		"""
-
-		a debugging function to find out what CSS styles are needed:
-
-		πρόϲ:
-		{'dicthi rend_ital', 'levellabel3', 'dictref lang_greek targorder_U', 'level1', 'level_1', 'dictquote
-		lang_greek', 'dictgram type_comp', 'dictdate', 'dictabbr', 'dictplacename', 'dicttr', 'dictpb',
-		'dictitype lang_greek', 'level_2', 'dictlbl', 'levellabel1', 'dictunclickablebibl', 'dictbibtitle',
-		'dictgramgrp', 'level2', 'dictcit', 'level_4', 'dictxr', 'dictorth lang_greek', 'level3', 'dictauthor',
-		'dictetym lang_greek', 'dictpos', 'dictgram type_dialect', 'level_3', 'levellabel2', 'levellabel4',
-		'dictforeign lang_greek'}
-
-		bonus:
-		{'dictitype', 'dicthi rend_ital', 'levellabel3', 'level1', 'dictnumber', 'level_1', 'level_5',
-		'levellabel5', 'dictusg type_style', 'dictgen', 'dictorth lang_la', 'dictetym', 'dicttrans', 'dicttr',
-		'dictquote lang_la', 'dictpb', 'level_2', 'levellabel1', 'dictunclickablebibl', 'level2', 'dictcb',
-		'dictcit', 'level_4', 'level3', 'dictauthor', 'dictpos', 'level_3', 'levellabel2', 'levellabel4'}
-
-		:return:
-		"""
-		tags = self.soup.find_all(True)
-		allclasses = list()
-		for t in tags:
-			try:
-				allclasses.append(t['class'])
-			except KeyError:
-				pass
-		print(set(allclasses))
-		return
 
 
 class dbGreekWord(dbDictionaryEntry):
