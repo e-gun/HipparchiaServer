@@ -369,6 +369,7 @@ def dictonaryentryashtml(count, seekingentry):
 				outputlist.append(w.body)
 			else:
 				outputlist.append(formatdictionarysummary(w))
+				outputlist.append('<p></p>\n')
 				outputlist.append(w.grabheadmaterial())
 				outputlist.append(fullentrystring)
 				outputlist.append(w.grabnonheadmaterial())

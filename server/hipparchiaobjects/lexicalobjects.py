@@ -190,11 +190,11 @@ class dbDictionaryEntry(object):
 		:param fullentry:
 		:return:
 		"""
-		heading = re.compile(r'(.*?)<sense')
-		head = re.search(heading, self.body)
 
+		# after formatting a newline marks the first paragraph of the body
+		h = re.search(r'\n', self.body)
 		try:
-			return head.group(1)
+			return self.body[:h.end()]
 		except AttributeError:
 			return str()
 
@@ -204,15 +204,11 @@ class dbDictionaryEntry(object):
 		:param fullentry:
 		:return:
 		"""
-		heading = re.compile(r'(.*?)<sense')
-		head = re.search(heading, self.body)
 
-		if not head:
-			# this is some sort of micro-entry
-			return self.body
-
+		# after formatting a newline marks the first paragraph of the body
+		h = re.search(r'\n', self.body)
 		try:
-			return self.body[head.end(1):]
+			return self.body[h.end():]
 		except AttributeError:
 			return str()
 

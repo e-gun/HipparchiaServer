@@ -360,6 +360,8 @@ body {
 	}
 
 .dictitype{
+	font-weight: 600;
+    color: var(--vdkgrey);
 	}
 
 .dicthi {
@@ -372,6 +374,21 @@ body {
 	/* definitions in the latin dictionary */
 	font-weight: 600;
     color: var(--vdkgrey);
+	}
+
+.dictorth {
+	font-weight: 600;
+    color: var(--dkteal);
+	}
+
+.dictorth .dictlang_la {
+	font-weight: 600;
+    color: var(--dkteal);
+	}
+
+.dictorth .dictlang_greek {
+	font-weight: 600;
+    color: var(--dkteal);
 	}
 
 .dictquote {
