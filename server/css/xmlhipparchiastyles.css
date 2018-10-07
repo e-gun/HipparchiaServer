@@ -48,7 +48,6 @@
 	--offwhite: hsla(0, 0%, 99%, 1);
 	--orange: hsla(47, 100%, 30%, 1);
 	--pink: hsla(0, 33%, 96%, 1);
-    --plum: hsl(291, 15%, 38%);
 	--red: hsla(346, 77%, 26%, 1);
 	--rustedorange: hsla(23, 37%, 39%, 1);
 	--sicklyyellow: hsla(44, 22%, 66%, 1);
@@ -308,25 +307,6 @@ body {
 	font-size: 80%;
     }
 
-
-/*
-    stles coughed out by dictionary entries
-		πρόϲ:
-		{'dicthi rend_ital', 'levellabel3', 'dictref lang_greek targorder_U', 'level1', 'level_1', 'dictquote
-		lang_greek', 'dictgram type_comp', 'dictdate', 'dictabbr', 'dictplacename', 'dicttr', 'dictpb',
-		'dictitype lang_greek', 'level_2', 'dictlbl', 'levellabel1', 'dictunclickablebibl', 'dictbibtitle',
-		'dictgramgrp', 'level2', 'dictcit', 'level_4', 'dictxr', 'dictorth lang_greek', 'level3', 'dictauthor',
-		'dictetym lang_greek', 'dictpos', 'dictgram type_dialect', 'level_3', 'levellabel2', 'levellabel4',
-		'dictforeign lang_greek'}
-
-		bonus:
-		{'dictitype', 'dicthi rend_ital', 'levellabel3', 'level1', 'dictnumber', 'level_1', 'level_5',
-		'levellabel5', 'dictusg type_style', 'dictgen', 'dictorth lang_la', 'dictetym', 'dicttrans', 'dicttr',
-		'dictquote lang_la', 'dictpb', 'level_2', 'levellabel1', 'dictunclickablebibl', 'level2', 'dictcb',
-		'dictcit', 'level_4', 'level3', 'dictauthor', 'dictpos', 'level_3', 'levellabel2', 'levellabel4'}
-
- */
-
 .dictauthor {
 	color: var(--dkbabyblue);
 	font-weight: bold;
@@ -341,54 +321,12 @@ body {
 	font-style: italic;
 }
 
-.dictcase{
-    font-style: bold;
-    }
-
-.dictcit{
-    }
-
-.dictetym{
-    color: var(--plum);
-    }
-
 .dictforeign {
     font-style: italic;
     }
 
-.dictforeign .dictlang_greek {
-	}
-
-.dictitype{
-	font-weight: 600;
-    color: var(--vdkgrey);
-	}
-
-.dicthi {
-	/* definitions in the latin dictionary */
-	font-weight: 600;
-    color: var(--vdkgrey);
-	}
-
-.dicthi .dictrend_ital{
-	/* definitions in the latin dictionary */
-	font-weight: 600;
-    color: var(--vdkgrey);
-	}
-
-.dictorth {
-	font-weight: 600;
-    color: var(--dkteal);
-	}
-
-.dictorth .dictlang_la {
-	font-weight: 600;
-    color: var(--dkteal);
-	}
-
-.dictorth .dictlang_greek {
-	font-weight: 600;
-    color: var(--dkteal);
+.dictforeign.lang_greek {
+	font-family: 'hipparchiamonostatic', monospace;
 	}
 
 .dictquote {
@@ -396,33 +334,14 @@ body {
     font-style: italic;
 	}
 
-.dictquote .dictlang_greek {
-	}
-
-.dictquote .dictlang_la {
+.dictquote.lang_greek {
+	font-family: 'hipparchiamonostatic', monospace;
 	}
 
 .dictsense {
 	padding: 10px;
 	margin-top: 20px;
 	}
-
-.dicttr{
-    font-weight: bold;
-    color: var(--vdkgrey);
-    }
-
-.dicttrans{
-    font-weight: bold;
-    color: var(--vdkgrey);
-    }
-
-.dictusg{
-    }
-
-.dictusg .dicttype_style{
-    color: var(--dkteal);
-    }
 
 .dictionaryform {
 	color: var(--dkteal);
@@ -725,11 +644,6 @@ body {
 
 .levellabel4 {
 	font-style: italic;
-	color: var(--red);
-	}
-
-.levellabel5 {
-	font-size: 85%;
 	color: var(--red);
 	}
 
@@ -1188,6 +1102,15 @@ body {
 	position: float;
 	}
 
+analysis {
+	font-style: italic;
+	}
+
+author {
+	color: var(--dkbabyblue);
+	font-weight: bold;
+	}
+
 bibl {
 	color: var(--dkbabyblue);
 	border: 1px dotted var(--invisible);
@@ -1197,6 +1120,15 @@ bibl:hover{
 	border: 1px dotted black;
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
+
+biblscope {
+	color: var(--dkbabyblue);
+}
+
+bibtitle {
+	color: var(--dkbabyblue);
+	font-style: italic;
+}
 
 browser {
 	color: var(--brtblue);
@@ -1235,6 +1167,11 @@ div.threecolumn {
 	/* Firefox */ column-count: 3;
 	}
 
+etym {
+    /*one of many dictionary tags: foreign|orth|pron|quote|gen|itype|etym|ref */
+    color: var(--dkgrey);
+    }
+
 fieldset {
 	display: inline-block;
 	border-width: 1px;
@@ -1243,9 +1180,38 @@ fieldset {
 	background-color: hsla(0, 0%, 98%, 1);
 	}
 
+foreign {
+    font-style: italic;
+    }
+
 form {
 	display: inline;
 	}
+
+gen {
+    /* should probably match orth */
+	color: var(--blue);
+    }
+
+gramgrp {
+    color: var(--dkgrey);
+    font-weight: bold;
+    }
+
+gramm {
+    color: var(--dkgrey);
+    font-weight: bold;
+    }
+
+greekfont {
+	font-family: var(--greekfont), 'hipparchiasansstatic', sans-serif;
+}
+
+
+hi {
+    font-weight: bold;
+    color: var(--vdkteal);
+    }
 
 indexedlocation:hover{
 	color: var(--dkbabyblue);
@@ -1261,6 +1227,10 @@ input {
 	text-align: center;
 	padding: 5px;
 	display: inline;
+	}
+
+itype {
+	color: var(--blue);
 	}
 
 latinfont {
@@ -1291,6 +1261,10 @@ observed:hover{
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
 
+orth {
+	color: var(--blue);
+	}
+
 p.level1 {}
 
 p.level2 {
@@ -1305,14 +1279,24 @@ p.level4 {
 	padding-left: 45px;
 	}
 
-p.level5 {
-	padding-left: 60px;
-	}
-
 pre {
     font-family: 'hipparchiamonostatic', monospace;
 	color: var(--skyblue);
     }
+
+pos {
+    color: var(--dkteal);
+    font-weight: bold;
+}
+
+pron {
+    font-style: italic;
+    }
+
+quote {
+	color: var(--black);
+    font-style: italic;
+	}
 
 sense {
 	padding: 10px;
@@ -1492,3 +1476,12 @@ ul.roman {
 unclickablebibl {
     color: var(--black);
     }
+
+usg {
+    font-weight: bold;
+    color: var(--red);
+    }
+
+worktitle {
+	font-style: italic;
+	}

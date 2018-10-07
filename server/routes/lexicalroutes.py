@@ -12,12 +12,13 @@ import re
 from flask import session
 
 from server import hipparchia
+from server.dbsupport.lexicaldbfunctions import searchdbforlexicalentry, querytotalwordcounts, lookformorphologymatches
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import depunct
 from server.formatting.wordformatting import removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.lexica.lexicalookups import findtotalcounts, getobservedwordprevalencedata, lexicalmatchesintohtml, \
-	lookformorphologymatches, returnentryhtml
+from server.formatting.lexicaformatting import multiplelexicalmatchesintohtml, dictonaryentryashtml, \
+	getobservedwordprevalencedata
 from server.listsandsession.genericlistfunctions import polytonicsort
 from server.listsandsession.sessionfunctions import justlatin, justtlg
 from server.listsandsession.sessionfunctions import probeforsessionvariables
@@ -125,7 +126,7 @@ def dictsearch(searchterm):
 
 		for entry in sortedfinds:
 			count += 1
-			returnarray.append({'value': returnentryhtml(count, entry[0], dbcursor)})
+			returnarray.append({'value': dictonaryentryashtml(count, entry[0])})
 	else:
 		returnarray.append({'value': '[nothing found]'})
 
@@ -151,6 +152,11 @@ def findbyform(observedword):
 
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
+
+	sanitationerror = '[empty search: <span class="emph">{w}</span> was sanitized into nothingness]'
+	dberror = '<br />[the {lang} morphology data has not been installed]'
+	notfounderror = '<br />[could not find a match for <span class="emph">{cw}</span> in the morphology table]'
+	nodataerror = '<br /><br />no prevalence data for {w}'
 
 	# the next is pointless because: 'po/lemon' will generate a URL '/parse/po/lemon'
 	# that will 404 before you can get to replacegreekbetacode()
@@ -178,8 +184,7 @@ def findbyform(observedword):
 	try:
 		cleanedword[0]
 	except IndexError:
-		returnarray = [{'value': '[empty search: <span class="emph">{w}</span> was sanitized into nothingness]'.format(
-			w=observedword)}]
+		returnarray = [{'value': sanitationerror.format(w=observedword)}]
 		return json.dumps(returnarray)
 
 	isgreek = True
@@ -197,31 +202,29 @@ def findbyform(observedword):
 	if morphologyobject:
 		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
 			returnarray.append(getobservedwordprevalencedata(cleanedword))
-		returnarray += lexicalmatchesintohtml(cleanedword, morphologyobject, dbcursor)
+		returnarray += multiplelexicalmatchesintohtml(morphologyobject)
 	else:
 		if isgreek and not session['available']['greek_morphology']:
 			returnarray = [
-				{'value': '<br />[the Greek morphology data has not been installed]'.format(cw=cleanedword)},
+				{'value': dberror.format(lang='Greek')},
 				{'entries': '[not found]'}
 			]
 		elif not isgreek and not session['available']['latin_morphology']:
 			returnarray = [
-				{'value': '<br />[the Latin morphology data has not been installed]'.format(cw=cleanedword)},
+				{'value': dberror.format(lang='Latin')},
 				{'entries': '[not found]'}
 			]
 		else:
 			returnarray = [
-				{'value':
-					 '<br />[could not find a match for <span class="emph">{cw}</span> in the morphology table]'.format(
-						 cw=cleanedword)},
+				{'value': notfounderror.format(cw=cleanedword)},
 				{'entries': '[not found]'}
 			]
 
-		prev = getobservedwordprevalencedata(cleanedword)
+		prev = {'value': getobservedwordprevalencedata(cleanedword)}
 		if not prev:
-			prev = getobservedwordprevalencedata(retainedgravity)
+			prev = {'value': getobservedwordprevalencedata(retainedgravity)}
 		if not prev:
-			prev = {'value': '<br /><br />no prevalence data for {w}'.format(w=retainedgravity)}
+			prev = {'value': nodataerror.format(w=retainedgravity)}
 		returnarray.append(prev)
 
 	returnarray = [r for r in returnarray if r]
@@ -247,10 +250,6 @@ def reverselexiconsearch(searchterm):
 
 	probeforsessionvariables()
 
-	dbconnection = ConnectionObject()
-	dbconnection.setautocommit()
-	dbcursor = dbconnection.cursor()
-
 	returnarray = list()
 
 	seeking = depunct(searchterm)
@@ -268,14 +267,9 @@ def reverselexiconsearch(searchterm):
 	for s in searchunder:
 		usedict = s[0]
 		translationlabel = s[1]
-
 		# first see if your term is mentioned at all
-		query = 'SELECT entry_name FROM {d}_dictionary WHERE translations ~ %s LIMIT {lim}'.format(d=usedict, lim=limit)
-		data = ('{s}'.format(s=seeking),)
-		dbcursor.execute(query, data)
-
-		matches = dbcursor.fetchall()
-		entries += [m[0] for m in matches]
+		wordobjects = searchdbforlexicalentry(seeking, usedict, limit)
+		entries += [w.entry for w in wordobjects]
 
 	if len(entries) == limit:
 		returnarray.append({'value': '[stopped searching after {lim} finds]'.format(lim=limit)})
@@ -284,7 +278,7 @@ def reverselexiconsearch(searchterm):
 
 	# we have the matches; now we will sort them either by frequency or by initial letter
 	if hipparchia.config['REVERSELEXICONRESULTSBYFREQUENCY'] == 'yes':
-		unsortedentries = [(findtotalcounts(e, dbcursor), e) for e in entries]
+		unsortedentries = [(querytotalwordcounts(e), e) for e in entries]
 		entries = list()
 		for e in unsortedentries:
 			hwcountobject = e[0]
@@ -300,7 +294,7 @@ def reverselexiconsearch(searchterm):
 	# now we retrieve and format the entries
 	if entries:
 		# summary of entry values first
-		countobjectdict = {e: findtotalcounts(e, dbcursor) for e in entries}
+		countobjectdict = {e: querytotalwordcounts(e) for e in entries}
 		summary = list()
 		count = 0
 		for c in countobjectdict.keys():
@@ -320,12 +314,10 @@ def reverselexiconsearch(searchterm):
 		count = 0
 		for entry in entries:
 			count += 1
-			returnarray.append({'value': returnentryhtml(count, entry, dbcursor)})
+			returnarray.append({'value': dictonaryentryashtml(count, entry)})
 	else:
 		returnarray.append({'value': '<br />[nothing found under "{skg}"]'.format(skg=seeking)})
 
 	returnarray = json.dumps(returnarray)
-
-	dbconnection.connectioncleanup()
 
 	return returnarray

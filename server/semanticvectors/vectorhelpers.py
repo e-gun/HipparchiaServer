@@ -23,7 +23,7 @@ from server.formatting.wordformatting import acuteorgrav, buildhipparchiatransta
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
-from server.lexica.lexicalookups import findcountsviawordcountstable, findtotalcounts
+from server.dbsupport.lexicaldbfunctions import querytotalwordcounts, findcountsviawordcountstable
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildbetweenwhereextension
 from server.startup import lemmatadict
@@ -901,11 +901,8 @@ def relativehomonymnweight(worda, wordb, morphdict) -> float:
 	:return:
 	"""
 
-	dbconnection = ConnectionObject()
-	dbcursor = dbconnection.cursor()
-
-	aheadwordobject = findtotalcounts(worda, dbcursor)
-	bheadwordobject = findtotalcounts(wordb, dbcursor)
+	aheadwordobject = querytotalwordcounts(worda)
+	bheadwordobject = querytotalwordcounts(wordb)
 	atotal = aheadwordobject.t
 	btotal = bheadwordobject.t
 	try:

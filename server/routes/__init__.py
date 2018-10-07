@@ -5,7 +5,7 @@ __all__ = ['browseroute', 'frontpage', 'getterroutes', 'hintroutes', 'inforoutes
 what can be found where: [routes/ $ grep "^@" *.py]
 
     browseroute.py:@hipparchia.route('/browse/<locus>')
-    cssroutes.py:@hipparchia.route('/css/<cssfile>', methods=['GET'])
+    cssroutes.py:@hipparchia.route('/css/<cssrequest>', methods=['GET'])
     frontpage.py:@hipparchia.route('/')
     frontpage.py:@hipparchia.route('/favicon.ico')
     frontpage.py:@hipparchia.route('/apple-touch-icon-precomposed.png')
@@ -26,20 +26,21 @@ what can be found where: [routes/ $ grep "^@" *.py]
     hintroutes.py:@hipparchia.route('/getlemmahint', methods=['GET'])
     inforoutes.py:@hipparchia.route('/databasecontents/<dictionarytodisplay>')
     inforoutes.py:@hipparchia.route('/csssamples')
+    inforoutes.py:@hipparchia.route('/showsession')
     inforoutes.py:@hipparchia.route('/testroute')
-    lexicalroutes.py:@hipparchia.route('/parse/<observedword>')
     lexicalroutes.py:@hipparchia.route('/dictsearch/<searchterm>')
+    lexicalroutes.py:@hipparchia.route('/parse/<observedword>')
     lexicalroutes.py:@hipparchia.route('/reverselookup/<searchterm>')
     resetroutes.py:@hipparchia.route('/resetsession')
     resetroutes.py:@hipparchia.route('/resetvectors')
     resetroutes.py:@hipparchia.route('/resetvectorimages')
-    searchroute.py:@hipparchia.route('/executesearch/<timestamp>', methods=['GET'])
+    searchroute.py:@hipparchia.route('/executesearch/<searchid>', methods=['GET'])
     selectionroutes.py:@hipparchia.route('/makeselection', methods=['GET'])
     selectionroutes.py:@hipparchia.route('/setsessionvariable', methods=['GET'])
     selectionroutes.py:@hipparchia.route('/clearselections', methods=['GET'])
     selectionroutes.py:@hipparchia.route('/getselections')
     textandindexroutes.py:@hipparchia.route('/indexto', methods=['GET'])
     textandindexroutes.py:@hipparchia.route('/textof', methods=['GET'])
-    websocketroutes.py:@hipparchia.route('/confirm/<ts>')
+    websocketroutes.py:@hipparchia.route('/confirm/<searchid>')
 
 """
