@@ -17,8 +17,8 @@ from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import depunct
 from server.formatting.wordformatting import removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.lexica.lexicalookups import getobservedwordprevalencedata, multiplelexicalmatchesintohtml, \
-	dictonaryentryashtml
+from server.formatting.lexicaformatting import multiplelexicalmatchesintohtml, dictonaryentryashtml, \
+	getobservedwordprevalencedata
 from server.listsandsession.genericlistfunctions import polytonicsort
 from server.listsandsession.sessionfunctions import justlatin, justtlg
 from server.listsandsession.sessionfunctions import probeforsessionvariables
