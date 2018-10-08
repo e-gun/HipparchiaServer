@@ -323,7 +323,8 @@ class dbDictionaryEntry(object):
 		# notes that dropping 'n' will ruin your ability to generate the sensehierarchy
 		dropset = {'default', 'valid', 'extent', 'n', 'opt'}
 
-		pruned = re.sub(tagfinder, lambda x: self._droptagsfromxml(x.group(1), dropset), self.body)
+		propertyfinder = re.compile(r'(\w+)=".*?"')
+		pruned = re.sub(tagfinder, lambda x: self._droptagsfromxml(x.group(1), dropset, propertyfinder), self.body)
 
 		preservetags = {'bibl', 'span', 'p', 'dictionaryentry', 'biblscope', 'sense', 'unclickablebibl'}
 		pruned = re.sub(tagfinder, lambda x: self._converttagstoclasses(x.group(1), preservetags), pruned)
@@ -343,7 +344,7 @@ class dbDictionaryEntry(object):
 		return newxmlstring
 
 	@staticmethod
-	def _droptagsfromxml(xmlstring: str, dropset: set) -> str:
+	def _droptagsfromxml(xmlstring: str, dropset: set, propertyfinder) -> str:
 		"""
 
 		if
@@ -359,10 +360,9 @@ class dbDictionaryEntry(object):
 		:return:
 		"""
 
-		finder = re.compile(r'(\w+)=".*?"')
 		components = xmlstring.split(' ')
 		combined = [components[0]]
-		preserved = [c for c in components[1:] if re.search(finder, c) and re.search(finder, c).group(1) not in dropset]
+		preserved = [c for c in components[1:] if re.search(propertyfinder, c) and re.search(propertyfinder, c).group(1) not in dropset]
 		combined.extend(preserved)
 		newxml = '<{x}>'.format(x=' '.join(combined))
 		return newxml
