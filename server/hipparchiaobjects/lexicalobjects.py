@@ -11,6 +11,7 @@ from typing import List
 
 from flask import session
 
+from server import hipparchia
 from server.formatting.abbreviations import deabbreviateauthors
 from server.formatting.wordformatting import stripaccents
 from server.listsandsession.genericlistfunctions import polytonicsort
@@ -52,6 +53,8 @@ class dbDictionaryEntry(object):
 		self.translations = translations.split(' ‖ ')
 		self.pos = pos.split(' ‖ ')
 		self.body = self._spacebetween(self._xmltohtmlquickconversions(entry_body))
+		if hipparchia.config['DEABBREVIATEAUTHORS'] != 'no':
+			self._deabbreviateauthornames()
 
 		self.xrefspresent = False
 		self.xmlhasbeenconverted = False
@@ -90,6 +93,20 @@ class dbDictionaryEntry(object):
 			return True
 		else:
 			return False
+
+	def _deabbreviateauthornames(self):
+		afinder = re.compile(r'<author>(.*?)</author>')
+		if self.isgreek():
+			d = 'greek'
+		elif self.islatin():
+			d = 'latin'
+		self.body = re.sub(afinder, lambda x: self._deabbreviateauthornamewrapper(x.group(1), d), self.body)
+
+	@staticmethod
+	def _deabbreviateauthornamewrapper(foundauthor: str, dictionary: str) -> str:
+		author = deabbreviateauthors(foundauthor, dictionary)
+		wrapper = '<author>{au}</author>'.format(au=author)
+		return wrapper
 
 	def generateauthorsummary(self) -> List:
 		"""
@@ -201,6 +218,10 @@ class dbDictionaryEntry(object):
 
 		# after formatting a newline marks the first paragraph of the body
 		h = re.search(r'\n', self.body)
+		if not h:
+			microentry = '<p></p>\n{b}'.format(b=self.body)
+			return microentry
+
 		try:
 			return self.body[h.end():]
 		except AttributeError:
@@ -323,7 +344,8 @@ class dbDictionaryEntry(object):
 		# notes that dropping 'n' will ruin your ability to generate the sensehierarchy
 		dropset = {'default', 'valid', 'extent', 'n', 'opt'}
 
-		pruned = re.sub(tagfinder, lambda x: self._droptagsfromxml(x.group(1), dropset), self.body)
+		propertyfinder = re.compile(r'(\w+)=".*?"')
+		pruned = re.sub(tagfinder, lambda x: self._droptagsfromxml(x.group(1), dropset, propertyfinder), self.body)
 
 		preservetags = {'bibl', 'span', 'p', 'dictionaryentry', 'biblscope', 'sense', 'unclickablebibl'}
 		pruned = re.sub(tagfinder, lambda x: self._converttagstoclasses(x.group(1), preservetags), pruned)
@@ -343,7 +365,7 @@ class dbDictionaryEntry(object):
 		return newxmlstring
 
 	@staticmethod
-	def _droptagsfromxml(xmlstring: str, dropset: set) -> str:
+	def _droptagsfromxml(xmlstring: str, dropset: set, propertyfinder) -> str:
 		"""
 
 		if
@@ -359,10 +381,9 @@ class dbDictionaryEntry(object):
 		:return:
 		"""
 
-		finder = re.compile(r'(\w+)=".*?"')
 		components = xmlstring.split(' ')
 		combined = [components[0]]
-		preserved = [c for c in components[1:] if re.search(finder, c) and re.search(finder, c).group(1) not in dropset]
+		preserved = [c for c in components[1:] if re.search(propertyfinder, c) and re.search(propertyfinder, c).group(1) not in dropset]
 		combined.extend(preserved)
 		newxml = '<{x}>'.format(x=' '.join(combined))
 		return newxml
@@ -474,8 +495,8 @@ class dbGreekWord(dbDictionaryEntry):
 		# modify self.body to add clicks to "cf" words, etc
 		if not self.xrefspresent:
 			self._greekgreaterthanlessthan()
-			self._greekxmltagwrapper('ref')
-			self._greekxmltagwrapper('etym')
+			self._greekdictionaryentrywrapper('ref')
+			self._greekdictionaryentrywrapper('etym')
 			self._greeksvfinder()
 			self._greekequivalentformfinder()
 			self._cffinder()
@@ -492,9 +513,8 @@ class dbGreekWord(dbDictionaryEntry):
 		# but note that it would take a while to get all of the accent possibilities in there
 		pass
 
-	def _greekxmltagwrapper(self, tag):
+	def _greekdictionaryentrywrapper(self, tag):
 		"""
-
 		sometimes you have "<tag>WORD</tag>" and sometimes you have "<tag>WORD.</tag>"
 
 		note the potential false-positive finds with things like:
@@ -511,11 +531,8 @@ class dbGreekWord(dbDictionaryEntry):
 
 		:return:
 		"""
-
 		# don't need to strip the accents with a greek word; do need to strip longs and shorts in a latin word
-
 		markupfinder = re.compile(r'(<{t}.*?>)(\w+)(\.?<.*?{t}>)'.format(t=tag))
-
 		self.body = re.sub(markupfinder, r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3', self.body)
 
 	def _greeksvfinder(self):
@@ -567,12 +584,11 @@ class dbLatinWord(dbDictionaryEntry):
 	def runbodyxrefsuite(self):
 		# modify self.body to add clicks to "cf" words, etc
 		if not self.xrefspresent:
-			self._latinetymologyfinder()
-			self._latinsubvidefinder()
+			self._latinxreffinder()
 			self._latinsynonymfinder()
 			self.xrefspresent = True
 
-	def _latinsubvidefinder(self):
+	def _latinxreffinder(self):
 		"""
 
 		make "balneum" clickable if you are told to "v. balneum"
@@ -593,18 +609,26 @@ class dbLatinWord(dbDictionaryEntry):
 		:return:
 		"""
 
-		xreffinder = list()
-		xreffinder.append(re.compile(r'(v\. )(\w+)( <sense)'))
-		xreffinder.append(re.compile(r'(v\. )(\w+)(\.)$'))
-		xreffinder.append(re.compile(r'(v\. )(\w+)(, I+)'))
-		xreffinder.append(re.compile(r'(\(cf\. )(\w+)(\))'))
-		xreffinder.append(re.compile(r'(; cf\. )(\w+)(\))'))
-		xreffinder.append(re.compile(r'(<etym opt="\w">\d\. )(\w+)(, q\. v\.)'))
-		xreffinder.append(re.compile(r'(from )(\w+)(</etym>)'))
+		sv = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
+		fingerprints = [r'(v\. )(\w+)( <sense)',
+					r'(v\. )(\w+)(\.)$',
+					r'(v\. )(\w+)(, I+)',
+					r'(\(cf\. )(\w+)(\))',
+					r'(; cf\. )(\w+)(\))',
+					r'(\(sc. )(\w+)([,)])',
+					r'(<etym opt="\w">\d\. )(\w+)(, q\. v\.)',
+					r'(from )(\w+)(</etym>)',
+					r'(<etym opt=".">)(\w+)(</etym>)',
+					r'(<etym opt=".">\d\. )(\w+)(</etym>)',
+					r'(<etym opt=".">)(\w+)([;,])',
+					r'(= )(\w+)([., ])',
+					r'(cf\. Gr\. )(\w+)(,)',
+					r'( i\. q\. )(\w+)([),])',
+					r'(pure Lat\.)(\w+)([),])',
+					]
 		# xreffinder.append(re.compile(r'<lbl opt="n">(s\.v\.)</lbl> <ref targOrder="U" lang="greek">(\w+)</ref>()'))
 
-		sv = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
-
+		xreffinder = [re.compile(f) for f in fingerprints]
 		for x in xreffinder:
 			self.body = re.sub(x, sv, self.body)
 
@@ -635,39 +659,6 @@ class dbLatinWord(dbDictionaryEntry):
 		newstring = head + substitutes + tail
 
 		return newstring
-
-	def _latinetymologyfinder(self):
-		"""
-
-		make "balneum" clickable if you are told a word comes from it.
-
-		sample from entry:
-
-			<etym opt="n">balneum</etym>
-
-			<gen opt="n">m.</gen>, = βούβαλοϲ,
-
-			i. q. εἴδωγον)   [nb: this example has a typo in the original data: εἴδωλον is meant]
-
-		note problem with:
-
-			<etym opt="n">Spanish</etym>
-
-		:return:
-		"""
-
-		xreffinder = list()
-		xreffinder.append(re.compile(r'(<etym opt=".">)(\w+)(</etym>)'))
-		xreffinder.append(re.compile(r'(<etym opt=".">\d\. )(\w+)(</etym>)'))
-		xreffinder.append(re.compile(r'(<etym opt=".">)(\w+)([;,])'))
-		xreffinder.append(re.compile(r'(= )(\w+)([, ])'))
-		xreffinder.append(re.compile(r'(cf\. Gr\. )(\w+)(,)'))
-		xreffinder.append(re.compile(r'( i\. q\. )(\w+)(\))'))
-
-		sv = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
-		for x in xreffinder:
-			self.body = re.sub(x, sv, self.body)
-
 
 
 """
