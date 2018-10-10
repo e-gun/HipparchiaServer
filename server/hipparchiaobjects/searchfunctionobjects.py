@@ -145,7 +145,13 @@ class RedisSearchFunctionObject(GenericSearchFunctionObject):
 		self.emptytest = self.listofplacestosearch
 
 	def getnextfnc(self):
-		nextsearchlocation = self.trytogetnext()
+		self.commitcount += 1
+		self.dbconnection.checkneedtocommit(self.commitcount)
+		try:
+			nextsearchlocation = self.getnetxitem(0)
+		except self.emptyerror:
+			nextsearchlocation = None
+
 		try:
 			# redis sends bytes; we need strings
 			nextsearchlocation = nextsearchlocation.decode()

@@ -38,7 +38,7 @@
 #   Waiting for redis to do a SPOP is not nearly as fast as accessing memory directly. The longer the searchlist
 #   the greater the penalty: a search of 236,835 texts is quite costly. There is also another experimental option:
 #   'queue'. This is another way of attacking the long-standing Manager() issue. For debuggging purposes only...
-#
+#   [ATM it looks like a queue mitigates but does not eliminate the problem]
 
 # hipparchia itself as a server
 FLASKSERVEDFROMPORT = 5000
