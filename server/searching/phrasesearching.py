@@ -7,15 +7,14 @@
 """
 
 import re
-from multiprocessing import JoinableQueue
 from multiprocessing.managers import ListProxy
 from typing import List
 
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
-from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.dbsupport.tablefunctions import assignuniquename
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 from server.hipparchiaobjects.helperobjects import QueryCombinator
+from server.hipparchiaobjects.searchfunctionobjects import returnsearchfncobject
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.searchfunctions import buildbetweenwhereextension, lookoutsideoftheline
 from server.searching.substringsearching import substringsearch
@@ -79,8 +78,6 @@ def phrasesearch(wkid: str, searchobject: SearchObject, cursor) -> List[dbWorkLi
 
 def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
-
-	not a good candidate for GenericSearchFunctionObject() given how much custom code is in here
 
 	foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll
 
@@ -189,45 +186,14 @@ def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofp
 
 	commitcount = 0
 
-	if so.redissearchlist:
-		listofplacestosearch = True
-		rc = establishredisconnection()
-		argument = '{id}_searchlist'.format(id=so.searchid)
-		getnetxitem = rc.spop
-		returnremainder = lambda x: len(rc.smembers(x))
-		rrparameter = argument
-	elif isinstance(listofplacestosearch, type(JoinableQueue())):
-		rc = None
-		getnetxitem = queuedgetnextfnc
-		argument = listofplacestosearch
-		returnremainder = lambda x: x.qsize()
-		rrparameter = listofplacestosearch
-	else:
-		rc = None
-		getnetxitem = listofplacestosearch.pop
-		argument = 0
-		returnremainder = lambda x: len(x)
-		rrparameter = rc.smembers(argument)
+	# build incomplete sfo to handle everything other than iteratethroughsearchlist()
+	sfo = returnsearchfncobject(list(), listofplacestosearch, searchobject, dbconnection, None)
 
 	while listofplacestosearch and activepoll.gethits() <= so.cap:
 		commitcount += 1
-		try:
-			authortable = getnetxitem(argument)
-		except IndexError:
-			authortable = None
-			listofplacestosearch = None
 
-		try:
-			activepoll.remain(returnremainder(rrparameter))
-		except TypeError:
-			pass
-		except AttributeError:
-			pass
-		except NotImplementedError:
-			# returnremainder = lambda x: x.qsize()
-			# "Note that .qsize() may raise NotImplementedError on Unix platforms like Mac OS X where sem_getvalue() is not implemented."
-			activepoll.setnotes('Multiprocessor queue sizes are unavailable: % complete will always read 0')
-			pass
+		authortable = sfo.getnextfnc()
+		sfo.updatepollremaining()
 
 		if authortable:
 			if so.redissearchlist:
@@ -337,6 +303,8 @@ def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofp
 		else:
 			# redis will return None for authortable if the set is now empty
 			listofplacestosearch = None
+
+	sfo.listcleanup()
 
 	return foundlineobjects
 

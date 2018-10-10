@@ -8,7 +8,7 @@
 
 import pickle
 import re
-from multiprocessing import Manager, Process, JoinableQueue
+from multiprocessing import Manager, Process
 from multiprocessing.managers import ListProxy
 from typing import List
 
@@ -22,7 +22,7 @@ from server.hipparchiaobjects.searchfunctionobjects import returnsearchfncobject
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, \
-	massagesearchtermsforwhitespace
+	massagesearchtermsforwhitespace, loadsearchqueue
 from server.searching.substringsearching import substringsearch
 from server.threading.mpthreadcount import setthreadcount
 
@@ -73,7 +73,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	# https://pymotw.com/2/multiprocessing/communication.html
 
 	if so.usequeue:
-		listofplacestosearch = loadqueue(so.indexrestrictions.keys(), workers)
+		listofplacestosearch = loadsearchqueue(so.indexrestrictions.keys(), workers)
 	activepoll.allworkis(len(so.searchlist))
 	activepoll.remain(len(so.indexrestrictions.keys()))
 	activepoll.sethits(0)
@@ -102,7 +102,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 				searchtuples.append((c, item))
 		activepoll.allworkis(len(searchtuples))
 		if so.usequeue:
-			searchtuples = loadqueue([t for t in searchtuples], workers)
+			searchtuples = loadsearchqueue([t for t in searchtuples], workers)
 		if so.redissearchlist:
 			ptuples = [pickle.dumps(s) for s in searchtuples]
 			buildredissearchlist(ptuples, so.searchid)
@@ -300,21 +300,3 @@ def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy
 	sfo.iteratethroughsearchlist()
 
 	return sfo.foundlineobjects
-
-
-def loadqueue(iterable, workers):
-	"""
-
-	simple function to put our values into a queue
-
-	:param iterable:
-	:param workers:
-	:return:
-	"""
-	q = JoinableQueue()
-	for item in iterable:
-		q.put(item)
-	# poison pills to stop the queue
-	for _ in range(workers):
-		q.put(None)
-	return q

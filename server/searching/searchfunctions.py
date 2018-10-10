@@ -8,6 +8,8 @@
 
 import re
 import time
+from multiprocessing import JoinableQueue
+
 from flask import request, session
 from string import punctuation
 from typing import List
@@ -431,3 +433,21 @@ def buildsearchobject(searchid: str, therequest: request, thesession: session) -
 	so = SearchObject(searchid, seeking, proximate, lemma, proximatelemma, frozensession)
 
 	return so
+
+
+def loadsearchqueue(iterable, workers):
+	"""
+
+	simple function to put our values into a queue
+
+	:param iterable:
+	:param workers:
+	:return:
+	"""
+	q = JoinableQueue()
+	for item in iterable:
+		q.put(item)
+	# poison pills to stop the queue
+	for _ in range(workers):
+		q.put(None)
+	return q
