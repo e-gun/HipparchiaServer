@@ -168,8 +168,7 @@ class RedisProgressPoll(object):
 	def deleteredispoll(self):
 		for k in self.keytypes:
 			rediskey = self.returnrediskey(k)
-			redisvalue = getattr(self, k)
-			self.redisconnection.delete(rediskey, redisvalue)
+			self.redisconnection.delete(rediskey)
 
 	def returnrediskey(self, keyname):
 		return '{id}_{k}'.format(id=self.searchid, k=keyname)

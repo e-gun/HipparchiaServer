@@ -137,10 +137,10 @@ class RedisSearchFunctionObject(GenericSearchFunctionObject):
 		super().__init__(foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
 		self.listofplacestosearch = True
 		self.rc = establishredisconnection()
-		redissearchid = '{id}_searchlist'.format(id=self.so.searchid)
+		self.redissearchid = '{id}_searchlist'.format(id=self.so.searchid)
 		# lambda this because if you define as self.rc.spop(redissearchid) you will actually pop an item..,
-		self.getnetxitem = lambda x: self.rc.spop(redissearchid)
-		self.remainder = self.rc.smembers(redissearchid)
+		self.getnetxitem = lambda x: self.rc.spop(self.redissearchid)
+		self.remainder = self.rc.smembers(self.redissearchid)
 		self.emptyerror = AttributeError
 		self.remaindererror = AttributeError
 		self.emptytest = self.listofplacestosearch
@@ -163,6 +163,9 @@ class RedisSearchFunctionObject(GenericSearchFunctionObject):
 			# next = None...
 			pass
 		return nextsearchlocation
+
+	def listcleanup(self):
+		self.rc.delete(self.redissearchid)
 
 
 class ManagedListSearchFunctionObject(GenericSearchFunctionObject):
