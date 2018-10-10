@@ -145,6 +145,9 @@ class RedisSearchFunctionObject(GenericSearchFunctionObject):
 		self.remaindererror = AttributeError
 		self.emptytest = self.listofplacestosearch
 
+	def __del__(self):
+		self.rc.delete(self.redissearchid)
+
 	def getnextfnc(self):
 		self.commitcount += 1
 		self.dbconnection.checkneedtocommit(self.commitcount)
@@ -163,9 +166,6 @@ class RedisSearchFunctionObject(GenericSearchFunctionObject):
 			# next = None...
 			pass
 		return nextsearchlocation
-
-	def listcleanup(self):
-		self.rc.delete(self.redissearchid)
 
 
 class ManagedListSearchFunctionObject(GenericSearchFunctionObject):
