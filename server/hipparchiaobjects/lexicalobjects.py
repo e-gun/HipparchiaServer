@@ -612,7 +612,7 @@ class dbLatinWord(dbDictionaryEntry):
 		sv = r'\1<dictionaryentry id="\2">\2</dictionaryentry>\3'
 		fingerprints = [r'(v\. )(\w+)( <sense)',
 					r'(v\. )(\w+)(\.)$',
-					r'(v\. )(\w+)(, I+)',
+					r'(v\. )(\w+)(, [A-Z])',
 					r'(\(cf\. )(\w+)(\))',
 					r'(; cf\. )(\w+)(\))',
 					r'(\(sc. )(\w+)([,)])',
@@ -625,6 +625,7 @@ class dbLatinWord(dbDictionaryEntry):
 					r'(cf\. Gr\. )(\w+)(,)',
 					r'( i\. q\. )(\w+)([),])',
 					r'(pure Lat\.)(\w+)([),])',
+					r'(\(for )(\w+)(, q\. v\.\))'
 					]
 		# xreffinder.append(re.compile(r'<lbl opt="n">(s\.v\.)</lbl> <ref targOrder="U" lang="greek">(\w+)</ref>()'))
 

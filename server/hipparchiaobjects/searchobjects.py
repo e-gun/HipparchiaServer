@@ -6,14 +6,10 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import pickle
 import re
 import time
-from multiprocessing.managers import ListProxy
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import dblineintolineobject
-from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.wordformatting import avoidsmallvariants
 from server.listsandsession.sessionfunctions import justlatin
@@ -125,6 +121,10 @@ class SearchObject(object):
 		self.usedcorpora = list()
 		self.sentencebundlesize = hipparchia.config['SENTENCESPERDOCUMENT']
 		self.poll = None
+		if hipparchia.config['SEARCHLISTCONNECTIONTYPE'] == 'queue':
+			self.usequeue = True
+		else:
+			self.usequeue = False
 		if hipparchia.config['SEARCHLISTCONNECTIONTYPE'] == 'redis':
 			self.redissearchlist = True
 		else:
@@ -436,142 +436,3 @@ class SearchOutputObject(object):
 		for item in itemsweuse:
 			outputdict[item] = getattr(self, item)
 		return outputdict
-
-
-class GenericSearchFunctionObject(object):
-	"""
-
-	a class to hold repeated code for the searches
-
-	the chief difference between most search types is the number and names of the parameters passed
-	to self.searchfunction
-
-	one also has the option of storing the searchlist either in shared memory or in a redis set
-	the retrieval, parrsing, and ending checks for the two structures are different
-
-	handling the matrix of possibilities for search_type and list_type combinations produces the
-	somewhat tangled set of options below
-
-	"""
-	def __init__(self, foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection, searchfunction):
-		self.commitcount = 0
-		self.dbconnection = dbconnection
-		self.dbcursor = self.dbconnection.cursor()
-		self.so = searchobject
-		self.foundlineobjects = foundlineobjects
-		self.listofplacestosearch = listofplacestosearch
-		self.searchfunction = searchfunction
-		self.searchfunctionparameters = None
-		self.activepoll = self.so.poll
-		self.parameterswapper = self.simpleparamswapper
-		if self.so.redissearchlist:
-			self.listofplacestosearch = True
-			self.rc = establishredisconnection()
-			self.getnextfnc = self.redistrytogetnext
-			redissearchid = '{id}_searchlist'.format(id=self.so.searchid)
-			# lambda this because if you define as self.rc.spop(redissearchid) you will actually pop an item..,
-			self.getnetxitem = lambda x: self.rc.spop(redissearchid)
-			self.remainder = self.rc.smembers(redissearchid)
-			self.emptyerror = AttributeError
-			self.remaindererror = AttributeError
-		else:
-			self.getnextfnc = self.trytogetnext
-			self.getnetxitem = self.listofplacestosearch.pop
-			self.remainder = self.listofplacestosearch
-			self.emptyerror = IndexError
-			self.remaindererror = TypeError
-
-	def redistrytogetnext(self):
-		nextsearchlocation = self.trytogetnext()
-		try:
-			# redis sends bytes; we need strings
-			nextsearchlocation = nextsearchlocation.decode()
-		except AttributeError:
-			# next = None...
-			pass
-		except UnicodeDecodeError:
-			# next = None...
-			pass
-		return nextsearchlocation
-
-	def trytogetnext(self):
-		self.commitcount += 1
-		self.dbconnection.checkneedtocommit(self.commitcount)
-		try:
-			nextsearchlocation = self.getnetxitem(0)
-		except self.emptyerror:
-			nextsearchlocation = None
-
-		return nextsearchlocation
-
-	def updatepollremaining(self):
-		try:
-			self.activepoll.remain(len(self.remainder))
-		except self.remaindererror:
-			pass
-
-	def updatepollfinds(self, lines: list):
-		if lines:
-			numberoffinds = len(lines)
-			self.activepoll.addhits(numberoffinds)
-		return
-
-	def simpleparamswapper(self, texttoinsert: str, insertposition: int) -> list:
-		"""
-
-		the various searchfunctions have different interfaces
-
-		this lets you get the right collection of paramaters into the various functions
-
-		:param texttoinsert:
-		:param insertposition:
-		:return:
-		"""
-		parameters = self.searchfunctionparameters
-		parameters[insertposition] = texttoinsert
-		return parameters
-
-	def tupleparamswapper(self, tupletoinsert: tuple, insertposition: int) -> list:
-		"""
-
-		somewhat brittle, but...
-
-		this handles the non-standard case of a tuple that needs swapping instead of an individual name
-		(i.e., it works with the lemmatized search)
-
-		:param tupletoinsert:
-		:param insertposition:
-		:return:
-		"""
-		if self.so.redissearchlist:
-			tupletoinsert = pickle.loads(tupletoinsert)
-
-		parameters = self.searchfunctionparameters
-		head = parameters[:insertposition]
-		tail = parameters[insertposition+1:]
-		newparams = head + list(tupletoinsert) + tail
-		return newparams
-
-	def iteratethroughsearchlist(self):
-		"""
-
-		this is the simple core of the whole thing; the rest is about feeding it properly
-
-		:return:
-		"""
-		insertposition = self.searchfunctionparameters.index('parametertoswap')
-		while self.listofplacestosearch and self.activepoll.gethits() <= self.so.cap:
-			nextitem = self.getnextfnc()
-			if nextitem:
-				params = self.parameterswapper(nextitem, insertposition)
-				foundlines = self.searchfunction(*tuple(params))
-				lineobjects = [dblineintolineobject(f) for f in foundlines]
-				self.foundlineobjects.extend(lineobjects)
-				self.updatepollfinds(lineobjects)
-				self.updatepollremaining()
-			else:
-				# or: self.listofplacestosearch = None
-				break
-		# empty return because foundlineobjects is a ListProxy:
-		# ask for self.foundlineobjects as the search result instead
-		return

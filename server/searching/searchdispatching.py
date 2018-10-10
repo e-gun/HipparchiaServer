@@ -8,7 +8,7 @@
 
 import pickle
 import re
-from multiprocessing import Manager, Process
+from multiprocessing import Manager, Process, JoinableQueue
 from multiprocessing.managers import ListProxy
 from typing import List
 
@@ -17,7 +17,8 @@ from server.dbsupport.redisdbfunctions import buildredissearchlist
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
-from server.hipparchiaobjects.searchobjects import GenericSearchFunctionObject, SearchObject
+from server.hipparchiaobjects.searchobjects import SearchObject
+from server.hipparchiaobjects.searchfunctionobjects import returnsearchfncobject
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
 from server.searching.proximitysearching import withinxlines, withinxwords
 from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, \
@@ -59,14 +60,20 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	manager = Manager()
 	foundlineobjects = manager.list()
 
+	workers = setthreadcount()
+
 	if not so.redissearchlist:
 		listofplacestosearch = manager.list(so.indexrestrictions.keys())
 	else:
 		listofplacestosearch = None
 		buildredissearchlist(list(so.indexrestrictions.keys()), so.searchid)
 
-	workers = setthreadcount()
-	
+	# experiment with JoinableQueue
+	# https://docs.python.org/3.7/library/multiprocessing.html#multiprocessing.JoinableQueue
+	# https://pymotw.com/2/multiprocessing/communication.html
+
+	if so.usequeue:
+		listofplacestosearch = loadqueue(so.indexrestrictions.keys(), workers)
 	activepoll.allworkis(len(so.searchlist))
 	activepoll.remain(len(so.indexrestrictions.keys()))
 	activepoll.sethits(0)
@@ -93,6 +100,8 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 		for c in chunked:
 			for item in masterlist:
 				searchtuples.append((c, item))
+		if so.usequeue:
+			searchtuples = loadqueue([t for t in searchtuples], workers)
 		if so.redissearchlist:
 			ptuples = [pickle.dumps(s) for s in searchtuples]
 			buildredissearchlist(ptuples, so.searchid)
@@ -160,6 +169,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 
 	for j in jobs:
 		j.start()
+
 	for j in jobs:
 		j.join()
 
@@ -189,12 +199,12 @@ def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 	# TESTING: probe the marked up data; good for finding rare/missing markup like 'hmu_scholium'
 	# searchobject.usecolumn = 'marked_up_line'
 
-	gsfo = GenericSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, substringsearch)
-	gsfo.searchfunctionparameters = [gsfo.so.termone, 'parametertoswap', gsfo.so, gsfo.dbcursor]
-	gsfo.dbconnection.setreadonly(False)
-	gsfo.iteratethroughsearchlist()
+	sfo = returnsearchfncobject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, substringsearch)
+	sfo.searchfunctionparameters = [sfo.so.termone, 'parametertoswap', sfo.so, sfo.dbcursor]
+	sfo.dbconnection.setreadonly(False)
+	sfo.iteratethroughsearchlist()
 
-	return gsfo.foundlineobjects
+	return sfo.foundlineobjects
 
 
 def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
@@ -225,11 +235,11 @@ def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: Lis
 	else:
 		fnc = withinxwords
 
-	gsfo = GenericSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, fnc)
-	gsfo.searchfunctionparameters = ['parametertoswap', gsfo.so, gsfo.dbconnection]
-	gsfo.iteratethroughsearchlist()
+	sfo = returnsearchfncobject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, fnc)
+	sfo.searchfunctionparameters = ['parametertoswap', sfo.so, sfo.dbconnection]
+	sfo.iteratethroughsearchlist()
 
-	return gsfo.foundlineobjects
+	return sfo.foundlineobjects
 
 
 def workonphrasesearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
@@ -249,11 +259,11 @@ def workonphrasesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 	:return:
 	"""
 
-	gsfo = GenericSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, phrasesearch)
-	gsfo.searchfunctionparameters = ['parametertoswap', gsfo.so, gsfo.dbcursor]
-	gsfo.iteratethroughsearchlist()
+	sfo = returnsearchfncobject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, phrasesearch)
+	sfo.searchfunctionparameters = ['parametertoswap', sfo.so, sfo.dbcursor]
+	sfo.iteratethroughsearchlist()
 
-	return gsfo.foundlineobjects
+	return sfo.foundlineobjects
 
 
 def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
@@ -283,10 +293,22 @@ def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy
 	:return:
 	"""
 
-	gsfo = GenericSearchFunctionObject(foundlineobjects, searchtuples, searchobject, dbconnection, substringsearch)
-	gsfo.dbconnection.setreadonly(False)
-	gsfo.parameterswapper = gsfo.tupleparamswapper
-	gsfo.searchfunctionparameters = ['parametertoswap', gsfo.so, gsfo.dbcursor]
-	gsfo.iteratethroughsearchlist()
+	sfo = returnsearchfncobject(foundlineobjects, searchtuples, searchobject, dbconnection, substringsearch)
+	sfo.dbconnection.setreadonly(False)
+	sfo.parameterswapper = sfo.tupleparamswapper
+	sfo.searchfunctionparameters = ['parametertoswap', sfo.so, sfo.dbcursor]
+	sfo.iteratethroughsearchlist()
 
-	return gsfo.foundlineobjects
+	return sfo.foundlineobjects
+
+
+def loadqueue(iterable, workers):
+	# line 198, in subqueryphrasesearch will fail because the syntax for queues is wrong
+	q = JoinableQueue()
+	for item in iterable:
+		q.put(item)
+	# poison pills to stop the queue
+	for _ in range(workers):
+		q.put(None)
+
+	return q

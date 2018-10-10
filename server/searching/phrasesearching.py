@@ -7,6 +7,7 @@
 """
 
 import re
+from multiprocessing import JoinableQueue
 from multiprocessing.managers import ListProxy
 from typing import List
 
@@ -193,6 +194,10 @@ def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofp
 		rc = establishredisconnection()
 		argument = '{id}_searchlist'.format(id=so.searchid)
 		getnetxitem = rc.spop
+	elif isinstance(listofplacestosearch, type(JoinableQueue())):
+		rc = None
+		getnetxitem = queuedgetnextfnc
+		argument = listofplacestosearch
 	else:
 		rc = None
 		getnetxitem = listofplacestosearch.pop
@@ -327,6 +332,12 @@ def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofp
 			listofplacestosearch = None
 
 	return foundlineobjects
+
+
+def queuedgetnextfnc(listofplacestosearch):
+	nextsearchlocation = listofplacestosearch.get()
+	listofplacestosearch.task_done()
+	return nextsearchlocation
 
 
 """
