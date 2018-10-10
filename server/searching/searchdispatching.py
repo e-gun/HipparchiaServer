@@ -100,12 +100,12 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 		for c in chunked:
 			for item in masterlist:
 				searchtuples.append((c, item))
+		activepoll.allworkis(len(searchtuples))
 		if so.usequeue:
 			searchtuples = loadqueue([t for t in searchtuples], workers)
 		if so.redissearchlist:
 			ptuples = [pickle.dumps(s) for s in searchtuples]
 			buildredissearchlist(ptuples, so.searchid)
-		activepoll.allworkis(len(searchtuples))
 		targetfunction = workonsimplelemmasearch
 		argumentuple = (foundlineobjects, searchtuples, so)
 	elif so.searchtype == 'phrase':

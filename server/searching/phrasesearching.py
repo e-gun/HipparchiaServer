@@ -226,7 +226,7 @@ def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofp
 		except NotImplementedError:
 			# returnremainder = lambda x: x.qsize()
 			# "Note that .qsize() may raise NotImplementedError on Unix platforms like Mac OS X where sem_getvalue() is not implemented."
-			activepoll.setnotes('Queue sizes are unavailable: % complete will always read 0')
+			activepoll.setnotes('Multiprocessor queue sizes are unavailable: % complete will always read 0')
 			pass
 
 		if authortable:

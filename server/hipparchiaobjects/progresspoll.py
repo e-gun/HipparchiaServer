@@ -94,7 +94,7 @@ class SharedMemoryProgressPoll(object):
 		message = '<span class="small">{msg}</span>'
 		if 14 < self.getelapsed() < 21:
 			m = '(long requests can be aborted by reloading the page)'
-		elif re.search('unavailable', self.notes) and 9 < self.getelapsed() < 15:
+		elif re.search('unavailable', self.notes) and 7 < self.getelapsed() < 15:
 			m = self.notes
 		elif re.search('unavailable', self.notes) is None:
 			m = self.notes
