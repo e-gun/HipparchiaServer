@@ -58,7 +58,7 @@ class GenericSearchFunctionObject(object):
 		try:
 			self.activepoll.remain(self.getremain())
 		except self.remaindererror:
-			self.activepoll.setnotes('Number remaining not available: % complete will be inaccurate')
+			self.activepoll.setnotes('Number remaining unavailable: % complete will be inaccurate')
 			pass
 
 	def updatepollfinds(self, lines: list):

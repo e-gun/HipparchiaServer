@@ -303,12 +303,18 @@ def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy
 
 
 def loadqueue(iterable, workers):
-	# line 198, in subqueryphrasesearch will fail because the syntax for queues is wrong
+	"""
+
+	simple function to put our values into a queue
+
+	:param iterable:
+	:param workers:
+	:return:
+	"""
 	q = JoinableQueue()
 	for item in iterable:
 		q.put(item)
 	# poison pills to stop the queue
 	for _ in range(workers):
 		q.put(None)
-
 	return q
