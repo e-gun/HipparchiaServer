@@ -194,14 +194,20 @@ def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofp
 		rc = establishredisconnection()
 		argument = '{id}_searchlist'.format(id=so.searchid)
 		getnetxitem = rc.spop
+		returnremainder = lambda x: len(rc.smembers(x))
+		rrparameter = argument
 	elif isinstance(listofplacestosearch, type(JoinableQueue())):
 		rc = None
 		getnetxitem = queuedgetnextfnc
 		argument = listofplacestosearch
+		returnremainder = lambda x: x.qsize()
+		rrparameter = listofplacestosearch
 	else:
 		rc = None
 		getnetxitem = listofplacestosearch.pop
 		argument = 0
+		returnremainder = lambda x: len(x)
+		rrparameter = rc.smembers(argument)
 
 	while listofplacestosearch and activepoll.gethits() <= so.cap:
 		commitcount += 1
@@ -211,16 +217,17 @@ def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofp
 			authortable = None
 			listofplacestosearch = None
 
-		if not so.redissearchlist:
-			try:
-				activepoll.remain(len(listofplacestosearch))
-			except TypeError:
-				pass
-		else:
-			try:
-				activepoll.remain(len(rc.smembers(argument)))
-			except AttributeError:
-				pass
+		try:
+			activepoll.remain(returnremainder(rrparameter))
+		except TypeError:
+			pass
+		except AttributeError:
+			pass
+		except NotImplementedError:
+			# returnremainder = lambda x: x.qsize()
+			# "Note that .qsize() may raise NotImplementedError on Unix platforms like Mac OS X where sem_getvalue() is not implemented."
+			activepoll.setnotes('Queue sizes are unavailable: % complete will always read 0')
+			pass
 
 		if authortable:
 			if so.redissearchlist:
