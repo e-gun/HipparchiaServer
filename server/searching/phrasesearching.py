@@ -309,12 +309,6 @@ def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofp
 	return foundlineobjects
 
 
-def queuedgetnextfnc(listofplacestosearch):
-	nextsearchlocation = listofplacestosearch.get()
-	listofplacestosearch.task_done()
-	return nextsearchlocation
-
-
 """
 
 notes on lead and lag: examining the next row and the previous row

@@ -5,6 +5,7 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
 import pickle
 from multiprocessing import JoinableQueue
 from multiprocessing.managers import ListProxy
@@ -214,11 +215,8 @@ class QueuedSearchFunctionObject(GenericSearchFunctionObject):
 
 def returnsearchfncobject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction):
 		if isinstance(listofplacestosearch, type(JoinableQueue())):
-			# print('QueuedSearchFunctionObject')
 			return QueuedSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
 		elif searchobject.redissearchlist:
-			# print('RedisSearchFunctionObject')
 			return RedisSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
 		else:
-			# print('ManagedListSearchFunctionObject')
 			return ManagedListSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
