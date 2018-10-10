@@ -112,8 +112,8 @@ run.py:
     dbid=0
     poolsize=4
     port = 6379
-    # redisconnection = redis.ConnectionPool(host='localhost', port=port, db=dbid, max_connections=poolsize)
-    redisconnection = redis.ConnectionPool(connection_class=redis.UnixDomainSocketConnection, path=sock, db=dbid, max_connections=poolsize)
+    redisconnection = redis.ConnectionPool(host='localhost', port=port, db=dbid, max_connections=poolsize)
+    # redisconnection = redis.ConnectionPool(connection_class=redis.UnixDomainSocketConnection, path=sock, db=dbid, max_connections=poolsize)
     c = redis.Redis(connection_pool=redisconnection)
 
 ex queries:

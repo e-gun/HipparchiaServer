@@ -184,22 +184,18 @@ def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofp
 		# the windowing problem means that '1' might be something that gets discarded
 		lim = ' LIMIT 5'
 
-	commitcount = 0
-
 	# build incomplete sfo to handle everything other than iteratethroughsearchlist()
 	sfo = returnsearchfncobject(list(), listofplacestosearch, searchobject, dbconnection, None)
 
-	while listofplacestosearch and activepoll.gethits() <= so.cap:
-		commitcount += 1
+	if so.redissearchlist:
+		listofplacestosearch = True
 
+	while listofplacestosearch and activepoll.gethits() <= so.cap:
+		# sfo.getnextfnc() also takes care of the commitcount
 		authortable = sfo.getnextfnc()
 		sfo.updatepollremaining()
 
 		if authortable:
-			if so.redissearchlist:
-				# b'lt0908' --> 'lt0908'
-				authortable = authortable.decode()
-			dbconnection.checkneedtocommit(commitcount)
 
 			qtemplate = """
 				SELECT secondpass.index, secondpass.{co} FROM 
