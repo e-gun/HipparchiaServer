@@ -13,7 +13,6 @@ from multiprocessing.managers import ListProxy
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.dbsupport.redisdbfunctions import buildredissearchlist
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -59,7 +58,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	activepoll.statusis('Loading the the dispatcher...')
 
 	manager = Manager()
-	founddblines = manager.list()
+	founddblineobjects = manager.list()
 
 	workers = setthreadcount()
 
@@ -87,7 +86,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	if so.searchtype == 'simple':
 		activepoll.statusis('Executing a simple word search...')
 		targetfunction = workonsimplesearch
-		argumentuple = (founddblines, listofplacestosearch, so)
+		argumentuple = (founddblineobjects, listofplacestosearch, so)
 	elif so.searchtype == 'simplelemma':
 		activepoll.statusis('Executing a lemmatized word search for the {n} known forms of {w}...'.format(n=len(so.lemma.formlist), w=so.lemma.dictionaryentry))
 		# don't search for every form at once (100+?)
@@ -108,7 +107,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 			ptuples = [pickle.dumps(s) for s in searchtuples]
 			buildredissearchlist(ptuples, so.searchid)
 		targetfunction = workonsimplelemmasearch
-		argumentuple = (founddblines, searchtuples, so)
+		argumentuple = (founddblineobjects, searchtuples, so)
 	elif so.searchtype == 'phrase':
 		activepoll.statusis('Executing a phrase search.')
 		so.leastcommon = findleastcommonterm(so.termone, so.accented)
@@ -129,11 +128,11 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 		if 0 < lccount < 500:
 			# print('workonphrasesearch()', searchingfor)
 			targetfunction = workonphrasesearch
-			argumentuple = (founddblines, listofplacestosearch, so)
+			argumentuple = (founddblineobjects, listofplacestosearch, so)
 		else:
 			# print('subqueryphrasesearch()', searchingfor)
 			targetfunction = subqueryphrasesearch
-			argumentuple = (founddblines, so.termone, listofplacestosearch, so)
+			argumentuple = (founddblineobjects, so.termone, listofplacestosearch, so)
 	elif so.searchtype == 'proximity':
 		activepoll.statusis('Executing a proximity search...')
 		if so.lemma or so.proximatelemma:
@@ -152,7 +151,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 			so.termone = so.termtwo
 			so.termtwo = tmp
 		targetfunction = workonproximitysearch
-		argumentuple = (founddblines, listofplacestosearch, so)
+		argumentuple = (founddblineobjects, listofplacestosearch, so)
 	else:
 		# impossible, but...
 		workers = 0
@@ -175,7 +174,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 		j.join()
 
 	# generator needs to turn into a list
-	foundlineobjects = [dblineintolineobject(f) for f in founddblines]
+	foundlineobjects = list(founddblineobjects)
 
 	for c in oneconnectionperworker:
 		oneconnectionperworker[c].connectioncleanup()

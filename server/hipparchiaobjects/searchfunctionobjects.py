@@ -118,11 +118,9 @@ class GenericSearchFunctionObject(object):
 			if nextitem:
 				params = self.parameterswapper(nextitem, insertposition)
 				foundlines = self.searchfunction(*tuple(params))
-				# a lineobject needs pickline to be shared within the manager: keep a simpler object?
-				# lineobjects = [dblineintolineobject(f) for f in foundlines]
-				foundlines = list(foundlines)
-				self.foundlineobjects.extend(foundlines)
-				self.updatepollfinds(foundlines)
+				lineobjects = [dblineintolineobject(f) for f in foundlines]
+				self.foundlineobjects.extend(lineobjects)
+				self.updatepollfinds(lineobjects)
 				self.updatepollremaining()
 			else:
 				# listofplacestosearch has been exhausted
