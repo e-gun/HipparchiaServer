@@ -80,6 +80,20 @@ freeze: 8 connections return; there are 10 workers...
 
 the choke seems more likely when you get many results really fast: some sort of problem with the lock on the managed list?
 
+Could move back to Pool from Manager in searchdispatching in order to work some more on the hang problem
+    NB: the old problem with Pool is the clumping of long dbs that means some workers have more
+    work to do than others: address it by sorting placestosearch by # of words in the table.
+    then you can call siftintopiles(). The downside is that you would always search a certain
+    kind of work first (i.e, Byzantine commentaries).
+
+*serious* refactoring obstacles:
+
+    the searchobject vs the pool:
+       RuntimeError: Synchronized objects should only be shared between processes through inheritance
+    the connectionobject vs the pool:
+       TypeError: can't pickle psycopg2.extensions.connection objects
+
+
 
 [F] In progress: launches, but will not serve [NOT A PRIORITY FEATURE]
 
