@@ -31,7 +31,8 @@ class GenericSearchFunctionObject(object):
 	somewhat tangled set of options below
 
 	"""
-	def __init__(self, foundlineobjects: ListProxy, listofplacestosearch, searchobject: SearchObject, dbconnection, searchfunction):
+	def __init__(self, workerid, foundlineobjects: ListProxy, listofplacestosearch, searchobject: SearchObject, dbconnection, searchfunction):
+		self.workerid = workerid
 		self.commitcount = 0
 		self.dbconnection = dbconnection
 		self.dbcursor = self.dbconnection.cursor()
@@ -129,12 +130,13 @@ class GenericSearchFunctionObject(object):
 		self.listcleanup()
 		# empty return because foundlineobjects is a ListProxy:
 		# ask for self.foundlineobjects as the search result instead
+		# print('{i} finished'.format(i=self.workerid))
 		return
 
 
 class RedisSearchFunctionObject(GenericSearchFunctionObject):
-	def __init__(self, foundlineobjects, listofplacestosearch: ListProxy, searchobject, dbconnection, searchfunction):
-		super().__init__(foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
+	def __init__(self, workerid, foundlineobjects, listofplacestosearch: ListProxy, searchobject, dbconnection, searchfunction):
+		super().__init__(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
 		self.listofplacestosearch = True
 		self.rc = establishredisconnection()
 		self.redissearchid = '{id}_searchlist'.format(id=self.so.searchid)
@@ -169,8 +171,8 @@ class RedisSearchFunctionObject(GenericSearchFunctionObject):
 
 
 class ManagedListSearchFunctionObject(GenericSearchFunctionObject):
-	def __init__(self, foundlineobjects, listofplacestosearch: ListProxy, searchobject, dbconnection, searchfunction):
-		super().__init__(foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
+	def __init__(self, workerid, foundlineobjects, listofplacestosearch: ListProxy, searchobject, dbconnection, searchfunction):
+		super().__init__(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
 		self.emptytest = self.listofplacestosearch
 		self.getnetxitem = self.listofplacestosearch.pop
 		self.remainder = self.listofplacestosearch
@@ -188,8 +190,8 @@ class ManagedListSearchFunctionObject(GenericSearchFunctionObject):
 
 
 class QueuedSearchFunctionObject(GenericSearchFunctionObject):
-	def __init__(self, foundlineobjects, listofplacestosearch: JoinableQueue, searchobject, dbconnection, searchfunction):
-		super().__init__(foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
+	def __init__(self, workerid, foundlineobjects, listofplacestosearch: ListProxy, searchobject, dbconnection, searchfunction):
+		super().__init__(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
 		self.getnetxitem = self.listofplacestosearch.get
 		self.emptyerror = QueueEmpty
 		self.remainder = None
@@ -216,10 +218,10 @@ class QueuedSearchFunctionObject(GenericSearchFunctionObject):
 		return self.listofplacestosearch.qsize()
 
 
-def returnsearchfncobject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction):
+def returnsearchfncobject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction):
 		if isinstance(listofplacestosearch, type(JoinableQueue())):
-			return QueuedSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
+			return QueuedSearchFunctionObject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
 		elif searchobject.redissearchlist:
-			return RedisSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
+			return RedisSearchFunctionObject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
 		else:
-			return ManagedListSearchFunctionObject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
+			return ManagedListSearchFunctionObject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)

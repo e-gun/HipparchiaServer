@@ -164,7 +164,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	# note that the following (when fully implemented...) does not produce speedups
 	# operedisconnectionperworker = {i: establishredisconnection() for i in range(workers)}
 
-	argumentswithconnections = [tuple(list(argumentuple) + [oneconnectionperworker[i]]) for i in range(workers)]
+	argumentswithconnections = [tuple([i] + list(argumentuple) + [oneconnectionperworker[i]]) for i in range(workers)]
 	jobs = [Process(target=targetfunction, args=argumentswithconnections[i]) for i in range(workers)]
 
 	for j in jobs:
@@ -182,7 +182,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	return foundlineobjects
 
 
-def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
+def workonsimplesearch(workerid: int, foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
 
 	the simplest version: look for a term in some places
@@ -199,7 +199,7 @@ def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 	# TESTING: probe the marked up data; good for finding rare/missing markup like 'hmu_scholium'
 	# searchobject.usecolumn = 'marked_up_line'
 
-	sfo = returnsearchfncobject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, substringsearch)
+	sfo = returnsearchfncobject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, substringsearch)
 	sfo.searchfunctionparameters = [sfo.so.termone, 'parametertoswap', sfo.so, sfo.dbcursor]
 	sfo.dbconnection.setreadonly(False)
 	sfo.iteratethroughsearchlist()
@@ -207,7 +207,7 @@ def workonsimplesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 	return sfo.foundlineobjects
 
 
-def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
+def workonproximitysearch(workerid: int, foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
 
 	look for A near/not near B
@@ -235,14 +235,14 @@ def workonproximitysearch(foundlineobjects: ListProxy, listofplacestosearch: Lis
 	else:
 		fnc = withinxwords
 
-	sfo = returnsearchfncobject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, fnc)
+	sfo = returnsearchfncobject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, fnc)
 	sfo.searchfunctionparameters = ['parametertoswap', sfo.so, sfo.dbconnection]
 	sfo.iteratethroughsearchlist()
 
 	return sfo.foundlineobjects
 
 
-def workonphrasesearch(foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
+def workonphrasesearch(workerid: int, foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
 
 	a multiprocessor aware function that hands off bits of a phrase search to multiple searchers
@@ -259,14 +259,14 @@ def workonphrasesearch(foundlineobjects: ListProxy, listofplacestosearch: ListPr
 	:return:
 	"""
 
-	sfo = returnsearchfncobject(foundlineobjects, listofplacestosearch, searchobject, dbconnection, phrasesearch)
+	sfo = returnsearchfncobject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, phrasesearch)
 	sfo.searchfunctionparameters = ['parametertoswap', sfo.so, sfo.dbcursor]
 	sfo.iteratethroughsearchlist()
 
 	return sfo.foundlineobjects
 
 
-def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
+def workonsimplelemmasearch(workerid: int, foundlineobjects: ListProxy, searchtuples: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
 
 	a multiprocessor aware function that hands off bits of a simple search to multiple searchers
@@ -293,7 +293,7 @@ def workonsimplelemmasearch(foundlineobjects: ListProxy, searchtuples: ListProxy
 	:return:
 	"""
 
-	sfo = returnsearchfncobject(foundlineobjects, searchtuples, searchobject, dbconnection, substringsearch)
+	sfo = returnsearchfncobject(workerid, foundlineobjects, searchtuples, searchobject, dbconnection, substringsearch)
 	sfo.dbconnection.setreadonly(False)
 	sfo.parameterswapper = sfo.tupleparamswapper
 	sfo.searchfunctionparameters = ['parametertoswap', sfo.so, sfo.dbcursor]

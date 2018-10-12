@@ -76,7 +76,7 @@ def phrasesearch(wkid: str, searchobject: SearchObject, cursor) -> List[dbWorkLi
 	return fullmatches
 
 
-def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
+def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: str, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
 	"""
 
 	foundlineobjects, searchingfor, searchlist, commitcount, whereclauseinfo, activepoll
@@ -185,7 +185,7 @@ def subqueryphrasesearch(foundlineobjects: ListProxy, searchphrase: str, listofp
 		lim = ' LIMIT 5'
 
 	# build incomplete sfo to handle everything other than iteratethroughsearchlist()
-	sfo = returnsearchfncobject(list(), listofplacestosearch, searchobject, dbconnection, None)
+	sfo = returnsearchfncobject(workerid, list(), listofplacestosearch, searchobject, dbconnection, None)
 
 	if so.redissearchlist:
 		listofplacestosearch = True
