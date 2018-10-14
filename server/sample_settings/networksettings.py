@@ -35,7 +35,7 @@
 # SEARCHLISTCONNECTIONTYPE if this is set to 'redis' you will not use Manager() to manage the searchlists but redis
 #   instead. There is a problesm with certain heardware/OS configurations that seems to crop up only when too
 #   many results get passed to the ListProxy at once. Storing the results in redis is a strategy to circumvent this.
-#   For debuggging purposes only...
+#   For debuggging purposes only... [Unfortunately this seems not to be the fix either]
 #
 # SEARCHLISTCONNECTIONTYPE if this is set to 'redis' you will not use Manager() to manage the searchlists but redis
 #   instead. At the moment this is all about tracking down a memory management oddity. Do not use this

@@ -209,6 +209,13 @@ def multiplelexicalmatchesintohtml(morphologyobject: dbMorphologyObject) -> List
 
 	# the top part of the HTML: just the analyses
 	count = 0
+
+	wc = findcountsviawordcountstable(morphologyobject.observed)
+	if wc:
+		thiswordoccurs = dbWordCountObject(*wc)
+		prevalence = 'Prevalence (this form): {pd}'.format(pd=formatprevalencedata(thiswordoccurs))
+		returnarray.append({'value': '<p class="wordcounts">{pr}</p>'.format(pr=prevalence)})
+
 	for p in possibilities:
 		count += 1
 		# {'50817064': [('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem dat pl</analysis>')], '50839960': [('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]}
