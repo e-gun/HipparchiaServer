@@ -253,7 +253,8 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 				# operation relative to the whole search and esp. relative to the speed gains of using a subquery search
 				lo = locallineobjects.pop()
 				if re.search(sp, getattr(lo, so.usewordlist)):
-					foundlineobjects.append(lo)
+					# foundlineobjects.append(lo)
+					sfo.addnewfindstolistoffinds([lo])
 					activepoll.addhits(1)
 					if so.onehit:
 						gotmyonehit = True
@@ -292,7 +293,8 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 							pass
 
 						if t and h:
-							foundlineobjects.append(lo)
+							# foundlineobjects.append(lo)
+							sfo.addnewfindstolistoffinds([lo])
 							activepoll.addhits(1)
 							if so.onehit:
 								gotmyonehit = True
