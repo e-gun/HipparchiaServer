@@ -14,11 +14,21 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 
 
+# this next should be used by *lots* of functions to make sure that what you ask for fits the dbWorkLine() params
+worklinetemplate = ['wkuniversalid', 'index', 'level_05_value', 'level_04_value', 'level_03_value',
+                    'level_02_value', 'level_01_value', 'level_00_value', 'marked_up_line',
+                    'accented_line', 'stripped_line', 'hyphenated_words', 'annotations']
+
+worklinetemplate = ', '.join(worklinetemplate)
+
+
 def dblineintolineobject(dbline: tuple) -> dbWorkLine:
 	"""
 	convert a db result into a db object
 
 	basically all columns pushed straight into the object with *one* twist: 1, 0, 2, 3, ...
+
+	worklinetemplate should fix this
 
 	:param dbline:
 	:return:
@@ -26,8 +36,7 @@ def dblineintolineobject(dbline: tuple) -> dbWorkLine:
 
 	# WARNING: be careful about the [1], [0], [2], order: wkuinversalid, index, level_05_value, ...
 
-	lineobject = dbWorkLine(dbline[1], dbline[0], dbline[2], dbline[3], dbline[4], dbline[5], dbline[6], dbline[7],
-	                        dbline[8], dbline[9], dbline[10], dbline[11], dbline[12])
+	lineobject = dbWorkLine(*dbline)
 
 	return lineobject
 
@@ -37,7 +46,7 @@ def grabonelinefromwork(workdbname: str, lineindex: int, cursor) -> tuple:
 	grab a line and return its contents
 	"""
 
-	query = 'SELECT * FROM {wk} WHERE index = %s'.format(wk=workdbname)
+	query = 'SELECT {wtmpl} FROM {wk} WHERE index = %s'.format(wtmpl=worklinetemplate, wk=workdbname)
 	data = (lineindex,)
 	cursor.execute(query, data)
 	foundline = cursor.fetchone()
@@ -129,9 +138,9 @@ def grablistoflines(table: str, uidlist: list) -> list:
 
 	lines = [int(uid.split('_ln_')[1]) for uid in uidlist]
 
-	qtemplate = 'SELECT * from {t} WHERE index = ANY(%s)'
+	qtemplate = 'SELECT {wtmpl} from {tb} WHERE index = ANY(%s)'
 
-	q = qtemplate.format(t=table)
+	q = qtemplate.format(wtmpl=worklinetemplate, tb=table)
 	d = (lines,)
 	cursor.execute(q, d)
 	lines = cursor.fetchall()
@@ -164,7 +173,7 @@ def grabbundlesoflines(worksandboundaries: dict, cursor) -> list:
 
 	for w in worksandboundaries:
 		db = w[0:6]
-		query = 'SELECT * FROM {db} WHERE (index >= %s AND index <= %s)'.format(db=db)
+		query = 'SELECT {wtmpl} FROM {db} WHERE (index >= %s AND index <= %s)'.format(wtmpl=worklinetemplate, db=db)
 		data = (worksandboundaries[w][0], worksandboundaries[w][1])
 		cursor.execute(query, data)
 		lines = resultiterator(cursor)
@@ -217,11 +226,11 @@ def bulkenvironsfetcher(table: str, searchresultlist: list, context: int) -> lis
 	cursor.execute(tempquery)
 
 	qtemplate = """
-	SELECT * FROM {au} WHERE EXISTS 
+	SELECT {wtmpl} FROM {au} WHERE EXISTS 
 		(SELECT 1 FROM {au}_includelist_{ac} incl WHERE incl.includeindex = {au}.index)
 	"""
 
-	query = qtemplate.format(au=table, ac=avoidcollisions)
+	query = qtemplate.format(wtmpl=worklinetemplate, au=table, ac=avoidcollisions)
 	cursor.execute(query)
 	results = resultiterator(cursor)
 

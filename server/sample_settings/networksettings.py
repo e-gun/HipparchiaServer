@@ -42,8 +42,8 @@
 #   unless searches are hanging and you are desperate to find a fix... This code is significantly slower.
 #   Waiting for redis to do a SPOP is not nearly as fast as accessing memory directly. The longer the searchlist
 #   the greater the penalty: a search of 236,835 texts is quite costly. There is also another experimental option:
-#   'queue'. This is another way of attacking the long-standing Manager() issue. For debuggging purposes only...
-#   This option is *meaningless* if you do not also set SEARCHRESULCONNECTIONTYPE to 'redis'
+#   'queue'. [DISABLED ATM] This is another way of attacking the long-standing Manager() issue. For debuggging purposes
+#   only...SEARCHLISTCONNECTIONTYPE='redis' is *meaningless* if you do not also set SEARCHRESULCONNECTIONTYPE to 'redis'
 
 # hipparchia itself as a server
 FLASKSERVEDFROMPORT = 5000

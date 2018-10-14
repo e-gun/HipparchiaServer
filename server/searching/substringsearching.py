@@ -12,6 +12,7 @@ import psycopg2
 
 from typing import Generator
 
+from server.dbsupport.dblinefunctions import worklinetemplate
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
 from server.hipparchiaobjects.searchobjects import SearchObject
@@ -82,8 +83,8 @@ def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, 
 		print('error in substringsearch(): unknown whereclause type', r['type'])
 		whr = 'WHERE ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax)
 
-	qtemplate = 'SELECT * FROM {db} {whr} {lm}'
-	q = qtemplate.format(db=authortable, whr=whr, lm=mylimit)
+	qtemplate = 'SELECT {wtmpl} FROM {db} {whr} {lm}'
+	q = qtemplate.format(wtmpl=worklinetemplate, db=authortable, whr=whr, lm=mylimit)
 	d = (seeking,)
 
 	try:

@@ -10,7 +10,7 @@ import re
 from multiprocessing.managers import ListProxy
 from typing import List
 
-from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
+from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
 from server.dbsupport.tablefunctions import assignuniquename
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 from server.hipparchiaobjects.helperobjects import QueryCombinator
@@ -58,7 +58,9 @@ def phrasesearch(wkid: str, searchobject: SearchObject, cursor) -> List[dbWorkLi
 			if len(fullmatches) > so.cap:
 				break
 			phraselen = len(searchphrase.split(' '))
-			wordset = lookoutsideoftheline(hit[0], phraselen - 1, wkid, so, cursor)
+			# wordklinetemplate in dblinefunctions.py governs the order of things here...
+			hitindex = hit[1]
+			wordset = lookoutsideoftheline(hitindex, phraselen - 1, wkid, so, cursor)
 			if not so.accented:
 				wordset = re.sub(r'[.?!;:,·’]', r'', wordset)
 			else:
@@ -184,8 +186,8 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 		# the windowing problem means that '1' might be something that gets discarded
 		lim = ' LIMIT 5'
 
-	# build incomplete sfo to handle everything other than iteratethroughsearchlist()
-	sfo = returnsearchfncobject(workerid, list(), listofplacestosearch, searchobject, dbconnection, None)
+	# build incomplete sfo that will handle everything other than iteratethroughsearchlist()
+	sfo = returnsearchfncobject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, None)
 
 	if so.redissearchlist:
 		listofplacestosearch = True
@@ -234,7 +236,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 			locallineobjects = list()
 			if indices:
 				for i in indices:
-					query = 'SELECT * FROM {tb} WHERE index=%s'.format(tb=authortable)
+					query = 'SELECT {wtmpl} FROM {tb} WHERE index=%s'.format(wtmpl=worklinetemplate, tb=authortable)
 					data = (i,)
 					cursor.execute(query, data)
 					locallineobjects.append(dblineintolineobject(cursor.fetchone()))
@@ -254,7 +256,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 				lo = locallineobjects.pop()
 				if re.search(sp, getattr(lo, so.usewordlist)):
 					# foundlineobjects.append(lo)
-					sfo.addnewfindstolistoffinds([lo])
+					sfo.addnewfindstolistoffinds([lo.decompose()])
 					activepoll.addhits(1)
 					if so.onehit:
 						gotmyonehit = True
@@ -267,7 +269,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 					if lo.wkuinversalid != nextline.wkuinversalid or lo.index != (nextline.index - 1):
 						# you grabbed the next line on the pile (e.g., index = 9999), not the actual next line (e.g., index = 101)
 						# usually you won't get a hit by grabbing the next db line, but sometimes you do...
-						query = 'SELECT * FROM {tb} WHERE index=%s'.format(tb=authortable)
+						query = 'SELECT {wtmpl} FROM {tb} WHERE index=%s'.format(wtmpl=worklinetemplate, tb=authortable)
 						data = (lo.index + 1,)
 						cursor.execute(query, data)
 						try:
@@ -294,7 +296,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 
 						if t and h:
 							# foundlineobjects.append(lo)
-							sfo.addnewfindstolistoffinds([lo])
+							sfo.addnewfindstolistoffinds([lo.decompose()])
 							activepoll.addhits(1)
 							if so.onehit:
 								gotmyonehit = True

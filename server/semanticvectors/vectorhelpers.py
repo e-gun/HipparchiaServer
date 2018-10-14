@@ -15,7 +15,7 @@ from string import punctuation
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
+from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, worklinetemplate
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, elidedextrapunct, extrapunct, \
@@ -189,7 +189,7 @@ def findsentences(authortable, searchobject, cursor):
 		whr = ''
 
 	# vanilla grab-it-all
-	query = 'SELECT * FROM {db} {whr}'.format(db=authortable, whr=whr)
+	query = 'SELECT {wtmpl}  FROM {db} {whr}'.format(wtmpl=worklinetemplate ,db=authortable, whr=whr)
 
 	# vs. something that skips titles (but might drop the odd other thing or two...)
 	# but this noes not play nicely with 'temptable'

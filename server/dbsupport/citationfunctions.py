@@ -9,7 +9,7 @@
 import re
 
 from server.dbsupport.miscdbfunctions import findtoplevelofwork
-from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber
+from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber, worklinetemplate
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.helperobjects import LowandHighInfo
 from server.hipparchiaobjects.dbtextobjects import dbOpus, dbWorkLine
@@ -60,7 +60,7 @@ def findvalidlevelvalues(workid: str, workstructure: dict, partialcitationtuple:
 
 	# select level_00_value from gr0565w001 where level_03_value='3' AND level_02_value='2' AND level_01_value='1' AND level_00_value NOT IN ('t') ORDER BY index ASC;
 	# select level_01_value from gr0565w001 where level_03_value='2' AND level_02_value='1' AND level_01_value NOT IN ('t') ORDER BY index ASC;
-	query = 'SELECT * FROM {db} WHERE ( wkuniversalid=%s ) AND '.format(lvl=atlevel-1, db=audb)
+	query = 'SELECT {wltmp} FROM {db} WHERE ( wkuniversalid=%s ) AND '.format(wltmp=worklinetemplate, lvl=atlevel-1, db=audb)
 	datalist = [workid]
 	for level in range(availablelevels - 1, atlevel - 1, -1):
 		query += ' level_0{lvl}_value=%s AND '.format(lvl=level)

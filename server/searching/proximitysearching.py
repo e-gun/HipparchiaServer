@@ -64,7 +64,12 @@ def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> L
 		for hit in hits:
 			if len(fullmatches) > so.cap:
 				break
-			isnear = dblooknear(hit[0], so.distance, so.termtwo, hit[1], so.usecolumn, dbcursor)
+			# this bit is BRITTLE because of the paramater order vs the db field order
+			#   dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, cursor)
+			# see "worklinetemplate" for the order in which the elements will return from a search hit
+			hitindex = hit[1]
+			hitwkid = hit[0]
+			isnear = dblooknear(hitindex, so.distance, so.termtwo, hitwkid, so.usecolumn, dbcursor)
 			if so.near and isnear:
 				fullmatches.append(hit)
 			elif not so.near and not isnear:

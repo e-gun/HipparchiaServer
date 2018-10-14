@@ -68,7 +68,9 @@ class GenericSearchFunctionObject(object):
 	def listcleanup(self):
 		pass
 
-	def addnewfindstolistoffinds(self, newfinds):
+	def addnewfindstolistoffinds(self, newfinds: list):
+		if newfinds:
+			print('newfinds', newfinds)
 		self.foundlineobjects.extend(newfinds)
 
 	def updatepollremaining(self):
@@ -134,9 +136,12 @@ class GenericSearchFunctionObject(object):
 			if nextitem:
 				params = self.parameterswapper(nextitem, insertposition)
 				foundlines = self.searchfunction(*tuple(params))
-				lineobjects = [dblineintolineobject(f) for f in foundlines]
-				self.addnewfindstolistoffinds(lineobjects)
-				self.updatepollfinds(lineobjects)
+				# a generator was returned
+				foundlines = list(foundlines)
+				# avoiding object generation to skip pickiling something a complex object inside a shared state structure
+				# lineobjects = [dblineintolineobject(f) for f in foundlines]
+				self.addnewfindstolistoffinds(foundlines)
+				self.updatepollfinds(foundlines)
 				self.updatepollremaining()
 			else:
 				# listofplacestosearch has been exhausted
@@ -175,7 +180,7 @@ class RedisSearchFunctionObject(GenericSearchFunctionObject):
 	def __del__(self):
 		self.rc.delete(self.redissearchid)
 
-	def addnewfindstolistoffinds(self, newfinds):
+	def addnewfindstolistoffinds(self, newfinds: list):
 		finds = [pickle.dumps(f) for f in newfinds]
 		for f in finds:
 			self.rc.rpush(self.redisfindsid, f)

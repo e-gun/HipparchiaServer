@@ -282,6 +282,22 @@ class dbWorkLine(object):
 		if hipparchia.config['DISTINCTGREEKANDLATINFONTS'] == 'yes':
 			self.accented = self.separategreekandlatinfonts()
 
+	def decompose(self) -> tuple:
+		"""
+
+		return the tuple that generated the object
+
+		but see dblineintolineobject():
+			all columns pushed straight into the object with *one* twist: 1, 0, 2, 3, ...
+
+		:return:
+		"""
+
+		items = ['wkuinversalid', 'index', 'l5', 'l4', 'l3', 'l2', 'l1', 'l0', 'accented', 'polytonic', 'stripped',
+		         'hyphenated', 'annotations']
+		tvals = [getattr(self, i) for i in items]
+		return tuple(tvals)
+
 	def uncleanlocus(self):
 		"""
 		call me to get a formatted citation: "3.2.1"

@@ -17,6 +17,7 @@ except ImportError:
 
 from server import hipparchia
 from server.threading.mpthreadcount import setthreadcount
+from server.dbsupport.dblinefunctions import dblineintolineobject
 
 
 class NullRedis(object):
@@ -126,5 +127,5 @@ def loadredisresults(searchid):
 	redisfindsid = '{id}_findslist'.format(id=searchid)
 	rc = establishredisconnection()
 	finds = rc.lrange(redisfindsid, 0, -1)
-	foundlineobjects = [pickle.loads(f) for f in finds]
+	foundlineobjects = [dblineintolineobject(pickle.loads(f)) for f in finds]
 	return foundlineobjects

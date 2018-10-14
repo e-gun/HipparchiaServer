@@ -9,7 +9,6 @@
 import configparser
 
 import psycopg2
-
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
@@ -181,8 +180,23 @@ def simplecontextgrabber(authortable: str, focusline: int, linesofcontext: int, 
 	:param cursor:
 	:return:
 	"""
+	# BRITTLE, but circular import if you try to grab this from its real home: dblinefunctions.py
+	worklinetemplate = """
+			wkuniversalid,
+			index,
+			level_05_value,
+			level_04_value,
+			level_03_value,
+			level_02_value,
+			level_01_value,
+			level_00_value,
+			marked_up_line,
+			accented_line,
+			stripped_line,
+			hyphenated_words,
+			annotations"""
 
-	query = 'SELECT * FROM {uid} WHERE (index BETWEEN %s AND %s) ORDER BY index'.format(uid=authortable)
+	query = 'SELECT {wtmpl} FROM {uid} WHERE (index BETWEEN %s AND %s) ORDER BY index'.format(wtmpl=worklinetemplate, uid=authortable)
 	data = (focusline - int(linesofcontext / 2), focusline + int(linesofcontext / 2))
 	cursor.execute(query, data)
 	foundlines = cursor.fetchall()

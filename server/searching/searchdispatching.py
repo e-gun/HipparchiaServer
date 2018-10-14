@@ -13,8 +13,8 @@ from multiprocessing.managers import ListProxy
 from typing import List
 
 from server import hipparchia
+from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.dbsupport.redisdbfunctions import buildredissearchlist, loadredisresults
-from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
@@ -171,8 +171,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	if so.redisresultlist:
 		foundlineobjects = loadredisresults(so.searchid)
 	else:
-		# generator needs to turn into a list
-		foundlineobjects = list(founddblineobjects)
+		foundlineobjects = [dblineintolineobject(item) for item in founddblineobjects]
 
 	for c in oneconnectionperworker:
 		oneconnectionperworker[c].connectioncleanup()

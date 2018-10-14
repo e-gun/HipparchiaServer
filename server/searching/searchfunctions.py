@@ -15,7 +15,7 @@ from string import punctuation
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline
+from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import extrapunct, removegravity, minimumgreek
 from server.hipparchiaobjects.searchobjects import SearchObject
@@ -211,7 +211,7 @@ def lookoutsideoftheline(linenumber: int, numberofextrawords: int, workid: str, 
 
 	workdbname = workid[0:6]
 
-	query = 'SELECT * FROM {db} WHERE index BETWEEN %s AND %s ORDER BY index ASC'.format(db=workdbname)
+	query = 'SELECT {wltmp} FROM {db} WHERE index BETWEEN %s AND %s ORDER BY index ASC'.format(wltmp=worklinetemplate, db=workdbname)
 	data = (linenumber - 1, linenumber + 1)
 	cursor.execute(query, data)
 	results = cursor.fetchall()

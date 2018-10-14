@@ -9,7 +9,7 @@
 import re
 
 from server.browsing.browserfunctions import checkfordocumentmetadata
-from server.dbsupport.dblinefunctions import dblineintolineobject
+from server.dbsupport.dblinefunctions import dblineintolineobject, worklinetemplate
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.startup import workdict
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
@@ -32,11 +32,9 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	auid = work[0:6]
 
 	qtemplate = """
-	SELECT index, wkuniversalid, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, 
-			marked_up_line, accented_line, stripped_line, hyphenated_words, annotations FROM {a}
-	        WHERE (index >= %s and index <= %s) ORDER BY index ASC
+	SELECT {wltmp} FROM {a} WHERE (index >= %s and index <= %s) ORDER BY index ASC
 	"""
-	query = qtemplate.format(a=auid)
+	query = qtemplate.format(wltmp=worklinetemplate, a=auid)
 
 	data = (firstline, lastline)
 	cursor.execute(query, data)
