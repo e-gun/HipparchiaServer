@@ -6,6 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import pickle
 from typing import List
 
 try:
@@ -109,3 +110,21 @@ def buildredissearchlist(listofsearchlocations: List, searchid: str):
 	# print('search set is', rc.smembers(rediskey))
 
 	return
+
+
+def loadredisresults(searchid):
+	"""
+
+	search results were passed to redis
+
+	grab and return them
+
+	:param searchid:
+	:return:
+	"""
+
+	redisfindsid = '{id}_findslist'.format(id=searchid)
+	rc = establishredisconnection()
+	finds = rc.lrange(redisfindsid, 0, -1)
+	foundlineobjects = [pickle.loads(f) for f in finds]
+	return foundlineobjects

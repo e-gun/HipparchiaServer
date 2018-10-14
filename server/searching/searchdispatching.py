@@ -13,7 +13,8 @@ from multiprocessing.managers import ListProxy
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.redisdbfunctions import buildredissearchlist
+from server.dbsupport.redisdbfunctions import buildredissearchlist, loadredisresults
+from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
@@ -62,18 +63,12 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 
 	workers = setthreadcount()
 
-	if not so.redissearchlist:
-		listofplacestosearch = manager.list(so.indexrestrictions.keys())
-	else:
+	if so.redisresultlist and so.redissearchlist:
 		listofplacestosearch = None
 		buildredissearchlist(list(so.indexrestrictions.keys()), so.searchid)
+	else:
+		listofplacestosearch = manager.list(so.indexrestrictions.keys())
 
-	# experiment with JoinableQueue
-	# https://docs.python.org/3.7/library/multiprocessing.html#multiprocessing.JoinableQueue
-	# https://pymotw.com/2/multiprocessing/communication.html
-
-	if so.usequeue:
-		listofplacestosearch = loadsearchqueue(so.indexrestrictions.keys(), workers)
 	activepoll.allworkis(len(so.searchlist))
 	activepoll.remain(len(so.indexrestrictions.keys()))
 	activepoll.sethits(0)
@@ -173,8 +168,11 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	for j in jobs:
 		j.join()
 
-	# generator needs to turn into a list
-	foundlineobjects = list(founddblineobjects)
+	if so.redisresultlist:
+		foundlineobjects = loadredisresults(so.searchid)
+	else:
+		# generator needs to turn into a list
+		foundlineobjects = list(founddblineobjects)
 
 	for c in oneconnectionperworker:
 		oneconnectionperworker[c].connectioncleanup()

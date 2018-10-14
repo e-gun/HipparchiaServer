@@ -32,13 +32,18 @@
 # REDISDBID sets the numerical value of the database we will use; 0 is a typical default; if your machine
 #   has other things going on with redis, then it is possible to generate conflicts is you leave this as '0'
 #
-# SEARCHLISTCONNECTIONTYPE if set to 'redis' you will not use Manager() to manage the searchlists but redis
+# SEARCHLISTCONNECTIONTYPE if this is set to 'redis' you will not use Manager() to manage the searchlists but redis
+#   instead. There is a problesm with certain heardware/OS configurations that seems to crop up only when too
+#   many results get passed to the ListProxy at once. Storing the results in redis is a strategy to circumvent this.
+#   For debuggging purposes only...
+#
+# SEARCHLISTCONNECTIONTYPE if this is set to 'redis' you will not use Manager() to manage the searchlists but redis
 #   instead. At the moment this is all about tracking down a memory management oddity. Do not use this
 #   unless searches are hanging and you are desperate to find a fix... This code is significantly slower.
 #   Waiting for redis to do a SPOP is not nearly as fast as accessing memory directly. The longer the searchlist
 #   the greater the penalty: a search of 236,835 texts is quite costly. There is also another experimental option:
 #   'queue'. This is another way of attacking the long-standing Manager() issue. For debuggging purposes only...
-#   [ATM it looks like a queue mitigates but does not eliminate the problem]
+#   This option is *meaningless* if you do not also set SEARCHRESULCONNECTIONTYPE to 'redis'
 
 # hipparchia itself as a server
 FLASKSERVEDFROMPORT = 5000
@@ -58,4 +63,5 @@ REDISPORT = 6379
 REDISCOCKET = '/tmp/redis.sock'
 REDISDBID = 0
 POLLCONNECTIONTYPE = 'notredis'
+SEARCHRESULCONNECTIONTYPE = 'notredis'
 SEARCHLISTCONNECTIONTYPE = 'notredis'

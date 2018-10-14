@@ -43,18 +43,33 @@ class GenericSearchFunctionObject(object):
 		self.searchfunctionparameters = None
 		self.activepoll = self.so.poll
 		self.parameterswapper = self.simpleparamswapper
-		self.remaindererror = NotImplementedError
-		self.emptytest = None
-		self.remainder = None
+		self.emptytest = self.listofplacestosearch
+		try:
+			self.getnetxitem = self.listofplacestosearch.pop
+		except AttributeError:
+			# this should get implemented momentarily after this GenericObject has been initialized
+			self.getnetxitem = NotImplementedError
+		self.remainder = self.listofplacestosearch
+		self.emptyerror = IndexError
+		self.remaindererror = TypeError
 
 	def getnextfnc(self):
-		raise NotImplementedError
+		self.commitcount += 1
+		self.dbconnection.checkneedtocommit(self.commitcount)
+		try:
+			nextsearchlocation = self.getnetxitem(0)
+		except self.emptyerror:
+			nextsearchlocation = None
+		return nextsearchlocation
 
 	def getremain(self):
 		return len(self.remainder)
 
 	def listcleanup(self):
 		pass
+
+	def addnewfindstolistoffinds(self, newfinds):
+		self.foundlineobjects.extend(newfinds)
 
 	def updatepollremaining(self):
 		try:
@@ -120,7 +135,7 @@ class GenericSearchFunctionObject(object):
 				params = self.parameterswapper(nextitem, insertposition)
 				foundlines = self.searchfunction(*tuple(params))
 				lineobjects = [dblineintolineobject(f) for f in foundlines]
-				self.foundlineobjects.extend(lineobjects)
+				self.addnewfindstolistoffinds(lineobjects)
 				self.updatepollfinds(lineobjects)
 				self.updatepollremaining()
 			else:
@@ -135,22 +150,37 @@ class GenericSearchFunctionObject(object):
 
 
 class RedisSearchFunctionObject(GenericSearchFunctionObject):
+	""""
+
+	use redis to store the results (because cramming too many hits too fast into the managed list causes problems on FreeBSD...)
+
+	using redis to store the searchlist seems only to slow you down and this slowdown itself is a "fix", but not a very interesting one
+
+	"""
 	def __init__(self, workerid, foundlineobjects, listofplacestosearch: ListProxy, searchobject, dbconnection, searchfunction):
 		super().__init__(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
-		self.listofplacestosearch = True
 		self.rc = establishredisconnection()
 		self.redissearchid = '{id}_searchlist'.format(id=self.so.searchid)
-		# lambda this because if you define as self.rc.spop(redissearchid) you will actually pop an item..,
-		self.getnetxitem = lambda x: self.rc.spop(self.redissearchid)
-		self.remainder = self.rc.smembers(self.redissearchid)
-		self.emptyerror = AttributeError
-		self.remaindererror = AttributeError
-		self.emptytest = self.listofplacestosearch
+		self.redisfindsid = '{id}_findslist'.format(id=self.so.searchid)
+		if searchobject.redissearchlist:
+			self.listofplacestosearch = True
+			# lambda this because if you define as self.rc.spop(redissearchid) you will actually pop an item..,
+			self.getnetxitem = lambda x: self.rc.spop(self.redissearchid)
+			self.getnextfnc = self.redisgetnextfnc
+			self.remainder = self.rc.smembers(self.redissearchid)
+			self.emptyerror = AttributeError
+			self.remaindererror = AttributeError
+			self.emptytest = self.listofplacestosearch
 
 	def __del__(self):
 		self.rc.delete(self.redissearchid)
 
-	def getnextfnc(self):
+	def addnewfindstolistoffinds(self, newfinds):
+		finds = [pickle.dumps(f) for f in newfinds]
+		for f in finds:
+			self.rc.rpush(self.redisfindsid, f)
+
+	def redisgetnextfnc(self):
 		self.commitcount += 1
 		self.dbconnection.checkneedtocommit(self.commitcount)
 		try:
@@ -171,25 +201,29 @@ class RedisSearchFunctionObject(GenericSearchFunctionObject):
 
 
 class ManagedListSearchFunctionObject(GenericSearchFunctionObject):
-	def __init__(self, workerid, foundlineobjects, listofplacestosearch: ListProxy, searchobject, dbconnection, searchfunction):
+	def __init__(self, workerid, foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject, dbconnection, searchfunction):
 		super().__init__(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
-		self.emptytest = self.listofplacestosearch
-		self.getnetxitem = self.listofplacestosearch.pop
-		self.remainder = self.listofplacestosearch
-		self.emptyerror = IndexError
-		self.remaindererror = TypeError
-
-	def getnextfnc(self):
-		self.commitcount += 1
-		self.dbconnection.checkneedtocommit(self.commitcount)
-		try:
-			nextsearchlocation = self.getnetxitem(0)
-		except self.emptyerror:
-			nextsearchlocation = None
-		return nextsearchlocation
 
 
 class QueuedSearchFunctionObject(GenericSearchFunctionObject):
+	"""
+
+	DISABLED
+
+	for searchlists this is not really better or more interesting than the ListProxy that a ManagedListSearchFunctionObject has
+
+	meanwhile implementing a Queue for results was not immediately fun or obvious or obviously going to help
+
+	need the following in "searchdispatching.py" to turn this on:
+
+		# experiment with JoinableQueue
+		# https://docs.python.org/3.7/library/multiprocessing.html#multiprocessing.JoinableQueue
+		# https://pymotw.com/2/multiprocessing/communication.html
+
+		if so.usequeue:
+			listofplacestosearch = loadsearchqueue(so.indexrestrictions.keys(), workers)
+
+	"""
 	def __init__(self, workerid, foundlineobjects, listofplacestosearch: ListProxy, searchobject, dbconnection, searchfunction):
 		super().__init__(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
 		self.getnetxitem = self.listofplacestosearch.get
@@ -221,7 +255,7 @@ class QueuedSearchFunctionObject(GenericSearchFunctionObject):
 def returnsearchfncobject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction):
 		if isinstance(listofplacestosearch, type(JoinableQueue())):
 			return QueuedSearchFunctionObject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
-		elif searchobject.redissearchlist:
+		elif searchobject.redisresultlist:
 			return RedisSearchFunctionObject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)
 		else:
 			return ManagedListSearchFunctionObject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction)

@@ -129,6 +129,10 @@ class SearchObject(object):
 			self.redissearchlist = True
 		else:
 			self.redissearchlist = False
+		if hipparchia.config['SEARCHRESULCONNECTIONTYPE'] == 'redis':
+			self.redisresultlist = True
+		else:
+			self.redisresultlist = False
 
 		# searchtermcharactersubstitutions() logic has moved here
 
