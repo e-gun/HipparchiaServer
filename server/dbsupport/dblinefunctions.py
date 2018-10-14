@@ -16,14 +16,15 @@ from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 
 # this next should be used by *lots* of functions to make sure that what you ask for fits the dbWorkLine() params
 worklinetemplate = ['wkuniversalid', 'index', 'level_05_value', 'level_04_value', 'level_03_value',
-                    'level_02_value', 'level_01_value', 'level_00_value', 'marked_up_line',
-                    'accented_line', 'stripped_line', 'hyphenated_words', 'annotations']
+					'level_02_value', 'level_01_value', 'level_00_value', 'marked_up_line',
+					'accented_line', 'stripped_line', 'hyphenated_words', 'annotations']
 
 worklinetemplate = ', '.join(worklinetemplate)
 
 
 def dblineintolineobject(dbline: tuple) -> dbWorkLine:
 	"""
+
 	convert a db result into a db object
 
 	basically all columns pushed straight into the object with *one* twist: 1, 0, 2, 3, ...

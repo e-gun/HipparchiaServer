@@ -70,8 +70,8 @@ class GenericSearchFunctionObject(object):
 
 	def addnewfindstolistoffinds(self, newfinds: list):
 		if newfinds:
-			print('newfinds', newfinds)
-		self.foundlineobjects.extend(newfinds)
+			# print('newfinds', newfinds)
+			self.foundlineobjects.extend(newfinds)
 
 	def updatepollremaining(self):
 		try:
