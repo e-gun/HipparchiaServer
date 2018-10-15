@@ -282,8 +282,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	xdftemplate="""
 	<span class="dictionaryform">{df}</span>&nbsp;:&nbsp;
 	from <span class="baseform">{bf}</span>
-	<span class="baseformtranslation">{tr}</span>
-	{x}:
+	<span class="baseformtranslation">{tr}</span>{x}:
 	"""
 
 	distinct = set([p.xref for p in possibilitieslist])
@@ -307,7 +306,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 			tr = str()
 
 		if session['debugparse'] == 'yes':
-			xrefinfo = '<&nbsp;code>[{x}]</code>'.format(x=firstsubentry.xref)
+			xrefinfo = '<code>[{x}]</code>'.format(x=firstsubentry.xref)
 		else:
 			xrefinfo = ''
 		xdf = xdftemplate.format(df=firstsubentry.observed, bf=bf, tr=tr, x=xrefinfo)
