@@ -58,7 +58,7 @@ class PooledRedisBorg(object):
 				sock = hipparchia.config['REDISCOCKET']
 				redisconnection = redis.ConnectionPool(connection_class=redis.UnixDomainSocketConnection, path=sock, db=dbid, max_connections=poolsize)
 			PooledRedisBorg._pool.append(redisconnection)
-			print('initialized PooledRedisBorg')
+			# print('initialized PooledRedisBorg')
 		self.pool = PooledRedisBorg._pool[0]
 		self.connection = redis.Redis(connection_pool=self.pool)
 
@@ -127,5 +127,6 @@ def loadredisresults(searchid):
 	redisfindsid = '{id}_findslist'.format(id=searchid)
 	rc = establishredisconnection()
 	finds = rc.lrange(redisfindsid, 0, -1)
-	foundlineobjects = [dblineintolineobject(pickle.loads(f)) for f in finds]
+	# foundlineobjects = [dblineintolineobject(pickle.loads(f)) for f in finds]
+	foundlineobjects = [pickle.loads(f) for f in finds]
 	return foundlineobjects

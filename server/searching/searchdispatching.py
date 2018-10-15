@@ -171,7 +171,8 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	if so.redisresultlist:
 		foundlineobjects = loadredisresults(so.searchid)
 	else:
-		foundlineobjects = [dblineintolineobject(item) for item in founddblineobjects]
+		# foundlineobjects = [dblineintolineobject(item) for item in founddblineobjects]
+		foundlineobjects = list(founddblineobjects)
 
 	for c in oneconnectionperworker:
 		oneconnectionperworker[c].connectioncleanup()

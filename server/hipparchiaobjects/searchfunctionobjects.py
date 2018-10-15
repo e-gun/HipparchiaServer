@@ -69,9 +69,7 @@ class GenericSearchFunctionObject(object):
 		pass
 
 	def addnewfindstolistoffinds(self, newfinds: list):
-		if newfinds:
-			# print('newfinds', newfinds)
-			self.foundlineobjects.extend(newfinds)
+		self.foundlineobjects.extend(newfinds)
 
 	def updatepollremaining(self):
 		try:
@@ -127,6 +125,11 @@ class GenericSearchFunctionObject(object):
 
 		this is the simple core of the whole thing; the rest is about feeding it properly
 
+		if you do not pickle the lineobjects here and now you will need to generate line objects at the other end
+			foundlineobjects = [dblineintolineobject(item) for item in founddblineobjects]
+
+		you will also need to use lo.decompose() in phrasesearching.py to feed the findslist
+
 		:return:
 		"""
 
@@ -136,12 +139,9 @@ class GenericSearchFunctionObject(object):
 			if nextitem:
 				params = self.parameterswapper(nextitem, insertposition)
 				foundlines = self.searchfunction(*tuple(params))
-				# a generator was returned
-				foundlines = list(foundlines)
-				# avoiding object generation to skip pickiling something a complex object inside a shared state structure
-				# lineobjects = [dblineintolineobject(f) for f in foundlines]
-				self.addnewfindstolistoffinds(foundlines)
-				self.updatepollfinds(foundlines)
+				lineobjects = [dblineintolineobject(f) for f in foundlines]
+				self.addnewfindstolistoffinds(lineobjects)
+				self.updatepollfinds(lineobjects)
 				self.updatepollremaining()
 			else:
 				# listofplacestosearch has been exhausted
@@ -213,7 +213,7 @@ class ManagedListSearchFunctionObject(GenericSearchFunctionObject):
 class QueuedSearchFunctionObject(GenericSearchFunctionObject):
 	"""
 
-	DISABLED
+	DISABLED / UNREACHABLE
 
 	for searchlists this is not really better or more interesting than the ListProxy that a ManagedListSearchFunctionObject has
 
