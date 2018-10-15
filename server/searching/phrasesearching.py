@@ -187,7 +187,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 		lim = ' LIMIT 5'
 
 	# build incomplete sfo that will handle everything other than iteratethroughsearchlist()
-	sfo = returnsearchfncobject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, None)
+	sfo = returnsearchfncobject(workerid, foundlineobjects, listofplacestosearch, so, dbconnection, None)
 
 	if so.redissearchlist:
 		listofplacestosearch = True
@@ -253,10 +253,9 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 				# it is not nearly so simple as picking the 2nd element in any run of 3: no always runs of 3 + matches in
 				# subsequent lines means that you really should check your work carefully; this is not an especially costly
 				# operation relative to the whole search and esp. relative to the speed gains of using a subquery search
-				lo = locallineobjects.pop()
-				if re.search(sp, getattr(lo, so.usewordlist)):
-					sfo.addnewfindstolistoffinds([lo])
-					# sfo.addnewfindstolistoffinds([lo.decompose()])
+				lineobject = locallineobjects.pop()
+				if re.search(sp, getattr(lineobject, so.usewordlist)):
+					sfo.addnewfindstolistoffinds([lineobject])
 					activepoll.addhits(1)
 					if so.onehit:
 						gotmyonehit = True
@@ -266,11 +265,11 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 					except IndexError:
 						nextline = makeablankline('gr0000w000', -1)
 
-					if lo.wkuinversalid != nextline.wkuinversalid or lo.index != (nextline.index - 1):
+					if lineobject.wkuinversalid != nextline.wkuinversalid or lineobject.index != (nextline.index - 1):
 						# you grabbed the next line on the pile (e.g., index = 9999), not the actual next line (e.g., index = 101)
 						# usually you won't get a hit by grabbing the next db line, but sometimes you do...
 						query = 'SELECT {wtmpl} FROM {tb} WHERE index=%s'.format(wtmpl=worklinetemplate, tb=authortable)
-						data = (lo.index + 1,)
+						data = (lineobject.index + 1,)
 						cursor.execute(query, data)
 						try:
 							nextline = dblineintolineobject(cursor.fetchone())
@@ -286,7 +285,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 						t = False
 						h = False
 						try:
-							t = re.search(tail, getattr(lo, so.usewordlist))
+							t = re.search(tail, getattr(lineobject, so.usewordlist))
 						except re.error:
 							pass
 						try:
@@ -295,8 +294,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 							pass
 
 						if t and h:
-							sfo.addnewfindstolistoffinds([lo])
-							# sfo.addnewfindstolistoffinds([lo.decompose()])
+							sfo.addnewfindstolistoffinds([lineobject])
 							activepoll.addhits(1)
 							if so.onehit:
 								gotmyonehit = True
