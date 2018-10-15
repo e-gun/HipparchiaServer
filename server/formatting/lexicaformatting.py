@@ -283,16 +283,13 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	count = 0
 	countchar = int('0030', 16)  # '1' (after you add 1)
 	subcountchar = int('0061', 16)  # 'a' (when counting from 0)
-	obsvstring = '<span class="obsv">({ct})&nbsp;'
-	xdfstring = '<span class="dictionaryform">{df}</span> - from <span class="baseform">{bf}</span>{tr}{x}: &nbsp;</span>'
-	# posstring = '\t<br /><span class="possibility">{pos}</span>&nbsp;'
-	# ctposstring = '\t<br /><span class="possibility">[{ct}]&nbsp;{a}</span>'
+	obsvstring = '\n<span class="obsv">({ct})&nbsp;{xdf}</span>'
+	xdfstring = '<span class="dictionaryform">{df}</span> - from <span class="baseform">{bf}</span>{tr}{x}:'
 	morphhtml = list()
 
 	for d in distinct:
 		count += 1
 		outputlist = list()
-		outputlist.append(obsvstring.format(ct=chr(count + countchar)))
 		subentries = [p for p in possibilitieslist if p.xref == d]
 		subentries = sorted(subentries, key=lambda x: x.number)
 		firstsubentry = subentries[0]
@@ -307,12 +304,13 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 			xrefinfo = '<&nbsp;code>[{x}]</code>'.format(x=firstsubentry.xref)
 		else:
 			xrefinfo = ''
-		outputlist.append(xdfstring.format(df=firstsubentry.observed, bf=bf, tr=tr, x=xrefinfo))
+		xdf = xdfstring.format(df=firstsubentry.observed, bf=bf, tr=tr, x=xrefinfo)
+		outputlist.append(obsvstring.format(ct=chr(count + countchar), xdf=xdf))
 
 		if len(subentries) == 1:
 			analysischunks = firstsubentry.getanalysislist()[0].split(' ')
 			analysischunks = ['<td class="morphcell">{a}</td>'.format(a=a) for a in analysischunks]
-			tr = '<tr><td class="morphcell invisible">{ct}</td>{tds}</tr>'.format(ct=chr(subcountchar), tds=''.join(analysischunks))
+			tr = '<tr><td class="morphcell invisible">{ct}</td>{tds}</tr>'.format(ct=chr(subcountchar), tds='\n'.join(analysischunks))
 			outputlist.append(morphabletemplate.format(trs=tr))
 		else:
 			rows = list()
