@@ -273,6 +273,8 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 
 	distinct = set([p.xref for p in possibilitieslist])
 	count = 0
+	countchar = int('0030', 16)  # '1' (after you add 1)
+	subcountchar = int('0061', 16)  # 'a' (when counting from 0)
 	obsvstring = '<p class="obsv">({ct})&nbsp;'
 	xdfstring = '<span class="dictionaryform">{df}</span> - from <span class="baseform">{bf}</span>{tr}{x}: &nbsp;'
 	posstring = '\t<br /><span class="possibility">{pos}</span>&nbsp;'
@@ -282,7 +284,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	for d in distinct:
 		count += 1
 		outputlist = list()
-		outputlist.append(obsvstring.format(ct=str(count)))
+		outputlist.append(obsvstring.format(ct=chr(count + countchar)))
 		subentries = [p for p in possibilitieslist if p.xref == d]
 		subentries = sorted(subentries, key=lambda x: x.number)
 		firstsubentry = subentries[0]
@@ -303,7 +305,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 			outputlist.append(posstring.format(pos=firstsubentry.getanalysislist()[0]))
 		else:
 			for e in range(len(subentries)):
-				outputlist.append(ctposstring.format(ct=chr(e + 97), a=subentries[e].getanalysislist()[0]))
+				outputlist.append(ctposstring.format(ct=chr(e + subcountchar), a=subentries[e].getanalysislist()[0]))
 			outputlist.append('&nbsp;')
 		distincthtml = '\n'.join(outputlist)
 		morphhtml.append(distincthtml)
