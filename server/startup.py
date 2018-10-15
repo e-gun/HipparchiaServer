@@ -177,6 +177,7 @@ del elapsed
 del launchtime
 
 if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
+	print('calculating word weights...')
 	if hipparchia.config['COLLAPSEDGENRECOUNTS'] == 'yes':
 		c = True
 	else:

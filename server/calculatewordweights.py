@@ -296,7 +296,7 @@ def findgeneraweights(language, collapsed=False):
 	]
 
 	cleanedknownworkgenres = [g.lower() for g in knownworkgenres]
-	cleanedknownworkgenres = [re.sub(r'[\.\s]','',g) for g in cleanedknownworkgenres]
+	cleanedknownworkgenres = [re.sub(r'[\.\s]', '', g) for g in cleanedknownworkgenres]
 
 	counts = {g: findcorpusweight(g, language) for g in cleanedknownworkgenres}
 	counts = {g: counts[g] for g in counts if counts[g] > 0}

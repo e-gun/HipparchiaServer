@@ -101,8 +101,8 @@ class dbHeadwordObject(dbWordCountObject):
 
 	"""
 
-	greekworderaweights = {'early': 7.75, 'middle': 1.92, 'late': 1}
-	corporaweights = {'gr': 1.0, 'lt': 10.68, 'in': 27.77, 'dp': 26.76, 'ch': 124.85}
+	greekworderaweights = {'early': 6.93, 'middle': 1.87, 'late': 1}
+	corporaweights = {'gr': 1.0, 'lt': 10.26, 'in': 27.81, 'dp': 26.52, 'ch': 119.77}
 
 	greekgenreweights = {'acta': 85.38, 'alchem': 72.13,
 						'anthol': 17.68, 'apocalyp': 117.69, 'apocryph': 89.77,

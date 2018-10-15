@@ -7,8 +7,6 @@
 """
 import re
 
-from flask import session
-
 from server import hipparchia
 from server.formatting.wordformatting import gkattemptelision, latattemptelision, minimumgreek
 

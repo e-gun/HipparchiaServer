@@ -282,7 +282,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	xdftemplate="""
 	<span class="dictionaryform">{df}</span>&nbsp;:&nbsp;
 	from <span class="baseform">{bf}</span>
-	<span class="baseformtranslation">{tr}</span>{x}:
+	<span class="baseformtranslation">{xlate}</span>{xref}:
 	"""
 
 	distinct = set([p.xref for p in possibilitieslist])
@@ -301,21 +301,22 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 
 		bf = firstsubentry.getbaseform()
 		if firstsubentry.gettranslation() and firstsubentry.gettranslation() != ' ':
-			tr = '&nbsp;("{tr}")'.format(tr=firstsubentry.gettranslation())
+			xlate = '&nbsp;(“{tr}”)'.format(tr=firstsubentry.gettranslation())
 		else:
-			tr = str()
+			xlate = str()
 
 		if session['debugparse'] == 'yes':
 			xrefinfo = '<code>[{x}]</code>'.format(x=firstsubentry.xref)
 		else:
-			xrefinfo = ''
-		xdf = xdftemplate.format(df=firstsubentry.observed, bf=bf, tr=tr, x=xrefinfo)
+			xrefinfo = str()
+
+		xdf = xdftemplate.format(df=firstsubentry.observed, bf=bf, xlate=xlate, xref=xrefinfo)
 		outputlist.append(obsvstring.format(ct=chr(count + countchar), xdf=xdf))
 
 		if len(subentries) == 1:
 			analysischunks = firstsubentry.getanalysislist()[0].split(' ')
-			analysischunks = ['<td class="morphcell">{a}</td>'.format(a=a) for a in analysischunks]
-			tr = '<tr><td class="morphcell invisible">{ct}</td>{tds}</tr>'.format(ct=chr(subcountchar), tds='\n'.join(analysischunks))
+			analysischunks = ['\n<td class="morphcell">{a}</td>'.format(a=a) for a in analysischunks]
+			tr = '<tr><td class="morphcell invisible">[{ct}]</td>{tds}\n</tr>'.format(ct=chr(subcountchar), tds=''.join(analysischunks))
 			outputlist.append(morphabletemplate.format(trs=tr))
 		else:
 			rows = list()
