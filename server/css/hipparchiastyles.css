@@ -799,6 +799,10 @@ body {
 	margin: 3px;
 }
 
+.outline {
+	border: 1px dotted black;
+	}
+
 .overline {
 	border-top: 1px var(--black);
 	}
@@ -845,6 +849,10 @@ body {
 
 .quotedtext {
 	font-style: italic;
+	}
+
+.red {
+	color: var(--red);
 	}
 
 .romannumerals {
@@ -1017,12 +1025,14 @@ body {
 
 #bottommessage {
 	position: fixed;
-	width: 300px;
-	margin-left: -150px;
+	width: 500px;
+	margin-left: -250px;
 	bottom: 5px;
 	text-align: center;
-	font-size: 75%;
+	font-size: 250%;
 	left: 50%;
+	font-weight: bold;
+	color: var(--skyblue);
 }
 
 #browserdialog {
