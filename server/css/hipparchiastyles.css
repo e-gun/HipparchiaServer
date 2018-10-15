@@ -1364,6 +1364,14 @@ table.navtable {
     font-size: 75%;
     }
 
+table.morphtable {
+	padding-top: 5px;
+	padding-bottom: 5px;
+    margin: auto;
+    display: block;
+    font-size: 75%;
+	}
+
 table.showborders, td.showborders {
     border: 1px solid black;
     font-family: 'hipparchiamonostatic', monospace;
@@ -1397,6 +1405,19 @@ td.browserembeddedannotations {
 td.documentmeta {
     padding-right: -20px;
     }
+
+td.morphcell {
+	padding-left: 5px;
+	padding-right: 5px;
+	}
+
+td.morphcell.labelcell {
+	font-weight: normal;
+	}
+
+td.morphcell.invisible{
+	color: var(--invisible);
+	}
 
 td.textmakerembeddedannotations {
 	padding-right: 10px;

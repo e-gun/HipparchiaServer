@@ -271,14 +271,22 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	:return:
 	"""
 
+	morphabletemplate = """
+	<table class="morphtable">
+		<tbody>
+			{trs}
+		</tbody>
+	</table>
+	"""
+
 	distinct = set([p.xref for p in possibilitieslist])
 	count = 0
 	countchar = int('0030', 16)  # '1' (after you add 1)
 	subcountchar = int('0061', 16)  # 'a' (when counting from 0)
-	obsvstring = '<p class="obsv">({ct})&nbsp;'
-	xdfstring = '<span class="dictionaryform">{df}</span> - from <span class="baseform">{bf}</span>{tr}{x}: &nbsp;'
-	posstring = '\t<br /><span class="possibility">{pos}</span>&nbsp;'
-	ctposstring = '\t<br /><span class="possibility">[{ct}]&nbsp;{a}</span>'
+	obsvstring = '<span class="obsv">({ct})&nbsp;'
+	xdfstring = '<span class="dictionaryform">{df}</span> - from <span class="baseform">{bf}</span>{tr}{x}: &nbsp;</span>'
+	# posstring = '\t<br /><span class="possibility">{pos}</span>&nbsp;'
+	# ctposstring = '\t<br /><span class="possibility">[{ct}]&nbsp;{a}</span>'
 	morphhtml = list()
 
 	for d in distinct:
@@ -302,15 +310,23 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 		outputlist.append(xdfstring.format(df=firstsubentry.observed, bf=bf, tr=tr, x=xrefinfo))
 
 		if len(subentries) == 1:
-			outputlist.append(posstring.format(pos=firstsubentry.getanalysislist()[0]))
+			analysischunks = firstsubentry.getanalysislist()[0].split(' ')
+			analysischunks = ['<td class="morphcell">{a}</td>'.format(a=a) for a in analysischunks]
+			tr = '<tr><td class="morphcell invisible">{ct}</td>{tds}</tr>'.format(ct=chr(subcountchar), tds=''.join(analysischunks))
+			outputlist.append(morphabletemplate.format(trs=tr))
 		else:
+			rows = list()
 			for e in range(len(subentries)):
-				outputlist.append(ctposstring.format(ct=chr(e + subcountchar), a=subentries[e].getanalysislist()[0]))
-			outputlist.append('&nbsp;')
+				analysischunks = subentries[e].getanalysislist()[0].split(' ')
+				analysischunks = ['<td class="morphcell">{a}</td>'.format(a=a) for a in analysischunks]
+				analysischunks = ['<td class="morphcell labelcell">[{ct}]</td>'.format(ct=chr(e + subcountchar))] + analysischunks
+				tr = '<tr>{tds}</tr>'.format(tds=''.join(analysischunks))
+				rows.append(tr)
+			outputlist.append(morphabletemplate.format(trs='\n'.join(rows)))
 		distincthtml = '\n'.join(outputlist)
 		morphhtml.append(distincthtml)
 
-	morphhtml = '<br>\n'.join(morphhtml)
+	morphhtml = '\n'.join(morphhtml)
 
 	return morphhtml
 
