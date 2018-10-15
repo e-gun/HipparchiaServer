@@ -254,6 +254,12 @@ body {
 	font-weight: bold;
 	}
 
+.baseformtranslation {
+	color: var(--black);
+	font-style: normal;
+	font-weight: normal;
+	}
+
 .browsercite {
 	color: var(--dkteal);
 	font-weight: normal;

@@ -279,12 +279,18 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	</table>
 	"""
 
+	xdftemplate="""
+	<span class="dictionaryform">{df}</span>&nbsp;:&nbsp;
+	from <span class="baseform">{bf}</span>
+	<span class="baseformtranslation">{tr}</span>
+	{x}:
+	"""
+
 	distinct = set([p.xref for p in possibilitieslist])
 	count = 0
 	countchar = int('0030', 16)  # '1' (after you add 1)
 	subcountchar = int('0061', 16)  # 'a' (when counting from 0)
 	obsvstring = '\n<span class="obsv">({ct})&nbsp;{xdf}</span>'
-	xdfstring = '<span class="dictionaryform">{df}</span> - from <span class="baseform">{bf}</span>{tr}{x}:'
 	morphhtml = list()
 
 	for d in distinct:
@@ -296,7 +302,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 
 		bf = firstsubentry.getbaseform()
 		if firstsubentry.gettranslation() and firstsubentry.gettranslation() != ' ':
-			tr = '&nbsp;({tr})'.format(tr=firstsubentry.gettranslation())
+			tr = '&nbsp;("{tr}")'.format(tr=firstsubentry.gettranslation())
 		else:
 			tr = str()
 
@@ -304,7 +310,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 			xrefinfo = '<&nbsp;code>[{x}]</code>'.format(x=firstsubentry.xref)
 		else:
 			xrefinfo = ''
-		xdf = xdfstring.format(df=firstsubentry.observed, bf=bf, tr=tr, x=xrefinfo)
+		xdf = xdftemplate.format(df=firstsubentry.observed, bf=bf, tr=tr, x=xrefinfo)
 		outputlist.append(obsvstring.format(ct=chr(count + countchar), xdf=xdf))
 
 		if len(subentries) == 1:
