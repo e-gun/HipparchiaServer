@@ -248,6 +248,12 @@ body {
     padding-left: 5px;
     }
 
+.baseform {
+	color: var(--vdkgrey);
+	font-style: italic;
+	font-weight: bold;
+	}
+
 .browsercite {
 	color: var(--dkteal);
 	font-weight: normal;
@@ -828,6 +834,8 @@ body {
 	}
 
 .possibility {
+	font-size: 85%;
+	margin-left: 30px;
     }
 
 .prevalence {

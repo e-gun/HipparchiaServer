@@ -21,6 +21,7 @@ class MorphPossibilityObject(object):
 	"""
 
 	def __init__(self, observedform, findalltuple, prefixcount):
+		# print('findalltuple', findalltuple)
 		self.observed = observedform
 		self.number = findalltuple[1]
 		self.entry = findalltuple[2]
@@ -151,55 +152,6 @@ class MorphPossibilityObject(object):
 		baseform = re.sub(r'^\s', '', baseform)
 
 		return baseform
-	
-	def formatconsolidatedgrammarentry(self, entrycountnumber=0):
-		"""
-		example: {'count': 1, 'form': 'ἀϲήμου', 'word': 'ἄϲημοϲ', 'transl': 'without mark', 'anal': ['masc/fem/neut gen sg'], 'xref': 16808356, 'trials': 1}
-
-		something like this will come back:
-
-		<p class="obsv">(1)&nbsp;
-		<span class="dictionaryform">ἀϲήμου</span> (from <span class="dictionaryform">ἄϲημοϲ</span>, without mark): &nbsp;
-		<br /><span class="possibility">masc/fem/neut gen sg</span>&nbsp;
-		
-		:return: 
-		"""
-
-		obsvstring = '<p class="obsv">({ct})&nbsp;'
-		dfstring = '<span class="dictionaryform">{df}</span>'
-		xdfstring = '<span class="dictionaryform">{df}</span> (from {wt}){x}: &nbsp;'
-		posstring = '<br /><span class="possibility">{pos}</span>&nbsp;'
-		ctposstring = '<br />[{ct}]&nbsp;<span class="possibility">{a}</span>'
-
-		if session['debugparse'] == 'yes':
-			xrefinfo = '<code>[{x}]</code>'.format(x=self.xref)
-		else:
-			xrefinfo = ''
-
-		analysislist = self.getanalysislist()
-		
-		outputlist = list()
-		outputlist.append(obsvstring.format(ct=str(entrycountnumber)))
-		wordandtranslation = dfstring.format(df=self.observed)
-		if len(self.gettranslation()) > 1:
-			wordandtranslation = ', '.join([wordandtranslation, self.gettranslation()])
-
-		outputlist.append(xdfstring.format(df=self.observed, wt=wordandtranslation, x=xrefinfo))
-		if len(analysislist) == 1:
-			outputlist.append(posstring.format(pos=analysislist[0]))
-		else:
-			count = 0
-			for a in analysislist:
-				count += 1
-				outputlist.append(ctposstring.format(ct=chr(count + 96), a=a))
-			outputlist.append('&nbsp;')
-
-		analysisstring = '\n'.join(outputlist)
-
-		# print('analysisstring\n', analysisstring)
-
-		return analysisstring
-	
 
 
 class dbLemmaObject(object):

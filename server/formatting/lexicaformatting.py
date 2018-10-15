@@ -15,7 +15,7 @@ from server import hipparchia
 from server.dbsupport.lexicaldbfunctions import probedictionary, grablemmataobjectfor, findparserxref, \
 	querytotalwordcounts, findcountsviawordcountstable
 from server.formatting.jsformatting import insertlexicalbrowserjs, dictionaryentryjs
-from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject
+from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject, MorphPossibilityObject
 from server.hipparchiaobjects.wordcountobjects import dbWordCountObject, dbHeadwordObject
 
 
@@ -208,7 +208,14 @@ def multiplelexicalmatchesintohtml(morphologyobject: dbMorphologyObject) -> List
 	possibilities = morphologyobject.getpossible()
 
 	# the top part of the HTML: just the analyses
-	count = 0
+
+	# there is a HUGE PROBLEM in the original data:
+	#   [a] 'ὑπό, ἐκ-ἀράω²': what comes before the comma is a prefix to the verb
+	#   [b] 'ἠχούϲαϲ, ἠχέω': what comes before the comma is an observed form of the verb
+	# when you .split() what do you have at wordandform[0]?
+	# you have to look at the full db entry for the word:
+	# the number of items in prefixrefs corresponds to the number of prefix checks you will need to make
+	# to recompose the verb
 
 	wc = findcountsviawordcountstable(morphologyobject.observed)
 	if wc:
@@ -216,25 +223,8 @@ def multiplelexicalmatchesintohtml(morphologyobject: dbMorphologyObject) -> List
 		prevalence = 'Prevalence (this form): {pd}'.format(pd=formatprevalencedata(thiswordoccurs))
 		returnarray.append({'value': '<p class="wordcounts">{pr}</p>'.format(pr=prevalence)})
 
-	for p in possibilities:
-		count += 1
-		# {'50817064': [('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem abl pl</analysis>'), ('nūbibus,nubes', '<transl>a cloud</transl><analysis>fem dat pl</analysis>')], '50839960': [('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc abl pl</analysis>'), ('nūbibus,nubis', '<transl>a cloud</transl><analysis>masc dat pl</analysis>')]}
-
-		# print('theentry',p.entry, p.number, p.gettranslation(), p.getanalysislist())
-
-		# there is a HUGE PROBLEM in the original data here:
-		#   [a] 'ὑπό, ἐκ-ἀράω²': what comes before the comma is a prefix to the verb
-		#   [b] 'ἠχούϲαϲ, ἠχέω': what comes before the comma is an observed form of the verb
-		# when you .split() what do you have at wordandform[0]?
-
-		# you have to look at the full db entry for the word:
-		# the number of items in prefixrefs corresponds to the number of prefix checks you will need to make to recompose the verb
-
-		returnarray.append({'value': p.formatconsolidatedgrammarentry(count)})
-
-	# the next will trim the items to check by inducing key collisions
-	# p.getbaseform(), p.entry, p.xref: judicium jūdiciūm, judicium 42397893
-	# p.getbaseform(), p.entry, p.xref: judicium jūdicium, judicium 42397893
+	morphhtml = formatparsinginformation(possibilities)
+	returnarray.append({'value': morphhtml})
 
 	distinct = dict()
 	for p in possibilities:
@@ -258,6 +248,69 @@ def multiplelexicalmatchesintohtml(morphologyobject: dbMorphologyObject) -> List
 			returnarray.append({'value': entryashtml})
 
 	return returnarray
+
+
+def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) -> str:
+	"""
+	sample output:
+
+	(1)  fores (from fores, to bore):
+	pres subj act 2nd sg
+	(2)  fores (from fores):
+	[a] fem acc pl
+	[b] fem nom/voc pl
+	(3)  fores (from fores):
+	imperf subj act 2nd sg
+	(4)  fores (from fores, a door):
+	[a] masc/fem acc pl
+	[b] masc/fem nom/voc pl
+	[c] fem acc pl
+	[d] fem nom/voc pl
+
+	:param possibilitieslist:
+	:return:
+	"""
+
+	distinct = set([p.xref for p in possibilitieslist])
+	count = 0
+	obsvstring = '<p class="obsv">({ct})&nbsp;'
+	xdfstring = '<span class="dictionaryform">{df}</span> - from <span class="baseform">{bf}</span>{tr}{x}: &nbsp;'
+	posstring = '\t<br /><span class="possibility">{pos}</span>&nbsp;'
+	ctposstring = '\t<br /><span class="possibility">[{ct}]&nbsp;{a}</span>'
+	morphhtml = list()
+
+	for d in distinct:
+		count += 1
+		outputlist = list()
+		outputlist.append(obsvstring.format(ct=str(count)))
+		subentries = [p for p in possibilitieslist if p.xref == d]
+		subentries = sorted(subentries, key=lambda x: x.number)
+		firstsubentry = subentries[0]
+
+		bf = firstsubentry.getbaseform()
+		if firstsubentry.gettranslation() and firstsubentry.gettranslation() != ' ':
+			tr = '&nbsp;({tr})'.format(tr=firstsubentry.gettranslation())
+		else:
+			tr = str()
+
+		if session['debugparse'] == 'yes':
+			xrefinfo = '<&nbsp;code>[{x}]</code>'.format(x=firstsubentry.xref)
+		else:
+			xrefinfo = ''
+		outputlist.append(xdfstring.format(df=firstsubentry.observed, bf=bf, tr=tr, x=xrefinfo))
+
+		if len(subentries) == 1:
+			outputlist.append(posstring.format(pos=firstsubentry.getanalysislist()[0]))
+		else:
+			for e in range(len(subentries)):
+				outputlist.append(ctposstring.format(ct=chr(e + 97), a=subentries[e].getanalysislist()[0]))
+			outputlist.append('&nbsp;')
+		distincthtml = '\n'.join(outputlist)
+		morphhtml.append(distincthtml)
+
+	morphhtml = '<br>\n'.join(morphhtml)
+
+	return morphhtml
 
 
 def dictonaryentryashtml(count, seekingentry):
