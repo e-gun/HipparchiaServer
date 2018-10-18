@@ -1103,6 +1103,10 @@ body {
 	transform: translateX(-50%);
 	}
 
+#lexicadialogtext{
+	font-family: var(--systemdefaultfont), 'hipparchiasansstatic', sans-serif;
+	}
+
 #loadslots, #saveslots {
 	padding-left: 3px;
 	padding-bottom: 3px;

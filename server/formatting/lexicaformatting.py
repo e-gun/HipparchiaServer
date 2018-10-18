@@ -297,6 +297,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 		outputlist = list()
 		subentries = [p for p in possibilitieslist if p.xref == d]
 		subentries = sorted(subentries, key=lambda x: x.number)
+
 		firstsubentry = subentries[0]
 
 		bf = firstsubentry.getbaseform()
