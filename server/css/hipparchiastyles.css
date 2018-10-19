@@ -204,9 +204,21 @@
 	}
 
 @font-face {
+	font-family: 'hipparchiacondensedboldstatic';
+	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
+	src: url('/static/ttf/HOSTEDFONTFAMILY_CONDENSEDBOLD.ttf') format('truetype');
+	}
+
+@font-face {
 	font-family: 'hipparchiaboldstatic';
 	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/HOSTEDFONTFAMILY_BOLD.ttf') format('truetype');
+	}
+
+@font-face {
+	font-family: 'hipparchiasemiboldstatic';
+	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
+	src: url('/static/ttf/HOSTEDFONTFAMILY_SEMIBOLD.ttf') format('truetype');
 	}
 
 @font-face {
@@ -220,6 +232,13 @@
 	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/HOSTEDFONTFAMILY_LIGHT.ttf') format('truetype');
 	}
+
+@font-face {
+	font-family: 'hipparchiabolditalicstatic';
+	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
+	src: url('/static/ttf/HOSTEDFONTFAMILY_BOLDITALIC.ttf') format('truetype');
+	}
+
 
 body {
 	background-color: var(--main-body-color);
@@ -341,7 +360,7 @@ body {
 
 .dictauthor {
 	color: var(--dkbabyblue);
-	font-weight: bold;
+	font-weight: 600;
 	}
 
 .dictbiblscope {
@@ -372,34 +391,34 @@ body {
 	}
 
 .dictitype{
-	font-weight: bold;
+	font-weight: 600;
     color: var(--vdkgrey);
 	}
 
 .dicthi {
 	/* definitions in the latin dictionary */
-	font-weight: bold;
+	font-weight: 600;
     color: var(--vdkgrey);
 	}
 
 .dicthi .dictrend_ital{
 	/* definitions in the latin dictionary */
-	font-weight: bold;
+	font-weight: 600;
     color: var(--vdkgrey);
 	}
 
 .dictorth {
-	font-weight: bold;
+	font-weight: 600;
     color: var(--dkteal);
 	}
 
 .dictorth .dictlang_la {
-	font-weight: bold;
+	font-weight: 600;
     color: var(--dkteal);
 	}
 
 .dictorth .dictlang_greek {
-	font-weight: bold;
+	font-weight: 600;
     color: var(--dkteal);
 	}
 
@@ -433,6 +452,8 @@ body {
     }
 
 .dictusg .dicttype_style{
+	font-stretch: condensed;
+	font-weight: bold;
     color: var(--dkteal);
     }
 
@@ -444,7 +465,7 @@ body {
 
 .dictionaryheading {
 	color: var(--rustedorange);
-	font-weight: bold;
+	font-weight: 600;
 	font-size: 120%;
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
@@ -475,7 +496,7 @@ body {
     }
 
 .emph {
-	font-weight: bold;
+	font-weight: 600;
 	color: var(--deepblue);
 	}
 
@@ -688,14 +709,14 @@ body {
 	}
 
 .label {
-	font-weight: bold;
+	font-weight: 600;
 	color: var(--vdkteal);
 	padding-left: 25px;
 	padding-right: 10px;
 	}
 
 .labelcell {
-	font-weight: bold;
+	font-weight: 600;
 	color: var(--vdkteal);
 	vertical-align: top;
 	text-align: center;
@@ -709,7 +730,7 @@ body {
 	font-size: 90%;
 	/* font-family: var(--latinfont), 'hipparchiacondensedstatic', sans-serif; */
 	font-family: 'hipparchiacondensedstatic', sans-serif;
-	font-stretch: condensed;
+	/* font-stretch: condensed; */
 	color: var(--blue);
 	}
 

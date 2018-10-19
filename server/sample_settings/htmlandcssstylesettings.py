@@ -7,6 +7,9 @@
 #   coverage for both Greek and Latin without any need to have a special font
 #   installed at the system level by people who visit.
 #
+# USEFONTFILESFORSTYLES will use something like Roboto-BoldItalic.ttf instead of
+#   using CSS commands like font-style: italic; + font-weight: bold;
+#
 # DEFAULTLOCALFONT sets the global font. A generic unicode font with good coverage
 #   is what you want to pick. You are also responsible for getting the name
 #   right. And, most importantly, it should be installed at the system-level for
@@ -30,6 +33,7 @@
 CSSSTYLESHEET = 'hipparchiastyles.css'
 DISTINCTGREEKANDLATINFONTS = 'no'
 HOSTEDFONTFAMILY = 'Roboto'  # DejaVu, IBMPlex, Noto, and Roboto should be pre-installed by Hipparchia
+USEFONTFILESFORSTYLES = 'yes'
 DEFAULTLOCALFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
