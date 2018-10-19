@@ -372,34 +372,34 @@ body {
 	}
 
 .dictitype{
-	font-weight: 600;
+	font-weight: bold;
     color: var(--vdkgrey);
 	}
 
 .dicthi {
 	/* definitions in the latin dictionary */
-	font-weight: 600;
+	font-weight: bold;
     color: var(--vdkgrey);
 	}
 
 .dicthi .dictrend_ital{
 	/* definitions in the latin dictionary */
-	font-weight: 600;
+	font-weight: bold;
     color: var(--vdkgrey);
 	}
 
 .dictorth {
-	font-weight: 600;
+	font-weight: bold;
     color: var(--dkteal);
 	}
 
 .dictorth .dictlang_la {
-	font-weight: 600;
+	font-weight: bold;
     color: var(--dkteal);
 	}
 
 .dictorth .dictlang_greek {
-	font-weight: 600;
+	font-weight: bold;
     color: var(--dkteal);
 	}
 
@@ -444,7 +444,7 @@ body {
 
 .dictionaryheading {
 	color: var(--rustedorange);
-	font-weight: 600;
+	font-weight: bold;
 	font-size: 120%;
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
@@ -452,7 +452,7 @@ body {
 .documentmetadatalabel {
     font-size: 85%;
 	color: var(--rustedorange);
-	font-weight: 600;
+	font-weight: bold;
     }
 
 .editorialmarker_angledbrackets {
@@ -475,7 +475,7 @@ body {
     }
 
 .emph {
-	font-weight: 600;
+	font-weight: bold;
 	color: var(--deepblue);
 	}
 
@@ -576,22 +576,22 @@ body {
 
 .hmu_expanded_text {
 	letter-spacing: 0.12em;
-    font-weight: 600;
+    font-weight: bold;
 	}
 
 .hmu_form_altered_by_scribe {
     font-style: italic;
-    font-weight: 600;
+    font-weight: bold;
     }
 
 .hmu_impression_of_stamp_on_papyrus {
 	font-size: 125%;
-	font-weight: 600;
+	font-weight: bold;
 	}
 
 .hmu_latin_expanded_text {
 	letter-spacing: 0.12em;
-    font-weight: 600;
+    font-weight: bold;
 	}
 
 .hmu_marginaltext{
@@ -639,7 +639,7 @@ body {
 
 .hmu_seal_attached_to_papyrus {
 	font-size: 125%;
-	font-weight: 600;
+	font-weight: bold;
 	}
 
 .hmu_stacked_text_lower {
@@ -688,14 +688,14 @@ body {
 	}
 
 .label {
-	font-weight: 600;
+	font-weight: bold;
 	color: var(--vdkteal);
 	padding-left: 25px;
 	padding-right: 10px;
 	}
 
 .labelcell {
-	font-weight: 600;
+	font-weight: bold;
 	color: var(--vdkteal);
 	vertical-align: top;
 	text-align: center;
@@ -798,7 +798,7 @@ body {
 .optionlabel {
 	border-top: 1px dotted var(--dkgrey);
 	font-size: 70%;
-	font-weight: 600;
+	font-weight: bold;
 	padding-left: 5px;
 	padding-right: 10px;
 	margin: 3px;
