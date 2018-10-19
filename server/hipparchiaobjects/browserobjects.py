@@ -99,11 +99,11 @@ class BrowserPassageObject(object):
 		self.authorandwork = ''
 
 	def generatepassageheader(self):
-		template = '<span class="author">{n}</span>, <span class="work">{t}</span><br />'
+		template = '<span class="currentlyviewingauthor">{n}</span>, <span class="currentlyviewingwork">{t}</span><br />'
 		self.authorandwork = template.format(n=self.name, t=self.title)
 		viewing = list()
 		viewing.append(avoidlonglines(self.authorandwork, 100, '<br />\n', list()))
-		viewing.append('<span class="citation">{c}</span>'.format(c=self.citation))
+		viewing.append('<span class="currentlyviewingcitation">{c}</span>'.format(c=self.citation))
 		if self.date:
 			if self.date > 1:
 				viewing.append('<br /><span class="assigneddate">(Assigned date of {d} CE)</span>'.format(d=self.date))

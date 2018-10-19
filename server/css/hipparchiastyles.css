@@ -324,10 +324,24 @@ body {
 
 .currentlyviewing {
 	text-align: left;
-	font-weight: bold;
 	color: var(--brtblue);
 	padding-bottom: 0;
 	}
+
+.currentlyviewingauthor {
+	font-weight: bold;
+	}
+
+.currentlyviewingwork {
+	font-weight: bold;
+	font-style: italic;
+	}
+
+.currentlyviewingcitation {
+	font-weight: bold;
+	}
+
+
 
 .date{
     color: var(--red);
@@ -874,6 +888,7 @@ body {
 	}
 
 .pubeditor, .pubpress, .pubcity, .pubyear, .pubseries {
+	font-weight: normal;
 	font-size: 70%;
 	}
 
