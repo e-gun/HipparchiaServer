@@ -56,7 +56,7 @@ def loadcssfile(cssrequest):
 	     'SEMIBLD': 'DejaVuSans-Bold',
 	     'THIN': 'DejaVuSans-ExtraLight',
 	     'LIGHT': 'DejaVuSans-ExtraLight',
-	     'BLDITALICLD': 'DejaVuSans-BoldOblique'}
+	     'BLDITALIC': 'DejaVuSans-BoldOblique'}
 
 	n = {'REGULAR': 'NotoSans-Regular',
 	     'MONO': 'NotoMono-Regular',
@@ -67,7 +67,7 @@ def loadcssfile(cssrequest):
 	     'SEMIBLD': 'NotoSansDisplay-SemiBold',
 	     'THIN': 'NotoSansDisplay-Thin',
 	     'LIGHT': 'NotoSansDisplay-Light',
-	     'BLDITALICLD': 'NotoSans-BoldItalic'}
+	     'BLDITALIC': 'NotoSans-BoldItalic'}
 
 	i = {'REGULAR': 'IBMPlexSans-Regular',
 	     'MONO': 'IBMPlexMono-Regular',
@@ -78,7 +78,7 @@ def loadcssfile(cssrequest):
 	     'SEMIBLD': 'IBMPlexSans-SemiBold',
 	     'THIN': 'IBMPlexSans-Thin',
 	     'LIGHT': 'IBMPlexSans-Light',
-	     'BLDITALICLD': 'IBMPlexSans-BoldItalic'}
+	     'BLDITALIC': 'IBMPlexSans-BoldItalic'}
 
 	r = {'REGULAR': 'Roboto-Regular',
 	     'MONO': 'RobotoMono-Medium',
@@ -89,7 +89,7 @@ def loadcssfile(cssrequest):
 	     'SEMIBLD': 'Roboto-Bold',
 	     'THIN': 'Roboto-Thin',
 	     'LIGHT': 'Roboto-Light',
-	     'BLDITALICLD': 'Roboto-BoldItalic'}
+	     'BLDITALIC': 'Roboto-BoldItalic'}
 
 	hostedfontfamilies = {'DejaVu': d, 'Noto': n, 'IBMPlex': i, 'Roboto': r}
 
