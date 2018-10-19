@@ -181,62 +181,52 @@
 
 @font-face {
 	font-family: 'hipparchiasansstatic';
-	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/HOSTEDFONTFAMILY_REGULAR.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiamonostatic';
-	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/HOSTEDFONTFAMILY_MONO.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiaobliquestatic';
-	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/HOSTEDFONTFAMILY_OBLIQUE.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiacondensedstatic';
-	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/HOSTEDFONTFAMILY_CONDENSED.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiacondensedboldstatic';
-	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
-	src: url('/static/ttf/HOSTEDFONTFAMILY_CONDENSEDBOLD.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_CNDENSEDBLD.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiaboldstatic';
-	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/HOSTEDFONTFAMILY_BOLD.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiasemiboldstatic';
-	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
-	src: url('/static/ttf/HOSTEDFONTFAMILY_SEMIBOLD.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_SEMIBLD.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiathinstatic';
-	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/HOSTEDFONTFAMILY_THIN.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchialightstatic';
-	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
 	src: url('/static/ttf/HOSTEDFONTFAMILY_LIGHT.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiabolditalicstatic';
-	/*noinspection CssUnknownTarget,CssUnknownTarget,CssUnknownTarget*/
-	src: url('/static/ttf/HOSTEDFONTFAMILY_BOLDITALIC.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_BLDITALIC.ttf') format('truetype');
 	}
 
 
@@ -959,6 +949,7 @@ body {
 
 .smallcapitals, .uncial {
 	font-variant: small-caps;
+	font-weight: 600;
 	}
 
 .smallerthannormal {

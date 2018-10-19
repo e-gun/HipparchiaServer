@@ -51,45 +51,45 @@ def loadcssfile(cssrequest):
 	     'MONO': 'DejaVuSansMono',
 	     'OBLIQUE': 'DejaVuSans-Oblique',
 	     'CONDENSED': 'DejaVuSansCondensed',
-	     'CONDENSEDBOLD': 'DejaVuSansCondensed-Bold',
+	     'CNDENSEDBLD': 'DejaVuSansCondensed-Bold',
 	     'BOLD': 'DejaVuSans-Bold',
-	     'SEMIBOLD': 'DejaVuSans-Bold',
+	     'SEMIBLD': 'DejaVuSans-Bold',
 	     'THIN': 'DejaVuSans-ExtraLight',
 	     'LIGHT': 'DejaVuSans-ExtraLight',
-	     'BOLDITALIC': 'DejaVuSans-BoldOblique'}
+	     'BLDITALICLD': 'DejaVuSans-BoldOblique'}
 
 	n = {'REGULAR': 'NotoSans-Regular',
 	     'MONO': 'NotoMono-Regular',
 	     'OBLIQUE': 'NotoSans-Italic',
 	     'CONDENSED': 'NotoSansDisplay-Condensed',
-	     'CONDENSEDBOLD': 'NotoSansDisplay-CondensedBold',
+	     'CNDENSEDBLD': 'NotoSansDisplay-CondensedBold',
 	     'BOLD': 'NotoSans-Bold',
-	     'SEMIBOLD': 'NotoSansDisplay-SemiBold',
+	     'SEMIBLD': 'NotoSansDisplay-SemiBold',
 	     'THIN': 'NotoSansDisplay-Thin',
 	     'LIGHT': 'NotoSansDisplay-Light',
-	     'BOLDITALIC': 'NotoSans-BoldItalic'}
+	     'BLDITALICLD': 'NotoSans-BoldItalic'}
 
 	i = {'REGULAR': 'IBMPlexSans-Regular',
 	     'MONO': 'IBMPlexMono-Regular',
 	     'OBLIQUE': 'IBMPlexSans-Italic',
 	     'CONDENSED': 'IBMPlexSansCondensed-Regular',
-	     'CONDENSEDBOLD': 'IBMPlexSansCondensed-Bold',
+	     'CNDENSEDBLD': 'IBMPlexSansCondensed-Bold',
 	     'BOLD': 'IBMPlexSans-Bold',
-	     'SEMIBOLD': 'IBMPlexSans-SemiBold',
+	     'SEMIBLD': 'IBMPlexSans-SemiBold',
 	     'THIN': 'IBMPlexSans-Thin',
 	     'LIGHT': 'IBMPlexSans-Light',
-	     'BOLDITALIC': 'IBMPlexSans-BoldItalic'}
+	     'BLDITALICLD': 'IBMPlexSans-BoldItalic'}
 
 	r = {'REGULAR': 'Roboto-Regular',
 	     'MONO': 'RobotoMono-Medium',
 	     'OBLIQUE': 'Roboto-Italic',
 	     'CONDENSED': 'RobotoCondensed-Regular',
-	     'CONDENSEDBOLD': 'RobotoCondensed-Bold',
+	     'CNDENSEDBLD': 'RobotoCondensed-Bold',
 	     'BOLD': 'Roboto-Bold',
-	     'SEMIBOLD': 'Roboto-Bold',
+	     'SEMIBLD': 'Roboto-Bold',
 	     'THIN': 'Roboto-Thin',
 	     'LIGHT': 'Roboto-Light',
-	     'BOLDITALIC': 'Roboto-BoldItalic'}
+	     'BLDITALICLD': 'Roboto-BoldItalic'}
 
 	hostedfontfamilies = {'DejaVu': d, 'Noto': n, 'IBMPlex': i, 'Roboto': r}
 
