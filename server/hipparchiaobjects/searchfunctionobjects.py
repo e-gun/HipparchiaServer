@@ -70,6 +70,8 @@ class GenericSearchFunctionObject(object):
 
 	def addnewfindstolistoffinds(self, newfinds: list):
 		self.foundlineobjects.extend(newfinds)
+		# nf = ', '.join([f.universalid for f in newfinds])
+		# print('{c} {u}\tadded\t{ln}'.format(c=self.workerid, u=self.dbconnection.uniquename, ln=nf))
 
 	def updatepollremaining(self):
 		try:
@@ -172,7 +174,7 @@ class RedisSearchFunctionObject(GenericSearchFunctionObject):
 			# lambda this because if you define as self.rc.spop(redissearchid) you will actually pop an item..,
 			self.getnetxitem = lambda x: self.rc.spop(self.redissearchid)
 			self.getnextfnc = self.redisgetnextfnc
-			self.remainder = self.rc.smembers(self.redissearchid)
+			self.getremain = self._redisgetremain
 			self.emptyerror = AttributeError
 			self.remaindererror = AttributeError
 			self.emptytest = self.listofplacestosearch
@@ -184,6 +186,9 @@ class RedisSearchFunctionObject(GenericSearchFunctionObject):
 		finds = [pickle.dumps(f) for f in newfinds]
 		for f in finds:
 			self.rc.rpush(self.redisfindsid, f)
+
+	def _redisgetremain(self):
+		return len(self.rc.smembers(self.redissearchid))
 
 	def redisgetnextfnc(self):
 		self.commitcount += 1
