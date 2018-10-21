@@ -1076,3 +1076,7 @@ def lowercases(match: re.match, g=0) -> str:
 	substitute = substitutions[val]
 
 	return substitute
+
+
+# test = 'h(=|'
+# print('betacodeconversiontest:\n\t{b}\n\t{u}'.format(b=test, u=replacegreekbetacode(test.upper())))

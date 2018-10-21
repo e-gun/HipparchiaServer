@@ -31,7 +31,7 @@ irritating to avoid "return redirect(url_for('frontpage'))" which is so simple a
 
 workonsimplesearch() (and probably its kin)
 
-a very odd bug in here on a Ryzen 1600x running FreeBSD 11.1: you can search for "mentior" 10x and
+a very odd bug in here on a Ryzen 1600x running FreeBSD 11.1/12ALPHA and Ubuntu 10: you can search for "mentior" 10x and
 somewhere in those trials the search will fail: one of the threads will get stuck in this function
 this cannot be reproduced on macOS 10.13.2 with identical versions of python and postgres installed...
 this bug is not in Hipparchia? presumably it also does not affect just this function

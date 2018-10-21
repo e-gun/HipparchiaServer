@@ -159,9 +159,13 @@ class GenericSearchFunctionObject(object):
 class RedisSearchFunctionObject(GenericSearchFunctionObject):
 	""""
 
-	use redis to store the results (because cramming too many hits too fast into the managed list causes problems on FreeBSD...)
+	use redis to store the results
 
-	using redis to store the searchlist seems only to slow you down and this slowdown itself is a "fix", but not a very interesting one
+	this is part of a long-term bug-hunt re. failures to exit from the searches; but it might make some sort of
+	sense for other reasons
+
+	using redis to store the searchlist seems only to slow you down and this slowdown itself is a "fix",
+	but not a very interesting one
 
 	"""
 	def __init__(self, workerid, foundlineobjects, listofplacestosearch: ListProxy, searchobject, dbconnection, searchfunction):
