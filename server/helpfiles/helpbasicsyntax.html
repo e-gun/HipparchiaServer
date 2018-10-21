@@ -37,14 +37,15 @@ the inscriptions are fairly liberal with their deployment of <code>ejus</code> a
 
 <p><span class="label">Betacode and the automatic betacode setting</span></p>
 
-HipparchiaServer can parse <a href="https://en.wikipedia.org/wiki/Beta_Code">betacode</a>.
+HipparchiaServer can parse <a href="https://en.wikipedia.org/wiki/Beta_Code">betacode</a>. But see below: the system understands
+betacode, but you are not allowed to send it every possible betacode sequence.
 Automatic betacode entry is <span class="emph">enabled in the default installation</span>.
-To disable it, edit <code>config.py</code> to read <code>TLGASSUMESBETACODE = 'no'</code>. When this option is active,
+To disable it, edit <code>inputsettings.py</code> to read <code>TLGASSUMESBETACODE = 'no'</code>. When this option is active,
 <span class="emph">if you are searching the Greek authors and only Greek authors</span>, then anything you type in Roman characters will be
 converted into betacode: <code>BETA</code> or <code>beta</code> becomes <code>βετα</code>, <code>udwr</code> becomes <code>υδωρ</code>.
 
 If betacode transformations are active then you can't search for the
-Latin inside of text texts unless you turn on some other corpus as well or else disable the feature. Note that this bit of magic is not available
+Latin inside of Greek texts unless you turn on some other corpus as well or else disable the feature. Note that this bit of magic is not available
 for the other corpora because the texts inside them are bilingual. Either enable UNIVERSALASSUMESBETACODE
 or enter unicode Greek into the search box instead.
 If you don't already have a unicode keyboard, consider looking into
@@ -52,7 +53,7 @@ If you don't already have a unicode keyboard, consider looking into
 NB: there are lots of places where <span class="emph">betacode syntax will conflict with regex syntax</span>. See
 examples at <span class="italic">Peculiarities and Gotchas</span> and also consult
 <span class="italic">Searching: REGEX</span>.
-It will be very hard to employ both betacode and regular expression at once if you are going to be at all ambitious with either.
+
 The <span class="emph">(undocumented) inscriptional ⒣</span> can be found by asking for <code>j</code>.
 
 A search for <code>jalaieus</code> will find <code>⒣αλαιεὺϲ</code>. But <code>jalaieu\s</code> will <span class="emph">not</span>
@@ -73,7 +74,10 @@ has been given a priority over betacode support: if you need accents, use unicod
 
 
 Unfortunately there is no way to search for <code>ϙόϲμοϲ</code> via betacode:
-<span class="emph">ϙ does not have a betacode equivalent</span>. Since HipparchiaServer will not let you search for capital
+<span class="emph">ϙ does not have a betacode equivalent that you are allowed to enter</span> since <code>#3</code> is
+disallowed as valid user input for security reasons.
+
+Since HipparchiaServer will not let you search for capital
 letters or for anything other than a lunate sigma, betacode like <code>*D</code> or <code>S2</code> will be meaningless.
 And, in fact, the asterisk in the former case will be counterproductive since that is a regex wildcard character.
 
