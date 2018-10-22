@@ -183,8 +183,9 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 		# foundlineobjects = [dblineintolineobject(item) for item in founddblineobjects]
 		foundlineobjects = list(founddblineobjects)
 
-	for c in oneconnectionperworker:
-		oneconnectionperworker[c].connectioncleanup()
+	if oneconnectionperworker[0]:
+		for c in oneconnectionperworker:
+			oneconnectionperworker[c].connectioncleanup()
 
 	return foundlineobjects
 
