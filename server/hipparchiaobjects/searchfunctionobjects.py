@@ -37,9 +37,11 @@ class GenericSearchFunctionObject(object):
 		self.commitcount = 0
 		if dbconnection:
 			self.dbconnection = dbconnection
+			self.needconnectioncleanup = False
 		else:
 			# you are running Windows and can't pickle your connections
 			self.dbconnection = ConnectionObject()
+			self.needconnectioncleanup = True
 		self.dbcursor = self.dbconnection.cursor()
 		self.so = searchobject
 		self.foundlineobjects = foundlineobjects
@@ -155,6 +157,10 @@ class GenericSearchFunctionObject(object):
 				break
 
 		self.listcleanup()
+
+		if self.needconnectioncleanup:
+			self.dbconnection.connectioncleanup()
+
 		# empty return because foundlineobjects is a ListProxy:
 		# ask for self.foundlineobjects as the search result instead
 		# print('{i} finished'.format(i=self.workerid))
