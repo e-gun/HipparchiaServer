@@ -36,7 +36,7 @@ def loadcssfile(cssrequest):
 
 	substitutes = ['DEFAULTLOCALFONT', 'DEFAULTLOCALGREEKFONT', 'DEFAULTLOCALNONGREEKFONT']
 
-	with open(hipparchia.root_path+'/css/'+cssfile) as f:
+	with open(hipparchia.root_path+'/css/'+cssfile, encoding='utf8') as f:
 		css = f.read()
 
 	if hipparchia.config['ENBALEFONTPICKER'] == 'yes':
