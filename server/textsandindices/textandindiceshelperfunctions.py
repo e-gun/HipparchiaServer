@@ -12,10 +12,11 @@ from multiprocessing import Manager, Process
 from server import hipparchia
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
+from server.dbsupport.lexicaldbfunctions import lookformorphologymatches
+from server.dbsupport.miscdbfunctions import icanpickleconnections
 from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.dbsupport.lexicaldbfunctions import lookformorphologymatches
 from server.searching.searchfunctions import atsignwhereclauses
 from server.threading.mpthreadcount import setthreadcount
 
@@ -271,7 +272,10 @@ def getrequiredmorphobjects(listofterms):
 	morphobjects = manager.dict()
 	workers = setthreadcount()
 
-	oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
+	if icanpickleconnections():
+		oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
+	else:
+		oneconnectionperworker = {i: None for i in range(workers)}
 
 	jobs = [Process(target=mpmorphology, args=(terms, morphobjects, oneconnectionperworker[i])) for i in range(workers)]
 	for j in jobs:
@@ -279,8 +283,9 @@ def getrequiredmorphobjects(listofterms):
 	for j in jobs:
 		j.join()
 
-	for c in oneconnectionperworker:
-		oneconnectionperworker[c].connectioncleanup()
+	if oneconnectionperworker[0]:
+		for c in oneconnectionperworker:
+			oneconnectionperworker[c].connectioncleanup()
 
 	return morphobjects
 
@@ -295,6 +300,9 @@ def mpmorphology(terms, morphobjects, dbconnection):
 	:param commitcount:
 	:return:
 	"""
+
+	if not dbconnection:
+		dbconnection = ConnectionObject()
 
 	dbcursor = dbconnection.cursor()
 
