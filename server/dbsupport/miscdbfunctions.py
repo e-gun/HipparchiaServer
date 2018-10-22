@@ -6,11 +6,14 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import configparser
+from multiprocessing import Process
 
 import psycopg2
+
+from server import hipparchia
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
+
 
 # to fiddle with some day:
 # 'In our testing asyncpg is, on average, 3x faster than psycopg2 (and its asyncio variant -- aiopg).'
@@ -26,9 +29,6 @@ from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 #   bugs out if you have lots of hits
 #       psycopg2cffi._impl.exceptions.OperationalError
 #       [substantially lower the commit count?]
-
-config = configparser.ConfigParser()
-config.read('config.ini')
 
 
 def resultiterator(cursor, chunksize=5000):
@@ -377,3 +377,27 @@ def probefordatabases() -> dict:
 	dbconnection.connectioncleanup()
 
 	return available
+
+
+def icanpickleconnections():
+	if hipparchia.config['ICANPICKLECONNECTIONS'] == 'n':
+		return False
+
+	if hipparchia.config['ICANPICKLECONNECTIONS'] == 'y':
+		return True
+
+	result = True
+	c = (ConnectionObject(),)
+	j = Process(target=type, args=c)
+
+	try:
+		j.start()
+		j.join()
+	except TypeError:
+		# can't pickle psycopg2.extensions.connection objects
+		print('to avoid seeing "EOFError: Ran out of input" messages edit "settings/networksettings.py" to read:')
+		print("\tICANPICKLECONNECTIONS = 'n'\n")
+		result = False
+	c[0].connectioncleanup()
+
+	return result

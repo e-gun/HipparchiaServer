@@ -26,7 +26,8 @@ Here are some examples that give you an idea of the sort of things that are poss
 <ul class="forexample">
     <li><code>\s\w\w\s\w\w\s\w\w\s\w\w\s</code> will find all runs of four words of two letters each.</li>
     <li><code>t.t.t.t.t.</code> will find places where you have 't + anything' five times in a row. Another way
-        of writing this same expression is <code>(t.){5}</code>
+        of writing this same expression is <code>(t.){5}</code>. <span class="emph">Note:</span> some of these
+        characters have likely beed disabled: <code>(</code> is disallowed by default.
         Your results will be <span class="lat">heres ei extitit Titius</span>; and <span class="lat">nec diu restitit: tota...</span>
         Note that the whitespace between <span class="lat">extitit</span> and <span class="lat">Titius</span> qualified
         as 'anything' in the first match. But you might have composed the search with something else in mind.</li>

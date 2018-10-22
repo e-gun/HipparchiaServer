@@ -13,6 +13,7 @@ from queue import Empty as QueueEmpty
 
 from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.dbsupport.redisdbfunctions import establishredisconnection
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchObject
 
 
@@ -34,7 +35,11 @@ class GenericSearchFunctionObject(object):
 	def __init__(self, workerid, foundlineobjects: ListProxy, listofplacestosearch, searchobject: SearchObject, dbconnection, searchfunction):
 		self.workerid = workerid
 		self.commitcount = 0
-		self.dbconnection = dbconnection
+		if dbconnection:
+			self.dbconnection = dbconnection
+		else:
+			# you are running Windows and can't pickle your connections
+			self.dbconnection = ConnectionObject()
 		self.dbcursor = self.dbconnection.cursor()
 		self.so = searchobject
 		self.foundlineobjects = foundlineobjects

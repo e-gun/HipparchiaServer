@@ -14,6 +14,7 @@ from typing import List
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject
+from server.dbsupport.miscdbfunctions import icanpickleconnections
 from server.dbsupport.redisdbfunctions import buildredissearchlist, loadredisresults
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -151,11 +152,19 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 		# impossible, but...
 		workers = 0
 
-	# you need to give each job its own connection if you use a connection pool
-	# otherwise there will be problems with threading
-	# note that we are not yet taking care of connection types: 'autocommit', etc
 
-	oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
+	# non-parallel multiprocessing implementation across platforms: widows can't pickle a connection;
+	# everone else needs to pickle the connection
+	if icanpickleconnections():
+		# you need to give each job its own connection if you use a connection pool
+		# otherwise there will be problems with threading
+		# note that we are not yet taking care of connection types: 'autocommit', etc
+
+		oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
+	else:
+		# will grab a connection later once inside of 'sfo'
+		oneconnectionperworker = {i: None for i in range(workers)}
+
 	# note that the following (when fully implemented...) does not produce speedups
 	# operedisconnectionperworker = {i: establishredisconnection() for i in range(workers)}
 
