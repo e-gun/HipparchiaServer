@@ -199,3 +199,17 @@ if current_process().name == 'MainProcess':
 	# empty dict in which to store progress polls
 	# note that more than one poll can be running
 	poll = dict()
+else:
+	authordict = dict()
+	workdict = dict()
+	authorgenresdict = dict()
+	authorlocationdict = dict()
+	workgenresdict = dict()
+	workprovenancedict = dict()
+	lemmatadict = dict()
+	listmapper = dict()
+	allincerta = dict()
+	allvaria = dict()
+	keyedlemmata = dict()
+	# this will break things?
+	poll = dict()

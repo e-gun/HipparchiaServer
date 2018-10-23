@@ -11,6 +11,7 @@ import math
 import os
 import random
 import time
+from multiprocessing import current_process
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -18,12 +19,14 @@ from matplotlib import pyplot as plt
 try:
 	import tensorflow as tf
 except ModuleNotFoundError:
-	print('tensorflow unavailable')
+	if current_process().name == 'MainProcess':
+		print('tensorflow unavailable')
 	tf = None
 try:
 	from sklearn.manifold import TSNE
 except ModuleNotFoundError:
-	print('sklearn unavailable')
+	if current_process().name == 'MainProcess':
+		print('sklearn unavailable')
 	TSNE = None
 
 from random import randint

@@ -7,7 +7,7 @@
 """
 
 import re
-from multiprocessing import Manager, Process
+from multiprocessing import Manager, Process, current_process
 
 from server.threading.mpthreadcount import setthreadcount
 
@@ -15,7 +15,8 @@ try:
 	import numpy as np
 	from scipy.spatial.distance import cosine as cosinedist
 except ImportError:
-	print('WARNING: vector math will be slow; install numpy and scipy for exponential speed gains')
+	if current_process().name == 'MainProcess':
+		print('WARNING: vector math will be slow; install numpy and scipy for exponential speed gains')
 	from math import sqrt
 
 

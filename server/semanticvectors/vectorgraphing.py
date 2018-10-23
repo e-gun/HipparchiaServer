@@ -7,6 +7,7 @@
 """
 
 from io import BytesIO
+from multiprocessing import current_process
 
 # https://matplotlib.org/faq/howto_faq.html#matplotlib-in-a-web-application-server
 # do this before importing pylab or pyplot: otherwise you will see:
@@ -24,7 +25,8 @@ try:
 	import matplotlib.pyplot as plt
 	import networkx as nx
 except ModuleNotFoundError:
-	print('matplotlib is not available')
+	if current_process().name == 'MainProcess':
+		print('matplotlib is not available')
 	matplotlib = None
 	plt = None
 	nx = None

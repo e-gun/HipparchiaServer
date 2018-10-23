@@ -8,6 +8,7 @@
 
 import json
 import locale
+from multiprocessing import current_process
 from pprint import pprint
 from time import time
 
@@ -21,7 +22,8 @@ try:
 	from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
 
 except ImportError:
-	print('sklearn is unavailable')
+	if current_process().name == 'MainProcess':
+		print('sklearn is unavailable')
 	CountVectorizer = None
 	TfidfTransformer = None
 	SGDClassifier = None
@@ -33,7 +35,8 @@ try:
 	import pyLDAvis
 	import pyLDAvis.sklearn as ldavis
 except ImportError:
-	print('pyLDAvis is not available')
+	if current_process().name == 'MainProcess':
+		print('pyLDAvis is not available')
 	pyLDAvis = None
 	ldavis = None
 

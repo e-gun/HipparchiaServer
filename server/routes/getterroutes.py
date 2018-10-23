@@ -7,6 +7,7 @@
 """
 
 import json
+from multiprocessing import current_process
 
 from flask import make_response, redirect, request, session, url_for
 
@@ -23,7 +24,8 @@ try:
 	from server.semanticvectors.vectorgraphing import fetchvectorgraph
 except ImportError:
 	fetchvectorgraph = None
-	print('could not import "fetchvectorgraph": graphing will be unavailable')
+	if current_process().name == 'MainProcess':
+		print('could not import "fetchvectorgraph": graphing will be unavailable')
 from server.startup import authordict, authorgenresdict, authorlocationdict, listmapper, workdict, workgenresdict, \
 	workprovenancedict
 

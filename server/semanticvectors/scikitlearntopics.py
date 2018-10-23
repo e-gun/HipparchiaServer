@@ -6,6 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 import locale
+from multiprocessing import current_process
 
 from server import hipparchia
 from server.formatting.vectorformatting import ldatopicsgenerateoutput
@@ -25,7 +26,8 @@ try:
 	from sklearn.pipeline import Pipeline
 	from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
 except ImportError:
-	print('sklearn is unavailable')
+	if current_process().name == 'MainProcess':
+		print('sklearn is unavailable')
 	CountVectorizer = None
 	TfidfTransformer = None
 	SGDClassifier = None
@@ -38,7 +40,8 @@ try:
 	import pyLDAvis
 	import pyLDAvis.sklearn as ldavis
 except ImportError:
-	print('pyLDAvis is not available')
+	if current_process().name == 'MainProcess':
+		print('pyLDAvis is not available')
 	pyLDAvis = None
 	ldavis = None
 
