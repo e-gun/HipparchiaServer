@@ -7,6 +7,7 @@
 """
 
 import time
+from multiprocessing import current_process
 
 from server import hipparchia
 from server.calculatewordweights import findccorporaweights, findtemporalweights, workobjectgeneraweights
@@ -17,181 +18,184 @@ from server.threading.mpthreadcount import setthreadcount
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
 	buildworkgenresdict, buildworkprovenancedict
 
-terminaltext = """
+if current_process().name == 'MainProcess':
+	# stupid Windows will fork new copies and reload all of this
 
-{project} / Copyright (C) {year} / {fullname}
-{mail}
-
-This program comes with ABSOLUTELY NO WARRANTY;
-without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.
-
-This is free software, and you are welcome to redistribute
-it and/or modify it under the terms of the GNU General
-Public License version 3.
-
-"""
-
-if hipparchia.config['ENOUGHALREADYWITHTHECOPYRIGHTNOTICE'] != 'yes':
-	print(terminaltext.format(project='HipparchiaServer', year='2016-18', fullname='E. Gunderson',
-	                          mail='Department of Classics, 125 Queen’s Park, Toronto, ON  M5S 2C7 Canada'))
-
-
-available = probefordatabases()
-warning = sum([available[x] for x in available])
-if warning == 0:
-	print('WARNING: support data is missing; some functions will be disabled')
-	for key in available:
-		if not available[key]:
-			print('\t{d} is unavailable'.format(d=key))
-	print()
-del warning
-del available
-
-if setthreadcount(startup=True) == 1:
-	print('queries will be dispatched to 1 thread')
-else:
-	print('queries will be dispatched to {t} threads'.format(t=setthreadcount()))
-
-"""
-this stuff gets loaded up front so you have access to all author and work info all the time
-otherwise you'll hit the DB too often and ask the same question over and over again
-"""
-
-
-# startup 4.922947645187378
-# profiling: [see https://zapier.com/engineering/profiling-python-boss/]
-# [a]
-# loadallauthorsasobjects(): 3589 function calls in 0.024 seconds
-# loadallworksasobjects(): 236975 function calls in 2.980 seconds
-#        236845    1.671    0.000    1.671    0.000 dbtextobjects.py:115(__init__)
-#       [but nothing happens inside of __init__ that you can expect to speed up]
-# loadallworksintoallauthors(): 473693 function calls in 0.241 seconds
-# [b]
-# buildaugenresdict(): 1840 function calls (1835 primitive calls) in 0.003 seconds
-# [c]
-# dictitemstartswith(): 1184230 function calls in 0.954 seconds
-# findspecificdate(): 1483 function calls in 0.142 seconds
-
-authordict = loadallauthorsasobjects()
-workdict = loadallworksasobjects()
-authordict = loadallworksintoallauthors(authordict, workdict)
-lemmatadict = loadlemmataasobjects()
-# print('lemmatadict disabled for debugging run; re-enable via "startup.py"')
-# lemmatadict = dict()
-# lemmatadict too long to be used by the hinter: need quicker access; so partition it up into keyedlemmata
-keyedlemmata = buildkeyedlemmata(list(lemmatadict.keys()))
-
-print('building core dictionaries', end='')
-launchtime = time.time()
-authorgenresdict = buildaugenresdict(authordict)
-authorlocationdict = buildauthorlocationdict(authordict)
-workgenresdict = buildworkgenresdict(workdict)
-workprovenancedict = buildworkprovenancedict(workdict)
-elapsed = round(time.time() - launchtime, 1)
-print(' ({e}s)'.format(e=elapsed))
-
-print('building specialized sublists', end='')
-launchtime = time.time()
-
-
-def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
+	terminaltext = """
+	
+	{project} / Copyright (C) {year} / {fullname}
+	{mail}
+	
+	This program comes with ABSOLUTELY NO WARRANTY;
+	without even the implied warranty of MERCHANTABILITY
+	or FITNESS FOR A PARTICULAR PURPOSE.
+	
+	This is free software, and you are welcome to redistribute
+	it and/or modify it under the terms of the GNU General
+	Public License version 3.
+	
 	"""
 
-	trim a dict via a criterion: muststartwith must begin the item to survive the check
+	if hipparchia.config['ENOUGHALREADYWITHTHECOPYRIGHTNOTICE'] != 'yes':
+		print(terminaltext.format(project='HipparchiaServer', year='2016-18', fullname='E. Gunderson',
+		                          mail='Department of Classics, 125 Queen’s Park, Toronto, ON  M5S 2C7 Canada'))
 
-	:param originaldict:
-	:param element:
-	:param muststartwith:
-	:return:
+
+	available = probefordatabases()
+	warning = sum([available[x] for x in available])
+	if warning == 0:
+		print('WARNING: support data is missing; some functions will be disabled')
+		for key in available:
+			if not available[key]:
+				print('\t{d} is unavailable'.format(d=key))
+		print()
+	del warning
+	del available
+
+	if setthreadcount(startup=True) == 1:
+		print('queries will be dispatched to 1 thread')
+	else:
+		print('queries will be dispatched to {t} threads'.format(t=setthreadcount()))
+
+	"""
+	this stuff gets loaded up front so you have access to all author and work info all the time
+	otherwise you'll hit the DB too often and ask the same question over and over again
 	"""
 
-	newdict = {x: originaldict[x] for x in originaldict
-				if getattr(originaldict[x], element)[0:2] == muststartwith}
 
-	return newdict
+	# startup 4.922947645187378
+	# profiling: [see https://zapier.com/engineering/profiling-python-boss/]
+	# [a]
+	# loadallauthorsasobjects(): 3589 function calls in 0.024 seconds
+	# loadallworksasobjects(): 236975 function calls in 2.980 seconds
+	#        236845    1.671    0.000    1.671    0.000 dbtextobjects.py:115(__init__)
+	#       [but nothing happens inside of __init__ that you can expect to speed up]
+	# loadallworksintoallauthors(): 473693 function calls in 0.241 seconds
+	# [b]
+	# buildaugenresdict(): 1840 function calls (1835 primitive calls) in 0.003 seconds
+	# [c]
+	# dictitemstartswith(): 1184230 function calls in 0.954 seconds
+	# findspecificdate(): 1483 function calls in 0.142 seconds
+
+	authordict = loadallauthorsasobjects()
+	workdict = loadallworksasobjects()
+	authordict = loadallworksintoallauthors(authordict, workdict)
+	lemmatadict = loadlemmataasobjects()
+	# print('lemmatadict disabled for debugging run; re-enable via "startup.py"')
+	# lemmatadict = dict()
+	# lemmatadict too long to be used by the hinter: need quicker access; so partition it up into keyedlemmata
+	keyedlemmata = buildkeyedlemmata(list(lemmatadict.keys()))
+
+	print('building core dictionaries', end='')
+	launchtime = time.time()
+	authorgenresdict = buildaugenresdict(authordict)
+	authorlocationdict = buildauthorlocationdict(authordict)
+	workgenresdict = buildworkgenresdict(workdict)
+	workprovenancedict = buildworkprovenancedict(workdict)
+	elapsed = round(time.time() - launchtime, 1)
+	print(' ({e}s)'.format(e=elapsed))
+
+	print('building specialized sublists', end='')
+	launchtime = time.time()
 
 
-listmapper = {
-	'gr': {'a': dictitemstartswith(authordict, 'universalid', 'gr'), 'w': dictitemstartswith(workdict, 'universalid', 'gr')},
-	'lt': {'a': dictitemstartswith(authordict, 'universalid', 'lt'), 'w': dictitemstartswith(workdict, 'universalid', 'lt')},
-	'dp': {'a': dictitemstartswith(authordict, 'universalid', 'dp'), 'w': dictitemstartswith(workdict, 'universalid', 'dp')},
-	'in': {'a': dictitemstartswith(authordict, 'universalid', 'in'), 'w': dictitemstartswith(workdict, 'universalid', 'in')},
-	'ch': {'a': dictitemstartswith(authordict, 'universalid', 'ch'), 'w': dictitemstartswith(workdict, 'universalid', 'ch')},
-}
+	def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
+		"""
+
+		trim a dict via a criterion: muststartwith must begin the item to survive the check
+
+		:param originaldict:
+		:param element:
+		:param muststartwith:
+		:return:
+		"""
+
+		newdict = {x: originaldict[x] for x in originaldict
+					if getattr(originaldict[x], element)[0:2] == muststartwith}
+
+		return newdict
 
 
-def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
-	"""
+	listmapper = {
+		'gr': {'a': dictitemstartswith(authordict, 'universalid', 'gr'), 'w': dictitemstartswith(workdict, 'universalid', 'gr')},
+		'lt': {'a': dictitemstartswith(authordict, 'universalid', 'lt'), 'w': dictitemstartswith(workdict, 'universalid', 'lt')},
+		'dp': {'a': dictitemstartswith(authordict, 'universalid', 'dp'), 'w': dictitemstartswith(workdict, 'universalid', 'dp')},
+		'in': {'a': dictitemstartswith(authordict, 'universalid', 'in'), 'w': dictitemstartswith(workdict, 'universalid', 'in')},
+		'ch': {'a': dictitemstartswith(authordict, 'universalid', 'ch'), 'w': dictitemstartswith(workdict, 'universalid', 'ch')},
+	}
 
-	tell me which items on the authorandworklist have unknown dates
 
-		incerta = 2500
-		varia = 2000
-		[failedtoparse = 9999]
+	def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
+		"""
 
-	this profiles as fairly slow when called on a large search list (.5s): 
-	it might be better to build a list of these up front
-	when loading HipparchiaServer since this is both static and repetitive
+		tell me which items on the authorandworklist have unknown dates
 
-	:param authorandworklist:
-	:param authorobjectdict:
-	:param worksdict:
-	:return:
-	"""
-	datematches = list()
+			incerta = 2500
+			varia = 2000
+			[failedtoparse = 9999]
 
-	for aw in authorandworklist:
-		w = workobjectdict[aw]
-		try:
-			# does the work have a date? if not, we will throw an exception
-			cd = int(w.converted_date)
-			if cd == specificdate:
-				datematches.append(aw)
-		except TypeError:
-			# no work date? then we will look inside the author for the date
-			aid = aw[0:6]
+		this profiles as fairly slow when called on a large search list (.5s):
+		it might be better to build a list of these up front
+		when loading HipparchiaServer since this is both static and repetitive
+
+		:param authorandworklist:
+		:param authorobjectdict:
+		:param worksdict:
+		:return:
+		"""
+		datematches = list()
+
+		for aw in authorandworklist:
+			w = workobjectdict[aw]
 			try:
-				cd = int(authorobjectdict[aid].converted_date)
+				# does the work have a date? if not, we will throw an exception
+				cd = int(w.converted_date)
 				if cd == specificdate:
 					datematches.append(aw)
 			except TypeError:
-				# the author can't tell you his date; i guess it is incerta by definition
-				datematches.append(aw)
+				# no work date? then we will look inside the author for the date
+				aid = aw[0:6]
+				try:
+					cd = int(authorobjectdict[aid].converted_date)
+					if cd == specificdate:
+						datematches.append(aw)
+				except TypeError:
+					# the author can't tell you his date; i guess it is incerta by definition
+					datematches.append(aw)
 
-	return datematches
+		return datematches
 
-# search list building and pruning was testing all items for their date this too often at a cost of .5s per full corpus search
-# so a master list is built up front that you can quickly make a check against
+	# search list building and pruning was testing all items for their date this too often at a cost of .5s per full corpus search
+	# so a master list is built up front that you can quickly make a check against
 
 
-allworks = workdict.keys()
-allvaria = set(findspecificdate(allworks, authordict, workdict, 2000))
-allincerta = set(findspecificdate(allworks, authordict, workdict, 2500))
+	allworks = workdict.keys()
+	allvaria = set(findspecificdate(allworks, authordict, workdict, 2000))
+	allincerta = set(findspecificdate(allworks, authordict, workdict, 2500))
 
-del allworks
+	del allworks
 
-elapsed = round(time.time() - launchtime, 1)
-print(' ({e}s)'.format(e=elapsed))
-del elapsed
-del launchtime
+	elapsed = round(time.time() - launchtime, 1)
+	print(' ({e}s)'.format(e=elapsed))
+	del elapsed
+	del launchtime
 
-if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
-	print('calculating word weights...')
-	if hipparchia.config['COLLAPSEDGENRECOUNTS'] == 'yes':
-		c = True
-	else:
-		c = False
-	print('greek wordweights', findtemporalweights('G'))
-	print('corpus weights', findccorporaweights())
-	# see function notes on the difference between this pair and the next pair
-	# print('greek genre weights:', findgeneraweights('G', c))
-	# print('latin genre weights:', findgeneraweights('L', c))
+	if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
+		print('calculating word weights...')
+		if hipparchia.config['COLLAPSEDGENRECOUNTS'] == 'yes':
+			c = True
+		else:
+			c = False
+		print('greek wordweights', findtemporalweights('G'))
+		print('corpus weights', findccorporaweights())
+		# see function notes on the difference between this pair and the next pair
+		# print('greek genre weights:', findgeneraweights('G', c))
+		# print('latin genre weights:', findgeneraweights('L', c))
 
-	# faster and smarter
-	print('greek genre weights:', workobjectgeneraweights('G', c, workdict))
-	print('latin genre weights:', workobjectgeneraweights('L', c, workdict))
+		# faster and smarter
+		print('greek genre weights:', workobjectgeneraweights('G', c, workdict))
+		print('latin genre weights:', workobjectgeneraweights('L', c, workdict))
 
-# empty dict in which to store progress polls
-# note that more than one poll can be running
-poll = dict()
+	# empty dict in which to store progress polls
+	# note that more than one poll can be running
+	poll = dict()
