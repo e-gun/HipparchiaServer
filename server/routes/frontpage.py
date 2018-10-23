@@ -124,7 +124,7 @@ def loadhelpdata():
 		helpfilepath = helppath+divmapper[d]
 		helpcontents = ''
 		if path.isfile(helpfilepath):
-			with open(helpfilepath, 'r') as f:
+			with open(helpfilepath, encoding='utf8') as f:
 				helpcontents = f.read()
 		helpdict[d] = helpcontents
 
