@@ -12,10 +12,6 @@
 # FLASKSEENATPORT might diverge from this if you are feeding flask
 # 	through uWSGI + nginx
 #
-# ICANPICKLECONNECTIONS if not either 'yes' or 'no' you will test to see how to send connections
-#   through the multiprocessing code. So far as I know: Windows is 'no; everyone else is 'yes'.
-#   This non-parallel implementation across platforms really stinks.
-#
 # CONNECTIONTYPE determines whether you generate a series of one-off connections to the
 #   database or if you use a persistent pool of connections instead. 'simple' gives you
 #   the former. Anything else gives you the latter which is faster. But with a pool you
@@ -55,9 +51,6 @@ FLASKSEENATPORT = 5000
 PROGRESSPOLLDEFAULTPORT = 5010
 LISTENINGADDRESS = '127.0.0.1'
 MYEXTERNALIPADDRESS = '127.0.0.1'
-
-# so far as I know: Windows is 'no; everyone else is 'yes'
-ICANPICKLECONNECTIONS = 'unknown'
 
 # postgresql connection instance; see also 'securitysettings.py'
 DBHOST = '127.0.0.1'

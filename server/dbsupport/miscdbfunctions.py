@@ -7,10 +7,10 @@
 """
 
 from multiprocessing import Process
+from os import name as osname
 
 import psycopg2
 
-from server import hipparchia
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
@@ -380,10 +380,10 @@ def probefordatabases() -> dict:
 
 
 def icanpickleconnections():
-	if hipparchia.config['ICANPICKLECONNECTIONS'] == 'n':
+	if osname == 'nt':
 		return False
 
-	if hipparchia.config['ICANPICKLECONNECTIONS'] == 'y':
+	if osname == 'posix':
 		return True
 
 	result = True
