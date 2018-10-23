@@ -7,6 +7,8 @@
 """
 
 import os
+from multiprocessing import current_process
+
 from flask import Flask
 
 from server import hipparchia
@@ -28,28 +30,35 @@ settingsdir = os.path.join(here, 'settings')
 samplesettingsdir = os.path.join(here, 'sample_settings')
 serverdir = os.path.normpath(os.path.join(here, '..'))
 
+
+def startupprint(message: str):
+	if current_process().name == 'MainProcess':
+		print(message)
+	return
+
+
 if not os.path.exists(samplesettingsdir):
-	print('"sample_settings" directory not found: configuration check will fail')
+	startupprint('"sample_settings" directory not found: configuration check will fail')
 
 for f in settingfiles:
 	filepath = os.path.join(samplesettingsdir, f)
 	try:
 		nullapp.config.from_pyfile(filepath)
 	except FileNotFoundError:
-		print('"./sample_settings/{f}" not found'.format(f=f))
+		startupprint('"./sample_settings/{f}" not found'.format(f=f))
 
 sampleconfigdict = dict(nullapp.config)
 del nullapp
 
 if not os.path.exists(settingsdir):
-	print('"settings" directory not found; searching for old-style "config.py"')
+	startupprint('"settings" directory not found; searching for old-style "config.py"')
 	settingsfile = os.path.join(serverdir, 'config.py')
 	try:
 		hipparchia.config.from_pyfile(settingsfile)
 	except FileNotFoundError:
-		print('could not find old-style "config.py"')
-	print('\tplease use the "sample_settings" folder to build a "settings" folder')
-	print('\tthere are likely to be new/different settings of which your old configuration is unaware\n')
+		startupprint('could not find old-style "config.py"')
+	startupprint('\tplease use the "sample_settings" folder to build a "settings" folder')
+	startupprint('\tthere are likely to be new/different settings of which your old configuration is unaware\n')
 	settingfiles = list()
 
 for f in settingfiles:
@@ -57,24 +66,24 @@ for f in settingfiles:
 	try:
 		hipparchia.config.from_pyfile(filepath)
 	except FileNotFoundError:
-		print('"./settings/{f}" not found; loading "{f}" from "sample_settings" instead'.format(f=f))
+		startupprint('"./settings/{f}" not found; loading "{f}" from "sample_settings" instead'.format(f=f))
 		sampledir = os.path.join(here, 'sample_settings')
 		filepath = os.path.join(sampledir, f)
 		hipparchia.config.from_pyfile(filepath)
 
 missingkeys = sampleconfigdict.keys() - hipparchia.config.keys()
 if missingkeys:
-	print('WARNING: incomplete configuration; you are missing values for:')
+	startupprint('WARNING: incomplete configuration; you are missing values for:')
 	for k in missingkeys:
-		print('\t', k)
-	print('the following values were assigned via the defaults in the "sample_settings" files')
+		startupprint('\t', k)
+	startupprint('the following values were assigned via the defaults in the "sample_settings" files')
 	for k in missingkeys:
 		hipparchia.config[k] = sampleconfigdict[k]
-		print('\t{k} = {v}'.format(k=k, v=hipparchia.config[k]))
+		startupprint('\t{k} = {v}'.format(k=k, v=hipparchia.config[k]))
 
 extrakeys = hipparchia.config.keys() - sampleconfigdict.keys()
 if extrakeys:
-	print('WARNING: your configuration file contains more options than are available in "sample_settings"')
-	print('the following options are unrecognized:')
+	startupprint('WARNING: your configuration file contains more options than are available in "sample_settings"')
+	startupprint('the following options are unrecognized:')
 	for k in extrakeys:
-		print('\t', k)
+		startupprint('\t{k}'.format(k=k))

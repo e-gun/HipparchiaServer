@@ -6,12 +6,15 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+from multiprocessing import current_process
+
 try:
 	from gensim import corpora
 	from gensim.models import LsiModel, TfidfModel
 	from gensim.similarities import MatrixSimilarity
 except ImportError:
-	print('gensim not available')
+	if current_process().name == 'MainProcess':
+		print('gensim not available')
 	corpora = None
 	LsiModel = None
 	TfidfModel = None

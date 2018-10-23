@@ -7,12 +7,14 @@
 """
 
 import pickle
+from multiprocessing import current_process
 from typing import List
 
 try:
 	import redis
 except ImportError:
-	print('redis unavailable')
+	if current_process().name == 'MainProcess':
+		print('redis unavailable')
 	redis = None
 
 from server import hipparchia

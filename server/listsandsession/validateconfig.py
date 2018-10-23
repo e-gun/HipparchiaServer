@@ -6,9 +6,8 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import os
 import re
-from typing import List, Dict
+from typing import Dict, List
 
 
 def loadconfig(filepath) -> list:
@@ -67,23 +66,3 @@ def compareconfigs(template, model) -> Dict[str, set]:
 	differencedict = {'missing': missing, 'extra': extra}
 
 	return differencedict
-
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
-relativeshift = '/../..'
-testresults = compareconfigs(dir_path + relativeshift + '/sample_config.py', dir_path + relativeshift + '/config.py')
-
-if len(testresults['missing']) > 0:
-	print('WARNING -- WARNING -- WARNING')
-	print('Hipparchia is almost certain to crash. If you are lucky it will merely spew error messages.')
-	print('Your configuration file ("config.py") needs to assign a value to the following:')
-	for m in testresults['missing']:
-		print('\t', m)
-	print('See "sample_config.py" in the HipparchiaServer directory.')
-
-if len(testresults['extra']) > 0:
-	print('WARNING -- WARNING -- WARNING')
-	print('Your active configuration contains items that are not in the template:')
-	for e in testresults['extra']:
-		print('\t', e)
-	print('These items are being ignored. Consider consulting "sample_config.py" in the HipparchiaServer directory.')
