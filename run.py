@@ -5,14 +5,16 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
 from multiprocessing import current_process
 
 from server import hipparchia
 
 if current_process().name == 'MainProcess':
 	# stupid Windows will fork new copies and reload all of this
-	hipparchiaversion = '1.1.3+ [MASTER]'
+	hipparchiaversion = '1.2'
 	print('\nVersion: {v}\n'.format(v=hipparchiaversion))
+
 
 if __name__ == '__main__':
 
