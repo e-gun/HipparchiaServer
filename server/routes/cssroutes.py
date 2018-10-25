@@ -102,6 +102,8 @@ def loadcssfile(cssrequest):
 		family = hostedfontfamilies[pickedfamily]
 	except KeyError:
 		family = None
+	except TypeError:
+		family = None
 
 	if family:
 		for face in family:
