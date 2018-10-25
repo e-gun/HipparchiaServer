@@ -47,7 +47,7 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 	so = searchobject
 	activepoll = so.poll
 	termone = so.lemma.dictionaryentry
-	imagename = ''
+	imagename = str()
 
 	try:
 		termtwo = so.proximatelemma.dictionaryentry

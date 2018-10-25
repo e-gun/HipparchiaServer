@@ -55,7 +55,7 @@ def cleantext(texttostrip):
 
 	praenomina = {
 		'A.': 'Aulus',
-		'App.': 'Applius',
+		'App.': 'Appius',
 		'C.': 'Caius',
 		'G.': 'Gaius',
 		'Cn.': 'Cnaius',

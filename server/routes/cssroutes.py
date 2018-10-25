@@ -39,9 +39,11 @@ def loadcssfile(cssrequest):
 	with open(hipparchia.root_path+'/css/'+cssfile, encoding='utf8') as f:
 		css = f.read()
 
+	pickedfamily = None
 	if hipparchia.config['ENBALEFONTPICKER'] == 'yes':
+		pickedfamily = session['fontchoice']
 		searchfor = re.compile('DEFAULTLOCALFONTWILLBESUPPLIEDFROMCONFIGFILE')
-		css = re.sub(searchfor, session['fontchoice'], css)
+		css = re.sub(searchfor, pickedfamily, css)
 
 	for s in substitutes:
 		searchfor = re.compile(s+'WILLBESUPPLIEDFROMCONFIGFILE')
@@ -93,22 +95,20 @@ def loadcssfile(cssrequest):
 
 	hostedfontfamilies = {'DejaVu': d, 'Noto': n, 'IBMPlex': i, 'Roboto': r}
 
-	if hipparchia.config['USEFONTFILESFORSTYLES'] == 'yes':
-		forceface = True
-	else:
-		forceface = False
+	if not pickedfamily:
+		pickedfamily = hostedfontfamilies[hipparchia.config['HOSTEDFONTFAMILY']]
 
 	try:
-		family = hostedfontfamilies[hipparchia.config['HOSTEDFONTFAMILY']]
+		family = hostedfontfamilies[pickedfamily]
 	except KeyError:
-		forceface = False
-		family = hostedfontfamilies['DejaVu']
+		family = None
 
-	for face in family:
-		searchfor = re.compile('HOSTEDFONTFAMILY_'+face)
-		css = re.sub(searchfor, family[face], css)
+	if family:
+		for face in family:
+			searchfor = re.compile('HOSTEDFONTFAMILY_'+face)
+			css = re.sub(searchfor, family[face], css)
 
-	if forceface:
+	if hipparchia.config['USEFONTFILESFORSTYLES'] == 'yes':
 		swaps = {
 			r"font-stretch: condensed;\n\tfont-weight: bold;":  "font-family: 'hipparchiacondensedboldstatic', sans-serif;",
 			r"font-weight: bold;\n\tfont-stretch: condensed;": "font-family: 'hipparchiacondensedboldstatic', sans-serif;",
