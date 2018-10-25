@@ -11,6 +11,7 @@ import re
 from flask import make_response, session
 
 from server import hipparchia
+from server.formatting.cssformatting import deface, fontsforstyles, gethostedfontdict
 from server.listsandsession.sessionfunctions import probeforsessionvariables
 
 
@@ -34,10 +35,13 @@ def loadcssfile(cssrequest):
 	if cssrequest in validcss:
 		cssfile = cssrequest
 
-	substitutes = ['DEFAULTLOCALFONT', 'DEFAULTLOCALGREEKFONT', 'DEFAULTLOCALNONGREEKFONT']
-
 	with open(hipparchia.root_path+'/css/'+cssfile, encoding='utf8') as f:
 		css = f.read()
+
+	substitutes = ['DEFAULTLOCALFONT', 'DEFAULTLOCALGREEKFONT', 'DEFAULTLOCALNONGREEKFONT']
+	for s in substitutes:
+		searchfor = re.compile(s+'WILLBESUPPLIEDFROMCONFIGFILE')
+		css = re.sub(searchfor, hipparchia.config[s], css)
 
 	pickedfamily = None
 	if hipparchia.config['ENBALEFONTPICKER'] == 'yes':
@@ -45,83 +49,23 @@ def loadcssfile(cssrequest):
 		searchfor = re.compile('DEFAULTLOCALFONTWILLBESUPPLIEDFROMCONFIGFILE')
 		css = re.sub(searchfor, pickedfamily, css)
 
-	for s in substitutes:
-		searchfor = re.compile(s+'WILLBESUPPLIEDFROMCONFIGFILE')
-		css = re.sub(searchfor, hipparchia.config[s], css)
-
-	d = {'REGULAR': 'DejaVuSans',
-	     'MONO': 'DejaVuSansMono',
-	     'OBLIQUE': 'DejaVuSans-Oblique',
-	     'CONDENSED': 'DejaVuSansCondensed',
-	     'CNDENSEDBLD': 'DejaVuSansCondensed-Bold',
-	     'BOLD': 'DejaVuSans-Bold',
-	     'SEMIBLD': 'DejaVuSans-Bold',
-	     'THIN': 'DejaVuSans-ExtraLight',
-	     'LIGHT': 'DejaVuSans-ExtraLight',
-	     'BLDITALIC': 'DejaVuSans-BoldOblique'}
-
-	n = {'REGULAR': 'NotoSans-Regular',
-	     'MONO': 'NotoMono-Regular',
-	     'OBLIQUE': 'NotoSans-Italic',
-	     'CONDENSED': 'NotoSansDisplay-Condensed',
-	     'CNDENSEDBLD': 'NotoSansDisplay-CondensedBold',
-	     'BOLD': 'NotoSans-Bold',
-	     'SEMIBLD': 'NotoSansDisplay-SemiBold',
-	     'THIN': 'NotoSansDisplay-Thin',
-	     'LIGHT': 'NotoSansDisplay-Light',
-	     'BLDITALIC': 'NotoSans-BoldItalic'}
-
-	i = {'REGULAR': 'IBMPlexSans-Regular',
-	     'MONO': 'IBMPlexMono-Regular',
-	     'OBLIQUE': 'IBMPlexSans-Italic',
-	     'CONDENSED': 'IBMPlexSansCondensed-Regular',
-	     'CNDENSEDBLD': 'IBMPlexSansCondensed-Bold',
-	     'BOLD': 'IBMPlexSans-Bold',
-	     'SEMIBLD': 'IBMPlexSans-SemiBold',
-	     'THIN': 'IBMPlexSans-Thin',
-	     'LIGHT': 'IBMPlexSans-Light',
-	     'BLDITALIC': 'IBMPlexSans-BoldItalic'}
-
-	r = {'REGULAR': 'Roboto-Regular',
-	     'MONO': 'RobotoMono-Medium',
-	     'OBLIQUE': 'Roboto-Italic',
-	     'CONDENSED': 'RobotoCondensed-Regular',
-	     'CNDENSEDBLD': 'RobotoCondensed-Bold',
-	     'BOLD': 'Roboto-Bold',
-	     'SEMIBLD': 'Roboto-Bold',
-	     'THIN': 'Roboto-Thin',
-	     'LIGHT': 'Roboto-Light',
-	     'BLDITALIC': 'Roboto-BoldItalic'}
-
-	hostedfontfamilies = {'DejaVu': d, 'Noto': n, 'IBMPlex': i, 'Roboto': r}
+	hostedfontfamilies = gethostedfontdict()
 
 	if not pickedfamily:
-		pickedfamily = hostedfontfamilies[hipparchia.config['HOSTEDFONTFAMILY']]
+		pickedfamily = hipparchia.config['HOSTEDFONTFAMILY']
 
 	try:
-		family = hostedfontfamilies[pickedfamily]
+		faces = hostedfontfamilies[pickedfamily]
 	except KeyError:
-		family = None
-	except TypeError:
-		family = None
+		faces = dict()
+		css = deface(css)
 
-	if family:
-		for face in family:
-			searchfor = re.compile('HOSTEDFONTFAMILY_'+face)
-			css = re.sub(searchfor, family[face], css)
+	for face in faces:
+		searchfor = re.compile('HOSTEDFONTFAMILY_'+face)
+		css = re.sub(searchfor, faces[face], css)
 
 	if hipparchia.config['USEFONTFILESFORSTYLES'] == 'yes':
-		swaps = {
-			r"font-stretch: condensed;\n\tfont-weight: bold;":  "font-family: 'hipparchiacondensedboldstatic', sans-serif;",
-			r"font-weight: bold;\n\tfont-stretch: condensed;": "font-family: 'hipparchiacondensedboldstatic', sans-serif;",
-			r"font-style: italic;\n\tfont-weight: bold;": "font-family: 'hipparchiabolditalicstatic', sans-serif;",
-			r"font-weight: bold;\n\tfont-style: italic;": "font-family: 'hipparchiabolditalicstatic', sans-serif;",
-			r"font-style: italic;": "font-family: 'hipparchiaobliquestatic', sans-serif;",
-			r"font-weight: bold;": "font-family: 'hipparchiaboldstatic', sans-serif;",
-			r"font-weight: 600;": "font-family: 'hipparchiasemiboldstatic', sans-serif;",
-		}
-		for s in swaps.keys():
-			css = re.sub(re.compile(s), swaps[s], css)
+		css = fontsforstyles(css)
 
 	# return send_from_directory('css', cssfile)
 
