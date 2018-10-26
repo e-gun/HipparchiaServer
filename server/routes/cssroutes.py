@@ -6,12 +6,10 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import re
-
-from flask import make_response, session
+from flask import make_response
 
 from server import hipparchia
-from server.formatting.cssformatting import deface, fontsforstyles, gethostedfontdict
+from server.hipparchiaobjects.cssformattingobject import CssFormattingObject
 from server.listsandsession.sessionfunctions import probeforsessionvariables
 
 
@@ -38,34 +36,9 @@ def loadcssfile(cssrequest):
 	with open(hipparchia.root_path+'/css/'+cssfile, encoding='utf8') as f:
 		css = f.read()
 
-	substitutes = ['DEFAULTLOCALFONT', 'DEFAULTLOCALGREEKFONT', 'DEFAULTLOCALNONGREEKFONT']
-	for s in substitutes:
-		searchfor = re.compile(s+'WILLBESUPPLIEDFROMCONFIGFILE')
-		css = re.sub(searchfor, hipparchia.config[s], css)
-
-	pickedfamily = None
-	if hipparchia.config['ENBALEFONTPICKER'] == 'yes':
-		pickedfamily = session['fontchoice']
-		searchfor = re.compile('DEFAULTLOCALFONTWILLBESUPPLIEDFROMCONFIGFILE')
-		css = re.sub(searchfor, pickedfamily, css)
-
-	hostedfontfamilies = gethostedfontdict()
-
-	if not pickedfamily:
-		pickedfamily = hipparchia.config['HOSTEDFONTFAMILY']
-
-	try:
-		faces = hostedfontfamilies[pickedfamily]
-	except KeyError:
-		faces = dict()
-		css = deface(css)
-
-	for face in faces:
-		searchfor = re.compile('HOSTEDFONTFAMILY_'+face)
-		css = re.sub(searchfor, faces[face], css)
-
-	if hipparchia.config['USEFONTFILESFORSTYLES'] == 'yes':
-		css = fontsforstyles(css)
+	cfo = CssFormattingObject(css)
+	cfo.runcleaningsuite()
+	css = cfo.css
 
 	# return send_from_directory('css', cssfile)
 
