@@ -174,10 +174,16 @@ def probedictionary(usedictionary: str, usecolumn: str, seeking: str, syntax: st
 					FROM {d} WHERE {col} {sy} %s ORDER BY id_number ASC"""
 	query = qtemplate.format(ec=extracolumn, d=usedictionary, col=usecolumn, sy=syntax)
 	data = (seeking,)
-	dbcursor.execute(query, data)
 	# print('searchdictionary()',query,'\n\t',data)
 
-	found = dbcursor.fetchall()
+	try:
+		dbcursor.execute(query, data)
+		found = dbcursor.fetchall()
+	except psycopg2.DataError:
+		# thrown by dbcursor.execute()
+		# invalid regular expression: parentheses () not balanced
+		# ό)μβροϲ is a (bogus) headword; how many others are there?
+		found = list()
 
 	# we might be at trial 2+ and so we need to strip the supplement we used at trial #1
 	if trialnumber > 2:
