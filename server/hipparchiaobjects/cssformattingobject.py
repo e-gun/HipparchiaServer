@@ -24,16 +24,16 @@ class CssFormattingObject(object):
 	     'LIGHT': 'DejaVuSans-ExtraLight',
 	     'BLDITALIC': 'DejaVuSans-BoldOblique'}
 
-	n = {'REGULAR': 'NotoSans-Regular',
-	     'MONO': 'NotoMono-Regular',
-	     'OBLIQUE': 'NotoSans-Italic',
-	     'CONDENSED': 'NotoSansDisplay-Condensed',
-	     'CNDENSEDBLD': 'NotoSansDisplay-CondensedBold',
-	     'BOLD': 'NotoSans-Bold',
-	     'SEMIBLD': 'NotoSansDisplay-SemiBold',
-	     'THIN': 'NotoSansDisplay-Thin',
-	     'LIGHT': 'NotoSansDisplay-Light',
-	     'BLDITALIC': 'NotoSans-BoldItalic'}
+	f = {'REGULAR': 'FiraSans-Regular',
+	     'MONO': 'FiraMono-Regular',
+	     'OBLIQUE': 'FiraSans-Italic',
+	     'CONDENSED': 'FiraSans-Thin',
+	     'CNDENSEDBLD': 'FiraSans-Bold',
+	     'BOLD': 'FiraSans-Bold',
+	     'SEMIBLD': 'FiraSans-Bold',
+	     'THIN': 'FiraSans-ExtraLight',
+	     'LIGHT': 'FiraSans-ExtraLight',
+	     'BLDITALIC': 'FiraSans-BoldItalic'}
 
 	i = {'REGULAR': 'IBMPlexSans-Regular',
 	     'MONO': 'IBMPlexMono-Regular',
@@ -45,6 +45,17 @@ class CssFormattingObject(object):
 	     'THIN': 'IBMPlexSans-Thin',
 	     'LIGHT': 'IBMPlexSans-Light',
 	     'BLDITALIC': 'IBMPlexSans-BoldItalic'}
+
+	n = {'REGULAR': 'NotoSans-Regular',
+	     'MONO': 'NotoMono-Regular',
+	     'OBLIQUE': 'NotoSans-Italic',
+	     'CONDENSED': 'NotoSansDisplay-Condensed',
+	     'CNDENSEDBLD': 'NotoSansDisplay-CondensedBold',
+	     'BOLD': 'NotoSans-Bold',
+	     'SEMIBLD': 'NotoSansDisplay-SemiBold',
+	     'THIN': 'NotoSansDisplay-Thin',
+	     'LIGHT': 'NotoSansDisplay-Light',
+	     'BLDITALIC': 'NotoSans-BoldItalic'}
 
 	r = {'REGULAR': 'Roboto-Regular',
 	     'MONO': 'RobotoMono-Medium',
@@ -62,8 +73,9 @@ class CssFormattingObject(object):
 		self.substitutes = ['DEFAULTLOCALFONT', 'DEFAULTLOCALGREEKFONT', 'DEFAULTLOCALNONGREEKFONT']
 		self.hostedfontdict = {
 			'DejaVu': CssFormattingObject.d,
-			'Noto': CssFormattingObject.n,
+			'Fira': CssFormattingObject.f,
 			'IBMPlex': CssFormattingObject.i,
+			'Noto': CssFormattingObject.n,
 			'Roboto': CssFormattingObject.r
 		}
 		self.faces = dict()

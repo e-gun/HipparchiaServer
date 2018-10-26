@@ -5,7 +5,9 @@
 # HOSTEDFONTFAMILY sets which of the font families that Hipparchia downloads upon
 #   installation will be served to clients. Any of them should ensure full
 #   coverage for both Greek and Latin without any need to have a special font
-#   installed at the system level by people who visit.
+#   installed at the system level by people who visit. HipparchiaThirdPartySoftware contains more
+#   hostable fonts inside the 'extra_fonts' directory. Install the TTF files into
+#   ~/hipparchia_venv/HipparchiaServer/server/static/ttf
 #
 # USEFONTFILESFORSTYLES will use something like Roboto-BoldItalic.ttf instead of
 #   using CSS commands like font-style: italic; + font-weight: bold;
@@ -24,18 +26,18 @@
 # ENBALEFONTPICKER allows you to select fonts from the web interface; but see notes on
 #   FONTPICKERLIST before enabling this. Anything other than 'yes' disables this option.
 #
-# FONTPICKERLIST is a list of fonts to choose from. These are *local to the client*.
-#   The item set here alters DEFAULTLOCALFONT in the CSS. So there is no point in enabling
-#   this in an environment where you expect to have remote users: if they choose 'GFSOrpheusSans'
-#   what are the chances that it is already installed on their system?
+# FONTPICKERLIST is a list of fonts to choose from. These can be *local to the client*.
+#   The item set here alters DEFAULTLOCALFONT in the CSS. To avoid problesm the list should contain
+#   only HOSTEDFONTS or you know you have installed. Also, remote users can get in trouble here:
+#   if they choose 'GFSOrpheusSans' what are the chances that it is already installed on their system?
 #
 
 CSSSTYLESHEET = 'hipparchiastyles.css'
 DISTINCTGREEKANDLATINFONTS = 'no'
-HOSTEDFONTFAMILY = 'Roboto'  # DejaVu, IBMPlex, Noto, and Roboto should be pre-installed by Hipparchia
+HOSTEDFONTFAMILY = 'Roboto'  # Roboto should be pre-installed by Hipparchia; see above about adding more
 USEFONTFILESFORSTYLES = 'yes'  # Only valid if you are using a HOSTEDFONTFAMILY
 DEFAULTLOCALFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 ENBALEFONTPICKER = 'no'
-FONTPICKERLIST = ['Noto', 'DejaVu', 'IBMPlex', 'Roboto']
+FONTPICKERLIST = ['Noto', 'DejaVu', 'Fira', 'IBMPlex', 'Roboto']  # see above about editing this list
