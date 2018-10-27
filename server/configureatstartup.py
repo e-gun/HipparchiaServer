@@ -75,7 +75,7 @@ missingkeys = sampleconfigdict.keys() - hipparchia.config.keys()
 if missingkeys:
 	startupprint('WARNING: incomplete configuration; you are missing values for:')
 	for k in missingkeys:
-		startupprint('\t', k)
+		startupprint('\t{k}'.format(k=k))
 	startupprint('the following values were assigned via the defaults in the "sample_settings" files')
 	for k in missingkeys:
 		hipparchia.config[k] = sampleconfigdict[k]

@@ -12,7 +12,7 @@ from server import hipparchia
 
 if current_process().name == 'MainProcess':
 	# stupid Windows will fork new copies and reload all of this
-	hipparchiaversion = '1.2.0+ [MASTER]'
+	hipparchiaversion = '1.2.1'
 	print('\nVersion: {v}\n'.format(v=hipparchiaversion))
 
 
