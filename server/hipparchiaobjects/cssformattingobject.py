@@ -18,6 +18,7 @@ class CssFormattingObject(object):
 	     'OBLIQUE': 'DejaVuSans-Oblique',
 	     'CONDENSED': 'DejaVuSansCondensed',
 	     'CNDENSEDBLD': 'DejaVuSansCondensed-Bold',
+	     'CNDENSEDOBL': 'DejaVuSansCondensed-Oblique',
 	     'BOLD': 'DejaVuSans-Bold',
 	     'SEMIBLD': 'DejaVuSans-Bold',
 	     'THIN': 'DejaVuSans-ExtraLight',
@@ -29,6 +30,7 @@ class CssFormattingObject(object):
 	     'OBLIQUE': 'FiraSans-Italic',
 	     'CONDENSED': 'FiraSans-Thin',
 	     'CNDENSEDBLD': 'FiraSans-Bold',
+	     'CNDENSEDOBL': 'FiraSans-ThinItalic',
 	     'BOLD': 'FiraSans-Bold',
 	     'SEMIBLD': 'FiraSans-Bold',
 	     'THIN': 'FiraSans-ExtraLight',
@@ -40,6 +42,7 @@ class CssFormattingObject(object):
 	     'OBLIQUE': 'IBMPlexSans-Italic',
 	     'CONDENSED': 'IBMPlexSansCondensed-Regular',
 	     'CNDENSEDBLD': 'IBMPlexSansCondensed-Bold',
+	     'CNDENSEDOBL': 'IBMPlexSansCondensed-Italic',
 	     'BOLD': 'IBMPlexSans-Bold',
 	     'SEMIBLD': 'IBMPlexSans-SemiBold',
 	     'THIN': 'IBMPlexSans-Thin',
@@ -51,6 +54,7 @@ class CssFormattingObject(object):
 	     'OBLIQUE': 'NotoSans-Italic',
 	     'CONDENSED': 'NotoSansDisplay-Condensed',
 	     'CNDENSEDBLD': 'NotoSansDisplay-CondensedBold',
+	     'CNDENSEDOBL': 'NotoSansDisplay-CondensedItalic',
 	     'BOLD': 'NotoSans-Bold',
 	     'SEMIBLD': 'NotoSansDisplay-SemiBold',
 	     'THIN': 'NotoSansDisplay-Thin',
@@ -62,6 +66,7 @@ class CssFormattingObject(object):
 	     'OBLIQUE': 'Roboto-Italic',
 	     'CONDENSED': 'RobotoCondensed-Regular',
 	     'CNDENSEDBLD': 'RobotoCondensed-Bold',
+	     'CNDENSEDOBL': 'RobotoCondensed-Italic',
 	     'BOLD': 'Roboto-Bold',
 	     'SEMIBLD': 'Roboto-Bold',
 	     'THIN': 'Roboto-Thin',
@@ -136,15 +141,19 @@ class CssFormattingObject(object):
 		if not self.knownface:
 			return
 
-		swaps = {
-			r"font-stretch: condensed;\n\tfont-weight: bold;": "font-family: 'hipparchiacondensedboldstatic', sans-serif;",
-			r"font-weight: bold;\n\tfont-stretch: condensed;": "font-family: 'hipparchiacondensedboldstatic', sans-serif;",
-			r"font-style: italic;\n\tfont-weight: bold;": "font-family: 'hipparchiabolditalicstatic', sans-serif;",
-			r"font-weight: bold;\n\tfont-style: italic;": "font-family: 'hipparchiabolditalicstatic', sans-serif;",
-			r"font-style: italic;": "font-family: 'hipparchiaobliquestatic', sans-serif;",
-			r"font-weight: bold;": "font-family: 'hipparchiaboldstatic', sans-serif;",
-			r"font-weight: 600;": "font-family: 'hipparchiasemiboldstatic', sans-serif;",
-		}
+		# need this to run in order
+		swaps = [
+			(r"font-stretch: condensed; font-weight: bold;", "font-family: 'hipparchiacondensedboldstatic', sans-serif;"),
+			(r"font-weight: bold; font-stretch: condensed;", "font-family: 'hipparchiacondensedboldstatic', sans-serif;"),
+			(r"font-stretch: condensed; font-style: italic;", "font-family: 'hipparchiacondenseditalicstatic', sans-serif;"),
+			(r"font-style: italic; font-stretch: condensed;", "font-family: 'hipparchiacondenseditalicstatic', sans-serif;"),
+			(r"font-style: italic; font-weight: bold;", "font-family: 'hipparchiabolditalicstatic', sans-serif;"),
+			(r"font-weight: bold; font-style: italic;", "font-family: 'hipparchiabolditalicstatic', sans-serif;"),
+			(r"font-style: italic;", "font-family: 'hipparchiaobliquestatic', sans-serif;"),
+			(r"font-weight: bold;", "font-family: 'hipparchiaboldstatic', sans-serif;"),
+			(r"font-weight: 600;", "font-family: 'hipparchiasemiboldstatic', sans-serif;"),
+			(r"font-stretch: condensed;", "font-family: 'hipparchiacondensedstatic', sans-serif;")
+		]
 
-		for s in swaps.keys():
-			self.css = re.sub(re.compile(s), swaps[s], self.css)
+		for s in swaps:
+			self.css = re.sub(re.compile(s[0]), s[1], self.css)

@@ -51,7 +51,7 @@
     --plum: hsl(291, 15%, 38%);
 	--red: hsla(346, 77%, 26%, 1);
 	--rustedorange: hsla(23, 37%, 39%, 1);
-	--sicklyyellow: hsla(44, 22%, 66%, 1);
+	--sicklyyellow: hsl(45, 16%, 53%);
 	--skyblue: hsla(205, 92%, 37%, 1);
 	--teal: hsla(196, 14%, 39%, 1);
 	--transparentgrey: hsla(0, 0%, 67%, .8);
@@ -59,125 +59,12 @@
 	--vdkgrey: hsla(0, 0%, 20%, 1);
 }
 
-/* COLOR USE OVERVIEW
-
---black
-    .match,
-    .metrics
-    .overline
-    .overunder
-    .proximate
-    #authorholdings
-    #searchlistcontents
---blue
-    .interlineartext
-    .interlinearmarginalia
-    .marginaltext
-    .textuallemma
-    orth
---brown
-    .editorialmarker_roundbrackets
-    hmu_roman_in_a_greek_text
---brtblue
-    .currentlyviewing
-    .ui-icon ui-icon-arrowthick-1-e:hover
-    .ui-icon ui-icon-arrowthick-1-w:hover
-    browser
---brtgreen
-    .loadoptions:hover
---deepblue
-    .emph
-    .prevalence
-    .sought
---dkbabyblue
-    .editorialmarker_curlybrackets
-    .foundlocus:hover
-    .selection:hover
-    author
-    bibl:hover
-    indexedlocation:hover
-    indexobserved:hover
-    observed:hover
---dkgreen
-    .marginaltext
---dkgrey
-    .homonym
---dkteal
-    .activeoption
-    .browsercite
-    .dictionaryform
-    .foundtext
-    .sampleoutput
-    #outputbox
-    span.lat
---huedgrey
-    .editorialmarker_squarebrackets
-    .unhandledpercent
-    .unhandledpound
-    td.embeddedannotations
---lessoffwhite
-    #browserdialog
-    #helptabs
---limegreen
-    .editorialmarker_angledbrackets
-    bibl
-    bibl:hover
---ltbabyblue
-    td.infocells
---ltgrey
-    tr.nthrow
---midgrey
-    .foundlocus:hover
-    .searchsel:hover
-    .selection:hover
-    .ui-icon ui-icon-arrowthick-1-e:hover
-    .ui-icon ui-icon-arrowthick-1-w:hover
-    bibl:hover
-    indexedlocation:hover
-    indexobserved:hover
-    observed:hover
---offwhite
-    #authorholdings
-    #searchlistcontents
-    #genrelistcontents
---orange
-    td.count
-    hmu_alternative_reading
---pink
-    .saveoptions:hover
-    #clearselections:hover
-    td.infocell
---red
-    .colorhighlight
-    .date
-    .focusline
-    .highlight
-    .levellabel1-4
-    .observed
-    .romannumerals
-    td.headword
---rustedorange
-    .crossreference
-    .dictionaryheading
-    .editorialmarker_angledquotes
-    .textdate
-    #searchsummary
-    #pollingdata
---sicklyyellow
-    hmu_unconventional_form_written_by_scribe
---skyblue
-    code
-    smallcode
---teal
---transparentgrey
-    [text-shadows]
---vdkteal
-    .findnumber
-    .label
-    .labelcell
-    span.lat
-*/
-
+/*
+    font swaps handled by cssformattingobject.py
+    you also need to put 'bold' and 'italic' on the same CSS line if you want the secondary swap to happen right
+    e.g.:
+        font-weight: bold; font-style: italic;
+ */
 
 @font-face {
 	font-family: 'hipparchiasansstatic';
@@ -202,6 +89,11 @@
 @font-face {
 	font-family: 'hipparchiacondensedboldstatic';
 	src: url('/static/ttf/HOSTEDFONTFAMILY_CNDENSEDBLD.ttf') format('truetype');
+	}
+
+@font-face {
+	font-family: 'hipparchiacondenseditalicstatic';
+	src: url('/static/ttf/HOSTEDFONTFAMILY_CNDENSEDOBL.ttf') format('truetype');
 	}
 
 @font-face {
@@ -259,8 +151,7 @@ body {
 
 .baseform {
 	color: var(--vdkgrey);
-	font-style: italic;
-	font-weight: bold;
+	font-style: italic; font-weight: bold;
 	}
 
 .baseformtranslation {
@@ -323,8 +214,7 @@ body {
 	}
 
 .currentlyviewingwork {
-	font-weight: bold;
-	font-style: italic;
+	font-weight: bold; font-style: italic;
 	}
 
 .currentlyviewingcitation {
@@ -575,6 +465,9 @@ body {
 .hmu_alternative_reading {
     color: var(--orange);
     font-style: italic;
+    -webkit-text-decoration-style: wavy;
+	-moz-text-decoration-style: wavy;
+	text-decoration-style: wavy;
     }
 
 .hmu_blank_quarter_spaces {
@@ -614,8 +507,7 @@ body {
 
 .hmu_form_altered_by_scribe {
     color: var(--red);
-    font-weight: bold;
-    font-style: italic;
+    font-weight: bold; font-style: italic;
     }
 
 .hmu_impression_of_stamp_on_papyrus {
@@ -692,12 +584,12 @@ body {
 	}
 
 .hmu_title {
-	font-weight: bold;
-	font-style: italic;
+	font-weight: bold; font-style: italic;
 	}
 
 .hmu_unconventional_form_written_by_scribe {
     color: var(--sicklyyellow);
+    font-stretch: condensed; font-style: italic;
     }
 
 .homonym {
@@ -742,8 +634,7 @@ body {
 .latin {
 	font-size: 90%;
 	/* font-family: var(--latinfont), 'hipparchiacondensedstatic', sans-serif; */
-	font-family: 'hipparchiacondensedstatic', sans-serif;
-	/* font-stretch: condensed; */
+	font-stretch: condensed;
 	color: var(--blue);
 	}
 
@@ -865,8 +756,7 @@ body {
 	}
 
 .picklabel {
-	font-weight: bold;
-	font-style: italic;
+	font-weight: bold; font-style: italic;
 	}
 
 .poetictext {
@@ -999,8 +889,7 @@ body {
 	}
 
 .title {
-	font-style: italic;
-	font-weight: bold;
+	font-style: italic; font-weight: bold;
 	}
 
 .translation {
@@ -1314,8 +1203,7 @@ form {
 	}
 
 hmutitle {
-	font-weight: bold;
-	font-style: italic;
+	font-weight: bold; font-style: italic;
 	}
 
 indexedlocation:hover{
@@ -1449,7 +1337,6 @@ td.browserembeddedannotations {
 	padding-left: 15px;
 	padding-bottom: 8px;
     color: var(--huedgrey);
-    font-family: 'hipparchiacondensedstatic', sans-serif;
 	font-stretch: condensed;
     font-size: 80%;
     vertical-align: middle;
@@ -1476,7 +1363,6 @@ td.textmakerembeddedannotations {
 	padding-right: 10px;
 	padding-left: 15px;
     color: var(--huedgrey);
-    font-family: 'hipparchiacondensedstatic', sans-serif;
 	font-stretch: condensed;
     font-size: 80%;
     vertical-align: middle;
