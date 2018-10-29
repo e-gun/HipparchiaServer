@@ -58,6 +58,7 @@ function loadoptions() {
             'nearestneighborsquery': $('#nearestneighborsquery'),
             'papyruscorpus': $('#papyruscorpus'),
             'quotesummary': $('#quotesummary'),
+            'searchinsidemarkup': $('#searchinsidemarkup'),
             'semanticvectorquery': $('#semanticvectorquery'),
             'sensesummary': $('#sensesummary'),
             'sentencesimilarity': $('#sentencesimilarity'),
@@ -445,6 +446,12 @@ $('#debugparse').change(function() {
 
 $('#indexskipsknownwords').change(function() {
     if(this.checked) { setoptions('indexskipsknownwords', 'yes'); } else { setoptions('indexskipsknownwords', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#searchinsidemarkup').change(function() {
+    if(this.checked) { setoptions('searchinsidemarkup', 'yes'); } else { setoptions('searchinsidemarkup', 'no'); }
     refreshselections();
     loadoptions();
     });

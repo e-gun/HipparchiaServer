@@ -199,6 +199,10 @@ class SearchObject(object):
 			self.usecolumn = 'stripped_line'
 			self.usewordlist = 'stripped'
 
+		if frozensession['searchinsidemarkup'] == 'yes':
+			self.usecolumn = 'marked_up_line'
+			self.usewordlist = 'polytonic'
+
 		if frozensession['searchscope'] == 'W':
 			self.scope = 'words'
 		else:

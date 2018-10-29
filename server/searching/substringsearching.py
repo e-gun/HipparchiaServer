@@ -87,6 +87,8 @@ def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, 
 	q = qtemplate.format(wtmpl=worklinetemplate, db=authortable, whr=whr, lm=mylimit)
 	d = (seeking,)
 
+	# print('q/d\nq:\t{q}\nd:\t{d}\n'.format(q=q, d=d))
+
 	try:
 		cursor.execute(q, d)
 		found = resultiterator(cursor)

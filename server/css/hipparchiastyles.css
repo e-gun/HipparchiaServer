@@ -332,7 +332,6 @@ body {
 	}
 
 
-
 .date{
     color: var(--red);
     }
@@ -377,7 +376,7 @@ body {
 }
 
 .dictcase{
-    font-style: bold;
+    font-weight: bold;
     }
 
 .dictcit{
@@ -391,7 +390,7 @@ body {
     font-style: italic;
     }
 
-.dictforeign .dictlang_greek {
+.dictforeign.dictlang_greek {
 	}
 
 .dictitype{
@@ -405,10 +404,15 @@ body {
     color: var(--vdkgrey);
 	}
 
-.dicthi .dictrend_ital{
+.dicthi.dictrend_ital{
 	/* definitions in the latin dictionary */
 	font-weight: 600;
     color: var(--vdkgrey);
+	}
+
+.dictnumber{
+	font-weight: 600;
+	color: var(--deepblue);
 	}
 
 .dictorth {
@@ -416,12 +420,17 @@ body {
     color: var(--dkteal);
 	}
 
-.dictorth .dictlang_la {
+.dictorth.dictlang_la {
 	font-weight: 600;
     color: var(--dkteal);
 	}
 
-.dictorth .dictlang_greek {
+.dictorth.dicttype_alt.dictlang_la {
+	font-weight: 600;
+    color: var(--teal);
+	}
+
+.dictorth.dictlang_greek {
 	font-weight: 600;
     color: var(--dkteal);
 	}
@@ -431,10 +440,10 @@ body {
     font-style: italic;
 	}
 
-.dictquote .dictlang_greek {
+.dictquote.dictlang_greek {
 	}
 
-.dictquote .dictlang_la {
+.dictquote.dictlang_la {
 	}
 
 .dictsense {
@@ -455,10 +464,9 @@ body {
 .dictusg{
     }
 
-.dictusg .dicttype_style{
-	font-stretch: condensed;
+.dictusg.dicttype_style{
 	font-weight: bold;
-    color: var(--dkteal);
+    color: var(--red);
     }
 
 .dictionaryform {
@@ -605,8 +613,9 @@ body {
 	}
 
 .hmu_form_altered_by_scribe {
-    font-style: italic;
+    color: var(--red);
     font-weight: bold;
+    font-style: italic;
     }
 
 .hmu_impression_of_stamp_on_papyrus {
@@ -1302,6 +1311,11 @@ fieldset {
 
 form {
 	display: inline;
+	}
+
+hmutitle {
+	font-weight: bold;
+	font-style: italic;
 	}
 
 indexedlocation:hover{

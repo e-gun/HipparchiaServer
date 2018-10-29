@@ -135,14 +135,14 @@ class BrowserPassageObject(object):
 		outputtable = list()
 		outputtable.append('<table>')
 		try:
-			spacer = ''.join(['&nbsp;' for i in range(0, hipparchia.config['MINIMUMBROWSERWIDTH'])])
+			spacer = ''.join(['&nbsp;' for _ in range(0, hipparchia.config['MINIMUMBROWSERWIDTH'])])
 			outputtable.append('<tr class="spacing">{sp}</tr>'.format(sp=spacer))
 		except:
 			pass
 
 		outputtable = outputtable + self.browsedlines
 
-		if hipparchia.config['HTMLDEBUGMODE'] == 'yes':
+		if session['debughtml'] == 'yes':
 			outputtable.append('</table>\n<span class="emph">(NB: click-to-parse is off if HTMLDEBUGMODE is set)</span>')
 		else:
 			outputtable.append('</table>')

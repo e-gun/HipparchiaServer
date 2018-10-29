@@ -37,8 +37,12 @@
 #
 # BLOCKRESETPATHS if not 'no', then you cannot access (the hidden) URLs 'resetvectors/' or 'resetvectorimages/'
 #
-# ALLOWUSERTOSETDEBUGMODES will enable toggles for next four options on the web interface
-#   (DBDEBUGMODE, LEXDEBUGMODE, PARSERDEBUGMODE, and HTMLDEBUGMODE)
+# ALLOWUSERTOSETDEBUGMODES will enable toggles for next five options on the web interface
+#   (DBDEBUGMODE, LEXDEBUGMODE, PARSERDEBUGMODE, HTMLDEBUGMODE, and SEARCHMARKEDUPLINE)
+#
+# SEARCHMARKEDUPLINE will enable searching for things like "hmu_date_or_numeric_equivalent_of_date". It will also ruin
+#   many, many other kinds of search
+
 
 SUPPRESSWARNINGS = 'yes'
 CALCULATEWORDWEIGHTS = 'no'
@@ -53,3 +57,4 @@ DBDEBUGMODE = 'no'
 LEXDEBUGMODE = 'no'
 PARSERDEBUGMODE = 'no'
 HTMLDEBUGMODE = 'no'
+SEARCHMARKEDUPLINE = 'no'

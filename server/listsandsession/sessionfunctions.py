@@ -71,6 +71,7 @@ def probeforsessionvariables():
 		session['psgselections'] = list()
 		session['quotesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALQUOTES']
 		session['searchscope'] = 'L'
+		session['searchinsidemarkup'] = hipparchia.config['SEARCHMARKEDUPLINE']
 		session['semanticvectorquery'] = 'no'
 		session['sensesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALSENSES']
 		session['sentencesimilarity'] = 'no'
@@ -139,7 +140,7 @@ def modifysessionvariable(param, val):
 		'varia'
 		]
 
-	blocakabledebugoptions = ['debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords']
+	blocakabledebugoptions = ['debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords', 'searchinsidemarkup']
 
 	if hipparchia.config['ALLOWUSERTOSETDEBUGMODES'] == 'yes':
 		availableoptions.extend(blocakabledebugoptions)
@@ -174,7 +175,7 @@ def modifysessionvariable(param, val):
 	for variable in ['authorssummary', 'bracketangled', 'bracketcurly', 'bracketround', 'bracketsquare', 'christiancorpus', 'cosdistbylineorword',
 	                 'cosdistbysentence', 'greekcorpus', 'headwordindexing', 'incerta', 'indexbyfrequency', 'inscriptioncorpus', 'latincorpus',
 	                 'nearestneighborsquery', 'onehit', 'papyruscorpus', 'quotesummary', 'semanticvectorquery', 'sensesummary', 'sentencesimilarity',
-	                 'spuria', 'topicmodel', 'varia', 'debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords']:
+	                 'spuria', 'topicmodel', 'varia', 'debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords', 'searchinsidemarkup']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 

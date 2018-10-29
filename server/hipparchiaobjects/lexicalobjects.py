@@ -615,6 +615,7 @@ class dbLatinWord(dbDictionaryEntry):
 					r'(v\. )(\w+)(, [A-Z])',
 					r'(\(cf\. )(\w+)(\))',
 					r'(; cf\. )(\w+)(\))',
+					r'(; cf\.: )(\w+)(\))',
 					r'(\(sc. )(\w+)([,)])',
 					r'(<etym opt="\w">\d\. )(\w+)(, q\. v\.)',
 					r'(from )(\w+)(</etym>)',

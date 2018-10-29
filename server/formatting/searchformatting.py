@@ -117,6 +117,11 @@ def flagsearchterms(searchresultobject: SearchResult, skg: str, prx: str, search
 	linelist = searchresultobject.lineobjects
 	highlightindex = searchresultobject.getindex()
 	newlineobjects = list()
+
+	if session['searchinsidemarkup'] == 'yes':
+		# skip it because this gets ugly fast
+		return linelist
+
 	for foundline in linelist:
 		# need a copy because otherwise you will see two+ highlighted lines in a result if this result abuts another one
 		# a highlighted foundline2 of result2 is showing up in result1 in addition to foundline1
