@@ -69,17 +69,23 @@
 
     <p class="optionlabel">Lexical summaries will only show counts of...</p>
     <p class="optionitem">
-        senses&nbsp;<input type="checkbox" id="sensesummary" value="yes">
-        &middot;&nbsp;authors&nbsp;<input type="checkbox" id="authorssummary" value="yes">
-        &middot;&nbsp;quotes&nbsp;<input type="checkbox" id="quotesummary" value="yes">
+        <label>senses&nbsp;<input type="checkbox" id="sensesummary" value="yes"></label>
+        &middot;&nbsp;<label>authors&nbsp;<input type="checkbox" id="authorssummary" value="yes"></label>
+        &middot;&nbsp;<label>quotes&nbsp;<input type="checkbox" id="quotesummary" value="yes"></label>
     </p>
 
     <p class="optionlabel">Display color shifted text inside of brackets?</p>
     <p class="optionitem">
-        [&nbsp;]&nbsp;<input type="checkbox" id="bracketsquare" value="yes">
-        &middot;&nbsp;(&nbsp;)&nbsp;<input type="checkbox" id="bracketround" value="yes">
-        &middot;&nbsp;&lt;&nbsp;&gt;&nbsp;<input type="checkbox" id="bracketangled" value="yes">
-        &middot;&nbsp;{&nbsp;}&nbsp;<input type="checkbox" id="bracketcurly" value="yes">
+        <label>[&nbsp;]&nbsp;<input type="checkbox" id="bracketsquare" value="yes"></label>
+        &middot;&nbsp;<label>(&nbsp;)&nbsp;<input type="checkbox" id="bracketround" value="yes"></label>
+        &middot;&nbsp;<label>&lt;&nbsp;&gt;&nbsp;<input type="checkbox" id="bracketangled" value="yes"></label>
+        &middot;&nbsp;<label>{&nbsp;}&nbsp;<input type="checkbox" id="bracketcurly" value="yes"></label>
+    </p>
+
+    <p class="optionlabel">Text features</p>
+    <p class="optionitem">
+        <label>force σ/ς&nbsp;<input type="checkbox" id="zaplunates" value="no"></label>
+        &middot;&nbsp;<label>colorless&nbsp;<input type="checkbox" id="suppresscolors" value="no"></label>
     </p>
 
     {% if picker == 'yes' %}

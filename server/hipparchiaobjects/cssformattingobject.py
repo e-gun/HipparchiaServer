@@ -73,6 +73,19 @@ class CssFormattingObject(object):
 	     'LIGHT': 'Roboto-Light',
 	     'BLDITALIC': 'Roboto-BoldItalic'}
 
+	# too many missing glyphs then you get to oblique greek
+	s = {'REGULAR': 'SourceSansPro-Regular',
+	     'MONO': 'SourceCodePro-Regular',
+	     'OBLIQUE': 'SourceSansPro-It',
+	     'CONDENSED': 'SourceSansPro-ExtraLight',
+	     'CNDENSEDBLD': 'SourceSansPro-Bold',
+	     'CNDENSEDOBL': 'SourceSansPro-ExtraLightIt',
+	     'BOLD': 'SourceSansPro-Bold',
+	     'SEMIBLD': 'SourceSansPro-Bold',
+	     'THIN': 'SourceSansPro-Light',
+	     'LIGHT': 'SourceSansPro-Light',
+	     'BLDITALIC': 'SourceSansPro-BoldIt'}
+
 	def __init__(self, originalcss):
 		self.css = originalcss
 		self.substitutes = ['DEFAULTLOCALFONT', 'DEFAULTLOCALGREEKFONT', 'DEFAULTLOCALNONGREEKFONT']
@@ -81,7 +94,8 @@ class CssFormattingObject(object):
 			'Fira': CssFormattingObject.f,
 			'IBMPlex': CssFormattingObject.i,
 			'Noto': CssFormattingObject.n,
-			'Roboto': CssFormattingObject.r
+			'Roboto': CssFormattingObject.r,
+			# 'SourceSans': CssFormattingObject.s
 		}
 		self.faces = dict()
 		self.knownface = True
@@ -98,6 +112,13 @@ class CssFormattingObject(object):
 		self._swapface()
 		self._swapdefaults()
 		self._fontsforstyles()
+		self._colorless()
+
+	def _colorless(self):
+		if session['suppresscolors'] == 'yes':
+			# kill - "color: var(--red);"
+			# save - "background-color: var(--main-body-color);"
+			self.css = re.sub(r'(?<!-)color: var\(--(.*?)\)', 'color: var(--black)', self.css)
 
 	def _determineface(self):
 		try:
@@ -141,7 +162,9 @@ class CssFormattingObject(object):
 		if not self.knownface:
 			return
 
-		# need this to run in order
+		# need this to run in order, so can't use a dict()
+		# [(findpattern1, replace1), ...]
+
 		swaps = [
 			(r"font-stretch: condensed; font-weight: bold;", "font-family: 'hipparchiacondensedboldstatic', sans-serif;"),
 			(r"font-weight: bold; font-stretch: condensed;", "font-family: 'hipparchiacondensedboldstatic', sans-serif;"),

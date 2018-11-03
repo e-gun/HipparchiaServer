@@ -63,9 +63,11 @@ function loadoptions() {
             'sensesummary': $('#sensesummary'),
             'sentencesimilarity': $('#sentencesimilarity'),
             'spuria': $('#includespuria'),
+            'suppresscolors': $('#suppresscolors'),
             'tensorflowgraph': $('#tensorflowgraph'),
             'topicmodel': $('#topicmodel'),
-            'varia': $('#includevaria')
+            'varia': $('#includevaria'),
+            'zaplunates': $('#zaplunates'),
         };
 
         Object.keys(simpletoggles).forEach(function(key) {
@@ -456,11 +458,24 @@ $('#searchinsidemarkup').change(function() {
     loadoptions();
     });
 
+$('#zaplunates').change(function() {
+    if(this.checked) { setoptions('zaplunates', 'yes'); } else { setoptions('zaplunates', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#suppresscolors').change(function() {
+    if(this.checked) { setoptions('suppresscolors', 'yes'); } else { setoptions('suppresscolors', 'no'); }
+    refreshselections();
+    loadoptions();
+    window.location.href = '/';
+    });
+
 //
 // vector checkboxes
 //
 
-const thesearchforms = ['#wordsearchform', '#lemmatasearchform', '#proximatesearchform', '#proximatelemmatasearchform']
+const thesearchforms = ['#wordsearchform', '#lemmatasearchform', '#proximatesearchform', '#proximatelemmatasearchform'];
 const wsf = $('#wordsearchform');
 const lsf = $('#lemmatasearchform');
 const plsf = $('#proximatelemmatasearchform');

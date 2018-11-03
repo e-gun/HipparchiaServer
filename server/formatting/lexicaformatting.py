@@ -15,6 +15,7 @@ from server import hipparchia
 from server.dbsupport.lexicaldbfunctions import probedictionary, grablemmataobjectfor, findparserxref, \
 	querytotalwordcounts, findcountsviawordcountstable
 from server.formatting.jsformatting import insertlexicalbrowserjs, dictionaryentryjs
+from server.formatting.wordformatting import attemptsigmadifferentiation
 from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject, MorphPossibilityObject
 from server.hipparchiaobjects.wordcountobjects import dbWordCountObject, dbHeadwordObject
 
@@ -246,6 +247,9 @@ def multiplelexicalmatchesintohtml(morphologyobject: dbMorphologyObject) -> List
 			count += 1
 			entryashtml = dictonaryentryashtml(count, entriestocheck[entry])
 			returnarray.append({'value': entryashtml})
+
+	if session['zaplunates'] == 'yes':
+		returnarray = [{'value': attemptsigmadifferentiation(x['value'])} for x in returnarray]
 
 	return returnarray
 

@@ -2,6 +2,8 @@
 # 	will want to put custom CSS in the same directory as the
 # 	default installed css ('hipparchiastyles.css')
 #
+# SUPPRESSCOLORS if set to 'yes' will set all colors to black in the CSS.
+#
 # HOSTEDFONTFAMILY sets which of the font families that Hipparchia downloads upon
 #   installation will be served to clients. Any of them should ensure full
 #   coverage for both Greek and Latin without any need to have a special font
@@ -34,6 +36,7 @@
 
 CSSSTYLESHEET = 'hipparchiastyles.css'
 DISTINCTGREEKANDLATINFONTS = 'no'
+SUPPRESSCOLORS = 'no'
 HOSTEDFONTFAMILY = 'Roboto'  # Roboto should be pre-installed by Hipparchia; see above about adding more
 USEFONTFILESFORSTYLES = 'yes'  # Only valid if you are using a HOSTEDFONTFAMILY
 DEFAULTLOCALFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'

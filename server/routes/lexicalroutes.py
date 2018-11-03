@@ -14,8 +14,7 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.lexicaldbfunctions import searchdbforlexicalentry, querytotalwordcounts, lookformorphologymatches
 from server.formatting.betacodetounicode import replacegreekbetacode
-from server.formatting.wordformatting import depunct
-from server.formatting.wordformatting import removegravity, stripaccents, tidyupterm
+from server.formatting.wordformatting import attemptsigmadifferentiation, depunct, removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.formatting.lexicaformatting import multiplelexicalmatchesintohtml, dictonaryentryashtml, \
 	getobservedwordprevalencedata
@@ -130,6 +129,9 @@ def dictsearch(searchterm):
 	else:
 		returnarray.append({'value': '[nothing found]'})
 
+	if session['zaplunates'] == 'yes':
+		returnarray = [{'value': attemptsigmadifferentiation(x['value'])} for x in returnarray]
+
 	returnarray = json.dumps(returnarray)
 
 	dbconnection.connectioncleanup()
@@ -228,7 +230,10 @@ def findbyform(observedword):
 		returnarray.append(prev)
 
 	returnarray = [r for r in returnarray if r]
-	returnarray = [{'observed': cleanedword}] + returnarray
+	if session['zaplunates'] == 'yes':
+		returnarray = [{'observed': attemptsigmadifferentiation(cleanedword)}] + returnarray
+	else:
+		returnarray = [{'observed': cleanedword}] + returnarray
 	returnarray = json.dumps(returnarray)
 
 	dbconnection.connectioncleanup()

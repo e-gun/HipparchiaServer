@@ -9,7 +9,8 @@
 import re
 from collections import deque
 
-from server import hipparchia
+from flask import session
+
 from server.formatting.wordformatting import forcelunates
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
@@ -176,12 +177,12 @@ def addobservedtags(word: str, lastword: str, hyphenated: str) -> str:
 		word = re.sub(r'\s$', '', word)
 		sp = ' '
 	else:
-		sp = ''
+		sp = str()
 
 	try:
 		word[-1]
 	except IndexError:
-		return ''
+		return str()
 
 	if word[-1] == '-' and word == lastword:
 		observed = '<observed id="{h}">{w}</observed>{sp}'.format(h=hyphenated, w=word, sp=sp)
@@ -206,7 +207,8 @@ def addobservedtags(word: str, lastword: str, hyphenated: str) -> str:
 	else:
 		observed = '<observed id="{w}">{w}</observed>{sp}'.format(w=word, sp=sp)
 
-	if hipparchia.config['RESTOREMEDIALANDFINALSIGMA'] == 'yes':
+	if session['zaplunates'] == 'yes':
+		# can only look up lunates
 		observed = re.sub(r'<observed id="(.*?)">', lambda x: '<observed id="{sub}">'.format(sub=forcelunates(x.group(1))), observed)
 
 	return observed

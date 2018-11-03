@@ -78,6 +78,7 @@ def probeforsessionvariables():
 		session['topicmodel'] = 'no'
 		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
 		session['spuria'] = hipparchia.config['DEFAULTSPURIA']
+		session['suppresscolors'] = hipparchia.config['SUPPRESSCOLORS']
 		session['tensorflowgraph'] = 'no'
 		session['varia'] = hipparchia.config['DEFAULTVARIA']
 		session['wkexclusions'] = list()
@@ -87,6 +88,7 @@ def probeforsessionvariables():
 		session['wlocexclusions'] = list()
 		session['wlocselections'] = list()
 		session['xmission'] = 'Any'
+		session['zaplunates'] = hipparchia.config['RESTOREMEDIALANDFINALSIGMA']
 		session.modified = True
 
 	return
@@ -135,9 +137,11 @@ def modifysessionvariable(param, val):
 		'sentencesimilarity',
 		'sortorder',
 		'spuria',
+		'suppresscolors',
 		'tensorflowgraph',
 		'topicmodel',
-		'varia'
+		'varia',
+		'zaplunates'
 		]
 
 	blocakabledebugoptions = ['debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords', 'searchinsidemarkup']
@@ -175,7 +179,8 @@ def modifysessionvariable(param, val):
 	for variable in ['authorssummary', 'bracketangled', 'bracketcurly', 'bracketround', 'bracketsquare', 'christiancorpus', 'cosdistbylineorword',
 	                 'cosdistbysentence', 'greekcorpus', 'headwordindexing', 'incerta', 'indexbyfrequency', 'inscriptioncorpus', 'latincorpus',
 	                 'nearestneighborsquery', 'onehit', 'papyruscorpus', 'quotesummary', 'semanticvectorquery', 'sensesummary', 'sentencesimilarity',
-	                 'spuria', 'topicmodel', 'varia', 'debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords', 'searchinsidemarkup']:
+	                 'spuria', 'topicmodel', 'varia', 'debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords', 'searchinsidemarkup',
+	                 'zaplunates', 'suppresscolors']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 

@@ -8,6 +8,7 @@
 
 import re
 from typing import List
+from flask import session
 
 from server import hipparchia
 from server.formatting.betacodeescapes import andsubstitutes
@@ -37,8 +38,7 @@ class dbAuthor(object):
 
 	"""
 
-	def __init__(self, universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date,
-	             converted_date, location):
+	def __init__(self, universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date, converted_date, location):
 
 		self.universalid = universalid
 		self.language = language
@@ -157,17 +157,15 @@ class dbOpus(object):
 				self.structure[idx] = label
 
 		availablelevels = 1
-		for level in [self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04,
-		              self.levellabels_05]:
+		for level in [self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04, self.levellabels_05]:
 			if level and level != '':
 				availablelevels += 1
 		self.availablelevels = availablelevels
 
 	def citation(self):
 		if self.universalid[0:2] not in ['in', 'dp', 'ch']:
-			cit = []
-			levels = [self.levellabels_00, self.levellabels_01, self.levellabels_02, self.levellabels_03,
-			          self.levellabels_04, self.levellabels_05]
+			cit = list()
+			levels = [self.levellabels_00, self.levellabels_01, self.levellabels_02, self.levellabels_03, self.levellabels_04, self.levellabels_05]
 			for l in range(0, self.availablelevels):
 				cit.append(levels[l])
 			cit.reverse()
@@ -275,7 +273,7 @@ class dbWorkLine(object):
 			self.accented = ''
 			self.stripped = ''
 
-		if hipparchia.config['RESTOREMEDIALANDFINALSIGMA'] == 'yes':
+		if session['zaplunates'] == 'yes':
 			self.accented = attemptsigmadifferentiation(self.accented)
 		if hipparchia.config['FORCELUNATESIGMANOMATTERWHAT'] == 'yes':
 			self.accented = forcelunates(self.accented)

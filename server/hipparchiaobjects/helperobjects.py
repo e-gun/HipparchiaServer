@@ -63,11 +63,13 @@ class QueryCombinator(object):
 		self.phrase = phrase
 		self.words = [w for w in self.phrase.split(' ') if w]
 
-	def take(self, n, iterable):
+	@staticmethod
+	def _grabhead(n, iterable):
 		"""Return first n items of the iterable as a list"""
 		return list(islice(iterable, n))
 
-	def tail(self, n, iterable):
+	@staticmethod
+	def _grabtail(n, iterable):
 		"""Return the last n items of the iterable as a list"""
 		return list(deque(iterable, maxlen=n))
 
@@ -75,8 +77,8 @@ class QueryCombinator(object):
 		"""Return all of the possible pairs of list items"""
 		combinations = list()
 		for c in range(1, len(self.words) + 1):
-			front = self.take(c, self.words)
-			back = self.tail(len(self.words) - c, self.words)
+			front = self._grabhead(c, self.words)
+			back = self._grabtail(len(self.words) - c, self.words)
 			combinations.append((front, back))
 		return combinations
 
