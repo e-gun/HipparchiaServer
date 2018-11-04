@@ -273,7 +273,13 @@ class dbWorkLine(object):
 			self.accented = ''
 			self.stripped = ''
 
-		if session['zaplunates'] == 'yes':
+		try:
+			zaplunates = session['zaplunates']
+		except RuntimeError:
+			# accursed Windows10 non-fork() issue
+			zaplunates = hipparchia.config['RESTOREMEDIALANDFINALSIGMA']
+
+		if zaplunates == 'yes':
 			self.accented = attemptsigmadifferentiation(self.accented)
 		if hipparchia.config['FORCELUNATESIGMANOMATTERWHAT'] == 'yes':
 			self.accented = forcelunates(self.accented)
