@@ -83,9 +83,9 @@
     </p>
 
     <p class="optionlabel">Text features</p>
-    <p class="optionitem">
+    <p class="optionitem">{% if icanzap == 'yes' %}
         <label>force σ/ς&nbsp;<input type="checkbox" id="zaplunates" value="no"></label>
-        &middot;&nbsp;<label>colorless&nbsp;<input type="checkbox" id="suppresscolors" value="no"></label>
+        &middot;&nbsp;{% endif %}<label>colorless&nbsp;<input type="checkbox" id="suppresscolors" value="no"></label>
     </p>
 
     {% if picker == 'yes' %}

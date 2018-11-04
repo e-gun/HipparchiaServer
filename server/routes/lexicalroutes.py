@@ -230,10 +230,12 @@ def findbyform(observedword):
 		returnarray.append(prev)
 
 	returnarray = [r for r in returnarray if r]
+
 	if session['zaplunates'] == 'yes':
 		returnarray = [{'observed': attemptsigmadifferentiation(cleanedword)}] + returnarray
 	else:
 		returnarray = [{'observed': cleanedword}] + returnarray
+
 	returnarray = json.dumps(returnarray)
 
 	dbconnection.connectioncleanup()

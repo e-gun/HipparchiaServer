@@ -8,6 +8,7 @@
 
 import json
 from os import path
+from os import name as osname
 from sys import argv
 
 from flask import render_template, send_file, session
@@ -61,6 +62,13 @@ def frontpage():
 	else:
 		corporalabels = {'g': 'G', 'l': 'L', 'd': 'D', 'i': 'I', 'c': 'C'}
 
+	icanzap = 'yes'
+	if osname == 'nt':
+		# windows can't have the UI σ/ς option because it can't fork()
+		# the 'fix' is to have frozensession always available when building a dbWorkLine
+		# but that involves a lot kludge just to make a very optional option work
+		icanzap = 'no'
+
 	page = render_template('search.html',
 							activelists=activelists,
 							activecorpora=activecorpora,
@@ -76,7 +84,8 @@ def frontpage():
 							varia=session['varia'],
 							undated=session['incerta'],
 							debug=debugpanel,
-							vectorhtml=vectorhtml)
+							vectorhtml=vectorhtml,
+							icanzap=icanzap)
 
 	return page
 
