@@ -43,4 +43,4 @@ DEFAULTLOCALFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 ENBALEFONTPICKER = 'no'
-FONTPICKERLIST = ['Noto', 'DejaVu', 'Fira', 'IBMPlex', 'Roboto', 'Open Sans', 'Ubuntu']  # see above about editing this list
+FONTPICKERLIST = ['Noto', 'DejaVu', 'Fira', 'IBMPlex', 'Roboto', 'Ubuntu']  # see above about editing this list
