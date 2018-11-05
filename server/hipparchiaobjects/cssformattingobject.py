@@ -61,6 +61,18 @@ class CssFormattingObject(object):
 	     'LIGHT': 'NotoSansDisplay-Light',
 	     'BLDITALIC': 'NotoSans-BoldItalic'}
 
+	o = {'REGULAR': 'OpenSans-Regular',
+	     'MONO': 'NotoMono-Regular',
+	     'OBLIQUE': 'OpenSans-Italic',
+	     'CONDENSED': 'OpenSansCondensed-Light',
+	     'CNDENSEDBLD': 'OpenSansCondensed-Bold',
+	     'CNDENSEDOBL': 'OpenSansCondensed-LightItalic',
+	     'BOLD': 'OpenSans-Bold',
+	     'SEMIBLD': 'OpenSans-SemiBold',
+	     'THIN': 'OpenSans-Light',
+	     'LIGHT': 'OpenSans-Light',
+	     'BLDITALIC': 'OpenSans-BoldItalic'}
+
 	r = {'REGULAR': 'Roboto-Regular',
 	     'MONO': 'RobotoMono-Medium',
 	     'OBLIQUE': 'Roboto-Italic',
@@ -86,6 +98,18 @@ class CssFormattingObject(object):
 	     'LIGHT': 'SourceSansPro-Light',
 	     'BLDITALIC': 'SourceSansPro-BoldIt'}
 
+	u = {'REGULAR': 'Ubuntu-R',
+	     'MONO': 'UbuntuMono-R',
+	     'OBLIQUE': 'Ubuntu-RI',
+	     'CONDENSED': 'Ubuntu-C',
+	     'CNDENSEDBLD': 'Ubuntu-C',
+	     'CNDENSEDOBL': 'Ubuntu-RI',
+	     'BOLD': 'Ubuntu-B',
+	     'SEMIBLD': 'Ubuntu-M',
+	     'THIN': 'Ubuntu-C',
+	     'LIGHT': 'Ubuntu-L',
+	     'BLDITALIC': 'Ubuntu-BI'}
+
 	def __init__(self, originalcss):
 		self.css = originalcss
 		self.substitutes = ['DEFAULTLOCALFONT', 'DEFAULTLOCALGREEKFONT', 'DEFAULTLOCALNONGREEKFONT']
@@ -94,7 +118,9 @@ class CssFormattingObject(object):
 			'Fira': CssFormattingObject.f,
 			'IBMPlex': CssFormattingObject.i,
 			'Noto': CssFormattingObject.n,
+			'Open Sans': CssFormattingObject.o,
 			'Roboto': CssFormattingObject.r,
+			'Ubuntu': CssFormattingObject.u,
 			# 'SourceSans': CssFormattingObject.s
 		}
 		self.faces = dict()

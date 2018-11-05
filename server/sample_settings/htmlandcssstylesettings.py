@@ -37,10 +37,10 @@
 CSSSTYLESHEET = 'hipparchiastyles.css'
 DISTINCTGREEKANDLATINFONTS = 'no'
 SUPPRESSCOLORS = 'no'
-HOSTEDFONTFAMILY = 'Roboto'  # Roboto should be pre-installed by Hipparchia; see above about adding more
+HOSTEDFONTFAMILY = 'Noto'  # Noto should be pre-installed by Hipparchia; see above about adding more
 USEFONTFILESFORSTYLES = 'yes'  # Only valid if you are using a HOSTEDFONTFAMILY
 DEFAULTLOCALFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 ENBALEFONTPICKER = 'no'
-FONTPICKERLIST = ['Noto', 'DejaVu', 'Fira', 'IBMPlex', 'Roboto']  # see above about editing this list
+FONTPICKERLIST = ['Noto', 'DejaVu', 'Fira', 'IBMPlex', 'Roboto', 'Open Sans', 'Ubuntu']  # see above about editing this list
