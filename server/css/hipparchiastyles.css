@@ -283,6 +283,11 @@ body {
 .dictforeign.dictlang_greek {
 	}
 
+.dictgram.dicttype_dialect{
+	font-weight: 600;
+	color: var(--deepblue);
+	}
+
 .dictitype{
 	font-weight: 600;
     color: var(--vdkgrey);
@@ -298,6 +303,11 @@ body {
 	/* definitions in the latin dictionary */
 	font-weight: 600;
     color: var(--vdkgrey);
+	}
+
+.dictmood{
+	font-weight: 600;
+	color: var(--deepblue);
 	}
 
 .dictnumber{
@@ -325,6 +335,11 @@ body {
     color: var(--dkteal);
 	}
 
+.dictper{
+	font-weight: 600;
+	color: var(--deepblue);
+ 	}
+
 .dictquote {
 	color: var(--black);
     font-style: italic;
@@ -339,6 +354,11 @@ body {
 .dictsense {
 	padding: 10px;
 	margin-top: 20px;
+	}
+
+.dicttns{
+	font-weight: 600;
+	color: var(--deepblue);
 	}
 
 .dicttr{
