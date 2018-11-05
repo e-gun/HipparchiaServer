@@ -118,9 +118,10 @@ class CssFormattingObject(object):
 			'Fira': CssFormattingObject.f,
 			'IBMPlex': CssFormattingObject.i,
 			'Noto': CssFormattingObject.n,
-			'Open Sans': CssFormattingObject.o,
 			'Roboto': CssFormattingObject.r,
 			'Ubuntu': CssFormattingObject.u,
+			# These only seem complete: they are missing plenty...
+			# 'Open Sans': CssFormattingObject.o,
 			# 'SourceSans': CssFormattingObject.s
 		}
 		self.faces = dict()
