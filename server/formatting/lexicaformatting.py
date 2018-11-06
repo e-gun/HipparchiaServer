@@ -12,12 +12,12 @@ from typing import Dict, List
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.lexicaldbfunctions import probedictionary, grablemmataobjectfor, findparserxref, \
-	querytotalwordcounts, findcountsviawordcountstable
-from server.formatting.jsformatting import insertlexicalbrowserjs, dictionaryentryjs
-from server.formatting.wordformatting import attemptsigmadifferentiation
-from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject, MorphPossibilityObject
-from server.hipparchiaobjects.wordcountobjects import dbWordCountObject, dbHeadwordObject
+from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, findparserxref, grablemmataobjectfor, \
+	probedictionary, querytotalwordcounts
+from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
+from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation
+from server.hipparchiaobjects.dbtextobjects import MorphPossibilityObject, dbMorphologyObject
+from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
 
 def formatdictionarysummary(wordentryobject) -> str:
@@ -250,6 +250,7 @@ def multiplelexicalmatchesintohtml(morphologyobject: dbMorphologyObject) -> List
 
 	if session['zaplunates'] == 'yes':
 		returnarray = [{'value': attemptsigmadifferentiation(x['value'])} for x in returnarray]
+		returnarray = [{'value': abbreviatedsigmarestoration(x['value'])} for x in returnarray]
 
 	return returnarray
 

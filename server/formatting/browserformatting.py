@@ -207,8 +207,4 @@ def addobservedtags(word: str, lastword: str, hyphenated: str) -> str:
 	else:
 		observed = '<observed id="{w}">{w}</observed>{sp}'.format(w=word, sp=sp)
 
-	if session['zaplunates'] == 'yes':
-		# can only look up lunates
-		observed = re.sub(r'<observed id="(.*?)">', lambda x: '<observed id="{sub}">'.format(sub=forcelunates(x.group(1))), observed)
-
 	return observed

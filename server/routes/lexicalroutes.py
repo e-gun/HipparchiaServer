@@ -14,7 +14,7 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.lexicaldbfunctions import searchdbforlexicalentry, querytotalwordcounts, lookformorphologymatches
 from server.formatting.betacodetounicode import replacegreekbetacode
-from server.formatting.wordformatting import attemptsigmadifferentiation, depunct, removegravity, stripaccents, tidyupterm
+from server.formatting.wordformatting import attemptsigmadifferentiation, abbreviatedsigmarestoration, depunct, removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.formatting.lexicaformatting import multiplelexicalmatchesintohtml, dictonaryentryashtml, \
 	getobservedwordprevalencedata
@@ -131,6 +131,7 @@ def dictsearch(searchterm):
 
 	if session['zaplunates'] == 'yes':
 		returnarray = [{'value': attemptsigmadifferentiation(x['value'])} for x in returnarray]
+		returnarray = [{'value': abbreviatedsigmarestoration(x['value'])} for x in returnarray]
 
 	returnarray = json.dumps(returnarray)
 
@@ -170,6 +171,7 @@ def findbyform(observedword):
 	# the next makes sense only in the context of pointedly invalid input
 	w = depunct(observedword)
 	w = tidyupterm(w)
+	w = re.sub(r'[σς]', 'ϲ', w)
 
 	# python seems to know how to do this with greek...
 	w = w.lower()
@@ -231,10 +233,7 @@ def findbyform(observedword):
 
 	returnarray = [r for r in returnarray if r]
 
-	if session['zaplunates'] == 'yes':
-		returnarray = [{'observed': attemptsigmadifferentiation(cleanedword)}] + returnarray
-	else:
-		returnarray = [{'observed': cleanedword}] + returnarray
+	returnarray = [{'observed': cleanedword}] + returnarray
 
 	returnarray = json.dumps(returnarray)
 

@@ -583,6 +583,24 @@ def attemptsigmadifferentiation(text: str) -> str:
 	return cleantext
 
 
+def abbreviatedsigmarestoration(text: str) -> str:
+	"""
+
+	after attemptsigmadifferentiation() in a lexical entry you will see a lot of things like: τὸ μὲν ς. in the entry
+	for σοφός.
+
+	try to fix that
+
+	:param text:
+	:return:
+	"""
+
+	text = re.sub(r'(?<=[\s>])ς\.', 'σ.', text)
+	text = re.sub(r'(?<=[\s>])ς</span>\.', 'σ</span>.', text)
+
+	return text
+
+
 def wordlistintoregex(wordlist: list) -> str:
 	"""
 
