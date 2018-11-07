@@ -75,6 +75,7 @@ def probeforsessionvariables():
 		session['semanticvectorquery'] = 'no'
 		session['sensesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALSENSES']
 		session['sentencesimilarity'] = 'no'
+		session['simpletextoutput'] = hipparchia.config['SIMPLETEXTOUTPUT']
 		session['topicmodel'] = 'no'
 		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
 		session['spuria'] = hipparchia.config['DEFAULTSPURIA']
@@ -135,6 +136,7 @@ def modifysessionvariable(param, val):
 		'semanticvectorquery',
 		'sensesummary',
 		'sentencesimilarity',
+		'simpletextoutput',
 		'sortorder',
 		'spuria',
 		'suppresscolors',
@@ -180,7 +182,7 @@ def modifysessionvariable(param, val):
 	                 'cosdistbysentence', 'greekcorpus', 'headwordindexing', 'incerta', 'indexbyfrequency', 'inscriptioncorpus', 'latincorpus',
 	                 'nearestneighborsquery', 'onehit', 'papyruscorpus', 'quotesummary', 'semanticvectorquery', 'sensesummary', 'sentencesimilarity',
 	                 'spuria', 'topicmodel', 'varia', 'debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords', 'searchinsidemarkup',
-	                 'zaplunates', 'suppresscolors']:
+	                 'zaplunates', 'suppresscolors', 'simpletextoutput']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 

@@ -12,12 +12,13 @@ import re
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.lexicaldbfunctions import searchdbforlexicalentry, querytotalwordcounts, lookformorphologymatches
+from server.dbsupport.lexicaldbfunctions import lookformorphologymatches, querytotalwordcounts, searchdbforlexicalentry
 from server.formatting.betacodetounicode import replacegreekbetacode
-from server.formatting.wordformatting import attemptsigmadifferentiation, abbreviatedsigmarestoration, depunct, removegravity, stripaccents, tidyupterm
+from server.formatting.lexicaformatting import dictonaryentryashtml, getobservedwordprevalencedata, \
+	multiplelexicalmatchesintohtml
+from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation, depunct, \
+	removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.formatting.lexicaformatting import multiplelexicalmatchesintohtml, dictonaryentryashtml, \
-	getobservedwordprevalencedata
 from server.listsandsession.genericlistfunctions import polytonicsort
 from server.listsandsession.sessionfunctions import justlatin, justtlg
 from server.listsandsession.sessionfunctions import probeforsessionvariables

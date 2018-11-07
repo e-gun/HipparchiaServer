@@ -64,8 +64,7 @@ def buildbrowseroutputobject(authorobject, workobject, locusindexvalue, cursor):
 	brackettypes = findactivebrackethighlighting()
 	continuationdict = {'square': False, 'round': False, 'curly': False, 'angled': False}
 
-	linetemplate = fetchhtmltemplateforlinerow()
-	lineprefix = ''
+	lineprefix = str()
 	if session['debugdb'] == 'yes':
 		lineprefix = '<smallcode>{id}&nbsp;&nbsp;&nbsp;</smallcode>&nbsp;'
 
@@ -104,14 +103,17 @@ def buildbrowseroutputobject(authorobject, workobject, locusindexvalue, cursor):
 				columna = line.locus()
 			else:
 				# do not insert a line number or special formatting
-				columna = ''
+				columna = str()
 
 		prefix = lineprefix.format(id=line.universalid)
 		columnb = prefix+columnb
 
 		notes = '; '.join(line.insetannotations())
 
-		linehtml = linetemplate.format(l=columnb, n=notes, c=columna)
+		if columna and session['simpletextoutput'] == 'yes':
+			columna = '({a})'.format(a=columna)
+
+		linehtml = passage.linetemplate.format(l=columnb, n=notes, c=columna)
 
 		passage.browsedlines.append(linehtml)
 		previousline = line
@@ -210,34 +212,6 @@ def fetchhtmltemplateformetadatarow(shownotes=True):
 				</td>
 			<td class="blank">&nbsp;</td>
 		</tr>
-		"""
-
-	return linetemplate
-
-
-def fetchhtmltemplateforlinerow(shownotes=True):
-	"""
-
-	return a template
-
-	:param shownotes:
-	:return:
-	"""
-
-	if shownotes:
-		linetemplate = """
-			<tr class="browser">
-				<td class="browserembeddedannotations">{n}</td>
-				<td class="browsedline">{l}</td>
-				<td class="browsercite">{c}</td>
-			</tr>
-			"""
-	else:
-		linetemplate = """
-			<tr class="browser">
-				<td class="browsedline">{l}</td>
-				<td class="browsercite">{c}</td>
-			</tr>
 		"""
 
 	return linetemplate

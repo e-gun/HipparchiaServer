@@ -1270,6 +1270,14 @@ observed:hover{
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
 
+p.browsedline {
+	line-height: 70%;
+	}
+
+p.lineoftext {
+	line-height: 70%;
+	}
+
 p.level1 {}
 
 p.level2 {

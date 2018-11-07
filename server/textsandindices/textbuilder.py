@@ -8,6 +8,8 @@
 
 import re
 
+from flask import session
+
 from server.browsing.browserfunctions import checkfordocumentmetadata
 from server.dbsupport.dblinefunctions import dblineintolineobject, worklinetemplate
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
@@ -47,22 +49,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	# 660	           δανείϲαϲ,
 	avoiddoubletap = False
 
-	shownotes = True
-	if shownotes:
-		linetemplate = """
-			<tr>
-				<td class="browsercite">{ca}</td>
-				<td class="lineoftext">{cb}</td>
-				<td class="textmakerembeddedannotations">{cc}</td>
-			</tr>
-		"""
-	else:
-		linetemplate = """
-			<tr>
-				<td class="browsercite">{ca}</td>
-				<td class="lineoftext">{cb}</td>
-			</tr>
-		"""
+	linetemplate = determinelinetemplate()
 
 	# pull these outside the "line in results" loop lest you compile the regex 12000x over 1000 lines
 	bracketfinder = {
@@ -150,6 +137,9 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 
 			notes = '; '.join(thisline.insetannotations())
 
+			if columna and session['simpletextoutput'] == 'yes':
+				columna = '({a})'.format(a=columna)
+
 			linehtml = linetemplate.format(ca=columna, cb=columnb, cc=notes)
 	
 			output.append(linehtml)
@@ -161,3 +151,40 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	html = '\n'.join(output)
 
 	return html
+
+
+def determinelinetemplate(shownotes=True):
+	"""
+
+	not esp DRY-friendly: there is a near copy inside the BrowserPassageObject()
+
+	:param shownotes:
+	:return:
+	"""
+	if session['simpletextoutput'] == 'yes':
+		linetemplate = """
+		<p class="lineoftext">
+			{cb}
+			&nbsp;
+			<span class="browsercite">{ca}</span>
+		</p>
+
+		"""
+		return linetemplate
+
+	if shownotes:
+		linetemplate = """
+			<tr>
+				<td class="browsercite">{ca}</td>
+				<td class="lineoftext">{cb}</td>
+				<td class="textmakerembeddedannotations">{cc}</td>
+			</tr>
+		"""
+	else:
+		linetemplate = """
+			<tr>
+				<td class="browsercite">{ca}</td>
+				<td class="lineoftext">{cb}</td>
+			</tr>
+		"""
+	return linetemplate

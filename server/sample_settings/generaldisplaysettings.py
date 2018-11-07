@@ -12,12 +12,16 @@
 #  	are set to 'yes' lunates win (and you
 #   waste CPU cycles).
 #
+# SIMPLETEXTOUTPUT will build texts and browser passages without an HTML table. This is much more friendly if
+#   you are going to cut and paste texts. It is less easy on the eye.
+#
 # CAPONDICTIONARYFINDS: refuse to find more than N items; useful to stop searches for 'δ'
 #   from hijacking the machine
 
 INSISTUPONSTANDARDANGLEBRACKETS = 'no'
 FORCELUNATESIGMANOMATTERWHAT = 'no'
 RESTOREMEDIALANDFINALSIGMA = 'no'
+SIMPLETEXTOUTPUT = 'no'
 
 # lexical output instance
 DEABBREVIATEAUTHORS = 'yes'

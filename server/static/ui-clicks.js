@@ -62,6 +62,7 @@ function loadoptions() {
             'semanticvectorquery': $('#semanticvectorquery'),
             'sensesummary': $('#sensesummary'),
             'sentencesimilarity': $('#sentencesimilarity'),
+            'simpletextoutput': $('#simpletextoutput'),
             'spuria': $('#includespuria'),
             'suppresscolors': $('#suppresscolors'),
             'tensorflowgraph': $('#tensorflowgraph'),
@@ -469,6 +470,12 @@ $('#suppresscolors').change(function() {
     refreshselections();
     loadoptions();
     window.location.href = '/';
+    });
+
+$('#simpletextoutput').change(function() {
+    if(this.checked) { setoptions('simpletextoutput', 'yes'); } else { setoptions('simpletextoutput', 'no'); }
+    refreshselections();
+    loadoptions();
     });
 
 //

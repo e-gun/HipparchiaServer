@@ -114,6 +114,17 @@ class BrowserPassageObject(object):
 		return header
 
 	def getlinetemplate(self, shownotes=True):
+		if session['simpletextoutput'] == 'yes':
+			linetemplate = """
+			<p class="browsedline">
+				{l}
+				&nbsp;
+				<span class="browsercite">{c}</span>
+			</p>
+			
+			"""
+			return linetemplate
+
 		if shownotes:
 			linetemplate = """
 			<tr class="browser">
