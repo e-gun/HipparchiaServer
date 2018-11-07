@@ -12,6 +12,41 @@ from server import hipparchia
 
 
 class CssFormattingObject(object):
+	a = {'REGULAR': 'Alegreya-Regular',
+	     'MONO': 'NotoMono-Regular',
+	     'OBLIQUE': 'Alegreya-Italic',
+	     'CONDENSED': 'AlegreyaSC-Regular',
+	     'CNDENSEDBLD': 'AlegreyaSC-Bold',
+	     'CNDENSEDOBL': 'AlegreyaSC-Italic',
+	     'BOLD': 'Alegreya-Bold',
+	     'SEMIBLD': 'Alegreya-Medium',
+	     'THIN': 'Alegreya-Regular',
+	     'LIGHT': 'Alegreya-Regular',
+	     'BLDITALIC': 'Alegreya-BoldItalic'}
+
+	c = {'REGULAR': 'cmunss',
+	     'MONO': 'cmunbtl',
+	     'OBLIQUE': 'cmunsi',
+	     'CONDENSED': 'cmunssdc',
+	     'CNDENSEDBLD': 'cmunbsr',
+	     'CNDENSEDOBL': 'cmunbso',
+	     'BOLD': 'cmunsx',
+	     'SEMIBLD': 'cmunbsr',
+	     'THIN': 'cmunbmr',
+	     'LIGHT': 'cmunbmr',
+	     'BLDITALIC': 'cmunso'}
+
+	cx = {'REGULAR': 'cmunrm',
+	     'MONO': 'cmunbtl',
+	     'OBLIQUE': 'cmunti',
+	     'CONDENSED': 'cmunrm',
+	     'CNDENSEDBLD': 'cmunbx',
+	     'CNDENSEDOBL': 'cmunti',
+	     'BOLD': 'cmunbx',
+	     'SEMIBLD': 'cmunrb',
+	     'THIN': 'cmunrm',
+	     'LIGHT': 'cmunrm',
+	     'BLDITALIC': 'cmunbi'}
 
 	d = {'REGULAR': 'DejaVuSans',
 	     'MONO': 'DejaVuSansMono',
@@ -24,6 +59,18 @@ class CssFormattingObject(object):
 	     'THIN': 'DejaVuSans-ExtraLight',
 	     'LIGHT': 'DejaVuSans-ExtraLight',
 	     'BLDITALIC': 'DejaVuSans-BoldOblique'}
+
+	dx = {'REGULAR': 'DejaVuSerif',
+	     'MONO': 'DejaVuSansMono',
+	     'OBLIQUE': 'DejaVuSerif-Italic',
+	     'CONDENSED': 'DejaVuSerifCondensed',
+	     'CNDENSEDBLD': 'DejaVuSerifCondensed-Bold',
+	     'CNDENSEDOBL': 'DejaVuSerifCondensed-Italic',
+	     'BOLD': 'DejaVuSerif-Bold',
+	     'SEMIBLD': 'DejaVuSerif-Bold',
+	     'THIN': 'DejaVuSerif',
+	     'LIGHT': 'DejaVuSerif',
+	     'BLDITALIC': 'DejaVuSerif-BoldItalic'}
 
 	f = {'REGULAR': 'FiraSans-Regular',
 	     'MONO': 'FiraMono-Regular',
@@ -49,6 +96,18 @@ class CssFormattingObject(object):
 	     'LIGHT': 'IBMPlexSans-Light',
 	     'BLDITALIC': 'IBMPlexSans-BoldItalic'}
 
+	ix = {'REGULAR': 'IBMPlexSerif-Regular',
+	     'MONO': 'IBMPlexMono-Regular',
+	     'OBLIQUE': 'IBMPlexSerif-Italic',
+	     'CONDENSED': 'IBMPlexSerif-Thin',
+	     'CNDENSEDBLD': 'IBMPlexSerif-Thin',
+	     'CNDENSEDOBL': 'IBMPlexSerif-ThinItalic',
+	     'BOLD': 'IBMPlexSerif-Bold',
+	     'SEMIBLD': 'IBMPlexSerif-SemiBold',
+	     'THIN': 'IBMPlexSerif-Thin',
+	     'LIGHT': 'IBMPlexSerif-Light',
+	     'BLDITALIC': 'IBMPlexSerif-BoldItalic'}
+
 	n = {'REGULAR': 'NotoSans-Regular',
 	     'MONO': 'NotoMono-Regular',
 	     'OBLIQUE': 'NotoSans-Italic',
@@ -60,6 +119,30 @@ class CssFormattingObject(object):
 	     'THIN': 'NotoSansDisplay-Thin',
 	     'LIGHT': 'NotoSansDisplay-Light',
 	     'BLDITALIC': 'NotoSans-BoldItalic'}
+
+	nd = {'REGULAR': 'NotoSansDisplay-Regular',
+	     'MONO': 'NotoMono-Regular',
+	     'OBLIQUE': 'NotoSansDisplay-Italic',
+	     'CONDENSED': 'NotoSansDisplay-Condensed',
+	     'CNDENSEDBLD': 'NotoSansDisplay-CondensedBold',
+	     'CNDENSEDOBL': 'NotoSansDisplay-CondensedItalic',
+	     'BOLD': 'NotoSansDisplay-Bold',
+	     'SEMIBLD': 'NotoSansDisplay-SemiBold',
+	     'THIN': 'NotoSansDisplay-Thin',
+	     'LIGHT': 'NotoSansDisplay-Light',
+	     'BLDITALIC': 'NotoSansDisplay-BoldItalic'}
+
+	nu = {'REGULAR': 'NotoSansUI-Regular',
+	     'MONO': 'NotoMono-Regular',
+	     'OBLIQUE': 'NotoSansUI-Italic',
+	     'CONDENSED': 'NotoSansDisplay-Condensed',
+	     'CNDENSEDBLD': 'NotoSansDisplay-CondensedBold',
+	     'CNDENSEDOBL': 'NotoSansDisplay-CondensedItalic',
+	     'BOLD': 'NotoSansUI-Bold',
+	     'SEMIBLD': 'NotoSansDisplay-SemiBold',
+	     'THIN': 'NotoSansDisplay-Thin',
+	     'LIGHT': 'NotoSansDisplay-Light',
+	     'BLDITALIC': 'NotoSansUI-BoldItalic'}
 
 	o = {'REGULAR': 'OpenSans-Regular',
 	     'MONO': 'NotoMono-Regular',
@@ -114,12 +197,18 @@ class CssFormattingObject(object):
 		self.css = originalcss
 		self.substitutes = ['DEFAULTLOCALFONT', 'DEFAULTLOCALGREEKFONT', 'DEFAULTLOCALNONGREEKFONT']
 		self.hostedfontdict = {
-			'DejaVu': CssFormattingObject.d,
+			'Alegreya': CssFormattingObject.a,
+			'CMUSans': CssFormattingObject.c,
+			'CMUSerif': CssFormattingObject.cx,
+			'DejaVuSans': CssFormattingObject.d,
+			'DejaVuSerif': CssFormattingObject.dx,
 			'Fira': CssFormattingObject.f,
 			'IBMPlex': CssFormattingObject.i,
 			'Noto': CssFormattingObject.n,
 			'Roboto': CssFormattingObject.r,
 			'Ubuntu': CssFormattingObject.u,
+			# Defective:
+			# 'IBMPlexSerif': CssFormattingObject.ix,
 			# These only seem complete: they are missing plenty...
 			# 'Open Sans': CssFormattingObject.o,
 			# 'SourceSans': CssFormattingObject.s
@@ -202,7 +291,8 @@ class CssFormattingObject(object):
 			(r"font-style: italic;", "font-family: 'hipparchiaobliquestatic', sans-serif;"),
 			(r"font-weight: bold;", "font-family: 'hipparchiaboldstatic', sans-serif;"),
 			(r"font-weight: 600;", "font-family: 'hipparchiasemiboldstatic', sans-serif;"),
-			(r"font-stretch: condensed;", "font-family: 'hipparchiacondensedstatic', sans-serif;")
+			(r"font-stretch: condensed;", "font-family: 'hipparchiacondensedstatic', sans-serif;"),
+			(r"font-style: normal;", "font-family: 'hipparchiasansstatic', sans-serif;")
 		]
 
 		for s in swaps:

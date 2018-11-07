@@ -258,6 +258,7 @@ body {
 
 .dictbiblscope {
 	color: var(--dkbabyblue);
+	font-style: normal;
 }
 
 .dictbibtitle {

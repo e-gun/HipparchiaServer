@@ -28,8 +28,8 @@
 # ENBALEFONTPICKER allows you to select fonts from the web interface; but see notes on
 #   FONTPICKERLIST before enabling this. Anything other than 'yes' disables this option.
 #
-# FONTPICKERLIST is a list of fonts to choose from. These can be *local to the client*.
-#   The item set here alters DEFAULTLOCALFONT in the CSS. To avoid problesm the list should contain
+# FONTPICKERLIST is a list of fonts to choose from. These can EITHER be served OR local to the client.
+#   The item set here alters DEFAULTLOCALFONT in the CSS. To avoid problems the list should contain
 #   only HOSTEDFONTS or you know you have installed. Also, remote users can get in trouble here:
 #   if they choose 'GFSOrpheusSans' what are the chances that it is already installed on their system?
 #
@@ -43,4 +43,4 @@ DEFAULTLOCALFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 ENBALEFONTPICKER = 'no'
-FONTPICKERLIST = ['Noto', 'DejaVu', 'Fira', 'IBMPlex', 'Roboto', 'Ubuntu']  # see above about editing this list
+FONTPICKERLIST = ['Noto', 'CMUSans', 'CMUSerif', 'DejaVuSans', 'DejaVuSerif', 'Fira', 'IBMPlex', 'Roboto', 'Ubuntu']  # see above about editing this list

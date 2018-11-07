@@ -8,9 +8,7 @@ config.py
 # 3rd party projects
 j*js
 ui-icons*
-DejaVu*
-Noto*
-Roboto*
+*.ttf
 
 # IDE
 .idea/
