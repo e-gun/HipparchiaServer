@@ -7,14 +7,14 @@
 """
 
 import re
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 from flask import session
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import prolixlocus
 from server.dbsupport.miscdbfunctions import probefordatabases
-from server.startup import authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict
+from server.startup import authorgenresdict, authorlocationdict, listmapper, workgenresdict, workprovenancedict
 
 
 def probeforsessionvariables():
@@ -42,7 +42,7 @@ def probeforsessionvariables():
 		session['bracketround'] = hipparchia.config['DEFAULTHIGHLIGHTROUNDBRACKETS']
 		session['bracketsquare'] = hipparchia.config['DEFAULTHIGHLIGHTSQUAREBRACKETS']
 		session['browsercontext'] = str(int(hipparchia.config['DEFAULTBROWSERLINES']))
-		session['christiancorpus'] = hipparchia.config['DEFAULTCHRISTIANCORPUSVALUE']
+		session['christiancorpus'] = corpusisonandavailable('christiancorpus')
 		session['cosdistbysentence'] = 'no'
 		session['cosdistbylineorword'] = 'no'
 		session['debugdb'] = hipparchia.config['DBDEBUGMODE']
@@ -52,20 +52,20 @@ def probeforsessionvariables():
 		session['debugparse'] = hipparchia.config['PARSERDEBUGMODE']
 		session['earliestdate'] = hipparchia.config['DEFAULTEARLIESTDATE']
 		session['fontchoice'] = hipparchia.config['HOSTEDFONTFAMILY']
-		session['greekcorpus'] = hipparchia.config['DEFAULTGREEKCORPUSVALUE']
+		session['greekcorpus'] = corpusisonandavailable('greekcorpus')
 		session['headwordindexing'] = hipparchia.config['DEFAULTINDEXBYHEADWORDS']
 		session['incerta'] = hipparchia.config['DEFAULTINCERTA']
 		session['indexbyfrequency'] = hipparchia.config['DEFAULTINDEXBYFREQUENCY']
 		session['indexskipsknownwords'] = 'no'
-		session['inscriptioncorpus'] = hipparchia.config['DEFAULTINSCRIPTIONCORPUSVALUE']
+		session['inscriptioncorpus'] = corpusisonandavailable('inscriptioncorpus')
 		session['latestdate'] = hipparchia.config['DEFAULTLATESTDATE']
-		session['latincorpus'] = hipparchia.config['DEFAULTLATINCORPUSVALUE']
+		session['latincorpus'] = corpusisonandavailable('latincorpus')
 		session['linesofcontext'] = int(hipparchia.config['DEFAULTLINESOFCONTEXT'])
 		session['maxresults'] = str(int(hipparchia.config['DEFAULTMAXRESULTS']))
 		session['nearestneighborsquery'] = 'no'
 		session['nearornot'] = 'T'
 		session['onehit'] = hipparchia.config['DEFAULTONEHIT']
-		session['papyruscorpus'] = hipparchia.config['DEFAULTPAPYRUSCORPUSVALUE']
+		session['papyruscorpus'] = corpusisonandavailable('papyruscorpus')
 		session['proximity'] = '1'
 		session['psgexclusions'] = list()
 		session['psgselections'] = list()
@@ -1050,3 +1050,37 @@ def returnactivelist(selectiondict: dict) -> List[str]:
 	activelist = list(set(activelist))
 
 	return activelist
+
+
+def corpusisonandavailable(corpusname):
+	"""
+
+	a rare situation:
+		you set Greek as available by default but you have no Greek data
+		you will see a Ⓖ forever
+
+	this only happens to a 'naive' new installer who has an incomplete dataset
+
+	:param corpusname:
+	:return:
+	"""
+
+	options = {
+		'christiancorpus': ('DEFAULTCHRISTIANCORPUSVALUE', 'ch'),
+		'greekcorpus': ('DEFAULTGREEKCORPUSVALUE', 'gr'),
+		'inscriptioncorpus': ('DEFAULTINSCRIPTIONCORPUSVALUE', 'in'),
+		'latincorpus': ('DEFAULTLATINCORPUSVALUE', 'lt'),
+		'papyruscorpus': ('DEFAULTPAPYRUSCORPUSVALUE', 'dp'),
+	}
+
+	assert corpusname in options, 'corpusisonandavailable() was sent a corpus not in known corpora'
+
+	optiontuple = options[corpusname]
+
+	setting = hipparchia.config[optiontuple[0]]
+	available = len(listmapper[optiontuple[1]]['a'])
+
+	if available > 0:
+		return setting
+	else:
+		return 'no'

@@ -64,6 +64,9 @@
     you also need to put 'bold' and 'italic' on the same CSS line if you want the secondary swap to happen right
     e.g.:
         font-weight: bold; font-style: italic;
+
+    note that 'hipparchiasansstatic' need not really be sans...
+
  */
 
 @font-face {
@@ -125,7 +128,7 @@
 body {
 	background-color: var(--main-body-color);
 	margin: 10px 10px 10px 10px;
-	font-family: var(--systemdefaultfont), 'hipparchiasansstatic', sans-serif;
+	font-family: 'hipparchiasansstatic', var(--systemdefaultfont), sans-serif;
 	color: var(--main-font-color);
 	font-size: 100%;
 	line-height: 1.4;
@@ -274,7 +277,6 @@ body {
     }
 
 .dictetym{
-    color: var(--plum);
     }
 
 .dictforeign {
@@ -1050,7 +1052,7 @@ body {
 	}
 
 #lexicadialogtext{
-	font-family: var(--systemdefaultfont), 'hipparchiasansstatic', sans-serif;
+	font-family: 'hipparchiasansstatic', var(--systemdefaultfont), sans-serif;
 	}
 
 #loadslots, #saveslots {
@@ -1144,7 +1146,7 @@ body {
 
 #sortresults-menu li{
 	font-size: 70%;
-	font-family: var(--systemdefaultfont), 'hipparchiasansstatic', sans-serif;
+	font-family: 'hipparchiasansstatic', var(--systemdefaultfont), sans-serif;
 }
 
 #toolbutton {
@@ -1269,6 +1271,10 @@ locus {
 observed:hover{
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}
+
+p {
+	font-family: 'hipparchiasansstatic', var(--systemdefaultfont), sans-serif;
 	}
 
 p.browsedline {

@@ -40,7 +40,6 @@ if current_process().name == 'MainProcess':
 		print(terminaltext.format(project='HipparchiaServer', year='2016-18', fullname='E. Gunderson',
 		                          mail='Department of Classics, 125 Queen’s Park, Toronto, ON  M5S 2C7 Canada'))
 
-
 	available = probefordatabases()
 	warning = sum([available[x] for x in available])
 	if warning == 0:
