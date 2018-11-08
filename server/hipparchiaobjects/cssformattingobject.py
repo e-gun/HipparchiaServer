@@ -27,25 +27,25 @@ class CssFormattingObject(object):
 	c = {'REGULAR': 'cmunss',
 	     'MONO': 'cmunbtl',
 	     'OBLIQUE': 'cmunsi',
-	     'CONDENSED': 'cmunssdc',
-	     'CNDENSEDBLD': 'cmunbsr',
-	     'CNDENSEDOBL': 'cmunbso',
+	     'CONDENSED': False,
+	     'CNDENSEDBLD': False,
+	     'CNDENSEDOBL': False,
 	     'BOLD': 'cmunsx',
 	     'SEMIBLD': 'cmunbsr',
-	     'THIN': 'cmunbmr',
-	     'LIGHT': 'cmunbmr',
+	     'THIN': False,
+	     'LIGHT': False,
 	     'BLDITALIC': 'cmunso'}
 
 	cx = {'REGULAR': 'cmunrm',
 	     'MONO': 'cmunbtl',
 	     'OBLIQUE': 'cmunti',
-	     'CONDENSED': 'cmunrm',
-	     'CNDENSEDBLD': 'cmunbx',
-	     'CNDENSEDOBL': 'cmunti',
+	     'CONDENSED': False,
+	     'CNDENSEDBLD': False,
+	     'CNDENSEDOBL': False,
 	     'BOLD': 'cmunbx',
 	     'SEMIBLD': 'cmunrb',
-	     'THIN': 'cmunrm',
-	     'LIGHT': 'cmunrm',
+	     'THIN': False,
+	     'LIGHT': False,
 	     'BLDITALIC': 'cmunbi'}
 
 	d = {'REGULAR': 'DejaVuSans',
@@ -55,8 +55,8 @@ class CssFormattingObject(object):
 	     'CNDENSEDBLD': 'DejaVuSansCondensed-Bold',
 	     'CNDENSEDOBL': 'DejaVuSansCondensed-Oblique',
 	     'BOLD': 'DejaVuSans-Bold',
-	     'SEMIBLD': 'DejaVuSans-Bold',
-	     'THIN': 'DejaVuSans-ExtraLight',
+	     'SEMIBLD': False,
+	     'THIN': False,
 	     'LIGHT': 'DejaVuSans-ExtraLight',
 	     'BLDITALIC': 'DejaVuSans-BoldOblique'}
 
@@ -67,20 +67,20 @@ class CssFormattingObject(object):
 	     'CNDENSEDBLD': 'DejaVuSerifCondensed-Bold',
 	     'CNDENSEDOBL': 'DejaVuSerifCondensed-Italic',
 	     'BOLD': 'DejaVuSerif-Bold',
-	     'SEMIBLD': 'DejaVuSerif-Bold',
-	     'THIN': 'DejaVuSerif',
-	     'LIGHT': 'DejaVuSerif',
+	     'SEMIBLD': False,
+	     'THIN': False,
+	     'LIGHT': False,
 	     'BLDITALIC': 'DejaVuSerif-BoldItalic'}
 
 	f = {'REGULAR': 'FiraSans-Regular',
 	     'MONO': 'FiraMono-Regular',
 	     'OBLIQUE': 'FiraSans-Italic',
 	     'CONDENSED': 'FiraSans-Thin',
-	     'CNDENSEDBLD': 'FiraSans-Bold',
+	     'CNDENSEDBLD': False,
 	     'CNDENSEDOBL': 'FiraSans-ThinItalic',
 	     'BOLD': 'FiraSans-Bold',
-	     'SEMIBLD': 'FiraSans-Bold',
-	     'THIN': 'FiraSans-ExtraLight',
+	     'SEMIBLD': False,
+	     'THIN': False,
 	     'LIGHT': 'FiraSans-ExtraLight',
 	     'BLDITALIC': 'FiraSans-BoldItalic'}
 
@@ -99,9 +99,9 @@ class CssFormattingObject(object):
 	ix = {'REGULAR': 'IBMPlexSerif-Regular',
 	     'MONO': 'IBMPlexMono-Regular',
 	     'OBLIQUE': 'IBMPlexSerif-Italic',
-	     'CONDENSED': 'IBMPlexSerif-Thin',
-	     'CNDENSEDBLD': 'IBMPlexSerif-Thin',
-	     'CNDENSEDOBL': 'IBMPlexSerif-ThinItalic',
+	     'CONDENSED': False,
+	     'CNDENSEDBLD': False,
+	     'CNDENSEDOBL': False,
 	     'BOLD': 'IBMPlexSerif-Bold',
 	     'SEMIBLD': 'IBMPlexSerif-SemiBold',
 	     'THIN': 'IBMPlexSerif-Thin',
@@ -144,6 +144,7 @@ class CssFormattingObject(object):
 	     'LIGHT': 'NotoSansDisplay-Light',
 	     'BLDITALIC': 'NotoSansUI-BoldItalic'}
 
+	# too many missing glyphs
 	o = {'REGULAR': 'OpenSans-Regular',
 	     'MONO': 'NotoMono-Regular',
 	     'OBLIQUE': 'OpenSans-Italic',
@@ -152,7 +153,7 @@ class CssFormattingObject(object):
 	     'CNDENSEDOBL': 'OpenSansCondensed-LightItalic',
 	     'BOLD': 'OpenSans-Bold',
 	     'SEMIBLD': 'OpenSans-SemiBold',
-	     'THIN': 'OpenSans-Light',
+	     'THIN': False,
 	     'LIGHT': 'OpenSans-Light',
 	     'BLDITALIC': 'OpenSans-BoldItalic'}
 
@@ -163,7 +164,7 @@ class CssFormattingObject(object):
 	     'CNDENSEDBLD': 'RobotoCondensed-Bold',
 	     'CNDENSEDOBL': 'RobotoCondensed-Italic',
 	     'BOLD': 'Roboto-Bold',
-	     'SEMIBLD': 'Roboto-Bold',
+	     'SEMIBLD': False,
 	     'THIN': 'Roboto-Thin',
 	     'LIGHT': 'Roboto-Light',
 	     'BLDITALIC': 'Roboto-BoldItalic'}
@@ -172,12 +173,12 @@ class CssFormattingObject(object):
 	s = {'REGULAR': 'SourceSansPro-Regular',
 	     'MONO': 'SourceCodePro-Regular',
 	     'OBLIQUE': 'SourceSansPro-It',
-	     'CONDENSED': 'SourceSansPro-ExtraLight',
-	     'CNDENSEDBLD': 'SourceSansPro-Bold',
-	     'CNDENSEDOBL': 'SourceSansPro-ExtraLightIt',
+	     'CONDENSED': False,
+	     'CNDENSEDBLD': False,
+	     'CNDENSEDOBL': False,
 	     'BOLD': 'SourceSansPro-Bold',
 	     'SEMIBLD': 'SourceSansPro-Bold',
-	     'THIN': 'SourceSansPro-Light',
+	     'THIN': False,
 	     'LIGHT': 'SourceSansPro-Light',
 	     'BLDITALIC': 'SourceSansPro-BoldIt'}
 
@@ -185,11 +186,11 @@ class CssFormattingObject(object):
 	     'MONO': 'UbuntuMono-R',
 	     'OBLIQUE': 'Ubuntu-RI',
 	     'CONDENSED': 'Ubuntu-C',
-	     'CNDENSEDBLD': 'Ubuntu-C',
+	     'CNDENSEDBLD': False,
 	     'CNDENSEDOBL': 'Ubuntu-RI',
 	     'BOLD': 'Ubuntu-B',
 	     'SEMIBLD': 'Ubuntu-M',
-	     'THIN': 'Ubuntu-C',
+	     'THIN': False,
 	     'LIGHT': 'Ubuntu-L',
 	     'BLDITALIC': 'Ubuntu-BI'}
 
@@ -245,8 +246,9 @@ class CssFormattingObject(object):
 
 	def _swapface(self):
 		for face in self.faces:
-			searchfor = re.compile('HOSTEDFONTFAMILY_'+face)
-			self.css = re.sub(searchfor, self.faces[face], self.css)
+			if self.faces[face]:
+				searchfor = re.compile('HOSTEDFONTFAMILY_'+face)
+				self.css = re.sub(searchfor, self.faces[face], self.css)
 
 	def _deface(self):
 		fingerprint = re.compile(r"'hipparchia\w+',")
@@ -282,18 +284,19 @@ class CssFormattingObject(object):
 		# [(findpattern1, replace1), ...]
 
 		swaps = [
-			(r"font-stretch: condensed; font-weight: bold;", "font-family: 'hipparchiacondensedboldstatic', sans-serif;"),
-			(r"font-weight: bold; font-stretch: condensed;", "font-family: 'hipparchiacondensedboldstatic', sans-serif;"),
-			(r"font-stretch: condensed; font-style: italic;", "font-family: 'hipparchiacondenseditalicstatic', sans-serif;"),
-			(r"font-style: italic; font-stretch: condensed;", "font-family: 'hipparchiacondenseditalicstatic', sans-serif;"),
-			(r"font-style: italic; font-weight: bold;", "font-family: 'hipparchiabolditalicstatic', sans-serif;"),
-			(r"font-weight: bold; font-style: italic;", "font-family: 'hipparchiabolditalicstatic', sans-serif;"),
-			(r"font-style: italic;", "font-family: 'hipparchiaobliquestatic', sans-serif;"),
-			(r"font-weight: bold;", "font-family: 'hipparchiaboldstatic', sans-serif;"),
-			(r"font-weight: 600;", "font-family: 'hipparchiasemiboldstatic', sans-serif;"),
-			(r"font-stretch: condensed;", "font-family: 'hipparchiacondensedstatic', sans-serif;"),
-			(r"font-style: normal;", "font-family: 'hipparchiasansstatic', sans-serif;")
+			('CNDENSEDBLD', r"font-stretch: condensed; font-weight: bold;", "font-family: 'hipparchiacondensedboldstatic', sans-serif;"),
+			('CNDENSEDBLD', r"font-weight: bold; font-stretch: condensed;", "font-family: 'hipparchiacondensedboldstatic', sans-serif;"),
+			('CNDENSEDOBL', r"font-stretch: condensed; font-style: italic;", "font-family: 'hipparchiacondenseditalicstatic', sans-serif;"),
+			('CNDENSEDOBL', r"font-style: italic; font-stretch: condensed;", "font-family: 'hipparchiacondenseditalicstatic', sans-serif;"),
+			('BLDITALIC', r"font-style: italic; font-weight: bold;", "font-family: 'hipparchiabolditalicstatic', sans-serif;"),
+			('BLDITALIC', r"font-weight: bold; font-style: italic;", "font-family: 'hipparchiabolditalicstatic', sans-serif;"),
+			('OBLIQUE', r"font-style: italic;", "font-family: 'hipparchiaobliquestatic', sans-serif;"),
+			('BOLD', r"font-weight: bold;", "font-family: 'hipparchiaboldstatic', sans-serif;"),
+			('SEMIBLD', r"font-weight: 600;", "font-family: 'hipparchiasemiboldstatic', sans-serif;"),
+			('CONDENSED', r"font-stretch: condensed;", "font-family: 'hipparchiacondensedstatic', sans-serif;"),
+			('REGULAR', r"font-style: normal;", "font-family: 'hipparchiasansstatic', sans-serif;")
 		]
 
 		for s in swaps:
-			self.css = re.sub(re.compile(s[0]), s[1], self.css)
+			if self.faces[s[0]]:
+				self.css = re.sub(re.compile(s[1]), s[2], self.css)

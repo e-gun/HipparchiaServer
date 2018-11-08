@@ -162,7 +162,9 @@ minimum software requirements:
 
 ```
 
-the project pages for the other dependencies:
+The required fonts and JS libraries are available via **HipparchiaThirdPartySoftware** (https://github.com/e-gun/HipparchiaThirdPartySoftware)
+
+Nevertheless, here are the project pages for the other dependencies:
 
 jquery:
     http://jquery.com/download/
