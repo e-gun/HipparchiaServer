@@ -76,6 +76,20 @@ class BaseFormMorphology(object):
 
 	select * from greek_morphology where greek_morphology.xrefs='83362071'
 
+	POS is tricky via the database:
+
+		hipparchiaDB=# select pos from latin_dictionary where entry_name='brevis';
+		     pos
+		-------------
+		 adv. ‖ adj.
+		(1 row)
+
+		hipparchiaDB=# select pos from latin_dictionary where entry_name='laudo';
+		     pos
+		--------------
+		 v. a. ‖ adv.
+		(1 row)
+
 	"""
 	def __init__(self, headword: str, language: str):
 		assert language in ['greek', 'latin'], 'BaseFormMorphology() only knows words that are "greek_morphology" or "latin_morphology"'
@@ -120,7 +134,7 @@ class BaseFormMorphology(object):
 		if self.principleparts and not self.missingparts:
 			return self.principleparts
 
-		pplen = 0
+		pplen = int()
 		if self.language == 'greek':
 			pplen = 6
 		elif self.language == 'latin':
@@ -176,7 +190,7 @@ class MorphAnalysis(object):
 
 	def findpartofspeech(self):
 		pos = None
-		tenses = ['pres', 'aor', 'fut', 'perf', 'imperf', 'plup', 'futperf']
+		tenses = ['pres', 'aor', 'fut', 'perf', 'imperf', 'plup', 'futperf', 'part']
 		if self.analyssiscomponents[0] in tenses:
 			pos = 'verb'
 			self.analysis = VerbAnalysis(self.word, self.language, self.analyssiscomponents)
@@ -195,10 +209,11 @@ class VerbAnalysis(object):
 	                    ('aor', 'ind', 'pass', '1st', 'sg'): 6
 	                    }
 
-	latprincipleparts = {('pres', 'ind', 'act', '1st', 'sg'): 1,
-	                     ('pres', 'inf', 'act', None, None): 2,
-	                     ('perf', 'ind', 'act', '1st', 'sg'): 3,
-	                     ('perf', 'part', 'pass', 'masc', 'nom', 'sg'): 4
+	# note the inverted dict structures
+	latprincipleparts = {1: ('pres', 'ind', 'act', '1st', 'sg'),
+	                     2: ('pres', 'inf', 'act', None, None),
+	                     3: ('perf', 'ind', 'act', '1st', 'sg'),
+	                     4: ('perf', 'part', 'pass', 'masc', 'nom', 'sg')
 	                     }
 
 	elementmap = {'tense': 0,
@@ -214,25 +229,48 @@ class VerbAnalysis(object):
 		# this will need refactoring when you do latin participles (can catch them via the exra # of parts (maybe))
 		self.word = word
 		self.language = language
+		self.dialects = list()
+		self.case = None
+		self.gender = None
+		self.person = None
 		self.tense = analyssiscomponents[0]
 		self.mood = analyssiscomponents[1]
 		self.voice = analyssiscomponents[2]
-		try:
-			self.person = analyssiscomponents[3]
-		except IndexError:
-			self.person = None
-		try:
-			self.number = analyssiscomponents[4]
-		except IndexError:
-			self.number = None
-		try:
-			dialects = ' '.join(analyssiscomponents[5:])
-			dialects = re.sub(r'[()]', '', dialects)
-			self.dialects = [x for x in dialects.split(' ') if x]
-		except IndexError:
-			self.dialects = list()
-		if not self.dialects:
-			self.dialects = ['attic']
+		if self.language == 'greek':
+			try:
+				self.person = analyssiscomponents[3]
+			except IndexError:
+				self.person = None
+			try:
+				self.number = analyssiscomponents[4]
+			except IndexError:
+				self.number = None
+			try:
+				dialects = ' '.join(analyssiscomponents[5:])
+				dialects = re.sub(r'[()]', '', dialects)
+				self.dialects = [x for x in dialects.split(' ') if x]
+			except IndexError:
+				pass
+			if not self.dialects:
+				self.dialects = ['attic']
+
+		if self.language == 'latin' and len(analyssiscomponents) == 6:
+			# participle
+			# print(word, len(analyssiscomponents), 'analyssiscomponents', analyssiscomponents)
+			self.gender = analyssiscomponents[3]
+			self.case = analyssiscomponents[4]
+			self.number = analyssiscomponents[5]
+
+		if self.language == 'latin' and len(analyssiscomponents) < 6:
+			# not a participle...
+			try:
+				self.person = analyssiscomponents[3]
+			except IndexError:
+				self.person = None
+			try:
+				self.number = analyssiscomponents[4]
+			except IndexError:
+				self.number = None
 
 		self.ppts = dict()
 		if self.language == 'greek':
@@ -242,8 +280,33 @@ class VerbAnalysis(object):
 
 		self.pptuple = (self.tense, self.mood, self.voice, self.person, self.number)
 		self.baseformdisqualifiers = ["'", 'κἀ']  # incomplete at the moment
+		# also need to toss the second of:
+		# [(1, 'subicio'), (1, 'subicioque')
 
 	def isaprinciplepart(self) -> bool:
+		if self.language == 'greek':
+			return self._isagreekprinciplepart()
+		if self.language == 'latin':
+			return self._isalatinprinciplepart()
+
+	def _isalatinprinciplepart(self) -> bool:
+		if self.case:
+			tomatch = [self.ppts[4]]
+		elif not self.person:
+			tomatch = [self.ppts[2]]
+		else:
+			tomatch = [self.ppts[1], self.ppts[3]]
+
+		if self.pptuple not in tomatch:
+			return False
+
+		dq = [re.search(d, self.word) for d in self.baseformdisqualifiers]
+		if any(dq):
+			return False
+
+		return True
+
+	def _isagreekprinciplepart(self) -> bool:
 		if self.pptuple not in self.ppts:
 			return False
 
@@ -257,14 +320,55 @@ class VerbAnalysis(object):
 		return True
 
 	def whichprinciplepart(self) -> int:
-		try:
-			part = self.ppts[self.pptuple]
-		except KeyError:
-			part = None
+		part = None
+
+		if self.language == 'greek':
+			try:
+				part = self.ppts[self.pptuple]
+			except KeyError:
+				part = None
+
+		if self.language == 'latin':
+			test = [p for p in self.ppts if self.ppts[p] == self.pptuple]
+			try:
+				part = test[0]
+			except IndexError:
+				part = None
 
 		return part
 
 	def nearestmatchforaprinciplepart(self, acceptableelements: list, acceptablepart: int):
+		if self.language == 'greek':
+			return self._nearestmatchforagreekprinciplepart(acceptableelements, acceptablepart)
+		if self.language == 'latin':
+			return self._nearestmatchforalatinprinciplepart(acceptableelements, acceptablepart)
+
+	def _nearestmatchforalatinprinciplepart(self, acceptableelements: list, acceptablepart: int):
+		acceptabletuple = tuple([getattr(self, e) for e in acceptableelements])
+
+		if 'case' in acceptableelements and 'number' in acceptableelements:
+			acceptableelements = [e.replace('number', 'pcpnumber') for e in acceptableelements]
+
+		positions = [VerbAnalysis.elementmap[e] for e in VerbAnalysis.elementmap if e in acceptableelements]
+		positions = sorted(positions)
+		usingppts = [self.ppts[p] for p in self.ppts.keys() if p is acceptablepart]
+		try:
+			usingppts = usingppts[0]
+		except IndexError:
+			return False
+
+		newusing = list()
+		for p in positions:
+			newusing.append(usingppts[p])
+
+		newusing = tuple(newusing)
+
+		if acceptabletuple == newusing:
+			return True
+		else:
+			return False
+
+	def _nearestmatchforagreekprinciplepart(self, acceptableelements: list, acceptablepart: int):
 		if not (self.dialects == ['attic'] or self.dialects == ['parad_form']):
 			return False
 

@@ -871,7 +871,8 @@ body {
 
 .smallcapitals, .uncial {
 	font-variant: small-caps;
-	font-weight: 600;
+	font-weight: normal;
+	font-size: 120%;
 	}
 
 .smallerthannormal {
