@@ -18,6 +18,7 @@ from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrows
 from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation
 from server.hipparchiaobjects.dbtextobjects import MorphPossibilityObject, dbMorphologyObject
 from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
+from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
 
 
 def formatdictionarysummary(wordentryobject) -> str:
@@ -291,6 +292,11 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	"""
 
 	distinct = set([p.xref for p in possibilitieslist])
+
+	# bfs = [BaseFormMorphology(p.getbaseform(), p.language()) for p in possibilitieslist]
+	# for b in bfs:
+	# 	print(b.headword, b.getprincipleparts())
+
 	count = 0
 	countchar = int('0030', 16)  # '1' (after you add 1)
 	subcountchar = int('0061', 16)  # 'a' (when counting from 0)

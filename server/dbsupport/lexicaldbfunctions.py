@@ -358,12 +358,15 @@ def grablemmataobjectfor(entryname, db, dbcursor=None):
 		dbconnection.setautocommit()
 		dbcursor = dbconnection.cursor()
 
+	field = 'dictionary_entry'
+
 	if not session['available'][db]:
 		lo = dbLemmaObject('[parsing is impossible: lemmata data was not installed]', -1, '')
 		return lo
 
-	q = 'SELECT * FROM {db} WHERE dictionary_entry=%s'.format(db=db)
+	q = 'SELECT * FROM {db} WHERE {f}=%s'.format(db=db, f=field)
 	d = (entryname,)
+
 	dbcursor.execute(q, d)
 	lem = dbcursor.fetchone()
 

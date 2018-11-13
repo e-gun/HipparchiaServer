@@ -56,6 +56,13 @@ class MorphPossibilityObject(object):
 		else:
 			return False
 
+	def language(self):
+		if self.amgreek():
+			return 'greek'
+		if self.amlatin():
+			return 'latin'
+		return 'unknown'
+
 	def getbaseform(self):
 		if hipparchia.config['SUPPRESSWARNINGS'] == 'no':
 			warn = True
@@ -131,7 +138,6 @@ class MorphPossibilityObject(object):
 		return baseform
 
 	def _getlatinbaseform(self):
-		baseform = ''
 		segments = self.entry.split(', ')
 
 		if len(segments) == 1 and '-' not in segments[-1]:
