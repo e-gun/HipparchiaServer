@@ -17,8 +17,8 @@ from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, fi
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
 from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation
 from server.hipparchiaobjects.dbtextobjects import MorphPossibilityObject, dbMorphologyObject
-from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
+from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
 
 def formatdictionarysummary(wordentryobject) -> str:
@@ -285,17 +285,13 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	</table>
 	"""
 
-	xdftemplate="""
+	xdftemplate = """
 	<span class="dictionaryform">{df}</span>&nbsp;:&nbsp;
 	from <span class="baseform">{bf}</span>
 	<span class="baseformtranslation">{xlate}</span>{xref}:
 	"""
 
 	distinct = set([p.xref for p in possibilitieslist])
-
-	# bfs = [BaseFormMorphology(p.getbaseform(), p.language()) for p in possibilitieslist]
-	# for b in bfs:
-	# 	print(b.headword, b.getprincipleparts())
 
 	count = 0
 	countchar = int('0030', 16)  # '1' (after you add 1)
@@ -376,6 +372,23 @@ def dictonaryentryashtml(count, seekingentry):
 	itemnotfoundstr = '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="prevalence">{skg}</span></p>\n'
 	fullentrystring = '<br /><br />\n<span class="lexiconhighlight">Full entry:</span><br />'
 
+	morphabletemplate = """
+	<table class="morphtable">
+		<tbody>
+			<tr><th class="morphcell labelcell" rowspan="1" colspan="2">principle parts</th></tr>	
+			{trs}
+			<tr><td></td><td class="morphcell">(total forms in use: {f})</td></tr>
+		</tbody>
+	</table>
+	"""
+
+	morphrowtemplate = """
+	<tr>
+		<td class="morphcell labelcell">[{ct}]</td>
+		<td class="morphcell">{ppt}</td>
+	</tr>
+	"""
+
 	navtemplate = """
 	<table class="navtable">
 	<tr>
@@ -442,7 +455,22 @@ def dictonaryentryashtml(count, seekingentry):
 				outputlist.append(xrefstr.format(x=xref))
 			outputlist.append('</p>')
 
-			if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
+			if session['principleparts'] != 'no':
+				fingerprints = {'v.', 'v. dep.', 'v. a.', 'v. n.'}
+				# and, sadly, some entries do not have a POS: "select pos from latin_dictionary where entry_name='declaro';"
+				# declaro: w.pos ['']
+				if (fingerprints & set(w.pos)) or w.pos == ['']:
+					if w.islatin():
+						lang = 'latin'
+					elif w.isgreek():
+						lang = 'greek'
+					morphanalysis = BaseFormMorphology(w.entry, lang)
+					ppts = morphanalysis.getprincipleparts()
+					if ppts and morphanalysis.mostlyconjugatedforms():
+						trs = [morphrowtemplate.format(ct=p[0], ppt=p[1]) for p in ppts]
+						outputlist.append(morphabletemplate.format(f=morphanalysis.numberofknownforms, trs='\n'.join(trs)))
+
+			if session['showwordcounts'] == 'yes':
 				countobject = querytotalwordcounts(seekingentry)
 				if countobject:
 					outputlist.append('<p class="wordcounts">Prevalence (all forms): ')

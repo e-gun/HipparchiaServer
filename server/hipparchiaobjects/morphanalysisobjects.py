@@ -9,8 +9,8 @@
 import re
 from typing import List
 
-from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.dbsupport.lexicaldbfunctions import grablemmataobjectfor, lookformorphologymatches
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 
 """
 
@@ -95,16 +95,29 @@ class BaseFormMorphology(object):
 		assert language in ['greek', 'latin'], 'BaseFormMorphology() only knows words that are "greek_morphology" or "latin_morphology"'
 		self.headword = headword
 		self.language = language
+		# next is unsafe because you will "KeyError: 'anno¹'"
+		# self.lemmata = lemmatadict[headword]
 		self.lemmata = grablemmataobjectfor(headword, '{lg}_lemmata'.format(lg=self.language), dbcursor=None)
 		self.dictionaryentry = self.lemmata.dictionaryentry
 		self.formlist = self.lemmata.formlist
 		c = ConnectionObject()
 		self.dbmorphobjects = [lookformorphologymatches(f, c.curs) for f in self.formlist]
 		c.connectioncleanup()
+		self.numberofknownforms = len(self.dbmorphobjects)
 		self.morphpossibilities = self._getmorphpossibilities()
 		self.analyses = self._getalanlyses()
 		self.missingparts = {'will_be_None_or_an_accurate_list_later'}
 		self.principleparts = None
+
+	def mostlyconjugatedforms(self):
+		# 'annus' has 'anno' in it: a single verbal lookalike
+		vv = [v for v in self.analyses if isinstance(v.getanalysis(), ConjugatedFormAnalysis)]
+		dd = [d for d in self.analyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
+		# print('mostlyconjugatedforms: len(vv) & len(dd)', len(vv), len(dd))
+		if len(vv) > len(dd):
+			return True
+		else:
+			return False
 
 	def getprincipleparts(self):
 		if not self.principleparts:
@@ -140,7 +153,13 @@ class BaseFormMorphology(object):
 		elif self.language == 'latin':
 			pplen = 4
 
-		verbforms = [a for a in self.analyses if a.partofspeech == 'verb']
+		# print('self.analyses[0].partofspeech',self.analyses[0].partofspeech)
+		# print('self.analyses[0].partofspeech', self.analyses[0].getanalysis())
+		verbforms = [a for a in self.analyses if a.partofspeech == 'conjugated' and isinstance(a.getanalysis(), ConjugatedFormAnalysis)]
+
+		if not verbforms:
+			return
+
 		pp = [(f.analysis.whichprinciplepart(), f.word) for f in verbforms if f.analysis.isaprinciplepart()]
 		pp = list(set(pp))
 		pp.sort()
@@ -151,26 +170,70 @@ class BaseFormMorphology(object):
 		# print('self.missingparts', self.missingparts)
 
 		for p in self.missingparts:
-			self.supplementmissing(p)
+			self._supplementmissing(p)
+
+		self._dropduplicates()
 
 		self.principleparts = sorted(self.principleparts)
 		return
 
-	def supplementmissing(self, parttosupplement):
+	def _dropduplicates(self):
+		parts = self.principleparts
+		disqualifiers = {'n$', 'que$', 'ue$'}
+
+		newparts = [parts[0]]
+		for i in range(1, len(parts)):
+			skip = False
+			thispartnumber = parts[i][0]
+			previouspartnumber = parts[i-1][0]
+			thispartstr = parts[i][1]
+			if thispartnumber == previouspartnumber:
+				disq = [re.search(thispartstr, d) for d in disqualifiers]
+				if disq:
+					skip = True
+			if not skip:
+				newparts.append((thispartnumber, thispartstr))
+
+		self.principleparts = newparts
+
+		return
+
+	def _supplementmissing(self, parttosupplement: int):
+		"""
+			[a] first-person singular present active indicative
+			[b] first-person singular future active indicative
+			[c] first-person singular aorist active indicative
+			[d] first-person singular perfect active indicative
+			[e] first-person singular perfect middle/passive
+			[f] first-person singular aorist passive indicative
+
+		:param parttosupplement:
+		:return:
+		"""
 
 		alternates = [
 			('tense', 'mood', 'voice', 'person'),
 			('tense', 'mood', 'voice', 'number'),
-			('tense', 'mood', 'voice')
+			('tense', 'mood', 'voice'),
+			('tense', 'mood', 'person', 'number'),
+			('tense', 'mood')
 			]
 
-		verbforms = [a for a in self.analyses if a.partofspeech == 'verb']
+		if self.language == 'greek' and parttosupplement in [5, 6]:
+			# have to have the voice and tense for pf passive
+			# have to have the voice and tense for aor passive
+			alternates.remove(('tense', 'mood'))
+			alternates.remove(('tense', 'mood', 'person', 'number'))
+
+		substitutetemplate = '{w}&nbsp;&nbsp;[{a}]'
+
+		verbforms = [a for a in self.analyses if a.partofspeech == 'conjugated']
 
 		for a in alternates:
 			for v in verbforms:
 				if v.analysis.nearestmatchforaprinciplepart(a, parttosupplement):
-					print('nextbest for pp {p} is {v}'.format(p=parttosupplement, v=v.word))
-					self.principleparts.append((parttosupplement, '[{w}]'.format(w=v.word)))
+					# print('nextbest for pp {p} is {v}'.format(p=parttosupplement, v=v.word))
+					self.principleparts.append((parttosupplement, substitutetemplate.format(w=v.word, a=v.analysisstring)))
 					self.missingparts = self.missingparts - {parttosupplement}
 					return
 		self.principleparts.append((parttosupplement, '[no forms in use]'))
@@ -185,22 +248,31 @@ class MorphAnalysis(object):
 		self.language = mylanguage
 		self.analysisstring = analysisstring
 		self.analyssiscomponents = analysisstring.split(' ')
-		self.analysis = None
 		self.partofspeech = self.findpartofspeech()
+		self.analysis = None
+
+	def getanalysis(self):
+		if not self.analysis:
+			self.findpartofspeech()
+		return self.analysis
 
 	def findpartofspeech(self):
-		pos = None
 		tenses = ['pres', 'aor', 'fut', 'perf', 'imperf', 'plup', 'futperf', 'part']
+		genders = ['masc', 'fem', 'neut']
 		if self.analyssiscomponents[0] in tenses:
-			pos = 'verb'
-			self.analysis = VerbAnalysis(self.word, self.language, self.analyssiscomponents)
+			pos = 'conjugated'
+			self.analysis = ConjugatedFormAnalysis(self.word, self.language, self.analyssiscomponents)
+		elif self.analyssiscomponents[0] in genders:
+			pos = 'declined'
+			self.analysis = DeclinedFormAnalysis()
+		else:
+			pos = 'notimplem'
+			self.analysis = None
+
 		return pos
 
-class NounAnalysis(object):
-	pass
 
-
-class VerbAnalysis(object):
+class ConjugatedFormAnalysis(object):
 	gkprincipleparts = {('pres', 'ind', 'act', '1st', 'sg'): 1,
 	                    ('fut', 'ind', 'act', '1st', 'sg'): 2,
 	                    ('aor', 'ind', 'act', '1st', 'sg'): 3,
@@ -274,11 +346,15 @@ class VerbAnalysis(object):
 
 		self.ppts = dict()
 		if self.language == 'greek':
-			self.ppts = VerbAnalysis.gkprincipleparts
+			self.ppts = ConjugatedFormAnalysis.gkprincipleparts
 		elif self.language == 'latin':
-			self.ppts = VerbAnalysis.latprincipleparts
+			self.ppts = ConjugatedFormAnalysis.latprincipleparts
 
-		self.pptuple = (self.tense, self.mood, self.voice, self.person, self.number)
+		if not self.case:
+			self.pptuple = (self.tense, self.mood, self.voice, self.person, self.number)
+		else:
+			# yes 'part' is not a mood, but...
+			self.pptuple = (self.tense, self.mood, self.voice, self.gender, self.case, self.number)
 		self.baseformdisqualifiers = ["'", 'κἀ']  # incomplete at the moment
 		# also need to toss the second of:
 		# [(1, 'subicio'), (1, 'subicioque')
@@ -296,6 +372,10 @@ class VerbAnalysis(object):
 			tomatch = [self.ppts[2]]
 		else:
 			tomatch = [self.ppts[1], self.ppts[3]]
+
+		# print(self.word)
+		# print('\tself.pptuple', self.pptuple)
+		# print('\ttomatch', tomatch)
 
 		if self.pptuple not in tomatch:
 			return False
@@ -349,7 +429,7 @@ class VerbAnalysis(object):
 		if 'case' in acceptableelements and 'number' in acceptableelements:
 			acceptableelements = [e.replace('number', 'pcpnumber') for e in acceptableelements]
 
-		positions = [VerbAnalysis.elementmap[e] for e in VerbAnalysis.elementmap if e in acceptableelements]
+		positions = [ConjugatedFormAnalysis.elementmap[e] for e in ConjugatedFormAnalysis.elementmap if e in acceptableelements]
 		positions = sorted(positions)
 		usingppts = [self.ppts[p] for p in self.ppts.keys() if p is acceptablepart]
 		try:
@@ -373,7 +453,7 @@ class VerbAnalysis(object):
 			return False
 
 		acceptabletuple = tuple([getattr(self, e) for e in acceptableelements])
-		positions = [VerbAnalysis.elementmap[e] for e in VerbAnalysis.elementmap if e in acceptableelements]
+		positions = [ConjugatedFormAnalysis.elementmap[e] for e in ConjugatedFormAnalysis.elementmap if e in acceptableelements]
 		positions = sorted(positions)
 
 		usingppts = [p for p in self.ppts.keys() if self.ppts[p] is acceptablepart]
@@ -391,6 +471,8 @@ class VerbAnalysis(object):
 			return False
 
 
+class DeclinedFormAnalysis(object):
+	pass
 
 
 class AdjAnalysis(object):

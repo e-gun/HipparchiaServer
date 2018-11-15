@@ -17,6 +17,9 @@
 #
 # CAPONDICTIONARYFINDS: refuse to find more than N items; useful to stop searches for 'δ'
 #   from hijacking the machine
+#
+# FINDPRINCIPLEPARTS: show the principle parts of verbs at the head of their dictionary entries
+#
 
 INSISTUPONSTANDARDANGLEBRACKETS = 'no'
 FORCELUNATESIGMANOMATTERWHAT = 'no'
@@ -33,6 +36,7 @@ AVOIDCIRCLEDLETTERS = 'no'
 FALLBACKTODOUBLESTRIKES = 'yes'
 REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
 CAPONDICTIONARYFINDS = 50
+FINDPRINCIPLEPARTS = 'no'
 
 # CLICKABLEINDEXEDPASSAGECAP: you can click to browse the passage
 # 	associated with an index item. Why would you even turn

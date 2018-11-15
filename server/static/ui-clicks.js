@@ -57,11 +57,13 @@ function loadoptions() {
             'latincorpus': $('#latincorpus'),
             'nearestneighborsquery': $('#nearestneighborsquery'),
             'papyruscorpus': $('#papyruscorpus'),
+            'principleparts': $('#principleparts'),
             'quotesummary': $('#quotesummary'),
             'searchinsidemarkup': $('#searchinsidemarkup'),
             'semanticvectorquery': $('#semanticvectorquery'),
             'sensesummary': $('#sensesummary'),
             'sentencesimilarity': $('#sentencesimilarity'),
+            'showwordcounts': $('#showwordcounts'),
             'simpletextoutput': $('#simpletextoutput'),
             'spuria': $('#includespuria'),
             'suppresscolors': $('#suppresscolors'),
@@ -474,6 +476,18 @@ $('#suppresscolors').change(function() {
 
 $('#simpletextoutput').change(function() {
     if(this.checked) { setoptions('simpletextoutput', 'yes'); } else { setoptions('simpletextoutput', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#principleparts').change(function() {
+    if(this.checked) { setoptions('principleparts', 'yes'); } else { setoptions('principleparts', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#showwordcounts').change(function() {
+    if(this.checked) { setoptions('showwordcounts', 'yes'); } else { setoptions('showwordcounts', 'no'); }
     refreshselections();
     loadoptions();
     });

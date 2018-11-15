@@ -55,7 +55,6 @@ class dbDictionaryEntry(object):
 		self.body = self._spacebetween(self._xmltohtmlquickconversions(entry_body))
 		if hipparchia.config['DEABBREVIATEAUTHORS'] != 'no':
 			self._deabbreviateauthornames()
-
 		self.xrefspresent = False
 		self.xmlhasbeenconverted = False
 		self.havesensehierarchy = False

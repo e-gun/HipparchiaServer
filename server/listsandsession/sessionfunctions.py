@@ -66,6 +66,7 @@ def probeforsessionvariables():
 		session['nearornot'] = 'T'
 		session['onehit'] = hipparchia.config['DEFAULTONEHIT']
 		session['papyruscorpus'] = corpusisonandavailable('papyruscorpus')
+		session['principleparts'] = hipparchia.config['FINDPRINCIPLEPARTS']
 		session['proximity'] = '1'
 		session['psgexclusions'] = list()
 		session['psgselections'] = list()
@@ -76,11 +77,12 @@ def probeforsessionvariables():
 		session['sensesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALSENSES']
 		session['sentencesimilarity'] = 'no'
 		session['simpletextoutput'] = hipparchia.config['SIMPLETEXTOUTPUT']
-		session['topicmodel'] = 'no'
+		session['showwordcounts'] = hipparchia.config['SHOWGLOBALWORDCOUNTS']
 		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
 		session['spuria'] = hipparchia.config['DEFAULTSPURIA']
 		session['suppresscolors'] = hipparchia.config['SUPPRESSCOLORS']
 		session['tensorflowgraph'] = 'no'
+		session['topicmodel'] = 'no'
 		session['varia'] = hipparchia.config['DEFAULTVARIA']
 		session['wkexclusions'] = list()
 		session['wkgnexclusions'] = list()
@@ -130,6 +132,7 @@ def modifysessionvariable(param, val):
 		'nearornot',
 		'onehit',
 		'papyruscorpus',
+		'principleparts',
 		'proximity',
 		'quotesummary',
 		'searchscope',
@@ -137,6 +140,7 @@ def modifysessionvariable(param, val):
 		'sensesummary',
 		'sentencesimilarity',
 		'simpletextoutput',
+		'showwordcounts',
 		'sortorder',
 		'spuria',
 		'suppresscolors',
@@ -182,7 +186,7 @@ def modifysessionvariable(param, val):
 	                 'cosdistbysentence', 'greekcorpus', 'headwordindexing', 'incerta', 'indexbyfrequency', 'inscriptioncorpus', 'latincorpus',
 	                 'nearestneighborsquery', 'onehit', 'papyruscorpus', 'quotesummary', 'semanticvectorquery', 'sensesummary', 'sentencesimilarity',
 	                 'spuria', 'topicmodel', 'varia', 'debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords', 'searchinsidemarkup',
-	                 'zaplunates', 'suppresscolors', 'simpletextoutput']:
+	                 'zaplunates', 'suppresscolors', 'simpletextoutput', 'principleparts', 'showwordcounts']:
 		if session[variable] not in ['yes', 'no']:
 			session[variable] = 'no'
 
