@@ -132,7 +132,7 @@ class RedisProgressPoll(object):
 		self.searchid = str(searchid)
 		self.launchtime = time.time()
 		self.portnumber = pollservedfromportnumber
-		self.active = False
+		self.active = 'no'
 		self.remaining = -1
 		self.poolofwork = -1
 		self.statusmessage = str()
@@ -150,7 +150,7 @@ class RedisProgressPoll(object):
 	def setkeytypes(self):
 		keytypes = {'launchtime': float,
 		            'portnumber': int,
-		            'active': bool,
+		            'active': bytes,
 		            'remaining': int,
 		            'poolofwork': int,
 		            'statusmessage': bytes,
@@ -218,13 +218,18 @@ class RedisProgressPoll(object):
 		self.redisconnection.incrby(k, hits)
 
 	def activate(self):
-		self.setredisvalue('active', True)
+		self.setredisvalue('active', 'yes')
 
 	def deactivate(self):
-		self.setredisvalue('active', False)
+		self.setredisvalue('active', 'no')
 
 	def getactivity(self):
-		return self.getredisvalue('active')
+		# some idiot broke the ability of redis_2 to do bool in redis_3...
+		activity = self.getredisvalue('active')
+		if activity.decode('utf-8') == 'yes':
+			return True
+		else:
+			return False
 
 	def getredisnotes(self):
 		notes = self.getredisvalue('notes')
