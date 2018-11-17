@@ -11,6 +11,7 @@ from typing import List
 import psycopg2
 from flask import session
 
+from server.formatting.abbreviations import unpackcommonabbreviations
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject
@@ -423,7 +424,7 @@ def findparserxref(wordobject) -> str:
 	return xrefvalues
 
 
-def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None) -> dbMorphologyObject:
+def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None, rewrite=None) -> dbMorphologyObject:
 	"""
 	hipparchiaDB=# select * from greek_morphology limit 1;
 	 observed_form |   xrefs   | prefixrefs |                                                             possible_dictionary_forms
@@ -488,7 +489,16 @@ def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None
 
 	if analysis:
 		morphobject = dbMorphologyObject(*analysis)
+		if rewrite:
+			morphobject.observed = rewrite
+			morphobject.rewritten = True
 	elif trialnumber < maxtrials:
+		# turn 'kal' into 'kalends', etc.
+		# not very costly as this is a dict lookup, and less costly than any call to the db
+		newword = unpackcommonabbreviations(word)
+		if newword != word:
+			return lookformorphologymatches(newword, dbcursor, 0, rewrite=word)
+
 		if revertword:
 			word = revertword
 		# this code lets you make multiple stabs at an answer if you have already failed once

@@ -27,6 +27,7 @@ class MorphPossibilityObject(object):
 		self.xkind = findalltuple[4]
 		self.transandanal = findalltuple[5]
 		self.prefixcount = prefixcount
+		self.rewritten = False
 
 	def gettranslation(self):
 		transfinder = re.compile(r'<transl>(.*?)</transl>')

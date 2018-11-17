@@ -1158,3 +1158,96 @@ def deabrevviatelatinauthors() -> Dict[str, str]:
 	}
 
 	return authordict
+
+
+def unpackcommonabbreviations(potentialabbreviaiton: str) -> str:
+	"""
+
+	turn an abbreviation into its headword: prid -> pridie
+
+	it is important to avoid getting greedy in here: feed this via failed headword indices and the '•••unparsed•••'
+	segment that follows
+
+	:param potentialabbreviaiton:
+	:return:
+	"""
+
+	abbreviations = {
+		'sal': 'salutem',
+		'prid': 'pridie',
+		'kal': 'kalendae',
+		'pl': 'plebis',
+		'hs': 'sestertius',
+		'sext': 'sextilis',
+		'ian': 'ianuarius',
+		'febr': 'februarius',
+		'mart': 'martius',
+		'apr': 'aprilis',
+		'mai': 'maius',
+		'quint': 'quintilis',
+		'sept': 'september',
+		'oct': 'october',
+		'nou': 'nouembris',
+		'dec': 'december',
+		# 'iul': 'Julius',
+		'imp': 'imperator',
+		'design': 'designatus',
+		'tr': 'tribunus',
+		# 't': 'Titus',
+		'cn': 'gnaeus',
+		'iii': 'tres',
+		'iiii': 'quattor',
+		'iu': 'quattor',
+		'u': 'quinque',
+		'ui': 'sex',
+		'uii': 'septem',
+		'uiii': 'octo',
+		'uiiii': 'nouem',
+		'ix': 'nouem',
+		'x': 'decem',
+		'xi': 'undecim',
+		'xii': 'duodecim',
+		'xiii': 'tredecim',
+		'xiiii': 'quattuordecim',
+		'xiu': 'quattuordecim',
+		'xu': 'quindecim',
+		'xui': 'sedecim',
+		'xuii': 'septemdecim',
+		'xuiii': 'dudeuiginti',
+		'xix': 'unodeuiginti',
+		'xx': 'uiginti',
+		'xxx': 'triginta',
+		'xl': 'quadraginta',
+		# or is it 'lucius'...?
+		# 'l': 'quinquaginta',
+		'lx': 'sexaginta',
+		'lxx': 'septuaginta',
+		'lxxx': 'octoginta',
+		'xc': 'nonaginta',
+		'cc': 'ducenti',
+		'ccc': 'trecenti',
+		'cd': 'quadrigenti',
+		'dc': 'sescenti',
+		'dcc': 'septigenti',
+		'dccc': 'octigenti',
+		'cm': 'nongenti',
+		'coss': 'consul',
+		'cos': 'consul',
+		'desig': 'designatus',
+		'ser': 'seruius',
+		'fab': 'fabius',
+		'ap': 'appius',
+		'sp': 'spurius',
+		'leg': 'legatus',
+		'ti': 'tiberius',
+		'n.': 'numerius',
+		'r': 'res',
+		'f': 'filius',
+	}
+
+	try:
+		word = abbreviations[potentialabbreviaiton]
+	except KeyError:
+		word = potentialabbreviaiton
+
+	return word

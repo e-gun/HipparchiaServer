@@ -194,6 +194,23 @@ class BaseFormMorphology(object):
 			if not skip:
 				newparts.append((thispartnumber, thispartstr))
 
+		# for i in range(1, len(parts)):
+		# 	skip = False
+		# 	thispartnumber = parts[i][0]
+		# 	previouspartnumber = parts[i-1][0]
+		# 	thispartstr = parts[i][1]
+		# 	previouspartstr = parts[i-1][1]
+		# 	if thispartnumber == previouspartnumber:
+		# 		skip = True
+		# 		disq = [re.search(thispartstr, d) for d in disqualifiers]
+		# 		if disq:
+		# 			pass
+		# 		else:
+		# 			modifiedstr = '{p}&nbsp;/&nbsp;{t}'.format(p=previouspartstr, t=thispartstr)
+		# 			newparts[i-1] = (previouspartnumber, modifiedstr)
+		# 	if not skip:
+		# 		newparts.append((thispartnumber, thispartstr))
+
 		self.principleparts = newparts
 
 		return
@@ -236,7 +253,7 @@ class BaseFormMorphology(object):
 					self.principleparts.append((parttosupplement, substitutetemplate.format(w=v.word, a=v.analysisstring)))
 					self.missingparts = self.missingparts - {parttosupplement}
 					return
-		self.principleparts.append((parttosupplement, '[no forms in use]'))
+		self.principleparts.append((parttosupplement, '[no form found]'))
 		self.missingparts = self.missingparts - {parttosupplement}
 		return
 
@@ -355,7 +372,7 @@ class ConjugatedFormAnalysis(object):
 		else:
 			# yes 'part' is not a mood, but...
 			self.pptuple = (self.tense, self.mood, self.voice, self.gender, self.case, self.number)
-		self.baseformdisqualifiers = ["'", 'κἀ']  # incomplete at the moment
+		self.baseformdisqualifiers = ["'", 'κἀ', 'κἤ']  # incomplete at the moment
 		# also need to toss the second of:
 		# [(1, 'subicio'), (1, 'subicioque')
 
