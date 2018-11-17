@@ -154,7 +154,7 @@ def buildfakesearchobject(qtype='nearestneighborsquery'):
 	for z in zeroes:
 		frozensession[z] = 0
 
-	yn = ['onehit', 'icandodates', 'nearestneighborsquery']
+	yn = ['onehit', 'icandodates', 'nearestneighborsquery', 'searchinsidemarkup']
 	for n in yn:
 		frozensession[n] = 'no'
 
