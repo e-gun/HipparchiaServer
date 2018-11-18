@@ -257,10 +257,10 @@ def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationva
 	return newcv
 
 
-def getrequiredmorphobjects(listofterms):
+def getrequiredmorphobjects(listofterms: set, furtherdeabbreviate=False):
 	"""
 
-	take a list of terms
+	take a set of terms
 
 	find the morphobjects associated with them
 
@@ -277,7 +277,8 @@ def getrequiredmorphobjects(listofterms):
 	else:
 		oneconnectionperworker = {i: None for i in range(workers)}
 
-	jobs = [Process(target=mpmorphology, args=(terms, morphobjects, oneconnectionperworker[i])) for i in range(workers)]
+	jobs = [Process(target=mpmorphology, args=(terms, furtherdeabbreviate, morphobjects, oneconnectionperworker[i]))
+	        for i in range(workers)]
 	for j in jobs:
 		j.start()
 	for j in jobs:
@@ -290,7 +291,7 @@ def getrequiredmorphobjects(listofterms):
 	return morphobjects
 
 
-def mpmorphology(terms, morphobjects, dbconnection):
+def mpmorphology(terms, furtherdeabbreviate, morphobjects, dbconnection):
 	"""
 
 	build a dict of morphology objects
@@ -316,7 +317,7 @@ def mpmorphology(terms, morphobjects, dbconnection):
 			term = None
 
 		if term:
-			mo = lookformorphologymatches(term, dbcursor)
+			mo = lookformorphologymatches(term, dbcursor, furtherdeabbreviate=furtherdeabbreviate)
 			if mo:
 				morphobjects[term] = mo
 			else:

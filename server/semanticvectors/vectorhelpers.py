@@ -379,7 +379,7 @@ def buildlemmatizesearchphrase(phrase: str) -> str:
 	phrase = phrase.strip()
 	words = phrase.split(' ')
 
-	morphdict = getrequiredmorphobjects(words)
+	morphdict = getrequiredmorphobjects(words, furtherdeabbreviate=True)
 	morphdict = convertmophdicttodict(morphdict)
 	# morphdict {'munera': {'munero', 'munus'}, 'urbis': {'urbs'}, 'uias': {'via', 'vio'}}
 

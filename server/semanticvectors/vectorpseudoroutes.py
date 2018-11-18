@@ -214,7 +214,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
 	# find all possible forms of all the words we used
 	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
 	activepoll.statusis('Finding headwords')
-	morphdict = getrequiredmorphobjects(allwords)
+	morphdict = getrequiredmorphobjects(allwords, furtherdeabbreviate=True)
 	morphdict = convertmophdicttodict(morphdict)
 
 	# find all possible headwords of all of the forms in use

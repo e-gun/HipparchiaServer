@@ -42,6 +42,7 @@ key features:
 			click on words to acquire parsing and dictionary info for them
 		dictionaries
 			look up individual words in Greek or Latin
+			customize dictionary output contents
 			get a morphological analysis of a Greek or Latin word
 			get per corpus counts of the use of the word and its derivatives
 			get a weighted chronological distribution of the word's use: mostly 'early', etc.
@@ -50,10 +51,12 @@ key features:
 			reverse lookup: 'unexpected' returns ἀδευκήϲ, ἀδόκητοϲ, ἀδόξαϲτοϲ, ἀελπτία, ...
 			    by default results return in order of word frequency
 			click to browse to passages cited in the lexical entries ('often' works)
+			click to follow a 'cf.'
 			flip forward/backwards through neighboring entries
 		text maker
 			build a text of a whole work or subsection of a work
 			for example see Xenophon, Hellenica as a whole or just book 3 or just book 3, chapter 4
+			customize text output formatting
 		index maker
 			build an index for a whole author, work or subsection of a work
 			for example see an index to all of Vergil or just the Aeneid or just Book 1 of the Aeneid
@@ -136,9 +139,8 @@ minimum software requirements:
         python 3.6+
             flask
             psycopg2 or psycopg2-binary
-            bs4
             websockets
-        postgresql 9.6+ / 10.0+
+        postgresql 9.6+
 
     to run the vectorizing functions
         python 3.6+
@@ -162,7 +164,8 @@ minimum software requirements:
 
 ```
 
-The required fonts and JS libraries are available via **HipparchiaThirdPartySoftware** (https://github.com/e-gun/HipparchiaThirdPartySoftware)
+See **Hipparchia[Platform]** for autoinstallers and/or installation recipies for your operating system. Hipparchia can be installed on 
+**BSD**, **Linux**, **macOS**, and **Windows**. The required fonts and JS libraries are available via **HipparchiaThirdPartySoftware** (https://github.com/e-gun/HipparchiaThirdPartySoftware)
 
 Nevertheless, here are the project pages for the other dependencies:
 
@@ -175,10 +178,10 @@ jquery-ui:
 js-cookie:
     https://github.com/js-cookie/js-cookie/releases
 
-see **HipparchiaBSD** and/or **HipparchiaMacOS** for details on how to acquire and to install these items.
 
+=====
 
-What you will see:
+What you will see when you point a browser at a HipparchiaServer:
 1. help screen
 ![help_screen](screenshots/00_help_screen.png)
 

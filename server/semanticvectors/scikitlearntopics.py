@@ -204,7 +204,7 @@ def ldatopicgraphing(sentencetuples, workssearched, searchobject, headwordstops=
 		allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]
 
 		activepoll.statusis('Finding all headwords')
-		morphdict = getrequiredmorphobjects(set(allwordsinorder))
+		morphdict = getrequiredmorphobjects(set(allwordsinorder), furtherdeabbreviate=True)
 		morphdict = convertmophdicttodict(morphdict)
 
 		activepoll.statusis('Building bags of words')

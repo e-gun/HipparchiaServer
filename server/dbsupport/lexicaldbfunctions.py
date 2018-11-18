@@ -424,8 +424,9 @@ def findparserxref(wordobject) -> str:
 	return xrefvalues
 
 
-def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None, rewrite=None) -> dbMorphologyObject:
+def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None, rewrite=None, furtherdeabbreviate=False) -> dbMorphologyObject:
 	"""
+
 	hipparchiaDB=# select * from greek_morphology limit 1;
 	 observed_form |   xrefs   | prefixrefs |                                                             possible_dictionary_forms
 	---------------+-----------+------------+---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -443,6 +444,9 @@ def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None
 	:param word:
 	:param dbcursor:
 	:param trialnumber:
+	:param revertword:
+	:param rewrite:
+	:param furtherdeabbreviate: a vector run has already turned 'm.' into Marcus, so it is safe to turn 'm' into 'mille'
 	:return:
 	"""
 
@@ -495,7 +499,7 @@ def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None
 	elif trialnumber < maxtrials:
 		# turn 'kal' into 'kalends', etc.
 		# not very costly as this is a dict lookup, and less costly than any call to the db
-		newword = unpackcommonabbreviations(word)
+		newword = unpackcommonabbreviations(word, furtherdeabbreviate)
 		if newword != word:
 			return lookformorphologymatches(newword, dbcursor, 0, rewrite=word)
 

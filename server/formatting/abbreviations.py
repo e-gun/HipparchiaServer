@@ -1160,15 +1160,17 @@ def deabrevviatelatinauthors() -> Dict[str, str]:
 	return authordict
 
 
-def unpackcommonabbreviations(potentialabbreviaiton: str) -> str:
+def unpackcommonabbreviations(potentialabbreviaiton: str, furtherunpack: bool) -> str:
 	"""
-
 	turn an abbreviation into its headword: prid -> pridie
 
 	it is important to avoid getting greedy in here: feed this via failed headword indices and the '•••unparsed•••'
 	segment that follows
 
+	a vector run has already turned 'm.' into Marcus via cleantext(), so it is safe to turn 'm' into 'mille'
+
 	:param potentialabbreviaiton:
+	:param furtherunpack:
 	:return:
 	"""
 
@@ -1193,8 +1195,12 @@ def unpackcommonabbreviations(potentialabbreviaiton: str) -> str:
 		'imp': 'imperator',
 		'design': 'designatus',
 		'tr': 'tribunus',
-		# 't': 'Titus',
+		't': 'Titus',
 		'cn': 'gnaeus',
+		'gn': 'gnaeus',
+		'q': 'quintus',
+		's': 'sextus',
+		'p': 'publius',
 		'iii': 'tres',
 		'iiii': 'quattor',
 		'iu': 'quattor',
@@ -1226,6 +1232,7 @@ def unpackcommonabbreviations(potentialabbreviaiton: str) -> str:
 		'xc': 'nonaginta',
 		'cc': 'ducenti',
 		'ccc': 'trecenti',
+		'cccc': 'quadrigenti',
 		'cd': 'quadrigenti',
 		'dc': 'sescenti',
 		'dcc': 'septigenti',
@@ -1244,6 +1251,15 @@ def unpackcommonabbreviations(potentialabbreviaiton: str) -> str:
 		'r': 'res',
 		'f': 'filius',
 	}
+
+	furtherabbreviations = {
+		'm': 'mille',
+		'c': 'centum',
+		'l': 'quinquaginta',
+	}
+
+	if furtherunpack:
+		abbreviations = {**abbreviations, **furtherabbreviations}
 
 	try:
 		word = abbreviations[potentialabbreviaiton]

@@ -112,7 +112,7 @@ def buildnnvectorspace(sentencetuples, searchobject):
 	activepoll.statusis(
 		'No stored model for this search. Generating a new one.<br />Finding headwords for {n} sentences'.format(n=wl))
 
-	morphdict = getrequiredmorphobjects(allwords)
+	morphdict = getrequiredmorphobjects(allwords, furtherdeabbreviate=True)
 
 	# associate each word with its possible headwords
 	morphdict = convertmophdicttodict(morphdict)

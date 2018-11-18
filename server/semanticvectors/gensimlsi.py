@@ -74,7 +74,7 @@ def lsifindmatches(sentencestuples, searchobject, lsispace):
 		wl = '{:,}'.format(len(listsofwords))
 		activepoll.statusis('Finding headwords for {n} sentences'.format(n=wl))
 
-		morphdict = getrequiredmorphobjects(allwords)
+		morphdict = getrequiredmorphobjects(allwords, furtherdeabbreviate=True)
 		morphdict = convertmophdicttodict(morphdict)
 
 		# find all possible headwords of all of the forms in use
