@@ -44,4 +44,4 @@ DEFAULTLOCALGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 ENBALEFONTPICKER = 'no'
 FONTPICKERLIST = ['Noto', 'CMUSans', 'CMUSerif', 'DejaVuSans', 'DejaVuSerif', 'EBGaramond',
-                  'Fira', 'IBMPlex', 'Lato', 'Roboto', 'Ubuntu']  # see above about editing this list
+                  'Fira', 'IBMPlex', 'Roboto', 'Ubuntu']  # see above about editing this list
