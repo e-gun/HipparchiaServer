@@ -3,12 +3,15 @@
 server/settings/
 zz_*
 config.py
-
+.DS_Store
 
 # 3rd party projects
 j*js
 ui-icons*
 *.ttf
+j*css
+server/static/ttf/LICEN*
+server/static/ttf/READ*
 
 # IDE
 .idea/
