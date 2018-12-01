@@ -84,6 +84,18 @@ class CssFormattingObject(object):
 	     'LIGHT': 'FiraSans-ExtraLight',
 	     'BLDITALIC': 'FiraSans-BoldItalic'}
 
+	g = {'REGULAR': 'EBGaramond-Regular',
+	     'MONO': 'NotoMono-Regular',
+	     'OBLIQUE': 'EBGaramond-Italic',
+	     'CONDENSED': False,
+	     'CNDENSEDBLD': False,
+	     'CNDENSEDOBL': False,
+	     'BOLD': 'EBGaramond-SemiBold',
+	     'SEMIBLD': False,
+	     'THIN': False,
+	     'LIGHT': False,
+	     'BLDITALIC': 'EBGaramond-SemiBoldItalic'}
+
 	i = {'REGULAR': 'IBMPlexSans-Regular',
 	     'MONO': 'IBMPlexMono-Regular',
 	     'OBLIQUE': 'IBMPlexSans-Italic',
@@ -107,6 +119,18 @@ class CssFormattingObject(object):
 	     'THIN': 'IBMPlexSerif-Thin',
 	     'LIGHT': 'IBMPlexSerif-Light',
 	     'BLDITALIC': 'IBMPlexSerif-BoldItalic'}
+
+	l = {'REGULAR': 'Lato-Regular',
+	     'MONO': 'NotoMono-Regular',
+	     'OBLIQUE': 'Lato-Italic',
+	     'CONDENSED': False,
+	     'CNDENSEDBLD': False,
+	     'CNDENSEDOBL': False,
+	     'BOLD': 'Lato-Bold',
+	     'SEMIBLD': 'Lato-SemiBold',
+	     'THIN': 'Lato-Thin',
+	     'LIGHT': 'Lato-Hairline',
+	     'BLDITALIC': 'Lato-BoldItalic'}
 
 	n = {'REGULAR': 'NotoSans-Regular',
 	     'MONO': 'NotoMono-Regular',
@@ -204,7 +228,9 @@ class CssFormattingObject(object):
 			'DejaVuSans': CssFormattingObject.d,
 			'DejaVuSerif': CssFormattingObject.dx,
 			'Fira': CssFormattingObject.f,
+			'EBGaramond': CssFormattingObject.g,
 			'IBMPlex': CssFormattingObject.i,
+			'Lato': CssFormattingObject.l,
 			'Noto': CssFormattingObject.n,
 			'Roboto': CssFormattingObject.r,
 			'Ubuntu': CssFormattingObject.u,

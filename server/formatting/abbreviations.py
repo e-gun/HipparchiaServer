@@ -1250,6 +1250,7 @@ def unpackcommonabbreviations(potentialabbreviaiton: str, furtherunpack: bool) -
 		'n.': 'numerius',
 		'r': 'res',
 		'f': 'filius',
+		'mod': 'modius'
 	}
 
 	furtherabbreviations = {
@@ -1257,6 +1258,29 @@ def unpackcommonabbreviations(potentialabbreviaiton: str, furtherunpack: bool) -
 		'c': 'centum',
 		'l': 'quinquaginta',
 	}
+
+	# the following should be added to the db instead...
+	morphsupplements = {
+		# a candidate for addition to the dictionary...; cf. poëta
+		'xuiri': 'decemuiri',
+		'xuiros': 'decemviros',
+		'xuiris': 'decemviris',
+		# add to morph table... [index to galen helps you grab this]
+		'τουτέϲτιν': 'τουτέϲτι',
+		'κᾄν': 'ἄν',
+		'κᾀν': 'ἄν',
+		'κᾀπί': 'ἐπὶ',
+		'κᾀκ': 'ἐκ',
+		'κᾀξ': 'ἐκ',
+		'κᾀνταῦθα': 'ἐνταῦθα',
+		'κᾀπειδάν': 'ἐπειδάν',
+		'κᾄπειθ': 'ἔπειτα',
+		'κᾄπειτα': 'ἔπειτα',
+		'κᾄπειτ': 'ἔπειτα',
+		'κᾀγώ': 'ἐγώ',
+	}
+
+	abbreviations = {**abbreviations, **morphsupplements}
 
 	if furtherunpack:
 		abbreviations = {**abbreviations, **furtherabbreviations}

@@ -39,8 +39,9 @@ DISTINCTGREEKANDLATINFONTS = 'no'
 SUPPRESSCOLORS = 'no'
 HOSTEDFONTFAMILY = 'Noto'  # Noto should be pre-installed by Hipparchia; see above about adding more
 USEFONTFILESFORSTYLES = 'yes'  # Only valid if you are using a HOSTEDFONTFAMILY
-DEFAULTLOCALFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
+DEFAULTLOCALFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'  # Arial is often present and it is very good
 DEFAULTLOCALGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 ENBALEFONTPICKER = 'no'
-FONTPICKERLIST = ['Noto', 'CMUSans', 'CMUSerif', 'DejaVuSans', 'DejaVuSerif', 'Fira', 'IBMPlex', 'Roboto', 'Ubuntu']  # see above about editing this list
+FONTPICKERLIST = ['Noto', 'CMUSans', 'CMUSerif', 'DejaVuSans', 'DejaVuSerif', 'EBGaramond',
+                  'Fira', 'IBMPlex', 'Lato', 'Roboto', 'Ubuntu']  # see above about editing this list
