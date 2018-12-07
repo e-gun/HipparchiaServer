@@ -20,7 +20,6 @@ except ImportError:
 	TfidfModel = None
 	MatrixSimilarity = None
 
-from server import hipparchia
 from server.dbsupport.vectordbfunctions import storevectorindatabase
 from server.formatting.vectorformatting import formatlsimatches, lsiformatoutput
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -60,6 +59,8 @@ def lsifindmatches(sentencestuples, searchobject, lsispace):
 	"""
 
 	so = searchobject
+	vv = so.vectorvalues
+
 	activepoll = so.poll
 
 	makespace = lsibuildspace
@@ -97,7 +98,7 @@ def lsifindmatches(sentencestuples, searchobject, lsispace):
 	similis = vectorindex[vectorquerylsi]
 	# print('similis', similis)
 
-	threshold = hipparchia.config['VECTORDISTANCECUTOFFLEMMAPAIR']
+	threshold = vv.lemmapaircutoffdistance
 
 	matches = list()
 	sims = sorted(enumerate(similis), key=lambda item: -item[1])

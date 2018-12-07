@@ -142,6 +142,24 @@ def buildfakesearchobject(qtype='nearestneighborsquery'):
 	"""
 
 	frozensession = dict()
+	
+	frozensession['vdim'] = hipparchia.config['VECTORDIMENSIONS']
+	frozensession['vwindow'] = hipparchia.config['VECTORWINDOW']
+	frozensession['viterat'] = hipparchia.config['VECTORTRAININGITERATIONS']
+	frozensession['vminpres'] = hipparchia.config['VECTORMINIMALPRESENCE']
+	frozensession['vdsamp'] = hipparchia.config['VECTORDOWNSAMPLE']
+	frozensession['vcutloc'] = hipparchia.config['VECTORDISTANCECUTOFFLOCAL']
+	frozensession['vcutneighb'] = hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']
+	frozensession['vcutlem'] = hipparchia.config['VECTORDISTANCECUTOFFLEMMAPAIR']
+	frozensession['vnncap'] = hipparchia.config['NEARESTNEIGHBORSCAP']
+	frozensession['vsentperdoc'] = hipparchia.config['SENTENCESPERDOCUMENT']
+	frozensession['ldamaxfeatures'] = hipparchia.config['LDAMAXFEATURES']
+	frozensession['ldacomponents'] = hipparchia.config['LDACOMPONENTS']
+	frozensession['ldamaxfreq'] = hipparchia.config['LDAMAXFREQ']
+	frozensession['ldaminfreq'] = hipparchia.config['LDAMINFREQ']
+	frozensession['ldaiterations'] = hipparchia.config['LDAITERATIONS']
+	frozensession['ldamustbelongerthan'] = hipparchia.config['LDAMUSTBELONGERTHAN']
+	
 	blanks = ['searchscope', 'nearornot', 'onehit']
 	for b in blanks:
 		frozensession[b] = None

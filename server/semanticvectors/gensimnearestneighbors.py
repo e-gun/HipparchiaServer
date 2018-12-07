@@ -14,8 +14,8 @@ except ImportError:
 		print('gensim not available')
 	Word2Vec = None
 
-from server import hipparchia
 from server.threading.mpthreadcount import setthreadcount
+from server.hipparchiaobjects.vectorobjects import VectorValues
 from server.dbsupport.vectordbfunctions import storevectorindatabase
 from server.formatting.vectorformatting import formatnnmatches, formatnnsimilarity, nearestneighborgenerateoutput
 from server.semanticvectors.vectorgraphing import graphnnmatches
@@ -45,6 +45,7 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 	"""
 
 	so = searchobject
+	vv = so.vectorvalues
 	activepoll = so.poll
 	termone = so.lemma.dictionaryentry
 	imagename = str()
@@ -67,16 +68,16 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 		html = similarity
 	else:
 		activepoll.statusis('Calculating the nearest neighbors')
-		mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
+		mostsimilar = findapproximatenearestneighbors(termone, vectorspace, vv)
 		# [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ('φυϲιάω', 0.5833806097507477), ('νόμοϲ', 0.5505017340183258), ...]
 		if not mostsimilar:
 			# proper noun? Ϲωκράτηϲ --> ϲωκράτηϲ
 			termone = termone[0].lower() + termone[1:]
-			mostsimilar = findapproximatenearestneighbors(termone, vectorspace)
+			mostsimilar = findapproximatenearestneighbors(termone, vectorspace, vv)
 		if mostsimilar:
 			html = formatnnmatches(mostsimilar)
 			activepoll.statusis('Building the graph')
-			mostsimilar = mostsimilar[:hipparchia.config['NEARESTNEIGHBORSCAP']]
+			mostsimilar = mostsimilar[:vv.neighborscap]
 			imagename = graphnnmatches(termone, mostsimilar, vectorspace, so)
 		else:
 			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
@@ -133,7 +134,7 @@ def buildnnvectorspace(sentencetuples, searchobject):
 	return vectorspace
 
 
-def findapproximatenearestneighbors(query, mymodel):
+def findapproximatenearestneighbors(query, mymodel, vectorvalues: VectorValues):
 	"""
 
 	search for points in space that are close to a given query point
@@ -143,16 +144,16 @@ def findapproximatenearestneighbors(query, mymodel):
 	this returns a list of tuples: (word, distance)
 
 	:param query:
-	:param morphdict:
-	:param sentences:
+	:param mymodel:
+	:param vectorvalues:
 	:return:
 	"""
 
-	explore = max(2500, hipparchia.config['NEARESTNEIGHBORSCAP'])
+	explore = max(2500, vectorvalues.neighborscap)
 
 	try:
 		mostsimilar = mymodel.wv.most_similar(query, topn=explore)
-		mostsimilar = [s for s in mostsimilar if s[1] > hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']]
+		mostsimilar = [s for s in mostsimilar if s[1] > vectorvalues.nearestneighborcutoffdistance]
 	except KeyError:
 		# keyedvectors.py: raise KeyError("word '%s' not in vocabulary" % word)
 		mostsimilar = None
@@ -230,6 +231,8 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	:return:
 	"""
 
+	vv = searchobject.vectorvalues
+
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
@@ -246,23 +249,18 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 
 	workers = setthreadcount()
 
-	dimensions = hipparchia.config['VECTORDIMENSIONS']
-	window = hipparchia.config['VECTORWINDOW']
-	trainingiterations = hipparchia.config['VECTORTRAININGITERATIONS']
-	minimumnumberofhits = hipparchia.config['VECTORMINIMALPRESENCE']
-	downsample = hipparchia.config['VECTORDOWNSAMPLE']
 	computeloss = False
 
 	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
 	try:
 		model = Word2Vec(bagsofwords,
-						min_count=minimumnumberofhits,
+						min_count=vv.minimumpresence,
 						seed=1,
-						iter=trainingiterations,
-						size=dimensions,
-						sample=downsample,
+						iter=vv.trainingiterations,
+						size=vv.dimensions,
+						sample=vv.downsample,
 						sg=1,  # the results seem terrible if you say sg=0
-						window=window,
+						window=vv.window,
 						workers=workers,
 						compute_loss=computeloss)
 	except RuntimeError:
@@ -271,7 +269,7 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 		model = None
 
 	if computeloss:
-		print('loss after {n} iterations was: {l}'.format(n=trainingiterations, l=model.get_latest_training_loss()))
+		print('loss after {n} iterations was: {l}'.format(n=vv.trainingiterations, l=model.get_latest_training_loss()))
 
 	if model:
 		model.delete_temporary_training_data(replace_word_vectors_with_normalized=True)

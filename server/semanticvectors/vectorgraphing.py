@@ -9,6 +9,8 @@
 from io import BytesIO
 from multiprocessing import current_process
 
+from server.hipparchiaobjects.vectorobjects import VectorValues
+
 # https://matplotlib.org/faq/howto_faq.html#matplotlib-in-a-web-application-server
 # do this before importing pylab or pyplot: otherwise you will see:
 #   RuntimeError: main thread is not in main loop
@@ -51,8 +53,10 @@ def graphbliteraldistancematches(searchterm, mostsimilartuples, searchobject):
 	:return:
 	"""
 
-	mostsimilartuples = [t for t in mostsimilartuples if t[1] > hipparchia.config['VECTORDISTANCECUTOFFLOCAL']]
-	mostsimilartuples = mostsimilartuples[:hipparchia.config['NEARESTNEIGHBORSCAP']]
+	vv = searchobject.vectorvalues
+
+	mostsimilartuples = [t for t in mostsimilartuples if t[1] > vv.localcutoffdistance]
+	mostsimilartuples = mostsimilartuples[:vv.neighborscap]
 
 	terms = [searchterm] + [t[0] for t in mostsimilartuples]
 
@@ -90,18 +94,18 @@ def graphnnmatches(searchterm, mostsimilartuples, vectorspace, searchobject):
 
 	title = givetitletograph('Conceptual neighborhood of', searchterm, searchobject)
 
-	imagename = graphmatches(title, searchterm, mostsimilartuples, terms, relevantconnections, vtype='nn')
+	imagename = graphmatches(title, searchterm, searchobject, mostsimilartuples, terms, relevantconnections, vtype='nn')
 
 	return imagename
 
 
-def graphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconnections, vtype):
+def graphmatches(graphtitle, searchterm, searchobject, mostsimilartuples, terms, relevantconnections, vtype):
 	# fnc = bokehgraphmatches
 	fnc = matplotgraphmatches
-	return fnc(graphtitle, searchterm, mostsimilartuples, terms, relevantconnections, vtype)
+	return fnc(graphtitle, searchterm, searchobject, mostsimilartuples, terms, relevantconnections, vtype)
 
 
-def matplotgraphmatches(graphtitle, searchterm, mostsimilartuples, terms, relevantconnections, vtype):
+def matplotgraphmatches(graphtitle, searchterm, searchobject, mostsimilartuples, terms, relevantconnections, vtype):
 	"""
 
 	mostsimilartuples come in a list and look like:
@@ -162,7 +166,7 @@ def matplotgraphmatches(graphtitle, searchterm, mostsimilartuples, terms, releva
 	nx.draw_networkx_edge_labels(graph, pos, edgelabels, font_size=12, alpha=0.8, label_pos=0.5, font_family='sans-serif')
 
 	# the fine print
-	plt.text(0, -1.1, generatethefineprint(vtype), ha='center', va='bottom')
+	plt.text(0, -1.1, generatethefineprint(vtype, searchobject.vectorvalues), ha='center', va='bottom')
 	# plt.text(1, -1, 'gensim', ha='center', va='bottom')
 	# plt.text(-1, -1, '@commit {v}'.format(v=readgitdata()[0:5]), ha='center', va='bottom')
 
@@ -309,7 +313,7 @@ def givetitletograph(topic, searchterm, searchobject):
 	return title
 
 
-def generatethefineprint(vtype):
+def generatethefineprint(vtype: str, vectorvalues: VectorValues) -> str:
 	"""
 
 	label graphs with setting values
@@ -317,24 +321,26 @@ def generatethefineprint(vtype):
 	:return:
 	"""
 
+	vv = vectorvalues
+
 	cutofffinder = {
-		'rudimentary': 'VECTORDISTANCECUTOFFLOCAL',
-		'nn': 'VECTORDISTANCECUTOFFNEARESTNEIGHBOR',
-		'unused': 'VECTORDISTANCECUTOFFLEMMAPAIR'
+		'rudimentary': vv.localcutoffdistance,
+		'nn': vv.nearestneighborcutoffdistance,
+		'unused': vv.lemmapaircutoffdistance
 	}
 
 	try:
-		c = hipparchia.config[cutofffinder[vtype]]
+		c = cutofffinder[vtype]
 	except KeyError:
 		c = '[unknown]'
-	d = hipparchia.config['VECTORDIMENSIONS']
-	w = hipparchia.config['VECTORWINDOW']
-	i = hipparchia.config['VECTORTRAININGITERATIONS']
-	p = hipparchia.config['VECTORMINIMALPRESENCE']
-	s = hipparchia.config['VECTORDOWNSAMPLE']
-	n = hipparchia.config['SENTENCESPERDOCUMENT']
 
 	fineprint = 'dimensions: {d} · sentences per document: {n} · window: {w} · minimum presence: {p} · training runs: {i} · downsample: {s} · cutoff: {c}'
-	fineprint = fineprint.format(d=d, n=n, w=w, p=p, i=i, s=s, c=c)
+	fineprint = fineprint.format(d=vv.dimensions,
+	                             n=vv.sentencesperdocument,
+	                             w=vv.window,
+	                             p=vv.minimumpresence,
+	                             i=vv.trainingiterations,
+	                             s=vv.downsample,
+	                             c=c)
 
 	return fineprint

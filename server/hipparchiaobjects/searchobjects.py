@@ -12,6 +12,7 @@ import time
 from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.wordformatting import avoidsmallvariants
+from server.hipparchiaobjects.vectorobjects import VectorValues
 from server.listsandsession.sessionfunctions import justlatin
 
 
@@ -117,6 +118,7 @@ class SearchObject(object):
 		self.vectortype = None
 		self.tovectorize = None
 		self.vectorquerytype = None
+		self.vectorvalues = VectorValues(frozensession)
 		self.starttime = time.time()
 		self.usedcorpora = list()
 		self.sentencebundlesize = hipparchia.config['SENTENCESPERDOCUMENT']

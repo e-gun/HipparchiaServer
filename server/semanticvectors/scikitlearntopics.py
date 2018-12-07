@@ -182,14 +182,15 @@ def ldatopicgraphing(sentencetuples, workssearched, searchobject, headwordstops=
 	sentencetuples = [(a, removestopwords(b, stops)) for a, b in sentencetuples]
 
 	activepoll = searchobject.poll
+	vv = searchobject.vectorvalues
 
 	settings = {
-		'maxfeatures': 2000,
-		'components': 12,  # topics
-		'maxfreq': .75,  # fewer than n% of sentences should have this word (i.e., purge common words)
-		'minfreq': 5,  # word must be found >n times
-		'iterations': 12,
-		'mustbelongerthan': 3
+		'maxfeatures': vv.ldamaxfeatures,
+		'components': vv.ldacomponents,     # topics
+		'maxfreq': vv.ldamaxfreq,           # fewer than n% of sentences should have this word (i.e., purge common words)
+		'minfreq': vv.ldaminfreq,           # word must be found >n times
+		'iterations': vv.ldaiterations,
+		'mustbelongerthan': vv.ldamustbelongerthan
 	}
 
 	# not easy to store/fetch since you need both ldavectorizer and ldamodel

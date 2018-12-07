@@ -84,6 +84,22 @@ def probeforsessionvariables():
 		session['tensorflowgraph'] = 'no'
 		session['topicmodel'] = 'no'
 		session['varia'] = hipparchia.config['DEFAULTVARIA']
+		session['vdim'] = hipparchia.config['VECTORDIMENSIONS']
+		session['vwindow'] = hipparchia.config['VECTORWINDOW']
+		session['viterat'] = hipparchia.config['VECTORTRAININGITERATIONS']
+		session['vminpres'] = hipparchia.config['VECTORMINIMALPRESENCE']
+		session['vdsamp'] = hipparchia.config['VECTORDOWNSAMPLE']
+		session['vcutloc'] = hipparchia.config['VECTORDISTANCECUTOFFLOCAL']
+		session['vcutneighb'] = hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']
+		session['vcutlem'] = hipparchia.config['VECTORDISTANCECUTOFFLEMMAPAIR']
+		session['vnncap'] = hipparchia.config['NEARESTNEIGHBORSCAP']
+		session['vsentperdoc'] = hipparchia.config['SENTENCESPERDOCUMENT']
+		session['ldamaxfeatures'] = hipparchia.config['LDAMAXFEATURES']
+		session['ldacomponents'] = hipparchia.config['LDACOMPONENTS']
+		session['ldamaxfreq'] = hipparchia.config['LDAMAXFREQ']
+		session['ldaminfreq'] = hipparchia.config['LDAMINFREQ']
+		session['ldaiterations'] = hipparchia.config['LDAITERATIONS']
+		session['ldamustbelongerthan'] = hipparchia.config['LDAMUSTBELONGERTHAN']
 		session['wkexclusions'] = list()
 		session['wkgnexclusions'] = list()
 		session['wkgnselections'] = list()
@@ -93,7 +109,6 @@ def probeforsessionvariables():
 		session['xmission'] = 'Any'
 		session['zaplunates'] = hipparchia.config['RESTOREMEDIALANDFINALSIGMA']
 		session.modified = True
-
 	return
 
 
@@ -107,63 +122,100 @@ def modifysessionvariable(param, val):
 	:return:
 	"""
 
-	availableoptions = [
-		'authorssummary',
-		'bracketangled',
-		'bracketcurly',
-		'bracketround',
-		'bracketsquare',
-		'browsercontext',
-		'christiancorpus',
-		'cosdistbylineorword',
-		'cosdistbysentence',
-		'earliestdate',
-		'fontchoice',
-		'greekcorpus',
-		'headwordindexing',
-		'incerta',
-		'indexbyfrequency',
-		'inscriptioncorpus',
-		'latestdate',
-		'latincorpus',
-		'linesofcontext',
-		'maxresults',
-		'nearestneighborsquery',
-		'nearornot',
-		'onehit',
-		'papyruscorpus',
-		'principleparts',
-		'proximity',
-		'quotesummary',
-		'searchscope',
-		'semanticvectorquery',
-		'sensesummary',
-		'sentencesimilarity',
-		'simpletextoutput',
-		'showwordcounts',
-		'sortorder',
-		'spuria',
-		'suppresscolors',
-		'tensorflowgraph',
-		'topicmodel',
-		'varia',
-		'zaplunates'
-		]
-
+	availableoptions = list()
 	blocakabledebugoptions = ['debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords', 'searchinsidemarkup']
 
 	if hipparchia.config['ALLOWUSERTOSETDEBUGMODES'] == 'yes':
 		availableoptions.extend(blocakabledebugoptions)
 
+	yesorno = [
+		'authorssummary',
+		'bracketangled',
+		'bracketcurly',
+		'bracketround',
+		'bracketsquare',
+		'christiancorpus',
+		'cosdistbylineorword',
+		'cosdistbysentence',
+		'debugdb',
+		'debughtml',
+		'debuglex',
+		'debugparse',
+		'greekcorpus',
+		'headwordindexing',
+		'incerta',
+		'indexbyfrequency',
+		'indexskipsknownwords',
+		'inscriptioncorpus',
+		'latincorpus',
+		'nearestneighborsquery',
+		'onehit',
+		'papyruscorpus',
+		'principleparts',
+		'quotesummary',
+		'searchinsidemarkup',
+		'semanticvectorquery',
+		'sensesummary',
+		'sentencesimilarity',
+		'showwordcounts',
+		'simpletextoutput',
+		'spuria',
+		'suppresscolors',
+		'topicmodel',
+		'varia',
+		'zaplunates',
+	]
+
+	vectoroptions = [
+		'ldacomponents',
+		'ldaiterations',
+		'ldamaxfeatures',
+		'ldamaxfreq',
+		'ldaminfreq',
+		'ldamustbelongerthan'
+		'vcutlem',
+		'vcutloc',
+		'vcutneighb',
+		'vdim',
+		'vdsamp',
+		'viterat',
+		'vminpres',
+		'vnncap',
+		'vsentperdoc',
+		'vwindow'
+	]
+
+	miscoptions = [
+		'browsercontext',
+		'earliestdate'
+		'fontchoice',
+		'latestdate',
+		'linesofcontext',
+		'maxresults',
+		'nearornot',
+		'proximity',
+		'searchscope',
+		'sortorder',
+		'tensorflowgraph',
+		]
+
+	for o in [miscoptions, yesorno]:
+		availableoptions.extend(o)
+
+	# special case because we are dealing with collections of numbers
+	if param in vectoroptions:
+		validatevectorvalue(param, val)
+		return
+
+	# first set; then check to see if you need to reset an invalid value
 	if param in availableoptions:
 		session[param] = val
-		# print('param = val:', param, session[param])
 	else:
-		# print('param not found:', param)
 		pass
 
 	# drop all selections/exclusions from any corpus that you just disabled
-	if param in ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus'] and session[param] != 'yes':
+	cc = ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']
+	if param in cc and session[param] != 'yes':
 		corpora = {'greekcorpus': 'gr', 'latincorpus': 'lt', 'inscriptioncorpus': 'in', 'papyruscorpus': 'dp', 'christiancorpus': 'ch'}
 		lists = ['auselections', 'psgselections', 'wkselections', 'auexclusions', 'psgexclusions', 'wkexclusions']
 		for l in lists:
@@ -181,14 +233,9 @@ def modifysessionvariable(param, val):
 		for l in checkagainst.keys():
 			session[l] = [item for item in session[l] if item in returnactivelist(checkagainst[l])]
 
-	# our yes/no options
-	for variable in ['authorssummary', 'bracketangled', 'bracketcurly', 'bracketround', 'bracketsquare', 'christiancorpus', 'cosdistbylineorword',
-	                 'cosdistbysentence', 'greekcorpus', 'headwordindexing', 'incerta', 'indexbyfrequency', 'inscriptioncorpus', 'latincorpus',
-	                 'nearestneighborsquery', 'onehit', 'papyruscorpus', 'quotesummary', 'semanticvectorquery', 'sensesummary', 'sentencesimilarity',
-	                 'spuria', 'topicmodel', 'varia', 'debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords', 'searchinsidemarkup',
-	                 'zaplunates', 'suppresscolors', 'simpletextoutput', 'principleparts', 'showwordcounts']:
-		if session[variable] not in ['yes', 'no']:
-			session[variable] = 'no'
+	if param in yesorno:
+		if session[param] not in ['yes', 'no']:
+			session[param] = 'no'
 
 	# A implies B
 	if session['indexskipsknownwords'] == 'yes':
@@ -268,6 +315,64 @@ def modifysessionvariable(param, val):
 
 	# print('set',param,'to',session[param])
 	session.modified = True
+
+	return
+
+
+def validatevectorvalue(param, val):
+	"""
+
+	make sure a vector setting makes sense
+
+	:param param:
+	:param val:
+	:return:
+	"""
+
+	val = int(val)
+
+	vectorranges = {
+		'ldacomponents': range(1, 51),
+		'ldaiterations': range(1, 26),
+		'ldamaxfeatures': range(1, 5001),
+		'ldamaxfreq': range(1, 101),
+		'ldaminfreq': range(1, 21),
+		'ldamustbelongerthan': range(1, 5),
+		'vcutlem': range(0, 101),
+		'vcutloc': range(0, 101),
+		'vcutneighb': range(0, 101),
+		'vdim': range(50, 500),
+		'vdsamp': range(1, 21),
+		'viterat': range(1, 21),
+		'vminpres': range(1, 21),
+		'vnncap': range(1, 26),
+		'vsentperdoc': range(1, 6),
+		'vwindow': range(2, 20)
+	}
+
+	vectordefaults = {
+		'ldacomponents': hipparchia.config['LDACOMPONENTS'],
+		'ldaiterations': hipparchia.config['LDAITERATIONS'],
+		'ldamaxfeatures': hipparchia.config['LDAMAXFEATURES'],
+		'ldamaxfreq': hipparchia.config['LDAMAXFREQ'],
+		'ldaminfreq': hipparchia.config['LDAMINFREQ'],
+		'ldamustbelongerthan': hipparchia.config['LDAMUSTBELONGERTHAN'],
+		'vcutlem': hipparchia.config['VECTORDISTANCECUTOFFLEMMAPAIR'],
+		'vcutloc': hipparchia.config['VECTORDISTANCECUTOFFLOCAL'],
+		'vcutneighb': hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR'],
+		'vdim': hipparchia.config['VECTORDIMENSIONS'],
+		'vdsamp': hipparchia.config['VECTORDOWNSAMPLE'],
+		'viterat': hipparchia.config['VECTORTRAININGITERATIONS'],
+		'vminpres': hipparchia.config['VECTORMINIMALPRESENCE'],
+		'vnncap': hipparchia.config['NEARESTNEIGHBORSCAP'],
+		'vsentperdoc': hipparchia.config['SENTENCESPERDOCUMENT'],
+		'vwindow': hipparchia.config['VECTORWINDOW'],
+	}
+
+	if val not in vectorranges[param]:
+		val = vectordefaults[param]
+
+	session[param] = val
 
 	return
 

@@ -45,7 +45,7 @@
 #
 # VECTORDISTANCECUTOFF: how close Word A needs to be to Word B for the associative matrix
 #   calculations to decide that there is a relationship worth pursuing: a value between 1 and 0
-#   1 --> identical;
+#   100 --> identical;
 #   0 --> completely unrelated
 #
 # VECTORTRAININGITERATIONS sets the number of training passes; this is a tricky one
@@ -83,10 +83,41 @@ VECTORDIMENSIONS = 300
 VECTORWINDOW = 10
 VECTORTRAININGITERATIONS = 12
 VECTORMINIMALPRESENCE = 10
-VECTORDOWNSAMPLE = 0.05
-VECTORDISTANCECUTOFFLOCAL = .33
-VECTORDISTANCECUTOFFNEARESTNEIGHBOR = .33
-VECTORDISTANCECUTOFFLEMMAPAIR = .5
+VECTORDOWNSAMPLE = 5
+VECTORDISTANCECUTOFFLOCAL = 33
+VECTORDISTANCECUTOFFNEARESTNEIGHBOR = 33
+VECTORDISTANCECUTOFFLEMMAPAIR = 50
 NEARESTNEIGHBORSCAP = 15
 SENTENCESPERDOCUMENT = 1
+
+# settings for ldatopicgraphing()
+LDAMAXFEATURES = 2000
+LDACOMPONENTS = 12      # topics
+LDAMAXFREQ = 75         # fewer than n% of sentences should have this word (i.e., purge common words)
+LDAMINFREQ = 5          # word must be found >n times
+LDAITERATIONS = 12
+LDAMUSTBELONGERTHAN = 3
+
 AUTOVECTORIZE = 'no'
+
+
+"""
+vectorranges = {
+	'ldacomponents': range(1, 51),
+	'ldaiterations': range(1, 26),
+	'ldamaxfeatures': range(1, 5001),
+	'ldamaxfreq': range(1, 101),
+	'ldaminfreq': range(1, 21),
+	'ldamustbelongerthan': range(1, 5),
+	'vcutlem': range(0, 101),
+	'vcutloc': range(0, 101),
+	'vcutneighb': range(0, 101),
+	'vdim': range(50, 500),
+	'vdsamp': range(1, 21),
+	'viterat': range(1, 21),
+	'vminpres': range(1, 21),
+	'vnncap': range(1, 26),
+	'vsentperdoc': range(1, 6),
+	'vwindow': range(2, 20)
+}
+"""
