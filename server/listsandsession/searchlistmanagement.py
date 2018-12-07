@@ -12,7 +12,8 @@ from flask import session
 
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.genericlistfunctions import tidyuplist, foundindict
-from server.listsandsession.sessionfunctions import justlatin, reducetosessionselections
+from server.listsandsession.sessionfunctions import reducetosessionselections
+from server.listsandsession.corpusavailability import justlatin
 from server.startup import allincerta, allvaria
 
 

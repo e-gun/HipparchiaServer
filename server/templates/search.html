@@ -41,6 +41,8 @@
 
 </div>
 
+{% autoescape false %}{{ vectoroptionshtml }}{% endautoescape %}
+
 <script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
 <script src="{{ url_for('static', filename='indexandtextmaker.js') }}"></script>
 <script src="{{ url_for('static', filename='ui-clicks.js') }}"></script>

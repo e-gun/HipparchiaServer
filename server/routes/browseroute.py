@@ -15,7 +15,7 @@ from server.formatting.lexicaformatting import lexicaldbquickfixes
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.listsandsession.sessionfunctions import probeforsessionvariables
+from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import authordict, workdict
 
 

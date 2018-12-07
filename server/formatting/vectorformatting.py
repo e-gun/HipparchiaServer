@@ -14,6 +14,7 @@ from server import hipparchia
 from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 from server.hipparchiaobjects.searchobjects import SearchOutputObject, SearchObject
+from server.semanticvectors.vectorhelpers import vectordefaults, vectorranges, vectorlabels
 from server.startup import authordict, workdict
 
 
@@ -266,7 +267,7 @@ def vectorhtmlforfrontpage() -> str:
 	"""
 
 	if hipparchia.config['SEMANTICVECTORSENABLED'] != 'yes':
-		return ''
+		return str()
 
 	textmapper = {'LITERALCOSINEDISTANCEENABLED': cdc,
 	              'CONCEPTSEARCHINGENABLED': cs,
@@ -283,6 +284,45 @@ def vectorhtmlforfrontpage() -> str:
 	vectorhtml = '\n'.join(vectorhtml)
 
 	return vectorhtml
+
+
+def vectorhtmlforoptionsbar() -> str:
+	"""
+
+	if we are doing vectors, then allow values to be set
+
+	need html (and js...) support for this
+
+	:return:
+	"""
+
+	if hipparchia.config['SEMANTICVECTORSENABLED'] != 'yes':
+		return str()
+
+	framedcontents = """
+	<div id="vectoroptionsetter" class="rightnavigator">
+		{contents}
+	</div>
+	"""
+
+	fieldtemplate = """
+	<fieldset id="{k}field">
+		<legend>{lg}</legend>
+		<input id="{k}" type="text" value="{d}" width="20px;">
+	</fieldset>
+	"""
+
+	htmlsupplement = list()
+	for k in vectordefaults.keys():
+		htmlsupplement.append(fieldtemplate.format(k=k, lg=vectorlabels[k], d=vectordefaults[k]))
+
+	htmlsupplement = '\n'.join(htmlsupplement)
+
+	htmlsupplement = framedcontents.format(contents=htmlsupplement)
+
+	htmlsupplement = str()
+
+	return htmlsupplement
 
 
 def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: str, workssearched: int, searchobject: SearchObject) -> str:

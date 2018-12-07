@@ -15,8 +15,8 @@ from flask import render_template, send_file, session
 
 from server import hipparchia
 from server.dbsupport.miscdbfunctions import versionchecking
-from server.formatting.vectorformatting import vectorhtmlforfrontpage
-from server.listsandsession.sessionfunctions import probeforsessionvariables
+from server.formatting.vectorformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar
+from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
 
 
@@ -45,6 +45,7 @@ def frontpage():
 	debugpanel = hipparchia.config['ALLOWUSERTOSETDEBUGMODES']
 
 	vectorhtml = vectorhtmlforfrontpage()
+	vectoroptionshtml = vectorhtmlforoptionsbar()
 
 	# check to see which dbs we actually own
 	activelists = [l for l in listmapper if len(listmapper[l]['a']) > 0]
@@ -85,6 +86,7 @@ def frontpage():
 							undated=session['incerta'],
 							debug=debugpanel,
 							vectorhtml=vectorhtml,
+							vectoroptionshtml=vectoroptionshtml,
 							icanzap=icanzap)
 
 	return page

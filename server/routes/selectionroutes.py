@@ -15,8 +15,9 @@ from server import hipparchia
 from server.formatting.wordformatting import depunct
 from server.listsandsession.genericlistfunctions import dropdupes, tidyuplist
 from server.listsandsession.sessionfunctions import modifysessionvariable, rationalizeselections, returnactivelist, \
-	selectionisactive, sessionselectionsashtml
-from server.listsandsession.sessionfunctions import probeforsessionvariables
+	selectionisactive
+from server.formatting.sessionhtmlandjs import sessionselectionsashtml
+from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \
 	workprovenancedict
 

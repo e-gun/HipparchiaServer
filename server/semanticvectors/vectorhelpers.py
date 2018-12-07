@@ -32,6 +32,65 @@ from server.startup import lemmatadict
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
 
+vectorranges = {
+	'ldacomponents': range(1, 51),
+	'ldaiterations': range(1, 26),
+	'ldamaxfeatures': range(1, 5001),
+	'ldamaxfreq': range(1, 101),
+	'ldaminfreq': range(1, 21),
+	'ldamustbelongerthan': range(1, 5),
+	'vcutlem': range(0, 101),
+	'vcutloc': range(0, 101),
+	'vcutneighb': range(0, 101),
+	'vdim': range(50, 500),
+	'vdsamp': range(1, 21),
+	'viterat': range(1, 21),
+	'vminpres': range(1, 21),
+	'vnncap': range(1, 26),
+	'vsentperdoc': range(1, 6),
+	'vwindow': range(2, 20)
+}
+
+vectordefaults = {
+	'ldacomponents': hipparchia.config['LDACOMPONENTS'],
+	'ldaiterations': hipparchia.config['LDAITERATIONS'],
+	'ldamaxfeatures': hipparchia.config['LDAMAXFEATURES'],
+	'ldamaxfreq': hipparchia.config['LDAMAXFREQ'],
+	'ldaminfreq': hipparchia.config['LDAMINFREQ'],
+	'ldamustbelongerthan': hipparchia.config['LDAMUSTBELONGERTHAN'],
+	'vcutlem': hipparchia.config['VECTORDISTANCECUTOFFLEMMAPAIR'],
+	'vcutloc': hipparchia.config['VECTORDISTANCECUTOFFLOCAL'],
+	'vcutneighb': hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR'],
+	'vdim': hipparchia.config['VECTORDIMENSIONS'],
+	'vdsamp': hipparchia.config['VECTORDOWNSAMPLE'],
+	'viterat': hipparchia.config['VECTORTRAININGITERATIONS'],
+	'vminpres': hipparchia.config['VECTORMINIMALPRESENCE'],
+	'vnncap': hipparchia.config['NEARESTNEIGHBORSCAP'],
+	'vsentperdoc': hipparchia.config['SENTENCESPERDOCUMENT'],
+	'vwindow': hipparchia.config['VECTORWINDOW'],
+}
+
+
+vectorlabels = {
+	'ldacomponents': 'LDA components',
+	'ldaiterations': 'LDA iterations',
+	'ldamaxfeatures': 'LDA features',
+	'ldamaxfreq': 'LDA max frequency',
+	'ldaminfreq': 'LDA min frequency',
+	'ldamustbelongerthan': 'LDA min length',
+	'vcutlem': 'Cutoff: Lemma pairs',
+	'vcutloc': 'Cutoff: Literal distance',
+	'vcutneighb': 'Cutoff: Nearest Neighbors',
+	'vdim': 'Vector Dimensions',
+	'vdsamp': 'Vector downsampling',
+	'viterat': 'Training iterations',
+	'vminpres': 'Minimal term presence',
+	'vnncap': 'Nearest Neighbors cap',
+	'vsentperdoc': 'Sentences per document',
+	'vwindow': 'Proximity window size'
+}
+
+
 def cleantext(texttostrip):
 	"""
 

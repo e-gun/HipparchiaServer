@@ -19,7 +19,7 @@ from server.formatting.miscformatting import validatepollid
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
-from server.listsandsession.sessionfunctions import probeforsessionvariables
+from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import authordict, poll, workdict
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import tcparserequest, \

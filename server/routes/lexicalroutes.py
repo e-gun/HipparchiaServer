@@ -20,8 +20,8 @@ from server.formatting.wordformatting import abbreviatedsigmarestoration, attemp
 	removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.listsandsession.genericlistfunctions import polytonicsort
-from server.listsandsession.sessionfunctions import justlatin, justtlg
-from server.listsandsession.sessionfunctions import probeforsessionvariables
+from server.listsandsession.corpusavailability import justlatin, justtlg
+from server.listsandsession.checksession import probeforsessionvariables
 
 
 @hipparchia.route('/dictsearch/<searchterm>')

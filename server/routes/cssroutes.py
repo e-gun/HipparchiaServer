@@ -10,7 +10,7 @@ from flask import make_response
 
 from server import hipparchia
 from server.hipparchiaobjects.cssformattingobject import CssFormattingObject
-from server.listsandsession.sessionfunctions import probeforsessionvariables
+from server.listsandsession.checksession import probeforsessionvariables
 
 
 @hipparchia.route('/css/<cssrequest>', methods=['GET'])
