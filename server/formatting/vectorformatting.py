@@ -488,7 +488,7 @@ def ldatopicsgenerateoutput(ldavishtmlandjs: str, workssearched: int, settings: 
 	#
 	# print('findsjs',findsjs)
 
-	who = ''
+	who = str()
 	where = '{n} authors'.format(n=searchobject.numberofauthorssearched())
 
 	if searchobject.numberofauthorssearched() == 1:

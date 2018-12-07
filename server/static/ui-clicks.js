@@ -132,6 +132,22 @@ function loadoptions() {
         });
 }
 
+
+//
+// vector spinners
+//
+
+function loadvectorspinners() {
+    $.getJSON('/getvectorranges', function (vsdata) {
+        let bcsh = document.getElementById("vectorspinnerscriptholder");
+        if (bcsh.hasChildNodes()) {
+            bcsh.removeChild(bcsh.firstChild);
+        }
+        $('#vectorspinnerscriptholder').html(vsdata);
+    });
+}
+
+
 // UPPER LEFT OPTIONS PANEL CLICKS
 
 function openoptionsslider() {
@@ -165,10 +181,6 @@ function openvectoroptionsslider() {
     $('#upperleftbuttons').hide();
 }
 
-function closevectoroptionsoptionsslider() {
-    closeoptionsslider();
-}
-
 $('#openoptionsbutton').click(function(){
     loadoptions();
     openoptionsslider();
@@ -189,13 +201,17 @@ $('#close_vector_options_button').click(function(){
 
 $('#vector_options_button').click(function(){
     loadoptions();
+    loadvectorspinners();
     openvectoroptionsslider();
 });
 
 $('#alt_vector_options_button').click(function(){
     loadoptions();
+    loadvectorspinners();
     openvectoroptionsslider();
 });
+
+// BROWSER CLICKS
 
 function browsetopassage() {
     let auth = $('#authorsautocomplete').val().slice(-7, -1);
@@ -223,9 +239,9 @@ function browsetopassage() {
     browseuponclick(loc);
 }
 
-$('#addtolist').click(function(){ addtosearchlist(); });
-
 $('#browseto').click(function(){ browsetopassage(); });
+
+$('#addtolist').click(function(){ addtosearchlist(); });
 
 $('#fewerchoices').click(function(){
     $('#morechoices').show();
@@ -235,7 +251,6 @@ $('#fewerchoices').click(function(){
     hidemany(ids);
     });
 
-
 $('#morechoices').click(function(){
     $('#morechoices').hide();
     const ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
@@ -243,7 +258,6 @@ $('#morechoices').click(function(){
     bulkshow(ids);
     loadoptions();
     });
-
 
 function showextendedsearch() {
         const ids = Array('#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox', '#semanticvectorquerycheckbox',
@@ -253,6 +267,7 @@ function showextendedsearch() {
 
 $('#moretools').click(function(){ $('#lexica').toggle(); });
 $('#alt_moretools').click(function(){ $('#lexica').toggle(); });
+$('#vectoralt_moretools').click(function(){ $('#lexica').toggle(); });
 
 // not working as expected
 // supposed to clear out the other boxes and restore the placeholder; only clears the boxes
@@ -533,7 +548,7 @@ $('#showwordcounts').change(function() {
     });
 
 //
-// vector checkboxes
+// vector checkboxes in main page body
 //
 
 const thesearchforms = ['#wordsearchform', '#lemmatasearchform', '#proximatesearchform', '#proximatelemmatasearchform'];
@@ -747,7 +762,7 @@ $('#termtwoisalemma').change(function() {
     });
 
 //
-// spinners
+// non-vector spinners
 //
 
 $('#linesofcontextspinner').spinner({
@@ -792,7 +807,6 @@ $( '#hitlimitspinner' ).spinner({
         setoptions('maxresults', String(result));
         }
         });
-
 
 $( '#latestdate' ).spinner({
     min: -850,

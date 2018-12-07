@@ -19,6 +19,7 @@ $(document).ready( function () {
 
     $('#clear_button').click( function() { window.location.href = '/resetsession'; });
     $('#alt_clear_button').click( function() { window.location.href = '/resetsession'; });
+    $('#vectoralt_clear_button').click( function() { window.location.href = '/resetsession'; });
     $('#helptabs').tabs();
     $('#helpbutton').click( function() {
         if (document.getElementById('Interface').innerHTML === '<!-- placeholder -->') {

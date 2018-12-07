@@ -7,7 +7,9 @@
 """
 
 import json
+import re
 from multiprocessing import current_process
+from string import Template
 
 from flask import make_response, redirect, request, session, url_for
 
@@ -28,6 +30,7 @@ except ImportError:
 		print('could not import "fetchvectorgraph": graphing will be unavailable')
 from server.startup import authordict, authorgenresdict, authorlocationdict, listmapper, workdict, workgenresdict, \
 	workprovenancedict
+from server.semanticvectors.vectorhelpers import vectorranges
 
 
 # getselections is in selectionroutes.py
@@ -339,3 +342,61 @@ def fetchstoredimage(figurename):
 	response.headers.set('Content-Disposition', 'attachment', filename='graph.png')
 
 	return response
+
+
+@hipparchia.route('/getvectorranges')
+def returnvectorsettingsranges():
+	"""
+
+	since vector settings names and ranges are subject to lots of tinkering, we will not
+	hard-code them into the HTML/JS but instead generate them dynamically
+
+	:return:
+	"""
+
+	scriptholder="""
+	<script>
+		{js}
+	</script>
+	"""
+
+	spinnertamplate = """
+	◦( '#$elementid' ).spinner({
+		min: $min,
+		max: $max,
+		value: $val,
+		step: $step,
+		stop: function( event, ui ) {
+			let result = ◦('#$elementid').spinner('value');
+			setoptions('$elementid', String(result));
+			loadvectorspinners();
+			},
+		spin: function( event, ui ) {
+			let result = ◦('#$elementid').spinner('value');
+			setoptions('$elementid', String(result));
+			loadvectorspinners();
+			}
+		});
+	"""
+
+	t = Template(spinnertamplate)
+
+	rangedata = list()
+
+	for k in vectorranges.keys():
+		r = list(vectorranges[k])
+		m = r[0]
+		x = r[-1]
+		s = int((m-x)/20)
+		thisjs = t.substitute(elementid=k,
+								min=m,
+								max=x,
+								step=s,
+								val=session[k])
+		thisjs = re.sub(r'◦', '$', thisjs)
+		rangedata.append(thisjs)
+
+	js = scriptholder.format(js='\n'.join(rangedata))
+	jsinjection = json.dumps(js)
+
+	return jsinjection
