@@ -16,7 +16,6 @@ from server.dbsupport.dblinefunctions import bulklinegrabber
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.proximitysearching import grableadingandlagging
-from server.semanticvectors.vectorhelpers import determinesettings, readgitdata
 
 
 def createvectorstable():
@@ -38,8 +37,7 @@ def createvectorstable():
 	CREATE TABLE public.storedvectors
 	(
 		ts timestamp without time zone,
-		versionstamp character varying(6) COLLATE pg_catalog."default",
-		instance character varying (512) COLLATE pg_catalog."default",
+		thumbprint bytea,
 		uidlist text[] COLLATE pg_catalog."default",
 		vectortype character varying(10) COLLATE pg_catalog."default",
 		calculatedvectorspace bytea
@@ -137,16 +135,15 @@ def storevectorindatabase(searchobject: SearchObject, vectortype: str, vectorspa
 
 	q = """
 	INSERT INTO public.storedvectors 
-		(ts, versionstamp, instance, uidlist, vectortype, calculatedvectorspace)
-		VALUES (%s, %s, %s, %s, %s, %s)
+		(ts, thumbprint, uidlist, vectortype, calculatedvectorspace)
+		VALUES (%s, %s, %s, %s, %s)
 	"""
 
 	pickledvectors = pickle.dumps(vectorspace)
-	settings = determinesettings()
 	ts = datetime.now().strftime("%Y-%m-%d %H:%M")
-	versionstamp = readgitdata()[:6]
+	thumbprint = pickle.dumps(searchobject.vectorvalues)
 
-	d = (ts, versionstamp, settings, uidlist, vectortype, pickledvectors)
+	d = (ts, thumbprint, uidlist, vectortype, pickledvectors)
 	dbcursor.execute(q, d)
 
 	# print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))
@@ -156,7 +153,7 @@ def storevectorindatabase(searchobject: SearchObject, vectortype: str, vectorspa
 	return
 
 
-def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout='instance'):
+def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout='thumbprint'):
 	"""
 
 	the stored vector might not reflect the current math rules
@@ -164,10 +161,10 @@ def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout=
 	return False if you are 'outdated'
 
 	hipparchiaDB=# select ts,versionstamp,uidlist from storedvectors;
-	        ts          | versionstamp |   uidlist
+	        ts          | thumbprint |   uidlist
 	---------------------+--------------+--------------
-	2018-02-14 20:49:00 | 7e1c1b       | {lt0474w011}
-	2018-02-14 20:50:00 | 7e1c1b       | {lt0474w057}
+	2018-02-14 20:49:00 | json       | {lt0474w011}
+	2018-02-14 20:50:00 | json       | {lt0474w057}
 	(2 rows)
 
 	:param searchobject:
@@ -180,8 +177,6 @@ def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout=
 		uidlist = searchobject.wholecorporasearched()
 	else:
 		uidlist = sorted(searchobject.searchlist)
-
-	version = readgitdata()
 
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
@@ -204,20 +199,15 @@ def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout=
 	if not result:
 		return False
 
-	if careabout == 'versionstamp':
-		outdated = (version[:6] != result[0])
-	elif careabout == 'instance':
-		current = determinesettings()
-		outdated = (current != result[0])
-	else:
-		outdated = True
+	storedvectorvlaues = pickle.loads(result[0])
+	currentvectorvalues = searchobject.vectorvalues
 
-	# print('checkforstoredvector()', uidlist, result[0], 'outdated=', outdated)
-
-	if outdated:
-		returnval = False
-	else:
+	if storedvectorvlaues == currentvectorvalues:
+		# print('vv matched')
 		returnval = pickle.loads(result[1])
+	else:
+		# print('vv not a match')
+		returnval = False
 
 	dbconnection.connectioncleanup()
 

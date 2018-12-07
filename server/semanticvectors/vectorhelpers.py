@@ -16,6 +16,7 @@ import psycopg2
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, worklinetemplate
+from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, querytotalwordcounts
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, elidedextrapunct, extrapunct, \
@@ -23,14 +24,12 @@ from server.formatting.wordformatting import acuteorgrav, buildhipparchiatransta
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
-from server.dbsupport.lexicaldbfunctions import querytotalwordcounts, findcountsviawordcountstable
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildbetweenwhereextension
 from server.startup import lemmatadict
 # bleh: numpy and scipy will fail to install on FreeBSD 11.x
 # the work-around functions below might be needed instead: presumably there are markedly slower...
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
-
 
 vectorranges = {
 	'ldacomponents': range(1, 51),
@@ -1018,34 +1017,6 @@ def readgitdata():
 		commit = 'unknowncommit'
 
 	return commit
-
-
-def determinesettings():
-	"""
-
-	what values were set in config.py?
-
-	:return:
-	"""
-
-	wecareabout = ['VECTORDIMENSIONS',
-					'VECTORWINDOW',
-					'VECTORTRAININGITERATIONS',
-					'VECTORMINIMALPRESENCE',
-					'VECTORDOWNSAMPLE',
-					'VECTORDISTANCECUTOFFLOCAL',
-					'VECTORDISTANCECUTOFFNEARESTNEIGHBOR',
-					'VECTORDISTANCECUTOFFLEMMAPAIR',
-					'NEARESTNEIGHBORSCAP',
-					'SENTENCESPERDOCUMENT']
-
-	settinglist = list()
-	for c in wecareabout:
-		settinglist.append('{a}={b}'.format(a=c, b=hipparchia.config[c]))
-
-	settingstring = ' · '.join(settinglist)
-
-	return settingstring
 
 
 """

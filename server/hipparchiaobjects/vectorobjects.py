@@ -32,3 +32,16 @@ class VectorValues(object):
 		self.ldaminfreq = s['ldaminfreq']
 		self.ldaiterations = s['ldaiterations']
 		self.ldamustbelongerthan = s['ldamustbelongerthan']
+
+	def __eq__(self, other):
+		sd = self.__dict__
+		od = other.__dict__
+		assert isinstance(other, VectorValues), 'VectorValues can only be compared with VectorValues'
+		# cc = [(sd[k], od[k]) for k in sd.keys()]
+		# print('VectorValues cc', cc)
+
+		comp = [sd[k] == od[k] for k in sd.keys()]
+		if set(comp) == {True}:
+			return True
+		else:
+			return False
