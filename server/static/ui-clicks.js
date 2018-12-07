@@ -18,22 +18,6 @@ function refreshselections() {
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
 }
 
-function openoptionsslider() {
-    let windowWidth = $(window).width();
-    let w = Math.min(windowWidth*.30, 250);
-    document.getElementById("setoptionsnavigator").style.width = w+"px";
-    document.getElementById("mainbody").style.marginLeft = w+"px";
-    $('#alt_upperleftbuttons').show();
-    $('#upperleftbuttons').hide();
-}
-
-function closeoptionsslider() {
-    document.getElementById("setoptionsnavigator").style.width = "0";
-    document.getElementById("mainbody").style.marginLeft = "0";
-    $('#alt_upperleftbuttons').hide();
-    $('#upperleftbuttons').show();
-}
-
 function loadoptions() {
     $.getJSON('/getsessionvariables', function (data) {
         // console.log(data);
@@ -139,7 +123,7 @@ function loadoptions() {
 
         $('#fontchoice').val(data.fontchoice);
         $('#fontchoice').selectmenu('refresh');
-   
+
         if (data.cosdistbysentence === 'yes' || data.cosdistbylineorword === 'yes' || data.semanticvectorquery === 'yes' ||
             data.nearestneighborsquery === 'yes' || data.tensorflowgraph === 'yes' || data.sentencesimilarity === 'yes' ||
             data.topicmodel === 'yes') {
@@ -148,13 +132,69 @@ function loadoptions() {
         });
 }
 
+// UPPER LEFT OPTIONS PANEL CLICKS
+
+function openoptionsslider() {
+    let windowWidth = $(window).width();
+    let w = Math.min(windowWidth*.30, 250);
+    document.getElementById("setoptionsnavigator").style.width = w+"px";
+    document.getElementById("vectoroptionsetter").style.width = "0";
+    document.getElementById("mainbody").style.marginLeft = w+"px";
+    $('#alt_upperleftbuttons').show();
+    $('#vector_upperleftbuttons').hide();
+    $('#upperleftbuttons').hide();
+}
+
+function closeoptionsslider() {
+    document.getElementById("setoptionsnavigator").style.width = "0";
+    document.getElementById("vectoroptionsetter").style.width = "0";
+    document.getElementById("mainbody").style.marginLeft = "0";
+    $('#alt_upperleftbuttons').hide();
+    $('#vector_upperleftbuttons').hide();
+    $('#upperleftbuttons').show();
+}
+
+function openvectoroptionsslider() {
+    let windowWidth = $(window).width();
+    let w = Math.min(windowWidth*.30, 250);
+    document.getElementById("setoptionsnavigator").style.width = "0";
+    document.getElementById("vectoroptionsetter").style.width = w+"px";
+    document.getElementById("mainbody").style.marginLeft = w+"px";
+    $('#alt_upperleftbuttons').hide();
+    $('#vector_upperleftbuttons').show();
+    $('#upperleftbuttons').hide();
+}
+
+function closevectoroptionsoptionsslider() {
+    closeoptionsslider();
+}
+
 $('#openoptionsbutton').click(function(){
+    loadoptions();
+    openoptionsslider();
+});
+
+$('#vectoralt_openoptionsbutton').click(function(){
     loadoptions();
     openoptionsslider();
 });
 
 $('#closeoptionsbutton').click(function(){
     closeoptionsslider();
+});
+
+$('#close_vector_options_button').click(function(){
+    closeoptionsslider();
+});
+
+$('#vector_options_button').click(function(){
+    loadoptions();
+    openvectoroptionsslider();
+});
+
+$('#alt_vector_options_button').click(function(){
+    loadoptions();
+    openvectoroptionsslider();
 });
 
 function browsetopassage() {

@@ -187,11 +187,10 @@ $(document).ready( function () {
 	});
 
 
-    var tohideonfirstload = Array('#clearpick', '#helptabs', '#edts', '#ldts', '#spur', '#alt_upperleftbuttons',
-        '#browserdialog', '#complexsearching', '#lemmatasearchform', '#proximatelemmatasearchform',
-        '#termonecheckbox', '#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox',
-        '#semanticvectorquerycheckbox', '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox',
-        '#sentencesimilaritycheckbox', '#topicmodelcheckbox');
+    var tohideonfirstload = Array('#alt_upperleftbuttons', '#browserdialog', '#clearpick', '#complexsearching', '#cosinedistancelineorwordcheckbox',
+        '#cosinedistancesentencecheckbox', '#edts', '#helptabs', '#ldts', '#lemmatasearchform', '#proximatelemmatasearchform',
+        '#semanticvectornnquerycheckbox', '#semanticvectorquerycheckbox', '#sentencesimilaritycheckbox', '#spur', '#tensorflowgraphcheckbox',
+        '#termonecheckbox', '#topicmodelcheckbox');
     bulkhider(tohideonfirstload);
 
 

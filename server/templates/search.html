@@ -3,6 +3,7 @@
 {% block content %}
 <!-- extend from base layout -->
     {% include "setoptions.html" ignore missing %}
+    {% autoescape false %}{{ vectoroptionshtml }}{% endautoescape %}
 
 <div id="mainbody">
     <!-- "mainbody" allows the option sidebar to push the page contents right -->
@@ -40,8 +41,6 @@
     {% include "miscuielements.html" ignore missing %}
 
 </div>
-
-{% autoescape false %}{{ vectoroptionshtml }}{% endautoescape %}
 
 <script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
 <script src="{{ url_for('static', filename='indexandtextmaker.js') }}"></script>
