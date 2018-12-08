@@ -14,6 +14,7 @@ from server import hipparchia
 from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 from server.hipparchiaobjects.searchobjects import SearchOutputObject, SearchObject
+from server.hipparchiaobjects.vectorobjects import VectorValues
 from server.semanticvectors.vectorhelpers import vectordefaults, vectorranges, vectorlabels
 from server.startup import authordict, workdict
 
@@ -60,7 +61,7 @@ def formatlsimatches(listofmatches: List[dict]) -> str:
 	return thehtml
 
 
-def formatnnmatches(listofneighbors: List[tuple]):
+def formatnnmatches(listofneighbors: List[tuple], vectorvalues: VectorValues):
 	"""
 
 	each neighbor is a tuple: [('εὕρηϲιϲ', 1.0), ('εὑρίϲκω', 0.6673248708248138), ...]
@@ -87,11 +88,11 @@ def formatnnmatches(listofneighbors: List[tuple]):
 	xtrarowtemplate = """
 	<tr class="vectorrow">
 		<td class="vectorscore"></td>
-		<td class="vectorword"><spance class="small">(not showing {n} {wtw} above the cutoff of {c})</span></td>
+		<td class="vectorword"><spance class="small">(not showing {n} {wtw} above the cutoff)</span></td>
 	</tr>
 	"""
 
-	cap = hipparchia.config['NEARESTNEIGHBORSCAP']
+	cap = vectorvalues.neighborscap
 	numberofungraphedtodisplay = 10
 	surplus = len(listofneighbors) - cap
 	ungraphed = listofneighbors[cap:cap + numberofungraphedtodisplay]
@@ -111,7 +112,7 @@ def formatnnmatches(listofneighbors: List[tuple]):
 		wtw = 'word that was'
 		if surplus > 1:
 			wtw = 'words that were'
-		cut = hipparchia.config['VECTORDISTANCECUTOFFNEARESTNEIGHBOR']
+		cut = vectorvalues.nearestneighborcutoffdistance
 		rows.append(xtrarowtemplate.format(n=surplus, wtw=wtw, c=cut))
 
 	newrows = list()

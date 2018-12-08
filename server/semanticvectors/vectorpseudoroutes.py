@@ -159,7 +159,7 @@ def findabsolutevectorsbysentence(searchobject):
 		activepoll.statusis('Finding all sentences')
 		sentencetuples = vectorprepdispatcher(so)
 		sentences = [s[1] for s in sentencetuples]
-		output = generatevectoroutput(sentences, workssearched, so, 'sentences')
+		output = generateabsolutevectorsoutput(sentences, workssearched, so, 'sentences')
 	else:
 		return emptyvectoroutput(so)
 
@@ -193,12 +193,12 @@ def findabsolutevectorsfromhits(searchobject, hitdict, workssearched):
 	activepoll.statusis('Compiling proximite wordlists')
 	environs = fetchverctorenvirons(hitdict, so)
 
-	output = generatevectoroutput(environs, workssearched, so, 'passages')
+	output = generateabsolutevectorsoutput(environs, workssearched, so, 'passages')
 
 	return output
 
 
-def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
+def generateabsolutevectorsoutput(listsofwords: list, workssearched: list, searchobject, vtype: str):
 	"""
 
 
@@ -210,6 +210,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
 
 	# find all words in use
 	allwords = findwordvectorset(listsofwords)
+	# print('allwords', allwords)
 
 	# find all possible forms of all the words we used
 	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
@@ -244,6 +245,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
 	activepoll.statusis('Calculating cosine distances')
 	cosinevalues = caclulatecosinevalues(focus, vectorspace, allheadwords.keys())
 	# cosinevalues = vectorcosinedispatching(focus, vectorspace, allheadwords.keys())
+	# print('generatevectoroutput cosinevalues', cosinevalues)
 
 	# apply the threshold and drop the 'None' items
 	threshold = 1.0 - vv.localcutoffdistance
@@ -251,7 +253,8 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
 	cosinevalues = {c: 1 - cosinevalues[c] for c in cosinevalues if cosinevalues[c] and falseidentity < cosinevalues[c] < threshold}
 	mostsimilar = [(c, cosinevalues[c]) for c in cosinevalues]
 	mostsimilar = sorted(mostsimilar, key=lambda t: t[1], reverse=True)
-	findshtml = formatnnmatches(mostsimilar)
+
+	findshtml = formatnnmatches(mostsimilar, vv)
 
 	# next we look for the interrelationships of the words that are above the threshold
 	activepoll.statusis('Calculating metacosine distances')
@@ -287,7 +290,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
 	output.thesearch = '{x}»{skg}«'.format(x=xtra, skg=focus)
 	output.htmlsearch = '{x}<span class="sought">»{skg}«</span>'.format(x=xtra, skg=focus)
 
-	output.sortby = 'distance with a cutoff of {c}'.format(c=1 - vv.localcutoffdistance)
+	output.sortby = 'distance with a cutoff of {c}'.format(c=vv.localcutoffdistance)
 	output.image = imagename
 	output.searchtime = so.getelapsedtime()
 

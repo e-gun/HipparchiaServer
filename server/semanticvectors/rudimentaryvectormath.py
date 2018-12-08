@@ -131,7 +131,6 @@ def caclulatecosinevalues(focusword, vectorspace, headwords):
 		avalues = list()
 		for num in numberedsentences:
 			avalues.append(vectorspace[num][w])
-		# print(avalues, ',', lemmavalues, w)
 		# scipy will choke if you send it div-by-zero data
 		# RuntimeWarning: invalid value encountered in true_divide dist = 1.0 - np.dot(u, v) / (norm(u) * norm(v))
 		# be careful not to end up with 0 in lemmavalues with 'voluptas' becuase of the 'v-for-u' issue

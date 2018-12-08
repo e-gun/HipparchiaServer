@@ -75,7 +75,7 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 			termone = termone[0].lower() + termone[1:]
 			mostsimilar = findapproximatenearestneighbors(termone, vectorspace, vv)
 		if mostsimilar:
-			html = formatnnmatches(mostsimilar)
+			html = formatnnmatches(mostsimilar, vv)
 			activepoll.statusis('Building the graph')
 			mostsimilar = mostsimilar[:vv.neighborscap]
 			imagename = graphnnmatches(termone, mostsimilar, vectorspace, so)

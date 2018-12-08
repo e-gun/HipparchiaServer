@@ -16,84 +16,6 @@ from server.hipparchiaobjects.vectorobjects import VectorValues
 from server.listsandsession.corpusavailability import justlatin
 
 
-class SearchResult(object):
-	"""
-
-	really just a more maintainable version of a dict
-
-	"""
-	def __init__(self, hitnumber, author, work, citationstring, clickurl, lineobjects):
-		self.hitnumber = hitnumber
-		self.author = avoidsmallvariants(author)
-		self.work = avoidsmallvariants(work)
-		self.citationstring = citationstring
-		self.clickurl = clickurl
-		self.lineobjects = lineobjects
-
-	def getindex(self):
-		"""
-
-		fetch the index value of the focus line
-
-		derive it from the tail of the clickurl, e.g.:
-
-			lt1002w002_LN_24040
-
-		:return:
-		"""
-
-		return int(self.clickurl.split('_')[-1])
-
-	def getworkid(self):
-		"""
-
-		fetch the wkuniversalid value of the focus line
-
-		derive it from the tail of the clickurl, e.g.:
-
-			lt1002w002_LN_24040
-
-		:return:
-		"""
-
-		return self.clickurl[0:10]
-
-	def getlocusthml(self):
-		"""
-		generate the wrapped html for the citation; e.g:
-			<locus>
-				<span class="findnumber">[13]</span>&nbsp;&nbsp;<span class="foundauthor">Quintilianus, Marcus Fabius</span>,&nbsp;<span class="foundwork">Declamationes Minores</span>:
-				<browser id="lt1002w002_LN_24040"><span class="foundlocus">oration 289, section pr, line 1</span><br /></browser>
-			</locus>
-		:return:
-		"""
-
-		locushtml = '<locus>\n{cit}</locus><br />\n'.format(cit=self.citationhtml(self.citationstring))
-
-		return locushtml
-
-	def citationhtml(self, citestring):
-		"""
-
-		generate the non-wrapped html for the citation; e.g:
-
-			<span class="findnumber">[13]</span>&nbsp;&nbsp;<span class="foundauthor">Quintilianus, Marcus Fabius</span>,&nbsp;<span class="foundwork">Declamationes Minores</span>:
-			<browser id="lt1002w002_LN_24040"><span class="foundlocus">oration 289, section pr, line 1</span><br /></browser>
-
-		:return:
-		"""
-
-		citationtemplate = """
-			<span class="findnumber">[{hn}]</span>&nbsp;&nbsp;
-			<span class="foundauthor">{au}</span>,&nbsp;<span class="foundwork">{wk}</span>:
-			<browser id="{url}"><span class="foundlocus">{cs}</span></browser>"""
-
-		locushtml = citationtemplate.format(hn=self.hitnumber, au=self.author, wk=self.work, url=self.clickurl,
-		                             cs=citestring)
-
-		return locushtml
-
-
 class SearchObject(object):
 	"""
 
@@ -104,11 +26,11 @@ class SearchObject(object):
 
 	def __init__(self, searchid, seeking, proximate, lemmaobject, proximatelemmaobject, frozensession):
 		self.searchid = searchid
-
 		self.originalseeking = seeking
 		self.originalproximate = proximate
 		self.lemma = lemmaobject
 		self.proximatelemma = proximatelemmaobject
+		self.session = frozensession
 
 		# '>' will mess you up still
 		self.originalseeking = re.sub(r'<', '&lt;', self.originalseeking)
@@ -173,7 +95,6 @@ class SearchObject(object):
 		self.seeking = seeking
 		self.proximate = proximate
 
-		self.session = frozensession
 		self.proximity = frozensession['proximity']
 		self.psgselections = frozensession['psgselections']
 		self.psgexclusions = frozensession['psgexclusions']
@@ -232,7 +153,7 @@ class SearchObject(object):
 		return activecorpora
 
 	def infervectorquerytype(self):
-		exclusive = {'cosdistbysentence', 'cosdistbysentence', 'semanticvectorquery', 'nearestneighborsquery',
+		exclusive = {'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery',
 		             'tensorflowgraph', 'sentencesimilarity', 'topicmodel'}
 
 		qtype = list()
@@ -446,3 +367,82 @@ class SearchOutputObject(object):
 		for item in itemsweuse:
 			outputdict[item] = getattr(self, item)
 		return outputdict
+
+
+class SearchResult(object):
+	"""
+
+	really just a more maintainable version of a dict
+
+	"""
+	def __init__(self, hitnumber, author, work, citationstring, clickurl, lineobjects):
+		self.hitnumber = hitnumber
+		self.author = avoidsmallvariants(author)
+		self.work = avoidsmallvariants(work)
+		self.citationstring = citationstring
+		self.clickurl = clickurl
+		self.lineobjects = lineobjects
+
+	def getindex(self):
+		"""
+
+		fetch the index value of the focus line
+
+		derive it from the tail of the clickurl, e.g.:
+
+			lt1002w002_LN_24040
+
+		:return:
+		"""
+
+		return int(self.clickurl.split('_')[-1])
+
+	def getworkid(self):
+		"""
+
+		fetch the wkuniversalid value of the focus line
+
+		derive it from the tail of the clickurl, e.g.:
+
+			lt1002w002_LN_24040
+
+		:return:
+		"""
+
+		return self.clickurl[0:10]
+
+	def getlocusthml(self):
+		"""
+		generate the wrapped html for the citation; e.g:
+			<locus>
+				<span class="findnumber">[13]</span>&nbsp;&nbsp;<span class="foundauthor">Quintilianus, Marcus Fabius</span>,&nbsp;<span class="foundwork">Declamationes Minores</span>:
+				<browser id="lt1002w002_LN_24040"><span class="foundlocus">oration 289, section pr, line 1</span><br /></browser>
+			</locus>
+		:return:
+		"""
+
+		locushtml = '<locus>\n{cit}</locus><br />\n'.format(cit=self.citationhtml(self.citationstring))
+
+		return locushtml
+
+	def citationhtml(self, citestring):
+		"""
+
+		generate the non-wrapped html for the citation; e.g:
+
+			<span class="findnumber">[13]</span>&nbsp;&nbsp;<span class="foundauthor">Quintilianus, Marcus Fabius</span>,&nbsp;<span class="foundwork">Declamationes Minores</span>:
+			<browser id="lt1002w002_LN_24040"><span class="foundlocus">oration 289, section pr, line 1</span><br /></browser>
+
+		:return:
+		"""
+
+		citationtemplate = """
+			<span class="findnumber">[{hn}]</span>&nbsp;&nbsp;
+			<span class="foundauthor">{au}</span>,&nbsp;<span class="foundwork">{wk}</span>:
+			<browser id="{url}"><span class="foundlocus">{cs}</span></browser>"""
+
+		locushtml = citationtemplate.format(hn=self.hitnumber, au=self.author, wk=self.work, url=self.clickurl,
+		                             cs=citestring)
+
+		return locushtml
+
