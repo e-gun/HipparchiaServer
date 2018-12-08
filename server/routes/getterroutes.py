@@ -369,14 +369,13 @@ def returnvectorsettingsranges():
 		stop: function( event, ui ) {
 			let result = ◦('#$elementid').spinner('value');
 			setoptions('$elementid', String(result));
-			loadvectorspinners();
 			},
 		spin: function( event, ui ) {
 			let result = ◦('#$elementid').spinner('value');
 			setoptions('$elementid', String(result));
-			loadvectorspinners();
 			}
 		});
+	◦( '#$elementid' ).val($val);
 	"""
 
 	t = Template(spinnertamplate)
@@ -387,7 +386,7 @@ def returnvectorsettingsranges():
 		r = list(vectorranges[k])
 		m = r[0]
 		x = r[-1]
-		s = int((m-x)/20)
+		s = max(int((x-m)/15), 1)
 		thisjs = t.substitute(elementid=k,
 								min=m,
 								max=x,

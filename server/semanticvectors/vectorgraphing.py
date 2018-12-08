@@ -54,7 +54,6 @@ def graphbliteraldistancematches(searchterm, mostsimilartuples, searchobject):
 	"""
 
 	vv = searchobject.vectorvalues
-
 	mostsimilartuples = [t for t in mostsimilartuples if t[1] > vv.localcutoffdistance]
 	mostsimilartuples = mostsimilartuples[:vv.neighborscap]
 
@@ -65,7 +64,7 @@ def graphbliteraldistancematches(searchterm, mostsimilartuples, searchobject):
 	relevantconnections = dict()
 
 	title = givetitletograph('Words most concretely connected with', searchterm, searchobject)
-	imagename = graphmatches(title, searchterm, mostsimilartuples, terms, relevantconnections, vtype='rudimentary')
+	imagename = graphmatches(title, searchterm, searchobject, mostsimilartuples, terms, relevantconnections, vtype='rudimentary')
 
 	return imagename
 

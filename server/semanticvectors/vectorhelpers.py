@@ -20,7 +20,7 @@ from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, qu
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, elidedextrapunct, extrapunct, \
-	minimumgreek, removegravity, stripaccents, tidyupterm
+	minimumgreek, removegravity, stripaccents, tidyupterm, basiclemmacleanup
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
@@ -38,16 +38,16 @@ vectorranges = {
 	'ldamaxfreq': range(1, 101),
 	'ldaminfreq': range(1, 21),
 	'ldamustbelongerthan': range(1, 5),
-	'vcutlem': range(0, 101),
-	'vcutloc': range(0, 101),
-	'vcutneighb': range(0, 101),
-	'vdim': range(50, 500),
+	'vcutlem': range(1, 101),
+	'vcutloc': range(1, 101),
+	'vcutneighb': range(1, 101),
+	'vdim': range(25, 501),
 	'vdsamp': range(1, 21),
 	'viterat': range(1, 21),
 	'vminpres': range(1, 21),
 	'vnncap': range(1, 26),
 	'vsentperdoc': range(1, 6),
-	'vwindow': range(2, 20)
+	'vwindow': range(2, 21)
 }
 
 vectordefaults = {
@@ -71,12 +71,12 @@ vectordefaults = {
 
 
 vectorlabels = {
-	'ldacomponents': 'LDA components',
-	'ldaiterations': 'LDA iterations',
-	'ldamaxfeatures': 'LDA features',
-	'ldamaxfreq': 'LDA max frequency',
-	'ldaminfreq': 'LDA min frequency',
-	'ldamustbelongerthan': 'LDA min length',
+	'ldacomponents': 'LDA: no. of topics',
+	'ldaiterations': 'LDA: iterations',
+	'ldamaxfeatures': 'LDA: features',
+	'ldamaxfreq': 'LDA: max frequency',
+	'ldaminfreq': 'LDA: min frequency',
+	'ldamustbelongerthan': 'LDA: min length',
 	'vcutlem': 'Cutoff: Lemma pairs',
 	'vcutloc': 'Cutoff: Literal distance',
 	'vcutneighb': 'Cutoff: Nearest Neighbors',
@@ -247,7 +247,7 @@ def findsentences(authortable, searchobject, cursor):
 		whr = ''
 
 	# vanilla grab-it-all
-	query = 'SELECT {wtmpl}  FROM {db} {whr}'.format(wtmpl=worklinetemplate ,db=authortable, whr=whr)
+	query = 'SELECT {wtmpl} FROM {db} {whr}'.format(wtmpl=worklinetemplate, db=authortable, whr=whr)
 
 	# vs. something that skips titles (but might drop the odd other thing or two...)
 	# but this noes not play nicely with 'temptable'
@@ -318,6 +318,8 @@ def parsevectorsentences(searchobject, lineobjects):
 		lookingfor = so.seeking
 
 	if lookingfor != '.':
+		# uv problem...
+		allsentences = [basiclemmacleanup(s) for s in allsentences]
 		matches = [s for s in allsentences if re.search(lookingfor, s)]
 	else:
 		matches = allsentences

@@ -159,7 +159,6 @@ def findabsolutevectorsbysentence(searchobject):
 		activepoll.statusis('Finding all sentences')
 		sentencetuples = vectorprepdispatcher(so)
 		sentences = [s[1] for s in sentencetuples]
-
 		output = generatevectoroutput(sentences, workssearched, so, 'sentences')
 	else:
 		return emptyvectoroutput(so)
@@ -206,6 +205,7 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
 	:return:
 	"""
 	so = searchobject
+	vv = so.vectorvalues
 	activepoll = so.poll
 
 	# find all words in use
@@ -242,12 +242,11 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
 		focus = so.seeking
 
 	activepoll.statusis('Calculating cosine distances')
-
 	cosinevalues = caclulatecosinevalues(focus, vectorspace, allheadwords.keys())
 	# cosinevalues = vectorcosinedispatching(focus, vectorspace, allheadwords.keys())
 
 	# apply the threshold and drop the 'None' items
-	threshold = 1.0 - hipparchia.config['VECTORDISTANCECUTOFFLOCAL']
+	threshold = 1.0 - vv.localcutoffdistance
 	falseidentity = .02
 	cosinevalues = {c: 1 - cosinevalues[c] for c in cosinevalues if cosinevalues[c] and falseidentity < cosinevalues[c] < threshold}
 	mostsimilar = [(c, cosinevalues[c]) for c in cosinevalues]
@@ -274,21 +273,21 @@ def generatevectoroutput(listsofwords, workssearched, searchobject, vtype):
 		if int(dist) > 1:
 			plural = 's'
 		else:
-			plural = ''
+			plural = str()
 		space = 'related terms within {a} {b}{s}'.format(a=dist, b=scale[so.session['searchscope']], s=plural)
 
-	found = max(hipparchia.config['NEARESTNEIGHBORSCAP'], len(cosinevalues))
+	found = max(vv.neighborscap, len(cosinevalues))
 	output.setresultcount(found, space)
 	output.setscope(workssearched)
 
 	if so.lemma:
 		xtra = 'all forms of '
 	else:
-		xtra = ''
+		xtra = str()
 	output.thesearch = '{x}»{skg}«'.format(x=xtra, skg=focus)
 	output.htmlsearch = '{x}<span class="sought">»{skg}«</span>'.format(x=xtra, skg=focus)
 
-	output.sortby = 'distance with a cutoff of {c}'.format(c=1 - hipparchia.config['VECTORDISTANCECUTOFFLOCAL'])
+	output.sortby = 'distance with a cutoff of {c}'.format(c=1 - vv.localcutoffdistance)
 	output.image = imagename
 	output.searchtime = so.getelapsedtime()
 

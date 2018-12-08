@@ -236,7 +236,10 @@ def validatevectorvalue(param, val):
 	:return:
 	"""
 
-	val = int(val)
+	try:
+		val = int(val)
+	except ValueError:
+		val = vectordefaults[param]
 
 	if val not in vectorranges[param]:
 		val = vectordefaults[param]

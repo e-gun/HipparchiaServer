@@ -51,7 +51,8 @@ def vectorprepdispatcher(searchobject):
 	for c in connections:
 		connections[c].connectioncleanup()
 
-	return list(foundsentences)
+	fs = list(foundsentences)
+	return fs
 
 
 def breaktextsintosentences(foundsentences, searchlist, searchobject, dbconnection):

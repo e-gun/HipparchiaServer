@@ -307,6 +307,7 @@ def vectorhtmlforoptionsbar() -> str:
 			<span id="close_vector_options_button" class="ui-icon ui-icon-arrow-1-sw" title="Vector options"></span>
 			<span id="vectoralt_clear_button" class="ui-icon ui-icon-close" title="Reset session/Clear search"></span>
 		</div>
+		<p class="optionlabel">Semantic Vector Settings</p>
 		{contents}
 	</div>
 	"""
@@ -318,9 +319,15 @@ def vectorhtmlforoptionsbar() -> str:
 	</fieldset>
 	"""
 
+	legendtemplate = '{lb} ({min} - {max})'
+
 	htmlsupplement = list()
 	for k in vectordefaults.keys():
-		htmlsupplement.append(fieldtemplate.format(k=k, lg=vectorlabels[k], d=vectordefaults[k]))
+		r = list(vectorranges[k])
+		m = r[0]
+		x = r[-1]
+		lg = legendtemplate.format(lb=vectorlabels[k], min=m, max=x)
+		htmlsupplement.append(fieldtemplate.format(k=k, lg=lg, d=vectordefaults[k]))
 
 	htmlsupplement = '\n'.join(htmlsupplement)
 
