@@ -250,3 +250,6 @@ What you will see when you point a browser at a HipparchiaServer:
 
 1. topic models via latent dirichlet allocation
 ![neighborhood_corpus](screenshots/22_lda_topics.png)
+
+1. adjust vector settings on the fly
+![neighborhood_corpus](screenshots/23_vector_ui.png)
