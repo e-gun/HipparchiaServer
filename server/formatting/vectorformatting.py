@@ -298,7 +298,10 @@ def vectorhtmlforoptionsbar() -> str:
 	"""
 
 	if hipparchia.config['SEMANTICVECTORSENABLED'] != 'yes':
-		return str()
+		emptyframe = """
+		<div id="vectoroptionsetter"></div>
+		"""
+		return emptyframe
 
 	framedcontents = """
 	<div id="vectoroptionsetter" class="sidenavigation">

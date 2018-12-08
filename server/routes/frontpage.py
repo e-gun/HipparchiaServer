@@ -43,6 +43,7 @@ def frontpage():
 		picker = 'nofontstopick'
 
 	debugpanel = hipparchia.config['ALLOWUSERTOSETDEBUGMODES']
+	havevectors = hipparchia.config['SEMANTICVECTORSENABLED']
 
 	vectorhtml = vectorhtmlforfrontpage()
 	vectoroptionshtml = vectorhtmlforoptionsbar()
@@ -87,6 +88,7 @@ def frontpage():
 							debug=debugpanel,
 							vectorhtml=vectorhtml,
 							vectoroptionshtml=vectoroptionshtml,
+							havevectors=havevectors,
 							icanzap=icanzap)
 
 	return page
