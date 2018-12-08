@@ -304,8 +304,8 @@ def vectorhtmlforoptionsbar() -> str:
 	<div id="vectoroptionsetter" class="sidenavigation">
 		<div id="vector_upperleftbuttons">
 			<span id="vectoralt_openoptionsbutton" class="ui-icon ui-icon-gear" title="Configuration options"></span>
+			<span id="close_vector_options_button" class="ui-icon ui-icon-arrowthick-1-sw" title="Vector options"></span>
 			<span id="vectoralt_moretools" title="Lexical tools" class="ui-icon ui-icon-wrench"></span>
-			<span id="close_vector_options_button" class="ui-icon ui-icon-arrow-1-sw" title="Vector options"></span>
 			<span id="vectoralt_clear_button" class="ui-icon ui-icon-close" title="Reset session/Clear search"></span>
 		</div>
 		<p class="optionlabel">Semantic Vector Settings</p>
