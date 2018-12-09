@@ -92,7 +92,7 @@ def modifysessionvariable(param, val):
 
 	miscoptions = [
 		'browsercontext',
-		'earliestdate'
+		'earliestdate',
 		'fontchoice',
 		'latestdate',
 		'linesofcontext',
