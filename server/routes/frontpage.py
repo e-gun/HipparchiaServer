@@ -18,6 +18,7 @@ from server.dbsupport.miscdbfunctions import versionchecking
 from server.formatting.vectorformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
+from version import hipparchiaserverversion
 
 
 @hipparchia.route('/')
@@ -89,6 +90,7 @@ def frontpage():
 							vectorhtml=vectorhtml,
 							vectoroptionshtml=vectoroptionshtml,
 							havevectors=havevectors,
+							version=hipparchiaserverversion,
 							icanzap=icanzap)
 
 	return page

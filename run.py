@@ -9,10 +9,10 @@
 from multiprocessing import current_process
 
 from server import hipparchia
+from version import hipparchiaserverversion as hipparchiaversion
 
 if current_process().name == 'MainProcess':
 	# stupid Windows will fork new copies and reload all of this
-	hipparchiaversion = '1.3.0+ [MASTER]'
 	print('\nVersion: {v}\n'.format(v=hipparchiaversion))
 
 
