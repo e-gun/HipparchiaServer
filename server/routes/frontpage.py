@@ -34,7 +34,9 @@ def frontpage():
 	probeforsessionvariables()
 
 	expectedsqltemplateversion = 2242018
+
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
+
 	fonts = hipparchia.config['FONTPICKERLIST']
 	fonts.sort()
 	if fonts:
@@ -54,9 +56,10 @@ def frontpage():
 
 	buildinfo = versionchecking(activelists, expectedsqltemplateversion)
 
+	knowncorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
+
 	# check to see eith which dbs we search by default or are presently active
-	activecorpora = [c for c in ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
-	                 if session[c] == 'yes']
+	activecorpora = [c for c in knowncorpora if session[c] == 'yes']
 
 	if hipparchia.config['AVOIDCIRCLEDLETTERS'] != 'yes':
 		corporalabels = {'g': 'Ⓖ', 'l': 'Ⓛ', 'd': 'Ⓓ', 'i': 'Ⓘ', 'c': 'Ⓒ'}

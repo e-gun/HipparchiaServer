@@ -147,11 +147,11 @@ def executesearch(searchid):
 			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of all {pn} known forms of <span class="sought">»{pskg}«</span>'
 			htmlsearch = htmlsearch.format(n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pn=len(so.proximatelemma.formlist), pskg=so.proximatelemma.dictionaryentry)
 		elif (so.lemma or so.proximatelemma) and (so.seeking or so.proximate):
-			# print('executesearch(): d - procimity of lemma to word')
+			# print('executesearch(): d - proximity of lemma to word')
 			so.searchtype = 'proximity'
 			if so.lemma:
 				lm = so.lemma
-				t = so.proximate
+				t = so.originalproximate
 			else:
 				lm = so.proximatelemma
 				t = so.seeking
@@ -171,9 +171,9 @@ def executesearch(searchid):
 		else:
 			# print('executesearch(): g - proximity of two terms')
 			so.searchtype = 'proximity'
-			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximate)
+			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.originalproximate)
 			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'
-			htmlsearch = htmlsearch.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximate)
+			htmlsearch = htmlsearch.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.originalproximate)
 
 		hits = searchdispatcher(so)
 		activepoll.statusis('Putting the results in context')
