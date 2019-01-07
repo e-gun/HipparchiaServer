@@ -60,6 +60,10 @@ class GenericSearchFunctionObject(object):
 		self.emptyerror = IndexError
 		self.remaindererror = TypeError
 
+	def authorsamongthefinds(self) -> set:
+		authorset = {f.authorid for f in self.foundlineobjects}
+		return authorset
+
 	def getnextfnc(self):
 		self.commitcount += 1
 		self.dbconnection.checkneedtocommit(self.commitcount)
@@ -144,14 +148,23 @@ class GenericSearchFunctionObject(object):
 
 		insertposition = self.searchfunctionparameters.index('parametertoswap')
 		while self.emptytest and self.activepoll.gethits() <= self.so.cap:
+			srchfunct = self.searchfunction
 			nextitem = self.getnextfnc()
-			if nextitem:
+			# simplelemma chunk might have already searched and found in an author
+			if self.so.lemma or self.so.proximatelemma:
+				# nextitem looks like '(chunk, item)'
+				if nextitem[1] in self.authorsamongthefinds():
+					srchfunct = None
+
+			if nextitem and srchfunct:
 				params = self.parameterswapper(nextitem, insertposition)
-				foundlines = self.searchfunction(*tuple(params))
+				foundlines = srchfunct(*tuple(params))
 				lineobjects = [dblineintolineobject(f) for f in foundlines]
 				self.addnewfindstolistoffinds(lineobjects)
 				self.updatepollfinds(lineobjects)
 				self.updatepollremaining()
+			elif not srchfunct:
+				pass
 			else:
 				# listofplacestosearch has been exhausted
 				break
