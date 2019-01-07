@@ -1,6 +1,6 @@
 //
 //	HipparchiaServer: an interface to a database of Greek and Latin texts
-//	Copyright: E Gunderson 2016-18
+//	Copyright: E Gunderson 2016-19
 //	License: License: GNU GENERAL PUBLIC LICENSE 3
 //      (see LICENSE in the top level directory of the distribution)
 
