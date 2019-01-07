@@ -426,9 +426,12 @@ def buildhintlist(seeking: str, listofposiblities: list) -> list:
 	:param listofposiblities:
 	:return:
 	"""
-
 	query = seeking.lower()
 	qlen = len(query)
-	hintlist = [{'value': p} for p in listofposiblities if query == p.lower()[0:qlen]]
+
+	canonhints = [{'value': p} for p in listofposiblities if query == p.lower()[0:qlen]]
+	pseudo = [x for x in listofposiblities if x[0] == '[']
+	pseudohints = [{'value': p} for p in pseudo if '[{q}'.format(q=query) == p.lower()[0:qlen + 1]]
+	hintlist = canonhints + pseudohints
 
 	return hintlist

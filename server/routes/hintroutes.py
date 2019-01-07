@@ -27,7 +27,8 @@ def offerauthorhints():
 	"""
 
 	query = request.args.get('term', '')
-	strippedquery = depunct(query)
+	# need [Demetrius]
+	strippedquery = depunct(query, '[')
 
 	ad = reducetosessionselections(listmapper, 'a')
 
