@@ -257,7 +257,7 @@ def findlinenumberfromlocus(locus, workobject, dbcursor):
 		cleanedp = [depunct(level, allowedpunct) for level in p]
 		cleanedp = tuple(cleanedp[:5])
 		if len(cleanedp) == wo.availablelevels:
-			thelocus = finddblinefromlocus(wo.universalid, cleanedp, dbcursor)
+			thelocus = finddblinefromlocus(wo, cleanedp, dbcursor)
 		else:
 			p = finddblinefromincompletelocus(wo, cleanedp, dbcursor)
 			resultmessage = p['code']

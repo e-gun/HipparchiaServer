@@ -89,41 +89,6 @@ def dbloadasingleworkobject(workuniversalid: str) -> dbOpus:
 	return workobject
 
 
-def findtoplevelofwork(workuid: str, cursor) -> int:
-	"""
-	give me a db name and I will peek into it to see what its top level is
-	a way to get around generating an author object when the lexical passages are flowing freely
-	:param workuid:
-	:param cursor:
-	:return:
-	"""
-
-	query = """
-	SELECT levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05 
-		FROM works WHERE universalid = %s
-	"""
-
-	data = (workuid,)
-	try:
-		cursor.execute(query, data)
-		results = cursor.fetchone()
-		results = list(results)
-	except:
-		results = ['zero', '', '', '', '', '']
-
-	label = None
-	while label == '' or label == None:
-		try:
-			label = results.pop()
-		except IndexError:
-			# pop from empty list
-			results = '[emptypop]'
-		
-	numberoflevels = len(results)+1
-
-	return numberoflevels
-
-
 def findselectionboundaries(workobject: dbOpus, selection: str, cursor) -> tuple:
 	"""
 	

@@ -8,11 +8,10 @@
 
 import re
 
-from server.dbsupport.miscdbfunctions import findtoplevelofwork
 from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber, worklinetemplate
 from server.formatting.wordformatting import avoidsmallvariants
-from server.hipparchiaobjects.helperobjects import LowandHighInfo
 from server.hipparchiaobjects.dbtextobjects import dbOpus, dbWorkLine
+from server.hipparchiaobjects.helperobjects import LowandHighInfo
 from server.startup import workdict
 
 
@@ -164,7 +163,7 @@ def prolixlocus(workobject: dbOpus, citationtuple: tuple) -> str:
 	return citation
 
 
-def finddblinefromlocus(workid: str, citationtuple: tuple, dbcursor) -> int:
+def finddblinefromlocus(workobject: dbOpus, citationtuple: tuple, dbcursor) -> int:
 	"""
 
 	citationtuple ('9','109','8') to focus on line 9, section 109, book 8
@@ -175,6 +174,8 @@ def finddblinefromlocus(workid: str, citationtuple: tuple, dbcursor) -> int:
 	:param dbcursor:
 	:return:
 	"""
+
+	workid = workobject.universalid
 
 	lmap = {0: 'level_00_value',
 	        1: 'level_01_value',
@@ -188,7 +189,7 @@ def finddblinefromlocus(workid: str, citationtuple: tuple, dbcursor) -> int:
 	if workid[0:2] in ['in', 'dp', 'ch']:
 		wklvs = 2
 	else:
-		wklvs = findtoplevelofwork(workid, dbcursor)
+		wklvs = workobject.availablelevels
 
 	if wklvs != len(citationtuple):
 		print('mismatch between shape of work and browsing request: impossible citation of'+workid+'.')
@@ -288,7 +289,7 @@ def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, cursor
 		# there is no line 25 to section 9. When no result is returned we will dump the 9 and see if just 25 works
 		# is usually does
 
-		dblinenumber = finddblinefromlocus(workobject.universalid, citationlist, cursor)
+		dblinenumber = finddblinefromlocus(workobject, tuple(citationlist), cursor)
 		if dblinenumber:
 			successcode = 'success'
 		else:
