@@ -136,7 +136,7 @@ def findtheworksof(authoruid):
 
 
 @hipparchia.route('/getstructure/<locus>')
-def workstructure(locus):
+def findworkstructure(locus):
 	"""
 	request detailed info about how a work works
 	this is fed back to the js boxes : who should be active, what are the autocomplete values, etc?
@@ -155,6 +155,11 @@ def workstructure(locus):
 	workid = depunct(workid)
 
 	try:
+		workobject = workdict[workid]
+	except KeyError:
+		workobject = None
+
+	try:
 		passage = locus.split('_AT_')[1]
 	except IndexError:
 		passage = 'top'
@@ -165,21 +170,9 @@ def workstructure(locus):
 	safepassage = [depunct(p, allowed) for p in unsafepassage]
 	safepassage = tuple(safepassage[:5])
 
-	try:
-		ao = authordict[workid[:6]]
-	except KeyError:
-		ao = makeanemptyauthor('gr0000')
-
-	# it is a list of works and not a dict, so we can't pull the structure from the key
-	# should probably change that some day
-	structure = dict()
-	for work in ao.listofworks:
-		if work.universalid == workid:
-			structure = work.structure
-
 	ws = dict()
-	if structure:
-		lowandhigh = findvalidlevelvalues(workid, structure, safepassage, dbcursor)
+	if workobject:
+		lowandhigh = findvalidlevelvalues(workobject, safepassage, dbcursor)
 		# example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
 		ws['totallevels'] = lowandhigh.levelsavailable
 		ws['level'] = lowandhigh.currentlevel

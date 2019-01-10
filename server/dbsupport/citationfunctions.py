@@ -15,7 +15,7 @@ from server.hipparchiaobjects.helperobjects import LowandHighInfo
 from server.startup import workdict
 
 
-def findvalidlevelvalues(workid: str, workstructure: dict, partialcitationtuple: tuple, cursor) -> LowandHighInfo:
+def findvalidlevelvalues(workobject: dbOpus, partialcitationtuple: tuple, cursor) -> LowandHighInfo:
 	"""
 
 	tell me some of a citation and i can tell you what is a valid choice at the next step
@@ -23,7 +23,10 @@ def findvalidlevelvalues(workid: str, workstructure: dict, partialcitationtuple:
 	note that you should not send me a full citation because i will look at lowestlevel-1
 
 	sample imput:
-		lt0474w015 {0: 'line', 1: 'section'} ('13',)
+		workid = lt0474w015
+		workstructure = {0: 'line', 1: 'section'}
+		partialcitationtuple = ('13',)
+	out:
 		(Cicero, Pro Sulla 13)
 
 	:param workid:
@@ -32,6 +35,9 @@ def findvalidlevelvalues(workid: str, workstructure: dict, partialcitationtuple:
 	:param cursor:
 	:return:
 	"""
+
+	workid = workobject.universalid
+	workstructure = workobject.structure
 
 	partialcitation = list(partialcitationtuple)
 	availablelevels = len(workstructure)
