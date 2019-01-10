@@ -216,7 +216,7 @@ function loadLevellist(workid,pariallocus){
 
     // python will return info about the next level down such as:
     //  [{'totallevels',3},{'level': 0}, {'label': 'verse'}, {'low': 1}, {'high': 100]
-    $.getJSON('/getstructure/'+workid+'_AT_'+pariallocus, function (selectiondata) {
+    $.getJSON('/getstructure/'+workid+'/'+pariallocus, function (selectiondata) {
         var top = selectiondata['totallevels']-1;
         var atlevel = selectiondata['level'];
         var label = selectiondata['label'];

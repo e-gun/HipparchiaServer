@@ -15,13 +15,13 @@ from flask import make_response, redirect, request, session, url_for
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
-from server.dbsupport.miscdbfunctions import makeanemptyauthor
 from server.formatting.bibliographicformatting import formatauthinfo, formatauthorandworkinfo, formatname, \
 	woformatworkinfo
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.listsandsession.searchlistmanagement import compilesearchlist, sortsearchlist
 from server.listsandsession.sessionfunctions import modifysessionselections, modifysessionvariable, parsejscookie
+
 try:
 	from server.semanticvectors.vectorgraphing import fetchvectorgraph
 except ImportError:
@@ -135,15 +135,15 @@ def findtheworksof(authoruid):
 	return hint
 
 
-@hipparchia.route('/getstructure/<locus>')
-def findworkstructure(locus):
+@hipparchia.route('/getstructure/<workid>/<locus>')
+def findworkstructure(workid, locus=None):
 	"""
 	request detailed info about how a work works
 	this is fed back to the js boxes : who should be active, what are the autocomplete values, etc?
 
 	sample input:
-		'/getstructure/gr0008w001_AT_-1'
-		'/getstructure/gr0008w001_AT_13|22'
+		'/getstructure/gr0008w001/-1'
+		'/getstructure/gr0008w001/13|22'
 
 	:return:
 	"""
@@ -151,24 +151,19 @@ def findworkstructure(locus):
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
-	workid = locus.split('_AT_')[0]
-	workid = depunct(workid)
-
 	try:
 		workobject = workdict[workid]
 	except KeyError:
 		workobject = None
 
-	try:
-		passage = locus.split('_AT_')[1]
-	except IndexError:
-		passage = 'top'
-
-	unsafepassage = passage.split('|')
-	# this list will need to match the one in '/browse': '-' is absolutely necessary to catch '-1'
-	allowed = ',;-'
-	safepassage = [depunct(p, allowed) for p in unsafepassage]
-	safepassage = tuple(safepassage[:5])
+	if not locus:
+		safepassage = 'top'
+	else:
+		unsafepassage = locus.split('|')
+		# this list will need to match the one in '/browse'
+		allowed = ',;'
+		safepassage = [depunct(p, allowed) for p in unsafepassage]
+		safepassage = tuple(safepassage[:5])
 
 	ws = dict()
 	if workobject:
@@ -188,6 +183,7 @@ def findworkstructure(locus):
 		ws['low'] = 'Error:'
 		ws['high'] = 'again'
 		ws['range'] = ['error', 'select', 'the', 'work', 'again']
+
 	results = json.dumps(ws)
 
 	dbconnection.connectioncleanup()
