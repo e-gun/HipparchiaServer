@@ -146,28 +146,6 @@ def formatname(workobject: dbOpus, authorobject: dbAuthor) -> str:
 	return name
 
 
-def getpublicationinfo(workobject: dbAuthor, cursor) -> str:
-	"""
-
-	what's in a name?
-
-	:param workobject:
-	:param cursor:
-	:return:
-	"""
-
-	uid = workobject.universalid
-	query = 'SELECT publication_info FROM works WHERE universalid = %s'
-	data = (uid,)
-	cursor.execute(query, data)
-	pi = cursor.fetchone()
-	pi = pi[0]
-
-	publicationhtml = formatpublicationinfo(pi)
-
-	return publicationhtml
-
-
 def formatpublicationinfo(pubinfo: str) -> str:
 	"""
 	in:

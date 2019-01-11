@@ -15,17 +15,17 @@ from server.dbsupport.citationfunctions import locusintocitation, finddblinefrom
 	perseusdelabeler
 from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber
 from server.dbsupport.miscdbfunctions import simplecontextgrabber, perseusidmismatch
-from server.formatting.bibliographicformatting import getpublicationinfo
+from server.formatting.bibliographicformatting import formatpublicationinfo
 from server.formatting.browserformatting import insertparserids
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject, BrowserPassageObject
-from server.hipparchiaobjects.dbtextobjects import dbOpus
+from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus, dbWorkLine
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.startup import workdict
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
 
-def buildbrowseroutputobject(authorobject, workobject, locusindexvalue, cursor):
+def buildbrowseroutputobject(authorobject: dbAuthor, workobject: dbOpus, locusindexvalue: int, dbcursor) -> BrowserOutputObject:
 	"""
 	this function does a lot of work via a number of subfunctions
 	lots of refactoring required if you change anything...
@@ -38,7 +38,7 @@ def buildbrowseroutputobject(authorobject, workobject, locusindexvalue, cursor):
 	:param locusindexvalue:
 	:param linesofcontext:
 	:param numbersevery:
-	:param cursor:
+	:param dbcursor:
 	:return:
 	"""
 
@@ -47,7 +47,7 @@ def buildbrowseroutputobject(authorobject, workobject, locusindexvalue, cursor):
 	numbersevery = hipparchia.config['SHOWLINENUMBERSEVERY']
 
 	# [a] acquire the lines we need to display
-	surroundinglines = simplecontextgrabber(workobject.authorid, locusindexvalue, linesofcontext, cursor)
+	surroundinglines = simplecontextgrabber(workobject.authorid, locusindexvalue, linesofcontext, dbcursor)
 	lines = [dblineintolineobject(l) for l in surroundinglines]
 	lines = [l for l in lines if l.wkuinversalid == thiswork]
 
@@ -58,7 +58,7 @@ def buildbrowseroutputobject(authorobject, workobject, locusindexvalue, cursor):
 
 	passage = BrowserPassageObject(authorobject, workobject, locusindexvalue)
 	passage.focusline = focusline
-	passage.biblio = getpublicationinfo(workobject, cursor)
+	passage.biblio = formatpublicationinfo(workobject.publication_info)
 	passage.citation = locusintocitation(workobject, focusline)
 
 	previousline = lines[0]
@@ -127,12 +127,14 @@ def buildbrowseroutputobject(authorobject, workobject, locusindexvalue, cursor):
 	return outputobject
 
 
-def checkfordocumentmetadata(line, workobject):
+def checkfordocumentmetadata(workline: dbWorkLine, workobject: dbOpus) -> str:
 	"""
 
-	if this line metadata about the document as a whole, then extract and format it
+	if this line contains metadata about the document as a whole, then extract and format it
 
-	:param line:
+	useful for papyri and inscriptions
+
+	:param workline:
 	:param workobject:
 	:return:
 	"""
@@ -145,10 +147,10 @@ def checkfordocumentmetadata(line, workobject):
 	cityfinder = re.compile(r'<hmu_metadata_city value="(.*?)" />')
 	pubfinder = re.compile(r'<hmu_metadata_publicationinfo value="(.*?)" />')
 
-	date = re.search(datefinder, line.accented)
-	region = re.search(regionfinder, line.accented)
-	city = re.search(cityfinder, line.accented)
-	pub = re.search(pubfinder, line.accented)
+	date = re.search(datefinder, workline.accented)
+	region = re.search(regionfinder, workline.accented)
+	city = re.search(cityfinder, workline.accented)
+	pub = re.search(pubfinder, workline.accented)
 
 	metadatatags = list()
 	if region:
@@ -255,6 +257,8 @@ def findlinenumberfromlinenumber(citation: str, workobject: dbOpus, resultmessag
 
 	dbcursor unused, but we want same parameters for all // functions
 
+	all we do here is make sure the original input was valid
+
 	:param citation:
 	:param workobject:
 	:param dbcursor:
@@ -316,6 +320,11 @@ def findlinenumberfromperseus(citation: str, workobject: dbOpus, resultmessage: 
 	sample url:
 
 		/browse/perseus/gr0016w001/7:130
+
+	is
+		Herodotus, Historiae, Book 7, section 130
+
+	that is, '7:130' is *NOT REVERSED*
 
 	:param citation:
 	:param workobject:
