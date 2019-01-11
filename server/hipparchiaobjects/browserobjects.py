@@ -45,8 +45,8 @@ class BrowserOutputObject(object):
 		if self.psgstarts < workobject.starts:
 			self.psgstarts = workobject.starts
 
-		self.browseforwards = '{w}_LN_{e}'.format(w=self.workid, e=self.psgends)
-		self.browseback = '{w}_LN_{s}'.format(w=self.workid, s=self.psgstarts)
+		self.browseforwards = 'linenumber/{w}/{e}'.format(w=self.workid, e=self.psgends)
+		self.browseback = 'linenumber/{w}/{s}'.format(w=self.workid, s=self.psgstarts)
 
 		# defaults that will change later
 		self.browserhtml = '[nothing found]'

@@ -262,7 +262,7 @@ class dbWorkLine(object):
 		self.polytonic = accented_line
 		self.stripped = stripped_line
 		self.annotations = annotations
-		self.universalid = self.wkuinversalid + '_LN_' + str(index)
+		self.universalid = 'line/{w}/{i}'.format(w=self.wkuinversalid, i=index)
 		self.hyphenated = hyphenated_words
 		if len(self.hyphenated) > 1:
 			self.hashyphenated = True
@@ -371,7 +371,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		template = '<indexedlocation id="{wk}_LN_{idx}">{loc}</indexedlocation>'
+		template = '<indexedlocation id="linenumber/{wk}/{idx}">{loc}</indexedlocation>'
 
 		return template.format(wk=self.wkuinversalid, idx=self.index, loc=self.locus())
 

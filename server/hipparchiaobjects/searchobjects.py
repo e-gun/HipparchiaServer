@@ -390,12 +390,12 @@ class SearchResult(object):
 
 		derive it from the tail of the clickurl, e.g.:
 
-			lt1002w002_LN_24040
+			'linenumber/lt1212w002/5284'
 
 		:return:
 		"""
 
-		return int(self.clickurl.split('_')[-1])
+		return int(self.clickurl.split('/')[-1])
 
 	def getworkid(self):
 		"""
@@ -404,24 +404,28 @@ class SearchResult(object):
 
 		derive it from the tail of the clickurl, e.g.:
 
-			lt1002w002_LN_24040
+			'linenumber/lt1212w002/5284'
 
 		:return:
 		"""
 
-		return self.clickurl[0:10]
+		elements = self.clickurl.split('/')
+
+		return elements[1]
 
 	def getlocusthml(self):
 		"""
 		generate the wrapped html for the citation; e.g:
 			<locus>
-				<span class="findnumber">[13]</span>&nbsp;&nbsp;<span class="foundauthor">Quintilianus, Marcus Fabius</span>,&nbsp;<span class="foundwork">Declamationes Minores</span>:
-				<browser id="lt1002w002_LN_24040"><span class="foundlocus">oration 289, section pr, line 1</span><br /></browser>
+				<span class="findnumber">[20]</span>&nbsp;&nbsp;
+				<span class="foundauthor">Valerius Maximus</span>,&nbsp;<span class="foundwork">Facta et Dicta Memorabilia</span>:
+				<browser id="linenumber/lt1038w001/199"><span class="foundlocus">book 1, chapter 1, section 15, line 6</span></browser>
 			</locus>
+			<br />
 		:return:
 		"""
 
-		locushtml = '<locus>\n{cit}</locus><br />\n'.format(cit=self.citationhtml(self.citationstring))
+		locushtml = '<locus>\n{cit}\n</locus><br />\n'.format(cit=self.citationhtml(self.citationstring))
 
 		return locushtml
 

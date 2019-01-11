@@ -19,6 +19,7 @@ from server.formatting.bibliographicformatting import getpublicationinfo
 from server.formatting.browserformatting import insertparserids
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject, BrowserPassageObject
+from server.hipparchiaobjects.dbtextobjects import dbOpus
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.startup import workdict
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
@@ -217,89 +218,147 @@ def fetchhtmltemplateformetadatarow(shownotes=True):
 	return linetemplate
 
 
-def findlinenumberfromlocus(locus, workobject, dbcursor):
+def findlinenumberfromcitation(method: str, citation: str, workobject: dbOpus, dbcursor) -> tuple:
 	"""
 
 	you have been given a locus in one of THREE possible formats
 
-		_LN_ : already a line number
-		_AT_ : a locus that corresponds to a hipparchia level-list
-		_PE_ : a locus embdeed in the dictionary data; these are regularly wonky
+		linenumber : already a line number
+		locus : a locus that corresponds to a hipparchia level-list
+		perseus : a locus embedded in the dictionary data; these are regularly wonky
 
 	try to turn what you have into a line number in a database table
 
-	:param locus:
+	:param citation:
 	:param workobject:
 	:param dbcursor:
 	:return:
 	"""
 
-	workdb = depunct(locus)[:10]
-	thelocus = locus[10:]
-	citationformat = thelocus[0:4]
-	wo = workobject
 	resultmessage = 'success'
 
-	# unfortunately you might need to find '300,19' as in 'Democritus, Fragmenta: Fragment 300,19, line 4'
-	# '-' is used for '-1' (which really means 'first available line at this level')
-	# ( ) and / should be converted to equivalents in the builder: they do us no good here
-	# see dbswapoutbadcharsfromciations() in HipparchiaBuilder
+	dispatcher = {
+		'linenumber': findlinenumberfromlinenumber,
+		'locus': findlinenumberfromlocus,
+		'perseus': findlinenumberfromperseus
+	}
+
+	thelinenumber, resultmessage = dispatcher[method](citation, workobject, resultmessage, dbcursor)
+
+	return thelinenumber, resultmessage
+
+
+def findlinenumberfromlinenumber(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
+	"""
+
+	you got here either by the hit list or a forward/back button in the passage browser
+
+	dbcursor unused, but we want same parameters for all // functions
+
+	:param citation:
+	:param workobject:
+	:param dbcursor:
+	:return:
+	"""
+
+	thelinenumber = re.sub('[\D]', '', citation)
+	if not thelinenumber:
+		thelinenumber = workobject.starts
+
+	return thelinenumber, resultmessage
+
+
+def findlinenumberfromlocus(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
+	"""
+
+	you were sent here by the citation builder autofill boxes
+
+	note that
+		browse/locus/gr0016w001/5|11|3
+	is
+		Herodotus, Historiae, Book 3, section 11, line 5
+
+	that is, '5|11|3' is *REVERSED*
+
+	unfortunately you might need to find '300,19' as in 'Democritus, Fragmenta: Fragment 300,19, line 4'
+	'-' is used for '-1' (which really means 'first available line at this level')
+	( ) and / should be converted to equivalents in the builder: they do us no good here
+	see dbswapoutbadcharsfromciations() in HipparchiaBuilder
+
+	:param citation:
+	:param workobject:
+	:param resultmessage:
+	:param dbcursor:
+	:return:
+	"""
+
 	allowedpunct = ',-'
 
-	if citationformat == '_LN_':
-		# you were sent here either by the hit list or a forward/back button in the passage browser
-		thelocus = re.sub('[\D]', '', thelocus[4:])
-	elif thelocus == '_AT_top':
-		thelocus = wo.starts
-	elif citationformat == '_AT_':
-		# you were sent here by the citation builder autofill boxes
-		p = locus[14:].split('|')
-		cleanedp = [depunct(level, allowedpunct) for level in p]
-		cleanedp = tuple(cleanedp[:5])
-		if len(cleanedp) == wo.availablelevels:
-			thelocus = finddblinefromlocus(wo, cleanedp, dbcursor)
-		else:
-			p = finddblinefromincompletelocus(wo, cleanedp, dbcursor)
-			resultmessage = p['code']
-			thelocus = p['line']
-	elif citationformat == '_PE_':
-		# here comes the fun part: alien format; inconsistent citation style; incorrect data...
-		try:
-			# dict does not always agree with our ids...
-			# do an imperfect test for this by inviting the exception
-			# you can still get a valid but wrong work, of course,
-			# but if you ask for w001 and only w003 exists, this is supposed to take care of that
-			returnfirstlinenumber(workdb, dbcursor)
-		except:
-			# dict did not agree with our ids...: euripides, esp
-			# what follows is a 'hope for the best' approach
-			workid = perseusidmismatch(workdb, dbcursor)
-			wo = workdict[workid]
-			# print('dictionary lookup id remap',workdb,workid,wo.title)
+	p = citation.split('|')
+	cleanedp = [depunct(level, allowedpunct) for level in p]
+	cleanedp = tuple(cleanedp[:5])
 
-		citation = thelocus[4:].split(':')
-		citation.reverse()
-
-		# life=cal. or section=32
-		needscleaning = [True for c in citation if len(c.split('=')) > 1]
-		if True in needscleaning:
-			citation = perseusdelabeler(citation, wo)
-
-		# another problem 'J. ' in sallust <bibl id="lt0631w001_PE_J. 79:3" default="NO" valid="yes"><author>Sall.</author> J. 79, 3</bibl>
-		# lt0631w002_PE_79:3 is what you need to send to finddblinefromincompletelocus()
-		# note that the work number is wrong, so the next is only a partial fix and valid only if wNNN has been set right
-
-		if ' ' in citation[-1]:
-			citation[-1] = citation[-1].split(' ')[-1]
-
-		# meaningful only in the context of someone purposefully submitting bad data...
-		citation = [depunct(level, allowedpunct) for level in citation]
-
-		p = finddblinefromincompletelocus(wo, citation, dbcursor)
-		resultmessage = p['code']
-		thelocus = p['line']
+	if len(cleanedp) == workobject.availablelevels:
+		thelinenumber = finddblinefromlocus(workobject, cleanedp, dbcursor)
 	else:
-		# you sent me passage in an impossible format
-		thelocus = None
+		p = finddblinefromincompletelocus(workobject, list(cleanedp), dbcursor)
+		resultmessage = p['code']
+		thelinenumber = p['line']
 
-	return thelocus, resultmessage
+	return thelinenumber, resultmessage
+
+
+def findlinenumberfromperseus(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
+	"""
+
+	here comes the fun part: alien format; inconsistent citation style; incorrect data...
+
+	sample url:
+
+		/browse/perseus/gr0016w001/7:130
+
+	:param citation:
+	:param workobject:
+	:param resultmessage:
+	:param dbcursor:
+	:return:
+	"""
+
+	allowedpunct = ',-'
+
+	try:
+		# dict does not always agree with our ids...
+		# do an imperfect test for this by inviting the exception
+		# you can still get a valid but wrong work, of course,
+		# but if you ask for w001 and only w003 exists, this is supposed to take care of that
+		returnfirstlinenumber(workobject.universalid, dbcursor)
+	except:
+		# dict did not agree with our ids...: euripides, esp
+		# what follows is a 'hope for the best' approach
+		workid = perseusidmismatch(workobject.universalid, dbcursor)
+		workobject = workdict[workid]
+
+	citationlist = citation.split(':')
+	citationlist.reverse()
+
+	# life=cal. or section=32
+	needscleaning = [True for c in citationlist if len(c.split('=')) > 1]
+	if True in needscleaning:
+		citationlist = perseusdelabeler(citationlist, workobject)
+
+	# another problem 'J. ' in sallust <bibl id="lt0631w001_PE_J. 79:3" default="NO" valid="yes"><author>Sall.</author> J. 79, 3</bibl>
+	# lt0631w002_PE_79:3 is what you need to send to finddblinefromincompletelocus()
+	# note that the work number is wrong, so the next is only a partial fix and valid only if wNNN has been set right
+
+	if ' ' in citationlist[-1]:
+		citationlist[-1] = citationlist[-1].split(' ')[-1]
+
+	# meaningful only in the context of someone purposefully submitting bad data...
+	citationlist = [depunct(level, allowedpunct) for level in citationlist]
+
+	p = finddblinefromincompletelocus(workobject, citationlist, dbcursor)
+	resultmessage = p['code']
+	thelinenumber = p['line']
+
+	return thelinenumber, resultmessage
+

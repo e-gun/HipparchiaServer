@@ -9,18 +9,17 @@
 import json
 
 from server import hipparchia
-from server.browsing.browserfunctions import buildbrowseroutputobject, findlinenumberfromlocus
+from server.browsing.browserfunctions import buildbrowseroutputobject, findlinenumberfromcitation
 from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
 from server.formatting.lexicaformatting import lexicaldbquickfixes
-from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import authordict, workdict
 
 
-@hipparchia.route('/browse/<locus>')
-def grabtextforbrowsing(locus):
+@hipparchia.route('/browse/<method>/<workdb>/<location>')
+def grabtextforbrowsing(method, workdb, location):
 	"""
 	you want to browse something
 	there are two standard ways to get results here: tell me a line or tell me a citation
@@ -38,34 +37,37 @@ def grabtextforbrowsing(locus):
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
-	workdb = depunct(locus)[:10]
-
-	ao = makeanemptyauthor('gr0000')
-	wo = makeanemptywork('gr0000w000')
+	knownmethods = ['linenumber', 'locus', 'perseus']
+	if method not in knownmethods:
+		method = 'linenumber'
 
 	perseusauthorneedsfixing = ['gr0006']
-	if '_PE_' in locus and workdb[:6] in perseusauthorneedsfixing:
-		# perseus has mis-mapped id numbers for the works relative to tlg-e
+	if method == 'perseus' and workdb[:6] in perseusauthorneedsfixing:
 		remapper = lexicaldbquickfixes([workdb])
 		workdb = remapper[workdb]
 
 	try:
-		ao = authordict[workdb[:6]]
-	except KeyError:
-		pass
-
-	try:
 		wo = workdict[workdb]
 	except KeyError:
-		if ao.universalid == 'gr0000':
-			pass
-		else:
-			# you have only selected an author, but not a work: 'gr7000w_AT_1' will fail because we need 'wNNN'
-			# so send line 1 of work 1
-			wo = ao.listofworks[0]
-			locus = '{w}_LN_{s}'.format(w=wo.universalid, s=wo.starts)
+		wo = makeanemptywork('gr0000w000')
 
-	passage, resultmessage = findlinenumberfromlocus(locus, wo, dbcursor)
+	try:
+		ao = authordict[workdb[:6]]
+	except KeyError:
+		ao = makeanemptyauthor('gr0000')
+
+	# try:
+	# 	wo = workdict[workdb]
+	# except KeyError:
+	# if ao.universalid == 'gr0000':
+	# 	pass
+	# else:
+	# 	# you have only selected an author, but not a work: 'gr7000w_AT_1' will fail because we need 'wNNN'
+	# 	# so send line 1 of work 1
+	# 	wo = ao.listofworks[0]
+	# 	locus = '{w}_LN_{s}'.format(w=wo.universalid, s=wo.starts)
+
+	passage, resultmessage = findlinenumberfromcitation(method, location, wo, dbcursor)
 
 	if passage and ao.universalid != 'gr0000':
 		passageobject = buildbrowseroutputobject(ao, wo, int(passage), dbcursor)

@@ -235,7 +235,7 @@ function browsetopassage() {
         }
 
     if (wrk.length !== 3) { wrk = '999'}
-    loc = auth+'w'+wrk+'_AT_'+loc.slice(0, (loc.length)-1);
+    loc = 'locus/' + auth+'w'+wrk+'/'+loc.slice(0, (loc.length)-1);
     browseuponclick(loc);
 }
 

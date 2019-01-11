@@ -207,7 +207,7 @@ function locusdataloader() {
     }
 
 
-function loadLevellist(workid,pariallocus){
+function loadLevellist(workid, pariallocus){
     // python is hoping to see something like ImmutableMultiDict([('locus', 'gr0026w001_AT_3')])
     //  or gr0565w001_AT_-1 (-1 = no knowledge of the work yet)
     //  or gr0565w001_AT_2|3
