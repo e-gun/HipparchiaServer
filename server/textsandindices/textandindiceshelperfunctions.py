@@ -8,6 +8,7 @@
 
 from collections import deque
 from multiprocessing import Manager, Process
+from typing import List
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
@@ -17,6 +18,7 @@ from server.dbsupport.miscdbfunctions import icanpickleconnections
 from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 from server.searching.searchfunctions import atsignwhereclauses
 from server.threading.mpthreadcount import setthreadcount
 
@@ -73,7 +75,7 @@ def tcparserequest(request, authordict, workdict):
 	return req
 
 
-def textsegmentfindstartandstop(authorobject, workobject, passageaslist, cursor):
+def textsegmentfindstartandstop(authorobject, workobject, passageaslist, cursor) -> dict:
 	"""
 	find the first and last lines of a work segment
 	:return:
@@ -114,16 +116,14 @@ def textsegmentfindstartandstop(authorobject, workobject, passageaslist, cursor)
 	return startandstop
 
 
-def wordindextohtmltable(indexingoutput, useheadwords):
+def wordindextohtmltable(indexingoutput: List[tuple], useheadwords: bool) -> str:
 	"""
+
 	pre-pack the concordance output into an html table so that the page JS can just iterate through a set of lines when the time comes
 	each result in the list is itself a list: [word, count, lociwherefound]
-	
-	input:
-		('sum¹', 'sunt', 1, '1.1')
-		('superus', 'summa', 1, '1.4')
-		...
+
 	:param indexingoutput:
+	:param useheadwords:
 	:return:
 	"""
 
@@ -194,7 +194,7 @@ def wordindextohtmltable(indexingoutput, useheadwords):
 	return html
 
 
-def dictmerger(masterdict, targetdict):
+def dictmerger(masterdict: dict, targetdict: dict):
 	"""
 
 	a more complex version also present in HipparchiaBuilder
@@ -226,7 +226,7 @@ def dictmerger(masterdict, targetdict):
 	return masterdict
 
 
-def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationvalue, brktype, openfinder=None, closefinder=None):
+def setcontinuationvalue(thisline: dbWorkLine, previousline: dbWorkLine, previouseditorialcontinuationvalue: bool, brktype: str, openfinder=None, closefinder=None):
 	"""
 
 	used to determine if a bracket span is running for multiple lines
@@ -257,7 +257,7 @@ def setcontinuationvalue(thisline, previousline, previouseditorialcontinuationva
 	return newcv
 
 
-def getrequiredmorphobjects(listofterms: set, furtherdeabbreviate=False):
+def getrequiredmorphobjects(setofterms: set, furtherdeabbreviate=False):
 	"""
 
 	take a set of terms
@@ -268,7 +268,7 @@ def getrequiredmorphobjects(listofterms: set, furtherdeabbreviate=False):
 	:return:
 	"""
 	manager = Manager()
-	terms = manager.list(listofterms)
+	terms = manager.list(setofterms)
 	morphobjects = manager.dict()
 	workers = setthreadcount()
 
@@ -291,14 +291,15 @@ def getrequiredmorphobjects(listofterms: set, furtherdeabbreviate=False):
 	return morphobjects
 
 
-def mpmorphology(terms, furtherdeabbreviate, morphobjects, dbconnection):
+def mpmorphology(terms: list, furtherdeabbreviate: bool, morphobjects, dbconnection: ConnectionObject):
 	"""
 
 	build a dict of morphology objects
 
 	:param terms:
+	:param furtherdeabbreviate:
 	:param morphobjects:
-	:param commitcount:
+	:param dbconnection:
 	:return:
 	"""
 

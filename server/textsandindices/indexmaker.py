@@ -9,12 +9,14 @@
 import re
 from multiprocessing import Pool
 from string import punctuation
+from typing import List
 
 from flask import session
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import grabbundlesoflines, makeablankline
 from server.formatting.wordformatting import elidedextrapunct, extrapunct, minimumgreek, tidyupterm
+from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 from server.listsandsession.genericlistfunctions import polytonicsort
 from server.textsandindices.textandindiceshelperfunctions import dictmerger, getrequiredmorphobjects
 from server.threading.mpthreadcount import setthreadcount
@@ -96,7 +98,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 	return sortedoutput
 
 
-def generatesortedoutputbyword(completeindexdict, onework, alphabetical):
+def generatesortedoutputbyword(completeindexdict: dict, onework: bool, alphabetical: bool) -> List[tuple]:
 	"""
 
 	the simple case: just spew the index out alphabetically
@@ -121,7 +123,7 @@ def generatesortedoutputbyword(completeindexdict, onework, alphabetical):
 	return sortedoutput
 
 
-def generatesortedoutputbyheadword(completeindexdict, onework, alphabetical, activepoll):
+def generatesortedoutputbyheadword(completeindexdict: dict, onework: bool, alphabetical: bool, activepoll) -> List[tuple]:
 	"""
 
 	arrange the index by headword
@@ -230,7 +232,7 @@ def generatesortedoutputbyheadword(completeindexdict, onework, alphabetical, act
 	return sortedoutput
 
 
-def findindexbaseforms(completeindexdict, morphobjects, activepoll):
+def findindexbaseforms(completeindexdict, morphobjects, activepoll) -> dict:
 	"""
 
 	step [b] for generatesortedoutputbyheadword()
@@ -275,7 +277,7 @@ def findindexbaseforms(completeindexdict, morphobjects, activepoll):
 	return augmentedindexdict
 
 
-def generateheadwordindexdict(augmentedindexdict):
+def generateheadwordindexdict(augmentedindexdict) -> dict:
 	"""
 
 	step [c] for generatesortedoutputbyheadword()
@@ -325,7 +327,7 @@ def generateheadwordindexdict(augmentedindexdict):
 	return headwordindexdict
 
 
-def htmlifysimpleindex(completeindexdict, onework):
+def htmlifysimpleindex(completeindexdict, onework) -> List[tuple]:
 	"""
 
 	:param completeindexdict:
@@ -360,7 +362,7 @@ def htmlifysimpleindex(completeindexdict, onework):
 	return unsortedoutput
 
 
-def linesintoindex(lineobjects, activepoll):
+def linesintoindex(lineobjects: List[dbWorkLine], activepoll) -> dict:
 	"""
 	generate the condordance dictionary:
 		{ wordA: [(workid1, index1, locus1), (workid2, index2, locus2),..., wordB: ...]}
@@ -431,7 +433,7 @@ def linesintoindex(lineobjects, activepoll):
 	return completeindex
 
 
-def pooledindexmaker(lineobjects):
+def pooledindexmaker(lineobjects: List[dbWorkLine]) -> dict:
 	"""
 
 	split up the line objects and dispatch them into an mp pool

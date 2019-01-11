@@ -17,7 +17,7 @@ from server.startup import workdict
 from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
 
 
-def buildtext(work, firstline, lastline, linesevery, cursor):
+def buildtext(work: str, firstline: int, lastline: int, linesevery: int, cursor) -> str:
 	"""
 	make a readable/printable version of a work
 
@@ -153,7 +153,7 @@ def buildtext(work, firstline, lastline, linesevery, cursor):
 	return html
 
 
-def determinelinetemplate(shownotes=True):
+def determinelinetemplate(shownotes=True) -> str:
 	"""
 
 	not esp DRY-friendly: there is a near copy inside the BrowserPassageObject()
