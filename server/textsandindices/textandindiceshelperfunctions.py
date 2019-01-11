@@ -23,7 +23,7 @@ from server.searching.searchfunctions import atsignwhereclauses
 from server.threading.mpthreadcount import setthreadcount
 
 
-def tcparserequest(request, authordict, workdict):
+def tcparserequest(request, authordict: dict, workdict: dict) -> dict:
 	"""
 
 	return the author, work, and locus requested

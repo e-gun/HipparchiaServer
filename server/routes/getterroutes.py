@@ -157,7 +157,7 @@ def findworkstructure(workid, locus=None):
 		workobject = None
 
 	if not locus:
-		safepassage = 'top'
+		safepassage = 'firstline'
 	else:
 		unsafepassage = locus.split('|')
 		# this list will need to match the one in '/browse'

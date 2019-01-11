@@ -45,7 +45,7 @@ def findvalidlevelvalues(workobject: dbOpus, partialcitationtuple: tuple, cursor
 	atlevel = availablelevels-len(partialcitation)
 	# cheat in the case where you want to find the top by sending a 'noncitation': 'top'
 	# e.g.: /getstructure?locus=gr0003w001_AT_top
-	if partialcitationtuple[0] == 'top':
+	if partialcitationtuple[0] == 'firstline':
 		atlevel = availablelevels
 	if atlevel < 1:
 		# i am confused; threatening to probe for level "-1"

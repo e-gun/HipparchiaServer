@@ -41,7 +41,7 @@ function parsepassagereturned(passagereturned) {
         wac.val(passagereturned['workboxcontents']);
         wac.prop('placeholder', '');
         loadWorklist(passagereturned['authornumber']);
-        loadLevellist(passagereturned['workid'],'top');
+        loadLevellist(passagereturned['workid'],'firstline');
 
         bdt.html(passagereturned['browserhtml']);
 

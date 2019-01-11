@@ -181,7 +181,7 @@ $('#worksautocomplete').autocomplete({
         resetworksautocomplete();
         var auth = $("#authorsautocomplete").val().slice(-7, -1);
         var wrk = ui.item.value.slice(-4, -1);
-        loadLevellist(auth+'w'+wrk,'top');
+        loadLevellist(auth+'w'+wrk,'firstline');
         }
 });
 
