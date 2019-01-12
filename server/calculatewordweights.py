@@ -11,7 +11,7 @@ import re
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 
 
-def findtemporalweights(language):
+def findtemporalweights(language: str) -> dict:
 	"""
 	figure out how many more words are 'late' than 'early', etc.
 	you only need to run this once every major recalibration of the data
@@ -33,7 +33,7 @@ def findtemporalweights(language):
 	return wordweights
 
 
-def findccorporaweights():
+def findccorporaweights() -> dict:
 	"""
 	figure out how many more words are 'gr' than 'lt', etc.
 	you only need to run this once every major recalibration of the data
@@ -56,7 +56,7 @@ def findccorporaweights():
 	return weights
 
 
-def workobjectgeneraweights(language, iscollapsed, workobjects):
+def workobjectgeneraweights(language: str, iscollapsed: bool, workobjects) -> dict:
 	"""
 
 	compare the results...
@@ -185,7 +185,7 @@ def workobjectgeneraweights(language, iscollapsed, workobjects):
 	return weights
 
 
-def findgeneraweights(language, collapsed=False):
+def findgeneraweights(language: str, collapsed=False) -> dict:
 	"""
 	figure out how many more words are 'acta' than 'lt', etc.
 	you only need to run this once every major recalibration of the data
@@ -333,7 +333,7 @@ def findgeneraweights(language, collapsed=False):
 	return weights
 
 
-def findchronologicalweights(era, language):
+def findchronologicalweights(era: str, language: str) -> int:
 	"""
 
 	an initial call to dictionary_headword_wordcounts to figure out the relative weight of the different eras
@@ -373,7 +373,7 @@ def findchronologicalweights(era, language):
 	return thesum
 
 
-def findgenreweightfromworkobject(genre, language, workdict):
+def findgenreweightfromworkobject(genre: str, language: str, workdict: dict) -> int:
 	"""
 
 	how many words belong to any given corpus?
@@ -395,7 +395,7 @@ def findgenreweightfromworkobject(genre, language, workdict):
 	return totalwords
 
 
-def findcorpusweight(corpus, language):
+def findcorpusweight(corpus: str, language: str) -> int:
 	"""
 
 	how many words belong to any given corpus?
