@@ -56,6 +56,10 @@ def grabtextforbrowsing(method, workdb, location):
 	except KeyError:
 		ao = makeanemptyauthor('gr0000')
 
+	if ao.universalid != 'gr0000' and ao.universalid != wo.universalid[:6]:
+		# you have only selected an author, but not a work
+		wo = ao.listofworks[0]
+
 	# try:
 	# 	wo = workdict[workdb]
 	# except KeyError:

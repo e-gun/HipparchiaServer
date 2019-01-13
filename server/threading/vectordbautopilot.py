@@ -133,7 +133,7 @@ def determinevectorworkpile(tempcap=False):
 	return workpile
 
 
-def buildfakesearchobject(qtype='nearestneighborsquery'):
+def buildfakesearchobject(qtype='nearestneighborsquery') -> SearchObject:
 	"""
 
 	do what it takes to build a hollow searchobject

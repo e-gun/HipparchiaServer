@@ -118,7 +118,7 @@ $(document).ready( function () {
         });
 
     function setoptions(sessionvar,value){
-	    $.getJSON('/setsessionvariable?' + sessionvar + '=' + value, function (resultdata) {
+	    $.getJSON('/setsessionvariable/' + sessionvar + '/' + value, function (resultdata) {
 		 // do nothing special: the return exists but is not relevant
 		 // [{"searchsyntax": "R"}]
 	    });

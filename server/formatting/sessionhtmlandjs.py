@@ -58,7 +58,7 @@ def sessionselectionsjs(labeltupleslist: List[Tuple[str, int]]) -> str:
 
 	template = """
 		$( '#{label}_0{number}' ).dblclick(function() lbrk
-			$.getJSON('/clearselections?cat={label}&id={number}', function (selectiondata) lbrk 
+			$.getJSON('/clearselections/{label}/{number}', function (selectiondata) lbrk 
 				reloadselections(selectiondata); rbrk);
 		rbrk);
 	"""

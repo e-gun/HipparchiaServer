@@ -6,7 +6,7 @@
 
 
 function setoptions(sessionvar, value){
-	$.getJSON( {url: '/setsessionvariable?' + sessionvar + '=' + value,
+	$.getJSON( {url: '/setsessionvariable/' + sessionvar + '/' + value,
 	    async: false,
 	    success: function (resultdata) {
 		 // do nothing special: the return exists but is not relevant
@@ -234,7 +234,7 @@ function browsetopassage() {
             }
         }
 
-    if (wrk.length !== 3) { wrk = '999'}
+    if (wrk.length !== 3) { wrk = 'FIRST'}
     loc = 'locus/' + auth+'w'+wrk+'/'+loc.slice(0, (loc.length)-1);
     browseuponclick(loc);
 }

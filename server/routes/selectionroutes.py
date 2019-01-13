@@ -124,8 +124,8 @@ def selectionmade():
 	return getcurrentselections()
 
 
-@hipparchia.route('/setsessionvariable', methods=['GET'])
-def setsessionvariable():
+@hipparchia.route('/setsessionvariable/<thevariable>/<thevalue>')
+def setsessionvariable(thevariable, thevalue):
 	"""
 	accept a variable name and value: hand it off to the parser/setter
 	returns:
@@ -136,12 +136,9 @@ def setsessionvariable():
 	:return:
 	"""
 
-	param = re.search(r'(.*?)=.*?', request.query_string.decode('utf-8'))
-	param = param.group(1)
-	val = request.args.get(param)
 	# need to accept '-' because of the date spinner; '_' because of 'converted_date', etc
 	validpunct = '-_'
-	val = depunct(val, validpunct)
+	thevalue = depunct(thevalue, validpunct)
 
 	try:
 		session['authorssummary']
@@ -149,40 +146,44 @@ def setsessionvariable():
 		# cookies are not enabled
 		return json.dumps([{'none': 'none'}])
 
-	modifysessionvariable(param, val)
+	modifysessionvariable(thevariable, thevalue)
 
-	result = json.dumps([{param: val}])
+	result = json.dumps([{thevariable: thevalue}])
 
 	return result
 
 
-@hipparchia.route('/clearselections', methods=['GET'])
-def clearselections():
+@hipparchia.route('/clearselections/<category>/<index>')
+def clearselections(category, index=-1):
 	"""
 	a selection gets thrown into the trash
+
 	:return:
 	"""
 
-	category = request.args.get('cat', '')
 	selectiontypes = ['auselections', 'wkselections', 'psgselections', 'agnselections', 'wkgnselections',
 						'alocselections', 'wlocselections', 'auexclusions', 'wkexclusions', 'psgexclusions',
 						'agnexclusions', 'wkgnexclusions', 'alocexclusions', 'wlocexclusions']
-	if category not in selectiontypes:
-		category = ''
 
-	item = request.args.get('id', '')
-	item = int(item)
+	if category not in selectiontypes:
+		category = None
 
 	try:
-		session[category].pop(item)
-	except IndexError:
-		print('\tclearselections() IndexError when popping {c}[{i}]'.format(c=category, i=str(item)))
-		pass
-	except KeyError:
-		print('\tclearselections() KeyError when popping {c}[{i}]'.format(c=category, i=str(item)))
-		pass
+		index = int(index)
+	except ValueError:
+		index = -1
 
-	session.modified = True
+	if category and index > -1:
+		try:
+			session[category].pop(index)
+		except IndexError:
+			print('\tclearselections() IndexError when popping {c}[{i}]'.format(c=category, i=str(index)))
+			pass
+		except KeyError:
+			print('\tclearselections() KeyError when popping {c}[{i}]'.format(c=category, i=str(index)))
+			pass
+
+		session.modified = True
 
 	return getcurrentselections()
 

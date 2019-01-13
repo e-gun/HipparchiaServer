@@ -11,7 +11,7 @@ from os import cpu_count
 from server import hipparchia
 
 
-def setthreadcount(startup=False):
+def setthreadcount(startup=False) -> int:
 	"""
 
 	used to set worker count on multithreaded functions
