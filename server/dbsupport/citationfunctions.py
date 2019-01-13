@@ -210,14 +210,14 @@ def finddblinefromlocus(workobject: dbOpus, citationtuple: tuple, dbcursor) -> i
 
 	query = query + ' AND '.join(lq) + ' ORDER BY index ASC'
 
-	# if the last selection box was empty you are sent '-1' instead of a real value
+	# if the last selection box was empty you are sent '_0' instead of a real value
 	# (because the first line of lvl05 is not necc. '1')
 	# so we need to kill off 'level_00_value=%s AND ', etc
 	# example: ('-1', '256', 'beta') [here the 1st line is actually '10t', btw]
 
 	citation = list(citationtuple)
 
-	if citation[0] == '-1':
+	if citation[0] == '_0':
 		query = re.sub(r'level_00_value=%s AND ', '', query)
 		citation = citation[1:]
 
@@ -326,8 +326,8 @@ def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, cursor
 		# you have an incomplete citation: assume that the top level is the last item, etc.
 		citationlist = perseuscitationsintohipparchiacitations(citationlist)
 		citationlist.reverse()
-		# the last selection box was empty and you were sent '-1' instead of a real value
-		citationlist = [c for c in citationlist if c != '-1']
+		# the last selection box was empty and you were sent '_0' instead of a real value
+		citationlist = [c for c in citationlist if c != '_0']
 		auid = workobject.universalid[0:6]
 
 		query = list()

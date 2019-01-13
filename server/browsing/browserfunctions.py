@@ -278,14 +278,12 @@ def findlinenumberfromlocus(citation: str, workobject: dbOpus, resultmessage: st
 	you were sent here by the citation builder autofill boxes
 
 	note that
-		browse/locus/gr0016w001/5|11|3
+		browse/locus/gr0016w001/3|11|5
 	is
 		Herodotus, Historiae, Book 3, section 11, line 5
 
-	that is, '5|11|3' is *REVERSED*
-
 	unfortunately you might need to find '300,19' as in 'Democritus, Fragmenta: Fragment 300,19, line 4'
-	'-' is used for '-1' (which really means 'first available line at this level')
+	'-' is used for '_0' (which really means 'first available line at this level')
 	( ) and / should be converted to equivalents in the builder: they do us no good here
 	see dbswapoutbadcharsfromciations() in HipparchiaBuilder
 
@@ -296,10 +294,11 @@ def findlinenumberfromlocus(citation: str, workobject: dbOpus, resultmessage: st
 	:return:
 	"""
 
-	allowedpunct = ',-'
+	allowedpunct = ',_'
 
 	p = citation.split('|')
 	cleanedp = [depunct(level, allowedpunct) for level in p]
+	cleanedp.reverse()
 	cleanedp = tuple(cleanedp[:5])
 
 	if len(cleanedp) == workobject.availablelevels:

@@ -57,19 +57,8 @@ def grabtextforbrowsing(method, workdb, location):
 		ao = makeanemptyauthor('gr0000')
 
 	if ao.universalid != 'gr0000' and ao.universalid != wo.universalid[:6]:
-		# you have only selected an author, but not a work
+		# you have only selected an author, but not a work: 'lt0474w_firstwork'
 		wo = ao.listofworks[0]
-
-	# try:
-	# 	wo = workdict[workdb]
-	# except KeyError:
-	# if ao.universalid == 'gr0000':
-	# 	pass
-	# else:
-	# 	# you have only selected an author, but not a work: 'gr7000w_AT_1' will fail because we need 'wNNN'
-	# 	# so send line 1 of work 1
-	# 	wo = ao.listofworks[0]
-	# 	locus = '{w}_LN_{s}'.format(w=wo.universalid, s=wo.starts)
 
 	passage, resultmessage = findlinenumberfromcitation(method, location, wo, dbcursor)
 
@@ -77,7 +66,7 @@ def grabtextforbrowsing(method, workdb, location):
 		passageobject = buildbrowseroutputobject(ao, wo, int(passage), dbcursor)
 	else:
 		passageobject = BrowserOutputObject(ao, wo, passage)
-		viewing = '<p class="currentlyviewing">error in fetching the browser data.<br />I was sent a citation that returned nothing: {c}</p><br /><br />'.format(c=locus)
+		viewing = '<p class="currentlyviewing">error in fetching the browser data.<br />I was sent a citation that returned nothing: {c}</p><br /><br />'.format(c=location)
 		if not passage:
 			passage = ''
 		table = [str(passage), workdb]

@@ -223,19 +223,22 @@ function browsetopassage() {
     let l1 = $('#level01').val();
     let l0 = $('#level00').val();
     let lvls = [ l5, l4, l3, l2, l1, l0];
-    let loc = '';
+    let loc = Array();
     for (let i = 5; i > -1; i-- ) {
         if (lvls[i] !== '') {
-            loc += lvls[i]+'|';
+            loc.push(lvls[i]);
         } else {
             if (i === 5) {
-                loc += '-1|';
+                loc.push('_0');
                 }
             }
         }
 
-    if (wrk.length !== 3) { wrk = 'FIRST'}
-    loc = 'locus/' + auth+'w'+wrk+'/'+loc.slice(0, (loc.length)-1);
+    loc.reverse();
+    let locstring = loc.join('|');
+
+    if (wrk.length !== 3) { wrk = '_firstwork'}
+    loc = 'locus/' + auth+'w'+wrk+'/'+locstring.slice(0, locstring.length);
     browseuponclick(loc);
 }
 
@@ -298,7 +301,7 @@ $('#lexicalsearch').click(function(){
     let dictterm = $('#lexicon').val();
     let restoreme = dictterm;
     // trailing space will be lost unless you do this: ' gladiator ' --> ' gladiator' and so you can't spearch for only that word...
-    if (dictterm.slice(-1) === ' ') { dictterm = dictterm.slice(0,-1) + '%20'; }
+    if (dictterm.slice(-1) === ' ') { dictterm = dictterm.slice(0, -1) + '%20'; }
     let parseterm = $('#parser').val();
     let reverseterm = $('#reverselexicon').val();
     let windowWidth = $(window).width();
@@ -321,7 +324,7 @@ $('#lexicalsearch').click(function(){
     } else if ( reverseterm.length > 0 ) {
         let originalterm = reverseterm;
         // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
-        if (reverseterm.slice(-1) === ' ') { reverseterm = reverseterm.slice(0,-1) + '%20'; }
+        if (reverseterm.slice(-1) === ' ') { reverseterm = reverseterm.slice(0, -1) + '%20'; }
         searchterm = reverseterm;
         url = '/reverselookup/';
         dialogtitle = originalterm;
