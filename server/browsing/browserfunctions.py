@@ -282,8 +282,14 @@ def findlinenumberfromlocus(citation: str, workobject: dbOpus, resultmessage: st
 	is
 		Herodotus, Historiae, Book 3, section 11, line 5
 
+	and
+		locus/lt1056w001/3|5|_0
+	is
+		Vitruvius, De Architectura, book 3, chapter 5, section 1, line 1
+
 	unfortunately you might need to find '300,19' as in 'Democritus, Fragmenta: Fragment 300,19, line 4'
-	'-' is used for '_0' (which really means 'first available line at this level')
+	'-' is used for something like Ar., Nubes 1510-1511
+	'_' is used for '_0' (which really means 'first available line at this level')
 	( ) and / should be converted to equivalents in the builder: they do us no good here
 	see dbswapoutbadcharsfromciations() in HipparchiaBuilder
 
@@ -294,19 +300,19 @@ def findlinenumberfromlocus(citation: str, workobject: dbOpus, resultmessage: st
 	:return:
 	"""
 
-	allowedpunct = ',_'
+	allowedpunct = ',_-'
 
-	p = citation.split('|')
-	cleanedp = [depunct(level, allowedpunct) for level in p]
-	cleanedp.reverse()
-	cleanedp = tuple(cleanedp[:5])
+	elements = citation.split('|')
+	cleanelements = [depunct(level, allowedpunct) for level in elements]
+	cleanelements.reverse()
+	cleanelements = tuple(cleanelements[:5])
 
-	if len(cleanedp) == workobject.availablelevels:
-		thelinenumber = finddblinefromlocus(workobject, cleanedp, dbcursor)
+	if len(cleanelements) == workobject.availablelevels:
+		thelinenumber = finddblinefromlocus(workobject, cleanelements, dbcursor)
 	else:
-		p = finddblinefromincompletelocus(workobject, list(cleanedp), dbcursor)
-		resultmessage = p['code']
-		thelinenumber = p['line']
+		elements = finddblinefromincompletelocus(workobject, list(cleanelements), dbcursor)
+		resultmessage = elements['code']
+		thelinenumber = elements['line']
 
 	return thelinenumber, resultmessage
 
@@ -322,8 +328,6 @@ def findlinenumberfromperseus(citation: str, workobject: dbOpus, resultmessage: 
 
 	is
 		Herodotus, Historiae, Book 7, section 130
-
-	that is, '7:130' is *NOT REVERSED*
 
 	:param citation:
 	:param workobject:
