@@ -55,7 +55,8 @@ class PooledRedisBorg(object):
 			dbid = hipparchia.config['REDISDBID']
 			if hipparchia.config['REDISPORT'] != 0:
 				port = hipparchia.config['REDISPORT']
-				redisconnection = redis.ConnectionPool(host='localhost', port=port, db=dbid, max_connections=poolsize)
+				redishost = hipparchia.config['REDISHOST']
+				redisconnection = redis.ConnectionPool(host=redishost, port=port, db=dbid, max_connections=poolsize)
 			else:
 				sock = hipparchia.config['REDISCOCKET']
 				redisconnection = redis.ConnectionPool(connection_class=redis.UnixDomainSocketConnection, path=sock, db=dbid, max_connections=poolsize)

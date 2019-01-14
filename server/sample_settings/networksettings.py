@@ -58,6 +58,7 @@ DBPORT = 5432
 CONNECTIONTYPE = 'pool'
 
 # you might be using redis; but note that redis is NOT pre-installed in standard or minimal installations
+REDISHOST = '127.0.0.1'
 REDISPORT = 6379
 REDISCOCKET = '/tmp/redis.sock'
 REDISDBID = 0
