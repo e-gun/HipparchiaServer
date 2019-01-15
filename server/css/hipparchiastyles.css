@@ -872,7 +872,8 @@ body {
 .smallcapitals, .uncial {
 	font-variant: small-caps;
 	font-weight: normal;
-	font-size: 120%;
+	font-size: 110%;
+    color: var(--deepblue);
 	}
 
 .smallerthannormal {
