@@ -95,6 +95,8 @@ def massagesearchtermsforwhitespace(query: str) -> str:
 def atsignwhereclauses(uidwithatsign, operand, authors) -> List[tuple]:
 	"""
 
+	the '_AT_' syntax is used to restrict the scope of a search
+
 	in order to restrict a search to a portion of a work, you will need a where clause
 	this builds it out of something like 'gr0003w001_AT_3|12' (Thuc., Bk 3, Ch 12)
 

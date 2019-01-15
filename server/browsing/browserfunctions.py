@@ -27,11 +27,10 @@ from server.textsandindices.textandindiceshelperfunctions import setcontinuation
 
 def buildbrowseroutputobject(authorobject: dbAuthor, workobject: dbOpus, locusindexvalue: int, dbcursor) -> BrowserOutputObject:
 	"""
-	this function does a lot of work via a number of subfunctions
-	lots of refactoring required if you change anything...
 
-	sample output:
-		output = {'browseforwards': 'gr0012w001_LN_2662', 'browseback': 'gr0012w001_LN_2652', 'authornumber': 'gr0012', 'workid': 'gr0012w001', 'authorboxcontents': 'Homer - Homerus (Epic.\x80) [gr0012]', 'workboxcontents': 'Ilias (w001)', 'browserhtml': '<p class="currentlyviewing"><span class="author">Homer</span>, <span class="work">Ilias</span><br /><span class="citation">Book 5, line 159</span><br /><span class="pubvolumename">Homeri Ilias. </span><span class="pubpress">Clarendon Press, </span><span class="pubcity">Oxford, </span><span class="pubyear">1931. </span><span class="pubeditor"> (Allen, T.W.)</span></p><table>\n<tr class="spacing">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tr>\n<tr class="browser">\n\t<td class="browsedline"><observed id="λεῖπ’">λεῖπ’</observed>, <observed id="ἐπεὶ">ἐπεὶ</observed> <observed id="οὐ">οὐ</observed> <observed id="ζώοντε">ζώοντε</observed> <observed id="μάχηϲ">μάχηϲ</observed> <observed id="ἐκνοϲτήϲαντε">ἐκνοϲτήϲαντε</observed> </td>\n\t<td class="browsercite"></td>\n</tr>\n\n<tr class="browser">\n\t<td class="browsedline"><observed id="δέξατο">δέξατο</observed>· <observed id="χηρωϲταὶ">χηρωϲταὶ</observed> <observed id="δὲ">δὲ</observed> <observed id="διὰ">διὰ</observed> <observed id="κτῆϲιν">κτῆϲιν</observed> <observed id="δατέοντο">δατέοντο</observed>. </td>\n\t<td class="browsercite"></td>\n</tr>\n\n<tr class="browser">\n\t<td class="browsedline"><span class="focusline">&nbsp;&nbsp;&nbsp;&nbsp;<observed id="Ἔνθ’">Ἔνθ’</observed> <observed id="υἷαϲ">υἷαϲ</observed> <observed id="Πριάμοιο">Πριάμοιο</observed> <observed id="δύω">δύω</observed> <observed id="λάβε">λάβε</observed> <observed id="Δαρδανίδαο">Δαρδανίδαο</observed> </span></td>\n\t<td class="browsercite">5.159</td>\n</tr>\n\n<tr class="browser">\n\t<td class="browsedline"><observed id="εἰν">εἰν</observed> <observed id="ἑνὶ">ἑνὶ</observed> <observed id="δίφρῳ">δίφρῳ</observed> <observed id="ἐόνταϲ">ἐόνταϲ</observed> <observed id="Ἐχέμμονά">Ἐχέμμονά</observed> <observed id="τε">τε</observed> <observed id="Χρομίον">Χρομίον</observed> <observed id="τε">τε</observed>. </td>\n\t<td class="browsercite">5.160</td>\n</tr>\n\n<tr class="browser">\n\t<td class="browsedline"><observed id="ὡϲ">ὡϲ</observed> <observed id="δὲ">δὲ</observed> <observed id="λέων">λέων</observed> <observed id="ἐν">ἐν</observed> <observed id="βουϲὶ">βουϲὶ</observed> <observed id="θορὼν">θορὼν</observed> <observed id="ἐξ">ἐξ</observed> <observed id="αὐχένα">αὐχένα</observed> <observed id="ἄξῃ">ἄξῃ</observed> </td>\n\t<td class="browsercite"></td>\n</tr>\n\n</table>'}
+	this function does a lot of work via a number of subfunctions
+
+	lots of refactoring required if you change anything...
 
 	:param authorobject:
 	:param workobject:
@@ -358,8 +357,8 @@ def findlinenumberfromperseus(citation: str, workobject: dbOpus, resultmessage: 
 	if True in needscleaning:
 		citationlist = perseusdelabeler(citationlist, workobject)
 
-	# another problem 'J. ' in sallust <bibl id="lt0631w001_PE_J. 79:3" default="NO" valid="yes"><author>Sall.</author> J. 79, 3</bibl>
-	# lt0631w002_PE_79:3 is what you need to send to finddblinefromincompletelocus()
+	# another problem 'J. ' in sallust <bibl id="perseus/lt0631w001/J. 79:3" default="NO" valid="yes"><author>Sall.</author> J. 79, 3</bibl>
+	# 'lt0631w002/79:3' is what you need to send to finddblinefromincompletelocus()
 	# note that the work number is wrong, so the next is only a partial fix and valid only if wNNN has been set right
 
 	if ' ' in citationlist[-1]:

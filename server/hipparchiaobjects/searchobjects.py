@@ -435,7 +435,7 @@ class SearchResult(object):
 		generate the non-wrapped html for the citation; e.g:
 
 			<span class="findnumber">[13]</span>&nbsp;&nbsp;<span class="foundauthor">Quintilianus, Marcus Fabius</span>,&nbsp;<span class="foundwork">Declamationes Minores</span>:
-			<browser id="lt1002w002_LN_24040"><span class="foundlocus">oration 289, section pr, line 1</span><br /></browser>
+			<browser id="linenumber/lt1002w002/24040"><span class="foundlocus">oration 289, section pr, line 1</span><br /></browser>
 
 		:return:
 		"""
@@ -445,8 +445,7 @@ class SearchResult(object):
 			<span class="foundauthor">{au}</span>,&nbsp;<span class="foundwork">{wk}</span>:
 			<browser id="{url}"><span class="foundlocus">{cs}</span></browser>"""
 
-		locushtml = citationtemplate.format(hn=self.hitnumber, au=self.author, wk=self.work, url=self.clickurl,
-		                             cs=citestring)
+		locushtml = citationtemplate.format(hn=self.hitnumber, au=self.author, wk=self.work, url=self.clickurl, cs=citestring)
 
 		return locushtml
 

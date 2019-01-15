@@ -21,13 +21,14 @@ from server.startup import authordict, workdict
 @hipparchia.route('/browse/<method>/<workdb>/<location>')
 def grabtextforbrowsing(method, workdb, location):
 	"""
+
 	you want to browse something
-	there are two standard ways to get results here: tell me a line or tell me a citation
-		sample input: '/browseto/gr0059w030_LN_48203'
-		sample input: '/browseto/gr0008w001_AT_23|3|3'
-	alternately you can sent me a perseus ref from a dictionary entry ('_PE_') and I will *try* to convert it into a '_LN_'
-	sample output: [could probably use retooling...]
-		[{'forwardsandback': ['gr0199w010_LN_55', 'gr0199w010_LN_5']}, {'value': '<currentlyviewing><span class="author">Bacchylides</span>, <span class="work">Dithyrambi</span><br />Dithyramb 1, line 42<br /><span class="pubvolumename">Bacchylide. Dithyrambes, épinicies, fragments<br /></span><span class="pubpress">Les Belles Lettres , </span><span class="pubcity">Paris , </span><span class="pubyear">1993. </span><span class="pubeditor"> (Irigoin, J. )</span></currentlyviewing><br /><br />'}, {'value': '<table>\n'}, {'value': '<tr class="browser"><td class="browsedline"><observed id="[–⏑–––⏑–––⏑–]δ̣ουϲ">[–⏑–––⏑–––⏑–]δ̣ουϲ</observed> </td><td class="browsercite"></td></tr>\n'}, ...]
+
+	there are multiple ways to get results here & different methods entail different location styles
+
+		sample input: '/browse/linenumber/lt1254w001/4877'
+		sample input: '/browse/locus/lt1254w001/15|13|4|_0'
+		sample input: '/browse/perseus/lt1254w001/4:9:12'
 
 	:return:
 	"""

@@ -92,7 +92,7 @@ def dbloadasingleworkobject(workuniversalid: str) -> dbOpus:
 def findselectionboundaries(workobject: dbOpus, selection: str, cursor) -> tuple:
 	"""
 	
-	ask for _AT_x|y|z
+	ask for something like 'lt1254w001/15|13|4'
 	
 	return (startline, endline) 
 	

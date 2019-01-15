@@ -208,14 +208,16 @@ function locusdataloader() {
 
 
 function loadLevellist(workid, pariallocus){
-    // python is hoping to see something like ImmutableMultiDict([('locus', 'gr0026w001_AT_3')])
-    //  or gr0565w001_AT_-1 (-1 = no knowledge of the work yet)
-    //  or gr0565w001_AT_2|3
-    // note that this is to be read as lowest known level first
-    // and bad things happen if you send level00 info
-
+    // python is hoping to be sent something like:
+    //
+    //  /getstructure/lt1254w001/firstline
+    //  /getstructure/lt0474w043/3|12
+    //
+    // bad things happen if you send level00 info
+    //
     // python will return info about the next level down such as:
     //  [{'totallevels',3},{'level': 0}, {'label': 'verse'}, {'low': 1}, {'high': 100]
+
     $.getJSON('/getstructure/'+workid+'/'+pariallocus, function (selectiondata) {
         var top = selectiondata['totallevels']-1;
         var atlevel = selectiondata['level'];

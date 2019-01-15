@@ -28,7 +28,9 @@ def selectionmade():
 	once a choice is made, parse and register it inside session['selections']
 	then return the human readable version of the same for display on the page
 
-	this is also called without arguments to return the searchlist contents by
+	'_AT_' syntax is used to restrict the scope of a search
+
+	this function is also called without arguments to return the searchlist contents by
 	skipping ahead to sessionselectionsashtml()
 
 	sample input:

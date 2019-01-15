@@ -55,6 +55,7 @@ class BrowserOutputObject(object):
 		outputdict = dict()
 		requiredkeys = ['browseforwards', 'browseback', 'authornumber', 'workid',
 		                'authorboxcontents', 'workboxcontents', 'browserhtml']
+
 		for item in requiredkeys:
 			outputdict[item] = getattr(self, item)
 

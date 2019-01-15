@@ -366,7 +366,7 @@ class dbWorkLine(object):
 
 		build a clickable url for the locus and wrap the locus in it:
 
-			<indexedlocation id="gr0032w008_LN_30784">1.4.4</indexedlocation>
+			<indexedlocation id="linenumber/gr0032w008/30784">1.4.4</indexedlocation>
 
 		:return:
 		"""

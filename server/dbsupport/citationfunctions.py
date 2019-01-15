@@ -44,15 +44,15 @@ def findvalidlevelvalues(workobject: dbOpus, partialcitationtuple: tuple, cursor
 
 	atlevel = availablelevels-len(partialcitation)
 	# cheat in the case where you want to find the top by sending a 'noncitation': 'top'
-	# e.g.: /getstructure?locus=gr0003w001_AT_top
+	# e.g.: /getstructure/gr0003w001/firstline
 	if partialcitationtuple[0] == 'firstline':
 		atlevel = availablelevels
 	if atlevel < 1:
 		# i am confused; threatening to probe for level "-1"
 		# a selection at level00 will do this to me
-		#   /getstructure?locus=gr0003w001_AT_3|36|5|3
+		#   /getstructure/gr0003w001/3|36|5|3
 		# this needs to be made uncontroversial:
-		#   /getstructure?locus=gr0003w001_AT_3|36|5
+		#   /getstructure/gr0003w001/3|36|5
 		# and so: massage the data
 		atlevel = 1
 		try:
@@ -222,7 +222,6 @@ def finddblinefromlocus(workobject: dbOpus, citationtuple: tuple, dbcursor) -> i
 		citation = citation[1:]
 
 	if not citation:
-		# '_AT_-1' turned into ['-1'] and then into []
 		indexvalue = workdict[workid].starts
 		return indexvalue
 
@@ -236,7 +235,7 @@ def finddblinefromlocus(workobject: dbOpus, citationtuple: tuple, dbcursor) -> i
 		# TypeError: 'NoneType' object is not subscriptable
 		indexvalue = returnfirstlinenumber(workdb, dbcursor)
 
-	# print('finddblinefromlocus() - indexvalue:',indexvalue)
+	# print('finddblinefromlocus() - indexvalue:', indexvalue)
 
 	return indexvalue
 
@@ -247,7 +246,7 @@ def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, cursor
 	this is used both by the browser selection boxes and by perseus passage lookups
 
 	need to deal with the perseus bibliographic references which often do not go all the way down to level zero
-	use what you have to find the first available db line so you can construct a '_LN_' browseto click
+	use what you have to find the first available db line so you can construct a '/browse/line/...' browseto click
 	the citation list arrives in ascending order of levels: 00, 01, 02...
 
 	sent something like:
@@ -358,8 +357,8 @@ def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, cursor
 				return results
 			elif workobject.universalid[0:6] == 'lt1014':
 				# The dictionary regularly (but inconsistently!) points to Seneca Maior [lt1014] when it is citing Seneca Minor [lt107]'
-				# but what follows will not save the day: "lt1014w001_PE_Ira, 2:11:2", "lt1014w001_PE_Cons. ad Marc. 1:6", and
-				# "lt1014w001_PE_Ep. 70:15" are all fundamentally broken: lt1017 will still not get you the right work numbers
+				# but what follows will not save the day: "lt1014w001/Ira, 2:11:2", "lt1014w001/Cons. ad Marc. 1:6", and
+				# "lt1014w001/Ep. 70:15" are all fundamentally broken: lt1017 will still not get you the right work numbers
 				#
 				# print('minor for maior b', workobject.universalid, workobject.title)
 				# newworkobject = dbloadasingleworkobject('lt1017'+workobject.universalid[6:])
@@ -392,11 +391,10 @@ def perseuslookupleveltrimmer(workobject: dbOpus, citationlist: list, cursor, tr
 	you had a valid looking citation, but it was not in fact valid
 
 	for example, Cicero's Phillipcs should be cited as oration, section, line
-	but PE will send  3, 10, 25: this is really oration 3, section 25
-	[actually, the list comes in in reversed order...]
+	but perseus will send  3:10:25. This is in fact oration 3, section 25
 
-	cicero's verrines seem to be (usually) broken: actio, book, section, (line)
-	dictionary will send 2, 18, 45 when the right answer is 2.2.45(.1) (and the 'wrong'
+	Cicero's verrines seem to be (usually) broken: actio, book, section, (line)
+	dictionary will send 2:18:45 when the right answer is 2.2.45(.1) (and the 'wrong'
 	request should be 2.2.18.45)
 
 	it seems that dropping the penultimate item is usually going to be the good second guess

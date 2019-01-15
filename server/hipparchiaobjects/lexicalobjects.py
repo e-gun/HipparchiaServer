@@ -233,7 +233,7 @@ class dbDictionaryEntry(object):
 			<bibl n="Perseus:abo:tlg,0019,003:1214" default="NO" valid="yes">
 
 		out:
-			<bibl id="gr0019w003_PE_1214" default="NO" valid="yes">
+			<bibl id="perseus/gr0019w003/1214" default="NO" valid="yes">
 
 		:return:
 		"""

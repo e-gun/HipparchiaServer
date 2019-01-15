@@ -30,10 +30,8 @@ function parsepassagereturned(passagereturned) {
         const aac = $('#authorsautocomplete');
         const wac = $('#worksautocomplete');
 		bdt.text('');
-        // the first item is info
-        // {'forwardsandback': ['/browseto/lt1254w001_AT_2|2|3|6', '/browseto/lt1254w001_AT_6|9|2|6']}
-        let fwdurl = passagereturned['browseforwards'];
-        let bkdurl = passagereturned['browseback'];
+        let fwdurl = passagereturned['browseforwards'];  // e.g. 'linenumber/lt1254w001/4868'
+        let bkdurl = passagereturned['browseback'];      // e.g. 'linenumber/lt1254w001/4840'
 
         resetworksautocomplete();
         aac.val(passagereturned['authorboxcontents']);
