@@ -6,4 +6,4 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-hipparchiaserverversion = '1.3.1+ [MASTER]'
+hipparchiaserverversion = '1.3.2'

@@ -1166,6 +1166,15 @@ body {
 	position: float;
 	}
 
+a.nounderline {
+	text-decoration: none;
+	}
+
+a.nounderline:hover{
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	 }
+
 bibl {
 	color: var(--dkbabyblue);
 	border: 1px dotted var(--invisible);

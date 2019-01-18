@@ -11,7 +11,7 @@ from string import punctuation
 
 # the one: because sometimes you don't want to zap τ’, δ’, κτλ.
 # the other: and sometimes you do
-elidedextrapunct = '\′‵‘·̆́“”„—†⌈⌋⌊⟫⟪❵❴⟧⟦«»›‹⟨⟩⸐„⸏⸖⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚̄⁝͜‖͡⸓͝'
+elidedextrapunct = '\′‵‘·̆́“”„—†ˈ⌈⌋⌊⟫⟪❵❴⟧⟦«»›‹⟨⟩⸐„⸏⸖⸎⸑–⏑–⏒⏓⏔⏕⏖⌐∙×⁚̄⁝͜‖͡⸓͝'
 extrapunct = elidedextrapunct + '’'
 
 minimumgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
@@ -701,3 +701,11 @@ def acuteorgrav(word: str) -> str:
 			reg += t
 
 	return reg
+
+
+def setdictionarylanguage(thisword) -> str:
+	if re.search(r'[a-z]', thisword):
+		usedictionary = 'latin'
+	else:
+		usedictionary = 'greek'
+	return usedictionary

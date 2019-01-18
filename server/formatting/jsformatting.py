@@ -41,7 +41,7 @@ def insertbrowserclickjs(tagname: str) -> str:
 	return js
 
 
-def insertlexicalbrowserjs(htmlentry: str) -> str:
+def insertlexicalbrowserjs() -> str:
 	"""
 
 	supplement the html with some js that can see the new objects
@@ -57,9 +57,9 @@ def insertlexicalbrowserjs(htmlentry: str) -> str:
 	</script>
 	"""
 
-	newhtml = htmlentry + js.format(jst=jstemplate)
+	newjs = js.format(jst=jstemplate)
 
-	return newhtml
+	return newjs
 
 
 def generatevectorjs(path: str) -> str:
@@ -73,7 +73,6 @@ def generatevectorjs(path: str) -> str:
 
 	jstemplate = """
 		$('lemmaheadword').click( function(e) { 
-			// var searchid = Date.now();
 			var searchid = generateId(8);
 			var url = '/REGEXREPLACE/'+searchid+'?lem='+this.id;
 			$('#imagearea').empty();
@@ -160,11 +159,8 @@ def supplementalindexjs() -> str:
 				$( '#lexicadialogtext' ).dialog( 'open' );
 				$( '#lexicadialogtext' ).html('[searching...]');
 				$.getJSON('/parse/'+this.id, function (definitionreturned) {
-					$( '#lexicon').val(definitionreturned[0]['trylookingunder']);
-					var dLen = definitionreturned.length;
-					var linesreturned = []
-					for (i = 0; i < dLen; i++) { linesreturned.push(definitionreturned[i]['value']); }
-					$( '#lexicadialogtext' ).html(linesreturned);
+					$( '#lexicadialogtext' ).html(definitionreturned['newhtml']);
+					$( '#lexicaljsscriptholder' ).html(definitionreturned['newjs']);
 				});
 			return false;
 		});
@@ -209,34 +205,36 @@ def dictionaryentryjs() -> str:
 	template = """
 	<script>
 	$('dictionaryentry').click( function(e) {
-            e.preventDefault();
-            var windowWidth = $(window).width();
-            var windowHeight = $(window).height();
-            $( '#lexicadialogtext' ).dialog({
-                    closeOnEscape: true,
-                    autoOpen: false,
-                    minWidth: windowWidth*.33,
-                    maxHeight: windowHeight*.9,
-                    // position: { my: "left top", at: "left top", of: window },
-                    title: this.id,
-                    draggable: true,
-                    icons: { primary: 'ui-icon-close' },
-                    click: function() { $( this ).dialog( 'close' ); }
-                    });
-            $( '#lexicadialogtext' ).dialog( 'open' );
-            $( '#lexicadialogtext' ).html('[searching...]');
-            $.getJSON('/dictsearch/^'+this.id+'$', function (definitionreturned) {
-                $( '#lexicon').val(definitionreturned[0]['trylookingunder']);
-                var dLen = definitionreturned.length;
-                var linesreturned = []
-                for (i = 0; i < dLen; i++) {
-                    linesreturned.push(definitionreturned[i]['value']);
-                    }
-                $( '#lexicadialogtext' ).html(linesreturned);
-            });
-            return false;
-        });
-    </script>
+		e.preventDefault();
+		var windowWidth = $(window).width();
+		var windowHeight = $(window).height();
+		let ldt = $('#lexicadialogtext');
+		let jshld = $('#lexicaljsscriptholder');
+		
+		ldt.dialog({
+			closeOnEscape: true,
+			autoOpen: false,
+			minWidth: windowWidth*.33,
+			maxHeight: windowHeight*.9,
+			// position: { my: "left top", at: "left top", of: window },
+			title: this.id,
+			draggable: true,
+			icons: { primary: 'ui-icon-close' },
+			click: function() { $(this).dialog('close'); }
+			});
+		
+		ldt.dialog('open');
+		ldt.html('[searching...]');
+		
+		$.getJSON('/dictsearch/^'+this.id+'$', function (definitionreturned) {
+			ldt.html(definitionreturned['newhtml']);
+			jshld.html(definitionreturned['newjs']);		
+			});
+			
+		return false;
+		
+		});
+	</script>
 	"""
 
 	return template

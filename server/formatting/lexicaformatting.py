@@ -12,12 +12,8 @@ from typing import Dict, List
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, findparserxref, grablemmataobjectfor, \
-	probedictionary, querytotalwordcounts
-from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
-from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation
-from server.hipparchiaobjects.dbtextobjects import MorphPossibilityObject, dbMorphologyObject
-from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
+from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable
+from server.hipparchiaobjects.dbtextobjects import MorphPossibilityObject
 from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
 
@@ -179,83 +175,6 @@ def lexicaldbquickfixes(listofnames: list) -> Dict[str, str]:
 	return substitutes
 
 
-def multiplelexicalmatchesintohtml(morphologyobject: dbMorphologyObject) -> List[dict]:
-	"""
-
-	you have found the word(s), now generate a collection of HTML lines to hand to the JS
-	this is a sort of pseudo-page
-
-	first do the parsing results; then do the dictionary results
-
-	observedform:
-		nubibus
-
-	matcheslist:
-		[('<possibility_1>χρημάτων, χρῆμα<xref_value>128139149</xref_value><transl>need</transl><analysis>neut gen pl</analysis></possibility_1>\n',)]
-
-	interesting problem with alternative latin genitive plurals: they generate a double entry unless you are careful
-		(1) iudicium (from jūdiciūm, judicium, a judgment):  neut gen pl
-		(2) iudicium (from jūdicium, judicium, a judgment):  neut nom/voc/acc sg
-
-	the xref values help here 42397893 & 42397893
-
-	:param observedform:
-	:param morphologyobject:
-	:param cursor:
-	:return:
-	"""
-
-	returnarray = list()
-	entriestocheck = dict()
-	possibilities = morphologyobject.getpossible()
-
-	# the top part of the HTML: just the analyses
-
-	# there is a HUGE PROBLEM in the original data:
-	#   [a] 'ὑπό, ἐκ-ἀράω²': what comes before the comma is a prefix to the verb
-	#   [b] 'ἠχούϲαϲ, ἠχέω': what comes before the comma is an observed form of the verb
-	# when you .split() what do you have at wordandform[0]?
-	# you have to look at the full db entry for the word:
-	# the number of items in prefixrefs corresponds to the number of prefix checks you will need to make
-	# to recompose the verb
-
-	wc = findcountsviawordcountstable(morphologyobject.observed)
-	if wc:
-		thiswordoccurs = dbWordCountObject(*wc)
-		prevalence = 'Prevalence (this form): {pd}'.format(pd=formatprevalencedata(thiswordoccurs))
-		returnarray.append({'value': '<p class="wordcounts">{pr}</p>'.format(pr=prevalence)})
-
-	morphhtml = formatparsinginformation(possibilities)
-	returnarray.append({'value': morphhtml})
-
-	distinct = dict()
-	for p in possibilities:
-		distinct[p.xref] = p.getbaseform()
-
-	count = 0
-	for d in distinct:
-		count += 1
-		entriestocheck[count] = distinct[d]
-
-	# look up and format the dictionary entries
-	if len(entriestocheck) == 1:
-		# sending 0 as the count to browserdictionarylookup() prevents enumeration
-		entryashtml = dictonaryentryashtml(0, entriestocheck[1])
-		returnarray.append({'value': entryashtml})
-	else:
-		count = 0
-		for entry in entriestocheck:
-			count += 1
-			entryashtml = dictonaryentryashtml(count, entriestocheck[entry])
-			returnarray.append({'value': entryashtml})
-
-	if session['zaplunates'] == 'yes':
-		returnarray = [{'value': attemptsigmadifferentiation(x['value'])} for x in returnarray]
-		returnarray = [{'value': abbreviatedsigmarestoration(x['value'])} for x in returnarray]
-
-	return returnarray
-
-
 def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) -> str:
 	"""
 	sample output:
@@ -296,7 +215,10 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	count = 0
 	countchar = int('0030', 16)  # '1' (after you add 1)
 	subcountchar = int('0061', 16)  # 'a' (when counting from 0)
-	obsvstring = '\n<span class="obsv">({ct})&nbsp;{xdf}</span>'
+	if len(distinct) > 1:
+		obsvstring = '\n<span class="obsv">({ct})&nbsp;{xdf}</span>'
+	else:
+		obsvstring = '\n<span class="obsv">{xdf}</span>'
 	morphhtml = list()
 
 	for d in distinct:
@@ -343,176 +265,6 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	return morphhtml
 
 
-def dictonaryentryashtml(count, seekingentry):
-	"""
-
-	look up a word and return an htlm version of its dictionary entry
-
-	count:
-		1
-	seekingentry:
-		judicium
-	entryxref:
-		42397893
-
-	:param count:
-	:param seekingentry:
-	:return:
-	"""
-
-	outputlist = list()
-	clickableentry = str()
-
-	newheadingstr = '<hr /><p class="dictionaryheading">{ent}'
-	nextheadingstr = '<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'
-	metricsstr = '&nbsp;<span class="metrics">[{me}]</span>'
-	codestr = '&nbsp;<code>[ID: {x}]</code>'
-	xrefstr = '&nbsp;<code>[XREF: {x}]</code>'
-	notfoundstr = '<br />\n<p class="dictionaryheading">nothing found under <span class="prevalence">{skg}</span></p>\n'
-	itemnotfoundstr = '<br />\n<p class="dictionaryheading">({ct}) nothing found under <span class="prevalence">{skg}</span></p>\n'
-	fullentrystring = '<br /><br />\n<span class="lexiconhighlight">Full entry:</span><br />'
-
-	morphabletemplate = """
-	<table class="morphtable">
-		<tbody>
-			<tr><th class="morphcell labelcell" rowspan="1" colspan="2">principle parts</th></tr>	
-			{trs}
-			<tr><td></td><td class="morphcell">(total forms in use: {f})</td></tr>
-		</tbody>
-	</table>
-	"""
-
-	morphrowtemplate = """
-	<tr>
-		<td class="morphcell labelcell">[{ct}]</td>
-		<td class="morphcell">{ppt}</td>
-	</tr>
-	"""
-
-	navtemplate = """
-	<table class="navtable">
-	<tr>
-		<td class="alignleft">
-			<span class="label">Previous: </span>
-			<dictionaryentry id="{p}">{p}</dictionaryentry>
-		</td>
-		<td>&nbsp;</td>
-		<td class="alignright">
-			<span class="label">Next: </span>
-			<dictionaryentry id="{n}">{n}</dictionaryentry>
-		</td>
-	<tr>
-	</table>
-	"""
-
-	if re.search(r'[a-z]', seekingentry):
-		usedictionary = 'latin'
-	else:
-		usedictionary = 'greek'
-
-	blankcursor = None
-	wordobjects = probedictionary(usedictionary + '_dictionary', 'entry_name', seekingentry, '=', dbcursor=blankcursor, trialnumber=0)
-
-	if wordobjects:
-		if len(wordobjects) > 1:
-			# supplement count above
-			# (1a), (1b), (2) ...
-			includesubcounts = True
-		else:
-			# just use count above
-			# (1), (2), (3)...
-			includesubcounts = False
-		subcount = 0
-		for w in wordobjects:
-			if not w.isagloss():
-				lemmaobject = grablemmataobjectfor(w.entry, usedictionary + '_lemmata', dbcursor=blankcursor)
-				w.authorlist = w.generateauthorsummary()
-				w.senselist = w.generatesensessummary()
-				w.quotelist = w.generatequotesummary(lemmaobject)
-
-			w.constructsensehierarchy()
-			w.runbodyxrefsuite()
-			w.insertclickablelookups()
-			# next is optional, really: a good CSS file will parse what you have thus far
-			# (HipparchiaServer v.1.1.2 has the old XML CSS)
-			w.xmltohtmlconversions()
-
-			subcount += 1
-
-			if count == 0:
-				outputlist.append(newheadingstr.format(ent=w.entry))
-			else:
-				if includesubcounts:
-					countval = str(count) + chr(subcount + 96)
-				else:
-					countval = str(count)
-				outputlist.append(nextheadingstr.format(cv=countval, ent=w.entry))
-			if u'\u0304' in w.metricalentry or u'\u0306' in w.metricalentry:
-				outputlist.append(metricsstr.format(me=w.metricalentry))
-			if session['debuglex'] == 'yes':
-				outputlist.append(codestr.format(x=w.id))
-				xref = findparserxref(w)
-				outputlist.append(xrefstr.format(x=xref))
-			outputlist.append('</p>')
-
-			if session['principleparts'] != 'no':
-				fingerprints = {'v.', 'v. dep.', 'v. a.', 'v. n.'}
-				# and, sadly, some entries do not have a POS: "select pos from latin_dictionary where entry_name='declaro';"
-				# declaro: w.pos ['']
-				if (fingerprints & set(w.pos)) or w.pos == ['']:
-					if w.islatin():
-						lang = 'latin'
-					elif w.isgreek():
-						lang = 'greek'
-					morphanalysis = BaseFormMorphology(w.entry, lang)
-					ppts = morphanalysis.getprincipleparts()
-					if ppts and morphanalysis.mostlyconjugatedforms():
-						trs = [morphrowtemplate.format(ct=p[0], ppt=p[1]) for p in ppts]
-						outputlist.append(morphabletemplate.format(f=morphanalysis.numberofknownforms, trs='\n'.join(trs)))
-
-			if session['showwordcounts'] == 'yes':
-				countobject = querytotalwordcounts(seekingentry)
-				if countobject:
-					outputlist.append('<p class="wordcounts">Prevalence (all forms): ')
-					outputlist.append(formatprevalencedata(countobject))
-					outputlist.append('</p>')
-
-			awq = w.authorlist + w.senselist + w.quotelist
-			zero = ['0 authors', '0 senses', '0 quotes']
-			for z in zero:
-				try:
-					awq.remove(z)
-				except ValueError:
-					pass
-
-			if len(awq) == 0:
-				# print('zero authors, senses, quotes')
-				# either you have turned off summary info or this is basically just a gloss entry
-				outputlist.append(w.body)
-			else:
-				outputlist.append(formatdictionarysummary(w))
-				outputlist.append('<p></p>\n')
-				outputlist.append(w.grabheadmaterial())
-				outputlist.append(fullentrystring)
-				outputlist.append(w.grabnonheadmaterial())
-
-			# add in next / previous links
-			outputlist.append(navtemplate.format(p=w.preventry, n=w.nextentry))
-
-			cleanedentry = '\n'.join(outputlist)
-			clickableentry = insertlexicalbrowserjs(cleanedentry)
-	else:
-		if count == 0:
-			cleanedentry = notfoundstr.format(skg=seekingentry)
-		else:
-			cleanedentry = itemnotfoundstr.format(ct=count, skg=seekingentry)
-		clickableentry = cleanedentry
-
-	entry = clickableentry + dictionaryentryjs()
-
-	return entry
-
-
 def getobservedwordprevalencedata(dictionaryword):
 	"""
 
@@ -521,7 +273,7 @@ def getobservedwordprevalencedata(dictionaryword):
 	"""
 
 	if not session['available']['wordcounts_0']:
-		return {'value': ''}
+		return str()
 
 	wc = findcountsviawordcountstable(dictionaryword)
 
@@ -569,7 +321,7 @@ def formatprevalencedata(wordcountobject):
 
 	thehtml = [' / '.join(thehtml)]
 
-	if type(w) == dbHeadwordObject:
+	if isinstance(w, dbHeadwordObject):
 
 		wts = [(w.getweightedcorpora(key), w.getlabel(key)) for key in ['gr', 'lt', 'in', 'dp', 'ch']]
 		allwts = [w[0] for w in wts]
