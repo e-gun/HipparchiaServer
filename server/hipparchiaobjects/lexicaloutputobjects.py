@@ -11,7 +11,6 @@ from flask import session
 
 from server.dbsupport.lexicaldbfunctions import findparserxref, grablemmataobjectfor, \
 	probedictionary, querytotalwordcounts
-from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
 from server.formatting.lexicaformatting import formatdictionarysummary, formatparsinginformation, formatprevalencedata, \
 	getobservedwordprevalencedata
 from server.formatting.wordformatting import setdictionarylanguage
@@ -37,8 +36,6 @@ class multipleWordOutputObject(object):
 		self.observedformsummary = self._getobservedformsummary()
 		self.entrywordobjects = self._buildentrywordobjectdict()
 		self.collectedlexicalouputobjects = self._buildcollectedlexicalouputobjects()
-		self.bibljs = str()
-		self.dictionaryentryjs = dictionaryentryjs()
 
 	def _setdictionarylanguage(self) -> str:
 		if re.search(r'[a-z]', self.thisword):
@@ -75,6 +72,8 @@ class multipleWordOutputObject(object):
 			seekingentry = self.entriestocheck[e]
 			wordobjectdict[e] = probedictionary(self.usedictionary + '_dictionary', 'entry_name', seekingentry, '=', dbcursor=blankcursor, trialnumber=0)
 
+		wordobjectdict = {idx: wordobjectdict[idx] for idx in wordobjectdict if wordobjectdict[idx]}
+
 		return wordobjectdict
 
 	def _buildcollectedlexicalouputobjects(self) -> dict:
@@ -83,7 +82,7 @@ class multipleWordOutputObject(object):
 
 		lexobjects = dict()
 		for e in self.entrywordobjects:
-			lexobjects[e] = [lexicalOutputObject(o) for o in self.entrywordobjects[e] if e]
+			lexobjects[e] = [lexicalOutputObject(o) for o in self.entrywordobjects[e]]
 		return lexobjects
 
 	def generateoutput(self):
@@ -120,10 +119,9 @@ class multipleWordOutputObject(object):
 
 				output.append(entry)
 
-		output.append(self.dictionaryentryjs)
-		htmlandjs = '\n'.join(output)
-		htmlandjs = insertlexicalbrowserjs(htmlandjs)
-		return htmlandjs
+		newhtml = '\n'.join(output)
+
+		return newhtml
 
 
 class lexicalOutputObject(object):
@@ -233,7 +231,7 @@ class lexicalOutputObject(object):
 		fullentry = '\n'.join(segments)
 		return fullentry
 
-	def generatelexicaloutput(self, countervalue=None, insertjs=False) -> str:
+	def generatelexicaloutput(self, countervalue=None) -> str:
 		if countervalue:
 			headingstr = '<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'
 		else:
@@ -277,9 +275,6 @@ class lexicalOutputObject(object):
 		outputlist.append(self.fullenty)
 
 		outputlist.append(navtemplate.format(p=w.preventry, n=w.nextentry))
-
-		if insertjs:
-			outputlist.append(dictionaryentryjs())
 
 		fullentry = '\n'.join(outputlist)
 

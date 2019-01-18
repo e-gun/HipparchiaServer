@@ -41,7 +41,7 @@ def insertbrowserclickjs(tagname: str) -> str:
 	return js
 
 
-def insertlexicalbrowserjs(htmlentry: str) -> str:
+def insertlexicalbrowserjs() -> str:
 	"""
 
 	supplement the html with some js that can see the new objects
@@ -57,9 +57,9 @@ def insertlexicalbrowserjs(htmlentry: str) -> str:
 	</script>
 	"""
 
-	newhtml = htmlentry + js.format(jst=jstemplate)
+	newjs = js.format(jst=jstemplate)
 
-	return newhtml
+	return newjs
 
 
 def generatevectorjs(path: str) -> str:
@@ -160,6 +160,7 @@ def supplementalindexjs() -> str:
 				$( '#lexicadialogtext' ).html('[searching...]');
 				$.getJSON('/parse/'+this.id, function (definitionreturned) {
 					$( '#lexicadialogtext' ).html(definitionreturned['newhtml']);
+					$( '#lexicaljsscriptholder' ).html(definitionreturned['newjs']);
 				});
 			return false;
 		});
@@ -207,7 +208,10 @@ def dictionaryentryjs() -> str:
 		e.preventDefault();
 		var windowWidth = $(window).width();
 		var windowHeight = $(window).height();
-		$('#lexicadialogtext').dialog({
+		let ldt = $('#lexicadialogtext');
+		let jshld = $('#lexicaljsscriptholder');
+		
+		ldt.dialog({
 			closeOnEscape: true,
 			autoOpen: false,
 			minWidth: windowWidth*.33,
@@ -219,11 +223,12 @@ def dictionaryentryjs() -> str:
 			click: function() { $(this).dialog('close'); }
 			});
 		
-		$('#lexicadialogtext').dialog('open');
-		$('#lexicadialogtext').html('[searching...]');
+		ldt.dialog('open');
+		ldt.html('[searching...]');
 		
 		$.getJSON('/dictsearch/^'+this.id+'$', function (definitionreturned) {
-			$( '#lexicadialogtext' ).html(definitionreturned['newhtml']);
+			ldt.html(definitionreturned['newhtml']);
+			jshld.html(definitionreturned['newjs']);		
 			});
 			
 		return false;

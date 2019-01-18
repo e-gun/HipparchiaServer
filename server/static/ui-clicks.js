@@ -298,6 +298,7 @@ $('#vectoralt_moretools').click(function(){ $('#lexica').toggle(); });
 
 
 $('#lexicalsearch').click(function(){
+    // note that modifications to this script should be kept in sync with dictionaryentryjs() in jsformatting.py
     let dictterm = $('#lexicon').val();
     let restoreme = dictterm;
     // trailing space will be lost unless you do this: ' gladiator ' --> ' gladiator' and so you can't spearch for only that word...
@@ -338,22 +339,24 @@ $('#lexicalsearch').click(function(){
 
     $(mydictfield).val('[Working on it...]');
     $.getJSON(url + searchterm, function (definitionreturned) {
-            let ldt = $('#lexicadialogtext');
-           ldt.dialog({
-                closeOnEscape: true,
-                autoOpen: false,
-                maxHeight: windowHeight*.9,
-                maxWidth: windowHeight*.9,
-                minWidth: windowHeight*.33,
-                position: { my: "left top", at: "left top", of: window },
-                title: dialogtitle,
-                draggable: true,
-                icons: { primary: 'ui-icon-close' },
-                click: function() { $( this ).dialog( 'close' ); }
-                });
-                ldt.dialog( 'open' );
-                ldt.html(definitionreturned['newhtml']);
-                $(mydictfield).val(restoreme);
+        let ldt = $('#lexicadialogtext');
+        let jshld = $('#lexicaljsscriptholder');
+        ldt.dialog({
+            closeOnEscape: true,
+            autoOpen: false,
+            maxHeight: windowHeight*.9,
+            maxWidth: windowHeight*.9,
+            minWidth: windowHeight*.33,
+            position: { my: "left top", at: "left top", of: window },
+            title: dialogtitle,
+            draggable: true,
+            icons: { primary: 'ui-icon-close' },
+            click: function() { $( this ).dialog( 'close' ); }
+            });
+            ldt.dialog( 'open' );
+            ldt.html(definitionreturned['newhtml']);
+            jshld.html(definitionreturned['newjs']);
+            $(mydictfield).val(restoreme);
         });
     });
 

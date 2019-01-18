@@ -24,6 +24,7 @@ from server.hipparchiaobjects.lexicaloutputobjects import lexicalOutputObject, m
 from server.listsandsession.checksession import probeforsessionvariables
 from server.listsandsession.corpusavailability import justlatin, justtlg
 from server.listsandsession.genericlistfunctions import polytonicsort
+from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
 
 
 @hipparchia.route('/dictsearch/<searchterm>')
@@ -153,6 +154,8 @@ def dictsearch(searchterm):
 		returnlist = [abbreviatedsigmarestoration(x) for x in returnlist]
 
 	returndict['newhtml'] = '\n'.join(returnlist)
+	returndict['newjs'] = '\n'.join([dictionaryentryjs(), insertlexicalbrowserjs()])
+
 	jsondict = json.dumps(returndict)
 
 	dbconnection.connectioncleanup()
@@ -225,8 +228,7 @@ def findbyform(observedword):
 
 	if morphologyobject:
 		oo = multipleWordOutputObject(cleanedword, morphologyobject)
-		htmlandjs = oo.generateoutput()
-		returndict['newhtml'] = htmlandjs
+		returndict['newhtml'] = oo.generateoutput()
 	else:
 		newhtml = list()
 		if isgreek and not session['available']['greek_morphology']:
@@ -243,9 +245,12 @@ def findbyform(observedword):
 			newhtml.append(nodataerror.format(w=retainedgravity))
 		else:
 			newhtml.append(prev)
+		try:
+			returndict['newhtml'] = '\n'.join(newhtml)
+		except TypeError:
+			returndict['newhtml'] = '[nothing found]'
 
-		returndict['newhtml'] = '\n'.join(newhtml)
-
+	returndict['newjs'] = '\n'.join([dictionaryentryjs(), insertlexicalbrowserjs()])
 	jsondict = json.dumps(returndict)
 
 	dbconnection.connectioncleanup()
@@ -354,6 +359,7 @@ def reverselexiconsearch(searchterm):
 		returnarray.append('<br />[nothing found under "{skg}"]'.format(skg=seeking))
 
 	returndict['newhtml'] = '\n'.join(returnarray)
+	returndict['newjs'] = '\n'.join([dictionaryentryjs(), insertlexicalbrowserjs()])
 
 	jsondict = json.dumps(returndict)
 

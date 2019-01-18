@@ -25,48 +25,50 @@ function browseuponclick(url){
     }
 
 function parsepassagereturned(passagereturned) {
-        const bdt = $('#browserdialogtext');
-        const ldt = $('#lexicadialogtext');
-        const aac = $('#authorsautocomplete');
-        const wac = $('#worksautocomplete');
-		bdt.text('');
-        let fwdurl = passagereturned['browseforwards'];  // e.g. 'linenumber/lt1254w001/4868'
-        let bkdurl = passagereturned['browseback'];      // e.g. 'linenumber/lt1254w001/4840'
+    const bdt = $('#browserdialogtext');
+    const ldt = $('#lexicadialogtext');
+    const aac = $('#authorsautocomplete');
+    const wac = $('#worksautocomplete');
+    const jshld = $('#lexicaljsscriptholder');
+    bdt.text('');
+    let fwdurl = passagereturned['browseforwards'];  // e.g. 'linenumber/lt1254w001/4868'
+    let bkdurl = passagereturned['browseback'];      // e.g. 'linenumber/lt1254w001/4840'
 
-        resetworksautocomplete();
-        aac.val(passagereturned['authorboxcontents']);
-        aac.prop('placeholder', '');
-        wac.val(passagereturned['workboxcontents']);
-        wac.prop('placeholder', '');
-        loadWorklist(passagereturned['authornumber']);
-        loadLevellist(passagereturned['workid'],'firstline');
+    resetworksautocomplete();
+    aac.val(passagereturned['authorboxcontents']);
+    aac.prop('placeholder', '');
+    wac.val(passagereturned['workboxcontents']);
+    wac.prop('placeholder', '');
+    loadWorklist(passagereturned['authornumber']);
+    loadLevellist(passagereturned['workid'],'firstline');
 
-        bdt.html(passagereturned['browserhtml']);
+    bdt.html(passagereturned['browserhtml']);
 
-        let ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo', '#browserdialog');
-        bulkshow(ids);
+    let ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo', '#browserdialog');
+    bulkshow(ids);
 
-        $('observed').click( function(e) {
-            e.preventDefault();
-            let windowWidth = $(window).width();
-            let windowHeight = $(window).height();
-            ldt.dialog({
-                    closeOnEscape: true,
-                    autoOpen: false,
-                    minWidth: windowWidth*.33,
-                    maxHeight: windowHeight*.9,
-                    // position: { my: "left top", at: "left top", of: window },
-                    title: this.id,
-                    draggable: true,
-                    icons: { primary: 'ui-icon-close' },
-                    click: function() { $( this ).dialog( 'close' ); }
-                    });
-            ldt.dialog( 'open' );
-            ldt.html('[searching...]');
-            $.getJSON('/parse/' + this.id, function (definitionreturned) {
-                ldt.html(definitionreturned['newhtml']);
-            });
-            return false;
+    $('observed').click( function(e) {
+        e.preventDefault();
+        let windowWidth = $(window).width();
+        let windowHeight = $(window).height();
+        ldt.dialog({
+                closeOnEscape: true,
+                autoOpen: false,
+                minWidth: windowWidth*.33,
+                maxHeight: windowHeight*.9,
+                // position: { my: "left top", at: "left top", of: window },
+                title: this.id,
+                draggable: true,
+                icons: { primary: 'ui-icon-close' },
+                click: function() { $( this ).dialog( 'close' ); }
+                });
+        ldt.dialog( 'open' );
+        ldt.html('[searching...]');
+        $.getJSON('/parse/' + this.id, function (definitionreturned) {
+            ldt.html(definitionreturned['newhtml']);
+            jshld.html(definitionreturned['newjs']);
         });
+        return false;
+    });
 	return [fwdurl, bkdurl]
 }
