@@ -140,7 +140,7 @@ def dictsearch(searchterm):
 
 		# very top: list the finds
 		if usecounter:
-			findstemplate = '({n})&nbsp;<a href="#{w}">{w}</a>'
+			findstemplate = '({n})&nbsp;<a class="nounderline" href="#{w}">{w}</a>'
 			findslist = [findstemplate.format(n=f[0]+1, w=f[1]) for f in enumerate(sortedfinds)]
 			returnlist.append('\n<br>\n'.join(findslist))
 
@@ -337,14 +337,13 @@ def reverselexiconsearch(searchterm):
 
 		summarytemplate = """
 		<span class="sensesum">({n})&nbsp;
-			<a href="#{w}">{w}</a>&nbsp;
+			<a class="nounderline" href="#{w}">{w}</a>&nbsp;
 			<span class="small">({t:,})</span>
 		</span>
 		"""
 
 		summary = sorted(summary, key=lambda x: x[2], reverse=True)
 		summary = [summarytemplate.format(n=e[0], w=e[1], t=e[2]) for e in summary]
-		# summary = ['<p class="dictionaryheading">{w}</p>'.format(w=seeking)] + summary
 		returnarray.append('\n<br />\n'.join(summary))
 
 		# then the entries proper
