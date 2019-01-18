@@ -64,13 +64,7 @@ function parsepassagereturned(passagereturned) {
             ldt.dialog( 'open' );
             ldt.html('[searching...]');
             $.getJSON('/parse/' + this.id, function (definitionreturned) {
-                $('#lexicon').val(definitionreturned[0]['trylookingunder']);
-                let dLen = definitionreturned.length;
-                let linesreturned = Array();
-                for (let i = 0; i < dLen; i++) {
-                    linesreturned.push(definitionreturned[i]['value']);
-                    }
-                ldt.html(linesreturned);
+                ldt.html(definitionreturned['newhtml']);
             });
             return false;
         });

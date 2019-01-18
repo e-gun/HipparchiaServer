@@ -12,16 +12,18 @@ import re
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.lexicaldbfunctions import lookformorphologymatches, querytotalwordcounts, searchdbforlexicalentry
+from server.dbsupport.lexicaldbfunctions import lookformorphologymatches, probedictionary, querytotalwordcounts, \
+	searchdbforlexicalentry
 from server.formatting.betacodetounicode import replacegreekbetacode
-from server.formatting.lexicaformatting import dictonaryentryashtml, getobservedwordprevalencedata, \
-	multiplelexicalmatchesintohtml
+from server.formatting.lexicaformatting import getobservedwordprevalencedata
 from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation, depunct, \
 	removegravity, stripaccents, tidyupterm
+from server.formatting.wordformatting import setdictionarylanguage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.listsandsession.genericlistfunctions import polytonicsort
-from server.listsandsession.corpusavailability import justlatin, justtlg
+from server.hipparchiaobjects.lexicaloutputobjects import lexicalOutputObject, multipleWordOutputObject
 from server.listsandsession.checksession import probeforsessionvariables
+from server.listsandsession.corpusavailability import justlatin, justtlg
+from server.listsandsession.genericlistfunctions import polytonicsort
 
 
 @hipparchia.route('/dictsearch/<searchterm>')
@@ -32,6 +34,7 @@ def dictsearch(searchterm):
 	json packing
 	:return:
 	"""
+	returndict = dict()
 
 	probeforsessionvariables()
 
@@ -60,8 +63,8 @@ def dictsearch(searchterm):
 		usecolumn = 'unaccented_entry'
 
 	if not session['available'][usedictionary + '_dictionary']:
-		r = [{'value': 'cannot look up {w}: {d} dictionary is not installed'.format(d=usedictionary, w=seeking)}]
-		return json.dumps(r)
+		returndict['newhtml'] = 'cannot look up {w}: {d} dictionary is not installed'.format(d=usedictionary, w=seeking)
+		return json.dumps(returndict)
 
 	limit = hipparchia.config['CAPONDICTIONARYFINDS']
 
@@ -87,6 +90,8 @@ def dictsearch(searchterm):
 	except:
 		found = list()
 
+	# found [('indoloria²',), ('indolorius',), ('indoloria¹',), ('indoloris',), ('dolorosus',), ('dolor',)]
+
 	if not found:
 		variantseeker = seeking[:-1] + '[¹²³⁴⁵⁶⁷⁸⁹]' + seeking[-1]
 		data = (variantseeker,)
@@ -106,39 +111,53 @@ def dictsearch(searchterm):
 			found = dbcursor.fetchall()
 
 	# the results should be given the polytonicsort() treatment
-	returnarray = list()
+	returnlist = list()
 
 	if len(found) == limit:
-		returnarray.append({'value': '[stopped searching after {lim} finds]'.format(lim=limit)})
+		returnlist.append('[stopped searching after {lim} finds]'.format(lim=limit))
 
 	if len(found) > 0:
 		finddict = {f[0]: f for f in found}
-		keys = finddict.keys()
-		keys = polytonicsort(keys)
+		findkeys = finddict.keys()
+		findkeys = polytonicsort(findkeys)
 
-		sortedfinds = [finddict[k] for k in keys]
+		sortedfinds = [finddict[k] for k in findkeys]
+		# print('sortedfinds', sortedfinds)
+		# sortedfinds [('μαντιπόλοϲ',)]
+		sortedfinds = [f[0] for f in sortedfinds]
 
 		if len(sortedfinds) == 1:
 			# sending '0' to browserdictionarylookup() will hide the count number
-			count = -1
+			usecounter = False
 		else:
-			count = 0
+			usecounter = True
 
-		for entry in sortedfinds:
+		wordobjects = [probedictionary(setdictionarylanguage(f) + '_dictionary', 'entry_name', f, '=', dbcursor=dbcursor, trialnumber=0) for f in sortedfinds]
+		flatten = lambda l: [item for sublist in l for item in sublist]
+		wordobjects = flatten(wordobjects)
+		outputobjects = [lexicalOutputObject(w) for w in wordobjects]
+
+		count = 0
+		for oo in outputobjects:
 			count += 1
-			returnarray.append({'value': dictonaryentryashtml(count, entry[0])})
+			if usecounter:
+				entry = oo.generatelexicaloutput(countervalue=count)
+			else:
+				entry = oo.generatelexicaloutput()
+			returnlist.append(entry)
 	else:
-		returnarray.append({'value': '[nothing found]'})
+		returnlist.append('[nothing found]')
 
 	if session['zaplunates'] == 'yes':
-		returnarray = [{'value': attemptsigmadifferentiation(x['value'])} for x in returnarray]
-		returnarray = [{'value': abbreviatedsigmarestoration(x['value'])} for x in returnarray]
+		returnlist = [attemptsigmadifferentiation(x) for x in returnlist]
+		returnlist = [abbreviatedsigmarestoration(x) for x in returnlist]
 
-	returnarray = json.dumps(returnarray)
+	returndict['newhtml'] = '\n'.join(returnlist)
+	jsondict = json.dumps(returndict)
 
 	dbconnection.connectioncleanup()
 
-	return returnarray
+	return jsondict
 
 
 @hipparchia.route('/parse/<observedword>')
@@ -186,61 +205,52 @@ def findbyform(observedword):
 	# cleanedword = re.sub(r'[uv]', r'[uv]', cleanedword)
 	# cleanedword = re.sub(r'[ij]', r'[ij]', cleanedword)
 
+	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
+	returndict = dict()
+
 	try:
 		cleanedword[0]
 	except IndexError:
-		returnarray = [{'value': sanitationerror.format(w=observedword)}]
-		return json.dumps(returnarray)
+		returndict['newhtml'] = sanitationerror.format(w=observedword)
+		return json.dumps(returndict)
 
 	isgreek = True
 	if re.search(r'[a-z]', cleanedword[0]):
 		cleanedword = stripaccents(cleanedword)
 		isgreek = False
 
-	# a collection of HTML items that the JS will just dump out later; i.e. a sort of pseudo-page
-	returnarray = list()
-
 	morphologyobject = lookformorphologymatches(cleanedword, dbcursor)
 	# print('findbyform() mm',morphologyobject.getpossible()[0].transandanal)
 	# φέρεται --> morphologymatches [('<possibility_1>', '1', 'φέρω', '122883104', '<transl>fero</transl><analysis>pres ind mp 3rd sg</analysis>')]
 
 	if morphologyobject:
-		if hipparchia.config['SHOWGLOBALWORDCOUNTS'] == 'yes':
-			returnarray.append(getobservedwordprevalencedata(cleanedword))
-		returnarray += multiplelexicalmatchesintohtml(morphologyobject)
+		oo = multipleWordOutputObject(cleanedword, morphologyobject)
+		htmlandjs = oo.generateoutput()
+		returndict['newhtml'] = htmlandjs
 	else:
+		newhtml = list()
 		if isgreek and not session['available']['greek_morphology']:
-			returnarray = [
-				{'value': dberror.format(lang='Greek')},
-				{'entries': '[not found]'}
-			]
+			newhtml.append(dberror.format(lang='Greek'))
 		elif not isgreek and not session['available']['latin_morphology']:
-			returnarray = [
-				{'value': dberror.format(lang='Latin')},
-				{'entries': '[not found]'}
-			]
+			newhtml.append(dberror.format(lang='Latin'))
 		else:
-			returnarray = [
-				{'value': notfounderror.format(cw=cleanedword)},
-				{'entries': '[not found]'}
-			]
+			newhtml.append(notfounderror.format(cw=cleanedword))
 
-		prev = {'value': getobservedwordprevalencedata(cleanedword)}
+		prev = getobservedwordprevalencedata(cleanedword)
 		if not prev:
-			prev = {'value': getobservedwordprevalencedata(retainedgravity)}
+			newhtml.append(getobservedwordprevalencedata(retainedgravity))
 		if not prev:
-			prev = {'value': nodataerror.format(w=retainedgravity)}
-		returnarray.append(prev)
+			newhtml.append(nodataerror.format(w=retainedgravity))
+		else:
+			newhtml.append(prev)
 
-	returnarray = [r for r in returnarray if r]
+		returndict['newhtml'] = '\n'.join(newhtml)
 
-	returnarray = [{'observed': cleanedword}] + returnarray
-
-	returnarray = json.dumps(returnarray)
+	jsondict = json.dumps(returndict)
 
 	dbconnection.connectioncleanup()
 
-	return returnarray
+	return jsondict
 
 
 @hipparchia.route('/reverselookup/<searchterm>')
@@ -257,6 +267,7 @@ def reverselexiconsearch(searchterm):
 
 	probeforsessionvariables()
 
+	returndict = dict()
 	returnarray = list()
 
 	seeking = depunct(searchterm)
@@ -279,7 +290,7 @@ def reverselexiconsearch(searchterm):
 		entries += [w.entry for w in wordobjects]
 
 	if len(entries) == limit:
-		returnarray.append({'value': '[stopped searching after {lim} finds]'.format(lim=limit)})
+		returnarray.append('[stopped searching after {lim} finds]\n<br>\n'.format(lim=limit))
 
 	entries = list(set(entries))
 
@@ -315,16 +326,35 @@ def reverselexiconsearch(searchterm):
 		summary = sorted(summary, key=lambda x: x[2], reverse=True)
 		summary = ['<span class="sensesum">({n})&nbsp;{w} <span class="small">({t:,})</span></span><br />'.format(n=e[0], w=e[1], t=e[2]) for e in summary]
 		# summary = ['<p class="dictionaryheading">{w}</p>'.format(w=seeking)] + summary
-		returnarray.append({'value': '\n'.join(summary)})
+		returnarray.append('\n'.join(summary))
 
 		# then the entries proper
+		dbconnection = ConnectionObject()
+		dbconnection.setautocommit()
+		dbcursor = dbconnection.cursor()
+
+		wordobjects = [probedictionary(setdictionarylanguage(e) + '_dictionary', 'entry_name', e, '=', dbcursor=dbcursor, trialnumber=0) for e in entries]
+		flatten = lambda l: [item for sublist in l for item in sublist]
+		wordobjects = flatten(wordobjects)
+		outputobjects = [lexicalOutputObject(w) for w in wordobjects]
+		if len(outputobjects) > 1:
+			usecounter = True
+		else:
+			usecounter = False
+
 		count = 0
-		for entry in entries:
+		for oo in outputobjects:
 			count += 1
-			returnarray.append({'value': dictonaryentryashtml(count, entry)})
+			if usecounter:
+				entry = oo.generatelexicaloutput(countervalue=count)
+			else:
+				entry = oo.generatelexicaloutput()
+			returnarray.append(entry)
 	else:
-		returnarray.append({'value': '<br />[nothing found under "{skg}"]'.format(skg=seeking)})
+		returnarray.append('<br />[nothing found under "{skg}"]'.format(skg=seeking))
 
-	returnarray = json.dumps(returnarray)
+	returndict['newhtml'] = '\n'.join(returnarray)
 
-	return returnarray
+	jsondict = json.dumps(returndict)
+
+	return jsondict

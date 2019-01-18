@@ -351,16 +351,10 @@ $('#lexicalsearch').click(function(){
                 icons: { primary: 'ui-icon-close' },
                 click: function() { $( this ).dialog( 'close' ); }
                 });
-           ldt.dialog( 'open' );
-           let dLen = definitionreturned.length;
-           let linesreturned = [];
-            for (let i = 0; i < dLen; i++) {
-                linesreturned.push(definitionreturned[i]['value']);
-                }
-            ldt.html(linesreturned);
-            $(mydictfield).val(restoreme);
+                ldt.dialog( 'open' );
+                ldt.html(definitionreturned['newhtml']);
+                $(mydictfield).val(restoreme);
         });
-
     });
 
 

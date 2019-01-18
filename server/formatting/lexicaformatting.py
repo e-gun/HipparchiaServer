@@ -15,8 +15,7 @@ from server import hipparchia
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, findparserxref, grablemmataobjectfor, \
 	probedictionary, querytotalwordcounts
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
-from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation
-from server.hipparchiaobjects.dbtextobjects import MorphPossibilityObject, dbMorphologyObject
+from server.hipparchiaobjects.dbtextobjects import MorphPossibilityObject
 from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
 from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
@@ -179,83 +178,6 @@ def lexicaldbquickfixes(listofnames: list) -> Dict[str, str]:
 	return substitutes
 
 
-def multiplelexicalmatchesintohtml(morphologyobject: dbMorphologyObject) -> List[dict]:
-	"""
-
-	you have found the word(s), now generate a collection of HTML lines to hand to the JS
-	this is a sort of pseudo-page
-
-	first do the parsing results; then do the dictionary results
-
-	observedform:
-		nubibus
-
-	matcheslist:
-		[('<possibility_1>χρημάτων, χρῆμα<xref_value>128139149</xref_value><transl>need</transl><analysis>neut gen pl</analysis></possibility_1>\n',)]
-
-	interesting problem with alternative latin genitive plurals: they generate a double entry unless you are careful
-		(1) iudicium (from jūdiciūm, judicium, a judgment):  neut gen pl
-		(2) iudicium (from jūdicium, judicium, a judgment):  neut nom/voc/acc sg
-
-	the xref values help here 42397893 & 42397893
-
-	:param observedform:
-	:param morphologyobject:
-	:param cursor:
-	:return:
-	"""
-
-	returnarray = list()
-	entriestocheck = dict()
-	possibilities = morphologyobject.getpossible()
-
-	# the top part of the HTML: just the analyses
-
-	# there is a HUGE PROBLEM in the original data:
-	#   [a] 'ὑπό, ἐκ-ἀράω²': what comes before the comma is a prefix to the verb
-	#   [b] 'ἠχούϲαϲ, ἠχέω': what comes before the comma is an observed form of the verb
-	# when you .split() what do you have at wordandform[0]?
-	# you have to look at the full db entry for the word:
-	# the number of items in prefixrefs corresponds to the number of prefix checks you will need to make
-	# to recompose the verb
-
-	wc = findcountsviawordcountstable(morphologyobject.observed)
-	if wc:
-		thiswordoccurs = dbWordCountObject(*wc)
-		prevalence = 'Prevalence (this form): {pd}'.format(pd=formatprevalencedata(thiswordoccurs))
-		returnarray.append({'value': '<p class="wordcounts">{pr}</p>'.format(pr=prevalence)})
-
-	morphhtml = formatparsinginformation(possibilities)
-	returnarray.append({'value': morphhtml})
-
-	distinct = dict()
-	for p in possibilities:
-		distinct[p.xref] = p.getbaseform()
-
-	count = 0
-	for d in distinct:
-		count += 1
-		entriestocheck[count] = distinct[d]
-
-	# look up and format the dictionary entries
-	if len(entriestocheck) == 1:
-		# sending 0 as the count to browserdictionarylookup() prevents enumeration
-		entryashtml = dictonaryentryashtml(0, entriestocheck[1])
-		returnarray.append({'value': entryashtml})
-	else:
-		count = 0
-		for entry in entriestocheck:
-			count += 1
-			entryashtml = dictonaryentryashtml(count, entriestocheck[entry])
-			returnarray.append({'value': entryashtml})
-
-	if session['zaplunates'] == 'yes':
-		returnarray = [{'value': attemptsigmadifferentiation(x['value'])} for x in returnarray]
-		returnarray = [{'value': abbreviatedsigmarestoration(x['value'])} for x in returnarray]
-
-	return returnarray
-
-
 def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) -> str:
 	"""
 	sample output:
@@ -296,7 +218,10 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	count = 0
 	countchar = int('0030', 16)  # '1' (after you add 1)
 	subcountchar = int('0061', 16)  # 'a' (when counting from 0)
-	obsvstring = '\n<span class="obsv">({ct})&nbsp;{xdf}</span>'
+	if len(distinct) > 1:
+		obsvstring = '\n<span class="obsv">({ct})&nbsp;{xdf}</span>'
+	else:
+		obsvstring = '\n<span class="obsv">{xdf}</span>'
 	morphhtml = list()
 
 	for d in distinct:
@@ -521,7 +446,7 @@ def getobservedwordprevalencedata(dictionaryword):
 	"""
 
 	if not session['available']['wordcounts_0']:
-		return {'value': ''}
+		return str()
 
 	wc = findcountsviawordcountstable(dictionaryword)
 
@@ -569,7 +494,7 @@ def formatprevalencedata(wordcountobject):
 
 	thehtml = [' / '.join(thehtml)]
 
-	if type(w) == dbHeadwordObject:
+	if isinstance(w, dbHeadwordObject):
 
 		wts = [(w.getweightedcorpora(key), w.getlabel(key)) for key in ['gr', 'lt', 'in', 'dp', 'ch']]
 		allwts = [w[0] for w in wts]

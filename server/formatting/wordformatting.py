@@ -701,3 +701,11 @@ def acuteorgrav(word: str) -> str:
 			reg += t
 
 	return reg
+
+
+def setdictionarylanguage(thisword) -> str:
+	if re.search(r'[a-z]', thisword):
+		usedictionary = 'latin'
+	else:
+		usedictionary = 'greek'
+	return usedictionary
