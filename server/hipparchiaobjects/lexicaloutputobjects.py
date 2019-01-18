@@ -120,7 +120,6 @@ class multipleWordOutputObject(object):
 				output.append(entry)
 
 		newhtml = '\n'.join(output)
-
 		return newhtml
 
 
@@ -232,6 +231,7 @@ class lexicalOutputObject(object):
 		return fullentry
 
 	def generatelexicaloutput(self, countervalue=None) -> str:
+		divtemplate = '<div id="{wd}">\n{entry}\n</div>'
 		if countervalue:
 			headingstr = '<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'
 		else:
@@ -277,5 +277,5 @@ class lexicalOutputObject(object):
 		outputlist.append(navtemplate.format(p=w.preventry, n=w.nextentry))
 
 		fullentry = '\n'.join(outputlist)
-
+		fullentry = divtemplate.format(wd=self.thisheadword, entry=fullentry)
 		return fullentry

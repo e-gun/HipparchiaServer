@@ -115,7 +115,7 @@ def dictsearch(searchterm):
 	returnlist = list()
 
 	if len(found) == limit:
-		returnlist.append('[stopped searching after {lim} finds]'.format(lim=limit))
+		returnlist.append('[stopped searching after {lim} finds]<br>'.format(lim=limit))
 
 	if len(found) > 0:
 		finddict = {f[0]: f for f in found}
@@ -138,6 +138,13 @@ def dictsearch(searchterm):
 		wordobjects = flatten(wordobjects)
 		outputobjects = [lexicalOutputObject(w) for w in wordobjects]
 
+		# very top: list the finds
+		if usecounter:
+			findstemplate = '({n})&nbsp;<a href="#{w}">{w}</a>'
+			findslist = [findstemplate.format(n=f[0]+1, w=f[1]) for f in enumerate(sortedfinds)]
+			returnlist.append('\n<br>\n'.join(findslist))
+
+		# the actual entries
 		count = 0
 		for oo in outputobjects:
 			count += 1
@@ -328,10 +335,17 @@ def reverselexiconsearch(searchterm):
 				totalhits = 0
 			summary.append((count, c, totalhits))
 
+		summarytemplate = """
+		<span class="sensesum">({n})&nbsp;
+			<a href="#{w}">{w}</a>&nbsp;
+			<span class="small">({t:,})</span>
+		</span>
+		"""
+
 		summary = sorted(summary, key=lambda x: x[2], reverse=True)
-		summary = ['<span class="sensesum">({n})&nbsp;{w} <span class="small">({t:,})</span></span><br />'.format(n=e[0], w=e[1], t=e[2]) for e in summary]
+		summary = [summarytemplate.format(n=e[0], w=e[1], t=e[2]) for e in summary]
 		# summary = ['<p class="dictionaryheading">{w}</p>'.format(w=seeking)] + summary
-		returnarray.append('\n'.join(summary))
+		returnarray.append('\n<br />\n'.join(summary))
 
 		# then the entries proper
 		dbconnection = ConnectionObject()
