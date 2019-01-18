@@ -118,7 +118,7 @@ $(document).ready( function () {
         });
 
     function setoptions(sessionvar,value){
-	    $.getJSON('/setsessionvariable/' + sessionvar + '/' + value, function (resultdata) {
+	    $.getJSON('/setsessionvariable/' + sessionlet + '/' + value, function (resultdata) {
 		 // do nothing special: the return exists but is not relevant
 		 // [{"searchsyntax": "R"}]
 	    });
@@ -137,7 +137,7 @@ $(document).ready( function () {
         // that table has to be created and  $('#imagearea') with it before you do any of the following
         //
 
-        var imagetarget = $('#imagearea');
+        let imagetarget = $('#imagearea');
         if (typeof output['image'] !== 'undefined' && output['image'] !== '') {
             let w = window.innerWidth * .9;
             let h = window.innerHeight * .9;
@@ -188,7 +188,7 @@ $(document).ready( function () {
 	});
 
 
-    var tohideonfirstload = Array('#alt_upperleftbuttons', '#browserdialog', '#clearpick', '#complexsearching', '#cosinedistancelineorwordcheckbox',
+    let tohideonfirstload = Array('#alt_upperleftbuttons', '#browserdialog', '#clearpick', '#complexsearching', '#cosinedistancelineorwordcheckbox',
         '#cosinedistancesentencecheckbox', '#edts', '#helptabs', '#ldts', '#lemmatasearchform', '#proximatelemmatasearchform',
         '#semanticvectornnquerycheckbox', '#semanticvectorquerycheckbox', '#sentencesimilaritycheckbox', '#spur', '#tensorflowgraphcheckbox',
         '#termonecheckbox', '#topicmodelcheckbox');

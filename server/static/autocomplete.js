@@ -10,13 +10,13 @@
 
 // these next two are repeats from documentready.js, but Safari would load this before documentready and so lack access to the functions
 function hidemany(arrayofelements) {
-    for (var i = 0; i < arrayofelements.length; i++) {
+    for (let i = 0; i < arrayofelements.length; i++) {
         $(arrayofelements[i]).hide();
         }
 }
 
 function clearmany(arrayofelements) {
-    for (var i = 0; i < arrayofelements.length; i++) {
+    for (let i = 0; i < arrayofelements.length; i++) {
         $(arrayofelements[i]).val('');
         }
 }
@@ -32,7 +32,7 @@ function reloadselections(selectiondata){
     $('#timerestrictions').html(selectiondata.timeexclusions);
     $('#selectioninfocell').html(selectiondata.selections);
     $('#exclusioninfocell').html(selectiondata.exclusions);
-    var holder = document.getElementById("selectionscriptholder");
+    let holder = document.getElementById("selectionscriptholder");
     if (holder.hasChildNodes()) { holder.removeChild(holder.firstChild); }
     $('#selectionscriptholder').html(selectiondata['newjs']);
     }
@@ -41,7 +41,7 @@ function reloadselections(selectiondata){
 function reloadAuthorlist(){
     $.getJSON('/getselections', function (selectiondata) {
         reloadselections(selectiondata);
-        var ids = Array('#worksautocomplete', '#level05', '#level04', '#level03', '#level02', '#level01', '#level00',
+        let ids = Array('#worksautocomplete', '#level05', '#level04', '#level03', '#level02', '#level01', '#level00',
             '#browseto', '#makeanindex', '#textofthis', '#fewerchoices', '#genresautocomplete', '#genreinfo',
             '#genrelistcontents', '#workgenresautocomplete', '#locationsautocomplete', '#provenanceautocomplete',
             '#pickgenre', '#excludegenre', '#setoptions', '#lexica', '#authinfo', '#authorholdings', '#searchlistcontents',
@@ -51,17 +51,17 @@ function reloadAuthorlist(){
 }
 
 function resetworksautocomplete(){
-    var ids = Array('#level05', '#level04', '#level03', '#level02', '#level01', '#level00');
+    let ids = Array('#level05', '#level04', '#level03', '#level02', '#level01', '#level00');
     hidemany(ids);
     clearmany(ids);
 }
 
 
 function checklocus() {
-    var locusval = '';
-    for (var i = 5; i > -1; i--) {
+    let locusval = '';
+    for (let i = 5; i > -1; i--) {
         if ($('#level0'+i.toString()).val() !== '') {
-            var foundval = $('#level0'+i.toStrint()).val();
+            let foundval = $('#level0'+i.toStrint()).val();
             if (locusval !== '') {
                 locusval += '|'+foundval;
             } else {
@@ -78,13 +78,13 @@ $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
     source: "/getauthorhint",
     select: function (event, ui) {
-        var selector = $('#worksautocomplete');
+        let selector = $('#worksautocomplete');
         selector.val('');
         resetworksautocomplete();
         // stupid timing issue if you select with mouse instead of keyboard: nothing happens
         // see: http://stackoverflow.com/questions/9809013/jqueryui-autocomplete-select-does-not-work-on-mouse-click-but-works-on-key-eve
-        var origEvent = event;
-        var auid = '';
+        let origEvent = event;
+        let auid = '';
         while (origEvent.originalEvent !== undefined){ origEvent = origEvent.originalEvent; }
         if (origEvent.type === 'click'){
             document.getElementById('authorsautocomplete').value = ui.item.value;
@@ -94,18 +94,18 @@ $('#authorsautocomplete').autocomplete({
         }
         loadWorklist(auid);
         selector.prop('placeholder', '(Pick a work)');
-        var ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo');
+        let ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo');
         bulkshow(ids);
         }
     });
 
 
 $('#pickauthor').click( function() {
-        var name = $('#authorsautocomplete').val();
-        var authorid = name.slice(-7, -1);
-        var locus = locusdataloader();
+        let name = $('#authorsautocomplete').val();
+        let authorid = name.slice(-7, -1);
+        let locus = locusdataloader();
         // $('#authorsautocomplete').val('');
-        var wrk = $('#worksautocomplete').val().slice(-4, -1);
+        let wrk = $('#worksautocomplete').val().slice(-4, -1);
         // $('#worksautocomplete').val('');
         resetworksautocomplete();
         if (authorid !== '') {
@@ -131,11 +131,11 @@ $('#pickauthor').click( function() {
 
 
 $('#excludeauthor').click( function() {
-        var name = $('#authorsautocomplete').val();
-        var authorid = name.slice(-7, -1);
-        var locus = locusdataloader();
+        let name = $('#authorsautocomplete').val();
+        let authorid = name.slice(-7, -1);
+        let locus = locusdataloader();
         // $('#authorsautocomplete').val('');
-        var wrk = $('#worksautocomplete').val().slice(-4, -1);
+        let wrk = $('#worksautocomplete').val().slice(-4, -1);
         // $('#worksautocomplete').val('');
         resetworksautocomplete();
         if (authorid !== '') {
@@ -165,10 +165,10 @@ $('#excludeauthor').click( function() {
 
 function loadWorklist(authornumber){
     $.getJSON('/getworksof/'+authornumber, function (selectiondata) {
-        var dLen = selectiondata.length;
-        var worksfound = Array();
+        let dLen = selectiondata.length;
+        let worksfound = Array();
         selector = $('#worksautocomplete');
-        for (var i = 0; i < dLen; i++) { worksfound.push(selectiondata[i]); }
+        for (let i = 0; i < dLen; i++) { worksfound.push(selectiondata[i]); }
         selector.autocomplete( "enable" );
         selector.autocomplete({ source: worksfound });
         // selector.val(worksfound[0]);
@@ -179,8 +179,8 @@ function loadWorklist(authornumber){
 $('#worksautocomplete').autocomplete({
     focus: function (event, ui) {
         resetworksautocomplete();
-        var auth = $("#authorsautocomplete").val().slice(-7, -1);
-        var wrk = ui.item.value.slice(-4, -1);
+        let auth = $("#authorsautocomplete").val().slice(-7, -1);
+        let wrk = ui.item.value.slice(-4, -1);
         loadLevellist(auth+'w'+wrk,'firstline');
         }
 });
@@ -191,15 +191,15 @@ $('#worksautocomplete').autocomplete({
 //
 
 function locusdataloader() {
-    var l5 = $('#level05').val();
-    var l4 = $('#level04').val();
-    var l3 = $('#level03').val();
-    var l2 = $('#level02').val();
-    var l1 = $('#level01').val();
-    var l0 = $('#level00').val();
-    var lvls = [ l5, l4, l3, l2, l1, l0];
-    var locusdata = '';
-    for (var i = 0; i < 6; i++ ) {
+    let l5 = $('#level05').val();
+    let l4 = $('#level04').val();
+    let l3 = $('#level03').val();
+    let l2 = $('#level02').val();
+    let l1 = $('#level01').val();
+    let l0 = $('#level00').val();
+    let lvls = [ l5, l4, l3, l2, l1, l0];
+    let locusdata = '';
+    for (let i = 0; i < 6; i++ ) {
         if (lvls[i] !== '') { locusdata += lvls[i]+'|' } }
     locusdata = locusdata.slice(0, (locusdata.length)-1);
 
@@ -219,24 +219,24 @@ function loadLevellist(workid, pariallocus){
     //  [{'totallevels',3},{'level': 0}, {'label': 'verse'}, {'low': 1}, {'high': 100]
 
     $.getJSON('/getstructure/'+workid+'/'+pariallocus, function (selectiondata) {
-        var top = selectiondata['totallevels']-1;
-        var atlevel = selectiondata['level'];
-        var label = selectiondata['label'];
-        var low = selectiondata['low'];
-        var high = selectiondata['high'];
+        let top = selectiondata['totallevels']-1;
+        let atlevel = selectiondata['level'];
+        let label = selectiondata['label'];
+        let low = selectiondata['low'];
+        let high = selectiondata['high'];
 
-        var possibilities = selectiondata['range'];
+        let possibilities = selectiondata['range'];
 
-        var generateme = '#level0'+String(atlevel);
+        let generateme = '#level0'+String(atlevel);
         if ( low !== '-9999') { $(generateme).prop('placeholder', '('+label+' '+String(low)+' to '+String(high)+')'); }
         else { $(generateme).prop('placeholder', '(awaiting a valid selection...)'); }
         $(generateme).show();
         $(generateme).autocomplete ({
             focus: function (event, ui) {
-                var auth = workid.slice(0,6);
-                var wrk = workid.slice(7,10);
+                let auth = workid.slice(0,6);
+                let wrk = workid.slice(7,10);
                 if (atlevel > 0) {
-                    var loc = locusdataloader();
+                    let loc = locusdataloader();
                     loadLevellist(auth+'w'+wrk,loc);
                     }
                 // if we do partialloc browsing then this can be off
@@ -246,9 +246,9 @@ function loadLevellist(workid, pariallocus){
             select: function (event, ui) {
                 // if we do partialloc browsing then this can be off
                 // if (atlevel <= 1) { $('#browseto').show(); }
-                var auth = workid.slice(0,6);
-                var wrk = workid.slice(7,10);
-                var loc = locusdataloader();
+                let auth = workid.slice(0,6);
+                let wrk = workid.slice(7,10);
+                let loc = locusdataloader();
 
                 loadLevellist(auth+'w'+wrk, String(loc));
 
@@ -279,10 +279,10 @@ $('#provenanceautocomplete').autocomplete({
     });
 
 $('#pickgenre').click( function() {
-        var genre = $('#genresautocomplete').val();
-        var wkgenre = $('#workgenresautocomplete').val();
-        var loc = $('#locationsautocomplete').val();
-        var prov = $('#provenanceautocomplete').val();
+        let genre = $('#genresautocomplete').val();
+        let wkgenre = $('#workgenresautocomplete').val();
+        let loc = $('#locationsautocomplete').val();
+        let prov = $('#provenanceautocomplete').val();
 
         if (genre !== '') {
             $.getJSON('/makeselection?genre=' + genre, function (selectiondata) {
@@ -311,10 +311,10 @@ $('#pickgenre').click( function() {
 
 
 $('#excludegenre').click( function() {
-        var genre = $('#genresautocomplete').val();
-        var wkgenre = $('#workgenresautocomplete').val();
-        var loc = $('#locationsautocomplete').val();
-        var prov = $('#provenanceautocomplete').val();
+        let genre = $('#genresautocomplete').val();
+        let wkgenre = $('#workgenresautocomplete').val();
+        let loc = $('#locationsautocomplete').val();
+        let prov = $('#provenanceautocomplete').val();
 
         if (genre !== '') {
             $.getJSON('/makeselection?genre=' + genre +'&exclude=t', function (selectiondata) {
