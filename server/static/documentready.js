@@ -117,19 +117,9 @@ $(document).ready( function () {
         checkactivityviawebsocket(searchid);
         });
 
-    function setoptions(sessionvar,value){
-	    $.getJSON('/setsessionvariable/' + sessionlet + '/' + value, function (resultdata) {
-		 // do nothing special: the return exists but is not relevant
-		 // [{"searchsyntax": "R"}]
-	    });
-        }
-
     function loadsearchresultsintodisplayresults(output) {
-
         document.title = output['title'];
-
         $('#searchsummary').html(output['searchsummary']);
-
         $('#displayresults').html(output['found']);
 
         //
@@ -159,6 +149,7 @@ $(document).ready( function () {
         document.getElementById('browserclickscriptholder').appendChild(browserclickscript);
     }
 
+    // setoptions() defined in ui-clicks.js
     $('#searchlines').click( function(){ setoptions('searchscope', 'L'); });
     $('#searchwords').click( function(){ setoptions('searchscope', 'W'); });
 
