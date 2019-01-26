@@ -47,6 +47,7 @@ from server.textsandindices.textandindiceshelperfunctions import getrequiredmorp
 
 """
 
+
 @hipparchia.route('/findvectors/<searchid>', methods=['GET'])
 def findabsolutevectors(searchid):
 	"""

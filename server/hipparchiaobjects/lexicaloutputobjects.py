@@ -96,6 +96,8 @@ class multipleWordOutputObject(object):
 			usecounter = True
 
 		topcount = 0
+		dupeskipper = set()
+
 		for lex in self.collectedlexicalouputobjects:
 			topcount += 1
 			# a dict whose values are a list of lexicalOutputObjects
@@ -106,18 +108,20 @@ class multipleWordOutputObject(object):
 
 			subcount = 0
 			for oo in self.collectedlexicalouputobjects[lex]:
-				subcount += 1
-				if usesubcounter:
-					countervalue = str(topcount) + chr(subcount + 96)
-				else:
-					countervalue = str(topcount)
+				if oo.id not in dupeskipper:
+					dupeskipper.add(oo.id)
+					subcount += 1
+					if usesubcounter:
+						countervalue = str(topcount) + chr(subcount + 96)
+					else:
+						countervalue = str(topcount)
 
-				if usecounter:
-					entry = oo.generatelexicaloutput(countervalue=countervalue)
-				else:
-					entry = oo.generatelexicaloutput()
+					if usecounter:
+						entry = oo.generatelexicaloutput(countervalue=countervalue)
+					else:
+						entry = oo.generatelexicaloutput()
 
-				output.append(entry)
+					output.append(entry)
 
 		newhtml = '\n'.join(output)
 		return newhtml
@@ -132,6 +136,7 @@ class lexicalOutputObject(object):
 
 	def __init__(self, thiswordobject):
 		self.thiswordobject = thiswordobject
+		self.id = thiswordobject.id
 		self.usedictionary = setdictionarylanguage(thiswordobject.entry)
 		self.thisheadword = thiswordobject.entry
 		self.headwordprevalence = getobservedwordprevalencedata(self.thisheadword)
