@@ -168,6 +168,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
 	# dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
+	dbconnection.setreadonly(False)
 	cursor = dbconnection.cursor()
 
 	qcomb = QueryCombinator(searchphrase)
