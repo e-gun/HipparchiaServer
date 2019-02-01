@@ -110,64 +110,26 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 					) secondpass
 				WHERE secondpass.linebundle ~ %s  LIMIT 200
 
-	DEBUGGING notes: SQL oddities
-
-	TROUBLE:
-
-		'ἐρρῶϲθαι ὑμᾶϲ' can't be found in BGU (Vol 1), 108 (dp0001w00b); but it is there:
-			[  𝕔 17 ]μεν. ἐρρῶϲθαι ὑμᾶϲ εὔχο(μαι).
-
-		you will return hits if you search for 'ἐρρῶϲθαι ὑμᾶϲ' in just dp0001:
-			BGU (Vol 1), 332: r, line 13 (dp0001w076)
-			BGU (Vol 1), 8 rp: line 18 (dp0001w09d)
-
-		you will return hits if you search for 'ἐρρῶϲθαι ὑμᾶϲ' in just dp0001w076 or dp0001w09d
-
-		there is nothing special in the original betacode:
-			█⑧① [ &c `17 ]$MEN. E)RRW=SQAI U(MA=S EU)/XO[1MAI]1.
-
-		set up a search just inside dp0001w00b
-
-			this will produce a result:
-				»ϲθαι ὑμᾶϲ εὔ«
-				»ῶϲθαι ὑμᾶϲ«
-				»ρῶϲθαι ὑ«
-				»μεν ἐρρ«
-				»ρῶϲθαι ὑμ«
-				»ῶϲθαι ὑμᾶ«
-			this fails to produce a result:
-				»ρῶϲθαι ὑμᾶ«
-
-		pgAdmin4 has trouble with the phrase too:
-			can find it via '﻿WHERE secondpass.linebundle ~ 'ὑμᾶϲ εὔχομαι'' in a different papyrus
-			can't find it in dp0001w00b
-			but will find it if you ask for the equivalent:
-			﻿'ἐρρῶϲθαι\sὑμᾶϲ'
-
-		WTF?
-
-		It looks like the problem goes away if you substitute '\s' for ' ' in the search phrase.
-		BUT why was there a problem in the first place?
-
-		Something about how the bundles are built? i.e., 'concat(accented_line, ' ', lead(accented_line)' That does
-		not really make sense (since the phrases are not at the edges of the joins...) But that is the only unusual
-		thing we are doing here...
-
-		very disturbing until the root cause of the trouble is made clear.
-
-		WTF, several months later:
-
-			you can skip the kludge; it works fine now...
-			upgrades to the underlying stack? python, psycopg2, and esp psql are all different now
-
 	:return:
+	"""
+
+	querytemplate = """
+		SELECT secondpass.index, secondpass.{co} FROM 
+			(SELECT firstpass.index, firstpass.linebundle, firstpass.{co} FROM
+					(SELECT index, {co}, concat({co}, ' ', lead({co}) OVER (ORDER BY index ASC)) AS linebundle
+						FROM {db} {whr} ) firstpass
+			) secondpass
+		WHERE secondpass.linebundle ~ %s {lim}"""
+
+	wheretempate = """
+	WHERE EXISTS
+		(SELECT 1 FROM {tbl}_includelist_{a} incl WHERE incl.includeindex = {tbl}.index)
 	"""
 
 	so = searchobject
 	activepoll = so.poll
 
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	# dbconnection = ConnectionObject('autocommit', readonlyconnection=False)
 	dbconnection.setreadonly(False)
 	cursor = dbconnection.cursor()
 
@@ -199,16 +161,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 		sfo.updatepollremaining()
 
 		if authortable:
-
-			qtemplate = """
-				SELECT secondpass.index, secondpass.{co} FROM 
-					(SELECT firstpass.index, firstpass.linebundle, firstpass.{co} FROM
-							(SELECT index, {co}, concat({co}, ' ', lead({co}) OVER (ORDER BY index ASC)) AS linebundle
-								FROM {db} {whr} ) firstpass
-					) secondpass
-				WHERE secondpass.linebundle ~ %s {lim}"""
-
-			whr = ''
+			whr = str()
 			r = so.indexrestrictions[authortable]
 			if r['type'] == 'between':
 				indexwedwhere = buildbetweenwhereextension(authortable, so)
@@ -221,13 +174,9 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 				q = r['where']['tempquery']
 				q = re.sub('_includelist', '_includelist_{a}'.format(a=avoidcollisions), q)
 				cursor.execute(q)
-				wtempate = """
-				WHERE EXISTS
-					(SELECT 1 FROM {tbl}_includelist_{a} incl WHERE incl.includeindex = {tbl}.index)
-				"""
-				whr = wtempate.format(tbl=authortable, a=avoidcollisions)
+				whr = wheretempate.format(tbl=authortable, a=avoidcollisions)
 
-			query = qtemplate.format(db=authortable, co=so.usecolumn, whr=whr, lim=lim)
+			query = querytemplate.format(db=authortable, co=so.usecolumn, whr=whr, lim=lim)
 			data = (sp,)
 			# print('subqueryphrasesearch() q,d:',query, data)
 			cursor.execute(query, data)

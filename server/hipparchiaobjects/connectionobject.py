@@ -27,18 +27,24 @@ class GenericConnectionObject(object):
 	"""
 
 	postgresproblem = """
-	You have a FATAL problem with the database connection
+	You have encountered a FATAL error:
+	
+		{e}
+	"""
 
-	EITHER 
-		the database server is not running
-	OR
-		you do not have the right username and password combination in your 
-		Hipparchia configuration file
+	noserverproblem = """Hipparchia cannot find a database server at {h}:{p}.
+	
+	You may need to edit 'settings/networksettings.py'"""
 
-	[NB if postgresql was not shut down cleanly it might fail to restart properly, 
+	badpassproblem = """Hipparchia was denied access to the database at {h}:{p}
+	
+	The password provided was rejected.
+	You probably need to edit 'settings/securitysettings.py'"""
+
+	darwinproblem = """	[NB if postgresql was not shut down cleanly it might fail to restart properly, 
 	and, worse, it might not notify you that it has failed to restart properly...
 	
-	On macOS you can try the following:
+	On macOS you can enter the following command:
 		$ psql
 	
 	If you see:
@@ -171,8 +177,21 @@ class PooledConnectionObject(GenericConnectionObject):
 
 			try:
 				readonlypool = pooltype(poolsize, poolsize * 2, **kwds)
-			except psycopg2.OperationalError:
-				print(GenericConnectionObject.postgresproblem)
+			except psycopg2.OperationalError as operror:
+				e = str()
+				thefailure = operror.args[0]
+				noconnection = 'could not connect to server'
+				badpass = 'password authentication failed'
+				if noconnection in thefailure:
+					e = GenericConnectionObject.noserverproblem.format(h=hipparchia.config['DBHOST'], p=hipparchia.config['DBPORT'])
+					print(GenericConnectionObject.postgresproblem.format(e=e))
+					if sys.platform == 'darwin':
+						print(GenericConnectionObject.darwinproblem)
+
+				if badpass in thefailure:
+					e = GenericConnectionObject.badpassproblem.format(h=hipparchia.config['DBHOST'], p=hipparchia.config['DBPORT'])
+					print(GenericConnectionObject.postgresproblem.format(e=e))
+
 				sys.exit(0)
 
 			# [B] 'rw' pool: only used by the vector graphing functions
