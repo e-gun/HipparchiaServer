@@ -9,12 +9,14 @@
 import json
 from os import path
 from os import name as osname
-from sys import argv
+from platform import platform
+from sys import argv, version_info
 
 from flask import render_template, send_file, session
+from flask import __version__ as flaskversion
 
 from server import hipparchia
-from server.dbsupport.miscdbfunctions import versionchecking
+from server.dbsupport.miscdbfunctions import versionchecking, getpostgresserverversion
 from server.formatting.vectorformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
@@ -55,6 +57,17 @@ def frontpage():
 	activelists = [l for l in listmapper if len(listmapper[l]['a']) > 0]
 
 	buildinfo = versionchecking(activelists, expectedsqltemplateversion)
+	psqlversion = getpostgresserverversion()
+	pythonversion = '{a}.{b}.{c}'.format(a=version_info.major, b=version_info.minor, c=version_info.micro)
+
+	backend = """
+	Platform    {pf}
+	PostgreSQL  {ps}
+	Python      {py}
+	Flask       {fl}
+	"""
+
+	backend = backend.format(pf=platform(), ps=psqlversion, py=pythonversion, fl=flaskversion)
 
 	knowncorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 
@@ -94,6 +107,7 @@ def frontpage():
 							vectoroptionshtml=vectoroptionshtml,
 							havevectors=havevectors,
 							version=hipparchiaserverversion,
+							backend=backend,
 							icanzap=icanzap)
 
 	return page

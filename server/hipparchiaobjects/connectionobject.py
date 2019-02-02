@@ -304,7 +304,7 @@ class SimpleConnectionObject(GenericConnectionObject):
 
 		close a connection down in the most tedious way possible
 
-		this overkill is mostly a legacy of the FreeBSD bug-hunt
+		this overkill is mostly a legacy of the FreeBSD bug-hunt (which was actually a hardware issue...)
 
 		:param cursor:
 		:param dbconnectiononnection:

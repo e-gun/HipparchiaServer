@@ -22,77 +22,25 @@ irritating to avoid "return redirect(url_for('frontpage'))" which is so simple a
 
 
 [E] platform specific bug? Ryzen vs FreeBSD vs threads (vs C-states?)
+    [YES: C-States; Fixed with BIOS update to powersave options]
 
-[gone as of FreeBSD 11.2-RELEASE?]
-[FreeBSD 12-ALPHA has a cousin: *regular* failure to execute the first search properly after launch]
-[FreeBSD 12-ALPHA will hang if you poke at it long enough]
-[SEARCHLISTCONNECTIONTYPE = 'redis' seems to fix this...]
-[SEARCHLISTCONNECTIONTYPE = 'queue' seems to have more or less the same problem; perhaps less bad...]
+    workonsimplesearch() (and its kin)
 
-workonsimplesearch() (and probably its kin)
+    a very odd bug in here on a Ryzen 1600x running FreeBSD 11.1/12ALPHA and Ubuntu 10: you can search for "mentior" 10x and
+    somewhere in those trials the search will fail: one of the threads will get stuck in this function
+    this cannot be reproduced on macOS 10.13.2 with identical versions of python and postgres installed...
+    this bug is not in Hipparchia? presumably it also does not affect just this function
 
-a very odd bug in here on a Ryzen 1600x running FreeBSD 11.1/12ALPHA and Ubuntu 10: you can search for "mentior" 10x and
-somewhere in those trials the search will fail: one of the threads will get stuck in this function
-this cannot be reproduced on macOS 10.13.2 with identical versions of python and postgres installed...
-this bug is not in Hipparchia? presumably it also does not affect just this function
-
-you will not trigger the bug with the following number of workers set in config.py
-    1
-    2
-    3
-    4
-at 5 and 6 you get fails: often right away
-but then you can do more searches that will work for a while
-then you will fail
-then you can do more searches on top of this
-this will leave you with two zombie threads and two eternally updating polls
-
-PooledCoonections can give some insight into the failure:
-
-success: lots of connections return
-    connection returned to pool: cdxuheaxllwh
-    connection returned to pool: lntxrxfazsae
-    connection returned to pool: ycxhhbbfddjb
-    connection returned to pool: plzhaoxekeif
-    connection returned to pool: fqdeflurdxda
-    connection returned to pool: pouehdobwalh
-    connection returned to pool: qtuwhufcywwq
-    connection returned to pool: zhqqklbrpcly
-    connection returned to pool: ngtlbdtntppq
-    connection returned to pool: gtilspjppzdt
-    connection returned to pool: mkmentgxkmqc
-    connection returned to pool: nnijmjgqylgs
-    connection returned to pool: minqxopiocju
-    connection returned to pool: sphojeucdudr
-    connection returned to pool: eisdjqpreipq
-    connection returned to pool: hhjryxvpohsi
-    [22/Mar/2018 08:28:05] "GET /executesearch/1521721684476?skg=%CE%A8%CE%B7%CF%86%CE%B9%CF%B2%CE%B1%CE%BC%CE%AD%CE%BD%CE%B7%CF%B2%20%CE%B4%E1%BD%B2%20%CF%84%E1%BF%86%CF%B2%20%CE%B2%CE%BF%CF%85%CE%BB%E1%BF%86%CF%B2 HTTP/1.1" 200 -
-
-freeze: 8 connections return; there are 10 workers...
-    connection returned to pool: bomicybcsucs
-    connection returned to pool: oonokovlecod
-    connection returned to pool: jzeoyhukohml
-    connection returned to pool: mlngnennlyif
-    connection returned to pool: zkwxcabpeucx
-    connection returned to pool: urcwtmarsxns
-    connection returned to pool: ufowvlsfrcer
-    connection returned to pool: qlscphoqoqpc
-
-the choke seems more likely when you get many results really fast: some sort of problem with the lock on the managed list?
-
-Could move back to Pool from Manager in searchdispatching in order to work some more on the hang problem
-    NB: the old problem with Pool is the clumping of long dbs that means some workers have more
-    work to do than others: address it by sorting placestosearch by # of words in the table.
-    then you can call siftintopiles(). The downside is that you would always search a certain
-    kind of work first (i.e, Byzantine commentaries).
-
-*serious* refactoring obstacles:
-
-    the searchobject vs the pool:
-       RuntimeError: Synchronized objects should only be shared between processes through inheritance
-    the connectionobject vs the pool:
-       TypeError: can't pickle psycopg2.extensions.connection objects
-
+    you will not trigger the bug with the following number of workers set in config.py
+        1
+        2
+        3
+        4
+    at 5 and 6 you get fails: often right away
+    but then you can do more searches that will work for a while
+    then you will fail
+    then you can do more searches on top of this
+    this will leave you with two zombie threads and two eternally updating polls
 
 
 [F] In progress: launches, but will not serve [NOT A PRIORITY FEATURE]
