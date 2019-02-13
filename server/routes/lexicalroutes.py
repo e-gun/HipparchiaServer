@@ -377,3 +377,17 @@ def reverselexiconsearch(searchterm):
 	jsondict = json.dumps(returndict)
 
 	return jsondict
+
+
+
+def knownforms(headword):
+	"""
+
+	display all known forms of...
+
+	:param headword:
+	:return:
+	"""
+
+	return
+

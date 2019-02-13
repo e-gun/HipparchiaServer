@@ -7,16 +7,16 @@
 """
 
 import json
-from os import path
 from os import name as osname
-from platform import platform
-from sys import argv, version_info
+from os import path
+from platform import platform, python_version_tuple
+from sys import argv
 
-from flask import render_template, send_file, session
 from flask import __version__ as flaskversion
+from flask import render_template, send_file, session
 
 from server import hipparchia
-from server.dbsupport.miscdbfunctions import versionchecking, getpostgresserverversion
+from server.dbsupport.miscdbfunctions import getpostgresserverversion, versionchecking
 from server.formatting.vectorformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
@@ -58,7 +58,8 @@ def frontpage():
 
 	buildinfo = versionchecking(activelists, expectedsqltemplateversion)
 	psqlversion = getpostgresserverversion()
-	pythonversion = '{a}.{b}.{c}'.format(a=version_info.major, b=version_info.minor, c=version_info.micro)
+	# Note that unlike the Python sys.version, the returned value will always include the patchlevel (it defaults to '0').
+	pythonversion = '.'.join(python_version_tuple())
 
 	backend = """
 	Platform    {pf}

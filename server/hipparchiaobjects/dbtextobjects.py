@@ -245,6 +245,8 @@ class dbWorkLine(object):
 
 	"""
 
+	nonliterarycorpora = ['in', 'dp', 'ch']
+
 	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value,
 	             level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words,
 	             annotations):
@@ -278,6 +280,10 @@ class dbWorkLine(object):
 		except RuntimeError:
 			# accursed Windows10 non-fork() issue
 			zaplunates = hipparchia.config['RESTOREMEDIALANDFINALSIGMA']
+		except KeyError:
+			# you don't have a session at all...
+			# you can provoke this by using something like curl on the server
+			zaplunates = 'no'
 
 		if zaplunates == 'yes':
 			self.accented = attemptsigmadifferentiation(self.accented)
@@ -312,7 +318,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		if self.wkuinversalid[0:2] not in ['in', 'dp', 'ch']:
+		if self.wkuinversalid[0:2] not in dbWorkLine.nonliterarycorpora:
 			loc = [lvl for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5] if str(lvl) != '-1']
 			loc.reverse()
 			citation = '.'.join(loc)
@@ -383,7 +389,7 @@ class dbWorkLine(object):
 		"""
 		loc = list()
 		for lvl in [self.l1, self.l2, self.l3, self.l4, self.l5]:
-			if str(lvl) != '-1' and (self.wkuinversalid[0:2] not in ['in', 'dp', 'ch'] and lvl != 'recto'):
+			if str(lvl) != '-1' and (self.wkuinversalid[0:2] not in dbWorkLine.nonliterarycorpora and lvl != 'recto'):
 				loc.append(lvl)
 		loc.reverse()
 

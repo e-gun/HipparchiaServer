@@ -10,6 +10,7 @@ import re
 from typing import List
 
 from server.dbsupport.lexicaldbfunctions import grablemmataobjectfor, lookformorphologymatches
+from server.formatting.morphologytableformatting import greekverbtabletemplate, filloutgreekverbtabletemplate
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 
 """
@@ -91,10 +92,11 @@ class BaseFormMorphology(object):
 		(1 row)
 
 	"""
-	def __init__(self, headword: str, language: str):
+	def __init__(self, headword: str, xref: str, language: str):
 		assert language in ['greek', 'latin'], 'BaseFormMorphology() only knows words that are "greek_morphology" or "latin_morphology"'
 		self.headword = headword
 		self.language = language
+		self.xref = xref
 		# next is unsafe because you will "KeyError: 'anno¹'"
 		# self.lemmata = lemmatadict[headword]
 		self.lemmata = grablemmataobjectfor(headword, '{lg}_lemmata'.format(lg=self.language), dbcursor=None)
@@ -103,11 +105,15 @@ class BaseFormMorphology(object):
 		c = ConnectionObject()
 		self.dbmorphobjects = [lookformorphologymatches(f, c.curs) for f in self.formlist]
 		c.connectioncleanup()
-		self.numberofknownforms = len(self.dbmorphobjects)
 		self.morphpossibilities = self._getmorphpossibilities()
+		self.numberofknownforms = len(self.morphpossibilities)
 		self.analyses = self._getalanlyses()
 		self.missingparts = {'will_be_None_or_an_accurate_list_later'}
 		self.principleparts = None
+		# d = self.generategreekformdictionary()
+		# t = greekverbtabletemplate('ind', 'act')
+		# print(filloutgreekverbtabletemplate(d, t))
+
 
 	def mostlyconjugatedforms(self):
 		# 'annus' has 'anno' in it: a single verbal lookalike
@@ -129,7 +135,77 @@ class BaseFormMorphology(object):
 		for m in self.dbmorphobjects:
 			if m:
 				pos.extend(m.getpossible())
+		pos = [p for p in pos if p.xref == self.xref]
+		# there are duplicates...
+		# 90643736 πεπιαϲμένωϲ ['perf part mp masc acc pl (attic doric)']
+		# 90643736 πιεζεύμενα ['pres part mp neut nom/voc/acc pl (epic doric ionic)']
+		# 90643736 πιεζεύμενα ['pres part mp neut nom/voc/acc pl (epic doric ionic)']
+		pset = {'{a}_{b}'.format(a=p.observed, b=p.getanalysislist()[0]): p for p in pos}
+		pos = [pset[k] for k in pset.keys()]
+		# print('_getmorphpossibilities')
+		# for p in pos:
+		# 	print(p.xref, p.observed, p.getanalysislist())
 		return pos
+
+	def generategreekformdictionary(self) -> dict:
+		"""
+
+		e.g. {'_attic_imperf_ind_mp_1st_pl_': 'ἠλαττώμεθα', ...}
+		[a]	imperf	ind	mp	1st	pl	(attic	doric	aeolic)
+		[b]	plup	ind	mp	1st	pl	(attic)
+		[c]	perf	ind	mp	1st	pl	(attic)
+		[d]	plup	ind	mp	1st	pl	(homeric	ionic)
+
+		cell arrangement: left to right and top to bottom is vmnpt
+		i.e., voice, mood, number, person, tense
+
+		to be used with greekverbtabletemplate()
+
+		:return:
+		"""
+
+		if self.language != 'greek':
+			return dict()
+
+		regextemplate = '_{d}_{m}_{v}_{n}_{p}_{t}_'
+		formdict = dict()
+		for possibility in self.morphpossibilities:
+			analysis = possibility.getanalysislist()[0]
+			analysisanddialects = analysis.split(' (')
+			try:
+				dialects = analysisanddialects[1]
+			except IndexError:
+				dialects = 'attic'
+			dialects = re.sub(r'\)', '', dialects)
+			dialectlist = dialects.split(' ')
+			analysislist = analysisanddialects[0].split(' ')
+			t = analysislist[0]
+			m = analysislist[1]
+			vv = analysislist[2]
+			if m == 'part':
+				p = str()
+				n = str()
+			else:
+				try:
+					p = analysislist[3]
+				except IndexError:
+					p = str()
+				try:
+					n = analysislist[4]
+				except IndexError:
+					n = str()
+
+			if vv == 'mp':
+				voices = ['mid', 'pass']
+			else:
+				voices = [vv]
+
+			for v in voices:
+				for d in dialectlist:
+					mykey = regextemplate.format(d=d, m=m, v=v, n=n, p=p, t=t)
+					formdict[mykey] = possibility.observed
+
+		return formdict
 
 	def _getalanlyses(self) -> list:
 		available = list()

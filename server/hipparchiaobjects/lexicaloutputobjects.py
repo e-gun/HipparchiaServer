@@ -180,7 +180,8 @@ class lexicalOutputObject(object):
 			# and, sadly, some entries do not have a POS: "select pos from latin_dictionary where entry_name='declaro';"
 			# declaro: w.pos ['']
 			if (fingerprints & set(w.pos)) or w.pos == ['']:
-				morphanalysis = BaseFormMorphology(w.entry, self.usedictionary)
+				xref = findparserxref(w)
+				morphanalysis = BaseFormMorphology(w.entry, xref, self.usedictionary)
 				ppts = morphanalysis.getprincipleparts()
 				if ppts and morphanalysis.mostlyconjugatedforms():
 					trs = [morphrowtemplate.format(ct=p[0], ppt=p[1]) for p in ppts]

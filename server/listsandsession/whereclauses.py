@@ -238,6 +238,11 @@ def wholeworktemptablecontents(authorid: str, setoflinenumbers: set) -> Dict[str
 	else:
 		lines = '-1'
 
+	# collision avoidance in table names is handled elsewhere by rewriting '{au}_includelist'
+	# i.e.:  q = re.sub('_includelist', '_includelist_{a}'.format(a=avoidcollisions), q)
+	# one could refactor down that (repeated) code by generating the unique name here
+	# the searchobject has a unique searchid that can do the bookkeeping?
+
 	tqtemplate = """
 	CREATE TEMPORARY TABLE {au}_includelist AS 
 		SELECT values 

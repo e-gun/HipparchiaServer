@@ -319,22 +319,27 @@ def getpostgresserverversion() -> str:
 	PostgreSQL 11.1 on x86_64-apple-darwin17.7.0, compiled by Apple LLVM version 10.0.0 (clang-1000.11.45.5), 64-bit
 	(1 row)
 
+
+	hipparchiaDB=# SHOW server_version;
+	server_version
+	----------------
+	11.1
+	(1 row)
+
 	:return:
 	"""
 
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
-	q = 'SELECT version()'
+	q = 'SHOW server_version;'
 	cursor.execute(q)
-	v = cursor.fetchall()
-	version = v[0][0]
-
-	trimversion = version.split(' ')[1]
+	v = cursor.fetchone()
+	version = v[0]
 
 	dbconnection.connectioncleanup()
 
-	return trimversion
+	return version
 
 
 def probefordatabases() -> dict:
