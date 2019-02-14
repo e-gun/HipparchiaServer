@@ -234,6 +234,38 @@ def dictionaryentryjs() -> str:
 		return false;
 		
 		});
+		
+	$('formsummary').click( function(e) {
+		e.preventDefault();
+		var windowWidth = $(window).width();
+		var windowHeight = $(window).height();
+		let ldt = $('#lexicadialogtext');
+		let jshld = $('#lexicaljsscriptholder');
+		
+		ldt.dialog({
+			closeOnEscape: true,
+			autoOpen: false,
+			minWidth: windowWidth*.33,
+			maxHeight: windowHeight*.9,
+			// position: { my: "left top", at: "left top", of: window },
+			title: this.id,
+			draggable: true,
+			icons: { primary: 'ui-icon-close' },
+			click: function() { $(this).dialog('close'); }
+			});
+		
+		ldt.dialog('open');
+		ldt.html('[searching...]');
+		
+		$.getJSON('/morphologychart/'+this.lang+'/'+this.id+'/'+this.lexid, function (definitionreturned) {
+			ldt.html(definitionreturned['newhtml']);
+			jshld.html(definitionreturned['newjs']);		
+			});
+			
+		return false;
+		
+		});
+			
 	</script>
 	"""
 

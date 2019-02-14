@@ -1236,6 +1236,17 @@ form {
 	display: inline;
 	}
 
+formsummary{
+    color: var(--rustedorange);
+	font-weight: 600;
+    }
+
+formsummary:hover{
+	color: var(--dkbabyblue);
+	font-weight: 600;
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}
+
 hmutitle {
 	font-weight: bold; font-style: italic;
 	}

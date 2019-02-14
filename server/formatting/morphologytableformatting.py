@@ -107,12 +107,10 @@ def greekverbtabletemplate(mood: str, voice: str, dialect='attic') -> str:
 	{tenseheader}
 	</tr>"""
 
-	tensestemplate = """
-	<tr>
+	tensestemplate = """<tr>
 		<td class="tenselabel">&nbsp;</td>
 		{alltenses}
-	</tr>
-	"""
+	</tr>"""
 
 	tensecell = '<td class="tensecell">{t}<br></td>'
 	tenserows = [tensecell.format(t=mytenses[k]) for k in sorted(mytenses.keys()) if mytenses[k]]
@@ -214,7 +212,7 @@ def filloutgreekverbtabletemplate(lookupdict, template):
 	for c in cells:
 		# ['_attic_subj_pass_pl_2nd_pres_', '_attic_subj_pass_pl_2nd_imperf_', ...]
 		try:
-			template = re.sub(c, lookupdict[c], template)
+			template = re.sub(c, '<verbform>' + lookupdict[c] + '</verbform>', template)
 		except KeyError:
 			template = re.sub(c, '---', template)
 

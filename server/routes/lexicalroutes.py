@@ -15,16 +15,18 @@ from server import hipparchia
 from server.dbsupport.lexicaldbfunctions import lookformorphologymatches, probedictionary, querytotalwordcounts, \
 	searchdbforlexicalentry
 from server.formatting.betacodetounicode import replacegreekbetacode
+from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
 from server.formatting.lexicaformatting import getobservedwordprevalencedata
+from server.formatting.morphologytableformatting import filloutgreekverbtabletemplate, greekverbtabletemplate
 from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation, depunct, \
 	removegravity, stripaccents, tidyupterm
 from server.formatting.wordformatting import setdictionarylanguage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.lexicaloutputobjects import lexicalOutputObject, multipleWordOutputObject
+from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
 from server.listsandsession.checksession import probeforsessionvariables
 from server.listsandsession.corpusavailability import justlatin, justtlg
 from server.listsandsession.genericlistfunctions import polytonicsort
-from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
 
 
 @hipparchia.route('/dictsearch/<searchterm>')
@@ -379,15 +381,48 @@ def reverselexiconsearch(searchterm):
 	return jsondict
 
 
-
-def knownforms(headword):
+@hipparchia.route('/morphologychart/<language>/<headword>/<lexiconid>')
+def knownforms(language, headword, lexiconid):
 	"""
 
 	display all known forms of...
 
-	:param headword:
+	you are supposed to be sent here via the principle parts click from a lexical entry
+
+	this means you have access to a BaseFormMorphology() object
+
+	that is how/why you know the paramaters already
+
+	:param lexiconid:
 	:return:
 	"""
 
-	return
+	try:
+		bfo = BaseFormMorphology(headword, str(lexiconid), language)
+	except:
+		print('could not initialize BaseFormMorphology() object')
+		return 'could not initialize BaseFormMorphology() object'
+
+	fd = bfo.generategreekformdictionary()
+
+	returnarray = list()
+	for d in bfo.knowndialects:
+		print('d', d)
+		for v in bfo.knownvoices:
+			print('v', v)
+			# moods = ['ind', 'subj', 'opt', 'imperat', 'inf', 'part']
+			moods = ['ind', 'subj', 'opt', 'imperat']
+			for m in moods:
+				print('m', m)
+				if bfo.tablewillhavecontents(d, v, m):
+					t = greekverbtabletemplate(m, v, dialect=d)
+					returnarray.append(filloutgreekverbtabletemplate(fd, t))
+
+	returndict = dict()
+	returndict['newhtml'] = '\n'.join(returnarray)
+	returndict['newjs'] = '\n'.join([dictionaryentryjs(), insertlexicalbrowserjs()])
+
+	jsondict = json.dumps(returndict)
+
+	return jsondict
 

@@ -110,10 +110,17 @@ class BaseFormMorphology(object):
 		self.analyses = self._getalanlyses()
 		self.missingparts = {'will_be_None_or_an_accurate_list_later'}
 		self.principleparts = None
-		# d = self.generategreekformdictionary()
-		# t = greekverbtabletemplate('ind', 'act')
-		# print(filloutgreekverbtabletemplate(d, t))
-
+		self.knownvoices = self._getknownvoices()
+		self.knowndialects = self._getknowndialects()
+		# fd = self.generategreekformdictionary()
+		# for d in self.knowndialects:
+		# 	for v in self.knownvoices:
+		# 		# moods = ['ind', 'subj', 'opt', 'imperat', 'inf', 'part']
+		# 		moods = ['ind', 'subj', 'opt', 'imperat']
+		# 		for m in moods:
+		# 			if self.tablewillhavecontents(d, v, m):
+		# 				t = greekverbtabletemplate(m, v, dialect=d)
+		# 				print(filloutgreekverbtabletemplate(fd, t))
 
 	def mostlyconjugatedforms(self):
 		# 'annus' has 'anno' in it: a single verbal lookalike
@@ -129,6 +136,19 @@ class BaseFormMorphology(object):
 		if not self.principleparts:
 			self._determineprincipleparts()
 		return self.principleparts
+
+	def tablewillhavecontents(self, dialect, voice, mood):
+		present = [w for w in self.analyses if
+		           dialect in w.analysis.dialects and
+		           w.analysis.voice == voice and
+		           w.analysis.mood == mood]
+
+		# print('present', dialect, voice, mood, present)
+
+		if len(present) > 0:
+			return True
+		else:
+			return False
 
 	def _getmorphpossibilities(self) -> list:
 		pos = list()
@@ -146,6 +166,29 @@ class BaseFormMorphology(object):
 		# for p in pos:
 		# 	print(p.xref, p.observed, p.getanalysislist())
 		return pos
+
+	def _getknowndialects(self) -> list:
+		alldialects = set()
+		parsing = [x.analysis for x in self.analyses if x.analysis]
+		for p in parsing:
+			dialectlist = p.dialects
+			alldialects.update(dialectlist)
+
+		alldialects = sorted(list(alldialects))
+		return alldialects
+
+	def _getknownvoices(self) -> list:
+		allvoices = set()
+		parsing = [x.analysis for x in self.analyses if x.analysis]
+		for p in parsing:
+			vv = p.voice
+			if vv == 'mp':
+				voices = ['mid', 'pass']
+			else:
+				voices = [vv]
+			allvoices.update(voices)
+		allvoices = sorted(list(allvoices))
+		return allvoices
 
 	def generategreekformdictionary(self) -> dict:
 		"""
@@ -169,31 +212,17 @@ class BaseFormMorphology(object):
 
 		regextemplate = '_{d}_{m}_{v}_{n}_{p}_{t}_'
 		formdict = dict()
-		for possibility in self.morphpossibilities:
-			analysis = possibility.getanalysislist()[0]
-			analysisanddialects = analysis.split(' (')
-			try:
-				dialects = analysisanddialects[1]
-			except IndexError:
-				dialects = 'attic'
-			dialects = re.sub(r'\)', '', dialects)
-			dialectlist = dialects.split(' ')
-			analysislist = analysisanddialects[0].split(' ')
-			t = analysislist[0]
-			m = analysislist[1]
-			vv = analysislist[2]
+		for possibility in self.analyses:
+			dialectlist = possibility.analysis.dialects
+			t = possibility.analysis.tense
+			m = possibility.analysis.mood
+			vv = possibility.analysis.voice
 			if m == 'part':
 				p = str()
 				n = str()
 			else:
-				try:
-					p = analysislist[3]
-				except IndexError:
-					p = str()
-				try:
-					n = analysislist[4]
-				except IndexError:
-					n = str()
+				p = possibility.analysis.person
+				n = possibility.analysis.number
 
 			if vv == 'mp':
 				voices = ['mid', 'pass']
@@ -337,19 +366,20 @@ class BaseFormMorphology(object):
 class MorphAnalysis(object):
 	def __init__(self, word, mylanguage, analysisstring):
 		self.word = word
+		self.observed = word
 		assert mylanguage in ['greek', 'latin'], 'MorphAnalysis() only knows words that are "greek" or "latin"'
 		self.language = mylanguage
 		self.analysisstring = analysisstring
 		self.analyssiscomponents = analysisstring.split(' ')
-		self.partofspeech = self.findpartofspeech()
 		self.analysis = None
+		self.partofspeech = self._findpartofspeech()
 
 	def getanalysis(self):
 		if not self.analysis:
-			self.findpartofspeech()
+			self._findpartofspeech()
 		return self.analysis
 
-	def findpartofspeech(self):
+	def _findpartofspeech(self):
 		tenses = ['pres', 'aor', 'fut', 'perf', 'imperf', 'plup', 'futperf', 'part']
 		genders = ['masc', 'fem', 'neut']
 		if self.analyssiscomponents[0] in tenses:
@@ -565,8 +595,18 @@ class ConjugatedFormAnalysis(object):
 
 
 class DeclinedFormAnalysis(object):
-	pass
+	"""
 
+	EMPTY HUSK: just avoiding exceptions ATM
+
+	needs a real implementation
+
+	"""
+	def __init__(self):
+		self.dialects = list()
+		self.tense = None
+		self.mood = None
+		self.voice = None
 
 class AdjAnalysis(object):
 	pass
