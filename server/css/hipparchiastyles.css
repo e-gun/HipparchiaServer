@@ -1355,13 +1355,6 @@ table {
 	font-weight: normal;
 	}
 
-table.navtable {
-    padding-top: 10px;
-    margin: auto;
-    display: block;
-    font-size: 75%;
-    }
-
 table.morphtable {
 	padding-top: 5px;
 	padding-bottom: 5px;
@@ -1369,6 +1362,20 @@ table.morphtable {
     display: block;
     font-size: 75%;
 	}
+
+table.navtable {
+    padding-top: 10px;
+    margin: auto;
+    display: block;
+    font-size: 75%;
+    }
+
+table.verbanalysis {
+    padding-top: 10px;
+    margin: auto;
+    display: block;
+    font-size: 75%;
+    }
 
 table.showborders, td.showborders {
     border: 1px solid black;
@@ -1399,6 +1406,24 @@ td.browserembeddedannotations {
     vertical-align: middle;
     }
 
+td.dialectlabel {
+	color: var(--red);
+	font-weight: bold;
+	font-size: 120%;
+	text-transform: uppercase;
+	}
+
+td.voicelabel {
+	font-weight: bold;
+	font-size: 110%;
+	}
+
+td.moodlabel {
+	font-weight: normal;
+	font-size: 110%;
+	}
+
+
 td.documentmeta {
     padding-right: -20px;
     }
@@ -1412,8 +1437,13 @@ td.morphcell.labelcell {
 	font-weight: normal;
 	}
 
-td.morphcell.invisible{
+td.morphcell.invisible {
 	color: var(--invisible);
+	}
+
+td.tensecell {
+	color: var(--huedgrey);
+	font-weight: bold;
 	}
 
 td.textmakerembeddedannotations {
@@ -1527,3 +1557,8 @@ ul.roman {
 unclickablebibl {
     color: var(--black);
     }
+
+verbform:hover{
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}

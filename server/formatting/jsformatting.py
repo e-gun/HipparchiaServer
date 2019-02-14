@@ -272,3 +272,49 @@ def dictionaryentryjs() -> str:
 	"""
 
 	return template
+
+
+def morphologychartjs() -> str:
+	"""
+
+	return js to insert
+
+	ensure exact matches, otherwise ἔρδω will pull up ὑπερδώριοϲ too
+
+	and so:
+		'/dictsearch/^'+this.id+'$'
+
+	:return:
+	"""
+	template = """
+	<script>
+		function displayresults(output) {
+			document.title = output['title'];
+			$('#searchsummary').html(output['searchsummary']);
+			$('#displayresults').html(output['found']);
+			let browserclickscript = document.createElement('script');
+			browserclickscript.innerHTML = output['js'];
+			document.getElementById('browserclickscriptholder').appendChild(browserclickscript);
+		}
+
+		$('verbform').click( function(){
+			$('#imagearea').empty();
+			$('#searchsummary').html('');
+			$('#displayresults').html('');
+	
+			let bcsh = document.getElementById("browserclickscriptholder");
+			if (bcsh.hasChildNodes()) { bcsh.removeChild(bcsh.firstChild); }
+	
+			let searchterm = this.getAttribute("searchterm");
+			
+			let searchid = generateId(8);
+			let url = '/singlewordsearch/' + searchid + '/' + searchterm;
+			
+			$.getJSON(url, function (returnedresults) { displayresults(returnedresults); });
+			
+			checkactivityviawebsocket(searchid);
+		});
+	</script>    
+	"""
+
+	return template

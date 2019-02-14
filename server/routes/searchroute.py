@@ -19,13 +19,13 @@ from server.formatting.searchformatting import buildresultobjects, flagsearchter
 	nocontexthtmlifysearchfinds
 from server.formatting.wordformatting import universalregexequivalent, wordlistintoregex
 from server.hipparchiaobjects.progresspoll import ProgressPoll
-from server.hipparchiaobjects.searchobjects import SearchOutputObject
+from server.hipparchiaobjects.searchobjects import SearchOutputObject, SearchObject
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
 	sortresultslist
 from server.listsandsession.checksession import probeforsessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchdispatching import searchdispatcher
-from server.searching.searchfunctions import buildsearchobject
+from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
 if hipparchia.config['SEMANTICVECTORSENABLED'] == 'yes':
 	from server.semanticvectors.gensimvectors import executegensimsearch
 	from server.semanticvectors.scikitlearntopics import sklearnselectedworks
@@ -39,7 +39,7 @@ from server.startup import authordict, listmapper, poll, workdict
 
 
 @hipparchia.route('/executesearch/<searchid>', methods=['GET'])
-def executesearch(searchid):
+def executesearch(searchid, so=None):
 	"""
 	the interface to all of the other search functions
 	tell me what you are looking for and i'll try to find it
@@ -51,11 +51,12 @@ def executesearch(searchid):
 	:return:
 	"""
 
-	probeforsessionvariables()
-
 	pollid = validatepollid(searchid)
 
-	so = buildsearchobject(pollid, request, session)
+	if not so:
+		# there is a so if singlewordsearch() sent you here
+		probeforsessionvariables()
+		so = buildsearchobject(pollid, request, session)
 
 	frozensession = so.session
 
@@ -280,5 +281,34 @@ def executesearch(searchid):
 	jsonoutput = json.dumps(output.generateoutput())
 
 	del poll[pollid]
+
+	return jsonoutput
+
+
+@hipparchia.route('/singlewordsearch/<searchid>/<searchterm>')
+def singlewordsearch(searchid, searchterm):
+	"""
+
+	you get sent here via the morphology tables
+
+	this is a restricted version of executesearch(): single, exact term
+
+	:param searchid:
+	:param searchterm:
+	:return:
+	"""
+
+	probeforsessionvariables()
+
+	pollid = validatepollid(searchid)
+	searchterm = cleaninitialquery(searchterm)
+	seeking = ' {s} '.format(s=searchterm)
+	proximate = str()
+	lemma = str()
+	proximatelemma = str()
+
+	so = SearchObject(pollid, seeking, proximate, lemma, proximatelemma, session)
+
+	jsonoutput = executesearch(pollid, so)
 
 	return jsonoutput

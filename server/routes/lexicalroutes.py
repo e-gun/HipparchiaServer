@@ -8,7 +8,6 @@
 
 import json
 import re
-import psycopg2
 
 from flask import session
 
@@ -16,7 +15,7 @@ from server import hipparchia
 from server.dbsupport.lexicaldbfunctions import lookformorphologymatches, probedictionary, querytotalwordcounts, \
 	searchdbforlexicalentry
 from server.formatting.betacodetounicode import replacegreekbetacode
-from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs
+from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs, morphologychartjs
 from server.formatting.lexicaformatting import getobservedwordprevalencedata
 from server.formatting.morphologytableformatting import filloutgreekverbtabletemplate, greekverbtabletemplate
 from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation, depunct, \
@@ -431,7 +430,7 @@ def knownforms(language, lexiconid, headword):
 
 	returndict = dict()
 	returndict['newhtml'] = '\n'.join(returnarray)
-	returndict['newjs'] = '\n'.join([dictionaryentryjs(), insertlexicalbrowserjs()])
+	returndict['newjs'] = morphologychartjs()
 
 	jsondict = json.dumps(returndict)
 

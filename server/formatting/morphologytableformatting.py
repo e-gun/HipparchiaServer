@@ -212,9 +212,11 @@ def filloutgreekverbtabletemplate(lookupdict, template):
 	for c in cells:
 		# ['_attic_subj_pass_pl_2nd_pres_', '_attic_subj_pass_pl_2nd_imperf_', ...]
 		try:
-			template = re.sub(c, '<verbform>' + lookupdict[c] + '</verbform>', template)
+			substitute = '<verbform searchterm="{f}">{f}</verbform>'.format(f=lookupdict[c])
 		except KeyError:
-			template = re.sub(c, '---', template)
+			substitute = '---'
+
+		template = re.sub(c, substitute, template)
 
 	return template
 
