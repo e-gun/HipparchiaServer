@@ -8,6 +8,7 @@
 
 import json
 import re
+import psycopg2
 
 from flask import session
 
@@ -381,8 +382,8 @@ def reverselexiconsearch(searchterm):
 	return jsondict
 
 
-@hipparchia.route('/morphologychart/<language>/<headword>/<lexiconid>')
-def knownforms(language, headword, lexiconid):
+@hipparchia.route('/morphologychart/<language>/<lexiconid>/<headword>')
+def knownforms(language, lexiconid, headword):
 	"""
 
 	display all known forms of...
@@ -397,6 +398,19 @@ def knownforms(language, headword, lexiconid):
 	:return:
 	"""
 
+	# sanitize all input...
+
+	knownlanguages = ['greek', 'latin']
+	if language not in knownlanguages:
+		language = 'greek'
+
+	try:
+		lexiconid = str(int(lexiconid))
+	except ValueError:
+		lexiconid = 'invalid_user_input'
+
+	headword = depunct(headword)
+
 	try:
 		bfo = BaseFormMorphology(headword, str(lexiconid), language)
 	except:
@@ -407,13 +421,10 @@ def knownforms(language, headword, lexiconid):
 
 	returnarray = list()
 	for d in bfo.knowndialects:
-		print('d', d)
 		for v in bfo.knownvoices:
-			print('v', v)
 			# moods = ['ind', 'subj', 'opt', 'imperat', 'inf', 'part']
 			moods = ['ind', 'subj', 'opt', 'imperat']
 			for m in moods:
-				print('m', m)
 				if bfo.tablewillhavecontents(d, v, m):
 					t = greekverbtabletemplate(m, v, dialect=d)
 					returnarray.append(filloutgreekverbtabletemplate(fd, t))

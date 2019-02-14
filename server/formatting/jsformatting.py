@@ -241,6 +241,8 @@ def dictionaryentryjs() -> str:
 		var windowHeight = $(window).height();
 		let ldt = $('#lexicadialogtext');
 		let jshld = $('#lexicaljsscriptholder');
+		let headword = this.getAttribute("headword")
+		let parserxref = this.getAttribute("parserxref")
 		
 		ldt.dialog({
 			closeOnEscape: true,
@@ -248,7 +250,7 @@ def dictionaryentryjs() -> str:
 			minWidth: windowWidth*.33,
 			maxHeight: windowHeight*.9,
 			// position: { my: "left top", at: "left top", of: window },
-			title: this.id,
+			title: headword,
 			draggable: true,
 			icons: { primary: 'ui-icon-close' },
 			click: function() { $(this).dialog('close'); }
@@ -257,7 +259,7 @@ def dictionaryentryjs() -> str:
 		ldt.dialog('open');
 		ldt.html('[searching...]');
 		
-		$.getJSON('/morphologychart/'+this.lang+'/'+this.id+'/'+this.lexid, function (definitionreturned) {
+		$.getJSON('/morphologychart/'+this.lang+'/'+parserxref+'/'+headword, function (definitionreturned) {
 			ldt.html(definitionreturned['newhtml']);
 			jshld.html(definitionreturned['newjs']);		
 			});

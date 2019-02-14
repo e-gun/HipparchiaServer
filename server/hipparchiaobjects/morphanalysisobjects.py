@@ -112,15 +112,6 @@ class BaseFormMorphology(object):
 		self.principleparts = None
 		self.knownvoices = self._getknownvoices()
 		self.knowndialects = self._getknowndialects()
-		# fd = self.generategreekformdictionary()
-		# for d in self.knowndialects:
-		# 	for v in self.knownvoices:
-		# 		# moods = ['ind', 'subj', 'opt', 'imperat', 'inf', 'part']
-		# 		moods = ['ind', 'subj', 'opt', 'imperat']
-		# 		for m in moods:
-		# 			if self.tablewillhavecontents(d, v, m):
-		# 				t = greekverbtabletemplate(m, v, dialect=d)
-		# 				print(filloutgreekverbtabletemplate(fd, t))
 
 	def mostlyconjugatedforms(self):
 		# 'annus' has 'anno' in it: a single verbal lookalike

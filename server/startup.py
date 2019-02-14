@@ -61,7 +61,6 @@ if current_process().name == 'MainProcess':
 	otherwise you'll hit the DB too often and ask the same question over and over again
 	"""
 
-
 	# startup 4.922947645187378
 	# profiling: [see https://zapier.com/engineering/profiling-python-boss/]
 	# [a]
@@ -79,9 +78,9 @@ if current_process().name == 'MainProcess':
 	authordict = loadallauthorsasobjects()
 	workdict = loadallworksasobjects()
 	authordict = loadallworksintoallauthors(authordict, workdict)
-	lemmatadict = loadlemmataasobjects()
-	# print('lemmatadict disabled for debugging run; re-enable via "startup.py"')
-	# lemmatadict = dict()
+	# lemmatadict = loadlemmataasobjects()
+	print('lemmatadict disabled for debugging run; re-enable via "startup.py"')
+	lemmatadict = dict()
 	# lemmatadict too long to be used by the hinter: need quicker access; so partition it up into keyedlemmata
 	keyedlemmata = buildkeyedlemmata(list(lemmatadict.keys()))
 
@@ -199,6 +198,7 @@ if current_process().name == 'MainProcess':
 	# note that more than one poll can be running
 	poll = dict()
 else:
+	# welcome back Windows users
 	authordict = dict()
 	workdict = dict()
 	authorgenresdict = dict()
