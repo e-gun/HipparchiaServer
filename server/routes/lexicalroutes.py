@@ -9,11 +9,13 @@
 import json
 import re
 
+import itertools
+
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.lexicaldbfunctions import lookformorphologymatches, probedictionary, querytotalwordcounts, \
-	searchdbforlexicalentry
+from server.dbsupport.lexicaldbfunctions import bulkfindwordcounts, lookformorphologymatches, probedictionary, \
+	querytotalwordcounts, searchdbforlexicalentry
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs, morphologychartjs
 from server.formatting.lexicaformatting import getobservedwordprevalencedata
@@ -422,7 +424,17 @@ def knownforms(language, lexiconid, headword):
 	</div>
 	"""
 
-	fd = bfo.generategreekformdictionary()
+	if language == 'greek':
+		fd = bfo.generategreekformdictionary()
+	else:
+		fd = dict()
+
+	wordset = {a.word for a in bfo.analyses}
+	initials = {stripaccents(w[0]) for w in wordset}
+	byinitial = {i: [w for w in wordset if w[0] == i] for i in initials}
+	wco = [bulkfindwordcounts(byinitial[i]) for i in byinitial]
+	wco = list(itertools.chain(*wco))
+	keyedwco = {w.entryname: w.t for w in wco}
 
 	returnarray = list()
 	returnarray.append(topofoutput.format(f=headword))
@@ -434,7 +446,7 @@ def knownforms(language, lexiconid, headword):
 			for m in moods:
 				if bfo.tablewillhavecontents(d, v, m):
 					t = greekverbtabletemplate(m, v, dialect=d)
-					returnarray.append(filloutgreekverbtabletemplate(fd, t))
+					returnarray.append(filloutgreekverbtabletemplate(fd, keyedwco, t))
 
 	returndict = dict()
 	returndict['newhtml'] = '\n'.join(returnarray)

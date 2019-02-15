@@ -78,9 +78,9 @@ if current_process().name == 'MainProcess':
 	authordict = loadallauthorsasobjects()
 	workdict = loadallworksasobjects()
 	authordict = loadallworksintoallauthors(authordict, workdict)
-	lemmatadict = loadlemmataasobjects()
-	# print('lemmatadict disabled for debugging run; re-enable via "startup.py"')
-	# lemmatadict = dict()
+	# lemmatadict = loadlemmataasobjects()
+	print('lemmatadict disabled for debugging run; re-enable via "startup.py"')
+	lemmatadict = dict()
 	# lemmatadict too long to be used by the hinter: need quicker access; so partition it up into keyedlemmata
 	keyedlemmata = buildkeyedlemmata(list(lemmatadict.keys()))
 

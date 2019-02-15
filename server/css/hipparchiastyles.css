@@ -200,6 +200,10 @@ body {
     color: var(--skyblue);
     }
 
+.counter {
+	color: var(--rustedorange);
+	}
+
 .crossreference {
 	font-style: italic;
 	color: var(--rustedorange);

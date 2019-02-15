@@ -194,7 +194,7 @@ def emptygreekformdictionary(dialect='attic') -> dict:
 	return formdict
 
 
-def filloutgreekverbtabletemplate(lookupdict, template):
+def filloutgreekverbtabletemplate(lookupdict: dict, wordcountdict: dict, template: str) -> str:
 	"""
 
 	regex swap the greekverbtabletemplate items
@@ -203,6 +203,7 @@ def filloutgreekverbtabletemplate(lookupdict, template):
 	:param template:
 	:return:
 	"""
+
 	seeking = r'<td class="morphcell">(.*?)</td>'
 	cells = re.findall(seeking, template)
 
@@ -215,6 +216,11 @@ def filloutgreekverbtabletemplate(lookupdict, template):
 			substitute = '<verbform searchterm="{f}">{f}</verbform>'.format(f=lookupdict[c])
 		except KeyError:
 			substitute = '---'
+
+		try:
+			substitute = '{s} (<span class="counter">{c}</span>)'.format(s=substitute, c=wordcountdict[lookupdict[c]])
+		except KeyError:
+			pass
 
 		template = re.sub(c, substitute, template)
 

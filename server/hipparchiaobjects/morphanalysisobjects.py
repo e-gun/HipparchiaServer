@@ -10,7 +10,6 @@ import re
 from typing import List
 
 from server.dbsupport.lexicaldbfunctions import grablemmataobjectfor, lookformorphologymatches
-from server.formatting.morphologytableformatting import greekverbtabletemplate, filloutgreekverbtabletemplate
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 
 """

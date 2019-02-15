@@ -11,13 +11,15 @@ from typing import List
 import psycopg2
 from flask import session
 
+from server.dbsupport.tablefunctions import assignuniquename
+from server.dbsupport.miscdbfunctions import resultiterator
 from server.formatting.abbreviations import unpackcommonabbreviations
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject
 from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbLatinWord
 from server.hipparchiaobjects.morphologyobjects import dbLemmaObject
-from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject
+from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
 
 def searchdbforlexicalentry(seeking, usedict, limit=None) -> List:
@@ -341,6 +343,61 @@ def findcountsviawordcountstable(wordtocheck):
 	dbconnection.connectioncleanup()
 
 	return result
+
+
+def bulkfindwordcounts(listofwords) -> List[dbWordCountObject]:
+	"""
+
+	note that the lists of words should all start with the same letter since the wordcount tables are letter-keyed
+
+	hipparchiaDB=# CREATE TEMP TABLE bulkcounter_51807f8bbe08 AS SELECT values AS  entriestocheck FROM unnest(ARRAY['κατακλειούϲηϲ', 'κατακλῇϲαι', 'κατακλεῖϲαι']) values;
+
+	hipparchiaDB=# SELECT * FROM wordcounts_κ WHERE EXISTS (SELECT 1 FROM bulkcounter_51807f8bbe08 tocheck WHERE tocheck.entriestocheck = wordcounts_κ.entry_name);
+	  entry_name   | total_count | gr_count | lt_count | dp_count | in_count | ch_count
+	---------------+-------------+----------+----------+----------+----------+----------
+	 κατακλεῖϲαι   |          31 |       30 |        0 |        0 |        1 |        0
+	 κατακλειούϲηϲ |           3 |        3 |        0 |        0 |        0 |        0
+	 κατακλῇϲαι    |           1 |        1 |        0 |        0 |        0 |        0
+	(3 rows)
+
+
+	:param listofwords:
+	:return:
+	"""
+
+	dbconnection = ConnectionObject(readonlyconnection=False)
+	dbcursor = dbconnection.cursor()
+
+	uniquename = assignuniquename(12)
+	firstletteroffirstword = stripaccents(listofwords[0][0])
+
+	if firstletteroffirstword not in 'abcdefghijklmnopqrstuvwxyzαβψδεφγηιξκλμνοπρϲτυωχθζ':
+		firstletteroffirstword = '0'
+
+	tqtemplate = """
+	CREATE TEMP TABLE bulkcounter_{rnd} AS
+		SELECT values AS 
+			entriestocheck FROM unnest(ARRAY[%s]) values
+	"""
+
+	tempquery = tqtemplate.format(rnd=uniquename)
+	data = (listofwords,)
+	dbcursor.execute(tempquery, data)
+
+	qtemplate = """
+	SELECT * FROM wordcounts_{x} WHERE EXISTS 
+		(SELECT 1 FROM bulkcounter_{rnd} tocheck WHERE tocheck.entriestocheck = wordcounts_{x}.entry_name)
+	"""
+
+	query = qtemplate.format(rnd=uniquename, x=firstletteroffirstword)
+	dbcursor.execute(query)
+	results = resultiterator(dbcursor)
+
+	wordcountobjects = [dbWordCountObject(*r) for r in results]
+
+	dbconnection.connectioncleanup()
+
+	return wordcountobjects
 
 
 def grablemmataobjectfor(entryname, db, dbcursor=None):
