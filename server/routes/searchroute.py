@@ -35,7 +35,7 @@ else:
 	sklearnselectedworks = None
 	findabsolutevectorsbysentence = None
 	findabsolutevectorsfromhits = None
-from server.startup import authordict, listmapper, poll, workdict
+from server.startup import authordict, listmapper, poll, workdict, lemmatadict
 
 
 @hipparchia.route('/executesearch/<searchid>', methods=['GET'])
@@ -305,6 +305,41 @@ def singlewordsearch(searchid, searchterm):
 	seeking = ' {s} '.format(s=searchterm)
 	proximate = str()
 	lemma = str()
+	proximatelemma = str()
+
+	so = SearchObject(pollid, seeking, proximate, lemma, proximatelemma, session)
+
+	jsonoutput = executesearch(pollid, so)
+
+	return jsonoutput
+
+
+
+@hipparchia.route('/lemmatizesearch/<searchid>/<headform>')
+def headwordsearch(searchid, headform):
+	"""
+
+	you get sent here via the morphology tables
+
+	this is a restricted version of executesearch(): a dictionary headword
+
+	:param searchid:
+	:param headform:
+	:return:
+	"""
+
+	probeforsessionvariables()
+	inputlemma = cleaninitialquery(headform)
+
+	try:
+		lemma = lemmatadict[inputlemma]
+	except KeyError:
+		lemma = None
+
+	pollid = validatepollid(searchid)
+	seeking = str()
+	proximate = str()
+
 	proximatelemma = str()
 
 	so = SearchObject(pollid, seeking, proximate, lemma, proximatelemma, session)

@@ -416,9 +416,17 @@ def knownforms(language, lexiconid, headword):
 		print('could not initialize BaseFormMorphology() object')
 		return 'could not initialize BaseFormMorphology() object'
 
+	topofoutput = """
+	<div class="center">
+		<span class="verylarge">All known forms of <lemmatizable headform="{f}">{f}</lemmatizable></span>
+	</div>
+	"""
+
 	fd = bfo.generategreekformdictionary()
 
 	returnarray = list()
+	returnarray.append(topofoutput.format(f=headword))
+
 	for d in bfo.knowndialects:
 		for v in bfo.knownvoices:
 			# moods = ['ind', 'subj', 'opt', 'imperat', 'inf', 'part']

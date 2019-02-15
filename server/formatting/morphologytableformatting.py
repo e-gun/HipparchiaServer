@@ -128,7 +128,7 @@ def greekverbtabletemplate(mood: str, voice: str, dialect='attic') -> str:
 	numbers = ['sg', 'dual', 'pl']
 	persons = ['1st', '2nd', '3rd']
 	tensedict = {1: 'pres', 2:'imperf', 3: 'fut', 4: 'aor', 5: 'perf', 6: 'plup', 7: 'futperf'}
-	tenses = [tensedict[k] for k in sorted(mytenses.keys())]
+	tenses = [tensedict[k] for k in sorted(mytenses.keys()) if mytenses[k]]
 
 	morphrowtemplate = """
 	<tr class="morphrow">

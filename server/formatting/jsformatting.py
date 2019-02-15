@@ -314,6 +314,64 @@ def morphologychartjs() -> str:
 			
 			checkactivityviawebsocket(searchid);
 		});
+		
+	
+		$('lemmatizable').click( function(){
+			$('#imagearea').empty();
+			$('#searchsummary').html('');
+			$('#displayresults').html('');
+	
+			let bcsh = document.getElementById("browserclickscriptholder");
+			if (bcsh.hasChildNodes()) { bcsh.removeChild(bcsh.firstChild); }
+	
+			let headform = this.getAttribute("headform");
+			
+			let searchid = generateId(8);
+			let url = '/lemmatizesearch/' + searchid + '/' + headform;
+			
+			$.getJSON(url, function (returnedresults) { displayresults(returnedresults); });
+			
+			checkactivityviawebsocket(searchid);
+		});
+		
+	function checkactivityviawebsocket(searchid) {
+		$.getJSON('/confirm/'+searchid, function(portnumber) {
+			// s = new WebSocket('ws://localhost:'+portnumber+'/');
+			// NOTE: according to the above, you will not be able to get progress reports if you are not at localhost
+			// that might be something you want to ensure
+			// the following is required for remote progress reports
+			let ip = location.hostname;
+			let s = new WebSocket('ws://'+ip+':'+portnumber+'/');
+			let amready = setInterval(function(){
+				if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
+				}, 10);
+			s.onmessage = function(e){
+				let progress = JSON.parse(e.data);
+				displayprogress(progress);
+				if  (progress['active'] === 'inactive') { $('#pollingdata').html(''); s.close(); s = null; }
+				}
+		});
+	}
+
+	function displayprogress(progress){
+		let r = progress['remaining'];
+		let t = progress['total'];
+		let h = progress['hits'];
+		let pct = Math.round((t-r) / t * 100);
+		let m = progress['message'];
+		let e = progress['elapsed'];
+		let x = progress['extrainfo'];
+		let thehtml = '';
+		if (t !== -1) {
+			thehtml += m + ': <span class="progress">' + pct + '%</span> completed&nbsp;(' + e + 's)';
+		} else {
+			thehtml += m + '&nbsp;(' + e + 's)';
+			}
+		if ( h > 0) { thehtml += '<br />(<span class="progress">' + h + '</span> found)'; }
+		thehtml += '<br />' + x;	
+		$('#pollingdata').html(thehtml);
+	}
+	
 	</script>    
 	"""
 

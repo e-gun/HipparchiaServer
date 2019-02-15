@@ -958,6 +958,10 @@ body {
 	color: var(--huedgrey);
     }
 
+.verylarge {
+	font-size: 140%;
+	}
+
 .wordcounts{
     font-size: 85%;
     }
@@ -1559,6 +1563,15 @@ unclickablebibl {
     }
 
 verbform:hover{
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}
+
+lemmatizable {
+	color: var(--red);
+	}
+
+lemmatizable:hover{
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
