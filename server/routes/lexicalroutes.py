@@ -413,7 +413,7 @@ def knownforms(language, lexiconid, headword):
 	headword = depunct(headword)
 
 	try:
-		bfo = BaseFormMorphology(headword, str(lexiconid), language)
+		bfo = BaseFormMorphology(headword, lexiconid, language)
 	except:
 		print('could not initialize BaseFormMorphology() object')
 		return 'could not initialize BaseFormMorphology() object'
@@ -424,17 +424,17 @@ def knownforms(language, lexiconid, headword):
 	</div>
 	"""
 
-	if language == 'greek':
-		fd = bfo.generategreekformdictionary()
-	else:
-		fd = dict()
+	fd = bfo.generateformdictionary()
 
-	wordset = {a.word for a in bfo.analyses}
-	initials = {stripaccents(w[0]) for w in wordset}
-	byinitial = {i: [w for w in wordset if w[0] == i] for i in initials}
-	wco = [bulkfindwordcounts(byinitial[i]) for i in byinitial]
-	wco = list(itertools.chain(*wco))
-	keyedwco = {w.entryname: w.t for w in wco}
+	wordcounts = True
+	keyedwco = dict()
+	if wordcounts:
+		wordset = {re.sub(r"'$", r'', a.word) for a in bfo.analyses}
+		initials = {stripaccents(w[0]) for w in wordset}
+		byinitial = {i: [w for w in wordset if w[0] == i] for i in initials}
+		wco = [bulkfindwordcounts(byinitial[i]) for i in byinitial]
+		wco = list(itertools.chain(*wco))
+		keyedwco = {w.entryname: w.t for w in wco if w}
 
 	returnarray = list()
 	returnarray.append(topofoutput.format(f=headword))

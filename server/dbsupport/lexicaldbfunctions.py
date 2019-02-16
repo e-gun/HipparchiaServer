@@ -360,7 +360,6 @@ def bulkfindwordcounts(listofwords) -> List[dbWordCountObject]:
 	 κατακλῇϲαι    |           1 |        1 |        0 |        0 |        0 |        0
 	(3 rows)
 
-
 	:param listofwords:
 	:return:
 	"""
@@ -368,8 +367,10 @@ def bulkfindwordcounts(listofwords) -> List[dbWordCountObject]:
 	dbconnection = ConnectionObject(readonlyconnection=False)
 	dbcursor = dbconnection.cursor()
 
-	uniquename = assignuniquename(12)
-	firstletteroffirstword = stripaccents(listofwords[0][0])
+	try:
+		firstletteroffirstword = stripaccents(listofwords[0][0])
+	except IndexError:
+		return list()
 
 	if firstletteroffirstword not in 'abcdefghijklmnopqrstuvwxyzαβψδεφγηιξκλμνοπρϲτυωχθζ':
 		firstletteroffirstword = '0'
@@ -380,6 +381,7 @@ def bulkfindwordcounts(listofwords) -> List[dbWordCountObject]:
 			entriestocheck FROM unnest(ARRAY[%s]) values
 	"""
 
+	uniquename = assignuniquename(12)
 	tempquery = tqtemplate.format(rnd=uniquename)
 	data = (listofwords,)
 	dbcursor.execute(tempquery, data)

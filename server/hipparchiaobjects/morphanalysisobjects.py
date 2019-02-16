@@ -177,10 +177,27 @@ class BaseFormMorphology(object):
 			else:
 				voices = [vv]
 			allvoices.update(voices)
+		allvoices = [v for v in voices if v]
 		allvoices = sorted(list(allvoices))
 		return allvoices
 
-	def generategreekformdictionary(self) -> dict:
+	def generateformdictionary(self) -> dict:
+		fd = dict()
+		if self.language == 'greek':
+			fd = self._generategreekformdictionary()
+		elif self.language == 'latin':
+			fd = self._generatelatinformdictionary()
+		return fd
+
+	def _generatelatinformdictionary(self) -> dict:
+		"""
+
+		:return:
+		"""
+
+		return dict()
+
+	def _generategreekformdictionary(self) -> dict:
 		"""
 
 		e.g. {'_attic_imperf_ind_mp_1st_pl_': 'ἠλαττώμεθα', ...}
@@ -222,7 +239,10 @@ class BaseFormMorphology(object):
 			for v in voices:
 				for d in dialectlist:
 					mykey = regextemplate.format(d=d, m=m, v=v, n=n, p=p, t=t)
-					formdict[mykey] = possibility.observed
+					try:
+						formdict[mykey].append(possibility.observed)
+					except KeyError:
+						formdict[mykey] = [possibility.observed]
 
 		return formdict
 
@@ -432,10 +452,16 @@ class ConjugatedFormAnalysis(object):
 				self.number = None
 			try:
 				dialects = ' '.join(analyssiscomponents[5:])
-				dialects = re.sub(r'[()]', '', dialects)
-				self.dialects = [x for x in dialects.split(' ') if x]
 			except IndexError:
-				pass
+				dialects = str()
+
+			dialects = re.sub(r'[()]', '', dialects)
+
+			if self.mood != 'part':
+				self.dialects = [x for x in dialects.split(' ') if x]
+			else:
+				self.dialects = list()
+
 			if not self.dialects:
 				self.dialects = ['attic']
 

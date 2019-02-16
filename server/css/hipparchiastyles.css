@@ -962,6 +962,10 @@ body {
 	color: var(--huedgrey);
     }
 
+.verbanalysis tr:nth-child(2n+4){
+	background: var(--ltgrey)
+}
+
 .verylarge {
 	font-size: 140%;
 	}
@@ -1259,6 +1263,11 @@ hmutitle {
 	font-weight: bold; font-style: italic;
 	}
 
+hr.styled {
+	border-top: 1px solid #8c8b8b;
+	border-bottom: 1px solid #fff;
+}
+
 indexedlocation:hover{
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
@@ -1366,7 +1375,7 @@ table {
 table.morphtable {
 	padding-top: 5px;
 	padding-bottom: 5px;
-    margin: auto;
+	margin: 0 auto;
     display: block;
     font-size: 75%;
 	}
@@ -1379,10 +1388,9 @@ table.navtable {
     }
 
 table.verbanalysis {
-    padding-top: 10px;
-    margin: auto;
-    display: block;
+    padding-top: 15px;
     font-size: 75%;
+	margin: 0 auto;
     }
 
 table.showborders, td.showborders {

@@ -90,6 +90,7 @@ def greekverbtabletemplate(mood: str, voice: str, dialect='attic') -> str:
 	{rows}
 	</tbody>
 	</table>
+	<hr class="styled">
 	"""
 
 	headerrowtemplate = """
@@ -204,6 +205,9 @@ def filloutgreekverbtabletemplate(lookupdict: dict, wordcountdict: dict, templat
 	:return:
 	"""
 
+	formtemplate = '<verbform searchterm="{sf}">{f}</verbform>'
+	formandcountertemplate = '{f} (<span class="counter">{c}</span>)'
+
 	seeking = r'<td class="morphcell">(.*?)</td>'
 	cells = re.findall(seeking, template)
 
@@ -212,14 +216,31 @@ def filloutgreekverbtabletemplate(lookupdict: dict, wordcountdict: dict, templat
 
 	for c in cells:
 		# ['_attic_subj_pass_pl_2nd_pres_', '_attic_subj_pass_pl_2nd_imperf_', ...]
+		# 2nd sg attic mid indic of τίκτω yields: τέξηι / τέξει / τέξῃ / τεκῇ
 		try:
-			substitute = '<verbform searchterm="{f}">{f}</verbform>'.format(f=lookupdict[c])
+			formlist = lookupdict[c]
 		except KeyError:
+			formlist = None
+
+		if formlist:
+			strippedforms = {f: re.sub(r"'$", r'', f) for f in formlist}
+			substitutetuplelist = [(re.sub(r"'$", r'', f), formtemplate.format(sf=strippedforms[f], f=f)) for f in formlist]
+			counted = list()
+			for s in substitutetuplelist:
+				try:
+					counted.append(formandcountertemplate.format(f=s[1], c=wordcountdict[s[0]]))
+				except KeyError:
+					counted.append(s[1])
+			substitute = ' / '.join(counted)
+		else:
 			substitute = '---'
 
 		try:
 			substitute = '{s} (<span class="counter">{c}</span>)'.format(s=substitute, c=wordcountdict[lookupdict[c]])
 		except KeyError:
+			pass
+		except TypeError:
+			# needs fixing...
 			pass
 
 		template = re.sub(c, substitute, template)
