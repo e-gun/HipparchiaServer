@@ -134,6 +134,9 @@ class BaseFormMorphology(object):
 		           w.analysis.mood == mood]
 
 		# print('present', dialect, voice, mood, present)
+		# if mood == 'inf':
+		# 	x = ['{a}'.format(a=w.analysis.word) for w in present]
+		# 	print('\n\t'.join(x))
 
 		if len(present) > 0:
 			return True
@@ -389,13 +392,15 @@ class BaseFormMorphology(object):
 
 class MorphAnalysis(object):
 	def __init__(self, word, mylanguage, analysisstring):
+		self.analysis = NotImplemented
+		self.analyssiscomponents = NotImplemented
+		self.dialects = NotImplemented
 		self.word = word
 		self.observed = word
 		assert mylanguage in ['greek', 'latin'], 'MorphAnalysis() only knows words that are "greek" or "latin"'
 		self.language = mylanguage
 		self.analysisstring = analysisstring
-		self.analyssiscomponents = analysisstring.split(' ')
-		self.analysis = None
+		self._parseanalysisstring()
 		self.partofspeech = self._findpartofspeech()
 
 	def getanalysis(self):
@@ -403,12 +408,25 @@ class MorphAnalysis(object):
 			self._findpartofspeech()
 		return self.analysis
 
+	def _parseanalysisstring(self):
+		components = self.analysisstring.split('(')
+		self.nondialectical = components[0]
+		try:
+			dialects = components[1]
+		except IndexError:
+			dialects = str()
+		dialects = re.sub(r'\)', '', dialects)
+		self.dialects = dialects.split(' ')
+		if self.dialects == ['']:
+			self.dialects = list()
+		self.analyssiscomponents = self.nondialectical.split(' ')
+
 	def _findpartofspeech(self):
 		tenses = ['pres', 'aor', 'fut', 'perf', 'imperf', 'plup', 'futperf', 'part']
 		genders = ['masc', 'fem', 'neut']
 		if self.analyssiscomponents[0] in tenses:
 			pos = 'conjugated'
-			self.analysis = ConjugatedFormAnalysis(self.word, self.language, self.analyssiscomponents)
+			self.analysis = ConjugatedFormAnalysis(self.word, self.language, self.dialects, self.analyssiscomponents)
 		elif self.analyssiscomponents[0] in genders:
 			pos = 'declined'
 			self.analysis = DeclinedFormAnalysis()
@@ -420,6 +438,7 @@ class MorphAnalysis(object):
 
 
 class ConjugatedFormAnalysis(object):
+
 	gkprincipleparts = {('pres', 'ind', 'act', '1st', 'sg'): 1,
 	                    ('fut', 'ind', 'act', '1st', 'sg'): 2,
 	                    ('aor', 'ind', 'act', '1st', 'sg'): 3,
@@ -444,11 +463,11 @@ class ConjugatedFormAnalysis(object):
 	           'case': 4,
 	           'pcpnumber': 5}
 
-	def __init__(self, word, language, analyssiscomponents: List[str]):
+	def __init__(self, word: str, language: str, dialects: list, analyssiscomponents: List[str]):
 		# this will need refactoring when you do latin participles (can catch them via the exra # of parts (maybe))
 		self.word = word
 		self.language = language
-		self.dialects = list()
+		self.dialects = dialects
 		self.case = None
 		self.gender = None
 		self.person = None
@@ -464,22 +483,18 @@ class ConjugatedFormAnalysis(object):
 				self.number = analyssiscomponents[4]
 			except IndexError:
 				self.number = None
-			try:
-				dialects = ' '.join(analyssiscomponents[5:])
-			except IndexError:
-				dialects = str()
 
-			dialects = re.sub(r'[()]', '', dialects)
-
-			if self.mood != 'part':
-				self.dialects = [x for x in dialects.split(' ') if x]
-			else:
+			if self.mood == 'part':
 				# ἐλπίζων :  from ἐλπίζω  (“hope for”):
 				# pres	part	act	masc	nom	sg
-				self.dialects = list()
 				self.gender = analyssiscomponents[3]
 				self.case = analyssiscomponents[4]
 				self.number = analyssiscomponents[5]
+
+			# if self.mood == 'inf':
+			# 	# ποιεῖν :  from ποιέω  (“make”):
+			# 	# [a]	pres	inf	act	(attic	epic	doric)
+			# 	pass
 
 			if not self.dialects:
 				self.dialects = ['attic']

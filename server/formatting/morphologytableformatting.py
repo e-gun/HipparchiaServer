@@ -176,7 +176,13 @@ def greekverbtabletemplate(mood: str, voice: str, dialect='attic', duals=True) -
 					allrows.append(morphrowtemplate.format(allcells=thisrow))
 				allrows.append(blankrow)
 	elif mood == 'inf':
-		pass
+		allcellsinrow = list()
+		allcellsinrow.append(morphlabelcell.format(ml='infinitive'))
+		for t in tenses:
+			mo = regextemplate.format(d=dialect, m=mood, v=voice, n=None, p=None, t=t)
+			allcellsinrow.append(morphcell.format(mo=mo))
+		thisrow = '\n\t\t'.join(allcellsinrow)
+		allrows.append(morphrowtemplate.format(allcells=thisrow))
 
 	rows = '\n'.join(allrows)
 	thetablehtml = tabletemplate.format(header=fullheader, rows=rows)

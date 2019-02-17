@@ -431,7 +431,7 @@ def knownforms(language, lexiconid, headword):
 	if wordcounts:
 		wordset = {re.sub(r"'$", r'', a.word) for a in bfo.analyses}
 		initials = {stripaccents(w[0]) for w in wordset}
-		byinitial = {i: [w for w in wordset if w[0] == i] for i in initials}
+		byinitial = {i: [w for w in wordset if stripaccents(w[0]) == i] for i in initials}
 		wco = [bulkfindwordcounts(byinitial[i]) for i in byinitial]
 		wco = list(itertools.chain(*wco))
 		keyedwco = {w.entryname: w.t for w in wco if w}
@@ -442,7 +442,7 @@ def knownforms(language, lexiconid, headword):
 	for d in bfo.knowndialects:
 		for v in bfo.knownvoices:
 			# moods = ['ind', 'subj', 'opt', 'imperat', 'inf', 'part']
-			moods = ['ind', 'subj', 'opt', 'imperat', 'part']
+			moods = ['ind', 'subj', 'opt', 'imperat', 'part', 'inf']
 			for m in moods:
 				if bfo.tablewillhavecontents(d, v, m):
 					t = greekverbtabletemplate(m, v, dialect=d, duals=bfo.icontainduals())
