@@ -62,7 +62,7 @@ def findmygreektenses(mood: str, voice: str) -> dict:
 	return mytenses
 
 
-def greekverbtabletemplate(mood: str, voice: str, dialect='attic') -> str:
+def greekverbtabletemplate(mood: str, voice: str, dialect='attic', duals=True) -> str:
 	"""
 
 	Smythe §383ff
@@ -70,13 +70,6 @@ def greekverbtabletemplate(mood: str, voice: str, dialect='attic') -> str:
 	cells look like:
 
 		<td class="morphcell">_attic_subj_pass_pl_2nd_pres_</td>
-
-	dialects too?
-
-		attic
-		epic
-		doric
-		aeolic
 
 	:return:
 	"""
@@ -113,6 +106,12 @@ def greekverbtabletemplate(mood: str, voice: str, dialect='attic') -> str:
 		{alltenses}
 	</tr>"""
 
+	blank = """
+	<tr><td>&nbsp;</td>{columns}</tr>
+	"""
+
+	blankrow = blank.format(columns=''.join(['<td>&nbsp;</td>' for k in sorted(mytenses.keys()) if mytenses[k]]))
+
 	tensecell = '<td class="tensecell">{t}<br></td>'
 	tenserows = [tensecell.format(t=mytenses[k]) for k in sorted(mytenses.keys()) if mytenses[k]]
 	tenserows = '\n\t\t'.join(tenserows)
@@ -125,10 +124,15 @@ def greekverbtabletemplate(mood: str, voice: str, dialect='attic') -> str:
 	# i.e., voice, mood, number, person, tense
 	# we are doing the npt part here
 
-	# the lists of numbers, persons, tenses is set to match the parser abbreviations
-	numbers = ['sg', 'dual', 'pl']
+	# the lists of numbers, persons, tenses, etc is set to match the parser abbreviations
+	cases = ['nom', 'gen', 'dat', 'acc', 'voc']
+	genders = ['masc', 'fem', 'neut']
+	if duals:
+		numbers = ['sg', 'dual', 'pl']
+	else:
+		numbers = ['sg', 'pl']
 	persons = ['1st', '2nd', '3rd']
-	tensedict = {1: 'pres', 2:'imperf', 3: 'fut', 4: 'aor', 5: 'perf', 6: 'plup', 7: 'futperf'}
+	tensedict = {1: 'pres', 2: 'imperf', 3: 'fut', 4: 'aor', 5: 'perf', 6: 'plup', 7: 'futperf'}
 	tenses = [tensedict[k] for k in sorted(mytenses.keys()) if mytenses[k]]
 
 	morphrowtemplate = """
@@ -140,22 +144,39 @@ def greekverbtabletemplate(mood: str, voice: str, dialect='attic') -> str:
 	morphlabelcell = '<td class="morphlabelcell">{ml}</td>'
 	morphcell = '<td class="morphcell">{mo}</td>'
 	regextemplate = '_{d}_{m}_{v}_{n}_{p}_{t}_'
+	pcpltemplate = '_{d}_{m}_{v}_{n}_{t}_{g}_{c}_'
 
 	# note that we cant do infinitives and participles yet
 
-	for n in numbers:
-		for p in persons:
-			if p == '1st' and n == 'dual':
-				pass
-			else:
-				allcells = list()
-				ml = '{n} {p}'.format(n=n, p=p)
-				allcells.append(morphlabelcell.format(ml=ml))
-				for t in tenses:
-					mo = regextemplate.format(d=dialect, m=mood, v=voice, n=n, p=p, t=t)
-					allcells.append(morphcell.format(mo=mo))
-				thesecells = '\n\t\t'.join(allcells)
-				allrows.append(morphrowtemplate.format(allcells=thesecells))
+	if mood != 'part' and mood != 'inf':
+		for n in numbers:
+			for p in persons:
+				if p == '1st' and n == 'dual':
+					pass
+				else:
+					allcellsinrow = list()
+					ml = '{n} {p}'.format(n=n, p=p)
+					allcellsinrow.append(morphlabelcell.format(ml=ml))
+					for t in tenses:
+						mo = regextemplate.format(d=dialect, m=mood, v=voice, n=n, p=p, t=t)
+						allcellsinrow.append(morphcell.format(mo=mo))
+					thisrow = '\n\t\t'.join(allcellsinrow)
+					allrows.append(morphrowtemplate.format(allcells=thisrow))
+	elif mood == 'part':
+		for n in numbers:
+			for g in genders:
+				for c in cases:
+					allcellsinrow = list()
+					ml = '{g} {n} {c}'.format(n=n, c=c, g=g)
+					allcellsinrow.append(morphlabelcell.format(ml=ml))
+					for t in tenses:
+						mo = pcpltemplate.format(d=dialect, m=mood, v=voice, n=n, c=c, t=t, g=g)
+						allcellsinrow.append(morphcell.format(mo=mo))
+					thisrow = '\n\t\t'.join(allcellsinrow)
+					allrows.append(morphrowtemplate.format(allcells=thisrow))
+				allrows.append(blankrow)
+	elif mood == 'inf':
+		pass
 
 	rows = '\n'.join(allrows)
 	thetablehtml = tabletemplate.format(header=fullheader, rows=rows)
@@ -175,12 +196,15 @@ def emptygreekformdictionary(dialect='attic') -> dict:
 	:return:
 	"""
 	regextemplate = '_{d}_{m}_{v}_{n}_{p}_{t}_'
+	pcpltemplate = '_{d}_{m}_{v}_{n}_{t}_{g}_{c}_'
 
 	moods = ['ind', 'subj', 'opt', 'imperat', 'inf', 'part']
 	voices = ['act', 'mid', 'pass']
 	numbers = ['sg', 'dual', 'pl']
 	persons = ['1st', '2nd', '3rd']
 	tenses = ['pres', 'imperf', 'fut', 'aor', 'perf', 'plup', 'futperf']
+	cases = ['nom', 'voc', 'dat', 'gen', 'acc']
+	genders = ['masc', 'fem', 'neut']
 
 	allkeys = list()
 	for m in moods:
@@ -188,7 +212,12 @@ def emptygreekformdictionary(dialect='attic') -> dict:
 			for n in numbers:
 				for p in persons:
 					for t in tenses:
-						allkeys.append(regextemplate.format(d=dialect, m=m, v=v, n=n, p=p, t=t))
+						if m == 'part':
+							for c in cases:
+								for g in genders:
+									allkeys.append(pcpltemplate.format(d=dialect, m=m, v=v, n=n, t=t, g=g, c=c))
+						else:
+							allkeys.append(regextemplate.format(d=dialect, m=m, v=v, n=n, p=p, t=t))
 
 	formdict = {k: str() for k in allkeys}
 

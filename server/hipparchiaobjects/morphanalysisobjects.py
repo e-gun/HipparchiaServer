@@ -140,6 +140,13 @@ class BaseFormMorphology(object):
 		else:
 			return False
 
+	def icontainduals(self):
+		duals = [x for x in self.analyses if x.analysis.number == 'dual']
+		if duals:
+			return True
+		else:
+			return False
+
 	def _getmorphpossibilities(self) -> list:
 		pos = list()
 		for m in self.dbmorphobjects:
@@ -177,7 +184,7 @@ class BaseFormMorphology(object):
 			else:
 				voices = [vv]
 			allvoices.update(voices)
-		allvoices = [v for v in voices if v]
+		allvoices = [v for v in allvoices if v]
 		allvoices = sorted(list(allvoices))
 		return allvoices
 
@@ -218,18 +225,25 @@ class BaseFormMorphology(object):
 			return dict()
 
 		regextemplate = '_{d}_{m}_{v}_{n}_{p}_{t}_'
+		pcpltemplate = '_{d}_{m}_{v}_{n}_{t}_{g}_{c}_'
+
 		formdict = dict()
 		for possibility in self.analyses:
 			dialectlist = possibility.analysis.dialects
 			t = possibility.analysis.tense
 			m = possibility.analysis.mood
 			vv = possibility.analysis.voice
+			n = possibility.analysis.number
 			if m == 'part':
+				template = pcpltemplate
 				p = str()
-				n = str()
+				g = possibility.analysis.gender
+				c = possibility.analysis.case
 			else:
+				template = regextemplate
 				p = possibility.analysis.person
-				n = possibility.analysis.number
+				g = str()
+				c = str()
 
 			if vv == 'mp':
 				voices = ['mid', 'pass']
@@ -238,7 +252,7 @@ class BaseFormMorphology(object):
 
 			for v in voices:
 				for d in dialectlist:
-					mykey = regextemplate.format(d=d, m=m, v=v, n=n, p=p, t=t)
+					mykey = template.format(d=d, m=m, v=v, n=n, p=p, t=t, g=g, c=c)
 					try:
 						formdict[mykey].append(possibility.observed)
 					except KeyError:
@@ -460,7 +474,12 @@ class ConjugatedFormAnalysis(object):
 			if self.mood != 'part':
 				self.dialects = [x for x in dialects.split(' ') if x]
 			else:
+				# ἐλπίζων :  from ἐλπίζω  (“hope for”):
+				# pres	part	act	masc	nom	sg
 				self.dialects = list()
+				self.gender = analyssiscomponents[3]
+				self.case = analyssiscomponents[4]
+				self.number = analyssiscomponents[5]
 
 			if not self.dialects:
 				self.dialects = ['attic']

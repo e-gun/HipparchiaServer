@@ -442,10 +442,10 @@ def knownforms(language, lexiconid, headword):
 	for d in bfo.knowndialects:
 		for v in bfo.knownvoices:
 			# moods = ['ind', 'subj', 'opt', 'imperat', 'inf', 'part']
-			moods = ['ind', 'subj', 'opt', 'imperat']
+			moods = ['ind', 'subj', 'opt', 'imperat', 'part']
 			for m in moods:
 				if bfo.tablewillhavecontents(d, v, m):
-					t = greekverbtabletemplate(m, v, dialect=d)
+					t = greekverbtabletemplate(m, v, dialect=d, duals=bfo.icontainduals())
 					returnarray.append(filloutgreekverbtabletemplate(fd, keyedwco, t))
 
 	returndict = dict()
