@@ -180,12 +180,21 @@ def verbtabletemplate(mood: str, voice: str, dialect='attic', duals=True, lang='
 	# we are doing the npt part here
 
 	# the lists of numbers, persons, tenses, etc is set to match the parser abbreviations
-	cases = ['nom', 'gen', 'dat', 'acc', 'voc']
+
+	cases = list()
+	if lang == 'latin':
+		cases = ['nom', 'gen', 'dat', 'acc', 'abl', 'voc']
+
+	if lang == 'greek':
+		cases = ['nom', 'gen', 'dat', 'acc', 'voc']
+
 	genders = ['masc', 'fem', 'neut']
+
 	if duals:
 		numbers = ['sg', 'dual', 'pl']
 	else:
 		numbers = ['sg', 'pl']
+
 	persons = ['1st', '2nd', '3rd']
 	tensedict = {1: 'pres', 2: 'imperf', 3: 'fut', 4: 'aor', 5: 'perf', 6: 'plup', 7: 'futperf'}
 	tenses = [tensedict[k] for k in sorted(mytenses.keys()) if mytenses[k]]
