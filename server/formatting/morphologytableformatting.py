@@ -64,7 +64,53 @@ def findmygreektenses(mood: str, voice: str) -> dict:
 	return mytenses
 
 
-def greekverbtabletemplate(mood: str, voice: str, dialect='attic', duals=True) -> str:
+def findmylatintenses(mood: str, voice: str) -> dict:
+	"""
+
+	what might actually be available?
+
+	:param mood:
+	:param voice:
+	:return:
+	"""
+
+	# the lists of moods, voices is set to match the parser abbreviations
+	# note that 'mp' is used for 'middle/passive': it should have disappeared before now
+
+	# don't actually know how to do 'gerund', 'gerundive', 'supine' yet
+	moods = ['ind', 'subj', 'imperat', 'inf', 'part', 'gerundive', 'supine']
+	voices = ['act', 'pass']
+
+	assert mood in moods, 'invalid mood submitted to findmygreektenses(): {m}'.format(m=mood)
+	assert voice in voices, 'invalid voice submitted to findmygreektenses(): {v}'.format(v=voice)
+
+	alltenses = {1: 'Present', 2: 'Imperfect', 3: 'Future', 5: 'Perfect', 6: 'Pluperfect', 7: 'Future Perfect'}
+
+	# note that ppf subj pass, etc are 'False' because 'laudātus essem' is not going to be found
+	# one could generate it...
+	availabletenses = {
+		'act': {
+			'ind': {1: True, 2: True, 3: True, 5: True, 6: True, 7: True},
+			'subj': {1: True, 2: False, 3: False, 5: True, 6: True, 7: False},
+			'imperat': {1: True, 2: False, 3: True, 5: False, 6: False, 7: False},
+			'inf': {1: True, 2: False, 3: False, 5: True, 6: False, 7: False},
+			'part': {1: True, 2: False, 3: True, 5: False, 6: False, 7: False}
+			},
+		'pass': {
+			'ind': {1: True, 2: True, 3: True, 5: False, 6: False, 7: False},
+			'subj': {1: True, 2: True, 3: False, 5: False, 6: False, 7: False},
+			'imperat': {1: True, 2: False, 3: True, 5: False, 6: False, 7: False},
+			'inf': {1: True, 2: False, 3: False, 5: False, 6: False, 7: False},
+			'part': {1: False, 2: False, 3: False, 5: True, 6: False, 7: False}
+			}
+		}
+
+	mytenses = {k: alltenses[k] if availabletenses[voice][mood][k] else str() for k in alltenses}
+
+	return mytenses
+
+
+def verbtabletemplate(mood: str, voice: str, dialect='attic', duals=True, lang='greek') -> str:
 	"""
 
 	Smythe §383ff
@@ -79,7 +125,11 @@ def greekverbtabletemplate(mood: str, voice: str, dialect='attic', duals=True) -
 	if session['morphduals'] == 'no':
 		duals = False
 
-	mytenses = findmygreektenses(mood, voice)
+	if lang == 'greek':
+		mytenses = findmygreektenses(mood, voice)
+
+	if lang == 'latin':
+		mytenses = findmylatintenses(mood, voice)
 
 	tabletemplate = """
 	<table class="verbanalysis">
@@ -196,50 +246,10 @@ def greekverbtabletemplate(mood: str, voice: str, dialect='attic', duals=True) -
 	return thetablehtml
 
 
-def emptygreekformdictionary(dialect='attic') -> dict:
+def filloutverbtabletemplate(lookupdict: dict, wordcountdict: dict, template: str) -> str:
 	"""
 
-	return a hollow dictionary with keys for theoretical forms
-
-	later on the observed forms will be added if they have been found
-
-	note that some are impossible
-
-	:return:
-	"""
-	regextemplate = '_{d}_{m}_{v}_{n}_{p}_{t}_'
-	pcpltemplate = '_{d}_{m}_{v}_{n}_{t}_{g}_{c}_'
-
-	moods = ['ind', 'subj', 'opt', 'imperat', 'inf', 'part']
-	voices = ['act', 'mid', 'pass']
-	numbers = ['sg', 'dual', 'pl']
-	persons = ['1st', '2nd', '3rd']
-	tenses = ['pres', 'imperf', 'fut', 'aor', 'perf', 'plup', 'futperf']
-	cases = ['nom', 'voc', 'dat', 'gen', 'acc']
-	genders = ['masc', 'fem', 'neut']
-
-	allkeys = list()
-	for m in moods:
-		for v in voices:
-			for n in numbers:
-				for p in persons:
-					for t in tenses:
-						if m == 'part':
-							for c in cases:
-								for g in genders:
-									allkeys.append(pcpltemplate.format(d=dialect, m=m, v=v, n=n, t=t, g=g, c=c))
-						else:
-							allkeys.append(regextemplate.format(d=dialect, m=m, v=v, n=n, p=p, t=t))
-
-	formdict = {k: str() for k in allkeys}
-
-	return formdict
-
-
-def filloutgreekverbtabletemplate(lookupdict: dict, wordcountdict: dict, template: str) -> str:
-	"""
-
-	regex swap the greekverbtabletemplate items
+	regex swap the verbtabletemplate items
 
 	:param lookupdict:
 	:param template:

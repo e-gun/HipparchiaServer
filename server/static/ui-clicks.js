@@ -132,7 +132,7 @@ function loadoptions() {
         $('#fontchoice').val(data.fontchoice);
         $('#fontchoice').selectmenu('refresh');
 
-        if(data['principleparts'] === 'yes') { $('#mophologytables').show(); } else { $('#mophologytables').hide(); }
+        if(data['principleparts'] === 'yes') { $('#mophologytablesoptions').show(); } else { $('#mophologytablesoptions').hide(); }
 
         if (data.cosdistbysentence === 'yes' || data.cosdistbylineorword === 'yes' || data.semanticvectorquery === 'yes' ||
             data.nearestneighborsquery === 'yes' || data.tensorflowgraph === 'yes' || data.sentencesimilarity === 'yes' ||
@@ -547,7 +547,7 @@ $('#simpletextoutput').change(function() {
 
 $('#principleparts').change(function() {
     if(this.checked) { setoptions('principleparts', 'yes'); } else { setoptions('principleparts', 'no'); }
-    if(this.checked) { $('#mophologytables').show(); } else { $('#mophologytables').hide(); }
+    if(this.checked) { $('#mophologytablesoptions').show(); } else { $('#mophologytablesoptions').hide(); }
     refreshselections();
     loadoptions();
     });

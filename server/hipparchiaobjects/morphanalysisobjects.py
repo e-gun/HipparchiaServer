@@ -134,7 +134,7 @@ class BaseFormMorphology(object):
 		return self.principleparts
 
 	def tablewillhavecontents(self, dialect, voice, mood):
-		present = [w for w in self.analyses if
+		present = [w for w in self.analyses if w.analysis and
 		           dialect in w.analysis.dialects and
 		           w.analysis.voice == voice and
 		           w.analysis.mood == mood]
@@ -145,7 +145,9 @@ class BaseFormMorphology(object):
 			return False
 
 	def icontainduals(self):
-		duals = [x for x in self.analyses if x.analysis.number == 'dual']
+		if self.language == 'latin':
+			return False
+		duals = [x for x in self.analyses if x.analysis and x.analysis.number == 'dual']
 		if duals:
 			return True
 		else:
@@ -179,6 +181,13 @@ class BaseFormMorphology(object):
 			dialectlist = p.dialects
 			alldialects.update(dialectlist)
 
+		bogusdialects = ['parad_form', 'prose']
+		for b in bogusdialects:
+			try:
+				alldialects.remove(b)
+			except KeyError:
+				pass
+
 		alldialects = sorted(list(alldialects))
 		return alldialects
 
@@ -196,23 +205,7 @@ class BaseFormMorphology(object):
 		allvoices = sorted(list(allvoices))
 		return allvoices
 
-	def generateformdictionary(self) -> dict:
-		fd = dict()
-		if self.language == 'greek':
-			fd = self._generategreekformdictionary()
-		elif self.language == 'latin':
-			fd = self._generatelatinformdictionary()
-		return fd
-
-	def _generatelatinformdictionary(self) -> dict:
-		"""
-
-		:return:
-		"""
-
-		return dict()
-
-	def _generategreekformdictionary(self) -> dict:
+	def generateverbformdictionary(self) -> dict:
 		"""
 
 		e.g. {'_attic_imperf_ind_mp_1st_pl_': 'ἠλαττώμεθα', ...}
@@ -229,14 +222,12 @@ class BaseFormMorphology(object):
 		:return:
 		"""
 
-		if self.language != 'greek':
-			return dict()
-
 		regextemplate = '_{d}_{m}_{v}_{n}_{p}_{t}_'
 		pcpltemplate = '_{d}_{m}_{v}_{n}_{t}_{g}_{c}_'
 
 		formdict = dict()
-		for possibility in self.analyses:
+		possibilities = [a for a in self.analyses if isinstance(a.analysis, ConjugatedFormAnalysis)]
+		for possibility in possibilities:
 			dialectlist = possibility.analysis.dialects
 			t = possibility.analysis.tense
 			m = possibility.analysis.mood
@@ -424,6 +415,8 @@ class MorphAnalysis(object):
 		self.dialects = dialects.split(' ')
 		if self.dialects == ['']:
 			self.dialects = list()
+		if self.language == 'latin':
+			self.dialects = [' ']
 		self.analyssiscomponents = self.nondialectical.split(' ')
 
 	def _findpartofspeech(self):
@@ -504,14 +497,24 @@ class ConjugatedFormAnalysis(object):
 			if not self.dialects:
 				self.dialects = ['attic']
 
-		if self.language == 'latin' and len(analyssiscomponents) == 6:
-			# participle
+		if self.language == 'latin' and self.mood == 'part' and len(analyssiscomponents) == 6:
+			# passive participle
 			# print(word, len(analyssiscomponents), 'analyssiscomponents', analyssiscomponents)
+			# laudata pptuple: ('perf', 'part', 'pass', 'fem', 'nom/voc', 'sg')
 			self.gender = analyssiscomponents[3]
 			self.case = analyssiscomponents[4]
 			self.number = analyssiscomponents[5]
 
-		if self.language == 'latin' and len(analyssiscomponents) < 6:
+		if self.language == 'latin' and self.mood == 'part' and len(analyssiscomponents) == 5:
+			# active participle
+			# print(word, len(analyssiscomponents), 'analyssiscomponents', analyssiscomponents)
+			# laudantes pptuple: ('pres', 'part', 'masc/fem', 'nom/voc', 'pl')
+			self.voice = 'act'
+			self.gender = analyssiscomponents[2]
+			self.case = analyssiscomponents[3]
+			self.number = analyssiscomponents[4]
+
+		if self.language == 'latin' and self.mood != 'part':
 			# not a participle...
 			try:
 				self.person = analyssiscomponents[3]
@@ -531,8 +534,9 @@ class ConjugatedFormAnalysis(object):
 		if not self.case:
 			self.pptuple = (self.tense, self.mood, self.voice, self.person, self.number)
 		else:
-			# yes 'part' is not a mood, but...
 			self.pptuple = (self.tense, self.mood, self.voice, self.gender, self.case, self.number)
+		# print(self.word, 'pptuple:', self.pptuple)
+
 		self.baseformdisqualifiers = ["'", 'κἀ', 'κἤ']  # incomplete at the moment
 		# also need to toss the second of:
 		# [(1, 'subicio'), (1, 'subicioque')

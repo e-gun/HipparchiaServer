@@ -19,7 +19,7 @@ from server.dbsupport.lexicaldbfunctions import bulkfindwordcounts, lookformorph
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs, morphologychartjs
 from server.formatting.lexicaformatting import getobservedwordprevalencedata
-from server.formatting.morphologytableformatting import filloutgreekverbtabletemplate, greekverbtabletemplate
+from server.formatting.morphologytableformatting import filloutverbtabletemplate, verbtabletemplate
 from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation, depunct, \
 	removegravity, stripaccents, tidyupterm
 from server.formatting.wordformatting import setdictionarylanguage
@@ -439,7 +439,7 @@ def knownforms(language, lexiconid, headword):
 	moods = sorted(list(moods))
 	moods = [m[1:] for m in moods]
 
-	fd = bfo.generateformdictionary()
+	fd = bfo.generateverbformdictionary()
 
 	if session['morphdialects'] == 'no':
 		bfo.nodialects()
@@ -461,8 +461,8 @@ def knownforms(language, lexiconid, headword):
 		for v in bfo.knownvoices:
 			for m in moods:
 				if bfo.tablewillhavecontents(d, v, m):
-					t = greekverbtabletemplate(m, v, dialect=d, duals=bfo.icontainduals())
-					returnarray.append(filloutgreekverbtabletemplate(fd, keyedwco, t))
+					t = verbtabletemplate(m, v, dialect=d, duals=bfo.icontainduals(), lang=bfo.language)
+					returnarray.append(filloutverbtabletemplate(fd, keyedwco, t))
 
 	returndict = dict()
 	returndict['newhtml'] = '\n'.join(returnarray)
