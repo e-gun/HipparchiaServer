@@ -53,6 +53,13 @@ key features:
 			click to browse to passages cited in the lexical entries ('often' works)
 			click to follow a 'cf.'
 			flip forward/backwards through neighboring entries
+		morphology tables
+		    see all extant forms arrayed by dialect, mood, voice, etc.
+		    use statistics present next to each form
+		        e.g., 2nd sg attic middle future indicatives are...
+		        ἀπολέϲηι (4) / ἀπολεῖ (181) / ἀπολέει (2) / ἀπολέϲει (181) / ἀπολέϲῃ (244) / ἀπολῇ (21)
+		    click to execute a follow-up search on any item
+		    toggles set the amount of detail to display
 		text maker
 			build a text of a whole work or subsection of a work
 			for example see Xenophon, Hellenica as a whole or just book 3 or just book 3, chapter 4
@@ -99,7 +106,6 @@ key features:
 	    can find Coptic words and characters: 'ⲫⲓⲗⲟⲑⲉⲟⲥ', 'ϩανϭοϊ̈', etc.
 	    forward-compatible unicode: attempt to properly code characters which are not yet available in most fonts
 	    known unknowns: unhandled characters preserve their betacode messages in the metadata for future fixes
-
 
 ```
 
@@ -159,8 +165,12 @@ minimum software requirements:
         js-cookie
         a fully stocked unicode font [Arial, DejaVu, Noto, Roboto, ...]
 
+    HipparchiaThirdPartySoftware can provide jquery, etc.
+    HipparchiaExtraFonts can provice Noto, etc.
+    
     javascript must be enabled in the browser
     the browser must accept cookies if you wish to save searches
+    
 
 ```
 
@@ -253,3 +263,6 @@ What you will see when you point a browser at a HipparchiaServer:
 
 1. adjust vector settings on the fly
 ![neighborhood_corpus](screenshots/23_vector_ui.png)
+
+1. explore morphology
+![morphology table](screenshots/24_morphology_tables.png)
