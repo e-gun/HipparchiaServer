@@ -57,6 +57,14 @@ def probeforsessionvariables():
 		session['latincorpus'] = corpusisonandavailable('latincorpus')
 		session['linesofcontext'] = int(hipparchia.config['DEFAULTLINESOFCONTEXT'])
 		session['maxresults'] = str(int(hipparchia.config['DEFAULTMAXRESULTS']))
+		session['morphtables'] = 'yes'
+		session['morphdialects'] = 'yes'
+		session['morphduals'] = 'yes'
+		session['morphemptyrows'] = 'yes'
+		session['morphfinite'] = 'yes'
+		session['morphimper'] = 'yes'
+		session['morphinfin'] = 'yes'
+		session['morphpcpls'] = 'yes'
 		session['nearestneighborsquery'] = 'no'
 		session['nearornot'] = 'T'
 		session['onehit'] = hipparchia.config['DEFAULTONEHIT']

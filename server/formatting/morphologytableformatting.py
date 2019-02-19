@@ -8,6 +8,8 @@
 
 import re
 
+from flask import session
+
 
 def findmygreektenses(mood: str, voice: str) -> dict:
 	"""
@@ -73,6 +75,9 @@ def greekverbtabletemplate(mood: str, voice: str, dialect='attic', duals=True) -
 
 	:return:
 	"""
+
+	if session['morphduals'] == 'no':
+		duals = False
 
 	mytenses = findmygreektenses(mood, voice)
 
@@ -174,7 +179,8 @@ def greekverbtabletemplate(mood: str, voice: str, dialect='attic', duals=True) -
 						allcellsinrow.append(morphcell.format(mo=mo))
 					thisrow = '\n\t\t'.join(allcellsinrow)
 					allrows.append(morphrowtemplate.format(allcells=thisrow))
-				allrows.append(blankrow)
+				if session['morphemptyrows'] == 'yes':
+					allrows.append(blankrow)
 	elif mood == 'inf':
 		allcellsinrow = list()
 		allcellsinrow.append(morphlabelcell.format(ml='infinitive'))
@@ -280,8 +286,30 @@ def filloutgreekverbtabletemplate(lookupdict: dict, wordcountdict: dict, templat
 
 		template = re.sub(c, substitute, template)
 
+	if session['morphemptyrows'] == 'no':
+		template = purgeemptyrows(template)
+
 	return template
 
+
+def purgeemptyrows(templatetoclean: str) -> str:
+	"""
+
+	kill off '---' if it appears over and over again in a row
+
+	:param templatetoclean:
+	:return:
+	"""
+
+	badpattern = '<tr class="morphrow">\n\t\t<td class="morphlabelcell">.*?</td>{rows}\n\t</tr>'
+	rowshape = '\n\t\t<td class="morphcell">---</td>'
+
+	for i in range(1, 8):
+		rows = ''.join([rowshape for _ in range(i)])
+		search = badpattern.format(rows=rows)
+		templatetoclean = re.sub(search, '', templatetoclean)
+
+	return templatetoclean
 
 # t = greekverbtabletemplate('subj', 'pass')
 # print(t)

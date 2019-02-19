@@ -424,7 +424,25 @@ def knownforms(language, lexiconid, headword):
 	</div>
 	"""
 
+	moods = {'0ind', '1subj', '2opt', '3imperat', '4part', '5inf'}
+	if session['morphinfin'] == 'no':
+		moods.remove('5inf')
+	if session['morphpcpls'] == 'no':
+		moods.remove('4part')
+	if session['morphimper'] == 'no':
+		moods.remove('3imperat')
+	if session['morphfinite'] == 'no':
+		moods.remove('0ind')
+		moods.remove('1subj')
+		moods.remove('2opt')
+
+	moods = sorted(list(moods))
+	moods = [m[1:] for m in moods]
+
 	fd = bfo.generateformdictionary()
+
+	if session['morphdialects'] == 'no':
+		bfo.nodialects()
 
 	wordcounts = True
 	keyedwco = dict()
@@ -441,8 +459,6 @@ def knownforms(language, lexiconid, headword):
 
 	for d in bfo.knowndialects:
 		for v in bfo.knownvoices:
-			# moods = ['ind', 'subj', 'opt', 'imperat', 'inf', 'part']
-			moods = ['ind', 'subj', 'opt', 'imperat', 'part', 'inf']
 			for m in moods:
 				if bfo.tablewillhavecontents(d, v, m):
 					t = greekverbtabletemplate(m, v, dialect=d, duals=bfo.icontainduals())

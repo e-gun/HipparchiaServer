@@ -39,6 +39,14 @@ function loadoptions() {
             'indexskipsknownwords': $('#indexskipsknownwords'),
             'inscriptioncorpus': $('#inscriptioncorpus'),
             'latincorpus': $('#latincorpus'),
+            'morphdialects': $('#morphdialects'),
+            'morphduals': $('#morphduals'),
+            'morphemptyrows': $('#morphemptyrows'),
+            'morphimper': $('#morphimper'),
+            'morphinfin': $('#morphinfin'),
+            'morphfinite': $('#morphfinite'),
+            'morphpcpls': $('#morphpcpls'),
+            'morphtables': $('#morphtables'),
             'nearestneighborsquery': $('#nearestneighborsquery'),
             'papyruscorpus': $('#papyruscorpus'),
             'principleparts': $('#principleparts'),
@@ -123,6 +131,8 @@ function loadoptions() {
 
         $('#fontchoice').val(data.fontchoice);
         $('#fontchoice').selectmenu('refresh');
+
+        if(data['principleparts'] === 'yes') { $('#mophologytables').show(); } else { $('#mophologytables').hide(); }
 
         if (data.cosdistbysentence === 'yes' || data.cosdistbylineorword === 'yes' || data.semanticvectorquery === 'yes' ||
             data.nearestneighborsquery === 'yes' || data.tensorflowgraph === 'yes' || data.sentencesimilarity === 'yes' ||
@@ -537,12 +547,61 @@ $('#simpletextoutput').change(function() {
 
 $('#principleparts').change(function() {
     if(this.checked) { setoptions('principleparts', 'yes'); } else { setoptions('principleparts', 'no'); }
+    if(this.checked) { $('#mophologytables').show(); } else { $('#mophologytables').hide(); }
     refreshselections();
     loadoptions();
     });
 
 $('#showwordcounts').change(function() {
     if(this.checked) { setoptions('showwordcounts', 'yes'); } else { setoptions('showwordcounts', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#morphdialects').change(function() {
+    if(this.checked) { setoptions('morphdialects', 'yes'); } else { setoptions('morphdialects', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#morphduals').change(function() {
+    if(this.checked) { setoptions('morphduals', 'yes'); } else { setoptions('morphduals', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#morphemptyrows').change(function() {
+    if(this.checked) { setoptions('morphemptyrows', 'yes'); } else { setoptions('morphemptyrows', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#morphimper').change(function() {
+    if(this.checked) { setoptions('morphimper', 'yes'); } else { setoptions('morphimper', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#morphinfin').change(function() {
+    if(this.checked) { setoptions('morphinfin', 'yes'); } else { setoptions('morphinfin', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#morphfinite').change(function() {
+    if(this.checked) { setoptions('morphfinite', 'yes'); } else { setoptions('morphfinite', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#morphpcpls').change(function() {
+    if(this.checked) { setoptions('morphpcpls', 'yes'); } else { setoptions('morphpcpls', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#morphtables').change(function() {
+    if(this.checked) { setoptions('morphtables', 'yes'); } else { setoptions('morphtables', 'no'); }
     refreshselections();
     loadoptions();
     });

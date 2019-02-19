@@ -112,6 +112,12 @@ class BaseFormMorphology(object):
 		self.knownvoices = self._getknownvoices()
 		self.knowndialects = self._getknowndialects()
 
+	def nodialects(self):
+		if self.language == 'greek':
+			self.knowndialects = ['attic']
+		elif self.language == 'latin':
+			self.knowndialects = [' ']
+
 	def mostlyconjugatedforms(self):
 		# 'annus' has 'anno' in it: a single verbal lookalike
 		vv = [v for v in self.analyses if isinstance(v.getanalysis(), ConjugatedFormAnalysis)]
@@ -132,11 +138,6 @@ class BaseFormMorphology(object):
 		           dialect in w.analysis.dialects and
 		           w.analysis.voice == voice and
 		           w.analysis.mood == mood]
-
-		# print('present', dialect, voice, mood, present)
-		# if mood == 'inf':
-		# 	x = ['{a}'.format(a=w.analysis.word) for w in present]
-		# 	print('\n\t'.join(x))
 
 		if len(present) > 0:
 			return True
@@ -168,6 +169,10 @@ class BaseFormMorphology(object):
 		return pos
 
 	def _getknowndialects(self) -> list:
+		if self.language == 'latin':
+			alldialects = [' ']
+			return alldialects
+
 		alldialects = set()
 		parsing = [x.analysis for x in self.analyses if x.analysis]
 		for p in parsing:
