@@ -204,37 +204,24 @@ def dictionaryentryjs() -> str:
 
 	template = """
 	<script>
-	$('dictionaryentry').click( function(e) {
-		e.preventDefault();
-		var windowWidth = $(window).width();
-		var windowHeight = $(window).height();
-		let ldt = $('#lexicadialogtext');
-		let jshld = $('#lexicaljsscriptholder');
-		
-		ldt.dialog({
-			closeOnEscape: true,
-			autoOpen: false,
-			minWidth: windowWidth*.33,
-			maxHeight: windowHeight*.9,
-			// position: { my: "left top", at: "left top", of: window },
-			title: this.id,
-			draggable: true,
-			icons: { primary: 'ui-icon-close' },
-			click: function() { $(this).dialog('close'); }
-			});
-		
-		ldt.dialog('open');
-		ldt.html('[searching...]');
-		
-		$.getJSON('/dictsearch/^'+this.id+'$', function (definitionreturned) {
-			ldt.html(definitionreturned['newhtml']);
-			jshld.html(definitionreturned['newjs']);		
-			});
+	
+	$('dictionaryidsearch').click( function(){
+			$('#imagearea').empty();
+
+			let ldt = $('#lexicadialogtext');
+			let jshld = $('#lexicaljsscriptholder');
+	
+			let entryid = this.getAttribute("entryid");
+			let language = this.getAttribute("language");
+
+			let url = '/dictionaryidsearch/' + language + '/' + entryid;
 			
-		return false;
-		
+			$.getJSON(url, function (definitionreturned) { 
+				ldt.html(definitionreturned['newhtml']);
+				jshld.html(definitionreturned['newjs']);	
+			});
 		});
-		
+	
 	$('formsummary').click( function(e) {
 		e.preventDefault();
 		var windowWidth = $(window).width();

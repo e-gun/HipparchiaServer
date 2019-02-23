@@ -256,18 +256,23 @@ class lexicalOutputObject(object):
 		<tr>
 			<td class="alignleft">
 				<span class="label">Previous: </span>
-				<dictionaryentry id="{p}">{p}</dictionaryentry>
+				<dictionaryidsearch entryid="{pid}" language="{lg}">{p}</dictionaryidsearch>
 			</td>
 			<td>&nbsp;</td>
 			<td class="alignright">
 				<span class="label">Next: </span>
-				<dictionaryentry id="{n}">{n}</dictionaryentry>
+				<dictionaryidsearch entryid="{nid}" language="{lg}">{n}</dictionaryidsearch>
 			</td>
 		<tr>
 		</table>
 		"""
 
 		w = self.thiswordobject
+		if w.isgreek():
+			language = 'greek'
+		else:
+			language = 'latin'
+
 		outputlist = list()
 		outputlist.append(headingstr.format(ent=w.entry, cv=countervalue))
 
@@ -285,7 +290,7 @@ class lexicalOutputObject(object):
 		outputlist.append(self.entrysummary)
 		outputlist.append(self.fullenty)
 
-		outputlist.append(navtemplate.format(p=w.preventry, n=w.nextentry))
+		outputlist.append(navtemplate.format(pid=w.preventryid, p=w.preventry, nid=w.nextentryid, n=w.nextentry, lg=language))
 
 		fullentry = '\n'.join(outputlist)
 		fullentry = divtemplate.format(wd=self.thisheadword, entry=fullentry)
