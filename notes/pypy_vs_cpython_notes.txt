@@ -14,6 +14,7 @@ once you make those adjustments (a vectorless) HipparchiaServer v1.1 will launch
 
 but the results will show you that the DB is the overwhelming bottleneck; meanwhile pypy6 is not as fast at lock/unlock as python37
 
+[Still true with PyPy 7.0.0-alpha0 vs python 3.7.2]
 
 ====
 

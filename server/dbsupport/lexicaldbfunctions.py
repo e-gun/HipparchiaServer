@@ -17,7 +17,7 @@ from server.formatting.abbreviations import unpackcommonabbreviations
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject
-from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbLatinWord
+from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbLatinWord, dbDictionaryEntry
 from server.hipparchiaobjects.morphologyobjects import dbLemmaObject
 from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
@@ -69,6 +69,55 @@ def searchdbforlexicalentry(seeking, usedict, limit=None) -> List:
 	dbconnection.connectioncleanup()
 
 	return wordobjects
+
+
+def findentrybyid(usedict: str, entryid: str) -> dbDictionaryEntry:
+	"""
+
+	find by id number
+
+	hipparchiaDB=# select * from greek_dictionary limit 0;
+	 entry_name | metrical_entry | unaccented_entry | id_number | pos | translations | entry_body
+	------------+----------------+------------------+-----------+-----+--------------+------------
+	(0 rows)
+
+
+	hipparchiaDB=# select * from latin_dictionary limit 0;
+	 entry_name | metrical_entry | id_number | entry_key | pos | translations | entry_body
+	------------+----------------+-----------+-----------+-----+--------------+------------
+	(0 rows)
+
+
+	:param usedict:
+	:param entryid:
+	:return:
+	"""
+	dbconnection = ConnectionObject()
+	dbconnection.setautocommit()
+	dbcursor = dbconnection.cursor()
+
+	assert usedict in ['greek', 'latin'], 'searchdbforlexicalentry() needs usedict to be "greek" or "latin"'
+
+	if usedict == 'latin':
+		extracolumn = 'entry_key'
+	else:
+		extracolumn = 'unaccented_entry'
+
+	qtemplate = """SELECT entry_name, metrical_entry, id_number, pos, translations, 
+					entry_body, {ec}
+					FROM {d}_dictionary WHERE id_number = %s"""
+
+	query = qtemplate.format(ec=extracolumn, d=usedict)
+	data = (entryid,)
+
+	dbcursor.execute(query, data)
+	match = dbcursor.fetchone()
+
+	wordobject = convertdictionaryfindintowordobject(match, '{d}_dictionary'.format(d=usedict), dbcursor)
+
+	dbconnection.connectioncleanup()
+
+	return wordobject
 
 
 def querytotalwordcounts(word: str, dbcursor=None) -> dbHeadwordObject:

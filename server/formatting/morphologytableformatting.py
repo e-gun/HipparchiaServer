@@ -125,6 +125,7 @@ def verbtabletemplate(mood: str, voice: str, dialect='attic', duals=True, lang='
 	if session['morphduals'] == 'no':
 		duals = False
 
+	mytenses = dict()
 	if lang == 'greek':
 		mytenses = findmygreektenses(mood, voice)
 

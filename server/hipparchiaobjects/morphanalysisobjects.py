@@ -12,62 +12,6 @@ from typing import List
 from server.dbsupport.lexicaldbfunctions import grablemmataobjectfor, lookformorphologymatches
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 
-"""
-
-IN PROGRESS
-
-select * from latin_lemmata where dictonary_entry='laudo';
-
-then, from that set you want to grab:
-	first-person singular present active indicative
-	present active infinitive
-	first-person singular perfect active indicative
-	perfect passive participle
-
-
-select * from latin_morphology where latin_morphology.observed_form='laudo';
-	<analysis>pres ind act 1st sg</analysis>
-
-select * from latin_morphology where latin_morphology.observed_form='laudare';
-	<analysis>pres inf act</analysis>
-
-select * from latin_morphology where latin_morphology.observed_form='laudaui';
-	<analysis>perf ind act 1st sg</analysis>
-
-select * from latin_morphology where latin_morphology.observed_form='laudatus';
-	<analysis>perf part pass masc nom sg</analysis>
-
-
-select * from greek_lemmata where greek_lemmata.dictionary_entry='παιδεύω';
-
-then, from that set you want to grab:
-	[a] first-person singular present active indicative
-	[b] first-person singular future active indicative
-	[c] first-person singular aorist active indicative
-	[d] first-person singular perfect active indicative
-	[e] first-person singular perfect middle/passive
-	[f] first-person singular aorist passive indicative
-
-if you iterate through the set, you are looking for:
-	[a] [select * from greek_morphology where greek_morphology.observed_form='παιδεύω';]
-		<analysis>pres ind act 1st sg (epic)</analysis>
-	[b] [select * from greek_morphology where greek_morphology.observed_form='παιδεύϲω';]
-		<analysis>fut ind act 1st sg</analysis>
-	[c] [select * from greek_morphology where greek_morphology.observed_form='ἐπαίδευϲα';]
-		<analysis>aor ind act 1st sg</analysis>
-	[d] [select * from greek_morphology where greek_morphology.observed_form='πεπαίδευκα';]
-		<analysis>perf ind act 1st sg</analysis>
-	[e] [select * from greek_morphology where greek_morphology.observed_form='πεπαίδευμαι';]
-		<analysis>perf ind mp 1st sg</analysis>
-	[f] [select * from greek_morphology where greek_morphology.observed_form='ἐπαιδεύθην';]
-		<analysis>aor ind pass 1st sg</analysis>
-
-	[if a forms never occurs, what do we do?][how to look for future indicatives of a form...]
-	[select * from greek_morphology where greek_morphology.xrefs='83362071' and possible_dictionary_forms ~ '<analysis>fut ind act';]
-	[but if you just grabbed all of the xrefs='83362071' you could sift them quickly
-
-"""
-
 
 class BaseFormMorphology(object):
 	"""
@@ -91,11 +35,12 @@ class BaseFormMorphology(object):
 		(1 row)
 
 	"""
-	def __init__(self, headword: str, xref: str, language: str):
+	def __init__(self, headword: str, xref: str, language: str, lexicalid: str):
 		assert language in ['greek', 'latin'], 'BaseFormMorphology() only knows words that are "greek_morphology" or "latin_morphology"'
 		self.headword = headword
 		self.language = language
 		self.xref = xref
+		self.lexicalid = lexicalid
 		# next is unsafe because you will "KeyError: 'anno¹'"
 		# self.lemmata = lemmatadict[headword]
 		self.lemmata = grablemmataobjectfor(headword, '{lg}_lemmata'.format(lg=self.language), dbcursor=None)
@@ -398,6 +343,18 @@ class MorphAnalysis(object):
 		self.analysisstring = analysisstring
 		self._parseanalysisstring()
 		self.partofspeech = self._findpartofspeech()
+
+	def isdeclined(self):
+		if isinstance(self.analysis, DeclinedFormAnalysis):
+			return True
+		else:
+			return False
+
+	def isconjugated(self):
+		if isinstance(self.analysis, ConjugatedFormAnalysis):
+			return True
+		else:
+			return False
 
 	def getanalysis(self):
 		if not self.analysis:

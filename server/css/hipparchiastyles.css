@@ -1587,3 +1587,12 @@ lemmatizable:hover{
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
+
+dictionaryidsearch {
+	color: var(--red);
+	}
+
+dictionaryidsearch:hover{
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}

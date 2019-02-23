@@ -6,16 +6,15 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import itertools
 import json
 import re
-
-import itertools
 
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.lexicaldbfunctions import bulkfindwordcounts, lookformorphologymatches, probedictionary, \
-	querytotalwordcounts, searchdbforlexicalentry
+from server.dbsupport.lexicaldbfunctions import bulkfindwordcounts, findentrybyid, lookformorphologymatches, \
+	probedictionary, querytotalwordcounts, searchdbforlexicalentry
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs, morphologychartjs
 from server.formatting.lexicaformatting import getobservedwordprevalencedata
@@ -383,8 +382,45 @@ def reverselexiconsearch(searchterm):
 	return jsondict
 
 
-@hipparchia.route('/morphologychart/<language>/<lexiconid>/<headword>')
-def knownforms(language, lexiconid, headword):
+@hipparchia.route('/dictionaryidsearch/<language>/<entryid>')
+def dictionaryidsearch(language, entryid):
+	"""
+
+	fed by /morphologychart/
+
+	:param language:
+	:param entryid:
+	:return:
+	"""
+
+	knownlanguages = ['greek', 'latin']
+	if language not in knownlanguages:
+		language = 'greek'
+
+	try:
+		entryid = str(int(entryid))
+	except ValueError:
+		entryid = None
+
+	wordobject = findentrybyid(language, entryid)
+	oo = lexicalOutputObject(wordobject)
+	entry = oo.generatelexicaloutput()
+
+	if session['zaplunates'] == 'yes':
+		entry = attemptsigmadifferentiation(entry)
+		entry = abbreviatedsigmarestoration(entry)
+
+	returndict = dict()
+	returndict['newhtml'] = entry
+	returndict['newjs'] = '\n'.join([dictionaryentryjs(), insertlexicalbrowserjs()])
+
+	jsondict = json.dumps(returndict)
+
+	return jsondict
+
+
+@hipparchia.route('/morphologychart/<language>/<lexicalid>/<xrefid>/<headword>')
+def knownforms(lexicalid, language, xrefid, headword):
 	"""
 
 	display all known forms of...
@@ -395,7 +431,7 @@ def knownforms(language, lexiconid, headword):
 
 	that is how/why you know the paramaters already
 
-	:param lexiconid:
+	:param xrefid:
 	:return:
 	"""
 
@@ -406,21 +442,34 @@ def knownforms(language, lexiconid, headword):
 		language = 'greek'
 
 	try:
-		lexiconid = str(int(lexiconid))
+		lexicalid = str(int(lexicalid))
 	except ValueError:
-		lexiconid = 'invalid_user_input'
+		lexicalid = 'invalid_user_input'
+
+	try:
+		xrefid = str(int(xrefid))
+	except ValueError:
+		xrefid = 'invalid_user_input'
 
 	headword = depunct(headword)
 
 	try:
-		bfo = BaseFormMorphology(headword, lexiconid, language)
+		bfo = BaseFormMorphology(headword, xrefid, language, lexicalid)
 	except:
 		print('could not initialize BaseFormMorphology() object')
 		return 'could not initialize BaseFormMorphology() object'
 
+	# if this is active a click on the word will do a lemmatized lookup of it
+	# topofoutput = """
+	# <div class="center">
+	# 	<span class="verylarge">All known forms of <lemmatizable headform="{w}">{w}</lemmatizable></span>
+	# </div>
+	# """
+
+	# if this is active a clock on the word will return you to the dictionary entry for it
 	topofoutput = """
 	<div class="center">
-		<span class="verylarge">All known forms of <lemmatizable headform="{f}">{f}</lemmatizable></span>
+		<span class="verylarge">All known forms of <dictionaryidsearch entryid="{eid}" language="{lg}">{w}</dictionaryidsearch></span>
 	</div>
 	"""
 
@@ -455,7 +504,7 @@ def knownforms(language, lexiconid, headword):
 		keyedwco = {w.entryname: w.t for w in wco if w}
 
 	returnarray = list()
-	returnarray.append(topofoutput.format(f=headword))
+	returnarray.append(topofoutput.format(w=bfo.headword, eid=bfo.lexicalid, lg=bfo.language))
 
 	for d in bfo.knowndialects:
 		for v in bfo.knownvoices:

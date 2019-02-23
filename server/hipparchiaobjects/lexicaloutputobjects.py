@@ -164,7 +164,7 @@ class lexicalOutputObject(object):
 				<tr>
 					<td></td>
 					<td class="morphcell">
-						<formsummary parserxref="{px}" headword="{w}" lang="{lg}">(total forms in use: {f})</formsummary>
+						<formsummary parserxref="{px}" lexicalid="{lid}" headword="{w}" lang="{lg}">(total forms in use: {f})</formsummary>
 					</td>
 				</tr>
 			</tbody>
@@ -186,11 +186,11 @@ class lexicalOutputObject(object):
 			# declaro: w.pos ['']
 			if (fingerprints & set(w.pos)) or w.pos == ['']:
 				xref = findparserxref(w)
-				morphanalysis = BaseFormMorphology(w.entry, xref, self.usedictionary)
+				morphanalysis = BaseFormMorphology(w.entry, xref, self.usedictionary, self.id)
 				ppts = morphanalysis.getprincipleparts()
 				if ppts and morphanalysis.mostlyconjugatedforms():
 					trs = [morphrowtemplate.format(ct=p[0], ppt=p[1]) for p in ppts]
-					pppts = morphabletemplate.format(f=morphanalysis.numberofknownforms, trs='\n'.join(trs), px=xref, w=w.entry, lg=self.usedictionary)
+					pppts = morphabletemplate.format(f=morphanalysis.numberofknownforms, trs='\n'.join(trs), px=xref, w=w.entry, lid=self.id, lg=self.usedictionary)
 		return pppts
 
 	def _buildentrysummary(self) -> str:
