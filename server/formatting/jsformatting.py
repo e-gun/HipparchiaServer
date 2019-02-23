@@ -205,6 +205,39 @@ def dictionaryentryjs() -> str:
 	template = """
 	<script>
 	
+	// clicks for xrefs inside the entry
+	
+	$('dictionaryentry').click( function(e) {
+		e.preventDefault();
+		var windowWidth = $(window).width();
+		var windowHeight = $(window).height();
+		let ldt = $('#lexicadialogtext');
+		let jshld = $('#lexicaljsscriptholder');
+		
+		ldt.dialog({
+			closeOnEscape: true,
+			autoOpen: false,
+			minWidth: windowWidth*.33,
+			maxHeight: windowHeight*.9,
+			// position: { my: "left top", at: "left top", of: window },
+			title: this.id,
+			draggable: true,
+			icons: { primary: 'ui-icon-close' },
+			click: function() { $(this).dialog('close'); }
+			});
+		
+		ldt.dialog('open');
+		ldt.html('[searching...]');
+		
+		$.getJSON('/dictsearch/^'+this.id+'$', function (definitionreturned) {
+			ldt.html(definitionreturned['newhtml']);
+			jshld.html(definitionreturned['newjs']);		
+			});
+		return false;
+		
+		});
+	
+	// clicks for next/previous
 	$('dictionaryidsearch').click( function(){
 			$('#imagearea').empty();
 
