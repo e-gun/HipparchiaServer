@@ -113,7 +113,10 @@ def findentrybyid(usedict: str, entryid: str) -> dbDictionaryEntry:
 	dbcursor.execute(query, data)
 	match = dbcursor.fetchone()
 
-	wordobject = convertdictionaryfindintowordobject(match, '{d}_dictionary'.format(d=usedict), dbcursor)
+	if match:
+		wordobject = convertdictionaryfindintowordobject(match, '{d}_dictionary'.format(d=usedict), dbcursor)
+	else:
+		wordobject = None
 
 	dbconnection.connectioncleanup()
 

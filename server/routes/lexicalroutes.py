@@ -403,12 +403,16 @@ def dictionaryidsearch(language, entryid):
 		entryid = None
 
 	wordobject = findentrybyid(language, entryid)
-	oo = lexicalOutputObject(wordobject)
-	entry = oo.generatelexicaloutput()
 
-	if session['zaplunates'] == 'yes':
-		entry = attemptsigmadifferentiation(entry)
-		entry = abbreviatedsigmarestoration(entry)
+	if wordobject:
+		oo = lexicalOutputObject(wordobject)
+		entry = oo.generatelexicaloutput()
+
+		if session['zaplunates'] == 'yes':
+			entry = attemptsigmadifferentiation(entry)
+			entry = abbreviatedsigmarestoration(entry)
+	else:
+		entry = '[nothing found in {lg} lexicon at ID value {x}]'.format(lg=language, x=entryid)
 
 	returndict = dict()
 	returndict['newhtml'] = entry
