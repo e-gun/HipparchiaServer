@@ -103,7 +103,7 @@ def executesearch(searchid, so=None):
 
 		isgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
 
-		so.vectorquerytype = so.infervectorquerytype()
+		# so.vectorquerytype = so.infervectorquerytype()
 
 		# note that cosdistbylineorword requires a hitdict and so has to come later
 		vectorfunctions = {'cosdistbysentence': findabsolutevectorsbysentence,
@@ -343,6 +343,49 @@ def headwordsearch(searchid, headform):
 	proximatelemma = str()
 
 	so = SearchObject(pollid, seeking, proximate, lemma, proximatelemma, session)
+
+	jsonoutput = executesearch(pollid, so)
+
+	return jsonoutput
+
+
+@hipparchia.route('/vectors/<vectortype>/<searchid>/<headform>')
+def vectorsearch(vectortype, searchid, headform):
+	"""
+
+	you get sent here if you have something clicked in the vector boxes: see 'documentready.js'
+
+	this is a restricted version of executesearch(): a dictionary headword
+
+	no particular virtue in breaking this out yet; but separation of vector routes is likely
+	useful in the long run
+
+	:param searchid:
+	:param headform:
+	:return:
+	"""
+
+	probeforsessionvariables()
+
+	vectorboxes = ['cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery',
+	               'tensorflowgraph', 'sentencesimilarity', 'topicmodel']
+
+	inputlemma = cleaninitialquery(headform)
+
+	try:
+		lemma = lemmatadict[inputlemma]
+	except KeyError:
+		lemma = None
+
+	pollid = validatepollid(searchid)
+	seeking = str()
+	proximate = str()
+	proximatelemma = str()
+
+	so = SearchObject(pollid, seeking, proximate, lemma, proximatelemma, session)
+
+	if vectortype in vectorboxes:
+		so.vectorquerytype = vectortype
 
 	jsonoutput = executesearch(pollid, so)
 

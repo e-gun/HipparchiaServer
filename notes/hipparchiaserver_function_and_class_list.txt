@@ -1,20 +1,21 @@
 hipparchia_venv/ $ cloc --not-match-f='^j' HipparchiaServer/
-     162 text files.
-     159 unique files.
+     163 text files.
+     160 unique files.
+
       20 files ignored.
 
-github.com/AlDanial/cloc v 1.80  T=0.48 s (313.7 files/s, 75478.0 lines/s)
+github.com/AlDanial/cloc v 1.80  T=0.59 s (253.2 files/s, 61588.1 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                         108           5608           8026          13693
-JavaScript                       6            408            336           2428
-CSS                              3            551            243           2253
-HTML                            27            175             24           1798
-Markdown                         1             56              0            199
-XML                              4              0              0             56
+Python                         109           5798           8173          14210
+CSS                              3            568            243           2316
+HTML                            27            177             26           1810
+JavaScript                       5            261            161           1414
+XML                              5              0              0           1062
+Markdown                         1             58              0            210
 -------------------------------------------------------------------------------
-SUM:                           149           6798           8629          20427
+SUM:                           150           6862           8603          21022
 -------------------------------------------------------------------------------
 
 server/ $  grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
@@ -98,10 +99,12 @@ dbsupport/dblinefunctions.py:def grablistoflines(table: str, uidlist: list) -> l
 dbsupport/dblinefunctions.py:def grabbundlesoflines(worksandboundaries: dict, cursor) -> list:
 dbsupport/dblinefunctions.py:def bulkenvironsfetcher(table: str, searchresultlist: list, context: int) -> list:
 dbsupport/lexicaldbfunctions.py:def searchdbforlexicalentry(seeking, usedict, limit=None) -> List:
+dbsupport/lexicaldbfunctions.py:def findentrybyid(usedict: str, entryid: str) -> dbDictionaryEntry:
 dbsupport/lexicaldbfunctions.py:def querytotalwordcounts(word: str, dbcursor=None) -> dbHeadwordObject:
 dbsupport/lexicaldbfunctions.py:def probedictionary(usedictionary: str, usecolumn: str, seeking: str, syntax: str, dbcursor=None, trialnumber=0) -> List:
 dbsupport/lexicaldbfunctions.py:def convertdictionaryfindintowordobject(foundline: tuple, usedictionary: str, dbcursor):
 dbsupport/lexicaldbfunctions.py:def findcountsviawordcountstable(wordtocheck):
+dbsupport/lexicaldbfunctions.py:def bulkfindwordcounts(listofwords) -> List[dbWordCountObject]:
 dbsupport/lexicaldbfunctions.py:def grablemmataobjectfor(entryname, db, dbcursor=None):
 dbsupport/lexicaldbfunctions.py:def findparserxref(wordobject) -> str:
 dbsupport/lexicaldbfunctions.py:def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None, rewrite=None, furtherdeabbreviate=False) -> dbMorphologyObject:
@@ -114,6 +117,7 @@ dbsupport/miscdbfunctions.py:def returnfirstwork(authorid: str, cursor) -> str:
 dbsupport/miscdbfunctions.py:def makeanemptyauthor(universalid: str) -> dbAuthor:
 dbsupport/miscdbfunctions.py:def makeanemptywork(universalid: str) -> dbOpus:
 dbsupport/miscdbfunctions.py:def versionchecking(activedbs: list, expectedsqltemplateversion: str) -> str:
+dbsupport/miscdbfunctions.py:def getpostgresserverversion() -> str:
 dbsupport/miscdbfunctions.py:def probefordatabases() -> dict:
 dbsupport/miscdbfunctions.py:def icanpickleconnections():
 dbsupport/redisdbfunctions.py:def establishredisconnection() -> redis.client.Redis:
@@ -215,6 +219,7 @@ formatting/jsformatting.py:def insertlexicalbrowserjs() -> str:
 formatting/jsformatting.py:def generatevectorjs(path: str) -> str:
 formatting/jsformatting.py:def supplementalindexjs() -> str:
 formatting/jsformatting.py:def dictionaryentryjs() -> str:
+formatting/jsformatting.py:def morphologychartjs() -> str:
 formatting/lexicaformatting.py:def formatdictionarysummary(wordentryobject) -> str:
 formatting/lexicaformatting.py:def lexicaldbquickfixes(listofnames: list) -> Dict[str, str]:
 formatting/lexicaformatting.py:def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) -> str:
@@ -222,6 +227,11 @@ formatting/lexicaformatting.py:def getobservedwordprevalencedata(dictionaryword)
 formatting/lexicaformatting.py:def formatprevalencedata(wordcountobject):
 formatting/miscformatting.py:def timedecorator(function):
 formatting/miscformatting.py:def validatepollid(searchid, maxchars=36):
+formatting/morphologytableformatting.py:def findmygreektenses(mood: str, voice: str) -> dict:
+formatting/morphologytableformatting.py:def findmylatintenses(mood: str, voice: str) -> dict:
+formatting/morphologytableformatting.py:def verbtabletemplate(mood: str, voice: str, dialect='attic', duals=True, lang='greek') -> str:
+formatting/morphologytableformatting.py:def filloutverbtabletemplate(lookupdict: dict, wordcountdict: dict, template: str) -> str:
+formatting/morphologytableformatting.py:def purgeemptyrows(templatetoclean: str) -> str:
 formatting/searchformatting.py:def buildresultobjects(hitdict: dict, authordict: dict, workdict: dict, searchobject: SearchObject) -> ResultList:
 formatting/searchformatting.py:def flagsearchterms(searchresultobject: SearchResult, skg: str, prx: str, searchobject: SearchObject) -> LineList:
 formatting/searchformatting.py:def highlightsearchterm(lineobject: dbWorkLine, regexequivalent, spanname) -> str:
@@ -334,10 +344,14 @@ routes/inforoutes.py:def testroute():
 routes/lexicalroutes.py:def dictsearch(searchterm):
 routes/lexicalroutes.py:def findbyform(observedword):
 routes/lexicalroutes.py:def reverselexiconsearch(searchterm):
+routes/lexicalroutes.py:def dictionaryidsearch(language, entryid):
+routes/lexicalroutes.py:def knownforms(lexicalid, language, xrefid, headword):
 routes/resetroutes.py:def clearsession():
 routes/resetroutes.py:def resetsemanticvectors():
 routes/resetroutes.py:def resetvectorgraphs():
-routes/searchroute.py:def executesearch(searchid):
+routes/searchroute.py:def executesearch(searchid, so=None):
+routes/searchroute.py:def singlewordsearch(searchid, searchterm):
+routes/searchroute.py:def headwordsearch(searchid, headform):
 routes/selectionroutes.py:def selectionmade():
 routes/selectionroutes.py:def setsessionvariable(thevariable, thevalue):
 routes/selectionroutes.py:def clearselections(category, index=-1):

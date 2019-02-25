@@ -358,7 +358,7 @@ def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: 
 	output = SearchOutputObject(so)
 	output.image = imagename
 
-	findsjs = generatevectorjs('findneighbors')
+	findsjs = generatevectorjs('nearestneighborsquery')
 
 	lm = so.lemma.dictionaryentry
 	try:

@@ -67,14 +67,30 @@ def generatevectorjs(path: str) -> str:
 
 	this JS is mainly a copy of material from documentready.js
 
+	@hipparchia.route('/vectors/<vectortype>/<searchid>/<headform>')
+	def vectorsearch(vectortype, searchid, headform):
+
 	:param path:
 	:return:
 	"""
 
 	jstemplate = """
+	
+		function whichVectorChoice () {
+			const vectorboxes = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity', '#topicmodel'];
+			let xor = [];
+			for (let i = 0; i < vectorboxes.length; i++) {
+				let opt = $(vectorboxes[i]);
+				if (opt.prop('checked')) { xor.push(vectorboxes[i].slice(1)); }
+				}
+			return xor[0];
+		}
+
 		$('lemmaheadword').click( function(e) { 
 			var searchid = generateId(8);
-			var url = '/REGEXREPLACE/'+searchid+'?lem='+this.id;
+			flaskpath = '/vectors/';
+			let vchoice = whichVectorChoice();
+			url = '/vectors/' + vchoice + '/' + searchid + '/' + this.id;
 			$('#imagearea').empty();
 			$('#searchsummary').html(''); 
 			$('#displayresults').html('');
@@ -126,6 +142,7 @@ def generatevectorjs(path: str) -> str:
 		});
 	"""
 
+	# REGEXREPLACE not currently present...
 	js = re.sub('REGEXREPLACE', path, jstemplate)
 
 	return js
@@ -194,6 +211,12 @@ def dictionaryentryjs() -> str:
 
 	return js to insert
 
+	$('formsummary'): build a morphology chart
+
+	$('dictionaryidsearch'): click for next/previous
+
+	$('dictionaryentry'): click for xrefs inside the entry
+
 	ensure exact matches, otherwise ἔρδω will pull up ὑπερδώριοϲ too
 
 	and so:
@@ -204,8 +227,6 @@ def dictionaryentryjs() -> str:
 
 	template = """
 	<script>
-	
-	// clicks for xrefs inside the entry
 	
 	$('dictionaryentry').click( function(e) {
 		e.preventDefault();
@@ -236,8 +257,7 @@ def dictionaryentryjs() -> str:
 		return false;
 		
 		});
-	
-	// clicks for next/previous
+
 	$('dictionaryidsearch').click( function(){
 			$('#imagearea').empty();
 

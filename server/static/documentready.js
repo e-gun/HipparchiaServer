@@ -83,6 +83,26 @@ $(document).ready( function () {
       return Array.from(arr, dec2hex).join('');
     }
 
+    function areWeWearchingVectors () {
+        const vectorboxes = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity', '#topicmodel'];
+        let xor = [];
+        for (let i = 0; i < vectorboxes.length; i++) {
+            let opt = $(vectorboxes[i]);
+            if (opt.prop('checked')) { xor.push(1); }
+            }
+        return xor.length;
+    }
+
+    function whichVectorChoice () {
+        const vectorboxes = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity', '#topicmodel'];
+        let xor = [];
+        for (let i = 0; i < vectorboxes.length; i++) {
+            let opt = $(vectorboxes[i]);
+            if (opt.prop('checked')) { xor.push(vectorboxes[i].slice(1)); }
+            }
+        return xor[0];
+    }
+
     $('#executesearch').click( function(){
         $('#imagearea').empty();
         $('#searchsummary').html('');
@@ -109,8 +129,21 @@ $(document).ready( function () {
         let qstring = qstringarray.join('&');
 
         let searchid = generateId(8);
+        let flaskpath = '';
+        let url = '';
+
         // let searchid = uuidv4();
-        let url = '/executesearch/' + searchid + '?' + qstring;
+
+        if (areWeWearchingVectors() === 0) {
+            flaskpath = '/executesearch/';
+            url = flaskpath + searchid + '?' + qstring;
+        } else {
+            let lsv = $('#lemmatasearchform').val();
+            let vtype = whichVectorChoice();
+            if (lsv.length === 0) { lsv = '_'; }
+            flaskpath = '/vectors/';
+            url = flaskpath + vtype + '/' + searchid + '/' + lsv;
+        }
 
         $.getJSON(url, function (returnedresults) { loadsearchresultsintodisplayresults(returnedresults); });
 
@@ -271,4 +304,3 @@ $(document).ready( function () {
 
        $('#pollingdata').html(thehtml);
     }
-

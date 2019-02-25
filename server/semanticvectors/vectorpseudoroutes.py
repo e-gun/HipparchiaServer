@@ -261,7 +261,7 @@ def generateabsolutevectorsoutput(listsofwords: list, workssearched: list, searc
 	activepoll.statusis('Calculating metacosine distances')
 	imagename = graphbliteraldistancematches(focus, mostsimilar, so)
 
-	findsjs = generatevectorjs('findvectors')
+	findsjs = generatevectorjs('cosdistbysentence')
 
 	output = SearchOutputObject(so)
 
