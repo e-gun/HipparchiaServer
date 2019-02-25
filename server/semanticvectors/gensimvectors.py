@@ -6,59 +6,16 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-from flask import request, session
-
 from server import hipparchia
 from server.dbsupport.vectordbfunctions import checkforstoredvector
-from server.formatting.miscformatting import validatepollid
-from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
 from server.semanticvectors.gensimlsi import lsigenerateoutput
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildlemmatizesearchphrase
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
-from server.startup import authordict, lemmatadict, listmapper, poll, workdict
-
-
-@hipparchia.route('/findneighbors/<searchid>', methods=['GET'])
-def findnearestneighborvectors(searchid):
-	"""
-
-	meant to be called via a click from a result from a prior search
-
-	:param searchid:
-	:return:
-	"""
-
-	pollid = validatepollid(searchid)
-
-	so = buildsearchobject(pollid, request, session)
-	so.seeking = ''
-	so.proximate = ''
-	so.proximatelemma = ''
-
-	try:
-		so.lemma = lemmatadict[cleaninitialquery(request.args.get('lem', ''))]
-	except KeyError:
-		so.lemma = None
-
-	so.vectorquerytype = 'nearestneighborsquery'
-
-	poll[pollid] = ProgressPoll(pollid)
-	activepoll = poll[pollid]
-	activepoll.activate()
-	activepoll.statusis('Preparing to search')
-
-	so.poll = activepoll
-
-	output = executegensimsearch(so)
-
-	del poll[pollid]
-
-	return output
+from server.startup import authordict, listmapper, workdict
 
 
 def executegensimsearch(searchobject):

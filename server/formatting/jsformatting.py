@@ -62,13 +62,14 @@ def insertlexicalbrowserjs() -> str:
 	return newjs
 
 
-def generatevectorjs(path: str) -> str:
+def generatevectorjs() -> str:
 	"""
 
 	this JS is mainly a copy of material from documentready.js
 
-	@hipparchia.route('/vectors/<vectortype>/<searchid>/<headform>')
-	def vectorsearch(vectortype, searchid, headform):
+	the click target is going to be:
+		@hipparchia.route('/vectors/<vectortype>/<searchid>/<headform>')
+		def vectorsearch(vectortype, searchid, headform):
 
 	:param path:
 	:return:
@@ -142,10 +143,7 @@ def generatevectorjs(path: str) -> str:
 		});
 	"""
 
-	# REGEXREPLACE not currently present...
-	js = re.sub('REGEXREPLACE', path, jstemplate)
-
-	return js
+	return jstemplate
 
 
 def supplementalindexjs() -> str:

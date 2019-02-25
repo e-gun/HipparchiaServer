@@ -9,25 +9,19 @@
 import json
 import locale
 
-from flask import request, session
-
 from server import hipparchia
 from server.dbsupport.vectordbfunctions import fetchverctorenvirons
 from server.formatting.jsformatting import generatevectorjs
-from server.formatting.miscformatting import validatepollid
 from server.formatting.vectorformatting import formatnnmatches
 from server.hipparchiaobjects.searchobjects import SearchOutputObject
-from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.rudimentaryvectormath import buildrudimentaryvectorspace, caclulatecosinevalues
 from server.semanticvectors.vectorgraphing import graphbliteraldistancematches
 from server.semanticvectors.vectorhelpers import convertmophdicttodict, findwordvectorset
-from server.startup import authordict, lemmatadict, listmapper, poll, workdict
+from server.startup import authordict, lemmatadict, listmapper, workdict
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
-
 
 """
 	THE BASIC MATH
@@ -46,45 +40,6 @@ from server.textsandindices.textandindiceshelperfunctions import getrequiredmorp
 	0 = unrelated
 
 """
-
-
-@hipparchia.route('/findvectors/<searchid>', methods=['GET'])
-def findabsolutevectors(searchid):
-	"""
-
-	meant to be called via a click from a result from a prior search
-
-	:param searchid:
-	:return:
-	"""
-
-	pollid = validatepollid(searchid)
-
-	so = buildsearchobject(pollid, request, session)
-	so.seeking = ''
-	so.proximate = ''
-	so.proximatelemma = ''
-
-	try:
-		so.lemma = lemmatadict[cleaninitialquery(request.args.get('lem', ''))]
-	except KeyError:
-		so.lemma = None
-
-	poll[pollid] = ProgressPoll(pollid)
-	activepoll = poll[pollid]
-	activepoll.activate()
-	activepoll.statusis('Preparing to search')
-	so.poll = activepoll
-
-	# nb: basically forcing so.session['cosdistbysentence'] == 'yes'
-	# don't know how to enter executesearch() properly to handle the other option
-	# print('cosdistbysentence')
-
-	output = findabsolutevectorsbysentence(so)
-
-	del poll[pollid]
-
-	return output
 
 
 def findabsolutevectorsbysentence(searchobject):
@@ -261,7 +216,7 @@ def generateabsolutevectorsoutput(listsofwords: list, workssearched: list, searc
 	activepoll.statusis('Calculating metacosine distances')
 	imagename = graphbliteraldistancematches(focus, mostsimilar, so)
 
-	findsjs = generatevectorjs('cosdistbysentence')
+	findsjs = generatevectorjs()
 
 	output = SearchOutputObject(so)
 
