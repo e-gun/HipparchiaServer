@@ -31,10 +31,11 @@ if hipparchia.config['SEMANTICVECTORSENABLED'] == 'yes':
 	from server.semanticvectors.scikitlearntopics import sklearnselectedworks
 	from server.semanticvectors.vectorpseudoroutes import findabsolutevectorsbysentence, findabsolutevectorsfromhits
 else:
-	executegensimsearch = None
-	sklearnselectedworks = None
-	findabsolutevectorsbysentence = None
-	findabsolutevectorsfromhits = None
+	voff = lambda x: 'vectors have not been enabled in your configuration file'
+	executegensimsearch = voff
+	sklearnselectedworks = voff
+	findabsolutevectorsbysentence = voff
+	findabsolutevectorsfromhits = voff
 from server.startup import authordict, listmapper, poll, workdict, lemmatadict
 
 
