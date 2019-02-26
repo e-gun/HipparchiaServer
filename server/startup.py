@@ -36,9 +36,13 @@ if current_process().name == 'MainProcess':
 	
 	"""
 
+	project = 'HipparchiaServer'
+	year = '2016-19'
+	fullname = 'E. Gunderson'
+	mailingaddr = 'Department of Classics, 125 Queen’s Park, Toronto, ON  M5S 2C7 Canada'
+
 	if hipparchia.config['ENOUGHALREADYWITHTHECOPYRIGHTNOTICE'] != 'yes':
-		print(terminaltext.format(project='HipparchiaServer', year='2016-18', fullname='E. Gunderson',
-		                          mail='Department of Classics, 125 Queen’s Park, Toronto, ON  M5S 2C7 Canada'))
+		print(terminaltext.format(project=project, year=year, fullname=fullname, mail=mailingaddr))
 
 	available = probefordatabases()
 	warning = sum([available[x] for x in available])

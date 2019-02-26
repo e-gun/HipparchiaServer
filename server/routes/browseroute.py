@@ -59,8 +59,13 @@ def grabtextforbrowsing(method, author, work, location=None):
 		except KeyError:
 			print('grabtextforbrowsing() failed to remap {a} + {w}'.format(a=author, w=work))
 
-	if not wo:
-		wo = workdict[returnfirstwork(ao.universalid, dbcursor)]
+	if ao and not wo:
+		try:
+			wo = workdict[returnfirstwork(ao.universalid, dbcursor)]
+		except KeyError:
+			# you are in some serious trouble: time to abort
+			print('bad data fed to grabtextforbrowsing():', method, author, work, location)
+			ao = None
 
 	passage, resultmessage = findlinenumberfromcitation(method, location, wo, dbcursor)
 
@@ -70,7 +75,7 @@ def grabtextforbrowsing(method, author, work, location=None):
 		passageobject = BrowserOutputObject(ao, wo, passage)
 		viewing = '<p class="currentlyviewing">error in fetching the browser data.<br />I was sent a citation that returned nothing: {c}</p><br /><br />'.format(c=location)
 		if not passage:
-			passage = ''
+			passage = str()
 		table = [str(passage), wo.universalid]
 		passageobject.browserhtml = viewing + '\n'.join(table)
 
