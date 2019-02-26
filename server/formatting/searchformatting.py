@@ -9,18 +9,17 @@
 import re
 from collections import deque
 from copy import deepcopy
-from flask import session
 from typing import List
 
-from server import hipparchia
+from flask import session
+
 from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dblinefunctions import bulkenvironsfetcher
 from server.formatting.bibliographicformatting import formatname
 from server.formatting.bracketformatting import brackethtmlifysearchfinds
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
-from server.hipparchiaobjects.searchobjects import SearchResult, SearchObject
+from server.hipparchiaobjects.searchobjects import SearchObject, SearchResult
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
-
 
 LineList = List[dbWorkLine]
 ResultList = List[SearchResult]
@@ -60,7 +59,8 @@ def buildresultobjects(hitdict: dict, authordict: dict, workdict: dict, searchob
 		n = formatname(wo, ao)
 		t = wo.title
 		c = locusintocitation(wo, lo)
-		resultlist.append(SearchResult(h+1, n, t, c, hitdict[h].universalid, [hitdict[h]]))
+		wn = wo.worknumber
+		resultlist.append(SearchResult(h+1, n, t, c, wn, hitdict[h].url, [hitdict[h]]))
 
 	if so.context == 0:
 		# no need to find the environs
@@ -93,7 +93,7 @@ def buildresultobjects(hitdict: dict, authordict: dict, workdict: dict, searchob
 		# toss lines that are not part of this work: 10 lines of context in the inscriptions will grab neighboring
 		# documents otherwise
 		for r in updatedresultlist:
-			r.lineobjects = [l for l in r.lineobjects if l.wkuinversalid == r.getworkid()]
+			r.lineobjects = [l for l in r.lineobjects if l.workid == r.worknumber]
 
 		return updatedresultlist
 

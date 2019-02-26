@@ -10,7 +10,7 @@ import json
 
 from server import hipparchia
 from server.browsing.browserfunctions import buildbrowseroutputobject, findlinenumberfromcitation
-from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
+from server.dbsupport.miscdbfunctions import buildauthorworkandpassage
 from server.formatting.lexicaformatting import lexicaldbquickfixes
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -18,8 +18,9 @@ from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import authordict, workdict
 
 
-@hipparchia.route('/browse/<method>/<workdb>/<location>')
-def grabtextforbrowsing(method, workdb, location):
+@hipparchia.route('/browse/<method>/<author>/<work>')
+@hipparchia.route('/browse/<method>/<author>/<work>/<location>')
+def grabtextforbrowsing(method, author, work, location=None):
 	"""
 
 	you want to browse something
@@ -33,6 +34,10 @@ def grabtextforbrowsing(method, workdb, location):
 	:return:
 	"""
 
+	if not location:
+		# never supposed to be true, but...
+		return grabtextforbrowsing('locus', author, work, '_0')
+
 	probeforsessionvariables()
 
 	dbconnection = ConnectionObject()
@@ -42,24 +47,17 @@ def grabtextforbrowsing(method, workdb, location):
 	if method not in knownmethods:
 		method = 'linenumber'
 
+	requested = buildauthorworkandpassage(author, work, location, authordict, workdict, dbcursor)
+	ao = requested['authorobject']
+	wo = requested['workobject']
+
 	perseusauthorneedsfixing = ['gr0006']
-	if method == 'perseus' and workdb[:6] in perseusauthorneedsfixing:
-		remapper = lexicaldbquickfixes([workdb])
-		workdb = remapper[workdb]
-
-	try:
-		wo = workdict[workdb]
-	except KeyError:
-		wo = makeanemptywork('gr0000w000')
-
-	try:
-		ao = authordict[workdb[:6]]
-	except KeyError:
-		ao = makeanemptyauthor('gr0000')
-
-	if ao.universalid != 'gr0000' and ao.universalid != wo.universalid[:6]:
-		# you have only selected an author, but not a work: 'lt0474w_firstwork'
-		wo = ao.listofworks[0]
+	if method == 'perseus' and author in perseusauthorneedsfixing:
+		remapper = lexicaldbquickfixes([author])
+		try:
+			wo = workdict[remapper[author]]
+		except KeyError:
+			print('grabtextforbrowsing() failed to remap {a} + {w}'.format(a=author, w=work))
 
 	passage, resultmessage = findlinenumberfromcitation(method, location, wo, dbcursor)
 
@@ -70,7 +68,7 @@ def grabtextforbrowsing(method, workdb, location):
 		viewing = '<p class="currentlyviewing">error in fetching the browser data.<br />I was sent a citation that returned nothing: {c}</p><br /><br />'.format(c=location)
 		if not passage:
 			passage = ''
-		table = [str(passage), workdb]
+		table = [str(passage), wo.universalid]
 		passageobject.browserhtml = viewing + '\n'.join(table)
 
 	if resultmessage != 'success':

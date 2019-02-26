@@ -375,13 +375,14 @@ class SearchResult(object):
 	really just a more maintainable version of a dict
 
 	"""
-	def __init__(self, hitnumber, author, work, citationstring, clickurl, lineobjects):
+	def __init__(self, hitnumber, author, work, citationstring, worknumber, clickurl, lineobjects):
 		self.hitnumber = hitnumber
 		self.author = avoidsmallvariants(author)
 		self.work = avoidsmallvariants(work)
 		self.citationstring = citationstring
 		self.clickurl = clickurl
 		self.lineobjects = lineobjects
+		self.worknumber = worknumber
 
 	def getindex(self):
 		"""
@@ -390,28 +391,12 @@ class SearchResult(object):
 
 		derive it from the tail of the clickurl, e.g.:
 
-			'linenumber/lt1212w002/5284'
+			'linenumber/lt1212/002/5284'
 
 		:return:
 		"""
 
 		return int(self.clickurl.split('/')[-1])
-
-	def getworkid(self):
-		"""
-
-		fetch the wkuniversalid value of the focus line
-
-		derive it from the tail of the clickurl, e.g.:
-
-			'linenumber/lt1212w002/5284'
-
-		:return:
-		"""
-
-		elements = self.clickurl.split('/')
-
-		return elements[1]
 
 	def getlocusthml(self):
 		"""

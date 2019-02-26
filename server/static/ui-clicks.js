@@ -248,7 +248,7 @@ function browsetopassage() {
     let locstring = loc.join('|');
 
     if (wrk.length !== 3) { wrk = '_firstwork'}
-    loc = 'locus/' + auth+'w'+wrk+'/'+locstring.slice(0, locstring.length);
+    loc = 'locus/' + auth + '/' + wrk + '/' +locstring.slice(0, locstring.length);
     browseuponclick(loc);
 }
 

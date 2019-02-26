@@ -253,6 +253,7 @@ class dbWorkLine(object):
 
 		self.wkuinversalid = wkuinversalid[:10]
 		self.authorid = wkuinversalid[:6]
+		self.workid = wkuinversalid[7:]
 		self.index = index
 		self.l5 = level_05_value
 		self.l4 = level_04_value
@@ -265,6 +266,7 @@ class dbWorkLine(object):
 		self.stripped = stripped_line
 		self.annotations = annotations
 		self.universalid = 'line/{w}/{i}'.format(w=self.wkuinversalid, i=index)
+		self.url = 'line/{a}/{w}/{i}'.format(a=self.authorid, w=self.workid, i=index)
 		self.hyphenated = hyphenated_words
 		if len(self.hyphenated) > 1:
 			self.hashyphenated = True

@@ -233,7 +233,7 @@ class dbDictionaryEntry(object):
 			<bibl n="Perseus:abo:tlg,0019,003:1214" default="NO" valid="yes">
 
 		out:
-			<bibl id="perseus/gr0019w003/1214" default="NO" valid="yes">
+			<bibl id="perseus/gr0019/003/1214" default="NO" valid="yes">
 
 		:return:
 		"""
@@ -263,8 +263,8 @@ class dbDictionaryEntry(object):
 		tlgfinder = re.compile(r'n="Perseus:abo:tlg,(\d\d\d\d),(\d\d\d):(.*?)"')
 		phifinder = re.compile(r'n="Perseus:abo:phi,(\d\d\d\d),(\d\d\d):(.*?)"')
 
-		clickableentry = re.sub(tlgfinder, r'id="perseus/gr\1w\2/\3"', htmlentry)
-		clickableentry = re.sub(phifinder, r'id="perseus/lt\1w\2/\3"', clickableentry)
+		clickableentry = re.sub(tlgfinder, r'id="perseus/gr\1/\2/\3"', htmlentry)
+		clickableentry = re.sub(phifinder, r'id="perseus/lt\1/\2/\3"', clickableentry)
 		self.body = clickableentry
 		self.haveclickablelookups = True
 		return
