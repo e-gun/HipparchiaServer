@@ -10,27 +10,27 @@ import json
 import locale
 import time
 
-from flask import request, session
+from flask import session
 
 from server import hipparchia
-from server.dbsupport.miscdbfunctions import returnfirstwork
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.miscformatting import validatepollid
 from server.formatting.wordformatting import avoidsmallvariants
-from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import authordict, poll, workdict
 from server.textsandindices.indexmaker import buildindextowork
-from server.textsandindices.textandindiceshelperfunctions import tcparserequest, \
+from server.textsandindices.textandindiceshelperfunctions import buildauthorworkandpassage, \
 	textsegmentfindstartandstop, wordindextohtmltable
 from server.textsandindices.textbuilder import buildtext
 
 
-@hipparchia.route('/indexto', methods=['GET'])
-def completeindex():
+@hipparchia.route('/indexto/<searchid>/<author>')
+@hipparchia.route('/indexto/<searchid>/<author>/<work>')
+@hipparchia.route('/indexto/<searchid>/<author>/<work>/<passage>')
+def completeindex(searchid: str, author: str, work=None, passage=None):
 	"""
 	build a complete index to a an author, work, or segment of a work
 
@@ -38,8 +38,6 @@ def completeindex():
 	"""
 
 	probeforsessionvariables()
-
-	searchid = request.args.get('id', '')
 
 	pollid = validatepollid(searchid)
 
@@ -51,19 +49,19 @@ def completeindex():
 	dbconnection = ConnectionObject('autocommit')
 	dbcursor = dbconnection.cursor()
 
-	req = tcparserequest(request, authordict, workdict)
-	ao = req['authorobject']
-	wo = req['workobject']
-	psg = req['passagelist']
+	requested = buildauthorworkandpassage(author, work, passage, authordict, workdict, dbcursor)
+	ao = requested['authorobject']
+	wo = requested['workobject']
+	psg = requested['passagelist']
 
 	if session['headwordindexing'] == 'yes':
 		useheadwords = True
 	else:
 		useheadwords = False
 
-	if ao.universalid != 'gr0000' and wo.universalid != 'gr0000w000':
+	if ao and wo and psg:
 		# we have both an author and a work, maybe we also have a subset of the work
-		if psg == ['']:
+		if not psg:
 			# whole work
 			poll[pollid].statusis('Preparing an index to {t}'.format(t=wo.title))
 			startline = wo.starts
@@ -79,9 +77,9 @@ def completeindex():
 		output = buildindextowork(cdict, poll[pollid], useheadwords, dbcursor)
 		allworks = list()
 
-	elif ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
-		poll[pollid].statusis('Preparing an index to the works of {a}'.format(a=ao.shortname))
+	elif ao:
 		# whole author
+		poll[pollid].statusis('Preparing an index to the works of {a}'.format(a=ao.shortname))
 		cdict = dict()
 		for wkid in ao.listworkids():
 			cdict[wkid] = (workdict[wkid].starts, workdict[wkid].ends)
@@ -145,31 +143,10 @@ def textmaker(author: str, work=None, passage=None):
 
 	linesevery = hipparchia.config['SHOWLINENUMBERSEVERY']
 
-	ao = None
-	wo = None
-	workdb = None
-	psg = str()
-
-	try:
-		ao = authordict[author]
-	except KeyError:
-		pass
-
-	if ao and work:
-		workdb = author + 'w' + work
-	elif ao:
-		workdb = returnfirstwork(ao.universalid, dbcursor)
-
-	try:
-		wo = workdict[workdb]
-	except KeyError:
-		pass
-
-	if passage:
-		allowed = ',;|'
-		psg = depunct(passage, allowed)
-		psg = psg.split('|')
-		psg.reverse()
+	requested = buildauthorworkandpassage(author, work, passage, authordict, workdict, dbcursor)
+	ao = requested['authorobject']
+	wo = requested['workobject']
+	psg = requested['passagelist']
 
 	if ao and wo:
 		# we have both an author and a work, maybe we also have a subset of the work
@@ -181,7 +158,6 @@ def textmaker(author: str, work=None, passage=None):
 			startandstop = textsegmentfindstartandstop(ao, wo, psg, dbcursor)
 			startline = startandstop['startline']
 			endline = startandstop['endline']
-
 		texthtml = buildtext(wo.universalid, startline, endline, linesevery, dbcursor)
 	else:
 		texthtml = str()

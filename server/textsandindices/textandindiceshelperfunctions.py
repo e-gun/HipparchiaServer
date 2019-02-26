@@ -15,7 +15,7 @@ from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
 from server.dbsupport.lexicaldbfunctions import lookformorphologymatches
 from server.dbsupport.miscdbfunctions import icanpickleconnections
-from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
+from server.dbsupport.miscdbfunctions import returnfirstwork
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
@@ -23,56 +23,54 @@ from server.searching.searchfunctions import atsignwhereclauses
 from server.threading.mpthreadcount import setthreadcount
 
 
-def tcparserequest(request, authordict: dict, workdict: dict) -> dict:
+def buildauthorworkandpassage(author: str, work: str, passage: str, authordict: dict, workdict: dict, dbcursor) -> dict:
 	"""
 
 	return the author, work, and locus requested
 	also some other handy variable derived from these items
 
-	:param request:
+	:param author:
+	:param work:
+	:param passage:
 	:param authordict:
 	:param workdict:
+	:param dbcursor:
 	:return:
 	"""
 
-	uid = depunct(request.args.get('auth', ''))
-	workid = depunct(request.args.get('work', ''))
+	ao = None
+	wo = None
+	workdb = None
+	psg = str()
 
-	allowed = ',;|'
-	locus = depunct(request.args.get('locus', ''), allowed)
+	try:
+		ao = authordict[author]
+	except KeyError:
+		pass
 
-	workdb = uid + 'w' + workid
-	
-	if uid != str():
-		try:
-			ao = authordict[uid]
-			if len(workdb) == 10:
-				try:
-					wo = workdict[workdb]
-				except KeyError:
-					wo = makeanemptywork('gr0000w000')
-			else:
-					wo = makeanemptywork('gr0000w000')
-		except KeyError:
-			ao = makeanemptyauthor('gr0000')
-			wo = makeanemptywork('gr0000w000')
-		
-		passage = locus.split('|')
-		passage.reverse()
+	if ao and work:
+		workdb = author + 'w' + work
+	elif ao:
+		workdb = returnfirstwork(ao.universalid, dbcursor)
 
-	else:
-		ao = makeanemptyauthor('gr0000')
-		wo = makeanemptywork('gr0000w000')
-		passage = list()
+	try:
+		wo = workdict[workdb]
+	except KeyError:
+		pass
+
+	if passage:
+		allowed = ',;|'
+		psg = depunct(passage, allowed)
+		psg = psg.split('|')
+		psg.reverse()
 	
-	req = dict()
+	requested = dict()
 	
-	req['authorobject'] = ao
-	req['workobject'] = wo
-	req['passagelist'] = passage
-	req['rawlocus'] = locus
+	requested['authorobject'] = ao
+	requested['workobject'] = wo
+	requested['passagelist'] = psg
 	
-	return req
+	return requested
 
 
 def textsegmentfindstartandstop(authorobject, workobject, passageaslist, cursor) -> dict:

@@ -45,10 +45,9 @@ $('#makeanindex').click( function() {
             let searchid = generateId(8);
             // let searchid = uuidv4();
             let url = '';
-            if (wrk === '') { url = '/indexto?auth=' + authorid+'&id='+searchid; }
-            else if (locus === '') { url = '/indexto?auth=' + authorid + '&work=' + wrk +'&id='+searchid; }
-            else { url = '/indexto?auth=' + authorid + '&work=' + wrk + '&locus=' + locus +'&id='+searchid; }
-
+            if (wrk === '') { url = '/indexto/' + searchid + '/' + authorid; }
+            else if (locus === '') { url = '/indexto/' + searchid + '/' + authorid + '/' + wrk; }
+            else { url = '/indexto/' + searchid + '/' + authorid +'/' + wrk + '/' + locus; }
             $.getJSON(url, function (indexdata) { loadindexintodisplayresults(indexdata); });
             checkactivityviawebsocket(searchid);
         }
@@ -99,9 +98,6 @@ $('#textofthis').click( function() {
         if (authorid !== '') {
             $('#clearpick').show();
             let url = '';
-            // if (wrk === '') { url = '/textof?auth=' + authorid + '&work=999'; }
-            // else if (locus === '') { url = '/textof?auth=' + authorid + '&work=' + wrk; }
-            // else { url = '/textof?auth=' + authorid + '&work=' + wrk + '&locus=' + locus; }
             if (wrk === '') { url = '/textof/' + authorid; }
             else if (locus === '') { url = '/textof/' + authorid + '/' + wrk; }
             else { url = '/textof/' + authorid + '/' + wrk + '/' + locus; }
