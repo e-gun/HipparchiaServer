@@ -13,6 +13,7 @@ import time
 from flask import session
 
 from server import hipparchia
+from server.dbsupport.miscdbfunctions import makeanemptywork
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.miscformatting import validatepollid
@@ -30,7 +31,7 @@ from server.textsandindices.textbuilder import buildtext
 @hipparchia.route('/indexto/<searchid>/<author>')
 @hipparchia.route('/indexto/<searchid>/<author>/<work>')
 @hipparchia.route('/indexto/<searchid>/<author>/<work>/<passage>')
-def completeindex(searchid: str, author: str, work=None, passage=None):
+def buildindexto(searchid: str, author: str, work=None, passage=None):
 	"""
 	build a complete index to a an author, work, or segment of a work
 
@@ -54,12 +55,15 @@ def completeindex(searchid: str, author: str, work=None, passage=None):
 	wo = requested['workobject']
 	psg = requested['passagelist']
 
+	if not work:
+		wo = makeanemptywork('gr0000w000')
+
 	if session['headwordindexing'] == 'yes':
 		useheadwords = True
 	else:
 		useheadwords = False
 
-	if ao and wo and psg:
+	if ao and work and wo and psg:
 		# we have both an author and a work, maybe we also have a subset of the work
 		if not psg:
 			# whole work
