@@ -10,7 +10,7 @@ import json
 
 from server import hipparchia
 from server.browsing.browserfunctions import buildbrowseroutputobject, findlinenumberfromcitation
-from server.dbsupport.miscdbfunctions import buildauthorworkandpassage
+from server.dbsupport.miscdbfunctions import buildauthorworkandpassage, returnfirstwork
 from server.formatting.lexicaformatting import lexicaldbquickfixes
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -59,9 +59,12 @@ def grabtextforbrowsing(method, author, work, location=None):
 		except KeyError:
 			print('grabtextforbrowsing() failed to remap {a} + {w}'.format(a=author, w=work))
 
+	if not wo:
+		wo = workdict[returnfirstwork(ao.universalid, dbcursor)]
+
 	passage, resultmessage = findlinenumberfromcitation(method, location, wo, dbcursor)
 
-	if passage and ao.universalid != 'gr0000':
+	if passage and ao:
 		passageobject = buildbrowseroutputobject(ao, wo, int(passage), dbcursor)
 	else:
 		passageobject = BrowserOutputObject(ao, wo, passage)
