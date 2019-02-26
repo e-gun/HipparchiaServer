@@ -99,9 +99,12 @@ $('#textofthis').click( function() {
         if (authorid !== '') {
             $('#clearpick').show();
             let url = '';
-            if (wrk === '') { url = '/textof?auth=' + authorid + '&work=999'; }
-            else if (locus === '') { url = '/textof?auth=' + authorid + '&work=' + wrk; }
-            else { url = '/textof?auth=' + authorid + '&work=' + wrk + '&locus=' + locus; }
+            // if (wrk === '') { url = '/textof?auth=' + authorid + '&work=999'; }
+            // else if (locus === '') { url = '/textof?auth=' + authorid + '&work=' + wrk; }
+            // else { url = '/textof?auth=' + authorid + '&work=' + wrk + '&locus=' + locus; }
+            if (wrk === '') { url = '/textof/' + authorid; }
+            else if (locus === '') { url = '/textof/' + authorid + '/' + wrk; }
+            else { url = '/textof/' + authorid + '/' + wrk + '/' + locus; }
 
             $.getJSON( url, function (returnedtext) { loadtextintodisplayresults(returnedtext); });
         }

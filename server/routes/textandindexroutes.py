@@ -13,10 +13,12 @@ import time
 from flask import request, session
 
 from server import hipparchia
+from server.dbsupport.miscdbfunctions import returnfirstwork
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.miscformatting import validatepollid
 from server.formatting.wordformatting import avoidsmallvariants
+from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.checksession import probeforsessionvariables
@@ -127,8 +129,10 @@ def completeindex():
 	return results
 
 
-@hipparchia.route('/textof', methods=['GET'])
-def textmaker():
+@hipparchia.route('/textof/<author>')
+@hipparchia.route('/textof/<author>/<work>')
+@hipparchia.route('/textof/<author>/<work>/<passage>')
+def textmaker(author: str, work=None, passage=None):
 	"""
 	build a text suitable for display
 	:return:
@@ -141,18 +145,35 @@ def textmaker():
 
 	linesevery = hipparchia.config['SHOWLINENUMBERSEVERY']
 
-	req = tcparserequest(request, authordict, workdict)
-	ao = req['authorobject']
-	wo = req['workobject']
-	psg = req['passagelist']
+	ao = None
+	wo = None
+	workdb = None
+	psg = str()
 
-	if ao.universalid != 'gr0000' and wo.universalid == 'gr0000w000':
-		# default to first work
-		wo = ao.listofworks[0]
+	try:
+		ao = authordict[author]
+	except KeyError:
+		pass
 
-	if ao.universalid != 'gr0000' and wo.universalid != 'gr0000w000':
+	if ao and work:
+		workdb = author + 'w' + work
+	elif ao:
+		workdb = returnfirstwork(ao.universalid, dbcursor)
+
+	try:
+		wo = workdict[workdb]
+	except KeyError:
+		pass
+
+	if passage:
+		allowed = ',;|'
+		psg = depunct(passage, allowed)
+		psg = psg.split('|')
+		psg.reverse()
+
+	if ao and wo:
 		# we have both an author and a work, maybe we also have a subset of the work
-		if psg == ['']:
+		if not psg:
 			# whole work
 			startline = wo.starts
 			endline = wo.ends
@@ -163,7 +184,7 @@ def textmaker():
 
 		texthtml = buildtext(wo.universalid, startline, endline, linesevery, dbcursor)
 	else:
-		texthtml = ''
+		texthtml = str()
 
 	if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS'] == 'yes':
 		texthtml = gtltsubstitutes(texthtml)
