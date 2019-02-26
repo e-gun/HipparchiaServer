@@ -40,7 +40,7 @@ function parsepassagereturned(passagereturned) {
     wac.val(passagereturned['workboxcontents']);
     wac.prop('placeholder', '');
     loadWorklist(passagereturned['authornumber']);
-    loadLevellist(passagereturned['workid'],'firstline');
+    loadLevellist(passagereturned['authornumber'], passagereturned['worknumber'],'firstline');
 
     bdt.html(passagereturned['browserhtml']);
 

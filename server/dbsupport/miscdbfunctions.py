@@ -11,6 +11,7 @@ from os import name as osname
 
 import psycopg2
 
+from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
@@ -400,3 +401,53 @@ def icanpickleconnections():
 	c[0].connectioncleanup()
 
 	return result
+
+
+def buildauthorworkandpassage(author: str, work: str, passage: str, authordict: dict, workdict: dict, dbcursor) -> dict:
+	"""
+
+	return the author, work, and locus requested
+	also some other handy variable derived from these items
+
+	:param author:
+	:param work:
+	:param passage:
+	:param authordict:
+	:param workdict:
+	:param dbcursor:
+	:return:
+	"""
+
+	ao = None
+	wo = None
+	workdb = None
+	psg = str()
+
+	try:
+		ao = authordict[author]
+	except KeyError:
+		pass
+
+	if ao and work:
+		workdb = author + 'w' + work
+	elif ao:
+		workdb = returnfirstwork(ao.universalid, dbcursor)
+
+	try:
+		wo = workdict[workdb]
+	except KeyError:
+		pass
+
+	if passage:
+		allowed = ',;|'
+		psg = depunct(passage, allowed)
+		psg = psg.split('|')
+		psg.reverse()
+
+	requested = dict()
+
+	requested['authorobject'] = ao
+	requested['workobject'] = wo
+	requested['passagelist'] = psg
+
+	return requested

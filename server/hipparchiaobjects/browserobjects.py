@@ -29,6 +29,7 @@ class BrowserOutputObject(object):
 		self.wo = workobject
 		self.authornumber = authorobject.universalid
 		self.workid = workobject.universalid
+		self.worknumber = workobject.worknumber
 		self.authorboxcontents = '{n} [{uid}]'.format(n=authorobject.cleanname, uid=authorobject.universalid)
 		self.workboxcontents = '{t} ({wkid})'.format(t=workobject.title, wkid=workobject.universalid[-4:])
 		self.linesofcontext = int(session['browsercontext'])
@@ -54,7 +55,7 @@ class BrowserOutputObject(object):
 	def generateoutput(self):
 		outputdict = dict()
 		requiredkeys = ['browseforwards', 'browseback', 'authornumber', 'workid',
-		                'authorboxcontents', 'workboxcontents', 'browserhtml']
+		                'authorboxcontents', 'workboxcontents', 'browserhtml', 'worknumber']
 
 		for item in requiredkeys:
 			outputdict[item] = getattr(self, item)

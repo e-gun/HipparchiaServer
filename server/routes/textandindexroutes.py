@@ -13,7 +13,7 @@ import time
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.miscdbfunctions import makeanemptywork
+from server.dbsupport.miscdbfunctions import makeanemptywork, buildauthorworkandpassage
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.miscformatting import validatepollid
@@ -23,8 +23,7 @@ from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import authordict, poll, workdict
 from server.textsandindices.indexmaker import buildindextowork
-from server.textsandindices.textandindiceshelperfunctions import buildauthorworkandpassage, \
-	textsegmentfindstartandstop, wordindextohtmltable
+from server.textsandindices.textandindiceshelperfunctions import textsegmentfindstartandstop, wordindextohtmltable
 from server.textsandindices.textbuilder import buildtext
 
 

@@ -15,6 +15,7 @@ from flask import make_response, redirect, request, session, url_for
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
+from server.dbsupport.miscdbfunctions import buildauthorworkandpassage
 from server.formatting.bibliographicformatting import formatauthinfo, formatauthorandworkinfo, formatname, \
 	woformatworkinfo
 from server.formatting.wordformatting import depunct
@@ -135,8 +136,9 @@ def findtheworksof(authoruid):
 	return hint
 
 
-@hipparchia.route('/getstructure/<workid>/<locus>')
-def findworkstructure(workid, locus=None):
+@hipparchia.route('/getstructure/<author>/<work>')
+@hipparchia.route('/getstructure/<author>/<work>/<passage>')
+def findworkstructure(author, work, passage=None):
 	"""
 	request detailed info about how a work works
 	this is fed back to the js boxes : who should be active, what are the autocomplete values, etc?
@@ -151,23 +153,19 @@ def findworkstructure(workid, locus=None):
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
-	try:
-		workobject = workdict[workid]
-	except KeyError:
-		workobject = None
+	requested = buildauthorworkandpassage(author, work, passage, authordict, workdict, dbcursor)
+	wo = requested['workobject']
+	psg = requested['passagelist']
 
-	if not locus:
-		safepassage = 'firstline'
+	if not passage:
+		safepassage = tuple(['firstline'])
 	else:
-		unsafepassage = locus.split('|')
-		# this list will need to match the one in '/browse'
-		allowed = ',;'
-		safepassage = [depunct(p, allowed) for p in unsafepassage]
-		safepassage = tuple(safepassage[:5])
+		psg.reverse()
+		safepassage = tuple(psg[:5])
 
 	ws = dict()
-	if workobject:
-		lowandhigh = findvalidlevelvalues(workobject, safepassage, dbcursor)
+	if wo:
+		lowandhigh = findvalidlevelvalues(wo, safepassage, dbcursor)
 		# example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
 		ws['totallevels'] = lowandhigh.levelsavailable
 		ws['level'] = lowandhigh.currentlevel

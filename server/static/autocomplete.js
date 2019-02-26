@@ -181,7 +181,7 @@ $('#worksautocomplete').autocomplete({
         resetworksautocomplete();
         let auth = $("#authorsautocomplete").val().slice(-7, -1);
         let wrk = ui.item.value.slice(-4, -1);
-        loadLevellist(auth+'w'+wrk,'firstline');
+        loadLevellist(auth, wrk,'firstline');
         }
 });
 
@@ -207,10 +207,10 @@ function locusdataloader() {
     }
 
 
-function loadLevellist(workid, pariallocus){
+function loadLevellist(author, work, pariallocus){
     // python is hoping to be sent something like:
     //
-    //  /getstructure/lt1254w001/firstline
+    //  /getstructure/lt1254w001
     //  /getstructure/lt0474w043/3|12
     //
     // bad things happen if you send level00 info
@@ -218,7 +218,14 @@ function loadLevellist(workid, pariallocus){
     // python will return info about the next level down such as:
     //  [{'totallevels',3},{'level': 0}, {'label': 'verse'}, {'low': 1}, {'high': 100]
 
-    $.getJSON('/getstructure/'+workid+'/'+pariallocus, function (selectiondata) {
+    let getpath = '';
+    if ( pariallocus !== 'firstline' ) {
+        getpath = author + '/' + work + '/' + pariallocus;
+    } else {
+        getpath = author + '/' + work;
+    }
+
+    $.getJSON('/getstructure/' + getpath, function (selectiondata) {
         let top = selectiondata['totallevels']-1;
         let atlevel = selectiondata['level'];
         let label = selectiondata['label'];
@@ -233,11 +240,9 @@ function loadLevellist(workid, pariallocus){
         $(generateme).show();
         $(generateme).autocomplete ({
             focus: function (event, ui) {
-                let auth = workid.slice(0,6);
-                let wrk = workid.slice(7,10);
                 if (atlevel > 0) {
                     let loc = locusdataloader();
-                    loadLevellist(auth+'w'+wrk,loc);
+                    loadLevellist(author, work, loc);
                     }
                 // if we do partialloc browsing then this can be off
                 // if (atlevel <= 1) { $('#browseto').show(); }
@@ -246,11 +251,8 @@ function loadLevellist(workid, pariallocus){
             select: function (event, ui) {
                 // if we do partialloc browsing then this can be off
                 // if (atlevel <= 1) { $('#browseto').show(); }
-                let auth = workid.slice(0,6);
-                let wrk = workid.slice(7,10);
                 let loc = locusdataloader();
-
-                loadLevellist(auth+'w'+wrk, String(loc));
+                loadLevellist(author, work, String(loc));
 
             }});
     });

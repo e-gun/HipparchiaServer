@@ -15,62 +15,10 @@ from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
 from server.dbsupport.lexicaldbfunctions import lookformorphologymatches
 from server.dbsupport.miscdbfunctions import icanpickleconnections
-from server.dbsupport.miscdbfunctions import returnfirstwork
-from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 from server.searching.searchfunctions import atsignwhereclauses
 from server.threading.mpthreadcount import setthreadcount
-
-
-def buildauthorworkandpassage(author: str, work: str, passage: str, authordict: dict, workdict: dict, dbcursor) -> dict:
-	"""
-
-	return the author, work, and locus requested
-	also some other handy variable derived from these items
-
-	:param author:
-	:param work:
-	:param passage:
-	:param authordict:
-	:param workdict:
-	:param dbcursor:
-	:return:
-	"""
-
-	ao = None
-	wo = None
-	workdb = None
-	psg = str()
-
-	try:
-		ao = authordict[author]
-	except KeyError:
-		pass
-
-	if ao and work:
-		workdb = author + 'w' + work
-	elif ao:
-		workdb = returnfirstwork(ao.universalid, dbcursor)
-
-	try:
-		wo = workdict[workdb]
-	except KeyError:
-		pass
-
-	if passage:
-		allowed = ',;|'
-		psg = depunct(passage, allowed)
-		psg = psg.split('|')
-		psg.reverse()
-	
-	requested = dict()
-	
-	requested['authorobject'] = ao
-	requested['workobject'] = wo
-	requested['passagelist'] = psg
-	
-	return requested
 
 
 def textsegmentfindstartandstop(authorobject, workobject, passageaslist, cursor) -> dict:
