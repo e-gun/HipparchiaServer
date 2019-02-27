@@ -47,7 +47,11 @@ class SharedMemoryProgressPoll(object):
 		# print('SharedMemoryProgressPoll()', self.searchid)
 
 	def getstatus(self):
-		return self.statusmessage.decode('utf-8')
+		try:
+			return self.statusmessage.decode('utf-8')
+		except AttributeError:
+			#  'SynchronizedString' object has no attribute 'decode'
+			return self.statusmessage
 
 	def getelapsed(self):
 		elapsed = round(time.time() - self.launchtime, 0)

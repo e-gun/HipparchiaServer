@@ -374,14 +374,14 @@ class dbWorkLine(object):
 
 		build a clickable url for the locus and wrap the locus in it:
 
-			<indexedlocation id="linenumber/gr0032w008/30784">1.4.4</indexedlocation>
+		   <indexedlocation id="linenumber/gr0032/008/30784">1.4.4</indexedlocation>
 
 		:return:
 		"""
 
-		template = '<indexedlocation id="linenumber/{wk}/{idx}">{loc}</indexedlocation>'
-
-		return template.format(wk=self.wkuinversalid, idx=self.index, loc=self.locus())
+		template = '<indexedlocation id="linenumber/{au}/{wk}/{idx}">{loc}</indexedlocation>'
+		locus = template.format(au=self.authorid, wk=self.workid, idx=self.index, loc=self.locus())
+		return locus
 
 	def shortlocus(self):
 		"""

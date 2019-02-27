@@ -53,7 +53,7 @@ def grabtextforbrowsing(method, author, work, location=None):
 
 	perseusauthorneedsfixing = ['gr0006']
 	if method == 'perseus' and author in perseusauthorneedsfixing:
-		remapper = lexicaldbquickfixes([author])
+		remapper = lexicaldbquickfixes([author+'w'+work])
 		try:
 			wo = workdict[remapper[author]]
 		except KeyError:

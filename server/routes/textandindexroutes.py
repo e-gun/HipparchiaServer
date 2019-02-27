@@ -62,39 +62,38 @@ def buildindexto(searchid: str, author: str, work=None, passage=None):
 	else:
 		useheadwords = False
 
-	if ao and work and wo and psg:
-		# we have both an author and a work, maybe we also have a subset of the work
-		if not psg:
-			# whole work
-			poll[pollid].statusis('Preparing an index to {t}'.format(t=wo.title))
-			startline = wo.starts
-			endline = wo.ends
-		else:
-			# partial work
-			poll[pollid].statusis('Preparing a partial index to {t}'.format(t=wo.title))
-			startandstop = textsegmentfindstartandstop(ao, wo, psg, dbcursor)
-			startline = startandstop['startline']
-			endline = startandstop['endline']
+	allworks = list()
+	output = list()
+	cdict = dict()
+	valid = True
 
+	if ao and work and psg:
+		# subsection of a work of an author
+		poll[pollid].statusis('Preparing a partial index to {t}'.format(t=wo.title))
+		startandstop = textsegmentfindstartandstop(ao, wo, psg, dbcursor)
+		startline = startandstop['startline']
+		endline = startandstop['endline']
 		cdict = {wo.universalid: (startline, endline)}
-		output = buildindextowork(cdict, poll[pollid], useheadwords, dbcursor)
-		allworks = list()
-
+	elif ao and work:
+		# one work
+		poll[pollid].statusis('Preparing an index to {t}'.format(t=wo.title))
+		startline = wo.starts
+		endline = wo.ends
+		cdict = {wo.universalid: (startline, endline)}
 	elif ao:
 		# whole author
-		poll[pollid].statusis('Preparing an index to the works of {a}'.format(a=ao.shortname))
-		cdict = dict()
-		for wkid in ao.listworkids():
-			cdict[wkid] = (workdict[wkid].starts, workdict[wkid].ends)
-		output = buildindextowork(cdict, poll[pollid], useheadwords, dbcursor)
-
 		allworks = ['{w}  ⇒ {t}'.format(w=w.universalid[6:10], t=w.title) for w in ao.listofworks]
 		allworks.sort()
-
+		poll[pollid].statusis('Preparing an index to the works of {a}'.format(a=ao.shortname))
+		for wkid in ao.listworkids():
+			cdict[wkid] = (workdict[wkid].starts, workdict[wkid].ends)
 	else:
 		# we do not have a valid selection
-		output = list()
-		allworks = list()
+		valid = False
+		output = ['invalid input']
+
+	if valid:
+		output = buildindextowork(cdict, poll[pollid], useheadwords, dbcursor)
 
 	# get ready to send stuff to the page
 	count = len(output)
