@@ -110,7 +110,7 @@ def findmylatintenses(mood: str, voice: str) -> dict:
 	return mytenses
 
 
-def nountabletemplate(dialect='attic', duals=True, lang='greek') -> str:
+def declinedtabletemplate(dialect='attic', duals=True, lang='greek', skipgenders=None) -> str:
 	"""
 
 
@@ -120,7 +120,88 @@ def nountabletemplate(dialect='attic', duals=True, lang='greek') -> str:
 	:return:
 	"""
 
-	return str()
+	genders = ['masc', 'fem', 'neut']
+	if skipgenders:
+		for s in skipgenders:
+			genders.remove(s)
+
+	cases = list()
+	if lang == 'latin':
+		cases = ['nom', 'gen', 'dat', 'acc', 'abl', 'voc']
+
+	if lang == 'greek':
+		cases = ['nom', 'gen', 'dat', 'acc', 'voc']
+
+	if duals:
+		numbers = ['sg', 'dual', 'pl']
+	else:
+		numbers = ['sg', 'pl']
+
+	tabletemplate = """
+	<table class="verbanalysis">
+	<tbody>
+	{header}
+	{rows}
+	</tbody>
+	</table>
+	<hr class="styled">
+	"""
+
+	headerrowtemplate = """
+	<tr align="center">
+		<td rowspan="1" colspan="{s}" class="dialectlabel">{dialect}<br>
+		</td>
+	</tr>
+	{genderlabel}
+	</tr>"""
+
+	genderlabel = """<tr>
+		<td class="genderlabel">&nbsp;</td>
+		{allgenders}
+	</tr>"""
+
+	blank = """
+	<tr><td>&nbsp;</td>{columns}</tr>
+	"""
+
+	blankrow = blank.format(columns=''.join(['<td>&nbsp;</td>' for _ in genders]))
+
+	gendercell = '<td class="gendercell">{g}<br></td>'
+	genderrows = [gendercell.format(g=g) for g in genders]
+	genderrows = '\n\t\t'.join(genderrows)
+	genderlabel = genderlabel.format(allgenders=genderrows)
+	fullheader = headerrowtemplate.format(dialect=dialect, genderlabel=genderlabel, s=len(genders))
+
+	allrows = list()
+
+	morphrowtemplate = """
+	<tr class="morphrow">
+		{allcells}
+	</tr>
+	"""
+
+	morphlabelcell = '<td class="morphlabelcell">{ml}</td>'
+	morphcell = '<td class="morphcell">{mo}</td>'
+	declinedtemplate = '_{d}_{n}_{g}_{c}_'
+
+	for n in numbers:
+		for c in cases:
+			allcellsinrow = list()
+			ml = '{n} {c}'.format(n=n, c=c)
+			allcellsinrow.append(morphlabelcell.format(ml=ml))
+			for g in genders:
+				mo = declinedtemplate.format(d=dialect, n=n, c=c, g=g)
+				allcellsinrow.append(morphcell.format(mo=mo))
+			thisrow = '\n\t\t'.join(allcellsinrow)
+			allrows.append(morphrowtemplate.format(allcells=thisrow))
+		if session['morphemptyrows'] == 'yes':
+			allrows.append(blankrow)
+
+	rows = '\n'.join(allrows)
+	thetablehtml = tabletemplate.format(header=fullheader, rows=rows)
+
+	# print('thetablehtml', thetablehtml)
+	return thetablehtml
 
 
 def verbtabletemplate(mood: str, voice: str, dialect='attic', duals=True, lang='greek') -> str:
@@ -267,6 +348,26 @@ def verbtabletemplate(mood: str, voice: str, dialect='attic', duals=True, lang='
 	thetablehtml = tabletemplate.format(header=fullheader, rows=rows)
 
 	return thetablehtml
+
+
+def filloutdeclinedtabletemplate(lookupdict: dict, wordcountdict: dict, template: str) -> str:
+	"""
+
+	regex swap the noun/adj items
+
+	:param lookupdict:
+	:param wordcountdict:
+	:param template:
+	:return:
+	"""
+
+	formtemplate = '<verbform searchterm="{sf}">{f}</verbform>'
+	formandcountertemplate = '{f} (<span class="counter">{c}</span>)'
+
+	seeking = r'<td class="morphcell">(.*?)</td>'
+	cells = re.findall(seeking, template)
+
+	return str()
 
 
 def filloutverbtabletemplate(lookupdict: dict, wordcountdict: dict, template: str) -> str:

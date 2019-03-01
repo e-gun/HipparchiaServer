@@ -11,7 +11,8 @@ import re
 from typing import List
 
 from server.dbsupport.lexicaldbfunctions import bulkfindwordcounts, grablemmataobjectfor, lookformorphologymatches
-from server.formatting.morphologytableformatting import filloutverbtabletemplate, verbtabletemplate, nountabletemplate
+from server.formatting.morphologytableformatting import filloutdeclinedtabletemplate, filloutverbtabletemplate, \
+	declinedtabletemplate, verbtabletemplate
 from server.formatting.wordformatting import stripaccents
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 
@@ -125,12 +126,12 @@ class BaseFormMorphology(object):
 
 	def buildhtmldeclinedtablerows(self) -> List[str]:
 		returnarray = list()
-		fd = self._generateverbformdictionary()
+		fd = self._generatedeclinedformdictionary()
 		keyedwcounts = self._generatekeyedwordcounts()
 		for d in self.knowndialects:
 			if self._declinedtablewillhavecontents(d):
-				t = nountabletemplate(dialect=d, duals=self.icontainduals(), lang=self.language)
-				returnarray.append(filloutverbtabletemplate(fd, keyedwcounts, t))
+				t = declinedtabletemplate(dialect=d, duals=self.icontainduals(), lang=self.language)
+				returnarray.append(filloutdeclinedtabletemplate(fd, keyedwcounts, t))
 		return returnarray
 
 	def getprincipleparts(self) -> List[str]:
@@ -217,6 +218,40 @@ class BaseFormMorphology(object):
 		allvoices = [v for v in allvoices if v]
 		allvoices = sorted(list(allvoices))
 		return allvoices
+
+	def _generatedeclinedformdictionary(self) -> dict:
+		"""
+
+		miles :  from miles :
+		[a]	masc/fem	nom	sg
+
+		operibus :  from opus¹  (“work”):
+		[a]	neut	abl	pl
+		[b]	neut
+
+		:return:
+		"""
+
+		declinedtemplate = '_{d}_{n}_{g}_{c}_'
+
+		formdict = dict()
+		declinedforms = [a for a in self.analyses if isinstance(a.analysis, DeclinedFormAnalysis)]
+		for form in declinedforms:
+			dialectlist = form.analysis.dialects
+			genders = form.analysis.gender.split('/')
+			c = form.analysis.case
+			n = form.analysis.number
+			for g in genders:
+				for d in dialectlist:
+					mykey = declinedtemplate.format(d=d, n=n, g=g, c=c)
+					try:
+						formdict[mykey].append(form.observed)
+					except KeyError:
+						formdict[mykey] = [form.observed]
+
+		# print('formdict', formdict)
+
+		return formdict
 
 	def _generateverbformdictionary(self) -> dict:
 		"""
@@ -692,7 +727,8 @@ class DeclinedFormAnalysis(object):
 		self.gender = analyssiscomponents[0]
 		self.case = analyssiscomponents[1]
 		self.number = analyssiscomponents[2]
-		print('DeclinedFormAnalysis()', self.word, self.gender, self.number, self.case, self.dialects)
+		self.voice = None
+		# print('DeclinedFormAnalysis()', self.word, self.gender, self.number, self.case, self.dialects)
 
 class AdjAnalysis(object):
 	pass
