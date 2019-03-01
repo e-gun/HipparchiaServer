@@ -11,18 +11,68 @@ from typing import List
 import psycopg2
 from flask import session
 
-from server.dbsupport.tablefunctions import assignuniquename
 from server.dbsupport.miscdbfunctions import resultiterator
+from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.abbreviations import unpackcommonabbreviations
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject
-from server.hipparchiaobjects.lexicalobjects import dbGreekWord, dbLatinWord, dbDictionaryEntry
+from server.hipparchiaobjects.lexicalobjects import dbDictionaryEntry, dbGreekWord, dbLatinWord
 from server.hipparchiaobjects.morphologyobjects import dbLemmaObject
 from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
 
-def searchdbforlexicalentry(seeking, usedict, limit=None) -> List:
+def headwordsearch(seeking, limit, usedictionary, usecolumn) -> List:
+
+	dbconnection = ConnectionObject()
+	dbcursor = dbconnection.cursor()
+
+	query = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s LIMIT {lim}'.format(d=usedictionary, c=usecolumn, lim=limit)
+	if seeking[0] == ' ' and seeking[-1] == ' ':
+		data = ('^' + seeking[1:-1] + '$',)
+	elif seeking[0] == ' ' and seeking[-1] != ' ':
+		data = ('^' + seeking[1:] + '.*?',)
+	elif seeking[0] == '^' and seeking[-1] == '$':
+		# esp if the dictionary sent this via next/previous entry
+		data = (seeking,)
+	else:
+		data = ('.*?' + seeking + '.*?',)
+
+	# print('query, data\n\t{q}\n\t{d}\n'.format(q=query, d=data))
+
+	dbcursor.execute(query, data)
+
+	# note that the dictionary db has a problem with vowel lengths vs accents
+	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
+	try:
+		foundentries = dbcursor.fetchall()
+	except:
+		foundentries = list()
+
+	# found [('indoloria²',), ('indolorius',), ('indoloria¹',), ('indoloris',), ('dolorosus',), ('dolor',)]
+
+	if not foundentries:
+		variantseeker = seeking[:-1] + '[¹²³⁴⁵⁶⁷⁸⁹]' + seeking[-1]
+		data = (variantseeker,)
+		dbcursor.execute(query, data)
+		foundentries = dbcursor.fetchall()
+
+	if not foundentries:
+		# maybe an inflected form was requested (can happen via clicks inside of an entry)
+		morph = lookformorphologymatches(seeking, dbcursor)
+		if morph:
+			guesses = morph.getpossible()
+			firstguess = guesses[0].getbaseform()
+			seeking = stripaccents(firstguess)
+			data = ('^{s}$'.format(s=seeking),)
+			# print('lookformorphologymatches() new data=', data)
+			dbcursor.execute(query, data)
+			foundentries = dbcursor.fetchall()
+
+	return foundentries
+
+
+def reversedictionarylookup(seeking, usedict, limit=None) -> List:
 	"""
 
 	find an (approximate) entry in a dictionary

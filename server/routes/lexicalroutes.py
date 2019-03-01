@@ -6,19 +6,17 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import itertools
 import json
 import re
 
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.lexicaldbfunctions import bulkfindwordcounts, findentrybyid, lookformorphologymatches, \
-	probedictionary, querytotalwordcounts, searchdbforlexicalentry
+from server.dbsupport.lexicaldbfunctions import findentrybyid, headwordsearch, lookformorphologymatches, \
+	probedictionary, querytotalwordcounts, reversedictionarylookup
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs, morphologychartjs
 from server.formatting.lexicaformatting import getobservedwordprevalencedata
-from server.formatting.morphologytableformatting import filloutverbtabletemplate, verbtabletemplate
 from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation, depunct, \
 	removegravity, stripaccents, tidyupterm
 from server.formatting.wordformatting import setdictionarylanguage
@@ -59,7 +57,7 @@ def dictsearch(searchterm):
 	stripped = re.sub(r'[uv]', '[uvUV]', stripped)
 	stripped = re.sub(r'[ij]', '[ijIJ]', stripped)
 
-	if re.search(r'[a-z]', stripped):
+	if re.search(r'[a-z]', seeking):
 		usedictionary = 'latin'
 		usecolumn = 'entry_name'
 	else:
@@ -70,49 +68,13 @@ def dictsearch(searchterm):
 		returndict['newhtml'] = 'cannot look up {w}: {d} dictionary is not installed'.format(d=usedictionary, w=seeking)
 		return json.dumps(returndict)
 
+	if not session['available'][usedictionary + '_dictionary']:
+		returndict['newhtml'] = 'cannot look up {w}: {d} dictionary is not installed'.format(d=usedictionary, w=seeking)
+		return json.dumps(returndict)
+
 	limit = hipparchia.config['CAPONDICTIONARYFINDS']
 
-	query = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s LIMIT {lim}'.format(d=usedictionary, c=usecolumn, lim=limit)
-	if stripped[0] == ' ' and stripped[-1] == ' ':
-		data = ('^' + stripped[1:-1] + '$',)
-	elif stripped[0] == ' ' and stripped[-1] != ' ':
-		data = ('^' + stripped[1:] + '.*?',)
-	elif stripped[0] == '^' and stripped[-1] == '$':
-		# esp if the dictionary sent this via next/previous entry
-		data = (stripped,)
-	else:
-		data = ('.*?' + stripped + '.*?',)
-
-	# print('query, data\n\t{q}\n\t{d}\n'.format(q=query, d=data))
-
-	dbcursor.execute(query, data)
-
-	# note that the dictionary db has a problem with vowel lengths vs accents
-	# SELECT * FROM greek_dictionary WHERE entry_name LIKE %s d ('μνᾱ/αϲθαι,μνάομαι',)
-	try:
-		found = dbcursor.fetchall()
-	except:
-		found = list()
-
-	# found [('indoloria²',), ('indolorius',), ('indoloria¹',), ('indoloris',), ('dolorosus',), ('dolor',)]
-
-	if not found:
-		variantseeker = seeking[:-1] + '[¹²³⁴⁵⁶⁷⁸⁹]' + seeking[-1]
-		data = (variantseeker,)
-		dbcursor.execute(query, data)
-		found = dbcursor.fetchall()
-
-	if not found:
-		# maybe an inflected form was requested (can happen via clicks inside of an entry)
-		morph = lookformorphologymatches(seeking, dbcursor)
-		if morph:
-			guesses = morph.getpossible()
-			firstguess = guesses[0].getbaseform()
-			stripped = stripaccents(firstguess)
-			data = ('^{s}$'.format(s=stripped),)
-			# print('lookformorphologymatches() new data=', data)
-			dbcursor.execute(query, data)
-			found = dbcursor.fetchall()
+	found = headwordsearch(stripped, limit, usedictionary, usecolumn)
 
 	# the results should be given the polytonicsort() treatment
 	returnlist = list()
@@ -301,7 +263,7 @@ def reverselexiconsearch(searchterm):
 		usedict = s[0]
 		translationlabel = s[1]
 		# first see if your term is mentioned at all
-		wordobjects = searchdbforlexicalentry(seeking, usedict, limit)
+		wordobjects = reversedictionarylookup(seeking, usedict, limit)
 		entries += [w.entry for w in wordobjects]
 
 	if len(entries) == limit:
@@ -477,45 +439,16 @@ def knownforms(lexicalid, language, xrefid, headword):
 	</div>
 	"""
 
-	moods = {'0ind', '1subj', '2opt', '3imperat', '4part', '5inf'}
-	if session['morphinfin'] == 'no':
-		moods.remove('5inf')
-	if session['morphpcpls'] == 'no':
-		moods.remove('4part')
-	if session['morphimper'] == 'no':
-		moods.remove('3imperat')
-	if session['morphfinite'] == 'no':
-		moods.remove('0ind')
-		moods.remove('1subj')
-		moods.remove('2opt')
-
-	moods = sorted(list(moods))
-	moods = [m[1:] for m in moods]
-
-	fd = bfo.generateverbformdictionary()
-
-	if session['morphdialects'] == 'no':
-		bfo.nodialects()
-
-	wordcounts = True
-	keyedwco = dict()
-	if wordcounts:
-		wordset = {re.sub(r"'$", r'', a.word) for a in bfo.analyses}
-		initials = {stripaccents(w[0]) for w in wordset}
-		byinitial = {i: [w for w in wordset if stripaccents(w[0]) == i] for i in initials}
-		wco = [bulkfindwordcounts(byinitial[i]) for i in byinitial]
-		wco = list(itertools.chain(*wco))
-		keyedwco = {w.entryname: w.t for w in wco if w}
-
 	returnarray = list()
-	returnarray.append(topofoutput.format(w=bfo.headword, eid=bfo.lexicalid, lg=bfo.language))
 
-	for d in bfo.knowndialects:
-		for v in bfo.knownvoices:
-			for m in moods:
-				if bfo.tablewillhavecontents(d, v, m):
-					t = verbtabletemplate(m, v, dialect=d, duals=bfo.icontainduals(), lang=bfo.language)
-					returnarray.append(filloutverbtabletemplate(fd, keyedwco, t))
+
+	if bfo.iamconjugated():
+		returnarray.append(topofoutput.format(w=bfo.headword, eid=bfo.lexicalid, lg=bfo.language))
+		returnarray = returnarray + bfo.buildhtmlverbtablerows(session)
+
+	if bfo.iamdeclined():
+		returnarray.append(topofoutput.format(w=bfo.headword, eid=bfo.lexicalid, lg=bfo.language))
+		returnarray = returnarray + bfo.buildhtmldeclinedtablerows()
 
 	returndict = dict()
 	returndict['newhtml'] = '\n'.join(returnarray)

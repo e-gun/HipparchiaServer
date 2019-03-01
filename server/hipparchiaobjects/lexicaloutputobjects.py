@@ -159,7 +159,7 @@ class lexicalOutputObject(object):
 		morphabletemplate = """
 		<table class="morphtable">
 			<tbody>
-				<tr><th class="morphcell labelcell" rowspan="1" colspan="2">principle parts</th></tr>	
+				<tr><th class="morphcell labelcell" rowspan="1" colspan="2">{head}</th></tr>	
 				{trs}
 				<tr>
 					<td></td>
@@ -181,16 +181,20 @@ class lexicalOutputObject(object):
 		pppts = str()
 		w = self.thiswordobject
 		if session['principleparts'] != 'no':
-			fingerprints = {'v.', 'v. dep.', 'v. a.', 'v. n.'}
+			# fingerprints = {'v.', 'v. dep.', 'v. a.', 'v. n.'}
 			# and, sadly, some entries do not have a POS: "select pos from latin_dictionary where entry_name='declaro';"
 			# declaro: w.pos ['']
-			if (fingerprints & set(w.pos)) or w.pos == ['']:
-				xref = findparserxref(w)
-				morphanalysis = BaseFormMorphology(w.entry, xref, self.usedictionary, self.id)
-				ppts = morphanalysis.getprincipleparts()
-				if ppts and morphanalysis.mostlyconjugatedforms():
-					trs = [morphrowtemplate.format(ct=p[0], ppt=p[1]) for p in ppts]
-					pppts = morphabletemplate.format(f=morphanalysis.numberofknownforms, trs='\n'.join(trs), px=xref, w=w.entry, lid=self.id, lg=self.usedictionary)
+			# if (fingerprints & set(w.pos)) or w.pos == ['']:
+			xref = findparserxref(w)
+			morphanalysis = BaseFormMorphology(w.entry, xref, self.usedictionary, self.id)
+			ppts = morphanalysis.getprincipleparts()
+			if ppts and morphanalysis.iamconjugated():
+				trs = [morphrowtemplate.format(ct=p[0], ppt=p[1]) for p in ppts]
+				pppts = morphabletemplate.format(f=morphanalysis.numberofknownforms, trs='\n'.join(trs), px=xref, w=w.entry, lid=self.id, lg=self.usedictionary, head='principle parts')
+			else:
+				trs = str()
+				pppts = morphabletemplate.format(f=morphanalysis.numberofknownforms, trs=trs, px=xref, w=w.entry, lid=self.id, lg=self.usedictionary, head=str())
+
 		return pppts
 
 	def _buildentrysummary(self) -> str:

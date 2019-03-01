@@ -6,10 +6,13 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import itertools
 import re
 from typing import List
 
-from server.dbsupport.lexicaldbfunctions import grablemmataobjectfor, lookformorphologymatches
+from server.dbsupport.lexicaldbfunctions import bulkfindwordcounts, grablemmataobjectfor, lookformorphologymatches
+from server.formatting.morphologytableformatting import filloutverbtabletemplate, verbtabletemplate, nountabletemplate
+from server.formatting.wordformatting import stripaccents
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 
 
@@ -63,7 +66,7 @@ class BaseFormMorphology(object):
 		elif self.language == 'latin':
 			self.knowndialects = [' ']
 
-	def mostlyconjugatedforms(self):
+	def iamconjugated(self):
 		# 'annus' has 'anno' in it: a single verbal lookalike
 		vv = [v for v in self.analyses if isinstance(v.getanalysis(), ConjugatedFormAnalysis)]
 		dd = [d for d in self.analyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
@@ -73,17 +76,80 @@ class BaseFormMorphology(object):
 		else:
 			return False
 
-	def getprincipleparts(self):
+	def iamdeclined(self):
+		dd = [d for d in self.analyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
+		if dd:
+			return True
+		else:
+			return False
+
+	@staticmethod
+	def _generatemoodlist(thesession: dict) -> list:
+		moods = {'0ind', '1subj', '2opt', '3imperat', '4part', '5inf'}
+		if thesession['morphinfin'] == 'no':
+			moods.remove('5inf')
+		if thesession['morphpcpls'] == 'no':
+			moods.remove('4part')
+		if thesession['morphimper'] == 'no':
+			moods.remove('3imperat')
+		if thesession['morphfinite'] == 'no':
+			moods.remove('0ind')
+			moods.remove('1subj')
+			moods.remove('2opt')
+
+		moods = sorted(list(moods))
+		moods = [m[1:] for m in moods]
+		return moods
+
+	def _generatekeyedwordcounts(self) -> dict:
+		wordset = {re.sub(r"'$", r'', a.word) for a in self.analyses}
+		initials = {stripaccents(w[0]) for w in wordset}
+		byinitial = {i: [w for w in wordset if stripaccents(w[0]) == i] for i in initials}
+		wco = [bulkfindwordcounts(byinitial[i]) for i in byinitial]
+		wco = list(itertools.chain(*wco))
+		keyedwcounts = {w.entryname: w.t for w in wco if w}
+		return keyedwcounts
+
+	def buildhtmlverbtablerows(self, thesession: dict) -> List[str]:
+		returnarray = list()
+		moods = self._generatemoodlist(thesession)
+		fd = self._generateverbformdictionary()
+		keyedwcounts = self._generatekeyedwordcounts()
+		for d in self.knowndialects:
+			for v in self.knownvoices:
+				for m in moods:
+					if self._verbtablewillhavecontents(d, v, m):
+						t = verbtabletemplate(m, v, dialect=d, duals=self.icontainduals(), lang=self.language)
+						returnarray.append(filloutverbtabletemplate(fd, keyedwcounts, t))
+		return returnarray
+
+	def buildhtmldeclinedtablerows(self) -> List[str]:
+		returnarray = list()
+		fd = self._generateverbformdictionary()
+		keyedwcounts = self._generatekeyedwordcounts()
+		for d in self.knowndialects:
+			if self._declinedtablewillhavecontents(d):
+				t = nountabletemplate(dialect=d, duals=self.icontainduals(), lang=self.language)
+				returnarray.append(filloutverbtabletemplate(fd, keyedwcounts, t))
+		return returnarray
+
+	def getprincipleparts(self) -> List[str]:
 		if not self.principleparts:
 			self._determineprincipleparts()
 		return self.principleparts
 
-	def tablewillhavecontents(self, dialect, voice, mood):
+	def _verbtablewillhavecontents(self, dialect: str, voice: str, mood: str):
 		present = [w for w in self.analyses if w.analysis and
 		           dialect in w.analysis.dialects and
 		           w.analysis.voice == voice and
 		           w.analysis.mood == mood]
+		if len(present) > 0:
+			return True
+		else:
+			return False
 
+	def _declinedtablewillhavecontents(self, dialect: str):
+		present = [w for w in self.analyses if w.analysis and dialect in w.analysis.dialects]
 		if len(present) > 0:
 			return True
 		else:
@@ -137,6 +203,8 @@ class BaseFormMorphology(object):
 		return alldialects
 
 	def _getknownvoices(self) -> list:
+		if not self.iamconjugated():
+			return list()
 		allvoices = set()
 		parsing = [x.analysis for x in self.analyses if x.analysis]
 		for p in parsing:
@@ -150,7 +218,7 @@ class BaseFormMorphology(object):
 		allvoices = sorted(list(allvoices))
 		return allvoices
 
-	def generateverbformdictionary(self) -> dict:
+	def _generateverbformdictionary(self) -> dict:
 		"""
 
 		e.g. {'_attic_imperf_ind_mp_1st_pl_': 'ἠλαττώμεθα', ...}
@@ -171,21 +239,21 @@ class BaseFormMorphology(object):
 		pcpltemplate = '_{d}_{m}_{v}_{n}_{t}_{g}_{c}_'
 
 		formdict = dict()
-		possibilities = [a for a in self.analyses if isinstance(a.analysis, ConjugatedFormAnalysis)]
-		for possibility in possibilities:
-			dialectlist = possibility.analysis.dialects
-			t = possibility.analysis.tense
-			m = possibility.analysis.mood
-			vv = possibility.analysis.voice
-			n = possibility.analysis.number
+		conjugatedforms = [a for a in self.analyses if isinstance(a.analysis, ConjugatedFormAnalysis)]
+		for form in conjugatedforms:
+			dialectlist = form.analysis.dialects
+			t = form.analysis.tense
+			m = form.analysis.mood
+			vv = form.analysis.voice
+			n = form.analysis.number
 			if m == 'part':
 				template = pcpltemplate
 				p = str()
-				g = possibility.analysis.gender
-				c = possibility.analysis.case
+				g = form.analysis.gender
+				c = form.analysis.case
 			else:
 				template = regextemplate
-				p = possibility.analysis.person
+				p = form.analysis.person
 				g = str()
 				c = str()
 
@@ -198,9 +266,9 @@ class BaseFormMorphology(object):
 				for d in dialectlist:
 					mykey = template.format(d=d, m=m, v=v, n=n, p=p, t=t, g=g, c=c)
 					try:
-						formdict[mykey].append(possibility.observed)
+						formdict[mykey].append(form.observed)
 					except KeyError:
-						formdict[mykey] = [possibility.observed]
+						formdict[mykey] = [form.observed]
 
 		return formdict
 
@@ -216,7 +284,7 @@ class BaseFormMorphology(object):
 			available.extend([MorphAnalysis(m.observed, mylanguage, a) for a in analysislist])
 		return available
 
-	def _determineprincipleparts(self):
+	def _determineprincipleparts(self) -> list:
 		if self.principleparts and not self.missingparts:
 			return self.principleparts
 
@@ -384,7 +452,7 @@ class MorphAnalysis(object):
 			self.analysis = ConjugatedFormAnalysis(self.word, self.language, self.dialects, self.analyssiscomponents)
 		elif self.analyssiscomponents[0] in genders:
 			pos = 'declined'
-			self.analysis = DeclinedFormAnalysis()
+			self.analysis = DeclinedFormAnalysis(self.word, self.language, self.dialects, self.analyssiscomponents)
 		else:
 			pos = 'notimplem'
 			self.analysis = None
@@ -613,16 +681,18 @@ class ConjugatedFormAnalysis(object):
 class DeclinedFormAnalysis(object):
 	"""
 
-	EMPTY HUSK: just avoiding exceptions ATM
-
-	needs a real implementation
+	DeclinedFormAnalysis() ματέρι fem sg dat ['doric', 'aeolic']
 
 	"""
-	def __init__(self):
-		self.dialects = list()
-		self.tense = None
-		self.mood = None
-		self.voice = None
+	def __init__(self, word: str, language: str, dialects: list, analyssiscomponents: List[str]):
+		self.word = word
+		self.language = language
+		self.dialects = dialects
+		self.analysiscomponents = analyssiscomponents
+		self.gender = analyssiscomponents[0]
+		self.case = analyssiscomponents[1]
+		self.number = analyssiscomponents[2]
+		print('DeclinedFormAnalysis()', self.word, self.gender, self.number, self.case, self.dialects)
 
 class AdjAnalysis(object):
 	pass

@@ -110,6 +110,19 @@ def findmylatintenses(mood: str, voice: str) -> dict:
 	return mytenses
 
 
+def nountabletemplate(dialect='attic', duals=True, lang='greek') -> str:
+	"""
+
+
+	:param dialect:
+	:param duals:
+	:param lang:
+	:return:
+	"""
+
+	return str()
+
+
 def verbtabletemplate(mood: str, voice: str, dialect='attic', duals=True, lang='greek') -> str:
 	"""
 
