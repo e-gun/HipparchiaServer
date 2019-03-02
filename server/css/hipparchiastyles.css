@@ -1250,6 +1250,7 @@ form {
 
 formsummary{
     color: var(--rustedorange);
+	font-size: 90%;
 	font-weight: 600;
     }
 

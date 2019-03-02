@@ -11,7 +11,7 @@ import re
 from typing import List
 
 from server.dbsupport.lexicaldbfunctions import bulkfindwordcounts, grablemmataobjectfor, lookformorphologymatches
-from server.formatting.morphologytableformatting import filloutdeclinedtabletemplate, filloutverbtabletemplate, \
+from server.formatting.morphologytableformatting import filloutmorphtabletemplate, \
 	declinedtabletemplate, verbtabletemplate
 from server.formatting.wordformatting import stripaccents
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -61,12 +61,6 @@ class BaseFormMorphology(object):
 		self.knownvoices = self._getknownvoices()
 		self.knowndialects = self._getknowndialects()
 
-	def nodialects(self):
-		if self.language == 'greek':
-			self.knowndialects = ['attic']
-		elif self.language == 'latin':
-			self.knowndialects = [' ']
-
 	def iamconjugated(self):
 		# 'annus' has 'anno' in it: a single verbal lookalike
 		vv = [v for v in self.analyses if isinstance(v.getanalysis(), ConjugatedFormAnalysis)]
@@ -83,6 +77,15 @@ class BaseFormMorphology(object):
 			return True
 		else:
 			return False
+
+	def _getmygenders(self) -> set:
+		declinedforms = [a for a in self.analyses if isinstance(a.analysis, DeclinedFormAnalysis)]
+		genders = set()
+		for f in declinedforms:
+			gset = set(f.analysis.gender.split('/'))
+			genders.update(gset)
+		mygenders = {g for g in genders if g}
+		return mygenders
 
 	@staticmethod
 	def _generatemoodlist(thesession: dict) -> list:
@@ -121,17 +124,19 @@ class BaseFormMorphology(object):
 				for m in moods:
 					if self._verbtablewillhavecontents(d, v, m):
 						t = verbtabletemplate(m, v, dialect=d, duals=self.icontainduals(), lang=self.language)
-						returnarray.append(filloutverbtabletemplate(fd, keyedwcounts, t))
+						returnarray.append(filloutmorphtabletemplate(fd, keyedwcounts, t))
 		return returnarray
 
 	def buildhtmldeclinedtablerows(self) -> List[str]:
 		returnarray = list()
 		fd = self._generatedeclinedformdictionary()
 		keyedwcounts = self._generatekeyedwordcounts()
+		mygenders = self._getmygenders()
+		skipgenders = {'masc', 'fem', 'neut'} - mygenders
 		for d in self.knowndialects:
 			if self._declinedtablewillhavecontents(d):
-				t = declinedtabletemplate(dialect=d, duals=self.icontainduals(), lang=self.language)
-				returnarray.append(filloutdeclinedtabletemplate(fd, keyedwcounts, t))
+				t = declinedtabletemplate(dialect=d, duals=self.icontainduals(), lang=self.language, skipgenders=skipgenders)
+				returnarray.append(filloutmorphtabletemplate(fd, keyedwcounts, t))
 		return returnarray
 
 	def getprincipleparts(self) -> List[str]:
@@ -229,6 +234,9 @@ class BaseFormMorphology(object):
 		[a]	neut	abl	pl
 		[b]	neut
 
+		λοιβή :  from λοιβή  (“pouring.”):
+		[a]	fem	nom/voc	sg	(attic	epic	ionic)
+
 		:return:
 		"""
 
@@ -239,18 +247,19 @@ class BaseFormMorphology(object):
 		for form in declinedforms:
 			dialectlist = form.analysis.dialects
 			genders = form.analysis.gender.split('/')
-			c = form.analysis.case
+			cases = form.analysis.case.split('/')
 			n = form.analysis.number
-			for g in genders:
-				for d in dialectlist:
-					mykey = declinedtemplate.format(d=d, n=n, g=g, c=c)
-					try:
-						formdict[mykey].append(form.observed)
-					except KeyError:
-						formdict[mykey] = [form.observed]
+			# print('d/c/g', form.observed, dialectlist, cases, genders)
+			for d in dialectlist:
+				for c in cases:
+					for g in genders:
+						mykey = declinedtemplate.format(d=d, n=n, g=g, c=c)
+						try:
+							formdict[mykey].append(form.observed)
+						except KeyError:
+							formdict[mykey] = [form.observed]
 
 		# print('formdict', formdict)
-
 		return formdict
 
 	def _generateverbformdictionary(self) -> dict:
@@ -282,15 +291,13 @@ class BaseFormMorphology(object):
 			vv = form.analysis.voice
 			n = form.analysis.number
 			if m == 'part':
-				template = pcpltemplate
 				p = str()
-				g = form.analysis.gender
-				c = form.analysis.case
+				genders = form.analysis.gender.split('/')
+				cases = form.analysis.case.split('/')
 			else:
-				template = regextemplate
 				p = form.analysis.person
-				g = str()
-				c = str()
+				genders = list()
+				cases = list()
 
 			if vv == 'mp':
 				voices = ['mid', 'pass']
@@ -299,11 +306,20 @@ class BaseFormMorphology(object):
 
 			for v in voices:
 				for d in dialectlist:
-					mykey = template.format(d=d, m=m, v=v, n=n, p=p, t=t, g=g, c=c)
-					try:
-						formdict[mykey].append(form.observed)
-					except KeyError:
-						formdict[mykey] = [form.observed]
+					if m == 'part':
+						for g in genders:
+							for c in cases:
+								mykey = pcpltemplate.format(d=d, m=m, v=v, n=n, p=p, t=t, g=g, c=c)
+								try:
+									formdict[mykey].append(form.observed)
+								except KeyError:
+									formdict[mykey] = [form.observed]
+					else:
+						mykey = regextemplate.format(d=d, m=m, v=v, n=n, p=p, t=t)
+						try:
+							formdict[mykey].append(form.observed)
+						except KeyError:
+							formdict[mykey] = [form.observed]
 
 		return formdict
 
@@ -319,7 +335,7 @@ class BaseFormMorphology(object):
 			available.extend([MorphAnalysis(m.observed, mylanguage, a) for a in analysislist])
 		return available
 
-	def _determineprincipleparts(self) -> list:
+	def _determineprincipleparts(self):
 		if self.principleparts and not self.missingparts:
 			return self.principleparts
 
@@ -343,13 +359,10 @@ class BaseFormMorphology(object):
 
 		allpresent = {p[0]: p[1] for p in pp}
 		self.missingparts = set(range(1, pplen + 1)) - set(allpresent.keys())
-		# print('self.missingparts', self.missingparts)
 
 		for p in self.missingparts:
 			self._supplementmissing(p)
-
 		self._dropduplicates()
-
 		self.principleparts = sorted(self.principleparts)
 		return
 
@@ -370,25 +383,7 @@ class BaseFormMorphology(object):
 			if not skip:
 				newparts.append((thispartnumber, thispartstr))
 
-		# for i in range(1, len(parts)):
-		# 	skip = False
-		# 	thispartnumber = parts[i][0]
-		# 	previouspartnumber = parts[i-1][0]
-		# 	thispartstr = parts[i][1]
-		# 	previouspartstr = parts[i-1][1]
-		# 	if thispartnumber == previouspartnumber:
-		# 		skip = True
-		# 		disq = [re.search(thispartstr, d) for d in disqualifiers]
-		# 		if disq:
-		# 			pass
-		# 		else:
-		# 			modifiedstr = '{p}&nbsp;/&nbsp;{t}'.format(p=previouspartstr, t=thispartstr)
-		# 			newparts[i-1] = (previouspartnumber, modifiedstr)
-		# 	if not skip:
-		# 		newparts.append((thispartnumber, thispartstr))
-
 		self.principleparts = newparts
-
 		return
 
 	def _supplementmissing(self, parttosupplement: int):
@@ -473,9 +468,9 @@ class MorphAnalysis(object):
 			dialects = str()
 		dialects = re.sub(r'\)', '', dialects)
 		self.dialects = dialects.split(' ')
-		if self.dialects == ['']:
-			self.dialects = list()
 		if self.language == 'latin':
+			self.dialects = [' ']
+		if self.dialects == ['']:
 			self.dialects = [' ']
 		self.analyssiscomponents = self.nondialectical.split(' ')
 
@@ -632,7 +627,9 @@ class ConjugatedFormAnalysis(object):
 		if self.pptuple not in self.ppts:
 			return False
 
-		if not (self.dialects == ['attic'] or self.dialects == ['parad_form']):
+		targetdialects = {'attic', ' '}
+
+		if not targetdialects.intersection(set(self.dialects)):
 			return False
 
 		dq = [re.search(d, self.word) for d in self.baseformdisqualifiers]

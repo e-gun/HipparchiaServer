@@ -350,27 +350,7 @@ def verbtabletemplate(mood: str, voice: str, dialect='attic', duals=True, lang='
 	return thetablehtml
 
 
-def filloutdeclinedtabletemplate(lookupdict: dict, wordcountdict: dict, template: str) -> str:
-	"""
-
-	regex swap the noun/adj items
-
-	:param lookupdict:
-	:param wordcountdict:
-	:param template:
-	:return:
-	"""
-
-	formtemplate = '<verbform searchterm="{sf}">{f}</verbform>'
-	formandcountertemplate = '{f} (<span class="counter">{c}</span>)'
-
-	seeking = r'<td class="morphcell">(.*?)</td>'
-	cells = re.findall(seeking, template)
-
-	return str()
-
-
-def filloutverbtabletemplate(lookupdict: dict, wordcountdict: dict, template: str) -> str:
+def filloutmorphtabletemplate(lookupdict: dict, wordcountdict: dict, template: str) -> str:
 	"""
 
 	regex swap the verbtabletemplate items

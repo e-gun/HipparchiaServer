@@ -157,16 +157,11 @@ class lexicalOutputObject(object):
 
 	def _buildprincipleparts(self) -> str:
 		morphabletemplate = """
+		<formsummary parserxref="{px}" lexicalid="{lid}" headword="{w}" lang="{lg}">known forms in use: {f}</formsummary>
 		<table class="morphtable">
 			<tbody>
 				<tr><th class="morphcell labelcell" rowspan="1" colspan="2">{head}</th></tr>	
 				{trs}
-				<tr>
-					<td></td>
-					<td class="morphcell">
-						<formsummary parserxref="{px}" lexicalid="{lid}" headword="{w}" lang="{lg}">(total forms in use: {f})</formsummary>
-					</td>
-				</tr>
 			</tbody>
 		</table>
 		"""
@@ -191,7 +186,7 @@ class lexicalOutputObject(object):
 			if ppts and morphanalysis.iamconjugated():
 				trs = [morphrowtemplate.format(ct=p[0], ppt=p[1]) for p in ppts]
 				pppts = morphabletemplate.format(f=morphanalysis.numberofknownforms, trs='\n'.join(trs), px=xref, w=w.entry, lid=self.id, lg=self.usedictionary, head='principle parts')
-			else:
+			elif morphanalysis.iamdeclined():
 				trs = str()
 				pppts = morphabletemplate.format(f=morphanalysis.numberofknownforms, trs=trs, px=xref, w=w.entry, lid=self.id, lg=self.usedictionary, head=str())
 
