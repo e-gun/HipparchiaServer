@@ -39,7 +39,13 @@ class BaseFormMorphology(object):
 		(1 row)
 
 	"""
-	def __init__(self, headword: str, xref: str, language: str, lexicalid: str):
+	def __init__(self, headword: str, xref: str, language: str, lexicalid: str, thesession: dict):
+		self.showalldialects = True
+		self.collapseattic = False
+		if thesession['morphdialects'] == 'no':
+			self.showalldialects = False
+		if thesession['collapseattic'] == 'yes':
+			self.collapseattic = True
 		assert language in ['greek', 'latin'], 'BaseFormMorphology() only knows words that are "greek_morphology" or "latin_morphology"'
 		self.headword = headword
 		self.language = language
@@ -87,6 +93,13 @@ class BaseFormMorphology(object):
 		mygenders = {g for g in genders if g}
 		return mygenders
 
+	def _atticlist(self) -> list:
+		if self.collapseattic:
+			atticlist = ['attic']
+		else:
+			atticlist = [' ', 'attic']
+		return atticlist
+
 	@staticmethod
 	def _generatemoodlist(thesession: dict) -> list:
 		moods = {'0ind', '1subj', '2opt', '3imperat', '4part', '5inf'}
@@ -119,7 +132,10 @@ class BaseFormMorphology(object):
 		moods = self._generatemoodlist(thesession)
 		fd = self._generateverbformdictionary()
 		keyedwcounts = self._generatekeyedwordcounts()
-		for d in self.knowndialects:
+		dialects = self.knowndialects
+		if not self.showalldialects:
+			dialects = self._atticlist()
+		for d in dialects:
 			for v in self.knownvoices:
 				for m in moods:
 					if self._verbtablewillhavecontents(d, v, m):
@@ -133,7 +149,10 @@ class BaseFormMorphology(object):
 		keyedwcounts = self._generatekeyedwordcounts()
 		mygenders = self._getmygenders()
 		skipgenders = {'masc', 'fem', 'neut'} - mygenders
-		for d in self.knowndialects:
+		dialects = self.knowndialects
+		if not self.showalldialects:
+			dialects = self._atticlist()
+		for d in dialects:
 			if self._declinedtablewillhavecontents(d):
 				t = declinedtabletemplate(dialect=d, duals=self.icontainduals(), lang=self.language, skipgenders=skipgenders)
 				returnarray.append(filloutmorphtabletemplate(fd, keyedwcounts, t))
@@ -205,6 +224,12 @@ class BaseFormMorphology(object):
 			except KeyError:
 				pass
 
+		if self.collapseattic:
+			try:
+				alldialects.remove(' ')
+			except KeyError:
+				pass
+
 		alldialects = sorted(list(alldialects))
 		return alldialects
 
@@ -244,13 +269,17 @@ class BaseFormMorphology(object):
 
 		formdict = dict()
 		declinedforms = [a for a in self.analyses if isinstance(a.analysis, DeclinedFormAnalysis)]
+		# tossedforms = [a for a in self.analyses if not isinstance(a.analysis, DeclinedFormAnalysis)]
+		# tossed = [(f.observed, f.partofspeech) for f in tossedforms]
+		# print('tossedforms', tossed)
 		for form in declinedforms:
 			dialectlist = form.analysis.dialects
 			genders = form.analysis.gender.split('/')
 			cases = form.analysis.case.split('/')
 			n = form.analysis.number
-			# print('d/c/g', form.observed, dialectlist, cases, genders)
 			for d in dialectlist:
+				if self.collapseattic and self.language == 'greek' and d == ' ':
+					d = 'attic'
 				for c in cases:
 					for g in genders:
 						mykey = declinedtemplate.format(d=d, n=n, g=g, c=c)
@@ -258,7 +287,6 @@ class BaseFormMorphology(object):
 							formdict[mykey].append(form.observed)
 						except KeyError:
 							formdict[mykey] = [form.observed]
-
 		# print('formdict', formdict)
 		return formdict
 
@@ -306,6 +334,8 @@ class BaseFormMorphology(object):
 
 			for v in voices:
 				for d in dialectlist:
+					if self.collapseattic and self.language == 'greek' and d == ' ':
+						d = 'attic'
 					if m == 'part':
 						for g in genders:
 							for c in cases:
@@ -332,7 +362,7 @@ class BaseFormMorphology(object):
 			if m.amlatin():
 				mylanguage = 'latin'
 			analysislist = m.getanalysislist()
-			available.extend([MorphAnalysis(m.observed, mylanguage, a) for a in analysislist])
+			available.extend([MorphAnalysis(m.observed, mylanguage, self.collapseattic, a) for a in analysislist])
 		return available
 
 	def _determineprincipleparts(self):
@@ -430,10 +460,11 @@ class BaseFormMorphology(object):
 
 
 class MorphAnalysis(object):
-	def __init__(self, word, mylanguage, analysisstring):
+	def __init__(self, word, mylanguage, collapseattic, analysisstring):
 		self.analysis = NotImplemented
 		self.analyssiscomponents = NotImplemented
 		self.dialects = NotImplemented
+		self.collapseattic = collapseattic
 		self.word = word
 		self.observed = word
 		assert mylanguage in ['greek', 'latin'], 'MorphAnalysis() only knows words that are "greek" or "latin"'
@@ -468,15 +499,20 @@ class MorphAnalysis(object):
 			dialects = str()
 		dialects = re.sub(r'\)', '', dialects)
 		self.dialects = dialects.split(' ')
-		if self.language == 'latin':
+
+		if self.dialects == [''] and self.collapseattic:
+			self.dialects = ['attic']
+
+		if self.dialects == [''] and not self.collapseattic:
 			self.dialects = [' ']
-		if self.dialects == ['']:
+
+		if self.language == 'latin':
 			self.dialects = [' ']
 		self.analyssiscomponents = self.nondialectical.split(' ')
 
 	def _findpartofspeech(self):
 		tenses = ['pres', 'aor', 'fut', 'perf', 'imperf', 'plup', 'futperf', 'part']
-		genders = ['masc', 'fem', 'neut']
+		genders = ['masc', 'fem', 'neut', 'masc/neut', 'masc/fem']
 		if self.analyssiscomponents[0] in tenses:
 			pos = 'conjugated'
 			self.analysis = ConjugatedFormAnalysis(self.word, self.language, self.dialects, self.analyssiscomponents)

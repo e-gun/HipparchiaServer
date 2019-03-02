@@ -40,6 +40,7 @@ def modifysessionvariable(param, val):
 		'bracketround',
 		'bracketsquare',
 		'christiancorpus',
+		'collapseattic',
 		'cosdistbylineorword',
 		'cosdistbysentence',
 		'debugdb',

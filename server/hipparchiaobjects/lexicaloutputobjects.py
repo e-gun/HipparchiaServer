@@ -181,7 +181,7 @@ class lexicalOutputObject(object):
 			# declaro: w.pos ['']
 			# if (fingerprints & set(w.pos)) or w.pos == ['']:
 			xref = findparserxref(w)
-			morphanalysis = BaseFormMorphology(w.entry, xref, self.usedictionary, self.id)
+			morphanalysis = BaseFormMorphology(w.entry, xref, self.usedictionary, self.id, session)
 			ppts = morphanalysis.getprincipleparts()
 			if ppts and morphanalysis.iamconjugated():
 				trs = [morphrowtemplate.format(ct=p[0], ppt=p[1]) for p in ppts]

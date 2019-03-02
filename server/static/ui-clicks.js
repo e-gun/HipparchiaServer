@@ -28,6 +28,7 @@ function loadoptions() {
             'bracketround': $('#bracketround'),
             'bracketsquare': $('#bracketsquare'),
             'christiancorpus': $('#christiancorpus'),
+            'collapseattic': $('#collapseattic'),
             'cosdistbylineorword': $('#cosdistbylineorword'),
             'cosdistbysentence': $('#cosdistbysentence'),
             'debughtml': $('#debughtml'),
@@ -602,6 +603,12 @@ $('#morphpcpls').change(function() {
 
 $('#morphtables').change(function() {
     if(this.checked) { setoptions('morphtables', 'yes'); } else { setoptions('morphtables', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#collapseattic').change(function() {
+    if(this.checked) { setoptions('collapseattic', 'yes'); } else { setoptions('collapseattic', 'no'); }
     refreshselections();
     loadoptions();
     });

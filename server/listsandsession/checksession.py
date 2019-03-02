@@ -38,6 +38,7 @@ def probeforsessionvariables():
 		session['bracketsquare'] = hipparchia.config['DEFAULTHIGHLIGHTSQUAREBRACKETS']
 		session['browsercontext'] = str(int(hipparchia.config['DEFAULTBROWSERLINES']))
 		session['christiancorpus'] = corpusisonandavailable('christiancorpus')
+		session['collapseattic'] = 'yes'
 		session['cosdistbysentence'] = 'no'
 		session['cosdistbylineorword'] = 'no'
 		session['debugdb'] = hipparchia.config['DBDEBUGMODE']

@@ -420,7 +420,7 @@ def knownforms(lexicalid, language, xrefid, headword):
 	headword = depunct(headword)
 
 	try:
-		bfo = BaseFormMorphology(headword, xrefid, language, lexicalid)
+		bfo = BaseFormMorphology(headword, xrefid, language, lexicalid, session)
 	except:
 		print('could not initialize BaseFormMorphology() object')
 		return 'could not initialize BaseFormMorphology() object'
