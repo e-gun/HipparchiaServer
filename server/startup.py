@@ -167,9 +167,9 @@ if current_process().name == 'MainProcess':
 
 		return datematches
 
-	# search list building and pruning was testing all items for their date this too often at a cost of .5s per full corpus search
+	# search list building and pruning was testing all items for their date
+	# this too often at a cost of .5s per full corpus search
 	# so a master list is built up front that you can quickly make a check against
-
 
 	allworks = workdict.keys()
 	allvaria = set(findspecificdate(allworks, authordict, workdict, 2000))

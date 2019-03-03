@@ -38,6 +38,11 @@ class BaseFormMorphology(object):
 		 v. a. ‖ adv.
 		(1 row)
 
+	there are THREE basic uses of this object
+		finding principle parts
+		generating a verb table
+		generating a noun/adj table
+
 	"""
 	def __init__(self, headword: str, xref: str, language: str, lexicalid: str, thesession: dict):
 		self.showalldialects = True
@@ -160,7 +165,8 @@ class BaseFormMorphology(object):
 
 	def getprincipleparts(self) -> List[str]:
 		if not self.principleparts:
-			self._determineprincipleparts()
+			ppf = PrinciplePartFunctions(self.analyses, self.language)
+			self.principleparts = ppf.determineprincipleparts()
 		return self.principleparts
 
 	def _verbtablewillhavecontents(self, dialect: str, voice: str, mood: str):
@@ -364,99 +370,6 @@ class BaseFormMorphology(object):
 			analysislist = m.getanalysislist()
 			available.extend([MorphAnalysis(m.observed, mylanguage, self.collapseattic, a) for a in analysislist])
 		return available
-
-	def _determineprincipleparts(self):
-		if self.principleparts and not self.missingparts:
-			return self.principleparts
-
-		pplen = int()
-		if self.language == 'greek':
-			pplen = 6
-		elif self.language == 'latin':
-			pplen = 4
-
-		# print('self.analyses[0].partofspeech',self.analyses[0].partofspeech)
-		# print('self.analyses[0].partofspeech', self.analyses[0].getanalysis())
-		verbforms = [a for a in self.analyses if a.partofspeech == 'conjugated' and isinstance(a.getanalysis(), ConjugatedFormAnalysis)]
-
-		if not verbforms:
-			return
-
-		pp = [(f.analysis.whichprinciplepart(), f.word) for f in verbforms if f.analysis.isaprinciplepart()]
-		pp = list(set(pp))
-		pp.sort()
-		self.principleparts = pp
-
-		allpresent = {p[0]: p[1] for p in pp}
-		self.missingparts = set(range(1, pplen + 1)) - set(allpresent.keys())
-
-		for p in self.missingparts:
-			self._supplementmissing(p)
-		self._dropduplicates()
-		self.principleparts = sorted(self.principleparts)
-		return
-
-	def _dropduplicates(self):
-		parts = self.principleparts
-		disqualifiers = {'n$', 'que$', 'ue$'}
-
-		newparts = [parts[0]]
-		for i in range(1, len(parts)):
-			skip = False
-			thispartnumber = parts[i][0]
-			previouspartnumber = parts[i-1][0]
-			thispartstr = parts[i][1]
-			if thispartnumber == previouspartnumber:
-				disq = [re.search(thispartstr, d) for d in disqualifiers]
-				if disq:
-					skip = True
-			if not skip:
-				newparts.append((thispartnumber, thispartstr))
-
-		self.principleparts = newparts
-		return
-
-	def _supplementmissing(self, parttosupplement: int):
-		"""
-			[a] first-person singular present active indicative
-			[b] first-person singular future active indicative
-			[c] first-person singular aorist active indicative
-			[d] first-person singular perfect active indicative
-			[e] first-person singular perfect middle/passive
-			[f] first-person singular aorist passive indicative
-
-		:param parttosupplement:
-		:return:
-		"""
-
-		alternates = [
-			('tense', 'mood', 'voice', 'person'),
-			('tense', 'mood', 'voice', 'number'),
-			('tense', 'mood', 'voice'),
-			('tense', 'mood', 'person', 'number'),
-			('tense', 'mood')
-			]
-
-		if self.language == 'greek' and parttosupplement in [5, 6]:
-			# have to have the voice and tense for pf passive
-			# have to have the voice and tense for aor passive
-			alternates.remove(('tense', 'mood'))
-			alternates.remove(('tense', 'mood', 'person', 'number'))
-
-		substitutetemplate = '{w}&nbsp;&nbsp;[{a}]'
-
-		verbforms = [a for a in self.analyses if a.partofspeech == 'conjugated']
-
-		for a in alternates:
-			for v in verbforms:
-				if v.analysis.nearestmatchforaprinciplepart(a, parttosupplement):
-					# print('nextbest for pp {p} is {v}'.format(p=parttosupplement, v=v.word))
-					self.principleparts.append((parttosupplement, substitutetemplate.format(w=v.word, a=v.analysisstring)))
-					self.missingparts = self.missingparts - {parttosupplement}
-					return
-		self.principleparts.append((parttosupplement, '[no form found]'))
-		self.missingparts = self.missingparts - {parttosupplement}
-		return
 
 
 class MorphAnalysis(object):
@@ -763,6 +676,7 @@ class DeclinedFormAnalysis(object):
 		self.voice = None
 		# print('DeclinedFormAnalysis()', self.word, self.gender, self.number, self.case, self.dialects)
 
+
 class AdjAnalysis(object):
 	pass
 
@@ -772,4 +686,120 @@ class AdvAnalysis(object):
 
 
 class IndeclAnalysis(object):
+	pass
+
+
+class PrinciplePartFunctions(object):
+	"""
+
+	functions to determing principle parts
+
+	loaded into a BaseFormMorphology() object on an as needed basis
+
+	"""
+	def __init__(self, analyses: list, language: str):
+		self.analyses = analyses
+		self.language = language
+		self.principleparts = None
+		self.missingparts = True
+
+	def determineprincipleparts(self):
+		if self.principleparts and not self.missingparts:
+			return self.principleparts
+
+		pplen = int()
+		if self.language == 'greek':
+			pplen = 6
+		elif self.language == 'latin':
+			pplen = 4
+
+		# print('self.analyses[0].partofspeech',self.analyses[0].partofspeech)
+		# print('self.analyses[0].partofspeech', self.analyses[0].getanalysis())
+		verbforms = [a for a in self.analyses if a.partofspeech == 'conjugated' and isinstance(a.getanalysis(), ConjugatedFormAnalysis)]
+
+		if not verbforms:
+			return
+
+		pp = [(f.analysis.whichprinciplepart(), f.word) for f in verbforms if f.analysis.isaprinciplepart()]
+		pp = list(set(pp))
+		pp.sort()
+		self.principleparts = pp
+
+		allpresent = {p[0]: p[1] for p in pp}
+		self.missingparts = set(range(1, pplen + 1)) - set(allpresent.keys())
+
+		for p in self.missingparts:
+			self._supplementmissingprinclpleparts(p)
+		self._dropduplicateprincipleparts()
+		self.principleparts = sorted(self.principleparts)
+		return self.principleparts
+
+	def _dropduplicateprincipleparts(self):
+		parts = self.principleparts
+		disqualifiers = {'n$', 'que$', 'ue$'}
+
+		newparts = [parts[0]]
+		for i in range(1, len(parts)):
+			skip = False
+			thispartnumber = parts[i][0]
+			previouspartnumber = parts[i-1][0]
+			thispartstr = parts[i][1]
+			if thispartnumber == previouspartnumber:
+				disq = [re.search(thispartstr, d) for d in disqualifiers]
+				if disq:
+					skip = True
+			if not skip:
+				newparts.append((thispartnumber, thispartstr))
+
+		self.principleparts = newparts
+		return
+
+	def _supplementmissingprinclpleparts(self, parttosupplement: int):
+		"""
+			[a] first-person singular present active indicative
+			[b] first-person singular future active indicative
+			[c] first-person singular aorist active indicative
+			[d] first-person singular perfect active indicative
+			[e] first-person singular perfect middle/passive
+			[f] first-person singular aorist passive indicative
+
+		:param parttosupplement:
+		:return:
+		"""
+
+		alternates = [
+			('tense', 'mood', 'voice', 'person'),
+			('tense', 'mood', 'voice', 'number'),
+			('tense', 'mood', 'voice'),
+			('tense', 'mood', 'person', 'number'),
+			('tense', 'mood')
+			]
+
+		if self.language == 'greek' and parttosupplement in [5, 6]:
+			# have to have the voice and tense for pf passive
+			# have to have the voice and tense for aor passive
+			alternates.remove(('tense', 'mood'))
+			alternates.remove(('tense', 'mood', 'person', 'number'))
+
+		substitutetemplate = '{w}&nbsp;&nbsp;[{a}]'
+
+		verbforms = [a for a in self.analyses if a.partofspeech == 'conjugated']
+
+		for a in alternates:
+			for v in verbforms:
+				if v.analysis.nearestmatchforaprinciplepart(a, parttosupplement):
+					# print('nextbest for pp {p} is {v}'.format(p=parttosupplement, v=v.word))
+					self.principleparts.append((parttosupplement, substitutetemplate.format(w=v.word, a=v.analysisstring)))
+					self.missingparts = self.missingparts - {parttosupplement}
+					return
+		self.principleparts.append((parttosupplement, '[no form found]'))
+		self.missingparts = self.missingparts - {parttosupplement}
+		return
+
+
+class DeclinedFormFunctions(object):
+	pass
+
+
+class ConjugatedFormFunctions(object):
 	pass
