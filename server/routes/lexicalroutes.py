@@ -441,7 +441,7 @@ def knownforms(lexicalid, language, xrefid, headword):
 
 	returnarray = list()
 
-	if bfo.iamconjugated():
+	if bfo.iammostlyconjugated():
 		returnarray.append(topofoutput.format(w=bfo.headword, eid=bfo.lexicalid, lg=bfo.language))
 		returnarray = returnarray + bfo.buildhtmlverbtablerows(session)
 

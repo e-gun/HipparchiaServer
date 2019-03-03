@@ -183,7 +183,7 @@ class lexicalOutputObject(object):
 			xref = findparserxref(w)
 			morphanalysis = BaseFormMorphology(w.entry, xref, self.usedictionary, self.id, session)
 			ppts = morphanalysis.getprincipleparts()
-			if ppts and morphanalysis.iamconjugated():
+			if ppts and morphanalysis.iammostlyconjugated():
 				trs = [morphrowtemplate.format(ct=p[0], ppt=p[1]) for p in ppts]
 				pppts = morphabletemplate.format(f=morphanalysis.numberofknownforms, trs='\n'.join(trs), px=xref, w=w.entry, lid=self.id, lg=self.usedictionary, head='principle parts')
 			elif morphanalysis.iamdeclined():

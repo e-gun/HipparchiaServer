@@ -69,10 +69,9 @@ class BaseFormMorphology(object):
 		self.analyses = self._getalanlyses()
 		self.missingparts = {'will_be_None_or_an_accurate_list_later'}
 		self.principleparts = None
-		self.knownvoices = self._getknownvoices()
 		self.knowndialects = self._getknowndialects()
 
-	def iamconjugated(self):
+	def iammostlyconjugated(self):
 		# 'annus' has 'anno' in it: a single verbal lookalike
 		vv = [v for v in self.analyses if isinstance(v.getanalysis(), ConjugatedFormAnalysis)]
 		dd = [d for d in self.analyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
@@ -89,39 +88,11 @@ class BaseFormMorphology(object):
 		else:
 			return False
 
-	def _getmygenders(self) -> set:
-		declinedforms = [a for a in self.analyses if isinstance(a.analysis, DeclinedFormAnalysis)]
-		genders = set()
-		for f in declinedforms:
-			gset = set(f.analysis.gender.split('/'))
-			genders.update(gset)
-		mygenders = {g for g in genders if g}
-		return mygenders
-
-	def _atticlist(self) -> list:
-		if self.collapseattic:
-			atticlist = ['attic']
-		else:
-			atticlist = [' ', 'attic']
-		return atticlist
-
-	@staticmethod
-	def _generatemoodlist(thesession: dict) -> list:
-		moods = {'0ind', '1subj', '2opt', '3imperat', '4part', '5inf'}
-		if thesession['morphinfin'] == 'no':
-			moods.remove('5inf')
-		if thesession['morphpcpls'] == 'no':
-			moods.remove('4part')
-		if thesession['morphimper'] == 'no':
-			moods.remove('3imperat')
-		if thesession['morphfinite'] == 'no':
-			moods.remove('0ind')
-			moods.remove('1subj')
-			moods.remove('2opt')
-
-		moods = sorted(list(moods))
-		moods = [m[1:] for m in moods]
-		return moods
+	def getprincipleparts(self) -> list:
+		if not self.principleparts:
+			ppf = PrinciplePartFunctions(self.analyses, self.language)
+			self.principleparts = ppf.determineprincipleparts()
+		return self.principleparts
 
 	def _generatekeyedwordcounts(self) -> dict:
 		wordset = {re.sub(r"'$", r'', a.word) for a in self.analyses}
@@ -133,67 +104,16 @@ class BaseFormMorphology(object):
 		return keyedwcounts
 
 	def buildhtmlverbtablerows(self, thesession: dict) -> List[str]:
-		returnarray = list()
-		moods = self._generatemoodlist(thesession)
-		fd = self._generateverbformdictionary()
 		keyedwcounts = self._generatekeyedwordcounts()
-		dialects = self.knowndialects
-		if not self.showalldialects:
-			dialects = self._atticlist()
-		for d in dialects:
-			for v in self.knownvoices:
-				for m in moods:
-					if self._verbtablewillhavecontents(d, v, m):
-						t = verbtabletemplate(m, v, dialect=d, duals=self.icontainduals(), lang=self.language)
-						returnarray.append(filloutmorphtabletemplate(fd, keyedwcounts, t))
+		cff = ConjugatedFormFunctions(self.analyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
+		returnarray = cff.buildhtmlverbtablerows(thesession)
 		return returnarray
 
 	def buildhtmldeclinedtablerows(self) -> List[str]:
-		returnarray = list()
-		fd = self._generatedeclinedformdictionary()
 		keyedwcounts = self._generatekeyedwordcounts()
-		mygenders = self._getmygenders()
-		skipgenders = {'masc', 'fem', 'neut'} - mygenders
-		dialects = self.knowndialects
-		if not self.showalldialects:
-			dialects = self._atticlist()
-		for d in dialects:
-			if self._declinedtablewillhavecontents(d):
-				t = declinedtabletemplate(dialect=d, duals=self.icontainduals(), lang=self.language, skipgenders=skipgenders)
-				returnarray.append(filloutmorphtabletemplate(fd, keyedwcounts, t))
+		dff = DeclinedFormFunctions(self.analyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
+		returnarray = dff.buildhtmldeclinedtablerows()
 		return returnarray
-
-	def getprincipleparts(self) -> List[str]:
-		if not self.principleparts:
-			ppf = PrinciplePartFunctions(self.analyses, self.language)
-			self.principleparts = ppf.determineprincipleparts()
-		return self.principleparts
-
-	def _verbtablewillhavecontents(self, dialect: str, voice: str, mood: str):
-		present = [w for w in self.analyses if w.analysis and
-		           dialect in w.analysis.dialects and
-		           w.analysis.voice == voice and
-		           w.analysis.mood == mood]
-		if len(present) > 0:
-			return True
-		else:
-			return False
-
-	def _declinedtablewillhavecontents(self, dialect: str):
-		present = [w for w in self.analyses if w.analysis and dialect in w.analysis.dialects]
-		if len(present) > 0:
-			return True
-		else:
-			return False
-
-	def icontainduals(self):
-		if self.language == 'latin':
-			return False
-		duals = [x for x in self.analyses if x.analysis and x.analysis.number == 'dual']
-		if duals:
-			return True
-		else:
-			return False
 
 	def _getmorphpossibilities(self) -> list:
 		pos = list()
@@ -238,126 +158,6 @@ class BaseFormMorphology(object):
 
 		alldialects = sorted(list(alldialects))
 		return alldialects
-
-	def _getknownvoices(self) -> list:
-		if not self.iamconjugated():
-			return list()
-		allvoices = set()
-		parsing = [x.analysis for x in self.analyses if x.analysis]
-		for p in parsing:
-			vv = p.voice
-			if vv == 'mp':
-				voices = ['mid', 'pass']
-			else:
-				voices = [vv]
-			allvoices.update(voices)
-		allvoices = [v for v in allvoices if v]
-		allvoices = sorted(list(allvoices))
-		return allvoices
-
-	def _generatedeclinedformdictionary(self) -> dict:
-		"""
-
-		miles :  from miles :
-		[a]	masc/fem	nom	sg
-
-		operibus :  from opus¹  (“work”):
-		[a]	neut	abl	pl
-		[b]	neut
-
-		λοιβή :  from λοιβή  (“pouring.”):
-		[a]	fem	nom/voc	sg	(attic	epic	ionic)
-
-		:return:
-		"""
-
-		declinedtemplate = '_{d}_{n}_{g}_{c}_'
-
-		formdict = dict()
-		declinedforms = [a for a in self.analyses if isinstance(a.analysis, DeclinedFormAnalysis)]
-		# tossedforms = [a for a in self.analyses if not isinstance(a.analysis, DeclinedFormAnalysis)]
-		# tossed = [(f.observed, f.partofspeech) for f in tossedforms]
-		# print('tossedforms', tossed)
-		for form in declinedforms:
-			dialectlist = form.analysis.dialects
-			genders = form.analysis.gender.split('/')
-			cases = form.analysis.case.split('/')
-			n = form.analysis.number
-			for d in dialectlist:
-				if self.collapseattic and self.language == 'greek' and d == ' ':
-					d = 'attic'
-				for c in cases:
-					for g in genders:
-						mykey = declinedtemplate.format(d=d, n=n, g=g, c=c)
-						try:
-							formdict[mykey].append(form.observed)
-						except KeyError:
-							formdict[mykey] = [form.observed]
-		# print('formdict', formdict)
-		return formdict
-
-	def _generateverbformdictionary(self) -> dict:
-		"""
-
-		e.g. {'_attic_imperf_ind_mp_1st_pl_': 'ἠλαττώμεθα', ...}
-		[a]	imperf	ind	mp	1st	pl	(attic	doric	aeolic)
-		[b]	plup	ind	mp	1st	pl	(attic)
-		[c]	perf	ind	mp	1st	pl	(attic)
-		[d]	plup	ind	mp	1st	pl	(homeric	ionic)
-
-		cell arrangement: left to right and top to bottom is vmnpt
-		i.e., voice, mood, number, person, tense
-
-		to be used with greekverbtabletemplate()
-
-		:return:
-		"""
-
-		regextemplate = '_{d}_{m}_{v}_{n}_{p}_{t}_'
-		pcpltemplate = '_{d}_{m}_{v}_{n}_{t}_{g}_{c}_'
-
-		formdict = dict()
-		conjugatedforms = [a for a in self.analyses if isinstance(a.analysis, ConjugatedFormAnalysis)]
-		for form in conjugatedforms:
-			dialectlist = form.analysis.dialects
-			t = form.analysis.tense
-			m = form.analysis.mood
-			vv = form.analysis.voice
-			n = form.analysis.number
-			if m == 'part':
-				p = str()
-				genders = form.analysis.gender.split('/')
-				cases = form.analysis.case.split('/')
-			else:
-				p = form.analysis.person
-				genders = list()
-				cases = list()
-
-			if vv == 'mp':
-				voices = ['mid', 'pass']
-			else:
-				voices = [vv]
-
-			for v in voices:
-				for d in dialectlist:
-					if self.collapseattic and self.language == 'greek' and d == ' ':
-						d = 'attic'
-					if m == 'part':
-						for g in genders:
-							for c in cases:
-								mykey = pcpltemplate.format(d=d, m=m, v=v, n=n, p=p, t=t, g=g, c=c)
-								try:
-									formdict[mykey].append(form.observed)
-								except KeyError:
-									formdict[mykey] = [form.observed]
-					else:
-						mykey = regextemplate.format(d=d, m=m, v=v, n=n, p=p, t=t)
-						try:
-							formdict[mykey].append(form.observed)
-						except KeyError:
-							formdict[mykey] = [form.observed]
-
-		return formdict
 
 	def _getalanlyses(self) -> list:
 		available = list()
@@ -692,7 +492,7 @@ class IndeclAnalysis(object):
 class PrinciplePartFunctions(object):
 	"""
 
-	functions to determing principle parts
+	functions for determining principle parts
 
 	loaded into a BaseFormMorphology() object on an as needed basis
 
@@ -798,8 +598,258 @@ class PrinciplePartFunctions(object):
 
 
 class DeclinedFormFunctions(object):
-	pass
+	"""
+
+	functions for building declined form tables
+
+	loaded into a BaseFormMorphology() object on an as needed basis
+
+	"""
+	def __init__(self, analyses: list, language: str, keyedwordcounts: dict, knowndialects: list, showalldialects: bool, collapseattic: bool):
+		self.analyses = analyses
+		self.language = language
+		self.keyedwordcounts = keyedwordcounts
+		self.knowndialects = knowndialects
+		self.showalldialects = showalldialects
+		self.collapseattic = collapseattic
+
+	def buildhtmldeclinedtablerows(self) -> List[str]:
+		returnarray = list()
+		fd = self._generatedeclinedformdictionary()
+		mygenders = self._getmygenders()
+		skipgenders = {'masc', 'fem', 'neut'} - mygenders
+		dialects = self.knowndialects
+		if not self.showalldialects:
+			dialects = self._atticlist()
+		for d in dialects:
+			if self._declinedtablewillhavecontents(d):
+				t = declinedtabletemplate(dialect=d, duals=self._icontainduals(), lang=self.language, skipgenders=skipgenders)
+				returnarray.append(filloutmorphtabletemplate(fd, self.keyedwordcounts, t))
+		return returnarray
+
+	def _atticlist(self) -> list:
+		if self.collapseattic:
+			atticlist = ['attic']
+		else:
+			atticlist = [' ', 'attic']
+		return atticlist
+
+	def _icontainduals(self):
+		if self.language == 'latin':
+			return False
+		duals = [x for x in self.analyses if x.analysis and x.analysis.number == 'dual']
+		if duals:
+			return True
+		else:
+			return False
+
+	def _declinedtablewillhavecontents(self, dialect: str):
+		present = [w for w in self.analyses if w.analysis and dialect in w.analysis.dialects]
+		if len(present) > 0:
+			return True
+		else:
+			return False
+
+	def _generatedeclinedformdictionary(self) -> dict:
+		"""
+
+		miles :  from miles :
+		[a]	masc/fem	nom	sg
+
+		operibus :  from opus¹  (“work”):
+		[a]	neut	abl	pl
+		[b]	neut
+
+		λοιβή :  from λοιβή  (“pouring.”):
+		[a]	fem	nom/voc	sg	(attic	epic	ionic)
+
+		:return:
+		"""
+
+		declinedtemplate = '_{d}_{n}_{g}_{c}_'
+
+		formdict = dict()
+		declinedforms = [a for a in self.analyses if isinstance(a.analysis, DeclinedFormAnalysis)]
+		# tossedforms = [a for a in self.analyses if not isinstance(a.analysis, DeclinedFormAnalysis)]
+		# tossed = [(f.observed, f.partofspeech) for f in tossedforms]
+		# print('tossedforms', tossed)
+		for form in declinedforms:
+			dialectlist = form.analysis.dialects
+			genders = form.analysis.gender.split('/')
+			cases = form.analysis.case.split('/')
+			n = form.analysis.number
+			for d in dialectlist:
+				if self.collapseattic and self.language == 'greek' and d == ' ':
+					d = 'attic'
+				for c in cases:
+					for g in genders:
+						mykey = declinedtemplate.format(d=d, n=n, g=g, c=c)
+						try:
+							formdict[mykey].append(form.observed)
+						except KeyError:
+							formdict[mykey] = [form.observed]
+		# print('formdict', formdict)
+		return formdict
+
+	def _getmygenders(self) -> set:
+		declinedforms = [a for a in self.analyses if isinstance(a.analysis, DeclinedFormAnalysis)]
+		genders = set()
+		for f in declinedforms:
+			gset = set(f.analysis.gender.split('/'))
+			genders.update(gset)
+		mygenders = {g for g in genders if g}
+		return mygenders
 
 
 class ConjugatedFormFunctions(object):
-	pass
+	"""
+
+	functions for building conjugated form tables
+
+	loaded into a BaseFormMorphology() object on an as needed basis
+
+	"""
+	def __init__(self, analyses: list, language: str, keyedwordcounts: dict, knowndialects: list, showalldialects: bool, collapseattic: bool):
+		self.analyses = analyses
+		self.language = language
+		self.keyedwordcounts = keyedwordcounts
+		self.knowndialects = knowndialects
+		self.showalldialects = showalldialects
+		self.collapseattic = collapseattic
+		self.knownvoices = self._getknownvoices()
+
+	def buildhtmlverbtablerows(self, thesession: dict) -> List[str]:
+		returnarray = list()
+		moods = self._generatemoodlist(thesession)
+		fd = self._generateverbformdictionary()
+		dialects = self.knowndialects
+		if not self.showalldialects:
+			dialects = self._atticlist()
+		for d in dialects:
+			for v in self.knownvoices:
+				for m in moods:
+					if self._verbtablewillhavecontents(d, v, m):
+						t = verbtabletemplate(m, v, dialect=d, duals=self._icontainduals(), lang=self.language)
+						returnarray.append(filloutmorphtabletemplate(fd, self.keyedwordcounts, t))
+		return returnarray
+
+	def _atticlist(self) -> list:
+		if self.collapseattic:
+			atticlist = ['attic']
+		else:
+			atticlist = [' ', 'attic']
+		return atticlist
+
+	def _icontainduals(self):
+		if self.language == 'latin':
+			return False
+		duals = [x for x in self.analyses if x.analysis and x.analysis.number == 'dual']
+		if duals:
+			return True
+		else:
+			return False
+
+	def _getknownvoices(self) -> list:
+		allvoices = set()
+		parsing = [x.analysis for x in self.analyses if x.analysis]
+		for p in parsing:
+			vv = p.voice
+			if vv == 'mp':
+				voices = ['mid', 'pass']
+			else:
+				voices = [vv]
+			allvoices.update(voices)
+		allvoices = [v for v in allvoices if v]
+		allvoices = sorted(list(allvoices))
+		return allvoices
+
+	@staticmethod
+	def _generatemoodlist(thesession: dict) -> list:
+		moods = {'0ind', '1subj', '2opt', '3imperat', '4part', '5inf'}
+		if thesession['morphinfin'] == 'no':
+			moods.remove('5inf')
+		if thesession['morphpcpls'] == 'no':
+			moods.remove('4part')
+		if thesession['morphimper'] == 'no':
+			moods.remove('3imperat')
+		if thesession['morphfinite'] == 'no':
+			moods.remove('0ind')
+			moods.remove('1subj')
+			moods.remove('2opt')
+
+		moods = sorted(list(moods))
+		moods = [m[1:] for m in moods]
+		return moods
+
+	def _generateverbformdictionary(self) -> dict:
+		"""
+
+		e.g. {'_attic_imperf_ind_mp_1st_pl_': 'ἠλαττώμεθα', ...}
+		[a]	imperf	ind	mp	1st	pl	(attic	doric	aeolic)
+		[b]	plup	ind	mp	1st	pl	(attic)
+		[c]	perf	ind	mp	1st	pl	(attic)
+		[d]	plup	ind	mp	1st	pl	(homeric	ionic)
+
+		cell arrangement: left to right and top to bottom is vmnpt
+		i.e., voice, mood, number, person, tense
+
+		to be used with greekverbtabletemplate()
+
+		:return:
+		"""
+
+		regextemplate = '_{d}_{m}_{v}_{n}_{p}_{t}_'
+		pcpltemplate = '_{d}_{m}_{v}_{n}_{t}_{g}_{c}_'
+
+		formdict = dict()
+		conjugatedforms = [a for a in self.analyses if isinstance(a.analysis, ConjugatedFormAnalysis)]
+		for form in conjugatedforms:
+			dialectlist = form.analysis.dialects
+			t = form.analysis.tense
+			m = form.analysis.mood
+			vv = form.analysis.voice
+			n = form.analysis.number
+			if m == 'part':
+				p = str()
+				genders = form.analysis.gender.split('/')
+				cases = form.analysis.case.split('/')
+			else:
+				p = form.analysis.person
+				genders = list()
+				cases = list()
+
+			if vv == 'mp':
+				voices = ['mid', 'pass']
+			else:
+				voices = [vv]
+
+			for v in voices:
+				for d in dialectlist:
+					if self.collapseattic and self.language == 'greek' and d == ' ':
+						d = 'attic'
+					if m == 'part':
+						for g in genders:
+							for c in cases:
+								mykey = pcpltemplate.format(d=d, m=m, v=v, n=n, p=p, t=t, g=g, c=c)
+								try:
+									formdict[mykey].append(form.observed)
+								except KeyError:
+									formdict[mykey] = [form.observed]
+					else:
+						mykey = regextemplate.format(d=d, m=m, v=v, n=n, p=p, t=t)
+						try:
+							formdict[mykey].append(form.observed)
+						except KeyError:
+							formdict[mykey] = [form.observed]
+
+		return formdict
+
+	def _verbtablewillhavecontents(self, dialect: str, voice: str, mood: str):
+		present = [w for w in self.analyses if w.analysis and
+		           dialect in w.analysis.dialects and
+		           w.analysis.voice == voice and
+		           w.analysis.mood == mood]
+		if len(present) > 0:
+			return True
+		else:
+			return False
