@@ -17,7 +17,7 @@ from typing import List
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
 from server.formatting.betacodetounicode import replacegreekbetacode
-from server.formatting.wordformatting import extrapunct, removegravity, minimumgreek
+from server.formatting.wordformatting import badpucntwithbackslash, removegravity, minimumgreek
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable
 from server.listsandsession.corpusavailability import justtlg
@@ -38,16 +38,16 @@ def cleaninitialquery(seeking: str) -> str:
 
 	# things you never need to see and are not part of a (for us) possible regex expression
 	# a lot of this may be hard to type, but if you cut and paste a result to make a new search, this stuff is in there
-	badpunct = ',;#'
+	extrapunct = ',;#'
 
-	seeking = re.sub(r'[{p}]'.format(p=re.escape(badpunct + extrapunct)), '', seeking)
+	seeking = re.sub(r'[{p}]'.format(p=re.escape(extrapunct + badpucntwithbackslash)), '', seeking)
 
 	# split() later at ' ' means confusion if you have double spaces
 	seeking = re.sub(r' {2,}', r' ', seeking)
 
 	if hipparchia.config['HOBBLEREGEX'] == 'yes':
 		seeking = re.sub(r'\d', '', seeking)
-		allowedpunct = '[].^$\''
+		allowedpunct = '[].^$\\\''
 		badpunct = ''.join(set(punctuation) - set(allowedpunct))
 		seeking = re.sub(r'[' + re.escape(badpunct) + ']', '', seeking)
 
