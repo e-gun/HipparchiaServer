@@ -456,4 +456,3 @@ def knownforms(lexicalid, language, xrefid, headword):
 	jsondict = json.dumps(returndict)
 
 	return jsondict
-

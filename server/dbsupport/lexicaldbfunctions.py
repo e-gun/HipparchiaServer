@@ -69,6 +69,8 @@ def headwordsearch(seeking, limit, usedictionary, usecolumn) -> List:
 			dbcursor.execute(query, data)
 			foundentries = dbcursor.fetchall()
 
+	dbconnection.connectioncleanup()
+
 	return foundentries
 
 

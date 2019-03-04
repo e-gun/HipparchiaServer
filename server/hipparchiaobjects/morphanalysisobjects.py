@@ -17,161 +17,6 @@ from server.formatting.wordformatting import stripaccents
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 
 
-class BaseFormMorphology(object):
-	"""
-
-	this only works for words that are dictionary headwords
-
-	select * from greek_morphology where greek_morphology.xrefs='83362071'
-
-	POS is tricky via the database:
-
-		hipparchiaDB=# select pos from latin_dictionary where entry_name='brevis';
-		     pos
-		-------------
-		 adv. ‖ adj.
-		(1 row)
-
-		hipparchiaDB=# select pos from latin_dictionary where entry_name='laudo';
-		     pos
-		--------------
-		 v. a. ‖ adv.
-		(1 row)
-
-	there are THREE basic uses of this object
-		finding principle parts
-		generating a verb table
-		generating a noun/adj table
-
-	"""
-	def __init__(self, headword: str, xref: str, language: str, lexicalid: str, thesession: dict):
-		self.showalldialects = True
-		self.collapseattic = False
-		if thesession['morphdialects'] == 'no':
-			self.showalldialects = False
-		if thesession['collapseattic'] == 'yes':
-			self.collapseattic = True
-		assert language in ['greek', 'latin'], 'BaseFormMorphology() only knows words that are "greek_morphology" or "latin_morphology"'
-		self.headword = headword
-		self.language = language
-		self.xref = xref
-		self.lexicalid = lexicalid
-		# next is unsafe because you will "KeyError: 'anno¹'"
-		# self.lemmata = lemmatadict[headword]
-		self.lemmata = grablemmataobjectfor(headword, '{lg}_lemmata'.format(lg=self.language), dbcursor=None)
-		self.dictionaryentry = self.lemmata.dictionaryentry
-		self.formlist = self.lemmata.formlist
-		c = ConnectionObject()
-		self.dbmorphobjects = [lookformorphologymatches(f, c.curs) for f in self.formlist]
-		c.connectioncleanup()
-		self.morphpossibilities = self._getmorphpossibilities()
-		self.numberofknownforms = len(self.morphpossibilities)
-		self.analyses = self._getalanlyses()
-		self.missingparts = {'will_be_None_or_an_accurate_list_later'}
-		self.principleparts = None
-		self.knowndialects = self._getknowndialects()
-
-	def iammostlyconjugated(self):
-		# 'annus' has 'anno' in it: a single verbal lookalike
-		vv = [v for v in self.analyses if isinstance(v.getanalysis(), ConjugatedFormAnalysis)]
-		dd = [d for d in self.analyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
-		# print('mostlyconjugatedforms: len(vv) & len(dd)', len(vv), len(dd))
-		if len(vv) > len(dd):
-			return True
-		else:
-			return False
-
-	def iamdeclined(self):
-		dd = [d for d in self.analyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
-		if dd:
-			return True
-		else:
-			return False
-
-	def getprincipleparts(self) -> list:
-		if not self.principleparts:
-			ppf = PrinciplePartFunctions(self.analyses, self.language)
-			self.principleparts = ppf.determineprincipleparts()
-		return self.principleparts
-
-	def _generatekeyedwordcounts(self) -> dict:
-		wordset = {re.sub(r"'$", r'', a.word) for a in self.analyses}
-		initials = {stripaccents(w[0]) for w in wordset}
-		byinitial = {i: [w for w in wordset if stripaccents(w[0]) == i] for i in initials}
-		wco = [bulkfindwordcounts(byinitial[i]) for i in byinitial]
-		wco = list(itertools.chain(*wco))
-		keyedwcounts = {w.entryname: w.t for w in wco if w}
-		return keyedwcounts
-
-	def buildhtmlverbtablerows(self, thesession: dict) -> List[str]:
-		keyedwcounts = self._generatekeyedwordcounts()
-		cff = ConjugatedFormFunctions(self.analyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
-		returnarray = cff.buildhtmlverbtablerows(thesession)
-		return returnarray
-
-	def buildhtmldeclinedtablerows(self) -> List[str]:
-		keyedwcounts = self._generatekeyedwordcounts()
-		dff = DeclinedFormFunctions(self.analyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
-		returnarray = dff.buildhtmldeclinedtablerows()
-		return returnarray
-
-	def _getmorphpossibilities(self) -> list:
-		pos = list()
-		for m in self.dbmorphobjects:
-			if m:
-				pos.extend(m.getpossible())
-		pos = [p for p in pos if p.xref == self.xref]
-		# there are duplicates...
-		# 90643736 πεπιαϲμένωϲ ['perf part mp masc acc pl (attic doric)']
-		# 90643736 πιεζεύμενα ['pres part mp neut nom/voc/acc pl (epic doric ionic)']
-		# 90643736 πιεζεύμενα ['pres part mp neut nom/voc/acc pl (epic doric ionic)']
-		pset = {'{a}_{b}'.format(a=p.observed, b=p.getanalysislist()[0]): p for p in pos}
-		pos = [pset[k] for k in pset.keys()]
-		# print('_getmorphpossibilities')
-		# for p in pos:
-		# 	print(p.xref, p.observed, p.getanalysislist())
-		return pos
-
-	def _getknowndialects(self) -> list:
-		if self.language == 'latin':
-			alldialects = [' ']
-			return alldialects
-
-		alldialects = set()
-		parsing = [x.analysis for x in self.analyses if x.analysis]
-		for p in parsing:
-			dialectlist = p.dialects
-			alldialects.update(dialectlist)
-
-		bogusdialects = ['parad_form', 'prose']
-		for b in bogusdialects:
-			try:
-				alldialects.remove(b)
-			except KeyError:
-				pass
-
-		if self.collapseattic:
-			try:
-				alldialects.remove(' ')
-			except KeyError:
-				pass
-
-		alldialects = sorted(list(alldialects))
-		return alldialects
-
-	def _getalanlyses(self) -> list:
-		available = list()
-		for m in self.morphpossibilities:
-			mylanguage = str()
-			if m.amgreek():
-				mylanguage = 'greek'
-			if m.amlatin():
-				mylanguage = 'latin'
-			analysislist = m.getanalysislist()
-			available.extend([MorphAnalysis(m.observed, mylanguage, self.collapseattic, a) for a in analysislist])
-		return available
-
-
 class MorphAnalysis(object):
 	def __init__(self, word, mylanguage, collapseattic, analysisstring):
 		self.analysis = NotImplemented
@@ -237,6 +82,183 @@ class MorphAnalysis(object):
 			self.analysis = None
 
 		return pos
+
+
+class BaseFormMorphology(object):
+	"""
+
+	this only works for words that are dictionary headwords
+
+	select * from greek_morphology where greek_morphology.xrefs='83362071'
+
+	POS is tricky via the database:
+
+		hipparchiaDB=# select pos from latin_dictionary where entry_name='brevis';
+		     pos
+		-------------
+		 adv. ‖ adj.
+		(1 row)
+
+		hipparchiaDB=# select pos from latin_dictionary where entry_name='laudo';
+		     pos
+		--------------
+		 v. a. ‖ adv.
+		(1 row)
+
+	there are THREE core uses of this object
+		finding principle parts: getprincipleparts()
+		generating a verb table: buildhtmlverbtablerows()
+		generating a noun/adj table: buildhtmldeclinedtablerows()
+
+	"""
+	def __init__(self, headword: str, xref: str, language: str, lexicalid: str, thesession: dict):
+		self.showalldialects = True
+		self.collapseattic = False
+		if thesession['morphdialects'] == 'no':
+			self.showalldialects = False
+		if thesession['collapseattic'] == 'yes':
+			self.collapseattic = True
+		assert language in ['greek', 'latin'], 'BaseFormMorphology() only knows words that are "greek_morphology" or "latin_morphology"'
+		self.headword = headword
+		self.language = language
+		self.xref = xref
+		self.lexicalid = lexicalid
+		# next is unsafe because you will "KeyError: 'anno¹'"
+		# self.lemmata = lemmatadict[headword]
+		self.lemmata = grablemmataobjectfor(headword, '{lg}_lemmata'.format(lg=self.language), dbcursor=None)
+		self.dictionaryentry = self.lemmata.dictionaryentry
+		self.formlist = self.lemmata.formlist
+		c = ConnectionObject()
+		self.dbmorphobjects = [lookformorphologymatches(f, c.curs) for f in self.formlist]
+		c.connectioncleanup()
+		self.morphpossibilities = self._getmorphpossibilities()
+		self.numberofknownforms = len(self.morphpossibilities)
+		self.analyses = self._getalanlyses()
+		self.missingparts = {'will_be_None_or_an_accurate_list_later'}
+		self.principleparts = None
+		self.knowndialects = self._getknowndialects()
+
+	def iammostlyconjugated(self):
+		# 'annus' has 'anno' in it: a single verbal lookalike
+		vv = [v for v in self.analyses if isinstance(v.getanalysis(), ConjugatedFormAnalysis)]
+		dd = [d for d in self.analyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
+		# print('mostlyconjugatedforms: len(vv) & len(dd)', len(vv), len(dd))
+		if len(vv) > len(dd):
+			return True
+		else:
+			return False
+
+	def iamdeclined(self):
+		dd = [d for d in self.analyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
+		if dd:
+			return True
+		else:
+			return False
+
+	def getprincipleparts(self) -> list:
+		if not self.principleparts:
+			ppf = PrinciplePartFunctions(self.analyses, self.language)
+			self.principleparts = ppf.determineprincipleparts()
+		return self.principleparts
+
+	def buildhtmlverbtablerows(self, thesession: dict) -> List[str]:
+		keyedwcounts = self._generatekeyedwordcounts()
+		cff = ConjugatedFormFunctions(self.analyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
+		returnarray = cff.buildhtmlverbtablerows(thesession)
+		return returnarray
+
+	def buildhtmldeclinedtablerows(self) -> List[str]:
+		keyedwcounts = self._generatekeyedwordcounts()
+		dff = DeclinedFormFunctions(self.analyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
+		returnarray = dff.buildhtmldeclinedtablerows()
+		return returnarray
+
+	def _generatekeyedwordcounts(self) -> dict:
+		"""
+
+		return something like:
+
+		{'πνεύμαϲι': 378, 'πνευμάτων': 2161, 'πνεῦμ': 89, 'πνεύμαϲ': 1, 'πνεῦμα': 23686, 'πνεύματα': 1959, 'πνεύματ': 17,
+		'πνεύματοϲ': 19025, 'πνεύμαϲιν': 299, 'πνεύματι': 8855}
+
+		:return:
+		"""
+		wordset = {re.sub(r"'$", r'', a.word) for a in self.analyses}
+		initials = {stripaccents(w[0]) for w in wordset}
+		byinitial = {i: [w for w in wordset if stripaccents(w[0]) == i] for i in initials}
+		wco = [bulkfindwordcounts(byinitial[i]) for i in byinitial]
+		wco = list(itertools.chain(*wco))
+		keyedwcounts = {w.entryname: w.t for w in wco if w}
+		return keyedwcounts
+
+	def _getmorphpossibilities(self) -> list:
+		"""
+
+		pos = [<server.hipparchiaobjects.morphologyobjects.MorphPossibilityObject object at 0x14ff0b320>, ...]
+
+		for p in pos:
+			print(p.xref, p.observed, p.getanalysislist())
+
+			92033245 πνεύματοϲ ['neut gen sg']
+			92033245 πνεύματι ['neut dat sg']
+			92033245 πνεύμαϲ' ['neut dat pl']
+			92033245 πνεύμαϲι ['neut dat pl']
+			92033245 πνεῦμ' ['neut nom/voc/acc sg']
+			...
+
+		:return:
+		"""
+		pos = list()
+		for m in self.dbmorphobjects:
+			if m:
+				pos.extend(m.getpossible())
+		pos = [p for p in pos if p.xref == self.xref]
+		# there are duplicates...
+		# 90643736 πεπιαϲμένωϲ ['perf part mp masc acc pl (attic doric)']
+		# 90643736 πιεζεύμενα ['pres part mp neut nom/voc/acc pl (epic doric ionic)']
+		# 90643736 πιεζεύμενα ['pres part mp neut nom/voc/acc pl (epic doric ionic)']
+		pset = {'{a}_{b}'.format(a=p.observed, b=p.getanalysislist()[0]): p for p in pos}
+		pos = [pset[k] for k in pset.keys()]
+		return pos
+
+	def _getknowndialects(self) -> list:
+		if self.language == 'latin':
+			alldialects = [' ']
+			return alldialects
+
+		alldialects = set()
+		parsing = [x.analysis for x in self.analyses if x.analysis]
+		for p in parsing:
+			dialectlist = p.dialects
+			alldialects.update(dialectlist)
+
+		bogusdialects = ['parad_form', 'prose']
+		for b in bogusdialects:
+			try:
+				alldialects.remove(b)
+			except KeyError:
+				pass
+
+		if self.collapseattic:
+			try:
+				alldialects.remove(' ')
+			except KeyError:
+				pass
+
+		alldialects = sorted(list(alldialects))
+		return alldialects
+
+	def _getalanlyses(self) -> List[MorphAnalysis]:
+		available = list()
+		for m in self.morphpossibilities:
+			mylanguage = str()
+			if m.amgreek():
+				mylanguage = 'greek'
+			if m.amlatin():
+				mylanguage = 'latin'
+			analysislist = m.getanalysislist()
+			available.extend([MorphAnalysis(m.observed, mylanguage, self.collapseattic, a) for a in analysislist])
+		return available
 
 
 class ConjugatedFormAnalysis(object):
@@ -476,11 +498,6 @@ class DeclinedFormAnalysis(object):
 		self.voice = None
 		# print('DeclinedFormAnalysis()', self.word, self.gender, self.number, self.case, self.dialects)
 
-
-class AdjAnalysis(object):
-	pass
-
-
 class AdvAnalysis(object):
 	pass
 
@@ -605,7 +622,7 @@ class DeclinedFormFunctions(object):
 	loaded into a BaseFormMorphology() object on an as needed basis
 
 	"""
-	def __init__(self, analyses: list, language: str, keyedwordcounts: dict, knowndialects: list, showalldialects: bool, collapseattic: bool):
+	def __init__(self, analyses: List[MorphAnalysis], language: str, keyedwordcounts: dict, knowndialects: list, showalldialects: bool, collapseattic: bool):
 		self.analyses = analyses
 		self.language = language
 		self.keyedwordcounts = keyedwordcounts
@@ -628,10 +645,12 @@ class DeclinedFormFunctions(object):
 		return returnarray
 
 	def _atticlist(self) -> list:
-		if self.collapseattic:
-			atticlist = ['attic']
-		else:
-			atticlist = [' ', 'attic']
+		atticlist = self.knowndialects
+		if self.language == 'greek':
+			if self.collapseattic:
+				atticlist = ['attic']
+			else:
+				atticlist = [' ', 'attic']
 		return atticlist
 
 	def _icontainduals(self):
@@ -662,6 +681,9 @@ class DeclinedFormFunctions(object):
 
 		λοιβή :  from λοιβή  (“pouring.”):
 		[a]	fem	nom/voc	sg	(attic	epic	ionic)
+
+		fd {'_ _sg_masc_gen_': ['dolorisque', 'dolorist', 'doloris', 'dolorisue'], '_ _pl_masc_acc_': ['dolores', 'doloresque'],
+		'_ _pl_masc_nom_': ['dolores', 'doloresque'], '_ _pl_masc_voc_': ['dolores', 'doloresque'], ... }
 
 		:return:
 		"""
@@ -709,7 +731,7 @@ class ConjugatedFormFunctions(object):
 	loaded into a BaseFormMorphology() object on an as needed basis
 
 	"""
-	def __init__(self, analyses: list, language: str, keyedwordcounts: dict, knowndialects: list, showalldialects: bool, collapseattic: bool):
+	def __init__(self, analyses: List[MorphAnalysis], language: str, keyedwordcounts: dict, knowndialects: list, showalldialects: bool, collapseattic: bool):
 		self.analyses = analyses
 		self.language = language
 		self.keyedwordcounts = keyedwordcounts
@@ -734,10 +756,12 @@ class ConjugatedFormFunctions(object):
 		return returnarray
 
 	def _atticlist(self) -> list:
-		if self.collapseattic:
-			atticlist = ['attic']
-		else:
-			atticlist = [' ', 'attic']
+		atticlist = self.knowndialects
+		if self.language == 'greek':
+			if self.collapseattic:
+				atticlist = ['attic']
+			else:
+				atticlist = [' ', 'attic']
 		return atticlist
 
 	def _icontainduals(self):
