@@ -294,6 +294,15 @@ def singlewordsearch(searchid, searchterm):
 
 	this is a restricted version of executesearch(): single, exact term
 
+
+	WINODWS ONLY ERROR: this function will trigger a recursion error
+
+	the situation looks a lot like case #3 @ https://bugs.python.org/issue9592
+
+	but that is supposed to be a closed bug
+
+	cf the complaints at https://forums.fast.ai/t/recursion-error-fastai-v1-0-27-windows-10/30673/10
+
 	:param searchid:
 	:param searchterm:
 	:return:
