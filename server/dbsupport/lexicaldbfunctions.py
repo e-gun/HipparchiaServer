@@ -504,7 +504,7 @@ def bulkfindwordcounts(listofwords) -> List[dbWordCountObject]:
 		results = resultiterator(dbcursor)
 	except psycopg2.ProgrammingError:
 		# if you do not have the wordcounts installed: 'ProgrammingError: relations "wordcounts_a" does not exist
-		results = None
+		results = list()
 
 	wordcountobjects = [dbWordCountObject(*r) for r in results]
 
