@@ -27,7 +27,10 @@ def headwordsearch(seeking, limit, usedictionary, usecolumn) -> List:
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
-	query = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s LIMIT {lim}'.format(d=usedictionary, c=usecolumn, lim=limit)
+	qstring = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s LIMIT {lim}'
+
+	query = qstring.format(d=usedictionary, c=usecolumn, lim=limit)
+
 	if seeking[0] == ' ' and seeking[-1] == ' ':
 		data = ('^' + seeking[1:-1] + '$',)
 	elif seeking[0] == ' ' and seeking[-1] != ' ':
@@ -496,8 +499,12 @@ def bulkfindwordcounts(listofwords) -> List[dbWordCountObject]:
 	"""
 
 	query = qtemplate.format(rnd=uniquename, x=firstletteroffirstword)
-	dbcursor.execute(query)
-	results = resultiterator(dbcursor)
+	try:
+		dbcursor.execute(query)
+		results = resultiterator(dbcursor)
+	except psycopg2.ProgrammingError:
+		# if you do not have the wordcounts installed: 'ProgrammingError: relations "wordcounts_a" does not exist
+		results = None
 
 	wordcountobjects = [dbWordCountObject(*r) for r in results]
 
