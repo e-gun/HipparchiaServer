@@ -7,6 +7,7 @@
 """
 
 import re
+from os import name as osname
 
 
 def insertbrowserclickjs(tagname: str) -> str:
@@ -325,6 +326,13 @@ def morphologychartjs() -> str:
 
 	:return:
 	"""
+
+	if osname != 'nt':
+		# singlewordsearch() will throw a recursion exception on Windows
+		searchurl = """let url = '/singlewordsearch/' + searchid + '/' + searchterm;"""
+	else:
+		searchurl = """let url = '/executesearch/' + searchid + '?skg=%20' + searchterm + '%20';"""
+
 	template = """
 	<script>
 		function displayresults(output) {
@@ -347,7 +355,7 @@ def morphologychartjs() -> str:
 			let searchterm = this.getAttribute("searchterm");
 			
 			let searchid = generateId(8);
-			let url = '/singlewordsearch/' + searchid + '/' + searchterm;
+			REGEXSEARCHURL
 			
 			$.getJSON(url, function (returnedresults) { displayresults(returnedresults); });
 			
@@ -430,5 +438,7 @@ def morphologychartjs() -> str:
 	
 	</script>    
 	"""
+
+	template = re.sub(r'REGEXSEARCHURL', searchurl, template)
 
 	return template

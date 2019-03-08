@@ -294,7 +294,7 @@ def singlewordsearch(searchid, searchterm):
 
 	this is a restricted version of executesearch(): single, exact term
 
-	WINODWS ONLY ERROR: this function will trigger a recursion error
+	WINDOWS ONLY ERROR: this function will trigger a recursion error
 
 	the situation looks a lot like case #3 @ https://bugs.python.org/issue9592
 
@@ -302,7 +302,11 @@ def singlewordsearch(searchid, searchterm):
 
 	cf the complaints at https://forums.fast.ai/t/recursion-error-fastai-v1-0-27-windows-10/30673/10
 
-	multiprocessing\popen_spawn_win32.py is the culprit?
+	"multiprocessing\popen_spawn_win32.py" is the culprit?
+
+	the current 'solution' is to send things to executesearch() instead "if osname == 'nt'"
+	this test is inside morphologychartjs(); this is a potential source of future brittleness
+	to the extent that one wants to explore refactoring executesearch()
 
 	:param searchid:
 	:param searchterm:
