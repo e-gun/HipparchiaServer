@@ -196,7 +196,7 @@ class lexicalOutputObject(object):
 		blankcursor = None
 		entryword = self.thiswordobject
 		if not entryword.isagloss():
-			lemmaobject = grablemmataobjectfor(entryword.entry, self.usedictionary + '_lemmata', dbcursor=blankcursor)
+			lemmaobject = grablemmataobjectfor(self.usedictionary + '_lemmata', word=entryword.entry, dbcursor=blankcursor)
 			entryword.authorlist = entryword.generateauthorsummary()
 			entryword.senselist = entryword.generatesensessummary()
 			entryword.quotelist = entryword.generatequotesummary(lemmaobject)

@@ -379,7 +379,7 @@ def probefordatabases() -> dict:
 	return available
 
 
-def icanpickleconnections():
+def icanpickleconnections() -> bool:
 	if osname == 'nt':
 		return False
 

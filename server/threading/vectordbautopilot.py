@@ -8,6 +8,7 @@
 
 import threading
 import time
+from typing import List
 
 from server import hipparchia
 from server.dbsupport.vectordbfunctions import checkforstoredvector
@@ -84,7 +85,7 @@ def startvectorizing():
 	return
 
 
-def determinevectorworkpile(tempcap=False):
+def determinevectorworkpile(tempcap=False) -> List[tuple]:
 	"""
 
 	probe the db for potential vectorization targets

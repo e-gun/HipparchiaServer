@@ -102,7 +102,7 @@ def sessiontimeexclusionsinfo():
 	return timerestrictions
 
 
-def sessionselectionsinfo(authordict, workdict):
+def sessionselectionsinfo(authordict: dict, workdict: dict) -> dict:
 	"""
 	build the selections html either for a or b:
 		#selectionstable + #selectioninfocell

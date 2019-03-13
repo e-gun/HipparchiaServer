@@ -17,7 +17,7 @@ from server.listsandsession.corpusavailability import justlatin
 from server.startup import allincerta, allvaria
 
 
-def compilesearchlist(listmapper: dict, s=session) -> list:
+def compilesearchlist(listmapper: dict, s: dict) -> list:
 	"""
 	master author dict + session selctions into a list of dbs to search
 

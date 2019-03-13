@@ -229,7 +229,7 @@ def getsearchlistcontents():
 	:return:
 	"""
 
-	searchlist = compilesearchlist(listmapper)
+	searchlist = compilesearchlist(listmapper, session)
 	searchlist = sortsearchlist(searchlist, authordict)
 
 	searchlistinfo = list()

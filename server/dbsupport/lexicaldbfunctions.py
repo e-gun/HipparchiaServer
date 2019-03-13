@@ -513,10 +513,20 @@ def bulkfindwordcounts(listofwords) -> List[dbWordCountObject]:
 	return wordcountobjects
 
 
-def grablemmataobjectfor(entryname, db, dbcursor=None):
+def grablemmataobjectfor(db, dbcursor=None, word=None, xref=None):
 	"""
 
 	send a word, return a lemmaobject
+
+	hipparchiaDB=# select * from greek_lemmata limit 0;
+	 dictionary_entry | xref_number | derivative_forms
+	------------------+-------------+------------------
+
+	EITHER 'word' should be set OR 'xref' should be set: not both
+
+	at the moment we only use 'word' in both calls to this function:
+		hipparchiaobjects/lexicaloutputobjects.py
+		hipparchiaobjects/morphanalysisobjects.py
 
 	:param entryname:
 	:param db:
@@ -529,14 +539,27 @@ def grablemmataobjectfor(entryname, db, dbcursor=None):
 		dbconnection.setautocommit()
 		dbcursor = dbconnection.cursor()
 
-	field = 'dictionary_entry'
+	field = str()
+	data = None
+
+	if xref:
+		field = 'xref_number'
+		data = xref
+
+	if word:
+		field = 'dictionary_entry'
+		data = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹]', '', word)
 
 	if not session['available'][db]:
 		lo = dbLemmaObject('[parsing is impossible: lemmata data was not installed]', -1, '')
 		return lo
 
+	if not data:
+		lo = dbLemmaObject('[programming error: no word or xref set in grablemmataobjectfor()]', -1, '')
+		return lo
+
 	q = 'SELECT * FROM {db} WHERE {f}=%s'.format(db=db, f=field)
-	d = (entryname,)
+	d = (data,)
 
 	dbcursor.execute(q, d)
 	lem = dbcursor.fetchone()

@@ -30,7 +30,7 @@ def timedecorator(function):
 	return wrapper
 
 
-def validatepollid(searchid, maxchars=36):
+def validatepollid(searchid, maxchars=36) -> str:
 	"""
 
 	make sure the pollid is legit

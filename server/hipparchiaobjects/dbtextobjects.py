@@ -265,8 +265,9 @@ class dbWorkLine(object):
 		self.polytonic = accented_line
 		self.stripped = stripped_line
 		self.annotations = annotations
+		# universalid is used by the vectors
 		self.universalid = 'line/{w}/{i}'.format(w=self.wkuinversalid, i=index)
-		self.url = 'line/{a}/{w}/{i}'.format(a=self.authorid, w=self.workid, i=index)
+		self.url = 'linenumber/{a}/{w}/{i}'.format(a=self.authorid, w=self.workid, i=index)
 		self.hyphenated = hyphenated_words
 		if len(self.hyphenated) > 1:
 			self.hashyphenated = True

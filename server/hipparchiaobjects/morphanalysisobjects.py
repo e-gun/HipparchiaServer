@@ -112,6 +112,7 @@ class BaseFormMorphology(object):
 
 	"""
 	def __init__(self, headword: str, xref: str, language: str, lexicalid: str, thesession: dict):
+		# print('bfmo init', headword, xref, language, lexicalid)
 		self.showalldialects = True
 		self.collapseattic = False
 		if thesession['morphdialects'] == 'no':
@@ -125,7 +126,7 @@ class BaseFormMorphology(object):
 		self.lexicalid = lexicalid
 		# next is unsafe because you will "KeyError: 'anno¹'"
 		# self.lemmata = lemmatadict[headword]
-		self.lemmata = grablemmataobjectfor(headword, '{lg}_lemmata'.format(lg=self.language), dbcursor=None)
+		self.lemmata = grablemmataobjectfor('{lg}_lemmata'.format(lg=self.language), word=self.headword, dbcursor=None)
 		self.dictionaryentry = self.lemmata.dictionaryentry
 		self.formlist = self.lemmata.formlist
 		c = ConnectionObject()

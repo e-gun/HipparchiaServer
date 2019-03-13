@@ -36,7 +36,7 @@ AVOIDCIRCLEDLETTERS = 'no'
 FALLBACKTODOUBLESTRIKES = 'yes'
 REVERSELEXICONRESULTSBYFREQUENCY = 'yes'
 CAPONDICTIONARYFINDS = 50
-FINDPRINCIPLEPARTS = 'no'
+FINDPRINCIPLEPARTS = 'yes'
 
 # CLICKABLEINDEXEDPASSAGECAP: you can click to browse the passage
 # 	associated with an index item. Why would you even turn
