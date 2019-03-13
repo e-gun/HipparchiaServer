@@ -10,7 +10,7 @@ import itertools
 import re
 from typing import List
 
-from server.dbsupport.lexicaldbfunctions import bulkfindwordcounts, grablemmataobjectfor, lookformorphologymatches
+from server.dbsupport.lexicaldbfunctions import bulkfindwordcounts, grablemmataobjectfor, lookformorphologymatches, bulkfindmorphologyobjects
 from server.formatting.morphologytableformatting import filloutmorphtabletemplate, \
 	declinedtabletemplate, verbtabletemplate
 from server.formatting.wordformatting import stripaccents
@@ -129,9 +129,7 @@ class BaseFormMorphology(object):
 		self.lemmata = grablemmataobjectfor('{lg}_lemmata'.format(lg=self.language), word=self.headword, dbcursor=None)
 		self.dictionaryentry = self.lemmata.dictionaryentry
 		self.formlist = self.lemmata.formlist
-		c = ConnectionObject()
-		self.dbmorphobjects = [lookformorphologymatches(f, c.curs) for f in self.formlist]
-		c.connectioncleanup()
+		self.dbmorphobjects = bulkfindmorphologyobjects(self.formlist, self.language)
 		self.morphpossibilities = self._getmorphpossibilities()
 		self.numberofknownforms = len(self.morphpossibilities)
 		self.analyses = self._getalanlyses()

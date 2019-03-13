@@ -452,67 +452,6 @@ def findcountsviawordcountstable(wordtocheck):
 	return result
 
 
-def bulkfindwordcounts(listofwords) -> List[dbWordCountObject]:
-	"""
-
-	note that the lists of words should all start with the same letter since the wordcount tables are letter-keyed
-
-	hipparchiaDB=# CREATE TEMP TABLE bulkcounter_51807f8bbe08 AS SELECT values AS  entriestocheck FROM unnest(ARRAY['κατακλειούϲηϲ', 'κατακλῇϲαι', 'κατακλεῖϲαι']) values;
-
-	hipparchiaDB=# SELECT * FROM wordcounts_κ WHERE EXISTS (SELECT 1 FROM bulkcounter_51807f8bbe08 tocheck WHERE tocheck.entriestocheck = wordcounts_κ.entry_name);
-	  entry_name   | total_count | gr_count | lt_count | dp_count | in_count | ch_count
-	---------------+-------------+----------+----------+----------+----------+----------
-	 κατακλεῖϲαι   |          31 |       30 |        0 |        0 |        1 |        0
-	 κατακλειούϲηϲ |           3 |        3 |        0 |        0 |        0 |        0
-	 κατακλῇϲαι    |           1 |        1 |        0 |        0 |        0 |        0
-	(3 rows)
-
-	:param listofwords:
-	:return:
-	"""
-
-	dbconnection = ConnectionObject(readonlyconnection=False)
-	dbcursor = dbconnection.cursor()
-
-	try:
-		firstletteroffirstword = stripaccents(listofwords[0][0])
-	except IndexError:
-		return list()
-
-	if firstletteroffirstword not in 'abcdefghijklmnopqrstuvwxyzαβψδεφγηιξκλμνοπρϲτυωχθζ':
-		firstletteroffirstword = '0'
-
-	tqtemplate = """
-	CREATE TEMP TABLE bulkcounter_{rnd} AS
-		SELECT values AS 
-			entriestocheck FROM unnest(ARRAY[%s]) values
-	"""
-
-	uniquename = assignuniquename(12)
-	tempquery = tqtemplate.format(rnd=uniquename)
-	data = (listofwords,)
-	dbcursor.execute(tempquery, data)
-
-	qtemplate = """
-	SELECT * FROM wordcounts_{x} WHERE EXISTS 
-		(SELECT 1 FROM bulkcounter_{rnd} tocheck WHERE tocheck.entriestocheck = wordcounts_{x}.entry_name)
-	"""
-
-	query = qtemplate.format(rnd=uniquename, x=firstletteroffirstword)
-	try:
-		dbcursor.execute(query)
-		results = resultiterator(dbcursor)
-	except psycopg2.ProgrammingError:
-		# if you do not have the wordcounts installed: 'ProgrammingError: relations "wordcounts_a" does not exist
-		results = list()
-
-	wordcountobjects = [dbWordCountObject(*r) for r in results]
-
-	dbconnection.connectioncleanup()
-
-	return wordcountobjects
-
-
 def grablemmataobjectfor(db, dbcursor=None, word=None, xref=None):
 	"""
 
@@ -740,3 +679,110 @@ def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None
 			morphobject = None
 
 	return morphobject
+
+
+def bulkfindwordcounts(listofwords: List[str]) -> List[dbWordCountObject]:
+	"""
+
+	note that the lists of words should all start with the same letter since the wordcount tables are letter-keyed
+
+	hipparchiaDB=# CREATE TEMP TABLE bulkcounter_51807f8bbe08 AS SELECT values AS  entriestocheck FROM unnest(ARRAY['κατακλειούϲηϲ', 'κατακλῇϲαι', 'κατακλεῖϲαι']) values;
+
+	hipparchiaDB=# SELECT * FROM wordcounts_κ WHERE EXISTS (SELECT 1 FROM bulkcounter_51807f8bbe08 tocheck WHERE tocheck.entriestocheck = wordcounts_κ.entry_name);
+	  entry_name   | total_count | gr_count | lt_count | dp_count | in_count | ch_count
+	---------------+-------------+----------+----------+----------+----------+----------
+	 κατακλεῖϲαι   |          31 |       30 |        0 |        0 |        1 |        0
+	 κατακλειούϲηϲ |           3 |        3 |        0 |        0 |        0 |        0
+	 κατακλῇϲαι    |           1 |        1 |        0 |        0 |        0 |        0
+	(3 rows)
+
+	:param listofwords:
+	:return:
+	"""
+
+	dbconnection = ConnectionObject(readonlyconnection=False)
+	dbcursor = dbconnection.cursor()
+
+	try:
+		firstletteroffirstword = stripaccents(listofwords[0][0])
+	except IndexError:
+		return list()
+
+	if firstletteroffirstword not in 'abcdefghijklmnopqrstuvwxyzαβψδεφγηιξκλμνοπρϲτυωχθζ':
+		firstletteroffirstword = '0'
+
+	tqtemplate = """
+	CREATE TEMP TABLE bulkcounter_{rnd} AS
+		SELECT values AS 
+			entriestocheck FROM unnest(ARRAY[%s]) values
+	"""
+
+	uniquename = assignuniquename(12)
+	tempquery = tqtemplate.format(rnd=uniquename)
+	data = (listofwords,)
+	dbcursor.execute(tempquery, data)
+
+	qtemplate = """
+	SELECT * FROM wordcounts_{x} WHERE EXISTS 
+		(SELECT 1 FROM bulkcounter_{rnd} tocheck WHERE tocheck.entriestocheck = wordcounts_{x}.entry_name)
+	"""
+
+	query = qtemplate.format(rnd=uniquename, x=firstletteroffirstword)
+	try:
+		dbcursor.execute(query)
+		results = resultiterator(dbcursor)
+	except psycopg2.ProgrammingError:
+		# if you do not have the wordcounts installed: 'ProgrammingError: relations "wordcounts_a" does not exist
+		results = list()
+
+	wordcountobjects = [dbWordCountObject(*r) for r in results]
+
+	dbconnection.connectioncleanup()
+
+	return wordcountobjects
+
+
+def bulkfindmorphologyobjects(listofwords: List[str], language: str) -> List[dbMorphologyObject]:
+	"""
+
+	generate a list of morphology objects from a list of words
+
+	you need to send known good data here: lookformorphologymatches() is how you hook up a random word to the parser
+
+	:param listofwords:
+	:return:
+	"""
+
+	dbconnection = ConnectionObject(readonlyconnection=False)
+	dbcursor = dbconnection.cursor()
+
+	tqtemplate = """
+	CREATE TEMP TABLE bulkmorph_{rnd} AS
+		SELECT values AS 
+			entriestocheck FROM unnest(ARRAY[%s]) values
+	"""
+
+	uniquename = assignuniquename(12)
+	tempquery = tqtemplate.format(rnd=uniquename)
+	data = (listofwords,)
+	dbcursor.execute(tempquery, data)
+
+	qtemplate = """
+	SELECT * FROM {lg}_morphology WHERE EXISTS 
+		(SELECT 1 FROM bulkmorph_{rnd} tocheck WHERE tocheck.entriestocheck = {lg}_morphology.observed_form)
+	"""
+
+	query = qtemplate.format(rnd=uniquename, lg=language)
+
+	try:
+		dbcursor.execute(query)
+		results = resultiterator(dbcursor)
+	except psycopg2.ProgrammingError:
+		# if you do not have the wordcounts installed: 'ProgrammingError: relations "wordcounts_a" does not exist
+		results = list()
+
+	morphobjects = [dbMorphologyObject(*r) for r in results]
+
+	dbconnection.connectioncleanup()
+
+	return morphobjects
