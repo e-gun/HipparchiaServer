@@ -9,7 +9,7 @@
 from os import cpu_count
 
 from server import hipparchia
-
+from server.commandlineoptions import getcommandlineargs
 
 def setthreadcount(startup=False) -> int:
 	"""
@@ -20,10 +20,15 @@ def setthreadcount(startup=False) -> int:
 	:return:
 	"""
 
-	if hipparchia.config['AUTOCONFIGWORKERS'] != 'yes':
-		workers = hipparchia.config['WORKERS']
+	commandlineargs = getcommandlineargs()
+
+	if not commandlineargs.threadcount:
+		if hipparchia.config['AUTOCONFIGWORKERS'] != 'yes':
+			workers = hipparchia.config['WORKERS']
+		else:
+			workers = int(cpu_count() / 2) + 1
 	else:
-		workers = int(cpu_count() / 2) + 1
+		workers = commandlineargs.threadcount
 
 	if workers < 1:
 		workers = 1

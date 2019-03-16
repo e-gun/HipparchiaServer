@@ -6,11 +6,10 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import argparse
-
 from multiprocessing import current_process
 
 from server import hipparchia
+from server.commandlineoptions import getcommandlineargs
 from version import hipparchiaserverversion as hipparchiaversion
 
 if current_process().name == 'MainProcess':
@@ -19,10 +18,6 @@ if current_process().name == 'MainProcess':
 
 
 if __name__ == '__main__':
-	commandlineparser = argparse.ArgumentParser(description='Start Hipparchia Server')
-	commandlineparser.add_argument('--skiplemma', action='store_true', help='[debugging] use empty lemmatadict for fast startup')
-	commandlineparser.add_argument('--profiling', action='store_true', help='[debugging] enable the profiler')
-	commandlineargs = commandlineparser.parse_args()
 
 	if hipparchia.config['ENABLELOGGING'] == 'yes':
 		from inspect import stack
@@ -61,10 +56,16 @@ if __name__ == '__main__':
 	
 	"""
 
-	if not commandlineargs.profiling:
-		host = hipparchia.config['LISTENINGADDRESS']
-		port = hipparchia.config['FLASKSERVEDFROMPORT']
+	commandlineargs = getcommandlineargs()
 
+	host = hipparchia.config['LISTENINGADDRESS']
+
+	if not commandlineargs.portoverride:
+		port = hipparchia.config['FLASKSERVEDFROMPORT']
+	else:
+		port = commandlineargs.portoverride
+
+	if not commandlineargs.profiling:
 		hipparchia.run(threaded=True, debug=False, host=host, port=port)
 
 	else:
@@ -77,5 +78,4 @@ if __name__ == '__main__':
 
 		d = False
 
-		hipparchia.run(debug=d, threaded=True, host=hipparchia.config['LISTENINGADDRESS'],
-		               port=hipparchia.config['FLASKSERVEDFROMPORT'])
+		hipparchia.run(debug=d, threaded=True, host=host, port=port)

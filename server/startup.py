@@ -6,24 +6,21 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import argparse
 import time
 from multiprocessing import current_process
 
 from server import hipparchia
 from server.calculatewordweights import findccorporaweights, findtemporalweights, workobjectgeneraweights
+from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.bulkdboperations import loadallauthorsasobjects, loadallworksasobjects, \
 	loadallworksintoallauthors, loadlemmataasobjects
 from server.dbsupport.miscdbfunctions import probefordatabases
-from server.threading.mpthreadcount import setthreadcount
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
 	buildworkgenresdict, buildworkprovenancedict
+from server.threading.mpthreadcount import setthreadcount
 
 if current_process().name == 'MainProcess':
-	commandlineparser = argparse.ArgumentParser(description='Start Hipparchia Server')
-	commandlineparser.add_argument('--skiplemma', action='store_true', help='[debugging] use empty lemmatadict for fast startup')
-	commandlineparser.add_argument('--profiling', action='store_true', help='[debugging] enable the profiler')
-	commandlineargs = commandlineparser.parse_args()
+	commandlineargs = getcommandlineargs()
 
 	# stupid Windows will fork new copies and reload all of this
 
