@@ -10,11 +10,10 @@ import itertools
 import re
 from typing import List
 
-from server.dbsupport.lexicaldbfunctions import bulkfindwordcounts, grablemmataobjectfor, lookformorphologymatches, bulkfindmorphologyobjects
-from server.formatting.morphologytableformatting import filloutmorphtabletemplate, \
-	declinedtabletemplate, verbtabletemplate
+from server.dbsupport.lexicaldbfunctions import bulkfindmorphologyobjects, bulkfindwordcounts, grablemmataobjectfor
+from server.formatting.morphologytableformatting import declinedtabletemplate, filloutmorphtabletemplate, \
+	verbtabletemplate
 from server.formatting.wordformatting import stripaccents
-from server.hipparchiaobjects.connectionobject import ConnectionObject
 
 
 class MorphAnalysis(object):

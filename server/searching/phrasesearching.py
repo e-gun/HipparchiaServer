@@ -112,6 +112,11 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 
 	:return:
 	"""
+	so = searchobject
+	activepoll = so.poll
+
+	# build incomplete sfo that will handle everything other than iteratethroughsearchlist()
+	sfo = returnsearchfncobject(workerid, foundlineobjects, listofplacestosearch, so, dbconnection, None)
 
 	querytemplate = """
 		SELECT secondpass.index, secondpass.{co} FROM 
@@ -126,12 +131,9 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 		(SELECT 1 FROM {tbl}_includelist_{a} incl WHERE incl.includeindex = {tbl}.index)
 	"""
 
-	so = searchobject
-	activepoll = so.poll
-
 	# substringsearch() needs ability to CREATE TEMPORARY TABLE
-	dbconnection.setreadonly(False)
-	cursor = dbconnection.cursor()
+	sfo.dbconnection.setreadonly(False)
+	dbcursor = sfo.dbconnection.cursor()
 
 	qcomb = QueryCombinator(searchphrase)
 	# the last time is the full phrase:  ('one two three four five', '')
@@ -148,9 +150,6 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 	else:
 		# the windowing problem means that '1' might be something that gets discarded
 		lim = ' LIMIT 5'
-
-	# build incomplete sfo that will handle everything other than iteratethroughsearchlist()
-	sfo = returnsearchfncobject(workerid, foundlineobjects, listofplacestosearch, so, dbconnection, None)
 
 	if so.redissearchlist:
 		listofplacestosearch = True
@@ -173,14 +172,14 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 				avoidcollisions = assignuniquename()
 				q = r['where']['tempquery']
 				q = re.sub('_includelist', '_includelist_{a}'.format(a=avoidcollisions), q)
-				cursor.execute(q)
+				dbcursor.execute(q)
 				whr = wheretempate.format(tbl=authortable, a=avoidcollisions)
 
 			query = querytemplate.format(db=authortable, co=so.usecolumn, whr=whr, lim=lim)
 			data = (sp,)
 			# print('subqueryphrasesearch() q,d:',query, data)
-			cursor.execute(query, data)
-			indices = [i[0] for i in cursor.fetchall()]
+			dbcursor.execute(query, data)
+			indices = [i[0] for i in dbcursor.fetchall()]
 			# this will yield a bunch of windows: you need to find the centers; see 'while...' below
 
 			locallineobjects = list()
@@ -188,8 +187,8 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 				for i in indices:
 					query = 'SELECT {wtmpl} FROM {tb} WHERE index=%s'.format(wtmpl=worklinetemplate, tb=authortable)
 					data = (i,)
-					cursor.execute(query, data)
-					locallineobjects.append(dblineintolineobject(cursor.fetchone()))
+					dbcursor.execute(query, data)
+					locallineobjects.append(dblineintolineobject(dbcursor.fetchone()))
 
 			locallineobjects.reverse()
 			# debugging
@@ -220,9 +219,9 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 						# usually you won't get a hit by grabbing the next db line, but sometimes you do...
 						query = 'SELECT {wtmpl} FROM {tb} WHERE index=%s'.format(wtmpl=worklinetemplate, tb=authortable)
 						data = (lineobject.index + 1,)
-						cursor.execute(query, data)
+						dbcursor.execute(query, data)
 						try:
-							nextline = dblineintolineobject(cursor.fetchone())
+							nextline = dblineintolineobject(dbcursor.fetchone())
 						except:
 							nextline = makeablankline('gr0000w000', -1)
 
@@ -253,6 +252,9 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 			listofplacestosearch = None
 
 	sfo.listcleanup()
+
+	if sfo.needconnectioncleanup:
+		sfo.dbconnection.connectioncleanup()
 
 	return foundlineobjects
 

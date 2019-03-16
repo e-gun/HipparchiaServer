@@ -745,9 +745,16 @@ def bulkfindwordcounts(listofwords: List[str]) -> List[dbWordCountObject]:
 def bulkfindmorphologyobjects(listofwords: List[str], language: str) -> List[dbMorphologyObject]:
 	"""
 
-	generate a list of morphology objects from a list of words
+	generate a list of morphology objects from a list of words: this is substantially faster than executing
+	lookformorphologymatches() over and over again
 
 	you need to send known good data here: lookformorphologymatches() is how you hook up a random word to the parser
+
+	CREATE TEMP TABLE bulkmorph_159d3b63b36c AS
+		SELECT values AS
+			entriestocheck FROM unnest(ARRAY[%s]) values
+
+	(['διηλλάξαντο', 'διηλλάξαμεν', 'διαλλάττωμεν', ...],)
 
 	:param listofwords:
 	:return:

@@ -159,7 +159,6 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 		# you need to give each job its own connection if you use a connection pool
 		# otherwise there will be problems with threading
 		# note that we are not yet taking care of connection types: 'autocommit', etc
-
 		oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
 	else:
 		# will grab a connection later once inside of 'sfo'
