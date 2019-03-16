@@ -16,6 +16,7 @@ from flask import __version__ as flaskversion
 from flask import render_template, send_file, session
 
 from server import hipparchia
+from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.miscdbfunctions import getpostgresserverversion, versionchecking
 from server.formatting.vectorformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar
 from server.listsandsession.checksession import probeforsessionvariables
@@ -48,6 +49,11 @@ def frontpage():
 		picker = 'nofontstopick'
 
 	debugpanel = hipparchia.config['ALLOWUSERTOSETDEBUGMODES']
+
+	commandlineargs = getcommandlineargs()
+	if commandlineargs.enabledebugui:
+		debugpanel = 'yes'
+
 	havevectors = hipparchia.config['SEMANTICVECTORSENABLED']
 
 	vectorhtml = vectorhtmlforfrontpage()

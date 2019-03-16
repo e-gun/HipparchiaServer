@@ -12,6 +12,7 @@ from typing import List
 from flask import session
 
 from server import hipparchia
+from server.commandlineoptions import getcommandlineargs
 from server.listsandsession.corpusavailability import corpusselectionsaspseudobinarystring
 from server.semanticvectors.vectorhelpers import vectordefaults, vectorranges
 from server.startup import authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict
@@ -30,7 +31,9 @@ def modifysessionvariable(param, val):
 	availableoptions = list()
 	blocakabledebugoptions = ['debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords', 'searchinsidemarkup']
 
-	if hipparchia.config['ALLOWUSERTOSETDEBUGMODES'] == 'yes':
+	commandlineargs = getcommandlineargs()
+
+	if hipparchia.config['ALLOWUSERTOSETDEBUGMODES'] == 'yes' or commandlineargs.enabledebugui:
 		availableoptions.extend(blocakabledebugoptions)
 
 	yesorno = [

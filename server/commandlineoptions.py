@@ -19,6 +19,7 @@ def getcommandlineargs():
 
 	commandlineparser = argparse.ArgumentParser(description='Start Hipparchia Server')
 
+	commandlineparser.add_argument('--enabledebugui', action='store_true', help='[debugging] (potentially) override the config file and turn the debug UI on')
 	commandlineparser.add_argument('--profiling', action='store_true', help='[debugging] enable the profiler')
 	commandlineparser.add_argument('--skiplemma', action='store_true', help='[debugging] use empty lemmatadict for fast startup')
 	commandlineparser.add_argument('--portoverride', required=False, type=int, help='[debugging] override the config file listening port')
