@@ -6,6 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import argparse
 import time
 from multiprocessing import current_process
 
@@ -19,6 +20,11 @@ from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlo
 	buildworkgenresdict, buildworkprovenancedict
 
 if current_process().name == 'MainProcess':
+	commandlineparser = argparse.ArgumentParser(description='Start Hipparchia Server')
+	commandlineparser.add_argument('--skiplemma', action='store_true', help='[debugging] use empty lemmatadict for fast startup')
+	commandlineparser.add_argument('--profiling', action='store_true', help='[debugging] enable the profiler')
+	commandlineargs = commandlineparser.parse_args()
+
 	# stupid Windows will fork new copies and reload all of this
 
 	terminaltext = """
@@ -82,9 +88,13 @@ if current_process().name == 'MainProcess':
 	authordict = loadallauthorsasobjects()
 	workdict = loadallworksasobjects()
 	authordict = loadallworksintoallauthors(authordict, workdict)
-	lemmatadict = loadlemmataasobjects()
-	# print('lemmatadict disabled for debugging run; re-enable via "startup.py"')
-	# lemmatadict = dict()
+
+	if commandlineargs.skiplemma:
+		print('lemmatadict disabled for debugging run')
+		lemmatadict = dict()
+	else:
+		lemmatadict = loadlemmataasobjects()
+
 	# lemmatadict too long to be used by the hinter: need quicker access; so partition it up into keyedlemmata
 	keyedlemmata = buildkeyedlemmata(list(lemmatadict.keys()))
 

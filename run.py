@@ -6,6 +6,8 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import argparse
+
 from multiprocessing import current_process
 
 from server import hipparchia
@@ -17,6 +19,10 @@ if current_process().name == 'MainProcess':
 
 
 if __name__ == '__main__':
+	commandlineparser = argparse.ArgumentParser(description='Start Hipparchia Server')
+	commandlineparser.add_argument('--skiplemma', action='store_true', help='[debugging] use empty lemmatadict for fast startup')
+	commandlineparser.add_argument('--profiling', action='store_true', help='[debugging] enable the profiler')
+	commandlineargs = commandlineparser.parse_args()
 
 	if hipparchia.config['ENABLELOGGING'] == 'yes':
 		from inspect import stack
@@ -55,7 +61,21 @@ if __name__ == '__main__':
 	
 	"""
 
-	host = hipparchia.config['LISTENINGADDRESS']
-	port = hipparchia.config['FLASKSERVEDFROMPORT']
+	if not commandlineargs.profiling:
+		host = hipparchia.config['LISTENINGADDRESS']
+		port = hipparchia.config['FLASKSERVEDFROMPORT']
 
-	hipparchia.run(threaded=True, debug=False, host=host, port=port)
+		hipparchia.run(threaded=True, debug=False, host=host, port=port)
+
+	else:
+		from werkzeug.contrib.profiler import ProfilerMiddleware
+
+		from server import hipparchia
+
+		hipparchia.config['PROFILE'] = True
+		hipparchia.wsgi_app = ProfilerMiddleware(hipparchia.wsgi_app, restrictions=[25])
+
+		d = False
+
+		hipparchia.run(debug=d, threaded=True, host=hipparchia.config['LISTENINGADDRESS'],
+		               port=hipparchia.config['FLASKSERVEDFROMPORT'])
