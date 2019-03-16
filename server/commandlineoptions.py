@@ -17,7 +17,7 @@ def getcommandlineargs():
 	:return:
 	"""
 
-	commandlineparser = argparse.ArgumentParser(description='Start Hipparchia Server')
+	commandlineparser = argparse.ArgumentParser(description='script used to launch HipparchiaServer')
 
 	commandlineparser.add_argument('--enabledebugui', action='store_true', help='[debugging] (potentially) override the config file and turn the debug UI on')
 	commandlineparser.add_argument('--profiling', action='store_true', help='[debugging] enable the profiler')
@@ -27,4 +27,3 @@ def getcommandlineargs():
 	commandlineargs = commandlineparser.parse_args()
 
 	return commandlineargs
-

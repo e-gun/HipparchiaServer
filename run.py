@@ -8,6 +8,8 @@
 
 from multiprocessing import current_process
 
+from werkzeug.contrib.profiler import ProfilerMiddleware
+
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
 from version import hipparchiaserverversion as hipparchiaversion
@@ -32,10 +34,6 @@ if __name__ == '__main__':
 		# Also add the handler to Flask's logger for cases
 		#  where Werkzeug isn't used as the underlying WSGI server.
 		hipparchia.logger.addHandler(handler)
-
-	# debug=True is considered to be a serious security hazard in a networked environment
-	# if you are working on Hipparchia's code, you might be interested in this; otherwise there
-	# are only bad reasons to set this to 'True'
 
 	"""
 	sometimes ^C will not kill every thread and you will still have an open server port
@@ -65,17 +63,11 @@ if __name__ == '__main__':
 	else:
 		port = commandlineargs.portoverride
 
-	if not commandlineargs.profiling:
-		hipparchia.run(threaded=True, debug=False, host=host, port=port)
-
-	else:
-		from werkzeug.contrib.profiler import ProfilerMiddleware
-
-		from server import hipparchia
-
-		hipparchia.config['PROFILE'] = True
+	if commandlineargs.profiling:
 		hipparchia.wsgi_app = ProfilerMiddleware(hipparchia.wsgi_app, restrictions=[25])
 
-		d = False
+	# debug=True is a *serious* security hazard in a networked environment
+	# if you are working on Hipparchia's code, you might be interested in this; otherwise there
+	# are only bad reasons to set this to 'True'
 
-		hipparchia.run(debug=d, threaded=True, host=host, port=port)
+	hipparchia.run(threaded=True, debug=False, host=host, port=port)
