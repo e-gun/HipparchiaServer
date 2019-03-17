@@ -125,7 +125,10 @@ class BaseFormMorphology(object):
 		self.lexicalid = lexicalid
 		# next is unsafe because you will "KeyError: 'anno¹'"
 		# self.lemmata = lemmatadict[headword]
-		self.lemmata = grablemmataobjectfor('{lg}_lemmata'.format(lg=self.language), word=self.headword, dbcursor=None)
+		self.lemmata = grablemmataobjectfor('{lg}_lemmata'.format(lg=self.language), word=self.headword)
+		if self.lemmata.xref == -1:
+			# you failed; maybe there is a superscript issue; the raw data is inconsistent here...
+			self.lemmata = grablemmataobjectfor('{lg}_lemmata'.format(lg=self.language), word=self.headword, allowsuperscripts=True)
 		self.dictionaryentry = self.lemmata.dictionaryentry
 		self.formlist = self.lemmata.formlist
 		self.dbmorphobjects = bulkfindmorphologyobjects(self.formlist, self.language)

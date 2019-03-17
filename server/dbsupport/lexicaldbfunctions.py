@@ -452,7 +452,7 @@ def findcountsviawordcountstable(wordtocheck):
 	return result
 
 
-def grablemmataobjectfor(db, dbcursor=None, word=None, xref=None):
+def grablemmataobjectfor(db, dbcursor=None, word=None, xref=None, allowsuperscripts=False):
 	"""
 
 	send a word, return a lemmaobject
@@ -467,8 +467,13 @@ def grablemmataobjectfor(db, dbcursor=None, word=None, xref=None):
 		hipparchiaobjects/lexicaloutputobjects.py
 		hipparchiaobjects/morphanalysisobjects.py
 
-	:param entryname:
+	'allowsuperscripts' because sometimes you are supposed to search under δέω² and sometimes you are not...
+
 	:param db:
+	:param dbcursor:
+	:param word:
+	:param xref:
+	:param allowsuperscripts:
 	:return:
 	"""
 
@@ -487,7 +492,10 @@ def grablemmataobjectfor(db, dbcursor=None, word=None, xref=None):
 
 	if word:
 		field = 'dictionary_entry'
-		data = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹]', '', word)
+		data = word
+
+	if not allowsuperscripts:
+		data = re.sub(r'[¹²³⁴⁵⁶⁷⁸⁹]', '', data)
 
 	if not session['available'][db]:
 		lo = dbLemmaObject('[parsing is impossible: lemmata data was not installed]', -1, '')
