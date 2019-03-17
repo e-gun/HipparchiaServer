@@ -16,15 +16,6 @@
 #
 # PARSERBUGMODE will show the xref value after the match
 #
-# CALCULATEWORDWEIGHTS will recalibrate the weighting constants: only
-# 	useful after a new DB build with new corpora definitions.
-# 	this can take a couple of minutes to calculate, so leaving it
-# 	at 'yes' is not such a great idea. And the new numbers are
-# 	not in fact entered into the code, just calculated; so you have
-# 	to edit dbHeadwordObject() yourself  after you are given the
-# 	numbers to send to it; if COLLAPSEDGENRECOUNTS is 'yes', you will
-#   not see all of the possibilities
-#
 # ENABLELOGGING = 'yes' will turn on logging and send the logs to
 #   HIPPARCHIALOGFILE
 #
@@ -43,9 +34,7 @@
 # SEARCHMARKEDUPLINE will enable searching for things like "hmu_date_or_numeric_equivalent_of_date". It will also ruin
 #   many, many other kinds of search
 
-
 SUPPRESSWARNINGS = 'yes'
-CALCULATEWORDWEIGHTS = 'no'
 ENABLELOGGING = 'no'
 HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 RETAINREDISPOLLS = 'no'

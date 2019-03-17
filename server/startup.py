@@ -15,6 +15,7 @@ from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.bulkdboperations import loadallauthorsasobjects, loadallworksasobjects, \
 	loadallworksintoallauthors, loadlemmataasobjects
 from server.dbsupport.miscdbfunctions import probefordatabases
+from server.listsandsession.genericlistfunctions import dictitemstartswith, findspecificdate
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
 	buildworkgenresdict, buildworkprovenancedict
 from server.threading.mpthreadcount import setthreadcount
@@ -107,24 +108,6 @@ if current_process().name == 'MainProcess':
 	print('building specialized sublists', end='')
 	launchtime = time.time()
 
-
-	def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
-		"""
-
-		trim a dict via a criterion: muststartwith must begin the item to survive the check
-
-		:param originaldict:
-		:param element:
-		:param muststartwith:
-		:return:
-		"""
-
-		newdict = {x: originaldict[x] for x in originaldict
-					if getattr(originaldict[x], element)[0:2] == muststartwith}
-
-		return newdict
-
-
 	listmapper = {
 		'gr': {'a': dictitemstartswith(authordict, 'universalid', 'gr'), 'w': dictitemstartswith(workdict, 'universalid', 'gr')},
 		'lt': {'a': dictitemstartswith(authordict, 'universalid', 'lt'), 'w': dictitemstartswith(workdict, 'universalid', 'lt')},
@@ -132,47 +115,6 @@ if current_process().name == 'MainProcess':
 		'in': {'a': dictitemstartswith(authordict, 'universalid', 'in'), 'w': dictitemstartswith(workdict, 'universalid', 'in')},
 		'ch': {'a': dictitemstartswith(authordict, 'universalid', 'ch'), 'w': dictitemstartswith(workdict, 'universalid', 'ch')},
 	}
-
-
-	def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
-		"""
-
-		tell me which items on the authorandworklist have unknown dates
-
-			incerta = 2500
-			varia = 2000
-			[failedtoparse = 9999]
-
-		this profiles as fairly slow when called on a large search list (.5s):
-		it might be better to build a list of these up front
-		when loading HipparchiaServer since this is both static and repetitive
-
-		:param authorandworklist:
-		:param authorobjectdict:
-		:param worksdict:
-		:return:
-		"""
-		datematches = list()
-
-		for aw in authorandworklist:
-			w = workobjectdict[aw]
-			try:
-				# does the work have a date? if not, we will throw an exception
-				cd = int(w.converted_date)
-				if cd == specificdate:
-					datematches.append(aw)
-			except TypeError:
-				# no work date? then we will look inside the author for the date
-				aid = aw[0:6]
-				try:
-					cd = int(authorobjectdict[aid].converted_date)
-					if cd == specificdate:
-						datematches.append(aw)
-				except TypeError:
-					# the author can't tell you his date; i guess it is incerta by definition
-					datematches.append(aw)
-
-		return datematches
 
 	# search list building and pruning was testing all items for their date
 	# this too often at a cost of .5s per full corpus search
@@ -189,19 +131,24 @@ if current_process().name == 'MainProcess':
 	del elapsed
 	del launchtime
 
-	if hipparchia.config['CALCULATEWORDWEIGHTS'] == 'yes':
+	# CALCULATEWORDWEIGHTS will recalibrate the weighting constants: only
+	# 	useful after a new DB build with new corpora definitions (i.e., *very* rarely).
+	# 	this can take a couple of minutes to calculate, so leaving it
+	# 	at 'yes' is not such a great idea. And the new numbers are
+	# 	not in fact entered into the code, just calculated; so you have
+	# 	to edit dbHeadwordObject() yourself  after you are given the
+	# 	numbers to send to it; if COLLAPSEDGENRECOUNTS is 'yes', you will
+	#   not see all of the possibilities
+
+	if commandlineargs.calculatewordweights or commandlineargs.collapsedgenreweights:
 		print('calculating word weights...')
-		if hipparchia.config['COLLAPSEDGENRECOUNTS'] == 'yes':
+		if commandlineargs.collapsedgenreweights:
 			c = True
 		else:
 			c = False
 		print('greek wordweights', findtemporalweights('G'))
 		print('corpus weights', findccorporaweights())
-		# see function notes on the difference between this pair and the next pair
-		# print('greek genre weights:', findgeneraweights('G', c))
-		# print('latin genre weights:', findgeneraweights('L', c))
 
-		# faster and smarter
 		print('greek genre weights:', workobjectgeneraweights('G', c, workdict))
 		print('latin genre weights:', workobjectgeneraweights('L', c, workdict))
 

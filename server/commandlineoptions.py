@@ -18,12 +18,18 @@ def getcommandlineargs():
 	"""
 
 	commandlineparser = argparse.ArgumentParser(description='script used to launch HipparchiaServer')
+	exclusivegroup = commandlineparser.add_mutually_exclusive_group()
 
+	commandlineparser.add_argument('--calculatewordweights', action='store_true', help='[info] (re)generate word weight info')
+	commandlineparser.add_argument('--collapsedgenreweights', action='store_true', help='[info] (re)generate word weight info & merge related genres ("allret", etc.)')
 	commandlineparser.add_argument('--enabledebugui', action='store_true', help='[debugging] (potentially) override the config file and turn the debug UI on')
+	exclusivegroup.add_argument('--pooledconnection', action='store_true', help='[debugging] (potentially) override the config file and force a pooled DB connection')
 	commandlineparser.add_argument('--profiling', action='store_true', help='[debugging] enable the profiler')
+	exclusivegroup.add_argument('--simpleconnection', action='store_true', help='[debugging] (potentially) override the config file and force a simple DB connection')
 	commandlineparser.add_argument('--skiplemma', action='store_true', help='[debugging] use empty lemmatadict for fast startup')
 	commandlineparser.add_argument('--portoverride', required=False, type=int, help='[debugging] override the config file listening port')
 	commandlineparser.add_argument('--threadcount', required=False, type=int, help='[debugging] override the config file threadcount')
+
 	commandlineargs = commandlineparser.parse_args()
 
 	return commandlineargs

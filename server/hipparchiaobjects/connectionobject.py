@@ -14,7 +14,7 @@ import threading
 from server import hipparchia
 from server.threading.mpthreadcount import setthreadcount
 from server.dbsupport.tablefunctions import assignuniquename
-
+from server.commandlineoptions import getcommandlineargs
 
 class GenericConnectionObject(object):
 	"""
@@ -323,9 +323,21 @@ class SimpleConnectionObject(GenericConnectionObject):
 		return
 
 
-if hipparchia.config['CONNECTIONTYPE'] == 'simple':
-	class ConnectionObject(SimpleConnectionObject):
-		pass
+commandlineargs = getcommandlineargs()
+
+if not commandlineargs.simpleconnection or commandlineargs.pooledconnection:
+	if hipparchia.config['CONNECTIONTYPE'] == 'simple':
+		class ConnectionObject(SimpleConnectionObject):
+			pass
+	else:
+		class ConnectionObject(PooledConnectionObject):
+			pass
 else:
-	class ConnectionObject(PooledConnectionObject):
-		pass
+	if commandlineargs.simpleconnection:
+		print('simple DB connections')
+		class ConnectionObject(SimpleConnectionObject):
+			pass
+	if commandlineargs.pooledconnection:
+		print('pooled DB connections')
+		class ConnectionObject(PooledConnectionObject):
+			pass

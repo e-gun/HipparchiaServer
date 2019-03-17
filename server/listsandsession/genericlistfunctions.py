@@ -10,6 +10,64 @@ import re
 from server.formatting.wordformatting import buildhipparchiatranstable, stripaccents
 
 
+def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
+	"""
+
+	trim a dict via a criterion: muststartwith must begin the item to survive the check
+
+	:param originaldict:
+	:param element:
+	:param muststartwith:
+	:return:
+	"""
+
+	newdict = {x: originaldict[x] for x in originaldict
+	           if getattr(originaldict[x], element)[0:2] == muststartwith}
+
+	return newdict
+
+
+def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
+		"""
+
+		tell me which items on the authorandworklist have unknown dates
+
+			incerta = 2500
+			varia = 2000
+			[failedtoparse = 9999]
+
+		this profiles as fairly slow when called on a large search list (.5s):
+		it might be better to build a list of these up front
+		when loading HipparchiaServer since this is both static and repetitive
+
+		:param authorandworklist:
+		:param authorobjectdict:
+		:param worksdict:
+		:return:
+		"""
+		datematches = list()
+
+		for aw in authorandworklist:
+			w = workobjectdict[aw]
+			try:
+				# does the work have a date? if not, we will throw an exception
+				cd = int(w.converted_date)
+				if cd == specificdate:
+					datematches.append(aw)
+			except TypeError:
+				# no work date? then we will look inside the author for the date
+				aid = aw[0:6]
+				try:
+					cd = int(authorobjectdict[aid].converted_date)
+					if cd == specificdate:
+						datematches.append(aw)
+				except TypeError:
+					# the author can't tell you his date; i guess it is incerta by definition
+					datematches.append(aw)
+
+		return datematches
+
+
 def tidyuplist(untidylist: list) -> list:
 	"""
 	sort and remove duplicates
