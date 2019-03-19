@@ -106,6 +106,7 @@ key features:
 	    can find Coptic words and characters: 'ⲫⲓⲗⲟⲑⲉⲟⲥ', 'ϩανϭοϊ̈', etc.
 	    forward-compatible unicode: attempt to properly code characters which are not yet available in most fonts
 	    known unknowns: unhandled characters preserve their betacode messages in the metadata for future fixes
+	    debugging options can be enabled at launch time (see "./run.py -h")
 
 ```
 

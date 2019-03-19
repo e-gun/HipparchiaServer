@@ -16,6 +16,7 @@ from server.threading.mpthreadcount import setthreadcount
 from server.dbsupport.tablefunctions import assignuniquename
 from server.commandlineoptions import getcommandlineargs
 
+
 class GenericConnectionObject(object):
 	"""
 
@@ -57,6 +58,23 @@ class GenericConnectionObject(object):
 		$ brew services restart postgres
 	]
 	"""
+
+	dbuser = hipparchia.config['DBUSER']
+	dbpass = hipparchia.config['DBPASS']
+	dbwriteuser = hipparchia.config['DBWRITEUSER']
+	dbwritepass = hipparchia.config['DBWRITEPASS']
+
+	dbhost = hipparchia.config['DBHOST']
+	dbport = hipparchia.config['DBPORT']
+	dbname = hipparchia.config['DBNAME']
+
+	commandlineargs = getcommandlineargs()
+	if commandlineargs.dbhost:
+		dbhost = commandlineargs.dbhost
+	if commandlineargs.dbport:
+		dbport = commandlineargs.dbport
+	if commandlineargs.dbname:
+		dbname = commandlineargs.dbname
 
 	def __init__(self, autocommit, readonlyconnection):
 		# note that only autocommit='autocommit' will make a difference
@@ -169,11 +187,11 @@ class PooledConnectionObject(GenericConnectionObject):
 			# pooltype = connectionpool.PersistentConnectionPool
 
 			# [A] 'ro' pool
-			kwds = {'user': hipparchia.config['DBUSER'],
-					'host': hipparchia.config['DBHOST'],
-					'port': hipparchia.config['DBPORT'],
-					'database': hipparchia.config['DBNAME'],
-					'password': hipparchia.config['DBPASS']}
+			kwds = {'user': GenericConnectionObject.dbuser,
+					'host': GenericConnectionObject.dbhost,
+					'port': GenericConnectionObject.dbport,
+					'database': GenericConnectionObject.dbname,
+					'password': GenericConnectionObject.dbpass}
 
 			try:
 				readonlypool = pooltype(poolsize, poolsize * 2, **kwds)
@@ -183,13 +201,13 @@ class PooledConnectionObject(GenericConnectionObject):
 				noconnection = 'could not connect to server'
 				badpass = 'password authentication failed'
 				if noconnection in thefailure:
-					e = GenericConnectionObject.noserverproblem.format(h=hipparchia.config['DBHOST'], p=hipparchia.config['DBPORT'])
+					e = GenericConnectionObject.noserverproblem.format(h=GenericConnectionObject.dbhost, p=GenericConnectionObject.dbport)
 					print(GenericConnectionObject.postgresproblem.format(e=e))
 					if sys.platform == 'darwin':
 						print(GenericConnectionObject.darwinproblem)
 
 				if badpass in thefailure:
-					e = GenericConnectionObject.badpassproblem.format(h=hipparchia.config['DBHOST'], p=hipparchia.config['DBPORT'])
+					e = GenericConnectionObject.badpassproblem.format(h=GenericConnectionObject.dbhost, p=GenericConnectionObject.dbport)
 					print(GenericConnectionObject.postgresproblem.format(e=e))
 
 				sys.exit(0)
@@ -197,8 +215,8 @@ class PooledConnectionObject(GenericConnectionObject):
 			# [B] 'rw' pool: only used by the vector graphing functions
 			# and these are always going to be single-threaded
 			littlepool = max(int(setthreadcount() / 2), 2)
-			kwds['user'] = hipparchia.config['DBWRITEUSER']
-			kwds['password'] = hipparchia.config['DBWRITEPASS']
+			kwds['user'] = GenericConnectionObject.dbwriteuser
+			kwds['password'] = GenericConnectionObject.dbwritepass
 			# this can be smaller because only vectors do rw and the vectorbot is not allowed in the pool
 			# but you also need to be free to leave rw unset
 			try:
@@ -276,18 +294,18 @@ class SimpleConnectionObject(GenericConnectionObject):
 		super().__init__(autocommit, readonlyconnection)
 		assert ctype in ['ro', 'rw'], 'connection type must be either "ro" or "rw"'
 		if ctype != 'rw':
-			u = hipparchia.config['DBUSER']
-			p = hipparchia.config['DBPASS']
+			u = GenericConnectionObject.dbuser
+			p = GenericConnectionObject.dbpass
 		else:
-			u = hipparchia.config['DBWRITEUSER']
-			p = hipparchia.config['DBWRITEPASS']
+			u = GenericConnectionObject.dbwriteuser
+			p = GenericConnectionObject.dbwritepass
 			self.readonlyconnection = False
 
 		try:
 			self.dbconnection = psycopg2.connect(user=u,
-												host=hipparchia.config['DBHOST'],
-												port=hipparchia.config['DBPORT'],
-												database=hipparchia.config['DBNAME'],
+												host=GenericConnectionObject.dbhost,
+												port=GenericConnectionObject.dbport,
+												database=GenericConnectionObject.dbname,
 												password=p)
 		except psycopg2.OperationalError:
 			print(GenericConnectionObject.postgresproblem)

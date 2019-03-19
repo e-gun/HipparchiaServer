@@ -11,9 +11,10 @@ import time
 from typing import List
 
 from server import hipparchia
+from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.vectordbfunctions import checkforstoredvector
-from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.gensimnearestneighbors import buildnnvectorspace
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
@@ -34,7 +35,9 @@ def startvectorizing():
 
 	workpile = None
 
-	if hipparchia.config['AUTOVECTORIZE'] == 'yes':
+	commandlineargs = getcommandlineargs()
+
+	if hipparchia.config['AUTOVECTORIZE'] == 'yes' and not commandlineargs.disablevectorbot:
 		workpile = determinevectorworkpile()
 
 	# [(['gr2062'], 4182615), (['gr0057'], 2594166), (['gr4090'], 2202504), ...]
@@ -79,7 +82,7 @@ def startvectorizing():
 				workpile = list()
 			del vectorspace
 
-	if hipparchia.config['AUTOVECTORIZE'] == 'yes':
+	if hipparchia.config['AUTOVECTORIZE'] == 'yes' and not commandlineargs.disablevectorbot:
 		print('vectorbot finished')
 
 	return

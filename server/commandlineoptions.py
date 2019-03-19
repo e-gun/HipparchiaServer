@@ -22,6 +22,10 @@ def getcommandlineargs():
 
 	commandlineparser.add_argument('--calculatewordweights', action='store_true', help='[info] (re)generate word weight info')
 	commandlineparser.add_argument('--collapsedgenreweights', action='store_true', help='[info] (re)generate word weight info & merge related genres ("allret", etc.)')
+	commandlineparser.add_argument('--dbhost', required=False, type=str, help='[debugging] override the config file database host address')
+	commandlineparser.add_argument('--dbname', required=False, type=str, help='[debugging] override the config file database name')
+	commandlineparser.add_argument('--dbport', required=False, type=int, help='[debugging] override the config file database listening port')
+	commandlineparser.add_argument('--disablevectorbot', action='store_true', help='[debugging] forciby disable the vectorbot for this run')
 	commandlineparser.add_argument('--enabledebugui', action='store_true', help='[debugging] (potentially) override the config file and turn the debug UI on')
 	exclusivegroup.add_argument('--pooledconnection', action='store_true', help='[debugging] (potentially) override the config file and force a pooled DB connection')
 	commandlineparser.add_argument('--profiling', action='store_true', help='[debugging] enable the profiler')
