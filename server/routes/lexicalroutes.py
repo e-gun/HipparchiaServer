@@ -12,6 +12,7 @@ import re
 from flask import session
 
 from server import hipparchia
+from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.lexicaldbfunctions import findentrybyid, headwordsearch, lookformorphologymatches, \
 	probedictionary, querytotalwordcounts, reversedictionarylookup
 from server.formatting.betacodetounicode import replacegreekbetacode
@@ -43,7 +44,8 @@ def dictsearch(searchterm):
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
-	if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
+	commandlineargs = getcommandlineargs()
+	if commandlineargs.forceuniversalbetacode or hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
 		searchterm = replacegreekbetacode(searchterm.upper())
 
 	allowedpunct = '^$.'

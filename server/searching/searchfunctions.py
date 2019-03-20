@@ -9,19 +9,20 @@
 import re
 import time
 from multiprocessing import JoinableQueue
-
-from flask import request, session
 from string import punctuation
 from typing import List
 
+from flask import request, session
+
 from server import hipparchia
+from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
-from server.formatting.betacodetounicode import replacegreekbetacode
-from server.formatting.wordformatting import badpucntwithbackslash, removegravity, minimumgreek
-from server.hipparchiaobjects.searchobjects import SearchObject
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable
-from server.listsandsession.corpusavailability import justtlg
+from server.formatting.betacodetounicode import replacegreekbetacode
+from server.formatting.wordformatting import badpucntwithbackslash, minimumgreek, removegravity
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.checksession import probeforsessionvariables
+from server.listsandsession.corpusavailability import justtlg
 from server.startup import lemmatadict
 
 
@@ -418,6 +419,10 @@ def buildsearchobject(searchid: str, therequest: request, thesession: session) -
 		#   this is something that could/should be debugged within that function,
 		#   but in practice it is silly to allow hybrid betacode/unicode? this only
 		#   makes the life of a person who wants unicode+regex w/ a betacode option more difficult
+		replacebeta = True
+
+	commandlineargs = getcommandlineargs()
+	if commandlineargs.forceuniversalbetacode:
 		replacebeta = True
 
 	if hipparchia.config['TLGASSUMESBETACODE'] == 'yes':
