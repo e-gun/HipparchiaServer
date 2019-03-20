@@ -108,6 +108,100 @@ def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, 
 	return found
 
 
+"""
+
+	ANOTHER DEAD END...
+
+	you can use psql's to_tsvector() and to_tsquery() functions
+
+	what you do via substringsearch()
+
+	q:	SELECT * FROM lt1020 WHERE ( (index BETWEEN 9768 AND 13860) ) AND ( stripped_line ~* %s )  LIMIT 200
+	d:	('(^|\\s)precatae(\\s|$)|(^|\\s)precor(\\s|$)|(^|\\s)precamini(\\s|$)|(^|\\s)precand[uv]m(\\s|$)|(^|\\s)precer(\\s|$)|(^|\\s)precat[uv]s(\\s|$)|(^|\\s)precor[uv]e(\\s|$)|(^|\\s)precam[uv]rq[uv]e(\\s|$)|(^|\\s)precabor(\\s|$)|(^|\\s)precanda(\\s|$)',)
+
+	sample 'tsvector' search:
+		SELECT * FROM lt1020 WHERE to_tsvector(accented_line) @@ to_tsquery('precor');
+
+	results:
+	
+		substringsearch()
+			Sought all 64 known forms of »preco«
+			Searched 836 texts and found 1,385 passages (3.98s)
+			Sorted by name
+	
+		tsvectorsearch()
+			Sought all 64 known forms of »preco«
+			Searched 836 texts and found 1,629 passages (58.39s)
+			Sorted by name
+
+	to_tsvector() is way slower: presumably substringsearch() has index to the index while to_tsvector() is effectively reindexing everything
+	AND there is also a mismatch in the results...
+
+	the difference between the two sets of results:
+
+		{'line/lt1017w012/19950', 'line/lt0959w007/22909',
+			'line/lt0959w002/2874', 'line/lt1512w001/3715',
+			'line/lt0975w001/1614', 'line/lt1017w016/44879',
+			'line/lt1020w001/1939', 'line/lt0893w001/2382',
+			'line/lt0959w006/13769', 'line/lt0959w007/26242',
+			'line/lt0893w005/6467', 'line/lt0959w008/27102',
+			'line/lt1254w001/7396', 'line/lt1017w008/8356',
+			'line/lt1017w001/1020', 'line/lt0893w001/66',
+			'line/lt1035w001/4642', 'line/lt1017w003/3010',
+			'line/lt0959w006/10283', 'line/lt0975w001/918',
+			'line/lt1017w009/10632', 'line/lt0959w007/23294',
+			'line/lt0959w002/2651', 'line/lt0474w057/133448',
+			'line/lt1017w001/575', 'line/lt1345w001/2081',
+			'line/lt0893w003/3828', 'line/lt0890w001/45',
+			'line/lt0550w001/5916', 'line/lt0959w006/14092',
+			'line/lt1020w002/12520', 'line/lt1345w001/4984',
+			'line/lt0660w002/1331', 'line/lt1017w004/4069',
+			'line/lt1017w002/2055', 'line/lt0472w001/2079',
+			'line/lt1017w009/9248', 'line/lt0893w001/2786',
+			'line/lt0474w036/51672', 'line/lt2028w001/31',
+			'line/lt0893w001/559', 'line/lt0959w006/21359',
+			'line/lt1512w006/11520', 'line/lt0893w001/818',
+			'line/lt2349w005/13128', 'line/lt0620w001/3045',
+			'line/lt0890w001/84', 'line/lt0893w006/7923',
+			'line/lt0893w004/5690', 'line/lt2349w005/11351',
+			'line/lt0690w003/5038', 'line/lt1017w008/7966',
+			'line/lt2349w005/13129', 'line/lt0893w005/7484',
+			'line/lt0972w001/4066', 'line/lt0893w005/7175',
+			'line/lt0959w002/3429', 'line/lt1017w003/2858',
+			'line/lt0893w005/6609', 'line/lt0893w005/6625',
+			'line/lt1351w005/17121', 'line/lt0400w003/810',
+			'line/lt2349w005/29263', 'line/lt0660w002/1444',
+			'line/lt0959w004/7028', 'line/lt2349w005/12243',
+			'line/lt0959w006/15468', 'line/lt0969w001/155',
+			'line/lt1017w003/2985', 'line/lt1017w007/7342',
+			'line/lt1017w007/6802', 'line/lt0959w006/16035',
+			'line/lt0690w003/10534', 'line/lt1017w006/6551'}
+
+		'prece' seems to be the issue
+		
+		NOTE that it is NOT on the formlist
+
+		terms ['precatae', 'precor', 'precamini', 'precandum', 'precer',
+			'precatus', 'precorue', 'precamurque', 'precabor', 'precanda',
+			'precando', 'precantia', 'precareris', 'precaturque',
+			'precesque', 'precetur', 'precabaturque', 'precaretur',
+			'precatu', 'precare', 'precata', 'precatusque', 'precentur',
+			'precantibusque', 'precanti', 'precarentur', 'precem', 'preces',
+			'precaturi', 'precaturus', 'precabuntur', 'precandi',
+			'precantem', 'precabatur', 'precorque', 'precantemque',
+			'precabantur', 'precabar', 'precemur', 'precaremur', 'precatam',
+			'precandam', 'precans', 'precantes', 'precarer', 'precantur',
+			'precabare', 'precarere', 'precaris', 'precatur', 'precatum',
+			'precamur', 'precarique', 'precantique', 'precantium',
+			'precabamur', 'precatique', 'precari', 'precante',
+			'precabanturque', 'precantis', 'preceris', 'precantibus',
+			'precati']
+
+	it does not seem like it is worth the trouble to figure out how 'prece' gets found by a first draft that was 20x slower than the current implementation
+
+"""
+
+
 # DEAD CODE KEPT AROUND SO THAT A BAD WHEEL IS NOT REINVENTED
 #
 # if so.searchtype == 'zz_never_meet_condition_simplelemma':
