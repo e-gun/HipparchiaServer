@@ -334,12 +334,20 @@ class ConjugatedFormAnalysis(object):
 
 		if self.language == 'latin' and self.mood == 'part' and len(analyssiscomponents) == 5:
 			# active participle
-			# print(word, len(analyssiscomponents), 'analyssiscomponents', analyssiscomponents)
 			# laudantes pptuple: ('pres', 'part', 'masc/fem', 'nom/voc', 'pl')
 			self.voice = 'act'
 			self.gender = analyssiscomponents[2]
 			self.case = analyssiscomponents[3]
 			self.number = analyssiscomponents[4]
+
+		if self.language == 'latin' and self.mood == 'part' and len(analyssiscomponents) == 4:
+			# active participle
+			# print(word, len(analyssiscomponents), 'analyssiscomponents', analyssiscomponents)
+			# potentium 4 analyssiscomponents ['pres', 'part', 'gen', 'pl']
+			self.voice = 'act'
+			self.gender = 'masc/fem/neut'
+			self.case = analyssiscomponents[2]
+			self.number = analyssiscomponents[3]
 
 		if self.language == 'latin' and self.mood != 'part':
 			# not a participle...
@@ -362,7 +370,6 @@ class ConjugatedFormAnalysis(object):
 			self.pptuple = (self.tense, self.mood, self.voice, self.person, self.number)
 		else:
 			self.pptuple = (self.tense, self.mood, self.voice, self.gender, self.case, self.number)
-		# print(self.word, 'pptuple:', self.pptuple)
 
 		self.baseformdisqualifiers = ["'", 'κἀ', 'κἤ']  # incomplete at the moment
 		# also need to toss the second of:

@@ -192,7 +192,7 @@ def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, 
 			Searched 836 texts and found 1,629 passages (58.39s)
 			Sorted by name
 
-	to_tsvector() is way slower: presumably substringsearch() has index to the index while to_tsvector()
+	to_tsvector() is way slower: presumably substringsearch() has access to the line indices while to_tsvector()
 	is effectively reindexing everything
 
 	AND there is also a mismatch in the results...
