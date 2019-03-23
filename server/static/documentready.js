@@ -108,6 +108,10 @@ $(document).ready( function () {
         $('#searchsummary').html('');
         $('#displayresults').html('');
 
+        let pd = $('#pollingdata');
+        pd.html('');
+        pd.show();
+
         // the script additions can pile up: so first kill off any scripts we have already added
         let bcsh = document.getElementById("browserclickscriptholder");
         if (bcsh.hasChildNodes()) { bcsh.removeChild(bcsh.firstChild); }
@@ -268,6 +272,7 @@ $(document).ready( function () {
             // NOTE: according to the above, you will not be able to get progress reports if you are not at localhost
             // that might be something you want to ensure
             // the following is required for remote progress reports
+            let pd = $('#pollingdata');
             let ip = location.hostname;
             let s = new WebSocket('ws://'+ip+':'+portnumber+'/');
             let amready = setInterval(function(){
@@ -276,7 +281,7 @@ $(document).ready( function () {
             s.onmessage = function(e){
                 let progress = JSON.parse(e.data);
                 displayprogress(progress);
-                if  (progress['active'] === 'inactive') { $('#pollingdata').html(''); s.close(); s = null; }
+                if  (progress['active'] === 'inactive') { pd.html(''); s.close(); s = null; }
                 }
         });
     }

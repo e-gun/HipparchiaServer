@@ -19,6 +19,10 @@ def insertbrowserclickjs(tagname: str) -> str:
 	"""
 
 	jstemplate = """
+	
+	// Chromium can send poll data after the search is done... 
+	$('#pollingdata').hide();
+	
 	$('%s').click( function() {
 		$.getJSON('/browse/'+this.id, function (passagereturned) {
 			$('#browseforward').unbind('click');
