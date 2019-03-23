@@ -13,7 +13,7 @@ from server.dbsupport.lexicaldbfunctions import findparserxref, grablemmataobjec
 	probedictionary, querytotalwordcounts
 from server.formatting.lexicaformatting import formatdictionarysummary, formatparsinginformation, formatprevalencedata, \
 	getobservedwordprevalencedata
-from server.formatting.wordformatting import setdictionarylanguage
+from server.formatting.wordformatting import attemptsigmadifferentiation, setdictionarylanguage
 from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
 
 
@@ -292,5 +292,9 @@ class lexicalOutputObject(object):
 		outputlist.append(navtemplate.format(pid=w.preventryid, p=w.preventry, nid=w.nextentryid, n=w.nextentry, lg=language))
 
 		fullentry = '\n'.join(outputlist)
+
+		if session['zaplunates'] == 'yes':
+			fullentry = attemptsigmadifferentiation(fullentry)
+
 		fullentry = divtemplate.format(wd=self.thisheadword, entry=fullentry)
 		return fullentry
