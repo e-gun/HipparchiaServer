@@ -1,0 +1,136 @@
+hipparchiaDB=# select distinct workgenre from works order by workgenre asc;
+     workgenre
+--------------------
+
+ Acta
+ Agric.
+ Alchem.
+ Anthol.
+ Apocalyp.
+ Apocryph.
+ Apol.
+ Astrol.
+ Astron.
+ Biog.
+ Biogr.
+ Bucol.
+ Caten.
+ Chronogr.
+ Comic.
+ Comm.
+ Concil.
+ Coq.
+ Dialog.
+ Dialog.</workname>
+ Docu.
+ Doxogr.
+ Eccl.
+ Eleg.
+ Encom.
+ Epic.
+ Epigr.
+ Epist.
+ Evangel.
+ Exeget.
+ Fab.
+ Geogr.
+ Gnom.
+ Gramm.
+ Hagiogr.
+ Hexametr.
+ Hist.
+ Homilet.
+ Hymn.
+ Hypoth.
+ Iamb.
+ Ignotum
+ Inscr.
+ Invect.
+ Invectiv.
+ Jurisprud.
+ Lexicogr.
+ Liturg.
+ Lyr.
+ Magica
+ Math.
+ Mech.
+ Med.
+ Metrolog.
+ Mim.
+ Mus.
+ Myth.
+ Narr. Fict.
+ Nat. Hist.
+ Onir.
+ Orac.
+ Orat.
+ Paradox.
+ Parod.
+ Paroem.
+ Perieg.
+ Phil.
+ Physiognom.
+ Poem.
+ Polyhist.
+ Prophet.
+ Pseudepigr.
+ Rhet.
+ Satura
+ Satyr.
+ Schol.
+ Tact.
+ Test.
+ Theol.
+ Trag.
+ ﹡Epic.
+ ﹡Hist.
+ ﹡Liturg.
+
+(85 rows)
+
+
+
+hipparchiaDB=# select distinct workgenre from works where universalid like 'lt%' order by workgenre asc;
+  workgenre
+-------------
+ Agric.
+ Astron.
+ Biog.
+ Biogr.
+ Bucol.
+ Comic.
+ Comm.
+ Coq.
+ Dialog.
+ Eleg.
+ Encom.
+ Epic.
+ Epigr.
+ Epist.
+ Fab.
+ Gnom.
+ Gramm.
+ Hexametr.
+ Hist.
+ Hypoth.
+ Ignotum
+ Invect.
+ Jurisprud.
+ Lexicogr.
+ Lyr.
+ Med.
+ Mim.
+ Narr. Fict.
+ Nat. Hist.
+ Orat.
+ Parod.
+ Phil.
+ Poem.
+ Polyhist.
+ Rhet.
+ Satura
+ Tact.
+ Trag.
+
+(39 rows)
+

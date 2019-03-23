@@ -1,0 +1,141 @@
+hipparchiaDB=# select distinct genres from authors order by genres asc;
+                                                  genres
+-----------------------------------------------------------------------------------------------------------
+
+ Alchemistae
+ Alchemistae,Poetae
+ Apologetici
+ Astrologici
+ Astrologici,Astronomici
+ Astrologici,Historici
+ Astrologici,Medici
+ Astronomici
+ Astronomici,Epici
+ Astronomici,Geographi
+ Astronomici,Mathematici
+ Atticistae
+ Biographi
+ Biographi,Historici
+ Biographi,Philosophici
+ Biographi,Poetae
+ Bucolici
+ Choliambographi
+ Chronographi
+ Comici
+ Comici,Iambici
+ Comici,Tragici
+ Doxographi
+ Elegiaci
+ Elegiaci,Epici
+ Elegiaci,Gnomici
+ Elegiaci,Grammatici
+ Elegiaci,Iambici
+ Elegiaci,Lyrici
+ Elegiaci,Philosophici,Tragici
+ Elegiaci,Tragici
+ Epici
+ Epici,Grammatici
+ Epici,Iambici
+ Epigrammatici
+ Epigrammatici,Historici
+ Epigrammatici,Lyrici
+ Epistolographi
+ Epistolographi,Grammatici,Hagiographi,Philologi,Philosophici,Poetae,Rhetorici,Scriptores Rerum Naturalium
+ Epistolographi,Hagiographi,Philosophici,Polyhistorici,Rhetorici,Scriptores Rerum Naturalium,Theologici
+ Epistolographi,Historici
+ Epistolographi,Historici,Philologi,Philosophici,Rhetorici,Scriptores Rerum Naturalium,Theologici
+ Epistolographi,Historici,Rhetorici,Scriptores Ecclesiastici
+ Epistolographi,Mathematici,Theologici
+ Epistolographi,Theologici
+ Geographi
+ Geographi,Historici
+ Geometri
+ Gnomici
+ Gnostici
+ Grammatici
+ Grammatici,Historici
+ Grammatici,Medici
+ Grammatici,Poetae
+ Grammatici,Rhetorici
+ Grammatici,Sophistae
+ Grammatici,Theologici
+ Historici
+ Historici,Medici
+ Historici,Mythographi
+ Historici,Oratores
+ Historici,Philologi,Philosophici,Rhetorici,Scriptores Ecclesiastici,Scriptores Rerum Naturalium
+ Historici,Philosophici
+ Historici,Poetae
+ Historici,Rhetorici
+ Historici,Rhetorici,Scriptores Ecclesiastici
+ Historici,Scriptores Ecclesiastici,Theologici
+ Historici,Sophistae
+ Hymnographi
+ Iambici
+ Lexicographi
+ Lexicographi,Scriptores Ecclesiastici,Theologici
+ Lyrici
+ Lyrici,Tragici
+ Mathematici
+ Mathematici,Mechanici
+ Mathematici,Philosophici
+ Mechanici
+ Medici
+ Medici,Philosophici
+ Medici,Scriptores Ecclesiastici
+ Mimographi
+ Musici
+ Musici,Philosophici
+ Mythographi
+ Mythographi,Philosophici
+ Nomographi,Poetae
+ Onirocritici
+ Oratores
+ Oratores,Rhetorici
+ Paradoxographi
+ Parodii
+ Paroemiographi
+ Periegetae
+ Philologi
+ Philologi,Rhetorici
+ Philologi,Scriptores Ecclesiastici
+ Philosophici
+ Philosophici,Poetae
+ Philosophici,Rhetorici
+ Philosophici,Sophistae
+ Philosophici,Tragici
+ Poetae
+ Poetae Didactici
+ Poetae Medici
+ Poetae Philosophi
+ Poetae,Polyhistorici
+ Poetae,Rhetorici,Scriptores Ecclesiastici,Scriptores Rerum Naturalium
+ Polyhistorici
+ Rhetorici
+ Rhetorici,Scriptores Ecclesiastici
+ Rhetorici,Sophistae
+ Scriptores Ecclesiastici
+ Scriptores Ecclesiastici,Theologici
+ Scriptores Erotici
+ Scriptores Fabularum
+ Sophistae
+ Tactici
+ Theologici
+ Tragici
+
+(122 rows)
+
+# make the above into 'z'
+y = z.split('\n ')
+y = [x.strip() for x in y]
+y = [x.split(',') for x in y]
+flatten = lambda l: [item for sublist in l for item in sublist]
+y = sorted(list(set(flatten(y))))
+'Alchemistae', 'Apologetici', 'Astrologici', 'Astronomici', 'Atticistae', 'Biographi', 'Bucolici', 'Choliambographi', 'Chronographi', 'Comici', 'Doxographi', 'Elegiaci', 'Epici', 'Epigrammatici', 'Epistolographi', 'Geographi', 'Geometri', 'Gnomici', 'Gnostici', 'Grammatici', 'Hagiographi', 'Historici', 'Hymnographi', 'Iambici', 'Lexicographi', 'Lyrici', 'Mathematici', 'Mechanici', 'Medici', 'Mimographi', 'Musici', 'Mythographi', 'Nomographi', 'Onirocritici', 'Oratores', 'Paradoxographi', 'Parodii', 'Paroemiographi', 'Periegetae', 'Philologi', 'Philosophici', 'Poetae', 'Poetae Didactici', 'Poetae Medici', 'Poetae Philosophi', 'Polyhistorici', 'Rhetorici', 'Scriptores Ecclesiastici', 'Scriptores Erotici', 'Scriptores Fabularum', 'Scriptores Rerum Naturalium', 'Sophistae', 'Tactici', 'Theologici', 'Tragici']
+
+
+hipparchiaDB=# select distinct genres from authors where universalid like 'lt%' order by genres asc;
+ genres
+--------
+
+(1 row)
