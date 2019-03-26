@@ -112,12 +112,8 @@ class BaseFormMorphology(object):
 	"""
 	def __init__(self, headword: str, xref: str, language: str, lexicalid: str, thesession: dict):
 		# print('bfmo init', headword, xref, language, lexicalid)
-		self.showalldialects = True
-		self.collapseattic = False
-		if thesession['morphdialects'] == 'no':
-			self.showalldialects = False
-		if thesession['collapseattic'] == 'yes':
-			self.collapseattic = True
+		self.showalldialects = thesession['morphdialects']
+		self.collapseattic = thesession['collapseattic']
 		assert language in ['greek', 'latin'], 'BaseFormMorphology() only knows words that are "greek_morphology" or "latin_morphology"'
 		self.headword = headword
 		self.language = language
@@ -798,13 +794,13 @@ class ConjugatedFormFunctions(object):
 	@staticmethod
 	def _generatemoodlist(thesession: dict) -> list:
 		moods = {'0ind', '1subj', '2opt', '3imperat', '4part', '5inf'}
-		if thesession['morphinfin'] == 'no':
+		if not thesession['morphinfin']:
 			moods.remove('5inf')
-		if thesession['morphpcpls'] == 'no':
+		if not thesession['morphpcpls']:
 			moods.remove('4part')
-		if thesession['morphimper'] == 'no':
+		if not thesession['morphimper']:
 			moods.remove('3imperat')
-		if thesession['morphfinite'] == 'no':
+		if not thesession['morphfinite']:
 			moods.remove('0ind')
 			moods.remove('1subj')
 			moods.remove('2opt')

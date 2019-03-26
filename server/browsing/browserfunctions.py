@@ -65,7 +65,7 @@ def buildbrowseroutputobject(authorobject: dbAuthor, workobject: dbOpus, locusin
 	continuationdict = {'square': False, 'round': False, 'curly': False, 'angled': False}
 
 	lineprefix = str()
-	if session['debugdb'] == 'yes':
+	if session['debugdb']:
 		lineprefix = '<smallcode>{id}&nbsp;&nbsp;&nbsp;</smallcode>&nbsp;'
 
 	# [b] format the lines and insert them into the BrowserPassageObject
@@ -78,7 +78,7 @@ def buildbrowseroutputobject(authorobject: dbAuthor, workobject: dbOpus, locusin
 			if metadata:
 				passage.browsedlines.append(metadata)
 
-		if session['debughtml'] == 'yes':
+		if session['debughtml']:
 			columnb = line.showlinehtml()
 		else:
 			columnb = insertparserids(line, continuationdict)
@@ -110,7 +110,7 @@ def buildbrowseroutputobject(authorobject: dbAuthor, workobject: dbOpus, locusin
 
 		notes = '; '.join(line.insetannotations())
 
-		if columna and session['simpletextoutput'] == 'yes':
+		if columna and session['simpletextoutput']:
 			columna = '({a})'.format(a=columna)
 
 		linehtml = passage.linetemplate.format(l=columnb, n=notes, c=columna)

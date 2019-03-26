@@ -38,9 +38,9 @@ def probeforsessionvariables():
 		session['bracketsquare'] = hipparchia.config['DEFAULTHIGHLIGHTSQUAREBRACKETS']
 		session['browsercontext'] = str(int(hipparchia.config['DEFAULTBROWSERLINES']))
 		session['christiancorpus'] = corpusisonandavailable('christiancorpus')
-		session['collapseattic'] = 'yes'
-		session['cosdistbysentence'] = 'no'
-		session['cosdistbylineorword'] = 'no'
+		session['collapseattic'] = True
+		session['cosdistbysentence'] = False
+		session['cosdistbylineorword'] = False
 		session['debugdb'] = hipparchia.config['DBDEBUGMODE']
 		session['debuglex'] = hipparchia.config['LEXDEBUGMODE']
 		session['debugparse'] = hipparchia.config['PARSERDEBUGMODE']
@@ -52,21 +52,21 @@ def probeforsessionvariables():
 		session['headwordindexing'] = hipparchia.config['DEFAULTINDEXBYHEADWORDS']
 		session['incerta'] = hipparchia.config['DEFAULTINCERTA']
 		session['indexbyfrequency'] = hipparchia.config['DEFAULTINDEXBYFREQUENCY']
-		session['indexskipsknownwords'] = 'no'
+		session['indexskipsknownwords'] = False
 		session['inscriptioncorpus'] = corpusisonandavailable('inscriptioncorpus')
 		session['latestdate'] = hipparchia.config['DEFAULTLATESTDATE']
 		session['latincorpus'] = corpusisonandavailable('latincorpus')
 		session['linesofcontext'] = int(hipparchia.config['DEFAULTLINESOFCONTEXT'])
 		session['maxresults'] = str(int(hipparchia.config['DEFAULTMAXRESULTS']))
-		session['morphtables'] = 'yes'
-		session['morphdialects'] = 'yes'
-		session['morphduals'] = 'yes'
-		session['morphemptyrows'] = 'yes'
-		session['morphfinite'] = 'yes'
-		session['morphimper'] = 'yes'
-		session['morphinfin'] = 'yes'
-		session['morphpcpls'] = 'yes'
-		session['nearestneighborsquery'] = 'no'
+		session['morphtables'] = True
+		session['morphdialects'] = True
+		session['morphduals'] = True
+		session['morphemptyrows'] = True
+		session['morphfinite'] = True
+		session['morphimper'] = True
+		session['morphinfin'] = True
+		session['morphpcpls'] = True
+		session['nearestneighborsquery'] = False
 		session['nearornot'] = 'T'
 		session['onehit'] = hipparchia.config['DEFAULTONEHIT']
 		session['papyruscorpus'] = corpusisonandavailable('papyruscorpus')
@@ -77,16 +77,16 @@ def probeforsessionvariables():
 		session['quotesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALQUOTES']
 		session['searchscope'] = 'L'
 		session['searchinsidemarkup'] = hipparchia.config['SEARCHMARKEDUPLINE']
-		session['semanticvectorquery'] = 'no'
+		session['semanticvectorquery'] = False
 		session['sensesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALSENSES']
-		session['sentencesimilarity'] = 'no'
+		session['sentencesimilarity'] = False
 		session['simpletextoutput'] = hipparchia.config['SIMPLETEXTOUTPUT']
 		session['showwordcounts'] = hipparchia.config['SHOWGLOBALWORDCOUNTS']
 		session['sortorder'] = hipparchia.config['DEFAULTSORTORDER']
 		session['spuria'] = hipparchia.config['DEFAULTSPURIA']
 		session['suppresscolors'] = hipparchia.config['SUPPRESSCOLORS']
-		session['tensorflowgraph'] = 'no'
-		session['topicmodel'] = 'no'
+		session['tensorflowgraph'] = False
+		session['topicmodel'] = False
 		session['varia'] = hipparchia.config['DEFAULTVARIA']
 		session['vdim'] = hipparchia.config['VECTORDIMENSIONS']
 		session['vwindow'] = hipparchia.config['VECTORWINDOW']
@@ -112,5 +112,73 @@ def probeforsessionvariables():
 		session['wlocselections'] = list()
 		session['xmission'] = 'Any'
 		session['zaplunates'] = hipparchia.config['RESTOREMEDIALANDFINALSIGMA']
+		convertyesnototruefalse()
 		session.modified = True
+	return
+
+
+def convertyesnototruefalse():
+	"""
+
+	anything that is y/n in the config file needs to be t/f in the session
+
+	:return:
+	"""
+
+	trueorfalse = [
+		'authorssummary',
+		'bracketangled',
+		'bracketcurly',
+		'bracketround',
+		'bracketsquare',
+		'christiancorpus',
+		'collapseattic',
+		'cosdistbylineorword',
+		'cosdistbysentence',
+		'debugdb',
+		'debughtml',
+		'debuglex',
+		'debugparse',
+		'greekcorpus',
+		'headwordindexing',
+		'incerta',
+		'indexbyfrequency',
+		'indexskipsknownwords',
+		'inscriptioncorpus',
+		'latincorpus',
+		'morphdialects',
+		'morphduals',
+		'morphemptyrows',
+		'morphimper',
+		'morphinfin',
+		'morphfinite',
+		'morphpcpls',
+		'morphtables',
+		'nearestneighborsquery',
+		'onehit',
+		'papyruscorpus',
+		'principleparts',
+		'quotesummary',
+		'searchinsidemarkup',
+		'semanticvectorquery',
+		'sensesummary',
+		'sentencesimilarity',
+		'showwordcounts',
+		'simpletextoutput',
+		'spuria',
+		'suppresscolors',
+		'topicmodel',
+		'varia',
+		'zaplunates',
+	]
+
+	for k in session.keys():
+		if k in trueorfalse and session[k] in ['yes', 'no']:
+			if session[k] == 'yes':
+				session[k] = True
+			else:
+				session[k] = False
+
+	session.modified = True
+
 	return

@@ -148,7 +148,7 @@ class lexicalOutputObject(object):
 
 	def _buildentrydistributionss(self) -> str:
 		distributions = str()
-		if session['showwordcounts'] == 'yes':
+		if session['showwordcounts']:
 			countobject = querytotalwordcounts(self.thisheadword)
 			if countobject:
 				prev = formatprevalencedata(countobject)
@@ -175,7 +175,7 @@ class lexicalOutputObject(object):
 
 		pppts = str()
 		w = self.thiswordobject
-		if session['principleparts'] != 'no':
+		if session['principleparts']:
 			# fingerprints = {'v.', 'v. dep.', 'v. a.', 'v. n.'}
 			# and, sadly, some entries do not have a POS: "select pos from latin_dictionary where entry_name='declaro';"
 			# declaro: w.pos ['']
@@ -217,7 +217,7 @@ class lexicalOutputObject(object):
 
 	def _builddistributiondict(self) -> str:
 		distributions = str()
-		if session['showwordcounts'] == 'yes':
+		if session['showwordcounts']:
 			countobject = querytotalwordcounts(self.thisheadword)
 			if countobject:
 				prev = formatprevalencedata(countobject)
@@ -278,7 +278,7 @@ class lexicalOutputObject(object):
 		if u'\u0304' in w.metricalentry or u'\u0306' in w.metricalentry:
 			outputlist.append(metricsstr.format(me=w.metricalentry))
 
-		if session['debuglex'] == 'yes':
+		if session['debuglex']:
 			outputlist.append(codestr.format(x=w.id))
 			xref = findparserxref(w)
 			outputlist.append(xrefstr.format(x=xref))
@@ -293,7 +293,7 @@ class lexicalOutputObject(object):
 
 		fullentry = '\n'.join(outputlist)
 
-		if session['zaplunates'] == 'yes':
+		if session['zaplunates']:
 			fullentry = attemptsigmadifferentiation(fullentry)
 
 		fullentry = divtemplate.format(wd=self.thisheadword, entry=fullentry)

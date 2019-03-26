@@ -116,7 +116,7 @@ class BrowserPassageObject(object):
 		return header
 
 	def getlinetemplate(self, shownotes=True):
-		if session['simpletextoutput'] == 'yes':
+		if session['simpletextoutput']:
 			linetemplate = """
 			<p class="browsedline">
 				{l}
@@ -155,7 +155,7 @@ class BrowserPassageObject(object):
 
 		outputtable = outputtable + self.browsedlines
 
-		if session['debughtml'] == 'yes':
+		if session['debughtml']:
 			outputtable.append('</table>\n<span class="emph">(NB: click-to-parse is off if HTMLDEBUGMODE is set)</span>')
 		else:
 			outputtable.append('</table>')
@@ -166,6 +166,6 @@ class BrowserPassageObject(object):
 
 	def generatepassagehtml(self):
 		html = self.generatepassageheader() + self.generatepassagetable()
-		if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS'] == 'yes':
+		if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS']:
 			html = gtltsubstitutes(html)
 		return html

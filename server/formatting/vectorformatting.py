@@ -267,7 +267,7 @@ def vectorhtmlforfrontpage() -> str:
 		</span>
 	"""
 
-	if hipparchia.config['SEMANTICVECTORSENABLED'] != 'yes':
+	if not hipparchia.config['SEMANTICVECTORSENABLED']:
 		return str()
 
 	textmapper = {'LITERALCOSINEDISTANCEENABLED': cdc,
@@ -279,7 +279,7 @@ def vectorhtmlforfrontpage() -> str:
 
 	vectorhtml = list()
 	for conf in textmapper:
-		if hipparchia.config[conf] == 'yes':
+		if hipparchia.config[conf]:
 			vectorhtml.append(textmapper[conf])
 
 	vectorhtml = '\n'.join(vectorhtml)

@@ -241,7 +241,7 @@ def fetchvectorgraph(imagename):
 	:return:
 	"""
 
-	if hipparchia.config['RETAINFIGURES'] == 'yes':
+	if hipparchia.config['RETAINFIGURES']:
 		deletewhendone = False
 	else:
 		deletewhendone = True

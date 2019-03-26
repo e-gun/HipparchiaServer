@@ -45,7 +45,7 @@ if current_process().name == 'MainProcess':
 	fullname = 'E. Gunderson'
 	mailingaddr = 'Department of Classics, 125 Queen’s Park, Toronto, ON  M5S 2C7 Canada'
 
-	if hipparchia.config['ENOUGHALREADYWITHTHECOPYRIGHTNOTICE'] != 'yes':
+	if not hipparchia.config['ENOUGHALREADYWITHTHECOPYRIGHTNOTICE']:
 		print(terminaltext.format(project=project, year=year, fullname=fullname, mail=mailingaddr))
 
 	available = probefordatabases()

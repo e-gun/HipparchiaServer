@@ -34,14 +34,14 @@ class dbWordCountObject(object):
 		self.d = docpapcount
 		self.i = inscriptioncount
 		self.c = christiancount
-		if hipparchia.config['AVOIDCIRCLEDLETTERS'] != 'yes':
+		if not hipparchia.config['AVOIDCIRCLEDLETTERS']:
 			self.tlabel = 'Ⓣ'
 			self.glabel = 'Ⓖ'
 			self.llabel = 'Ⓛ'
 			self.dlabel = 'Ⓓ'
 			self.ilabel = 'Ⓘ'
 			self.clabel = 'Ⓒ'
-		elif hipparchia.config['FALLBACKTODOUBLESTRIKES'] == 'yes':
+		elif hipparchia.config['FALLBACKTODOUBLESTRIKES']:
 			self.tlabel = '𝕋'
 			self.glabel = '𝔾'
 			self.llabel = '𝕃'
@@ -249,13 +249,13 @@ class dbHeadwordObject(dbWordCountObject):
 		except:
 			# no date info is available for this (Latin) word
 			self.wtdgkearly, self.wtdgkmiddle, self.wtdgklate, self.predomera = -1, -1, -1, -1
-		if hipparchia.config['AVOIDCIRCLEDLETTERS'] != 'yes':
+		if not hipparchia.config['AVOIDCIRCLEDLETTERS']:
 			self.qlabel = 'ⓠ'
 			self.elabel = 'ⓔ'
 			self.mlabel = 'ⓜ'
 			self.latelabel = 'ⓛ'
 			self.unklabel = 'ⓤ'
-		elif hipparchia.config['FALLBACKTODOUBLESTRIKES'] == 'yes':
+		elif hipparchia.config['FALLBACKTODOUBLESTRIKES']:
 			self.qlabel = '𝕢'
 			self.elabel = '𝕖'
 			self.mlabel = '𝕞'
@@ -361,7 +361,7 @@ class dbHeadwordObject(dbWordCountObject):
 
 		mygenres = gwt[self.language]
 
-		if hipparchia.config['EXCLUDEMINORGENRECOUNTS'] == 'yes':
+		if hipparchia.config['EXCLUDEMINORGENRECOUNTS']:
 			return self.genresebyweightlessminorgenres(500, mygenres)
 
 		genretuplelist = [(key, getattr(self, key) * mygenres[key]) for key in mygenres]

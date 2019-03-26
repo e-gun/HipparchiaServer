@@ -99,13 +99,13 @@ def compilesearchlist(listmapper: dict, s: dict) -> list:
 			searchlist = prunebydate(searchlist, ad, wd, s)
 
 	# [B] now start subtracting from the list of inclusions
-	if s['spuria'] == 'no':
+	if not s['spuria']:
 		searchlist = removespuria(searchlist, wd)
 
-	if s['incerta'] == 'no':
+	if not s['incerta']:
 		searchlist = list(set(searchlist) - set(allincerta))
 
-	if s['varia'] == 'no':
+	if not s['varia']:
 		searchlist = list(set(searchlist) - set(allvaria))
 
 	# build the exclusion list
@@ -372,10 +372,10 @@ def prunebydate(searchlist: list, authorobjectdict: dict, workobjectdict: dict, 
 					# the author can't tell you his date; you must be building a list with both latin authors and something else
 					trimmedlist.append(universalid)
 		# [b] then add back in any varia and/or incerta as needed
-		if s['varia'] == 'yes':
+		if s['varia']:
 			varia = list(allvaria.intersection(searchlist))
 			trimmedlist += varia
-		if s['incerta'] == 'yes':
+		if s['incerta']:
 			incerta = list(allincerta.intersection(searchlist))
 			trimmedlist += incerta
 

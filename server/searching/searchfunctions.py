@@ -46,7 +46,7 @@ def cleaninitialquery(seeking: str) -> str:
 	# split() later at ' ' means confusion if you have double spaces
 	seeking = re.sub(r' {2,}', r' ', seeking)
 
-	if hipparchia.config['HOBBLEREGEX'] == 'yes':
+	if hipparchia.config['HOBBLEREGEX']:
 		seeking = re.sub(r'\d', '', seeking)
 		allowedpunct = '[].^$\\\''
 		badpunct = ''.join(set(punctuation) - set(allowedpunct))
@@ -413,7 +413,7 @@ def buildsearchobject(searchid: str, therequest: request, thesession: session) -
 
 	replacebeta = False
 
-	if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes' and re.search('[a-zA-Z]', seeking):
+	if hipparchia.config['UNIVERSALASSUMESBETACODE'] and re.search('[a-zA-Z]', seeking):
 		# why the 'and' condition:
 		#   sending unicode 'οὐθενὸϲ' to the betacode function will result in 0 hits
 		#   this is something that could/should be debugged within that function,
@@ -425,7 +425,7 @@ def buildsearchobject(searchid: str, therequest: request, thesession: session) -
 	if commandlineargs.forceuniversalbetacode:
 		replacebeta = True
 
-	if hipparchia.config['TLGASSUMESBETACODE'] == 'yes':
+	if hipparchia.config['TLGASSUMESBETACODE']:
 		if justtlg() and (re.search('[a-zA-Z]', seeking) or re.search('[a-zA-Z]', proximate)) and not re.search(minimumgreek, seeking) and not re.search(minimumgreek, proximate):
 			replacebeta = True
 

@@ -53,7 +53,7 @@ async def wscheckpoll(websocket, path):
 			progress['hits'] = poll[pollid].gethits()
 			progress['message'] = poll[pollid].getstatus()
 			progress['elapsed'] = poll[pollid].getelapsed()
-			if hipparchia.config['SUPPRESSLONGREQUESTMESSAGE'] == 'no':
+			if not hipparchia.config['SUPPRESSLONGREQUESTMESSAGE']:
 				if poll[pollid].getnotes():
 					progress['extrainfo'] = poll[pollid].getnotes()
 			else:

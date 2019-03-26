@@ -22,7 +22,7 @@ from server.textsandindices.textandindiceshelperfunctions import dictmerger, get
 from server.threading.mpthreadcount import setthreadcount
 
 
-def buildindextowork(cdict, activepoll, headwords, cursor):
+def buildindextowork(cdict: dict, activepoll, headwords: bool, cursor) -> List[tuple]:
 	"""
 
 	speed notes
@@ -50,7 +50,7 @@ def buildindextowork(cdict, activepoll, headwords, cursor):
 
 	alphabetical = True
 
-	if session['indexbyfrequency'] == 'yes':
+	if session['indexbyfrequency']:
 		alphabetical = False
 
 	# print('cdict',cdict)
@@ -156,16 +156,16 @@ def generatesortedoutputbyheadword(completeindexdict: dict, onework: bool, alpha
 	activepoll.statusis('Remapping entries')
 	activepoll.allworkis(-1)
 
-	if hipparchia.config['DELETEUNACCENTEDGREEKFROMINDEX'] == 'yes':
+	if hipparchia.config['DELETEUNACCENTEDGREEKFROMINDEX']:
 		hasaccent = re.compile(r'[ἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
 		accenteddict = {k: augmentedindexdict[k] for k in augmentedindexdict.keys() if re.search(hasaccent, k)}
 		latindict = {k: augmentedindexdict[k] for k in augmentedindexdict.keys() if re.search(r'[a-z]', k)}
 		augmentedindexdict = {**accenteddict, **latindict}
-		if hipparchia.config['DROPLATININAGREEKINDEX'] == 'yes':
+		if hipparchia.config['DROPLATININAGREEKINDEX']:
 			if len(latindict.keys()) * 5 < len(accenteddict.keys()):
 				augmentedindexdict = accenteddict
 
-	if session['indexskipsknownwords'] == 'yes':
+	if session['indexskipsknownwords']:
 		# 'baseforms' is either False or a list
 		augmentedindexdict = {k: augmentedindexdict[k] for k in augmentedindexdict.keys() if not augmentedindexdict[k]['baseforms']}
 
@@ -397,7 +397,7 @@ def linesintoindex(lineobjects: List[dbWorkLine], activepoll) -> dict:
 	if len(lineobjects) < hipparchia.config['CLICKABLEINDEXEDPASSAGECAP'] or hipparchia.config['CLICKABLEINDEXEDPASSAGECAP'] < 0:
 		# [a] '<indexedlocation id="linenumbergr0032w008/31011">2.17.6</indexedlocation>' vs [b] just '2.17.6'
 		indexingmethod = 'anchoredlocus'
-	elif session['indexskipsknownwords'] == 'yes':
+	elif session['indexskipsknownwords']:
 		indexingmethod = 'anchoredlocus'
 	else:
 		indexingmethod = 'locus'

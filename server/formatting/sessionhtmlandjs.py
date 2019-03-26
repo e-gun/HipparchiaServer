@@ -37,7 +37,7 @@ def sessionselectionsashtml(authordict: dict, workdict: dict) -> dict:
 	# numberofselections is -1 if there were no selections
 	# returning this will hide the selections table; but it should not be hidden if there are time restrictions or spuria restrictions
 	# so say '0' instead
-	if sxhtml['numberofselections'] == -1 and (selectioninfo['timeexclusions'] != '' or session['spuria'] == 'no'):
+	if sxhtml['numberofselections'] == -1 and (selectioninfo['timeexclusions'] != '' or not session['spuria']):
 		selectioninfo['numberofselections'] = 0
 	else:
 		selectioninfo['numberofselections'] = sxhtml['numberofselections']

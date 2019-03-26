@@ -47,7 +47,14 @@ def getsessionvariables():
 
 	returndict = {k: session[k] for k in session.keys() if k != 'csrf_token'}
 
-	# print('rd',returndict)
+	for k in returndict.keys():
+		if isinstance(returndict[k], bool):
+			if returndict[k]:
+				returndict[k] = 'yes'
+			else:
+				returndict[k] = 'no'
+
+	# print('rd', returndict)
 	returndict = json.dumps(returndict)
 
 	return returndict
@@ -284,7 +291,7 @@ def getgenrelistcontents():
 
 	genres += '<h3>Author Categories</h3>'
 	for sessionvar in ['greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'latincorpus']:
-		if session[sessionvar] == 'yes':
+		if session[sessionvar]:
 			for g in authorgenresdict[sessionmapper[sessionvar]]:
 				glist.append(g)
 
@@ -296,7 +303,7 @@ def getgenrelistcontents():
 	glist = list()
 	genres += '\n<h3>Work Categories</h3>'
 	for sessionvar in ['greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'latincorpus']:
-		if session[sessionvar] == 'yes':
+		if session[sessionvar]:
 			for g in workgenresdict[sessionmapper[sessionvar]]:
 				glist.append(g)
 
