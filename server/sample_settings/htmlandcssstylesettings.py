@@ -1,3 +1,6 @@
+# note that internally 'yes'/'no' are converted to True/False, but one should still use 'yes'/'no'
+# and definitely *do not* use 'True'/'False' since they are not the same as True/False...
+
 # CSSSTYLESHEET presupposes './server/css' as part of its path; i.e. you
 # 	will want to put custom CSS in the same directory as the
 # 	default installed css ('hipparchiastyles.css')

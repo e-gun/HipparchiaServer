@@ -1,3 +1,6 @@
+# note that internally 'yes'/'no' are converted to True/False, but one should still use 'yes'/'no'
+# and definitely *do not* use 'True'/'False' since they are not the same as True/False...
+
 ### Hipparchia performance variables ###
 ##  [set once and forget: AUTOCONFIGWORKERS, WORKERS, MPCOMMITCOUNT] ##
 #
