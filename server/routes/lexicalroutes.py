@@ -420,6 +420,7 @@ def knownforms(lexicalid, language, xrefid, headword):
 		xrefid = 'invalid_user_input'
 
 	headword = depunct(headword)
+	headword = re.sub(r'[σς]', 'ϲ', headword)
 
 	try:
 		bfo = BaseFormMorphology(headword, xrefid, language, lexicalid, session)
@@ -454,6 +455,10 @@ def knownforms(lexicalid, language, xrefid, headword):
 	returndict = dict()
 	returndict['newhtml'] = '\n'.join(returnarray)
 	returndict['newjs'] = morphologychartjs()
+
+	if session['zaplunates']:
+		returndict['newhtml'] = attemptsigmadifferentiation(returndict['newhtml'])
+		returndict['newhtml'] = abbreviatedsigmarestoration(returndict['newhtml'])
 
 	jsondict = json.dumps(returndict)
 

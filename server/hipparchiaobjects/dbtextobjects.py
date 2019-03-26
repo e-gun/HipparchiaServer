@@ -275,8 +275,8 @@ class dbWorkLine(object):
 			self.hashyphenated = False
 
 		if self.accented is None:
-			self.accented = ''
-			self.stripped = ''
+			self.accented = str()
+			self.stripped = str()
 
 		try:
 			zaplunates = session['zaplunates']
@@ -286,9 +286,9 @@ class dbWorkLine(object):
 		except KeyError:
 			# you don't have a session at all...
 			# you can provoke this by using something like curl on the server
-			zaplunates = 'no'
+			zaplunates = False
 
-		if zaplunates == 'yes':
+		if zaplunates:
 			self.accented = attemptsigmadifferentiation(self.accented)
 		if hipparchia.config['FORCELUNATESIGMANOMATTERWHAT']:
 			self.accented = forcelunates(self.accented)
@@ -329,7 +329,7 @@ class dbWorkLine(object):
 			# papyrus and inscriptions are wonky: usually they have just a recto, but sometimes they have something else
 			# only mark the 'something else' version
 			if self.l1 != 'recto':
-				citation = self.l1 + ' ' + self.l0
+				citation = '{a} {b}'.format(a=self.l1, b=self.l0)
 			else:
 				citation = self.l0
 
@@ -370,7 +370,7 @@ class dbWorkLine(object):
 
 		return lc
 
-	def anchoredlocus(self):
+	def anchoredlocus(self) -> str:
 		"""
 
 		build a clickable url for the locus and wrap the locus in it:
@@ -384,7 +384,7 @@ class dbWorkLine(object):
 		locus = template.format(au=self.authorid, wk=self.workid, idx=self.index, loc=self.locus())
 		return locus
 
-	def shortlocus(self):
+	def shortlocus(self) -> str:
 		"""
 		try to get a short citation that drops the lvl0 info: "3.2"
 		useful for tagging level shifts without constantly seeing 'line 1'
@@ -435,7 +435,7 @@ class dbWorkLine(object):
 
 		return newtuple
 
-	def samelevelas(self, other):
+	def samelevelas(self, other) -> bool:
 		"""
 		are two loci at the same level or have we shifted books, sections, etc?
 		the two loci have to be from the same work
@@ -449,7 +449,7 @@ class dbWorkLine(object):
 		else:
 			return False
 
-	def equivalentlevelas(self, other):
+	def equivalentlevelas(self, other) -> bool:
 		"""
 		are two loci at the same level or have we shifted books, sections, etc?
 		the two loci do not have to be from the same work
@@ -463,7 +463,7 @@ class dbWorkLine(object):
 		else:
 			return False
 
-	def toplevel(self):
+	def toplevel(self) -> str:
 		top = 0
 		for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]:
 			if str(lvl) != '-1':
@@ -474,7 +474,7 @@ class dbWorkLine(object):
 		# should not need this, but...
 		return top
 
-	def unformattedline(self):
+	def unformattedline(self) -> str:
 		"""
 		remove markup from contents
 
@@ -491,7 +491,7 @@ class dbWorkLine(object):
 
 		return unformatted
 
-	def showlinehtml(self):
+	def showlinehtml(self) -> str:
 		"""
 
 		make HTML of marked up line visible
@@ -507,7 +507,7 @@ class dbWorkLine(object):
 
 		return visiblehtml
 
-	def wordcount(self):
+	def wordcount(self) -> int:
 		"""
 		return a wordcount
 		"""
@@ -515,7 +515,7 @@ class dbWorkLine(object):
 		line = self.stripped
 		return len([x for x in line.split(' ') if x])
 
-	def wordlist(self, version):
+	def wordlist(self, version) -> List[str]:
 		"""
 		return a list of words in the line; will include the full version of a hyphenated last word
 		:param version:
@@ -535,21 +535,21 @@ class dbWorkLine(object):
 
 		return wordlist
 
-	def lastword(self, version):
+	def lastword(self, version: str) -> str:
 		last = ''
 		if version in ['accented', 'stripped']:
 			line = getattr(self, version).split(' ')
 			last = line[-1]
 		return last
 
-	def firstword(self, version):
+	def firstword(self, version: str) -> str:
 		first = ''
 		if version in ['accented', 'stripped']:
 			line = getattr(self, version).split(' ')
 			first = line[0]
 		return first
 
-	def allbutlastword(self, version):
+	def allbutlastword(self, version: str) -> str:
 		"""
 		return the line less its final word
 		"""
@@ -562,7 +562,7 @@ class dbWorkLine(object):
 
 		return allbutlastword
 
-	def allbutfirstword(self, version):
+	def allbutfirstword(self, version: str) -> str:
 		"""
 		return the line less its first word
 		"""
@@ -577,13 +577,13 @@ class dbWorkLine(object):
 
 		return allbutfirstword
 
-	def allbutfirstandlastword(self, version):
+	def allbutfirstandlastword(self, version: str) -> str:
 		"""
 		terun the line lest the first and last words (presumably both are hypenated)
 		:param version:
 		:return:
 		"""
-		allbutfirstandlastword = ''
+		allbutfirstandlastword = str()
 		if version in ['accented', 'stripped']:
 			line = getattr(self, version)
 			if version == 'accented':
@@ -594,7 +594,7 @@ class dbWorkLine(object):
 
 		return allbutfirstandlastword
 
-	def insetannotations(self):
+	def insetannotations(self) -> List[str]:
 		"""
 
 		<hmu_metadata_notes value="Non. 104M" />
