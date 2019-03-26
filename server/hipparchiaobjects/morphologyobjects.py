@@ -65,7 +65,7 @@ class MorphPossibilityObject(object):
 		return 'unknown'
 
 	def getbaseform(self):
-		if hipparchia.config['SUPPRESSWARNINGS'] == 'no':
+		if not hipparchia.config['SUPPRESSWARNINGS']:
 			warn = True
 		else:
 			warn = False
@@ -96,7 +96,7 @@ class MorphPossibilityObject(object):
 
 		:return:
 		"""
-		if hipparchia.config['SUPPRESSWARNINGS'] == 'no':
+		if not hipparchia.config['SUPPRESSWARNINGS']:
 			warn = True
 		else:
 			warn = False

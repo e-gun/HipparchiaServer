@@ -78,7 +78,7 @@ def findabsolutevectorsbysentence(searchobject):
 	so.usecolumn = 'marked_up_line'
 
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
-	activecorpora = [c for c in allcorpora if so.session[c] == 'yes']
+	activecorpora = [c for c in allcorpora if so.session[c]]
 
 	if (lemma or so.seeking) and activecorpora:
 		activepoll.statusis('Compiling the list of works to search')
@@ -224,7 +224,7 @@ def generateabsolutevectorsoutput(listsofwords: list, workssearched: list, searc
 	output.found = findshtml
 	output.js = findsjs
 
-	if so.session['cosdistbylineorword'] == 'no':
+	if not so.session['cosdistbylineorword']:
 		space = 'related terms in {s} {t}'.format(s=len(listsofwords), t=vtype)
 	else:
 		dist = so.session['proximity']
@@ -271,7 +271,7 @@ def emptyvectoroutput(searchobject, reasons=list()):
 	output.reasons = reasons
 
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
-	activecorpora = [c for c in allcorpora if so.session[c] == 'yes']
+	activecorpora = [c for c in allcorpora if so.session[c]]
 
 	if not activecorpora:
 		output.reasons.append('there are no active databases')

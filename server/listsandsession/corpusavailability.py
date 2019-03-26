@@ -31,7 +31,7 @@ def corpusselectionsasavalue(thesession=None) -> int:
 	binarystring = '0b'
 
 	for s in ['latincorpus', 'greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']:
-		if thesession[s] == 'yes':
+		if thesession[s]:
 			binarystring += '1'
 		else:
 			binarystring += '0'
@@ -61,7 +61,7 @@ def corpusselectionsaspseudobinarystring(thesession=None) -> str:
 	binarystring = ''
 
 	for s in ['latincorpus', 'greekcorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']:
-		if thesession[s] == 'yes':
+		if thesession[s]:
 			binarystring += '1'
 		else:
 			binarystring += '0'

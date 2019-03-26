@@ -18,25 +18,31 @@ from server.semanticvectors.vectorhelpers import vectordefaults, vectorranges
 from server.startup import authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict
 
 
-def modifysessionvariable(param, val):
+def modifysessionvariable(parameter, value):
 	"""
 
 	set session variables after checking them for validity
 
-	:param param:
-	:param val:
+	:param parameter:
+	:param value:
 	:return:
 	"""
+
+	# y/n ==> t/f
+	if value == 'yes':
+		value = True
+	if value == 'no':
+		value = False
 
 	availableoptions = list()
 	blocakabledebugoptions = ['debughtml', 'debuglex', 'debugparse', 'debugdb', 'indexskipsknownwords', 'searchinsidemarkup']
 
 	commandlineargs = getcommandlineargs()
 
-	if hipparchia.config['ALLOWUSERTOSETDEBUGMODES'] == 'yes' or commandlineargs.enabledebugui:
+	if hipparchia.config['ALLOWUSERTOSETDEBUGMODES'] or commandlineargs.enabledebugui:
 		availableoptions.extend(blocakabledebugoptions)
 
-	yesorno = [
+	trueorfalse = [
 		'authorssummary',
 		'bracketangled',
 		'bracketcurly',
@@ -116,27 +122,27 @@ def modifysessionvariable(param, val):
 		'tensorflowgraph',
 		]
 
-	for o in [miscoptions, yesorno]:
+	for o in [miscoptions, trueorfalse]:
 		availableoptions.extend(o)
 
 	# special case because we are dealing with collections of numbers
-	if param in vectoroptions:
-		validatevectorvalue(param, val)
+	if parameter in vectoroptions:
+		validatevectorvalue(parameter, value)
 		return
 
 	# first set; then check to see if you need to reset an invalid value
-	if param in availableoptions:
-		session[param] = val
+	if parameter in availableoptions:
+		session[parameter] = value
 	else:
 		pass
 
 	# drop all selections/exclusions from any corpus that you just disabled
 	cc = ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']
-	if param in cc and session[param] != 'yes':
+	if parameter in cc and not session[parameter]:
 		corpora = {'greekcorpus': 'gr', 'latincorpus': 'lt', 'inscriptioncorpus': 'in', 'papyruscorpus': 'dp', 'christiancorpus': 'ch'}
 		lists = ['auselections', 'psgselections', 'wkselections', 'auexclusions', 'psgexclusions', 'wkexclusions']
 		for l in lists:
-			session[l] = [item for item in session[l] if not re.search(r'^'+corpora[param], item)]
+			session[l] = [item for item in session[l] if not re.search(r'^' + corpora[parameter], item)]
 
 		# authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict
 		checkagainst = {'agnselections': authorgenresdict,
@@ -150,22 +156,22 @@ def modifysessionvariable(param, val):
 		for l in checkagainst.keys():
 			session[l] = [item for item in session[l] if item in returnactivelist(checkagainst[l])]
 
-	if param in yesorno:
-		if session[param] not in ['yes', 'no']:
-			session[param] = 'no'
+	if parameter in trueorfalse:
+		if session[parameter] not in [True, False]:
+			session[parameter] = False
 
 	# A implies B
-	if session['indexskipsknownwords'] == 'yes':
-		session['headwordindexing'] = 'yes'
+	if session['indexskipsknownwords']:
+		session['headwordindexing'] = True
 
 	# only one of these can be active at one time
 	exclusive = {'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery', 'tensorflowgraph', 'sentencesimilarity', 'topicmodel'}
 
 	for e in exclusive:
-		if param == e and val == 'yes':
+		if parameter == e and value:
 			others = exclusive - {e}
 			for o in others:
-				session[o] = 'no'
+				session[o] = False
 
 	if session['nearornot'] not in ['T', 'F']:
 		session['nearornot'] = 'T'
@@ -224,39 +230,39 @@ def modifysessionvariable(param, val):
 	if int(session['browsercontext']) < 5 or int(session['browsercontext']) > 100:
 		session['browsercontext'] = '20'
 
-	if hipparchia.config['ENBALEFONTPICKER'] == 'yes' and session['fontchoice'] in hipparchia.config['FONTPICKERLIST']:
+	if hipparchia.config['ENBALEFONTPICKER'] and session['fontchoice'] in hipparchia.config['FONTPICKERLIST']:
 		# print('chose', session['fontchoice'])
 		pass
 	else:
 		session['fontchoice'] = hipparchia.config['HOSTEDFONTFAMILY']
 
-	# print('set',param,'to',session[param])
+	# print('set', parameter, 'to', session[parameter])
 	session.modified = True
 
 	return
 
 
-def validatevectorvalue(param, val):
+def validatevectorvalue(parameter, value):
 	"""
 
 	make sure a vector setting makes sense
 
 	vectorranges & vectordefaults are imported from vectorhelpers.py
 
-	:param param:
-	:param val:
+	:param parameter:
+	:param value:
 	:return:
 	"""
 
 	try:
-		val = int(val)
+		value = int(value)
 	except ValueError:
-		val = vectordefaults[param]
+		value = vectordefaults[parameter]
 
-	if val not in vectorranges[param]:
-		val = vectordefaults[param]
+	if value not in vectorranges[parameter]:
+		value = vectordefaults[parameter]
 
-	session[param] = val
+	session[parameter] = value
 
 	return
 
@@ -500,15 +506,15 @@ def returnactivedbs(thesession=None) -> List[str]:
 
 	activedbs = list()
 
-	if thesession['latincorpus'] == 'yes':
+	if thesession['latincorpus']:
 		activedbs.append('lt')
-	if thesession['greekcorpus'] == 'yes':
+	if thesession['greekcorpus']:
 		activedbs.append('gr')
-	if thesession['inscriptioncorpus'] == 'yes':
+	if thesession['inscriptioncorpus']:
 		activedbs.append('in')
-	if thesession['papyruscorpus'] == 'yes':
+	if thesession['papyruscorpus']:
 		activedbs.append('dp')
-	if thesession['christiancorpus'] == 'yes':
+	if thesession['christiancorpus']:
 		activedbs.append('ch')
 
 	return activedbs
@@ -530,13 +536,13 @@ def findactivebrackethighlighting(thesession=None) -> List[str]:
 		
 	brackets = list()
 
-	if thesession['bracketsquare'] == 'yes':
+	if thesession['bracketsquare']:
 		brackets.append('square')
-	if thesession['bracketround'] == 'yes':
+	if thesession['bracketround']:
 		brackets.append('round')
-	if thesession['bracketangled'] == 'yes':
+	if thesession['bracketangled']:
 		brackets.append('angled')
-	if thesession['bracketcurly'] == 'yes':
+	if thesession['bracketcurly']:
 		brackets.append('curly')
 	return brackets
 

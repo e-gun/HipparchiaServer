@@ -194,7 +194,7 @@ def declinedtabletemplate(dialect='attic', duals=True, lang='greek', skipgenders
 				allcellsinrow.append(morphcell.format(mo=mo))
 			thisrow = '\n\t\t'.join(allcellsinrow)
 			allrows.append(morphrowtemplate.format(allcells=thisrow))
-		if session['morphemptyrows'] == 'yes':
+		if session['morphemptyrows']:
 			allrows.append(blankrow)
 
 	rows = '\n'.join(allrows)
@@ -216,7 +216,7 @@ def verbtabletemplate(mood: str, voice: str, dialect='attic', duals=True, lang='
 	:return:
 	"""
 
-	if session['morphduals'] == 'no':
+	if not session['morphduals']:
 		duals = False
 
 	mytenses = dict()
@@ -333,7 +333,7 @@ def verbtabletemplate(mood: str, voice: str, dialect='attic', duals=True, lang='
 						allcellsinrow.append(morphcell.format(mo=mo))
 					thisrow = '\n\t\t'.join(allcellsinrow)
 					allrows.append(morphrowtemplate.format(allcells=thisrow))
-				if session['morphemptyrows'] == 'yes':
+				if session['morphemptyrows']:
 					allrows.append(blankrow)
 	elif mood == 'inf':
 		allcellsinrow = list()
@@ -400,7 +400,7 @@ def filloutmorphtabletemplate(lookupdict: dict, wordcountdict: dict, template: s
 
 		template = re.sub(c, substitute, template)
 
-	if session['morphemptyrows'] == 'no':
+	if not session['morphemptyrows']:
 		template = purgeemptyrows(template)
 
 	return template

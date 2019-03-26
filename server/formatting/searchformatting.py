@@ -118,7 +118,7 @@ def flagsearchterms(searchresultobject: SearchResult, skg: str, prx: str, search
 	highlightindex = searchresultobject.getindex()
 	newlineobjects = list()
 
-	if session['searchinsidemarkup'] == 'yes':
+	if session['searchinsidemarkup']:
 		# skip it because this gets ugly fast
 		return linelist
 
@@ -225,13 +225,13 @@ def htmlifysearchfinds(listofsearchresultobjects: ResultList, searchobject: Sear
 
 	linehtmltemplate = '<span class="locus">{lc}</span>&nbsp;<span class="foundtext">{ft}</span><br />'
 
-	if session['debugdb'] == 'yes':
+	if session['debugdb']:
 		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
 
 	for ro in listofsearchresultobjects:
 		firstline = ro.lineobjects[0]
 		firstline.accented = unbalancedspancleaner(firstline.accented)
-		if session['debughtml'] == 'yes':
+		if session['debughtml']:
 			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 			           for ln in ro.lineobjects]
 		elif findactivebrackethighlighting(searchobject.session):
@@ -263,7 +263,7 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects: ResultList) -> str:
 
 	linehtmltemplate = '<span class="foundtext">{ft}</span>'
 
-	if session['debugdb'] == 'yes':
+	if session['debugdb']:
 		linehtmltemplate = '<smallcode>{id}</smallcode>&nbsp;' + linehtmltemplate
 
 	tabelrowtemplate = """
@@ -285,7 +285,7 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects: ResultList) -> str:
 			rowstyle = 'regular'
 		ln = ro.lineobjects[0]
 		ln.accented = unbalancedspancleaner(ln.accented)
-		if session['debughtml'] == 'yes':
+		if session['debughtml']:
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 		else:
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)

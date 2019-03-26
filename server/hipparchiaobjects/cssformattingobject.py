@@ -242,7 +242,7 @@ class CssFormattingObject(object):
 		}
 		self.faces = dict()
 		self.knownface = True
-		if hipparchia.config['ENBALEFONTPICKER'] == 'yes':
+		if hipparchia.config['ENBALEFONTPICKER']:
 			self.pickerinuse = True
 			self.pickedfamily = session['fontchoice']
 		else:
@@ -258,7 +258,7 @@ class CssFormattingObject(object):
 		self._colorless()
 
 	def _colorless(self):
-		if session['suppresscolors'] == 'yes':
+		if session['suppresscolors']:
 			# kill - "color: var(--red);"
 			# save - "background-color: var(--main-body-color);"
 			self.css = re.sub(r'(?<!-)color: var\(--(.*?)\)', 'color: var(--black)', self.css)

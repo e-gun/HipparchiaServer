@@ -71,7 +71,7 @@ def sklearnselectedworks(searchobject):
 	so.vectortype = 'topicmodel'
 
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
-	activecorpora = [c for c in allcorpora if so.session[c] == 'yes']
+	activecorpora = [c for c in allcorpora if so.session[c]]
 
 	if activecorpora:
 		activepoll.statusis('Compiling the list of works to search')

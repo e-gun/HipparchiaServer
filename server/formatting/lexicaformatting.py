@@ -235,7 +235,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 		else:
 			xlate = str()
 
-		if session['debugparse'] == 'yes':
+		if session['debugparse']:
 			xrefinfo = '<code>[{x}]</code>'.format(x=firstsubentry.xref)
 		else:
 			xrefinfo = str()
@@ -341,7 +341,7 @@ def formatprevalencedata(wordcountobject):
 			thehtml.append(' / '.join(wts))
 			thehtml.append('</p>')
 
-		if hipparchia.config['COLLAPSEDGENRECOUNTS'] == 'yes':
+		if hipparchia.config['COLLAPSEDGENRECOUNTS']:
 			genreinfotuples = w.collapsedgenreweights()
 		else:
 			genreinfotuples = w.sortgenresbyweight()

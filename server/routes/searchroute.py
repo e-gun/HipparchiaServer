@@ -26,7 +26,7 @@ from server.listsandsession.checksession import probeforsessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
-if hipparchia.config['SEMANTICVECTORSENABLED'] == 'yes':
+if hipparchia.config['SEMANTICVECTORSENABLED']:
 	from server.semanticvectors.gensimvectors import executegensimsearch
 	from server.semanticvectors.scikitlearntopics import sklearnselectedworks
 	from server.semanticvectors.vectorpseudoroutes import findabsolutevectorsbysentence, findabsolutevectorsfromhits
@@ -74,9 +74,9 @@ def executesearch(searchid, so=None):
 	output = SearchOutputObject(so)
 
 	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
-	activecorpora = [c for c in allcorpora if frozensession[c] == 'yes']
+	activecorpora = [c for c in allcorpora if frozensession[c]]
 
-	if (len(so.seeking) > 0 or so.lemma or frozensession['tensorflowgraph'] == 'yes' or frozensession['topicmodel'] == 'yes') and activecorpora:
+	if (len(so.seeking) > 0 or so.lemma or frozensession['tensorflowgraph'] or frozensession['topicmodel']) and activecorpora:
 		activepoll.statusis('Compiling the list of works to search')
 		searchlist = compilesearchlist(listmapper, frozensession)
 
@@ -244,7 +244,7 @@ def executesearch(searchid, so=None):
 		else:
 			findshtml = nocontexthtmlifysearchfinds(resultlist)
 
-		if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS'] == 'yes':
+		if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS']:
 			findshtml = gtltsubstitutes(findshtml)
 
 		findsjs = insertbrowserclickjs('browser')

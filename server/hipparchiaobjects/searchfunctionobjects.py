@@ -150,7 +150,7 @@ class GenericSearchFunctionObject(object):
 		while self.emptytest and self.activepoll.gethits() <= self.so.cap:
 			srchfunct = self.searchfunction
 			nextitem = self.getnextfnc()
-			if self.so.session['onehit'] == 'yes':
+			if self.so.session['onehit']:
 				# simplelemma chunk might have already searched and found in an author
 				if self.so.lemma or self.so.proximatelemma:
 					# nextitem looks like '(chunk, item)'

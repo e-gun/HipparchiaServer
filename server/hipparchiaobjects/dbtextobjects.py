@@ -290,9 +290,9 @@ class dbWorkLine(object):
 
 		if zaplunates == 'yes':
 			self.accented = attemptsigmadifferentiation(self.accented)
-		if hipparchia.config['FORCELUNATESIGMANOMATTERWHAT'] == 'yes':
+		if hipparchia.config['FORCELUNATESIGMANOMATTERWHAT']:
 			self.accented = forcelunates(self.accented)
-		if hipparchia.config['DISTINCTGREEKANDLATINFONTS'] == 'yes':
+		if hipparchia.config['DISTINCTGREEKANDLATINFONTS']:
 			self.accented = self.separategreekandlatinfonts()
 
 	def decompose(self) -> tuple:

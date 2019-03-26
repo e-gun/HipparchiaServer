@@ -57,10 +57,8 @@ def buildindexto(searchid: str, author: str, work=None, passage=None):
 	if not work:
 		wo = makeanemptywork('gr0000w000')
 
-	if session['headwordindexing'] == 'yes':
-		useheadwords = True
-	else:
-		useheadwords = False
+	# bool
+	useheadwords = session['headwordindexing']
 
 	allworks = list()
 	output = list()
@@ -164,7 +162,7 @@ def textmaker(author: str, work=None, passage=None):
 	else:
 		texthtml = str()
 
-	if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS'] == 'yes':
+	if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS']:
 		texthtml = gtltsubstitutes(texthtml)
 
 	results = dict()

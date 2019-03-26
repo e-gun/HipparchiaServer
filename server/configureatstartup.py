@@ -87,3 +87,11 @@ if extrakeys:
 	startupprint('the following options are unrecognized:')
 	for k in extrakeys:
 		startupprint('\t{k}'.format(k=k))
+
+# move to T/F over y/n
+
+for k in hipparchia.config.keys():
+	if hipparchia.config[k] == 'yes':
+		hipparchia.config[k] = True
+	if hipparchia.config[k] == 'no':
+		hipparchia.config[k] = False

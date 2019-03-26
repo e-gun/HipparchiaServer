@@ -37,7 +37,7 @@ def startvectorizing():
 
 	commandlineargs = getcommandlineargs()
 
-	if hipparchia.config['AUTOVECTORIZE'] == 'yes' and not commandlineargs.disablevectorbot:
+	if hipparchia.config['AUTOVECTORIZE'] and not commandlineargs.disablevectorbot:
 		workpile = determinevectorworkpile()
 
 	# [(['gr2062'], 4182615), (['gr0057'], 2594166), (['gr4090'], 2202504), ...]
@@ -45,7 +45,7 @@ def startvectorizing():
 	indextype = 'nn'
 
 	while workpile:
-		if len(poll.keys()) > 1:
+		if len(poll.keys()) != 0:
 			print('vectorbot pausing to make way for a search')
 			time.sleep(30)
 
@@ -82,7 +82,7 @@ def startvectorizing():
 				workpile = list()
 			del vectorspace
 
-	if hipparchia.config['AUTOVECTORIZE'] == 'yes' and not commandlineargs.disablevectorbot:
+	if hipparchia.config['AUTOVECTORIZE'] and not commandlineargs.disablevectorbot:
 		print('vectorbot finished')
 
 	return
@@ -176,11 +176,11 @@ def buildfakesearchobject(qtype='nearestneighborsquery') -> SearchObject:
 	for z in zeroes:
 		frozensession[z] = 0
 
-	yn = ['onehit', 'icandodates', 'nearestneighborsquery', 'searchinsidemarkup']
-	for n in yn:
-		frozensession[n] = 'no'
+	trueorfalse = ['onehit', 'icandodates', 'nearestneighborsquery', 'searchinsidemarkup']
+	for x in trueorfalse:
+		frozensession[x] = False
 
-	so = SearchObject(1, '', '', None, None, frozensession)
+	so = SearchObject(1, str(), str(), None, None, frozensession)
 
 	# parsevectorsentences() needs the following:
 	so.vectorquerytype = qtype
@@ -190,5 +190,5 @@ def buildfakesearchobject(qtype='nearestneighborsquery') -> SearchObject:
 	return so
 
 
-vectorbot = threading.Thread(target=startvectorizing, name='vectorbot', args=())
+vectorbot = threading.Thread(target=startvectorizing, name='vectorbot', args=tuple())
 vectorbot.start()

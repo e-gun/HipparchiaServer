@@ -79,11 +79,11 @@ def frontpage():
 	knowncorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 
 	# check to see eith which dbs we search by default or are presently active
-	activecorpora = [c for c in knowncorpora if session[c] == 'yes']
+	activecorpora = [c for c in knowncorpora if session[c]]
 
-	if hipparchia.config['AVOIDCIRCLEDLETTERS'] != 'yes':
+	if not hipparchia.config['AVOIDCIRCLEDLETTERS']:
 		corporalabels = {'g': 'Ⓖ', 'l': 'Ⓛ', 'd': 'Ⓓ', 'i': 'Ⓘ', 'c': 'Ⓒ'}
-	elif hipparchia.config['FALLBACKTODOUBLESTRIKES'] == 'yes':
+	elif hipparchia.config['FALLBACKTODOUBLESTRIKES']:
 		corporalabels = {'g': '𝔾', 'l': '𝕃', 'd': '𝔻', 'i': '𝕀', 'c': 'ℂ'}
 	else:
 		corporalabels = {'g': 'G', 'l': 'L', 'd': 'D', 'i': 'I', 'c': 'C'}

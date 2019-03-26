@@ -122,7 +122,7 @@ class SearchObject(object):
 			self.usecolumn = 'stripped_line'
 			self.usewordlist = 'stripped'
 
-		if frozensession['searchinsidemarkup'] == 'yes':
+		if frozensession['searchinsidemarkup']:
 			self.usecolumn = 'marked_up_line'
 			self.usewordlist = 'polytonic'
 
@@ -133,14 +133,14 @@ class SearchObject(object):
 
 		if frozensession['nearornot'] == 'T':
 			self.near = True
-			self.nearstr = ''
+			self.nearstr = str()
 		else:
 			self.near = False
 			self.nearstr = ' not'
 
 		self.cap = int(frozensession['maxresults'])
 
-		if frozensession['onehit'] == 'yes':
+		if frozensession['onehit']:
 			self.onehit = True
 		else:
 			self.onehit = False
@@ -149,7 +149,7 @@ class SearchObject(object):
 
 	def getactivecorpora(self):
 		allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
-		activecorpora = [c for c in allcorpora if self.session[c] == 'yes']
+		activecorpora = [c for c in allcorpora if self.session[c]]
 		return activecorpora
 
 	def infervectorquerytype(self):
@@ -158,7 +158,7 @@ class SearchObject(object):
 
 		qtype = list()
 		for e in exclusive:
-			if self.session[e] == 'yes':
+			if self.session[e]:
 				qtype.append(e)
 
 		if len(qtype) > 1:
@@ -334,7 +334,7 @@ class SearchOutputObject(object):
 				betw = 'Searched between {a} and {b}\n\t<br>'.format(a=self.dmin, b=self.dmax)
 
 		onehit = '<!-- unlimited hits per author -->\n'
-		if self.onehit == 'yes':
+		if self.onehit:
 			onehit = 'Only allowing one match per item searched (either a whole author or a specified work)\n\t<br>'
 
 		hitmax = '<!-- did not hit the results cap -->\n'

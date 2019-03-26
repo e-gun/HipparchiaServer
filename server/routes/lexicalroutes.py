@@ -45,7 +45,7 @@ def dictsearch(searchterm):
 	dbcursor = dbconnection.cursor()
 
 	commandlineargs = getcommandlineargs()
-	if commandlineargs.forceuniversalbetacode or hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
+	if commandlineargs.forceuniversalbetacode or hipparchia.config['UNIVERSALASSUMESBETACODE']:
 		searchterm = replacegreekbetacode(searchterm.upper())
 
 	allowedpunct = '^$.'
@@ -123,7 +123,7 @@ def dictsearch(searchterm):
 	else:
 		returnlist.append('[nothing found]')
 
-	if session['zaplunates'] == 'yes':
+	if session['zaplunates']:
 		returnlist = [attemptsigmadifferentiation(x) for x in returnlist]
 		returnlist = [abbreviatedsigmarestoration(x) for x in returnlist]
 
@@ -162,7 +162,7 @@ def findbyform(observedword):
 	# that will 404 before you can get to replacegreekbetacode()
 	# this is a bug in the interaction between Flask and the JS
 
-	# if hipparchia.config['UNIVERSALASSUMESBETACODE'] == 'yes':
+	# if hipparchia.config['UNIVERSALASSUMESBETACODE']:
 	# 	observedword = replacegreekbetacode(observedword.upper())
 
 	# the next makes sense only in the context of pointedly invalid input
@@ -274,7 +274,7 @@ def reverselexiconsearch(searchterm):
 	entries = list(set(entries))
 
 	# we have the matches; now we will sort them either by frequency or by initial letter
-	if hipparchia.config['REVERSELEXICONRESULTSBYFREQUENCY'] == 'yes':
+	if hipparchia.config['REVERSELEXICONRESULTSBYFREQUENCY']:
 		unsortedentries = [(querytotalwordcounts(e), e) for e in entries]
 		entries = list()
 		for e in unsortedentries:
@@ -372,7 +372,7 @@ def dictionaryidsearch(language, entryid):
 		oo = lexicalOutputObject(wordobject)
 		entry = oo.generatelexicaloutput()
 
-		if session['zaplunates'] == 'yes':
+		if session['zaplunates']:
 			entry = attemptsigmadifferentiation(entry)
 			entry = abbreviatedsigmarestoration(entry)
 	else:

@@ -137,7 +137,7 @@ def buildtext(work: str, firstline: int, lastline: int, linesevery: int, cursor)
 
 			notes = '; '.join(thisline.insetannotations())
 
-			if columna and session['simpletextoutput'] == 'yes':
+			if columna and session['simpletextoutput']:
 				columna = '({a})'.format(a=columna)
 
 			linehtml = linetemplate.format(ca=columna, cb=columnb, cc=notes)
@@ -161,7 +161,7 @@ def determinelinetemplate(shownotes=True) -> str:
 	:param shownotes:
 	:return:
 	"""
-	if session['simpletextoutput'] == 'yes':
+	if session['simpletextoutput']:
 		linetemplate = """
 		<p class="lineoftext">
 			{cb}
