@@ -1,3 +1,6 @@
+# note that internally 'yes'/'no' are converted to True/False, but one should still use 'yes'/'no'
+# and definitely *do not* use 'True'/'False' since they are not the same as True/False...
+
 # [7] SEMANTIC VECTORS: experimental and in-progress
 #   many extra packages need to be configured and installed
 #   the results are not well explained; they cannot necessarily be trusted.

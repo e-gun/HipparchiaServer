@@ -1,3 +1,6 @@
+# note that internally 'yes'/'no' are converted to True/False, but one should still use 'yes'/'no'
+# and definitely *do not* use 'True'/'False' since they are not the same as True/False...
+
 ### [2] network values ###
 ##  [only change these if you know why you are doing it: you have a firewall problem, etc.] ##
 #
