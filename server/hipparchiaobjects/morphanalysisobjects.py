@@ -75,7 +75,10 @@ class MorphAnalysis(object):
 			self.analysis = ConjugatedFormAnalysis(self.word, self.language, self.dialects, self.analyssiscomponents)
 		elif self.analyssiscomponents[0] in genders:
 			pos = 'declined'
-			self.analysis = DeclinedFormAnalysis(self.word, self.language, self.dialects, self.analyssiscomponents)
+			try:
+				self.analysis = DeclinedFormAnalysis(self.word, self.language, self.dialects, self.analyssiscomponents)
+			except AssertionError:
+				self.analysis = None
 		else:
 			pos = 'notimplem'
 			self.analysis = None
@@ -490,8 +493,13 @@ class DeclinedFormAnalysis(object):
 
 	DeclinedFormAnalysis() ματέρι fem sg dat ['doric', 'aeolic']
 
+	bad data:
+
+		DeclinedFormAnalysis: word, analyssiscomponents τοιουτουϲί ['masc']
+
 	"""
 	def __init__(self, word: str, language: str, dialects: list, analyssiscomponents: List[str]):
+		assert len(analyssiscomponents) > 2, print('bad data sent to DeclinedFormAnalysis: too few components\n\t{w}: {a}'.format(w=word, a=analyssiscomponents))
 		self.word = word
 		self.language = language
 		self.dialects = dialects
