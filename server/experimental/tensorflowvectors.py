@@ -10,23 +10,23 @@ import locale
 import math
 import os
 import random
-import time
 from multiprocessing import current_process
 
 import numpy as np
+from click import secho
 from matplotlib import pyplot as plt
 
 try:
 	import tensorflow as tf
 except ModuleNotFoundError:
 	if current_process().name == 'MainProcess':
-		print('tensorflow unavailable')
+		secho('tensorflow unavailable', fg='bright_black')
 	tf = None
 try:
 	from sklearn.manifold import TSNE
 except ModuleNotFoundError:
 	if current_process().name == 'MainProcess':
-		print('sklearn unavailable')
+		secho('sklearn unavailable', fg='bright_black')
 	TSNE = None
 
 from random import randint

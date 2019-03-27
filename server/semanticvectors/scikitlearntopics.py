@@ -8,16 +8,18 @@
 import locale
 from multiprocessing import current_process
 
+from click import secho
+
 from server import hipparchia
+from server.dbsupport.vectordbfunctions import checkforstoredvector, storevectorindatabase
 from server.formatting.vectorformatting import ldatopicsgenerateoutput
-from server.listsandsession.searchlistmanagement import compilesearchlist, flagexclusions, calculatewholeauthorsearches
+from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, buildflatbagsofwords
+from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict
 from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
-from server.startup import listmapper, workdict, authordict
+from server.startup import authordict, listmapper, workdict
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
-from server.dbsupport.vectordbfunctions import storevectorindatabase, checkforstoredvector
 
 try:
 	from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
@@ -27,7 +29,7 @@ try:
 	from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
 except ImportError:
 	if current_process().name == 'MainProcess':
-		print('sklearn is unavailable')
+		secho('sklearn is unavailable', fg='bright_black')
 	CountVectorizer = None
 	TfidfTransformer = None
 	SGDClassifier = None
@@ -41,7 +43,7 @@ try:
 	import pyLDAvis.sklearn as ldavis
 except ImportError:
 	if current_process().name == 'MainProcess':
-		print('pyLDAvis is not available')
+		secho('pyLDAvis is unavailable', fg='bright_black')
 	pyLDAvis = None
 	ldavis = None
 

@@ -11,7 +11,6 @@ import json
 import re
 
 import websockets
-
 from click import secho
 
 from server import hipparchia

@@ -120,7 +120,11 @@ or, more tersely:
 
     % run.py
 
-Upon startup you will eventually see:
+Upon startup you will see something like:
+
+![launch_image](screenshots/successful_launch.png)
+
+Note that `keyedlemmata` can take a while to load. You are ready for business when you see the last line that says `Running...`:
 
     * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
 

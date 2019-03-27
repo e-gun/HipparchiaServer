@@ -10,11 +10,13 @@ import pickle
 from multiprocessing import current_process
 from typing import List
 
+from click import secho
+
 try:
 	import redis
 except ImportError:
 	if current_process().name == 'MainProcess':
-		print('redis unavailable')
+		secho('redis unavailable', fg='bright_black')
 	redis = None
 
 from server import hipparchia

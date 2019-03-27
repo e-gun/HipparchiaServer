@@ -12,6 +12,8 @@ from multiprocessing import current_process
 from pprint import pprint
 from time import time
 
+from click import secho
+
 from server.semanticvectors.scikitlearntopics import ldatopicgraphing
 
 try:
@@ -23,7 +25,7 @@ try:
 
 except ImportError:
 	if current_process().name == 'MainProcess':
-		print('sklearn is unavailable')
+		secho('sklearn is unavailable', fg='bright_black')
 	CountVectorizer = None
 	TfidfTransformer = None
 	SGDClassifier = None
@@ -36,7 +38,7 @@ try:
 	import pyLDAvis.sklearn as ldavis
 except ImportError:
 	if current_process().name == 'MainProcess':
-		print('pyLDAvis is not available')
+		secho('pyLDAvis is not available', fg='bright_black')
 	pyLDAvis = None
 	ldavis = None
 

@@ -17,11 +17,11 @@ if current_process().name == 'MainProcess':
 	# stupid Windows will fork new copies and reload all of this
 	vstring = """
 	{banner}
-	{v}
+	 {v}
 	{banner}
 	"""
 	v = 'HipparchiaServer v{v}'.format(v=hipparchiaversion)
-	banner = ''.join('=' for _ in range(len(v)))
+	banner = ''.join('=' for _ in range(len(v)+2))
 	secho(vstring.format(banner=banner, v=v, s=''), bold=True, fg='cyan')
 
 from server import hipparchia

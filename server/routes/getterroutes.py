@@ -11,6 +11,7 @@ import re
 from multiprocessing import current_process
 from string import Template
 
+from click import secho
 from flask import make_response, redirect, request, session, url_for
 
 from server import hipparchia
@@ -28,7 +29,7 @@ try:
 except ImportError:
 	fetchvectorgraph = None
 	if current_process().name == 'MainProcess':
-		print('could not import "fetchvectorgraph": graphing will be unavailable')
+		secho('could not import "fetchvectorgraph": graphing will be unavailable', fg='bright_black')
 from server.startup import authordict, authorgenresdict, authorlocationdict, listmapper, workdict, workgenresdict, \
 	workprovenancedict
 from server.semanticvectors.vectorhelpers import vectorranges
