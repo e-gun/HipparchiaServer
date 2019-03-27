@@ -29,7 +29,7 @@ def getcommandlineargs():
 	commandlineparser.add_argument('--skiplemma', action='store_true', help='[debugging] use empty lemmatadict for fast startup (some functions will be lost)')
 	commandlineparser.add_argument('--disablevectorbot', action='store_true', help='[force setting] disable the vectorbot for this run')
 	commandlineparser.add_argument('--forceuniversalbetacode', action='store_true', help='[force setting] all input on the search line will be parsed as betacode')
-	commandlineparser.add_argument('--forcefont', required=False, type=str, help='[force setting] assign a value to DEFAULTLOCALFONT')
+	commandlineparser.add_argument('--forcefont', required=False, type=str, help='[force setting] assign a value to DEFAULTLOCALFONT; "MyFont Sans" requires quotation marks to handle the space in the name')
 	exclusivegroup.add_argument('--pooledconnection', action='store_true', help='[force setting] force a pooled DB connection')
 	exclusivegroup.add_argument('--simpleconnection', action='store_true', help='[force setting] force a simple DB connection')
 	commandlineparser.add_argument('--threadcount', required=False, type=int, help='[force setting] override the config file threadcount')
