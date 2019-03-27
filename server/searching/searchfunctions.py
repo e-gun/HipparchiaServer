@@ -155,9 +155,9 @@ def buildbetweenwhereextension(authortable: str, searchobject: SearchObject) -> 
 	"""
 
 	r = searchobject.indexrestrictions[authortable]
-	whereclauseadditions = ''
-	bds = ''
-	oms = ''
+	whereclauseadditions = str()
+	bds = str()
+	oms = str()
 
 	if not r['where']:
 		return whereclauseadditions

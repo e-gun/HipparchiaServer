@@ -106,7 +106,7 @@
         &middot;&nbsp;<label>simplified text output&nbsp;<input type="checkbox" id="simpletextoutput" value="no"></label>
     </p>
 
-    {% if picker == 'yes' %}
+    {% if picker %}
     <p class="optionlabel">Font for display</p>
     <p class="optionitem">
         <select name="fontchoice" id="fontchoice">
@@ -114,7 +114,7 @@
         </select>
     </p>
     {% endif %}
-    {% if debug == 'yes' %}
+    {% if debug %}
     <p class="optionlabel">Display debugging info for</p>
     <p class="optionitem">
         html&nbsp;<input type="checkbox" id="debughtml" value="no">

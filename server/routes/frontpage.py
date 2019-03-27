@@ -45,14 +45,13 @@ def frontpage():
 	if fonts:
 		picker = hipparchia.config['ENBALEFONTPICKER']
 	else:
-		# anythong other then 'yes' disables the picker
-		picker = 'nofontstopick'
+		picker = False
 
 	debugpanel = hipparchia.config['ALLOWUSERTOSETDEBUGMODES']
 
 	commandlineargs = getcommandlineargs()
 	if commandlineargs.enabledebugui:
-		debugpanel = 'yes'
+		debugpanel = True
 
 	havevectors = hipparchia.config['SEMANTICVECTORSENABLED']
 
