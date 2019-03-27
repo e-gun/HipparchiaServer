@@ -67,7 +67,7 @@ def probeforsessionvariables():
 		session['morphinfin'] = True
 		session['morphpcpls'] = True
 		session['nearestneighborsquery'] = False
-		session['nearornot'] = 'T'
+		session['nearornot'] = 'near'
 		session['onehit'] = hipparchia.config['DEFAULTONEHIT']
 		session['papyruscorpus'] = corpusisonandavailable('papyruscorpus')
 		session['principleparts'] = hipparchia.config['FINDPRINCIPLEPARTS']
@@ -75,7 +75,7 @@ def probeforsessionvariables():
 		session['psgexclusions'] = list()
 		session['psgselections'] = list()
 		session['quotesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALQUOTES']
-		session['searchscope'] = 'L'
+		session['searchscope'] = 'lines'
 		session['searchinsidemarkup'] = hipparchia.config['SEARCHMARKEDUPLINE']
 		session['semanticvectorquery'] = False
 		session['sensesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALSENSES']

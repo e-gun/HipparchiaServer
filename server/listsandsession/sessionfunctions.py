@@ -173,13 +173,13 @@ def modifysessionvariable(parameter, value):
 			for o in others:
 				session[o] = False
 
-	if session['nearornot'] not in ['T', 'F']:
-		session['nearornot'] = 'T'
+	if session['nearornot'] not in ['near', 'notnear']:
+		session['nearornot'] = 'near'
 
 	try:
 		int(session['maxresults'])
 	except ValueError:
-		session['maxresults'] = '500'
+		session['maxresults'] = '200'
 
 	try:
 		if int(session['proximity']) > 15:
@@ -224,8 +224,8 @@ def modifysessionvariable(parameter, value):
 	if session['sortorder'] not in ['universalid', 'shortname', 'genres', 'converted_date', 'location']:
 		session['sortorder'] = 'shortname'
 
-	if session['searchscope'] not in ['L', 'W']:
-		session['searchscope'] = 'L'
+	if session['searchscope'] not in ['lines', 'words']:
+		session['searchscope'] = 'lines'
 
 	if int(session['browsercontext']) < 5 or int(session['browsercontext']) > 100:
 		session['browsercontext'] = '20'
@@ -330,8 +330,9 @@ def parsejscookie(cookiestring: str) -> dict:
 	for sel in selectioncategories:
 		try:
 			selectiondictionary[sel] = re.search(r'%22' + sel + r'%22:\[(.*?)\]', cookiestring).group(1)
-		except:
-			selectiondictionary[sel] = ''
+		except AttributeError:
+			# AttributeError: 'NoneType' object has no attribute 'group'
+			selectiondictionary[sel] = str()
 
 	# found; but mangled entries still:
 	# {'agnselections': '%22Alchemistae%22%2C%22Biographi%22', 'wkselections': '%22gr1908w003%22%2C%22gr2612w001%22', 'psgselections': '', 'auselections': '%22gr0116%22%2C%22gr0199%22', 'wkgnselections': '%22Caten.%22%2C%22Doxogr.%22'}
@@ -346,8 +347,9 @@ def parsejscookie(cookiestring: str) -> dict:
 	for sel in selectioncategories:
 		try:
 			nonselections = re.sub(re.escape(re.search(r'%22' + sel + r'%22:\[(.*?)\]', nonselections).group(0)), '', nonselections)
-		except:
-			nonselections = ''
+		except AttributeError:
+			# AttributeError: 'NoneType' object has no attribute 'group'
+			nonselections = str()
 			
 	nonselections = re.sub(r'%22', '', nonselections)
 	allotheroptions = nonselections.split('%2C')

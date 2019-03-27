@@ -41,12 +41,12 @@ $(document).ready( function () {
     $('#extendsearch').click( function() {
         $.getJSON('/getsessionvariables', function (data) {
                 $( "#proximityspinner" ).spinner('value', data.proximity);
-                if (data.searchscope === 'L') {
+                if (data.searchscope === 'lines') {
                     $('#searchlines').prop('checked', true); $('#searchwords').prop('checked', false);
                 } else {
                     $('#searchlines').prop('checked', false); $('#searchwords').prop('checked', true);
                 }
-                if (data.nearornot === 'T') {
+                if (data.nearornot === 'near') {
                     $('#wordisnear').prop('checked', true); $('#wordisnotnear').prop('checked', false);
                 } else {
                     $('#wordisnear').prop('checked', false); $('#wordisnotnear').prop('checked', true);
@@ -187,11 +187,11 @@ $(document).ready( function () {
     }
 
     // setoptions() defined in ui-clicks.js
-    $('#searchlines').click( function(){ setoptions('searchscope', 'L'); });
-    $('#searchwords').click( function(){ setoptions('searchscope', 'W'); });
+    $('#searchlines').click( function(){ setoptions('searchscope', 'lines'); });
+    $('#searchwords').click( function(){ setoptions('searchscope', 'words'); });
 
-    $('#wordisnear').click( function(){ setoptions('nearornot', 'T'); });
-    $('#wordisnotnear').click( function(){ setoptions('nearornot', 'F'); });
+    $('#wordisnear').click( function(){ setoptions('nearornot', 'near'); });
+    $('#wordisnotnear').click( function(){ setoptions('nearornot', 'notnear'); });
 
     $('#proximityspinner').spinner({
         min: 1,

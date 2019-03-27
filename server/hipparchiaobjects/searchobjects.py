@@ -126,12 +126,12 @@ class SearchObject(object):
 			self.usecolumn = 'marked_up_line'
 			self.usewordlist = 'polytonic'
 
-		if frozensession['searchscope'] == 'W':
+		if frozensession['searchscope'] == 'words':
 			self.scope = 'words'
 		else:
 			self.scope = 'lines'
 
-		if frozensession['nearornot'] == 'T':
+		if frozensession['nearornot'] == 'near':
 			self.near = True
 			self.nearstr = str()
 		else:
