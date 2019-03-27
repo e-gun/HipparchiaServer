@@ -29,7 +29,7 @@ from server.commandlineoptions import getcommandlineargs
 
 if __name__ == '__main__':
 
-	if hipparchia.config['ENABLELOGGING'] == 'yes':
+	if hipparchia.config['ENABLELOGGING']:
 		from inspect import stack
 		from os import path
 		import logging
