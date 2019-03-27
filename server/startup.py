@@ -9,6 +9,8 @@
 import time
 from multiprocessing import current_process
 
+from click import secho
+
 from server import hipparchia
 from server.calculatewordweights import findccorporaweights, findtemporalweights, workobjectgeneraweights
 from server.commandlineoptions import getcommandlineargs
@@ -103,7 +105,7 @@ if current_process().name == 'MainProcess':
 	workgenresdict = buildworkgenresdict(workdict)
 	workprovenancedict = buildworkprovenancedict(workdict)
 	elapsed = round(time.time() - launchtime, 1)
-	print(' ({e}s)'.format(e=elapsed))
+	secho(' ({e}s)'.format(e=elapsed), fg='red')
 
 	print('building specialized sublists', end='')
 	launchtime = time.time()
@@ -127,7 +129,7 @@ if current_process().name == 'MainProcess':
 	del allworks
 
 	elapsed = round(time.time() - launchtime, 1)
-	print(' ({e}s)'.format(e=elapsed))
+	secho(' ({e}s)'.format(e=elapsed), fg='red')
 	del elapsed
 	del launchtime
 

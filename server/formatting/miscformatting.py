@@ -9,6 +9,8 @@
 import re
 import time
 
+from click import secho
+
 
 def timedecorator(function):
 	"""
@@ -24,7 +26,7 @@ def timedecorator(function):
 	def wrapper(*args, **kwargs):
 		result = function(*args, **kwargs)
 		elapsed = round(time.time() - launchtime, 1)
-		print(' ({e}s)'.format(e=elapsed))
+		secho(' ({e}s)'.format(e=elapsed), fg='red')
 		return result
 
 	return wrapper

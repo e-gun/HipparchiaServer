@@ -10,6 +10,8 @@ import threading
 import time
 from typing import List
 
+from click import secho
+
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.vectordbfunctions import checkforstoredvector
@@ -46,7 +48,7 @@ def startvectorizing():
 
 	while workpile:
 		if len(poll.keys()) != 0:
-			print('vectorbot pausing to make way for a search')
+			secho('vectorbot pausing to make way for a search', fg='red')
 			time.sleep(30)
 
 		# the typical searchlist is one item: ['lt1414']
@@ -71,19 +73,19 @@ def startvectorizing():
 			else:
 				v = '{i} vectorized ({w} words)'
 			if vectorspace and wordcount > 5000:
-				print(v.format(i=searchlist[0], w=wordcount, n=len(searchlist)-1))
+				secho(v.format(i=searchlist[0], w=wordcount, n=len(searchlist)-1), fg='green')
 
 			if vectorspace and len(workpile) % 25 == 0:
-				print('{n} items remain to vectorize'.format(n=len(workpile)))
+				secho('{n} items remain to vectorize'.format(n=len(workpile)), fg='green')
 
 			if not vectorspace and len(workpile) % 100 == 0:
-				print('{n} items remain to vectorize, but vectors are not returned with shorter authors'.format(n=len(workpile)))
-				print('aborting vectorization')
+				secho('{n} items remain to vectorize, but vectors are not returned with shorter authors'.format(n=len(workpile)), fg='green')
+				secho('aborting vectorization', fg='green')
 				workpile = list()
 			del vectorspace
 
 	if hipparchia.config['AUTOVECTORIZE'] and not commandlineargs.disablevectorbot:
-		print('vectorbot finished')
+		secho('vectorbot finished', fg='green', bold=True)
 
 	return
 
@@ -102,7 +104,7 @@ def determinevectorworkpile(tempcap=False) -> List[tuple]:
 		# real number is just over 93596456
 		cap = 94000000
 
-	print('the vectorbot is active and searching for items that need to be vectorized')
+	secho('the vectorbot is active and searching for items that need to be vectorized', fg='green', bold=True)
 
 	authors = [(authordict[a].universalid, authordict[a].countwordsinworks()) for a in authordict]
 	authorsbylength = sorted(authors, key=lambda x: x[1])

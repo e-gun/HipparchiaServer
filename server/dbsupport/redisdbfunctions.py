@@ -19,7 +19,6 @@ except ImportError:
 
 from server import hipparchia
 from server.threading.mpthreadcount import setthreadcount
-from server.dbsupport.dblinefunctions import dblineintolineobject
 
 
 class NullRedis(object):

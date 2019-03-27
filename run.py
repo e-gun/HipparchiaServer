@@ -8,16 +8,24 @@
 
 from multiprocessing import current_process
 
+from click import secho
 from werkzeug.contrib.profiler import ProfilerMiddleware
 
-from server import hipparchia
-from server.commandlineoptions import getcommandlineargs
 from version import hipparchiaserverversion as hipparchiaversion
 
 if current_process().name == 'MainProcess':
 	# stupid Windows will fork new copies and reload all of this
-	print('\nVersion: {v}\n'.format(v=hipparchiaversion))
+	vstring = """
+	{banner}
+	{v}
+	{banner}
+	"""
+	v = 'HipparchiaServer v{v}'.format(v=hipparchiaversion)
+	banner = ''.join('=' for _ in range(len(v)))
+	secho(vstring.format(banner=banner, v=v, s=''), bold=True, fg='cyan')
 
+from server import hipparchia
+from server.commandlineoptions import getcommandlineargs
 
 if __name__ == '__main__':
 
