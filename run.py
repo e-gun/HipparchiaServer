@@ -9,7 +9,13 @@
 from multiprocessing import current_process
 
 from click import secho
-from werkzeug.contrib.profiler import ProfilerMiddleware
+try:
+	# DeprecationWarning: 'werkzeug.contrib.profiler' has moved to'werkzeug.middleware.profiler'.
+	# This import is deprecated as ofversion 0.15 and will be removed in version 1.0.
+	from werkzeug.middleware.profiler import ProfilerMiddleware
+except ImportError:
+	# maybe you have an older version of werkzeug...
+	from werkzeug.contrib.profiler import ProfilerMiddleware
 
 from version import hipparchiaserverversion as hipparchiaversion
 
