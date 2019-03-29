@@ -9,7 +9,25 @@
 import re
 import time
 
+from sys import platform
+
 from click import secho
+
+
+def attemptcolorprint(*args, **kwargs):
+	"""
+
+	windows does odd things with the startup notifications: will not mix and match print and secho; instead you get
+	all the secho's and then all the prints (although this is out of order of execution)
+
+	:param args:
+	:param kwargs:
+	:return:
+	"""
+	if platform is not 'win32':
+		secho(*args, **kwargs)
+	else:
+		print(*args)
 
 
 def timedecorator(function):
