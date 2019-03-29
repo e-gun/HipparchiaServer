@@ -16,6 +16,20 @@ from click import secho
 def skipnewlineprint(*args):
 	"""
 
+	windows does odd things with the startup notifications...
+
+	:param args:
+	:return:
+	"""
+	if platform is not 'win32':
+		print(*args, end='')
+	else:
+		print(*args)
+
+
+def attemptsecho(*args, **kwargs):
+	"""
+
 	windows does odd things with the startup notifications: will not mix and match print and secho; instead you get
 	all the secho's and then all the prints (although this is out of order of execution)
 
@@ -23,8 +37,9 @@ def skipnewlineprint(*args):
 	:param kwargs:
 	:return:
 	"""
+
 	if platform is not 'win32':
-		print(*args, end='')
+			secho(*args, **kwargs)
 	else:
 		print(*args)
 

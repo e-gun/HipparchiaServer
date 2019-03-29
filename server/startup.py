@@ -8,9 +8,6 @@
 
 import time
 from multiprocessing import current_process
-from sys import platform
-
-from click import secho
 
 from server import hipparchia
 from server.calculatewordweights import findccorporaweights, findtemporalweights, workobjectgeneraweights
@@ -18,7 +15,7 @@ from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.bulkdboperations import loadallauthorsasobjects, loadallworksasobjects, \
 	loadallworksintoallauthors, loadlemmataasobjects
 from server.dbsupport.miscdbfunctions import probefordatabases
-from server.formatting.miscformatting import skipnewlineprint
+from server.formatting.miscformatting import attemptsecho, skipnewlineprint
 from server.listsandsession.genericlistfunctions import dictitemstartswith, findspecificdate
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
 	buildworkgenresdict, buildworkprovenancedict
@@ -108,7 +105,7 @@ if current_process().name == 'MainProcess':
 	workgenresdict = buildworkgenresdict(workdict)
 	workprovenancedict = buildworkprovenancedict(workdict)
 	elapsed = round(time.time() - launchtime, 1)
-	secho(' ({e}s)'.format(e=elapsed), fg='red')
+	attemptsecho(' ({e}s)'.format(e=elapsed), fg='red')
 
 	skipnewlineprint('building specialized sublists')
 	launchtime = time.time()
@@ -132,7 +129,7 @@ if current_process().name == 'MainProcess':
 	del allworks
 
 	elapsed = round(time.time() - launchtime, 1)
-	secho(' ({e}s)'.format(e=elapsed), fg='red')
+	attemptsecho(' ({e}s)'.format(e=elapsed), fg='red')
 	del elapsed
 	del launchtime
 
