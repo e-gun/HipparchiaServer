@@ -7,7 +7,7 @@
 """
 
 from server.dbsupport.miscdbfunctions import resultiterator
-from server.formatting.miscformatting import skipnewlineprint, timedecorator
+from server.formatting.miscformatting import timedecorator
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 from server.hipparchiaobjects.morphologyobjects import dbLemmaObject
@@ -22,7 +22,7 @@ def loadallauthorsasobjects() -> dict:
 	:return:
 	"""
 
-	skipnewlineprint('loading all authors...')
+	print('loading all authors...', end='')
 
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
@@ -34,7 +34,7 @@ def loadallauthorsasobjects() -> dict:
 
 	authorsdict = {r[0]: dbAuthor(*r) for r in results}
 
-	skipnewlineprint('\t{a} authors loaded'.format(a=len(authorsdict)))
+	print('\t', len(authorsdict), 'authors loaded', end='')
 
 	dbconnection.connectioncleanup()
 
@@ -50,7 +50,7 @@ def loadallworksasobjects() -> dict:
 	:return:
 	"""
 
-	skipnewlineprint('loading all works...  ')
+	print('loading all works...  ', end='')
 
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
@@ -66,7 +66,7 @@ def loadallworksasobjects() -> dict:
 
 	worksdict = {r[0]: dbOpus(*r) for r in results}
 
-	skipnewlineprint('\t{w} works loaded'.format(w=len(worksdict)))
+	print('\t', len(worksdict), 'works loaded', end='')
 
 	dbconnection.connectioncleanup()
 
@@ -87,7 +87,7 @@ def loadlemmataasobjects() -> dict:
 	:return:
 	"""
 
-	skipnewlineprint('loading all lemmata...')
+	print('loading all lemmata...', end='')
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
@@ -104,7 +104,7 @@ def loadlemmataasobjects() -> dict:
 		results = resultiterator(cursor)
 		lemmatadict = {**{r[0]: dbLemmaObject(*r) for r in results}, **lemmatadict}
 
-	skipnewlineprint('\t{lm} lemmata loaded'.format(lm=len(lemmatadict)))
+	print('\t', len(lemmatadict), 'lemmata loaded', end='')
 	# print('lemmatadict["laudo"]', lemmatadict['laudo'].formlist)
 	# print('lemmatadict["λύω"]', lemmatadict['λύω'].formlist)
 

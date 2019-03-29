@@ -9,18 +9,18 @@
 import time
 from multiprocessing import current_process
 
+from click import secho
+
 from server import hipparchia
 from server.calculatewordweights import findccorporaweights, findtemporalweights, workobjectgeneraweights
 from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.bulkdboperations import loadallauthorsasobjects, loadallworksasobjects, \
 	loadallworksintoallauthors, loadlemmataasobjects
 from server.dbsupport.miscdbfunctions import probefordatabases
-from server.formatting.miscformatting import attemptsecho, skipnewlineprint
 from server.listsandsession.genericlistfunctions import dictitemstartswith, findspecificdate
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
 	buildworkgenresdict, buildworkprovenancedict
 from server.threading.mpthreadcount import setthreadcount
-
 
 if current_process().name == 'MainProcess':
 	commandlineargs = getcommandlineargs()
@@ -28,18 +28,18 @@ if current_process().name == 'MainProcess':
 	# stupid Windows will fork new copies and reload all of this
 
 	terminaltext = """
-	
+
 	{project} / Copyright (C) {year} / {fullname}
 	{mail}
-	
+
 	This program comes with ABSOLUTELY NO WARRANTY;
 	without even the implied warranty of MERCHANTABILITY
 	or FITNESS FOR A PARTICULAR PURPOSE.
-	
+
 	This is free software, and you are welcome to redistribute
 	it and/or modify it under the terms of the GNU General
 	Public License version 3.
-	
+
 	"""
 
 	project = 'HipparchiaServer'
@@ -98,24 +98,29 @@ if current_process().name == 'MainProcess':
 	# lemmatadict too long to be used by the hinter: need quicker access; so partition it up into keyedlemmata
 	keyedlemmata = buildkeyedlemmata(list(lemmatadict.keys()))
 
-	skipnewlineprint('building core dictionaries')
+	print('building core dictionaries', end='')
 	launchtime = time.time()
 	authorgenresdict = buildaugenresdict(authordict)
 	authorlocationdict = buildauthorlocationdict(authordict)
 	workgenresdict = buildworkgenresdict(workdict)
 	workprovenancedict = buildworkprovenancedict(workdict)
 	elapsed = round(time.time() - launchtime, 1)
-	attemptsecho(' ({e}s)'.format(e=elapsed), fg='red')
+	secho(' ({e}s)'.format(e=elapsed), fg='red')
 
-	skipnewlineprint('building specialized sublists')
+	print('building specialized sublists', end='')
 	launchtime = time.time()
 
 	listmapper = {
-		'gr': {'a': dictitemstartswith(authordict, 'universalid', 'gr'), 'w': dictitemstartswith(workdict, 'universalid', 'gr')},
-		'lt': {'a': dictitemstartswith(authordict, 'universalid', 'lt'), 'w': dictitemstartswith(workdict, 'universalid', 'lt')},
-		'dp': {'a': dictitemstartswith(authordict, 'universalid', 'dp'), 'w': dictitemstartswith(workdict, 'universalid', 'dp')},
-		'in': {'a': dictitemstartswith(authordict, 'universalid', 'in'), 'w': dictitemstartswith(workdict, 'universalid', 'in')},
-		'ch': {'a': dictitemstartswith(authordict, 'universalid', 'ch'), 'w': dictitemstartswith(workdict, 'universalid', 'ch')},
+		'gr': {'a': dictitemstartswith(authordict, 'universalid', 'gr'),
+		       'w': dictitemstartswith(workdict, 'universalid', 'gr')},
+		'lt': {'a': dictitemstartswith(authordict, 'universalid', 'lt'),
+		       'w': dictitemstartswith(workdict, 'universalid', 'lt')},
+		'dp': {'a': dictitemstartswith(authordict, 'universalid', 'dp'),
+		       'w': dictitemstartswith(workdict, 'universalid', 'dp')},
+		'in': {'a': dictitemstartswith(authordict, 'universalid', 'in'),
+		       'w': dictitemstartswith(workdict, 'universalid', 'in')},
+		'ch': {'a': dictitemstartswith(authordict, 'universalid', 'ch'),
+		       'w': dictitemstartswith(workdict, 'universalid', 'ch')},
 	}
 
 	# search list building and pruning was testing all items for their date
@@ -129,7 +134,7 @@ if current_process().name == 'MainProcess':
 	del allworks
 
 	elapsed = round(time.time() - launchtime, 1)
-	attemptsecho(' ({e}s)'.format(e=elapsed), fg='red')
+	secho(' ({e}s)'.format(e=elapsed), fg='red')
 	del elapsed
 	del launchtime
 
