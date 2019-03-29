@@ -21,8 +21,7 @@ from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import badpucntwithbackslash, minimumgreek, removegravity
 from server.hipparchiaobjects.searchobjects import SearchObject
-from server.listsandsession.checksession import probeforsessionvariables
-from server.listsandsession.corpusavailability import justtlg
+from server.listsandsession.checksession import probeforsessionvariables, justtlg
 from server.startup import lemmatadict
 
 

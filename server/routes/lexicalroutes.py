@@ -24,8 +24,7 @@ from server.formatting.wordformatting import setdictionarylanguage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.lexicaloutputobjects import lexicalOutputObject, multipleWordOutputObject
 from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
-from server.listsandsession.checksession import probeforsessionvariables
-from server.listsandsession.corpusavailability import justlatin, justtlg
+from server.listsandsession.checksession import probeforsessionvariables, justlatin, justtlg
 from server.listsandsession.genericlistfunctions import polytonicsort
 
 

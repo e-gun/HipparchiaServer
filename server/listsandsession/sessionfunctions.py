@@ -13,7 +13,7 @@ from flask import session
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
-from server.listsandsession.corpusavailability import corpusselectionsaspseudobinarystring
+from server.listsandsession.checksession import corpusselectionsaspseudobinarystring
 from server.semanticvectors.vectorhelpers import vectordefaults, vectorranges
 from server.startup import authorgenresdict, authorlocationdict, workgenresdict, workprovenancedict
 

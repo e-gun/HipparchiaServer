@@ -13,7 +13,7 @@ from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.vectorobjects import VectorValues
-from server.listsandsession.corpusavailability import justlatin
+from server.listsandsession.checksession import justlatin
 
 
 class SearchObject(object):
