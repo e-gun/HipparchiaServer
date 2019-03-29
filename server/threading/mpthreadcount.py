@@ -35,5 +35,5 @@ def setthreadcount(startup=False) -> int:
 
 	if workers > cpu_count() and startup:
 		print('\nWARNING: threadcount exceeds total available number of threads: {a} vs {b}'.format(a=workers, b=cpu_count()))
-
+		print('[consider editing "WORKERS" and/or "AUTOCONFIGWORKERS" in "settings/performancsettings.py"]')
 	return workers
