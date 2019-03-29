@@ -6,12 +6,18 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+from sys import platform
+
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.formatting.miscformatting import timedecorator
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 from server.hipparchiaobjects.morphologyobjects import dbLemmaObject
 
+if platform is 'win32':
+	theend = '\n'
+else:
+	theend = str()
 
 @timedecorator
 def loadallauthorsasobjects() -> dict:
@@ -22,7 +28,7 @@ def loadallauthorsasobjects() -> dict:
 	:return:
 	"""
 
-	print('loading all authors...', end='')
+	print('loading all authors...', end=theend)
 
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
@@ -34,7 +40,7 @@ def loadallauthorsasobjects() -> dict:
 
 	authorsdict = {r[0]: dbAuthor(*r) for r in results}
 
-	print('\t', len(authorsdict), 'authors loaded', end='')
+	print('\t', len(authorsdict), 'authors loaded', end=theend)
 
 	dbconnection.connectioncleanup()
 
@@ -50,7 +56,7 @@ def loadallworksasobjects() -> dict:
 	:return:
 	"""
 
-	print('loading all works...  ', end='')
+	print('loading all works...  ', end=theend)
 
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
@@ -66,7 +72,7 @@ def loadallworksasobjects() -> dict:
 
 	worksdict = {r[0]: dbOpus(*r) for r in results}
 
-	print('\t', len(worksdict), 'works loaded', end='')
+	print('\t', len(worksdict), 'works loaded', end=theend)
 
 	dbconnection.connectioncleanup()
 
@@ -87,7 +93,7 @@ def loadlemmataasobjects() -> dict:
 	:return:
 	"""
 
-	print('loading all lemmata...', end='')
+	print('loading all lemmata...', end=theend)
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
@@ -104,7 +110,7 @@ def loadlemmataasobjects() -> dict:
 		results = resultiterator(cursor)
 		lemmatadict = {**{r[0]: dbLemmaObject(*r) for r in results}, **lemmatadict}
 
-	print('\t', len(lemmatadict), 'lemmata loaded', end='')
+	print('\t', len(lemmatadict), 'lemmata loaded', end=theend)
 	# print('lemmatadict["laudo"]', lemmatadict['laudo'].formlist)
 	# print('lemmatadict["λύω"]', lemmatadict['λύω'].formlist)
 

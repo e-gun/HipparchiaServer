@@ -8,6 +8,9 @@
 
 import time
 from multiprocessing import current_process
+from sys import platform
+
+from click import secho
 
 from server import hipparchia
 from server.calculatewordweights import findccorporaweights, findtemporalweights, workobjectgeneraweights
@@ -15,12 +18,15 @@ from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.bulkdboperations import loadallauthorsasobjects, loadallworksasobjects, \
 	loadallworksintoallauthors, loadlemmataasobjects
 from server.dbsupport.miscdbfunctions import probefordatabases
-from server.formatting.miscformatting import attemptcolorprint
 from server.listsandsession.genericlistfunctions import dictitemstartswith, findspecificdate
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
 	buildworkgenresdict, buildworkprovenancedict
 from server.threading.mpthreadcount import setthreadcount
 
+if platform is 'win32':
+	theend = '\n'
+else:
+	theend = str()
 
 if current_process().name == 'MainProcess':
 	commandlineargs = getcommandlineargs()
@@ -105,9 +111,9 @@ if current_process().name == 'MainProcess':
 	workgenresdict = buildworkgenresdict(workdict)
 	workprovenancedict = buildworkprovenancedict(workdict)
 	elapsed = round(time.time() - launchtime, 1)
-	attemptcolorprint(' ({e}s)'.format(e=elapsed), fg='red')
+	secho(' ({e}s)'.format(e=elapsed), fg='red')
 
-	print('building specialized sublists', end='')
+	print('building specialized sublists', end=theend)
 	launchtime = time.time()
 
 	listmapper = {
@@ -129,7 +135,7 @@ if current_process().name == 'MainProcess':
 	del allworks
 
 	elapsed = round(time.time() - launchtime, 1)
-	attemptcolorprint(' ({e}s)'.format(e=elapsed), fg='red')
+	secho(' ({e}s)'.format(e=elapsed), fg='red')
 	del elapsed
 	del launchtime
 
