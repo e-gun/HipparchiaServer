@@ -18,15 +18,12 @@ from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.bulkdboperations import loadallauthorsasobjects, loadallworksasobjects, \
 	loadallworksintoallauthors, loadlemmataasobjects
 from server.dbsupport.miscdbfunctions import probefordatabases
+from server.formatting.miscformatting import skipnewlineprint
 from server.listsandsession.genericlistfunctions import dictitemstartswith, findspecificdate
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
 	buildworkgenresdict, buildworkprovenancedict
 from server.threading.mpthreadcount import setthreadcount
 
-if platform is 'win32':
-	theend = '\n'
-else:
-	theend = str()
 
 if current_process().name == 'MainProcess':
 	commandlineargs = getcommandlineargs()
@@ -104,7 +101,7 @@ if current_process().name == 'MainProcess':
 	# lemmatadict too long to be used by the hinter: need quicker access; so partition it up into keyedlemmata
 	keyedlemmata = buildkeyedlemmata(list(lemmatadict.keys()))
 
-	print('building core dictionaries', end='')
+	skipnewlineprint('building core dictionaries')
 	launchtime = time.time()
 	authorgenresdict = buildaugenresdict(authordict)
 	authorlocationdict = buildauthorlocationdict(authordict)
@@ -113,7 +110,7 @@ if current_process().name == 'MainProcess':
 	elapsed = round(time.time() - launchtime, 1)
 	secho(' ({e}s)'.format(e=elapsed), fg='red')
 
-	print('building specialized sublists', end=theend)
+	skipnewlineprint('building specialized sublists')
 	launchtime = time.time()
 
 	listmapper = {
