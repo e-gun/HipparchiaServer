@@ -1264,6 +1264,11 @@ hmutitle {
 	font-weight: bold; font-style: italic;
 	}
 
+hmu_serviusformatting {
+	font-style: italic;
+	color: var(--dkteal);
+	}
+
 hr.styled {
 	border-top: 1px solid #8c8b8b;
 	border-bottom: 1px solid #fff;
@@ -1272,7 +1277,7 @@ hr.styled {
 indexedlocation:hover{
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
-	 }
+	}
 
 indexobserved:hover{
 	color: var(--dkbabyblue);

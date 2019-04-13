@@ -14,7 +14,7 @@ from server.browsing.browserfunctions import checkfordocumentmetadata
 from server.dbsupport.dblinefunctions import dblineintolineobject, worklinetemplate
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.startup import workdict
-from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
+from server.textsandindices.textandindiceshelperfunctions import paragraphformatting, setcontinuationvalue
 
 
 def buildtext(work: str, firstline: int, lastline: int, linesevery: int, cursor) -> str:
@@ -103,8 +103,9 @@ def buildtext(work: str, firstline: int, lastline: int, linesevery: int, cursor)
 		brackettypes = findactivebrackethighlighting()
 		editorialcontinuation = {'square': False, 'round': False, 'curly': False, 'angled': False}
 
-		for line in results:
-			thisline = dblineintolineobject(line)
+		lines = [dblineintolineobject(line) for line in results]
+		lines = paragraphformatting(lines)
+		for thisline in lines:
 			if workobject.isnotliterary() and thisline.index == workobject.starts:
 				# line.index == workobject.starts added as a check because
 				# otherwise you will re-see date info in the middle of some documents

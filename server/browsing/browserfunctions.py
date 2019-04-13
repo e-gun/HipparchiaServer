@@ -22,7 +22,7 @@ from server.hipparchiaobjects.browserobjects import BrowserOutputObject, Browser
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus, dbWorkLine
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.startup import workdict
-from server.textsandindices.textandindiceshelperfunctions import setcontinuationvalue
+from server.textsandindices.textandindiceshelperfunctions import paragraphformatting, setcontinuationvalue
 
 
 def buildbrowseroutputobject(authorobject: dbAuthor, workobject: dbOpus, locusindexvalue: int, dbcursor) -> BrowserOutputObject:
@@ -69,6 +69,11 @@ def buildbrowseroutputobject(authorobject: dbAuthor, workobject: dbOpus, locusin
 		lineprefix = '<smallcode>{id}&nbsp;&nbsp;&nbsp;</smallcode>&nbsp;'
 
 	# [b] format the lines and insert them into the BrowserPassageObject
+	# [b1] check to see if this line is part of a larger formatting block: really only servius?
+
+	lines = paragraphformatting(lines)
+
+	# [b2]
 	for line in lines:
 		if workobject.isnotliterary() and line.index == workobject.starts:
 			# line.index == workobject.starts added as a check because

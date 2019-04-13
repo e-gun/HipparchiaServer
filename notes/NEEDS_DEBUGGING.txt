@@ -18,6 +18,7 @@ a second click will clear the display
 js async timing issue, it seems
 irritating to avoid "return redirect(url_for('frontpage'))" which is so simple and easy to call
 
+
 [D] platform specific bug: FreeBSD %complete poll info not working with proximity search
 
 

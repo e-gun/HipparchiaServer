@@ -269,6 +269,7 @@ class dbWorkLine(object):
 		self.universalid = 'line/{w}/{i}'.format(w=self.wkuinversalid, i=index)
 		self.url = 'linenumber/{a}/{w}/{i}'.format(a=self.authorid, w=self.workid, i=index)
 		self.hyphenated = hyphenated_words
+		self.paragraphformatting = None
 		if len(self.hyphenated) > 1:
 			self.hashyphenated = True
 		else:
@@ -808,6 +809,74 @@ class dbWorkLine(object):
 		close = bracketfinder[btype]['c']
 		if re.search(close, self.accented):
 			return True
+		else:
+			return False
+
+	def hmurewrite(self):
+		"""
+
+		convert <hmu_xxx> ... </hmu_xxx> into
+		<span class="xxx">...</span>
+
+		:return:
+		"""
+
+		hmuopenfinder = re.compile(r'<hmu_(.*?)>')
+		hmuclosefinder = re.compile(r'</hmu_(.*?)>')
+		self.accented = re.sub(hmuopenfinder, r'<span class="\1">', self.accented)
+		self.accented = re.sub(hmuclosefinder, r'</span>', self.accented)
+
+	def hmuopenedbutnotclosed(self):
+		"""
+
+		we are kiijung for paragraphs of formatting that are just getting started
+
+		return the tag name if there is an <hmu_...> and not a corresponding </hmu...> in the line
+
+		otherwise return false
+
+		:return:
+		"""
+
+		opentag = False
+
+		openfinder = re.compile(r'<(hmu_.*?)>')
+		open = re.search(openfinder, self.accented)
+		if not open:
+			pass
+		else:
+			opentag = open.group(1)
+			close = r'</{t}>'.format(t=opentag)
+			if re.search(close, self.accented):
+				openedat = open.span()[0]
+				closedat = re.search(close, self.accented).span()[0]
+				if openedat < closedat:
+					opentag = False
+
+		return opentag
+
+	def hmuclosedbeforeopened(self, tagtocheck) -> bool:
+		"""
+
+		true if there is a stray '</tagtocheck>' in the line
+
+		:return:
+		"""
+
+		closecheck = r'</{t}>'.format(t=tagtocheck)
+		closed = re.search(closecheck, self.accented)
+		if closed:
+			closedat = closed.span()[0]
+			open = r'<{t}>'.format(t=tagtocheck)
+			opened = re.search(open, self.accented)
+			if opened:
+				openedat = opened.span()[0]
+				if openedat < closedat:
+					return False
+				else:
+					return True
+			else:
+				return True
 		else:
 			return False
 
