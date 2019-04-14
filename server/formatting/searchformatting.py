@@ -20,6 +20,7 @@ from server.formatting.bracketformatting import brackethtmlifysearchfinds
 from server.hipparchiaobjects.dbtextobjects import dbWorkLine
 from server.hipparchiaobjects.searchobjects import SearchObject, SearchResult
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
+from server.textsandindices.textandindiceshelperfunctions import paragraphformatting
 
 LineList = List[dbWorkLine]
 ResultList = List[SearchResult]
@@ -56,16 +57,14 @@ def buildresultobjects(hitdict: dict, authordict: dict, workdict: dict, searchob
 		lo = hitdict[h]
 		wo = workdict[lo.wkuinversalid]
 		ao = authordict[lo.authorid]
-		n = formatname(wo, ao)
-		t = wo.title
-		c = locusintocitation(wo, lo)
-		wn = wo.worknumber
-		resultlist.append(SearchResult(h+1, n, t, c, wn, hitdict[h].url, [hitdict[h]]))
+		name = formatname(wo, ao)
+		title = wo.title
+		citation = locusintocitation(wo, lo)
+		resultlist.append(SearchResult(h+1, name, title, citation, wo.worknumber, hitdict[h].url, [hitdict[h]]))
 
 	if so.context == 0:
 		# no need to find the environs
 		return resultlist
-
 	else:
 		# aggregate hits by author table so we can search each table once instead of 100x
 		hitlocations = dict()
@@ -94,6 +93,7 @@ def buildresultobjects(hitdict: dict, authordict: dict, workdict: dict, searchob
 		# documents otherwise
 		for r in updatedresultlist:
 			r.lineobjects = [l for l in r.lineobjects if l.workid == r.worknumber]
+			r.lineobjects = paragraphformatting(r.lineobjects)
 
 		return updatedresultlist
 
