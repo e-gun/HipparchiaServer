@@ -17,7 +17,8 @@ from flask import render_template, send_file, session
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
-from server.dbsupport.miscdbfunctions import getpostgresserverversion, versionchecking
+from server.dbsupport.miscdbfunctions import getpostgresserverversion
+from server.dbsupport.dbbuildinfo import versionchecking
 from server.formatting.vectorformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper

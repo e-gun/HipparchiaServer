@@ -119,7 +119,7 @@ def buildtext(work: str, firstline: int, lastline: int, linesevery: int, cursor)
 				editorialcontinuation = {t: setcontinuationvalue(thisline, previousline, editorialcontinuation[t], t, openfinder=openfinder, closefinder=closefinder)
 				                         for t in brackettypes}
 			else:
-				columnb = thisline.accented
+				columnb = thisline.markedup
 
 			if thisline.samelevelas(previousline) is not True:
 				columna = thisline.shortlocus()

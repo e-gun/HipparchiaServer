@@ -291,13 +291,14 @@ def paragraphformatting(listoflines: List[dbWorkLine]) -> List[dbWorkLine]:
 			# it is possible that this will not yield balanced HTML
 			# e.g. <span class="normal"> furenti similis. <hmu_serviusformatting>sane quidam volunt, Vergilium</span></hmu_serviusformatting>
 			# this gets 'fixed' by hmurewrite() which yields '</span></span>' instead
-			line.accented = '{ln}</{t}>'.format(t=memory, ln=line.accented)
+			line.markedup = '{ln}</{t}>'.format(t=memory, ln=line.markedup)
 		if memory and line.hmuclosedbeforeopened(memory):
 			# it is possible that this will not yield balanced HTML
-			line.accented = '<{t}>{ln}'.format(t=memory, ln=line.accented)
+			line.markedup = '<{t}>{ln}'.format(t=memory, ln=line.markedup)
 			memory = None
 		if memory and not paragraphtag:
 			# 'and not' because the first condition already rewrote this line
-			line.accented = '<{t}>{ln}</{t}>'.format(t=memory, ln=line.accented)
-		line.hmurewrite()
+			line.markedup = '<{t}>{ln}</{t}>'.format(t=memory, ln=line.markedup)
+		line.hmuspanrewrite()
+		line.hmufontshiftsintospans()
 	return listoflines

@@ -151,10 +151,10 @@ def checkfordocumentmetadata(workline: dbWorkLine, workobject: dbOpus) -> str:
 	cityfinder = re.compile(r'<hmu_metadata_city value="(.*?)" />')
 	pubfinder = re.compile(r'<hmu_metadata_publicationinfo value="(.*?)" />')
 
-	date = re.search(datefinder, workline.accented)
-	region = re.search(regionfinder, workline.accented)
-	city = re.search(cityfinder, workline.accented)
-	pub = re.search(pubfinder, workline.accented)
+	date = re.search(datefinder, workline.markedup)
+	region = re.search(regionfinder, workline.markedup)
+	city = re.search(cityfinder, workline.markedup)
+	pub = re.search(pubfinder, workline.markedup)
 
 	metadatatags = list()
 	if region:

@@ -15,6 +15,9 @@ from server.formatting.betacodeescapes import andsubstitutes
 from server.formatting.wordformatting import attemptsigmadifferentiation, forcelunates
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.morphologyobjects import MorphPossibilityObject
+from server.dbsupport.dbbuildinfo import buildoptionchecking
+
+buildoptions = buildoptionchecking()
 
 
 class dbAuthor(object):
@@ -223,9 +226,64 @@ class dbOpus(object):
 		return set(range(self.starts, self.ends + 1))
 
 
+class dbMorphologyObject(object):
+	"""
+
+	an object that corresponds to a db line
+
+	CREATE TABLE public.greek_morphology (
+		observed_form character varying(64) COLLATE pg_catalog."default",
+		xrefs character varying(128) COLLATE pg_catalog."default",
+		prefixrefs character varying(128) COLLATE pg_catalog."default",
+		possible_dictionary_forms text COLLATE pg_catalog."default"
+	)
+
+	hipparchiaDB=# select count(observed_form) from greek_morphology;
+	 count
+	--------
+	 911871
+	(1 row)
+
+	hipparchiaDB=# select count(observed_form) from latin_morphology;
+	 count
+	--------
+	 270227
+	(1 row)
+
+
+	hipparchiaDB=# select * from greek_morphology where observed_form='καταμείναντεϲ';
+	observed_form |  xrefs   | prefixrefs |                                                                       possible_dictionary_forms
+	---------------+----------+------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	καταμείναντεϲ | 58645029 |            | <possibility_1>καταμένω<xref_value>58645029</xref_value><xref_kind>9</xref_kind><transl>stay</transl><analysis>aor part act masc nom/voc pl</analysis></possibility_1>+
+	           |          |            |
+	(1 row)
+
+
+	"""
+
+	def __init__(self, observed, xrefs, prefixrefs, possibleforms):
+		self.observed = observed
+		self.xrefs = xrefs.split(', ')
+		self.prefixrefs = [x for x in prefixrefs.split(', ') if x]
+		self.possibleforms = possibleforms
+		self.prefixcount = len(self.prefixrefs)
+		self.xrefcount = len(self.xrefs)
+
+	def countpossible(self) -> int:
+		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
+		thepossible = re.findall(possiblefinder, self.possibleforms)
+		return len(thepossible)
+
+	def getpossible(self) -> List[MorphPossibilityObject]:
+		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
+		thepossible = re.findall(possiblefinder, self.possibleforms)
+		listofpossibilitiesobjects = [MorphPossibilityObject(self.observed, p, self.prefixcount) for p in thepossible]
+		return listofpossibilitiesobjects
+
+
 class dbWorkLine(object):
 	"""
-	an object that corresponds to a db line
+	an object that corresponds to a db line (+ a fair number of methods...)
 
 	CREATE TABLE public.in0207 (
 		index integer NOT NULL UNIQUE DEFAULT nextval('in0207'::regclass),
@@ -246,12 +304,48 @@ class dbWorkLine(object):
 	"""
 
 	nonliterarycorpora = ['in', 'dp', 'ch']
+	hmuopenfinder = re.compile(r'<hmu_span_(.*?)>')
+	hmuclosefinder = re.compile(r'</hmu_span_(.*?)>')
+	hmushiftfinder = re.compile(r'<hmu_fontshift_(.*?)_(.*?)>')
+	hmushiftcleaner = re.compile(r'</hmu_fontshift_.*?>')
+	bracketclosedfinder = {'square': {'c': re.compile(r'\]')}, 'round': {'c': re.compile(r'\)')}, 'angled': {'c': re.compile(r'⟩')}, 'curly': {'c': re.compile(r'\}')}}
+	editorialbrackets = {
+				'square': {
+					'ocreg': re.compile(r'\[(.*?)(\]|$)'),
+					'coreg': re.compile(r'(^|\[)(.*?)\]'),
+					'class': 'editorialmarker_squarebrackets',
+					'o': '[',
+					'c': ']'
+				},
+				'round': {
+					'ocreg': re.compile(r'\((.*?)(\)|$)'),
+					'coreg': re.compile(r'(^|\()(.*?)\)'),
+					'class': 'editorialmarker_roundbrackets',
+					'o': '(',
+					'c': ')'
+				},
+				'angled': {
+					'ocreg': re.compile(r'⟨(.*?)(⟩|$)'),
+					'coreg': re.compile(r'(^|⟨)(.*?)⟩'),
+					'class': 'editorialmarker_angledbrackets',
+					'o': '⟨',
+					'c': '⟩'
+				},
+				'curly': {
+					'ocreg': re.compile(r'\{(.*?)(\}|$)'),
+					'coreg': re.compile(r'(^|\{)(.*?)\}'),
+					'class': 'editorialmarker_curlybrackets',
+					'o': '{',
+					'c': '}'
+				}
+			}
 
 	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value,
 	             level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words,
 	             annotations):
 
 		self.wkuinversalid = wkuinversalid[:10]
+		self.db = wkuinversalid[0:2]
 		self.authorid = wkuinversalid[:6]
 		self.workid = wkuinversalid[7:]
 		self.index = index
@@ -261,7 +355,7 @@ class dbWorkLine(object):
 		self.l2 = level_02_value
 		self.l1 = level_01_value
 		self.l0 = level_00_value
-		self.accented = marked_up_line
+		self.markedup = marked_up_line
 		self.polytonic = accented_line
 		self.stripped = stripped_line
 		self.annotations = annotations
@@ -275,8 +369,8 @@ class dbWorkLine(object):
 		else:
 			self.hashyphenated = False
 
-		if self.accented is None:
-			self.accented = str()
+		if self.markedup is None:
+			self.markedup = str()
 			self.stripped = str()
 
 		try:
@@ -290,11 +384,16 @@ class dbWorkLine(object):
 			zaplunates = False
 
 		if zaplunates:
-			self.accented = attemptsigmadifferentiation(self.accented)
+			self.markedup = attemptsigmadifferentiation(self.markedup)
 		if hipparchia.config['FORCELUNATESIGMANOMATTERWHAT']:
-			self.accented = forcelunates(self.accented)
+			self.markedup = forcelunates(self.markedup)
 		if hipparchia.config['DISTINCTGREEKANDLATINFONTS']:
-			self.accented = self.separategreekandlatinfonts()
+			self.markedup = self.separategreekandlatinfonts()
+
+	def showhtmlversion(self) -> str:
+		self.hmuspanrewrite()
+		line = self.markedup
+		return line
 
 	def decompose(self) -> tuple:
 		"""
@@ -312,7 +411,7 @@ class dbWorkLine(object):
 		tvals = [getattr(self, i) for i in items]
 		return tuple(tvals)
 
-	def uncleanlocus(self):
+	def uncleanlocus(self) -> str:
 		"""
 		call me to get a formatted citation: "3.2.1"
 
@@ -322,7 +421,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		if self.wkuinversalid[0:2] not in dbWorkLine.nonliterarycorpora:
+		if self.db not in dbWorkLine.nonliterarycorpora:
 			loc = [lvl for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5] if str(lvl) != '-1']
 			loc.reverse()
 			citation = '.'.join(loc)
@@ -336,7 +435,7 @@ class dbWorkLine(object):
 
 		return citation
 
-	def locus(self):
+	def locus(self) -> str:
 		"""
 
 		turn the funky substitutes into standard characters:
@@ -393,7 +492,7 @@ class dbWorkLine(object):
 		"""
 		loc = list()
 		for lvl in [self.l1, self.l2, self.l3, self.l4, self.l5]:
-			if str(lvl) != '-1' and (self.wkuinversalid[0:2] not in dbWorkLine.nonliterarycorpora and lvl != 'recto'):
+			if str(lvl) != '-1' and (self.db not in dbWorkLine.nonliterarycorpora and lvl != 'recto'):
 				loc.append(lvl)
 		loc.reverse()
 
@@ -487,7 +586,7 @@ class dbWorkLine(object):
 		markup = re.compile(r'(<.*?>)')
 		nbsp = re.compile(r'&nbsp;')
 
-		unformatted = re.sub(markup, r'', self.accented)
+		unformatted = re.sub(markup, r'', self.markedup)
 		unformatted = re.sub(nbsp, r'', unformatted)
 
 		return unformatted
@@ -504,7 +603,7 @@ class dbWorkLine(object):
 		left = '<smallcode>&lt;'
 		right = '&gt;</smallcode>'
 
-		visiblehtml = re.sub(markup, left + r'\2' + right, self.accented)
+		visiblehtml = re.sub(markup, left + r'\2' + right, self.markedup)
 
 		return visiblehtml
 
@@ -567,7 +666,7 @@ class dbWorkLine(object):
 		"""
 		return the line less its first word
 		"""
-		allbutfirstword = ''
+		allbutfirstword = str()
 		if version in ['accented', 'stripped']:
 			line = getattr(self, version)
 			if version == 'accented':
@@ -608,7 +707,7 @@ class dbWorkLine(object):
 		pattern = re.compile(r'<hmu_metadata_notes value="(.*?)" />')
 		ands = re.compile(r'&(\d{1,2})(.*?)(&\d?)')
 
-		notes = re.findall(pattern, self.accented)
+		notes = re.findall(pattern, self.markedup)
 		notes = [re.sub(ands, andsubstitutes, n) for n in notes]
 
 		return notes
@@ -631,38 +730,9 @@ class dbWorkLine(object):
 		"""
 
 		if not bracketfinder:
-			bracketfinder = {
-				'square': {
-					'ocreg': re.compile(r'\[(.*?)(\]|$)'),
-					'coreg': re.compile(r'(^|\[)(.*?)\]'),
-					'class': 'editorialmarker_squarebrackets',
-					'o': '[',
-					'c': ']'
-				},
-				'round': {
-					'ocreg': re.compile(r'\((.*?)(\)|$)'),
-					'coreg': re.compile(r'(^|\()(.*?)\)'),
-					'class': 'editorialmarker_roundbrackets',
-					'o': '(',
-					'c': ')'
-				},
-				'angled': {
-					'ocreg': re.compile(r'⟨(.*?)(⟩|$)'),
-					'coreg': re.compile(r'(^|⟨)(.*?)⟩'),
-					'class': 'editorialmarker_angledbrackets',
-					'o': '⟨',
-					'c': '⟩'
-				},
-				'curly': {
-					'ocreg': re.compile(r'\{(.*?)(\}|$)'),
-					'coreg': re.compile(r'(^|\{)(.*?)\}'),
-					'class': 'editorialmarker_curlybrackets',
-					'o': '{',
-					'c': '}'
-				}
-			}
+			bracketfinder = dbWorkLine.editorialbrackets
 
-		theline = self.accented
+		theline = self.markedup
 
 		# the brackets in the metadata will throw off the bracketfinder:
 		#   <hmu_metadata_publicationinfo value="BSA 47.1952.187,3 [SEG 12.419]" />
@@ -713,7 +783,7 @@ class dbWorkLine(object):
 		           'l': {'open': '<latinfont>', 'close': '</latinfont>'},
 		           'x': {'open': '', 'close': ''}}
 
-		linechars = list(self.accented)
+		linechars = list(self.markedup)
 		linechars.reverse()
 		if not linechars:
 			# otherwise you will throw exceptions in a second
@@ -756,6 +826,20 @@ class dbWorkLine(object):
 		else:
 			return 'l'
 
+	def probablylatin(self):
+		mostlylatindbs = ['lt', 'ch']
+		if self.db in mostlylatindbs:
+			return True
+		else:
+			return False
+
+	def probablygreek(self):
+		mostlygreekdbs = ['gr', 'in', 'dp']
+		if self.db in mostlygreekdbs:
+			return True
+		else:
+			return False
+
 	def bracketopenedbutnotclosed(self, btype='square', bracketfinder=None):
 		"""
 
@@ -779,11 +863,11 @@ class dbWorkLine(object):
 		openandnotclose = bracketfinder[btype]['regex']
 
 		try:
-			falsify = [re.search(e, self.accented) for e in bracketfinder[btype]['exceptions']]
+			falsify = [re.search(e, self.markedup) for e in bracketfinder[btype]['exceptions']]
 		except:
 			falsify = [None]
 
-		if re.search(openandnotclose, self.accented) and True not in falsify:
+		if re.search(openandnotclose, self.markedup) and True not in falsify:
 			return True
 		else:
 			return False
@@ -799,20 +883,15 @@ class dbWorkLine(object):
 		"""
 
 		if not bracketfinder:
-			bracketfinder = {
-				'square': {'c': re.compile(r'\]')},
-				'round': {'c': re.compile(r'\)')},
-				'angled': {'c': re.compile(r'⟩')},
-				'curly': {'c': re.compile(r'\}')},
-			}
+			bracketfinder = dbWorkLine.bracketclosedfinder
 
 		close = bracketfinder[btype]['c']
-		if re.search(close, self.accented):
+		if re.search(close, self.markedup):
 			return True
 		else:
 			return False
 
-	def hmurewrite(self):
+	def hmuspanrewrite(self):
 		"""
 
 		convert <hmu_xxx> ... </hmu_xxx> into
@@ -820,11 +899,73 @@ class dbWorkLine(object):
 
 		:return:
 		"""
+		try:
+			alreadyconverted = buildoptions[self.db]['htmlifydatabase']
+		except KeyError:
+			alreadyconverted = 'n'
 
-		hmuopenfinder = re.compile(r'<hmu_(.*?)>')
-		hmuclosefinder = re.compile(r'</hmu_(.*?)>')
-		self.accented = re.sub(hmuopenfinder, r'<span class="\1">', self.accented)
-		self.accented = re.sub(hmuclosefinder, r'</span>', self.accented)
+		if alreadyconverted == 'n':
+			self.markedup = re.sub(dbWorkLine.hmuopenfinder, r'<span class="\1">', self.markedup)
+			self.markedup = re.sub(dbWorkLine.hmuclosefinder, r'</span>', self.markedup)
+
+	def hmufontshiftsintospans(self):
+		"""
+
+		turn '<hmu_fontshift_latin_italic>b </hmu_fontshift_latin_italic>'
+
+		into '<span class="latin italic">b </span>'
+
+		:param texttoclean:
+		:return:
+		"""
+
+		try:
+			alreadyconverted = buildoptions[self.db]['htmlifydatabase']
+		except KeyError:
+			alreadyconverted = 'n'
+
+		if alreadyconverted == 'n':
+			if self.probablygreek():
+				language = 'greek'
+			else:
+				language = 'latin'
+
+			self.markedup = re.sub(dbWorkLine.hmushiftfinder, lambda x: self.matchskipper(x.group(1), x.group(2), language), self.markedup)
+			self.markedup = re.sub(dbWorkLine.hmushiftcleaner, r'</span>', self.markedup)
+
+	@staticmethod
+	def matchskipper(groupone, grouptwo, language: str) -> str:
+		"""
+
+		r'<span class="\1 \2">'
+
+		or
+
+		r'<span class="\2">'
+
+		skip a matchgroup if it matches language
+
+		this is useful because "latin normal" in a latin author can lead to
+		a color shift, vel sim. when you really don't need to flag 'latinity' in this
+		context
+
+		also convert 'smallerthannormal_italic' into 'smallerthannormal italic'
+
+
+		:param groupone:
+		:param grouptwo:
+		:param language:
+		:return:
+		"""
+
+		grouptwo = re.sub(r'_', ' ', grouptwo)
+
+		if groupone != language:
+			spanner = '<span class="{a} {b}">'.format(a=groupone, b=grouptwo)
+		else:
+			spanner = '<span class="{b}">'.format(a=groupone, b=grouptwo)
+
+		return spanner
 
 	def hmuopenedbutnotclosed(self):
 		"""
@@ -841,17 +982,15 @@ class dbWorkLine(object):
 		opentag = False
 
 		openfinder = re.compile(r'<(hmu_.*?)>')
-		open = re.search(openfinder, self.accented)
-		if not open:
-			pass
-		else:
-			opentag = open.group(1)
-			close = r'</{t}>'.format(t=opentag)
-			if re.search(close, self.accented):
-				openedat = open.span()[0]
-				closedat = re.search(close, self.accented).span()[0]
-				if openedat < closedat:
-					opentag = False
+		closefinder = re.compile(r'</(hmu_.*?)>')
+		opened = set(re.findall(openfinder, self.markedup))
+		closed = set(re.findall(closefinder, self.markedup))
+		differ = opened.difference(closed)
+		differ = {d for d in differ if 'standalone' not in d}
+
+		if differ:
+			# note that if there are two unbalanced tags we just failed to do something about that
+			opentag = differ.pop()
 
 		return opentag
 
@@ -864,11 +1003,11 @@ class dbWorkLine(object):
 		"""
 
 		closecheck = r'</{t}>'.format(t=tagtocheck)
-		closed = re.search(closecheck, self.accented)
+		closed = re.search(closecheck, self.markedup)
 		if closed:
 			closedat = closed.span()[0]
 			open = r'<{t}>'.format(t=tagtocheck)
-			opened = re.search(open, self.accented)
+			opened = re.search(open, self.markedup)
 			if opened:
 				openedat = opened.span()[0]
 				if openedat < closedat:
@@ -879,58 +1018,3 @@ class dbWorkLine(object):
 				return True
 		else:
 			return False
-
-
-class dbMorphologyObject(object):
-	"""
-
-	an object that corresponds to a db line
-
-	CREATE TABLE public.greek_morphology (
-		observed_form character varying(64) COLLATE pg_catalog."default",
-		xrefs character varying(128) COLLATE pg_catalog."default",
-		prefixrefs character varying(128) COLLATE pg_catalog."default",
-		possible_dictionary_forms text COLLATE pg_catalog."default"
-	)
-
-	hipparchiaDB=# select count(observed_form) from greek_morphology;
-	 count
-	--------
-	 911871
-	(1 row)
-
-	hipparchiaDB=# select count(observed_form) from latin_morphology;
-	 count
-	--------
-	 270227
-	(1 row)
-
-
-	hipparchiaDB=# select * from greek_morphology where observed_form='καταμείναντεϲ';
-	observed_form |  xrefs   | prefixrefs |                                                                       possible_dictionary_forms
-	---------------+----------+------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	καταμείναντεϲ | 58645029 |            | <possibility_1>καταμένω<xref_value>58645029</xref_value><xref_kind>9</xref_kind><transl>stay</transl><analysis>aor part act masc nom/voc pl</analysis></possibility_1>+
-	           |          |            |
-	(1 row)
-
-
-	"""
-
-	def __init__(self, observed, xrefs, prefixrefs, possibleforms):
-		self.observed = observed
-		self.xrefs = xrefs.split(', ')
-		self.prefixrefs = [x for x in prefixrefs.split(', ') if x]
-		self.possibleforms = possibleforms
-		self.prefixcount = len(self.prefixrefs)
-		self.xrefcount = len(self.xrefs)
-
-	def countpossible(self) -> int:
-		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
-		thepossible = re.findall(possiblefinder, self.possibleforms)
-		return len(thepossible)
-
-	def getpossible(self) -> List[MorphPossibilityObject]:
-		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
-		thepossible = re.findall(possiblefinder, self.possibleforms)
-		listofpossibilitiesobjects = [MorphPossibilityObject(self.observed, p, self.prefixcount) for p in thepossible]
-		return listofpossibilitiesobjects

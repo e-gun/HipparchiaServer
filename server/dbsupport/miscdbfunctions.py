@@ -258,57 +258,6 @@ def makeanemptywork(universalid: str) -> dbOpus:
 	return wkobject
 
 
-def versionchecking(activedbs: list, expectedsqltemplateversion: str) -> str:
-	"""
-
-	send a warning if the corpora were built from a different template than the one active on the server
-
-	:param activedbs:
-	:param expectedsqltemplateversion:
-	:return:
-	"""
-
-	dbconnection = ConnectionObject()
-	cursor = dbconnection.cursor()
-
-	activedbs += ['lx', 'lm']
-	labeldecoder = {
-		'lt': 'The corpus of Latin authors',
-		'gr': 'The corpus of Greek authors',
-		'in': 'The corpus of classical inscriptions',
-		'dp': 'The corpus of papyri',
-		'ch': 'The corpus of Christian era inscriptions',
-		'lx': 'The lexical database',
-		'lm': 'The parsing database'
-	}
-
-	q = 'SELECT corpusname, templateversion, corpusbuilddate FROM builderversion'
-	cursor.execute(q)
-	results = cursor.fetchall()
-
-	corpora = {r[0]: (r[1], r[2]) for r in results}
-
-	for db in activedbs:
-		if db in corpora:
-			if int(corpora[db][0]) != expectedsqltemplateversion:
-				t = """
-				WARNING: VERSION MISMATCH
-				{d} has a builder template version of {v}
-				(and was compiled {t})
-				But the server expects the template version to be {e}.
-				EXPECT THE WORST IF YOU TRY TO EXECUTE ANY SEARCHES
-				"""
-				print(t.format(d=labeldecoder[db], v=corpora[db][0], t=corpora[db][1], e=expectedsqltemplateversion))
-
-	buildinfo = ['\t{corpus}: {date} [{prolix}]'.format(corpus=c, date=corpora[c][1], prolix=labeldecoder[c])
-				for c in sorted(corpora.keys())]
-	buildinfo = '\n'.join(buildinfo)
-
-	dbconnection.connectioncleanup()
-
-	return buildinfo
-
-
 def getpostgresserverversion() -> str:
 	"""
 

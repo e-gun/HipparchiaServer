@@ -44,7 +44,7 @@ def buildresultobjects(hitdict: dict, authordict: dict, workdict: dict, searchob
 	"""
 
 	# for h in hitdict.keys():
-	#	print(h,hitdict[h].universalid, hitdict[h].accented)
+	#	print(h,hitdict[h].universalid, hitdict[h].markedup)
 
 	so = searchobject
 	activepoll = so.poll
@@ -127,13 +127,13 @@ def flagsearchterms(searchresultobject: SearchResult, skg: str, prx: str, search
 		# a highlighted foundline2 of result2 is showing up in result1 in addition to foundline1
 		fl = deepcopy(foundline)
 		if fl.index == highlightindex:
-			fl.accented = highlightsearchterm(fl, skg, 'match')
+			fl.markedup = highlightsearchterm(fl, skg, 'match')
 			if so.context > 0:
-				fl.accented = '<span class="highlight">{fla}</span>'.format(fla=fl.accented)
+				fl.markedup = '<span class="highlight">{fla}</span>'.format(fla=fl.markedup)
 		if so.searchtype == 'proximity':
 			# negative proximity ('not near') does not need anything special here: you simply never meet the condition
-			if re.search(so.termtwo, fl.accented) or re.search(so.termtwo, fl.stripped):
-				fl.accented = highlightsearchterm(fl, prx, 'proximate')
+			if re.search(so.termtwo, fl.markedup) or re.search(so.termtwo, fl.stripped):
+				fl.markedup = highlightsearchterm(fl, prx, 'proximate')
 		newlineobjects.append(fl)
 
 	return newlineobjects
@@ -157,7 +157,7 @@ def highlightsearchterm(lineobject: dbWorkLine, regexequivalent, spanname) -> st
 	:return:
 	"""
 
-	line = lineobject.accented
+	line = lineobject.markedup
 	newline = line
 	line = newline
 
@@ -230,14 +230,14 @@ def htmlifysearchfinds(listofsearchresultobjects: ResultList, searchobject: Sear
 
 	for ro in listofsearchresultobjects:
 		firstline = ro.lineobjects[0]
-		firstline.accented = unbalancedspancleaner(firstline.accented)
+		firstline.markedup = unbalancedspancleaner(firstline.markedup)
 		if session['debughtml']:
 			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 			           for ln in ro.lineobjects]
 		elif findactivebrackethighlighting(searchobject.session):
 			passage = brackethtmlifysearchfinds(ro.lineobjects, searchobject, linehtmltemplate)
 		else:
-			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)
+			passage = [linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markedup)
 			           for ln in ro.lineobjects]
 		passage = unbalancedspancleaner('\n'.join(passage))
 		resultsashtml.append(ro.getlocusthml())
@@ -284,11 +284,11 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects: ResultList) -> str:
 		else:
 			rowstyle = 'regular'
 		ln = ro.lineobjects[0]
-		ln.accented = unbalancedspancleaner(ln.accented)
+		ln.markedup = unbalancedspancleaner(ln.markedup)
 		if session['debughtml']:
 			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
 		else:
-			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.accented)
+			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markedup)
 
 		citation = ro.citationhtml(ln.avoidminimallocus())
 		resultsashtml.append(tabelrowtemplate.format(rs=rowstyle, cit=citation, h=h))

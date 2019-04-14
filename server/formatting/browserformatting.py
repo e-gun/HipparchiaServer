@@ -48,7 +48,7 @@ def insertparserids(lineobject: dbWorkLine, continuationdict: dict) -> str:
 	:return:
 	"""
 
-	theline = lineobject.accented
+	theline = lineobject.markedup
 	newline = ['']
 
 	brackettypes = findactivebrackethighlighting()
