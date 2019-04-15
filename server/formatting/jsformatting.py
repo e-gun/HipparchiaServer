@@ -352,7 +352,8 @@ def morphologychartjs() -> str:
 			$('#imagearea').empty();
 			$('#searchsummary').html('');
 			$('#displayresults').html('');
-	
+			$('#pollingdata').show();
+			
 			let bcsh = document.getElementById("browserclickscriptholder");
 			if (bcsh.hasChildNodes()) { bcsh.removeChild(bcsh.firstChild); }
 	
@@ -371,7 +372,8 @@ def morphologychartjs() -> str:
 			$('#imagearea').empty();
 			$('#searchsummary').html('');
 			$('#displayresults').html('');
-	
+			$('#pollingdata').show();
+			
 			let bcsh = document.getElementById("browserclickscriptholder");
 			if (bcsh.hasChildNodes()) { bcsh.removeChild(bcsh.firstChild); }
 	
@@ -404,10 +406,6 @@ def morphologychartjs() -> str:
 		
 		function checkactivityviawebsocket(searchid) {
 			$.getJSON('/confirm/'+searchid, function(portnumber) {
-				// s = new WebSocket('ws://localhost:'+portnumber+'/');
-				// NOTE: according to the above, you will not be able to get progress reports if you are not at localhost
-				// that might be something you want to ensure
-				// the following is required for remote progress reports
 				let ip = location.hostname;
 				let s = new WebSocket('ws://'+ip+':'+portnumber+'/');
 				let amready = setInterval(function(){
