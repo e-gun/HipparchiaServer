@@ -290,7 +290,7 @@ def parsevectorsentences(searchobject, lineobjects):
 
 	requiresids = ['semanticvectorquery', 'nearestneighborsquery', 'sentencesimilarity']
 
-	columnmap = {'marked_up_line': 'accented', 'accented_line': 'polytonic', 'stripped_line': 'stripped'}
+	columnmap = {'marked_up_line': 'markedup', 'accented_line': 'polytonic', 'stripped_line': 'stripped'}
 	col = columnmap[so.usecolumn]
 
 	if so.vectorquerytype in requiresids:

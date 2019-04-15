@@ -293,17 +293,20 @@ class CssFormattingObject(object):
 		if not commandlineargs.forcefont:
 			for s in self.substitutes:
 				searchfor = re.compile(s + 'WILLBESUPPLIEDFROMCONFIGFILE')
-				self.css = re.sub(searchfor, hipparchia.config[s], self.css)
+				swap = '"{f}"'.format(f=hipparchia.config[s])
+				self.css = re.sub(searchfor, swap, self.css)
 		else:
 			for s in self.substitutes:
 				searchfor = re.compile(s + 'WILLBESUPPLIEDFROMCONFIGFILE')
-				self.css = re.sub(searchfor, commandlineargs.forcefont, self.css)
+				swap = '"{f}"'.format(f=commandlineargs.forcefont)
+				self.css = re.sub(searchfor, swap, self.css)
 
 	def _pickerswaps(self):
 		commandlineargs = getcommandlineargs()
 		if self.pickerinuse and not commandlineargs.forcefont:
 			searchfor = re.compile('DEFAULTLOCALFONTWILLBESUPPLIEDFROMCONFIGFILE')
-			self.css = re.sub(searchfor, self.pickedfamily, self.css)
+			swap = '"{f}"'.format(f=self.pickedfamily)
+			self.css = re.sub(searchfor, swap, self.css)
 			self._deface()
 
 	def _fontsforstyles(self):

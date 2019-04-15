@@ -174,7 +174,7 @@ class SearchObject(object):
 	def getelapsedtime(self):
 		return str(round(time.time() - self.starttime, 2))
 
-	def fullcorpussearch(self, corpus):
+	def _doingafullcorpussearch(self, corpus) -> bool:
 		# this is a cheat that assumes a static body of texts
 		# sql check is: 'SELECT COUNT(universalid) FROM authors WHERE universalid LIKE 'dp%';'
 		corpora = {
@@ -205,12 +205,12 @@ class SearchObject(object):
 
 		whole = list()
 		for c in corpora:
-			if self.fullcorpussearch(c):
+			if self._doingafullcorpussearch(c):
 				whole.append(corpora[c])
 
 		return whole
 
-	def numberofauthorssearched(self):
+	def numberofauthorssearched(self) -> int:
 		authors = set([a[:6] for a in self.searchlist])
 		return len(authors)
 
@@ -282,7 +282,7 @@ class SearchOutputObject(object):
 		r = ' and '.join(self.reasons)
 		self.htmlsearch = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=r)
 
-	def generatesummary(self):
+	def generatesummary(self) -> str:
 		"""
 
 		generate the summary info.
@@ -346,7 +346,7 @@ class SearchOutputObject(object):
 
 		return summary
 
-	def generateoutput(self):
+	def generateoutput(self) -> dict:
 		"""
 
 		this is the one we really care about:
@@ -384,7 +384,7 @@ class SearchResult(object):
 		self.lineobjects = lineobjects
 		self.worknumber = worknumber
 
-	def getindex(self):
+	def getindex(self) -> int:
 		"""
 
 		fetch the index value of the focus line
@@ -398,7 +398,7 @@ class SearchResult(object):
 
 		return int(self.clickurl.split('/')[-1])
 
-	def getlocusthml(self):
+	def getlocusthml(self) -> str:
 		"""
 		generate the wrapped html for the citation; e.g:
 			<locus>
@@ -414,7 +414,7 @@ class SearchResult(object):
 
 		return locushtml
 
-	def citationhtml(self, citestring):
+	def citationhtml(self, citestring) -> str:
 		"""
 
 		generate the non-wrapped html for the citation; e.g:
@@ -433,4 +433,3 @@ class SearchResult(object):
 		locushtml = citationtemplate.format(hn=self.hitnumber, au=self.author, wk=self.work, url=self.clickurl, cs=citestring)
 
 		return locushtml
-
