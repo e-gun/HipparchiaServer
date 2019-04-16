@@ -894,7 +894,7 @@ class dbWorkLine(object):
 	def hmuspanrewrite(self):
 		"""
 
-		convert <hmu_xxx> ... </hmu_xxx> into
+		convert <hmu_span_xxx> ... </hmu_span_xxx> into
 		<span class="xxx">...</span>
 
 		:return:

@@ -434,8 +434,22 @@ body {
 	padding: 20px;
 	}
 
+.epigraphical_text_after_correction {
+	color: var(--red);
+	font-style: italic;
+	}
+
+.epigraphical_text_inserted_after_erasure {
+	color: var(--red);
+	}
+
 .erasedepigraphicaltext {
 	text-decoration: line-through;
+	}
+
+.expanded_text {
+	letter-spacing: 0.12em;
+    font-weight: bold;
 	}
 
 .explanation {
@@ -518,20 +532,6 @@ body {
 	text-decoration-style: wavy;
 	}
 
-.hmu_epigraphical_text_after_correction {
-	color: var(--red);
-	font-style: italic;
-	}
-
-.hmu_epigraphical_text_inserted_after_erasure {
-	color: var(--red);
-	}
-
-.hmu_expanded_text {
-	letter-spacing: 0.12em;
-    font-weight: bold;
-	}
-
 .hmu_form_altered_by_scribe {
     color: var(--red);
     font-weight: bold; font-style: italic;
@@ -559,13 +559,6 @@ body {
 	padding: 50px;
 	}
 
-.hmu_overline_and_underline {
-	/* Sought »hmu_overline_and_underline«
-	Searched 235,999 texts and found 0 passages (21.62s)*/
-	border-bottom: 1px var(--black);
-	border-top: 1px var(--black);
-	}
-
 .hmu_papyrological_fraction{
 	color: var(--red);
 	font-style: italic;
@@ -575,7 +568,7 @@ body {
     text-decoration: line-through;
     }
 
-.hmu_preferred_epigraphical_text_used {
+.preferred_epigraphical_text_used {
 	/* Sought »hmu_preferred_epigraphical_text_used«
 	Searched 229,374 texts and found 0 passages (3.14s) */
 	}
@@ -595,17 +588,17 @@ body {
 	font-weight: bold;
 	}
 
-.hmu_stacked_text_lower {
+.stacked_text_lower {
 	font-size: 80%;
     vertical-align: sub;
 	}
 
-.hmu_stacked_text_upper {
+.stacked_text_upper {
     vertical-align: super;
 	font-size: 80%;
 	}
 
-.hmu_textual_lemma {
+.textual_lemma {
 	font-style: italic;
 	color: var(--blue);
 	}
@@ -771,10 +764,13 @@ body {
 	border-top: 1px var(--black);
 	}
 
-.overline {
-	text-decoration: overline;
+.overline_and_underline {
+	/* Sought »hmu_overline_and_underline«
+	Searched 235,999 texts and found 0 passages (21.62s)*/
+	border-bottom: 1px var(--black);
+	border-top: 1px var(--black);
 	}
-
+	
 .pickedgenre {
 	}
 
