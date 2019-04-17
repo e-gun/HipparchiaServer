@@ -299,6 +299,5 @@ def paragraphformatting(listoflines: List[dbWorkLine]) -> List[dbWorkLine]:
 		if memory and not paragraphtag:
 			# 'and not' because the first condition already rewrote this line
 			line.markedup = '<{t}>{ln}</{t}>'.format(t=memory, ln=line.markedup)
-		line.hmuspanrewrite()
-		line.hmufontshiftsintospans()
+		line.generatehtmlversion()
 	return listoflines

@@ -104,7 +104,7 @@ def buildtext(work: str, firstline: int, lastline: int, linesevery: int, cursor)
 		editorialcontinuation = {'square': False, 'round': False, 'curly': False, 'angled': False}
 
 		lines = [dblineintolineobject(line) for line in results]
-		lines = paragraphformatting(lines)
+		lines = paragraphformatting(lines)  # polish up the HTML of the lines
 		for thisline in lines:
 			if workobject.isnotliterary() and thisline.index == workobject.starts:
 				# line.index == workobject.starts added as a check because

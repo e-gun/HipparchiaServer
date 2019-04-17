@@ -113,6 +113,23 @@ class dbWorkLine(object):
 			self.markedup = str()
 			self.stripped = str()
 
+	def _tagsalreadyrational(self):
+		try:
+			rational = buildoptions[self.db]['rationalizetags']
+		except KeyError:
+			rational = 'n'
+
+		try:
+			alreadyhtml = buildoptions[self.db]['htmlifydatabase']
+		except KeyError:
+			alreadyhtml = 'y'
+
+		if rational == 'y' and alreadyhtml == 'n':
+			return True
+		else:
+			return False
+
+	def generatehtmlversion(self) -> str:
 		try:
 			zaplunates = session['zaplunates']
 		except RuntimeError:
@@ -130,31 +147,9 @@ class dbWorkLine(object):
 		if hipparchia.config['DISTINCTGREEKANDLATINFONTS']:
 			self.markedup = self.separategreekandlatinfonts()
 
-		# in progress code
-		rationalize = True
-		if rationalize:
-			self.fixhmuirrationaloragnization()
-
-	def _tagsalreadyrational(self):
-		try:
-			rational = buildoptions[self.db]['rationalizetags']
-		except KeyError:
-			rational = 'n'
-
-		try:
-			alreadyhtml = buildoptions[self.db]['htmlifydatabase']
-		except KeyError:
-			alreadyhtml = 'y'
-
-		if rational == 'y' and alreadyhtml == 'n':
-			return True
-		else:
-			return False
-
-	def showhtmlversion(self) -> str:
+		self.fixhmuirrationaloragnization()
 		self.hmuspanrewrite()
-		line = self.markedup
-		return line
+		self.hmufontshiftsintospans()
 
 	def decompose(self) -> tuple:
 		"""
