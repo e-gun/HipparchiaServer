@@ -104,6 +104,7 @@ class dbWorkLine(object):
 		self.url = 'linenumber/{a}/{w}/{i}'.format(a=self.authorid, w=self.workid, i=index)
 		self.hyphenated = hyphenated_words
 		self.paragraphformatting = None
+		self.hasbeencleaned = False
 		if len(self.hyphenated) > 1:
 			self.hashyphenated = True
 		else:
@@ -129,7 +130,7 @@ class dbWorkLine(object):
 		else:
 			return False
 
-	def generatehtmlversion(self) -> str:
+	def generatehtmlversion(self):
 		try:
 			zaplunates = session['zaplunates']
 		except RuntimeError:
@@ -354,6 +355,9 @@ class dbWorkLine(object):
 
 		:return:
 		"""
+
+		if not self.hasbeencleaned:
+			self.generatehtmlversion()
 
 		markup = re.compile(r'(<)(.*?)(>)')
 		left = '<smallcode>&lt;'

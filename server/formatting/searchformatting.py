@@ -63,7 +63,10 @@ def buildresultobjects(hitdict: dict, authordict: dict, workdict: dict, searchob
 		resultlist.append(SearchResult(h+1, name, title, citation, wo.worknumber, hitdict[h].url, [hitdict[h]]))
 
 	if so.context == 0:
-		# no need to find the environs
+		# no need to find the environs; but you should still format the individual lines
+		# cf. call to paragraphformatting() in the '...else...' clause
+		for r in resultlist:
+			_ = [l.generatehtmlversion() for l in r.lineobjects]
 		return resultlist
 	else:
 		# aggregate hits by author table so we can search each table once instead of 100x
