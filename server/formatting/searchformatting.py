@@ -17,7 +17,7 @@ from server.dbsupport.citationfunctions import locusintocitation
 from server.dbsupport.dblinefunctions import bulkenvironsfetcher
 from server.formatting.bibliographicformatting import formatname
 from server.formatting.bracketformatting import brackethtmlifysearchfinds
-from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.searchobjects import SearchObject, SearchResult
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.textsandindices.textandindiceshelperfunctions import paragraphformatting

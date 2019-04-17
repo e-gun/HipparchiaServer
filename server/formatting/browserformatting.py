@@ -12,7 +12,7 @@ from collections import deque
 from flask import session
 
 from server.formatting.wordformatting import forcelunates
-from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 
 

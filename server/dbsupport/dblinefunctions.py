@@ -11,8 +11,7 @@ from collections import deque
 from server.dbsupport.miscdbfunctions import perseusidmismatch, resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.hipparchiaobjects.dbtextobjects import dbWorkLine
-
+from server.hipparchiaobjects.worklineobject import dbWorkLine
 
 # this next should be used by *lots* of functions to make sure that what you ask for fits the dbWorkLine() params
 worklinetemplate = ['wkuniversalid', 'index', 'level_05_value', 'level_04_value', 'level_03_value',

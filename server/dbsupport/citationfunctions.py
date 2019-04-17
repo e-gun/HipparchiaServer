@@ -10,7 +10,8 @@ import re
 
 from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber, worklinetemplate
 from server.formatting.wordformatting import avoidsmallvariants
-from server.hipparchiaobjects.dbtextobjects import dbOpus, dbWorkLine
+from server.hipparchiaobjects.dbtextobjects import dbOpus
+from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.helperobjects import LowandHighInfo
 from server.startup import workdict
 

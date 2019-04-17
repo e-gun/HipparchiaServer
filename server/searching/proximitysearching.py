@@ -13,7 +13,7 @@ from typing import List
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
 from server.formatting.wordformatting import wordlistintoregex
-from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.searchfunctions import dblooknear
 from server.searching.substringsearching import substringsearch

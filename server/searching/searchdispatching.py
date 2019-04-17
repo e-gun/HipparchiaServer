@@ -18,7 +18,7 @@ from server.dbsupport.miscdbfunctions import icanpickleconnections
 from server.dbsupport.redisdbfunctions import buildredissearchlist, loadredisresults
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.searchfunctionobjects import returnsearchfncobject
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch

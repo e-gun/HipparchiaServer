@@ -12,7 +12,7 @@ from typing import List
 
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
 from server.dbsupport.tablefunctions import assignuniquename
-from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.hipparchiaobjects.searchfunctionobjects import returnsearchfncobject
 from server.hipparchiaobjects.searchobjects import SearchObject

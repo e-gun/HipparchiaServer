@@ -12,7 +12,7 @@ from typing import List
 
 from server import hipparchia
 from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
-from server.hipparchiaobjects.dbtextobjects import dbWorkLine
+from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.searchobjects import SearchOutputObject, SearchObject
 from server.hipparchiaobjects.vectorobjects import VectorValues
 from server.semanticvectors.vectorhelpers import vectordefaults, vectorranges, vectorlabels

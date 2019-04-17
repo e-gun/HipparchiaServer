@@ -19,7 +19,8 @@ from server.formatting.bibliographicformatting import formatpublicationinfo
 from server.formatting.browserformatting import insertparserids
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject, BrowserPassageObject
-from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus, dbWorkLine
+from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
+from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
 from server.startup import workdict
 from server.textsandindices.textandindiceshelperfunctions import paragraphformatting, setcontinuationvalue
