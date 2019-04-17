@@ -30,6 +30,29 @@ def findvalidlevelvalues(workobject: dbOpus, partialcitationtuple: tuple, cursor
 	out:
 		(Cicero, Pro Sulla 13)
 
+	note that this is mildly costly as a function call when you convert all of the results to lineobjects
+	OOP is a lot easier; but you pay a price
+
+	this also means that lowering the init costs of dbworklines is a good idea
+
+	--------------------------------------------------------------------------------
+
+	127.0.0.1 - - [16/Apr/2019 21:55:27] "GET /getworksof/lt2349 HTTP/1.1" 200 -
+	--------------------------------------------------------------------------------
+	PATH: '/getstructure/lt2349/005'
+	         208072 function calls in 0.380 seconds
+
+	   Ordered by: internal time, call count
+	   List reduced from 254 to 25 due to restriction <25>
+
+	   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+	    34548    0.099    0.000    0.174    0.000 /Users/erik/hipparchia_venv/HipparchiaServer/server/hipparchiaobjects/worklineobject.py:83(__init__)
+	    69098    0.071    0.000    0.071    0.000 {method 'format' of 'str' objects}
+	        1    0.063    0.063    0.063    0.063 {method 'execute' of 'psycopg2.extensions.cursor' objects}
+	        1    0.061    0.061    0.061    0.061 {method 'fetchall' of 'psycopg2.extensions.cursor' objects}
+	    34548    0.031    0.000    0.205    0.000 /Users/erik/hipparchia_venv/HipparchiaServer/server/dbsupport/dblinefunctions.py:24(dblineintolineobject)
+    ...
+
 	:param workid:
 	:param workstructure:
 	:param partialcitationtuple:

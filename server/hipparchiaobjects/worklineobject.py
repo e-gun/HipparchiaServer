@@ -834,6 +834,7 @@ class dbWorkLine(object):
 		"""
 
 		if self._tagsalreadyrational():
+			# that is, your HipparchiaBuilder settings mood executing this code here and now
 			return
 
 		line = self.markedup
