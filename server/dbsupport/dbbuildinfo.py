@@ -30,7 +30,8 @@ def buildoptionchecking() -> dict:
 	try:
 		dbcursor.execute(q)
 		results = dbcursor.fetchall()
-	except psycopg2.errors.UndefinedColumn:
+	except:
+		# psycopg2.errors.UndefinedColumn; but Windows will tell you that there is no 'errors' module...
 		results = None
 	dbconnection.connectioncleanup()
 
