@@ -194,6 +194,12 @@ js-cookie:
     https://github.com/js-cookie/js-cookie/releases
 
 
+`semanticvectors` are **not installed** by default. If you install them, you will also need 
+to edit `./server/settings/semanticvectorsettings.py` to enable them: `SEMANTICVECTORSENABLED = 'yes'`
+
+Note also that different types of vector search need to be individually enabled within the configuraiton file. 
+The default installation has them all set to `no`. So you will need to edit at least one of them and set it to `yes`.
+
 =====
 
 What you will see when you point a browser at a HipparchiaServer:

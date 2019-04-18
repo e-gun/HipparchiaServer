@@ -22,7 +22,7 @@ from server.hipparchiaobjects.morphologyobjects import dbLemmaObject
 from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
 
-def headwordsearch(seeking, limit, usedictionary, usecolumn) -> List:
+def headwordsearch(seeking: str, limit: str, usedictionary: str, usecolumn: str) -> List[tuple]:
 
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
@@ -77,7 +77,7 @@ def headwordsearch(seeking, limit, usedictionary, usecolumn) -> List:
 	return foundentries
 
 
-def reversedictionarylookup(seeking, usedict, limit=None) -> List:
+def reversedictionarylookup(seeking: str, usedict: str, limit=None) -> List:
 	"""
 
 	find an (approximate) entry in a dictionary
