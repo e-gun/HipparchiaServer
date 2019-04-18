@@ -52,7 +52,7 @@ def brackethtmlifysearchfinds(listoflineobjects: list, searchobject: SearchObjec
 	except IndexError:
 		previous = makeablankline('gr0000w000', -1)
 
-	passage.append(linehtmltemplate.format(id=previous.universalid, lc=previous.locus(), ft=previous.markeditorialinsersions(continuationdict)))
+	passage.append(linehtmltemplate.format(id=previous.getlineurl(), lc=previous.locus(), ft=previous.markeditorialinsersions(continuationdict)))
 
 	while lines:
 		ln = lines.popleft()

@@ -111,7 +111,7 @@ def buildbrowseroutputobject(authorobject: dbAuthor, workobject: dbOpus, locusin
 				# do not insert a line number or special formatting
 				columna = str()
 
-		prefix = lineprefix.format(id=line.universalid)
+		prefix = lineprefix.format(id=line.getlineurl())
 		columnb = prefix+columnb
 
 		notes = '; '.join(line.insetannotations())

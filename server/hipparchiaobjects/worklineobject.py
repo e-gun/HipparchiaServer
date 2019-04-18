@@ -99,20 +99,24 @@ class dbWorkLine(object):
 		self.polytonic = accented_line
 		self.stripped = stripped_line
 		self.annotations = annotations
-		# universalid is used by the vectors
-		self.universalid = 'line/{w}/{i}'.format(w=self.wkuinversalid, i=index)
-		self.url = 'linenumber/{a}/{w}/{i}'.format(a=self.authorid, w=self.workid, i=index)
 		self.hyphenated = hyphenated_words
 		self.paragraphformatting = None
 		self.hasbeencleaned = False
-		if len(self.hyphenated) > 1:
-			self.hashyphenated = True
-		else:
-			self.hashyphenated = False
+		# if len(self.hyphenated) > 1:
+		# 	self.hashyphenated = True
+		# else:
+		# 	self.hashyphenated = False
 
 		if self.markedup is None:
 			self.markedup = str()
+			self.polytonic = str()
 			self.stripped = str()
+
+	def getlineurl(self):
+		return 'line/{w}/{i}'.format(w=self.wkuinversalid, i=self.index)
+
+	def getbrowserurl(self):
+		return 'linenumber/{a}/{w}/{i}'.format(a=self.authorid, w=self.workid, i=self.index)
 
 	def _tagsalreadyrational(self):
 		try:
