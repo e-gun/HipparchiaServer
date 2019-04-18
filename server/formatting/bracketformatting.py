@@ -56,7 +56,7 @@ def brackethtmlifysearchfinds(listoflineobjects: list, searchobject: SearchObjec
 
 	while lines:
 		ln = lines.popleft()
-		passage.append(linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markeditorialinsersions(continuationdict)))
+		passage.append(linehtmltemplate.format(id=ln.getlineurl(), lc=ln.locus(), ft=ln.markeditorialinsersions(continuationdict)))
 		continuationdict = {t: setcontinuationvalue(ln, previous, continuationdict[t], t) for t in brackettypes}
 		previous = ln
 

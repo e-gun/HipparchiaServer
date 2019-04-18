@@ -42,13 +42,26 @@ class dbWorkLine(object):
 	"""
 
 	nonliterarycorpora = ['in', 'dp', 'ch']
-	hmuopenfinder = re.compile(r'<hmu_span_(.*?)>')
-	hmuclosefinder = re.compile(r'</hmu_span_(.*?)>')
+	# re.compile pulled out of the inset functions so that you do not compile 100k times when generating a long text
+	insetvaluefinder = re.compile(r'value=".*?" ')
+	metadatafinder = re.compile(r'<hmu_metadata_notes value="(.*?)" />')
+	andsfinder = re.compile(r'&(\d{1,2})(.*?)(&\d?)')
+	hmuopenfinder = re.compile(r'<(hmu_.*?)>')
+	hmuclosefinder = re.compile(r'</(hmu_.*?)>')
+	hmuspanopenfinder = re.compile(r'<hmu_span_(.*?)>')
+	hmuspanclosefinder = re.compile(r'</hmu_span_(.*?)>')
 	hmushiftfinder = re.compile(r'<hmu_fontshift_(.*?)_(.*?)>')
 	hmushiftcleaner = re.compile(r'</hmu_fontshift_.*?>')
 	hmuformattingopener = re.compile(r'<hmu_(span|fontshift)_(.*?)>')
 	hmuformattingcloser = re.compile(r'</hmu_(span|fontshift)_(.*?)>')
 	bracketclosedfinder = {'square': {'c': re.compile(r'\]')}, 'round': {'c': re.compile(r'\)')}, 'angled': {'c': re.compile(r'⟩')}, 'curly': {'c': re.compile(r'\}')}}
+	bracketfinder = {
+		'square': {'regex': re.compile(r'\[[^\]]{0,}$'),
+		           'exceptions': [re.compile(r'\[(ϲτρ|ἀντ)\. .\.'), re.compile(r'\[ἐπῳδόϲ')]},
+		'round': {'regex': re.compile(r'\([^\)]{0,}$')},
+		'angled': {'regex': re.compile(r'⟨[^⟩]{0,}$')},
+		'curly': {'regex': re.compile(r'\{[^\}]{0,}$')},
+		}
 	editorialbrackets = {
 				'square': {
 					'ocreg': re.compile(r'\[(.*?)(\]|$)'),
@@ -102,11 +115,6 @@ class dbWorkLine(object):
 		self.hyphenated = hyphenated_words
 		self.paragraphformatting = None
 		self.hasbeencleaned = False
-		# if len(self.hyphenated) > 1:
-		# 	self.hashyphenated = True
-		# else:
-		# 	self.hashyphenated = False
-
 		if self.markedup is None:
 			self.markedup = str()
 			self.polytonic = str()
@@ -468,11 +476,11 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		pattern = re.compile(r'<hmu_metadata_notes value="(.*?)" />')
-		ands = re.compile(r'&(\d{1,2})(.*?)(&\d?)')
+		# metadatafinder = re.compile(r'<hmu_metadata_notes value="(.*?)" />')
+		# andsfinder = re.compile(r'&(\d{1,2})(.*?)(&\d?)')
 
-		notes = re.findall(pattern, self.markedup)
-		notes = [re.sub(ands, andsubstitutes, n) for n in notes]
+		notes = re.findall(dbWorkLine.metadatafinder, self.markedup)
+		notes = [re.sub(dbWorkLine.andsfinder, andsubstitutes, n) for n in notes]
 
 		return notes
 
@@ -501,9 +509,9 @@ class dbWorkLine(object):
 		# the brackets in the metadata will throw off the bracketfinder:
 		#   <hmu_metadata_publicationinfo value="BSA 47.1952.187,3 [SEG 12.419]" />
 		# but we do not need that info when (merely) displaying the line: it is extracted elsewhere
-		insetfinder = re.compile(r'value=".*?" ')
+		# insetvaluefinder = re.compile(r'value=".*?" ')
 
-		theline = re.sub(insetfinder, r'value="" ', theline)
+		theline = re.sub(dbWorkLine.insetvaluefinder, r'value="" ', theline)
 
 		for t in editorialcontinuationdict.keys():
 			try:
@@ -616,13 +624,7 @@ class dbWorkLine(object):
 		"""
 
 		if not bracketfinder:
-			bracketfinder = {
-				'square': {'regex': re.compile(r'\[[^\]]{0,}$'),
-				           'exceptions': [re.compile(r'\[(ϲτρ|ἀντ)\. .\.'), re.compile(r'\[ἐπῳδόϲ')]},
-				'round': {'regex': re.compile(r'\([^\)]{0,}$')},
-				'angled': {'regex': re.compile(r'⟨[^⟩]{0,}$')},
-				'curly': {'regex': re.compile(r'\{[^\}]{0,}$')},
-			}
+			bracketfinder = dbWorkLine.bracketfinder
 
 		openandnotclose = bracketfinder[btype]['regex']
 
@@ -669,8 +671,8 @@ class dbWorkLine(object):
 			alreadyconverted = 'n'
 
 		if alreadyconverted == 'n':
-			self.markedup = re.sub(dbWorkLine.hmuopenfinder, r'<span class="\1">', self.markedup)
-			self.markedup = re.sub(dbWorkLine.hmuclosefinder, r'</span>', self.markedup)
+			self.markedup = re.sub(dbWorkLine.hmuspanopenfinder, r'<span class="\1">', self.markedup)
+			self.markedup = re.sub(dbWorkLine.hmuspanclosefinder, r'</span>', self.markedup)
 
 	def hmufontshiftsintospans(self):
 		"""
@@ -745,10 +747,8 @@ class dbWorkLine(object):
 
 		opentag = False
 
-		openfinder = re.compile(r'<(hmu_.*?)>')
-		closefinder = re.compile(r'</(hmu_.*?)>')
-		opened = set(re.findall(openfinder, self.markedup))
-		closed = set(re.findall(closefinder, self.markedup))
+		opened = set(re.findall(dbWorkLine.hmuopenfinder, self.markedup))
+		closed = set(re.findall(dbWorkLine.hmuclosefinder, self.markedup))
 		differ = opened.difference(closed)
 		differ = {d for d in differ if 'standalone' not in d}
 

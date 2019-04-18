@@ -60,7 +60,7 @@ def buildresultobjects(hitdict: dict, authordict: dict, workdict: dict, searchob
 		name = formatname(wo, ao)
 		title = wo.title
 		citation = locusintocitation(wo, lo)
-		resultlist.append(SearchResult(h+1, name, title, citation, wo.worknumber, hitdict[h].url, [hitdict[h]]))
+		resultlist.append(SearchResult(h+1, name, title, citation, wo.worknumber, hitdict[h].getbrowserurl(), [hitdict[h]]))
 
 	if so.context == 0:
 		# no need to find the environs; but you should still format the individual lines
@@ -289,9 +289,9 @@ def nocontexthtmlifysearchfinds(listofsearchresultobjects: ResultList) -> str:
 		ln = ro.lineobjects[0]
 		ln.markedup = unbalancedspancleaner(ln.markedup)
 		if session['debughtml']:
-			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.showlinehtml())
+			h = linehtmltemplate.format(id=ln.getlineurl(), lc=ln.locus(), ft=ln.showlinehtml())
 		else:
-			h = linehtmltemplate.format(id=ln.universalid, lc=ln.locus(), ft=ln.markedup)
+			h = linehtmltemplate.format(id=ln.getlineurl(), lc=ln.locus(), ft=ln.markedup)
 
 		citation = ro.citationhtml(ln.avoidminimallocus())
 		resultsashtml.append(tabelrowtemplate.format(rs=rowstyle, cit=citation, h=h))
