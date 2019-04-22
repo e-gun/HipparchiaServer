@@ -10,11 +10,10 @@ import threading
 import time
 from typing import List
 
-from click import secho
-
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.vectordbfunctions import checkforstoredvector
+from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.whereclauses import configurewhereclausedata
@@ -48,7 +47,7 @@ def startvectorizing():
 
 	while workpile:
 		if len(poll.keys()) != 0:
-			secho('vectorbot pausing to make way for a search', fg='red')
+			consolewarning('vectorbot pausing to make way for a search')
 			time.sleep(30)
 
 		# the typical searchlist is one item: ['lt1414']
@@ -73,19 +72,19 @@ def startvectorizing():
 			else:
 				v = '{i} vectorized ({w} words)'
 			if vectorspace and wordcount > 5000:
-				secho(v.format(i=searchlist[0], w=wordcount, n=len(searchlist)-1), fg='green')
+				consolewarning(v.format(i=searchlist[0], w=wordcount, n=len(searchlist)-1), color='green', isbold=False)
 
 			if vectorspace and len(workpile) % 25 == 0:
-				secho('{n} items remain to vectorize'.format(n=len(workpile)), fg='green')
+				consolewarning('{n} items remain to vectorize'.format(n=len(workpile)), color='green', isbold=False)
 
 			if not vectorspace and len(workpile) % 100 == 0:
-				secho('{n} items remain to vectorize, but vectors are not returned with shorter authors'.format(n=len(workpile)), fg='green')
-				secho('aborting vectorization', fg='green')
+				consolewarning('{n} items remain to vectorize, but vectors are not returned with shorter authors'.format(n=len(workpile)), color='green', isbold=False)
+				consolewarning('aborting vectorization', color='green', isbold=False)
 				workpile = list()
 			del vectorspace
 
 	if hipparchia.config['AUTOVECTORIZE'] and not commandlineargs.disablevectorbot:
-		secho('vectorbot finished', fg='green', bold=True)
+		consolewarning('vectorbot finished', color='green')
 
 	return
 
@@ -104,7 +103,7 @@ def determinevectorworkpile(tempcap=False) -> List[tuple]:
 		# real number is just over 93596456
 		cap = 94000000
 
-	secho('the vectorbot is active and searching for items that need to be vectorized', fg='green', bold=True)
+	consolewarning('the vectorbot is active and searching for items that need to be vectorized', color='green')
 
 	authors = [(authordict[a].universalid, authordict[a].countwordsinworks()) for a in authordict]
 	authorsbylength = sorted(authors, key=lambda x: x[1])

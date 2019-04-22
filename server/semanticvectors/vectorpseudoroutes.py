@@ -228,7 +228,7 @@ def generateabsolutevectorsoutput(listsofwords: list, workssearched: list, searc
 		space = 'related terms in {s} {t}'.format(s=len(listsofwords), t=vtype)
 	else:
 		dist = so.session['proximity']
-		scale = {'W': 'word', 'L': 'line'}
+		scale = {'words': 'word', 'lines': 'line'}
 		if int(dist) > 1:
 			plural = 's'
 		else:

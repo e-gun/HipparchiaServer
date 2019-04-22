@@ -294,7 +294,7 @@ def parsevectorsentences(searchobject, lineobjects):
 	col = columnmap[so.usecolumn]
 
 	if so.vectorquerytype in requiresids:
-		wholetext = ' '.join(['⊏{i}⊐{t}'.format(i=l.universalid, t=getattr(l, col)) for l in lineobjects])
+		wholetext = ' '.join(['⊏{i}⊐{t}'.format(i=l.getlineurl(), t=getattr(l, col)) for l in lineobjects])
 	else:
 		wholetext = ' '.join([getattr(l, col) for l in lineobjects])
 
@@ -345,7 +345,7 @@ def parsevectorsentences(searchobject, lineobjects):
 
 	if so.vectorquerytype in requiresids:
 		# now we mark the source of every sentence by turning it into a tuple: (location, text)
-		previousid = lineobjects[0].universalid
+		previousid = lineobjects[0].getlineurl()
 		idfinder = re.compile(r'⊏(.*?)⊐')
 		taggedmatches = list()
 		for m in matches:

@@ -121,6 +121,7 @@ class dbWorkLine(object):
 			self.stripped = str()
 
 	def getlineurl(self):
+		# .getlineur() is used by the vectors
 		return 'line/{w}/{i}'.format(w=self.wkuinversalid, i=self.index)
 
 	def getbrowserurl(self):

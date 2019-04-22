@@ -11,9 +11,9 @@ import json
 import re
 
 import websockets
-from click import secho
 
 from server import hipparchia
+from server.formatting.miscformatting import consolewarning
 from server.formatting.miscformatting import validatepollid
 from server.startup import poll
 
@@ -113,12 +113,12 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	asyncio.set_event_loop(loop)
 
 	wspolling = websockets.serve(wscheckpoll, theip, port=theport, loop=loop)
-	secho('opening websocket at {p}'.format(p=theport), fg='cyan')
+	consolewarning('opening websocket at {p}'.format(p=theport), color='cyan', isbold=False)
 
 	try:
 		loop.run_until_complete(wspolling)
 	except OSError:
-		secho('websocket could not be launched: cannot get access to {i}:{p}'.format(p=theport, i=theip), fg='red', bold=True)
+		consolewarning('websocket could not be launched: cannot get access to {i}:{p}'.format(p=theport, i=theip), color='red')
 		pass
 
 	try:
@@ -128,5 +128,5 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 		loop.close()
 
 	# actually this function never returns
-	print('wow: startwspolling() returned')
+	consolewarning('wow: startwspolling() returned')
 	return
