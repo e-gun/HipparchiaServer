@@ -13,6 +13,7 @@ import psycopg2
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import bulklinegrabber
+from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.proximitysearching import grableadingandlagging
@@ -26,7 +27,7 @@ def createvectorstable():
 	:return:
 	"""
 
-	print('resetting the stored vectors table')
+	consolewarning('resetting the stored vectors table', color='green')
 
 	dbconnection = ConnectionObject(ctype='rw')
 	dbcursor = dbconnection.cursor()
@@ -72,7 +73,7 @@ def createstoredimagestable():
 	:return:
 	"""
 
-	print('resetting the stored images table')
+	consolewarning('resetting the stored images table', color='green')
 
 	dbconnection = ConnectionObject(ctype='rw')
 	dbcursor = dbconnection.cursor()

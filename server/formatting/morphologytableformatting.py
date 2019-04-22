@@ -8,8 +8,9 @@
 
 import re
 
-from click import secho
 from flask import session
+
+from server.formatting.miscformatting import consolewarning
 
 
 def findmygreektenses(mood: str, voice: str) -> dict:
@@ -228,7 +229,7 @@ def verbtabletemplate(mood: str, voice: str, dialect='attic', duals=True, lang='
 			# hipparchiaDB=# select * from greek_morphology where possible_dictionary_forms like '%ἀπαλλάϲϲω%' and possible_dictionary_forms like '%2nd%' and possible_dictionary_forms like '%imperat%' and possible_dictionary_forms like '%attic%';
 			# you will see: <possibility_4>ἀπαλλάϲϲω<xref_value>11723310</xref_value><xref_kind>9</xref_kind><transl>set free</transl><analysis>aor imperat 2nd dual</analysis></possibility_4>
 			# contrast: <possibility_6>ἀπαλλάϲϲω<xref_value>11723310</xref_value><xref_kind>9</xref_kind><transl>set free</transl><analysis>aor ind pass 2nd dual (homeric ionic)</analysis></possibility_6>
-			secho('>>> invalid parser data: cannot build a table where mood = "{m}" and voice = "{v}" <<<'.format(m=mood, v=voice), bold=True, fg='yellow')
+			consolewarning('invalid parser data: cannot build a table where mood = "{m}" and voice = "{v}"'.format(m=mood, v=voice))
 			mytenses = dict()
 
 	if lang == 'latin':

@@ -9,6 +9,7 @@
 import re
 
 from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber, worklinetemplate
+from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.dbtextobjects import dbOpus
 from server.hipparchiaobjects.worklineobject import dbWorkLine
@@ -222,7 +223,7 @@ def finddblinefromlocus(workobject: dbOpus, citationtuple: tuple, dbcursor) -> i
 		wklvs = workobject.availablelevels
 
 	if wklvs != len(citationtuple):
-		print('mismatch between shape of work and browsing request: impossible citation of'+workid+'.')
+		consolewarning('mismatch between shape of work and browsing request: impossible citation of {w}.'.format(w=workid))
 		print(str(wklvs), ' levels vs', list(citationtuple))
 		print('safe to ignore if you requested the first line of a work')
 

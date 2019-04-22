@@ -58,3 +58,17 @@ def validatepollid(searchid, maxchars=36) -> str:
 		pollid = 'this_poll_will_never_be_found'
 
 	return pollid
+
+
+def consolewarning(message: str, color='yellow', isbold=True):
+	"""
+
+	send color text output because something bad happened
+
+	:param message:
+	:return:
+	"""
+
+	secho('>>> {msg} <<<'.format(msg=message), bold=isbold, fg=color)
+
+	return

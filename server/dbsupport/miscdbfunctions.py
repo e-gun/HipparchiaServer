@@ -11,6 +11,7 @@ from os import name as osname
 
 import psycopg2
 
+from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
@@ -198,8 +199,8 @@ def perseusidmismatch(badworkdbnumber: str, cursor) -> str:
 			except IndexError:
 				newworkid = returnfirstwork(badworkdbnumber[0:6], cursor)
 		except psycopg2.DatabaseError as e:
-			print('perseusidmismatch() - could not execute', query)
-			print('Error:', e)
+			consolewarning('perseusidmismatch() - could not execute', query)
+			consolewarning('Error:', e)
 			newworkid = returnfirstwork(badworkdbnumber[0:6], cursor)
 
 	return newworkid
@@ -344,8 +345,8 @@ def icanpickleconnections() -> bool:
 		j.join()
 	except TypeError:
 		# can't pickle psycopg2.extensions.connection objects
-		print('to avoid seeing "EOFError: Ran out of input" messages edit "settings/networksettings.py" to read:')
-		print("\tICANPICKLECONNECTIONS = 'n'\n")
+		consolewarning('to avoid seeing "EOFError: Ran out of input" messages edit "settings/networksettings.py" to read:')
+		consolewarning("\tICANPICKLECONNECTIONS = 'n'\n")
 		result = False
 	c[0].connectioncleanup()
 

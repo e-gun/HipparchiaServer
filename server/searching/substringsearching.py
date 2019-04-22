@@ -5,6 +5,7 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
 import multiprocessing
 import re
 
@@ -15,6 +16,7 @@ from typing import Generator
 from server.dbsupport.dblinefunctions import worklinetemplate
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
+from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.searching.searchfunctions import buildbetweenwhereextension
 
@@ -80,7 +82,7 @@ def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, 
 		whr = 'WHERE {xtn} ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax, xtn=whereextensions)
 	else:
 		# should never see this
-		print('error in substringsearch(): unknown whereclause type', r['type'])
+		consolewarning('error in substringsearch(): unknown whereclause type', r['type'])
 		whr = 'WHERE ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax)
 
 	qtemplate = 'SELECT {wtmpl} FROM {db} {whr} {lm}'
@@ -94,16 +96,16 @@ def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, 
 		found = resultiterator(cursor)
 	except psycopg2.DataError:
 		# e.g., invalid regular expression: parentheses () not balanced
-		print('DataError; cannot search for »{d}«\n\tcheck for unbalanced parentheses and/or bad regex'.format(d=d[0]))
+		consolewarning('DataError; cannot search for »{d}«\n\tcheck for unbalanced parentheses and/or bad regex'.format(d=d[0]), color='red')
 	except psycopg2.InternalError:
 		# current transaction is aborted, commands ignored until end of transaction block
-		print('psycopg2.InternalError; did not execute', q, d)
+		consolewarning('psycopg2.InternalError; did not execute query="{q}" and data="{d}'.format(q=q, d=d), color='red')
 	except psycopg2.DatabaseError:
 		# psycopg2.DatabaseError: error with status PGRES_TUPLES_OK and no message from the libpq
 		# added to track PooledConnection threading issues
 		# will see: 'DatabaseError for <cursor object at 0x136bab520; closed: 0> @ Process-4'
-		print('DatabaseError for {c} @ {p}'.format(c=cursor, p=multiprocessing.current_process().name))
-		print('\tq, d', q, d)
+		consolewarning('DatabaseError for {c} @ {p}'.format(c=cursor, p=multiprocessing.current_process().name), color='red')
+		consolewarning('\tq, d', q, d)
 
 	return found
 

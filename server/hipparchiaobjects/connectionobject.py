@@ -12,6 +12,7 @@ import sys
 import threading
 
 from server import hipparchia
+from server.formatting.miscformatting import consolewarning
 from server.threading.mpthreadcount import setthreadcount
 from server.dbsupport.tablefunctions import assignuniquename
 from server.commandlineoptions import getcommandlineargs
@@ -134,9 +135,9 @@ class GenericConnectionObject(object):
 			except psycopg2.DatabaseError:
 				# psycopg2.DatabaseError: error with status PGRES_TUPLES_OK and no message from the libpq
 				# will return often-but-not-always '2' as the status: i.e., STATUS_IN_TRANSACTION
-				print(self.uniquename, 'failed its commit()')
+				consolewarning('{c} failed its commit()'.format(c=self.uniquename), color='red')
 				status = self.dbconnection.get_transaction_status()
-				print('\tConnectionObject {me} status is {s}'.format(me=self.uniquename, s=status))
+				consolewarning('\tConnectionObject {me} status is {s}'.format(me=self.uniquename, s=status))
 		return
 
 	def connectioncleanup(self):
@@ -202,13 +203,13 @@ class PooledConnectionObject(GenericConnectionObject):
 				badpass = 'password authentication failed'
 				if noconnection in thefailure:
 					e = GenericConnectionObject.noserverproblem.format(h=GenericConnectionObject.dbhost, p=GenericConnectionObject.dbport)
-					print(GenericConnectionObject.postgresproblem.format(e=e))
+					consolewarning(GenericConnectionObject.postgresproblem.format(e=e))
 					if sys.platform == 'darwin':
-						print(GenericConnectionObject.darwinproblem)
+						consolewarning(GenericConnectionObject.darwinproblem)
 
 				if badpass in thefailure:
 					e = GenericConnectionObject.badpassproblem.format(h=GenericConnectionObject.dbhost, p=GenericConnectionObject.dbport)
-					print(GenericConnectionObject.postgresproblem.format(e=e))
+					consolewarning(GenericConnectionObject.postgresproblem.format(e=e))
 
 				sys.exit(0)
 
@@ -242,7 +243,7 @@ class PooledConnectionObject(GenericConnectionObject):
 			except psycopg2.pool.PoolError:
 				# the pool is exhausted: try a basic connection instead
 				# but in the long run should probably make a bigger pool/debug something
-				print('PoolError: fallback to SimpleConnectionObject()')
+				consolewarning('PoolError: fallback to SimpleConnectionObject()')
 				self.simpleconnectionfallback()
 
 		if self.autocommit == 'autocommit':
@@ -271,7 +272,7 @@ class PooledConnectionObject(GenericConnectionObject):
 		try:
 			self.dbconnection.set_session(readonly=False)
 		except psycopg2.OperationalError:
-			print('change your connection type to "simple" in "networksettings.py"; pooled connections are failing')
+			consolewarning('change your connection type to "simple" in "networksettings.py"; pooled connections are failing', color='red')
 		self.setdefaultisolation()
 		self.pool.putconn(self.dbconnection, key=self.uniquename)
 		# print('connection returned to pool:', self.uniquename)
