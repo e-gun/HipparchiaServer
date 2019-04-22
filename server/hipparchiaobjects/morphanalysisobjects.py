@@ -163,13 +163,13 @@ class BaseFormMorphology(object):
 
 	def buildhtmlverbtablerows(self, thesession: dict) -> List[str]:
 		keyedwcounts = self._generatekeyedwordcounts()
-		cff = ConjugatedFormFunctions(self.analyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
+		cff = ConjugatedFormFunctions(self.headword, self.analyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
 		returnarray = cff.buildhtmlverbtablerows(thesession)
 		return returnarray
 
 	def buildhtmldeclinedtablerows(self) -> List[str]:
 		keyedwcounts = self._generatekeyedwordcounts()
-		dff = DeclinedFormFunctions(self.analyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
+		dff = DeclinedFormFunctions(self.headword, self.analyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
 		returnarray = dff.buildhtmldeclinedtablerows()
 		return returnarray
 
@@ -634,7 +634,8 @@ class DeclinedFormFunctions(object):
 	loaded into a BaseFormMorphology() object on an as needed basis
 
 	"""
-	def __init__(self, analyses: List[MorphAnalysis], language: str, keyedwordcounts: dict, knowndialects: list, showalldialects: bool, collapseattic: bool):
+	def __init__(self, headword: str, analyses: List[MorphAnalysis], language: str, keyedwordcounts: dict, knowndialects: list, showalldialects: bool, collapseattic: bool):
+		self.headword = headword
 		self.analyses = analyses
 		self.language = language
 		self.keyedwordcounts = keyedwordcounts
@@ -743,7 +744,8 @@ class ConjugatedFormFunctions(object):
 	loaded into a BaseFormMorphology() object on an as needed basis
 
 	"""
-	def __init__(self, analyses: List[MorphAnalysis], language: str, keyedwordcounts: dict, knowndialects: list, showalldialects: bool, collapseattic: bool):
+	def __init__(self, headword: str, analyses: List[MorphAnalysis], language: str, keyedwordcounts: dict, knowndialects: list, showalldialects: bool, collapseattic: bool):
+		self.headword = headword
 		self.analyses = analyses
 		self.language = language
 		self.keyedwordcounts = keyedwordcounts

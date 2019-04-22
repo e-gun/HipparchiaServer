@@ -342,7 +342,7 @@ def unbalancedspancleaner(html: str) -> str:
 		html = supplement + html
 
 	if opened > closed:
-		for i in range(0,opened-closed):
+		for i in range(0, opened - closed):
 			supplement += '</span>'
 		html = html + supplement
 

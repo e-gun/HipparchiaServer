@@ -36,6 +36,7 @@
 	--dkbabyblue: hsla(237, 43%, 57%, 1);
 	--dkgreen: hsla(120, 80%, 20%, 1);
 	--dkgrey: hsla(0, 0%, 33%, 1);
+	--dkred: hsl(0, 34%, 23%);
 	--dkteal: hsla(203, 22%, 26%, 1);
 	--green: hsla(120, 100%, 27%, 1);
 	--huedgrey: hsla(240, 6%, 49%, 1);
@@ -843,6 +844,7 @@ body {
 
 .serviusformatting {
 	font-style: italic;
+	color: var(--copper);
 	}
 
 .sidenavigation {
@@ -1262,7 +1264,7 @@ hmutitle {
 
 hmu_serviusformatting {
 	font-style: italic;
-	color: var(--dkteal);
+	color: var(--dkgreen);
 	}
 
 hr.styled {
