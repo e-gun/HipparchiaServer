@@ -10,6 +10,8 @@ from os import cpu_count
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
+from server.formatting.miscformatting import consolewarning
+
 
 def setthreadcount(startup=False) -> int:
 	"""
@@ -34,6 +36,6 @@ def setthreadcount(startup=False) -> int:
 		workers = 1
 
 	if workers > cpu_count() and startup:
-		print('\nWARNING: threadcount exceeds total available number of threads: {a} vs {b}'.format(a=workers, b=cpu_count()))
-		print('[consider editing "WORKERS" and/or "AUTOCONFIGWORKERS" in "HipparchiaServe/server/settings/performancesettings.py"]')
+		consolewarning('\nWARNING: thread count exceeds total available number of threads: {a} > {b}'.format(a=workers, b=cpu_count()))
+		consolewarning('consider editing "WORKERS" and/or "AUTOCONFIGWORKERS" in "HipparchiaServe/server/settings/performancesettings.py"')
 	return workers

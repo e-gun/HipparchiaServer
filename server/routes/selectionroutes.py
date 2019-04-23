@@ -12,6 +12,7 @@ import re
 from flask import request, session
 
 from server import hipparchia
+from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import depunct
 from server.listsandsession.genericlistfunctions import dropdupes, tidyuplist
 from server.listsandsession.sessionfunctions import modifysessionvariable, rationalizeselections, returnactivelist, \
@@ -179,10 +180,10 @@ def clearselections(category, index=-1):
 		try:
 			session[category].pop(index)
 		except IndexError:
-			print('\tclearselections() IndexError when popping {c}[{i}]'.format(c=category, i=str(index)))
+			consolewarning('\tclearselections() IndexError when popping {c}[{i}]'.format(c=category, i=str(index)), color='red')
 			pass
 		except KeyError:
-			print('\tclearselections() KeyError when popping {c}[{i}]'.format(c=category, i=str(index)))
+			consolewarning('\tclearselections() KeyError when popping {c}[{i}]'.format(c=category, i=str(index)), color='red')
 			pass
 
 		session.modified = True

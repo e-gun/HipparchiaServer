@@ -309,7 +309,7 @@ class SimpleConnectionObject(GenericConnectionObject):
 												database=GenericConnectionObject.dbname,
 												password=p)
 		except psycopg2.OperationalError:
-			print(GenericConnectionObject.postgresproblem)
+			consolewarning(GenericConnectionObject.postgresproblem, color='red')
 			sys.exit(0)
 
 		if self.autocommit == 'autocommit':
@@ -353,10 +353,10 @@ if not commandlineargs.simpleconnection or commandlineargs.pooledconnection:
 			pass
 else:
 	if commandlineargs.simpleconnection:
-		print('simple DB connections')
+		consolewarning('simple DB connections')
 		class ConnectionObject(SimpleConnectionObject):
 			pass
 	if commandlineargs.pooledconnection:
-		print('pooled DB connections')
+		consolewarning('pooled DB connections')
 		class ConnectionObject(PooledConnectionObject):
 			pass

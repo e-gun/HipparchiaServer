@@ -54,21 +54,40 @@ def validatepollid(searchid, maxchars=36) -> str:
 	pollid = re.sub(r'[^a-f0-9-]', '', searchid[:maxchars])
 
 	if pollid != searchid:
-		print('this_poll_will_never_be_found: searchid ≠ pollid ({a} ≠ {b})'.format(a=searchid, b=pollid))
+		consolewarning('this_poll_will_never_be_found: searchid ≠ pollid ({a} ≠ {b})'.format(a=searchid, b=pollid), color='red')
 		pollid = 'this_poll_will_never_be_found'
 
 	return pollid
 
 
-def consolewarning(message: str, color='yellow', isbold=True):
+def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True):
 	"""
 
-	send color text output because something bad happened
+	send color text output because something interesting happened
 
 	:param message:
 	:return:
 	"""
 
-	secho('>>> {msg} <<<'.format(msg=message), bold=isbold, fg=color)
+	template = '{head} {msg} {tail}'
+
+	colormap = {
+		'red': ('!!!', '!!!'),
+		'yellow': ('>>>', ''),
+		'green': ('+++', ''),
+		'cyan': ('===', ''),
+	}
+
+	try:
+		head = colormap[color][0]
+		tail = colormap[color][1]
+	except KeyError:
+		colorcoded = False
+
+	if not colorcoded:
+		head = '>>>'
+		tail = ''
+
+	secho(template.format(head=head, tail=tail, msg=message), bold=isbold, fg=color)
 
 	return

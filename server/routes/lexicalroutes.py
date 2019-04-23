@@ -18,6 +18,7 @@ from server.dbsupport.lexicaldbfunctions import findentrybyid, headwordsearch, l
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs, morphologychartjs
 from server.formatting.lexicaformatting import getobservedwordprevalencedata
+from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation, depunct, \
 	removegravity, stripaccents, tidyupterm
 from server.formatting.wordformatting import setdictionarylanguage
@@ -424,7 +425,7 @@ def knownforms(lexicalid, language, xrefid, headword):
 	try:
 		bfo = BaseFormMorphology(headword, xrefid, language, lexicalid, session)
 	except:
-		print('could not initialize BaseFormMorphology() object')
+		consolewarning('could not initialize BaseFormMorphology() object')
 		return 'could not initialize BaseFormMorphology() object'
 
 	# if this is active a click on the word will do a lemmatized lookup of it

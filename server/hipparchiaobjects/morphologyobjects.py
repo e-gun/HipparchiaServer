@@ -5,9 +5,11 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
 import re
 
 from server import hipparchia
+from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import gkattemptelision, latattemptelision, minimumgreek
 
 
@@ -44,20 +46,20 @@ class MorphPossibilityObject(object):
 		xreflist = re.findall(xreffinder, self.transandanal)
 		return xreflist
 
-	def amgreek(self):
+	def amgreek(self) -> bool:
 		if re.search(minimumgreek, self.entry):
 			return True
 		else:
 			return False
 
-	def amlatin(self):
+	def amlatin(self) -> bool:
 		minimumlatin = re.compile(r'[a-z]')
 		if re.search(minimumlatin, self.entry):
 			return True
 		else:
 			return False
 
-	def language(self):
+	def language(self) -> str:
 		if self.amgreek():
 			return 'greek'
 		if self.amlatin():
@@ -76,10 +78,10 @@ class MorphPossibilityObject(object):
 			return self._getlatinbaseform()
 		else:
 			if warn:
-				print('MorphPossibilityObject failed to determine its own language', self.entry)
+				consolewarning('MorphPossibilityObject failed to determine its own language: {e}'.format(e=self.entry))
 			return None
 
-	def _getgreekbaseform(self):
+	def _getgreekbaseform(self) -> str:
 		"""
 		the tricky bit:
 
@@ -103,7 +105,7 @@ class MorphPossibilityObject(object):
 
 		# need an aspiration check; incl εκ -⟩ εξ
 
-		baseform = ''
+		baseform = str()
 		segments = self.entry.split(', ')
 
 		if len(segments) == 1 and '-' not in segments[-1]:
@@ -127,11 +129,11 @@ class MorphPossibilityObject(object):
 					baseform = segments[i] + '-' + baseform
 				except IndexError:
 					if warn:
-						print('abandoning efforts to parse', self.entry)
+						consolewarning('abandoning efforts to parse {e}'.format(e=self.entry))
 					baseform = segments[-1]
 		else:
 			if warn:
-				print('MorphPossibilityObject.getbaseform() is confused', self.entry, segments)
+				consolewarning('MorphPossibilityObject.getbaseform() is confused: {e} - {s}'.format(e=self.entry, s=segments))
 
 		# not sure this ever happens with the greek data
 		baseform = re.sub(r'^\s', '', baseform)
