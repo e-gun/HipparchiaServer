@@ -379,6 +379,8 @@ def buildsearchobject(searchid: str, therequest: request, thesession: session) -
 	:return:
 	"""
 
+	whitespace = ' '
+
 	if not searchid:
 		searchid = str(int(time.time()))
 
@@ -435,6 +437,12 @@ def buildsearchobject(searchid: str, therequest: request, thesession: session) -
 		proximate = proximate.upper()
 		proximate = replacegreekbetacode(proximate)
 		proximate = proximate.lower()
+
+	if seeking == whitespace:
+		seeking = str()
+
+	if proximate == whitespace:
+		proximate = str()
 
 	so = SearchObject(searchid, seeking, proximate, lemma, proximatelemma, frozensession)
 

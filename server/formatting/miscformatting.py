@@ -60,7 +60,7 @@ def validatepollid(searchid, maxchars=36) -> str:
 	return pollid
 
 
-def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True):
+def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True, baremessage=False):
 	"""
 
 	send color text output because something interesting happened
@@ -69,13 +69,13 @@ def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True):
 	:return:
 	"""
 
-	template = '{head} {msg} {tail}'
+	template = '{head}{msg}{tail}'
 
 	colormap = {
-		'red': ('!!!', '!!!'),
-		'yellow': ('>>>', ''),
-		'green': ('+++', ''),
-		'cyan': ('===', ''),
+		'red': ('!!! ', ' !!!'),
+		'yellow': ('>>> ', ''),
+		'green': ('+++ ', ''),
+		'cyan': ('=== ', ''),
 	}
 
 	try:
@@ -85,8 +85,12 @@ def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True):
 		colorcoded = False
 
 	if not colorcoded:
-		head = '>>>'
-		tail = ''
+		head = '>>> '
+		tail = str()
+
+	if baremessage:
+		head = str()
+		tail = str()
 
 	secho(template.format(head=head, tail=tail, msg=message), bold=isbold, fg=color)
 

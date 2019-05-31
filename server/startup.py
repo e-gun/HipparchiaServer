@@ -17,10 +17,12 @@ from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.bulkdboperations import loadallauthorsasobjects, loadallworksasobjects, \
 	loadallworksintoallauthors, loadlemmataasobjects
 from server.dbsupport.miscdbfunctions import probefordatabases
+from server.formatting.miscformatting import consolewarning
 from server.listsandsession.genericlistfunctions import dictitemstartswith, findspecificdate
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
 	buildworkgenresdict, buildworkprovenancedict
 from server.threading.mpthreadcount import setthreadcount
+
 
 if current_process().name == 'MainProcess':
 	commandlineargs = getcommandlineargs()
@@ -53,18 +55,18 @@ if current_process().name == 'MainProcess':
 	available = probefordatabases()
 	warning = sum([available[x] for x in available])
 	if warning == 0:
-		print('WARNING: support data is missing; some functions will be disabled')
+		consolewarning('WARNING: support data is missing; some functions will be disabled')
 		for key in available:
 			if not available[key]:
-				print('\t{d} is unavailable'.format(d=key))
+				consolewarning('\t{d} is unavailable'.format(d=key))
 		print()
 	del warning
 	del available
 
 	if setthreadcount(startup=True) == 1:
-		print('queries will be dispatched to 1 thread')
+		consolewarning('queries will be dispatched to 1 thread', baremessage=True)
 	else:
-		print('queries will be dispatched to {t} threads'.format(t=setthreadcount()))
+		consolewarning('queries will be dispatched to {t} threads'.format(t=setthreadcount()), baremessage=True)
 
 	"""
 	this stuff gets loaded up front so you have access to all author and work info all the time
@@ -90,7 +92,7 @@ if current_process().name == 'MainProcess':
 	authordict = loadallworksintoallauthors(authordict, workdict)
 
 	if commandlineargs.skiplemma:
-		print('lemmatadict disabled for debugging run')
+		consolewarning('lemmatadict disabled for debugging run', baremessage=True)
 		lemmatadict = dict()
 	else:
 		lemmatadict = loadlemmataasobjects()
@@ -148,16 +150,16 @@ if current_process().name == 'MainProcess':
 	#   not see all of the possibilities
 
 	if commandlineargs.calculatewordweights or commandlineargs.collapsedgenreweights:
-		print('calculating word weights...')
+		consolewarning('calculating word weights... [insert the results into into "dbHeadwordObject()"]', baremessage=True)
 		if commandlineargs.collapsedgenreweights:
 			c = True
 		else:
 			c = False
-		print('greek wordweights', findtemporalweights('G'))
-		print('corpus weights', findccorporaweights())
+		consolewarning('[a] greekworderaweights = {w}'.format(w=findtemporalweights('G')), color='cyan')
+		consolewarning('[b] corporaweights = {w}'.format(w=findccorporaweights()), color='cyan')
 
-		print('greek genre weights:', workobjectgeneraweights('G', c, workdict))
-		print('latin genre weights:', workobjectgeneraweights('L', c, workdict))
+		consolewarning('[c] greekgenreweights = {w}'.format(w=workobjectgeneraweights('G', c, workdict)), color='cyan')
+		consolewarning('[d] latingenreweights = {w}'.format(w=workobjectgeneraweights('L', c, workdict)), color='cyan')
 
 	# empty dict in which to store progress polls
 	# note that more than one poll can be running

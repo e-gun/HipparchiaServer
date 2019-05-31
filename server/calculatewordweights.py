@@ -38,16 +38,17 @@ def findccorporaweights() -> dict:
 	figure out how many more words are 'gr' than 'lt', etc.
 	you only need to run this once every major recalibration of the data
 	the results are something like:
-		corpus weights {'gr': 1.0, 'lt': 11.371559943504066, 'in': 28.130258550554572, 'dp': 27.492143340147255, 'ch': 129.8977636244065}
+		corpus weights {'gr': 1.0, 'lt': 10.26, 'in': 28.06, 'dp': 26.85, 'ch': 120.4}
 
-	counts {'gr': 98970519, 'lt': 9435706, 'in': 3540624, 'dp': 3606545, 'ch': 808509}
 
 	:return:
 	"""
 
 	corpora = ['gr', 'lt', 'in', 'dp', 'ch']
 
-	counts = {corpus: findcorpusweight(corpus+'_count', 'B') for corpus in corpora}
+	# counts = {corpus: findcorpusweight(corpus+'_count', 'B') for corpus in corpora}
+	# print('counts',counts)
+	counts = {corpus: findcorpusweightviawordcounts(corpus) for corpus in corpora}
 
 	maximum = max(counts.values())
 
@@ -386,7 +387,7 @@ def findgenreweightfromworkobject(genre: str, language: str, workdict: dict) -> 
 	:return:
 	"""
 
-	wordlist = [workdict[w].wordcount for w in workdict if workdict[w].workgenre == genre and (workdict[w].language==language or workdict[w].language==None)]
+	wordlist = [workdict[w].wordcount for w in workdict if workdict[w].workgenre == genre and (workdict[w].language == language or not workdict[w].language)]
 	totalwords = sum(wordlist)
 
 	# w = "{:,}".format(totalwords)
@@ -419,6 +420,26 @@ def findcorpusweight(corpus: str, language: str) -> int:
 	the question is whether or not this distortion is uniform between genres.
 
 	this function is less accurate than if you use "work.wordcount" & "work.workgenre"
+
+	BAD RESULTS FOR WHOLE CORPORA: USE findcorpusweightviawordcounts() INSTEAD
+	something not good in the builder...
+
+		counts {'gr': 100216900, 'lt': 9767024, 'in': 3571271, 'dp': 3733156, 'ch': 832398} [EG]
+		counts {'gr': 100217532, 'lt': 9767021, 'in': 3571247, 'dp': 3733178, 'ch': 829512} [Mini]
+		counts {'gr': 100217307, 'lt': 9767019, 'in': 3571216, 'dp': 3733212, 'ch': 829518} [FreeBSD]
+
+		100217307 / 100216900 = 1.0000040611912762
+		829518 / 832398 = 0.996540116626902
+		9767019 / 9767024 = 0.9999994880733374
+
+	BUT, the genre counts match:
+
+		Hist.	7,622,971
+		Hist.	7,622,971
+
+	generatecopystream()?
+
+	monothreadedindexer()?
 
 	:param corpus:
 	:param language:
@@ -461,6 +482,45 @@ def findcorpusweight(corpus: str, language: str) -> int:
 	# print('{c}\t{n}'.format(c=corpus, n=w))
 
 	return thesum
+
+
+def findcorpusweightviawordcounts(corpus: str) -> int:
+	"""
+
+	hipparchiaDB=> select * from wordcounts_θ where entry_name='θυγατριδοῦϲ';
+	 entry_name  | total_count | gr_count | lt_count | dp_count | in_count | ch_count
+	-------------+-------------+----------+----------+----------+----------+----------
+	 θυγατριδοῦϲ |         128 |      120 |        0 |        3 |        5 |        0
+	(1 row)
+
+	:param corpus:
+	:param language:
+	:return:
+	"""
+	letters = {'G': 'αβψδεφγηιξκλμνοπρϲτυωχθζ',
+	           'L': 'abcdefghijklmnopqrstuvxyz',
+	           'A': '0abcdefghijklmnopqrstuvwxyzαβψδεφγηιξκλμνοπρϲτυωχθζ'}
+
+	dbconnection = ConnectionObject('autocommit')
+	cursor = dbconnection.cursor()
+
+	myletters = letters['A']
+
+	corpora = {'gr': 'gr_count', 'lt': 'lt_count', 'dp': 'dp_count', 'in': 'in_count', 'ch': 'ch_count'}
+	c = corpora[corpus]
+
+	mycount = 0
+	for l in myletters:
+		q = 'SELECT SUM({c}) FROM wordcounts_{l}'.format(c=c, l=l)
+		cursor.execute(q)
+		thesum = cursor.fetchall()
+		try:
+			mycount += thesum[0][0]
+		except TypeError:
+			# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
+			pass
+	return mycount
+
 
 """
 greek wordweights {'early': 7.75, 'middle': 1.92, 'late': 1}
