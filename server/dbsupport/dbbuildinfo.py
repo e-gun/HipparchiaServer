@@ -72,8 +72,15 @@ def versionchecking(activedbs: list, expectedsqltemplateversion: str) -> str:
 	}
 
 	q = 'SELECT corpusname, templateversion, corpusbuilddate FROM builderversion'
-	cursor.execute(q)
-	results = cursor.fetchall()
+
+	try:
+		cursor.execute(q)
+		results = cursor.fetchall()
+	except:
+		# UndefinedTable, presumably: 'relation "builderversion" does not exist'
+		# the only way to see this is to run the Server without a build inside the DB?
+		dbconnection.connectioncleanup()
+		return str()
 
 	corpora = {r[0]: (r[1], r[2]) for r in results}
 
