@@ -297,7 +297,7 @@ def vectorhtmlforoptionsbar() -> str:
 	:return:
 	"""
 
-	if hipparchia.config['SEMANTICVECTORSENABLED'] != 'yes':
+	if not hipparchia.config['SEMANTICVECTORSENABLED']:
 		emptyframe = """
 		<div id="vectoroptionsetter"></div>
 		"""
