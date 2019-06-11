@@ -47,28 +47,28 @@ class SharedMemoryProgressPoll(object):
 		self.polltype = 'SharedMemoryProgressPoll'
 		# print('SharedMemoryProgressPoll()', self.searchid)
 
-	def getstatus(self):
+	def getstatus(self) -> str:
 		try:
 			return self.statusmessage.decode('utf-8')
 		except AttributeError:
 			#  'SynchronizedString' object has no attribute 'decode'
 			return self.statusmessage
 
-	def getelapsed(self):
+	def getelapsed(self) -> float:
 		elapsed = round(time.time() - self.launchtime, 0)
 		return elapsed
 
-	def getremaining(self):
+	def getremaining(self) -> int:
 		return self.remaining.value
 
-	def gethits(self):
+	def gethits(self) -> int:
 		return self.hitcount.value
 
-	def worktotal(self):
+	def worktotal(self) -> int:
 		return self.poolofwork.value
 
-	def statusis(self, statusmessage):
-		self.statusmessage = bytes(statusmessage, encoding='UTF-8')
+	def statusis(self, newstatusmessage):
+		self.statusmessage = bytes(newstatusmessage, encoding='UTF-8')
 
 	def allworkis(self, amount):
 		self.poolofwork.value = amount
@@ -89,13 +89,13 @@ class SharedMemoryProgressPoll(object):
 	def deactivate(self):
 		self.active = False
 
-	def getactivity(self):
+	def getactivity(self) -> bool:
 		return self.active
 
 	def setnotes(self, message):
 		self.notes = message
 
-	def getnotes(self):
+	def getnotes(self) -> str:
 		message = '<span class="small">{msg}</span>'
 		if 14 < self.getelapsed() < 21:
 			m = '(long requests can be aborted by reloading the page)'
@@ -255,6 +255,73 @@ class RedisProgressPoll(object):
 		else:
 			m = ''
 
+		return message.format(msg=m)
+
+
+class NullProgressPoll(object):
+	"""
+
+	for debugging purposes...
+
+	"""
+
+	def __init__(self, searchid, portnumber=None):
+		self.searchid = str(searchid)
+		self.launchtime = time.time()
+		self.portnumber = portnumber
+		self.active = False
+		self.remaining = -1
+		self.poolofwork = -1
+		self.statusmessage = str()
+		self.hitcount = -1
+		self.notes = str()
+		self.polltype = 'NullProgressPoll'
+
+	def getstatus(self) -> str:
+		return 'NullProgressPoll'
+
+	def getelapsed(self) -> float:
+		return 0
+
+	def getremaining(self) -> int:
+		return -1
+
+	def gethits(self) -> int:
+		return -1
+
+	def worktotal(self) -> int:
+		return -1
+
+	def statusis(self, newstatusmessage):
+		pass
+
+	def allworkis(self, amount):
+		pass
+
+	def remain(self, remaining):
+		pass
+
+	def sethits(self, found):
+		pass
+
+	def addhits(self, hits):
+		pass
+
+	def activate(self):
+		pass
+
+	def deactivate(self):
+		pass
+
+	def getactivity(self) -> bool:
+		return False
+
+	def setnotes(self, message):
+		pass
+
+	def getnotes(self) -> str:
+		message = '<span class="small">{msg}</span>'
+		m = 'NullProgressPoll'
 		return message.format(msg=m)
 
 

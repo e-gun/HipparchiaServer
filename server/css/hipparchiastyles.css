@@ -1065,6 +1065,7 @@ body {
 
 #lexicadialogtext{
 	font-family: 'hipparchiasansstatic', var(--systemdefaultfont), sans-serif;
+	font-size: 90%;
 	}
 
 #loadslots, #saveslots {

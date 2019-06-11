@@ -1,0 +1,93 @@
+testing the completeness of your build.
+
+If you think something quit out and is incomplete, the ‘right answers’ follow.
+
+
+~/ $ psql hipparchiaDB
+psql (11.3)
+Type "help" for help.
+
+hipparchiaDB=# select count(*) from authors where universalid ~ '^gr';
+ count
+-------
+  1823
+(1 row)
+
+hipparchiaDB=# select count(*) from authors where universalid ~ '^lt';
+ count
+-------
+   362
+(1 row)
+
+hipparchiaDB=# select count(*) from authors where universalid ~ '^dp';
+ count
+-------
+   516
+(1 row)
+
+hipparchiaDB=# select count(*) from authors where universalid ~ '^in';
+ count
+-------
+   463
+(1 row)
+
+hipparchiaDB=# select count(*) from authors where universalid ~ '^ch';
+ count
+-------
+   291
+(1 row)
+
+hipparchiaDB=# select count(*) from works where universalid ~ '^gr';
+ count
+-------
+  6625
+(1 row)
+
+hipparchiaDB=# select count(*) from works where universalid ~ '^lt';
+ count
+-------
+   836
+(1 row)
+
+hipparchiaDB=# select count(*) from works where universalid ~ '^dp';
+ count
+-------
+ 49230
+(1 row)
+
+hipparchiaDB=# select count(*) from works where universalid ~ '^in';
+ count
+--------
+ 139970
+(1 row)
+
+hipparchiaDB=# select count(*) from works where universalid ~ '^ch';
+ count
+-------
+ 40174
+(1 row)
+
+hipparchiaDB=# select count(*) from greek_dictionary;
+ count
+--------
+ 115969
+(1 row)
+
+hipparchiaDB=# select count(*) from latin_dictionary;
+ count
+-------
+ 51594
+(1 row)
+
+hipparchiaDB=# select count(*) from greek_lemmata;
+ count
+--------
+ 114098
+(1 row)
+
+hipparchiaDB=# select count(*) from latin_lemmata;
+ count
+-------
+ 38662
+(1 row)
+
