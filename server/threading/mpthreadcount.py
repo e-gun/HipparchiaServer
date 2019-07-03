@@ -38,4 +38,5 @@ def setthreadcount(startup=False) -> int:
 	if workers > cpu_count() and startup:
 		consolewarning('\nWARNING: thread count exceeds total available number of threads: {a} > {b}'.format(a=workers, b=cpu_count()))
 		consolewarning('consider editing "WORKERS" and/or "AUTOCONFIGWORKERS" in "HipparchiaServe/server/settings/performancesettings.py"')
+
 	return workers

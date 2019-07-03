@@ -216,9 +216,9 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	countchar = int('0030', 16)  # '1' (after you add 1)
 	subcountchar = int('0061', 16)  # 'a' (when counting from 0)
 	if len(distinct) > 1:
-		obsvstring = '\n<span class="obsv">({ct})&nbsp;{xdf}</span>'
+		obsvstring = '\n<a class="parsing" href="{link}"><span class="obsv">({ct})&nbsp;{xdf}</span></a>'
 	else:
-		obsvstring = '\n<span class="obsv">{xdf}</span>'
+		obsvstring = '\n<a class="parsing" href="{link}"><span class="obsv">{xdf}</span></a>'
 	morphhtml = list()
 
 	for d in distinct:
@@ -241,7 +241,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 			xrefinfo = str()
 
 		xdf = xdftemplate.format(df=firstsubentry.observed, bf=bf, xlate=xlate, xref=xrefinfo)
-		outputlist.append(obsvstring.format(ct=chr(count + countchar), xdf=xdf))
+		outputlist.append(obsvstring.format(ct=chr(count + countchar), xdf=xdf, link="#{a}_{b}".format(a=bf, b=firstsubentry.xref)))
 
 		if len(subentries) == 1:
 			analysischunks = firstsubentry.getanalysislist()[0].split(' ')

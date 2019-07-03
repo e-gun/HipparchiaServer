@@ -1601,3 +1601,12 @@ dictionaryidsearch:hover{
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
+
+a.parsing {
+	text-decoration: none;
+	}
+
+a.parsing:hover{
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}

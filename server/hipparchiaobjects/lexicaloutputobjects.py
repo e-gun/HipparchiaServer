@@ -241,7 +241,7 @@ class lexicalOutputObject(object):
 		return fullentry
 
 	def generatelexicaloutput(self, countervalue=None) -> str:
-		divtemplate = '<div id="{wd}">\n{entry}\n</div>'
+		divtemplate = '<div id="{wd}_{idx}">\n{entry}\n</div>'
 		if countervalue:
 			headingstr = '<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'
 		else:
@@ -296,5 +296,5 @@ class lexicalOutputObject(object):
 		if session['zaplunates']:
 			fullentry = attemptsigmadifferentiation(fullentry)
 
-		fullentry = divtemplate.format(wd=self.thisheadword, entry=fullentry)
+		fullentry = divtemplate.format(wd=self.thisheadword, idx=findparserxref(w), entry=fullentry)
 		return fullentry
