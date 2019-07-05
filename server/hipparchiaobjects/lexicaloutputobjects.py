@@ -243,12 +243,12 @@ class lexicalOutputObject(object):
 	def generatelexicaloutput(self, countervalue=None) -> str:
 		divtemplate = '<div id="{wd}_{idx}">\n{entry}\n</div>'
 		if countervalue:
-			headingstr = '<hr /><p class="dictionaryheading">({cv})&nbsp;{ent}'
+			headingstr = '<hr /><p class="dictionaryheading" id={wd}_{wordid}>({cv})&nbsp;{ent}'
 		else:
-			headingstr = '<hr /><p class="dictionaryheading">{ent}'
+			headingstr = '<hr /><p class="dictionaryheading" id={wd}_{wordid}>{ent}'
 		metricsstr = '&nbsp;<span class="metrics">[{me}]</span>'
-		codestr = '&nbsp;<code>[ID: {x}]</code>'
-		xrefstr = '&nbsp;<code>[XREF: {x}]</code>'
+		codestr = '&nbsp;<code>[ID: {wordid}]</code>'
+		xrefstr = '&nbsp;<code>[XREF: {xref}]</code>'
 
 		navtemplate = """
 		<table class="navtable">
@@ -273,15 +273,15 @@ class lexicalOutputObject(object):
 			language = 'latin'
 
 		outputlist = list()
-		outputlist.append(headingstr.format(ent=w.entry, cv=countervalue))
+		outputlist.append(headingstr.format(ent=w.entry, cv=countervalue, wordid=w.id, wd=self.thisheadword))
 
 		if u'\u0304' in w.metricalentry or u'\u0306' in w.metricalentry:
 			outputlist.append(metricsstr.format(me=w.metricalentry))
 
 		if session['debuglex']:
-			outputlist.append(codestr.format(x=w.id))
+			outputlist.append(codestr.format(wordid=w.id))
 			xref = findparserxref(w)
-			outputlist.append(xrefstr.format(x=xref))
+			outputlist.append(xrefstr.format(xref=xref))
 		outputlist.append('</p>')
 
 		outputlist.append(self.entrysprincipleparts)

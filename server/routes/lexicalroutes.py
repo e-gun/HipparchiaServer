@@ -260,38 +260,36 @@ def reverselexiconsearch(searchterm):
 
 	limit = hipparchia.config['CAPONDICTIONARYFINDS']
 
-	entries = list()
+	entriestuples = list()
 	for s in searchunder:
 		usedict = s[0]
 		translationlabel = s[1]
 		# first see if your term is mentioned at all
 		wordobjects = reversedictionarylookup(seeking, usedict, limit)
-		entries += [w.entry for w in wordobjects]
+		entriestuples += [(w.entry, w.id) for w in wordobjects]
 
-	if len(entries) == limit:
+	if len(entriestuples) == limit:
 		returnarray.append('[stopped searching after {lim} finds]\n<br>\n'.format(lim=limit))
 
-	entries = list(set(entries))
+	entriestuples = list(set(entriestuples))
 
-	# we have the matches; now we will sort them either by frequency or by initial letter
-	if hipparchia.config['REVERSELEXICONRESULTSBYFREQUENCY']:
-		unsortedentries = [(querytotalwordcounts(e), e) for e in entries]
-		entries = list()
-		for e in unsortedentries:
-			hwcountobject = e[0]
-			term = e[1]
-			if hwcountobject:
-				entries.append((hwcountobject.t, term))
-			else:
-				entries.append((0, term))
-		entries = sorted(entries, reverse=True)
-		entries = [e[1] for e in entries]
-	else:
-		entries = polytonicsort(entries)
+	unsortedentries = [(querytotalwordcounts(e[0]), e[0], e[1]) for e in entriestuples]
+	entries = list()
+	for e in unsortedentries:
+		hwcountobject = e[0]
+		term = e[1]
+		idval = e[2]
+		if hwcountobject:
+			entries.append((hwcountobject.t, term, idval))
+		else:
+			entries.append((0, term, idval))
+	entries = sorted(entries, reverse=True)
+	entriestuples = [(e[1], e[2]) for e in entries]
+
 	# now we retrieve and format the entries
-	if entries:
+	if entriestuples:
 		# summary of entry values first
-		countobjectdict = {e: querytotalwordcounts(e) for e in entries}
+		countobjectdict = {e: querytotalwordcounts(e[0]) for e in entriestuples}
 		summary = list()
 		count = 0
 		for c in countobjectdict.keys():
@@ -300,17 +298,18 @@ def reverselexiconsearch(searchterm):
 				totalhits = countobjectdict[c].t
 			except:
 				totalhits = 0
-			summary.append((count, c, totalhits))
+			# c[0]: the word; c[1]: the id
+			summary.append((count, c[0], c[1], totalhits))
 
 		summarytemplate = """
 		<span class="sensesum">({n})&nbsp;
-			<a class="nounderline" href="#{w}">{w}</a>&nbsp;
+			<a class="nounderline" href="#{w}_{wdid}">{w}</a>&nbsp;
 			<span class="small">({t:,})</span>
 		</span>
 		"""
 
-		summary = sorted(summary, key=lambda x: x[2], reverse=True)
-		summary = [summarytemplate.format(n=e[0], w=e[1], t=e[2]) for e in summary]
+		summary = sorted(summary, key=lambda x: x[3], reverse=True)
+		summary = [summarytemplate.format(n=e[0], w=e[1], wdid=e[2], t=e[3]) for e in summary]
 		returnarray.append('\n<br />\n'.join(summary))
 
 		# then the entries proper
@@ -318,7 +317,7 @@ def reverselexiconsearch(searchterm):
 		dbconnection.setautocommit()
 		dbcursor = dbconnection.cursor()
 
-		wordobjects = [probedictionary(setdictionarylanguage(e) + '_dictionary', 'entry_name', e, '=', dbcursor=dbcursor, trialnumber=0) for e in entries]
+		wordobjects = [probedictionary(setdictionarylanguage(e[0]) + '_dictionary', 'entry_name', e[0], '=', dbcursor=dbcursor, trialnumber=0) for e in entriestuples]
 		flatten = lambda l: [item for sublist in l for item in sublist]
 		wordobjects = flatten(wordobjects)
 		outputobjects = [lexicalOutputObject(w) for w in wordobjects]
