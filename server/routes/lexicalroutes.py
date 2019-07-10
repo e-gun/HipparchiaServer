@@ -76,39 +76,33 @@ def dictsearch(searchterm):
 
 	limit = hipparchia.config['CAPONDICTIONARYFINDS']
 
-	found = headwordsearch(stripped, limit, usedictionary, usecolumn)
+	foundtuples = headwordsearch(stripped, limit, usedictionary, usecolumn)
 
-	# the results should be given the polytonicsort() treatment
+	# example:
+	# foundentries [('scrofa¹', 43118), ('scrofinus', 43120), ('scrofipascus', 43121), ('Scrofa²', 43119), ('scrofulae', 43122)]
+
 	returnlist = list()
 
-	if len(found) == limit:
+	if len(foundtuples) == limit:
 		returnlist.append('[stopped searching after {lim} finds]<br>'.format(lim=limit))
 
-	if len(found) > 0:
-		finddict = {f[0]: f for f in found}
-		findkeys = finddict.keys()
-		findkeys = polytonicsort(findkeys)
+	if len(foundtuples) > 0:
 
-		sortedfinds = [finddict[k] for k in findkeys]
-		# print('sortedfinds', sortedfinds)
-		# sortedfinds [('μαντιπόλοϲ',)]
-		sortedfinds = [f[0] for f in sortedfinds]
-
-		if len(sortedfinds) == 1:
+		if len(foundtuples) == 1:
 			# sending '0' to browserdictionarylookup() will hide the count number
 			usecounter = False
 		else:
 			usecounter = True
 
-		wordobjects = [probedictionary(setdictionarylanguage(f) + '_dictionary', 'entry_name', f, '=', dbcursor=dbcursor, trialnumber=0) for f in sortedfinds]
+		wordobjects = [probedictionary(setdictionarylanguage(f[0]) + '_dictionary', 'entry_name', f[0], '=', dbcursor=dbcursor, trialnumber=0) for f in foundtuples]
 		flatten = lambda l: [item for sublist in l for item in sublist]
 		wordobjects = flatten(wordobjects)
 		outputobjects = [lexicalOutputObject(w) for w in wordobjects]
 
 		# very top: list the finds
 		if usecounter:
-			findstemplate = '({n})&nbsp;<a class="nounderline" href="#{w}">{w}</a>'
-			findslist = [findstemplate.format(n=f[0]+1, w=f[1]) for f in enumerate(sortedfinds)]
+			findstemplate = '({n})&nbsp;<a class="nounderline" href="#{w}_{wdid}">{w}</a>'
+			findslist = [findstemplate.format(n=f[0]+1, w=f[1][0], wdid=f[1][1]) for f in enumerate(foundtuples)]
 			returnlist.append('\n<br>\n'.join(findslist))
 
 		# the actual entries

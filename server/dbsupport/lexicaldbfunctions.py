@@ -23,11 +23,31 @@ from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCo
 
 
 def headwordsearch(seeking: str, limit: str, usedictionary: str, usecolumn: str) -> List[tuple]:
+	"""
+
+	dictsearch() uses this
+
+	hipparchiaDB=# SELECT entry_name, id_number FROM latin_dictionary WHERE entry_name ~* '.*?scrof.*?' ORDER BY id_number ASC LIMIT 50;
+	  entry_name  | id_number
+	--------------+-----------
+	 scrofa¹      |     43118
+	 Scrofa²      |     43119
+	 scrofinus    |     43120
+	 scrofipascus |     43121
+	 scrofulae    |     43122
+	(5 rows)
+
+	:param seeking:
+	:param limit:
+	:param usedictionary:
+	:param usecolumn:
+	:return:
+	"""
 
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
-	qstring = 'SELECT entry_name FROM {d}_dictionary WHERE {c} ~* %s LIMIT {lim}'
+	qstring = 'SELECT entry_name, id_number FROM {d}_dictionary WHERE {c} ~* %s ORDER BY id_number ASC LIMIT {lim}'
 
 	query = qstring.format(d=usedictionary, c=usecolumn, lim=limit)
 
@@ -41,8 +61,6 @@ def headwordsearch(seeking: str, limit: str, usedictionary: str, usecolumn: str)
 	else:
 		data = ('.*?' + seeking + '.*?',)
 
-	# print('query, data\n\t{q}\n\t{d}\n'.format(q=query, d=data))
-
 	dbcursor.execute(query, data)
 
 	# note that the dictionary db has a problem with vowel lengths vs accents
@@ -52,7 +70,9 @@ def headwordsearch(seeking: str, limit: str, usedictionary: str, usecolumn: str)
 	except:
 		foundentries = list()
 
-	# found [('indoloria²',), ('indolorius',), ('indoloria¹',), ('indoloris',), ('dolorosus',), ('dolor',)]
+	# print('foundentries', foundentries)
+	# '/dictsearch/scrof'
+	# foundentries [('scrofa¹', 43118), ('scrofinus', 43120), ('scrofipascus', 43121), ('Scrofa²', 43119), ('scrofulae', 43122)]
 
 	if not foundentries:
 		variantseeker = seeking[:-1] + '[¹²³⁴⁵⁶⁷⁸⁹]' + seeking[-1]

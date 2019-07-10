@@ -85,7 +85,7 @@ class multipleWordOutputObject(object):
 			lexobjects[e] = [lexicalOutputObject(o) for o in self.entrywordobjects[e]]
 		return lexobjects
 
-	def generateoutput(self):
+	def generateoutput(self) -> str:
 		output = list()
 		output.append(self.thisformprevalence)
 		output.append(self.observedformsummary)
