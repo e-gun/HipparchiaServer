@@ -11,6 +11,7 @@ import re
 from typing import List
 
 from server.dbsupport.lexicaldbfunctions import bulkfindmorphologyobjects, bulkfindwordcounts, grablemmataobjectfor
+from server.formatting.miscformatting import consolewarning
 from server.formatting.morphologytableformatting import declinedtabletemplate, filloutmorphtabletemplate, \
 	verbtabletemplate
 from server.formatting.wordformatting import stripaccents
@@ -72,7 +73,13 @@ class MorphAnalysis(object):
 		genders = ['masc', 'fem', 'neut', 'masc/neut', 'masc/fem']
 		if self.analyssiscomponents[0] in tenses:
 			pos = 'conjugated'
-			self.analysis = ConjugatedFormAnalysis(self.word, self.language, self.dialects, self.analyssiscomponents)
+			try:
+				self.analysis = ConjugatedFormAnalysis(self.word, self.language, self.dialects, self.analyssiscomponents)
+			except IndexError:
+				# bad original data; too few items in analyssiscomponents
+				warnstring = 'cannot conjugate {w}: analysis list is too short: {a}'.format(w=self.word, a=self.analyssiscomponents)
+				consolewarning(warnstring, 'yellow')
+				self.analysis = None
 		elif self.analyssiscomponents[0] in genders:
 			pos = 'declined'
 			try:
@@ -258,10 +265,30 @@ class BaseFormMorphology(object):
 				mylanguage = 'latin'
 			analysislist = m.getanalysislist()
 			available.extend([MorphAnalysis(m.observed, mylanguage, self.collapseattic, a) for a in analysislist])
+			# drop any items that failed to generate an analysis
+			available = [a for a in available if a]
 		return available
 
 
 class ConjugatedFormAnalysis(object):
+	"""
+
+	the original data contains some holes
+
+	for example:
+		wget localhost:5000/parse/δέουσαν
+
+	you will generate many CFA objects; the following is sensible original data:
+
+		w: δεδεημένωι
+		['perf', 'part', 'mp', 'masc/neut', 'dat', 'sg']
+
+	but this is defective since 'voice' has been omitted:
+
+		w: δεῖν
+		['pres', 'part', 'neut', 'nom/voc/acc', 'sg']
+
+	"""
 
 	gkprincipleparts = {('pres', 'ind', 'act', '1st', 'sg'): 1,
 	                    ('fut', 'ind', 'act', '1st', 'sg'): 2,
@@ -616,7 +643,8 @@ class PrinciplePartFunctions(object):
 
 		for a in alternates:
 			for v in verbforms:
-				if v.analysis.nearestmatchforaprinciplepart(a, parttosupplement):
+				# first test makes sure 'none' did not come back as the CFA object
+				if v.analysis and v.analysis.nearestmatchforaprinciplepart(a, parttosupplement):
 					# print('nextbest for pp {p} is {v}'.format(p=parttosupplement, v=v.word))
 					self.principleparts.append((parttosupplement, substitutetemplate.format(w=v.word, a=v.analysisstring)))
 					self.missingparts = self.missingparts - {parttosupplement}

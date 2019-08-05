@@ -79,6 +79,7 @@ def dictsearch(searchterm):
 	foundtuples = headwordsearch(stripped, limit, usedictionary, usecolumn)
 
 	# example:
+	# results are presorted by ID# via the postgres query
 	# foundentries [('scrofa¹', 43118), ('scrofinus', 43120), ('scrofipascus', 43121), ('Scrofa²', 43119), ('scrofulae', 43122)]
 
 	returnlist = list()
