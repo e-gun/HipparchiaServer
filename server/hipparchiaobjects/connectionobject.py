@@ -357,10 +357,10 @@ if not commandlineargs.simpleconnection or commandlineargs.pooledconnection:
 			pass
 else:
 	if commandlineargs.simpleconnection:
-		consolewarning('simple DB connections')
 		class ConnectionObject(SimpleConnectionObject):
 			pass
+		consolewarning('simple DB connections')
 	if commandlineargs.pooledconnection:
-		consolewarning('pooled DB connections')
 		class ConnectionObject(PooledConnectionObject):
 			pass
+		consolewarning('pooled DB connections')
