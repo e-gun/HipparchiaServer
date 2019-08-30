@@ -78,7 +78,7 @@ class dbAuthor(object):
 		return [w.universalid for w in self.listofworks]
 
 	def countwordsinworks(self):
-		return sum([w.wordcount for w in self.listofworks])
+		return sum([w.wordcount for w in self.listofworks if w.wordcount])
 
 
 class dbOpus(object):

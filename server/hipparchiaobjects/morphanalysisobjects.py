@@ -77,7 +77,7 @@ class MorphAnalysis(object):
 				self.analysis = ConjugatedFormAnalysis(self.word, self.language, self.dialects, self.analyssiscomponents)
 			except IndexError:
 				# bad original data; too few items in analyssiscomponents
-				warnstring = 'cannot conjugate {w}: analysis list is too short: {a}'.format(w=self.word, a=self.analyssiscomponents)
+				warnstring = 'cannot parse {w}: analysis list is too short: {a}'.format(w=self.word, a=self.analyssiscomponents)
 				consolewarning(warnstring, 'yellow')
 				self.analysis = None
 		elif self.analyssiscomponents[0] in genders:

@@ -123,6 +123,7 @@ class multipleWordOutputObject(object):
 
 					output.append(entry)
 
+		output = [o for o in output if o]
 		newhtml = '\n'.join(output)
 		return newhtml
 
