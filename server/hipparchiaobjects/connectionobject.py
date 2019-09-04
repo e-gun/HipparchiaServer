@@ -308,8 +308,12 @@ class SimpleConnectionObject(GenericConnectionObject):
 												port=GenericConnectionObject.dbport,
 												database=GenericConnectionObject.dbname,
 												password=p)
-		except psycopg2.OperationalError:
-			consolewarning(GenericConnectionObject.postgresproblem, color='red')
+		except psycopg2.OperationalError as operror:
+			thefailure = operror.args[0]
+			unknown = 'no pg_hba.conf entry for'
+			if unknown in thefailure:
+				thefailure = 'username and password problem for "DBWRITEUSER": check "securitysettings.py"'
+			consolewarning(GenericConnectionObject.postgresproblem.format(e=thefailure), color='red')
 			sys.exit(0)
 
 		if self.autocommit == 'autocommit':
@@ -353,10 +357,10 @@ if not commandlineargs.simpleconnection or commandlineargs.pooledconnection:
 			pass
 else:
 	if commandlineargs.simpleconnection:
-		consolewarning('simple DB connections')
 		class ConnectionObject(SimpleConnectionObject):
 			pass
+		consolewarning('simple DB connections')
 	if commandlineargs.pooledconnection:
-		consolewarning('pooled DB connections')
 		class ConnectionObject(PooledConnectionObject):
 			pass
+		consolewarning('pooled DB connections')

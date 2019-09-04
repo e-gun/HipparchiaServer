@@ -768,7 +768,13 @@ class dbWorkLine(object):
 		"""
 
 		closecheck = r'</{t}>'.format(t=tagtocheck)
-		closed = re.search(closecheck, self.markedup)
+		try:
+			closed = re.search(closecheck, self.markedup)
+		except re.error:
+			# re.error: unknown extension ?) at position 33
+			# lt0407@138016 | Antonio. ad ea autem quae scripsisti (tris enim acceperam <span class="smallcapitals">iii</span>
+			# print('hmuclosedbeforeopened() re.error: {ln}'.format(ln=self.markedup))
+			return False
 		if closed:
 			closedat = closed.span()[0]
 			open = r'<{t}>'.format(t=tagtocheck)
