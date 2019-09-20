@@ -27,7 +27,7 @@ def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> 
 	return newdict
 
 
-def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
+def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate) -> list:
 		"""
 
 		tell me which items on the authorandworklist have unknown dates

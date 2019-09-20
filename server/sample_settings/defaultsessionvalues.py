@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ### the default instance for various 'session' items ###
 ##  [set any/all of these to suit your own typical use scenarios] ##
 # these items can all be set to different temporary values via the

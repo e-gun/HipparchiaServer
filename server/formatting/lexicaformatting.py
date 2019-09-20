@@ -205,9 +205,13 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	"""
 
 	xdftemplate = """
-	<span class="dictionaryform">{df}</span>&nbsp;:&nbsp;
-	from <span class="baseform">{bf}</span>
-	<span class="baseformtranslation">{xlate}</span>{xref}:
+	<span class="obsv">
+		<span class="dictionaryform">{df}</span>&nbsp;:&nbsp;
+		<a class="parsing" href="RE_SUB_LINK"><span class="obsv">
+			from <span class="baseform">{bf}</span>
+			<span class="baseformtranslation">{xlate}</span>{xref}
+		</a>
+	</span>
 	"""
 
 	distinct = set([p.xref for p in possibilitieslist])
@@ -216,9 +220,9 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	countchar = int('0030', 16)  # '1' (after you add 1)
 	subcountchar = int('0061', 16)  # 'a' (when counting from 0)
 	if len(distinct) > 1:
-		obsvstring = '\n<a class="parsing" href="{link}"><span class="obsv">({ct})&nbsp;{xdf}</span></a>'
+		obsvstring = '\n({ct})&nbsp;{xdf}'
 	else:
-		obsvstring = '\n<a class="parsing" href="{link}"><span class="obsv">{xdf}</span></a>'
+		obsvstring = '\n{xdf}'
 	morphhtml = list()
 
 	for d in distinct:
@@ -241,6 +245,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 			xrefinfo = str()
 
 		xdf = xdftemplate.format(df=firstsubentry.observed, bf=bf, xlate=xlate, xref=xrefinfo)
+		xdf = re.sub(r'RE_SUB_LINK', '{link}', xdf)
 		outputlist.append(obsvstring.format(ct=chr(count + countchar), xdf=xdf, link="#{a}_{b}".format(a=bf, b=firstsubentry.xref)))
 
 		if len(subentries) == 1:
