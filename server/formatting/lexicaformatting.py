@@ -245,8 +245,8 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 			xrefinfo = str()
 
 		xdf = xdftemplate.format(df=firstsubentry.observed, bf=bf, xlate=xlate, xref=xrefinfo)
-		xdf = re.sub(r'RE_SUB_LINK', '{link}', xdf)
-		outputlist.append(obsvstring.format(ct=chr(count + countchar), xdf=xdf, link="#{a}_{b}".format(a=bf, b=firstsubentry.xref)))
+		xdf = re.sub(r'RE_SUB_LINK', '#{a}_{b}'.format(a=bf, b=firstsubentry.xref), xdf)
+		outputlist.append(obsvstring.format(ct=chr(count + countchar), xdf=xdf))
 
 		if len(subentries) == 1:
 			analysischunks = firstsubentry.getanalysislist()[0].split(' ')
