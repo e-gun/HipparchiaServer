@@ -270,7 +270,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	return morphhtml
 
 
-def getobservedwordprevalencedata(dictionaryword):
+def getobservedwordprevalencedata(dictionaryword) -> str:
 	"""
 
 	:param dictionaryword:
@@ -297,7 +297,7 @@ def getobservedwordprevalencedata(dictionaryword):
 		return None
 
 
-def formatprevalencedata(wordcountobject):
+def formatprevalencedata(wordcountobject) -> str:
 	"""
 
 	html for the results

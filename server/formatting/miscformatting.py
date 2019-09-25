@@ -68,6 +68,8 @@ def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True, 
 	:param message:
 	:return:
 	"""
+	head = str()
+	tail = str()
 
 	template = '{head}{msg}{tail}'
 
