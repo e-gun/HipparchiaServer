@@ -374,16 +374,6 @@ def linesintoindex(lineobjects: List[dbWorkLine], activepoll) -> dict:
 	# kill off titles and salutations: dangerous as there l1='t' has not been 100% ruled out as a valid body citation
 	# lineobjects = [ln for ln in lineobjects if ln.l1 not in ['t', 'sa']]
 
-	grave = 'ὰὲὶὸὺὴὼῒῢᾲῂῲἃἓἳὃὓἣὣἂἒἲὂὒἢὢ'
-	acute = 'άέίόύήώΐΰᾴῄῴἅἕἵὅὕἥὥἄἔἴὄὔἤὤ'
-	gravetoacute = str.maketrans(grave, acute)
-
-	# note the tricky combining marks like " ͡ " which can be hard to spot since they float over another special character
-	# τ’ and δ’ and the rest are a problem
-
-	greekpunct = re.compile('[{s}]'.format(s=re.escape(punctuation + elidedextrapunct)))
-	latinpunct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
-
 	defaultwork = lineobjects[0].wkuinversalid
 
 	completeindex = dict()
@@ -411,18 +401,7 @@ def linesintoindex(lineobjects: List[dbWorkLine], activepoll) -> dict:
 			line = makeablankline(defaultwork, None)
 
 		if line.index:
-			# don't use set() - that will yield undercounts
-			polytonicwords = line.wordlist('polytonic')
-			polytonicgreekwords = [tidyupterm(w, greekpunct).lower() for w in polytonicwords if re.search(minimumgreek, w)]
-			polytoniclatinwords = [tidyupterm(w, latinpunct).lower() for w in polytonicwords if not re.search(minimumgreek, w)]
-			polytonicwords = polytonicgreekwords + polytoniclatinwords
-			# need to figure out how to grab τ’ and δ’ and the rest
-			# but you can't decide that me is elided in a line like 'inquam, ‘teque laudo. sed quando?’ ‘nihil ad me’ inquit ‘de'
-			unformattedwords = set(line.wordlist('marked_up_line'))
-			words = [w for w in polytonicwords if w+'’' not in unformattedwords or not re.search(minimumgreek, w)]
-			elisions = [w+"'" for w in polytonicwords if w+'’' in unformattedwords and re.search(minimumgreek, w)]
-			words.extend(elisions)
-			words = [w.translate(gravetoacute) for w in words]
+			words = line.indexablewordlist()
 			for w in words:
 				referencestyle = getattr(line, indexingmethod)
 				try:
