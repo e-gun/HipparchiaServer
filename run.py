@@ -6,7 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-from multiprocessing import current_process
+import multiprocessing
 
 from click import secho
 try:
@@ -19,7 +19,7 @@ except ImportError:
 
 from version import hipparchiaserverversion as hipparchiaversion
 
-if current_process().name == 'MainProcess':
+if multiprocessing.current_process().name == 'MainProcess':
 	# stupid Windows will fork new copies and reload all of this
 	vstring = """
 	{banner}
@@ -34,6 +34,32 @@ from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
 
 if __name__ == '__main__':
+
+	"""
+	https://docs.python.org/3.8/library/multiprocessing.html
+	
+	spawn
+	The parent process starts a fresh python interpreter process. The child process will only inherit those resources necessary to run the process objects run() method. In particular, unnecessary file descriptors and handles from the parent process will not be inherited. Starting a process using this method is rather slow compared to using fork or forkserver.
+
+	Available on Unix and Windows. The default on Windows and macOS.
+
+	Changed in version 3.8: On macOS, the spawn start method is now the default. The fork start method should be considered unsafe as it can lead to crashes of the subprocess. See bpo-33725.
+	
+	[but we never had problems with 'fork' in macos AND spawn is a lot slower...]
+	"""
+
+	mpmethod = '**UNSET** [this is a problem...]'
+	try:
+		# mpmethod = 'forkserver'
+		# this will get you into trouble with the vectorbot
+		# TypeError: can't pickle psycopg2.extensions.connection objects
+		mpmethod = 'fork'
+		multiprocessing.set_start_method(mpmethod)
+	except:
+		mpmethod = 'spawn'
+		multiprocessing.set_start_method(mpmethod)
+	finally:
+		secho('multiprocessing method set to: {m}'.format(m=mpmethod), fg='cyan')
 
 	if hipparchia.config['ENABLELOGGING']:
 		from inspect import stack

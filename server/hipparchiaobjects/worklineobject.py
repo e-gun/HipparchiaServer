@@ -433,6 +433,7 @@ class dbWorkLine(object):
 		elisions = [w+"'" for w in polytonicwords if w+'’' in unformattedwords and re.search(dbWorkLine.minimumgreek, w)]
 		listofwords.extend(elisions)
 		listofwords = [w.translate(dbWorkLine.gravetoacute) for w in listofwords]
+		listofwords = [re.sub('v', 'u', w) for w in listofwords]
 		return listofwords
 
 	def lastword(self, version: str) -> str:
