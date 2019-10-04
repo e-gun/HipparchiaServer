@@ -77,6 +77,8 @@
 #   both drive space and CPU time; do not set this to 'yes' unless you are ready for the commitment
 #
 
+# Windows 10 is not ready for semantic vectors
+#	TypeError: can't pickle psycopg2.extensions.connection objects
 SEMANTICVECTORSENABLED = 'no'
 LITERALCOSINEDISTANCEENABLED = 'no'
 CONCEPTMAPPINGENABLED = 'no'

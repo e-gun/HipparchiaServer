@@ -196,6 +196,9 @@ def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout=
 		# psycopg2.ProgrammingError: relation "public.storedvectors" does not exist
 		createvectorstable()
 		result = False
+	except psycopg2.errors.UndefinedTable:
+		createvectorstable()
+		result = False
 
 	if not result:
 		return False
