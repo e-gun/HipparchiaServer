@@ -6,6 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import multiprocessing
 import threading
 import time
 from typing import List
@@ -72,18 +73,21 @@ def startvectorizing():
 			else:
 				v = '{i} vectorized ({w} words)'
 			if vectorspace and wordcount > 5000:
-				consolewarning(v.format(i=searchlist[0], w=wordcount, n=len(searchlist)-1), color='green', isbold=False)
+				consolewarning(v.format(i=searchlist[0], w=wordcount, n=len(searchlist) - 1), color='green',
+				               isbold=False)
 
 			if vectorspace and len(workpile) % 25 == 0:
 				consolewarning('{n} items remain to vectorize'.format(n=len(workpile)), color='green', isbold=False)
 
 			if not vectorspace and len(workpile) % 100 == 0:
-				consolewarning('{n} items remain to vectorize, but vectors are not returned with shorter authors'.format(n=len(workpile)), color='green', isbold=False)
+				consolewarning(
+					'{n} items remain to vectorize, but vectors are not returned with shorter authors'.format(
+						n=len(workpile)), color='green', isbold=False)
 				consolewarning('aborting vectorization', color='green', isbold=False)
 				workpile = list()
 			del vectorspace
 
-	if hipparchia.config['AUTOVECTORIZE'] and not commandlineargs.disablevectorbot:
+	if hipparchia.config['AUTOVECTORIZE'] and not commandlineargs.disablevectorbot and multiprocessing.current_process().name == 'MainProcess':
 		consolewarning('vectorbot finished', color='green')
 
 	return
@@ -103,7 +107,8 @@ def determinevectorworkpile(tempcap=False) -> List[tuple]:
 		# real number is just over 93596456
 		cap = 94000000
 
-	consolewarning('the vectorbot is active and searching for items that need to be vectorized', color='green')
+	if multiprocessing.current_process().name == 'MainProcess':
+		consolewarning('the vectorbot is active and searching for items that need to be vectorized', color='green')
 
 	authors = [(authordict[a].universalid, authordict[a].countwordsinworks()) for a in authordict]
 	authorsbylength = sorted(authors, key=lambda x: x[1])
@@ -117,8 +122,7 @@ def determinevectorworkpile(tempcap=False) -> List[tuple]:
 
 	corpustuples = list()
 	for item in activelists:
-		corpustuples.append(([authordict[a].universalid for a in authordict if authordict[a].universalid[:2] == item],
-		                     sum([authordict[a].countwordsinworks() for a in authordict if authordict[a].universalid[:2] == item])))
+		corpustuples.append(([authordict[a].universalid for a in authordict if authordict[a].universalid[:2] == item], sum([authordict[a].countwordsinworks() for a in authordict if authordict[a].universalid[:2] == item])))
 
 	# gk 75233496
 	# lt 7548164
@@ -147,7 +151,7 @@ def buildfakesearchobject(qtype='nearestneighborsquery') -> SearchObject:
 	"""
 
 	frozensession = dict()
-	
+
 	frozensession['vdim'] = hipparchia.config['VECTORDIMENSIONS']
 	frozensession['vwindow'] = hipparchia.config['VECTORWINDOW']
 	frozensession['viterat'] = hipparchia.config['VECTORTRAININGITERATIONS']
@@ -164,7 +168,7 @@ def buildfakesearchobject(qtype='nearestneighborsquery') -> SearchObject:
 	frozensession['ldaminfreq'] = hipparchia.config['LDAMINFREQ']
 	frozensession['ldaiterations'] = hipparchia.config['LDAITERATIONS']
 	frozensession['ldamustbelongerthan'] = hipparchia.config['LDAMUSTBELONGERTHAN']
-	
+
 	blanks = ['searchscope', 'nearornot', 'onehit']
 	for b in blanks:
 		frozensession[b] = None

@@ -6,6 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import platform
 from multiprocessing import Manager, Process
 
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -30,6 +31,11 @@ def vectorprepdispatcher(searchobject):
 
 	so = searchobject
 
+	if platform.system() == 'Windows':
+		# otherwise: RecursionError: maximum recursion depth exceeded while calling a Python object
+		searchlist = list(so.indexrestrictions.keys())
+		return monobreaktextsintosentences(searchlist, so)
+
 	manager = Manager()
 	foundsentences = manager.list()
 	listofitemstosearch = manager.list(so.indexrestrictions.keys())
@@ -40,8 +46,7 @@ def vectorprepdispatcher(searchobject):
 
 	connections = {i: ConnectionObject(readonlyconnection=False) for i in range(workers)}
 
-	jobs = [Process(target=targetfunction, args=(foundsentences, listofitemstosearch, so, connections[i]))
-			for i in range(workers)]
+	jobs = [Process(target=targetfunction, args=(foundsentences, listofitemstosearch, so, connections[i])) for i in range(workers)]
 
 	for j in jobs:
 		j.start()
@@ -93,3 +98,20 @@ def breaktextsintosentences(foundsentences, searchlist, searchobject, dbconnecti
 			pass
 
 	return foundsentences
+
+
+def monobreaktextsintosentences(searchlist, searchobject):
+	"""
+
+	A wrapper for breaktextsintosentences() since Windows can MP it...
+
+	:param searchlist:
+	:param searchobject:
+	:return:
+	"""
+	foundsentences = list()
+	dbconnection = ConnectionObject(readonlyconnection=False)
+	foundsentences = breaktextsintosentences(foundsentences, searchlist, searchobject, dbconnection)
+	dbconnection.connectioncleanup()
+	fs = list(foundsentences)
+	return fs
