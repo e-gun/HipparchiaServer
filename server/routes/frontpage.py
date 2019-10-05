@@ -22,7 +22,7 @@ from server.dbsupport.dbbuildinfo import versionchecking
 from server.formatting.vectorformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
-from version import hipparchiaserverversion
+from version import hipparchiaserverversion, readgitdata
 
 
 @hipparchia.route('/')
@@ -95,6 +95,8 @@ def frontpage():
 		# but that involves a lot kludge just to make a very optional option work
 		icanzap = 'no'
 
+	version = '{v} [git: {g}]'.format(v=hipparchiaserverversion, g=readgitdata())
+
 	page = render_template('search.html',
 							activelists=activelists,
 							activecorpora=activecorpora,
@@ -113,7 +115,7 @@ def frontpage():
 							vectorhtml=vectorhtml,
 							vectoroptionshtml=vectoroptionshtml,
 							havevectors=havevectors,
-							version=hipparchiaserverversion,
+							version=version,
 							backend=backend,
 							icanzap=icanzap)
 

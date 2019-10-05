@@ -18,17 +18,24 @@ except ImportError:
 	from werkzeug.contrib.profiler import ProfilerMiddleware
 
 from version import hipparchiaserverversion as hipparchiaversion
+from version import readgitdata
 
 if multiprocessing.current_process().name == 'MainProcess':
 	# stupid Windows will fork new copies and reload all of this
 	vstring = """
 	{banner}
-	 {v}
+	  {v}
+	  {g}
 	{banner}
 	"""
 	v = 'HipparchiaServer v{v}'.format(v=hipparchiaversion)
-	banner = ''.join('=' for _ in range(len(v)+2))
-	secho(vstring.format(banner=banner, v=v, s=''), bold=True, fg='cyan')
+	c = readgitdata()
+	t = len(v) - len('[git: ]')
+	c = c[:t]
+	g = '[git: {c}]'.format(c=c)
+	# p = ''.join(' ' for _ in range(pad))
+	banner = ''.join('=' for _ in range(len(g)+4))
+	secho(vstring.format(banner=banner, v=v, g=g), bold=True, fg='cyan')
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
@@ -48,7 +55,7 @@ if __name__ == '__main__':
 	[but we never had problems with 'fork' in macos AND spawn is a lot slower...]
 	"""
 
-	mpmethod = '**UNSET** [this is a problem...]'
+	mpmethod = str()
 	try:
 		# mpmethod = 'forkserver'
 		# this will get you into trouble with the vectorbot
