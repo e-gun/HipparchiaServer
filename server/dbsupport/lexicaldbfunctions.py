@@ -189,7 +189,8 @@ def findentrybyid(usedict: str, entryid: str) -> dbDictionaryEntry:
 	except:
 		# older database: int vs float on this column
 		# psycopg2.errors.InvalidTextRepresentation: invalid input syntax for integer: "13493.0"
-		data = (int(entryid),)
+		eidconverted = str(int(float(entryid)))
+		data = (eidconverted,)
 		dbcursor.execute(query, data)
 	match = dbcursor.fetchone()
 
