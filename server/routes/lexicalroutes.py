@@ -356,7 +356,7 @@ def dictionaryidsearch(language, entryid):
 		language = 'greek'
 
 	try:
-		entryid = str(int(entryid))
+		entryid = str(float(entryid))
 	except ValueError:
 		entryid = None
 

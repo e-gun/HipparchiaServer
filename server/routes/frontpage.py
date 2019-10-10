@@ -156,6 +156,7 @@ def loadhelpdata():
 					'VectorSearching': 'helpvectors.html',
 					'Oddities': 'helpoddities.html',
 					'Extending': 'helpextending.html',
+					'IncludedMaterials': 'includedmaterials.html',
 					'Openness': 'helpopenness.html'}
 
 	helpdict = dict()

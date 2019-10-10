@@ -276,7 +276,7 @@ class lexicalOutputObject(object):
 		outputlist = list()
 		outputlist.append(headingstr.format(ent=w.entry, cv=countervalue, wordid=w.id, wd=self.thisheadword))
 
-		if u'\u0304' in w.metricalentry or u'\u0306' in w.metricalentry:
+		if w.metricalentry != w.entry:
 			outputlist.append(metricsstr.format(me=w.metricalentry))
 
 		if session['debuglex']:

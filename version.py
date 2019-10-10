@@ -10,7 +10,7 @@ import sys
 import os
 
 
-hipparchiaserverversion = '1.4.8'
+hipparchiaserverversion = '1.5.0'
 
 
 def readgitdata() -> str:
@@ -24,6 +24,7 @@ def readgitdata() -> str:
 
 	:return:
 	"""
+
 	here = os.path.dirname(sys.argv[0])
 	gitfile = here + '/.git/logs/HEAD'
 	line = str()
