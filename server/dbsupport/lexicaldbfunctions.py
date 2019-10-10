@@ -184,8 +184,13 @@ def findentrybyid(usedict: str, entryid: str) -> dbDictionaryEntry:
 
 	query = qtemplate.format(ec=extracolumn, d=usedict)
 	data = (entryid,)
-
-	dbcursor.execute(query, data)
+	try:
+		dbcursor.execute(query, data)
+	except:
+		# older database: int vs float on this column
+		# psycopg2.errors.InvalidTextRepresentation: invalid input syntax for integer: "13493.0"
+		data = (int(entryid),)
+		dbcursor.execute(query, data)
 	match = dbcursor.fetchone()
 
 	if match:
