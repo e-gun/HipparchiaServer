@@ -259,7 +259,8 @@ class dbDictionaryEntry(object):
 			htmlentry = re.sub(key, bdict[key], htmlentry)
 
 		# now do the work of finding the lookups
-
+		# latin old style: <bibl n="Perseus:abo:phi,0550,001:3:765" default="NO" valid="yes">
+		# latin new style: <bibl n="urn:cts:latinLit:phi0550.phi001:3:765">
 		tlgfinder = re.compile(r'n="Perseus:abo:tlg,(\d\d\d\d),(\d\d\d):(.*?)"')
 		phifinder = re.compile(r'n="Perseus:abo:phi,(\d\d\d\d),(\d\d\d):(.*?)"')
 
