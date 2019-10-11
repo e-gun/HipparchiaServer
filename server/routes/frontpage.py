@@ -37,7 +37,7 @@ def frontpage():
 
 	probeforsessionvariables()
 
-	expectedsqltemplateversion = 2242018
+	expectedsqltemplateversion = 10082019
 
 	stylesheet = hipparchia.config['CSSSTYLESHEET']
 

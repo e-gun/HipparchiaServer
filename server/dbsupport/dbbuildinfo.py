@@ -6,8 +6,6 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import psycopg2
-
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 
 
@@ -73,6 +71,14 @@ def versionchecking(activedbs: list, expectedsqltemplateversion: str) -> str:
 
 	q = 'SELECT corpusname, templateversion, corpusbuilddate FROM builderversion'
 
+	warning = """
+		WARNING: VERSION MISMATCH
+		{d} has a builder template version of {v}
+		(and was compiled {t})
+		This version of HipparchiaServer expects the template version to be {e}.
+		You should either rebuild your data or revert to a compatible version of HipparchiaServer
+		FAILED SEARCHES / UNEXPECTED OUTPUT POSSIBLE
+		"""
 	try:
 		cursor.execute(q)
 		results = cursor.fetchall()
@@ -87,14 +93,7 @@ def versionchecking(activedbs: list, expectedsqltemplateversion: str) -> str:
 	for db in activedbs:
 		if db in corpora:
 			if int(corpora[db][0]) != expectedsqltemplateversion:
-				t = """
-				WARNING: VERSION MISMATCH
-				{d} has a builder template version of {v}
-				(and was compiled {t})
-				But the server expects the template version to be {e}.
-				EXPECT THE WORST IF YOU TRY TO EXECUTE ANY SEARCHES
-				"""
-				print(t.format(d=labeldecoder[db], v=corpora[db][0], t=corpora[db][1], e=expectedsqltemplateversion))
+				print(warning.format(d=labeldecoder[db], v=corpora[db][0], t=corpora[db][1], e=expectedsqltemplateversion))
 
 	buildinfo = ['\t{corpus}: {date} [{prolix}]'.format(corpus=c, date=corpora[c][1], prolix=labeldecoder[c])
 				for c in sorted(corpora.keys())]
