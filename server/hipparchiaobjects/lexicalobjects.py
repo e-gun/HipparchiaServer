@@ -246,6 +246,7 @@ class dbDictionaryEntry(object):
 
 		for bib in bibs:
 			if 'Perseus:abo' not in bib[1]:
+				# OR: if 'Perseus:abo' not in bib[1] and 'urn:cts:latinLit:phi' not in bib[1]:
 				head = '<unclickablebibl'
 				tail = '</unclickablebibl>'
 			else:
@@ -260,12 +261,19 @@ class dbDictionaryEntry(object):
 
 		# now do the work of finding the lookups
 		# latin old style: <bibl n="Perseus:abo:phi,0550,001:3:765" default="NO" valid="yes">
-		# latin new style: <bibl n="urn:cts:latinLit:phi0550.phi001:3:765">
+		# latin new styleA: <bibl n="urn:cts:latinLit:phi0550.phi001:3:765">
+		# latin new styleB: <bibl n="urn:cts:latinLit:phi1276.phi001.perseus-lat1:1:90"><author>Juv.</author> 1, 90</bibl>
+		# and there are other oddities to the new style, including arrant author ids
+		# accordingly not building with that data at the moment
 		tlgfinder = re.compile(r'n="Perseus:abo:tlg,(\d\d\d\d),(\d\d\d):(.*?)"')
 		phifinder = re.compile(r'n="Perseus:abo:phi,(\d\d\d\d),(\d\d\d):(.*?)"')
+		# diofindera = re.compile(r'n="urn:cts:latinLit:phi(\d\d\d\d)\.phi(\d\d\d):(.*?)"')
+		# diofinderb = re.compile(r'n="urn:cts:latinLit:phi(\d\d\d\d)\.phi(\d\d\d)\.perseus-lat\d:(.*?)"')
 
 		clickableentry = re.sub(tlgfinder, r'id="perseus/gr\1/\2/\3"', htmlentry)
 		clickableentry = re.sub(phifinder, r'id="perseus/lt\1/\2/\3"', clickableentry)
+		# clickableentry = re.sub(diofindera, r'id="perseus/lt\1/\2/\3"', clickableentry)
+		# clickableentry = re.sub(diofinderb, r'id="perseus/lt\1/\2/\3"', clickableentry)
 		self.body = clickableentry
 		self.haveclickablelookups = True
 		return
