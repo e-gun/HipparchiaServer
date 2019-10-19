@@ -40,7 +40,15 @@ def cleaninitialquery(seeking: str) -> str:
 	# a lot of this may be hard to type, but if you cut and paste a result to make a new search, this stuff is in there
 	extrapunct = ',;#'
 
-	seeking = re.sub(r'[{p}]'.format(p=re.escape(extrapunct + badpucntwithbackslash)), '', seeking)
+	if hipparchia.config['FOOLISHLYALLOWREGEX']:
+		stripset = {x for x in extrapunct}.union({x for x in badpucntwithbackslash})
+		stripset = stripset - {x for x in hipparchia.config['FOOLISHLYALLOWREGEX']}
+	else:
+		stripset = extrapunct + badpucntwithbackslash
+
+	strippunct = ''.join(list(stripset))
+
+	seeking = re.sub(r'[{p}]'.format(p=re.escape(strippunct)), '', seeking)
 
 	# split() later at ' ' means confusion if you have double spaces
 	seeking = re.sub(r' {2,}', r' ', seeking)
