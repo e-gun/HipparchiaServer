@@ -312,6 +312,9 @@ class dbDictionaryEntry(object):
 		lvl = re.search(levelfinder, foundsense)
 		num = re.search(numfinder, foundsense)
 
+		if not lvl or not num:
+			return foundsense
+
 		paragraphlevel = lvl.group(1)
 
 		rewritten = template.format(pl=paragraphlevel, lv=lvl.group(1), nm=num.group(1), sn=foundsense)
