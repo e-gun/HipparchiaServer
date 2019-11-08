@@ -27,7 +27,8 @@ DBWRITEPASS = 'consider_re-using_HipparchiaBuilder_pass'
 # 	network but are not so foolish as to allow "!|'", etc. only
 # 	[].^$ will be allowed and all digits will be dropped
 
-# FOOLISHLYALLOWREGEX is a collection of character you *will* accept: '!*+', e.g.
+# FOOLISHLYALLOWREGEX is a collection of character you *will* accept: '!*+,', e.g.
+#   HOBBLEREGEX set to 'yes' will override anything you put here
 
 HOBBLEREGEX = 'no'
 FOOLISHLYALLOWREGEX = ''

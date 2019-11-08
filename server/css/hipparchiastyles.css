@@ -24,6 +24,9 @@
 	/* --systemdefaultfont: ZZforce_fallback_to_whatever_is_set_as_hipparchiasansstatic; */
 
 	/* define COLORS by variable so you can change them all right here */
+	/* formula to invert HEX: amount*(255-value)+(1-amount)*value */
+	/* colorsys.hls_to_rgb(h, l, s) */
+
 	--main-body-color: hsla(0, 0%, 97%, 1);
 	--main-font-color: hsla(0, 0%, 6%, 1);
 	--black: hsla(0, 0%, 0%, 1);
