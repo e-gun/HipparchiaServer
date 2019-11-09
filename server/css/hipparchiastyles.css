@@ -34,12 +34,12 @@
 	--brown: hsla(22, 22%, 26%, 1);
 	--brtblue: hsla(236, 44%, 40%, 1);
 	--brtgreen: hsla(120, 43%, 77%, 1);
-    --copper: hsl(11, 53%, 30%);
+    --copper: hsla(11, 53%, 30%);
 	--deepblue: hsla(233, 77%, 26%, 1);
 	--dkbabyblue: hsla(237, 43%, 57%, 1);
 	--dkgreen: hsla(120, 80%, 20%, 1);
 	--dkgrey: hsla(0, 0%, 33%, 1);
-	--dkred: hsl(0, 34%, 23%);
+	--dkred: hsla(0, 34%, 23%);
 	--dkteal: hsla(203, 22%, 26%, 1);
 	--green: hsla(120, 100%, 27%, 1);
 	--huedgrey: hsla(240, 6%, 49%, 1);
@@ -52,7 +52,7 @@
 	--offwhite: hsla(0, 0%, 99%, 1);
 	--orange: hsla(47, 100%, 30%, 1);
 	--pink: hsla(0, 33%, 96%, 1);
-    --plum: hsl(291, 15%, 38%);
+    --plum: hsla(291, 15%, 38%);
 	--red: hsla(346, 77%, 26%, 1);
 	--rustedorange: hsla(23, 37%, 39%, 1);
 	--sicklyyellow: hsl(45, 16%, 53%);

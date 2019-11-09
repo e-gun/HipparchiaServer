@@ -258,6 +258,7 @@ class CssFormattingObject(object):
 		self._swapface()
 		self._swapdefaults()
 		self._fontsforstyles()
+		# self._invertcolors()
 		self._colorless()
 
 	def _colorless(self):
@@ -265,6 +266,35 @@ class CssFormattingObject(object):
 			# kill - "color: var(--red);"
 			# save - "background-color: var(--main-body-color);"
 			self.css = re.sub(r'(?<!-)color: var\(--(.*?)\)', 'color: var(--black)', self.css)
+
+	def _invertcolors(self):
+		hslfinder = re.compile(r'hsla\((\d+), (\d+)%, (\d+)%')
+		self.css = re.sub(hslfinder, self.colorinversion, self.css)
+
+	@staticmethod
+	def colorinversion(regexmatch):
+		template = 'hsla({h}, {s}%, {b}%'
+		hue = int(regexmatch.group(1))
+		sat = int(regexmatch.group(2))
+		brt = int(regexmatch.group(3))
+
+		if hue > 180:
+			newhue = hue - 180
+		else:
+			newhue = 180 - hue
+
+		# compress sat span since 0 is just grey
+		dist = 50 - sat
+		newsat = 50 + dist
+		if newsat < 20:
+			newsat = 20
+
+		dist = 50 - brt
+		newbrt = 50 + dist
+
+		inverted = template.format(h=newhue, s=newsat, b=newbrt)
+
+		return inverted
 
 	def _determineface(self):
 		commandlineargs = getcommandlineargs()
