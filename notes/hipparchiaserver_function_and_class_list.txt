@@ -1,21 +1,21 @@
 hipparchia_venv/ $ cloc --not-match-f='^j' HipparchiaServer/
      169 text files.
-     168 unique files.
-      23 files ignored.
+     166 unique files.
+      24 files ignored.
 
-github.com/AlDanial/cloc v 1.82  T=0.65 s (233.7 files/s, 58681.8 lines/s)
+github.com/AlDanial/cloc v 1.84  T=0.74 s (205.8 files/s, 48531.4 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                         112           6073           8568          14888
-CSS                              3            616            141           2490
-HTML                            27            177             26           1811
-XML                              5              0              0           1475
+Python                         110           6138           8629          15017
+HTML                            28            178             26           1858
 JavaScript                       5            265            161           1455
+CSS                              2            315             75           1268
 Markdown                         1             62              0            217
+XML                              6              0              0            182
 -------------------------------------------------------------------------------
-SUM:                           153           7193           8896          22336
--------------------------------------------------------------------------------
+SUM:                           152           6958           8891          19997
+
 
 server/ $  grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
 dbsupport/redisdbfunctions.py:class NullRedis(object):
@@ -52,6 +52,7 @@ hipparchiaobjects/morphologyobjects.py:class MorphPossibilityObject(object):
 hipparchiaobjects/morphologyobjects.py:class dbLemmaObject(object):
 hipparchiaobjects/progresspoll.py:class SharedMemoryProgressPoll(object):
 hipparchiaobjects/progresspoll.py:class RedisProgressPoll(object):
+hipparchiaobjects/progresspoll.py:class NullProgressPoll(object):
 hipparchiaobjects/searchfunctionobjects.py:class GenericSearchFunctionObject(object):
 hipparchiaobjects/searchfunctionobjects.py:class RedisSearchFunctionObject(GenericSearchFunctionObject):
 hipparchiaobjects/searchfunctionobjects.py:class ManagedListSearchFunctionObject(GenericSearchFunctionObject):
@@ -230,8 +231,8 @@ formatting/jsformatting.py:def morphologychartjs() -> str:
 formatting/lexicaformatting.py:def formatdictionarysummary(wordentryobject) -> str:
 formatting/lexicaformatting.py:def lexicaldbquickfixes(listofnames: list) -> Dict[str, str]:
 formatting/lexicaformatting.py:def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) -> str:
-formatting/lexicaformatting.py:def getobservedwordprevalencedata(dictionaryword):
-formatting/lexicaformatting.py:def formatprevalencedata(wordcountobject):
+formatting/lexicaformatting.py:def getobservedwordprevalencedata(dictionaryword) -> str:
+formatting/lexicaformatting.py:def formatprevalencedata(wordcountobject) -> str:
 formatting/miscformatting.py:def timedecorator(function):
 formatting/miscformatting.py:def validatepollid(searchid, maxchars=36) -> str:
 formatting/miscformatting.py:def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True, baremessage=False):
@@ -293,7 +294,7 @@ listsandsession/checksession.py:def justlit(thesession=None) -> bool:
 listsandsession/checksession.py:def justdoc(thesession=None) -> bool:
 listsandsession/checksession.py:def corpusisonandavailable(corpusname):
 listsandsession/genericlistfunctions.py:def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
-listsandsession/genericlistfunctions.py:def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate):
+listsandsession/genericlistfunctions.py:def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate) -> list:
 listsandsession/genericlistfunctions.py:def tidyuplist(untidylist: list) -> list:
 listsandsession/genericlistfunctions.py:def dropdupes(checklist: list, matchlist: list) -> list:
 listsandsession/genericlistfunctions.py:def polytonicsort(unsortedwords: list) -> list:
@@ -404,6 +405,7 @@ semanticvectors/gensimnearestneighbors.py:def buildgensimmodel(searchobject, mor
 semanticvectors/gensimvectors.py:def executegensimsearch(searchobject):
 semanticvectors/preparetextforvectorization.py:def vectorprepdispatcher(searchobject):
 semanticvectors/preparetextforvectorization.py:def breaktextsintosentences(foundsentences, searchlist, searchobject, dbconnection):
+semanticvectors/preparetextforvectorization.py:def monobreaktextsintosentences(searchlist, searchobject):
 semanticvectors/rudimentaryvectormath.py:def finddotproduct(listofavalues, listofbvalues):
 semanticvectors/rudimentaryvectormath.py:def findvectorlength(listofvalues):
 semanticvectors/rudimentaryvectormath.py:def findcosinedist(avalues, lemmavalues, lemmavaluelength):

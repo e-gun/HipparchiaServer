@@ -1100,6 +1100,7 @@ def deabrevviatelatinauthors() -> Dict[str, str]:
 	authordict = {
 		'Amm.': 'Ammianus',
 		'Anthol. Lat.': 'Latin Anthology',
+		'App.': 'Apuleius',
 		'Auct. Her.': 'Rhetorica ad Herennium',
 		'Caes.': 'Caesar',
 		'Cat.': 'Catullus',

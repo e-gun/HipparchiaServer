@@ -286,8 +286,8 @@ class CssFormattingObject(object):
 		# compress sat span since 0 is just grey
 		dist = 50 - sat
 		newsat = 50 + dist
-		if newsat < 20:
-			newsat = 20
+		if newsat < 5:
+			newsat = 5
 
 		dist = 50 - brt
 		newbrt = 50 + dist
