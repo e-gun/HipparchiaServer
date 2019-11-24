@@ -25,8 +25,7 @@ from server.formatting.wordformatting import setdictionarylanguage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.lexicaloutputobjects import lexicalOutputObject, multipleWordOutputObject
 from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
-from server.listsandsession.checksession import probeforsessionvariables, justlatin, justtlg
-from server.listsandsession.genericlistfunctions import polytonicsort
+from server.listsandsession.checksession import justlatin, justtlg, probeforsessionvariables
 
 
 @hipparchia.route('/dictsearch/<searchterm>')
@@ -404,7 +403,7 @@ def knownforms(lexicalid, language, xrefid, headword):
 		language = 'greek'
 
 	try:
-		lexicalid = str(int(lexicalid))
+		lexicalid = str(float(lexicalid))
 	except ValueError:
 		lexicalid = 'invalid_user_input'
 

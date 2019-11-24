@@ -42,7 +42,9 @@
 #   execute and so you if you allow a full corpora search you will
 #   bring your system to it knees for a long, long time. 7548165 is
 #   all of Latin. 13518316 is all Greek literature up to 300 BCE.
-# 	75233492 is all Greek literature.
+# 	75233492 is all Greek literature. It takes >12GB of RAM to autovectorize
+#   all of greek, so be careful about this if you turn on AUTOVECTORIZE
+#   with MAXVECTORSPACE > 75233492.
 #   If you search for the literal cosine distances of a common word you can easily
 #   chew up >24GB of RAM. Your system will hang unless/until Hipparchia
 #   receives more memory optimizations. Gensim NN vectorization of all
