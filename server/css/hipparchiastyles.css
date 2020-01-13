@@ -1185,6 +1185,8 @@ a.nounderline {
 	}
 
 a.nounderline:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	 }
@@ -1195,7 +1197,8 @@ bibl {
 	}
 
 bibl:hover{
-	border: 1px dotted black;
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
 
@@ -1222,6 +1225,8 @@ dictionaryentry{
     }
 
 dictionaryentry:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
 	color: var(--dkbabyblue);
 	font-weight: 600;
 	text-shadow: 1px 1px 3px var(--transparentgrey);
@@ -1258,6 +1263,8 @@ formsummary{
     }
 
 formsummary:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
 	color: var(--dkbabyblue);
 	font-weight: 600;
 	text-shadow: 1px 1px 3px var(--transparentgrey);
@@ -1278,11 +1285,15 @@ hr.styled {
 }
 
 indexedlocation:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
 
 indexobserved:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
@@ -1302,6 +1313,8 @@ legend {
 	}
 
 lemmaheadword:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	 }
@@ -1317,6 +1330,8 @@ locus {
 	}
 
 observed:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
@@ -1584,6 +1599,8 @@ unclickablebibl {
     }
 
 verbform:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
@@ -1593,6 +1610,8 @@ lemmatizable {
 	}
 
 lemmatizable:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
@@ -1602,6 +1621,8 @@ dictionaryidsearch {
 	}
 
 dictionaryidsearch:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
@@ -1611,6 +1632,8 @@ a.parsing {
 	}
 
 a.parsing:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
 	color: var(--dkbabyblue);
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
