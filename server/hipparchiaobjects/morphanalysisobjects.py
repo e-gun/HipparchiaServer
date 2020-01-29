@@ -524,6 +524,8 @@ class DeclinedFormAnalysis(object):
 
 		DeclinedFormAnalysis: word, analyssiscomponents τοιουτουϲί ['masc']
 
+		bad data sent to DeclinedFormAnalysis: too few components
+		nilne: ['neut', 'sg']
 	"""
 	def __init__(self, word: str, language: str, dialects: list, analyssiscomponents: List[str]):
 		assert len(analyssiscomponents) > 2, print('bad data sent to DeclinedFormAnalysis: too few components\n\t{w}: {a}'.format(w=word, a=analyssiscomponents))
@@ -536,6 +538,7 @@ class DeclinedFormAnalysis(object):
 		self.number = analyssiscomponents[2]
 		self.voice = None
 		# print('DeclinedFormAnalysis()', self.word, self.gender, self.number, self.case, self.dialects)
+
 
 class AdvAnalysis(object):
 	pass

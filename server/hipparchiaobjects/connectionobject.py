@@ -202,7 +202,6 @@ class PooledConnectionObject(GenericConnectionObject):
 			try:
 				readonlypool = pooltype(poolsize, poolsize * 2, **kwds)
 			except psycopg2.OperationalError as operror:
-				e = str()
 				thefailure = operror.args[0]
 				noconnection = 'could not connect to server'
 				badpass = 'password authentication failed'
@@ -248,8 +247,10 @@ class PooledConnectionObject(GenericConnectionObject):
 			except psycopg2.pool.PoolError:
 				# the pool is exhausted: try a basic connection instead
 				# but in the long run should probably make a bigger pool/debug something
-				consolewarning('PoolError: fallback to SimpleConnectionObject()')
+				consolewarning('PoolError: emergency fallback to SimpleConnectionObject()')
 				self.simpleconnectionfallback()
+				consolewarning('PoolError: emptying out PooledConnectionObject._pools()')
+				PooledConnectionObject._pools = dict()
 
 		if self.autocommit == 'autocommit':
 			self.setautocommit()

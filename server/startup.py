@@ -45,7 +45,7 @@ if current_process().name == 'MainProcess':
 	"""
 
 	project = 'HipparchiaServer'
-	year = '2016-19'
+	year = '2016-20'
 	fullname = 'E. Gunderson'
 	mailingaddr = 'Department of Classics, 125 Queen’s Park, Toronto, ON  M5S 2C7 Canada'
 
