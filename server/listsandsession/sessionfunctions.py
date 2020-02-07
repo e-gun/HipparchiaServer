@@ -87,6 +87,7 @@ def modifysessionvariable(parameter, value):
 		'topicmodel',
 		'varia',
 		'zaplunates',
+		'zapvees',
 	]
 
 	vectoroptions = [

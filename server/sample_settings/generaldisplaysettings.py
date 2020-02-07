@@ -9,6 +9,8 @@
 #  	in the data and instead print ϲ; this is only
 # 	meaningful if the HipparchiaBuilder (lamentably) had the 'lunates = n' option set to begin with
 #
+# FORCEUFORV: 'yes' means that DB 'pavor' will display as 'pauor'
+#
 # RESTOREMEDIALANDFINALSIGMA: 'yes' means you will, alas, override ϲ
 #  	and try to print σ or ς as needed; this is only meaningful if the
 #  	HipparchiaBuilder had the 'lunates = y' option set to begin with.
@@ -27,6 +29,7 @@
 
 INSISTUPONSTANDARDANGLEBRACKETS = 'no'
 FORCELUNATESIGMANOMATTERWHAT = 'no'
+FORCEUFORV = 'no'
 RESTOREMEDIALANDFINALSIGMA = 'no'
 SIMPLETEXTOUTPUT = 'no'
 

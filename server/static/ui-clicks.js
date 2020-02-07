@@ -64,6 +64,7 @@ function loadoptions() {
             'topicmodel': $('#topicmodel'),
             'varia': $('#includevaria'),
             'zaplunates': $('#zaplunates'),
+            'zapvees': $('#zapvees'),
         };
 
         Object.keys(simpletoggles).forEach(function(key) {
@@ -529,6 +530,12 @@ $('#searchinsidemarkup').change(function() {
 
 $('#zaplunates').change(function() {
     if(this.checked) { setoptions('zaplunates', 'yes'); } else { setoptions('zaplunates', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
+$('#zapvees').change(function() {
+    if(this.checked) { setoptions('zapvees', 'yes'); } else { setoptions('zapvees', 'no'); }
     refreshselections();
     loadoptions();
     });

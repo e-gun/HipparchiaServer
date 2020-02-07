@@ -710,3 +710,36 @@ def setdictionarylanguage(thisword) -> str:
 	else:
 		usedictionary = 'greek'
 	return usedictionary
+
+
+def uforvoutsideofmarkup(textwithmarkup) -> str:
+	"""
+
+	take a marked up line; swap u for v
+	but don't screw up any v's inside of the markup
+
+	:param textwithmarkup:
+	:return:
+	"""
+
+	flatten = lambda l: [item for sublist in l for item in sublist]
+	markupfinder = re.compile(r'<.*?>')
+
+	spans = re.finditer(markupfinder, textwithmarkup)
+	ranges = [s.span() for s in spans]
+	if ranges:
+		# e.g., ranges = [(26, 54), (57, 64), (64, 85), (102, 109), (109, 137), (138, 145), (145, 166), (181, 188)]
+		ranges = [range(r[0], r[1]) for r in ranges]
+		preserve = set(flatten(ranges))
+		textbyposition = enumerate(textwithmarkup)
+		newstr = list()
+		for t in textbyposition:
+			if t[0] not in preserve and t[1] == 'v':
+				newstr.append('u')
+			else:
+				newstr.append(t[1])
+		newstr = ''.join(newstr)
+	else:
+		newstr = re.sub(r'v', 'u', textwithmarkup)
+
+	return newstr

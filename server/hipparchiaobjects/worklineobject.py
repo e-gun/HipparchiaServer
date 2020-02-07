@@ -15,7 +15,7 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.dbbuildinfo import buildoptionchecking
 from server.formatting.betacodeescapes import andsubstitutes
-from server.formatting.wordformatting import attemptsigmadifferentiation, avoidsmallvariants, forcelunates, tidyupterm
+from server.formatting.wordformatting import attemptsigmadifferentiation, avoidsmallvariants, forcelunates, tidyupterm, uforvoutsideofmarkup
 
 buildoptions = buildoptionchecking()
 
@@ -113,6 +113,7 @@ class dbWorkLine(object):
 		self.db = wkuinversalid[0:2]
 		self.authorid = wkuinversalid[:6]
 		self.workid = wkuinversalid[7:]
+		self.universalid = wkuinversalid
 		self.index = index
 		self.l5 = level_05_value
 		self.l4 = level_04_value
@@ -166,6 +167,16 @@ class dbWorkLine(object):
 			# you can provoke this by using something like curl on the server
 			zaplunates = False
 
+		try:
+			zapvees = session['zapvees']
+		except RuntimeError:
+			# accursed Windows10 non-fork() issue
+			zapvees = hipparchia.config['FORCEUFORV']
+		except KeyError:
+			# you don't have a session at all...
+			# you can provoke this by using something like curl on the server
+			zapvees = False
+
 		if zaplunates:
 			self.markedup = attemptsigmadifferentiation(self.markedup)
 		if hipparchia.config['FORCELUNATESIGMANOMATTERWHAT']:
@@ -173,9 +184,13 @@ class dbWorkLine(object):
 		if hipparchia.config['DISTINCTGREEKANDLATINFONTS']:
 			self.markedup = self.separategreekandlatinfonts()
 
+		if zapvees:
+			self.markedup = uforvoutsideofmarkup(self.markedup)
+
 		self.fixhmuirrationaloragnization()
 		self.hmuspanrewrite()
 		self.hmufontshiftsintospans()
+
 
 	def decompose(self) -> tuple:
 		"""

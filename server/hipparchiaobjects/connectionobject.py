@@ -247,8 +247,11 @@ class PooledConnectionObject(GenericConnectionObject):
 			except psycopg2.pool.PoolError:
 				# the pool is exhausted: try a basic connection instead
 				# but in the long run should probably make a bigger pool/debug something
+				# at the moment the only way to hit this error is via some sort of platform bug that yields a hung search
+				# that is, something like a ryzen c-state aborted search damages the pool in the long run...
 				consolewarning('PoolError: emergency fallback to SimpleConnectionObject()')
 				self.simpleconnectionfallback()
+				# this almost certainly damages the search in progress... figure out how to do it right
 				consolewarning('PoolError: emptying out PooledConnectionObject._pools()')
 				PooledConnectionObject._pools = dict()
 
