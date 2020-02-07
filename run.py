@@ -62,6 +62,11 @@ if __name__ == '__main__':
 		# TypeError: can't pickle psycopg2.extensions.connection objects
 		mpmethod = 'fork'
 		multiprocessing.set_start_method(mpmethod)
+	except RuntimeError:
+		#   File "/usr/local/Cellar/python/3.7.6_1/Frameworks/Python.framework/Versions/3.7/lib/python3.7/multiprocessing/context.py", line 242, in set_start_method
+		#     raise RuntimeError('context has already been set')
+		# RuntimeError: context has already been set
+		pass
 	except:
 		mpmethod = 'spawn'
 		multiprocessing.set_start_method(mpmethod)
