@@ -112,6 +112,7 @@ def probeforsessionvariables():
 		session['wlocselections'] = list()
 		session['xmission'] = 'Any'
 		session['zaplunates'] = hipparchia.config['RESTOREMEDIALANDFINALSIGMA']
+		session['zapvees'] = hipparchia.config['FORCEUFORV']
 		convertyesnototruefalse()
 		session.modified = True
 	return
