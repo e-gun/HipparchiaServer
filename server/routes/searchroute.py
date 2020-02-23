@@ -380,6 +380,13 @@ def vectorsearch(vectortype, searchid, headform):
 	:return:
 	"""
 
+	if not hipparchia.config['SEMANTICVECTORSENABLED']:
+		so = SearchObject(str(), str(), str(), str(), str(), session)
+		oo = SearchOutputObject(so)
+		target = 'searchsummary'
+		message = '[semantic vectors have not been enabled]'
+		return oo.generatenulloutput(itemname=target, itemval=message)
+
 	probeforsessionvariables()
 
 	vectorboxes = ['cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery',

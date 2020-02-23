@@ -103,8 +103,8 @@ def executegensimsearch(searchobject):
 		# 'False' if there is no vectorspace; 'failed' if there can never be one; otherwise vectors
 		vectorspace = checkforstoredvector(so, indextype)
 
-		if vectorspace == 'failed to build model':
-			reasons = ['failed to build vector model (too few words?)']
+		if not vectorspace and hipparchia.config['FORBIDUSERDEFINEDVECTORSPACES']:
+			reasons = ['you are only allowed to fetch pre-stored vector spaces; <b>try a single author or corpus search using the default vector values</b>']
 			return emptyvectoroutput(so, reasons)
 
 		# find all sentences

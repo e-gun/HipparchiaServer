@@ -180,8 +180,8 @@ def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, curso
 	except AttributeError:
 		upto = None
 
-	ucount = len([x for x in upto.split(' ') if x])
-	pcount = len([x for x in past.split(' ') if x])
+	ucount = len([x for x in upto.split(' ') if upto])
+	pcount = len([x for x in past.split(' ') if past])
 
 	atline = hitline.index
 	lagging = [x for x in upto.split(' ') if x]

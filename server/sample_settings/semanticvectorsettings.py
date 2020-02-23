@@ -22,6 +22,9 @@
 #   Please consider researching the topic before making any arguments based
 #   on the results that this code will generate.
 #
+# FORBIDUSERDEFINEDVECTORSPACES: if 'yes' you are effectively saying only the autobot-generated sets are valid for
+#   searching; this option will block anything that is not already vectorized from returning a result
+#
 # LITERALCOSINEDISTANCEENABLED allows you to seek the concrete neighbors of words.
 #   In all of the instances of X, what other terms also show up nearby? This
 #   is not necessarily the most interesting search.
@@ -81,7 +84,9 @@
 
 # Windows 10 is not ready for semantic vectors
 #	TypeError: can't pickle psycopg2.extensions.connection objects
+
 SEMANTICVECTORSENABLED = 'no'
+FORBIDUSERDEFINEDVECTORSPACES = 'no'
 LITERALCOSINEDISTANCEENABLED = 'no'
 CONCEPTMAPPINGENABLED = 'no'
 TOPICMODELINGENABLED = 'no'

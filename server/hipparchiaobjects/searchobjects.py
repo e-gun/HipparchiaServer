@@ -153,6 +153,10 @@ class SearchObject(object):
 		return activecorpora
 
 	def infervectorquerytype(self):
+
+		if not hipparchia.config['SEMANTICVECTORSENABLED']:
+			return None
+
 		exclusive = {'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery',
 		             'tensorflowgraph', 'sentencesimilarity', 'topicmodel'}
 
@@ -367,6 +371,31 @@ class SearchOutputObject(object):
 		for item in itemsweuse:
 			outputdict[item] = getattr(self, item)
 		return outputdict
+
+	def generatenulloutput(self, itemname=None, itemval=str()):
+		"""
+
+		build null output that you can feed with an error message
+
+		useful for catching illegitimate searches / configurations
+
+		'searchsummary' is almost certainly the 'itemmname' you will pick
+
+		:param itemname:
+		:param itemval:
+		:return:
+		"""
+
+		outputdict = dict()
+		itemsweuse = ['title', 'searchsummary', 'found', 'image', 'js']
+		for item in itemsweuse:
+			if item != itemname:
+				outputdict[item] = str()
+			else:
+				outputdict[item] = itemval
+		return outputdict
+
+
 
 
 class SearchResult(object):

@@ -1109,7 +1109,7 @@ def deabrevviatelatinauthors() -> Dict[str, str]:
 		'Charis.': 'Charisius',
 		'Cic.': 'Cicero',
 		'Col.': 'Columella',
-		'Curt.': 'Quntus Curtius Rufus',
+		'Curt.': 'Quintus Curtius Rufus',
 		'Dig.': 'Digest of Justinian',
 		'Enn.': 'Ennius',
 		'Eutr.': 'Eutropius',

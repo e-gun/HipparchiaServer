@@ -65,7 +65,16 @@ def startvectorizing():
 			indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 			so.indexrestrictions = indexrestrictions
 			sentencetuples = vectorprepdispatcher(so)
-			vectorspace = buildnnvectorspace(sentencetuples, so)
+			try:
+				vectorspace = buildnnvectorspace(sentencetuples, so)
+			except EOFError:
+				#   File "/Users/erik/hipparchia_venv/HipparchiaServer/server/textsandindices/textandindiceshelperfunctions.py", line 216, in getrequiredmorphobjects
+				#     manager = Manager()
+				#   File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.7/lib/python3.7/multiprocessing/context.py", line 56, in Manager
+				#     m.start()
+				consolewarning('non-fatal EOF error when vectorbot attempted to build vectorspace for {s}'.format(s=searchlist), color='yellow')
+				vectorspace = None
+
 			# the vectorspace is stored in the db at the end of the call to buildnnvectorspace()
 
 			if vectorspace and len(searchlist) > 1:
