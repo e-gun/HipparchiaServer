@@ -51,26 +51,11 @@ function reloadAuthorlist(){
 }
 
 function resetworksautocomplete(){
-    let ids = Array('#level05', '#level04', '#level03', '#level02', '#level01', '#level00');
+    let ids = Array('#level05', '#level04', '#level03', '#level02', '#level01', '#level00',
+        '#level05endpoint', 'level04endpoint', 'level03endpoint', 'level02endpoint', 'level01endpoint',
+        'level00endpoint');
     hidemany(ids);
     clearmany(ids);
-}
-
-
-function checklocus() {
-    let locusval = '';
-    for (let i = 5; i > -1; i--) {
-        if ($('#level0'+i.toString()).val() !== '') {
-            let foundval = $('#level0'+i.toStrint()).val();
-            if (locusval !== '') {
-                locusval += '|'+foundval;
-            } else {
-                locusval = foundval;
-            }
-        }
-    }
-    console.log(locusval);
-    return locusval;
 }
 
 
@@ -78,6 +63,7 @@ $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
     source: "/getauthorhint",
     select: function (event, ui) {
+        let thisselector = $('#authorsautocomplete');
         let selector = $('#worksautocomplete');
         selector.val('');
         resetworksautocomplete();
@@ -88,14 +74,15 @@ $('#authorsautocomplete').autocomplete({
         while (origEvent.originalEvent !== undefined){ origEvent = origEvent.originalEvent; }
         if (origEvent.type === 'click'){
             document.getElementById('authorsautocomplete').value = ui.item.value;
-            auid = $('#authorsautocomplete').val().slice(-7, -1);
+            auid = thisselector.val().slice(-7, -1);
         } else {
-            auid = $('#authorsautocomplete').val().slice(-7, -1);
+            auid = thisselector.val().slice(-7, -1);
         }
         loadWorklist(auid);
         selector.prop('placeholder', '(Pick a work)');
         let ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo');
         bulkshow(ids);
+        $("#authorendpoint").val(thisselector.val());
         }
     });
 
@@ -182,7 +169,11 @@ $('#worksautocomplete').autocomplete({
         let auth = $("#authorsautocomplete").val().slice(-7, -1);
         let wrk = ui.item.value.slice(-4, -1);
         loadLevellist(auth, wrk,'firstline');
-        }
+        },
+     select: function (event, ui) {
+        let thisselector = $('#worksautocomplete');
+        $("#workendpoint").val(thisselector.val());
+     }
 });
 
 
@@ -204,7 +195,23 @@ function locusdataloader() {
     locusdata = locusdata.slice(0, (locusdata.length)-1);
 
     return locusdata;
-    }
+}
+
+function endpointdataloader() {
+    let l5 = $('#level05endpoint').val();
+    let l4 = $('#level04endpoint').val();
+    let l3 = $('#level03endpoint').val();
+    let l2 = $('#level02endpoint').val();
+    let l1 = $('#level01endpoint').val();
+    let l0 = $('#level00endpoint').val();
+    let lvls = [ l5, l4, l3, l2, l1, l0];
+    let locusdata = '';
+    for (let i = 0; i < 6; i++ ) {
+        if (lvls[i] !== '') { locusdata += lvls[i]+'|' } }
+    locusdata = locusdata.slice(0, (locusdata.length)-1);
+
+    return locusdata;
+}
 
 
 function loadLevellist(author, work, pariallocus){
@@ -216,7 +223,7 @@ function loadLevellist(author, work, pariallocus){
     // bad things happen if you send level00 info
     //
     // python will return info about the next level down such as:
-    //  [{'totallevels',3},{'level': 0}, {'label': 'verse'}, {'low': 1}, {'high': 100]
+    //  ws =  {'totallevels': 5, 'level': 2, 'label': 'par', 'low': '1', 'high': '10', 'range': ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
 
     let getpath = '';
     if ( pariallocus !== 'firstline' ) {
@@ -231,17 +238,39 @@ function loadLevellist(author, work, pariallocus){
         let label = selectiondata['label'];
         let low = selectiondata['low'];
         let high = selectiondata['high'];
-
         let possibilities = selectiondata['range'];
 
         let generateme = '#level0'+String(atlevel);
+
         if ( low !== '-9999') { $(generateme).prop('placeholder', '('+label+' '+String(low)+' to '+String(high)+')'); }
         else { $(generateme).prop('placeholder', '(awaiting a valid selection...)'); }
+
         $(generateme).show();
         $(generateme).autocomplete ({
             focus: function (event, ui) {
                 if (atlevel > 0) {
                     let loc = locusdataloader();
+                    loadLevellist(author, work, loc);
+                    }
+                },
+            source: possibilities,
+            select: function (event, ui) {
+                let loc = locusdataloader();
+                loadLevellist(author, work, String(loc));
+            }});
+
+        let endpointlevel = atlevel+1;
+        let endpointbox = '#level0'+String(endpointlevel)+'endpoint';
+        let startpointbox = '#level0'+endpointlevel;
+        $(endpointbox).val($(startpointbox).val());
+
+        let generateendpoint = '#level0'+String(atlevel)+'endpoint';
+        if ( low !== '-9999') { $(generateendpoint).prop('placeholder', '('+label+' '+String(low)+' to '+String(high)+')'); }
+        else { $(generateendpoint).prop('placeholder', '(awaiting a valid selection...)'); }
+        $(generateendpoint).autocomplete ({
+            focus: function (event, ui) {
+                if (atlevel > 0) {
+                    let loc = endpointdataloader();
                     loadLevellist(author, work, loc);
                     }
                 // if we do partialloc browsing then this can be off
@@ -251,9 +280,8 @@ function loadLevellist(author, work, pariallocus){
             select: function (event, ui) {
                 // if we do partialloc browsing then this can be off
                 // if (atlevel <= 1) { $('#browseto').show(); }
-                let loc = locusdataloader();
+                let loc = endpointdataloader();
                 loadLevellist(author, work, String(loc));
-
             }});
     });
 }

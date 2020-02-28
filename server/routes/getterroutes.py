@@ -190,6 +190,9 @@ def findworkstructure(author, work, passage=None):
 		ws['high'] = 'again'
 		ws['range'] = ['error', 'select', 'the', 'work', 'again']
 
+	# print('ws = ', ws)
+	# example: {'totallevels': 5, 'level': 2, 'label': 'par', 'low': '1', 'high': '10', 'range': ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
+
 	results = json.dumps(ws)
 
 	dbconnection.connectioncleanup()
