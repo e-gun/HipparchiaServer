@@ -189,6 +189,7 @@ class dbWorkLine(object):
 			self.markedup = uforvoutsideofmarkup(self.markedup)
 
 		# needs to happen after zapvees
+		# smallcaps means: "Civitatem peregrinvs vsvrpans veneat" and not "Ciuitatem peregrinus usurpans ueneat"
 		if re.search(self.smallcaps, self.markedup):
 			vlswaplambda = lambda x: x.group(1) + re.sub(r'u', 'v', x.group(2)) + x.group(3)
 			self.markedup = re.sub(self.smallcaps, vlswaplambda, self.markedup)
@@ -196,7 +197,6 @@ class dbWorkLine(object):
 		self.fixhmuirrationaloragnization()
 		self.hmuspanrewrite()
 		self.hmufontshiftsintospans()
-
 
 	def decompose(self) -> tuple:
 		"""
