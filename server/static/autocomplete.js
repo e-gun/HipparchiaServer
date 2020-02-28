@@ -8,7 +8,7 @@
 // AUTHORS
 //
 
-// these next two are repeats from documentready.js, but Safari would load this before documentready and so lack access to the functions
+// these next two are repeats from documentready.js, but Safari would load this before documentready and so lacked access to the functions
 function hidemany(arrayofelements) {
     for (let i = 0; i < arrayofelements.length; i++) {
         $(arrayofelements[i]).hide();
@@ -52,8 +52,8 @@ function reloadAuthorlist(){
 
 function resetworksautocomplete(){
     let ids = Array('#level05', '#level04', '#level03', '#level02', '#level01', '#level00',
-        '#level05endpoint', 'level04endpoint', 'level03endpoint', 'level02endpoint', 'level01endpoint',
-        'level00endpoint');
+        '#level05endpoint', '#level04endpoint', '#level03endpoint', '#level02endpoint', '#level01endpoint',
+        '#level00endpoint', '#endpointnotice', '#fromnotice', '#authorendpoint', '#workendpoint');
     hidemany(ids);
     clearmany(ids);
 }
@@ -82,7 +82,7 @@ $('#authorsautocomplete').autocomplete({
         selector.prop('placeholder', '(Pick a work)');
         let ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo');
         bulkshow(ids);
-        $("#authorendpoint").val(thisselector.val());
+        $('#authorendpoint').val(thisselector.val());
         }
     });
 
@@ -172,9 +172,18 @@ $('#worksautocomplete').autocomplete({
         },
      select: function (event, ui) {
         let thisselector = $('#worksautocomplete');
-        $("#workendpoint").val(thisselector.val());
+        $('#workendpoint').val(thisselector.val());
+        toggleendpointarrows();
      }
 });
+
+function toggleendpointarrows() {
+    let isclosed = $('#endpointbutton-isclosed');
+    let isopen = $('#endpointbutton-isopen');
+    if ( isclosed.is(':hidden') && isopen.is(':hidden')) {
+        isclosed.show();
+    }
+}
 
 
 //

@@ -1018,3 +1018,42 @@ $('#genreinfo').click(function(){
                 document.getElementById('genrelistcontents').innerHTML = selectiondata;
                 });
     });
+
+//
+// ENDPOINT UI CLICKS
+//
+
+$('#endpointbutton-isclosed').click(function(){
+    // go from invisible to visible
+    let aep = $('#authorendpoint');
+    let aac = $('#authorsautocomplete');
+    aep.show();
+    aep.val(aac.val());
+    $('#workendpoint').show();
+    $('#fromnotice').show();
+    $('#endpointnotice').show();
+    $('#endpointbutton-isopen').show();
+    $('#endpointbutton-isclosed').hide();
+    let levellist = ['00', '01', '02', '03', '04', '05'];
+    let author = aac.val().slice(-7, -1);
+    let work = $('#worksautocomplete').val().slice(-4, -1);
+    let getpath = author + '/' + work;
+    $.getJSON('/getstructure/' + getpath, function (selectiondata) {
+        let lvls = selectiondata['totallevels'];
+        for (var i = 0; i < lvls; i++) {
+            $('#level'+levellist[i]+'endpoint').show();
+            }
+        });
+    });
+
+$('#endpointbutton-isopen').click(function(){
+    // go from visible to invisible
+    $('#authorendpoint').hide();
+    $('#workendpoint').hide();
+    $('#fromnotice').hide();
+    $('#endpointnotice').hide();
+    $('#endpointbutton-isclosed').show();
+        $('#endpointbutton-isopen').hide();
+    let lvls = ['05', '04', '03', '02', '01', '00'];
+    for (var i = 0; i < lvls.length; i++) { $('#level'+lvls[i]+'endpoint').hide(); }
+    });
