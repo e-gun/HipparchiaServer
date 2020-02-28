@@ -8,6 +8,7 @@
 
 import time
 from multiprocessing import current_process
+from os import cpu_count
 
 from click import secho
 
@@ -22,7 +23,6 @@ from server.listsandsession.genericlistfunctions import dictitemstartswith, find
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
 	buildworkgenresdict, buildworkprovenancedict
 from server.threading.mpthreadcount import setthreadcount
-
 
 if current_process().name == 'MainProcess':
 	commandlineargs = getcommandlineargs()
@@ -63,6 +63,7 @@ if current_process().name == 'MainProcess':
 	del warning
 	del available
 
+	consolewarning('{n} CPUs available'.format(n=cpu_count()), color='green', baremessage=True)
 	if setthreadcount(startup=True) == 1:
 		consolewarning('queries will be dispatched to 1 thread', baremessage=True)
 	else:

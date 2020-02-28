@@ -104,6 +104,7 @@ class dbWorkLine(object):
 	extrapunct = elidedextrapunct + '’'
 	greekpunct = re.compile('[{s}]'.format(s=re.escape(punctuation + elidedextrapunct)))
 	latinpunct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
+	smallcaps = re.compile(r'(<span class="smallcapitals">)(.*?)(</span>)')
 
 	def __init__(self, wkuinversalid, index, level_05_value, level_04_value, level_03_value, level_02_value,
 	             level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words,
@@ -186,6 +187,11 @@ class dbWorkLine(object):
 
 		if zapvees:
 			self.markedup = uforvoutsideofmarkup(self.markedup)
+
+		# needs to happen after zapvees
+		if re.search(self.smallcaps, self.markedup):
+			vlswaplambda = lambda x: x.group(1) + re.sub(r'u', 'v', x.group(2)) + x.group(3)
+			self.markedup = re.sub(self.smallcaps, vlswaplambda, self.markedup)
 
 		self.fixhmuirrationaloragnization()
 		self.hmuspanrewrite()

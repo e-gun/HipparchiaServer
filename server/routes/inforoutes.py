@@ -146,10 +146,30 @@ def testroute():
 	activepoll.activate()
 	activepoll.statusis('executing testroute()')
 
+	# looking for CAP-U when we need CAP-V
+	# from server.hipparchiaobjects.connectionobject import ConnectionObject
+	# # select marked_up_line from lt0914 where marked_up_line like '%U%' limit 1;
+	# lt = {x for x in authordict if x[0:2] == 'lt'}
+	# dbconnection = ConnectionObject()
+	# cursor = dbconnection.cursor()
+	# problematic = list()
+	# for au in lt:
+	# 	q = "select marked_up_line from {x} where marked_up_line like '%U%' limit 1;".format(x=au)
+	# 	cursor.execute(q)
+	# 	f = cursor.fetchone()
+	# 	if f:
+	# 		print('{a}\t{b}'.format(a=au, b=f))
+	# 		problematic.append(au)
+	# print('has CAP-U', problematic)
+	#
+	# dbconnection.connectioncleanup()
+
 	# from server.routes.vectorroutes import findlatentsemanticindex
 	#
 	# so = buildsearchobject(ts, request, session)
 	#
 	# doimportedfunction = findlatentsemanticindex(activepoll, so)
+
+	del activepoll
 
 	return redirect(url_for('frontpage'))
