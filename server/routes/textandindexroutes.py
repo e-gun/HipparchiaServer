@@ -13,10 +13,12 @@ import time
 from flask import session
 
 from server import hipparchia
+from server.dbsupport.citationfunctions import finddblinefromincompletelocus
+from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
 from server.dbsupport.miscdbfunctions import makeanemptywork, buildauthorworkandpassage
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
-from server.formatting.miscformatting import validatepollid
+from server.formatting.miscformatting import consolewarning, validatepollid
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
@@ -95,6 +97,7 @@ def buildindexto(searchid: str, author: str, work=None, passage=None):
 
 	# get ready to send stuff to the page
 	count = len(output)
+
 	try:
 		locale.setlocale(locale.LC_ALL, 'en_US')
 		count = locale.format_string('%d', count, grouping=True)
@@ -113,6 +116,101 @@ def buildindexto(searchid: str, author: str, work=None, passage=None):
 	results['title'] = avoidsmallvariants(wo.title)
 	results['structure'] = avoidsmallvariants(wo.citation())
 	results['worksegment'] = '.'.join(psg)
+	results['elapsed'] = buildtime
+	results['wordsfound'] = count
+	results['indexhtml'] = indexhtml
+	results['keytoworks'] = allworks
+	results['newjs'] = supplementalindexjs()
+
+	results = json.dumps(results)
+
+	dbconnection.connectioncleanup()
+	del poll[pollid]
+
+	return results
+
+
+@hipparchia.route('/indexspan/<searchid>/<author>/<work>/<startpoint>/<endpoint>')
+def buildindextospan(searchid: str, author: str, work: str, startpoint: str, endpoint: str):
+	"""
+
+	build an index to a subset of a work:
+		Cic., De Or. 2.3 - 2.30
+		"GET /indexspan/117aba39/lt0474/037/2|3/2|20 HTTP/1.1"
+
+	:param searchid:
+	:param author:
+	:param work:
+	:param startpoint:
+	:param endpoint:
+	:return:
+	"""
+
+	# print('startpoint, endpoint', startpoint, endpoint)
+	probeforsessionvariables()
+
+	pollid = validatepollid(searchid)
+
+	starttime = time.time()
+
+	poll[pollid] = ProgressPoll(pollid)
+	poll[pollid].activate()
+
+	dbconnection = ConnectionObject('autocommit')
+	dbcursor = dbconnection.cursor()
+
+	requested = buildauthorworkandpassage(author, work, startpoint, authordict, workdict, dbcursor, endpoint=endpoint)
+	ao = requested['authorobject']
+	wo = requested['workobject']
+	start = requested['passagelist']
+	stop = requested['endpointlist']
+	print('start,stop:',start,stop)
+
+	allworks = list()
+	output = list()
+	cdict = dict()
+	valid = True
+	useheadwords = session['headwordindexing']
+
+	poll[pollid].statusis('Preparing a partial index to {t}'.format(t=wo.title))
+	firstlinenumber = finddblinefromincompletelocus(wo, start, dbcursor)
+	lastlinenumber = finddblinefromincompletelocus(wo, stop, dbcursor, findlastline=True)
+	if firstlinenumber['code'] == 'success' and lastlinenumber['code'] == 'success':
+		print("(firstlinenumber['line'], lastlinenumber['line'])", (firstlinenumber['line'], lastlinenumber['line']))
+		cdict = {wo.universalid: (firstlinenumber['line'], lastlinenumber['line'])}
+		startln = dblineintolineobject(grabonelinefromwork(ao.universalid, firstlinenumber['line'], dbcursor))
+		stopln = dblineintolineobject(grabonelinefromwork(ao.universalid, lastlinenumber['line'], dbcursor))
+	else:
+		msg = '"indexspan/" could not find first and last: {a}w{b} - {c} TO {d}'
+		consolewarning(msg.format(a=author, b=work, c=startpoint, d=endpoint))
+		startln = makeablankline(work, 0)
+		stopln = makeablankline(work, 1)
+		valid = False
+
+	if valid:
+		output = buildindextowork(cdict, poll[pollid], useheadwords, dbcursor)
+
+	# get ready to send stuff to the page
+	count = len(output)
+
+	try:
+		locale.setlocale(locale.LC_ALL, 'en_US')
+		count = locale.format_string('%d', count, grouping=True)
+	except locale.Error:
+		count = str(count)
+
+	poll[pollid].statusis('Preparing the index HTML')
+	indexhtml = wordindextohtmltable(output, useheadwords)
+
+	buildtime = time.time() - starttime
+	buildtime = round(buildtime, 2)
+	poll[pollid].deactivate()
+
+	results = dict()
+	results['authorname'] = avoidsmallvariants(ao.shortname)
+	results['title'] = avoidsmallvariants(wo.title)
+	results['structure'] = avoidsmallvariants(wo.citation())
+	results['worksegment'] = 'from {a} to {b}'.format(a=startln.shortlocus(), b=stopln.shortlocus())
 	results['elapsed'] = buildtime
 	results['wordsfound'] = count
 	results['indexhtml'] = indexhtml

@@ -11,6 +11,7 @@ key features:
 			add/exclude individual works
 			add/exclude individual work genres
 			add/exclude individual passages
+            add/exclude work spans ('books 1-2', e.g.)
 			add/exclude individual author locations
 			add/exclude individual work provenances
 			include/exclude spuria

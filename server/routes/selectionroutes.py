@@ -105,13 +105,19 @@ def selectionmade():
 			lastline = finddblinefromincompletelocus(workobject, stop, emptycursor, findlastline=True)
 			citationtemplate = '{a}w{b}_FROM_{c}_TO_{d}'
 			if firstline['code'] == 'success' and lastline['code'] == 'success':
-				loc = citationtemplate.format(a=uid, b=workid, c=firstline['line'], d=lastline['line'])
+				fl = firstline['line']
+				ll = lastline['line']
+				loc = citationtemplate.format(a=uid, b=workid, c=fl, d=ll)
 				# print('span selected:', loc)
 				# span selected: lt0474w005_FROM_4501_TO_11915
 				# Cicero, In Verrem: 2.1.t.1
 				# Cicero, In Verrem: 2.3.228.15
-				session['psg' + suffix].append(loc)
-				session['psg' + suffix] = tidyuplist(session['psg' + suffix])
+				if ll > fl:
+					session['psg' + suffix].append(loc)
+					session['psg' + suffix] = tidyuplist(session['psg' + suffix])
+				else:
+					msg = '"makeselection/" sent a firstline greater than the lastine value: {a} > {b} [{c}; {d}]'
+					consolewarning(msg.format(a=fl, b=ll, c=locus, d=endpoint))
 				rationalizeselections(loc, suffix)
 			else:
 				msg = '"makeselection/" could not find first and last: {a}w{b} - {c} TO {d}'

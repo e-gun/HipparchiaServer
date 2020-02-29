@@ -360,11 +360,13 @@ def icanpickleconnections() -> bool:
 	return result
 
 
-def buildauthorworkandpassage(author: str, work: str, passage: str, authordict: dict, workdict: dict, dbcursor) -> dict:
+def buildauthorworkandpassage(author: str, work: str, passage: str, authordict: dict, workdict: dict, dbcursor, endpoint=None) -> dict:
 	"""
 
 	return the author, work, and locus requested
 	also some other handy variable derived from these items
+
+	can also handle spans if you end an 'endpoint'
 
 	:param author:
 	:param work:
@@ -378,7 +380,8 @@ def buildauthorworkandpassage(author: str, work: str, passage: str, authordict: 
 	ao = None
 	wo = None
 	workdb = None
-	psg = str()
+	psg = list()
+	end = list()
 
 	try:
 		ao = authordict[author]
@@ -401,10 +404,17 @@ def buildauthorworkandpassage(author: str, work: str, passage: str, authordict: 
 		psg = psg.split('|')
 		psg.reverse()
 
+	if endpoint:
+		allowed = ',;|'
+		end = depunct(endpoint, allowed)
+		end = end.split('|')
+		end.reverse()
+
 	requested = dict()
 
 	requested['authorobject'] = ao
 	requested['workobject'] = wo
 	requested['passagelist'] = psg
+	requested['endpointlist'] = end
 
 	return requested

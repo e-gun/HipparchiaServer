@@ -135,7 +135,7 @@ def compilesearchlist(listmapper: dict, s: dict) -> list:
 			excludedworks += foundindict(wd, 'provenance', l)
 
 	searchlist = list(set(searchlist) - set(excludedworks))
-	print('searchlist', searchlist)
+	# print('searchlist', searchlist)
 
 	return searchlist
 

@@ -11,7 +11,7 @@ from typing import List, Tuple
 
 from flask import session
 
-from server.dbsupport.citationfunctions import locusintocitation, prolixlocus
+from server.dbsupport.citationfunctions import prolixlocus
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.listsandsession.checksession import probeforsessionvariables
@@ -258,6 +258,7 @@ def sessionselectionsinfo(authordict: dict, workdict: dict) -> dict:
 					stopln = dblineintolineobject(grabonelinefromwork(uid, stop, dbcursor))
 					dbconnection.connectioncleanup()
 					loc = spantemplate.format(a=startln.shortlocus(), b=stopln.shortlocus())
+
 				thehtml.append(psgtemplate.format(v=v, var=var, soe=selectionorexclusion, lv=localval, au=ao.akaname, wk=wk.title, loc=loc, tit=tit))
 				thejs.append((var, localval))
 

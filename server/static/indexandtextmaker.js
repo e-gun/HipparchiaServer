@@ -35,21 +35,29 @@ $('#makeanindex').click( function() {
         let name = $('#authorsautocomplete').val();
         let authorid = name.slice(-7, -1);
         let locus = locusdataloader();
+        let endpoint = endpointdataloader();
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
         $('#searchsummary').html('');
         $('#displayresults').html('');
 
         if (authorid !== '') {
-            $('#clearpick').show();
-            // var searchid = Date.now();
-            let searchid = generateId(8);
-            // let searchid = uuidv4();
-            let url = '';
-            if (wrk === '') { url = '/indexto/' + searchid + '/' + authorid; }
-            else if (locus === '') { url = '/indexto/' + searchid + '/' + authorid + '/' + wrk; }
-            else { url = '/indexto/' + searchid + '/' + authorid +'/' + wrk + '/' + locus; }
-            $.getJSON(url, function (indexdata) { loadindexintodisplayresults(indexdata); });
-            checkactivityviawebsocket(searchid);
+            if (locus === endpoint) {
+                $('#clearpick').show();
+                // var searchid = Date.now();
+                let searchid = generateId(8);
+                // let searchid = uuidv4();
+                let url = '';
+                if (wrk === '') { url = '/indexto/' + searchid + '/' + authorid; }
+                else if (locus === '') { url = '/indexto/' + searchid + '/' + authorid + '/' + wrk; }
+                else { url = '/indexto/' + searchid + '/' + authorid +'/' + wrk + '/' + locus; }
+                $.getJSON(url, function (indexdata) { loadindexintodisplayresults(indexdata); });
+                checkactivityviawebsocket(searchid);
+            } else {
+                let searchid = generateId(8);
+                let url = '/indexspan/' + searchid + '/' + authorid +'/' + wrk + '/' + locus + '/' + endpoint;
+                $.getJSON(url, function (indexdata) { loadindexintodisplayresults(indexdata); });
+                checkactivityviawebsocket(searchid);
+            }
         }
 });
 
