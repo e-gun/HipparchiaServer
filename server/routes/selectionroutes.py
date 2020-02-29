@@ -155,6 +155,7 @@ def selectionmade():
 		session['wloc' + other] = dropdupes(session['wloc' + other], session['wloc' + suffix])
 
 	# after the update to the session, you need to update the page html to reflect the changes
+	# print('session["psgselections"]=', session['psgselections'])
 
 	return getcurrentselections()
 

@@ -5,12 +5,15 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
 import re
 from typing import List, Tuple
 
 from flask import session
 
-from server.dbsupport.citationfunctions import prolixlocus
+from server.dbsupport.citationfunctions import locusintocitation, prolixlocus
+from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.listsandsession.checksession import probeforsessionvariables
 
 
@@ -124,6 +127,7 @@ def sessionselectionsinfo(authordict: dict, workdict: dict) -> dict:
 
 	returndict = dict()
 	thejs = list()
+
 	tit = 'title="Double-click to remove this item"'
 
 	try:
@@ -224,25 +228,37 @@ def sessionselectionsinfo(authordict: dict, workdict: dict) -> dict:
 		v = 'psg'
 		var = v + selectionorexclusion
 		if session[var]:
+			psgtemplate = '<span class="{v}{soe} selection" id="{var}_0{lv}" {tit}>{au}, <span class="pickedwork">{wk}</span>&nbsp; <span class="pickedsubsection">{loc}</span></span><br />'
+			spantemplate = 'from {a} to {b}'
 			thehtml.append('<span class="picklabel">Passages</span><br />')
 			localval = -1
 			for s in session[var]:
 				localval += 1
-				locus = s[14:].split('|')
-				# print('l', s, s[:6], s[7:10], s[14:], locus)
-				locus.reverse()
-				citationtuple = tuple(locus)
 				uid = s[:6]
 				ao = authordict[uid]
-				for w in ao.listofworks:
-					if w.universalid == s[0:10]:
-						wk = w
-				loc = prolixlocus(wk, citationtuple)
-				thehtml.append('<span class="{v}{soe} selection" id="{var}_0{lv}" {tit}>{au}, '
-				               '<span class="pickedwork">{wk}</span>&nbsp;'
-				               '<span class="pickedsubsection">{loc}</span></span><br />'
-				               ''.format(v=v, var=var, soe=selectionorexclusion, lv=localval, au=ao.akaname,
-				                           wk=wk.title, loc=loc, tit=tit))
+				loc = str()
+				# watch out for heterogenous passage selection formats; only _AT_ and _FROM_ exist ATM
+				# session[psgselections] = ['lt0474w005_FROM_4501_TO_11915', 'lt2806w002_AT_3|4|5']
+				if '_AT_' in s:
+					locus = s.split('_AT_')[1].split('|')
+					locus.reverse()
+					citationtuple = tuple(locus)
+					for w in ao.listofworks:
+						if w.universalid == s[0:10]:
+							wk = w
+					loc = prolixlocus(wk, citationtuple)
+				elif '_FROM_' in s:
+					dbconnection = ConnectionObject()
+					dbcursor = dbconnection.cursor()
+					wk = workdict[s[0:10]]
+					locus = s.split('_FROM_')[1]
+					start = locus.split('_TO_')[0]
+					stop = locus.split('_TO_')[1]
+					startln = dblineintolineobject(grabonelinefromwork(uid, start, dbcursor))
+					stopln = dblineintolineobject(grabonelinefromwork(uid, stop, dbcursor))
+					dbconnection.connectioncleanup()
+					loc = spantemplate.format(a=startln.shortlocus(), b=stopln.shortlocus())
+				thehtml.append(psgtemplate.format(v=v, var=var, soe=selectionorexclusion, lv=localval, au=ao.akaname, wk=wk.title, loc=loc, tit=tit))
 				thejs.append((var, localval))
 
 		returndict[selectionorexclusion] = '\n'.join(thehtml)
