@@ -1053,7 +1053,7 @@ $('#endpointbutton-isopen').click(function(){
     $('#fromnotice').hide();
     $('#endpointnotice').hide();
     $('#endpointbutton-isclosed').show();
-        $('#endpointbutton-isopen').hide();
+    $('#endpointbutton-isopen').hide();
     let lvls = ['05', '04', '03', '02', '01', '00'];
     for (var i = 0; i < lvls.length; i++) { $('#level'+lvls[i]+'endpoint').hide(); }
     });

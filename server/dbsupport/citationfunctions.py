@@ -11,6 +11,7 @@ import re
 from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber, worklinetemplate
 from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import avoidsmallvariants
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbOpus
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.helperobjects import LowandHighInfo
@@ -194,11 +195,13 @@ def prolixlocus(workobject: dbOpus, citationtuple: tuple) -> str:
 	return citation
 
 
-def finddblinefromlocus(workobject: dbOpus, citationtuple: tuple, dbcursor) -> int:
+def finddblinefromlocus(workobject: dbOpus, citationtuple: tuple, dbcursor, findlastline=False) -> int:
 	"""
 
 	citationtuple ('9','109','8') to focus on line 9, section 109, book 8
 	finddblinefromlocus(h, 1, ('130', '24')) ---> 15033
+
+	findlastline lets you grab the end of a segment: needed for the "endpoint" selection code
 
 	:param workid:
 	:param citationtuple:
@@ -233,7 +236,10 @@ def finddblinefromlocus(workobject: dbOpus, citationtuple: tuple, dbcursor) -> i
 	for level in range(0, len(citationtuple)):
 		lq.append('{l}=%s'.format(l=lmap[level]))
 
-	query = query + ' AND '.join(lq) + ' ORDER BY index ASC'
+	if not findlastline:
+		query = query + ' AND '.join(lq) + ' ORDER BY index ASC'
+	else:
+		query = query + ' AND '.join(lq) + ' ORDER BY index DESC'
 
 	# if the last selection box was empty you are sent '_0' instead of a real value
 	# (because the first line of lvl05 is not necc. '1')
@@ -265,7 +271,7 @@ def finddblinefromlocus(workobject: dbOpus, citationtuple: tuple, dbcursor) -> i
 	return indexvalue
 
 
-def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, cursor, trialnumber=0) -> dict:
+def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, dbcursor, trialnumber=0, findlastline=False) -> dict:
 	"""
 
 	this is used both by the browser selection boxes and by perseus passage lookups
@@ -282,10 +288,16 @@ def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, cursor
 
 	:param workobject:
 	:param citationlist:
-	:param cursor:
+	:param dbcursor:
 	:param trialnumber:
 	:return:
 	"""
+
+	dbconnection = None
+	if not dbcursor:
+		# we were not passed a cursor
+		dbconnection = ConnectionObject()
+		dbcursor = dbconnection.cursor()
 
 	# print('citationlist',workobject.universalid,citationlist)
 
@@ -319,13 +331,13 @@ def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, cursor
 		# there is no line 25 to section 9. When no result is returned we will dump the 9 and see if just 25 works
 		# is usually does
 
-		dblinenumber = finddblinefromlocus(workobject, tuple(citationlist), cursor)
+		dblinenumber = finddblinefromlocus(workobject, tuple(citationlist), dbcursor, findlastline)
 		if dblinenumber:
 			successcode = 'success'
 		else:
 			# for lt0474w058 PE will send section=33, 11, 1, 1
 			# but Cicero, Epistulae ad Quintum Fratrem is book, letter, section, line
-			results = perseuslookupleveltrimmer(workobject, citationlist, cursor, trialnumber)
+			results = perseuslookupleveltrimmer(workobject, citationlist, dbcursor, trialnumber)
 			return results
 	elif numberoflevels < len(citationlist):
 		# something stupid like plautus' acts and scenes when you only want the line numbers
@@ -363,13 +375,16 @@ def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, cursor
 			query.append('{lvl}=%s'.format(lvl=lmap[0]))
 
 		query = ' AND '.join(query)
-		query += ' ORDER BY index ASC'
+		if not findlastline:
+			query += ' ORDER BY index ASC'
+		else:
+			query += ' ORDER BY index DESC'
 
 		data = tuple([workobject.universalid]+citationlist)
 
 		try:
-			cursor.execute(query, data)
-			found = cursor.fetchone()
+			dbcursor.execute(query, data)
+			found = dbcursor.fetchone()
 			dblinenumber = found[0]
 			# often actually true...
 			successcode = 'success'
@@ -378,7 +393,7 @@ def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, cursor
 			# print('nothing found: returning first line')
 			if trialnumber < 2:
 				citationlist = perseuslookupchangecase(citationlist)
-				results = finddblinefromincompletelocus(workobject, citationlist, cursor, trialnumber)
+				results = finddblinefromincompletelocus(workobject, citationlist, dbcursor, trialnumber)
 				return results
 			elif workobject.universalid[0:6] == 'lt1014':
 				# The dictionary regularly (but inconsistently!) points to Seneca Maior [lt1014] when it is citing Seneca Minor [lt107]'
@@ -406,6 +421,10 @@ def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, cursor
 					successcode += '<br >The edition used by the lexicon might not match the local edition of the fragments.'
 
 	results = {'code': successcode, 'line': dblinenumber}
+
+	if dbconnection:
+		# we grabbed a connection because we were not passed a cursor
+		dbconnection.connectioncleanup()
 
 	return results
 

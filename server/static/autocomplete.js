@@ -116,6 +116,10 @@ $('#pickauthor').click( function() {
                 $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&endpoint=' + endpoint, function (selectiondata) {
                     reloadselections(selectiondata);
                 });
+                $('#fromnotice').hide();
+                $('#endpointnotice').hide();
+                $('#endpointbutton-isclosed').hide();
+                $('#endpointbutton-isopen').hide();
              }
         }
         $('#searchlistcontents').hide();

@@ -12,6 +12,7 @@ import re
 from flask import request, session
 
 from server import hipparchia
+from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import depunct
 from server.listsandsession.genericlistfunctions import dropdupes, tidyuplist
@@ -86,9 +87,35 @@ def selectionmade():
 
 	# you have validated the input, now do something with it...
 	if (uid != '') and (workid != '') and (locus != '') and (endpoint != ''):
-		# a span in an author: bk1 and bk2 of the aeneid, e.g.
+		# a span in an author: 3 verrine orations, e.g. [note that the selection is 'greedy': 1start - 3end]
+		# http://127.0.0.1:5000/makeselection?auth=lt0474&work=005&locus=2|1&endpoint=2|3
 		# convert this into a 'firstline' through 'lastline' format
-		pass
+		emptycursor = None
+		workobject = None
+		try:
+			workobject = workdict['{a}w{b}'.format(a=uid, b=workid)]
+		except KeyError:
+			consolewarning('"makeselection/" sent a bad workuniversalid: {a}w{b}'.format(a=uid, b=workid))
+		start = locus.split('|')
+		stop = endpoint.split('|')
+		start.reverse()
+		stop.reverse()
+		if workobject:
+			firstline = finddblinefromincompletelocus(workobject, start, emptycursor)
+			lastline = finddblinefromincompletelocus(workobject, stop, emptycursor, findlastline=True)
+			citationtemplate = '{a}w{b}_FROM_{c}_TO_{d}'
+			if firstline['code'] == 'success' and lastline['code'] == 'success':
+				loc = citationtemplate.format(a=uid, b=workid, c=firstline['line'], d=lastline['line'])
+				# print('span selected:', loc)
+				# span selected: lt0474w005_FROM_4501_TO_11915
+				# Cicero, In Verrem: 2.1.t.1
+				# Cicero, In Verrem: 2.3.228.15
+				session['psg' + suffix].append(loc)
+				session['psg' + suffix] = tidyuplist(session['psg' + suffix])
+				rationalizeselections(loc, suffix)
+			else:
+				msg = '"makeselection/" could not find first and last: {a}w{b} - {c} TO {d}'
+				consolewarning(msg.format(a=uid, b=workid, c=locus, d=endpoint))
 	elif (uid != '') and (workid != '') and (locus != ''):
 		# a specific passage
 		session['psg' + suffix].append(uid + 'w' + workid + '_AT_' + locus)
