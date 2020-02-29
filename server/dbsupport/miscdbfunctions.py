@@ -94,14 +94,21 @@ def dbloadasingleworkobject(workuniversalid: str) -> dbOpus:
 def findselectionboundaries(workobject: dbOpus, selection: str, cursor) -> tuple:
 	"""
 	
-	ask for something like 'lt1254w001/15|13|4'
-	
+	selections look like
+		lt2806w002_AT_3|4
+		lt0474w005_FROM_4501_TO_11915
 	return (startline, endline) 
 	
 	:param selection: 
 	:return: 
 	"""
 
+	if '_FROM_' in selection:
+		span = selection.split('_FROM_')[1]
+		boundaries = tuple(span.split('_TO_'))
+		return boundaries
+
+	# OK, then we must be an '_AT_' ...
 	locus = selection[14:].split('|')
 
 	wklvls = list(workobject.structure.keys())

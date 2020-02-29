@@ -130,6 +130,7 @@ $('#excludeauthor').click( function() {
         let name = $('#authorsautocomplete').val();
         let authorid = name.slice(-7, -1);
         let locus = locusdataloader();
+        let endpoint = endpointdataloader();
         // $('#authorsautocomplete').val('');
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
         // $('#worksautocomplete').val('');
@@ -143,14 +144,22 @@ $('#excludeauthor').click( function() {
                   $('#worksautocomplete').prop('placeholder', '(Pick a work)');
                   });
              } else if (locus === '') {
-                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk+'&exclude=t', function (selectiondata) {
+                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&exclude=t', function (selectiondata) {
+                    reloadselections(selectiondata);
+                });
+             } else if (locus === endpoint){
+                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&exclude=t', function (selectiondata) {
                     reloadselections(selectiondata);
                 });
              } else {
-                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus+'&exclude=t', function (selectiondata) {
+                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&endpoint=' + endpoint + '&exclude=t', function (selectiondata) {
                     reloadselections(selectiondata);
                 });
-             }
+                $('#fromnotice').hide();
+                $('#endpointnotice').hide();
+                $('#endpointbutton-isclosed').hide();
+                $('#endpointbutton-isopen').hide();
+            }
         }
         $('#searchlistcontents').hide();
 });

@@ -156,6 +156,7 @@ def selectionmade():
 
 	# after the update to the session, you need to update the page html to reflect the changes
 	# print('session["psgselections"]=', session['psgselections'])
+	# print('session["psgexclusions"]=', session['psgexclusions'])
 
 	return getcurrentselections()
 
