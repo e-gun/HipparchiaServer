@@ -91,6 +91,7 @@ $('#pickauthor').click( function() {
         let name = $('#authorsautocomplete').val();
         let authorid = name.slice(-7, -1);
         let locus = locusdataloader();
+        let endpoint = endpointdataloader();
         // $('#authorsautocomplete').val('');
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
         // $('#worksautocomplete').val('');
@@ -107,8 +108,12 @@ $('#pickauthor').click( function() {
                 $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
                     reloadselections(selectiondata);
                 });
-             } else {
+             } else if (locus === endpoint){
                 $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (selectiondata) {
+                    reloadselections(selectiondata);
+                });
+             } else {
+                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&endpoint=' + endpoint, function (selectiondata) {
                     reloadselections(selectiondata);
                 });
              }
@@ -280,7 +285,7 @@ function loadLevellist(author, work, pariallocus){
             focus: function (event, ui) {
                 if (atlevel > 0) {
                     let loc = endpointdataloader();
-                    loadLevellist(author, work, loc);
+                    endpointloadLevellist(author, work, loc);
                     }
                 // if we do partialloc browsing then this can be off
                 // if (atlevel <= 1) { $('#browseto').show(); }
@@ -290,11 +295,58 @@ function loadLevellist(author, work, pariallocus){
                 // if we do partialloc browsing then this can be off
                 // if (atlevel <= 1) { $('#browseto').show(); }
                 let loc = endpointdataloader();
-                loadLevellist(author, work, String(loc));
+                endpointloadLevellist(author, work, String(loc));
             }});
     });
 }
 
+
+function endpointloadLevellist(author, work, pariallocus){
+    // python is hoping to be sent something like:
+    //
+    //  /getstructure/lt1254w001
+    //  /getstructure/lt0474w043/3|12
+    //
+    // bad things happen if you send level00 info
+    //
+    // python will return info about the next level down such as:
+    //  ws =  {'totallevels': 5, 'level': 2, 'label': 'par', 'low': '1', 'high': '10', 'range': ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
+
+    let getpath = '';
+    if ( pariallocus !== 'firstline' ) {
+        getpath = author + '/' + work + '/' + pariallocus;
+    } else {
+        getpath = author + '/' + work;
+    }
+
+    $.getJSON('/getstructure/' + getpath, function (selectiondata) {
+        let top = selectiondata['totallevels']-1;
+        let atlevel = selectiondata['level'];
+        let label = selectiondata['label'];
+        let low = selectiondata['low'];
+        let high = selectiondata['high'];
+        let possibilities = selectiondata['range'];
+
+        let generateme = '#level0'+String(atlevel)+'endpoint';
+
+        if ( low !== '-9999') { $(generateme).prop('placeholder', '('+label+' '+String(low)+' to '+String(high)+')'); }
+        else { $(generateme).prop('placeholder', '(awaiting a valid selection...)'); }
+
+        $(generateme).show();
+        $(generateme).autocomplete ({
+            focus: function (event, ui) {
+                if (atlevel > 0) {
+                    let loc = endpointdataloader();
+                    endpointdataloader(author, work, loc);
+                    }
+                },
+            source: possibilities,
+            select: function (event, ui) {
+                let loc = endpointdataloader();
+                endpointdataloader(author, work, String(loc));
+            }});
+    });
+}
 
 //
 // GENRES

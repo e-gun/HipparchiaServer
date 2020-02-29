@@ -49,10 +49,12 @@ def selectionmade():
 	workid = depunct(request.args.get('work', ''))
 	genre = depunct(request.args.get('genre', ''))
 	auloc = depunct(request.args.get('auloc', ''))
+
 	exclude = re.sub('[^tf]', '', request.args.get('exclude', ''))
 
 	allowedpunct = '|,'
 	locus = depunct(request.args.get('locus', ''), allowedpunct)
+	endpoint = depunct(request.args.get('endpoint', ''), allowedpunct)
 
 	allowedpunct = '.-?'
 	wkprov = depunct(request.args.get('wkprov', ''), allowedpunct)
@@ -71,20 +73,23 @@ def selectionmade():
 	uid = selectionisactive(uid)
 
 	if genre and genre not in returnactivelist(authorgenresdict):
-		genre = ''
+		genre = str()
 
 	if wkgenre and wkgenre not in returnactivelist(workgenresdict):
-		wkgenre = ''
+		wkgenre = str()
 
 	if auloc and auloc not in returnactivelist(authorlocationdict):
-		auloc = ''
+		auloc = str()
 
 	if wkprov and wkprov not in returnactivelist(workprovenancedict):
-		wkprov = ''
+		wkprov = str()
 
 	# you have validated the input, now do something with it...
-
-	if (uid != '') and (workid != '') and (locus != ''):
+	if (uid != '') and (workid != '') and (locus != '') and (endpoint != ''):
+		# a span in an author: bk1 and bk2 of the aeneid, e.g.
+		# convert this into a 'firstline' through 'lastline' format
+		pass
+	elif (uid != '') and (workid != '') and (locus != ''):
 		# a specific passage
 		session['psg' + suffix].append(uid + 'w' + workid + '_AT_' + locus)
 		session['psg' + suffix] = tidyuplist(session['psg' + suffix])

@@ -1027,9 +1027,9 @@ $('#endpointbutton-isclosed').click(function(){
     // go from invisible to visible
     let aep = $('#authorendpoint');
     let aac = $('#authorsautocomplete');
-    aep.show();
+    // aep.show();
     aep.val(aac.val());
-    $('#workendpoint').show();
+    // $('#workendpoint').show();
     $('#fromnotice').show();
     $('#endpointnotice').show();
     $('#endpointbutton-isopen').show();
@@ -1048,8 +1048,8 @@ $('#endpointbutton-isclosed').click(function(){
 
 $('#endpointbutton-isopen').click(function(){
     // go from visible to invisible
-    $('#authorendpoint').hide();
-    $('#workendpoint').hide();
+    // $('#authorendpoint').hide();
+    // $('#workendpoint').hide();
     $('#fromnotice').hide();
     $('#endpointnotice').hide();
     $('#endpointbutton-isclosed').show();
