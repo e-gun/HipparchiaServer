@@ -102,15 +102,28 @@ $('#textofthis').click( function() {
         let name = $('#authorsautocomplete').val();
         let authorid = name.slice(-7, -1);
         let locus = locusdataloader();
+        let endpoint = endpointdataloader();
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
         if (authorid !== '') {
-            $('#clearpick').show();
-            let url = '';
-            if (wrk === '') { url = '/textof/' + authorid; }
-            else if (locus === '') { url = '/textof/' + authorid + '/' + wrk; }
-            else { url = '/textof/' + authorid + '/' + wrk + '/' + locus; }
-
-            $.getJSON( url, function (returnedtext) { loadtextintodisplayresults(returnedtext); });
+            if (locus === endpoint) {
+                $('#clearpick').show();
+                let url = '';
+                if (wrk === '') {
+                    url = '/textof/' + authorid;
+                } else if (locus === '') {
+                    url = '/textof/' + authorid + '/' + wrk;
+                } else {
+                    url = '/textof/' + authorid + '/' + wrk + '/' + locus;
+                }
+                $.getJSON(url, function (returnedtext) {
+                    loadtextintodisplayresults(returnedtext);
+                });
+            } else {
+                let url = '/textofspan/' + authorid +'/' + wrk + '/' + locus + '/' + endpoint;
+                 $.getJSON(url, function (returnedtext) {
+                    loadtextintodisplayresults(returnedtext);
+                });
+            }
         }
     });
 

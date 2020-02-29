@@ -135,7 +135,7 @@ def buildindextospan(searchid: str, author: str, work: str, startpoint: str, end
 	"""
 
 	build an index to a subset of a work:
-		Cic., De Or. 2.3 - 2.30
+		Cic., De Or. 2.3 - 2.20
 		"GET /indexspan/117aba39/lt0474/037/2|3/2|20 HTTP/1.1"
 
 	:param searchid:
@@ -164,7 +164,6 @@ def buildindextospan(searchid: str, author: str, work: str, startpoint: str, end
 	wo = requested['workobject']
 	start = requested['passagelist']
 	stop = requested['endpointlist']
-	print('start,stop:',start,stop)
 
 	allworks = list()
 	output = list()
@@ -176,7 +175,6 @@ def buildindextospan(searchid: str, author: str, work: str, startpoint: str, end
 	firstlinenumber = finddblinefromincompletelocus(wo, start, dbcursor)
 	lastlinenumber = finddblinefromincompletelocus(wo, stop, dbcursor, findlastline=True)
 	if firstlinenumber['code'] == 'success' and lastlinenumber['code'] == 'success':
-		print("(firstlinenumber['line'], lastlinenumber['line'])", (firstlinenumber['line'], lastlinenumber['line']))
 		cdict = {wo.universalid: (firstlinenumber['line'], lastlinenumber['line'])}
 		startln = dblineintolineobject(grabonelinefromwork(ao.universalid, firstlinenumber['line'], dbcursor))
 		stopln = dblineintolineobject(grabonelinefromwork(ao.universalid, lastlinenumber['line'], dbcursor))
@@ -268,6 +266,66 @@ def textmaker(author: str, work=None, passage=None):
 	results['title'] = avoidsmallvariants(wo.title)
 	results['structure'] = avoidsmallvariants(wo.citation())
 	results['worksegment'] = '.'.join(psg)
+	results['texthtml'] = texthtml
+
+	results = json.dumps(results)
+
+	dbconnection.connectioncleanup()
+
+	return results
+
+
+@hipparchia.route('/textofspan//<author>/<work>/<startpoint>/<endpoint>')
+def buildtexttospan(author: str, work: str, startpoint: str, endpoint: str):
+	"""
+
+	build a text of a span:
+
+
+	:param author:
+	:param work:
+	:param startpoint:
+	:param endpoint:
+	:return:
+	"""
+
+	probeforsessionvariables()
+
+	dbconnection = ConnectionObject('autocommit')
+	dbcursor = dbconnection.cursor()
+
+	linesevery = hipparchia.config['SHOWLINENUMBERSEVERY']
+
+	requested = buildauthorworkandpassage(author, work, startpoint, authordict, workdict, dbcursor, endpoint=endpoint)
+	ao = requested['authorobject']
+	wo = requested['workobject']
+	start = requested['passagelist']
+	stop = requested['endpointlist']
+
+	firstlinenumber = finddblinefromincompletelocus(wo, start, dbcursor)
+	lastlinenumber = finddblinefromincompletelocus(wo, stop, dbcursor, findlastline=True)
+	texthtml = str()
+	if firstlinenumber['code'] == 'success' and lastlinenumber['code'] == 'success':
+		fl = firstlinenumber['line']
+		ll = lastlinenumber['line']
+		texthtml = buildtext(wo.universalid, fl, ll, linesevery, dbcursor)
+		startln = dblineintolineobject(grabonelinefromwork(ao.universalid, fl, dbcursor))
+		stopln = dblineintolineobject(grabonelinefromwork(ao.universalid, ll, dbcursor))
+	else:
+		msg = '"buildtexttospan/" could not find first and last: {a}w{b} - {c} TO {d}'
+		consolewarning(msg.format(a=author, b=work, c=startpoint, d=endpoint))
+		startln = makeablankline(work, 0)
+		stopln = makeablankline(work, 1)
+		valid = False
+
+	if hipparchia.config['INSISTUPONSTANDARDANGLEBRACKETS']:
+		texthtml = gtltsubstitutes(texthtml)
+
+	results = dict()
+	results['authorname'] = avoidsmallvariants(ao.shortname)
+	results['title'] = avoidsmallvariants(wo.title)
+	results['structure'] = avoidsmallvariants(wo.citation())
+	results['worksegment'] = 'from {a} to {b}'.format(a=startln.shortlocus(), b=stopln.shortlocus())
 	results['texthtml'] = texthtml
 
 	results = json.dumps(results)
