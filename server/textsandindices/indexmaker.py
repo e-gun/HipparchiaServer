@@ -374,9 +374,11 @@ def linesintoindex(lineobjects: List[dbWorkLine], activepoll) -> dict:
 	# kill off titles and salutations: dangerous as there l1='t' has not been 100% ruled out as a valid body citation
 	# lineobjects = [ln for ln in lineobjects if ln.l1 not in ['t', 'sa']]
 
-	defaultwork = lineobjects[0].wkuinversalid
-
 	completeindex = dict()
+	try:
+		defaultwork = lineobjects[0].wkuinversalid
+	except IndexError:
+		return completeindex
 
 	# clickable entries will break after too many words. Toggle bewteen indexing methods by guessing N words per line and
 	# then pick 'locus' when you have too many lineobjects: a nasty hack

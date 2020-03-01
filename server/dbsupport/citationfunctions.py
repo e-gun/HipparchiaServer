@@ -426,6 +426,7 @@ def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, dbcurs
 		# we grabbed a connection because we were not passed a cursor
 		dbconnection.connectioncleanup()
 
+	# print('query,data', query, data)
 	return results
 
 

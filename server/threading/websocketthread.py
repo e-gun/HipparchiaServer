@@ -79,6 +79,9 @@ async def wscheckpoll(websocket, path):
 		except websockets.exceptions.ConnectionClosed:
 			# websockets.exceptions.ConnectionClosed because you reloaded the page in the middle of a search
 			pass
+		except TypeError:
+			# Object of type SynchronizedString is not JSON serializable
+			pass
 
 	return
 

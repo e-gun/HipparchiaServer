@@ -54,7 +54,7 @@ $('#makeanindex').click( function() {
                 checkactivityviawebsocket(searchid);
             } else {
                 let searchid = generateId(8);
-                let url = '/indexspan/' + searchid + '/' + authorid +'/' + wrk + '/' + locus + '/' + endpoint;
+                let url = '/indexto/' + searchid + '/' + authorid +'/' + wrk + '/' + locus + '/' + endpoint;
                 $.getJSON(url, function (indexdata) { loadindexintodisplayresults(indexdata); });
                 checkactivityviawebsocket(searchid);
             }
@@ -119,7 +119,7 @@ $('#textofthis').click( function() {
                     loadtextintodisplayresults(returnedtext);
                 });
             } else {
-                let url = '/textofspan/' + authorid +'/' + wrk + '/' + locus + '/' + endpoint;
+                let url = '/textof/' + authorid +'/' + wrk + '/' + locus + '/' + endpoint;
                  $.getJSON(url, function (returnedtext) {
                     loadtextintodisplayresults(returnedtext);
                 });
