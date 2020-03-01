@@ -995,8 +995,8 @@ body {
 
 #activeoptions {
 	position: fixed;
-	top: 15px;
-	right: 15px;
+	top: 10px;
+	right: 10px;
 	font-size: 80%;
 	}
 
@@ -1045,7 +1045,7 @@ body {
 #clickforhelp {
 	position: fixed;
 	bottom: 10px;
-	right: 15px;
+	right: 10px;
 	}
 
 #displayresults {
@@ -1117,7 +1117,7 @@ body {
 #savedprofiles {
 	position: fixed;
 	bottom: 50px;
-	right: 15px;
+	right: 10px;
 	font-size: 100%;
 	}
 
@@ -1182,6 +1182,13 @@ body {
 	padding: 10px;
 	margin: auto;
 }
+
+#versioning {
+	position: fixed;
+	bottom: 10px;
+	left: 10px;
+	font-size: 75%;
+	}
 
 #wordsearchform {
 	position: float;

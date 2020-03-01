@@ -116,6 +116,7 @@ def frontpage():
 							vectoroptionshtml=vectoroptionshtml,
 							havevectors=havevectors,
 							version=version,
+							shortversion=hipparchiaserverversion,
 							backend=backend,
 							icanzap=icanzap)
 
