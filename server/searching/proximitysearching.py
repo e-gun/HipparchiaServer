@@ -169,22 +169,34 @@ def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, curso
 	match = re.search(r'{s}'.format(s=seeking), searchzone)
 	# but what if you just found 'paucitate' inside of 'paucitatem'?
 	# you will have 'm' left over and this will throw off your distance-in-words count
+	past = None
+	upto = None
+	lagging = list()
+	leading = list()
+	ucount = 0
+	pcount = 0
+
 	try:
 		past = searchzone[match.end():].strip()
 	except AttributeError:
 		# AttributeError: 'NoneType' object has no attribute 'end'
-		past = None
+		pass
 
 	try:
 		upto = searchzone[:match.start()].strip()
 	except AttributeError:
-		upto = None
+		pass
 
-	ucount = len([x for x in upto.split(' ') if upto])
-	pcount = len([x for x in past.split(' ') if past])
+	if upto:
+		ucount = len([x for x in upto.split(' ') if x])
+		lagging = [x for x in upto.split(' ') if x]
+
+	if past:
+		pcount = len([x for x in past.split(' ') if x])
+		leading = [x for x in past.split(' ') if x]
 
 	atline = hitline.index
-	lagging = [x for x in upto.split(' ') if x]
+
 	while ucount < distance + 1:
 		atline -= 1
 		try:
@@ -198,7 +210,6 @@ def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, curso
 	lagging = lagging[-1 * (distance - 1):]
 	lagging = ' '.join(lagging)
 
-	leading = [x for x in past.split(' ') if x]
 	atline = hitline.index
 	while pcount < distance + 1:
 		atline += 1
