@@ -216,7 +216,7 @@ $(document).ready( function () {
 	});
 
 
-    let tohideonfirstload = Array('#alt_upperleftbuttons', '#browserdialog', '#clearpick', '#complexsearching', '#cosinedistancelineorwordcheckbox',
+    let tohideonfirstload = Array('#alt_upperleftbuttons', '#browserdialog', '#complexsearching', '#cosinedistancelineorwordcheckbox',
         '#cosinedistancesentencecheckbox', '#edts', '#helptabs', '#ldts', '#lemmatasearchform', '#proximatelemmatasearchform',
         '#semanticvectornnquerycheckbox', '#semanticvectorquerycheckbox', '#sentencesimilaritycheckbox', '#spur', '#tensorflowgraphcheckbox',
         '#termonecheckbox', '#topicmodelcheckbox', '#level05endpoint', '#level04endpoint', '#level03endpoint', '#level02endpoint', '#level01endpoint',

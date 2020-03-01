@@ -42,10 +42,7 @@ $('#makeanindex').click( function() {
 
         if (authorid !== '') {
             if (locus === endpoint) {
-                $('#clearpick').show();
-                // var searchid = Date.now();
                 let searchid = generateId(8);
-                // let searchid = uuidv4();
                 let url = '';
                 if (wrk === '') { url = '/indexto/' + searchid + '/' + authorid; }
                 else if (locus === '') { url = '/indexto/' + searchid + '/' + authorid + '/' + wrk; }
@@ -106,7 +103,6 @@ $('#textofthis').click( function() {
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
         if (authorid !== '') {
             if (locus === endpoint) {
-                $('#clearpick').show();
                 let url = '';
                 if (wrk === '') {
                     url = '/textof/' + authorid;

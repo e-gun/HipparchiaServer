@@ -95,10 +95,10 @@ class BrowserPassageObject(object):
 		# to be populated later, mostly by generatepassageheader()
 		self.browsedlines = list()
 		self.focusline = None
-		self.biblio = ''
-		self.citation = ''
-		self.header = ''
-		self.authorandwork = ''
+		self.biblio = str()
+		self.citation = str()
+		self.header = str()
+		self.authorandwork = str()
 
 	def generatepassageheader(self):
 		template = '<span class="currentlyviewingauthor">{n}</span>, <span class="currentlyviewingwork">{t}</span><br />'

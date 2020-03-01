@@ -45,7 +45,7 @@ function reloadAuthorlist(){
             '#browseto', '#makeanindex', '#textofthis', '#fewerchoices', '#genresautocomplete', '#genreinfo',
             '#genrelistcontents', '#workgenresautocomplete', '#locationsautocomplete', '#provenanceautocomplete',
             '#pickgenre', '#excludegenre', '#setoptions', '#lexica', '#authinfo', '#authorholdings', '#searchlistcontents',
-            '#loadslots', '#saveslots');
+            '#loadslots', '#saveslots', '#ndpointbutton-isopen', '#ndpointbutton-isclosed', '#fromnotice', '#endpointnotice');
         hidemany(ids);
     });
 }
@@ -92,12 +92,9 @@ $('#pickauthor').click( function() {
         let authorid = name.slice(-7, -1);
         let locus = locusdataloader();
         let endpoint = endpointdataloader();
-        // $('#authorsautocomplete').val('');
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
-        // $('#worksautocomplete').val('');
         resetworksautocomplete();
         if (authorid !== '') {
-            $('#clearpick').show();
             if (wrk === '') {
               $.getJSON('/makeselection?auth=' + authorid, function (selectiondata) {
                     reloadselections(selectiondata);
@@ -131,12 +128,9 @@ $('#excludeauthor').click( function() {
         let authorid = name.slice(-7, -1);
         let locus = locusdataloader();
         let endpoint = endpointdataloader();
-        // $('#authorsautocomplete').val('');
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
-        // $('#worksautocomplete').val('');
         resetworksautocomplete();
         if (authorid !== '') {
-            $('#clearpick').show();
             if (wrk === '') {
               $.getJSON('/makeselection?auth=' + authorid+'&exclude=t', function (selectiondata) {
                    reloadselections(selectiondata);
@@ -259,6 +253,10 @@ function loadLevellist(author, work, pariallocus){
         getpath = author + '/' + work;
     }
 
+    let openbutton = $('#endpointbutton-isclosed');
+    let closebutton = $('#endpointbutton-isopen');
+    let workboxval = $('#worksautocomplete').val();
+
     $.getJSON('/getstructure/' + getpath, function (selectiondata) {
         let top = selectiondata['totallevels']-1;
         let atlevel = selectiondata['level'];
@@ -284,6 +282,10 @@ function loadLevellist(author, work, pariallocus){
             select: function (event, ui) {
                 let loc = locusdataloader();
                 loadLevellist(author, work, String(loc));
+                if ( atlevel && workboxval && openbutton.is(':hidden') === true && closebutton.is(':hidden') === true) {
+                    openbutton.show();
+                }
+                if (!workboxval) { openbutton.hide(); closebutton.hide(); }
             }});
 
         let endpointlevel = atlevel+1;

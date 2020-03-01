@@ -194,6 +194,8 @@ def textmaker(author: str, work=None, passage=None, endpoint=None):
 				consolewarning(msg.format(a=author, b=work, c=psg, d=endpoint))
 				startlnobj = makeablankline(work, 0)
 				stoplnobj = makeablankline(work, 1)
+				startline = 0
+				endline = 1
 			segmenttext = 'from {a} to {b}'.format(a=startlnobj.shortlocus(), b=stoplnobj.shortlocus())
 		elif not psg:
 			# whole work

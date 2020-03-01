@@ -254,7 +254,11 @@ function browsetopassage() {
     browseuponclick(loc);
 }
 
-$('#browseto').click(function(){ browsetopassage(); });
+$('#browseto').click(function(){
+    $('#endpointbutton-isopen').hide();
+    $('#endpointbutton-isclosed').hide();
+    browsetopassage();
+});
 
 $('#addtolist').click(function(){ addtosearchlist(); });
 
