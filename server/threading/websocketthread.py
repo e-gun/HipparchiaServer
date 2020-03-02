@@ -81,6 +81,7 @@ async def wscheckpoll(websocket, path):
 			pass
 		except TypeError:
 			# Object of type SynchronizedString is not JSON serializable
+			consolewarning('websocket non-fatal error: "SynchronizedString is not JSON serializable"', color='yellow', isbold=False)
 			pass
 
 	return

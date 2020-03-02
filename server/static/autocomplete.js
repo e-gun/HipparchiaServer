@@ -39,14 +39,14 @@ function reloadselections(selectiondata){
 
 
 function reloadAuthorlist(){
+    let ids = Array('#worksautocomplete', '#level05', '#level04', '#level03', '#level02', '#level01', '#level00',
+        '#browseto', '#makeanindex', '#textofthis', '#fewerchoices', '#genresautocomplete', '#genreinfo',
+        '#genrelistcontents', '#workgenresautocomplete', '#locationsautocomplete', '#provenanceautocomplete',
+        '#pickgenre', '#excludegenre', '#setoptions', '#lexica', '#authinfo', '#authorholdings', '#searchlistcontents',
+        '#loadslots', '#saveslots', '#endpointbutton-isopen', '#endpointbutton-isclosed', '#fromnotice', '#endpointnotice');
+    hidemany(ids);
     $.getJSON('/getselections', function (selectiondata) {
         reloadselections(selectiondata);
-        let ids = Array('#worksautocomplete', '#level05', '#level04', '#level03', '#level02', '#level01', '#level00',
-            '#browseto', '#makeanindex', '#textofthis', '#fewerchoices', '#genresautocomplete', '#genreinfo',
-            '#genrelistcontents', '#workgenresautocomplete', '#locationsautocomplete', '#provenanceautocomplete',
-            '#pickgenre', '#excludegenre', '#setoptions', '#lexica', '#authinfo', '#authorholdings', '#searchlistcontents',
-            '#loadslots', '#saveslots', '#ndpointbutton-isopen', '#ndpointbutton-isclosed', '#fromnotice', '#endpointnotice');
-        hidemany(ids);
     });
 }
 
@@ -113,10 +113,6 @@ $('#pickauthor').click( function() {
                 $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&endpoint=' + endpoint, function (selectiondata) {
                     reloadselections(selectiondata);
                 });
-                $('#fromnotice').hide();
-                $('#endpointnotice').hide();
-                $('#endpointbutton-isclosed').hide();
-                $('#endpointbutton-isopen').hide();
              }
         }
         $('#searchlistcontents').hide();
@@ -163,6 +159,10 @@ $('#excludeauthor').click( function() {
 //
 
 function loadWorklist(authornumber){
+    $('#fromnotice').hide();
+    $('#endpointnotice').hide();
+    $('#endpointbutton-isclosed').hide();
+    $('#endpointbutton-isopen').hide();
     $.getJSON('/getworksof/'+authornumber, function (selectiondata) {
         let dLen = selectiondata.length;
         let worksfound = Array();
@@ -170,7 +170,6 @@ function loadWorklist(authornumber){
         for (let i = 0; i < dLen; i++) { worksfound.push(selectiondata[i]); }
         selector.autocomplete( "enable" );
         selector.autocomplete({ source: worksfound });
-        // selector.val(worksfound[0]);
     });
 }
 

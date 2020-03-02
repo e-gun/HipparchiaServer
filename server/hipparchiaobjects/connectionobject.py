@@ -148,6 +148,13 @@ class GenericConnectionObject(object):
 	def connectioncleanup(self):
 		raise NotImplementedError
 
+	def plzcleanpool(self):
+		return False
+
+	@staticmethod
+	def resetpool():
+		pass
+
 
 class PooledConnectionObject(GenericConnectionObject):
 	"""
@@ -178,6 +185,7 @@ class PooledConnectionObject(GenericConnectionObject):
 	"""
 
 	_pools = dict()
+	poolneedscleaning = False
 
 	def __init__(self, autocommit='defaultisno', readonlyconnection=True, ctype='ro'):
 		super().__init__(autocommit, readonlyconnection)
@@ -251,15 +259,26 @@ class PooledConnectionObject(GenericConnectionObject):
 				# that is, something like a ryzen c-state aborted search damages the pool in the long run...
 				consolewarning('PoolError: emergency fallback to SimpleConnectionObject()')
 				self.simpleconnectionfallback()
-				# this almost certainly damages the search in progress... figure out how to do it right
-				consolewarning('PoolError: emptying out PooledConnectionObject._pools()')
-				PooledConnectionObject._pools = dict()
+				PooledConnectionObject.poolneedscleaning = True
 
 		if self.autocommit == 'autocommit':
 			self.setautocommit()
 
 		self.setreadonly(self.readonlyconnection)
 		self.curs = getattr(self.dbconnection, 'cursor')()
+
+	@staticmethod
+	def resetpool():
+		# dangerous to do this while anything interesting is going on
+		# currently checking to see if need cleaning at head of searchdispatcher
+		consolewarning('emptying out PooledConnectionObject._pools()')
+		PooledConnectionObject._pools = dict()
+
+	def plzcleanpool(self):
+		if PooledConnectionObject.poolneedscleaning:
+			return True
+		else:
+			return False
 
 	def simpleconnectionfallback(self):
 		# print('SimpleConnectionObject', self.uniquename)
@@ -301,6 +320,8 @@ class SimpleConnectionObject(GenericConnectionObject):
 	add connectioncleanup() to the mix
 
 	"""
+
+	poolneedscleaning = False
 
 	def __init__(self, autocommit='defaultisno', readonlyconnection=True, ctype='ro'):
 		super().__init__(autocommit, readonlyconnection)

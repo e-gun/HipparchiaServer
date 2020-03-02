@@ -278,6 +278,7 @@ def getsearchlistcontents():
 			bundle = {wo.universalid: boundaries}
 			linesinspan = grabbundlesoflines(bundle, dbcursor)
 			wordcount = sum([ln.wordcount() for ln in linesinspan])
+			wordstotal += wordcount
 			searchlistinfo.append(formatauthorandworkinfo(au, wo, countprovided=wordcount))
 
 	if len(searchlistinfo) > cap:

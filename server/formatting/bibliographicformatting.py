@@ -111,7 +111,7 @@ def woformatworkinfo(workobject: dbOpus) -> str:
 	if workobject.isnotliterary():
 		d = '(<span class="date">{d}</span>)'.format(d=workobject.bcedate())
 	else:
-		d = ''
+		d = str()
 
 	p = formatpublicationinfo(workobject.publication_info)
 	if len(p) == 0:
@@ -169,7 +169,7 @@ def formatpublicationinfo(pubinfo: str) -> str:
 		# {'pages':[' (',')']}
 	]
 
-	publicationhtml = ''
+	publicationhtml = str()
 
 	for t in tags:
 		tag = next(iter(t.keys()))
@@ -243,7 +243,6 @@ def formatauthorandworkinfo(authorname: str, workobject: dbOpus, countprovided=F
 		c = '[{wc} wds]'.format(wc=wc)
 	else:
 		c = str()
-
 
 	authorandworkinfo = '{a}, <span class="italic">{t}</span> {c}<br />'.format(a=authorname, t=workobject.title, c=c)
 

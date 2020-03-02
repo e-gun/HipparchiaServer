@@ -43,6 +43,11 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	:return:
 	"""
 
+	# clean out the pool if neccessary before starting
+	c = ConnectionObject()
+	if c.poolneedscleaning:
+		c.resetpool()
+
 	so = searchobject
 	activepoll = so.poll
 
