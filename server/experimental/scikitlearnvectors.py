@@ -372,9 +372,9 @@ def simplesktextcomparison(sentencetuples, searchobject, stopwordsbyheadword=Fal
 	activepoll.statusis('Sifting...'.format(n=len(sentences)))
 	linemapper = {l.universalid.lower(): l for l in gabbedlineobjects}
 
-	similaritiesdict = {id: (m[1], linemapper[sentencetuples[m[0][0]][0]], sentences[m[0][0]],
+	similaritiesdict = {sid: (m[1], linemapper[sentencetuples[m[0][0]][0]], sentences[m[0][0]],
 						linemapper[sentencetuples[m[0][1]][0]], sentences[m[0][1]])
-						for id, m in enumerate(mostsimilar)}
+						for sid, m in enumerate(mostsimilar)}
 
 	# {id: (scoreA, lineobjectA1, sentA1, lineobjectA2, sentA2), id2: (scoreB, lineobjectB1, sentB1, lineobjectB2, sentB2), ... }
 

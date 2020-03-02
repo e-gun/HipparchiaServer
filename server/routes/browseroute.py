@@ -9,7 +9,7 @@
 import json
 
 from server import hipparchia
-from server.browsing.browserfunctions import buildbrowseroutputobject, findlinenumberfromcitation
+from server.browsing.browserfunctions import buildbrowseroutputobject, browserfindlinenumberfromcitation
 from server.dbsupport.miscdbfunctions import buildauthorworkandpassage, returnfirstwork
 from server.formatting.miscformatting import consolewarning
 from server.formatting.lexicaformatting import lexicaldbquickfixes
@@ -68,7 +68,7 @@ def grabtextforbrowsing(method, author, work, location=None):
 			consolewarning('bad data fed to grabtextforbrowsing(): {m} / {a} / {w} / {l}'.format(m=method, a=author, w=work, l=location))
 			ao = None
 
-	passage, resultmessage = findlinenumberfromcitation(method, location, wo, dbcursor)
+	passage, resultmessage = browserfindlinenumberfromcitation(method, location, wo, dbcursor)
 
 	if passage and ao:
 		passageobject = buildbrowseroutputobject(ao, wo, int(passage), dbcursor)

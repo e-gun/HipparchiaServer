@@ -16,7 +16,8 @@ from flask import make_response, redirect, request, session, url_for
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
-from server.dbsupport.miscdbfunctions import buildauthorworkandpassage
+from server.dbsupport.dblinefunctions import grabbundlesoflines
+from server.dbsupport.miscdbfunctions import buildauthorworkandpassage, findselectionboundaries
 from server.formatting.bibliographicformatting import formatauthinfo, formatauthorandworkinfo, formatname, \
 	woformatworkinfo
 from server.formatting.wordformatting import depunct
@@ -239,6 +240,8 @@ def getsearchlistcontents():
 
 	:return:
 	"""
+	dbconnection = ConnectionObject()
+	dbcursor = dbconnection.cursor()
 
 	searchlist = compilesearchlist(listmapper, session)
 	searchlist = sortsearchlist(searchlist, authordict)
@@ -255,19 +258,27 @@ def getsearchlistcontents():
 
 	count = 0
 	wordstotal = 0
-	for work in searchlist:
-		work = work[:10]
+	# print('searchlist', searchlist)
+	for worksel in searchlist:
+		wo = workdict[worksel[:10]]
+		au = formatname(wo, authordict[worksel[0:6]])
 		count += 1
-		w = workdict[work]
-		au = formatname(w, authordict[work[0:6]])
-
-		try:
-			wordstotal += workdict[work].wordcount
-		except TypeError:
-			# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
-			pass
 		searchlistinfo.append('\n[{ct}]&nbsp;'.format(ct=count))
-		searchlistinfo.append(formatauthorandworkinfo(au, w))
+		if len(worksel) == 10:
+			# 'lt0474w071' vs 'lt0474w071_AT_' vs 'lt0474w071_FROM_x_TO_y'
+			try:
+				wordstotal += workdict[worksel].wordcount
+			except TypeError:
+				# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
+				pass
+			searchlistinfo.append(formatauthorandworkinfo(au, wo))
+		if '_FROM_' in worksel or '_AT_' in worksel:
+			boundaries = findselectionboundaries(wo, worksel, dbcursor)
+			# grabbundlesoflines wants: {'work1': (start,stop), 'work2': (start,stop), ...}
+			bundle = {wo.universalid: boundaries}
+			linesinspan = grabbundlesoflines(bundle, dbcursor)
+			wordcount = sum([ln.wordcount() for ln in linesinspan])
+			searchlistinfo.append(formatauthorandworkinfo(au, wo, countprovided=wordcount))
 
 	if len(searchlistinfo) > cap:
 		searchlistinfo = searchlistinfo[:cap+1]
@@ -278,6 +289,8 @@ def getsearchlistcontents():
 
 	searchlistinfo = '\n'.join(searchlistinfo)
 	searchlistinfo = json.dumps(searchlistinfo)
+
+	dbconnection.connectioncleanup()
 
 	return searchlistinfo
 

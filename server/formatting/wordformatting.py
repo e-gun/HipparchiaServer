@@ -166,8 +166,8 @@ def buildhipparchiatranstable() -> dict:
 	invals.append('vUJjÁÄáäÉËéëÍÏíïÓÖóöÜÚüúăāĕēĭīŏōŭū')
 	outvals.append('uVIiaaaaeeeeiiiioooouuuuaaeeiioouu')
 
-	invals = ''.join(invals)
-	outvals = ''.join(outvals)
+	invals = str().join(invals)
+	outvals = str().join(outvals)
 
 	transtable = str.maketrans(invals, outvals)
 
@@ -455,7 +455,7 @@ def universalregexequivalent(searchterm: str) -> str:
 		'v': '[VvUuü]'
 	}
 
-	searchtermequivalent = ''
+	searchtermequivalent = str()
 	searchterm = re.sub(r'(^\s|\s$)', '', searchterm)
 	for c in searchterm:
 		try:
@@ -499,7 +499,7 @@ def depunct(stringtoclean, allowedpunctuationsting=None):
 	badpunct = punctuation
 	if allowedpunctuationsting:
 		badpunct = set(badpunct) - set(allowedpunctuationsting)
-		badpunct = ''.join(badpunct)
+		badpunct = str().join(badpunct)
 	badpunct = r'[{np}]'.format(np=re.escape(badpunct))
 
 	cleaned = re.sub(badpunct, '', stringtoclean)
@@ -646,7 +646,7 @@ def upperorlowerregex(word: str) -> str:
 	"""
 
 	reg = ['[{a}{b}]'.format(a=w, b=w.upper()) for w in word]
-	reg = ''.join(reg)
+	reg = str().join(reg)
 
 	return reg
 
@@ -691,7 +691,7 @@ def acuteorgrav(word: str) -> str:
 	if len(word) > 2:
 		head = word[0:-2]
 	else:
-		head = ''
+		head = str()
 
 	reg = head
 
@@ -738,7 +738,7 @@ def uforvoutsideofmarkup(textwithmarkup) -> str:
 				newstr.append('u')
 			else:
 				newstr.append(t[1])
-		newstr = ''.join(newstr)
+		newstr = str().join(newstr)
 	else:
 		newstr = re.sub(r'v', 'u', textwithmarkup)
 

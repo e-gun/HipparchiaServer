@@ -225,7 +225,7 @@ def fetchhtmltemplateformetadatarow(shownotes=True):
 	return linetemplate
 
 
-def findlinenumberfromcitation(method: str, citation: str, workobject: dbOpus, dbcursor) -> tuple:
+def browserfindlinenumberfromcitation(method: str, citation: str, workobject: dbOpus, dbcursor) -> tuple:
 	"""
 
 	you have been given a locus in one of THREE possible formats
@@ -245,9 +245,9 @@ def findlinenumberfromcitation(method: str, citation: str, workobject: dbOpus, d
 	resultmessage = 'success'
 
 	dispatcher = {
-		'linenumber': findlinenumberfromlinenumber,
-		'locus': findlinenumberfromlocus,
-		'perseus': findlinenumberfromperseus
+		'linenumber': browserfindlinenumberfromlinenumber,
+		'locus': browserfindlinenumberfromlocus,
+		'perseus': browserfindlinenumberfromperseus
 	}
 
 	thelinenumber, resultmessage = dispatcher[method](citation, workobject, resultmessage, dbcursor)
@@ -255,7 +255,7 @@ def findlinenumberfromcitation(method: str, citation: str, workobject: dbOpus, d
 	return thelinenumber, resultmessage
 
 
-def findlinenumberfromlinenumber(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
+def browserfindlinenumberfromlinenumber(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
 	"""
 
 	you got here either by the hit list or a forward/back button in the passage browser
@@ -277,7 +277,7 @@ def findlinenumberfromlinenumber(citation: str, workobject: dbOpus, resultmessag
 	return thelinenumber, resultmessage
 
 
-def findlinenumberfromlocus(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
+def browserfindlinenumberfromlocus(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
 	"""
 
 	you were sent here by the citation builder autofill boxes
@@ -322,7 +322,7 @@ def findlinenumberfromlocus(citation: str, workobject: dbOpus, resultmessage: st
 	return thelinenumber, resultmessage
 
 
-def findlinenumberfromperseus(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
+def browserfindlinenumberfromperseus(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
 	"""
 
 	here comes the fun part: alien format; inconsistent citation style; incorrect data...

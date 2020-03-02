@@ -220,21 +220,30 @@ def avoidlonglines(string: str, maxlen: int, splitval: str, stringlist=list()) -
 	return newstringhtml
 
 
-def formatauthorandworkinfo(authorname: str, workobject: dbOpus) -> str:
+def formatauthorandworkinfo(authorname: str, workobject: dbOpus, countprovided=False) -> str:
 	"""
 
-	dbdata into html
+	used by getsearchlistcontents()
+
+	dbdata into html:
+
+		[39]  Cicero, Brutus [25,767 wds]
 
 	:param authorname:
 	:param workobject:
 	:return:
 	"""
 
-	if workobject.wordcount:
+	if countprovided and workobject.wordcount:
+		c = '[{wc} of {twc} words selected]'.format(wc=format(countprovided, ',d'), twc=format(workobject.wordcount, ',d'))
+	elif countprovided:
+		c = '[{wc} wds in selection]'.format(wc=format(countprovided, ',d'))
+	elif workobject.wordcount:
 		wc = format(workobject.wordcount, ',d')
 		c = '[{wc} wds]'.format(wc=wc)
 	else:
-		c = ''
+		c = str()
+
 
 	authorandworkinfo = '{a}, <span class="italic">{t}</span> {c}<br />'.format(a=authorname, t=workobject.title, c=c)
 
