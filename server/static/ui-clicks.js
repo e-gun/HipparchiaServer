@@ -735,6 +735,7 @@ $('#cosdistbysentence').change(function() {
         $(others).prop('checked', false);
         activatethisbox(lsf, '(pick a headword)');
         activatethisbox(plsf, '(unused for this type of query)');
+        trmtwolem.prop('checked', false);
         wsf.hide();
         psf.hide();
         displayvectorsandlemmata();
@@ -754,6 +755,7 @@ $('#cosdistbylineorword').change(function() {
         $(others).prop('checked', false);
         activatethisbox(lsf, '(pick a headword)');
         activatethisbox(plsf, '(unused for this type of query)');
+        trmtwolem.prop('checked', false);
         wsf.hide();
         psf.hide();
         displayvectorsandlemmata();
@@ -800,7 +802,7 @@ $('#nearestneighborsquery').change(function() {
         psf.hide();
         displayvectorsandlemmata();
         trmonelem.prop('checked', true);
-        trmtwolem.prop('checked', true);
+        trmtwolem.prop('checked', false);
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
@@ -839,12 +841,12 @@ $('#sentencesimilarity').change(function() {
         $('#complexsearching').show();
         activatethisbox(lsf, '(unused for sentencesimilarity)');
         activatethisbox(plsf, '(unused for this type of query)');
+        trmonelem.prop('checked', false);
+        trmtwolem.prop('checked', false);
         wsf.hide();
         psf.hide();
         hidelemmatanotification();
         showvectornotification();
-        trmonelem.prop('checked', false);
-        trmtwolem.prop('checked', false);
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
@@ -861,14 +863,14 @@ $('#topicmodel').change(function() {
         $('#complexsearching').show();
         activatethisbox(lsf, '(unused for topic models)');
         activatethisbox(plsf, '(unused for this type of query)');
+        trmonelem.prop('checked', false);
+        trmtwolem.prop('checked', false);
         wsf.hide();
         psf.hide();
         vschon.show();
         vschoff.hide();
         hidelemmatanotification();
         showvectornotification();
-        trmonelem.prop('checked', false);
-        trmtwolem.prop('checked', false);
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
