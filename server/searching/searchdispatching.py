@@ -42,11 +42,13 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	:param activepoll:
 	:return:
 	"""
-
 	# clean out the pool if neccessary before starting
-	c = ConnectionObject()
-	if c.poolneedscleaning:
-		c.resetpool()
+	# this seems like the safest time for a reset of the pool: otherwise you could have workers working...
+	if hipparchia.config['CONNECTIONTYPE'] == 'pool':
+		c = ConnectionObject()
+		if c.poolneedscleaning:
+			c.resetpool()
+		c.connectioncleanup()
 
 	so = searchobject
 	activepoll = so.poll

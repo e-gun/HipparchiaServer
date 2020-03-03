@@ -193,7 +193,7 @@ class PooledConnectionObject(GenericConnectionObject):
 		if not PooledConnectionObject._pools:
 			# initialize the borg
 			# note that poolsize is implicitly a claim about how many concurrent users you imagine having
-			poolsize = setthreadcount() + 2
+			poolsize = setthreadcount() + 3
 
 			# three known pool types; simple should be faster as you are avoiding locking
 			pooltype = connectionpool.SimpleConnectionPool
@@ -273,6 +273,7 @@ class PooledConnectionObject(GenericConnectionObject):
 		# currently checking to see if need cleaning at head of searchdispatcher
 		consolewarning('emptying out PooledConnectionObject._pools()')
 		PooledConnectionObject._pools = dict()
+		PooledConnectionObject.poolneedscleaning = False
 
 	def plzcleanpool(self):
 		if PooledConnectionObject.poolneedscleaning:
@@ -283,6 +284,7 @@ class PooledConnectionObject(GenericConnectionObject):
 	def simpleconnectionfallback(self):
 		# print('SimpleConnectionObject', self.uniquename)
 		c = SimpleConnectionObject(autocommit=self.autocommit, readonlyconnection=self.readonlyconnection, ctype=self.cytpe)
+		c.thisisafallback = True
 		self.dbconnection = c.dbconnection
 		self.connectioncleanup = c.connectioncleanup
 
@@ -353,6 +355,7 @@ class SimpleConnectionObject(GenericConnectionObject):
 
 		self.setreadonly(self.readonlyconnection)
 		self.curs = getattr(self.dbconnection, 'cursor')()
+		self.thisisafallback = False
 
 	def connectioncleanup(self):
 		"""
@@ -376,6 +379,9 @@ class SimpleConnectionObject(GenericConnectionObject):
 		# print('deleted connection', self.uniquename)
 
 		return
+
+	def plzcleanpool(self):
+		return self.thisisafallback
 
 
 commandlineargs = getcommandlineargs()
