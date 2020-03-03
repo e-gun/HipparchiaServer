@@ -13,7 +13,7 @@ import time
 from server import hipparchia
 from server.formatting.miscformatting import consolewarning
 from server.formatting.miscformatting import validatepollid
-from server.startup import poll
+from server.startup import progresspolldict
 from server.threading.websocketthread import startwspolling
 
 
@@ -43,13 +43,13 @@ def checkforactivesearch(searchid):
 		pollstart.start()
 
 	try:
-		if poll[pollid].getactivity():
+		if progresspolldict[pollid].getactivity():
 			return json.dumps(pollport)
 	except KeyError:
 		# print('websocket checkforactivesearch() KeyError', pollid)
 		time.sleep(.10)
 		try:
-			if poll[pollid].getactivity():
+			if progresspolldict[pollid].getactivity():
 				return json.dumps(pollport)
 			else:
 				consolewarning('checkforactivesearch() reports that the websocket is still inactive: there is a serious problem?')

@@ -164,7 +164,7 @@ if current_process().name == 'MainProcess':
 
 	# empty dict in which to store progress polls
 	# note that more than one poll can be running
-	poll = dict()
+	progresspolldict = dict()
 else:
 	# welcome back Windows users
 	authordict = dict()
@@ -179,4 +179,4 @@ else:
 	allvaria = dict()
 	keyedlemmata = dict()
 	# this will break things?
-	poll = dict()
+	progresspolldict = dict()

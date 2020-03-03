@@ -20,7 +20,7 @@ from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.gensimnearestneighbors import buildnnvectorspace
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.startup import authordict, listmapper, poll, workdict
+from server.startup import authordict, listmapper, progresspolldict, workdict
 
 
 def startvectorizing():
@@ -47,7 +47,7 @@ def startvectorizing():
 	indextype = 'nn'
 
 	while workpile:
-		if len(poll.keys()) != 0:
+		if len(progresspolldict.keys()) != 0:
 			consolewarning('vectorbot pausing to make way for a search')
 			time.sleep(30)
 

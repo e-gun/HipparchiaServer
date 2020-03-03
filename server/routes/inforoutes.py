@@ -17,7 +17,7 @@ from server import hipparchia
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \
 	workprovenancedict
-from server.startup import poll
+from server.startup import progresspolldict
 
 
 #
@@ -141,8 +141,8 @@ def testroute():
 	"""
 
 	ts = str(int(time.time()))
-	poll[ts] = ProgressPoll(ts)
-	activepoll = poll[ts]
+	progresspolldict[ts] = ProgressPoll(ts)
+	activepoll = progresspolldict[ts]
 	activepoll.activate()
 	activepoll.statusis('executing testroute()')
 

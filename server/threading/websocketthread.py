@@ -15,7 +15,7 @@ import websockets
 from server import hipparchia
 from server.formatting.miscformatting import consolewarning
 from server.formatting.miscformatting import validatepollid
-from server.startup import poll
+from server.startup import progresspolldict
 
 
 async def wscheckpoll(websocket, path):
@@ -49,15 +49,15 @@ async def wscheckpoll(websocket, path):
 	while True:
 		progress = dict()
 		try:
-			progress['active'] = poll[pollid].getactivity()
-			progress['total'] = poll[pollid].worktotal()
-			progress['remaining'] = poll[pollid].getremaining()
-			progress['hits'] = poll[pollid].gethits()
-			progress['message'] = poll[pollid].getstatus()
-			progress['elapsed'] = poll[pollid].getelapsed()
+			progress['active'] = progresspolldict[pollid].getactivity()
+			progress['total'] = progresspolldict[pollid].worktotal()
+			progress['remaining'] = progresspolldict[pollid].getremaining()
+			progress['hits'] = progresspolldict[pollid].gethits()
+			progress['message'] = progresspolldict[pollid].getstatus()
+			progress['elapsed'] = progresspolldict[pollid].getelapsed()
 			if not hipparchia.config['SUPPRESSLONGREQUESTMESSAGE']:
-				if poll[pollid].getnotes():
-					progress['extrainfo'] = poll[pollid].getnotes()
+				if progresspolldict[pollid].getnotes():
+					progress['extrainfo'] = progresspolldict[pollid].getnotes()
 			else:
 				progress['extrainfo'] = ''
 		except KeyError:

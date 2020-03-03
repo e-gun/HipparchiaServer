@@ -23,7 +23,7 @@ from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.checksession import probeforsessionvariables
-from server.startup import authordict, poll, workdict
+from server.startup import authordict, progresspolldict, workdict
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import textsegmentfindstartandstop, wordindextohtmltable
 from server.textsandindices.textbuilder import buildtext
@@ -46,8 +46,8 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 
 	starttime = time.time()
 
-	poll[pollid] = ProgressPoll(pollid)
-	poll[pollid].activate()
+	progresspolldict[pollid] = ProgressPoll(pollid)
+	progresspolldict[pollid].activate()
 
 	dbconnection = ConnectionObject('autocommit')
 	dbcursor = dbconnection.cursor()
@@ -87,14 +87,14 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 		segmenttext = 'from {a} to {b}'.format(a=startln.shortlocus(), b=stopln.shortlocus())
 	elif ao and work and psg:
 		# subsection of a work of an author
-		poll[pollid].statusis('Preparing a partial index to {t}'.format(t=wo.title))
+		progresspolldict[pollid].statusis('Preparing a partial index to {t}'.format(t=wo.title))
 		startandstop = textsegmentfindstartandstop(ao, wo, psg, dbcursor)
 		startline = startandstop['startline']
 		endline = startandstop['endline']
 		cdict = {wo.universalid: (startline, endline)}
 	elif ao and work:
 		# one work
-		poll[pollid].statusis('Preparing an index to {t}'.format(t=wo.title))
+		progresspolldict[pollid].statusis('Preparing an index to {t}'.format(t=wo.title))
 		startline = wo.starts
 		endline = wo.ends
 		cdict = {wo.universalid: (startline, endline)}
@@ -102,7 +102,7 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 		# whole author
 		allworks = ['{w}  ⇒ {t}'.format(w=w.universalid[6:10], t=w.title) for w in ao.listofworks]
 		allworks.sort()
-		poll[pollid].statusis('Preparing an index to the works of {a}'.format(a=ao.shortname))
+		progresspolldict[pollid].statusis('Preparing an index to the works of {a}'.format(a=ao.shortname))
 		for wkid in ao.listworkids():
 			cdict[wkid] = (workdict[wkid].starts, workdict[wkid].ends)
 	else:
@@ -114,7 +114,7 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 		segmenttext = '.'.join(psg)
 
 	if valid:
-		output = buildindextowork(cdict, poll[pollid], useheadwords, dbcursor)
+		output = buildindextowork(cdict, progresspolldict[pollid], useheadwords, dbcursor)
 
 	# get ready to send stuff to the page
 	count = len(output)
@@ -125,12 +125,12 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 	except locale.Error:
 		count = str(count)
 
-	poll[pollid].statusis('Preparing the index HTML')
+	progresspolldict[pollid].statusis('Preparing the index HTML')
 	indexhtml = wordindextohtmltable(output, useheadwords)
 
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)
-	poll[pollid].deactivate()
+	progresspolldict[pollid].deactivate()
 
 	results = dict()
 	results['authorname'] = avoidsmallvariants(ao.shortname)
@@ -146,7 +146,7 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 	results = json.dumps(results)
 
 	dbconnection.connectioncleanup()
-	del poll[pollid]
+	del progresspolldict[pollid]
 
 	return results
 

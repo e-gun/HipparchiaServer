@@ -36,7 +36,7 @@ else:
 	sklearnselectedworks = voff
 	findabsolutevectorsbysentence = voff
 	findabsolutevectorsfromhits = voff
-from server.startup import authordict, listmapper, poll, workdict, lemmatadict
+from server.startup import authordict, listmapper, progresspolldict, workdict, lemmatadict
 
 
 @hipparchia.route('/executesearch/<searchid>', methods=['GET'])
@@ -63,8 +63,8 @@ def executesearch(searchid, so=None):
 
 	phrasefinder = re.compile(r'[^\s]\s[^\s]')
 
-	poll[pollid] = ProgressPoll(pollid)
-	activepoll = poll[pollid]
+	progresspolldict[pollid] = ProgressPoll(pollid)
+	activepoll = progresspolldict[pollid]
 	activepoll.activate()
 	activepoll.statusis('Preparing to search')
 	so.poll = activepoll
@@ -119,7 +119,7 @@ def executesearch(searchid, so=None):
 			# print('executesearch(): a - vectorquery ({t})'.format(t=so.vectorquerytype))
 			fnc = vectorfunctions[so.vectorquerytype]
 			output = fnc(so)
-			del poll[pollid]
+			del progresspolldict[pollid]
 			return output
 
 		if so.lemma:
@@ -187,7 +187,7 @@ def executesearch(searchid, so=None):
 			# print('executesearch(): h - cosdistbylineorword')
 			# take these hits and head on over to the vector worker
 			output = findabsolutevectorsfromhits(so, hitdict, workssearched)
-			del poll[pollid]
+			del progresspolldict[pollid]
 			return output
 
 		resultlist = buildresultobjects(hitdict, authordict, workdict, so)
@@ -281,7 +281,7 @@ def executesearch(searchid, so=None):
 	activepoll.deactivate()
 	jsonoutput = json.dumps(output.generateoutput())
 
-	del poll[pollid]
+	del progresspolldict[pollid]
 
 	return jsonoutput
 

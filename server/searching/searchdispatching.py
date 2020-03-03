@@ -27,7 +27,6 @@ from server.searching.searchfunctions import findleastcommonterm, findleastcommo
 	massagesearchtermsforwhitespace
 from server.searching.substringsearching import substringsearch
 from server.threading.mpthreadcount import setthreadcount
-from server.startup import poll
 
 
 def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
