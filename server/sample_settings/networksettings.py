@@ -23,6 +23,11 @@
 #   the pool if you have too many concurrent searches (but simple connections are supposed
 #   to be made as a fallback when a pooled one is not available).
 #
+# ENABLEPOOLCLEANING: a feature that will go away some day? Broken connection pools will fall back to 'simple'
+#   until the pool gets reset; 'yes' here enables the please-clean-the-pool checks to take place
+#   probably worth leaving off unless you are seeing a lot of error messages in the console/logs:
+#     " >>> PoolError: emergency fallback to SimpleConnectionObject() "
+#
 # POLLCONNECTIONTYPE will either use a shared memory ProgressPoll() or one that saves
 #   information in a redis database. The latter option is set by setting the value to 'redis'.
 #   If Hipparchia is served via WSGI you cannot save the polls in shared memory.
@@ -60,6 +65,7 @@ MYEXTERNALIPADDRESS = '127.0.0.1'
 DBHOST = '127.0.0.1'
 DBPORT = 5432
 CONNECTIONTYPE = 'pool'
+ENABLEPOOLCLEANING = 'no'
 
 # you might be using redis; but note that redis is NOT pre-installed in standard or minimal installations
 REDISHOST = '127.0.0.1'

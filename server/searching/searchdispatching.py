@@ -27,6 +27,7 @@ from server.searching.searchfunctions import findleastcommonterm, findleastcommo
 	massagesearchtermsforwhitespace
 from server.searching.substringsearching import substringsearch
 from server.threading.mpthreadcount import setthreadcount
+from server.startup import poll
 
 
 def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
@@ -43,8 +44,9 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	:return:
 	"""
 	# clean out the pool if neccessary before starting
-	# this seems like the safest time for a reset of the pool: otherwise you could have workers working...
-	if hipparchia.config['CONNECTIONTYPE'] == 'pool':
+	# this seems like the safest time for a reset of the pool: otherwise you could have workers working
+	# but if you have a multi-user environment AND pool problems this code might make things worse
+	if hipparchia.config['ENABLEPOOLCLEANING'] and hipparchia.config['CONNECTIONTYPE'] == 'pool':
 		c = ConnectionObject()
 		if c.poolneedscleaning:
 			c.resetpool()
@@ -58,7 +60,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	if so.seeking:
 		searchingfor = massagesearchtermsforwhitespace(so.seeking)
 	else:
-		searchingfor = ''
+		searchingfor = str()
 
 	# lunate sigmas / UV / JI issues
 	unomdifiedskg = searchingfor
