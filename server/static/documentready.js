@@ -220,7 +220,8 @@ $(document).ready( function () {
         '#cosinedistancesentencecheckbox', '#edts', '#helptabs', '#ldts', '#lemmatasearchform', '#proximatelemmatasearchform',
         '#semanticvectornnquerycheckbox', '#semanticvectorquerycheckbox', '#sentencesimilaritycheckbox', '#spur', '#tensorflowgraphcheckbox',
         '#termonecheckbox', '#topicmodelcheckbox', '#level05endpoint', '#level04endpoint', '#level03endpoint', '#level02endpoint', '#level01endpoint',
-        '#level00endpoint', '#endpointnotice', '#fromnotice', '#authorendpoint', '#workendpoint', '#endpointbutton-isclosed', '#endpointbutton-isopen');
+        '#level00endpoint', '#endpointnotice', '#fromnotice', '#authorendpoint', '#workendpoint', '#endpointbutton-isclosed', '#endpointbutton-isopen',
+        '#lemmatizing-ison', '#vectorizing-ison');
     bulkhider(tohideonfirstload);
 
 

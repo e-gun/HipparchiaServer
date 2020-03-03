@@ -633,6 +633,12 @@ const wsf = $('#wordsearchform');
 const lsf = $('#lemmatasearchform');
 const plsf = $('#proximatelemmatasearchform');
 const psf = $('#proximatesearchform');
+const trmonelem = $('#termoneisalemma');
+const trmtwolem = $('#termtwoisalemma');
+const vschon = $('#vectorizing-ison');
+const vschoff  = $('#vectorizing-isoff');
+const lschon = $('#lemmatizing-ison');
+const lschoff= $('#lemmatizing-isoff');
 
 function clearsearchboxvalues() {
     for (let i = 0; i < thesearchforms.length; i++) {
@@ -675,10 +681,47 @@ function activatethisbox(toactivate, placeholder) {
     toactivate.attr('placeholder', placeholder);
 }
 
+function displayvectorsandlemmata() {
+    vschon.show();
+    vschoff.hide();
+    lschon.show();
+    lschoff.hide();
+}
+
+function hidevectorsandlemmata() {
+    vschon.hide();
+    vschoff.show();
+    lschon.hide();
+    lschoff.show();
+}
+
+function hidevectornotification() {
+    vschon.hide();
+    vschoff.show();
+}
+
+function showvectornotification() {
+    vschon.show();
+    vschoff.hide();
+}
+
+function hidelemmatanotification() {
+    lschon.hide();
+    lschoff.show();
+}
+
+function showlemmatanotification() {
+    lschon.show();
+    lschoff.hide();
+}
+
 function restorecheckboxestodefault() {
-    $('#termoneisalemma').prop('checked', false);
-    $('#termtwoisalemma').prop('checked', false);
+    console.log('restorecheckboxestodefault');
+    trmonelem.prop('checked', false);
+    trmtwolem.prop('checked', false);
+    hidelemmatanotification();
     restoreplaceholders();
+    hidevectornotification();
     wsf.show();
     psf.show();
     lsf.hide();
@@ -694,11 +737,13 @@ $('#cosdistbysentence').change(function() {
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
         psf.hide();
-        $('#termoneisalemma').prop('checked', true);
+        displayvectorsandlemmata();
+        trmonelem.prop('checked', true);
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
         restorecheckboxestodefault();
+        hidevectorsandlemmata();
         }
     });
 
@@ -711,11 +756,13 @@ $('#cosdistbylineorword').change(function() {
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
         psf.hide();
-        $('#termoneisalemma').prop('checked', true);
+        displayvectorsandlemmata();
+        trmonelem.prop('checked', true);
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
         restorecheckboxestodefault();
+        hidevectorsandlemmata();
         }
     });
 
@@ -729,12 +776,15 @@ $('#semanticvectorquery').change(function() {
         $('#lemmatasearchform').hide();
         $('#proximatelemmatasearchform').attr('placeholder', '(unused for this type of query)');
         $('#proximatesearchform').attr('placeholder', '(unused for this type of query)');
-        $('#termoneisalemma').prop('checked', false);
-        $('#termtwoisalemma').prop('checked', false);
+        trmonelem.prop('checked', false);
+        trmtwolem.prop('checked', false);
+        hidelemmatanotification();
+        showvectornotification();
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
         restorecheckboxestodefault();
+        hidevectorsandlemmata();
         }
     });
 
@@ -748,12 +798,14 @@ $('#nearestneighborsquery').change(function() {
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
         psf.hide();
-        $('#termoneisalemma').prop('checked', true);
-        $('#termtwoisalemma').prop('checked', true);
+        displayvectorsandlemmata();
+        trmonelem.prop('checked', true);
+        trmtwolem.prop('checked', true);
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
         restorecheckboxestodefault();
+        hidevectorsandlemmata();
         }
     });
 
@@ -767,12 +819,15 @@ $('#tensorflowgraph').change(function() {
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
         psf.hide();
-        $('#termoneisalemma').prop('checked', true);
-        $('#termtwoisalemma').prop('checked', true);
+        hidelemmatanotification();
+        showvectornotification();
+        trmonelem.prop('checked', false);
+        trmtwolem.prop('checked', false);
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
         restorecheckboxestodefault();
+        hidevectorsandlemmata();
         }
     });
 
@@ -786,12 +841,15 @@ $('#sentencesimilarity').change(function() {
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
         psf.hide();
-        $('#termoneisalemma').prop('checked', true);
-        $('#termtwoisalemma').prop('checked', true);
+        hidelemmatanotification();
+        showvectornotification();
+        trmonelem.prop('checked', false);
+        trmtwolem.prop('checked', false);
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
         restorecheckboxestodefault();
+        hidevectorsandlemmata();
         }
     });
 
@@ -805,36 +863,49 @@ $('#topicmodel').change(function() {
         activatethisbox(plsf, '(unused for this type of query)');
         wsf.hide();
         psf.hide();
-        $('#termoneisalemma').prop('checked', true);
-        $('#termtwoisalemma').prop('checked', true);
+        vschon.show();
+        vschoff.hide();
+        hidelemmatanotification();
+        showvectornotification();
+        trmonelem.prop('checked', false);
+        trmtwolem.prop('checked', false);
         setoptions(this.id, 'yes');
     } else {
         setoptions(this.id, 'no');
         restorecheckboxestodefault();
+        hidevectorsandlemmata();
         }
     });
 
-$('#termoneisalemma').change(function() {
+trmonelem.change(function() {
     if(this.checked) {
         wsf.hide();
         wsf.val('');
         lsf.show();
+        showlemmatanotification();
         } else {
         lsf.hide();
         lsf.val('');
         wsf.show();
+        if(!trmtwolem.is(':checked')) {
+            hidelemmatanotification();
+            }
         }
     });
 
-$('#termtwoisalemma').change(function() {
+trmtwolem.change(function() {
     if(this.checked) {
         psf.hide();
         psf.val('');
         plsf.show();
+        showlemmatanotification();
         } else {
         plsf.hide();
         plsf.val('');
         psf.show();
+        if(!trmonelem.is(':checked')) {
+            hidelemmatanotification();
+            }
         }
     });
 
