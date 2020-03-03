@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# note that internally 'yes'/'no' are converted to True/False, but one should still use 'yes'/'no'
-# and definitely *do not* use 'True'/'False' since they are not the same as True/False...
+# note that internally 'yes'/'no' are converted to True/False; and so one can use 'yes'/'no'
+# but definitely *do not* use 'True'/'False' since they are not the same as True/False...
 
 # [7] SEMANTIC VECTORS: experimental and in-progress
 #   many extra packages need to be configured and installed
@@ -22,7 +22,7 @@
 #   Please consider researching the topic before making any arguments based
 #   on the results that this code will generate.
 #
-# FORBIDUSERDEFINEDVECTORSPACES: if 'yes' you are effectively saying only the autobot-generated sets are valid for
+# FORBIDUSERDEFINEDVECTORSPACES: if True you are effectively saying only the autobot-generated sets are valid for
 #   searching; this option will block anything that is not already vectorized from returning a result
 #
 # LITERALCOSINEDISTANCEENABLED allows you to seek the concrete neighbors of words.
@@ -79,18 +79,18 @@
 #   larger values are also acceptable if you want to experiment.
 #
 # AUTOVECTORIZE will fill the vector db in the background; this will chew up plenty of resources:
-#   both drive space and CPU time; do not set this to 'yes' unless you are ready for the commitment
+#   both drive space and CPU time; do not set this to True unless you are ready for the commitment
 #
 
 # Windows 10 is not ready for semantic vectors
 #	TypeError: can't pickle psycopg2.extensions.connection objects
 
-SEMANTICVECTORSENABLED = 'no'
-FORBIDUSERDEFINEDVECTORSPACES = 'no'
-LITERALCOSINEDISTANCEENABLED = 'no'
-CONCEPTMAPPINGENABLED = 'no'
-TOPICMODELINGENABLED = 'no'
-CONCEPTSEARCHINGENABLED = 'no'  # of dubious value as currently implemented
+SEMANTICVECTORSENABLED = False
+FORBIDUSERDEFINEDVECTORSPACES = False
+LITERALCOSINEDISTANCEENABLED = False
+CONCEPTMAPPINGENABLED = False
+TOPICMODELINGENABLED = False
+CONCEPTSEARCHINGENABLED = False  # of dubious value as currently implemented
 MAXVECTORSPACE = 7548165
 MAXSENTENCECOMPARISONSPACE = 50000
 VECTORDIMENSIONS = 300
@@ -112,7 +112,7 @@ LDAMINFREQ = 5          # word must be found >n times
 LDAITERATIONS = 12
 LDAMUSTBELONGERTHAN = 3
 
-AUTOVECTORIZE = 'no'
+AUTOVECTORIZE = False
 
 
 """

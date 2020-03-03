@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-# note that internally 'yes'/'no' are converted to True/False, but one should still use 'yes'/'no'
-# and definitely *do not* use 'True'/'False' since they are not the same as True/False...
+# note that internally 'yes'/'no' are converted to True/False; and so one can use 'yes'/'no'
+# but definitely *do not* use 'True'/'False' since they are not the same as True/False...
 
 # CSSSTYLESHEET presupposes './server/css' as part of its path; i.e. you
 # 	will want to put custom CSS in the same directory as the
 # 	default installed css ('hipparchiastyles.css')
 #
-# SUPPRESSCOLORS if set to 'yes' will set all colors to black in the CSS.
+# SUPPRESSCOLORS if set to True will set all colors to black in the CSS.
 #
 # HOSTEDFONTFAMILY sets which of the font families that Hipparchia downloads upon
 #   installation will be served to clients. Any of them should ensure full
@@ -23,14 +23,14 @@
 #   right. And, most importantly, it should be installed at the system-level for
 #   anyone who visits.
 #
-# DEFAULTLOCALGREEKFONT is meaningful only if DISTINCTGREEKANDLATINFONTS is 'yes'.
+# DEFAULTLOCALGREEKFONT is meaningful only if DISTINCTGREEKANDLATINFONTS is True.
 #   In that case Greek characters will display in this font
 #
-# DEFAULTLOCALNONGREEKFONT is meaningful only if DISTINCTGREEKANDLATINFONTS is 'yes'.
+# DEFAULTLOCALNONGREEKFONT is meaningful only if DISTINCTGREEKANDLATINFONTS is True.
 #   In that case all non-Greek characters will display in this font.
 #
 # ENBALEFONTPICKER allows you to select fonts from the web interface; but see notes on
-#   FONTPICKERLIST before enabling this. Anything other than 'yes' disables this option.
+#   FONTPICKERLIST before enabling this. Anything other than True disables this option.
 #
 # FONTPICKERLIST is a list of fonts to choose from. These can EITHER be served OR local to the client.
 #   The item set here alters DEFAULTLOCALFONT in the CSS. To avoid problems the list should contain
@@ -39,13 +39,13 @@
 #
 
 CSSSTYLESHEET = 'hipparchiastyles.css'
-DISTINCTGREEKANDLATINFONTS = 'no'
-SUPPRESSCOLORS = 'no'
+DISTINCTGREEKANDLATINFONTS = False
+SUPPRESSCOLORS = False
 HOSTEDFONTFAMILY = 'Noto'  # Noto should be pre-installed by Hipparchia; see above about adding more
-USEFONTFILESFORSTYLES = 'yes'  # Only valid if you are using a HOSTEDFONTFAMILY
+USEFONTFILESFORSTYLES = True  # Only valid if you are using a HOSTEDFONTFAMILY
 DEFAULTLOCALFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'  # Arial is often present and it is very good
 DEFAULTLOCALGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
 DEFAULTLOCALNONGREEKFONT = 'yourfonthere_otherwise_fallbacktohipparchiahostedfonts'
-ENBALEFONTPICKER = 'no'
+ENBALEFONTPICKER = False
 FONTPICKERLIST = ['Noto', 'CMUSans', 'CMUSerif', 'DejaVuSans', 'DejaVuSerif', 'EBGaramond',
                   'Fira', 'IBMPlex', 'Roboto', 'Ubuntu']  # see above about editing this list

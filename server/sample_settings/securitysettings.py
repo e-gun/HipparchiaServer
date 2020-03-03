@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# note that internally 'yes'/'no' are converted to True/False, but one should still use 'yes'/'no'
-# and definitely *do not* use 'True'/'False' since they are not the same as True/False...
+# note that internally 'yes'/'no' are converted to True/False; and so one can use 'yes'/'no'
+# but definitely *do not* use 'True'/'False' since they are not the same as True/False...
 
 ##  [set once and forget: SECRET_KEY] ##
 SECRET_KEY = 'yourkeyhereitshouldbelongandlooklikecryptographicgobbledygook'
@@ -28,8 +28,8 @@ DBWRITEPASS = 'consider_re-using_HipparchiaBuilder_pass'
 # 	[].^$ will be allowed and all digits will be dropped
 
 # FOOLISHLYALLOWREGEX is a collection of character you *will* accept: '!*+,', e.g.
-#   HOBBLEREGEX set to 'yes' will override anything you put here
+#   HOBBLEREGEX set to 'yes'/True will override anything you put here
 
-HOBBLEREGEX = 'no'
+HOBBLEREGEX = False
 FOOLISHLYALLOWREGEX = ''
 

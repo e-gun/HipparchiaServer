@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# note that internally 'yes'/'no' are converted to True/False, but one should still use 'yes'/'no'
-# and definitely *do not* use 'True'/'False' since they are not the same as True/False...
+# note that internally 'yes'/'no' are converted to True/False; and so one can use 'yes'/'no'
+# but definitely *do not* use 'True'/'False' since they are not the same as True/False...
 
 ### [4] Hipparchia debug variables ###
 ##  [only change this if you know why you are doing it] ##
@@ -12,7 +12,7 @@
 # DBDEBUGMODE and HTMLDEBUGMODE will show DB locations of hits and/or
 # 	the raw HTML markup inside the DB there are no security
 # 	implications here; these can only be set at launch; any changes
-# 	require restarting HipparchiaServer 'yes' is only useful if you
+# 	require restarting HipparchiaServer True is only useful if you
 # 	think there is some sort of glitch in the data and/or its
 # 	representation that you want to check
 #
@@ -20,7 +20,7 @@
 #
 # PARSERBUGMODE will show the xref value after the match
 #
-# ENABLELOGGING = 'yes' will turn on logging and send the logs to
+# ENABLELOGGING = True will turn on logging and send the logs to
 #   HIPPARCHIALOGFILE
 #
 # HIPPARCHIALOGFILE is the log file; pick your path wisely: it is
@@ -30,7 +30,7 @@
 #
 # RETAINFIGURES will prevent graphs from being deleted after display
 #
-# BLOCKRESETPATHS if not 'no', then you cannot access (the hidden) URLs 'resetvectors/' or 'resetvectorimages/'
+# BLOCKRESETPATHS if not False, then you cannot access (the hidden) URLs 'resetvectors/' or 'resetvectorimages/'
 #
 # ALLOWUSERTOSETDEBUGMODES will enable toggles for next five options on the web interface
 #   (DBDEBUGMODE, LEXDEBUGMODE, PARSERDEBUGMODE, HTMLDEBUGMODE, and SEARCHMARKEDUPLINE)
@@ -38,16 +38,16 @@
 # SEARCHMARKEDUPLINE will enable searching for things like "hmu_date_or_numeric_equivalent_of_date". It will also ruin
 #   many, many other kinds of search
 
-SUPPRESSWARNINGS = 'yes'
-ENABLELOGGING = 'no'
+SUPPRESSWARNINGS = True
+ENABLELOGGING = False
 HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
-RETAINREDISPOLLS = 'no'
-RETAINFIGURES = 'no'
-BLOCKRESETPATHS = 'yes'
+RETAINREDISPOLLS = False
+RETAINFIGURES = False
+BLOCKRESETPATHS = True
 
-ALLOWUSERTOSETDEBUGMODES = 'no'
-DBDEBUGMODE = 'no'
-LEXDEBUGMODE = 'no'
-PARSERDEBUGMODE = 'no'
-HTMLDEBUGMODE = 'no'
-SEARCHMARKEDUPLINE = 'no'
+ALLOWUSERTOSETDEBUGMODES = False
+DBDEBUGMODE = False
+LEXDEBUGMODE = False
+PARSERDEBUGMODE = False
+HTMLDEBUGMODE = False
+SEARCHMARKEDUPLINE = False

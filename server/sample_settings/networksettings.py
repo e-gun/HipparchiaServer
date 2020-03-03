@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# note that internally 'yes'/'no' are converted to True/False, but one should still use 'yes'/'no'
-# and definitely *do not* use 'True'/'False' since they are not the same as True/False...
+# note that internally 'yes'/'no' are converted to True/False; and so one can use 'yes'/'no'
+# but definitely *do not* use 'True'/'False' since they are not the same as True/False...
 
 ### [2] network values ###
 ##  [only change these if you know why you are doing it: you have a firewall problem, etc.] ##
@@ -65,7 +65,7 @@ MYEXTERNALIPADDRESS = '127.0.0.1'
 DBHOST = '127.0.0.1'
 DBPORT = 5432
 CONNECTIONTYPE = 'pool'
-ENABLEPOOLCLEANING = 'no'
+ENABLEPOOLCLEANING = False
 
 # you might be using redis; but note that redis is NOT pre-installed in standard or minimal installations
 REDISHOST = '127.0.0.1'

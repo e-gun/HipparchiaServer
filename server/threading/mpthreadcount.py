@@ -25,7 +25,7 @@ def setthreadcount(startup=False) -> int:
 	commandlineargs = getcommandlineargs()
 
 	if not commandlineargs.threadcount:
-		if hipparchia.config['AUTOCONFIGWORKERS'] != 'yes':
+		if not hipparchia.config['AUTOCONFIGWORKERS']:
 			workers = hipparchia.config['WORKERS']
 		else:
 			workers = int(cpu_count() / 2) + 1

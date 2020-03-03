@@ -46,7 +46,7 @@
 #   an option of interest only to debuggers and hard-core optimizers.
 #
 
-AUTOCONFIGWORKERS = 'yes'
+AUTOCONFIGWORKERS = True
 WORKERS = 3
 MPCOMMITCOUNT = 250
 LEMMACHUNKSIZE = 10
