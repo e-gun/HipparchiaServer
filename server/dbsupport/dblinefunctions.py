@@ -54,15 +54,32 @@ def grabonelinefromwork(workdbname: str, lineindex: int, cursor) -> tuple:
 	return foundline
 
 
-def returnfirstorlastlinenumber(workid: str, dbcursor, findlastline=False) -> int:
+def returnfirstorlastlinenumber(workid: str, dbcursor, findlastline=False, disallowt=False, disallowlevel=0) -> int:
 	"""
+
 	return the lowest index value
 	used to handle exceptions
+	also used by the rawinput infrastructure
+
+	options for dodging useless 't' citaitons, etc
 
 	:param workid:
 	:param dbcursor:
 	:return:
 	"""
+
+	qtemplate = 'SELECT {minormax}(index) FROM {db} WHERE wkuniversalid=%s'
+
+	disallow = list()
+	tlist = list()
+
+	if disallowt:
+		disallowtemplate = 'level_0{n}_value <> %s'
+		for level in range(disallowlevel+1):
+			disallow.append(disallowtemplate.format(n=level))
+			tlist.append('t')
+		disallow = ' AND '.join(disallow)
+		disallow = ' AND ({d})'.format(d=disallow)
 
 	db = workid[0:6]
 
@@ -73,8 +90,12 @@ def returnfirstorlastlinenumber(workid: str, dbcursor, findlastline=False) -> in
 
 	firstline = -1
 	while firstline == -1:
-		query = 'SELECT {minormax}(index) FROM {db} WHERE wkuniversalid=%s'.format(db=db, minormax=m)
-		data = (workid,)
+		query = qtemplate.format(db=db, minormax=m)
+		if disallowt:
+			query = query + disallow
+			data = tuple([workid] + tlist)
+		else:
+			data = (workid,)
 		try:
 			dbcursor.execute(query, data)
 			found = dbcursor.fetchone()

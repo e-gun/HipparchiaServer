@@ -224,6 +224,7 @@ $(document).ready( function () {
         '#lemmatizing-ison', '#vectorizing-ison', '#rawlocationinput', '#rawendpointinput', '#usingrawinput');
     bulkhider(tohideonfirstload);
 
+    loadoptions();
 
     function checkCookie(){
         let c = navigator.cookieEnabled;

@@ -51,9 +51,10 @@ def selectionmade():
 	genre = depunct(request.args.get('genre', ''))
 	auloc = depunct(request.args.get('auloc', ''))
 
+	rawdataentry = re.sub('[^tf]', '', request.args.get('raw', ''))
 	exclude = re.sub('[^tf]', '', request.args.get('exclude', ''))
 
-	allowedpunct = '|,'
+	allowedpunct = '|,.'
 	locus = depunct(request.args.get('locus', ''), allowedpunct)
 	endpoint = depunct(request.args.get('endpoint', ''), allowedpunct)
 
@@ -69,6 +70,10 @@ def selectionmade():
 	else:
 		suffix = 'exclusions'
 		other = 'selections'
+
+	if rawdataentry == 't':
+		locus = re.sub(r'\.', '|', locus)
+		endpoint = re.sub(r'\.', '|', endpoint)
 
 	# the selection box might contain stale info if you deselect a corpus while items are still in the box
 	uid = selectionisactive(uid)

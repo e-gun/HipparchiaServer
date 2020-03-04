@@ -207,7 +207,7 @@ def findworkstructure(author, work, passage=None):
 def sampleworkcitation(authorid: str, workid: str) -> str:
 	"""
 
-	called by loadsamplecitation() in authocomplete.js
+	called by loadsamplecitation() in autocomplete.js
 
 	we are using the maual input style on the web page
 	so we need some hint on how to do things: check the end line for a sample citation
@@ -221,8 +221,8 @@ def sampleworkcitation(authorid: str, workid: str) -> str:
 	dbcursor = dbconnection.cursor()
 
 	returnvals = dict()
-	returnvals['index'] = str()
-	returnvals['citation'] = str()
+	returnvals['firstline'] = str()
+	returnvals['lastline'] = str()
 
 	authorid = depunct(authorid)
 	workid = depunct(workid)
@@ -231,17 +231,18 @@ def sampleworkcitation(authorid: str, workid: str) -> str:
 		ao = authordict[authorid]
 		wo = workdict[authorid+'w'+workid]
 	except KeyError:
-		returnvals['citation'] = 'no such author/work combination'
+		returnvals['firstline'] = 'no such author/work combination'
 		return json.dumps(returnvals)
 
+	toplevel = wo.availablelevels - 1
+	firstlineindex = returnfirstorlastlinenumber(wo.universalid, dbcursor, disallowt=True, disallowlevel=toplevel)
+	flo = dblineintolineobject(grabonelinefromwork(authorid, firstlineindex, dbcursor))
+
 	lastlineidx = returnfirstorlastlinenumber(wo.universalid, dbcursor, findlastline=True)
-	lo = dblineintolineobject(grabonelinefromwork(authorid, lastlineidx, dbcursor))
+	llo = dblineintolineobject(grabonelinefromwork(authorid, lastlineidx, dbcursor))
 
-	locuscitation = lo.prolixlocus()
-
-	returnvals = dict()
-	returnvals['index'] = lastlineidx
-	returnvals['citation'] = locuscitation
+	returnvals['firstline'] = flo.prolixlocus()
+	returnvals['lastline'] = llo.prolixlocus()
 
 	results = json.dumps(returnvals)
 

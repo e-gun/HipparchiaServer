@@ -95,27 +95,49 @@ $('#pickauthor').click( function() {
         let locus = locusdataloader();
         let endpoint = endpointdataloader();
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
+        let rawlocus = $('#rawlocationinput').val();
+        let rawendpoint = $('#rawendpointinput').val();
         resetworksautocomplete();
         if (authorid !== '') {
             if (wrk === '') {
-              $.getJSON('/makeselection?auth=' + authorid, function (selectiondata) {
+                $.getJSON('/makeselection?auth=' + authorid, function (selectiondata) {
                     reloadselections(selectiondata);
                     loadWorklist(authorid);
                     $('#worksautocomplete').prop('placeholder', '(Pick a work)');
-                    });
-             } else if (locus === '') {
-                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
-                    reloadselections(selectiondata);
                 });
-             } else if (locus === endpoint){
-                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (selectiondata) {
-                    reloadselections(selectiondata);
-                });
-             } else {
-                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&endpoint=' + endpoint, function (selectiondata) {
-                    reloadselections(selectiondata);
-                });
-             }
+            } else if ($('#autofillinput').is(':checked')) {
+                // you are using the autofill boxes
+                if (locus === '') {
+                   $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
+                       reloadselections(selectiondata);
+                   });
+                } else if (locus === endpoint){
+                   $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (selectiondata) {
+                       reloadselections(selectiondata);
+                   });
+                } else {
+                   $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&endpoint=' + endpoint, function (selectiondata) {
+                       reloadselections(selectiondata);
+                   });
+                }
+            } else {
+                // you are using the raw entry subsystem
+                if (rawlocus === '') {
+                   $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
+                       reloadselections(selectiondata);
+                       });
+                } else if (rawendpoint === '') {
+                    console.log('raw_entry: a+w+l');
+                   $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&raw=t', function (selectiondata) {
+                       reloadselections(selectiondata);
+                   });
+                } else {
+                    console.log('raw_entry: a+w+l+e');
+                   $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&endpoint=' + rawendpoint + '&raw=t', function (selectiondata) {
+                       reloadselections(selectiondata);
+                   });
+                }
+            }
         }
         $('#searchlistcontents').hide();
 });
@@ -246,9 +268,10 @@ function loadsamplecitation(author, work) {
     // so we need some hint on how to do things: check the end line for a sample citation
     // "Cic., In Verr" ==> 2.5.189.7
     $.getJSON('/getsamplecitation/' + author + '/' + work, function (citationdata) {
-        let samplecite = citationdata['citation'];
-        $('#rawlocationinput').prop('placeholder', '(e.g.: ' + samplecite + ')');
-        $('#rawendpointinput').prop('placeholder', '(e.g.: ' + samplecite + ')');
+        let firstline = citationdata['firstline'];
+        let lastline = citationdata['lastline'];
+        $('#rawlocationinput').prop('placeholder', '(' + firstline + ' to ' + lastline + ')');
+        $('#rawendpointinput').prop('placeholder', '(' + firstline + ' to ' + lastline + ')');
     });
 }
 
