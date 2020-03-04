@@ -287,14 +287,17 @@ class dbWorkLine(object):
 		locus = template.format(au=self.authorid, wk=self.workid, idx=self.index, loc=self.locus())
 		return locus
 
-	def shortlocus(self) -> str:
+	def _generatelocus(self, levellist) -> str:
 		"""
-		try to get a short citation that drops the lvl0 info: "3.2"
-		useful for tagging level shifts without constantly seeing 'line 1'
+
+		common code for prolixlocus() and shortlocus()
+
+		:param levellist:
 		:return:
 		"""
+
 		loc = list()
-		for lvl in [self.l1, self.l2, self.l3, self.l4, self.l5]:
+		for lvl in levellist:
 			if str(lvl) != '-1' and (self.db not in dbWorkLine.nonliterarycorpora and lvl != 'recto'):
 				loc.append(lvl)
 		loc.reverse()
@@ -305,6 +308,27 @@ class dbWorkLine(object):
 			citation = '.'.join(loc)
 
 		return citation
+
+
+	def prolixlocus(self) -> str:
+		"""
+		try to get a citation that DOES NOT drop the lvl0 info: "3.2"
+		:return:
+		"""
+
+		levellist = [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]
+		return self._generatelocus(levellist)
+
+
+	def shortlocus(self) -> str:
+		"""
+		try to get a short citation that drops the lvl0 info: "3.2"
+		useful for tagging level shifts without constantly seeing 'line 1'
+		:return:
+		"""
+
+		levellist = [self.l1, self.l2, self.l3, self.l4, self.l5]
+		return self._generatelocus(levellist)
 
 	def uncleanlocustuple(self):
 		"""

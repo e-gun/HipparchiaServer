@@ -257,7 +257,8 @@ def sessionselectionsinfo(authordict: dict, workdict: dict) -> dict:
 					startln = dblineintolineobject(grabonelinefromwork(uid, start, dbcursor))
 					stopln = dblineintolineobject(grabonelinefromwork(uid, stop, dbcursor))
 					dbconnection.connectioncleanup()
-					loc = spantemplate.format(a=startln.shortlocus(), b=stopln.shortlocus())
+					# print('_FROM_', start, stop, startln.uncleanlocustuple(), stopln.uncleanlocustuple())
+					loc = spantemplate.format(a=startln.prolixlocus(), b=stopln.prolixlocus())
 
 				thehtml.append(psgtemplate.format(v=v, var=var, soe=selectionorexclusion, lv=localval, au=ao.akaname, wk=wk.title, loc=loc, tit=tit))
 				thejs.append((var, localval))

@@ -1118,7 +1118,8 @@ $('#endpointbutton-isclosed').click(function(){
     $.getJSON('/getstructure/' + getpath, function (selectiondata) {
         let lvls = selectiondata['totallevels'];
         for (var i = 0; i < lvls; i++) {
-            $('#level'+levellist[i]+'endpoint').show();
+            if ($('#level'+levellist[i]).is(':visible')) {
+                $('#level'+levellist[i]+'endpoint').show();}
             }
         });
     });

@@ -23,7 +23,8 @@ function clearmany(arrayofelements) {
 
 function reloadselections(selectiondata){
     // the data comes back from the server as a dict with three keys: timeexclusions, selections, exclusions
-
+    $('#endpointbutton-isopen').hide();
+    $('#endpointbutton-isclosed').hide();
     if (selectiondata.numberofselections > -1) {
             $('#selectionstable').show();
         } else {
@@ -352,6 +353,7 @@ function endpointloadLevellist(author, work, pariallocus){
                 if (atlevel > 0) {
                     let loc = endpointdataloader();
                     endpointdataloader(author, work, loc);
+                    $('#level0'+String(atlevel-1)+'endpoint').show()
                     }
                 },
             source: possibilities,
