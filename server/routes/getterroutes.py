@@ -16,7 +16,7 @@ from flask import make_response, redirect, request, session, url_for
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
-from server.dbsupport.dblinefunctions import grabbundlesoflines
+from server.dbsupport.dblinefunctions import dblineintolineobject, grabbundlesoflines, grabonelinefromwork, returnfirstorlastlinenumber
 from server.dbsupport.miscdbfunctions import buildauthorworkandpassage, findselectionboundaries
 from server.formatting.bibliographicformatting import formatauthinfo, formatauthorandworkinfo, formatname, \
 	woformatworkinfo
@@ -161,6 +161,8 @@ def findworkstructure(author, work, passage=None):
 
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
+	author = depunct(author)
+	work = depunct(work)
 
 	requested = buildauthorworkandpassage(author, work, passage, authordict, workdict, dbcursor)
 	wo = requested['workobject']
@@ -201,8 +203,55 @@ def findworkstructure(author, work, passage=None):
 	return results
 
 
+@hipparchia.route('/getsamplecitation/<authorid>/<workid>')
+def sampleworkcitation(authorid: str, workid: str) -> str:
+	"""
+
+	called by loadsamplecitation() in authocomplete.js
+
+	we are using the maual input style on the web page
+	so we need some hint on how to do things: check the end line for a sample citation
+	"Cic., In Verr" ==> 2.5.189.7
+
+	:param authorid:
+	:param workid:
+	:return:
+	"""
+	dbconnection = ConnectionObject()
+	dbcursor = dbconnection.cursor()
+
+	returnvals = dict()
+	returnvals['index'] = str()
+	returnvals['citation'] = str()
+
+	authorid = depunct(authorid)
+	workid = depunct(workid)
+
+	try:
+		ao = authordict[authorid]
+		wo = workdict[authorid+'w'+workid]
+	except KeyError:
+		returnvals['citation'] = 'no such author/work combination'
+		return json.dumps(returnvals)
+
+	lastlineidx = returnfirstorlastlinenumber(wo.universalid, dbcursor, findlastline=True)
+	lo = dblineintolineobject(grabonelinefromwork(authorid, lastlineidx, dbcursor))
+
+	locuscitation = lo.prolixlocus()
+
+	returnvals = dict()
+	returnvals['index'] = lastlineidx
+	returnvals['citation'] = locuscitation
+
+	results = json.dumps(returnvals)
+
+	dbconnection.connectioncleanup()
+
+	return results
+
+
 @hipparchia.route('/getauthorinfo/<authorid>')
-def getauthinfo(authorid):
+def getauthinfo(authorid: str):
 	"""
 	show local info about the author one is considering in the selection box
 	:return:

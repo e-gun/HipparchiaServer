@@ -54,29 +54,34 @@ def grabonelinefromwork(workdbname: str, lineindex: int, cursor) -> tuple:
 	return foundline
 
 
-def returnfirstlinenumber(workid: str, cursor) -> int:
+def returnfirstorlastlinenumber(workid: str, dbcursor, findlastline=False) -> int:
 	"""
 	return the lowest index value
 	used to handle exceptions
 
 	:param workid:
-	:param cursor:
+	:param dbcursor:
 	:return:
 	"""
 
 	db = workid[0:6]
 
+	if findlastline:
+		m = 'max'
+	else:
+		m = 'min'
+
 	firstline = -1
 	while firstline == -1:
-		query = 'SELECT min(index) FROM {db} WHERE wkuniversalid=%s'.format(db=db)
+		query = 'SELECT {minormax}(index) FROM {db} WHERE wkuniversalid=%s'.format(db=db, minormax=m)
 		data = (workid,)
 		try:
-			cursor.execute(query, data)
-			found = cursor.fetchone()
+			dbcursor.execute(query, data)
+			found = dbcursor.fetchone()
 			firstline = found[0]
 		except IndexError:
-			workid = perseusidmismatch(workid, cursor)
-			firstline = returnfirstlinenumber(workid, cursor)
+			workid = perseusidmismatch(workid, dbcursor)
+			firstline = returnfirstorlastlinenumber(workid, dbcursor)
 
 	return firstline
 

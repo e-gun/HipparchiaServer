@@ -186,7 +186,7 @@ $(document).ready( function () {
         document.getElementById('browserclickscriptholder').appendChild(browserclickscript);
     }
 
-    // setoptions() defined in ui-clicks.js
+    // setoptions() defined in coreinterfaceclicks.js
     $('#searchlines').click( function(){ setoptions('searchscope', 'lines'); });
     $('#searchwords').click( function(){ setoptions('searchscope', 'words'); });
 
@@ -221,7 +221,7 @@ $(document).ready( function () {
         '#semanticvectornnquerycheckbox', '#semanticvectorquerycheckbox', '#sentencesimilaritycheckbox', '#spur', '#tensorflowgraphcheckbox',
         '#termonecheckbox', '#topicmodelcheckbox', '#level05endpoint', '#level04endpoint', '#level03endpoint', '#level02endpoint', '#level01endpoint',
         '#level00endpoint', '#endpointnotice', '#fromnotice', '#authorendpoint', '#workendpoint', '#endpointbutton-isclosed', '#endpointbutton-isopen',
-        '#lemmatizing-ison', '#vectorizing-ison');
+        '#lemmatizing-ison', '#vectorizing-ison', '#rawlocationinput', '#rawendpointinput', '#usingrawinput');
     bulkhider(tohideonfirstload);
 
 

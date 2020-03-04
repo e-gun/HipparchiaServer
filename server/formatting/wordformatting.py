@@ -486,15 +486,18 @@ def universalregexequivalent(searchterm: str) -> str:
 	return searchtermequivalent
 
 
-def depunct(stringtoclean, allowedpunctuationsting=None):
+def depunct(stringtoclean: str, allowedpunctuationsting=None) -> str:
 	"""
 
 	'abc*d$ef, ghi;' + ',;' ==> 'abcdef, ghi;'
 
-	:param wordtoclean:
+	:param stringtoclean:
 	:param allowedpunctuationsting:
 	:return:
 	"""
+
+	if not stringtoclean:
+		return str()
 
 	badpunct = punctuation
 	if allowedpunctuationsting:

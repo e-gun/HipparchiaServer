@@ -54,7 +54,8 @@ function reloadAuthorlist(){
 function resetworksautocomplete(){
     let ids = Array('#level05', '#level04', '#level03', '#level02', '#level01', '#level00',
         '#level05endpoint', '#level04endpoint', '#level03endpoint', '#level02endpoint', '#level01endpoint',
-        '#level00endpoint', '#endpointnotice', '#fromnotice', '#authorendpoint', '#workendpoint');
+        '#level00endpoint', '#endpointnotice', '#fromnotice', '#authorendpoint', '#workendpoint', '#rawlocationinput',
+        '#rawendpointinput');
     hidemany(ids);
     clearmany(ids);
 }
@@ -167,10 +168,10 @@ function loadWorklist(authornumber){
     $.getJSON('/getworksof/'+authornumber, function (selectiondata) {
         let dLen = selectiondata.length;
         let worksfound = Array();
-        selector = $('#worksautocomplete');
+        let wac = $('#worksautocomplete');
         for (let i = 0; i < dLen; i++) { worksfound.push(selectiondata[i]); }
-        selector.autocomplete( "enable" );
-        selector.autocomplete({ source: worksfound });
+        wac.autocomplete( "enable" );
+        wac.autocomplete({ source: worksfound });
     });
 }
 
@@ -180,7 +181,12 @@ $('#worksautocomplete').autocomplete({
         resetworksautocomplete();
         let auth = $("#authorsautocomplete").val().slice(-7, -1);
         let wrk = ui.item.value.slice(-4, -1);
-        loadLevellist(auth, wrk,'firstline');
+        if ($('#autofillinput').is(':checked')) {
+            loadLevellist(auth, wrk, 'firstline');
+        } else {
+            $('#rawlocationinput').show();
+            loadsamplecitation(auth, wrk);
+        }
         },
      select: function (event, ui) {
         let thisselector = $('#worksautocomplete');
@@ -234,6 +240,17 @@ function endpointdataloader() {
     return locusdata;
 }
 
+
+function loadsamplecitation(author, work) {
+    // we are using the maual input style on the web page
+    // so we need some hint on how to do things: check the end line for a sample citation
+    // "Cic., In Verr" ==> 2.5.189.7
+    $.getJSON('/getsamplecitation/' + author + '/' + work, function (citationdata) {
+        let samplecite = citationdata['citation'];
+        $('#rawlocationinput').prop('placeholder', '(e.g.: ' + samplecite + ')');
+        $('#rawendpointinput').prop('placeholder', '(e.g.: ' + samplecite + ')');
+    });
+}
 
 function loadLevellist(author, work, pariallocus){
     // python is hoping to be sent something like:

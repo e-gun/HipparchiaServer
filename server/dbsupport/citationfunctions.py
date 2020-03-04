@@ -8,7 +8,7 @@
 
 import re
 
-from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber, worklinetemplate
+from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstorlastlinenumber, worklinetemplate
 from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -264,7 +264,7 @@ def finddblinefromlocus(workobject: dbOpus, citationtuple: tuple, dbcursor, find
 		indexvalue = found[0]
 	except TypeError:
 		# TypeError: 'NoneType' object is not subscriptable
-		indexvalue = returnfirstlinenumber(workdb, dbcursor)
+		indexvalue = returnfirstorlastlinenumber(workdb, dbcursor)
 
 	# print('finddblinefromlocus() - indexvalue:', indexvalue)
 

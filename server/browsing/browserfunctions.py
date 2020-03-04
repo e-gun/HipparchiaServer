@@ -13,7 +13,7 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.citationfunctions import locusintocitation, finddblinefromlocus, finddblinefromincompletelocus, \
 	perseusdelabeler
-from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstlinenumber
+from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstorlastlinenumber
 from server.dbsupport.miscdbfunctions import simplecontextgrabber, perseusidmismatch
 from server.formatting.bibliographicformatting import formatpublicationinfo
 from server.formatting.browserformatting import insertparserids
@@ -348,7 +348,7 @@ def browserfindlinenumberfromperseus(citation: str, workobject: dbOpus, resultme
 		# do an imperfect test for this by inviting the exception
 		# you can still get a valid but wrong work, of course,
 		# but if you ask for w001 and only w003 exists, this is supposed to take care of that
-		returnfirstlinenumber(workobject.universalid, dbcursor)
+		returnfirstorlastlinenumber(workobject.universalid, dbcursor)
 	except:
 		# dict did not agree with our ids...: euripides, esp
 		# what follows is a 'hope for the best' approach
