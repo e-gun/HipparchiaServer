@@ -127,19 +127,22 @@ $('#pickauthor').click( function() {
                        reloadselections(selectiondata);
                        });
                 } else if (rawendpoint === '') {
-                    console.log('raw_entry: a+w+l');
                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&raw=t', function (selectiondata) {
                        reloadselections(selectiondata);
                    });
                 } else {
-                    console.log('raw_entry: a+w+l+e');
                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&endpoint=' + rawendpoint + '&raw=t', function (selectiondata) {
                        reloadselections(selectiondata);
                    });
                 }
             }
+            $('#fromnotice').hide();
+            $('#endpointnotice').hide();
+            $('#endpointbutton-isclosed').hide();
+            $('#endpointbutton-isopen').hide();
         }
         $('#searchlistcontents').hide();
+
 });
 
 
@@ -149,26 +152,46 @@ $('#excludeauthor').click( function() {
         let locus = locusdataloader();
         let endpoint = endpointdataloader();
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
+        let rawlocus = $('#rawlocationinput').val();
+        let rawendpoint = $('#rawendpointinput').val();
         resetworksautocomplete();
         if (authorid !== '') {
             if (wrk === '') {
-              $.getJSON('/makeselection?auth=' + authorid+'&exclude=t', function (selectiondata) {
-                   reloadselections(selectiondata);
-                   loadWorklist(authorid);
-                  $('#worksautocomplete').prop('placeholder', '(Pick a work)');
-                  });
-             } else if (locus === '') {
-                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&exclude=t', function (selectiondata) {
+                $.getJSON('/makeselection?auth=' + authorid + '&exclude=t', function (selectiondata) {
                     reloadselections(selectiondata);
+                    loadWorklist(authorid);
+                    $('#worksautocomplete').prop('placeholder', '(Pick a work)');
                 });
-             } else if (locus === endpoint){
-                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&exclude=t', function (selectiondata) {
-                    reloadselections(selectiondata);
-                });
-             } else {
-                $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&endpoint=' + endpoint + '&exclude=t', function (selectiondata) {
-                    reloadselections(selectiondata);
-                });
+            } else if ($('#autofillinput').is(':checked')) {
+                // you are using the autofill boxes
+                if (locus === '') {
+                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&exclude=t', function (selectiondata) {
+                        reloadselections(selectiondata);
+                    });
+                } else if (locus === endpoint) {
+                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&exclude=t', function (selectiondata) {
+                        reloadselections(selectiondata);
+                    });
+                } else {
+                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&endpoint=' + endpoint + '&exclude=t', function (selectiondata) {
+                        reloadselections(selectiondata);
+                    });
+                }
+            } else {
+                // you are using the raw entry subsystem
+                if (rawlocus === '') {
+                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&exclude=t', function (selectiondata) {
+                        reloadselections(selectiondata);
+                    });
+                } else if (rawendpoint === '') {
+                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&raw=t' + '&exclude=t', function (selectiondata) {
+                        reloadselections(selectiondata);
+                    });
+                } else {
+                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&endpoint=' + rawendpoint + '&raw=t' + '&exclude=t', function (selectiondata) {
+                        reloadselections(selectiondata);
+                    });
+                }
                 $('#fromnotice').hide();
                 $('#endpointnotice').hide();
                 $('#endpointbutton-isclosed').hide();

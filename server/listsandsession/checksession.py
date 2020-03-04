@@ -75,7 +75,7 @@ def probeforsessionvariables():
 		session['psgexclusions'] = list()
 		session['psgselections'] = list()
 		session['quotesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALQUOTES']
-		session['rawinputstyle'] = hipparchia.config['DEFAULTSUMMARIZELEXICALQUOTES']
+		session['rawinputstyle'] = hipparchia.config['DEFAULTUSERAWINPUTSTYLE']
 		session['searchscope'] = 'lines'
 		session['searchinsidemarkup'] = hipparchia.config['DEFAULTUSERAWINPUTSTYLE']
 		session['semanticvectorquery'] = False
