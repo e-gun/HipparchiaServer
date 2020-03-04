@@ -75,8 +75,9 @@ def probeforsessionvariables():
 		session['psgexclusions'] = list()
 		session['psgselections'] = list()
 		session['quotesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALQUOTES']
+		session['rawinputstyle'] = hipparchia.config['DEFAULTSUMMARIZELEXICALQUOTES']
 		session['searchscope'] = 'lines'
-		session['searchinsidemarkup'] = hipparchia.config['SEARCHMARKEDUPLINE']
+		session['searchinsidemarkup'] = hipparchia.config['DEFAULTUSERAWINPUTSTYLE']
 		session['semanticvectorquery'] = False
 		session['sensesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALSENSES']
 		session['sentencesimilarity'] = False
@@ -160,6 +161,7 @@ def convertyesnototruefalse():
 		'papyruscorpus',
 		'principleparts',
 		'quotesummary',
+		'rawinputstyle',
 		'searchinsidemarkup',
 		'semanticvectorquery',
 		'sensesummary',

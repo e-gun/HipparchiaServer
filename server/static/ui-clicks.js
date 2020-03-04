@@ -99,7 +99,8 @@ function loadoptions() {
         const xoredtoggles = {
             'onehit': {'y': $('#onehit_y'), 'n': $('#onehit_n'), 'f': $('#onehitisfalse'), 't': $('#onehitistrue')},
             'headwordindexing': {'y': $('#headwordindexing_y'), 'n': $('#headwordindexing_n'), 'f': $('#headwordindexinginactive'), 't': $('#headwordindexingactive')},
-            'indexbyfrequency': {'y': $('#frequencyindexing_y'), 'n': $('#frequencyindexing_n'), 'f': $('#frequencyindexinginactive'), 't': $('#frequencyindexingactive')}
+            'indexbyfrequency': {'y': $('#frequencyindexing_y'), 'n': $('#frequencyindexing_n'), 'f': $('#frequencyindexinginactive'), 't': $('#frequencyindexingactive')},
+            'rawinputstyle': {'y': $('#manualinput'), 'n': $('#autofillinput'), 'f': $('#usingautoinput'), 't': $('#usingrawinput')},
         };
 
         Object.keys(xoredtoggles).forEach(function(key) {
@@ -404,6 +405,14 @@ $('#onehit_y').click( function(){
 
 $('#onehit_n').click( function(){
     setoptions('onehit', 'no'); $('#onehitisfalse').show(); $('#onehitistrue').hide();
+});
+
+$('#autofillinput').click( function(){
+    setoptions('rawinputstyle', 'no'); $('#usingautoinput').show(); $('#usingrawinput').hide();
+});
+
+$('#manualinput').click( function(){
+    setoptions('rawinputstyle', 'yes'); $('#usingrawinput').show(); $('#usingautoinput').hide();
 });
 
 $('#includespuria').change(function() {

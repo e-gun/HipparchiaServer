@@ -76,6 +76,7 @@ def modifysessionvariable(parameter, value):
 		'papyruscorpus',
 		'principleparts',
 		'quotesummary',
+		'rawinputstyle',
 		'searchinsidemarkup',
 		'semanticvectorquery',
 		'sensesummary',
