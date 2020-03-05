@@ -12,6 +12,7 @@ import re
 from server import hipparchia
 from server.browsing.browserfunctions import buildbrowseroutputobject, browserfindlinenumberfromcitation
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
+from server.dbsupport.dblinefunctions import returnfirstorlastlinenumber
 from server.dbsupport.miscdbfunctions import buildauthorworkandpassage, returnfirstwork
 from server.formatting.miscformatting import consolewarning
 from server.formatting.lexicaformatting import lexicaldbquickfixes
@@ -38,12 +39,9 @@ def grabtextforbrowsing(method, author, work, location=None):
 	:return:
 	"""
 
-	if not location:
-		# never supposed to be true, but...
-		return grabtextforbrowsing('locus', author, work, '_0')
-
 	try:
-		workdict[author+'w'+work]
+		wo = workdict[author+'w'+work]
+		ao = authordict[author]
 	except KeyError:
 		# Might as well sing of anger: Μῆνιν ἄειδε θεὰ Πηληϊάδεω Ἀχιλῆοϲ...
 		return grabtextforbrowsing('locus', 'gr0012', '001', '1')
@@ -53,18 +51,16 @@ def grabtextforbrowsing(method, author, work, location=None):
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
-	author = depunct(author)
-	work = depunct(work)
 	allowed = '_|,:'
 	location = depunct(location, allowedpunctuationsting=allowed)
+
+	if not location or location == '|_0':
+		locationval = returnfirstorlastlinenumber(wo.universalid, dbcursor)
+		return grabtextforbrowsing('linenumber', author, work, str(locationval))
 
 	knownmethods = ['linenumber', 'locus', 'perseus']
 	if method not in knownmethods:
 		method = 'linenumber'
-
-	requested = buildauthorworkandpassage(author, work, location, authordict, workdict, dbcursor)
-	ao = requested['authorobject']
-	wo = requested['workobject']
 
 	perseusauthorneedsfixing = ['gr0006']
 	if method == 'perseus' and author in perseusauthorneedsfixing:
@@ -141,6 +137,8 @@ def rawcitationgrabtextforbrowsing(author: str, work: str, location=None):
 	location = re.sub(r'\.', '|', location)
 	allowed = '_|,:'
 	location = depunct(location, allowedpunctuationsting=allowed)
+	if not location:
+		return grabtextforbrowsing('locus', author, work, '_0')
 
 	emptycursor = None
 

@@ -204,8 +204,6 @@ def textmaker(author: str, work=None, passage=None, endpoint=None):
 	:return:
 	"""
 
-	print('au, wk, psg, end', author, work, passage, endpoint)
-
 	probeforsessionvariables()
 
 	dbconnection = ConnectionObject('autocommit')

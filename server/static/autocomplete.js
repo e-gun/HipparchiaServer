@@ -97,6 +97,10 @@ $('#pickauthor').click( function() {
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
         let rawlocus = $('#rawlocationinput').val();
         let rawendpoint = $('#rawendpointinput').val();
+        if ($('#endpointnotice').is(':hidden')) {
+            rawendpoint = '';
+            endpoint = '';
+        }
         resetworksautocomplete();
         if (authorid !== '') {
             if (wrk === '') {

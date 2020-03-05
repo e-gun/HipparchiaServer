@@ -40,13 +40,17 @@ $('#makeanindex').click( function() {
         let searchid = generateId(8);
         let rawlocus = $('#rawlocationinput').val();
         let rawendpoint = $('#rawendpointinput').val();
+        if ($('#endpointnotice').is(':hidden')) {
+            rawendpoint = '';
+            endpoint = '';
+        }
         $('#searchsummary').html('');
         $('#displayresults').html('');
 
         if (authorid !== '') {
             if ($('#autofillinput').is(':checked')) {
                 // you are using the autofill boxes
-                if (locus === endpoint) {
+                if (endpoint === '') {
                     let url = '';
                     if (wrk === '') {
                         url = '/indexto/' + searchid + '/' + authorid;
@@ -131,10 +135,14 @@ $('#textofthis').click( function() {
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
         let rawlocus = $('#rawlocationinput').val();
         let rawendpoint = $('#rawendpointinput').val();
+        if ($('#endpointnotice').is(':hidden')) {
+            rawendpoint = '';
+            endpoint = '';
+        }
         if (authorid !== '') {
             if ($('#autofillinput').is(':checked')) {
                 // you are using the autofill boxes
-                if (locus === endpoint) {
+                if (endpoint === '') {
                     let url = '';
                     if (wrk === '') {
                         url = '/textof/' + authorid;
