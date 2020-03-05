@@ -165,6 +165,8 @@ def textmaker(author: str, work=None, passage=None, endpoint=None):
 	:return:
 	"""
 
+	print('au, wk, psg, end', author, work, passage, endpoint)
+
 	probeforsessionvariables()
 
 	dbconnection = ConnectionObject('autocommit')
@@ -244,8 +246,6 @@ def texmakerfromrawlocus(author: str, work: str, location: str, endpoint=None):
 	:return:
 	"""
 
-	emptycursor = None
-
 	try:
 		wo = workdict[author+'w'+work]
 	except KeyError:
@@ -262,19 +262,9 @@ def texmakerfromrawlocus(author: str, work: str, location: str, endpoint=None):
 	location = re.sub(r'\.', '|', location)
 	allowed = '_|,:'
 	location = depunct(location, allowedpunctuationsting=allowed)
-	start = location.split('|')
-	start.reverse()
-	targetlinedict = finddblinefromincompletelocus(wo, start, emptycursor)
 
 	if endpoint:
 		endpoint = re.sub(r'\.', '|', endpoint)
 		endpoint = depunct(endpoint, allowedpunctuationsting=allowed)
-		end = endpoint.split('|')
-		endpointline = finddblinefromincompletelocus(wo, end, emptycursor)
 
-	if not endpoint and targetlinedict['code'] == 'success':
-		return textmaker(wo.authorid, wo.worknumber, str(targetlinedict['line']))
-	elif endpoint and targetlinedict['code'] == 'success' and endpointline['code'] == 'success':
-		return textmaker(wo.authorid, wo.worknumber, str(targetlinedict['line']), str(endpointline['line']))
-	else:
-		return textmaker(str())
+	return textmaker(wo.authorid, wo.worknumber, location, endpoint)

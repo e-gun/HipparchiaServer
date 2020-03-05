@@ -443,6 +443,10 @@ $('#genreinfo').click(function(){
 // ENDPOINT UI CLICKS
 //
 
+$('#rawlocationinput').click(function () {
+    toggleendpointarrows();
+});
+
 $('#endpointbutton-isclosed').click(function(){
     // go from invisible to visible
     let aep = $('#authorendpoint');

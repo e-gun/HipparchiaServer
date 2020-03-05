@@ -132,9 +132,9 @@ $('#textofthis').click( function() {
                 } else if (rawlocus === '' && rawendpoint === '') {
                     url = '/textof/' + authorid + '/' + wrk;
                 } else if (rawlocus === '') {
-                    url = '/textofrawlocus/' + authorid + '/' + wrk + '/' + locus;
+                    url = '/textofrawlocus/' + authorid + '/' + wrk + '/' + rawlocus;
                 } else {
-                    url = '/textofrawlocus/' + authorid + '/' + wrk + '/' + locus + '/' + rawendpoint;
+                    url = '/textofrawlocus/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
                 }
                 $.getJSON(url, function (returnedtext) {
                 loadtextintodisplayresults(returnedtext);
