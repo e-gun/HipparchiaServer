@@ -39,8 +39,14 @@ def grabtextforbrowsing(method, author, work, location=None):
 	:return:
 	"""
 
+	wo = None
+
 	try:
 		wo = workdict[author+'w'+work]
+	except KeyError:
+		pass
+
+	try:
 		ao = authordict[author]
 	except KeyError:
 		# Might as well sing of anger: Μῆνιν ἄειδε θεὰ Πηληϊάδεω Ἀχιλῆοϲ...
