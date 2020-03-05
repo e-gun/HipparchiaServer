@@ -152,6 +152,7 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 	return results
 
 
+@hipparchia.route('/indextorawlocus/<searchid>/<author>/<work>/<location>')
 @hipparchia.route('/indextorawlocus/<searchid>/<author>/<work>/<location>/<endpoint>')
 def indexfromrawlocus(searchid: str, author: str, work=None, location=None, endpoint=None):
 	"""

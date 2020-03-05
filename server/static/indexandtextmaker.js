@@ -73,7 +73,7 @@ $('#makeanindex').click( function() {
                     url = '/indexto/' + searchid + '/' + authorid;
                 } else if (rawlocus === '' && rawendpoint === '') {
                     url = '/indexto/' + searchid + '/' + authorid + '/' + wrk;
-                } else if (rawlocus === '') {
+                } else if (rawendpoint === '') {
                     url = '/indextorawlocus/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus;
                 } else {
                     url = '/indextorawlocus/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
@@ -159,7 +159,7 @@ $('#textofthis').click( function() {
                     url = '/textof/' + authorid;
                 } else if (rawlocus === '' && rawendpoint === '') {
                     url = '/textof/' + authorid + '/' + wrk;
-                } else if (rawlocus === '') {
+                } else if (rawendpoint === '') {
                     url = '/textofrawlocus/' + authorid + '/' + wrk + '/' + rawlocus;
                 } else {
                     url = '/textofrawlocus/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
