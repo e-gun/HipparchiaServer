@@ -152,6 +152,44 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 	return results
 
 
+@hipparchia.route('/indextorawlocus/<searchid>/<author>/<work>/<location>/<endpoint>')
+def indexfromrawlocus(searchid: str, author: str, work=None, location=None, endpoint=None):
+	"""
+
+	the rawlocus version of buildindexto()
+
+	:param searchid:
+	:param author:
+	:param work:
+	:param location:
+	:param endpoint:
+	:return:
+	"""
+
+	try:
+		wo = workdict[author+'w'+work]
+	except KeyError:
+		wo = None
+
+	try:
+		ao = authordict[author]
+	except KeyError:
+		ao = None
+
+	if not wo and not ao:
+		return buildindexto(searchid, str())
+
+	location = re.sub(r'\.', '|', location)
+	allowed = '_|,:'
+	location = depunct(location, allowedpunctuationsting=allowed)
+
+	if endpoint:
+		endpoint = re.sub(r'\.', '|', endpoint)
+		endpoint = depunct(endpoint, allowedpunctuationsting=allowed)
+
+	return buildindexto(searchid, wo.authorid, wo.worknumber, location, endpoint)
+
+
 @hipparchia.route('/textof/<author>')
 @hipparchia.route('/textof/<author>/<work>')
 @hipparchia.route('/textof/<author>/<work>/<passage>')

@@ -36,9 +36,8 @@ $('#onehit_n').click( function(){
 $('#autofillinput').click( function(){
     setoptions('rawinputstyle', 'no'); $('#usingautoinput').show(); $('#usingrawinput').hide();
     let elementarray = ['#rawlocationinput', '#rawendpointinput', '#fromnotice', '#endpointnotice',
-        '#endpointbutton-isopen', '#endpointbutton-isclosed'];
+        '#endpointbutton-isopen', '#endpointbutton-isclosed', '#rawlocationinput', '#rawendpointinput'];
     bulkhider(elementarray);
-    endpointhider();
 });
 
 $('#manualinput').click( function(){

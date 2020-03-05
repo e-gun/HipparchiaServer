@@ -81,6 +81,7 @@ async def wscheckpoll(websocket, path):
 			pass
 		except TypeError:
 			# Object of type SynchronizedString is not JSON serializable
+			# macOS and indexmaker combo is a problem; macOS is the real problem?
 			consolewarning('websocket non-fatal error: "SynchronizedString is not JSON serializable"', color='yellow', isbold=False)
 			pass
 

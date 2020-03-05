@@ -37,22 +37,50 @@ $('#makeanindex').click( function() {
         let locus = locusdataloader();
         let endpoint = endpointdataloader();
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
+        let searchid = generateId(8);
+        let rawlocus = $('#rawlocationinput').val();
+        let rawendpoint = $('#rawendpointinput').val();
         $('#searchsummary').html('');
         $('#displayresults').html('');
 
         if (authorid !== '') {
-            if (locus === endpoint) {
-                let searchid = generateId(8);
-                let url = '';
-                if (wrk === '') { url = '/indexto/' + searchid + '/' + authorid; }
-                else if (locus === '') { url = '/indexto/' + searchid + '/' + authorid + '/' + wrk; }
-                else { url = '/indexto/' + searchid + '/' + authorid +'/' + wrk + '/' + locus; }
-                $.getJSON(url, function (indexdata) { loadindexintodisplayresults(indexdata); });
-                checkactivityviawebsocket(searchid);
+            if ($('#autofillinput').is(':checked')) {
+                // you are using the autofill boxes
+                if (locus === endpoint) {
+                    let url = '';
+                    if (wrk === '') {
+                        url = '/indexto/' + searchid + '/' + authorid;
+                    } else if (locus === '') {
+                        url = '/indexto/' + searchid + '/' + authorid + '/' + wrk;
+                    } else {
+                        url = '/indexto/' + searchid + '/' + authorid + '/' + wrk + '/' + locus;
+                    }
+                    $.getJSON(url, function (indexdata) {
+                        loadindexintodisplayresults(indexdata);
+                    });
+                    checkactivityviawebsocket(searchid);
+                } else {
+                    let url = '/indexto/' + searchid + '/' + authorid + '/' + wrk + '/' + locus + '/' + endpoint;
+                    $.getJSON(url, function (indexdata) {
+                        loadindexintodisplayresults(indexdata);
+                    });
+                    checkactivityviawebsocket(searchid);
+                }
             } else {
-                let searchid = generateId(8);
-                let url = '/indexto/' + searchid + '/' + authorid +'/' + wrk + '/' + locus + '/' + endpoint;
-                $.getJSON(url, function (indexdata) { loadindexintodisplayresults(indexdata); });
+                // you are using the raw entry subsystem
+                let url = '';
+                if (wrk === '') {
+                    url = '/indexto/' + searchid + '/' + authorid;
+                } else if (rawlocus === '' && rawendpoint === '') {
+                    url = '/indexto/' + searchid + '/' + authorid + '/' + wrk;
+                } else if (rawlocus === '') {
+                    url = '/indextorawlocus/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus;
+                } else {
+                    url = '/indextorawlocus/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
+                }
+                $.getJSON(url, function (indexdata) {
+                    loadindexintodisplayresults(indexdata);
+                });
                 checkactivityviawebsocket(searchid);
             }
         }
