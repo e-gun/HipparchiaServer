@@ -101,23 +101,43 @@ $('#textofthis').click( function() {
         let locus = locusdataloader();
         let endpoint = endpointdataloader();
         let wrk = $('#worksautocomplete').val().slice(-4, -1);
+        let rawlocus = $('#rawlocationinput').val();
+        let rawendpoint = $('#rawendpointinput').val();
         if (authorid !== '') {
-            if (locus === endpoint) {
+            if ($('#autofillinput').is(':checked')) {
+                // you are using the autofill boxes
+                if (locus === endpoint) {
+                    let url = '';
+                    if (wrk === '') {
+                        url = '/textof/' + authorid;
+                    } else if (locus === '') {
+                        url = '/textof/' + authorid + '/' + wrk;
+                    } else {
+                        url = '/textof/' + authorid + '/' + wrk + '/' + locus;
+                    }
+                    $.getJSON(url, function (returnedtext) {
+                        loadtextintodisplayresults(returnedtext);
+                    });
+                } else {
+                    let url = '/textof/' + authorid + '/' + wrk + '/' + locus + '/' + endpoint;
+                    $.getJSON(url, function (returnedtext) {
+                        loadtextintodisplayresults(returnedtext);
+                    });
+                }
+            } else {
+                // you are using the raw entry subsystem
                 let url = '';
                 if (wrk === '') {
                     url = '/textof/' + authorid;
-                } else if (locus === '') {
+                } else if (rawlocus === '' && rawendpoint === '') {
                     url = '/textof/' + authorid + '/' + wrk;
+                } else if (rawlocus === '') {
+                    url = '/textofrawlocus/' + authorid + '/' + wrk + '/' + locus;
                 } else {
-                    url = '/textof/' + authorid + '/' + wrk + '/' + locus;
+                    url = '/textofrawlocus/' + authorid + '/' + wrk + '/' + locus + '/' + rawendpoint;
                 }
                 $.getJSON(url, function (returnedtext) {
-                    loadtextintodisplayresults(returnedtext);
-                });
-            } else {
-                let url = '/textof/' + authorid +'/' + wrk + '/' + locus + '/' + endpoint;
-                 $.getJSON(url, function (returnedtext) {
-                    loadtextintodisplayresults(returnedtext);
+                loadtextintodisplayresults(returnedtext);
                 });
             }
         }

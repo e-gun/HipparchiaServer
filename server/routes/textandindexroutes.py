@@ -8,6 +8,7 @@
 
 import json
 import locale
+import re
 import time
 
 from flask import session
@@ -19,7 +20,7 @@ from server.dbsupport.miscdbfunctions import makeanemptywork, buildauthorworkand
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.miscformatting import consolewarning, validatepollid
-from server.formatting.wordformatting import avoidsmallvariants
+from server.formatting.wordformatting import avoidsmallvariants, depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.checksession import probeforsessionvariables
@@ -227,3 +228,53 @@ def textmaker(author: str, work=None, passage=None, endpoint=None):
 	dbconnection.connectioncleanup()
 
 	return results
+
+
+@hipparchia.route('/textofrawlocus/<author>/<work>/<location>')
+@hipparchia.route('/textofrawlocus/<author>/<work>/<location>/<endpoint>')
+def texmakerfromrawlocus(author: str, work: str, location: str, endpoint=None):
+	"""
+
+	the rawlocus version of textmaker()
+
+	:param author:
+	:param work:
+	:param location:
+	:param endpoint:
+	:return:
+	"""
+
+	emptycursor = None
+
+	try:
+		wo = workdict[author+'w'+work]
+	except KeyError:
+		wo = None
+
+	try:
+		ao = authordict[author]
+	except KeyError:
+		ao = None
+
+	if not wo and not ao:
+		return textmaker(str())
+
+	location = re.sub(r'\.', '|', location)
+	allowed = '_|,:'
+	location = depunct(location, allowedpunctuationsting=allowed)
+	start = location.split('|')
+	start.reverse()
+	targetlinedict = finddblinefromincompletelocus(wo, start, emptycursor)
+
+	if endpoint:
+		endpoint = re.sub(r'\.', '|', endpoint)
+		endpoint = depunct(endpoint, allowedpunctuationsting=allowed)
+		end = endpoint.split('|')
+		endpointline = finddblinefromincompletelocus(wo, end, emptycursor)
+
+	if not endpoint and targetlinedict['code'] == 'success':
+		return textmaker(wo.authorid, wo.worknumber, str(targetlinedict['line']))
+	elif endpoint and targetlinedict['code'] == 'success' and endpointline['code'] == 'success':
+		return textmaker(wo.authorid, wo.worknumber, str(targetlinedict['line']), str(endpointline['line']))
+	else:
+		return textmaker(str())
