@@ -214,30 +214,45 @@ $('#alt_vector_options_button').click(function(){
 function browsetopassage() {
     let auth = $('#authorsautocomplete').val().slice(-7, -1);
     let wrk = $('#worksautocomplete').val().slice(-4, -1);
-    let l5 = $('#level05').val();
-    let l4 = $('#level04').val();
-    let l3 = $('#level03').val();
-    let l2 = $('#level02').val();
-    let l1 = $('#level01').val();
-    let l0 = $('#level00').val();
-    let lvls = [ l5, l4, l3, l2, l1, l0];
-    let loc = Array();
-    for (let i = 5; i > -1; i-- ) {
-        if (lvls[i] !== '') {
-            loc.push(lvls[i]);
-        } else {
-            if (i === 5) {
-                loc.push('_0');
+
+    if ($('#autofillinput').is(':checked')) {
+        // you are using the autofill boxes
+        let l5 = $('#level05').val();
+        let l4 = $('#level04').val();
+        let l3 = $('#level03').val();
+        let l2 = $('#level02').val();
+        let l1 = $('#level01').val();
+        let l0 = $('#level00').val();
+        let lvls = [ l5, l4, l3, l2, l1, l0];
+        let loc = Array();
+        for (let i = 5; i > -1; i-- ) {
+            if (lvls[i] !== '') {
+                loc.push(lvls[i]);
+            } else {
+                if (i === 5) {
+                    loc.push('_0');
+                    }
                 }
             }
+
+        loc.reverse();
+        let locstring = loc.join('|');
+
+        if (wrk.length !== 3) { wrk = '_firstwork'}
+        loc = 'locus/' + auth + '/' + wrk + '/' +locstring.slice(0, locstring.length);
+        browseuponclick(loc);
+    } else {
+        // you are using rawentry
+        let rawlocus = $('#rawlocationinput').val();
+        let loc = String();
+        if (wrk.length !== 3) { wrk = '_firstwork'}
+        if (rawlocus === '') {
+            loc = auth + '/' + wrk;
+        } else {
+            loc = auth + '/' + wrk + '/' + rawlocus;
         }
-
-    loc.reverse();
-    let locstring = loc.join('|');
-
-    if (wrk.length !== 3) { wrk = '_firstwork'}
-    loc = 'locus/' + auth + '/' + wrk + '/' +locstring.slice(0, locstring.length);
-    browseuponclick(loc);
+        rawlocusbrowseuponclick(loc);
+    }
 }
 
 $('#browseto').click(function(){

@@ -7,12 +7,15 @@
 """
 
 import json
+import re
 
 from server import hipparchia
 from server.browsing.browserfunctions import buildbrowseroutputobject, browserfindlinenumberfromcitation
+from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.miscdbfunctions import buildauthorworkandpassage, returnfirstwork
 from server.formatting.miscformatting import consolewarning
 from server.formatting.lexicaformatting import lexicaldbquickfixes
+from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.listsandsession.checksession import probeforsessionvariables
@@ -28,9 +31,9 @@ def grabtextforbrowsing(method, author, work, location=None):
 
 	there are multiple ways to get results here & different methods entail different location styles
 
-		sample input: '/browse/linenumber/lt1254w001/4877'
-		sample input: '/browse/locus/lt1254w001/15|13|4|_0'
-		sample input: '/browse/perseus/lt1254w001/4:9:12'
+		sample input: '/browse/linenumber/lt0550/001/1855'
+		sample input: '/browse/locus/lt0550/001/3|100'
+		sample input: '/browse/perseus/lt0550/001/2:717'
 
 	:return:
 	"""
@@ -39,10 +42,21 @@ def grabtextforbrowsing(method, author, work, location=None):
 		# never supposed to be true, but...
 		return grabtextforbrowsing('locus', author, work, '_0')
 
+	try:
+		workdict[author+'w'+work]
+	except KeyError:
+		# Might as well sing of anger: Μῆνιν ἄειδε θεὰ Πηληϊάδεω Ἀχιλῆοϲ...
+		return grabtextforbrowsing('locus', 'gr0012', '001', '1')
+
 	probeforsessionvariables()
 
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
+
+	author = depunct(author)
+	work = depunct(work)
+	allowed = '_|,:'
+	location = depunct(location, allowedpunctuationsting=allowed)
 
 	knownmethods = ['linenumber', 'locus', 'perseus']
 	if method not in knownmethods:
@@ -89,3 +103,52 @@ def grabtextforbrowsing(method, author, work, location=None):
 	dbconnection.connectioncleanup()
 
 	return browserdata
+
+
+@hipparchia.route('/browserawlocus/<author>/<work>')
+@hipparchia.route('/browserawlocus/<author>/<work>/<location>')
+def rawcitationgrabtextforbrowsing(author: str, work: str, location=None):
+	"""
+
+	the raw input version of grabtextforbrowsing()
+
+		/browserawlocus/lt0550/001/3.100
+
+	:param author:
+	:param work:
+	:param location:
+	:return:
+	"""
+
+	try:
+		wo = workdict[author+'w'+work]
+	except KeyError:
+		wo = None
+
+	try:
+		ao = authordict[author]
+	except KeyError:
+		ao = None
+
+	if not wo and not ao:
+		return grabtextforbrowsing('locus', 'unknownauthor', 'unknownwork', '_0')
+	elif not wo:
+		wo = ao.grabfirstworkobject()
+
+	if not location:
+		return grabtextforbrowsing('locus', wo.authorid, wo.worknumber, '_0')
+
+	location = re.sub(r'\.', '|', location)
+	allowed = '_|,:'
+	location = depunct(location, allowedpunctuationsting=allowed)
+
+	emptycursor = None
+
+	start = location.split('|')
+	start.reverse()
+	targetlinedict = finddblinefromincompletelocus(wo, start, emptycursor)
+	if targetlinedict['code'] == 'success':
+		targetline = str(targetlinedict['line'])
+		return grabtextforbrowsing('linenumber', wo.authorid, wo.worknumber, targetline)
+	else:
+		return grabtextforbrowsing('locus', author, work, '_0')

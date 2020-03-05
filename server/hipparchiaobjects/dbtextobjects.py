@@ -77,6 +77,10 @@ class dbAuthor(object):
 	def listworkids(self):
 		return [w.universalid for w in self.listofworks]
 
+	def grabfirstworkobject(self):
+		# end up here if there was a workobject failure and we need *something* to associate with this author
+		return self.listofworks[0]
+
 	def countwordsinworks(self):
 		return sum([w.wordcount for w in self.listofworks if w.wordcount])
 

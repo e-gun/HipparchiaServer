@@ -24,6 +24,25 @@ function browseuponclick(url){
         );
     }
 
+function rawlocusbrowseuponclick(url){
+	$.getJSON(
+	    { url: '/browserawlocus/' + url,
+	    success: function (passagereturned) {
+	        let bf = $('#browseforward');
+	        let bb = $('#browseback');
+            bf.unbind('click');
+            bb.unbind('click');
+
+            let fb = parsepassagereturned(passagereturned);
+            // left and right arrow keys
+
+            bf.bind('click', function(){ browseuponclick(fb[0]); });
+            bb.bind('click', function(){ browseuponclick(fb[1]); });
+            }
+        }
+        );
+    }
+
 function parsepassagereturned(passagereturned) {
     const bdt = $('#browserdialogtext');
     const ldt = $('#lexicadialogtext');
@@ -40,7 +59,14 @@ function parsepassagereturned(passagereturned) {
     wac.val(passagereturned['workboxcontents']);
     wac.prop('placeholder', '');
     loadWorklist(passagereturned['authornumber']);
-    loadLevellist(passagereturned['authornumber'], passagereturned['worknumber'],'firstline');
+    if ($('#autofillinput').is(':checked')) {
+        // autofill option
+        loadLevellist(passagereturned['authornumber'], passagereturned['worknumber'], 'firstline');
+    } else {
+        // rawentry
+        loadsamplecitation(passagereturned['authornumber'], passagereturned['worknumber']);
+        $('#rawlocationinput').show();
+    }
 
     bdt.html(passagereturned['browserhtml']);
 
