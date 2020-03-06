@@ -746,3 +746,73 @@ def uforvoutsideofmarkup(textwithmarkup) -> str:
 		newstr = re.sub(r'v', 'u', textwithmarkup)
 
 	return newstr
+
+
+def citationcharacterset() -> set:
+	"""
+
+	determined via putting the following code into "/testroute"
+
+	# looking for all of the unique chars required to generate all of the citations.
+
+	dbconnection = ConnectionObject()
+	cursor = dbconnection.cursor()
+	flatten = lambda x: [item for sublist in x for item in sublist]
+
+	authorlist = [a for a in authordict]
+
+	charlist = list()
+
+	count = 0
+	for a in authorlist:
+		count += 1
+		q = 'select level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value from {t}'
+		cursor.execute(q.format(t=a))
+		f = cursor.fetchall()
+		c = set(str().join(flatten(f)))
+		charlist.append(c)
+
+	charlist = flatten(charlist)
+	charlist = set(charlist)
+	charlist = list(charlist)
+	charlist.sort()
+
+	print(charlist)
+	dbconnection.connectioncleanup()
+
+
+	:return:
+
+	"""
+
+	# ooh, look at all of those dangerous injectable characters...; fortunately some of them are small variants
+
+	allusedchars = {' ', ',', '-', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ';', '<', '>', '@',
+	                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+	                'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '^', '_', '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+	                'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
+	                'z', '❨', '❩', '⟦', '⟧', '﹕', '﹖', '﹠', '﹡', '﹢', '﹦', '﹪', '＇', '／'}
+
+	return allusedchars
+
+
+def reducetovalidcitationcharacters(text: str, supplement=None) -> str:
+	"""
+
+	take a string and purge it of any characters that could not potentially be found in a citation
+
+	supplement should be a stinrg (which is a list...): '123!|abc"
+
+	:param text:
+	:return:
+	"""
+
+	# tempting to exclude ';<>-,.'
+	totallyunaccepablenomatterwhat = set()
+
+	validchars = citationcharacterset() - totallyunaccepablenomatterwhat
+	if supplement:
+		validchars = validchars.union(set(supplement))
+	reduced = [x for x in text if x in validchars]
+	restored = str().join(reduced)
+	return restored

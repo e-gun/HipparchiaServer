@@ -12,7 +12,7 @@ from os import name as osname
 import psycopg2
 
 from server.formatting.miscformatting import consolewarning
-from server.formatting.wordformatting import depunct
+from server.formatting.wordformatting import depunct, reducetovalidcitationcharacters
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
@@ -399,14 +399,14 @@ def buildauthorworkandpassage(author: str, work: str, passage: str, authordict: 
 		pass
 
 	if passage:
-		allowed = ',;|'
-		psg = depunct(passage, allowed)
+		supplement = ',;|'
+		psg = reducetovalidcitationcharacters(passage, supplement)
 		psg = psg.split('|')
 		psg.reverse()
 
 	if endpoint:
-		allowed = ',;|'
-		end = depunct(endpoint, allowed)
+		supplement = ',;|'
+		end = reducetovalidcitationcharacters(endpoint, supplement)
 		end = end.split('|')
 		end.reverse()
 

@@ -20,7 +20,7 @@ from server.dbsupport.miscdbfunctions import buildauthorworkandpassage, makeanem
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.miscformatting import consolewarning, validatepollid
-from server.formatting.wordformatting import avoidsmallvariants, depunct
+from server.formatting.wordformatting import avoidsmallvariants, reducetovalidcitationcharacters, depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.checksession import probeforsessionvariables
@@ -53,7 +53,7 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 	dbconnection = ConnectionObject('autocommit')
 	dbcursor = dbconnection.cursor()
 
-	requested = buildauthorworkandpassage(author, work, passage, authordict, workdict, dbcursor, endpoint=endpoint)
+	requested = buildauthorworkandpassage(author, work, passage, authordict, workdict, dbcursor, endpoint)
 	ao = requested['authorobject']
 	wo = requested['workobject']
 	psg = requested['passagelist']
@@ -183,13 +183,14 @@ def indexfromrawlocus(searchid: str, author: str, work=None, location=None, endp
 	if not wo and not ao:
 		return buildindexto(searchid, str())
 
+	supplement = '_|'
+
 	location = re.sub(r'\.', '|', location)
-	allowed = '_|,:'
-	location = depunct(location, allowedpunctuationsting=allowed)
+	location = reducetovalidcitationcharacters(location, supplement=supplement)
 
 	if endpoint:
 		endpoint = re.sub(r'\.', '|', endpoint)
-		endpoint = depunct(endpoint, allowedpunctuationsting=allowed)
+		endpoint = reducetovalidcitationcharacters(endpoint, supplement=supplement)
 
 	return buildindexto(searchid, wo.authorid, wo.worknumber, location, endpoint)
 
@@ -303,12 +304,13 @@ def texmakerfromrawlocus(author: str, work: str, location: str, endpoint=None):
 	if not wo and not ao:
 		return textmaker(str())
 
+	supplement = '_|'
+
 	location = re.sub(r'\.', '|', location)
-	allowed = '_|,:'
-	location = depunct(location, allowedpunctuationsting=allowed)
+	location = reducetovalidcitationcharacters(location, supplement=supplement)
 
 	if endpoint:
 		endpoint = re.sub(r'\.', '|', endpoint)
-		endpoint = depunct(endpoint, allowedpunctuationsting=allowed)
+		endpoint = reducetovalidcitationcharacters(endpoint, supplement=supplement)
 
 	return textmaker(wo.authorid, wo.worknumber, location, endpoint)

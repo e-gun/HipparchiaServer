@@ -14,6 +14,7 @@ from os import path
 from flask import redirect, render_template, session, url_for
 
 from server import hipparchia
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \
 	workprovenancedict
@@ -169,6 +170,34 @@ def testroute():
 	# so = buildsearchobject(ts, request, session)
 	#
 	# doimportedfunction = findlatentsemanticindex(activepoll, so)
+
+
+	# # looking for all of the unique chars required to generate all of the citations.
+	#
+	# dbconnection = ConnectionObject()
+	# cursor = dbconnection.cursor()
+	# flatten = lambda x: [item for sublist in x for item in sublist]
+	#
+	# authorlist = [a for a in authordict]
+	#
+	# charlist = list()
+	#
+	# count = 0
+	# for a in authorlist:
+	# 	count += 1
+	# 	q = 'select level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value from {t}'
+	# 	cursor.execute(q.format(t=a))
+	# 	f = cursor.fetchall()
+	# 	c = set(str().join(flatten(f)))
+	# 	charlist.append(c)
+	#
+	# charlist = flatten(charlist)
+	# charlist = set(charlist)
+	# charlist = list(charlist)
+	# charlist.sort()
+	#
+	# print(charlist)
+	# dbconnection.connectioncleanup()
 
 	del activepoll
 
