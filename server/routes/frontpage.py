@@ -22,7 +22,7 @@ from server.dbsupport.dbbuildinfo import versionchecking
 from server.formatting.vectorformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
-from version import hipparchiaserverversion, readgitdata
+from version import devel, hipparchiaserverversion, readgitdata
 
 
 @hipparchia.route('/')
@@ -97,6 +97,11 @@ def frontpage():
 
 	version = '{v} [git: {g}]'.format(v=hipparchiaserverversion, g=readgitdata())
 
+	shortversion = hipparchiaserverversion
+
+	if devel:
+		shortversion = version
+
 	page = render_template('search.html',
 							activelists=activelists,
 							activecorpora=activecorpora,
@@ -116,7 +121,7 @@ def frontpage():
 							vectoroptionshtml=vectoroptionshtml,
 							havevectors=havevectors,
 							version=version,
-							shortversion=hipparchiaserverversion,
+							shortversion=shortversion,
 							backend=backend,
 							icanzap=icanzap)
 

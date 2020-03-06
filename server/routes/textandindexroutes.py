@@ -16,7 +16,7 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
-from server.dbsupport.miscdbfunctions import makeanemptywork, buildauthorworkandpassage
+from server.dbsupport.miscdbfunctions import buildauthorworkandpassage, makeanemptyauthor, makeanemptywork
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.miscformatting import consolewarning, validatepollid
@@ -132,6 +132,9 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 	buildtime = time.time() - starttime
 	buildtime = round(buildtime, 2)
 	progresspolldict[pollid].deactivate()
+
+	if not ao:
+		ao = makeanemptyauthor('gr0000')
 
 	results = dict()
 	results['authorname'] = avoidsmallvariants(ao.shortname)
@@ -254,6 +257,10 @@ def textmaker(author: str, work=None, passage=None, endpoint=None):
 
 	if not segmenttext:
 		segmenttext = '.'.join(psg)
+
+	if not ao or not wo:
+		ao = makeanemptyauthor('gr0000')
+		wo = makeanemptywork('gr0000w000')
 
 	results = dict()
 	results['authorname'] = avoidsmallvariants(ao.shortname)
