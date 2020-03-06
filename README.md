@@ -5,6 +5,7 @@ key features:
 	searching
 		search multiple corpora simultaneously
 		build search lists with according to a variety of criteria
+            select passages by hand or via autofill boxes that know the structure of any text at any point
 		    search by date range
 			add/exclude individual authors
 			add/exclude individual author genres
@@ -209,6 +210,9 @@ What you will see when you point a browser at a HipparchiaServer:
 
 1. interface overview
 ![interface_overview](screenshots/01_interface_overview.png)
+
+1. options sidebar
+[options sidebar](screenshots/01b_options_sidebar.png)
 
 1. inclusions and exclusions
 ![inclusions_and_exclusions](screenshots/02_inclusions_and_exclusions.png)
