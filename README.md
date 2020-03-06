@@ -211,9 +211,6 @@ What you will see when you point a browser at a HipparchiaServer:
 1. interface overview
 ![interface_overview](screenshots/01_interface_overview.png)
 
-1. options sidebar
-[options sidebar](screenshots/01b_options_sidebar.png)
-
 1. inclusions and exclusions
 ![inclusions_and_exclusions](screenshots/02_inclusions_and_exclusions.png)
 
