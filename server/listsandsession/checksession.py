@@ -77,7 +77,7 @@ def probeforsessionvariables():
 		session['quotesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALQUOTES']
 		session['rawinputstyle'] = hipparchia.config['DEFAULTUSERAWINPUTSTYLE']
 		session['searchscope'] = 'lines'
-		session['searchinsidemarkup'] = hipparchia.config['DEFAULTUSERAWINPUTSTYLE']
+		session['searchinsidemarkup'] = hipparchia.config['SEARCHMARKEDUPLINE']
 		session['semanticvectorquery'] = False
 		session['sensesummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALSENSES']
 		session['sentencesimilarity'] = False

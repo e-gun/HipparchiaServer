@@ -10,8 +10,8 @@ import sys
 import os
 
 
-hipparchiaserverversion = '1.5.0+'
-devel = True
+hipparchiaserverversion = '1.5.1'
+devel = False
 
 
 def readgitdata() -> str:
@@ -30,12 +30,15 @@ def readgitdata() -> str:
 	gitfile = here + '/.git/logs/HEAD'
 	line = str()
 
-	with open(gitfile) as fh:
-		for line in fh:
-			pass
-		lastline = line
+	if os.path.exists(gitfile):
+		with open(gitfile) as fh:
+			for line in fh:
+				pass
+			lastline = line
 
-	gitdata = lastline.split(' ')
-	commit = gitdata[1]
+		gitdata = lastline.split(' ')
+		commit = gitdata[1]
+	else:
+		commit = 'git commit data not found'
 
 	return commit
