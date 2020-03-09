@@ -60,7 +60,7 @@ def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, 
 	found = list()
 
 	r = so.indexrestrictions[authortable]
-	whereextensions = ''
+	whereextensions = str()
 
 	if r['type'] == 'temptable':
 		# make the table

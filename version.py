@@ -10,8 +10,8 @@ import sys
 import os
 
 
-hipparchiaserverversion = '1.5.1'
-devel = False
+hipparchiaserverversion = '1.5.1+'
+devel = True
 
 
 def readgitdata() -> str:

@@ -8,6 +8,8 @@
 import re
 from string import punctuation
 
+from server import hipparchia
+
 
 # the one: because sometimes you don't want to zap τ’, δ’, κτλ.
 # the other: and sometimes you do
@@ -806,6 +808,8 @@ def reducetovalidcitationcharacters(text: str, supplement=None) -> str:
 	:param text:
 	:return:
 	"""
+
+	text = text[:hipparchia.config['MAXIMUMLOCUSLENGTH']]
 
 	# tempting to exclude ';<>-,.'
 	totallyunaccepablenomatterwhat = set()

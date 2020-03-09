@@ -36,17 +36,19 @@ def cleaninitialquery(seeking: str) -> str:
 	:return:
 	"""
 
+	seeking = seeking[:hipparchia.config['MAXIMUMQUERYLENGTH']]
+
 	# things you never need to see and are not part of a (for us) possible regex expression
 	# a lot of this may be hard to type, but if you cut and paste a result to make a new search, this stuff is in there
-	extrapunct = ',;#'
+	extrapuncttostrip = ',;#'
 
 	if hipparchia.config['FOOLISHLYALLOWREGEX']:
-		stripset = {x for x in extrapunct}.union({x for x in badpucntwithbackslash})
+		stripset = {x for x in extrapuncttostrip}.union({x for x in badpucntwithbackslash})
 		stripset = stripset - {x for x in hipparchia.config['FOOLISHLYALLOWREGEX']}
 	else:
-		stripset = extrapunct + badpucntwithbackslash
+		stripset = extrapuncttostrip + badpucntwithbackslash
 
-	strippunct = ''.join(list(stripset))
+	strippunct = str().join(list(stripset))
 
 	seeking = re.sub(r'[{p}]'.format(p=re.escape(strippunct)), '', seeking)
 
@@ -71,11 +73,15 @@ def massagesearchtermsforwhitespace(query: str) -> str:
 	:return:
 	"""
 
+	whitespace = ' '
+
 	query = query.lower()
 	prefix = None
 	suffix = None
+	startfrom = 0
+	endat = 0
 
-	if query[0] == ' ':
+	if query[0] == whitespace:
 		# otherwise you will miss words that start lines because they do not have a leading whitespace
 		prefix = r'(^|\s)'
 		startfrom = 1
@@ -83,7 +89,7 @@ def massagesearchtermsforwhitespace(query: str) -> str:
 		prefix = r'(^|\s)'
 		startfrom = 2
 
-	if query[-1] == ' ':
+	if query[-1] == whitespace:
 		# otherwise you will miss words that end lines because they do not have a trailing whitespace
 		suffix = r'(\s|$)'
 		endat = -1
@@ -118,6 +124,7 @@ def atsignwhereclauses(uidwithatsign, operand, authors) -> List[tuple]:
 	"""
 
 	whereclausetuples = list()
+	wk = None
 
 	a = uidwithatsign[:6]
 	locus = uidwithatsign[14:].split('|')
@@ -218,7 +225,7 @@ def lookoutsideoftheline(linenumber: int, numberofextrawords: int, workid: str, 
 	:param cursor:
 	:return:
 	"""
-
+	whitespace = ' '
 	workdbname = workid[0:6]
 
 	query = 'SELECT {wltmp} FROM {db} WHERE index BETWEEN %s AND %s ORDER BY index ASC'.format(wltmp=worklinetemplate, db=workdbname)
@@ -247,9 +254,9 @@ def lookoutsideoftheline(linenumber: int, numberofextrawords: int, workid: str, 
 		elif line.index == linenumber + 1:
 			text += wordsinline[0:numberofextrawords]
 
-	aggregate = ' '.join(text)
-	aggregate = re.sub(r'\s\s', r' ', aggregate)
-	aggregate = ' ' + aggregate + ' '
+	aggregate = whitespace.join(text)
+	aggregate = re.sub(r'\s\s', whitespace, aggregate)
+	aggregate = ' {a} '.format(a=aggregate)
 
 	return aggregate
 
@@ -274,8 +281,9 @@ def findleastcommonterm(searchphrase: str, accentsneeded: bool) -> str:
 	:return:
 	"""
 
+	whitespace = ' '
 	stillneedtofindterm = True
-	searchterms = searchphrase.split(' ')
+	searchterms = searchphrase.split(whitespace)
 	searchterms = [x for x in searchterms if x]
 	leastcommonterm = searchterms[0]
 
@@ -305,7 +313,7 @@ def findleastcommonterm(searchphrase: str, accentsneeded: bool) -> str:
 			longestterm = searchterms[0]
 		except KeyError:
 			# did you send me a bunch of regex that just got wiped?
-			longestterm = [(len(t), t) for t in searchphrase.split(' ') if t]
+			longestterm = [(len(t), t) for t in searchphrase.split(whitespace) if t]
 			longestterm.sort(reverse=True)
 			return longestterm[0][1]
 		for term in searchterms:
@@ -324,6 +332,7 @@ def findleastcommontermcount(searchphrase: str, accentsneeded: bool) -> int:
 	:param listofterms:
 	:return:
 	"""
+
 	fewesthits = -1
 	searchterms = searchphrase.split(' ')
 	searchterms = [x for x in searchterms if x]
