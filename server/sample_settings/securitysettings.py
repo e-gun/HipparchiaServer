@@ -6,6 +6,7 @@
 # 14 chars for Digest 50.17.211.pr.2
 MAXIMUMQUERYLENGTH = 64
 MAXIMUMLOCUSLENGTH = 24
+MAXIMUMLEXICALLENGTH = 18
 
 ##  [set once and forget: SECRET_KEY] ##
 SECRET_KEY = 'yourkeyhereitshouldbelongandlooklikecryptographicgobbledygook'

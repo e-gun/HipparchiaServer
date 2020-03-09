@@ -38,6 +38,7 @@ def dictsearch(searchterm):
 	"""
 	returndict = dict()
 
+	searchterm = searchterm[:hipparchia.config['MAXIMUMLEXICALLENGTH']]
 	probeforsessionvariables()
 
 	dbconnection = ConnectionObject()
@@ -142,6 +143,8 @@ def findbyform(observedword):
 	:return:
 	"""
 
+	observedword = observedword[:hipparchia.config['MAXIMUMLEXICALLENGTH']]
+
 	probeforsessionvariables()
 
 	dbconnection = ConnectionObject()
@@ -237,6 +240,8 @@ def reverselexiconsearch(searchterm):
 
 	:return:
 	"""
+
+	searchterm = searchterm[:hipparchia.config['MAXIMUMLEXICALLENGTH']]
 
 	probeforsessionvariables()
 
@@ -397,6 +402,8 @@ def knownforms(lexicalid, language, xrefid, headword):
 	"""
 
 	# sanitize all input...
+
+	headword = headword[:hipparchia.config['MAXIMUMLEXICALLENGTH']]
 
 	knownlanguages = ['greek', 'latin']
 	if language not in knownlanguages:
