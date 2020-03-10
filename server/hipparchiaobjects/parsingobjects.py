@@ -13,7 +13,7 @@ from server.dbsupport.miscdbfunctions import returnfirstwork
 from server.startup import authordict, workdict
 
 
-class TextAndIndexInputParsingObject(object):
+class InputParsingObject(object):
 	"""
 
 	clean and prep the textmaker or indexmaker query info
@@ -23,15 +23,15 @@ class TextAndIndexInputParsingObject(object):
 		self.authorid = authorid
 		self.workid = workid
 		self.searchlocation = searchlocation
-		self.endpoint = endpoint
+		self.endpointlocation = endpoint
 
 		self.delimiter = delimiter
 		self.objecttype = objecttype
 		self.needsreversal = True
 		self.defaulthipparchiadelimeter = '|'
 
-		assert self.delimiter in ['.', '|']
-		assert self.objecttype in ['text', 'index']
+		assert self.delimiter in [None, '.', '|', ':']
+		assert self.objecttype in ['text', 'index', 'browser', 'structure']
 		assert self.needsreversal in [True, False]
 
 		self.supplementalvalidcitationcharacters = '_|'
@@ -42,7 +42,7 @@ class TextAndIndexInputParsingObject(object):
 		self.authorobject = self._findauthorobject()
 		self.workobject = self._findworkobject()
 		self.passageaslist = self._findpassagelist(self.searchlocation)
-		self.endpointlist = self._findpassagelist(self.endpoint)
+		self.endpointlist = self._findpassagelist(self.endpointlocation)
 		# print('self.delimiter', self.delimiter)
 		# print('self.passageaslist', self.passageaslist)
 		# print('self.endpointlist', self.endpointlist)
@@ -70,12 +70,22 @@ class TextAndIndexInputParsingObject(object):
 		if not thecitation:
 			return list()
 		else:
-			thecitation = re.sub(re.escape(self.delimiter), self.defaulthipparchiadelimeter, thecitation)
+			if self.delimiter:
+				thecitation = re.sub(re.escape(self.delimiter), self.defaulthipparchiadelimeter, thecitation)
 			thecitation = self.reducetovalidcitationcharacters(thecitation)
 			citationlist = thecitation.split(self.defaulthipparchiadelimeter)
 			if self.needsreversal:
 				citationlist.reverse()
+			# there are only five levels...
+			citationlist = citationlist[:5]
 			return citationlist
+
+	def updatepassagelist(self):
+		# if you update the supplemental chars you need to call this again to get the non-default values
+		self.passageaslist = self._findpassagelist(self.searchlocation)
+
+	def updateenpointlist(self):
+		self.endpointlist = self._findpassagelist(self.endpointlocation)
 
 	def hasauthorobject(self):
 		if self.authorobject:
@@ -158,11 +168,28 @@ class TextAndIndexInputParsingObject(object):
 		return restored
 
 
-class TextmakerInputParsingObject(TextAndIndexInputParsingObject):
-	def __init__(self, authorid, workid=None, searchlocation=None, endpoint=None, delimiter='|', objecttype='text'):
-		super().__init__(authorid, workid, searchlocation, endpoint, delimiter, objecttype)
+class TextmakerInputParsingObject(InputParsingObject):
+	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|', objecttype='text'):
+		super().__init__(authorid, workid, location, endpoint, delimiter, objecttype)
 
 
-class IndexmakerInputParsingObject(TextAndIndexInputParsingObject):
-	def __init__(self, authorid, workid=None, searchlocation=None, endpoint=None, delimiter='|', objecttype='index'):
-		super().__init__(authorid, workid, searchlocation, endpoint, delimiter, objecttype)
+class IndexmakerInputParsingObject(InputParsingObject):
+	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|', objecttype='index'):
+		super().__init__(authorid, workid, location, endpoint, delimiter, objecttype)
+
+
+class BrowserInputParsingObject(InputParsingObject):
+	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|', objecttype='browser'):
+		super().__init__(authorid, workid, location, endpoint, delimiter, objecttype)
+		self.supplementalvalidcitationcharacters = '_|,:'
+		self.updatepassagelist()
+
+
+class StructureInputParsingObject(InputParsingObject):
+	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|', objecttype='structure'):
+		super().__init__(authorid, workid, location, endpoint, delimiter, objecttype)
+		if not location:
+			self.searchlocation = 'firstline'
+		self.needsreversal = False
+		self.updatepassagelist()
+		self.citationtuple = tuple(self.passageaslist)

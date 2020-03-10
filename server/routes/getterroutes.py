@@ -16,12 +16,14 @@ from flask import make_response, redirect, request, session, url_for
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
-from server.dbsupport.dblinefunctions import dblineintolineobject, grabbundlesoflines, grabonelinefromwork, returnfirstorlastlinenumber
-from server.dbsupport.miscdbfunctions import buildauthorworkandpassage, findselectionboundaries
+from server.dbsupport.dblinefunctions import dblineintolineobject, grabbundlesoflines, grabonelinefromwork, \
+	returnfirstorlastlinenumber
+from server.dbsupport.miscdbfunctions import findselectionboundaries
 from server.formatting.bibliographicformatting import formatauthinfo, formatauthorandworkinfo, formatname, \
 	woformatworkinfo
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.parsingobjects import StructureInputParsingObject
 from server.listsandsession.searchlistmanagement import compilesearchlist, sortsearchlist
 from server.listsandsession.sessionfunctions import modifysessionselections, modifysessionvariable, parsejscookie
 
@@ -161,18 +163,10 @@ def findworkstructure(author, work, passage=None):
 
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
-	author = depunct(author)
-	work = depunct(work)
 
-	requested = buildauthorworkandpassage(author, work, passage, authordict, workdict, dbcursor)
-	wo = requested['workobject']
-	psg = requested['passagelist']
-
-	if not passage:
-		safepassage = tuple(['firstline'])
-	else:
-		psg.reverse()
-		safepassage = tuple(psg[:5])
+	po = StructureInputParsingObject(author, work, passage)
+	wo = po.workobject
+	safepassage = po.citationtuple
 
 	ws = dict()
 	if wo:

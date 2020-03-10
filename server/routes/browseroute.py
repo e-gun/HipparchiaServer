@@ -7,20 +7,18 @@
 """
 
 import json
-import re
 
 from server import hipparchia
-from server.browsing.browserfunctions import buildbrowseroutputobject, browserfindlinenumberfromcitation
+from server.browsing.browserfunctions import browserfindlinenumberfromcitation, buildbrowseroutputobject
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dblinefunctions import returnfirstorlastlinenumber
-from server.dbsupport.miscdbfunctions import buildauthorworkandpassage, returnfirstwork
-from server.formatting.miscformatting import consolewarning
 from server.formatting.lexicaformatting import lexicaldbquickfixes
-from server.formatting.wordformatting import depunct
+from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.parsingobjects import BrowserInputParsingObject
 from server.listsandsession.checksession import probeforsessionvariables
-from server.startup import authordict, workdict
+from server.startup import workdict
 
 
 @hipparchia.route('/browse/<method>/<author>/<work>')
@@ -39,16 +37,20 @@ def grabtextforbrowsing(method, author, work, location=None):
 	:return:
 	"""
 
-	wo = None
+	if method not in ['linenumber', 'locus', 'perseus']:
+		method = 'linenumber'
 
-	try:
-		wo = workdict[author+'w'+work]
-	except KeyError:
-		pass
+	delimiterdict = {'linenumber': None, 'locus': '|', 'perseus': ':'}
+	delimiter = delimiterdict[method]
 
-	try:
-		ao = authordict[author]
-	except KeyError:
+	po = BrowserInputParsingObject(author, work, location, delimiter=delimiter)
+	po.supplementalvalidcitationcharacters = '_|,:'
+	po.updatepassagelist()
+
+	ao = po.authorobject
+	wo = po.workobject
+
+	if not po.authorobject:
 		# Might as well sing of anger: Μῆνιν ἄειδε θεὰ Πηληϊάδεω Ἀχιλῆοϲ...
 		return grabtextforbrowsing('locus', 'gr0012', '001', '1')
 
@@ -57,16 +59,9 @@ def grabtextforbrowsing(method, author, work, location=None):
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
-	allowed = '_|,:'
-	location = depunct(location, allowedpunctuationsting=allowed)
-
 	if not location or location == '|_0':
 		locationval = returnfirstorlastlinenumber(wo.universalid, dbcursor)
 		return grabtextforbrowsing('linenumber', author, work, str(locationval))
-
-	knownmethods = ['linenumber', 'locus', 'perseus']
-	if method not in knownmethods:
-		method = 'linenumber'
 
 	perseusauthorneedsfixing = ['gr0006']
 	if method == 'perseus' and author in perseusauthorneedsfixing:
@@ -78,7 +73,7 @@ def grabtextforbrowsing(method, author, work, location=None):
 
 	if ao and not wo:
 		try:
-			wo = workdict[returnfirstwork(ao.universalid, dbcursor)]
+			wo = ao.grabfirstworkobject()
 		except KeyError:
 			# you are in some serious trouble: time to abort
 			consolewarning('bad data fed to grabtextforbrowsing(): {m} / {a} / {w} / {l}'.format(m=method, a=author, w=work, l=location))
@@ -122,37 +117,21 @@ def rawcitationgrabtextforbrowsing(author: str, work: str, location=None):
 	:return:
 	"""
 
-	try:
-		wo = workdict[author+'w'+work]
-	except KeyError:
-		wo = None
+	po = BrowserInputParsingObject(author, work, location, delimiter='.')
+	ao = po.authorobject
+	wo = po.workobject
 
-	try:
-		ao = authordict[author]
-	except KeyError:
-		ao = None
-
-	if not wo and not ao:
-		return grabtextforbrowsing('locus', 'unknownauthor', 'unknownwork', '_0')
-	elif not wo:
-		wo = ao.grabfirstworkobject()
-
-	if not location:
+	if not location and wo:
 		return grabtextforbrowsing('locus', wo.authorid, wo.worknumber, '_0')
-
-	location = re.sub(r'\.', '|', location)
-	allowed = '_|,:'
-	location = depunct(location, allowedpunctuationsting=allowed)
-	if not location:
-		return grabtextforbrowsing('locus', author, work, '_0')
+	elif not location and not wo:
+		wo = ao.grabfirstworkobject()
+		return grabtextforbrowsing('locus', wo.authorid, wo.worknumber, '_0')
 
 	emptycursor = None
 
-	start = location.split('|')
-	start.reverse()
-	targetlinedict = finddblinefromincompletelocus(wo, start, emptycursor)
+	targetlinedict = finddblinefromincompletelocus(wo, po.passageaslist, emptycursor)
 	if targetlinedict['code'] == 'success':
 		targetline = str(targetlinedict['line'])
 		return grabtextforbrowsing('linenumber', wo.authorid, wo.worknumber, targetline)
 	else:
-		return grabtextforbrowsing('locus', author, work, '_0')
+		return grabtextforbrowsing('locus', wo.authorid, wo.worknumber, '_0')
