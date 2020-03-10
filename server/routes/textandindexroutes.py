@@ -8,7 +8,6 @@
 
 import json
 import locale
-import re
 import time
 
 from flask import session
@@ -16,15 +15,16 @@ from flask import session
 from server import hipparchia
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
-from server.dbsupport.miscdbfunctions import buildauthorworkandpassage, makeanemptyauthor, makeanemptywork
+from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
 from server.formatting.miscformatting import consolewarning, validatepollid
-from server.formatting.wordformatting import avoidsmallvariants, reducetovalidcitationcharacters, depunct
+from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.parsingobjects import IndexmakerInputParsingObject, TextmakerInputParsingObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.checksession import probeforsessionvariables
-from server.startup import authordict, progresspolldict, workdict
+from server.startup import progresspolldict, workdict
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import textsegmentfindstartandstop, wordindextohtmltable
 from server.textsandindices.textbuilder import buildtext
@@ -34,7 +34,7 @@ from server.textsandindices.textbuilder import buildtext
 @hipparchia.route('/indexto/<searchid>/<author>/<work>')
 @hipparchia.route('/indexto/<searchid>/<author>/<work>/<passage>')
 @hipparchia.route('/indexto/<searchid>/<author>/<work>/<passage>/<endpoint>')
-def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=None):
+def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=None, citationdelimiter='|'):
 	"""
 	build a complete index to a an author, work, or segment of a work
 
@@ -53,11 +53,12 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 	dbconnection = ConnectionObject('autocommit')
 	dbcursor = dbconnection.cursor()
 
-	requested = buildauthorworkandpassage(author, work, passage, authordict, workdict, dbcursor, endpoint)
-	ao = requested['authorobject']
-	wo = requested['workobject']
-	psg = requested['passagelist']
-	stop = requested['endpointlist']
+	po = IndexmakerInputParsingObject(author, work, passage, endpoint, citationdelimiter)
+
+	ao = po.authorobject
+	wo = po.workobject
+	psg = po.passageaslist
+	stop = po.endpointlist
 
 	if not work:
 		wo = makeanemptywork('gr0000w000')
@@ -170,36 +171,16 @@ def indexfromrawlocus(searchid: str, author: str, work=None, location=None, endp
 	:return:
 	"""
 
-	try:
-		wo = workdict[author+'w'+work]
-	except KeyError:
-		wo = None
+	delimiter = '.'
 
-	try:
-		ao = authordict[author]
-	except KeyError:
-		ao = None
-
-	if not wo and not ao:
-		return buildindexto(searchid, str())
-
-	supplement = '_|'
-
-	location = re.sub(r'\.', '|', location)
-	location = reducetovalidcitationcharacters(location, supplement=supplement)
-
-	if endpoint:
-		endpoint = re.sub(r'\.', '|', endpoint)
-		endpoint = reducetovalidcitationcharacters(endpoint, supplement=supplement)
-
-	return buildindexto(searchid, wo.authorid, wo.worknumber, location, endpoint)
+	return buildindexto(searchid, author, work, location, endpoint, citationdelimiter=delimiter)
 
 
 @hipparchia.route('/textof/<author>')
 @hipparchia.route('/textof/<author>/<work>')
 @hipparchia.route('/textof/<author>/<work>/<passage>')
 @hipparchia.route('/textof/<author>/<work>/<passage>/<endpoint>')
-def textmaker(author: str, work=None, passage=None, endpoint=None):
+def textmaker(author: str, work=None, passage=None, endpoint=None, citationdelimiter='|'):
 	"""
 	build a text suitable for display
 
@@ -215,19 +196,18 @@ def textmaker(author: str, work=None, passage=None, endpoint=None):
 
 	linesevery = hipparchia.config['SHOWLINENUMBERSEVERY']
 
-	requested = buildauthorworkandpassage(author, work, passage, authordict, workdict, dbcursor, endpoint=endpoint)
-	ao = requested['authorobject']
-	wo = requested['workobject']
-	psg = requested['passagelist']
-	stop = requested['endpointlist']
+	po = TextmakerInputParsingObject(author, work, passage, endpoint, citationdelimiter)
+
+	ao = po.authorobject
+	wo = po.workobject
 
 	segmenttext = str()
 
 	if ao and wo:
 		# we have both an author and a work, maybe we also have a subset of the work
 		if endpoint:
-			firstlinenumber = finddblinefromincompletelocus(wo, psg, dbcursor)
-			lastlinenumber = finddblinefromincompletelocus(wo, stop, dbcursor, findlastline=True)
+			firstlinenumber = finddblinefromincompletelocus(wo, po.passageaslist, dbcursor)
+			lastlinenumber = finddblinefromincompletelocus(wo, po.endpointlist, dbcursor, findlastline=True)
 			if firstlinenumber['code'] == 'success' and lastlinenumber['code'] == 'success':
 				startline = firstlinenumber['line']
 				endline = lastlinenumber['line']
@@ -235,18 +215,18 @@ def textmaker(author: str, work=None, passage=None, endpoint=None):
 				stoplnobj = dblineintolineobject(grabonelinefromwork(ao.universalid, endline, dbcursor))
 			else:
 				msg = '"buildtexttospan/" could not find first and last: {a}w{b} - {c} TO {d}'
-				consolewarning(msg.format(a=author, b=work, c=psg, d=endpoint))
+				consolewarning(msg.format(a=author, b=work, c=passage, d=endpoint))
 				startlnobj = makeablankline(work, 0)
 				stoplnobj = makeablankline(work, 1)
 				startline = 0
 				endline = 1
 			segmenttext = 'from {a} to {b}'.format(a=startlnobj.shortlocus(), b=stoplnobj.shortlocus())
-		elif not psg:
+		elif not po.passageaslist:
 			# whole work
 			startline = wo.starts
 			endline = wo.ends
 		else:
-			startandstop = textsegmentfindstartandstop(ao, wo, psg, dbcursor)
+			startandstop = textsegmentfindstartandstop(ao, wo, po.passageaslist, dbcursor)
 			startline = startandstop['startline']
 			endline = startandstop['endline']
 		texthtml = buildtext(wo.universalid, startline, endline, linesevery, dbcursor)
@@ -257,7 +237,7 @@ def textmaker(author: str, work=None, passage=None, endpoint=None):
 		texthtml = gtltsubstitutes(texthtml)
 
 	if not segmenttext:
-		segmenttext = '.'.join(psg)
+		segmenttext = '.'.join(po.passageaslist)
 
 	if not ao or not wo:
 		ao = makeanemptyauthor('gr0000')
@@ -291,26 +271,6 @@ def texmakerfromrawlocus(author: str, work: str, location: str, endpoint=None):
 	:return:
 	"""
 
-	try:
-		wo = workdict[author+'w'+work]
-	except KeyError:
-		wo = None
+	delimiter = '.'
 
-	try:
-		ao = authordict[author]
-	except KeyError:
-		ao = None
-
-	if not wo and not ao:
-		return textmaker(str())
-
-	supplement = '_|'
-
-	location = re.sub(r'\.', '|', location)
-	location = reducetovalidcitationcharacters(location, supplement=supplement)
-
-	if endpoint:
-		endpoint = re.sub(r'\.', '|', endpoint)
-		endpoint = reducetovalidcitationcharacters(endpoint, supplement=supplement)
-
-	return textmaker(wo.authorid, wo.worknumber, location, endpoint)
+	return textmaker(author, work, location, endpoint, citationdelimiter=delimiter)

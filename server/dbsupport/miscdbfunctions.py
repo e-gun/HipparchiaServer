@@ -12,7 +12,7 @@ from os import name as osname
 import psycopg2
 
 from server.formatting.miscformatting import consolewarning
-from server.formatting.wordformatting import depunct, reducetovalidcitationcharacters
+from server.formatting.wordformatting import reducetovalidcitationcharacters
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
@@ -213,28 +213,37 @@ def perseusidmismatch(badworkdbnumber: str, cursor) -> str:
 	return newworkid
 
 
-def returnfirstwork(authorid: str, cursor) -> str:
+def returnfirstwork(authorid: str, dbcursor=None) -> str:
 	"""
 	more exception handling
 	this will produce bad results, but it will not kill the program
 	:param authorid:
-	:param cursor:
+	:param dbcursor:
 	:return:
 	"""
+
+	needscleanup = False
+	if not dbcursor:
+		dbconnection = ConnectionObject()
+		dbcursor = dbconnection.cursor()
+		needscleanup = True
 
 	# print('panic and grab first work of',authorid)
 	query = 'SELECT universalid FROM works WHERE universalid LIKE %s ORDER BY universalid'
 	data = (authorid+'%',)
-	cursor.execute(query, data)
-	found = cursor.fetchone()
+	dbcursor.execute(query, data)
+	found = dbcursor.fetchone()
 	try:
 		found = found[0]
 	except IndexError:
 		# yikes: an author we don't know about
 		# perseus will send you gr1415, but he is not in the db
 		# homer...
-		found = returnfirstwork('gr0012w001', cursor)
-	
+		found = returnfirstwork('gr0012w001', dbcursor)
+
+	if needscleanup:
+		dbconnection.connectioncleanup()
+
 	return found
 
 
