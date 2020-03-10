@@ -93,6 +93,8 @@ class InputParsingObject(object):
 
 		determined via putting the following code into "/testroute"
 
+		might need to update it if there is a qualitative change made over in HipparchiaBuilder
+
 		# looking for all of the unique chars required to generate all of the citations.
 
 		dbconnection = ConnectionObject()
@@ -120,7 +122,6 @@ class InputParsingObject(object):
 		print(charlist)
 		dbconnection.connectioncleanup()
 
-
 		:return:
 
 		"""
@@ -141,7 +142,7 @@ class InputParsingObject(object):
 
 		take a string and purge it of any characters that could not potentially be found in a citation
 
-		supplement should be a stinrg (which is a list...): '123!|abc"
+		supplement should be a string (which is itself the equivalent of a list...): '123!|abc"
 
 		:param text:
 		:return:
@@ -169,7 +170,7 @@ class IndexmakerInputParsingObject(InputParsingObject):
 class BrowserInputParsingObject(InputParsingObject):
 	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|'):
 		super().__init__(authorid, workid, location, endpoint, delimiter)
-		self.supplementalvalidcitationcharacters = '_|,:'
+		self.supplementalvalidcitationcharacters = '_|:'
 		self.updatepassagelist()
 
 

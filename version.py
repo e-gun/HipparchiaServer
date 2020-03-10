@@ -10,9 +10,13 @@ import sys
 import os
 
 
-hipparchiaserverversion = '1.5.1+'
 devel = True
 
+hipparchiaserverversion = '1.5.1'
+supplement = '+ [DEVEL]'
+
+if devel:
+	hipparchiaserverversion = hipparchiaserverversion + supplement
 
 def readgitdata() -> str:
 	"""
