@@ -225,8 +225,10 @@ def fetchhtmltemplateformetadatarow(shownotes=True):
 	return linetemplate
 
 
-def browserfindlinenumberfromcitation(method: str, citation: str, workobject: dbOpus, dbcursor) -> tuple:
+def browserfindlinenumberfromcitation(method: str, citationlist: list, workobject: dbOpus, dbcursor) -> tuple:
 	"""
+
+	a BrowserInputParsingObject has a pre-cleaned passageaslist that should be used
 
 	you have been given a locus in one of THREE possible formats
 
@@ -236,7 +238,7 @@ def browserfindlinenumberfromcitation(method: str, citation: str, workobject: db
 
 	try to turn what you have into a line number in a database table
 
-	:param citation:
+	:param citationlist:
 	:param workobject:
 	:param dbcursor:
 	:return:
@@ -250,12 +252,12 @@ def browserfindlinenumberfromcitation(method: str, citation: str, workobject: db
 		'perseus': browserfindlinenumberfromperseus
 	}
 
-	thelinenumber, resultmessage = dispatcher[method](citation, workobject, resultmessage, dbcursor)
+	thelinenumber, resultmessage = dispatcher[method](citationlist, workobject, resultmessage, dbcursor)
 
 	return thelinenumber, resultmessage
 
 
-def browserfindlinenumberfromlinenumber(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
+def browserfindlinenumberfromlinenumber(citationlist: list, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
 	"""
 
 	you got here either by the hit list or a forward/back button in the passage browser
@@ -264,20 +266,28 @@ def browserfindlinenumberfromlinenumber(citation: str, workobject: dbOpus, resul
 
 	all we do here is make sure the original input was valid
 
-	:param citation:
+	the list should have one item and look like ['1234']
+
+	:param citationlist:
 	:param workobject:
 	:param dbcursor:
 	:return:
 	"""
 
-	thelinenumber = re.sub('[\D]', '', citation)
+	try:
+		thelinenumber = citationlist[0]
+	except IndexError:
+		thelinenumber = 'X'
+
+	thelinenumber = re.sub(r'\D', str(), thelinenumber)
+
 	if not thelinenumber:
 		thelinenumber = workobject.starts
 
 	return thelinenumber, resultmessage
 
 
-def browserfindlinenumberfromlocus(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
+def browserfindlinenumberfromlocus(citationlist: list, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
 	"""
 
 	you were sent here by the citation builder autofill boxes
@@ -298,31 +308,28 @@ def browserfindlinenumberfromlocus(citation: str, workobject: dbOpus, resultmess
 	( ) and / should be converted to equivalents in the builder: they do us no good here
 	see dbswapoutbadcharsfromciations() in HipparchiaBuilder
 
-	:param citation:
+	see also citationcharacterset() in InputParsingObject()
+
+	:param citationlist:
 	:param workobject:
 	:param resultmessage:
 	:param dbcursor:
 	:return:
 	"""
 
-	allowedpunct = ',_-'
+	ct = tuple(citationlist)
 
-	elements = citation.split('|')
-	cleanelements = [depunct(level, allowedpunct) for level in elements]
-	cleanelements.reverse()
-	cleanelements = tuple(cleanelements[:5])
-
-	if len(cleanelements) == workobject.availablelevels:
-		thelinenumber = finddblinefromlocus(workobject, cleanelements, dbcursor)
+	if len(ct) == workobject.availablelevels:
+		thelinenumber = finddblinefromlocus(workobject, ct, dbcursor)
 	else:
-		elements = finddblinefromincompletelocus(workobject, list(cleanelements), dbcursor)
+		elements = finddblinefromincompletelocus(workobject, citationlist, dbcursor)
 		resultmessage = elements['code']
 		thelinenumber = elements['line']
 
 	return thelinenumber, resultmessage
 
 
-def browserfindlinenumberfromperseus(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
+def browserfindlinenumberfromperseus(citationlist: list, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
 	"""
 
 	here comes the fun part: alien format; inconsistent citation style; incorrect data...
@@ -334,14 +341,12 @@ def browserfindlinenumberfromperseus(citation: str, workobject: dbOpus, resultme
 	is
 		Herodotus, Historiae, Book 7, section 130
 
-	:param citation:
+	:param citationlist:
 	:param workobject:
 	:param resultmessage:
 	:param dbcursor:
 	:return:
 	"""
-
-	allowedpunct = ',-'
 
 	try:
 		# dict does not always agree with our ids...
@@ -355,10 +360,8 @@ def browserfindlinenumberfromperseus(citation: str, workobject: dbOpus, resultme
 		workid = perseusidmismatch(workobject.universalid, dbcursor)
 		workobject = workdict[workid]
 
-	citationlist = citation.split(':')
-	citationlist.reverse()
-
 	# life=cal. or section=32
+	# this has already been nuked?
 	needscleaning = [True for c in citationlist if len(c.split('=')) > 1]
 	if True in needscleaning:
 		citationlist = perseusdelabeler(citationlist, workobject)
@@ -369,9 +372,6 @@ def browserfindlinenumberfromperseus(citation: str, workobject: dbOpus, resultme
 
 	if ' ' in citationlist[-1]:
 		citationlist[-1] = citationlist[-1].split(' ')[-1]
-
-	# meaningful only in the context of someone purposefully submitting bad data...
-	citationlist = [depunct(level, allowedpunct) for level in citationlist]
 
 	p = finddblinefromincompletelocus(workobject, citationlist, dbcursor)
 	resultmessage = p['code']

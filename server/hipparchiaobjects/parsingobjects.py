@@ -19,20 +19,17 @@ class InputParsingObject(object):
 	clean and prep the textmaker or indexmaker query info
 
 	"""
-	def __init__(self, authorid, workid=None, searchlocation=None, endpoint=None, delimiter=NotImplemented, objecttype=NotImplemented):
+	def __init__(self, authorid, workid=None, searchlocation=None, endpoint=None, delimiter=NotImplemented):
 		self.authorid = authorid
 		self.workid = workid
 		self.searchlocation = searchlocation
 		self.endpointlocation = endpoint
 
 		self.delimiter = delimiter
-		self.objecttype = objecttype
 		self.needsreversal = True
 		self.defaulthipparchiadelimeter = '|'
 
 		assert self.delimiter in [None, '.', '|', ':']
-		assert self.objecttype in ['text', 'index', 'browser', 'structure']
-		assert self.needsreversal in [True, False]
 
 		self.supplementalvalidcitationcharacters = '_|'
 		# tempting to exclude ';<>-,.'
@@ -87,17 +84,8 @@ class InputParsingObject(object):
 	def updateenpointlist(self):
 		self.endpointlist = self._findpassagelist(self.endpointlocation)
 
-	def hasauthorobject(self):
-		if self.authorobject:
-			return True
-		else:
-			return False
-
-	def hasworkobject(self):
-		if self.workobject:
-			return True
-		else:
-			return False
+	def getcitationtuple(self):
+		return tuple(self.passageaslist)
 
 	@staticmethod
 	def citationcharacterset() -> set:
@@ -169,27 +157,26 @@ class InputParsingObject(object):
 
 
 class TextmakerInputParsingObject(InputParsingObject):
-	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|', objecttype='text'):
-		super().__init__(authorid, workid, location, endpoint, delimiter, objecttype)
+	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|'):
+		super().__init__(authorid, workid, location, endpoint, delimiter)
 
 
 class IndexmakerInputParsingObject(InputParsingObject):
-	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|', objecttype='index'):
-		super().__init__(authorid, workid, location, endpoint, delimiter, objecttype)
+	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|'):
+		super().__init__(authorid, workid, location, endpoint, delimiter)
 
 
 class BrowserInputParsingObject(InputParsingObject):
-	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|', objecttype='browser'):
-		super().__init__(authorid, workid, location, endpoint, delimiter, objecttype)
+	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|'):
+		super().__init__(authorid, workid, location, endpoint, delimiter)
 		self.supplementalvalidcitationcharacters = '_|,:'
 		self.updatepassagelist()
 
 
 class StructureInputParsingObject(InputParsingObject):
-	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|', objecttype='structure'):
-		super().__init__(authorid, workid, location, endpoint, delimiter, objecttype)
+	def __init__(self, authorid, workid=None, location=None, endpoint=None, delimiter='|'):
+		super().__init__(authorid, workid, location, endpoint, delimiter)
 		if not location:
 			self.searchlocation = 'firstline'
 		self.needsreversal = False
 		self.updatepassagelist()
-		self.citationtuple = tuple(self.passageaslist)

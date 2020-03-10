@@ -166,11 +166,10 @@ def findworkstructure(author, work, passage=None):
 
 	po = StructureInputParsingObject(author, work, passage)
 	wo = po.workobject
-	safepassage = po.citationtuple
 
 	ws = dict()
 	if wo:
-		lowandhigh = findvalidlevelvalues(wo, safepassage, dbcursor)
+		lowandhigh = findvalidlevelvalues(wo, po.getcitationtuple(), dbcursor)
 		# example: (4, 3, 'Book', '1', '7', ['1', '2', '3', '4', '5', '6', '7'])
 		ws['totallevels'] = lowandhigh.levelsavailable
 		ws['level'] = lowandhigh.currentlevel

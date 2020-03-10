@@ -79,16 +79,16 @@ def grabtextforbrowsing(method, author, work, location=None):
 			consolewarning('bad data fed to grabtextforbrowsing(): {m} / {a} / {w} / {l}'.format(m=method, a=author, w=work, l=location))
 			ao = None
 
-	passage, resultmessage = browserfindlinenumberfromcitation(method, location, wo, dbcursor)
+	thelocation, resultmessage = browserfindlinenumberfromcitation(method, po.passageaslist, wo, dbcursor)
 
-	if passage and ao:
-		passageobject = buildbrowseroutputobject(ao, wo, int(passage), dbcursor)
+	if thelocation and ao:
+		passageobject = buildbrowseroutputobject(ao, wo, int(thelocation), dbcursor)
 	else:
-		passageobject = BrowserOutputObject(ao, wo, passage)
+		passageobject = BrowserOutputObject(ao, wo, thelocation)
 		viewing = '<p class="currentlyviewing">error in fetching the browser data.<br />I was sent a citation that returned nothing: {c}</p><br /><br />'.format(c=location)
-		if not passage:
-			passage = str()
-		table = [str(passage), wo.universalid]
+		if not thelocation:
+			thelocation = str()
+		table = [str(thelocation), wo.universalid]
 		passageobject.browserhtml = viewing + '\n'.join(table)
 
 	if resultmessage != 'success':
@@ -130,6 +130,7 @@ def rawcitationgrabtextforbrowsing(author: str, work: str, location=None):
 	emptycursor = None
 
 	targetlinedict = finddblinefromincompletelocus(wo, po.passageaslist, emptycursor)
+
 	if targetlinedict['code'] == 'success':
 		targetline = str(targetlinedict['line'])
 		return grabtextforbrowsing('linenumber', wo.authorid, wo.worknumber, targetline)
