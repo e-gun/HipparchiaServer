@@ -108,10 +108,7 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 	except ValueError:
 		theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
-	if hipparchia.config['MYEXTERNALIPADDRESS'] != '127.0.0.1':
-		theip = hipparchia.config['MYEXTERNALIPADDRESS']
-	else:
-		theip = '127.0.0.1'
+	theip = hipparchia.config['MYEXTERNALIPADDRESS']
 
 	# because we are not in the main thread we cannot ask for the default loop
 	loop = asyncio.new_event_loop()

@@ -111,3 +111,19 @@ you will see:
 there is no voice for
 
     <possibility_4>ἀπαλλάϲϲω<xref_value>11723310</xref_value><xref_kind>9</xref_kind><transl>set free</transl><analysis>aor imperat 2nd dual</analysis></possibility_4>
+
+[I] BREAKAGE WARNING
+
+vector graphing breaks if you go to matplotlib 3.2.0
+
+  File "/Users/erik/hipparchia_venv/lib/python3.7/site-packages/matplotlib/__init__.py", line 1543, in inner
+    return func(ax, *map(sanitize_sequence, args), **kwargs)
+  File "/Users/erik/hipparchia_venv/lib/python3.7/site-packages/matplotlib/cbook/deprecation.py", line 358, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/erik/hipparchia_venv/lib/python3.7/site-packages/matplotlib/axes/_axes.py", line 4387, in scatter
+    raise ValueError("s must be a scalar, or the same size as x and y")
+
+the "fix" is a downgrade:
+
+    ./bin/pip install matplotlib==3.1.3
+
