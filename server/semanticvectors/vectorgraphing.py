@@ -34,12 +34,25 @@ except ModuleNotFoundError:
 	nx = None
 
 import psycopg2
+from pkg_resources import get_distribution as checkversion
+
 from server import hipparchia
+from server.formatting.miscformatting import consolewarning
 from server.dbsupport.tablefunctions import assignuniquename
 from server.dbsupport.vectordbfunctions import createstoredimagestable
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.startup import authordict, workdict
 
+
+ml = checkversion("matplotlib").version  # e.g., '3.1.3'
+validmll = '3.1.3'
+invalidmpl = '3.2.0'
+
+if ml != validmll:
+	consolewarning('\tvector graphing is broken if you use the 3.2.x branch of matplotlib\t', color='red', isbold=True, baremessage=True)
+	consolewarning('\tyou have version {v} installed\t'.format(v=ml), color='red', isbold=True, baremessage=True)
+	consolewarning('\tconsider forcing the last known good version:\t', color='red', isbold=True, baremessage=True)
+	consolewarning('\t"~/hipparchia_venv/bin/pip install matplotlib==3.1.3"\t', color='red', isbold=True, baremessage=True)
 
 def graphbliteraldistancematches(searchterm, mostsimilartuples, searchobject):
 	"""

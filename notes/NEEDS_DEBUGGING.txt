@@ -115,7 +115,14 @@ there is no voice for
 [I] BREAKAGE WARNING
 
 vector graphing breaks if you go to matplotlib 3.2.0
-
+  File "/Users/erik/hipparchia_venv/HipparchiaServer/server/semanticvectors/vectorgraphing.py", line 96, in graphnnmatches
+    imagename = graphmatches(title, searchterm, searchobject, mostsimilartuples, terms, relevantconnections, vtype='nn')
+  File "/Users/erik/hipparchia_venv/HipparchiaServer/server/semanticvectors/vectorgraphing.py", line 104, in graphmatches
+    return fnc(graphtitle, searchterm, searchobject, mostsimilartuples, terms, relevantconnections, vtype)
+  File "/Users/erik/hipparchia_venv/HipparchiaServer/server/semanticvectors/vectorgraphing.py", line 162, in matplotgraphmatches
+    nx.draw_networkx_nodes(graph, pos, node_size=scalednodes, alpha=0.75, node_color=range(len(terms)), cmap='Pastel1')
+  File "/Users/erik/hipparchia_venv/lib/python3.7/site-packages/networkx/drawing/nx_pylab.py", line 417, in draw_networkx_nodes
+    label=label)
   File "/Users/erik/hipparchia_venv/lib/python3.7/site-packages/matplotlib/__init__.py", line 1543, in inner
     return func(ax, *map(sanitize_sequence, args), **kwargs)
   File "/Users/erik/hipparchia_venv/lib/python3.7/site-packages/matplotlib/cbook/deprecation.py", line 358, in wrapper
@@ -125,5 +132,8 @@ vector graphing breaks if you go to matplotlib 3.2.0
 
 the "fix" is a downgrade:
 
-    ./bin/pip install matplotlib==3.1.3
+    ~/hipparchia_venv/bin/pip install matplotlib==3.1.3
+
+check:
+    https://matplotlib.org/3.2.0/api/api_changes.html
 
