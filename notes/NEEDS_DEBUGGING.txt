@@ -114,6 +114,9 @@ there is no voice for
 
 [I] BREAKAGE WARNING
 
+# bug report filed to https://github.com/matplotlib/matplotlib/issues/16739
+# a length check fails (_axes.py @ 4386): new to 3.2.0; not present in 3.1.3 #16739
+
 vector graphing breaks if you go to matplotlib 3.2.0
   File "/Users/erik/hipparchia_venv/HipparchiaServer/server/semanticvectors/vectorgraphing.py", line 96, in graphnnmatches
     imagename = graphmatches(title, searchterm, searchobject, mostsimilartuples, terms, relevantconnections, vtype='nn')
@@ -131,9 +134,33 @@ vector graphing breaks if you go to matplotlib 3.2.0
     raise ValueError("s must be a scalar, or the same size as x and y")
 
 the "fix" is a downgrade:
-
     ~/hipparchia_venv/bin/pip install matplotlib==3.1.3
 
 check:
     https://matplotlib.org/3.2.0/api/api_changes.html
 
+https://github.com/matplotlib/matplotlib/issues/16739
+
+from random import uniform as rnd
+import matplotlib.pyplot as plt
+ax = plt.gca()
+
+a = [-0.10902419, -0.75646717, -0.96403103, -0.1960284,  -0.05789045,  0.16462492, 0.25156931, 0.56237587, 0.69960643, 0.31271061, -0.62216608, 0.47206789, 0.60326695, -0.08107401, -0.45185505, 0.17231438]
+b = [-0.07969323, -0.32750072, -0.09406059, 0.27041506, -1., 0.18910032, 0.62951915, 0.09861711, -0.06275149, 0.22269021, -0.86167041, -0.23924364, 0.42907668, 0.58223968, 0.54558958, -0.30232771]
+c = [9323.340654373169, 6616.982460021973, 5690.618991851807, 5689.395904541016, 5672.798752784729, 5638.451099395752, 5606.265664100647, 5553.000926971436, 5544.699668884277, 5531.859755516052, 5476.373791694641, 5463.115096092224, 5454.218745231628, 5441.088080406189, 5435.509443283081]
+
+>>> ax.scatter(a, b, c)
+<matplotlib.collections.PathCollection object at 0x116fe1ef0>
+
+d = [rnd(-1,1) for _ in range(16)]
+e = [rnd(-1,1) for _ in range(16)]
+f = [rnd(3000, 4000) for _ in range(15)]
+
+ax.scatter(d, e, f)
+
+
+can 'fix' matplotlib 3.2.0 as follows @ _axes.py ln 4378:
+
+        if len(s) not in (1, x.size):
+            # raise ValueError("s must be a scalar, or the same size as x and y")
+            print('not raising ValueError...')

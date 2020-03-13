@@ -26,6 +26,23 @@ try:
 	matplotlib.use('Agg')
 	import matplotlib.pyplot as plt
 	import networkx as nx
+
+	from pkg_resources import get_distribution as checkversion
+	from packaging.version import parse as versionparse
+	from server.formatting.miscformatting import consolewarning
+
+	ml = checkversion("matplotlib").version
+	validmll = '3.1.3'
+	invalidmpl = '3.2.0'
+
+	if versionparse(ml) > versionparse(validmll):
+		consolewarning('\tvector graphing is BROKEN if you use the 3.2.x branch of matplotlib\t', color='red',
+		               isbold=True, baremessage=True)
+		consolewarning('\tyou have version {v} installed\t'.format(v=ml), color='red', isbold=True, baremessage=True)
+		consolewarning('\tconsider forcing the last known good version:\t', color='red', isbold=True, baremessage=True)
+		consolewarning('\t"~/hipparchia_venv/bin/pip install matplotlib=={v}"\t'.format(v=validmll), color='red',
+		               isbold=True, baremessage=True)
+
 except ModuleNotFoundError:
 	if current_process().name == 'MainProcess':
 		print('matplotlib is not available')
@@ -34,25 +51,12 @@ except ModuleNotFoundError:
 	nx = None
 
 import psycopg2
-from pkg_resources import get_distribution as checkversion
 
 from server import hipparchia
-from server.formatting.miscformatting import consolewarning
 from server.dbsupport.tablefunctions import assignuniquename
 from server.dbsupport.vectordbfunctions import createstoredimagestable
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.startup import authordict, workdict
-
-
-ml = checkversion("matplotlib").version  # e.g., '3.1.3'
-validmll = '3.1.3'
-invalidmpl = '3.2.0'
-
-if ml != validmll:
-	consolewarning('\tvector graphing is broken if you use the 3.2.x branch of matplotlib\t', color='red', isbold=True, baremessage=True)
-	consolewarning('\tyou have version {v} installed\t'.format(v=ml), color='red', isbold=True, baremessage=True)
-	consolewarning('\tconsider forcing the last known good version:\t', color='red', isbold=True, baremessage=True)
-	consolewarning('\t"~/hipparchia_venv/bin/pip install matplotlib==3.1.3"\t', color='red', isbold=True, baremessage=True)
 
 def graphbliteraldistancematches(searchterm, mostsimilartuples, searchobject):
 	"""
@@ -168,6 +172,25 @@ def matplotgraphmatches(graphtitle, searchterm, searchobject, mostsimilartuples,
 
 	scalednodes = [1200 * t[1] * 10 for t in mostsimilartuples]
 	# scalednodes = [1200 * (t[1] ** 2.5) * 10 for t in mostsimilartuples]
+	# matplotlib 3.2.0 exception
+	# see _axes.py 4386: len(s), x.size 15 16
+	# but s needs to be the same size as x....: 16 & 16
+	# s is what we send as scalednodes
+	#     def scatter(self, x, y, s=None, c=None, marker=None, cmap=None, norm=None,
+	#                 vmin=None, vmax=None, alpha=None, linewidths=None,
+	#                 verts=None, edgecolors=None, *, plotnonfinite=False,
+	#                 **kwargs):
+	#
+	#         A scatter plot of *y* vs. *x* with varying marker size and/or color.
+	#
+	#         Parameters
+	#         ----------
+	#         x, y : scalar or array-like, shape (n, )
+	#             The data positions.
+	#
+	#         s : scalar or array-like, shape (n, ), optional
+	#             The marker size in points**2.
+	#             Default is ``rcParams['lines.markersize'] ** 2``.
 
 	# nodes
 	nx.draw_networkx_nodes(graph, pos, node_size=scalednodes, alpha=0.75, node_color=range(len(terms)), cmap='Pastel1')
