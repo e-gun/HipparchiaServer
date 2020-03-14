@@ -396,8 +396,6 @@ class SearchOutputObject(object):
 		return outputdict
 
 
-
-
 class SearchResult(object):
 	"""
 

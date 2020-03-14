@@ -42,12 +42,14 @@ from server.startup import authordict, listmapper, progresspolldict, workdict, l
 @hipparchia.route('/executesearch/<searchid>', methods=['GET'])
 def executesearch(searchid, so=None):
 	"""
+
 	the interface to all of the other search functions
+
 	tell me what you are looking for and i'll try to find it
 
 	the results are returned in a json bundle that will be used to update the html on the page
 
-	note that vector queries also flow through here
+	note that cosdistbysentence vector queries also flow through here: they need a hitdict
 
 	:return:
 	"""
@@ -103,24 +105,6 @@ def executesearch(searchid, so=None):
 		# return the data derived therefrom instead of "search result" data
 
 		isgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
-
-		# so.vectorquerytype = so.infervectorquerytype()
-
-		# note that cosdistbylineorword requires a hitdict and so has to come later
-		vectorfunctions = {'cosdistbysentence': findabsolutevectorsbysentence,
-		                   'semanticvectorquery': executegensimsearch,
-		                   'nearestneighborsquery': executegensimsearch,
-		                   'topicmodel': sklearnselectedworks}
-
-		# for TESTING purposes rewrite one of the definitions
-		# vectorfunctions['tensorflowgraph'] = gensimexperiment
-
-		if so.vectorquerytype in vectorfunctions:
-			# print('executesearch(): a - vectorquery ({t})'.format(t=so.vectorquerytype))
-			fnc = vectorfunctions[so.vectorquerytype]
-			output = fnc(so)
-			del progresspolldict[pollid]
-			return output
 
 		if so.lemma:
 			so.termone = wordlistintoregex(so.lemma.formlist)
@@ -406,9 +390,37 @@ def vectorsearch(vectortype, searchid, headform):
 
 	so = SearchObject(pollid, seeking, proximate, lemma, proximatelemma, session)
 
+	progresspolldict[pollid] = ProgressPoll(pollid)
+	activepoll = progresspolldict[pollid]
+	activepoll.activate()
+	activepoll.statusis('Preparing to vectorize')
+	so.poll = activepoll
+
+	output = SearchOutputObject(so)
+
+	# note that cosdistbylineorword requires a hitdict and has to executesearch() to get one
+
 	if vectortype in vectorboxes:
 		so.vectorquerytype = vectortype
 
-	jsonoutput = executesearch(pollid, so)
+		vectorfunctions = {'cosdistbysentence': findabsolutevectorsbysentence,
+		                   'semanticvectorquery': executegensimsearch,
+		                   'nearestneighborsquery': executegensimsearch,
+		                   'topicmodel': sklearnselectedworks}
 
-	return jsonoutput
+		# for TESTING purposes rewrite one of the definitions
+		# vectorfunctions['tensorflowgraph'] = gensimexperiment
+
+		if so.vectorquerytype in vectorfunctions:
+			fnc = vectorfunctions[so.vectorquerytype]
+			jsonoutput = fnc(so)
+			del progresspolldict[pollid]
+			return jsonoutput
+		if so.vectorquerytype == 'cosdistbylineorword':
+			jsonoutput = executesearch(pollid, so)
+			return jsonoutput
+
+	# nothing happened...
+	target = 'searchsummary'
+	message = '[unknown vector query type]'
+	return output.generatenulloutput(itemname=target, itemval=message)

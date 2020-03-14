@@ -44,6 +44,8 @@ def startvectorizing():
 
 	searching is safe when the vectorbot finishes
 
+	this is fairly 'new' and perhaps emerged via an OS update [it has been known but not documented for a while]
+
 	linux does not seem to have this problem
 
 	:return:
