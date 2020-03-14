@@ -11,7 +11,7 @@ from server.dbsupport.vectordbfunctions import checkforstoredvector
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.gensimlsi import lsigenerateoutput
-from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
+from server.semanticvectors.gensimnearestneighbors import generateanalogies, generatenearestneighbordata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildlemmatizesearchphrase
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
@@ -33,9 +33,9 @@ def executegensimsearch(searchobject):
 	so = searchobject
 	activepoll = so.poll
 
-	# print('so.vectorquerytype', so.vectorquerytype)
+	print('so.vectorquerytype', so.vectorquerytype)
 
-	if so.vectorquerytype != 'nearestneighborsquery':
+	if so.vectorquerytype == 'CURRENTLYUNUSED':
 		outputfunction = lsigenerateoutput
 		indextype = 'lsi'
 		so.lemma = None
@@ -43,9 +43,15 @@ def executegensimsearch(searchobject):
 		if not so.tovectorize:
 			reasons = ['unable to lemmatize the search term(s) [nb: whole words required and accents matter]']
 			return emptyvectoroutput(so, reasons)
-	else:
+	elif so.vectorquerytype == 'nearestneighborsquery':
 		outputfunction = generatenearestneighbordata
 		indextype = 'nn'
+	elif so.vectorquerytype == 'analogyfinder':
+		outputfunction = generateanalogies
+		indextype = 'nn'
+	else:
+		reasons = ['unknown vectorquerytype sent to executegensimsearch()']
+		return emptyvectoroutput(so, reasons)
 
 	activepoll.statusis('Preparing to search')
 

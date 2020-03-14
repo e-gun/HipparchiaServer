@@ -89,6 +89,40 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 	return output
 
 
+def generateanalogies(sentencetuples, searchobject, vectorspace):
+	"""
+
+		most_similar(positive=None, negative=None, topn=10, restrict_vocab=None, indexer=None)
+			[analogies; most_similar(positive=['woman', 'king'], negative=['man']) --> queen]
+
+		most_similar_cosmul(positive=None, negative=None, topn=10)
+		[analogy finder; most_similar_cosmul(positive=['baghdad', 'england'], negative=['london']) --> iraq]
+
+	:param sentencetuples:
+	:param searchobject:
+	:param vectorspace:
+	:return:
+	"""
+	so = searchobject
+	if not so.lemmaone or not so.lemmatwo or not so.lemmathree:
+		return emptyvectoroutput(so, '[did not have three valid lemmata]')
+	if not vectorspace:
+		vectorspace = buildnnvectorspace(sentencetuples, so)
+		if vectorspace == 'failed to build model':
+			reasons = [vectorspace]
+			return emptyvectoroutput(so, reasons)
+
+	positive = [so.lemmaone.dictionaryentry, so.lemmatwo.dictionaryentry]
+	negative = [so.lemmathree.dictionaryentry]
+
+	similarities = vectorspace.wv.most_similar(positive=positive, negative=negative, topn=6)
+
+	print('generateanalogies() similarities are', similarities)
+
+	output = None
+	return output
+
+
 def buildnnvectorspace(sentencetuples, searchobject):
 	"""
 

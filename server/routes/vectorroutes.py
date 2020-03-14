@@ -13,6 +13,7 @@ from server.formatting.miscformatting import validatepollid
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchObject, SearchOutputObject
 from server.listsandsession.checksession import probeforsessionvariables
+
 if hipparchia.config['SEMANTICVECTORSENABLED']:
 	from server.semanticvectors.gensimvectors import executegensimsearch
 	from server.semanticvectors.scikitlearntopics import sklearnselectedworks
@@ -24,7 +25,6 @@ else:
 	findabsolutevectorsbysentence = voff
 	findabsolutevectorsfromhits = voff
 from server.routes.searchroute import executesearch
-from server.searching.searchfunctions import cleaninitialquery
 from server.startup import lemmatadict, progresspolldict
 
 

@@ -33,6 +33,8 @@
 #   a lemmatized term and all of the other terms that "neighbor" it in the vector
 #   space.
 #
+# VECTORANALOGIESENABLED = find A:B :: C:D; that is, 'vir':'bonus' :: 'mulier' : ???
+#
 # TOPICMODELINGENABLED allows you to build graphs of topic clusters via Latent Dirichlet Allocation.
 #
 # CONCEPTSEARCHINGENABLED allows you to search for sentences related to a lemmatized
@@ -90,6 +92,7 @@ FORBIDUSERDEFINEDVECTORSPACES = False
 LITERALCOSINEDISTANCEENABLED = False
 CONCEPTMAPPINGENABLED = False
 TOPICMODELINGENABLED = False
+VECTORANALOGIESENABLED = True
 CONCEPTSEARCHINGENABLED = False  # of dubious value as currently implemented
 MAXVECTORSPACE = 7548165
 MAXSENTENCECOMPARISONSPACE = 50000

@@ -160,7 +160,7 @@ class SearchObject(object):
 			return None
 
 		exclusive = {'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery',
-		             'tensorflowgraph', 'sentencesimilarity', 'topicmodel'}
+		             'tensorflowgraph', 'sentencesimilarity', 'topicmodel', 'analogyfinder'}
 
 		qtype = list()
 		for e in exclusive:
