@@ -10,8 +10,9 @@ from server import hipparchia
 from server.dbsupport.vectordbfunctions import checkforstoredvector
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
+from server.semanticvectors.gensimanalogies import generateanalogies
 from server.semanticvectors.gensimlsi import lsigenerateoutput
-from server.semanticvectors.gensimnearestneighbors import generateanalogies, generatenearestneighbordata
+from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildlemmatizesearchphrase
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
