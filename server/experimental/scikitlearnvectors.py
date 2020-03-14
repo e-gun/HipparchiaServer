@@ -48,7 +48,7 @@ from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, mostcommonwordsviaheadwords, mostcommoninflectedforms
 from server.dbsupport.dblinefunctions import grablistoflines
-from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
+from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 from server.formatting.vectorformatting import skformatmostimilar
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.startup import authordict, listmapper, workdict

@@ -17,7 +17,7 @@ from server.listsandsession.searchlistmanagement import calculatewholeauthorsear
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict
-from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
+from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 from server.startup import authordict, listmapper, workdict
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 

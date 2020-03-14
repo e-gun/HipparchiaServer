@@ -20,7 +20,7 @@ from server.dbsupport.vectordbfunctions import storevectorindatabase
 from server.formatting.vectorformatting import formatnnmatches, formatnnsimilarity, nearestneighborgenerateoutput
 from server.semanticvectors.vectorgraphing import graphnnmatches
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, findwordvectorset
-from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
+from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
 

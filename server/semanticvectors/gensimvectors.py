@@ -14,7 +14,7 @@ from server.semanticvectors.gensimlsi import lsigenerateoutput
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import buildlemmatizesearchphrase
-from server.semanticvectors.vectorpseudoroutes import emptyvectoroutput
+from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 from server.startup import authordict, listmapper, workdict
 
 
