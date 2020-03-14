@@ -32,6 +32,20 @@ def startvectorizing():
 
 	exit when there are none that are out of date or blank
 
+	macOS is currently doing something strange if you run searches while the vectorbot is active
+
+		libc++abi.dylib: terminating with uncaught exception of type std::runtime_error: Couldn't close file
+		Traceback (most recent call last):
+			File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.7/lib/python3.7/threading.py", line 917, in _bootstrap_inner
+			...
+			File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.7/lib/python3.7/multiprocessing/connection.py", line 383, in _recv
+			raise EOFError
+		EOFError
+
+	searching is safe when the vectorbot finishes
+
+	linux does not seem to have this problem
+
 	:return:
 	"""
 
