@@ -57,7 +57,8 @@ function hideallboxes() {
 }
 
 function findotheroptions(thisoption) {
-    const xoredoptions = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity', '#topicmodel'];
+    const xoredoptions = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph',
+        '#sentencesimilarity', '#topicmodel', '#analogiescheckbox'];
     let xor = [];
     for (let i = 0; i < xoredoptions.length; i++) {
         let opt = $(xoredoptions[i]);
@@ -267,6 +268,31 @@ $('#topicmodel').change(function() {
         showvectornotification();
         setoptions(this.id, 'yes');
     } else {
+        setoptions(this.id, 'no');
+        restorecheckboxestodefault();
+        hidevectorsandlemmata();
+        }
+    });
+
+$('#analogyfinder').change(function() {
+    restoreplaceholders();
+    if(this.checked) {
+        let others = findotheroptions(this.id);
+        $(others).prop('checked', false);
+        $('#analogiesbox').show();
+        activatethisbox(lsf, '(unused for analogies)');
+        activatethisbox(plsf, '(unused for analogies)');
+        trmonelem.prop('checked', false);
+        trmtwolem.prop('checked', false);
+        wsf.hide();
+        psf.hide();
+        vschon.show();
+        vschoff.hide();
+        hidelemmatanotification();
+        showvectornotification();
+        setoptions(this.id, 'yes');
+    } else {
+        $('#analogiesbox').hide();
         setoptions(this.id, 'no');
         restorecheckboxestodefault();
         hidevectorsandlemmata();

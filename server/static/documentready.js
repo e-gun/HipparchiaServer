@@ -61,6 +61,7 @@ $(document).ready( function () {
         $('#tensorflowgraphcheckbox').toggle();
         $('#sentencesimilaritycheckbox').toggle();
         $('#topicmodelcheckbox').toggle();
+        $('#analogiescheckbox').toggle();
         });
 
     // https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript#2117523
@@ -221,7 +222,7 @@ $(document).ready( function () {
         '#semanticvectornnquerycheckbox', '#semanticvectorquerycheckbox', '#sentencesimilaritycheckbox', '#spur', '#tensorflowgraphcheckbox',
         '#termonecheckbox', '#topicmodelcheckbox', '#level05endpoint', '#level04endpoint', '#level03endpoint', '#level02endpoint', '#level01endpoint',
         '#level00endpoint', '#endpointnotice', '#fromnotice', '#authorendpoint', '#workendpoint', '#endpointbutton-isclosed', '#endpointbutton-isopen',
-        '#lemmatizing-ison', '#vectorizing-ison', '#rawlocationinput', '#rawendpointinput', '#usingrawinput');
+        '#lemmatizing-ison', '#vectorizing-ison', '#rawlocationinput', '#rawendpointinput', '#usingrawinput', '#analogiescheckbox');
     bulkhider(tohideonfirstload);
 
     loadoptions();

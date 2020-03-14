@@ -281,7 +281,8 @@ $('#morechoices').click(function(){
 
 function showextendedsearch() {
         const ids = Array('#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox', '#semanticvectorquerycheckbox',
-            '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox', '#sentencesimilaritycheckbox', '#complexsearching', '#topicmodelcheckbox');
+            '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox', '#sentencesimilaritycheckbox', '#complexsearching', '#topicmodelcheckbox',
+            '#analogiescheckbox');
         bulkshow(ids);
 }
 

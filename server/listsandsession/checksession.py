@@ -28,6 +28,7 @@ def probeforsessionvariables():
 		session['agnselections'] = list()
 		session['alocexclusions'] = list()
 		session['alocselections'] = list()
+		session['analogyfinder'] = False
 		session['auexclusions'] = list()
 		session['auselections'] = list()
 		session['authorssummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALAUTHORS']
@@ -128,6 +129,7 @@ def convertyesnototruefalse():
 	"""
 
 	trueorfalse = [
+		'analogyfinder'
 		'authorssummary',
 		'bracketangled',
 		'bracketcurly',

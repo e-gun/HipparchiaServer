@@ -267,6 +267,14 @@ def vectorhtmlforfrontpage() -> str:
 		</span>
 	"""
 
+	anal = """
+		<span id="analogiescheckbox">
+			<span class="small">Analogy Finder</span>
+			<input type="checkbox" id="analogyfinder" value="yes" title="Find analogies in a vector space (A:B::C:D)">
+		</span>
+	"""
+
+
 	if not hipparchia.config['SEMANTICVECTORSENABLED']:
 		return str()
 
@@ -275,7 +283,9 @@ def vectorhtmlforfrontpage() -> str:
 	              'CONCEPTMAPPINGENABLED': cm,
 	              # 'TENSORFLOWVECTORSENABLED': tf,
 	              # 'SENTENCESIMILARITYENABLED': ss,
-	              'TOPICMODELINGENABLED': lda}
+	              'TOPICMODELINGENABLED': lda,
+	              'VECTORANALOGIESENABLED': anal
+	              }
 
 	vectorhtml = list()
 	for conf in textmapper:
