@@ -27,21 +27,24 @@ try:
 	import matplotlib.pyplot as plt
 	import networkx as nx
 
-	from pkg_resources import get_distribution as checkversion
-	from packaging.version import parse as versionparse
-	from server.formatting.miscformatting import consolewarning
+	# see below on a versioning problem with matplotlib. It *seems* to be fixed but the commented-out code should linger
+	# for a little while
 
-	ml = checkversion("matplotlib").version
-	validmll = '3.1.3'
-	invalidmpl = '3.2.0'
-
-	if versionparse(ml) > versionparse(validmll):
-		consolewarning('\tvector graphing is BROKEN if you use the 3.2.x branch of matplotlib\t', color='red',
-		               isbold=True, baremessage=True)
-		consolewarning('\tyou have version {v} installed\t'.format(v=ml), color='red', isbold=True, baremessage=True)
-		consolewarning('\tconsider forcing the last known good version:\t', color='red', isbold=True, baremessage=True)
-		consolewarning('\t"~/hipparchia_venv/bin/pip install matplotlib=={v}"\t'.format(v=validmll), color='red',
-		               isbold=True, baremessage=True)
+	# from pkg_resources import get_distribution as checkversion
+	# from packaging.version import parse as versionparse
+	# from server.formatting.miscformatting import consolewarning
+	#
+	# ml = checkversion("matplotlib").version
+	# validmll = '3.1.3'
+	# invalidmpl = '3.2.0'
+	#
+	# if versionparse(ml) > versionparse(validmll):
+	# 	consolewarning('\tvector graphing is BROKEN if you use the 3.2.x branch of matplotlib\t', color='red',
+	# 	               isbold=True, baremessage=True)
+	# 	consolewarning('\tyou have version {v} installed\t'.format(v=ml), color='red', isbold=True, baremessage=True)
+	# 	consolewarning('\tconsider forcing the last known good version:\t', color='red', isbold=True, baremessage=True)
+	# 	consolewarning('\t"~/hipparchia_venv/bin/pip install matplotlib=={v}"\t'.format(v=validmll), color='red',
+	# 	               isbold=True, baremessage=True)
 
 except ModuleNotFoundError:
 	if current_process().name == 'MainProcess':
@@ -172,7 +175,13 @@ def matplotgraphmatches(graphtitle, searchterm, searchobject, mostsimilartuples,
 
 	scalednodes = [1200 * t[1] * 10 for t in mostsimilartuples]
 	# scalednodes = [1200 * (t[1] ** 2.5) * 10 for t in mostsimilartuples]
-	# matplotlib 3.2.0 exception
+
+	#
+	# FYI: matplotlib 3.2.0 exception
+	#
+	# see https://github.com/matplotlib/matplotlib/issues/16739
+	# @tacaswell had the solutIon: just pad the array...
+
 	# see _axes.py 4386: len(s), x.size 15 16
 	# but s needs to be the same size as x....: 16 & 16
 	# s is what we send as scalednodes
@@ -192,7 +201,7 @@ def matplotgraphmatches(graphtitle, searchterm, searchobject, mostsimilartuples,
 	#             The marker size in points**2.
 	#             Default is ``rcParams['lines.markersize'] ** 2``.
 
-	# nodes
+	scalednodes.append(0)
 	nx.draw_networkx_nodes(graph, pos, node_size=scalednodes, alpha=0.75, node_color=range(len(terms)), cmap='Pastel1')
 	nx.draw_networkx_labels(graph, pos, font_size=20, font_family='sans-serif', font_color='Black')
 

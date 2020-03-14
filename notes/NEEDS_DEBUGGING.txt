@@ -112,7 +112,11 @@ there is no voice for
 
     <possibility_4>ἀπαλλάϲϲω<xref_value>11723310</xref_value><xref_kind>9</xref_kind><transl>set free</transl><analysis>aor imperat 2nd dual</analysis></possibility_4>
 
-[I] BREAKAGE WARNING
+[I] BREAKAGE WARNING [FIXED?]
+
+# see https://github.com/matplotlib/matplotlib/issues/16739
+# @tacaswell had the solutIon: just pad the array...
+
 
 # bug report filed to https://github.com/matplotlib/matplotlib/issues/16739
 # a length check fails (_axes.py @ 4386): new to 3.2.0; not present in 3.1.3 #16739
