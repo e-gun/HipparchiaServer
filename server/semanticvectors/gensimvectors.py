@@ -33,7 +33,7 @@ def executegensimsearch(searchobject):
 	so = searchobject
 	activepoll = so.poll
 
-	print('so.vectorquerytype', so.vectorquerytype)
+	# print('so.vectorquerytype', so.vectorquerytype)
 
 	if so.vectorquerytype == 'CURRENTLYUNUSED':
 		outputfunction = lsigenerateoutput

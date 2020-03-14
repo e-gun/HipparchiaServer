@@ -89,7 +89,7 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 	return output
 
 
-def generateanalogies(sentencetuples, searchobject, vectorspace):
+def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace):
 	"""
 
 		most_similar(positive=None, negative=None, topn=10, restrict_vocab=None, indexer=None)
@@ -112,15 +112,28 @@ def generateanalogies(sentencetuples, searchobject, vectorspace):
 			reasons = [vectorspace]
 			return emptyvectoroutput(so, reasons)
 
-	positive = [so.lemmaone.dictionaryentry, so.lemmatwo.dictionaryentry]
-	negative = [so.lemmathree.dictionaryentry]
+	a = so.lemmaone.dictionaryentry
+	b = so.lemmatwo.dictionaryentry
+	c = so.lemmathree.dictionaryentry
+	positive = [a, b]
+	negative = [c]
 
-	similarities = vectorspace.wv.most_similar(positive=positive, negative=negative, topn=6)
+	similarities = vectorspace.wv.most_similar(positive=positive, negative=negative, topn=4)
+	cosimilarities = vectorspace.wv.most_similar_cosmul(positive=positive, negative=negative, topn=4)
 
-	print('generateanalogies() similarities are', similarities)
+	print('{a} : {b} :: {c} : _______'.format(a=a, b=b, c=c))
+
+	print('generateanalogies() similarities are')
+	for s in similarities:
+		print('\t',s)
+
+	print('generateanalogies() cosimilarities are')
+	for s in cosimilarities:
+		print('\t',s)
 
 	output = None
-	return output
+
+	return emptyvectoroutput(so, '[test code is sending the real output to the console]')
 
 
 def buildnnvectorspace(sentencetuples, searchobject):
