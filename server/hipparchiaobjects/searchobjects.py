@@ -30,8 +30,10 @@ class SearchObject(object):
 		self.originalproximate = proximate
 		self.lemma = lemmaobject
 		self.proximatelemma = proximatelemmaobject
+		self.lemmaone = self.lemma
+		self.lemmatwo = self.proximatelemma
+		self.lemmathree = None
 		self.session = frozensession
-
 		# '>' will mess you up still
 		self.originalseeking = re.sub(r'<', '&lt;', self.originalseeking)
 		self.originalseeking = re.sub(r'>', '&gt;', self.originalseeking)

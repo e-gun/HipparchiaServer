@@ -29,7 +29,7 @@ from server.startup import lemmatadict, progresspolldict
 
 
 @hipparchia.route('/vectors/<vectortype>/<searchid>/<headform>')
-def vectorsearch(vectortype, searchid, headform):
+def vectorsearch(vectortype, searchid, headform, so=None):
 	"""
 
 	you get sent here if you have something clicked in the vector boxes: see 'documentready.js'
@@ -54,21 +54,20 @@ def vectorsearch(vectortype, searchid, headform):
 	probeforsessionvariables()
 
 	vectorboxes = ['cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery',
-	               'tensorflowgraph', 'sentencesimilarity', 'topicmodel']
-
-	inputlemma = cleaninitialquery(headform)
+	               'tensorflowgraph', 'sentencesimilarity', 'topicmodel', 'analogyfinder']
 
 	try:
-		lemma = lemmatadict[inputlemma]
+		lemma = lemmatadict[headform]
 	except KeyError:
 		lemma = None
 
 	pollid = validatepollid(searchid)
-	seeking = str()
-	proximate = str()
-	proximatelemma = str()
 
-	so = SearchObject(pollid, seeking, proximate, lemma, proximatelemma, session)
+	if not so:
+		seeking = str()
+		proximate = str()
+		proximatelemma = str()
+		so = SearchObject(pollid, seeking, proximate, lemma, proximatelemma, session)
 
 	progresspolldict[pollid] = ProgressPoll(pollid)
 	activepoll = progresspolldict[pollid]
@@ -86,6 +85,7 @@ def vectorsearch(vectortype, searchid, headform):
 		vectorfunctions = {'cosdistbysentence': findabsolutevectorsbysentence,
 		                   'semanticvectorquery': executegensimsearch,
 		                   'nearestneighborsquery': executegensimsearch,
+		                   'analogyfinder': executegensimsearch,
 		                   'topicmodel': sklearnselectedworks}
 
 		# for TESTING purposes rewrite one of the definitions
@@ -104,3 +104,36 @@ def vectorsearch(vectortype, searchid, headform):
 	target = 'searchsummary'
 	message = '[unknown vector query type]'
 	return output.generatenulloutput(itemname=target, itemval=message)
+
+
+@hipparchia.route('/vectoranalogies/<searchid>/<termone>/<termtwo>/<termthree>')
+def analogysearch(searchid, termone, termtwo, termthree):
+	"""
+
+	A:B :: C:D
+
+	:param searchid:
+	:param termone:
+	:param termtwo:
+	:param termthree:
+	:return:
+	"""
+
+	try:
+		termone = lemmatadict[termone]
+		termtwo = lemmatadict[termtwo]
+		termthree = lemmatadict[termthree]
+	except KeyError:
+		termone = None
+		termtwo = None
+		termthree = None
+
+	pollid = validatepollid(searchid)
+
+	seeking = str()
+	proximate = str()
+
+	so = SearchObject(pollid, seeking, proximate, termone, termtwo, session)
+	so.lemmathree = termthree
+
+	return vectorsearch('analogyfinder', pollid, None, so=so)

@@ -192,7 +192,7 @@ $('#nearestneighborsquery').change(function() {
         $(others).prop('checked', false);
         $('#complexsearching').show();
         activatethisbox(lsf, '(pick a headword)');
-        activatethisbox(plsf, '(unused for this type of query)');
+        activatethisbox(plsf, '(unused for nearest neighbors)');
         wsf.hide();
         psf.hide();
         displayvectorsandlemmata();
@@ -212,8 +212,8 @@ $('#tensorflowgraph').change(function() {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
-        activatethisbox(lsf, '(unused for tensorflowgraph)');
-        activatethisbox(plsf, '(unused for this type of query)');
+        activatethisbox(lsf, '(unused for tensorflow graph)');
+        activatethisbox(plsf, '(unused for tensorflow graph)');
         wsf.hide();
         psf.hide();
         hidelemmatanotification();
@@ -234,8 +234,8 @@ $('#sentencesimilarity').change(function() {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
         $('#complexsearching').show();
-        activatethisbox(lsf, '(unused for sentencesimilarity)');
-        activatethisbox(plsf, '(unused for this type of query)');
+        activatethisbox(lsf, '(unused for sentences similarity)');
+        activatethisbox(plsf, '(unused for sentences similarity)');
         trmonelem.prop('checked', false);
         trmtwolem.prop('checked', false);
         wsf.hide();
@@ -257,7 +257,7 @@ $('#topicmodel').change(function() {
         $(others).prop('checked', false);
         $('#complexsearching').show();
         activatethisbox(lsf, '(unused for topic models)');
-        activatethisbox(plsf, '(unused for this type of query)');
+        activatethisbox(plsf, '(unused for topic models)');
         trmonelem.prop('checked', false);
         trmtwolem.prop('checked', false);
         wsf.hide();
