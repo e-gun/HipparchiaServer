@@ -107,7 +107,7 @@ def vectorsearch(vectortype, searchid, headform, so=None):
 
 
 @hipparchia.route('/vectoranalogies/<searchid>/<termone>/<termtwo>/<termthree>')
-def analogysearch(searchid, termone, termtwo, termthree, disabled=True):
+def analogysearch(searchid, termone, termtwo, termthree, disabled=True, acceptinginput=False):
 	"""
 
 	FOR TESTING ONLY; WILL NOT SEND OUTPUT TO BROWSER
@@ -130,9 +130,10 @@ def analogysearch(searchid, termone, termtwo, termthree, disabled=True):
 	if disabled:
 		return redirect(url_for('frontpage'))
 
-	termone = 'φιλοϲοφία'
-	termtwo = 'ἐπιϲτήμη'
-	termthree = 'γυμναϲία'
+	if not acceptinginput:
+		termone = 'φιλοϲοφία'
+		termtwo = 'ἐπιϲτήμη'
+		termthree = 'γυμναϲία'
 
 	try:
 		termone = lemmatadict[termone]

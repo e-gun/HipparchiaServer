@@ -3,23 +3,11 @@
 //	Copyright: E Gunderson 2016-20
 //	License: License: GNU GENERAL PUBLIC LICENSE 3
 //      (see LICENSE in the top level directory of the distribution)
+//
 
 //
 // AUTHORS
 //
-
-// these next two are repeats from documentready.js, but Safari would load this before documentready and so lacked access to the functions
-function hidemany(arrayofelements) {
-    for (let i = 0; i < arrayofelements.length; i++) {
-        $(arrayofelements[i]).hide();
-        }
-}
-
-function clearmany(arrayofelements) {
-    for (let i = 0; i < arrayofelements.length; i++) {
-        $(arrayofelements[i]).val('');
-        }
-}
 
 function reloadselections(selectiondata){
     // the data comes back from the server as a dict with three keys: timeexclusions, selections, exclusions
@@ -38,28 +26,26 @@ function reloadselections(selectiondata){
     $('#selectionscriptholder').html(selectiondata['newjs']);
     }
 
-
 function reloadAuthorlist(){
-    let ids = Array('#worksautocomplete', '#level05', '#level04', '#level03', '#level02', '#level01', '#level00',
-        '#browseto', '#makeanindex', '#textofthis', '#fewerchoices', '#genresautocomplete', '#genreinfo',
-        '#genrelistcontents', '#workgenresautocomplete', '#locationsautocomplete', '#provenanceautocomplete',
-        '#pickgenre', '#excludegenre', '#setoptions', '#lexica', '#authinfo', '#authorholdings', '#searchlistcontents',
-        '#loadslots', '#saveslots', '#endpointbutton-isopen', '#endpointbutton-isclosed', '#fromnotice', '#endpointnotice');
+    let ids = Array('#lexica', '#authorholdings', '#selectionendpoint');
     hidemany(ids);
+    hidemany(actionbuttons);
+    hidemany(nonessentialautofills);
+    hidemany(loadandsaveslots);
+    hidemany(levelsids);
+    hidemany(endpointnoticesandbuttons);
     $.getJSON('/getselections', function (selectiondata) {
         reloadselections(selectiondata);
     });
 }
 
 function resetworksautocomplete(){
-    let ids = Array('#level05', '#level04', '#level03', '#level02', '#level01', '#level00',
-        '#level05endpoint', '#level04endpoint', '#level03endpoint', '#level02endpoint', '#level01endpoint',
-        '#level00endpoint', '#endpointnotice', '#fromnotice', '#authorendpoint', '#workendpoint', '#rawlocationinput',
-        '#rawendpointinput');
-    hidemany(ids);
-    clearmany(ids);
+    hidemany(inputids);
+    hidemany(endpointids);
+    hidemany(endpointnotices);
+    clearmany(inputids);
+    clearmany(endpointids);
 }
-
 
 $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
@@ -83,7 +69,7 @@ $('#authorsautocomplete').autocomplete({
         loadWorklist(auid);
         selector.prop('placeholder', '(Pick a work)');
         let ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo');
-        bulkshow(ids);
+        showmany(ids);
         $('#authorendpoint').val(thisselector.val());
         }
     });

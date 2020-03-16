@@ -216,14 +216,7 @@ $(document).ready( function () {
 		);
 	});
 
-
-    let tohideonfirstload = Array('#alt_upperleftbuttons', '#browserdialog', '#complexsearching', '#cosinedistancelineorwordcheckbox',
-        '#cosinedistancesentencecheckbox', '#edts', '#helptabs', '#ldts', '#lemmatasearchform', '#proximatelemmatasearchform',
-        '#semanticvectornnquerycheckbox', '#semanticvectorquerycheckbox', '#sentencesimilaritycheckbox', '#spur', '#tensorflowgraphcheckbox',
-        '#termonecheckbox', '#topicmodelcheckbox', '#level05endpoint', '#level04endpoint', '#level03endpoint', '#level02endpoint', '#level01endpoint',
-        '#level00endpoint', '#endpointnotice', '#fromnotice', '#authorendpoint', '#workendpoint', '#endpointbutton-isclosed', '#endpointbutton-isopen',
-        '#lemmatizing-ison', '#vectorizing-ison', '#rawlocationinput', '#rawendpointinput', '#usingrawinput', '#analogiescheckbox');
-    bulkhider(tohideonfirstload);
+    hidemany(tohideonfirstload);
 
     loadoptions();
 
@@ -243,28 +236,6 @@ $(document).ready( function () {
     }
 
     checkCookie();
-
-    //
-    // BULK OPERATIONS ON ARRAYS OF ELEMENTS
-    //
-
-    function bulkhider(arrayofelements) {
-        for (let i = 0; i < arrayofelements.length; i++) {
-            $(arrayofelements[i]).hide();
-            }
-    }
-
-    function bulkshow(arrayofelements) {
-        for (let i = 0; i < arrayofelements.length; i++) {
-            $(arrayofelements[i]).show();
-            }
-    }
-
-    function bulkclear(arrayofelements) {
-        for (let i = 0; i < arrayofelements.length; i++) {
-            $(arrayofelements[i]).val('');
-            }
-    }
 
     //
     // PROGRESS INDICATOR

@@ -35,16 +35,17 @@ $('#onehit_n').click( function(){
 
 $('#autofillinput').click( function(){
     setoptions('rawinputstyle', 'no'); $('#usingautoinput').show(); $('#usingrawinput').hide();
-    let elementarray = ['#rawlocationinput', '#rawendpointinput', '#fromnotice', '#endpointnotice',
-        '#endpointbutton-isopen', '#endpointbutton-isclosed', '#rawlocationinput', '#rawendpointinput'];
-    bulkhider(elementarray);
+    // let elementarray = ['#rawlocationinput', '#rawendpointinput', '#fromnotice', '#endpointnotice',
+    //     '#endpointbutton-isopen', '#endpointbutton-isclosed', '#rawlocationinput', '#rawendpointinput'];
+    hidemany(rawinputuielements);
 });
 
 $('#manualinput').click( function(){
     setoptions('rawinputstyle', 'yes'); $('#usingrawinput').show(); $('#usingautoinput').hide();
-    let elementarray = ['#level05endpoint', '#level04endpoint', '#level03endpoint', '#level02endpoint', '#level01endpoint',
-        '#level00endpoint', '#level05', '#level04', '#level03', '#level02', '#level01', '#level00' ];
-    bulkhider(elementarray);
+    // let elementarray = ['#level05endpoint', '#level04endpoint', '#level03endpoint', '#level02endpoint', '#level01endpoint',
+    //     '#level00endpoint', '#level05', '#level04', '#level03', '#level02', '#level01', '#level00' ];
+    let elementarray = Array().concat(levelsids, endpointlevelssids);
+    hidemany(elementarray);
 });
 
 $('#includespuria').change(function() {

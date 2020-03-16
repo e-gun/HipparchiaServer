@@ -71,7 +71,7 @@ function parsepassagereturned(passagereturned) {
     bdt.html(passagereturned['browserhtml']);
 
     let ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo', '#browserdialog');
-    bulkshow(ids);
+    showmany(ids);
 
     $('observed').click( function(e) {
         e.preventDefault();

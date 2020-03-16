@@ -43,6 +43,9 @@
 
 </div>
 
+ <!-- load uielementlists first: others will use its values -->
+<script src="{{ url_for('static', filename='uielementlists.js') }}"></script>
+
 <script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
 <script src="{{ url_for('static', filename='indexandtextmaker.js') }}"></script>
 <script src="{{ url_for('static', filename='coreinterfaceclicks.js') }}"></script>
@@ -51,6 +54,8 @@
 <script src="{{ url_for('static', filename='nonvectorspinners.js') }}"></script>
 <script src="{{ url_for('static', filename='cookieclicks.js') }}"></script>
 <script src="{{ url_for('static', filename='browser.js') }}"></script>
+
+ <!-- load documentready last: calls on too much that is above -->
 <script src="{{ url_for('static', filename='documentready.js') }}"></script>
 
 {% endblock %}

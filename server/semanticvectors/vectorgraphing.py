@@ -20,11 +20,20 @@ from server.hipparchiaobjects.vectorobjects import VectorValues
 # matplotlib-2.2.3 --> 3.0.0
 # now it launches IPython even though you don't want it...
 #
+# How to use Matplotlib in a web application server
+# In general, the simplest solution when using Matplotlib in a web server is to completely avoid using pyplot
+# (pyplot maintains references to the opened figures to make show work, but this will cause memory leaks unless
+# the figures are properly closed). Since Matplotlib 3.1, one can directly create figures using the Figure constructor
+# and save them to in-memory buffers. The following example uses Flask, but other frameworks work similarly: ...
+#
+# BUT, a plt contains many, many objects of which a Figure() is only one. It would take a lot of rewriting?
+#
 
 try:
 	import matplotlib
 	matplotlib.use('Agg')
 	import matplotlib.pyplot as plt
+	# from matplotlib.figure import Figure
 	import networkx as nx
 
 	# see below on a versioning problem with matplotlib. It *seems* to be fixed but the commented-out code should linger
@@ -45,7 +54,6 @@ try:
 	# 	consolewarning('\tconsider forcing the last known good version:\t', color='red', isbold=True, baremessage=True)
 	# 	consolewarning('\t"~/hipparchia_venv/bin/pip install matplotlib=={v}"\t'.format(v=validmll), color='red',
 	# 	               isbold=True, baremessage=True)
-
 except ModuleNotFoundError:
 	if current_process().name == 'MainProcess':
 		print('matplotlib is not available')
@@ -60,6 +68,7 @@ from server.dbsupport.tablefunctions import assignuniquename
 from server.dbsupport.vectordbfunctions import createstoredimagestable
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.startup import authordict, workdict
+
 
 def graphbliteraldistancematches(searchterm, mostsimilartuples, searchobject):
 	"""

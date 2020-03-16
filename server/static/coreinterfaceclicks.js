@@ -263,19 +263,19 @@ $('#browseto').click(function(){
 
 $('#addtolist').click(function(){ addtosearchlist(); });
 
-$('#fewerchoices').click(function(){
-    $('#morechoices').show();
+$('#fewerchoicesbutton').click(function(){
+    $('#morechoicesbutton').show();
     const ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
         '#provenanceautocomplete', '#pickgenre', '#excludegenre', '#genreinfo', '#genrelistcontents', '#edts',
-        '#ldts', '#spur');
+        '#ldts', '#spuriacheckboxes');
     hidemany(ids);
     });
 
-$('#morechoices').click(function(){
-    $('#morechoices').hide();
+$('#morechoicesbutton').click(function(){
+    $('#morechoicesbutton').hide();
     const ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
-        '#provenanceautocomplete', '#pickgenre', '#excludegenre', '#genreinfo', '#edts', '#ldts', '#spur');
-    bulkshow(ids);
+        '#provenanceautocomplete', '#pickgenre', '#excludegenre', '#genreinfo', '#edts', '#ldts', '#spuriacheckboxes');
+    showmany(ids);
     loadoptions();
     });
 
@@ -283,7 +283,7 @@ function showextendedsearch() {
         const ids = Array('#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox', '#semanticvectorquerycheckbox',
             '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox', '#sentencesimilaritycheckbox', '#complexsearching', '#topicmodelcheckbox',
             '#analogiescheckbox');
-        bulkshow(ids);
+        showmany(ids);
 }
 
 $('#moretools').click(function(){ $('#lexica').toggle(); });
