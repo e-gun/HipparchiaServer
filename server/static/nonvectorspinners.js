@@ -88,9 +88,8 @@ $( '#earliestdate' ).spinner({
 
 
 // 'width' property not working when you define the spinners
-const spinners = ["#earliestdate", "#latestdate", "#hitlimitspinner", "#linesofcontextspinner", "#browserspinner"];
-for (let i = 0; i < spinners.length; i++) {
+for (let i = 0; i < nonvectorspinners.length; i++) {
     const mywidth = 90;
-    $(spinners[i]).width(mywidth);
+    $(nonvectorspinners[i]).width(mywidth);
 }
 

@@ -35,10 +35,10 @@ $(document).ready( function () {
             }
         $('#helptabs').toggle();
         $('#executesearch').toggle();
-        $('#extendsearch').toggle();
+        $('#extendsearchbutton').toggle();
     });
 
-    $('#extendsearch').click( function() {
+    $('#extendsearchbutton').click( function() {
         $.getJSON('/getsessionvariables', function (data) {
                 $( "#proximityspinner" ).spinner('value', data.proximity);
                 if (data.searchscope === 'lines') {
@@ -54,14 +54,16 @@ $(document).ready( function () {
                 });
         $('#complexsearching').toggle();
         $('#termonecheckbox').toggle();
-        $('#cosinedistancesentencecheckbox').toggle();
-        $('#cosinedistancelineorwordcheckbox').toggle();
-        $('#semanticvectorquerycheckbox').toggle();
-        $('#semanticvectornnquerycheckbox').toggle();
-        $('#tensorflowgraphcheckbox').toggle();
-        $('#sentencesimilaritycheckbox').toggle();
-        $('#topicmodelcheckbox').toggle();
-        $('#analogiescheckbox').toggle();
+        // $('#vectorzone').toggle();
+        togglemany(vectorcheckboxspans);
+        // $('#cosinedistancesentencecheckbox').toggle();
+        // $('#cosinedistancelineorwordcheckbox').toggle();
+        // $('#semanticvectorquerycheckbox').toggle();
+        // $('#semanticvectornnquerycheckbox').toggle();
+        // $('#tensorflowgraphcheckbox').toggle();
+        // $('#sentencesimilaritycheckbox').toggle();
+        // $('#topicmodelcheckbox').toggle();
+        // $('#analogiescheckbox').toggle();
         });
 
     // https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript#2117523
@@ -85,7 +87,6 @@ $(document).ready( function () {
     }
 
     function areWeWearchingVectors () {
-        const vectorboxes = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity', '#topicmodel'];
         let xor = [];
         for (let i = 0; i < vectorboxes.length; i++) {
             let opt = $(vectorboxes[i]);
@@ -95,7 +96,6 @@ $(document).ready( function () {
     }
 
     function whichVectorChoice () {
-        const vectorboxes = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity', '#topicmodel'];
         let xor = [];
         for (let i = 0; i < vectorboxes.length; i++) {
             let opt = $(vectorboxes[i]);
@@ -216,71 +216,73 @@ $(document).ready( function () {
 		);
 	});
 
-    hidemany(tohideonfirstload);
+loadoptions();
 
-    loadoptions();
-
-    function checkCookie(){
-        let c = navigator.cookieEnabled;
-        if (!c){
-            document.cookie = "testcookie";
-            c = document.cookie.indexOf("testcookie")!=-1;
-            document.cookie = "testcookie=1; expires=Thu, 01-Jan-1970 00:00:01 GMT";
-        }
-
-        if (c) {
-            $('#cookiemessage').hide();
-        } else {
-            $('#cookiemessage').show();
-        }
+function checkCookie(){
+    let c = navigator.cookieEnabled;
+    if (!c){
+        document.cookie = "testcookie";
+        c = document.cookie.indexOf("testcookie")!=-1;
+        document.cookie = "testcookie=1; expires=Thu, 01-Jan-1970 00:00:01 GMT";
     }
 
-    checkCookie();
-
-    //
-    // PROGRESS INDICATOR
-    //
-
-    function checkactivityviawebsocket(searchid) {
-        $.getJSON('/confirm/'+searchid, function(portnumber) {
-            // s = new WebSocket('ws://localhost:'+portnumber+'/');
-            // NOTE: according to the above, you will not be able to get progress reports if you are not at localhost
-            // that might be something you want to ensure
-            // the following is required for remote progress reports
-            let pd = $('#pollingdata');
-            let ip = location.hostname;
-            let s = new WebSocket('ws://'+ip+':'+portnumber+'/');
-            let amready = setInterval(function(){
-                if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
-                }, 10);
-            s.onmessage = function(e){
-                let progress = JSON.parse(e.data);
-                displayprogress(progress);
-                if  (progress['active'] === 'inactive') { pd.html(''); s.close(); s = null; }
-                }
-        });
+    if (c) {
+        $('#cookiemessage').hide();
+    } else {
+        $('#cookiemessage').show();
     }
+}
 
-    function displayprogress(progress){
-        let r = progress['remaining'];
-        let t = progress['total'];
-        let h = progress['hits'];
-        let pct = Math.round((t-r) / t * 100);
-        let m = progress['message'];
-        let e = progress['elapsed'];
-        let x = progress['extrainfo'];
+checkCookie();
 
-        let thehtml = '';
+//
+// PROGRESS INDICATOR
+//
 
-        if (t !== -1) {
-            thehtml += m + ': <span class="progress">' + pct + '%</span> completed&nbsp;(' + e + 's)';
-        } else {
-            thehtml += m + '&nbsp;(' + e + 's)';
+function checkactivityviawebsocket(searchid) {
+    $.getJSON('/confirm/'+searchid, function(portnumber) {
+        // s = new WebSocket('ws://localhost:'+portnumber+'/');
+        // NOTE: according to the above, you will not be able to get progress reports if you are not at localhost
+        // that might be something you want to ensure
+        // the following is required for remote progress reports
+        let pd = $('#pollingdata');
+        let ip = location.hostname;
+        let s = new WebSocket('ws://'+ip+':'+portnumber+'/');
+        let amready = setInterval(function(){
+            if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }
+            }, 10);
+        s.onmessage = function(e){
+            let progress = JSON.parse(e.data);
+            displayprogress(progress);
+            if  (progress['active'] === 'inactive') { pd.html(''); s.close(); s = null; }
             }
+    });
+}
 
-       if ( h > 0) { thehtml += '<br />(<span class="progress">' + h + '</span> found)'; }
+function displayprogress(progress){
+    let r = progress['remaining'];
+    let t = progress['total'];
+    let h = progress['hits'];
+    let pct = Math.round((t-r) / t * 100);
+    let m = progress['message'];
+    let e = progress['elapsed'];
+    let x = progress['extrainfo'];
 
-       thehtml += '<br />' + x;
+    let thehtml = '';
 
-       $('#pollingdata').html(thehtml);
-    }
+    if (t !== -1) {
+        thehtml += m + ': <span class="progress">' + pct + '%</span> completed&nbsp;(' + e + 's)';
+    } else {
+        thehtml += m + '&nbsp;(' + e + 's)';
+        }
+
+   if ( h > 0) { thehtml += '<br />(<span class="progress">' + h + '</span> found)'; }
+
+   thehtml += '<br />' + x;
+
+   $('#pollingdata').html(thehtml);
+}
+
+hidemany(tohideonfirstload);
+togglemany(vectorcheckboxspans);
+

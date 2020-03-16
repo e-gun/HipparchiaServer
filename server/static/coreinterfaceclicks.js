@@ -211,35 +211,37 @@ $('#alt_vector_options_button').click(function(){
 
 // BROWSER CLICKS
 
+function generateautofilllocationstring(){
+    let l5 = $('#level05').val();
+    let l4 = $('#level04').val();
+    let l3 = $('#level03').val();
+    let l2 = $('#level02').val();
+    let l1 = $('#level01').val();
+    let l0 = $('#level00').val();
+    let lvls = [ l5, l4, l3, l2, l1, l0];
+    let loc = Array();
+    for (let i = 5; i > -1; i-- ) {
+        if (lvls[i] !== '') {
+            loc.push(lvls[i]);
+        } else {
+            if (i === 5) {
+                loc.push('_0');
+                }
+            }
+        }
+    loc.reverse();
+    return loc.join('|');
+}
+
 function browsetopassage() {
     let auth = $('#authorsautocomplete').val().slice(-7, -1);
     let wrk = $('#worksautocomplete').val().slice(-4, -1);
 
     if ($('#autofillinput').is(':checked')) {
         // you are using the autofill boxes
-        let l5 = $('#level05').val();
-        let l4 = $('#level04').val();
-        let l3 = $('#level03').val();
-        let l2 = $('#level02').val();
-        let l1 = $('#level01').val();
-        let l0 = $('#level00').val();
-        let lvls = [ l5, l4, l3, l2, l1, l0];
-        let loc = Array();
-        for (let i = 5; i > -1; i-- ) {
-            if (lvls[i] !== '') {
-                loc.push(lvls[i]);
-            } else {
-                if (i === 5) {
-                    loc.push('_0');
-                    }
-                }
-            }
-
-        loc.reverse();
-        let locstring = loc.join('|');
-
+        let locstring = generateautofilllocationstring();
         if (wrk.length !== 3) { wrk = '_firstwork'}
-        loc = 'locus/' + auth + '/' + wrk + '/' +locstring.slice(0, locstring.length);
+        let loc = 'locus/' + auth + '/' + wrk + '/' +locstring.slice(0, locstring.length);
         browseuponclick(loc);
     } else {
         // you are using rawentry
@@ -256,8 +258,7 @@ function browsetopassage() {
 }
 
 $('#browseto').click(function(){
-    $('#endpointbutton-isopen').hide();
-    $('#endpointbutton-isclosed').hide();
+    hidemany(endpointbuttons);
     browsetopassage();
 });
 
@@ -265,7 +266,8 @@ $('#addtolist').click(function(){ addtosearchlist(); });
 
 $('#fewerchoicesbutton').click(function(){
     $('#morechoicesbutton').show();
-    const ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
+    $('#fewerchoicesbutton').hide();
+    let ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
         '#provenanceautocomplete', '#pickgenre', '#excludegenre', '#genreinfo', '#genrelistcontents', '#edts',
         '#ldts', '#spuriacheckboxes');
     hidemany(ids);
@@ -273,14 +275,17 @@ $('#fewerchoicesbutton').click(function(){
 
 $('#morechoicesbutton').click(function(){
     $('#morechoicesbutton').hide();
+    $('#fewerchoicesbutton').show();
     const ids = Array('#fewerchoices', '#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
         '#provenanceautocomplete', '#pickgenre', '#excludegenre', '#genreinfo', '#edts', '#ldts', '#spuriacheckboxes');
-    showmany(ids);
+    // showmany(ids);
+    let toshow = Array().concat(categoryautofills, extrasearchcriteria, genreselectbuttons);
+    showmany(toshow);
     loadoptions();
     });
 
 function showextendedsearch() {
-        const ids = Array('#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox', '#semanticvectorquerycheckbox',
+        let ids = Array('#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox', '#semanticvectorquerycheckbox',
             '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox', '#sentencesimilaritycheckbox', '#complexsearching', '#topicmodelcheckbox',
             '#analogiescheckbox');
         showmany(ids);
@@ -313,7 +318,6 @@ $('#vectoralt_moretools').click(function(){ $('#lexica').toggle(); });
 //    $rl.val(''); $rl.removeAttr("value"); $rl.attr('placeholder', '(English to Greek or Latin)');
 //    $lx.val(''); $lx.removeAttr("value"); $lx.attr('placeholder', '(Dictionary Search)');
 //    });
-
 
 $('#lexicalsearch').click(function(){
     // note that modifications to this script should be kept in sync with dictionaryentryjs() in jsformatting.py
@@ -486,6 +490,7 @@ $('#endpointbutton-isopen').click(function(){
     $('#endpointnotice').hide();
     $('#endpointbutton-isclosed').show();
     $('#endpointbutton-isopen').hide();
-    let lvls = ['05', '04', '03', '02', '01', '00'];
-    for (var i = 0; i < lvls.length; i++) { $('#level'+lvls[i]+'endpoint').hide(); }
+    hidemany(endpointlevelssids);
+    // let lvls = ['05', '04', '03', '02', '01', '00'];
+    // for (var i = 0; i < lvls.length; i++) { $('#level'+lvls[i]+'endpoint').hide(); }
     });

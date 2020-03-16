@@ -27,64 +27,15 @@ function clearmany(arrayofelements) {
         }
 }
 
-// python to generate these...
-// idfind = re.compile(r'id="(.*?)"')
-// y = re.findall(idfind, x)
-// y.sort()
+function togglemany(arrayofelements) {
+        for (let i = 0; i < arrayofelements.length; i++) {
+        $(arrayofelements[i]).toggle();
+        }
+}
 
-const activeoptionshtmlids = Array('#activeoptions', '#chrisactive', '#chrnotisactive', '#ddpisactive', '#ddpnotisactive',
-    '#frequencyindexingactive', '#frequencyindexinginactive', '#grkisactive', '#grkisnotactive', '#headwordindexingactive',
-    '#headwordindexiningactive', '#insisactive', '#insnotisactive', '#latisactive', '#latisnotactive', '#lemmatizing-isoff',
-    '#lemmatizing-ison', '#onehitisfalse', '#onehitistrue', '#spuriaisfalse', '#spuriaistrue', '#undatedisfalse', '#undatedistrue',
-    '#usingautoinput', '#usingrawinput', '#variaisfalse', '#variaistrue', '#vectorizing-isoff', '#vectorizing-ison');
-
-const basehtmlids = Array('#versioning');
-
-const browserdialoghtmlidl = Array('#browseback', '#browseforward', '#browserclose', '#browserdialog', '#browserdialogtext',
-    '#browsernavigationbuttons');
-
-const hipparchiahelphtmlids = Array('#BasicSyntax', '#Browsing', '#Dictionaries', '#Extending', '#IncludedMaterials',
-    '#Interface', '#LemmaSearching', '#MakingSearchLists', '#Oddities', '#Openness', '#RegexSearching', '#SpeedSearching',
-    '#VectorSearching', '#helptabs');
-
-const lexicahtmlids = Array('#lexica', '#lexicalsearch', '#lexicon', '#parser', '#reverselexicon');
-
-const miscuielementshtmlids = Array('#bottommessage', '#clear_button', '#clickforhelp', '#cookiemessage', '#helpbutton',
-    '#moretools', '#openoptionsbutton', '#upperleftbuttons', '#vector_options_button');
-
-const outputboxhtmlids = Array('#authoroutputcontent', '#exclusioninfocell', '#jscriptwigetcell', '#outputbox',
-    '#searchinfo', '#searchlistcontents', '#selectioninfocell', '#selectionstable', '#timerestrictions');
-
-const saveslotshtmlids = Array('#load01', '#load02', '#load03', '#load04', '#load05', '#loadslots', '#save01', '#save02',
-    '#save03', '#save04', '#save05', '#savedprofiles', '#saveslots', '#toggleloadslots', '#togglesaveslots');
-
-const searchfieldhtmlids = Array('#addauthortosearchlist', '#authinfobutton', '#authorendpoint', '#authorholdings',
-    '#authorsautocomplete', '#browseto', '#earliestdate', '#edts', '#endpointbutton-isclosed', '#endpointbutton-isopen',
-    '#endpointnotice', '#excludeauthor', '#excludeauthorfromsearchlist', '#excludegenre', '#fewerchoicesbutton', '#fromnotice', '#genreinfobutton',
-    '#genrelistcontents', '#genresautocomplete', '#includeincerta', '#includespuria', '#includevaria', '#latestdate',
-    '#ldts', '#level00', '#level00endpoint', '#level01', '#level01endpoint', '#level02', '#level02endpoint', '#level03',
-    '#level03endpoint', '#level04', '#level04endpoint', '#level05', '#level05endpoint', '#locationsautocomplete',
-    '#makeanindex', '#morechoicesbutton','#provenanceautocomplete', '#rawendpointinput', '#rawlocationinput', '#searchfield',
-    '#selectionendpoint', '#spuriacheckboxes', '#workendpoint', '#workgenresautocomplete', '#worksautocomplete');
-
-const searchhtlmids = Array('#browserclickscriptholder', '#displayresults', '#imagearea', '#indexclickscriptholder',
-    '#lexicadialog', '#lexicadialogtext', '#mainbody', '#pollingdata', '#searchsummary', '#vectorspinnerscriptholder',
-    '#vectorspinnerscriptholder');
-
-const setoptionshtmlids = Array('#alt_clear_button', '#alt_moretools', '#alt_upperleftbuttons',
-    '#alt_vector_options_button', '#authorssummary', '#autofillinput', '#bracketangled', '#bracketcurly', '#bracketround',
-    '#bracketsquare', '#browserspinner', '#christiancorpus', '#closeoptionsbutton', '#collapseattic', '#debugdb', '#debughtml',
-    '#debuglex', '#debugparse', '#fontchoice', '#frequencyindexing_n', '#frequencyindexing_y', '#greekcorpus',
-    '#headwordindexing_n', '#headwordindexing_y', '#hitlimitspinner', '#indexskipsknownwords', '#inscriptioncorpus',
-    '#latincorpus', '#linesofcontextspinner', '#manualinput', '#mophologytablesoptions', '#morphdialects', '#morphduals',
-    '#morphemptyrows', '#morphfinite', '#morphimper', '#morphinfin', '#morphpcpls', '#onehit_n', '#onehit_y', '#papyruscorpus',
-    '#principleparts', '#quotesummary', '#searchinsidemarkup', '#sensesummary', '#setoptionsnavigator', '#showwordcounts',
-    '#simpletextoutput', '#sortresults', '#suppresscolors', '#zaplunates', '#zapvees');
-
-const vectorformattingdotpyids = Array(['#analogiescheckbox', '#analogyfinder', '#cosdistbylineorword',
-    '#cosdistbysentence', '#cosinedistancelineorwordcheckbox', '#cosinedistancesentencecheckbox', '#nearestneighborsquery',
-    '#semanticvectornnquerycheckbox', '#semanticvectorquery', '#semanticvectorquerycheckbox', '#sentencesimilarity',
-    '#sentencesimilaritycheckbox', '#tensorflowgraph', '#tensorflowgraphcheckbox', '#topicmodel', '#topicmodelcheckbox']);
+//
+// ID COLLECTIONS
+//
 
 // searchfield.html structure
 
@@ -123,13 +74,14 @@ const infobuttons = Array('#authinfobutton', '#genreinfobutton');
 // action buttons
 
 const coreactionbuttons = Array('#addauthortosearchlist', '#excludeauthorfromsearchlist');
-const extendedactionbuttons = Array('#browseto', '#makeanindex', '#textofthis', '#fewerchoices', '#pickgenre', '#excludegenre');
-const actionbuttons = Array().concat(coreactionbuttons, extendedactionbuttons);
+const extendedactionbuttons = Array('#browseto', '#makeanindex', '#textofthis', '#fewerchoices');
+const genreselectbuttons = Array('#pickgenrebutton', '#excludegenrebutton');
+const actionbuttons = Array().concat(coreactionbuttons, extendedactionbuttons, genreselectbuttons);
 
 // datespinners and includespuria checkboxes
 
 const datespinners = Array('#edts', '#ldts');
-const miscrestrictions = Array().concat(datespinners, ['#spuriacheckboxes']);
+const extrasearchcriteria = Array().concat(datespinners, ['#spuriacheckboxes']);
 
 // infoboxes
 
@@ -144,7 +96,92 @@ const loadandsaveslots = Array('#loadslots', '#saveslots');
 const extrasearchforms = Array('#lemmatasearchform', '#proximatesearchform', '#proximatelemmatasearchform');
 const extrasearchuielements = Array('#nearornot', '#termonecheckbox', '#termtwocheckbox', '#complexsearching');
 
+// spinners
+
+const nonvectorspinners = ["#earliestdate", "#latestdate", "#hitlimitspinner", "#linesofcontextspinner", "#browserspinner"];
+
+// vectors
+const vectorcheckboxspans = ['#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox', '#semanticvectorquerycheckbox',
+    '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox', '#sentencesimilaritycheckbox', '#topicmodelcheckbox',
+    '#analogiescheckbox'];
+
+const vectorboxes = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity', '#topicmodel']
+
+// collections of elements that have logical connections
+
+const postauthorpickui = ['#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfobutton'];
+const postbrowsepickui = Array().concat(postauthorpickui, ['#browserdialog']);
+
+const extrauichoices = Array().concat(categoryautofills);
+
+// and see below for firstload hides which is defined last because it needs vectorformattingdotpyids
+
+
+//
+// COMPREHENSIVE ID COLLECTIONS
 //
 
-const tohideonfirstload = Array().concat(['#browserdialog', '#helptabs', '#fewerchoicesbutton', '#vectorzone'], vectorformattingdotpyids, endpointnoticesandbuttons,
-    endpointids, inputids, actionbuttons, infobuttons, miscrestrictions, infoboxes, extrasearchforms, extrasearchuielements);
+// python to generate these...
+// idfind = re.compile(r'id="(.*?)"')
+// y = re.findall(idfind, x)
+// y.sort()
+
+const activeoptionshtmlids = Array('#activeoptions', '#chrisactive', '#chrnotisactive', '#ddpisactive', '#ddpnotisactive',
+    '#frequencyindexingactive', '#frequencyindexinginactive', '#grkisactive', '#grkisnotactive', '#headwordindexingactive',
+    '#headwordindexiningactive', '#insisactive', '#insnotisactive', '#latisactive', '#latisnotactive', '#lemmatizing-isoff',
+    '#lemmatizing-ison', '#onehitisfalse', '#onehitistrue', '#spuriaisfalse', '#spuriaistrue', '#undatedisfalse', '#undatedistrue',
+    '#usingautoinput', '#usingrawinput', '#variaisfalse', '#variaistrue', '#vectorizing-isoff', '#vectorizing-ison');
+
+const basehtmlids = Array('#versioning');
+
+const browserdialoghtmlidl = Array('#browseback', '#browseforward', '#browserclose', '#browserdialog', '#browserdialogtext',
+    '#browsernavigationbuttons');
+
+const hipparchiahelphtmlids = Array('#BasicSyntax', '#Browsing', '#Dictionaries', '#Extending', '#IncludedMaterials',
+    '#Interface', '#LemmaSearching', '#MakingSearchLists', '#Oddities', '#Openness', '#RegexSearching', '#SpeedSearching',
+    '#VectorSearching', '#helptabs');
+
+const lexicahtmlids = Array('#lexica', '#lexicalsearch', '#lexicon', '#parser', '#reverselexicon');
+
+const miscuielementshtmlids = Array('#bottommessage', '#clear_button', '#clickforhelp', '#cookiemessage', '#helpbutton',
+    '#moretools', '#openoptionsbutton', '#upperleftbuttons', '#vector_options_button');
+
+const outputboxhtmlids = Array('#authoroutputcontent', '#exclusioninfocell', '#jscriptwigetcell', '#outputbox',
+    '#searchinfo', '#searchlistcontents', '#selectioninfocell', '#selectionstable', '#timerestrictions');
+
+const saveslotshtmlids = Array('#load01', '#load02', '#load03', '#load04', '#load05', '#loadslots', '#save01', '#save02',
+    '#save03', '#save04', '#save05', '#savedprofiles', '#saveslots', '#toggleloadslots', '#togglesaveslots');
+
+const searchfieldhtmlids = Array('#addauthortosearchlist', '#authinfobutton', '#authorendpoint', '#authorholdings',
+    '#authorsautocomplete', '#browseto', '#earliestdate', '#edts', '#endpointbutton-isclosed', '#endpointbutton-isopen',
+    '#endpointnotice', '#excludeauthor', '#excludeauthorfromsearchlist', '#excludegenrebutton', '#fewerchoicesbutton', '#fromnotice', '#genreinfobutton',
+    '#genrelistcontents', '#genresautocomplete', '#includeincerta', '#includespuria', '#includevaria', '#latestdate',
+    '#ldts', '#level00', '#level00endpoint', '#level01', '#level01endpoint', '#level02', '#level02endpoint', '#level03',
+    '#level03endpoint', '#level04', '#level04endpoint', '#level05', '#level05endpoint', '#locationsautocomplete',
+    '#makeanindex', '#morechoicesbutton','#pickgenrebutton', '#provenanceautocomplete', '#rawendpointinput', '#rawlocationinput', '#searchfield',
+    '#selectionendpoint', '#spuriacheckboxes', '#workendpoint', '#workgenresautocomplete', '#worksautocomplete');
+
+const searchhtlmids = Array('#browserclickscriptholder', '#displayresults', '#imagearea', '#indexclickscriptholder',
+    '#lexicadialog', '#lexicadialogtext', '#mainbody', '#pollingdata', '#searchsummary', '#vectorspinnerscriptholder',
+    '#vectorspinnerscriptholder');
+
+const setoptionshtmlids = Array('#alt_clear_button', '#alt_moretools', '#alt_upperleftbuttons',
+    '#alt_vector_options_button', '#authorssummary', '#autofillinput', '#bracketangled', '#bracketcurly', '#bracketround',
+    '#bracketsquare', '#browserspinner', '#christiancorpus', '#closeoptionsbutton', '#collapseattic', '#debugdb', '#debughtml',
+    '#debuglex', '#debugparse', '#fontchoice', '#frequencyindexing_n', '#frequencyindexing_y', '#greekcorpus',
+    '#headwordindexing_n', '#headwordindexing_y', '#hitlimitspinner', '#indexskipsknownwords', '#inscriptioncorpus',
+    '#latincorpus', '#linesofcontextspinner', '#manualinput', '#mophologytablesoptions', '#morphdialects', '#morphduals',
+    '#morphemptyrows', '#morphfinite', '#morphimper', '#morphinfin', '#morphpcpls', '#onehit_n', '#onehit_y', '#papyruscorpus',
+    '#principleparts', '#quotesummary', '#searchinsidemarkup', '#sensesummary', '#setoptionsnavigator', '#showwordcounts',
+    '#simpletextoutput', '#sortresults', '#suppresscolors', '#zaplunates', '#zapvees');
+
+const vectorformattingdotpyids = Array(['#analogiescheckbox', '#analogyfinder', '#cosdistbylineorword',
+    '#cosdistbysentence', '#cosinedistancelineorwordcheckbox', '#cosinedistancesentencecheckbox', '#nearestneighborsquery',
+    '#semanticvectornnquerycheckbox', '#semanticvectorquery', '#semanticvectorquerycheckbox', '#sentencesimilarity',
+    '#sentencesimilaritycheckbox', '#tensorflowgraph', '#tensorflowgraphcheckbox', '#topicmodel', '#topicmodelcheckbox']);
+
+
+// firstload hiding
+
+const tohideonfirstload = Array().concat(['#browserdialog', '#helptabs', '#fewerchoicesbutton', '#lemmatizing-ison', '#vectorizing-ison', '#usingrawinput'],
+    vectorformattingdotpyids, endpointnoticesandbuttons, endpointids, inputids, actionbuttons, infobuttons, infoboxes, extrasearchforms, extrasearchcriteria, extrasearchuielements);

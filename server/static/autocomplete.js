@@ -68,8 +68,7 @@ $('#authorsautocomplete').autocomplete({
         }
         loadWorklist(auid);
         selector.prop('placeholder', '(Pick a work)');
-        let ids = Array('#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfo');
-        showmany(ids);
+        showmany(postauthorpickui);
         $('#authorendpoint').val(thisselector.val());
         }
     });
@@ -355,13 +354,9 @@ function loadLevellist(author, work, pariallocus){
                     let loc = endpointdataloader();
                     endpointloadLevellist(author, work, loc);
                     }
-                // if we do partialloc browsing then this can be off
-                // if (atlevel <= 1) { $('#browseto').show(); }
                 },
             source: possibilities,
             select: function (event, ui) {
-                // if we do partialloc browsing then this can be off
-                // if (atlevel <= 1) { $('#browseto').show(); }
                 let loc = endpointdataloader();
                 endpointloadLevellist(author, work, String(loc));
             }});
@@ -438,7 +433,7 @@ $('#provenanceautocomplete').autocomplete({
     source: '/getwkprovenancehint'
     });
 
-$('#pickgenre').click( function() {
+$('#pickgenrebutton').click( function() {
         let genre = $('#genresautocomplete').val();
         let wkgenre = $('#workgenresautocomplete').val();
         let loc = $('#locationsautocomplete').val();
@@ -470,7 +465,7 @@ $('#pickgenre').click( function() {
 
 
 
-$('#excludegenre').click( function() {
+$('#excludegenrebutton').click( function() {
         let genre = $('#genresautocomplete').val();
         let wkgenre = $('#workgenresautocomplete').val();
         let loc = $('#locationsautocomplete').val();
