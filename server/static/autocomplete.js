@@ -456,7 +456,7 @@ $('#pickgenrebutton').click( function() {
                 reloadselections(selectiondata);
              });
         }
-
+        clearmany(categoryautofills);
         $('#searchlistcontents').hide();
     });
 
@@ -489,7 +489,7 @@ $('#excludegenrebutton').click( function() {
                 reloadselections(selectiondata);
              });
         }
-
+        clearmany(categoryautofills);
         $('#searchlistcontents').hide();
     });
 

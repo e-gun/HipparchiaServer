@@ -413,7 +413,7 @@ $(function() {
 // info
 //
 
-$('#authinfo').click(function(){
+$('#authinfobutton').click(function(){
         $('#authorholdings').toggle();
         let authorid = $('#authorsautocomplete').val().slice(-7, -1);
         $.getJSON('/getauthorinfo/' + authorid, function (selectiondata) {
@@ -456,11 +456,9 @@ $('#endpointbutton-isclosed').click(function(){
     // go from invisible to visible
     let aep = $('#authorendpoint');
     let aac = $('#authorsautocomplete');
-    // aep.show();
     aep.val(aac.val());
-    // $('#workendpoint').show();
-    $('#fromnotice').show();
-    $('#endpointnotice').show();
+    showmany(['#selectionendpoint']);
+    showmany(endpointnotices);
     $('#endpointbutton-isopen').show();
     $('#endpointbutton-isclosed').hide();
      if ($('#autofillinput').is(':checked')) {
@@ -477,20 +475,12 @@ $('#endpointbutton-isclosed').click(function(){
             }
         });
     } else {
-        $('#rawendpointinput').show();
+         showmany(['#rawendpointinput']);
     }
     });
 
 $('#endpointbutton-isopen').click(function(){
-    // go from visible to invisible
-    // $('#authorendpoint').hide();
-    // $('#workendpoint').hide();
-    $('#rawendpointinput').hide();
-    $('#fromnotice').hide();
-    $('#endpointnotice').hide();
     $('#endpointbutton-isclosed').show();
     $('#endpointbutton-isopen').hide();
-    hidemany(endpointlevelssids);
-    // let lvls = ['05', '04', '03', '02', '01', '00'];
-    // for (var i = 0; i < lvls.length; i++) { $('#level'+lvls[i]+'endpoint').hide(); }
+    hidemany(['#selectionendpoint']);
     });

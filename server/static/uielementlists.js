@@ -50,7 +50,7 @@ const inputids = levelsids.concat(Array('#rawlocationinput'));
 const endpointlevelssids = Array('#level05endpoint', '#level04endpoint', '#level03endpoint', '#level02endpoint',
     '#level01endpoint', '#level00endpoint');
 
-const endpointids = endpointlevelssids.concat(Array('#rawendpointinput', '#authorendpoint', '#authorendpoint'));
+const endpointids = endpointlevelssids.concat(Array('#rawendpointinput', '#authorendpoint', '#workendpoint'));
 
 const endpointnotices = Array('#endpointnotice', '#fromnotice');
 
@@ -58,8 +58,9 @@ const endpointbuttons = Array('#endpointbutton-isopen', '#endpointbutton-isclose
 
 const endpointnotification = Array().concat(endpointnotices, endpointbuttons);
 
-const rawinputuielements = Array('#rawlocationinput', '#rawendpointinput', '#fromnotice', '#endpointnotice',
-        '#endpointbutton-isopen', '#endpointbutton-isclosed', '#rawlocationinput', '#rawendpointinput');
+const rawinputboxes = Array('#rawlocationinput', '#rawendpointinput');
+
+const rawinputuielements = Array().concat(rawinputboxes, endpointnotification);
 
 const endpointnoticesandbuttons = endpointnotices.concat(endpointbuttons);
 
