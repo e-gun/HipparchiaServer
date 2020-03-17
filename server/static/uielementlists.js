@@ -106,11 +106,17 @@ const extrasearchuielements = Array('#nearornot', '#termonecheckbox', '#termtwoc
 const nonvectorspinners = ["#earliestdate", "#latestdate", "#hitlimitspinner", "#linesofcontextspinner", "#browserspinner"];
 
 // vectors
+
 const vectorcheckboxspans = ['#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox', '#semanticvectorquerycheckbox',
     '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox', '#sentencesimilaritycheckbox', '#topicmodelcheckbox',
     '#analogiescheckbox'];
 
 const vectorboxes = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity', '#topicmodel']
+
+const vectorformattingdotpyids = Array(['#analogiescheckbox', '#analogyfinder', '#cosdistbylineorword',
+    '#cosdistbysentence', '#cosinedistancelineorwordcheckbox', '#cosinedistancesentencecheckbox', '#nearestneighborsquery',
+    '#semanticvectornnquerycheckbox', '#semanticvectorquery', '#semanticvectorquerycheckbox', '#sentencesimilarity',
+    '#sentencesimilaritycheckbox', '#tensorflowgraph', '#tensorflowgraphcheckbox', '#topicmodel', '#topicmodelcheckbox']);
 
 // collections of elements that have logical connections
 
@@ -119,10 +125,13 @@ const postauthorpickui = Array().concat(corepickui, coreactionbuttons);
 const postbrowsepickui = Array().concat(corepickui, ['#browserdialog']);
 const extrauichoices = Array().concat(categoryautofills);
 
-// and see below for firstload hides which is defined last because it needs vectorformattingdotpyids
+// firstload hiding
+
+const tohideonfirstload = Array().concat(['#browserdialog', '#helptabs', '#fewerchoicesbutton', '#lemmatizing-ison', '#vectorizing-ison', '#alt_upperleftbuttons'],
+    vectorformattingdotpyids, endpointnoticesandbuttons, endpointids, inputids, actionbuttons, infobuttons, infoboxes, extrasearchforms, extrasearchcriteria, extrasearchuielements);
 
 //
-// COMPREHENSIVE ID COLLECTIONS
+// FYI: COMPREHENSIVE ID COLLECTIONS
 //
 
 // python to generate these...
@@ -178,14 +187,3 @@ const setoptionshtmlids = Array('#alt_clear_button', '#alt_moretools', '#alt_upp
     '#morphemptyrows', '#morphfinite', '#morphimper', '#morphinfin', '#morphpcpls', '#onehit_n', '#onehit_y', '#papyruscorpus',
     '#principleparts', '#quotesummary', '#searchinsidemarkup', '#sensesummary', '#setoptionsnavigator', '#showwordcounts',
     '#simpletextoutput', '#sortresults', '#suppresscolors', '#zaplunates', '#zapvees');
-
-const vectorformattingdotpyids = Array(['#analogiescheckbox', '#analogyfinder', '#cosdistbylineorword',
-    '#cosdistbysentence', '#cosinedistancelineorwordcheckbox', '#cosinedistancesentencecheckbox', '#nearestneighborsquery',
-    '#semanticvectornnquerycheckbox', '#semanticvectorquery', '#semanticvectorquerycheckbox', '#sentencesimilarity',
-    '#sentencesimilaritycheckbox', '#tensorflowgraph', '#tensorflowgraphcheckbox', '#topicmodel', '#topicmodelcheckbox']);
-
-
-// firstload hiding
-
-const tohideonfirstload = Array().concat(['#browserdialog', '#helptabs', '#fewerchoicesbutton', '#lemmatizing-ison', '#vectorizing-ison', '#usingrawinput'],
-    vectorformattingdotpyids, endpointnoticesandbuttons, endpointids, inputids, actionbuttons, infobuttons, infoboxes, extrasearchforms, extrasearchcriteria, extrasearchuielements);
