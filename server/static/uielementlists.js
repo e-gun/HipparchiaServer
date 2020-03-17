@@ -127,7 +127,7 @@ const extrauichoices = Array().concat(categoryautofills);
 
 // firstload hiding
 
-const tohideonfirstload = Array().concat(['#browserdialog', '#helptabs', '#fewerchoicesbutton', '#lemmatizing-ison', '#vectorizing-ison', '#alt_upperleftbuttons'],
+const tohideonfirstload = Array().concat(['#browserdialog', '#helptabs', '#fewerchoicesbutton', '#lemmatizing-ison', '#vectorizing-ison', '#alt_upperleftbuttons', '#analogiesinputarea'],
     vectorformattingdotpyids, endpointnoticesandbuttons, endpointids, inputids, actionbuttons, infobuttons, infoboxes, extrasearchforms, extrasearchcriteria, extrasearchuielements);
 
 //

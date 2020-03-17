@@ -502,7 +502,18 @@ $('#lemmatasearchform').autocomplete({
     source: '/getlemmahint'
     });
 
-
 $('#proximatelemmatasearchform').autocomplete({
+    source: '/getlemmahint'
+    });
+
+$('#analogiesinputA').autocomplete({
+    source: '/getlemmahint'
+    });
+
+$('#analogiesinputB').autocomplete({
+    source: '/getlemmahint'
+    });
+
+$('#analogiesinputC').autocomplete({
     source: '/getlemmahint'
     });
