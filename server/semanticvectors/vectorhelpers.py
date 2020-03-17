@@ -551,6 +551,26 @@ def convertsingleuidtodblineobject(lineuid, cursor):
 	return fetchedline
 
 
+def buildwinnertakeallbagsofwords(morphdict, sentences):
+	"""
+
+	turn a list of sentences into a list of list of headwords
+
+	here we figure out which headword is the dominant homonym
+
+	then we just use that term
+
+		esse ===> sum
+		esse =/=> edo
+
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	raise NotImplemented
+
+
 def buildflatbagsofwords(morphdict, sentences):
 	"""
 	turn a list of sentences into a list of list of headwords

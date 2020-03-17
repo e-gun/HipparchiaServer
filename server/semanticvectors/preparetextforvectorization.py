@@ -103,7 +103,7 @@ def breaktextsintosentences(foundsentences, searchlist, searchobject, dbconnecti
 def monobreaktextsintosentences(searchlist, searchobject):
 	"""
 
-	A wrapper for breaktextsintosentences() since Windows can MP it...
+	A wrapper for breaktextsintosentences() since Windows can't MP it...
 
 	:param searchlist:
 	:param searchobject:
