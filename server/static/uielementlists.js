@@ -56,6 +56,8 @@ const endpointnotices = Array('#endpointnotice', '#fromnotice');
 
 const endpointbuttons = Array('#endpointbutton-isopen', '#endpointbutton-isclosed');
 
+const endpointnotification = Array().concat(endpointnotices, endpointbuttons);
+
 const rawinputuielements = Array('#rawlocationinput', '#rawendpointinput', '#fromnotice', '#endpointnotice',
         '#endpointbutton-isopen', '#endpointbutton-isclosed', '#rawlocationinput', '#rawendpointinput');
 
@@ -65,7 +67,9 @@ const endpointnoticesandbuttons = endpointnotices.concat(endpointbuttons);
 
 const categoryautofills = Array('#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete', '#provenanceautocomplete');
 
-const nonessentialautofills = categoryautofills.concat(Array('#worksautocomplete'));
+const nonessentialautofills = Array().concat(categoryautofills, ['#worksautocomplete']);
+
+const allautofills = Array().concat(nonessentialautofills, ['#authorsautocomplete']);
 
 // info buttons
 
@@ -83,9 +87,9 @@ const actionbuttons = Array().concat(coreactionbuttons, extendedactionbuttons, g
 const datespinners = Array('#edts', '#ldts');
 const extrasearchcriteria = Array().concat(datespinners, ['#spuriacheckboxes']);
 
-// infoboxes
+// infoboxes + infotables
 
-const infoboxes = Array('#genrelistcontents', '#outputbox');
+const infoboxes = Array('#genrelistcontents', '#selectionstable', '#searchlistcontents');
 
 // loadandsave UI
 
@@ -109,13 +113,12 @@ const vectorboxes = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvec
 
 // collections of elements that have logical connections
 
-const postauthorpickui = ['#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfobutton'];
-const postbrowsepickui = Array().concat(postauthorpickui, ['#browserdialog']);
-
+const corepickui = ['#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfobutton'];
+const postauthorpickui = Array().concat(corepickui, coreactionbuttons);
+const postbrowsepickui = Array().concat(corepickui, ['#browserdialog']);
 const extrauichoices = Array().concat(categoryautofills);
 
 // and see below for firstload hides which is defined last because it needs vectorformattingdotpyids
-
 
 //
 // COMPREHENSIVE ID COLLECTIONS

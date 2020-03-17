@@ -10,9 +10,8 @@
 //
 
 function reloadselections(selectiondata){
+    hidemany(endpointbuttons);
     // the data comes back from the server as a dict with three keys: timeexclusions, selections, exclusions
-    $('#endpointbutton-isopen').hide();
-    $('#endpointbutton-isclosed').hide();
     if (selectiondata.numberofselections > -1) {
             $('#selectionstable').show();
         } else {
@@ -21,7 +20,7 @@ function reloadselections(selectiondata){
     $('#timerestrictions').html(selectiondata.timeexclusions);
     $('#selectioninfocell').html(selectiondata.selections);
     $('#exclusioninfocell').html(selectiondata.exclusions);
-    let holder = document.getElementById("selectionscriptholder");
+    let holder = document.getElementById('selectionscriptholder');
     if (holder.hasChildNodes()) { holder.removeChild(holder.firstChild); }
     $('#selectionscriptholder').html(selectiondata['newjs']);
     }
@@ -47,6 +46,7 @@ function resetworksautocomplete(){
     clearmany(endpointids);
 }
 
+
 $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
     source: "/getauthorhint",
@@ -70,11 +70,12 @@ $('#authorsautocomplete').autocomplete({
         selector.prop('placeholder', '(Pick a work)');
         showmany(postauthorpickui);
         $('#authorendpoint').val(thisselector.val());
+        clearmany(allautofills);
         }
     });
 
 
-$('#pickauthor').click( function() {
+$('#addauthortosearchlist').click( function() {
         let name = $('#authorsautocomplete').val();
         let authorid = name.slice(-7, -1);
         let locus = locusdataloader();
@@ -125,17 +126,13 @@ $('#pickauthor').click( function() {
                    });
                 }
             }
-            $('#fromnotice').hide();
-            $('#endpointnotice').hide();
-            $('#endpointbutton-isclosed').hide();
-            $('#endpointbutton-isopen').hide();
+            hidemany(endpointnotification);
         }
         $('#searchlistcontents').hide();
-
 });
 
 
-$('#excludeauthor').click( function() {
+$('#excludeauthorfromsearchlist').click( function() {
         let name = $('#authorsautocomplete').val();
         let authorid = name.slice(-7, -1);
         let locus = locusdataloader();

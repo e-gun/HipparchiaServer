@@ -54,16 +54,7 @@ $(document).ready( function () {
                 });
         $('#complexsearching').toggle();
         $('#termonecheckbox').toggle();
-        // $('#vectorzone').toggle();
         togglemany(vectorcheckboxspans);
-        // $('#cosinedistancesentencecheckbox').toggle();
-        // $('#cosinedistancelineorwordcheckbox').toggle();
-        // $('#semanticvectorquerycheckbox').toggle();
-        // $('#semanticvectornnquerycheckbox').toggle();
-        // $('#tensorflowgraphcheckbox').toggle();
-        // $('#sentencesimilaritycheckbox').toggle();
-        // $('#topicmodelcheckbox').toggle();
-        // $('#analogiescheckbox').toggle();
         });
 
     // https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript#2117523
