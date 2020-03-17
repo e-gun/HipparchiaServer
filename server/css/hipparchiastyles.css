@@ -995,10 +995,17 @@ body {
 
 #activeoptions {
 	position: fixed;
-	top: 10px;
+	top: 45px;
 	right: 10px;
 	font-size: 80%;
 	}
+
+#currentuser {
+	position: fixed;
+	top: 10px;
+	right: 10px;
+	font-size: 66%;
+}
 
 #authorholdings {
 	background-color: var(--offwhite);

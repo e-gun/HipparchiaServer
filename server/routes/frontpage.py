@@ -17,9 +17,10 @@ from flask import render_template, send_file, session
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
-from server.dbsupport.miscdbfunctions import getpostgresserverversion
 from server.dbsupport.dbbuildinfo import versionchecking
+from server.dbsupport.miscdbfunctions import getpostgresserverversion
 from server.formatting.vectorformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar
+from server.hipparchiaobjects.authenticationobjects import LoginForm
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
 from version import devel, hipparchiaserverversion, readgitdata
@@ -102,6 +103,11 @@ def frontpage():
 	if devel:
 		shortversion = version
 
+	loginform = None
+
+	if hipparchia.config['LIMITACCESSTOLOGGEDINUSERS']:
+		loginform = LoginForm()
+
 	page = render_template('search.html',
 							activelists=activelists,
 							activecorpora=activecorpora,
@@ -123,7 +129,8 @@ def frontpage():
 							version=version,
 							shortversion=shortversion,
 							backend=backend,
-							icanzap=icanzap)
+							icanzap=icanzap,
+							loginform=loginform)
 
 	return page
 

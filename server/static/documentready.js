@@ -277,3 +277,21 @@ function displayprogress(progress){
 hidemany(tohideonfirstload);
 togglemany(vectorcheckboxspans);
 
+//
+// authentication
+//
+
+
+$.getJSON('/checkuser', function(data){
+    var u = data['userid'];
+    $('#userid').html(u);
+    if (u === 'Anonymous') {
+        $('#executelogin').show();
+        $('#executelogout').hide();
+        } else {
+        $('#executelogin').hide();
+        $('#executelogout').show();
+        }
+    });
+
+

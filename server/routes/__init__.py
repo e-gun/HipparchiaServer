@@ -1,5 +1,5 @@
 __all__ = ['browseroute', 'frontpage', 'getterroutes', 'hintroutes', 'inforoutes', 'lexicalroutes', 'searchroute',
-           'selectionroutes', 'textandindexroutes', 'websocketroutes', 'resetroutes', 'cssroutes']
+           'selectionroutes', 'textandindexroutes', 'websocketroutes', 'resetroutes', 'cssroutes', 'authenticationroutes']
 
 """
 what can be found where: [routes/ $ grep "^@" *.py]

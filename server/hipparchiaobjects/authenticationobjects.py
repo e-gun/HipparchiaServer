@@ -15,7 +15,7 @@ from wtforms.validators import DataRequired
 class PassUser(object):
     """
 
-    log people into hipparcha
+    log people into hipparchia
 
     """
     def __init__(self, username, password):

@@ -40,12 +40,13 @@
     <div id="lexicaljsscriptholder"> </div>
     <!-- misc ui elements -->
     {% include "miscuielements.html" ignore missing %}
-
+    {% include "authentication.html" ignore missing %}
 </div>
 
  <!-- load uielementlists first: others will use its values -->
 <script src="{{ url_for('static', filename='uielementlists.js') }}"></script>
 
+<script src="{{ url_for('static', filename='authentication.js') }}"></script>
 <script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
 <script src="{{ url_for('static', filename='indexandtextmaker.js') }}"></script>
 <script src="{{ url_for('static', filename='coreinterfaceclicks.js') }}"></script>

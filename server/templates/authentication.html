@@ -1,0 +1,18 @@
+{% if loginform %}
+<div id="currentuser" class="unobtrusive">
+    <span class="ui-icon ui-icon-person"></span>
+    <span id="userid" class="user">{{ user }}</span>
+    <span id="executelogout" class="ui-icon ui-icon-squaresmall-close"></span>
+    <span id="executelogin" class="ui-icon ui-icon-key"></span>
+    <br>
+    <span id="alertarea"></span>
+</div>
+<div id="validateusers" title="Submit username and password" class="center unobtrusive">
+    <form id="hipparchiauserlogin" method="POST" action="/appetmptlogin">
+        {{ loginform.user(size=12, placeholder='[username]') }}
+        {{ loginform.pw(size=12, type='password', placeholder='[password]') }}
+        {{ loginform.hidden_tag() }}
+        <p class="center"><input type="submit" name="login" value="Login"></p>
+    </form>
+</div>
+{% endif %}

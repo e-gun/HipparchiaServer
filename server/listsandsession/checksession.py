@@ -58,6 +58,7 @@ def probeforsessionvariables():
 		session['latestdate'] = hipparchia.config['DEFAULTLATESTDATE']
 		session['latincorpus'] = corpusisonandavailable('latincorpus')
 		session['linesofcontext'] = int(hipparchia.config['DEFAULTLINESOFCONTEXT'])
+		session['loggedin'] = False
 		session['maxresults'] = str(int(hipparchia.config['DEFAULTMAXRESULTS']))
 		session['morphtables'] = True
 		session['morphdialects'] = True
@@ -106,6 +107,7 @@ def probeforsessionvariables():
 		session['ldaminfreq'] = hipparchia.config['LDAMINFREQ']
 		session['ldaiterations'] = hipparchia.config['LDAITERATIONS']
 		session['ldamustbelongerthan'] = hipparchia.config['LDAMUSTBELONGERTHAN']
+		session['userid'] = 'Anonymous'
 		session['wkexclusions'] = list()
 		session['wkgnexclusions'] = list()
 		session['wkgnselections'] = list()
