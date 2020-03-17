@@ -9,6 +9,7 @@
 from flask import redirect, session, url_for
 
 from server import hipparchia
+from server.authentication.authenticationwrapper import requireauthentication
 from server.formatting.miscformatting import validatepollid
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchObject, SearchOutputObject
@@ -29,6 +30,7 @@ else:
 
 
 @hipparchia.route('/vectors/<vectortype>/<searchid>/<headform>')
+@requireauthentication
 def vectorsearch(vectortype, searchid, headform, so=None):
 	"""
 
@@ -107,6 +109,7 @@ def vectorsearch(vectortype, searchid, headform, so=None):
 
 
 @hipparchia.route('/vectoranalogies/<searchid>/<termone>/<termtwo>/<termthree>')
+@requireauthentication
 def analogysearch(searchid, termone, termtwo, termthree, disabled=True, acceptinginput=False):
 	"""
 

@@ -13,6 +13,7 @@ import time
 from flask import session
 
 from server import hipparchia
+from server.authentication.authenticationwrapper import requireauthentication
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
 from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
@@ -34,6 +35,7 @@ from server.textsandindices.textbuilder import buildtext
 @hipparchia.route('/indexto/<searchid>/<author>/<work>')
 @hipparchia.route('/indexto/<searchid>/<author>/<work>/<passage>')
 @hipparchia.route('/indexto/<searchid>/<author>/<work>/<passage>/<endpoint>')
+@requireauthentication
 def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=None, citationdelimiter='|'):
 	"""
 	build a complete index to a an author, work, or segment of a work
@@ -147,7 +149,6 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 	results['indexhtml'] = indexhtml
 	results['keytoworks'] = allworks
 	results['newjs'] = supplementalindexjs()
-
 	results = json.dumps(results)
 
 	dbconnection.connectioncleanup()
@@ -158,6 +159,7 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 
 @hipparchia.route('/indextorawlocus/<searchid>/<author>/<work>/<location>')
 @hipparchia.route('/indextorawlocus/<searchid>/<author>/<work>/<location>/<endpoint>')
+@requireauthentication
 def indexfromrawlocus(searchid: str, author: str, work=None, location=None, endpoint=None):
 	"""
 
@@ -180,6 +182,7 @@ def indexfromrawlocus(searchid: str, author: str, work=None, location=None, endp
 @hipparchia.route('/textof/<author>/<work>')
 @hipparchia.route('/textof/<author>/<work>/<passage>')
 @hipparchia.route('/textof/<author>/<work>/<passage>/<endpoint>')
+@requireauthentication
 def textmaker(author: str, work=None, passage=None, endpoint=None, citationdelimiter='|'):
 	"""
 	build a text suitable for display
@@ -259,6 +262,7 @@ def textmaker(author: str, work=None, passage=None, endpoint=None, citationdelim
 
 @hipparchia.route('/textofrawlocus/<author>/<work>/<location>')
 @hipparchia.route('/textofrawlocus/<author>/<work>/<location>/<endpoint>')
+@requireauthentication
 def texmakerfromrawlocus(author: str, work: str, location: str, endpoint=None):
 	"""
 

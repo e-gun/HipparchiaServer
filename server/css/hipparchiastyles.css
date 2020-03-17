@@ -1000,13 +1000,6 @@ body {
 	font-size: 80%;
 	}
 
-#currentuser {
-	position: fixed;
-	top: 10px;
-	right: 10px;
-	font-size: 66%;
-}
-
 #authorholdings {
 	background-color: var(--offwhite);
 	border: 1px dotted black;
@@ -1054,6 +1047,13 @@ body {
 	bottom: 10px;
 	right: 10px;
 	}
+
+#currentuser {
+	position: fixed;
+	top: 10px;
+	right: 10px;
+	font-size: 66%;
+}
 
 #displayresults {
 	padding: 10px;

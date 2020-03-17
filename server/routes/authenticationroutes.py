@@ -7,14 +7,13 @@
 """
 
 import json
-from flask import session
-from flask_login import LoginManager
+
 from flask import redirect, session, url_for
+from flask_login import LoginManager
 
 from server import hipparchia
 from server.authentication.knownusers import loadusersdict
 from server.hipparchiaobjects.authenticationobjects import LoginForm, PassUser
-
 
 loginmanager = LoginManager()
 loginmanager.init_app(hipparchia)

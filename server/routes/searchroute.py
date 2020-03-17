@@ -12,6 +12,7 @@ import re
 from flask import request, session
 
 from server import hipparchia
+from server.authentication.authenticationwrapper import requireauthentication
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.formatting.miscformatting import validatepollid
@@ -34,7 +35,9 @@ else:
 	findabsolutevectorsfromhits = voff
 
 
+
 @hipparchia.route('/executesearch/<searchid>', methods=['GET'])
+@requireauthentication
 def executesearch(searchid, so=None):
 	"""
 
@@ -266,6 +269,7 @@ def executesearch(searchid, so=None):
 
 
 @hipparchia.route('/singlewordsearch/<searchid>/<searchterm>')
+@requireauthentication
 def singlewordsearch(searchid, searchterm):
 	"""
 
@@ -309,6 +313,7 @@ def singlewordsearch(searchid, searchterm):
 
 
 @hipparchia.route('/lemmatizesearch/<searchid>/<headform>')
+@requireauthentication
 def headwordsearch(searchid, headform):
 	"""
 

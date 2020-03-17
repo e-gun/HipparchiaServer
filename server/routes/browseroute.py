@@ -9,6 +9,7 @@
 import json
 
 from server import hipparchia
+from server.authentication.authenticationwrapper import requireauthentication
 from server.browsing.browserfunctions import browserfindlinenumberfromcitation, buildbrowseroutputobject
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dblinefunctions import returnfirstorlastlinenumber
@@ -23,6 +24,7 @@ from server.startup import workdict
 
 @hipparchia.route('/browse/<method>/<author>/<work>')
 @hipparchia.route('/browse/<method>/<author>/<work>/<location>')
+@requireauthentication
 def grabtextforbrowsing(method, author, work, location=None):
 	"""
 
@@ -104,6 +106,7 @@ def grabtextforbrowsing(method, author, work, location=None):
 
 @hipparchia.route('/browserawlocus/<author>/<work>')
 @hipparchia.route('/browserawlocus/<author>/<work>/<location>')
+@requireauthentication
 def rawcitationgrabtextforbrowsing(author: str, work: str, location=None):
 	"""
 
