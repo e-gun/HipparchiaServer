@@ -53,7 +53,11 @@ $(document).ready( function () {
                 }
                 });
         $('#complexsearching').toggle();
-        $('#termonecheckbox').toggle();
+        if ($('#termoneisalemma').is(":checked")) {
+            $('#termonecheckbox').show();
+        } else {
+            $('#termonecheckbox').toggle();
+        }
         $('#termtwocheckbox').toggle();
         togglemany(vectorcheckboxspans);
         });
