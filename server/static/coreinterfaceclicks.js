@@ -474,3 +474,64 @@ $('#endpointbutton-isopen').click(function(){
     $('#endpointbutton-isopen').hide();
     hidemany(['#selectionendpoint']);
     });
+
+
+//
+// COMPLEX SEARCH BUTTONS (the clicks are in documentready.js; the code is here
+//
+
+function closeextendedsearcharea() {
+    $('#extendsearchbutton-ispresentlyopen').hide();
+    $('#extendsearchbutton-ispresentlyclosed').show();
+    $('#complexsearching').hide();
+    let lsf = $('#lemmatasearchform');
+    let wsf = $('#wordsearchform');
+    let tcb = $('#termonecheckbox');
+    if ($('#termoneisalemma').is(":checked")) {
+        tcb.show();
+        lsf.show();
+        lsf.attr('placeholder', '(all forms of...)');
+        wsf.hide();
+    } else {
+        tcb.hide();
+        lsf.hide();
+        wsf.show();
+    }
+    $('#termtwocheckbox').hide();
+    // reset vectors
+    // the checkbox names can be found via
+    for (let i = 0; i < vectoroptionarray.length; i++) {
+        let item = $('#'+ vectoroptionarray[i] +'');
+        if (item.prop('checked') ) {
+            setoptions(vectoroptionarray[i], 'no');
+        }
+    }
+    $('#vectorizing-ison').hide();
+    $('#vectorizing-isoff').show();
+    hidemany(vectorcheckboxspans);
+}
+
+function openextendedsearcharea() {
+    $('#extendsearchbutton-ispresentlyclosed').hide();
+    $('#extendsearchbutton-ispresentlyopen').show();
+    $.getJSON('/getsessionvariables', function (data) {
+            $( "#proximityspinner" ).spinner('value', data.proximity);
+            if (data.searchscope === 'lines') {
+                $('#searchlines').prop('checked', true); $('#searchwords').prop('checked', false);
+            } else {
+                $('#searchlines').prop('checked', false); $('#searchwords').prop('checked', true);
+            }
+            if (data.nearornot === 'near') {
+                $('#wordisnear').prop('checked', true); $('#wordisnotnear').prop('checked', false);
+            } else {
+                $('#wordisnear').prop('checked', false); $('#wordisnotnear').prop('checked', true);
+            }
+            });
+    $('#complexsearching').show();
+    $('#termonecheckbox').show();
+    $('#termtwocheckbox').show();
+    showmany(vectorcheckboxspans);
+}
+
+
+

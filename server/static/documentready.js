@@ -39,51 +39,11 @@ $(document).ready( function () {
     });
 
     $('#extendsearchbutton-ispresentlyopen').click( function() {
-        $('#extendsearchbutton-ispresentlyopen').hide();
-        $('#extendsearchbutton-ispresentlyclosed').show();
-        $('#complexsearching').hide();
-        if ($('#termoneisalemma').is(":checked")) {
-            $('#termonecheckbox').show();
-            $('#lemmatasearchform').show();
-        } else {
-            $('#termonecheckbox').hide();
-            $('#wordsearchform').show();
-            $('#lemmatasearchform').hide();
-        }
-        $('#termtwocheckbox').hide();
-        // reset vectors
-        // the checkbox names can be found via
-        for (let i = 0; i < vectoroptionarray.length; i++) {
-            let item = $('#'+ vectoroptionarray[i] +'');
-            if (item.prop('checked') ) {
-                setoptions(vectoroptionarray[i], 'no');
-            }
-        }
-        $('#vectorizing-ison').hide();
-        $('#vectorizing-isoff').show();
-        hidemany(vectorcheckboxspans);
+        closeextendedsearcharea();
     });
 
     $('#extendsearchbutton-ispresentlyclosed').click( function() {
-        $('#extendsearchbutton-ispresentlyclosed').hide();
-        $('#extendsearchbutton-ispresentlyopen').show();
-        $.getJSON('/getsessionvariables', function (data) {
-                $( "#proximityspinner" ).spinner('value', data.proximity);
-                if (data.searchscope === 'lines') {
-                    $('#searchlines').prop('checked', true); $('#searchwords').prop('checked', false);
-                } else {
-                    $('#searchlines').prop('checked', false); $('#searchwords').prop('checked', true);
-                }
-                if (data.nearornot === 'near') {
-                    $('#wordisnear').prop('checked', true); $('#wordisnotnear').prop('checked', false);
-                } else {
-                    $('#wordisnear').prop('checked', false); $('#wordisnotnear').prop('checked', true);
-                }
-                });
-        $('#complexsearching').show();
-        $('#termonecheckbox').show();
-        $('#termtwocheckbox').show();
-        showmany(vectorcheckboxspans);
+        openextendedsearcharea();
         });
 
     // https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript#2117523
@@ -305,6 +265,7 @@ function displayprogress(progress){
 
 hidemany(tohideonfirstload);
 togglemany(vectorcheckboxspans);
+closeextendedsearcharea();
 
 if ($('#termoneisalemma').is(":checked")) {
     $('#termonecheckbox').show(); }
