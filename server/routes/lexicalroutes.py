@@ -12,6 +12,7 @@ import re
 from flask import session
 
 from server import hipparchia
+from server.authentication.authenticationwrapper import requireauthentication
 from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.lexicaldbfunctions import findentrybyid, headwordsearch, lookformorphologymatches, \
 	probedictionary, querytotalwordcounts, reversedictionarylookup
@@ -29,6 +30,7 @@ from server.listsandsession.checksession import justlatin, justtlg, probeforsess
 
 
 @hipparchia.route('/dictsearch/<searchterm>')
+@requireauthentication
 def dictsearch(searchterm):
 	"""
 	look up words
@@ -133,6 +135,7 @@ def dictsearch(searchterm):
 
 
 @hipparchia.route('/parse/<observedword>')
+@requireauthentication
 def findbyform(observedword):
 	"""
 	this function sets of a chain of other functions
@@ -230,6 +233,7 @@ def findbyform(observedword):
 
 
 @hipparchia.route('/reverselookup/<searchterm>')
+@requireauthentication
 def reverselexiconsearch(searchterm):
 	"""
 	attempt to find all of the greek/latin dictionary entries that might go with the english search term
@@ -345,6 +349,7 @@ def reverselexiconsearch(searchterm):
 
 
 @hipparchia.route('/dictionaryidsearch/<language>/<entryid>')
+@requireauthentication
 def dictionaryidsearch(language, entryid):
 	"""
 
@@ -386,6 +391,7 @@ def dictionaryidsearch(language, entryid):
 
 
 @hipparchia.route('/morphologychart/<language>/<lexicalid>/<xrefid>/<headword>')
+@requireauthentication
 def knownforms(lexicalid, language, xrefid, headword):
 	"""
 

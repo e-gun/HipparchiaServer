@@ -36,6 +36,10 @@ def requireauthentication(routefunction):
 		session['loggedin']
 	except KeyError:
 		session['loggedin'] = False
+	except RuntimeError:
+		# RuntimeError: Working outside of request context.
+		# an issue at startup
+		pass
 
 	wrappername = routefunction.__name__
 
