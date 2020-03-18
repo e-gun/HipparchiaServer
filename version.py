@@ -18,6 +18,7 @@ supplement = '+ [DEVEL]'
 if devel:
 	hipparchiaserverversion = hipparchiaserverversion + supplement
 
+
 def readgitdata() -> str:
 	"""
 

@@ -98,7 +98,9 @@ const loadandsaveslots = Array('#loadslots', '#saveslots');
 
 // searchforms
 
-const extrasearchforms = Array('#lemmatasearchform', '#proximatesearchform', '#proximatelemmatasearchform');
+const extrasearchform = Array('#proximatesearchform');
+const lemmatasearchforms = Array('#lemmatasearchform', '#proximatelemmatasearchform');
+const allextrasearchfroms = Array().concat(extrasearchform, lemmatasearchforms);
 const extrasearchuielements = Array('#nearornot', '#termonecheckbox', '#termtwocheckbox', '#complexsearching');
 
 // spinners
@@ -128,7 +130,7 @@ const extrauichoices = Array().concat(categoryautofills);
 // firstload hiding
 
 const tohideonfirstload = Array().concat(['#browserdialog', '#helptabs', '#fewerchoicesbutton', '#lemmatizing-ison', '#vectorizing-ison', '#alt_upperleftbuttons', '#analogiesinputarea'],
-    vectorformattingdotpyids, endpointnoticesandbuttons, endpointids, inputids, actionbuttons, infobuttons, infoboxes, extrasearchforms, extrasearchcriteria, extrasearchuielements);
+    vectorformattingdotpyids, endpointnoticesandbuttons, endpointids, inputids, actionbuttons, infobuttons, infoboxes, lemmatasearchforms, extrasearchcriteria, extrasearchuielements);
 
 //
 // FYI: COMPREHENSIVE ID COLLECTIONS
