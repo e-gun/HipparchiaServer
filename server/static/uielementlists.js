@@ -33,6 +33,21 @@ function togglemany(arrayofelements) {
         }
 }
 
+function setoptions(sessionvar, value){
+	$.getJSON( {url: '/setsessionvariable/' + sessionvar + '/' + value,
+	    async: false,
+	    success: function (resultdata) {
+		 // do nothing special: the return exists but is not relevant
+	    }
+	    });
+}
+
+function setmultiple(arrayofvars, value) {
+    for (let i = 0; i < arrayofvars.length; i++) {
+        setoptions(arrayofvars[i], value);
+        }
+}
+
 //
 // ID COLLECTIONS
 //
@@ -66,7 +81,8 @@ const endpointnoticesandbuttons = endpointnotices.concat(endpointbuttons);
 
 // category selection ui
 
-const categoryautofills = Array('#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete', '#provenanceautocomplete');
+const categoryautofills = Array('#genresautocomplete', '#workgenresautocomplete', '#locationsautocomplete',
+    '#provenanceautocomplete');
 
 const nonessentialautofills = Array().concat(categoryautofills, ['#worksautocomplete']);
 
@@ -113,12 +129,21 @@ const vectorcheckboxspans = ['#cosinedistancesentencecheckbox', '#cosinedistance
     '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox', '#sentencesimilaritycheckbox', '#topicmodelcheckbox',
     '#analogiescheckbox'];
 
-const vectorboxes = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity', '#topicmodel']
+const vectorboxes = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery',
+    '#tensorflowgraph', '#sentencesimilarity', '#topicmodel'];
 
 const vectorformattingdotpyids = Array(['#analogiescheckbox', '#analogyfinder', '#cosdistbylineorword',
     '#cosdistbysentence', '#cosinedistancelineorwordcheckbox', '#cosinedistancesentencecheckbox', '#nearestneighborsquery',
     '#semanticvectornnquerycheckbox', '#semanticvectorquery', '#semanticvectorquerycheckbox', '#sentencesimilarity',
     '#sentencesimilaritycheckbox', '#tensorflowgraph', '#tensorflowgraphcheckbox', '#topicmodel', '#topicmodelcheckbox']);
+
+// the checkbox names can be found via: vectorhtmlforfrontpage() in vectorformatting.py
+// >>> f = re.compile(r'type="checkbox" id="(.*?)"')
+// >>> re.findall(f,x)
+
+let vectoroptionarray = Array('cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery',
+    'nearestneighborsquery', 'tensorflowgraph', 'sentencesimilarity', 'topicmodel', 'analogyfinder');
+
 
 // collections of elements that have logical connections
 
@@ -128,9 +153,10 @@ const postbrowsepickui = Array().concat(corepickui, ['#browserdialog']);
 const extrauichoices = Array().concat(categoryautofills);
 
 // firstload hiding
-
-const tohideonfirstload = Array().concat(['#browserdialog', '#helptabs', '#fewerchoicesbutton', '#lemmatizing-ison', '#vectorizing-ison', '#alt_upperleftbuttons', '#analogiesinputarea'],
-    vectorformattingdotpyids, endpointnoticesandbuttons, endpointids, inputids, actionbuttons, infobuttons, infoboxes, lemmatasearchforms, extrasearchcriteria, extrasearchuielements);
+const miscfirstloadhides = Array('#browserdialog', '#helptabs', '#fewerchoicesbutton', '#lemmatizing-ison',
+    '#vectorizing-ison', '#alt_upperleftbuttons', '#analogiesinputarea', '#extendsearchbutton-ispresentlyopen');
+const tohideonfirstload = Array().concat(miscfirstloadhides, vectorformattingdotpyids, endpointnoticesandbuttons,
+    endpointids, inputids, actionbuttons, infobuttons, infoboxes, lemmatasearchforms, extrasearchcriteria, extrasearchuielements);
 
 //
 // FYI: COMPREHENSIVE ID COLLECTIONS

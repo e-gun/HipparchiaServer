@@ -4,16 +4,6 @@
 //	License: License: GNU GENERAL PUBLIC LICENSE 3
 //      (see LICENSE in the top level directory of the distribution)
 
-
-function setoptions(sessionvar, value){
-	$.getJSON( {url: '/setsessionvariable/' + sessionvar + '/' + value,
-	    async: false,
-	    success: function (resultdata) {
-		 // do nothing special: the return exists but is not relevant
-	    }
-	    });
-}
-
 function refreshselections() {
     $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
 }

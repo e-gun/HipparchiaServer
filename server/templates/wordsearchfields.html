@@ -1,15 +1,12 @@
 <div id="wordsearchfields" class="center">
     <button id="executesearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Execute the search"><span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        {% if lookedfor == '' %}
-        <input id="wordsearchform" type="text" action="" method="" name="seeking" placeholder="(looking for...)" size=25>
-        {% else %}
-        <input id="wordsearchform" type="text" action="" method="" name="seeking" placeholder="(looking for...)" value="{{ lookedfor }}" size=25>
-        {% endif %}
-        <input id="lemmatasearchform" type="text" action="" method="" name="lemmata" placeholder="(all forms of...)" size=25>
+        <input id="wordsearchform" type="text" name="seeking" placeholder="(looking for...)" size=25>
+        <input id="lemmatasearchform" type="text" name="lemmata" placeholder="(all forms of...)" size=25>
         <span id="termonecheckbox">
             <span class="small">λ</span><input type="checkbox" id="termoneisalemma" value="yes">
         </span>
-    <button id="extendsearchbutton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Complicate the search"><span class="ui-button-icon ui-icon ui-icon-arrow-1-e"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+    <button id="extendsearchbutton-ispresentlyopen" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Complicate the search"><span class="ui-button-icon ui-icon ui-icon-arrow-1-e"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+    <button id="extendsearchbutton-ispresentlyclosed" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Complicate the search"><span class="ui-button-icon ui-icon ui-icon-arrow-1-e"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
     <br />
     <div id="complexsearching">
         <div id="nearornot">
@@ -18,12 +15,8 @@
             <label for="wordisnotnear">not near
             <input type="radio" name="near" id="wordisnotnear" value="F"></label>
         </div>
-        {% if proximate == '' %}
-        <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" size=25>
-        {% else %}
-        <input id="proximatesearchform" type="text" action="" method="" name="proximate" placeholder="(near... and within...)" value="{{ proximate }}" size=25>
-        {% endif %}
-        <input id="proximatelemmatasearchform" type="text" action="" method="" name="lemmata" placeholder="(near all forms of... and within...)" size=25>
+        <input id="proximatesearchform" type="text" name="proximate" placeholder="(near... and within...)" size=25>
+        <input id="proximatelemmatasearchform" type="text" name="lemmata" placeholder="(near all forms of... and within...)" size=25>
         <span id="termtwocheckbox">
             <span class="small">λ</span><input type="checkbox" id="termtwoisalemma" value="yes">
         </span>
