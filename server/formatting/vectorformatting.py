@@ -399,6 +399,64 @@ def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: 
 	return jsonoutput
 
 
+def analogiesgenerateoutput(searchobject, findstuples: list) -> str:
+	"""
+
+	findstuples: [(word1, value1), (word2, value2), ...]
+
+	:param searchobject:
+	:param findstuples:
+	:return:
+	"""
+
+	so = searchobject
+	output = SearchOutputObject(so)
+
+	a = so.lemmaone.dictionaryentry
+	b = so.lemmatwo.dictionaryentry
+	c = so.lemmathree.dictionaryentry
+
+	tabletemplate = """
+	<table class="vectortable">
+	{thdr}
+	{rows}
+	<table>
+	"""
+
+	thdrtemplate = """
+	<tr>
+		<th>{a}</th>
+		<th>{b}</th>
+		<th>{c}</th>
+	</tr>
+	"""
+
+	thdr = thdrtemplate.format(a=str(), b=str(), c=str())
+
+	rowtemplate = """
+	<tr>
+		<td>{wrd}</td>
+		<td></td>
+		<td>{val: .3f}</td>
+	</tr>
+	"""
+
+	therows = [rowtemplate.format(wrd=t[0], val=t[1]) for t in findstuples]
+	therows = '\n'.join(therows)
+
+	thetable = tabletemplate.format(thdr=thdr, rows=therows)
+	output.found = thetable
+
+	activepoll = so.poll
+	output.title = '{a} : {b} :: {c} : ???'.format(a=a, b=b, c=c)
+
+	output.searchtime = so.getelapsedtime()
+	activepoll.deactivate()
+	jsonoutput = json.dumps(output.generateoutput())
+
+	return jsonoutput
+
+
 def lsiformatoutput(findshtml: str, workssearched: int, matches: list, searchobject: SearchObject) -> str:
 	"""
 

@@ -98,6 +98,7 @@ def vectorsearch(vectortype, searchid, headform, so=None):
 			jsonoutput = fnc(so)
 			del progresspolldict[pollid]
 			return jsonoutput
+
 		if so.vectorquerytype == 'cosdistbylineorword':
 			jsonoutput = executesearch(pollid, so)
 			return jsonoutput
@@ -105,12 +106,13 @@ def vectorsearch(vectortype, searchid, headform, so=None):
 	# nothing happened...
 	target = 'searchsummary'
 	message = '[unknown vector query type]'
+
 	return output.generatenulloutput(itemname=target, itemval=message)
 
 
 @hipparchia.route('/vectoranalogies/<searchid>/<termone>/<termtwo>/<termthree>')
 @requireauthentication
-def analogysearch(searchid, termone, termtwo, termthree, disabled=True, acceptinginput=False):
+def analogysearch(searchid, termone, termtwo, termthree):
 	"""
 
 	FOR TESTING ONLY; WILL NOT SEND OUTPUT TO BROWSER
@@ -130,9 +132,10 @@ def analogysearch(searchid, termone, termtwo, termthree, disabled=True, acceptin
 	:return:
 	"""
 
-	if disabled:
+	if not hipparchia.config['VECTORANALOGIESENABLED']:
 		return redirect(url_for('frontpage'))
 
+	acceptinginput = True
 	if not acceptinginput:
 		termone = 'φιλοϲοφία'
 		termtwo = 'ἐπιϲτήμη'

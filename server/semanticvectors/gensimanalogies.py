@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+	HipparchiaServer: an interface to a database of Greek and Latin texts
+	Copyright: E Gunderson 2016-20
+	License: GNU GENERAL PUBLIC LICENSE 3
+		(see LICENSE in the top level directory of the distribution)
+"""
+
+from server.formatting.vectorformatting import analogiesgenerateoutput
 from server.semanticvectors.gensimnearestneighbors import buildnnvectorspace
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 
@@ -47,11 +56,11 @@ def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace):
 	# for s in similarities:
 	# 	print('\t',s)
 
-	print('generateanalogies() cosimilarities\n')
-	print('{a} : {b} :: {c} : _______'.format(a=a, b=b, c=c))
-	for s in cosimilarities:
-		print('\t{v: .3f}: {t}'.format(t=s[0], v=s[1]))
+	# print('generateanalogies() cosimilarities\n')
+	# print('{a} : {b} :: {c} : _______'.format(a=a, b=b, c=c))
+	# for s in cosimilarities:
+	# 	print('\t{v: .3f}: {t}'.format(t=s[0], v=s[1]))
 
-	output = None
+	output = analogiesgenerateoutput(searchobject, cosimilarities)
 
-	return emptyvectoroutput(so, '[test code is sending the real output to the console]')
+	return output

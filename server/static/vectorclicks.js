@@ -260,10 +260,8 @@ $('#topicmodel').change(function() {
         activatethisbox(plsf, '(unused for topic models)');
         trmonelem.prop('checked', false);
         trmtwolem.prop('checked', false);
-        wsf.hide();
-        psf.hide();
+        hidemany([wsf, psf, vschoff]);
         vschon.show();
-        vschoff.hide();
         hidelemmatanotification();
         showvectornotification();
         setoptions(this.id, 'yes');
@@ -276,28 +274,46 @@ $('#topicmodel').change(function() {
 
 $('#analogyfinder').change(function() {
     restoreplaceholders();
+    let aia = $('#analogiesinputarea');
     if(this.checked) {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
-        $('#analogiesbox').show();
+        aia.show();
+        // $('#analogiesbox').show();
         activatethisbox(lsf, '(unused for analogies)');
         activatethisbox(plsf, '(unused for analogies)');
         trmonelem.prop('checked', false);
         trmtwolem.prop('checked', false);
-        wsf.hide();
-        psf.hide();
+        hidemany([wsf, psf, vschoff]);
         vschon.show();
-        vschoff.hide();
         hidelemmatanotification();
         showvectornotification();
         setoptions(this.id, 'yes');
     } else {
-        $('#analogiesbox').hide();
+        aia.hide();
+        // $('#analogiesbox').hide();
         setoptions(this.id, 'no');
         restorecheckboxestodefault();
         hidevectorsandlemmata();
         }
     });
+
+$('#executeanalogysearch').click(function() {
+    let A = $('#analogiesinputA').val();
+    let B = $('#analogiesinputB').val();
+    let C = $('#analogiesinputC').val();
+    let searchid = generateId(8);
+    // @hipparchia.route('/vectoranalogies/<searchid>/<termone>/<termtwo>/<termthree>')
+    let url = `/vectoranalogies/${searchid}/${A}/${B}/${C}`;
+    $.getJSON(url, function (returnedresults) { loadanalogyresults(returnedresults); });
+
+});
+
+function loadanalogyresults(outputdata) {
+    let targetarea = $('#analogiesresults');
+    targetarea.html(outputdata['found']);
+    // console.log(outputdata);
+}
 
 trmonelem.change(function() {
     if(this.checked) {

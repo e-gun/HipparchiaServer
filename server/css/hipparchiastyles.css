@@ -1615,6 +1615,11 @@ ul.roman {
 	padding-bottom: 5px;
 	}
 
+.vectortable{
+	width: 50%;
+	margin: auto;
+}
+
 unclickablebibl {
     color: var(--black);
     }

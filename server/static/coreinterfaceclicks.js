@@ -504,6 +504,7 @@ function closeextendedsearcharea() {
         let item = $('#'+ vectoroptionarray[i] +'');
         if (item.prop('checked') ) {
             setoptions(vectoroptionarray[i], 'no');
+            item.prop('checked', false);
         }
     }
     $('#vectorizing-ison').hide();
