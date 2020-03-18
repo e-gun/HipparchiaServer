@@ -32,6 +32,11 @@ def requireauthentication(routefunction):
 	:return:
 	"""
 
+	try:
+		session['loggedin']
+	except KeyError:
+		session['loggedin'] = False
+
 	wrappername = routefunction.__name__
 
 	injectjs = """
