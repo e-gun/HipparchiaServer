@@ -6,10 +6,24 @@
         (see LICENSE in the top level directory of the distribution)
 """
 
-from flask_wtf import FlaskForm
-from werkzeug.security import generate_password_hash, check_password_hash
-from wtforms import StringField
-from wtforms.validators import DataRequired
+from server import hipparchia
+from server.formatting.miscformatting import consolewarning
+
+try:
+    from flask_wtf import FlaskForm
+    from werkzeug.security import generate_password_hash, check_password_hash
+    from wtforms import StringField
+    from wtforms.validators import DataRequired
+except ModuleNotFoundError:
+    if hipparchia.config['LIMITACCESSTOLOGGEDINUSERS']:
+        hipparchia.config['LIMITACCESSTOLOGGEDINUSERS'] = False
+        consolewarning('flask_wtf and/or wtforms not found: ~/hipparchia_venv/bin/pip install flask_wtf', color='red')
+        consolewarning('forcibly setting LIMITACCESSTOLOGGEDINUSERS to False', color='red')
+    FlaskForm = None
+    generate_password_hash = None
+    check_password_hash = None
+    StringField = None
+    DataRequired = None
 
 
 class PassUser(object):
@@ -40,10 +54,13 @@ class PassUser(object):
     def is_anonymous(self):
         return False
 
-    def get_id(self):
+    def getid(self) -> str:
         return str(self.username)  # python 3
 
 
-class LoginForm(FlaskForm):
-    user = StringField('username', validators=[DataRequired()])
-    pw = StringField('password', validators=[DataRequired()])
+if FlaskForm:
+    class LoginForm(FlaskForm):
+        user = StringField('username', validators=[DataRequired()])
+        pw = StringField('password', validators=[DataRequired()])
+else:
+    LoginForm = None

@@ -9,21 +9,33 @@
 import json
 
 from flask import redirect, session, url_for
-from flask_login import LoginManager
+
 
 from server import hipparchia
+from server.formatting.miscformatting import consolewarning
 from server.authentication.knownusers import loadusersdict
 from server.hipparchiaobjects.authenticationobjects import LoginForm, PassUser
 
-loginmanager = LoginManager()
-loginmanager.init_app(hipparchia)
+try:
+	from flask_login import LoginManager
+	loginmanager = LoginManager()
+	loginmanager.init_app(hipparchia)
+
+	@loginmanager.user_loader
+	def loaduser(uid):
+		return PassUser.getid(uid)
+
+except ModuleNotFoundError:
+	if hipparchia.config['LIMITACCESSTOLOGGEDINUSERS']:
+		hipparchia.config['LIMITACCESSTOLOGGEDINUSERS'] = False
+		consolewarning('flask_login not found: install via "~/hipparchia_venv/bin/pip install flask_login"', color='red')
+		consolewarning('forcibly setting LIMITACCESSTOLOGGEDINUSERS to False', color='red')
+
+	def loaduser(uid):
+		return 'Anonymous'
 
 
-@loginmanager.user_loader
-def loaduser(uid):
-	return PassUser.get_id(uid)
-
-@hipparchia.route('/appetmptlogin', methods=['GET', 'POST'])
+@hipparchia.route('/attemptlogin', methods=['GET', 'POST'])
 def hipparchialogin():
 	# https://flask-login.readthedocs.io/en/latest/
 	# http://wtforms.readthedocs.io/en/latest/crash_course.html
@@ -60,9 +72,9 @@ def hipparchialogin():
 	if session['loggedin']:
 		returndata['authenticated'] = 'success'
 
+	# unused ATM
 	data = json.dumps(returndata)
 
-	# return data
 	return redirect(url_for('frontpage'))
 
 
