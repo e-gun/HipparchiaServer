@@ -282,6 +282,9 @@ function displayprogress(progress){
 hidemany(tohideonfirstload);
 togglemany(vectorcheckboxspans);
 
+if ($('#termoneisalemma').is(":checked")) {
+    $('#termonecheckbox').show(); }
+
 //
 // authentication
 //
