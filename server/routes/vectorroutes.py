@@ -135,28 +135,27 @@ def analogysearch(searchid, termone, termtwo, termthree):
 	if not hipparchia.config['VECTORANALOGIESENABLED']:
 		return redirect(url_for('frontpage'))
 
-	# acceptinginput = True
-	# if not acceptinginput:
-	# 	termone = 'φιλοϲοφία'
-	# 	termtwo = 'ἐπιϲτήμη'
-	# 	termthree = 'γυμναϲία'
-
-	try:
-		termone = lemmatadict[termone]
-		termtwo = lemmatadict[termtwo]
-		termthree = lemmatadict[termthree]
-	except KeyError:
-		termone = None
-		termtwo = None
-		termthree = None
-
 	pollid = validatepollid(searchid)
 
 	seeking = str()
 	proximate = str()
 
-	so = SearchObject(pollid, seeking, proximate, termone, termtwo, session)
-	so.lemmathree = termthree
+	if not session['baggingmethod'] == 'unlemmatized':
+		try:
+			termone = lemmatadict[termone]
+			termtwo = lemmatadict[termtwo]
+			termthree = lemmatadict[termthree]
+		except KeyError:
+			termone = None
+			termtwo = None
+			termthree = None
+
+		so = SearchObject(pollid, seeking, proximate, termone, termtwo, session)
+		so.lemmathree = termthree
+	else:
+		so = SearchObject(pollid, termone, termtwo, True, True, session)
+		so.lemmathree = True
+		so.termthree = so.searchtermcleanup(termthree)
 
 	# vectorsearch(vectortype, searchid, headform, so=None)
 	return vectorsearch('analogyfinder', pollid, None, so=so)

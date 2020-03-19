@@ -109,9 +109,12 @@ function loadoptions() {
 
         const baggingmethods =  {
             // be careful about 'winnertakeall' vs 'winnerstakeall', etc.
+            //
             'alternates': $('#alternatebagbutton'),
             'flat': $('#flatbagbutton'),
-            'winnertakeall': $('#winnertakesallbutton')};
+            'winnertakesall': $('#winnertakesallbutton'),
+            'unlemmatized': $('#unlemmatizedbutton'),
+        };
 
         Object.keys(baggingmethods).forEach(function(returnedkey) {
             if (data.baggingmethod !== returnedkey) {

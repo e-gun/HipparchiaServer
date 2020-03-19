@@ -552,7 +552,7 @@ def convertsingleuidtodblineobject(lineuid, cursor):
 	return fetchedline
 
 
-def buildwinnertakeallbagsofwords(morphdict, sentences):
+def buildwinnertakesallbagsofwords(morphdict, sentences):
 	"""
 
 	turn a list of sentences into a list of list of headwords

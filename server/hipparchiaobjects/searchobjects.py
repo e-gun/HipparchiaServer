@@ -33,6 +33,7 @@ class SearchObject(object):
 		self.lemmaone = self.lemma
 		self.lemmatwo = self.proximatelemma
 		self.lemmathree = None
+		self.termthree = None
 		self.session = frozensession
 		# '>' will mess you up still
 		self.originalseeking = re.sub(r'<', '&lt;', self.originalseeking)
@@ -62,16 +63,8 @@ class SearchObject(object):
 
 		# searchtermcharactersubstitutions() logic has moved here
 
-		seeking = re.sub('[σς]', 'ϲ', seeking)
-		seeking = re.sub(r'\\ϲ', r'\\s', seeking)
-		seeking = re.sub(r'^ ', r'(^|\\s)', seeking)
-		seeking = re.sub(r' $', r'(\\s|$)', seeking)
-		seeking = seeking.lower()
-		proximate = re.sub('[σς]', 'ϲ', proximate)
-		proximate = re.sub(r'\\ϲ', r'\\s', proximate)
-		proximate = re.sub(r'^ ', r'(^|\\s)', proximate)
-		proximate = re.sub(r' $', r'(\\s|$)', proximate)
-		proximate = proximate.lower()
+		seeking = self.searchtermcleanup(seeking)
+		proximate = self.searchtermcleanup(proximate)
 
 		# print ('seeking,proximate',seeking,proximate)
 
@@ -148,6 +141,15 @@ class SearchObject(object):
 			self.onehit = False
 
 		self.distance = int(frozensession['proximity'])
+
+	@staticmethod
+	def searchtermcleanup(searchterm):
+		searchterm = re.sub('[σς]', 'ϲ', searchterm)
+		searchterm = re.sub(r'\\ϲ', r'\\s', searchterm)
+		searchterm = re.sub(r'^ ', r'(^|\\s)', searchterm)
+		searchterm = re.sub(r' $', r'(\\s|$)', searchterm)
+		searchterm = searchterm.lower()
+		return searchterm
 
 	def getactivecorpora(self):
 		allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']

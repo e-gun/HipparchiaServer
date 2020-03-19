@@ -121,11 +121,10 @@ AUTOVECTORIZE = False
 
 # baggingmethods = {'flat': buildflatbagsofwords,
 #                   'alternates': buildbagsofwordswithalternates,
-#                   'winnertakeall': buildwinnertakeallbagsofwords,
+#                   'winnertakesall': buildwinnertakesallbagsofwords,
 #                   'unlemmatized': buidunlemmatizedbagsofwords}
 
-DEFAULTBAGGINGMETHOD = 'flat'
-
+DEFAULTBAGGINGMETHOD = 'winnertakesall'
 
 """
 vectorranges = {

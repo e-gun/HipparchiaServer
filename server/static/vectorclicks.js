@@ -58,7 +58,7 @@ function hideallboxes() {
 
 function findotheroptions(thisoption) {
     const xoredoptions = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph',
-        '#sentencesimilarity', '#topicmodel', '#analogiescheckbox'];
+        '#sentencesimilarity', '#topicmodel', '#analogyfinder'];
     return xorfinder(thisoption, xoredoptions);
 }
 
@@ -184,6 +184,7 @@ $('#winnertakesallbutton').change(function() {
 
 
 $('#cosdistbysentence').change(function() {
+    $('#analogiesinputarea').hide();
     restoreplaceholders();
     if(this.checked) {
         let others = findotheroptions(this.id);
@@ -204,6 +205,7 @@ $('#cosdistbysentence').change(function() {
     });
 
 $('#cosdistbylineorword').change(function() {
+    $('#analogiesinputarea').hide();
     restoreplaceholders();
     if(this.checked) {
         let others = findotheroptions(this.id);
@@ -225,6 +227,7 @@ $('#cosdistbylineorword').change(function() {
 
 $('#semanticvectorquery').change(function() {
     restoreplaceholders();
+    $('#analogiesinputarea').hide();
     if(this.checked) {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
@@ -247,6 +250,7 @@ $('#semanticvectorquery').change(function() {
 
 $('#nearestneighborsquery').change(function() {
     restoreplaceholders();
+    $('#analogiesinputarea').hide();
     if(this.checked) {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
@@ -268,6 +272,7 @@ $('#nearestneighborsquery').change(function() {
 
 $('#tensorflowgraph').change(function() {
     restoreplaceholders();
+    $('#analogiesinputarea').hide();
     if(this.checked) {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
@@ -290,6 +295,7 @@ $('#tensorflowgraph').change(function() {
 
 $('#sentencesimilarity').change(function() {
     restoreplaceholders();
+    $('#analogiesinputarea').hide();
     if(this.checked) {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
@@ -312,6 +318,7 @@ $('#sentencesimilarity').change(function() {
 
 $('#topicmodel').change(function() {
     restoreplaceholders();
+    $('#analogiesinputarea').hide();
     if(this.checked) {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);

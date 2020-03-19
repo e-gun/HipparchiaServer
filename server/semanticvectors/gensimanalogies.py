@@ -43,14 +43,27 @@ def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace):
 			reasons = [vectorspace]
 			return emptyvectoroutput(so, reasons)
 
-	a = so.lemmaone.dictionaryentry
-	b = so.lemmatwo.dictionaryentry
-	c = so.lemmathree.dictionaryentry
+	if so.frozensession['baggingmethod'] != 'unlemmatized':
+		a = so.lemmaone.dictionaryentry
+		b = so.lemmatwo.dictionaryentry
+		c = so.lemmathree.dictionaryentry
+	else:
+		a = so.seeking
+		b = so.proximate
+		c = so.termthree
+
 	positive = [a, b]
 	negative = [c]
 
 	# similarities are less interesting than cosimilarities
 	# similarities = vectorspace.wv.most_similar(positive=positive, negative=negative, topn=4)
+
+	try:
+		similarities = vectorspace.wv.most_similar(positive=positive, negative=negative, topn=4)
+	except KeyError as theexception:
+		# KeyError: "word 'terra' not in vocabulary"
+		missing = re.search(r'word \'(.*?)\'', str(theexception))
+		similarities = [('"{m}" was missing from the vector space'.format(m=missing.group(1)), 0)]
 
 	try:
 		cosimilarities = vectorspace.wv.most_similar_cosmul(positive=positive, negative=negative, topn=5)
@@ -59,15 +72,11 @@ def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace):
 		missing = re.search(r'word \'(.*?)\'', str(theexception))
 		cosimilarities = [('"{m}" was missing from the vector space'.format(m=missing.group(1)), 0)]
 
-	# print('generateanalogies() similarities are')
-	# for s in similarities:
-	# 	print('\t',s)
+	simlabel = [('<b>similarities</b>', -1)]
+	cosimlabel = [('<b>cosimilarities</b>', -1)]
 
-	# print('generateanalogies() cosimilarities\n')
-	# print('{a} : {b} :: {c} : _______'.format(a=a, b=b, c=c))
-	# for s in cosimilarities:
-	# 	print('\t{v: .3f}: {t}'.format(t=s[0], v=s[1]))
+	output = simlabel + similarities + cosimlabel + cosimilarities
 
-	output = analogiesgenerateoutput(searchobject, cosimilarities)
+	output = analogiesgenerateoutput(searchobject, output)
 
 	return output

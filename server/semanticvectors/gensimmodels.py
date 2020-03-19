@@ -8,7 +8,7 @@
 
 from server.dbsupport.vectordbfunctions import storevectorindatabase
 from server.semanticvectors.vectorhelpers import buidunlemmatizedbagsofwords, buildbagsofwordswithalternates, \
-	buildflatbagsofwords, buildwinnertakeallbagsofwords
+	buildflatbagsofwords, buildwinnertakesallbagsofwords
 from server.threading.mpthreadcount import setthreadcount
 
 try:
@@ -80,7 +80,7 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 
 	baggingmethods = {'flat': buildflatbagsofwords,
 	                  'alternates': buildbagsofwordswithalternates,
-	                  'winnertakeall': buildwinnertakeallbagsofwords,
+	                  'winnertakesall': buildwinnertakesallbagsofwords,
 	                  'unlemmatized': buidunlemmatizedbagsofwords}
 
 	# print('baggingmethod is', searchobject.session['baggingmethod'])
