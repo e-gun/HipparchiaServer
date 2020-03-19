@@ -43,7 +43,7 @@ def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace):
 			reasons = [vectorspace]
 			return emptyvectoroutput(so, reasons)
 
-	if so.frozensession['baggingmethod'] != 'unlemmatized':
+	if so.session['baggingmethod'] != 'unlemmatized':
 		a = so.lemmaone.dictionaryentry
 		b = so.lemmatwo.dictionaryentry
 		c = so.lemmathree.dictionaryentry

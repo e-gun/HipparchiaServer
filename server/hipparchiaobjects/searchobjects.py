@@ -260,14 +260,17 @@ class SearchOutputObject(object):
 
 		# currently unused
 		if searchobject.lemma:
-			self.lemma = searchobject.lemma.dictionaryentry
+			try:
+				self.lemma = searchobject.lemma.dictionaryentry
+			except AttributeError:
+				self.lemma = str()
 		else:
-			self.lemma = ''
+			self.lemma = str()
 
 		if searchobject.termone:
 			self.headword = searchobject.termone
 		else:
-			self.headword = ''
+			self.headword = str()
 
 		dmin, dmax = bcedating(searchobject.session)
 		self.dmin = dmin

@@ -441,9 +441,14 @@ def analogiesgenerateoutput(searchobject, findstuples: list) -> str:
 	so = searchobject
 	output = SearchOutputObject(so)
 
-	a = so.lemmaone.dictionaryentry
-	b = so.lemmatwo.dictionaryentry
-	c = so.lemmathree.dictionaryentry
+	if so.session['baggingmethod'] != 'unlemmatized':
+		a = so.lemmaone.dictionaryentry
+		b = so.lemmatwo.dictionaryentry
+		c = so.lemmathree.dictionaryentry
+	else:
+		a = so.seeking
+		b = so.proximate
+		c = so.termthree
 
 	tabletemplate = """
 	<table class="vectortable">
