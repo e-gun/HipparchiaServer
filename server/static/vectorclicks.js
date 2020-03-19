@@ -144,6 +144,7 @@ $('#alternatebagbutton').change(function() {
         let others = xorbaggingoptions(this.id);
         $(others).prop('checked', false);
         setoptions('baggingmethod', myname);
+        hidemanyrevealone(lemmatabagoptions, '#alternates-ison');
     } else {
         setoptions('baggingmethod', 'resettodefault');
         }
@@ -155,6 +156,7 @@ $('#flatbagbutton').change(function() {
         let others = xorbaggingoptions(this.id);
         $(others).prop('checked', false);
         setoptions('baggingmethod', myname);
+        hidemanyrevealone(lemmatabagoptions, '#flatlemma-ison');
     } else {
         setoptions('baggingmethod', 'resettodefault');
         }
@@ -166,6 +168,7 @@ $('#unlemmatizedbutton').change(function() {
         let others = xorbaggingoptions(this.id);
         $(others).prop('checked', false);
         setoptions('baggingmethod', myname);
+        hidemanyrevealone(lemmatabagoptions, '#unlemmatized-ison');
     } else {
         setoptions('baggingmethod', 'resettodefault');
         }
@@ -177,6 +180,7 @@ $('#winnertakesallbutton').change(function() {
         let others = xorbaggingoptions(this.id);
         $(others).prop('checked', false);
         setoptions('baggingmethod', myname);
+        hidemanyrevealone(lemmatabagoptions, '#winnertakesall-ison');
     } else {
         setoptions('baggingmethod', 'resettodefault');
         }
@@ -342,6 +346,7 @@ $('#topicmodel').change(function() {
 $('#analogyfinder').change(function() {
     restoreplaceholders();
     let aia = $('#analogiesinputarea');
+    $('#analogiesresults').html('');
     if(this.checked) {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
@@ -379,9 +384,7 @@ $('#executeanalogysearch').click(function() {
 function loadanalogyresults(outputdata) {
     let targetarea = $('#analogiesresults');
     targetarea.html(outputdata['found']);
-    // console.log(outputdata);
 }
-
 
 
 trmonelem.change(function() {

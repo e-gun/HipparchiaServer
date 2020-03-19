@@ -21,6 +21,18 @@ function showmany(arrayofelements) {
         }
 }
 
+function hidemanyrevealone(arrayofelementstohide, elementtoshow) {
+    for (let i = 0; i < arrayofelementstohide.length; i++) {
+        console.log(arrayofelementstohide[i] + '  ' + elementtoshow);
+        if (arrayofelementstohide[i] === elementtoshow) {
+            console.log('hide');
+            $(arrayofelementstohide[i]).show();
+        } else {
+            $(arrayofelementstohide[i]).hide();
+        }
+        }
+}
+
 function clearmany(arrayofelements) {
     for (let i = 0; i < arrayofelements.length; i++) {
         $(arrayofelements[i]).val('');
@@ -99,6 +111,10 @@ const extendedactionbuttons = Array('#browseto', '#makeanindex', '#textofthis', 
 const genreselectbuttons = Array('#pickgenrebutton', '#excludegenrebutton');
 const actionbuttons = Array().concat(coreactionbuttons, extendedactionbuttons, genreselectbuttons);
 
+// active options
+
+const lemmatabagoptions = Array('#winnertakesall-ison', '#unlemmatized-ison', '#flatlemma-ison', '#alternates-ison');
+
 // datespinners and includespuria checkboxes
 
 const datespinners = Array('#edts', '#ldts');
@@ -156,7 +172,8 @@ const extrauichoices = Array().concat(categoryautofills);
 const miscfirstloadhides = Array('#browserdialog', '#helptabs', '#fewerchoicesbutton', '#lemmatizing-ison',
     '#vectorizing-ison', '#alt_upperleftbuttons', '#analogiesinputarea', '#extendsearchbutton-ispresentlyopen');
 const tohideonfirstload = Array().concat(miscfirstloadhides, vectorformattingdotpyids, endpointnoticesandbuttons,
-    endpointids, inputids, actionbuttons, infobuttons, infoboxes, lemmatasearchforms, extrasearchcriteria, extrasearchuielements);
+    endpointids, inputids, actionbuttons, infobuttons, infoboxes, lemmatasearchforms, extrasearchcriteria,
+    lemmatabagoptions, extrasearchuielements);
 
 //
 // FYI: COMPREHENSIVE ID COLLECTIONS

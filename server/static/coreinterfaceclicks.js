@@ -116,13 +116,24 @@ function loadoptions() {
             'unlemmatized': $('#unlemmatizedbutton'),
         };
 
+        const baggingbuttons =  {
+            'alternates': $('#alternates-ison'),
+            'flat': $('#flatlemma-ison'),
+            'winnertakesall': $('#winnertakesall-ison'),
+            'unlemmatized': $('#unlemmatized-ison'),
+        };
+
         Object.keys(baggingmethods).forEach(function(returnedkey) {
             if (data.baggingmethod !== returnedkey) {
                 baggingmethods[returnedkey].prop('checked', false);
+                baggingbuttons[returnedkey].hide();
             } else {
                 baggingmethods[returnedkey].prop('checked', true);
+                baggingbuttons[returnedkey].show();
             }
         });
+
+
 
         let setspinnervalues = {
             'earliestdate': $('#earliestdate'),
