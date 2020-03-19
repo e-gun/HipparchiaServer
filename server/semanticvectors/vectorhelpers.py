@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import time
+from collections import deque
 from string import punctuation
 
 import psycopg2
@@ -19,11 +20,11 @@ from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefr
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, querytotalwordcounts
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
-from server.formatting.wordformatting import acuteorgrav, buildhipparchiatranstable, elidedextrapunct, extrapunct, \
-	minimumgreek, removegravity, stripaccents, tidyupterm, basiclemmacleanup
+from server.formatting.wordformatting import acuteorgrav, basiclemmacleanup, buildhipparchiatranstable, \
+	elidedextrapunct, extrapunct, minimumgreek, removegravity, stripaccents, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
-from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
+from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildbetweenwhereextension
 from server.startup import lemmatadict
@@ -563,12 +564,66 @@ def buildwinnertakeallbagsofwords(morphdict, sentences):
 		esse ===> sum
 		esse =/=> edo
 
+	assuming that it is faster to do this 2x so you can do a temp table query rather than iterate into DB
+
+	not tested/profiled, though...
+
 	:param morphdict:
 	:param sentences:
 	:return:
 	"""
 
-	raise NotImplemented
+	# PART ONE: figure out who the "winners" are going to be
+
+	bagsofwords = buildflatbagsofwords(morphdict, sentences)
+
+	allheadwords = {w for bag in bagsofwords for w in bag}
+
+	dbconnection = ConnectionObject(readonlyconnection=False)
+	dbconnection.setautocommit()
+	dbcursor = dbconnection.cursor()
+
+	rnd = assignuniquename(6)
+
+	tqtemplate = """
+	CREATE TEMPORARY TABLE temporary_headwordlist_{rnd} AS
+		SELECT headwords AS hw FROM unnest(ARRAY[{allwords}]) headwords
+	"""
+
+	qtemplate = """
+	SELECT entry_name, total_count FROM {db} 
+		WHERE EXISTS 
+			(SELECT 1 FROM temporary_headwordlist_{rnd} temptable WHERE temptable.hw = {db}.entry_name)
+	"""
+
+	tempquery = tqtemplate.format(rnd=rnd, allwords=list(allheadwords))
+	dbcursor.execute(tempquery)
+	# https://www.psycopg.org/docs/extras.html#psycopg2.extras.execute_values
+	# third parameter is
+
+	query = qtemplate.format(rnd=rnd, db='dictionary_headword_wordcounts')
+	dbcursor.execute(query)
+	results = resultiterator(dbcursor)
+
+	randkedheadwords = {r[0]: r[1] for r in results}
+
+	# PART TWO: let the winners take all
+
+	bagsofwords = deque()
+	for s in sentences:
+		lemattized = list()
+		for word in s:
+			# [('x', 4), ('y', 5), ('z', 1)]
+			try:
+				possibilities = sorted([(item, randkedheadwords[item]) for item in morphdict[word]], key=lambda x: x[1])
+				# first item of last tuple is the winner
+				lemattized.append(possibilities[-1][0])
+			except KeyError:
+				pass
+		if lemattized:
+			bagsofwords.append(lemattized)
+
+	return bagsofwords
 
 
 def buildflatbagsofwords(morphdict, sentences):
