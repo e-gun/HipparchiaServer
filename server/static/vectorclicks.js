@@ -59,7 +59,16 @@ function hideallboxes() {
 function findotheroptions(thisoption) {
     const xoredoptions = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph',
         '#sentencesimilarity', '#topicmodel', '#analogiescheckbox'];
-    let xor = [];
+    return xorfinder(thisoption, xoredoptions);
+}
+
+function xorbaggingoptions(thisoption) {
+    const xoredoptions = ['#flatbagbutton', '#alternatebagbutton', '#winnertakesallbutton'];
+    return xorfinder(thisoption, xoredoptions);
+}
+
+function xorfinder(thisoption, xoredoptions){
+    let xor = Array();
     for (let i = 0; i < xoredoptions.length; i++) {
         let opt = $(xoredoptions[i]);
         if (opt.attr('id') !== thisoption) {
@@ -122,6 +131,46 @@ function restorecheckboxestodefault() {
     lsf.hide();
     plsf.hide();
 }
+
+// match sessionfunctions.py
+// 	baggingmethods = [
+// 		'alternates',
+// 		'flat',
+// 		'winnertakesall' ]
+
+$('#alternatebagbutton').change(function() {
+    let myname = 'alternates';
+    if(this.checked) {
+        let others = xorbaggingoptions(this.id);
+        $(others).prop('checked', false);
+        setoptions('baggingmethod', myname);
+    } else {
+        setoptions('baggingmethod', 'resettodefault');
+        }
+    });
+
+$('#flatbagbutton').change(function() {
+    let myname = 'flat';
+    if(this.checked) {
+        let others = xorbaggingoptions(this.id);
+        $(others).prop('checked', false);
+        setoptions('baggingmethod', myname);
+    } else {
+        setoptions('baggingmethod', 'resettodefault');
+        }
+    });
+
+$('#winnertakesallbutton').change(function() {
+    let myname = 'winnertakesall';
+    if(this.checked) {
+        let others = xorbaggingoptions(this.id);
+        $(others).prop('checked', false);
+        setoptions('baggingmethod', myname);
+    } else {
+        setoptions('baggingmethod', 'resettodefault');
+        }
+    });
+
 
 $('#cosdistbysentence').change(function() {
     restoreplaceholders();
@@ -306,7 +355,7 @@ $('#executeanalogysearch').click(function() {
     // @hipparchia.route('/vectoranalogies/<searchid>/<termone>/<termtwo>/<termthree>')
     let url = `/vectoranalogies/${searchid}/${A}/${B}/${C}`;
     $.getJSON(url, function (returnedresults) { loadanalogyresults(returnedresults); });
-
+    checkactivityviawebsocket(searchid);
 });
 
 function loadanalogyresults(outputdata) {
@@ -314,6 +363,8 @@ function loadanalogyresults(outputdata) {
     targetarea.html(outputdata['found']);
     // console.log(outputdata);
 }
+
+
 
 trmonelem.change(function() {
     if(this.checked) {

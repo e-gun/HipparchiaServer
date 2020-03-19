@@ -49,9 +49,9 @@ def requireauthentication(routefunction):
 
 	htmlresults = """
 	<br>
-	you are not logged in
-	<br>
-	please log in and try again
+	<div class="center">
+		<span class="label largerthannormal">You are not logged in.</span> Please log in and try again
+	</div>
 	<br>
 	"""
 
@@ -62,10 +62,11 @@ def requireauthentication(routefunction):
 	itemsweuse = set(textmakeritems + browseritems + searchitems + indexmakeritems)
 	outputdict = {i: str() for i in itemsweuse}
 
-	def wrapper(*args, **kwargs):
+	def wrapperfunction(*args, **kwargs):
 		if session['loggedin'] or not hipparchia.config['LIMITACCESSTOLOGGEDINUSERS']:
 			return routefunction(*args, **kwargs)
 		else:
+			# different functions send their output to different bits of the page: try to get the message to one of them
 			outputdict['title'] = 'not logged in'
 			outputdict['searchsummary'] = htmlresults
 			outputdict['browserhtml'] = htmlresults
@@ -75,6 +76,6 @@ def requireauthentication(routefunction):
 			jsonoutput = json.dumps(outputdict)
 			return jsonoutput
 
-	wrapper.__name__ = wrappername
+	wrapperfunction.__name__ = wrappername
 
-	return wrapper
+	return wrapperfunction

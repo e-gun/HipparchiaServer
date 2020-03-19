@@ -107,6 +107,20 @@ function loadoptions() {
             }
         });
 
+        const baggingmethods =  {
+            // be careful about 'winnertakeall' vs 'winnerstakeall', etc.
+            'alternates': $('#alternatebagbutton'),
+            'flat': $('#flatbagbutton'),
+            'winnertakeall': $('#winnertakesallbutton')};
+
+        Object.keys(baggingmethods).forEach(function(returnedkey) {
+            if (data.baggingmethod !== returnedkey) {
+                baggingmethods[returnedkey].prop('checked', false);
+            } else {
+                baggingmethods[returnedkey].prop('checked', true);
+            }
+        });
+
         let setspinnervalues = {
             'earliestdate': $('#earliestdate'),
             'latestdate': $('#latestdate'),

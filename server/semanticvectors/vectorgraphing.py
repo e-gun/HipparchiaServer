@@ -387,13 +387,14 @@ def generatethefineprint(vtype: str, vectorvalues: VectorValues) -> str:
 	except KeyError:
 		c = '[unknown]'
 
-	fineprint = 'dimensions: {d} · sentences per document: {n} · window: {w} · minimum presence: {p} · training runs: {i} · downsample: {s} · cutoff: {c}'
-	fineprint = fineprint.format(d=vv.dimensions,
-	                             n=vv.sentencesperdocument,
-	                             w=vv.window,
-	                             p=vv.minimumpresence,
-	                             i=vv.trainingiterations,
-	                             s=vv.downsample,
-	                             c=c)
+	fineprint = 'bagging: {b} · dimensions: {d} · sentences per document: {n} · window: {w} · minimum presence: {p} · training runs: {i} · downsample: {s} · cutoff: {c}'
+	fineprint = fineprint.format(b=vv.baggingmethod,
+								d=vv.dimensions,
+								n=vv.sentencesperdocument,
+								w=vv.window,
+								p=vv.minimumpresence,
+								i=vv.trainingiterations,
+								s=vv.downsample,
+								c=c)
 
 	return fineprint

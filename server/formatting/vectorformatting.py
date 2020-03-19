@@ -321,7 +321,6 @@ def vectorhtmlforoptionsbar() -> str:
 			<span id="vectoralt_moretools" title="Lexical tools" class="ui-icon ui-icon-wrench"></span>
 			<span id="vectoralt_clear_button" class="ui-icon ui-icon-close" title="Reset session/Clear search"></span>
 		</div>
-		<p class="optionlabel">Semantic Vector Settings</p>
 		{contents}
 	</div>
 	"""
@@ -344,6 +343,35 @@ def vectorhtmlforoptionsbar() -> str:
 		htmlsupplement.append(fieldtemplate.format(k=k, lg=lg, d=vectordefaults[k]))
 
 	htmlsupplement = '\n'.join(htmlsupplement)
+	htmlsupplement = '<p class="optionlabel">Semantic Vector Settings</p>\n' + htmlsupplement
+
+	baggingtemplate = """
+	<span id="{sid}" style="">
+			<span class="small">{slb}</span>
+			<input type="checkbox" id="{bid}" value="yes" title="{bti}">
+	</span>
+	"""
+
+	baggingoptions = {
+		'flat': {'sid': 'flatbagspan', 'slb': 'Flat bags', 'bid': 'flatbagbutton', 'bti': 'Build flat bags of words'},
+		'alternates': {'sid': 'alternatebagspan', 'slb': 'Composite alternates', 'bid': 'alternatebagbutton', 'bti': 'Build composite alternates bags of words'},
+		'winnertakesall': {'sid': 'winnerbagspan', 'slb': 'Winner takes all', 'bid': 'winnertakesallbutton', 'bti': 'Bags contain only the most popular homonym'},
+	}
+
+	baggingsupplement = list()
+	for b in baggingoptions:
+		sid = baggingoptions[b]['sid']
+		slb = baggingoptions[b]['slb']
+		bid = baggingoptions[b]['bid']
+		bti = baggingoptions[b]['bti']
+		baggingsupplement.append(baggingtemplate.format(sid=sid, slb=slb, bid=bid, bti=bti))
+
+	baggingsupplement = '&middot;&nbsp;\n'.join(baggingsupplement)
+
+	baggingsupplement = '<p class="optionlabel">How to fill the bags of words</p>\n' + baggingsupplement
+
+	# prepend
+	htmlsupplement = baggingsupplement + htmlsupplement
 
 	htmlsupplement = framedcontents.format(contents=htmlsupplement)
 
@@ -431,7 +459,9 @@ def analogiesgenerateoutput(searchobject, findstuples: list) -> str:
 	</tr>
 	"""
 
-	thdr = thdrtemplate.format(a=str(), b=str(), c=str())
+	meth = searchobject.session['baggingmethod']
+
+	thdr = thdrtemplate.format(a=str(), b=meth, c=str())
 
 	rowtemplate = """
 	<tr>

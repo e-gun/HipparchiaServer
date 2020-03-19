@@ -135,11 +135,11 @@ def analogysearch(searchid, termone, termtwo, termthree):
 	if not hipparchia.config['VECTORANALOGIESENABLED']:
 		return redirect(url_for('frontpage'))
 
-	acceptinginput = True
-	if not acceptinginput:
-		termone = 'φιλοϲοφία'
-		termtwo = 'ἐπιϲτήμη'
-		termthree = 'γυμναϲία'
+	# acceptinginput = True
+	# if not acceptinginput:
+	# 	termone = 'φιλοϲοφία'
+	# 	termtwo = 'ἐπιϲτήμη'
+	# 	termthree = 'γυμναϲία'
 
 	try:
 		termone = lemmatadict[termone]
@@ -158,4 +158,5 @@ def analogysearch(searchid, termone, termtwo, termthree):
 	so = SearchObject(pollid, seeking, proximate, termone, termtwo, session)
 	so.lemmathree = termthree
 
+	# vectorsearch(vectortype, searchid, headform, so=None)
 	return vectorsearch('analogyfinder', pollid, None, so=so)
