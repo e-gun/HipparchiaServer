@@ -33,6 +33,7 @@ def probeforsessionvariables():
 		session['auselections'] = list()
 		session['authorssummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALAUTHORS']
 		session['available'] = probefordatabases()
+		session['baggingmethod'] = hipparchia.config['DEFAULTBAGGINGMETHOD']
 		session['bracketangled'] = hipparchia.config['DEFAULTHIGHLIGHTANGLEDBRACKETS']
 		session['bracketcurly'] = hipparchia.config['DEFAULTHIGHLIGHTCURLYBRACKETS']
 		session['bracketround'] = hipparchia.config['DEFAULTHIGHLIGHTROUNDBRACKETS']

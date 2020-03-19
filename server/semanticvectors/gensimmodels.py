@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+	HipparchiaServer: an interface to a database of Greek and Latin texts
+	Copyright: E Gunderson 2016-20
+	License: GNU GENERAL PUBLIC LICENSE 3
+		(see LICENSE in the top level directory of the distribution)
+"""
+
+from server import hipparchia
 from server.dbsupport.vectordbfunctions import storevectorindatabase
 from server.semanticvectors.vectorhelpers import buildflatbagsofwords, buildwinnertakeallbagsofwords, buildbagsofwordswithalternates
 from server.threading.mpthreadcount import setthreadcount
@@ -72,7 +81,8 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	                  'alternates': buildbagsofwordswithalternates,
 	                  'winnertakeall': buildwinnertakeallbagsofwords}
 
-	bagofwordsfunction = baggingmethods['winnertakeall']
+	# print('baggingmethod is', searchobject.session['baggingmethod'])
+	bagofwordsfunction = baggingmethods[searchobject.session['baggingmethod']]
 
 	bagsofwords = bagofwordsfunction(morphdict, sentences)
 

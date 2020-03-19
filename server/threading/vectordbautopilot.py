@@ -126,6 +126,7 @@ def determinevectorworkpile(tempcap=False) -> List[tuple]:
 
 	if multiprocessing.current_process().name == 'MainProcess':
 		consolewarning('the vectorbot is active and searching for items that need to be vectorized', color='green')
+		consolewarning('bagging method has been set to: {b}'.format(b=hipparchia.config['DEFAULTBAGGINGMETHOD']))
 
 	authors = [(authordict[a].universalid, authordict[a].countwordsinworks()) for a in authordict]
 	authorsbylength = sorted(authors, key=lambda x: x[1])

@@ -83,7 +83,9 @@
 # AUTOVECTORIZE will fill the vector db in the background; this will chew up plenty of resources:
 #   both drive space and CPU time; do not set this to True unless you are ready for the commitment
 #
-
+# DEFAULTBAGGINGMETHOD defines what makes for a bag of words and so determines the core structure of the vectorized
+#   landscape...
+#
 # Windows 10 is not ready for semantic vectors
 #	TypeError: can't pickle psycopg2.extensions.connection objects
 
@@ -116,6 +118,12 @@ LDAITERATIONS = 12
 LDAMUSTBELONGERTHAN = 3
 
 AUTOVECTORIZE = False
+
+# baggingmethods = {'flat': buildflatbagsofwords,
+#                   'alternates': buildbagsofwordswithalternates,
+#                   'winnertakeall': buildwinnertakeallbagsofwords}
+
+DEFAULTBAGGINGMETHOD = 'flat'
 
 
 """

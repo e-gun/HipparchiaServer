@@ -124,6 +124,12 @@ def modifysessionvariable(parameter, value):
 		'tensorflowgraph',
 		]
 
+	baggingmethods = [
+		'alternates',
+		'flat',
+		'winnertakesall'
+	]
+
 	for o in [miscoptions, trueorfalse]:
 		availableoptions.extend(o)
 
@@ -237,6 +243,10 @@ def modifysessionvariable(parameter, value):
 		pass
 	else:
 		session['fontchoice'] = hipparchia.config['HOSTEDFONTFAMILY']
+
+	if session['baggingmethod'] not in baggingmethods:
+		# session['baggingmethod'] = 'flat'
+		session['baggingmethod'] = hipparchia.config['DEFAULTBAGGINGMETHOD']
 
 	# print('set', parameter, 'to', session[parameter])
 	session.modified = True

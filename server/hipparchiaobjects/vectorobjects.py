@@ -32,6 +32,7 @@ class VectorValues(object):
 		self.ldaminfreq = s['ldaminfreq']
 		self.ldaiterations = s['ldaiterations']
 		self.ldamustbelongerthan = s['ldamustbelongerthan']
+		self.baggingmethod = s['baggingmethod']
 
 	def __eq__(self, other):
 		sd = self.__dict__
@@ -40,7 +41,11 @@ class VectorValues(object):
 		# cc = [(sd[k], od[k]) for k in sd.keys()]
 		# print('VectorValues cc', cc)
 
-		comp = [sd[k] == od[k] for k in sd.keys()]
+		try:
+			comp = [sd[k] == od[k] for k in sd.keys()]
+		except KeyError:
+			return False
+
 		if set(comp) == {True}:
 			return True
 		else:
