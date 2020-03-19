@@ -6,10 +6,11 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-from server import hipparchia
 from server.dbsupport.vectordbfunctions import storevectorindatabase
-from server.semanticvectors.vectorhelpers import buildflatbagsofwords, buildwinnertakeallbagsofwords, buildbagsofwordswithalternates
+from server.semanticvectors.vectorhelpers import buidunlemmatizedbagsofwords, buildbagsofwordswithalternates, \
+	buildflatbagsofwords, buildwinnertakeallbagsofwords
 from server.threading.mpthreadcount import setthreadcount
+
 try:
 	from gensim.models import Word2Vec
 except ImportError:
@@ -79,7 +80,8 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 
 	baggingmethods = {'flat': buildflatbagsofwords,
 	                  'alternates': buildbagsofwordswithalternates,
-	                  'winnertakeall': buildwinnertakeallbagsofwords}
+	                  'winnertakeall': buildwinnertakeallbagsofwords,
+	                  'unlemmatized': buidunlemmatizedbagsofwords}
 
 	# print('baggingmethod is', searchobject.session['baggingmethod'])
 	bagofwordsfunction = baggingmethods[searchobject.session['baggingmethod']]

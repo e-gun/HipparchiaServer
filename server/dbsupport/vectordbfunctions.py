@@ -203,11 +203,10 @@ def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout=
 	if not result:
 		return False
 
-	storedvectorvlaues = pickle.loads(result[0])
+	storedvectorvalues = pickle.loads(result[0])
 	currentvectorvalues = searchobject.vectorvalues
 
-	if storedvectorvlaues == currentvectorvalues:
-		# print('vv matched')
+	if storedvectorvalues == currentvectorvalues:
 		returnval = pickle.loads(result[1])
 	else:
 		# print('vv not a match')

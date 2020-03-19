@@ -121,7 +121,8 @@ AUTOVECTORIZE = False
 
 # baggingmethods = {'flat': buildflatbagsofwords,
 #                   'alternates': buildbagsofwordswithalternates,
-#                   'winnertakeall': buildwinnertakeallbagsofwords}
+#                   'winnertakeall': buildwinnertakeallbagsofwords,
+#                   'unlemmatized': buidunlemmatizedbagsofwords}
 
 DEFAULTBAGGINGMETHOD = 'flat'
 

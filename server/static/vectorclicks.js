@@ -63,7 +63,7 @@ function findotheroptions(thisoption) {
 }
 
 function xorbaggingoptions(thisoption) {
-    const xoredoptions = ['#flatbagbutton', '#alternatebagbutton', '#winnertakesallbutton'];
+    const xoredoptions = ['#flatbagbutton', '#alternatebagbutton', '#winnertakesallbutton', '#unlemmatizedbutton'];
     return xorfinder(thisoption, xoredoptions);
 }
 
@@ -151,6 +151,17 @@ $('#alternatebagbutton').change(function() {
 
 $('#flatbagbutton').change(function() {
     let myname = 'flat';
+    if(this.checked) {
+        let others = xorbaggingoptions(this.id);
+        $(others).prop('checked', false);
+        setoptions('baggingmethod', myname);
+    } else {
+        setoptions('baggingmethod', 'resettodefault');
+        }
+    });
+
+$('#unlemmatizedbutton').change(function() {
+    let myname = 'unlemmatized';
     if(this.checked) {
         let others = xorbaggingoptions(this.id);
         $(others).prop('checked', false);

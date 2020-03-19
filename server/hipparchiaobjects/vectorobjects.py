@@ -38,8 +38,12 @@ class VectorValues(object):
 		sd = self.__dict__
 		od = other.__dict__
 		assert isinstance(other, VectorValues), 'VectorValues can only be compared with VectorValues'
-		# cc = [(sd[k], od[k]) for k in sd.keys()]
-		# print('VectorValues cc', cc)
+
+		# for k in sd.keys():
+		# 	print('vvo:',k,sd[k])
+		#
+		# for k in od.keys():
+		# 	print('odo:',k,od[k])
 
 		try:
 			comp = [sd[k] == od[k] for k in sd.keys()]

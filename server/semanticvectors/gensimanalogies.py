@@ -6,6 +6,8 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import re
+
 from server.formatting.vectorformatting import analogiesgenerateoutput
 from server.semanticvectors.gensimnearestneighbors import buildnnvectorspace
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
@@ -50,7 +52,12 @@ def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace):
 	# similarities are less interesting than cosimilarities
 	# similarities = vectorspace.wv.most_similar(positive=positive, negative=negative, topn=4)
 
-	cosimilarities = vectorspace.wv.most_similar_cosmul(positive=positive, negative=negative, topn=5)
+	try:
+		cosimilarities = vectorspace.wv.most_similar_cosmul(positive=positive, negative=negative, topn=5)
+	except KeyError as theexception:
+		# KeyError: "word 'terra' not in vocabulary"
+		missing = re.search(r'word \'(.*?)\'', str(theexception))
+		cosimilarities = [('"{m}" was missing from the vector space'.format(m=missing.group(1)), 0)]
 
 	# print('generateanalogies() similarities are')
 	# for s in similarities:

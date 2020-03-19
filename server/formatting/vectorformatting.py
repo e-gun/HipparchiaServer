@@ -356,6 +356,7 @@ def vectorhtmlforoptionsbar() -> str:
 		'flat': {'sid': 'flatbagspan', 'slb': 'Flat bags', 'bid': 'flatbagbutton', 'bti': 'Build flat bags of words'},
 		'alternates': {'sid': 'alternatebagspan', 'slb': 'Composite alternates', 'bid': 'alternatebagbutton', 'bti': 'Build composite alternates bags of words'},
 		'winnertakesall': {'sid': 'winnerbagspan', 'slb': 'Winner takes all', 'bid': 'winnertakesallbutton', 'bti': 'Bags contain only the most popular homonym'},
+		'unlemmatized': {'sid': 'unlemmatizedspan', 'slb': 'No lemmatizing', 'bid': 'unlemmatizedbutton', 'bti': 'Bags contain exactly what the sentence says'},
 	}
 
 	baggingsupplement = list()

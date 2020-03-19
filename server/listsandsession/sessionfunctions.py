@@ -122,12 +122,14 @@ def modifysessionvariable(parameter, value):
 		'searchscope',
 		'sortorder',
 		'tensorflowgraph',
+		'baggingmethod'
 		]
 
 	baggingmethods = [
 		'alternates',
 		'flat',
-		'winnertakesall'
+		'winnertakesall',
+		'unlemmatized'
 	]
 
 	for o in [miscoptions, trueorfalse]:
@@ -143,6 +145,10 @@ def modifysessionvariable(parameter, value):
 		session[parameter] = value
 	else:
 		pass
+
+	if session['baggingmethod'] not in baggingmethods:
+		# session['baggingmethod'] = 'flat'
+		session['baggingmethod'] = hipparchia.config['DEFAULTBAGGINGMETHOD']
 
 	# drop all selections/exclusions from any corpus that you just disabled
 	cc = ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']
@@ -244,11 +250,8 @@ def modifysessionvariable(parameter, value):
 	else:
 		session['fontchoice'] = hipparchia.config['HOSTEDFONTFAMILY']
 
-	if session['baggingmethod'] not in baggingmethods:
-		# session['baggingmethod'] = 'flat'
-		session['baggingmethod'] = hipparchia.config['DEFAULTBAGGINGMETHOD']
+	# print('"{v}" caused "{p}" to become "{q}"'.format(v=value, p=parameter, q=session[parameter]))
 
-	# print('set', parameter, 'to', session[parameter])
 	session.modified = True
 
 	return

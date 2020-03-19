@@ -626,6 +626,23 @@ def buildwinnertakeallbagsofwords(morphdict, sentences):
 	return bagsofwords
 
 
+def buidunlemmatizedbagsofwords(morphdict, sentences):
+	"""
+
+	you wasted a bunch of cycles generating the morphdict, now you will fail to use it...
+
+	what you see is what you get...
+
+	:param morphdict:
+	:param sentences:
+	:return:
+	"""
+
+	bagsofwords = sentences
+
+	return bagsofwords
+
+
 def buildflatbagsofwords(morphdict, sentences):
 	"""
 	turn a list of sentences into a list of list of headwords
