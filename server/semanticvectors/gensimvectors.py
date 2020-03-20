@@ -60,7 +60,8 @@ def executegensimsearch(searchobject):
 
 	activecorpora = so.getactivecorpora()
 
-	if (so.lemma or so.tovectorize) and activecorpora:
+	# so.seeking should only be set via a fallback when session['baggingmethod'] == 'unlemmatized'
+	if (so.lemma or so.tovectorize or so.seeking) and activecorpora:
 		activepoll.statusis('Compiling the list of works to search')
 		searchlist = compilesearchlist(listmapper, so.session)
 	elif not activecorpora:

@@ -38,13 +38,20 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 	so = searchobject
 	vv = so.vectorvalues
 	activepoll = so.poll
-	termone = so.lemma.dictionaryentry
 	imagename = str()
+	try:
+		termone = so.lemma.dictionaryentry
+	except AttributeError:
+		# AttributeError: 'str' object has no attribute 'dictionaryentry'
+		# session['baggingmethod'] == 'unlemmatized' (I hope...)
+		termone = so.seeking
 
 	try:
 		termtwo = so.proximatelemma.dictionaryentry
 	except AttributeError:
 		termtwo = None
+
+	print('termonone', termone)
 
 	if not vectorspace:
 		vectorspace = buildnnvectorspace(sentencetuples, so)

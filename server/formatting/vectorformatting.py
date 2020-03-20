@@ -392,6 +392,8 @@ def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: 
 	:return:
 	"""
 
+	vectorsearchwaslemmatized = True
+
 	so = searchobject
 	activepoll = so.poll
 	output = SearchOutputObject(so)
@@ -399,14 +401,27 @@ def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: 
 
 	findsjs = generatevectorjs()
 
-	lm = so.lemma.dictionaryentry
+	try:
+		lm = so.lemma.dictionaryentry
+	except AttributeError:
+		# AttributeError: 'NoneType' object has no attribute 'dictionaryentry'
+		vectorsearchwaslemmatized = False
+		lm = so.seeking
+
 	try:
 		pr = so.proximatelemma.dictionaryentry
 	except AttributeError:
 		# proximatelemma is None
 		pr = None
 
-	output.title = 'Neighbors for all forms of »{skg}«'.format(skg=lm, pr=pr)
+	if vectorsearchwaslemmatized:
+		extrastringone = 'all forms of '
+		ht = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
+	else:
+		extrastringone = str()
+		ht = '<span class="sought">»{skg}«</span>'
+
+	output.title = 'Neighbors for {es}»{skg}«'.format(skg=lm, pr=pr, es=extrastringone)
 	output.found = findshtml
 	output.js = findsjs
 
@@ -416,8 +431,8 @@ def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: 
 		pass
 
 	output.setscope(workssearched)
-	output.thesearch = 'all forms of »{skg}«'.format(skg=lm)
-	output.htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
+	output.thesearch = '{es}»{skg}«'.format(skg=lm, es=extrastringone)
+	output.htmlsearch = ht
 	output.sortby = 'proximity'
 	output.image = imagename
 	output.searchtime = so.getelapsedtime()
