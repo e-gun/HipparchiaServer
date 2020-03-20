@@ -119,11 +119,9 @@ def vectorsearch(vectortype, searchid, headform, so=None):
 def analogysearch(searchid, termone, termtwo, termthree):
 	"""
 
-	FOR TESTING ONLY; WILL NOT SEND OUTPUT TO BROWSER
-
 	the results are distinctly unsatisfying....
 
-	abandon for now? what is the lesson here? it probably teaches you something about the other results that is worth knowing...
+	what is the lesson here? it probably teaches you something about the other results that is worth knowing...
 
 	A:B :: C:D
 
