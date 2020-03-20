@@ -186,6 +186,7 @@ def buildfakesearchobject(qtype='nearestneighborsquery') -> SearchObject:
 	frozensession['ldaminfreq'] = hipparchia.config['LDAMINFREQ']
 	frozensession['ldaiterations'] = hipparchia.config['LDAITERATIONS']
 	frozensession['ldamustbelongerthan'] = hipparchia.config['LDAMUSTBELONGERTHAN']
+	frozensession['baggingmethod'] = hipparchia.config['DEFAULTBAGGINGMETHOD']
 
 	blanks = ['searchscope', 'nearornot', 'onehit']
 	for b in blanks:
