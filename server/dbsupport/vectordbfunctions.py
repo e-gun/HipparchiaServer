@@ -41,6 +41,7 @@ def createvectorstable():
 		thumbprint bytea,
 		uidlist text[] COLLATE pg_catalog."default",
 		vectortype character varying(10) COLLATE pg_catalog."default",
+		baggingmethod character varying(24) COLLATE pg_catalog."default",
 		calculatedvectorspace bytea
 	)
 	WITH (
@@ -116,6 +117,15 @@ def storevectorindatabase(searchobject: SearchObject, vectortype: str, vectorspa
 
 	vectorspace will be something like '<class 'gensim.models.word2vec.Word2Vec'>'
 
+	hipparchiaDB=# select ts,uidlist,vectortype,baggingmethod from storedvectors;
+	         ts          | uidlist  | vectortype | baggingmethod
+	---------------------+----------+------------+----------------
+	 2020-03-20 14:21:00 | {lt1318} | nn         | flat
+	 2020-03-20 14:25:00 | {lt1318} | nn         | winnertakesall
+	 2020-03-20 14:25:00 | {lt1318} | nn         | alternates
+	 2020-03-20 14:26:00 | {lt1318} | nn         | unlemmatized
+	(4 rows)
+
 	:param vectorspace:
 	:param uidlist:
 	:param vectortype:
@@ -130,21 +140,25 @@ def storevectorindatabase(searchobject: SearchObject, vectortype: str, vectorspa
 	dbconnection = ConnectionObject(ctype='rw')
 	dbcursor = dbconnection.cursor()
 
-	q = 'DELETE FROM public.storedvectors WHERE (uidlist = %s and vectortype = %s)'
-	d = (uidlist, vectortype)
+	q = """
+	DELETE FROM public.storedvectors WHERE 
+		(uidlist = %s AND vectortype = %s AND baggingmethod = %s)
+	"""
+
+	d = (uidlist, vectortype, searchobject.session['baggingmethod'])
 	dbcursor.execute(q, d)
 
 	q = """
 	INSERT INTO public.storedvectors 
-		(ts, thumbprint, uidlist, vectortype, calculatedvectorspace)
-		VALUES (%s, %s, %s, %s, %s)
+		(ts, thumbprint, uidlist, vectortype, baggingmethod, calculatedvectorspace)
+		VALUES (%s, %s, %s, %s, %s, %s)
 	"""
 
 	pickledvectors = pickle.dumps(vectorspace)
 	ts = datetime.now().strftime("%Y-%m-%d %H:%M")
 	thumbprint = pickle.dumps(searchobject.vectorvalues)
 
-	d = (ts, thumbprint, uidlist, vectortype, pickledvectors)
+	d = (ts, thumbprint, uidlist, vectortype, searchobject.session['baggingmethod'], pickledvectors)
 	dbcursor.execute(q, d)
 
 	# print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))
@@ -185,9 +199,9 @@ def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout=
 	q = """
 	SELECT {crit}, calculatedvectorspace 
 		FROM public.storedvectors 
-		WHERE uidlist=%s AND vectortype=%s
+		WHERE uidlist=%s AND vectortype=%s AND baggingmethod = %s
 	"""
-	d = (uidlist, vectortype)
+	d = (uidlist, vectortype, searchobject.session['baggingmethod'])
 
 	try:
 		cursor.execute(q.format(crit=careabout), d)
