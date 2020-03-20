@@ -143,8 +143,8 @@ def findabsolutevectorsfromhits(searchobject, hitdict, workssearched):
 	so = searchobject
 	activepoll = so.poll
 
-	so.proximate = ''
-	so.proximatelemma = ''
+	so.proximate = str()
+	so.proximatelemma = str()
 
 	activepoll.statusis('Compiling proximite wordlists')
 	environs = fetchverctorenvirons(hitdict, so)
@@ -243,6 +243,7 @@ def generateabsolutevectorsoutput(listsofwords: list, workssearched: list, searc
 		xtra = 'all forms of '
 	else:
 		xtra = str()
+
 	output.thesearch = '{x}»{skg}«'.format(x=xtra, skg=focus)
 	output.htmlsearch = '{x}<span class="sought">»{skg}«</span>'.format(x=xtra, skg=focus)
 

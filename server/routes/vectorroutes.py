@@ -71,7 +71,8 @@ def vectorsearch(vectortype, searchid, headform, so=None):
 		proximatelemma = str()
 		so = SearchObject(pollid, seeking, proximate, lemma, proximatelemma, session)
 
-	if session['baggingmethod'] == 'unlemmatized':
+	if so.session['baggingmethod'] == 'unlemmatized' and not so.seeking:
+		# analogysearch() might have already set so.seeking
 		so.seeking = so.searchtermcleanup(headform)
 
 	progresspolldict[pollid] = ProgressPoll(pollid)
