@@ -51,7 +51,7 @@ def validatepollid(searchid, maxchars=36) -> str:
 	:return:
 	"""
 
-	pollid = re.sub(r'[^a-f0-9-]', '', searchid[:maxchars])
+	pollid = re.sub(r'[^a-f0-9-]', str(), searchid[:maxchars])
 
 	if pollid != searchid:
 		consolewarning('this_poll_will_never_be_found: searchid ≠ pollid ({a} ≠ {b})'.format(a=searchid, b=pollid), color='red')
@@ -75,9 +75,9 @@ def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True, 
 
 	colormap = {
 		'red': ('!!! ', ' !!!'),
-		'yellow': ('>>> ', ''),
-		'green': ('+++ ', ''),
-		'cyan': ('=== ', ''),
+		'yellow': ('>>> ', str()),
+		'green': ('+++ ', str()),
+		'cyan': ('=== ', str()),
 	}
 
 	try:

@@ -49,7 +49,8 @@ def insertparserids(lineobject: dbWorkLine, continuationdict: dict) -> str:
 	"""
 
 	theline = lineobject.markedup
-	newline = ['']
+	newline = [str()]
+	whitespace = ' '
 
 	brackettypes = findactivebrackethighlighting()
 	if brackettypes:
@@ -62,8 +63,8 @@ def insertparserids(lineobject: dbWorkLine, continuationdict: dict) -> str:
 
 	# OK, you have your segments, but the following will have a spacing problem ('</observed><span...>' vs '</observed> <span...>':
 	#	['ὁ μὲν ', '<span class="expanded">', 'Μυρμιδόϲιν·', '</span>']
-	# you can fix the formatting issue by adding an item that is just a blank space: ' '
-	#	['ὁ μὲν ', ' ', '<span class="expanded">', 'Μυρμιδόϲιν·', '</span>']
+	# you can fix the formatting issue by adding an item that is just a blank space: whitespace
+	#	['ὁ μὲν ', whitespace, '<span class="expanded">', 'Μυρμιδόϲιν·', '</span>']
 	# another place where you need space:
 	#	['</span>', ' Κωπάιδων']
 
@@ -72,11 +73,11 @@ def insertparserids(lineobject: dbWorkLine, continuationdict: dict) -> str:
 		if len(segments[0]) > 1 and re.search(r'\s$', segments[0]) and re.search(r'^<', segments[1]):
 			# ['ὁ μὲν ', '<span class="expanded">', 'Μυρμιδόϲιν·', '</span>']
 			properlyspacedsegments.append(segments.popleft())
-			properlyspacedsegments.append(' ')
+			properlyspacedsegments.append(whitespace)
 		elif re.search(r'>$', segments[0]) and re.search(r'^\s', segments[1]):
 			# ['</span>', ' Κωπάιδων']
 			properlyspacedsegments.append(segments.popleft())
-			properlyspacedsegments.append(' ')
+			properlyspacedsegments.append(whitespace)
 		else:
 			properlyspacedsegments.append(segments.popleft())
 	properlyspacedsegments.append(segments.popleft())
@@ -87,7 +88,7 @@ def insertparserids(lineobject: dbWorkLine, continuationdict: dict) -> str:
 			# this is markup don't 'observe' it
 			newline[-1] += segment
 		else:
-			words = segment.split(' ')
+			words = segment.split(whitespace)
 			words = ['{wd} '.format(wd=w) for w in words if len(w) > 0]
 			words = deque(words)
 
@@ -100,7 +101,7 @@ def insertparserids(lineobject: dbWorkLine, continuationdict: dict) -> str:
 				lastword = None
 
 			try:
-				lastword = re.sub(r'\s$', r'', lastword)
+				lastword = re.sub(r'\s$', str(), lastword)
 			except TypeError:
 				pass
 
@@ -114,7 +115,7 @@ def insertparserids(lineobject: dbWorkLine, continuationdict: dict) -> str:
 				lastword = None
 
 			if not firstword:
-				newline[-1] += ' '
+				newline[-1] += whitespace
 
 			if firstword:
 				if bracketcheck(firstword):
@@ -132,9 +133,9 @@ def insertparserids(lineobject: dbWorkLine, continuationdict: dict) -> str:
 				else:
 					newline.append(addobservedtags(lastword, lastword, hyphenated))
 
-	newline = ''.join(newline)
+	newline = str().join(newline)
 	cleaner = re.compile(r'<observed id=""></observed>')
-	newline = re.sub(cleaner, '', newline)
+	newline = re.sub(cleaner, str(), newline)
 
 	return newline
 

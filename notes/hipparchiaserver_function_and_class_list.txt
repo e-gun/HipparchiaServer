@@ -1,25 +1,27 @@
 hipparchia_venv/ $ cloc --not-match-f='^j' HipparchiaServer/
-     169 text files.
-     166 unique files.
-      24 files ignored.
+     185 text files.
+     184 unique files.
+      23 files ignored.
 
-github.com/AlDanial/cloc v 1.84  T=0.74 s (205.8 files/s, 48531.4 lines/s)
+github.com/AlDanial/cloc v 1.84  T=0.43 s (390.5 files/s, 90417.0 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                         110           6138           8629          15017
-HTML                            28            178             26           1858
-JavaScript                       5            265            161           1455
-CSS                              2            315             75           1268
-Markdown                         1             62              0            217
-XML                              6              0              0            182
+Python                         120           6521           9222          15854
+JavaScript                      11            374            251           2108
+HTML                            29            180             29           1933
+CSS                              2            319             75           1313
+XML                              6              0              0            671
+Markdown                         1             62              0            219
 -------------------------------------------------------------------------------
-SUM:                           152           6958           8891          19997
+SUM:                           169           7456           9577          22098
+-------------------------------------------------------------------------------
 
 
 server/ $  grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
 dbsupport/redisdbfunctions.py:class NullRedis(object):
 dbsupport/redisdbfunctions.py:class PooledRedisBorg(object):
+hipparchiaobjects/authenticationobjects.py:class PassUser(object):
 hipparchiaobjects/browserobjects.py:class BrowserOutputObject(object):
 hipparchiaobjects/browserobjects.py:class BrowserPassageObject(object):
 hipparchiaobjects/connectionobject.py:class GenericConnectionObject(object):
@@ -50,6 +52,11 @@ hipparchiaobjects/morphanalysisobjects.py:class DeclinedFormFunctions(object):
 hipparchiaobjects/morphanalysisobjects.py:class ConjugatedFormFunctions(object):
 hipparchiaobjects/morphologyobjects.py:class MorphPossibilityObject(object):
 hipparchiaobjects/morphologyobjects.py:class dbLemmaObject(object):
+hipparchiaobjects/parsingobjects.py:class InputParsingObject(object):
+hipparchiaobjects/parsingobjects.py:class TextmakerInputParsingObject(InputParsingObject):
+hipparchiaobjects/parsingobjects.py:class IndexmakerInputParsingObject(InputParsingObject):
+hipparchiaobjects/parsingobjects.py:class BrowserInputParsingObject(InputParsingObject):
+hipparchiaobjects/parsingobjects.py:class StructureInputParsingObject(InputParsingObject):
 hipparchiaobjects/progresspoll.py:class SharedMemoryProgressPoll(object):
 hipparchiaobjects/progresspoll.py:class RedisProgressPoll(object):
 hipparchiaobjects/progresspoll.py:class NullProgressPoll(object):
@@ -73,14 +80,16 @@ calculatewordweights.py:def findgenreweightfromworkobject(genre: str, language: 
 calculatewordweights.py:def findcorpusweight(corpus: str, language: str) -> int:
 calculatewordweights.py:def findcorpusweightviawordcounts(corpus: str) -> int:
 commandlineoptions.py:def getcommandlineargs():
-configureatstartup.py:def startupprint(message: str):
+configureatstartup.py:def startupprint(message: str, color='white', isbold=False, colorcoded=False, baremessage=True):
+authentication/authenticationwrapper.py:def requireauthentication(routefunction):
+authentication/knownusers.py:def loadusersdict(knownusersandpasswords=None):
 browsing/browserfunctions.py:def buildbrowseroutputobject(authorobject: dbAuthor, workobject: dbOpus, locusindexvalue: int, dbcursor) -> BrowserOutputObject:
 browsing/browserfunctions.py:def checkfordocumentmetadata(workline: dbWorkLine, workobject: dbOpus) -> str:
 browsing/browserfunctions.py:def fetchhtmltemplateformetadatarow(shownotes=True):
-browsing/browserfunctions.py:def findlinenumberfromcitation(method: str, citation: str, workobject: dbOpus, dbcursor) -> tuple:
-browsing/browserfunctions.py:def findlinenumberfromlinenumber(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
-browsing/browserfunctions.py:def findlinenumberfromlocus(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
-browsing/browserfunctions.py:def findlinenumberfromperseus(citation: str, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
+browsing/browserfunctions.py:def browserfindlinenumberfromcitation(method: str, citationlist: list, workobject: dbOpus, dbcursor) -> tuple:
+browsing/browserfunctions.py:def browserfindlinenumberfromlinenumber(citationlist: list, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
+browsing/browserfunctions.py:def browserfindlinenumberfromlocus(citationlist: list, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
+browsing/browserfunctions.py:def browserfindlinenumberfromperseus(citationlist: list, workobject: dbOpus, resultmessage: str, dbcursor) -> tuple:
 dbsupport/bulkdboperations.py:def loadallauthorsasobjects() -> dict:
 dbsupport/bulkdboperations.py:def loadallworksasobjects() -> dict:
 dbsupport/bulkdboperations.py:def loadlemmataasobjects() -> dict:
@@ -88,8 +97,8 @@ dbsupport/bulkdboperations.py:def loadallworksintoallauthors(authorsdict, worksd
 dbsupport/citationfunctions.py:def findvalidlevelvalues(workobject: dbOpus, partialcitationtuple: tuple, cursor) -> LowandHighInfo:
 dbsupport/citationfunctions.py:def locusintocitation(workobject: dbOpus, lineobject: dbWorkLine) -> str:
 dbsupport/citationfunctions.py:def prolixlocus(workobject: dbOpus, citationtuple: tuple) -> str:
-dbsupport/citationfunctions.py:def finddblinefromlocus(workobject: dbOpus, citationtuple: tuple, dbcursor) -> int:
-dbsupport/citationfunctions.py:def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, cursor, trialnumber=0) -> dict:
+dbsupport/citationfunctions.py:def finddblinefromlocus(workobject: dbOpus, citationtuple: tuple, dbcursor, findlastline=False) -> int:
+dbsupport/citationfunctions.py:def finddblinefromincompletelocus(workobject: dbOpus, citationlist: list, dbcursor, trialnumber=0, findlastline=False) -> dict:
 dbsupport/citationfunctions.py:def perseuslookupleveltrimmer(workobject: dbOpus, citationlist: list, cursor, trialnumber: int) -> dict:
 dbsupport/citationfunctions.py:def perseuslookupchangecase(citationlist: list) -> list:
 dbsupport/citationfunctions.py:def perseusdelabeler(citationlist: list, workobject: dbOpus) -> list:
@@ -98,7 +107,7 @@ dbsupport/dbbuildinfo.py:def buildoptionchecking() -> dict:
 dbsupport/dbbuildinfo.py:def versionchecking(activedbs: list, expectedsqltemplateversion: str) -> str:
 dbsupport/dblinefunctions.py:def dblineintolineobject(dbline: tuple) -> dbWorkLine:
 dbsupport/dblinefunctions.py:def grabonelinefromwork(workdbname: str, lineindex: int, cursor) -> tuple:
-dbsupport/dblinefunctions.py:def returnfirstlinenumber(workid: str, cursor) -> int:
+dbsupport/dblinefunctions.py:def returnfirstorlastlinenumber(workid: str, dbcursor, findlastline=False, disallowt=False, disallowlevel=0) -> int:
 dbsupport/dblinefunctions.py:def makeablankline(work: str, fakelinenumber: int) -> dbWorkLine:
 dbsupport/dblinefunctions.py:def bulklinegrabber(table: str, column: str, criterion: str, setofcriteria, cursor) -> dict:
 dbsupport/dblinefunctions.py:def grablistoflines(table: str, uidlist: list) -> list:
@@ -121,13 +130,12 @@ dbsupport/miscdbfunctions.py:def dbloadasingleworkobject(workuniversalid: str) -
 dbsupport/miscdbfunctions.py:def findselectionboundaries(workobject: dbOpus, selection: str, cursor) -> tuple:
 dbsupport/miscdbfunctions.py:def simplecontextgrabber(authortable: str, focusline: int, linesofcontext: int, cursor) -> list:
 dbsupport/miscdbfunctions.py:def perseusidmismatch(badworkdbnumber: str, cursor) -> str:
-dbsupport/miscdbfunctions.py:def returnfirstwork(authorid: str, cursor) -> str:
+dbsupport/miscdbfunctions.py:def returnfirstwork(authorid: str, dbcursor=None) -> str:
 dbsupport/miscdbfunctions.py:def makeanemptyauthor(universalid: str) -> dbAuthor:
 dbsupport/miscdbfunctions.py:def makeanemptywork(universalid: str) -> dbOpus:
 dbsupport/miscdbfunctions.py:def getpostgresserverversion() -> str:
 dbsupport/miscdbfunctions.py:def probefordatabases() -> dict:
 dbsupport/miscdbfunctions.py:def icanpickleconnections() -> bool:
-dbsupport/miscdbfunctions.py:def buildauthorworkandpassage(author: str, work: str, passage: str, authordict: dict, workdict: dict, dbcursor) -> dict:
 dbsupport/redisdbfunctions.py:def establishredisconnection() -> redis.client.Redis:
 dbsupport/redisdbfunctions.py:def buildredissearchlist(listofsearchlocations: List, searchid: str):
 dbsupport/redisdbfunctions.py:def loadredisresults(searchid):
@@ -216,7 +224,7 @@ formatting/bibliographicformatting.py:def woformatworkinfo(workobject: dbOpus) -
 formatting/bibliographicformatting.py:def formatname(workobject: dbOpus, authorobject: dbAuthor) -> str:
 formatting/bibliographicformatting.py:def formatpublicationinfo(pubinfo: str) -> str:
 formatting/bibliographicformatting.py:def avoidlonglines(string: str, maxlen: int, splitval: str, stringlist=list()) -> str:
-formatting/bibliographicformatting.py:def formatauthorandworkinfo(authorname: str, workobject: dbOpus) -> str:
+formatting/bibliographicformatting.py:def formatauthorandworkinfo(authorname: str, workobject: dbOpus, countprovided=False) -> str:
 formatting/bracketformatting.py:def gtltsubstitutes(text: str) -> str:
 formatting/bracketformatting.py:def brackethtmlifysearchfinds(listoflineobjects: list, searchobject: SearchObject, linehtmltemplate: str) -> list:
 formatting/browserformatting.py:def insertparserids(lineobject: dbWorkLine, continuationdict: dict) -> str:
@@ -261,6 +269,7 @@ formatting/vectorformatting.py:def locusformat(dblineobject: dbWorkLine) -> str:
 formatting/vectorformatting.py:def vectorhtmlforfrontpage() -> str:
 formatting/vectorformatting.py:def vectorhtmlforoptionsbar() -> str:
 formatting/vectorformatting.py:def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: str, workssearched: int, searchobject: SearchObject) -> str:
+formatting/vectorformatting.py:def analogiesgenerateoutput(searchobject, findstuples: list) -> str:
 formatting/vectorformatting.py:def lsiformatoutput(findshtml: str, workssearched: int, matches: list, searchobject: SearchObject) -> str:
 formatting/vectorformatting.py:def ldatopicsgenerateoutput(ldavishtmlandjs: str, workssearched: int, settings: dict, searchobject: SearchObject):
 formatting/wordformatting.py:def removegravity(accentedword: str) -> str:
@@ -271,7 +280,7 @@ formatting/wordformatting.py:def gkattemptelision(hypenatedgreekheadword: str) -
 formatting/wordformatting.py:def latattemptelision(hypenatedlatinheadword: str) -> str:
 formatting/wordformatting.py:def tidyupterm(word: str, punct=None) -> str:
 formatting/wordformatting.py:def universalregexequivalent(searchterm: str) -> str:
-formatting/wordformatting.py:def depunct(stringtoclean, allowedpunctuationsting=None):
+formatting/wordformatting.py:def depunct(stringtoclean: str, allowedpunctuationsting=None) -> str:
 formatting/wordformatting.py:def avoidsmallvariants(text: str) -> str:
 formatting/wordformatting.py:def forcelunates(text: str) -> str:
 formatting/wordformatting.py:def basiclemmacleanup(text: str) -> str:
@@ -281,6 +290,9 @@ formatting/wordformatting.py:def wordlistintoregex(wordlist: list) -> str:
 formatting/wordformatting.py:def upperorlowerregex(word: str) -> str:
 formatting/wordformatting.py:def acuteorgrav(word: str) -> str:
 formatting/wordformatting.py:def setdictionarylanguage(thisword) -> str:
+formatting/wordformatting.py:def uforvoutsideofmarkup(textwithmarkup) -> str:
+formatting/wordformatting.py:def citationcharacterset() -> set:
+formatting/wordformatting.py:def reducetovalidcitationcharacters(text: str, supplement=None) -> str:
 hipparchiaobjects/searchfunctionobjects.py:def returnsearchfncobject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction):
 listsandsession/checksession.py:def probeforsessionvariables():
 listsandsession/checksession.py:def convertyesnototruefalse():
@@ -329,7 +341,11 @@ listsandsession/whereclauses.py:def configurewhereclausedata(searchlist: list, w
 listsandsession/whereclauses.py:def wholeworkbetweenclausecontents(listofworkobjects: list) -> List[Tuple[int, int]]:
 listsandsession/whereclauses.py:def wholeworktemptablecontents(authorid: str, setoflinenumbers: set) -> Dict[str, str]:
 listsandsession/whereclauses.py:def partialworkbetweenclausecontents(workobject: dbOpus, searchobject: SearchObject) -> Tuple[str, Dict[str, list]]:
+routes/authenticationroutes.py:def hipparchialogin():
+routes/authenticationroutes.py:def hipparchialogout():
+routes/authenticationroutes.py:def checkuser():
 routes/browseroute.py:def grabtextforbrowsing(method, author, work, location=None):
+routes/browseroute.py:def rawcitationgrabtextforbrowsing(author: str, work: str, location=None):
 routes/cssroutes.py:def loadcssfile(cssrequest):
 routes/frontpage.py:def frontpage():
 routes/frontpage.py:def sendfavicon():
@@ -339,7 +355,8 @@ routes/getterroutes.py:def getsessionvariables():
 routes/getterroutes.py:def cookieintosession(cookienum):
 routes/getterroutes.py:def findtheworksof(authoruid):
 routes/getterroutes.py:def findworkstructure(author, work, passage=None):
-routes/getterroutes.py:def getauthinfo(authorid):
+routes/getterroutes.py:def sampleworkcitation(authorid: str, workid: str) -> str:
+routes/getterroutes.py:def getauthinfo(authorid: str):
 routes/getterroutes.py:def getsearchlistcontents():
 routes/getterroutes.py:def getgenrelistcontents():
 routes/getterroutes.py:def fetchstoredimage(figurename):
@@ -365,13 +382,16 @@ routes/resetroutes.py:def resetvectorgraphs():
 routes/searchroute.py:def executesearch(searchid, so=None):
 routes/searchroute.py:def singlewordsearch(searchid, searchterm):
 routes/searchroute.py:def headwordsearch(searchid, headform):
-routes/searchroute.py:def vectorsearch(vectortype, searchid, headform):
 routes/selectionroutes.py:def selectionmade():
 routes/selectionroutes.py:def setsessionvariable(thevariable, thevalue):
 routes/selectionroutes.py:def clearselections(category, index=-1):
 routes/selectionroutes.py:def getcurrentselections():
-routes/textandindexroutes.py:def buildindexto(searchid: str, author: str, work=None, passage=None):
-routes/textandindexroutes.py:def textmaker(author: str, work=None, passage=None):
+routes/textandindexroutes.py:def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=None, citationdelimiter='|'):
+routes/textandindexroutes.py:def indexfromrawlocus(searchid: str, author: str, work=None, location=None, endpoint=None):
+routes/textandindexroutes.py:def textmaker(author: str, work=None, passage=None, endpoint=None, citationdelimiter='|'):
+routes/textandindexroutes.py:def texmakerfromrawlocus(author: str, work: str, location: str, endpoint=None):
+routes/vectorroutes.py:def vectorsearch(vectortype, searchid, headform, so=None):
+routes/vectorroutes.py:def analogysearch(searchid, termone, termtwo, termthree):
 routes/websocketroutes.py:def checkforactivesearch(searchid):
 searching/phrasesearching.py:def phrasesearch(wkid: str, searchobject: SearchObject, cursor) -> List[dbWorkLine]:
 searching/phrasesearching.py:def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: str, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
@@ -394,14 +414,15 @@ searching/searchfunctions.py:def dblooknear(index: int, distanceinlines: int, se
 searching/searchfunctions.py:def buildsearchobject(searchid: str, therequest: request, thesession: session) -> SearchObject:
 searching/searchfunctions.py:def loadsearchqueue(iterable, workers):
 searching/substringsearching.py:def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, cursor, templimit=None) -> Generator:
+semanticvectors/gensimanalogies.py:def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace):
 semanticvectors/gensimlsi.py:def lsigenerateoutput(sentencestuples, workssearched, searchobject, lsispace):
 semanticvectors/gensimlsi.py:def lsifindmatches(sentencestuples, searchobject, lsispace):
 semanticvectors/gensimlsi.py:def lsibuildspace(morphdict, sentences):
+semanticvectors/gensimmodels.py:def buildgensimmodel(searchobject, morphdict, sentences):
 semanticvectors/gensimnearestneighbors.py:def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vectorspace):
 semanticvectors/gensimnearestneighbors.py:def buildnnvectorspace(sentencetuples, searchobject):
 semanticvectors/gensimnearestneighbors.py:def findapproximatenearestneighbors(query, mymodel, vectorvalues: VectorValues):
 semanticvectors/gensimnearestneighbors.py:def findword2vecsimilarities(termone, termtwo, mymodel):
-semanticvectors/gensimnearestneighbors.py:def buildgensimmodel(searchobject, morphdict, sentences):
 semanticvectors/gensimvectors.py:def executegensimsearch(searchobject):
 semanticvectors/preparetextforvectorization.py:def vectorprepdispatcher(searchobject):
 semanticvectors/preparetextforvectorization.py:def breaktextsintosentences(foundsentences, searchlist, searchobject, dbconnection):
@@ -435,6 +456,8 @@ semanticvectors/vectorhelpers.py:def bruteforcefinddblinefromsentence(thissenten
 semanticvectors/vectorhelpers.py:def finddblinesfromsentences(thissentence, sentencestuples, cursor):
 semanticvectors/vectorhelpers.py:def convertlineuidstolineobject(listoflines, cursor):
 semanticvectors/vectorhelpers.py:def convertsingleuidtodblineobject(lineuid, cursor):
+semanticvectors/vectorhelpers.py:def buildwinnertakesallbagsofwords(morphdict, sentences):
+semanticvectors/vectorhelpers.py:def buidunlemmatizedbagsofwords(morphdict, sentences):
 semanticvectors/vectorhelpers.py:def buildflatbagsofwords(morphdict, sentences):
 semanticvectors/vectorhelpers.py:def buildbagsofwordswithalternates(morphdict, sentences):
 semanticvectors/vectorhelpers.py:def mostcommoninflectedforms(cheat=True) -> set:
@@ -444,10 +467,10 @@ semanticvectors/vectorhelpers.py:def mostcommonwordsviaheadwords() -> set:
 semanticvectors/vectorhelpers.py:def removestopwords(sentencestring, stopwords):
 semanticvectors/vectorhelpers.py:def relativehomonymnweight(worda, wordb, morphdict) -> float:
 semanticvectors/vectorhelpers.py:def readgitdata():
-semanticvectors/vectorpseudoroutes.py:def findabsolutevectorsbysentence(searchobject):
-semanticvectors/vectorpseudoroutes.py:def findabsolutevectorsfromhits(searchobject, hitdict, workssearched):
-semanticvectors/vectorpseudoroutes.py:def generateabsolutevectorsoutput(listsofwords: list, workssearched: list, searchobject, vtype: str):
-semanticvectors/vectorpseudoroutes.py:def emptyvectoroutput(searchobject, reasons=list()):
+semanticvectors/vectorroutehelperfunctions.py:def findabsolutevectorsbysentence(searchobject):
+semanticvectors/vectorroutehelperfunctions.py:def findabsolutevectorsfromhits(searchobject, hitdict, workssearched):
+semanticvectors/vectorroutehelperfunctions.py:def generateabsolutevectorsoutput(listsofwords: list, workssearched: list, searchobject, vtype: str):
+semanticvectors/vectorroutehelperfunctions.py:def emptyvectoroutput(searchobject, reasons=list()):
 textsandindices/indexmaker.py:def buildindextowork(cdict: dict, activepoll, headwords: bool, cursor) -> List[tuple]:
 textsandindices/indexmaker.py:def generatesortedoutputbyword(completeindexdict: dict, onework: bool, alphabetical: bool) -> List[tuple]:
 textsandindices/indexmaker.py:def generatesortedoutputbyheadword(completeindexdict: dict, onework: bool, alphabetical: bool, activepoll) -> List[tuple]:

@@ -371,6 +371,14 @@ $('#analogyfinder').change(function() {
     });
 
 $('#executeanalogysearch').click(function() {
+    $('#imagearea').empty();
+    $('#searchsummary').html('');
+    $('#displayresults').html('');
+    $('#analogiesresults').html('');
+    let pd = $('#pollingdata');
+
+    pd.html('');
+    pd.show();
     let A = $('#analogiesinputA').val();
     let B = $('#analogiesinputB').val();
     let C = $('#analogiesinputC').val();

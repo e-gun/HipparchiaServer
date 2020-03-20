@@ -12,7 +12,7 @@ import os
 
 devel = True
 
-hipparchiaserverversion = '1.5.1'
+hipparchiaserverversion = '1.6.0'
 supplement = '+ [DEVEL]'
 
 if devel:

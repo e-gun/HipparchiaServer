@@ -451,7 +451,7 @@ def analogiesgenerateoutput(searchobject, findstuples: list) -> str:
 		c = so.termthree
 
 	tabletemplate = """
-	<table class="vectortable">
+	<table class="vectortable outline">
 	{thdr}
 	{rows}
 	<table>
@@ -467,13 +467,13 @@ def analogiesgenerateoutput(searchobject, findstuples: list) -> str:
 
 	meth = searchobject.session['baggingmethod']
 
-	thdr = thdrtemplate.format(a=str(), b=meth, c=str())
+	thdr = thdrtemplate.format(a='Bagging method:', b=meth, c=str())
 
 	rowtemplate = """
 	<tr>
 		<td>{wrd}</td>
 		<td></td>
-		<td>{val: .3f}</td>
+		<td>{val}</td>
 	</tr>
 	"""
 

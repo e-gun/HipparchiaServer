@@ -94,6 +94,7 @@ key features:
 	    hover over interface items to get tooltips
 
 	misc
+        restrict access via user/pass combinations
 	    accepts betacode input of greek (with or without accents):
 	        "MH=NIN A)/EIDE QEA\"
 	        "mh=nin a)/eide qea\"
@@ -278,4 +279,7 @@ What you will see when you point a browser at a HipparchiaServer:
 ![neighborhood_corpus](screenshots/23_vector_ui.png)
 
 1. explore morphology
-![morphology table](screenshots/24_morphology_tables.png)
+![morphology table](screenshots/24_morphology_tables
+
+1. analogy finder
+![morphology table](screenshots/25_analogy_finder.png)

@@ -72,8 +72,10 @@ def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace):
 		missing = re.search(r'word \'(.*?)\'', str(theexception))
 		cosimilarities = [('"{m}" was missing from the vector space'.format(m=missing.group(1)), 0)]
 
-	simlabel = [('<b>similarities</b>', -1)]
-	cosimlabel = [('<b>cosimilarities</b>', -1)]
+	simlabel = [('<b>similarities</b>', str())]
+	cosimlabel = [('<b>cosimilarities</b>', str())]
+	similarities = [(s[0], round(s[1], 3)) for s in similarities]
+	cosimilarities = [(s[0], round(s[1], 3)) for s in cosimilarities]
 
 	output = simlabel + similarities + cosimlabel + cosimilarities
 
