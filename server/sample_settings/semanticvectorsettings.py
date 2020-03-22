@@ -123,6 +123,12 @@ AUTOVECTORIZE = False
 #                   'alternates': buildbagsofwordswithalternates,
 #                   'winnertakesall': buildwinnertakesallbagsofwords,
 #                   'unlemmatized': buidunlemmatizedbagsofwords}
+#
+# alternates: rewrite sentence to put all base forms of homonyms as a single term; esp -> "edo•sum"
+# flat: rewrite sentence to put all base forms of homonyms right next to one another; est --> "edo sum"
+# winndertakesall: rewrite sentence and insert only the most prevalent base form; est -> "sum"
+# unlemmatized: do not rewrite the sentence (and so do not associate forms with one antother); est -> "est"
+#
 
 DEFAULTBAGGINGMETHOD = 'winnertakesall'
 

@@ -35,11 +35,15 @@ FOOLISHLYALLOWREGEX = ''
 
 # 62 chars in the following line of Accius: Quódsi, ut decuit, stáres mecum aut méus ⟨te⟩ maestarét dolor,
 # 14 chars for Digest 50.17.211.pr.2
-MAXIMUMQUERYLENGTH = 64
+MAXIMUMQUERYLENGTH = 72
 MAXIMUMLOCUSLENGTH = 24
 MAXIMUMLEXICALLENGTH = 18
 
+
 # apply remote access restrictions
+# NB: you really shouldn't be opening up hipparchia to the whole internet...
+# the default configuration assumes that anyone who is able to connect to localhost can freely use the server
+# and the only person who will normally fit that bill is the individual who launched HipparchiaServer
 
 LIMITACCESSTOLOGGEDINUSERS = False
 SETADEFAULTUSER = True
