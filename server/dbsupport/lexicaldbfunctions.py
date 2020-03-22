@@ -5,13 +5,14 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
 import re
 from typing import List
 
 import psycopg2
 from flask import session
 
-from server.dbsupport.miscdbfunctions import resultiterator
+from server.dbsupport.miscdbfunctions import resultiterator, cleanpoolifneeded
 from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.abbreviations import unpackcommonabbreviations
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
@@ -44,6 +45,7 @@ def headwordsearch(seeking: str, limit: str, usedictionary: str, usecolumn: str)
 	:return:
 	"""
 
+	cleanpoolifneeded()
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
@@ -112,6 +114,7 @@ def reversedictionarylookup(seeking: str, usedict: str, limit=None) -> List:
 	:return:
 	"""
 
+	cleanpoolifneeded()
 	dbconnection = ConnectionObject()
 	dbconnection.setautocommit()
 	dbcursor = dbconnection.cursor()
@@ -167,6 +170,8 @@ def findentrybyid(usedict: str, entryid: str) -> dbDictionaryEntry:
 	:param entryid:
 	:return:
 	"""
+
+	cleanpoolifneeded()
 	dbconnection = ConnectionObject()
 	dbconnection.setautocommit()
 	dbcursor = dbconnection.cursor()

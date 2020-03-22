@@ -14,7 +14,7 @@ from typing import List
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject
-from server.dbsupport.miscdbfunctions import icanpickleconnections
+from server.dbsupport.miscdbfunctions import icanpickleconnections, cleanpoolifneeded
 from server.dbsupport.redisdbfunctions import buildredissearchlist, loadredisresults
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -45,11 +45,7 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	# clean out the pool if neccessary before starting
 	# this seems like the safest time for a reset of the pool: otherwise you could have workers working
 	# but if you have a multi-user environment AND pool problems this code might make things worse
-	if hipparchia.config['ENABLEPOOLCLEANING'] and hipparchia.config['CONNECTIONTYPE'] == 'pool':
-		c = ConnectionObject()
-		if c.poolneedscleaning:
-			c.resetpool()
-		c.connectioncleanup()
+	cleanpoolifneeded()
 
 	so = searchobject
 	activepoll = so.poll

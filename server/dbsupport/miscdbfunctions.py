@@ -11,8 +11,8 @@ from os import name as osname
 
 import psycopg2
 
+from server import hipparchia
 from server.formatting.miscformatting import consolewarning
-from server.formatting.wordformatting import reducetovalidcitationcharacters
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
@@ -367,3 +367,21 @@ def icanpickleconnections() -> bool:
 	c[0].connectioncleanup()
 
 	return result
+
+
+def cleanpoolifneeded():
+	"""
+
+	clean out the pool if neccessary before starting
+	this seems like the safest time for a reset of the pool: otherwise you could have workers working
+	but if you have a multi-user environment AND pool problems this code might make things worse
+
+	:return:
+	"""
+
+	if hipparchia.config['ENABLEPOOLCLEANING'] and hipparchia.config['CONNECTIONTYPE'] == 'pool':
+		c = ConnectionObject()
+		if c.poolneedscleaning:
+			c.resetpool()
+		c.connectioncleanup()
+	return
