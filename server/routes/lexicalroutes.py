@@ -354,6 +354,8 @@ def reverselexiconsearch(searchid, searchterm):
 
 	jsondict = json.dumps(returndict)
 
+	del progresspolldict[pollid]
+
 	return jsondict
 
 

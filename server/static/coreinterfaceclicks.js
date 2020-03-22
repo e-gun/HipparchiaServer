@@ -365,6 +365,9 @@ $('#lexicalsearch').click(function(){
         restoreme = searchterm;
     } else if ( reverseterm.length > 0 ) {
         $('#searchsummary').html('');
+        let pd = $('#pollingdata');
+        pd.html('');
+        pd.show();
         let searchid = generateId(8);
         checkactivityviawebsocket(searchid);
         let originalterm = reverseterm;
