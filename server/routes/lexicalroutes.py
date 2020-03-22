@@ -19,14 +19,16 @@ from server.dbsupport.lexicaldbfunctions import findentrybyid, headwordsearch, l
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.jsformatting import dictionaryentryjs, insertlexicalbrowserjs, morphologychartjs
 from server.formatting.lexicaformatting import getobservedwordprevalencedata
-from server.formatting.miscformatting import consolewarning
+from server.formatting.miscformatting import consolewarning, validatepollid
 from server.formatting.wordformatting import abbreviatedsigmarestoration, attemptsigmadifferentiation, depunct, \
 	removegravity, stripaccents, tidyupterm
 from server.formatting.wordformatting import setdictionarylanguage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.lexicaloutputobjects import lexicalOutputObject, multipleWordOutputObject
 from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
+from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.checksession import justlatin, justtlg, probeforsessionvariables
+from server.startup import progresspolldict
 
 
 @hipparchia.route('/dictsearch/<searchterm>')
@@ -232,20 +234,27 @@ def findbyform(observedword):
 	return jsondict
 
 
-@hipparchia.route('/reverselookup/<searchterm>')
+@hipparchia.route('/reverselookup/<searchid>/<searchterm>')
 @requireauthentication
-def reverselexiconsearch(searchterm):
+def reverselexiconsearch(searchid, searchterm):
 	"""
 	attempt to find all of the greek/latin dictionary entries that might go with the english search term
 
 	'ape' will drive this crazy; what is needed is a lookup for only the senses
 
-	this can be built into the dictionary via beautiful soup
+	this can be built into the dictionary
 
+	:param searchid:
+	:param searchterm:
 	:return:
 	"""
 
 	searchterm = searchterm[:hipparchia.config['MAXIMUMLEXICALLENGTH']]
+	pollid = validatepollid(searchid)
+	progresspolldict[pollid] = ProgressPoll(pollid)
+	activepoll = progresspolldict[pollid]
+	activepoll.activate()
+	activepoll.statusis('Search lexical entries for "{t}"'.format(t=searchterm))
 
 	probeforsessionvariables()
 

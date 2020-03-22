@@ -351,6 +351,7 @@ $('#lexicalsearch').click(function(){
     let url = '';
     let dialogtitle = '';
     let mydictfield = '';
+
     if ( dictterm.length > 0) {
         searchterm = dictterm;
         url = '/dictsearch/';
@@ -363,11 +364,14 @@ $('#lexicalsearch').click(function(){
         mydictfield = '#parser';
         restoreme = searchterm;
     } else if ( reverseterm.length > 0 ) {
+        $('#searchsummary').html('');
+        let searchid = generateId(8);
+        checkactivityviawebsocket(searchid);
         let originalterm = reverseterm;
         // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
         if (reverseterm.slice(-1) === ' ') { reverseterm = reverseterm.slice(0, -1) + '%20'; }
         searchterm = reverseterm;
-        url = '/reverselookup/';
+        url = '/reverselookup/' + searchid + '/';
         dialogtitle = originalterm;
         mydictfield = '#reverselexicon';
         restoreme = searchterm;
