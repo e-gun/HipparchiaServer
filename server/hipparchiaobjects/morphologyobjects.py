@@ -59,6 +59,41 @@ class MorphPossibilityObject(object):
 		else:
 			return False
 
+	def canbeanadverb(self) -> bool:
+		analysislist = self.getanalysislist()
+		test = [a for a in analysislist if 'adverb' in a]
+		if not test:
+			return False
+		else:
+			return True
+
+	def isconjugated(self) -> bool:
+		# note that we are only checking for 1st princip part here; therefore looking at headwords
+		# if you want conjugated forms, then....
+		# analysislist: ['perf part pass masc dat sg', ...]
+		analysislist = self.getanalysislist()
+		tokens = [a.split(' ') for a in analysislist]
+		flatten = lambda l: [item for sublist in l for item in sublist]
+		tokens = set(flatten(tokens))
+		thumbprints = {'pres', 'ind', 'act', 'pass', 'mid', '1st'}
+		if not tokens & thumbprints:
+			return False
+		else:
+			return True
+
+	def isdeclined(self) -> bool:
+		analysislist = self.getanalysislist()
+		tokens = [a.split(' ') for a in analysislist]
+		flatten = lambda l: [item for sublist in l for item in sublist]
+		tokens = set(flatten(tokens))
+		thumbprints = {'nom', 'sg', 'masc', 'fem'}
+		if not tokens & thumbprints:
+			return False
+		elif self.isconjugated():
+			return False
+		else:
+			return True
+
 	def language(self) -> str:
 		if self.amgreek():
 			return 'greek'
@@ -159,33 +194,3 @@ class MorphPossibilityObject(object):
 		baseform = re.sub(r'^\s', '', baseform)
 
 		return baseform
-
-
-class dbLemmaObject(object):
-	"""
-	an object that corresponds to a db line
-
-	CREATE TABLE public.greek_lemmata (
-		dictionary_entry character varying(64) COLLATE pg_catalog."default",
-		xref_number integer,
-		derivative_forms text COLLATE pg_catalog."default"
-	)
-
-	hipparchiaDB=# select count(dictionary_entry) from greek_lemmata;
-	 count
-	--------
-	 114098
-	(1 row)
-
-	hipparchiaDB=# select count(dictionary_entry) from latin_lemmata;
-	 count
-	-------
-	 38662
-	(1 row)
-
-	"""
-
-	def __init__(self, dictionaryentry, xref, derivativeforms):
-		self.dictionaryentry = dictionaryentry
-		self.xref = xref
-		self.formlist = derivativeforms

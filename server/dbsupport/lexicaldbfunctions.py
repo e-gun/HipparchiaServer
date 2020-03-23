@@ -12,14 +12,14 @@ from typing import List
 import psycopg2
 from flask import session
 
+from server.dbsupport.bulkdboperations import bulklexicalgrab
 from server.dbsupport.miscdbfunctions import resultiterator, cleanpoolifneeded
 from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.abbreviations import unpackcommonabbreviations
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject
+from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject, dbLemmaObject
 from server.hipparchiaobjects.lexicalobjects import dbDictionaryEntry, dbGreekWord, dbLatinWord
-from server.hipparchiaobjects.morphologyobjects import dbLemmaObject
 from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
 
@@ -799,36 +799,7 @@ def bulkfindmorphologyobjects(listofwords: List[str], language: str) -> List[dbM
 	:return:
 	"""
 
-	dbconnection = ConnectionObject(readonlyconnection=False)
-	dbcursor = dbconnection.cursor()
-
-	tqtemplate = """
-	CREATE TEMP TABLE bulkmorph_{rnd} AS
-		SELECT values AS 
-			entriestocheck FROM unnest(ARRAY[%s]) values
-	"""
-
-	uniquename = assignuniquename(12)
-	tempquery = tqtemplate.format(rnd=uniquename)
-	data = (listofwords,)
-	dbcursor.execute(tempquery, data)
-
-	qtemplate = """
-	SELECT * FROM {lg}_morphology WHERE EXISTS 
-		(SELECT 1 FROM bulkmorph_{rnd} tocheck WHERE tocheck.entriestocheck = {lg}_morphology.observed_form)
-	"""
-
-	query = qtemplate.format(rnd=uniquename, lg=language)
-
-	try:
-		dbcursor.execute(query)
-		results = resultiterator(dbcursor)
-	except psycopg2.ProgrammingError:
-		# if you do not have the wordcounts installed: 'ProgrammingError: relations "wordcounts_a" does not exist
-		results = list()
-
+	results = bulklexicalgrab(listofwords, 'morphology', 'observed_form', language)
 	morphobjects = [dbMorphologyObject(*r) for r in results]
-
-	dbconnection.connectioncleanup()
 
 	return morphobjects

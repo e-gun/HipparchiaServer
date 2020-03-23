@@ -6,13 +6,24 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-from server.semanticvectors.gensimmodels import buildgensimmodel
-from server.hipparchiaobjects.vectorobjects import VectorValues
+import re
+from typing import List
+
+from flask import session
+
+from server.dbsupport.bulkdboperations import bulklexicalgrab
+from server.dbsupport.lexicaldbfunctions import lookformorphologymatches
 from server.formatting.vectorformatting import formatnnmatches, formatnnsimilarity, nearestneighborgenerateoutput
+from server.hipparchiaobjects.lexicalobjects import dbColumnorderGreekword, dbColumnorderLatinword
+from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
+from server.hipparchiaobjects.vectorobjects import VectorValues
+from server.semanticvectors.gensimmodels import buildgensimmodel
 from server.semanticvectors.vectorgraphing import graphnnmatches
 from server.semanticvectors.vectorhelpers import convertmophdicttodict, findwordvectorset
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
+from server.startup import lemmatadict
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
+from server.hipparchiaobjects.connectionobject import ConnectionObject
 
 
 def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vectorspace):
@@ -35,6 +46,8 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 	:return:
 	"""
 
+	posrestriction = 'testing'
+
 	so = searchobject
 	vv = so.vectorvalues
 	activepoll = so.poll
@@ -50,8 +63,6 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 		termtwo = so.proximatelemma.dictionaryentry
 	except AttributeError:
 		termtwo = None
-
-	print('termonone', termone)
 
 	if not vectorspace:
 		vectorspace = buildnnvectorspace(sentencetuples, so)
@@ -73,6 +84,11 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 			termone = termone[0].lower() + termone[1:]
 			mostsimilar = findapproximatenearestneighbors(termone, vectorspace, vv)
 		if mostsimilar:
+			# you can get back >1000 items
+			if posrestriction:
+				activepoll.statusis('Trimming by part of speech')
+				validset = trimbypartofspeech([m[0] for m in mostsimilar], posrestriction)
+				mostsimilar = [m for m in mostsimilar if m[0] in validset]
 			html = formatnnmatches(mostsimilar, vv)
 			activepoll.statusis('Building the graph')
 			mostsimilar = mostsimilar[:vv.neighborscap]
@@ -182,3 +198,96 @@ def findword2vecsimilarities(termone, termtwo, mymodel):
 
 	return similarity
 
+
+def trimbypartofspeech(listofwords: List[str], partofspeech: str) -> set:
+	"""
+
+	return only the adjectives, e.g., in a list of headwords
+
+	note these are words and not HeadwordObjects
+
+	need a collection of BaseFormMorphology objects
+
+	but to do that you need: (headword, xrefid, language, lexicalid, session)
+
+	hipparchiaDB=# select * from greek_dictionary limit 0;
+	 entry_name | metrical_entry | unaccented_entry | id_number | pos | translations | entry_body
+	------------+----------------+------------------+-----------+-----+--------------+------------
+	(0 rows)
+
+	p {'prep.', '', 'partic.', 'num. adj.', 'adv. num.', 'v. n.', 'subst.', 'v. dep.', 'adv.', 'pron. adj.', 'p. a.', 'v. freq. a.', 'v. a.', 'adj.'}
+
+	:param listofwords:
+	:param partofspeech:
+	:return:
+	"""
+
+	# cap = 250
+	# listofwords = listofwords[:cap]
+
+	mappostodbcategories = {
+		'adjective': 'adj.',
+		'verb': 'v.',
+		'adverb': 'adv.'
+	}
+
+	isgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
+
+	if re.search(isgreek, listofwords[0]):
+		language = 'greek'
+		objecttemplate = dbColumnorderGreekword
+	else:
+		language = 'latin'
+		objecttemplate = dbColumnorderLatinword
+
+	# print('finding lex')
+	# lexicalresults = bulklexicalgrab(listofwords, 'dictionary', 'entry_name', language)
+	# lexicalresults = [objecttemplate(*r) for r in lexicalresults]
+	# lexicalresults = {r.entry: r for r in lexicalresults}
+
+	# morphobjects = bulkfindmorphologyobjects(listofwords, language)
+	# print('finding possibilities')
+	# # {religiosus: [<server.hipparchiaobjects.morphologyobjects.MorphPossibilityObject object at 0x14dcf6240>], ...}
+	# morphobjects = {m.observed: m.getpossible() for m in morphobjects}
+	# declined = [m for m in morphobjects if set([o.isdeclined() for o in morphobjects[m]])]
+	# print('declined', declined)
+
+	# lexicalresults = bulklexicalgrab(listofwords, 'dictionary', 'entry_name', language)
+	# basewords = [objecttemplate(*r) for r in lexicalresults]
+	# xrefsdixt = dict()
+	# for b in basewords:
+	# 	try:
+	# 		xrefsdixt[b.entry] = lemmatadict[b.entry]
+	# 	except KeyError:
+	# 		print('keyerror on', b.entry)
+	# 		pass
+	#
+	# bmodict = {b.entry: BaseFormMorphology(b.entry, xrefsdixt[b.entry].xref, language, b.id, session, passedlemmataobject=xrefsdixt[b.entry]) for b in basewords}
+	#
+	# reducedlistofwords = list()
+	# for w in listofwords:
+	# 	print('analyses', w, bmodict[w].analyses)
+	# 	try:
+	# 		if bmodict[w].iammostlyconjugated():
+	# 			reducedlistofwords.append(w)
+	# 	except KeyError:
+	# 		print('keyerror on', w)
+	#
+	# print('reducedlistofwords', reducedlistofwords)
+
+	dbconnection = ConnectionObject()
+	dbcursor = dbconnection.cursor()
+
+	morphologyobjecdict = {w: lookformorphologymatches(w, dbcursor) for w in listofwords}
+	# {'serius¹': None, 'solacium': <server.hipparchiaobjects.dbtextobjects.dbMorphologyObject object at 0x155362780>, ... }
+	possibilitieslistdict = {m: morphologyobjecdict[m].getpossible() for m in morphologyobjecdict if morphologyobjecdict[m]}
+	verbpossib = {m for m in possibilitieslistdict if True in [p.isconjugated() for p in possibilitieslistdict[m]]}
+	# print('verbpossib', verbpossib)
+	nounandadjpossib = {m for m in possibilitieslistdict if True in [p.isdeclined() for p in possibilitieslistdict[m]]}
+
+	dbconnection.connectioncleanup()
+
+	# trimmedlist = set([w for w in listofwords if w in verbpossib])
+	trimmedlist = set([w for w in listofwords if w in nounandadjpossib])
+
+	return trimmedlist

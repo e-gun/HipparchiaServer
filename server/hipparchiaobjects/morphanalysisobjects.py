@@ -15,6 +15,7 @@ from server.formatting.miscformatting import consolewarning
 from server.formatting.morphologytableformatting import declinedtabletemplate, filloutmorphtabletemplate, \
 	verbtabletemplate
 from server.formatting.wordformatting import stripaccents
+from server.startup import lemmatadict
 
 
 class MorphAnalysis(object):
@@ -120,7 +121,7 @@ class BaseFormMorphology(object):
 		generating a noun/adj table: buildhtmldeclinedtablerows()
 
 	"""
-	def __init__(self, headword: str, xref: str, language: str, lexicalid: str, thesession: dict):
+	def __init__(self, headword: str, xref: str, language: str, lexicalid: str, thesession: dict, passedlemmataobject=None):
 		# print('bfmo init', headword, xref, language, lexicalid)
 		self.showalldialects = thesession['morphdialects']
 		self.collapseattic = thesession['collapseattic']
@@ -129,12 +130,17 @@ class BaseFormMorphology(object):
 		self.language = language
 		self.xref = xref
 		self.lexicalid = lexicalid
-		# next is unsafe because you will "KeyError: 'anno¹'"
-		# self.lemmata = lemmatadict[headword]
-		self.lemmata = grablemmataobjectfor('{lg}_lemmata'.format(lg=self.language), word=self.headword)
-		if self.lemmata.xref == -1:
-			# you failed; maybe there is a superscript issue; the raw data is inconsistent here...
-			self.lemmata = grablemmataobjectfor('{lg}_lemmata'.format(lg=self.language), word=self.headword, allowsuperscripts=True)
+		if passedlemmataobject:
+			self.lemmata = passedlemmataobject
+		else:
+			try:
+				self.lemmata = lemmatadict[headword]
+				# print('headword type(lemmata)', headword, type(self.lemmata))
+			except KeyError:
+				self.lemmata = grablemmataobjectfor('{lg}_lemmata'.format(lg=self.language), word=self.headword)
+				if self.lemmata.xref == -1:
+					# you failed; maybe there is a superscript issue; the raw data is inconsistent here...
+					self.lemmata = grablemmataobjectfor('{lg}_lemmata'.format(lg=self.language), word=self.headword, allowsuperscripts=True)
 		self.dictionaryentry = self.lemmata.dictionaryentry
 		self.formlist = self.lemmata.formlist
 		self.dbmorphobjects = bulkfindmorphologyobjects(self.formlist, self.language)
@@ -149,7 +155,7 @@ class BaseFormMorphology(object):
 		# 'annus' has 'anno' in it: a single verbal lookalike
 		vv = [v for v in self.analyses if isinstance(v.getanalysis(), ConjugatedFormAnalysis)]
 		dd = [d for d in self.analyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
-		# print('mostlyconjugatedforms: len(vv) & len(dd)', len(vv), len(dd))
+		# print('mostlyconjugatedforms: len(vv) & len(dd)', self.headword, len(vv), len(dd))
 		if len(vv) > len(dd):
 			return True
 		else:
@@ -219,6 +225,7 @@ class BaseFormMorphology(object):
 		for m in self.dbmorphobjects:
 			if m:
 				pos.extend(m.getpossible())
+
 		pos = [p for p in pos if p.xref == self.xref]
 		# there are duplicates...
 		# 90643736 πεπιαϲμένωϲ ['perf part mp masc acc pl (attic doric)']

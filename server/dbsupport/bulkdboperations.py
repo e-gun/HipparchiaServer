@@ -6,11 +6,15 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+from typing import List
+
+import psycopg2
+
+from server.dbsupport.tablefunctions import assignuniquename
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.formatting.miscformatting import timedecorator
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
-from server.hipparchiaobjects.morphologyobjects import dbLemmaObject
+from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus, dbLemmaObject
 
 
 @timedecorator
@@ -105,7 +109,7 @@ def loadlemmataasobjects() -> dict:
 		lemmatadict = {**{r[0]: dbLemmaObject(*r) for r in results}, **lemmatadict}
 
 	print('\t', len(lemmatadict), 'lemmata loaded', end='')
-	# print('lemmatadict["laudo"]', lemmatadict['laudo'].formlist)
+	# print('lemmatadict["molestus"]', lemmatadict['molestus'].formlist)
 	# print('lemmatadict["λύω"]', lemmatadict['λύω'].formlist)
 
 	dbconnection.connectioncleanup()
@@ -128,3 +132,50 @@ def loadallworksintoallauthors(authorsdict, worksdict) -> dict:
 		authorsdict[auid].addwork(worksdict[wkid])
 
 	return authorsdict
+
+
+def bulklexicalgrab(listofwords: List[str], tabletouse: str, targetcolumn: str, language: str) -> list:
+	"""
+
+	grab a bunch of lex/morph entries by using a temp table
+
+	e.g.,
+		lexicalresults = bulklexicalgrab(listofwords, 'dictionary', 'entry_name', language)
+		results = bulklexicalgrab(listofwords, 'morphology', 'observed_form', language)
+
+	:param listofwords:
+	:param tabletouse:
+	:return:
+	"""
+
+	dbconnection = ConnectionObject(readonlyconnection=False)
+	dbcursor = dbconnection.cursor()
+
+	tqtemplate = """
+	CREATE TEMP TABLE bulklex_{rnd} AS
+		SELECT values AS 
+			entriestocheck FROM unnest(ARRAY[%s]) values
+	"""
+
+	uniquename = assignuniquename(12)
+	tempquery = tqtemplate.format(rnd=uniquename)
+	data = (listofwords,)
+	dbcursor.execute(tempquery, data)
+
+	qtemplate = """
+	SELECT * FROM {lg}_{thetable} WHERE EXISTS 
+		(SELECT 1 FROM bulklex_{rnd} tocheck WHERE tocheck.entriestocheck = {lg}_{thetable}.{target})
+	"""
+
+	query = qtemplate.format(rnd=uniquename, thetable=tabletouse, target=targetcolumn, lg=language)
+
+	try:
+		dbcursor.execute(query)
+		results = resultiterator(dbcursor)
+	except psycopg2.ProgrammingError:
+		# if you do not have the wordcounts installed: 'ProgrammingError: relations "wordcounts_a" does not exist
+		results = list()
+
+	dbconnection.connectioncleanup()
+
+	return results

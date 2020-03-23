@@ -674,6 +674,37 @@ class dbLatinWord(dbDictionaryEntry):
 		return newstring
 
 
+class dbColumnorderGreekword(dbGreekWord):
+	"""
+
+	the order inside the db lines is not the __init__ order of dbGreekWord()
+
+	hipparchiaDB=# select * from greek_dictionary limit 0;
+	entry_name | metrical_entry | unaccented_entry | id_number | pos | translations | entry_body
+	------------+----------------+------------------+-----------+-----+--------------+------------
+	(0 rows)
+
+	"""
+	def __int__(self, entry_name, metrical_entry, unaccented_entry, id_number, pos, translations, entry_body):
+		super().__init__(entry_name, metrical_entry, id_number, pos, translations, entry_body, unaccented_entry)
+
+
+class dbColumnorderLatinword(dbLatinWord):
+	"""
+
+	the order inside the db lines is not the __init__ order of dbLatinWord()
+
+	hipparchiaDB=# select * from latin_dictionary limit 0;
+	 entry_name | metrical_entry | id_number | entry_key | pos | translations | entry_body
+	------------+----------------+-----------+-----------+-----+--------------+------------
+
+
+	"""
+
+	def __init__(self, entry_name, metrical_entry, id_number, entry_key, pos, translations, entry_body):
+		super().__init__(entry_name, metrical_entry, id_number, pos, translations, entry_body, entry_key)
+
+
 """
 [probably not] TODO: clickable INS or DDP xrefs in dictionary entries
 

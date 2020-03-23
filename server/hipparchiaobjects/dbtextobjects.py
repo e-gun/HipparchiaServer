@@ -275,3 +275,33 @@ class dbMorphologyObject(object):
 		thepossible = re.findall(possiblefinder, self.possibleforms)
 		listofpossibilitiesobjects = [MorphPossibilityObject(self.observed, p, self.prefixcount) for p in thepossible]
 		return listofpossibilitiesobjects
+
+
+class dbLemmaObject(object):
+	"""
+	an object that corresponds to a db line
+
+	CREATE TABLE public.greek_lemmata (
+		dictionary_entry character varying(64) COLLATE pg_catalog."default",
+		xref_number integer,
+		derivative_forms text COLLATE pg_catalog."default"
+	)
+
+	hipparchiaDB=# select count(dictionary_entry) from greek_lemmata;
+	 count
+	--------
+	 114098
+	(1 row)
+
+	hipparchiaDB=# select count(dictionary_entry) from latin_lemmata;
+	 count
+	-------
+	 38662
+	(1 row)
+
+	"""
+
+	def __init__(self, dictionaryentry, xref, derivativeforms):
+		self.dictionaryentry = dictionaryentry
+		self.xref = xref
+		self.formlist = derivativeforms
