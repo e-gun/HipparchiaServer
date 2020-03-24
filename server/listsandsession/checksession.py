@@ -91,6 +91,7 @@ def probeforsessionvariables():
 		session['suppresscolors'] = hipparchia.config['SUPPRESSCOLORS']
 		session['tensorflowgraph'] = False
 		session['topicmodel'] = False
+		session['trimvectoryby'] = 'none'
 		session['varia'] = hipparchia.config['DEFAULTVARIA']
 		session['vdim'] = hipparchia.config['VECTORDIMENSIONS']
 		session['vwindow'] = hipparchia.config['VECTORWINDOW']

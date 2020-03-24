@@ -133,7 +133,19 @@ function loadoptions() {
             }
         });
 
+        const trimmingoptions =  {
+            'none': $('#trimming-none'),
+            'declined': $('#trimming-declined'),
+            'conjugated': $('#trimming-conjugated'),
+        };
 
+        Object.keys(trimmingoptions).forEach(function(returnedkey) {
+            if (data.trimvectoryby !== returnedkey) {
+                trimmingoptions[returnedkey].prop('checked', false);
+            } else {
+                trimmingoptions[returnedkey].prop('checked', true);
+            }
+        });
 
         let setspinnervalues = {
             'earliestdate': $('#earliestdate'),
@@ -155,9 +167,15 @@ function loadoptions() {
 
         if(data['principleparts'] === 'yes') { $('#mophologytablesoptions').show(); } else { $('#mophologytablesoptions').hide(); }
 
+        if (data.nearestneighborsquery === 'yes' || data.analogyfinder === 'yes') {
+            $('#trimmingcheckboxes').show();
+        } else {
+            $('#trimmingcheckboxes').hide();
+        }
+
         if (data.cosdistbysentence === 'yes' || data.cosdistbylineorword === 'yes' || data.semanticvectorquery === 'yes' ||
             data.nearestneighborsquery === 'yes' || data.tensorflowgraph === 'yes' || data.sentencesimilarity === 'yes' ||
-            data.topicmodel === 'yes') {
+            data.topicmodel === 'yes' || data.analogyfinder === 'yes') {
             showextendedsearch();
             }
         });
@@ -307,7 +325,7 @@ function showextendedsearch() {
             '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox', '#sentencesimilaritycheckbox', '#complexsearching', '#topicmodelcheckbox',
             '#analogiescheckbox');
         showmany(ids);
-}
+        }
 
 $('#moretools').click(function(){ $('#lexica').toggle(); });
 $('#alt_moretools').click(function(){ $('#lexica').toggle(); });

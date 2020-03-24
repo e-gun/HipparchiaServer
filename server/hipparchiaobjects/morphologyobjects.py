@@ -19,6 +19,8 @@ class MorphPossibilityObject(object):
 	the embedded morphological possibilities
 
 	"""
+	tenses = {'pres', 'aor', 'fut', 'perf', 'imperf', 'plup', 'futperf'}
+	genders = {'masc', 'fem', 'neut', 'masc/neut', 'masc/fem'}
 
 	def __init__(self, observedform, findalltuple, prefixcount):
 		# print('findalltuple', findalltuple)
@@ -67,29 +69,37 @@ class MorphPossibilityObject(object):
 		else:
 			return True
 
-	def isconjugated(self) -> bool:
-		# note that we are only checking for 1st princip part here; therefore looking at headwords
-		# if you want conjugated forms, then....
-		# analysislist: ['perf part pass masc dat sg', ...]
-		analysislist = self.getanalysislist()
-		tokens = [a.split(' ') for a in analysislist]
+	def _gettokens(self) -> set:
 		flatten = lambda l: [item for sublist in l for item in sublist]
-		tokens = set(flatten(tokens))
-		thumbprints = {'pres', 'ind', 'act', 'pass', 'mid', '1st'}
+		tokens = flatten([a.split(' ') for a in self.getanalysislist()])
+		tokens = flatten([t.split('/') for t in tokens])
+		tokens = set(tokens)
+		return tokens
+
+	def isconjugatedverb(self, bagging='lemmatized') -> bool:
+		tokens = self._gettokens()
+		# thumbprints = {'pres', 'ind', 'act', 'pass', 'mid', '1st', '2nd', '3rd'}
+		if bagging == 'unlemmatized':
+			thumbprints = {'1st', '2nd', '3rd'}
+		else:
+			thumbprints = {'1st'}
 		if not tokens & thumbprints:
 			return False
 		else:
 			return True
 
-	def isdeclined(self) -> bool:
-		analysislist = self.getanalysislist()
-		tokens = [a.split(' ') for a in analysislist]
-		flatten = lambda l: [item for sublist in l for item in sublist]
-		tokens = set(flatten(tokens))
-		thumbprints = {'nom', 'sg', 'masc', 'fem'}
+	def isnounoradjective(self, bagging='lemmatized') -> bool:
+		# incredibilis ['masc/fem nom/voc sg']}
+		tokens = self._gettokens()
+		# thumbprints = {'nom', 'sg', 'masc', 'fem', 'neut', 'pl', 'voc', 'dat', 'gen'}
+		if bagging == 'unlemmatized':
+			thumbprints = {'masc', 'fem', 'neut'}
+		else:
+			thumbprints = {'nom'}
+		disqualification = {'part', 'pass', 'act'}
 		if not tokens & thumbprints:
 			return False
-		elif self.isconjugated():
+		elif tokens & disqualification:
 			return False
 		else:
 			return True
@@ -194,3 +204,92 @@ class MorphPossibilityObject(object):
 		baseform = re.sub(r'^\s', '', baseform)
 
 		return baseform
+
+
+
+"""
+
+not easy to fingerprint via the lexicon
+
+pos not stored in the greek dictionary...
+
+
+hipparchiaDB=# select distinct pos from latin_dictionary;
+              pos
+-------------------------------
+subst. ‖ adv. ‖ adj.
+subst. ‖ v. n.
+prep. ‖ adv. ‖ adj.
+v. a. ‖ adv. ‖ prep.
+p. a. ‖ adv. ‖ v. freq. a.
+v. a. ‖ adv. ‖ subst.
+adv. num.
+subst.
+subst. ‖ adj.
+v. a. ‖ v. dep. ‖ adv.
+adj. ‖ v. n.
+v. dep. ‖ adj. ‖ adv.
+v. dep. ‖ adj.
+v. a. ‖ adv.
+v. dep. ‖ adv.
+pron. adj. ‖ adv.
+adv. ‖ adj. ‖ v. n.
+prep.
+v. a. ‖ prep.
+adv. ‖ prep. ‖ adj.
+prep. ‖ partic.
+v. a. ‖ adj. ‖ p. a. ‖ subst.
+adj. ‖ adv. ‖ adj.
+adv. ‖ adj.
+v. a. ‖ subst.
+prep. ‖ adj.
+adj. ‖ partic.
+v. a. ‖ adv. ‖ adj. ‖ p. a.
+adv. ‖ adj. ‖ p. a.
+v. dep. ‖ p. a. ‖ v. n.
+subst. ‖ adj. ‖ adv. ‖ adj.
+v. a. ‖ adv. ‖ p. a.
+v. a. ‖ adv. ‖ adj.
+v. freq. a.
+adv. ‖ partic.
+v. a. ‖ p. a. ‖ subst.
+v. dep. ‖ p. a. ‖ adv.
+v. a. ‖ p. a. ‖ v. n.
+
+v. a. ‖ adv. ‖ p. a. ‖ subst.
+p. a. ‖ v. dep. ‖ adv.
+v. a. ‖ v. dep. ‖ p. a.
+num. adj.
+adv. ‖ prep. ‖ p. a. ‖ adj.
+adv. ‖ v. n.
+subst. ‖ num. adj.
+v. a. ‖ adv. ‖ p. a. ‖ v. n.
+v. a. ‖ adj. ‖ prep. ‖ p. a.
+v. n.
+v. a. ‖ v. dep.
+subst. ‖ adj. ‖ adj.
+v. a. ‖ adj.
+v. dep. ‖ adj. ‖ p. a.
+v. a. ‖ adj. ‖ p. a.
+adj. ‖ num. adj.
+adv. ‖ p. a. ‖ v. n.
+subst. ‖ p. a. ‖ v. n.
+p. a.
+adv.
+p. a. ‖ v. n.
+v. dep. ‖ p. a.
+adj.
+v. dep. ‖ v. n.
+adv. ‖ prep.
+adj. ‖ adj.
+partic.
+subst. ‖ adv.
+p. a. ‖ v. freq. a.
+subst. ‖ adv. ‖ p. a. ‖ v. n.
+v. dep.
+v. a. ‖ v. n.
+adv. ‖ p. a.
+v. a.
+v. a. ‖ p. a.
+interj.
+"""

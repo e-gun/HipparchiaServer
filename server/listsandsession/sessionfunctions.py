@@ -122,7 +122,8 @@ def modifysessionvariable(parameter, value):
 		'searchscope',
 		'sortorder',
 		'tensorflowgraph',
-		'baggingmethod'
+		'baggingmethod',
+		'trimvectoryby'
 		]
 
 	baggingmethods = [
@@ -130,6 +131,12 @@ def modifysessionvariable(parameter, value):
 		'flat',
 		'winnertakesall',
 		'unlemmatized'
+	]
+
+	trimmingmethods = [
+		'none',
+		'conjugated',
+		'declined'
 	]
 
 	for o in [miscoptions, trueorfalse]:
@@ -149,6 +156,9 @@ def modifysessionvariable(parameter, value):
 	if session['baggingmethod'] not in baggingmethods:
 		# session['baggingmethod'] = 'flat'
 		session['baggingmethod'] = hipparchia.config['DEFAULTBAGGINGMETHOD']
+
+	if session['trimvectoryby'] not in trimmingmethods:
+		session['trimvectoryby'] = 'none'
 
 	# drop all selections/exclusions from any corpus that you just disabled
 	cc = ['greekcorpus', 'latincorpus', 'inscriptioncorpus', 'papyruscorpus', 'christiancorpus']

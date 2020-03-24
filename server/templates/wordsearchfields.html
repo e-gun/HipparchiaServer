@@ -28,6 +28,13 @@
     </div>
     <div id="vectorzone">
         {% autoescape false %}{{ vectorhtml }}{% endautoescape %}
+        <br>
+        <fieldset id="trimmingcheckboxes" class="small">
+            <legend>Trim results by part of speech...</legend>
+            untrimmed <input type="checkbox" id="trimming-none" value="no">&nbsp;&middot;&nbsp;
+            retain nouns and adjectives <input type="checkbox" id="trimming-declined" value="no">&nbsp;&middot;&nbsp;
+            retain conjugated verbs <input type="checkbox" id="trimming-conjugated" value="no"><br />
+        </fieldset>
     </div>
 </div>
 <div id="analogiesinputarea" class="center">

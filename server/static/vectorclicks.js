@@ -67,6 +67,10 @@ function xorbaggingoptions(thisoption) {
     return xorfinder(thisoption, xoredoptions);
 }
 
+function xortrimming(thisoption) {
+    return xorfinder(thisoption, trimmingoptions);
+}
+
 function xorfinder(thisoption, xoredoptions){
     let xor = Array();
     for (let i = 0; i < xoredoptions.length; i++) {
@@ -189,6 +193,7 @@ $('#winnertakesallbutton').change(function() {
 
 $('#cosdistbysentence').change(function() {
     $('#analogiesinputarea').hide();
+    $('#trimmingcheckboxes').hide();
     restoreplaceholders();
     if(this.checked) {
         let others = findotheroptions(this.id);
@@ -210,6 +215,7 @@ $('#cosdistbysentence').change(function() {
 
 $('#cosdistbylineorword').change(function() {
     $('#analogiesinputarea').hide();
+    $('#trimmingcheckboxes').hide();
     restoreplaceholders();
     if(this.checked) {
         let others = findotheroptions(this.id);
@@ -232,6 +238,7 @@ $('#cosdistbylineorword').change(function() {
 $('#semanticvectorquery').change(function() {
     restoreplaceholders();
     $('#analogiesinputarea').hide();
+    $('#trimmingcheckboxes').hide();
     if(this.checked) {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
@@ -255,6 +262,7 @@ $('#semanticvectorquery').change(function() {
 $('#nearestneighborsquery').change(function() {
     restoreplaceholders();
     $('#analogiesinputarea').hide();
+    let trim = $('#trimmingcheckboxes');
     if(this.checked) {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
@@ -267,16 +275,19 @@ $('#nearestneighborsquery').change(function() {
         trmonelem.prop('checked', true);
         trmtwolem.prop('checked', false);
         setoptions(this.id, 'yes');
+        trim.show();
     } else {
         setoptions(this.id, 'no');
         restorecheckboxestodefault();
         hidevectorsandlemmata();
+        trim.hide();
         }
     });
 
 $('#tensorflowgraph').change(function() {
     restoreplaceholders();
     $('#analogiesinputarea').hide();
+    $('#trimmingcheckboxes').hide();
     if(this.checked) {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
@@ -300,6 +311,7 @@ $('#tensorflowgraph').change(function() {
 $('#sentencesimilarity').change(function() {
     restoreplaceholders();
     $('#analogiesinputarea').hide();
+    $('#trimmingcheckboxes').hide();
     if(this.checked) {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
@@ -323,6 +335,7 @@ $('#sentencesimilarity').change(function() {
 $('#topicmodel').change(function() {
     restoreplaceholders();
     $('#analogiesinputarea').hide();
+    $('#trimmingcheckboxes').hide();
     if(this.checked) {
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
@@ -346,8 +359,10 @@ $('#topicmodel').change(function() {
 $('#analogyfinder').change(function() {
     restoreplaceholders();
     let aia = $('#analogiesinputarea');
+    let trim = $('#trimmingcheckboxes');
     $('#analogiesresults').html('');
     if(this.checked) {
+        trim.show();
         let others = findotheroptions(this.id);
         $(others).prop('checked', false);
         aia.show();
@@ -362,6 +377,7 @@ $('#analogyfinder').change(function() {
         showvectornotification();
         setoptions(this.id, 'yes');
     } else {
+        trim.hide();
         aia.hide();
         // $('#analogiesbox').hide();
         setoptions(this.id, 'no');
@@ -426,3 +442,27 @@ trmtwolem.change(function() {
             }
         }
     });
+
+$('#trimming-none').change(function() {
+    if (this.checked) {
+        let others = xortrimming(this.id);
+        $(others).prop('checked', false);
+        setoptions('trimvectoryby', 'none');
+    }
+});
+
+$('#trimming-declined').change(function() {
+    if (this.checked) {
+        let others = xortrimming(this.id);
+        $(others).prop('checked', false);
+        setoptions('trimvectoryby', 'declined');
+    }
+});
+
+$('#trimming-conjugated').change(function() {
+    if (this.checked) {
+        let others = xortrimming(this.id);
+        $(others).prop('checked', false);
+        setoptions('trimvectoryby', 'conjugated');
+    }
+});

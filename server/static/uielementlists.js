@@ -23,9 +23,7 @@ function showmany(arrayofelements) {
 
 function hidemanyrevealone(arrayofelementstohide, elementtoshow) {
     for (let i = 0; i < arrayofelementstohide.length; i++) {
-        console.log(arrayofelementstohide[i] + '  ' + elementtoshow);
         if (arrayofelementstohide[i] === elementtoshow) {
-            console.log('hide');
             $(arrayofelementstohide[i]).show();
         } else {
             $(arrayofelementstohide[i]).hide();
@@ -114,7 +112,7 @@ const actionbuttons = Array().concat(coreactionbuttons, extendedactionbuttons, g
 // active options
 
 const lemmatabagoptions = Array('#winnertakesall-ison', '#unlemmatized-ison', '#flatlemma-ison', '#alternates-ison');
-
+const trimmingoptions = Array('#trimming-none', '#trimming-declined', '#trimming-conjugated');
 // datespinners and includespuria checkboxes
 
 const datespinners = Array('#edts', '#ldts');
@@ -170,7 +168,7 @@ const extrauichoices = Array().concat(categoryautofills);
 
 // firstload hiding
 const miscfirstloadhides = Array('#browserdialog', '#helptabs', '#fewerchoicesbutton', '#lemmatizing-ison',
-    '#vectorizing-ison', '#alt_upperleftbuttons', '#analogiesinputarea', '#extendsearchbutton-ispresentlyopen');
+    '#vectorizing-ison', '#alt_upperleftbuttons', '#analogiesinputarea', '#extendsearchbutton-ispresentlyopen', '#trimmingcheckboxes');
 const tohideonfirstload = Array().concat(miscfirstloadhides, vectorformattingdotpyids, endpointnoticesandbuttons,
     endpointids, inputids, actionbuttons, infobuttons, infoboxes, lemmatasearchforms, extrasearchcriteria,
     lemmatabagoptions, extrasearchuielements);
