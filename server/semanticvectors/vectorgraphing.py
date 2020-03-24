@@ -338,6 +338,13 @@ def givetitletograph(topic, searchterm, searchobject):
 
 	so = searchobject
 
+	less = str()
+	if so.session['trimvectoryby'] != 'none' and ( so.session['nearestneighborsquery'] or so.session['analogyfinder']):
+		if so.session['trimvectoryby'] == 'conjugated':
+			less = ' (w/ unconjugated forms omitted)'
+		if so.session['trimvectoryby'] == 'declined':
+			less = ' (w/ non-declined forms omitted)'
+
 	if len(so.searchlist) > 1:
 		wholes = so.wholecorporasearched()
 		if wholes:
@@ -361,7 +368,7 @@ def givetitletograph(topic, searchterm, searchobject):
 		else:
 			source = '{au}, {wk}'.format(au=authordict[searched[:6]].shortname, wk=workdict[searched[:10]].title)
 
-	title = '{t} »{w}«\nin {s}'.format(t=topic, w=searchterm, s=source)
+	title = '{t} »{w}«\nin {s}{l}'.format(t=topic, w=searchterm, s=source, l=less)
 
 	return title
 
