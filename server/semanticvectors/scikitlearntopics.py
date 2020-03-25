@@ -5,6 +5,7 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
 import locale
 from multiprocessing import current_process
 
@@ -16,7 +17,8 @@ from server.formatting.vectorformatting import ldatopicsgenerateoutput
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict
+from server.semanticvectors.vectorhelpers import buidunlemmatizedbagsofwords, buildbagsofwordswithalternates, \
+	buildflatbagsofwords, buildwinnertakesallbagsofwords, convertmophdicttodict
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 from server.startup import authordict, listmapper, workdict
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
@@ -61,8 +63,6 @@ def sklearnselectedworks(searchobject):
 	if not ldavis or not CountVectorizer:
 		reasons = ['requisite software not installed: sklearn and/or ldavis is unavailable']
 		return emptyvectoroutput(searchobject, reasons)
-
-	skfunctiontotest = ldatopicgraphing
 
 	so = searchobject
 	activepoll = so.poll
@@ -114,7 +114,7 @@ def sklearnselectedworks(searchobject):
 		if len(sentencetuples) > hipparchia.config['MAXSENTENCECOMPARISONSPACE']:
 			reasons = ['scope of search exceeded allowed maximum: {a} > {b}'.format(a=len(sentencetuples), b=hipparchia.config['MAXSENTENCECOMPARISONSPACE'])]
 			return emptyvectoroutput(so, reasons)
-		output = skfunctiontotest(sentencetuples, workssearched, so)
+		output = ldatopicgraphing(sentencetuples, workssearched, so)
 
 	else:
 		return emptyvectoroutput(so)
@@ -211,12 +211,13 @@ def ldatopicgraphing(sentencetuples, workssearched, searchobject, headwordstops=
 		morphdict = convertmophdicttodict(morphdict)
 
 		activepoll.statusis('Building bags of words')
-		# going forward we we need a list of lists of headwords
-		# there are two ways to do this:
-		#   'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ'
 
-		bagofwordsfunction = buildflatbagsofwords
-		# bagofwordsfunction = buildbagsofwordswithalternates
+		baggingmethods = {'flat': buildflatbagsofwords,
+		                  'alternates': buildbagsofwordswithalternates,
+		                  'winnertakesall': buildwinnertakesallbagsofwords,
+		                  'unlemmatized': buidunlemmatizedbagsofwords}
+
+		bagofwordsfunction = baggingmethods[searchobject.session['baggingmethod']]
 
 		bagsofwordlists = bagofwordsfunction(morphdict, sentencesaslists)
 		bagsofsentences = [' '.join(b) for b in bagsofwordlists]

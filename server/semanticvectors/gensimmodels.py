@@ -66,24 +66,20 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	:return:
 	"""
 
+	activepoll = searchobject.poll
+
 	vv = searchobject.vectorvalues
 
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
-	# going forward we we need a list of lists of headwords
-	# there are three ways to do this:
-	#   'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ' vs 'ϲυγγενήϲ' (& forget lesser used forms)
-	#
-	# if might be possible to vectorize in unlemmatized form and then to search via the lemma
-	# here you would need to invoke mymodel.wv.n_similarity(self, ws1, ws2) where ws is a list of words
+	activepoll.statusis('Building bags of words')
 
 	baggingmethods = {'flat': buildflatbagsofwords,
 	                  'alternates': buildbagsofwordswithalternates,
 	                  'winnertakesall': buildwinnertakesallbagsofwords,
 	                  'unlemmatized': buidunlemmatizedbagsofwords}
 
-	# print('baggingmethod is', searchobject.session['baggingmethod'])
 	bagofwordsfunction = baggingmethods[searchobject.session['baggingmethod']]
 
 	bagsofwords = bagofwordsfunction(morphdict, sentences)

@@ -339,7 +339,7 @@ def givetitletograph(topic, searchterm, searchobject):
 	so = searchobject
 
 	less = str()
-	if so.session['trimvectoryby'] != 'none' and ( so.session['nearestneighborsquery'] or so.session['analogyfinder']):
+	if so.session['trimvectoryby'] != 'none' and (so.session['nearestneighborsquery'] or so.session['analogyfinder']):
 		if so.session['trimvectoryby'] == 'conjugated':
 			less = ' (w/ unconjugated forms omitted)'
 		if so.session['trimvectoryby'] == 'declined':

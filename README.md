@@ -5,14 +5,14 @@ key features:
 	searching
 		search multiple corpora simultaneously
 		build search lists with according to a variety of criteria
-            select passages by hand or via autofill boxes that know the structure of any text at any point
-		    search by date range
+			select passages by hand or via autofill boxes that know the structure of any text at any point
+			search by date range
 			add/exclude individual authors
 			add/exclude individual author genres
 			add/exclude individual works
 			add/exclude individual work genres
 			add/exclude individual passages
-            add/exclude work spans ('books 1-2', e.g.)
+			add/exclude work spans ('books 1-2', e.g.)
 			add/exclude individual author locations
 			add/exclude individual work provenances
 			include/exclude spuria
@@ -22,8 +22,8 @@ key features:
 			reset sessions to configurable defaults
 		search syntax
 			search with or without polytonic accents
-    			type accented words to make the search sensitive to accents
-    			type unaccented words and the search is not sensitive to accents
+				type accented words to make the search sensitive to accents
+				type unaccented words and the search is not sensitive to accents
 			wildcard searching via regular expressions
 			phrase searching: "κατὰ τὸ ψήφιϲμα", etc.
 			proximity searching:
@@ -51,17 +51,17 @@ key features:
 			get a weighted distribution by top N genres: show if a word predominantly 'epic', etc.
 			get a summary of uses, senses, and quotes
 			reverse lookup: 'unexpected' returns ἀδευκήϲ, ἀδόκητοϲ, ἀδόξαϲτοϲ, ἀελπτία, ...
-			    by default results return in order of word frequency
+				by default results return in order of word frequency
 			click to browse to passages cited in the lexical entries ('often' works)
 			click to follow a 'cf.'
 			flip forward/backwards through neighboring entries
 		morphology tables
-		    see all extant forms arrayed by dialect, mood, voice, etc.
-		    use statistics present next to each form
-		        e.g., 2nd sg attic middle future indicatives are...
-		        ἀπολέϲηι (4) / ἀπολεῖ (181) / ἀπολέει (2) / ἀπολέϲει (181) / ἀπολέϲῃ (244) / ἀπολῇ (21)
-		    click to execute a follow-up search on any item
-		    toggles set the amount of detail to display
+			see all extant forms arrayed by dialect, mood, voice, etc.
+			use statistics present next to each form
+				e.g., 2nd sg attic middle future indicatives are...
+				ἀπολέϲηι (4) / ἀπολεῖ (181) / ἀπολέει (2) / ἀπολέϲει (181) / ἀπολέϲῃ (244) / ἀπολῇ (21)
+			click to execute a follow-up search on any item
+			toggles set the amount of detail to display
 		text maker
 			build a text of a whole work or subsection of a work
 			for example see Xenophon, Hellenica as a whole or just book 3 or just book 3, chapter 4
@@ -74,42 +74,43 @@ key features:
 			click on index words to get lexical information [excessive index size will disable this]
 			click on index passages to browse to that passage [excessive index size will disable this]
 		semantic vectors
-		    calculate the relationship between words on any arbitrary search list using linear algebra
-		    various algorithms available:
-		        literal proximity
-		        word2vec nearest neighbors
-		        lsi matrix-similarity
-		        lda topic maps
-		    configurable settings for key variable like training runs and downsampling
+			calculate the relationship between words on any arbitrary search list using linear algebra
+			various algorithms available:
+				literal proximity
+				word2vec nearest neighbors
+				lsi matrix-similarity
+				lda topic maps
+			configurable settings for key variable like training runs and downsampling
+			trim results by part of speech
 
 	local/contextual information
-	    searches give progress updates in percentage complete and time elapsed
-	    concordance builds give progress updates in percentage complete and time elapsed
-	    search lists can be inspected/hidden before execution
-	    local info on current author can be shown/hidden
-	    local info on genre lists can be shown/hidden
-	    show/hide the settings pane
-	    show/hide the complex criteria setter
-	    show/hide the complex search dialog boxes
-	    hover over interface items to get tooltips
+		searches give progress updates in percentage complete and time elapsed
+		concordance builds give progress updates in percentage complete and time elapsed
+		search lists can be inspected/hidden before execution
+		local info on current author can be shown/hidden
+		local info on genre lists can be shown/hidden
+		show/hide the settings pane
+		show/hide the complex criteria setter
+		show/hide the complex search dialog boxes
+		hover over interface items to get tooltips
 
 	misc
-        restrict access via user/pass combinations
-	    accepts betacode input of greek (with or without accents):
-	        "MH=NIN A)/EIDE QEA\"
-	        "mh=nin a)/eide qea\"
-	        "mhnin aeide qea"
-	    search will attempt to choose the most efficient strategy for any given situation
+		restrict access via user/pass combinations
+		accepts betacode input of greek (with or without accents):
+			"MH=NIN A)/EIDE QEA\"
+			"mh=nin a)/eide qea\"
+			"mhnin aeide qea"
+		search will attempt to choose the most efficient strategy for any given situation
 		text layout in results/browser/text maker sensitive to shifts in font face and size
-	    text layout via CSS: possible to modify the style sheet to suit your own tastes
-	    optional highlighting of editorial insertions: {abc}, <def>, (ghi), [jkl]
-	    configurable defaults for most options
-	    will display annotations to the original text
-	    unicode support of technical, rare, and exotic characters (that you can also search for: 𐆂,𐄒, 🜚)
-	    can find Coptic words and characters: 'ⲫⲓⲗⲟⲑⲉⲟⲥ', 'ϩανϭοϊ̈', etc.
-	    forward-compatible unicode: attempt to properly code characters which are not yet available in most fonts
-	    known unknowns: unhandled characters preserve their betacode messages in the metadata for future fixes
-	    debugging options can be enabled at launch time (see "./run.py -h")
+		text layout via CSS: possible to modify the style sheet to suit your own tastes
+		optional highlighting of editorial insertions: {abc}, <def>, (ghi), [jkl]
+		configurable defaults for most options
+		will display annotations to the original text
+		unicode support of technical, rare, and exotic characters (that you can also search for: 𐆂,𐄒, 🜚)
+		can find Coptic words and characters: 'ⲫⲓⲗⲟⲑⲉⲟⲥ', 'ϩανϭοϊ̈', etc.
+		forward-compatible unicode: attempt to properly code characters which are not yet available in most fonts
+		known unknowns: unhandled characters preserve their betacode messages in the metadata for future fixes
+		debugging options can be enabled at launch time (see "./run.py -h")
 
 ```
 
@@ -117,11 +118,11 @@ HipparchiaServer typically runs from the command line within a python virtual en
 
 for example:
 
-    % ~/hipparchia_venv/bin/python3 ~/hipparchia_venv/HipparchiaServer/run.py
+	% ~/hipparchia_venv/bin/python3 ~/hipparchia_venv/HipparchiaServer/run.py
 
 or, more tersely:
 
-    % run.py
+	% run.py
 
 Upon startup you will see something like:
 
@@ -129,7 +130,7 @@ Upon startup you will see something like:
 
 Note that `keyedlemmata` can take a while to load. You are ready for business when you see the last line that says `Running...`:
 
-    * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+	* Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
 
 Then you aim your browser at http://localhost:5000 and you are ready to roll.
 
@@ -149,36 +150,36 @@ Instructions on how to use Hipparchia can be found by clicking on the '?' button
 
 minimum software requirements:
 
-    to launch HipparchiaServer
-        python 3.6+
-            flask
-            psycopg2 or psycopg2-binary
-            websockets
-        postgresql 9.6+
+	to launch HipparchiaServer
+		python 3.6+
+			flask
+			psycopg2 or psycopg2-binary
+			websockets
+		postgresql 9.6+
 
-    to run the vectorizing functions
-        python 3.6+
-            cython
-            scipy
-            numpy
-            gensim
-            sklearn
-            pyLDAvis
-            matplotlib
-            networkx
+	to run the vectorizing functions
+		python 3.6+
+			cython
+			scipy
+			numpy
+			gensim
+			sklearn
+			pyLDAvis
+			matplotlib
+			networkx
 
-    to properly interact with HipparchiaServer via a browser
-        jquery
-        jquery-ui
-        js-cookie
-        a fully stocked unicode font [Arial, DejaVu, Noto, Roboto, ...]
+	to properly interact with HipparchiaServer via a browser
+		jquery
+		jquery-ui
+		js-cookie
+		a fully stocked unicode font [Arial, DejaVu, Noto, Roboto, ...]
 
-    HipparchiaThirdPartySoftware can provide jquery, etc.
-    HipparchiaExtraFonts can provice Noto, etc.
-    
-    javascript must be enabled in the browser
-    the browser must accept cookies if you wish to save searches
-    
+	HipparchiaThirdPartySoftware can provide jquery, etc.
+	HipparchiaExtraFonts can provice Noto, etc.
+	
+	javascript must be enabled in the browser
+	the browser must accept cookies if you wish to save searches
+	
 
 ```
 
@@ -188,13 +189,13 @@ See **Hipparchia[Platform]** for autoinstallers and/or installation recipies for
 Nevertheless, here are the project pages for the other dependencies:
 
 jquery:
-    http://jquery.com/download/
+	http://jquery.com/download/
 
 jquery-ui:
-    http://jqueryui.com/download/
+	http://jqueryui.com/download/
 
 js-cookie:
-    https://github.com/js-cookie/js-cookie/releases
+	https://github.com/js-cookie/js-cookie/releases
 
 
 `semanticvectors` are **not installed** by default. If you install them, you will also need 
@@ -279,7 +280,7 @@ What you will see when you point a browser at a HipparchiaServer:
 ![neighborhood_corpus](screenshots/23_vector_ui.png)
 
 1. explore morphology
-![morphology table](screenshots/24_morphology_tables
+![morphology table](screenshots/24_morphology_tables.png)
 
 1. analogy finder
 ![morphology table](screenshots/25_analogy_finder.png)

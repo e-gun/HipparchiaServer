@@ -111,8 +111,8 @@ SENTENCESPERDOCUMENT = 1
 
 # settings for ldatopicgraphing()
 LDAMAXFEATURES = 2000
-LDACOMPONENTS = 10      # topics
-LDAMAXFREQ = 49         # fewer than n% of sentences should have this word (i.e., purge common words)
+LDACOMPONENTS = 6      # topics
+LDAMAXFREQ = 35         # fewer than n% of sentences should have this word (i.e., purge common words)
 LDAMINFREQ = 5          # word must be found >n times
 LDAITERATIONS = 12
 LDAMUSTBELONGERTHAN = 3

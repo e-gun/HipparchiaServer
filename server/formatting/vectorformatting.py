@@ -283,8 +283,8 @@ def vectorhtmlforfrontpage() -> str:
 	              'CONCEPTMAPPINGENABLED': cm,
 	              # 'TENSORFLOWVECTORSENABLED': tf,
 	              # 'SENTENCESIMILARITYENABLED': ss,
+	              'VECTORANALOGIESENABLED': anal,
 	              'TOPICMODELINGENABLED': lda,
-	              'VECTORANALOGIESENABLED': anal
 	              }
 
 	vectorhtml = list()
@@ -579,11 +579,11 @@ def ldatopicsgenerateoutput(ldavishtmlandjs: str, workssearched: int, settings: 
 	output = SearchOutputObject(so)
 
 	lines = ldavishtmlandjs.split('\n')
-	lines = [re.sub(r'\t', '', l) for l in lines if l]
+	lines = [re.sub(r'\t', str(), l) for l in lines if l]
 
 	lines.reverse()
 
-	thisline = ''
+	thisline = str()
 	html = list()
 
 	while not re.search(r'<script type="text/javascript">', thisline):
@@ -631,7 +631,7 @@ def ldatopicsgenerateoutput(ldavishtmlandjs: str, workssearched: int, settings: 
 			w = workdict[searchobject.searchlist[0]]
 			w = w.title
 		except KeyError:
-			w = ''
+			w = str()
 		where = '{a}, <worktitle>{w}</worktitle>'.format(a=who, w=w)
 
 	output.title = 'Latent Dirichlet Allocation'
