@@ -386,6 +386,16 @@ $('#analogyfinder').change(function() {
         }
     });
 
+$('#vectortestfunction').change(function() {
+    restoreplaceholders();
+    if(this.checked) {
+        setoptions(this.id, 'yes');
+    } else {
+        // $('#analogiesbox').hide();
+        setoptions(this.id, 'no');
+        }
+    });
+
 $('#executeanalogysearch').click(function() {
     $('#imagearea').empty();
     $('#searchsummary').html('');
@@ -404,6 +414,10 @@ $('#executeanalogysearch').click(function() {
     $.getJSON(url, function (returnedresults) { loadanalogyresults(returnedresults); });
     checkactivityviawebsocket(searchid);
 });
+
+
+
+
 
 function loadanalogyresults(outputdata) {
     let targetarea = $('#analogiesresults');

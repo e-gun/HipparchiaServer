@@ -189,11 +189,12 @@ def modifysessionvariable(parameter, value):
 		session['headwordindexing'] = True
 
 	# only one of these can be active at one time
-	exclusive = {'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery', 'tensorflowgraph', 'sentencesimilarity', 'topicmodel', 'analogyfinder'}
+	vectorsareexclusive = {'cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery',
+	                       'tensorflowgraph', 'sentencesimilarity', 'topicmodel', 'analogyfinder', 'vectortestfunction'}
 
-	for e in exclusive:
+	for e in vectorsareexclusive:
 		if parameter == e and value:
-			others = exclusive - {e}
+			others = vectorsareexclusive - {e}
 			for o in others:
 				session[o] = False
 

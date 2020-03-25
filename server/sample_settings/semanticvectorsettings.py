@@ -96,6 +96,7 @@ CONCEPTMAPPINGENABLED = False
 TOPICMODELINGENABLED = False
 VECTORANALOGIESENABLED = False    # user interface is incomplete; results are not so hot; do not enable as thing stand
 CONCEPTSEARCHINGENABLED = False   # of dubious value as currently implemented
+TESTINGVECTORBUTTONENABLED = False  # maybe an in-progress/experimental function exists and you are working on/with it
 MAXVECTORSPACE = 7548165
 MAXSENTENCECOMPARISONSPACE = 50000
 VECTORDIMENSIONS = 300
@@ -111,7 +112,7 @@ SENTENCESPERDOCUMENT = 1
 
 # settings for ldatopicgraphing()
 LDAMAXFEATURES = 2000
-LDACOMPONENTS = 6      # topics
+LDACOMPONENTS = 7       # topics
 LDAMAXFREQ = 35         # fewer than n% of sentences should have this word (i.e., purge common words)
 LDAMINFREQ = 5          # word must be found >n times
 LDAITERATIONS = 12

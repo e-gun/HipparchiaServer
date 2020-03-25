@@ -141,15 +141,16 @@ const nonvectorspinners = ["#earliestdate", "#latestdate", "#hitlimitspinner", "
 
 const vectorcheckboxspans = ['#cosinedistancesentencecheckbox', '#cosinedistancelineorwordcheckbox', '#semanticvectorquerycheckbox',
     '#semanticvectornnquerycheckbox', '#tensorflowgraphcheckbox', '#sentencesimilaritycheckbox', '#topicmodelcheckbox',
-    '#analogiescheckbox'];
+    '#analogiescheckbox', '#vectortestcheckbox'];
 
 const vectorboxes = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery',
-    '#tensorflowgraph', '#sentencesimilarity', '#topicmodel'];
+    '#tensorflowgraph', '#sentencesimilarity', '#topicmodel', '#vectortestfunction'];
 
 const vectorformattingdotpyids = Array(['#analogiescheckbox', '#analogyfinder', '#cosdistbylineorword',
     '#cosdistbysentence', '#cosinedistancelineorwordcheckbox', '#cosinedistancesentencecheckbox', '#nearestneighborsquery',
     '#semanticvectornnquerycheckbox', '#semanticvectorquery', '#semanticvectorquerycheckbox', '#sentencesimilarity',
-    '#sentencesimilaritycheckbox', '#tensorflowgraph', '#tensorflowgraphcheckbox', '#topicmodel', '#topicmodelcheckbox']);
+    '#sentencesimilaritycheckbox', '#tensorflowgraph', '#tensorflowgraphcheckbox', '#topicmodel', '#topicmodelcheckbox',
+    '#vectortestcheckbox', '#vectortestfunction']);
 
 // the checkbox names can be found via: vectorhtmlforfrontpage() in vectorformatting.py
 // >>> f = re.compile(r'type="checkbox" id="(.*?)"')

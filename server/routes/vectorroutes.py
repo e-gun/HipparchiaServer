@@ -89,13 +89,12 @@ def vectorsearch(vectortype, searchid, headform, so=None):
 		so.vectorquerytype = vectortype
 
 		vectorfunctions = {'cosdistbysentence': findabsolutevectorsbysentence,
-		                   'semanticvectorquery': executegensimsearch,
-		                   'nearestneighborsquery': executegensimsearch,
-		                   'analogyfinder': executegensimsearch,
-		                   'topicmodel': sklearnselectedworks}
-
-		# for TESTING purposes rewrite one of the definitions
-		# vectorfunctions['tensorflowgraph'] = gensimexperiment
+							'semanticvectorquery': executegensimsearch,
+							'nearestneighborsquery': executegensimsearch,
+							'analogyfinder': executegensimsearch,
+							'topicmodel': sklearnselectedworks,
+							# 'vectortestfunction': experimentalvectorsearchfunction
+							}
 
 		if so.vectorquerytype in vectorfunctions:
 			fnc = vectorfunctions[so.vectorquerytype]
@@ -109,7 +108,8 @@ def vectorsearch(vectortype, searchid, headform, so=None):
 
 	# nothing happened...
 	target = 'searchsummary'
-	message = '[unknown vector query type]'
+	message = '[unknown or unsupported vector query type]'
+	del progresspolldict[pollid]
 
 	return output.generatenulloutput(itemname=target, itemval=message)
 

@@ -274,6 +274,13 @@ def vectorhtmlforfrontpage() -> str:
 		</span>
 	"""
 
+	testing = """
+		<span id="vectortestcheckbox">
+			<span class="small">Vectortestfunction</span>
+			<input type="checkbox" id="vectortestfunction" value="yes" title="Do whatever one does...">
+		</span>
+	"""
+
 
 	if not hipparchia.config['SEMANTICVECTORSENABLED']:
 		return str()
@@ -285,6 +292,7 @@ def vectorhtmlforfrontpage() -> str:
 	              # 'SENTENCESIMILARITYENABLED': ss,
 	              'VECTORANALOGIESENABLED': anal,
 	              'TOPICMODELINGENABLED': lda,
+	              'TESTINGVECTORBUTTONENABLED': testing,
 	              }
 
 	vectorhtml = list()
