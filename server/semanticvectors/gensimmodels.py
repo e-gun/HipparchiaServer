@@ -7,8 +7,7 @@
 """
 
 from server.dbsupport.vectordbfunctions import storevectorindatabase
-from server.semanticvectors.vectorhelpers import buidunlemmatizedbagsofwords, buildbagsofwordswithalternates, \
-	buildflatbagsofwords, buildwinnertakesallbagsofwords
+from server.semanticvectors.wordbaggers import buildwordbags
 from server.threading.mpthreadcount import setthreadcount
 
 try:
@@ -66,23 +65,12 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	:return:
 	"""
 
-	activepoll = searchobject.poll
-
 	vv = searchobject.vectorvalues
 
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
-	activepoll.statusis('Building bags of words')
-
-	baggingmethods = {'flat': buildflatbagsofwords,
-	                  'alternates': buildbagsofwordswithalternates,
-	                  'winnertakesall': buildwinnertakesallbagsofwords,
-	                  'unlemmatized': buidunlemmatizedbagsofwords}
-
-	bagofwordsfunction = baggingmethods[searchobject.session['baggingmethod']]
-
-	bagsofwords = bagofwordsfunction(morphdict, sentences)
+	bagsofwords = buildwordbags(searchobject, morphdict, sentences)
 
 	workers = setthreadcount()
 

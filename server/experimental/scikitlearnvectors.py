@@ -46,7 +46,8 @@ from server import hipparchia
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, mostcommonwordsviaheadwords, mostcommoninflectedforms
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, mostcommonwordsviaheadwords, mostcommoninflectedforms
+from server.semanticvectors.wordbaggers import buildwordbags
 from server.dbsupport.dblinefunctions import grablistoflines
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 from server.formatting.vectorformatting import skformatmostimilar
@@ -449,21 +450,15 @@ def ldatopicmodeling(sentencetuples, searchobject):
 	sentencetuples = [s for s in sentencetuples if len(s[1].strip().split(' ')) > mustbelongerthan]
 	sentences = [s[1] for s in sentencetuples]
 
-	sentencesaslists = [s.split(' ') for s in sentences]
-	allwordsinorder = [item for sublist in sentencesaslists for item in sublist if item]
+	sentences = [s.split(' ') for s in sentences]
+	allwordsinorder = [item for sublist in sentences for item in sublist if item]
 
 	morphdict = getrequiredmorphobjects(set(allwordsinorder))
 	morphdict = convertmophdicttodict(morphdict)
 
-	# going forward we we need a list of lists of headwords
-	# there are two ways to do this:
-	#   'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ'
+	bagsofwords = buildwordbags(searchobject, morphdict, sentences)
 
-	bagofwordsfunction = buildflatbagsofwords
-	# bagofwordsfunction = buildbagsofwordswithalternates
-
-	bagsofwordlists = bagofwordsfunction(morphdict, sentencesaslists)
-	bagsofsentences = [' '.join(b) for b in bagsofwordlists]
+	bagsofsentences = [' '.join(b) for b in bagsofwords]
 
 	# Use tf (raw term count) features for LDA.
 	ldavectorizer = CountVectorizer(max_df=maxfreq,

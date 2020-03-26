@@ -17,9 +17,9 @@ from server.formatting.vectorformatting import ldatopicsgenerateoutput
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import buidunlemmatizedbagsofwords, buildbagsofwordswithalternates, \
-	buildflatbagsofwords, buildwinnertakesallbagsofwords, convertmophdicttodict
+from server.semanticvectors.vectorhelpers import convertmophdicttodict
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
+from server.semanticvectors.wordbaggers import buildwordbags
 from server.startup import authordict, listmapper, workdict
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
@@ -210,16 +210,7 @@ def ldatopicgraphing(sentencetuples, workssearched, searchobject, headwordstops=
 		morphdict = getrequiredmorphobjects(set(allwordsinorder), furtherdeabbreviate=True)
 		morphdict = convertmophdicttodict(morphdict)
 
-		activepoll.statusis('Building bags of words')
-
-		baggingmethods = {'flat': buildflatbagsofwords,
-		                  'alternates': buildbagsofwordswithalternates,
-		                  'winnertakesall': buildwinnertakesallbagsofwords,
-		                  'unlemmatized': buidunlemmatizedbagsofwords}
-
-		bagofwordsfunction = baggingmethods[searchobject.session['baggingmethod']]
-
-		bagsofwordlists = bagofwordsfunction(morphdict, sentencesaslists)
+		bagsofwordlists = buildwordbags(searchobject, morphdict, sentencesaslists)
 		bagsofsentences = [' '.join(b) for b in bagsofwordlists]
 
 		# print('bagsofsentences[:3]', bagsofsentences[3:])

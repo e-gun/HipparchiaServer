@@ -25,8 +25,9 @@ from server.formatting.vectorformatting import formatlsimatches, lsiformatoutput
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import LSIVectorCorpus
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import buildflatbagsofwords, convertmophdicttodict, finddblinesfromsentences, \
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, finddblinesfromsentences, \
 	findwordvectorset
+from server.semanticvectors.wordbaggers import buildwordbags
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
 
@@ -88,7 +89,7 @@ def lsifindmatches(sentencestuples, searchobject, lsispace):
 		hw = '{:,}'.format(len(allheadwords.keys()))
 		activepoll.statusis('Building vectors for {h} headwords in {n} sentences'.format(h=hw, n=wl))
 
-		lsispace = makespace(morphdict, listsofwords)
+		lsispace = makespace(searchobject, morphdict, listsofwords)
 		storevectorindatabase(so, 'lsi', lsispace)
 
 	vectorquerylsi = lsispace.findquerylsi(so.tovectorize)
@@ -138,7 +139,7 @@ def lsifindmatches(sentencestuples, searchobject, lsispace):
 	return matches
 
 
-def lsibuildspace(morphdict, sentences):
+def lsibuildspace(searchobject, morphdict, sentences):
 	"""
 
 	:param allheadwords:
@@ -150,9 +151,7 @@ def lsibuildspace(morphdict, sentences):
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
-	# going forward we we need a list of lists of headwords
-	# homonymns are adjacent, not joined: 'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ'
-	bagsofwords = buildflatbagsofwords(morphdict, sentences)
+	bagsofwords = buildwordbags(searchobject, morphdict, sentences)
 
 	lsidictionary = corpora.Dictionary(bagsofwords)
 	lsicorpus = [lsidictionary.doc2bow(bag) for bag in bagsofwords]

@@ -58,7 +58,7 @@ function hideallboxes() {
 
 function findotheroptions(thisoption) {
     const xoredoptions = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph',
-        '#sentencesimilarity', '#topicmodel', '#analogyfinder'];
+        '#sentencesimilarity', '#topicmodel', '#analogyfinder', '#vectortestfunction'];
     return xorfinder(thisoption, xoredoptions);
 }
 
@@ -389,6 +389,8 @@ $('#analogyfinder').change(function() {
 $('#vectortestfunction').change(function() {
     restoreplaceholders();
     if(this.checked) {
+        let others = findotheroptions(this.id);
+        $(others).prop('checked', false);
         setoptions(this.id, 'yes');
     } else {
         // $('#analogiesbox').hide();

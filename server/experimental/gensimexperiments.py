@@ -12,7 +12,7 @@ from gensim.models import LogEntropyModel, LsiModel
 from server.hipparchiaobjects.helperobjects import LogEntropyVectorCorpus
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import buildflatbagsofwords
+from server.semanticvectors.wordbaggers import buildwordbags
 from server.semanticvectors.vectorhelpers import convertmophdicttodict, findwordvectorset
 from server.startup import authordict, listmapper
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
@@ -54,7 +54,7 @@ def gensimexperiment(so):
 		for h in morphdict[m]:
 			allheadwords[h] = m
 
-	vectorspace = logentropybuildspace(morphdict, listsofwords)
+	vectorspace = logentropybuildspace(so, morphdict, listsofwords)
 
 	return output
 
@@ -76,7 +76,7 @@ def doc2vecbuildspace(morphdict, sentences):
 	return
 
 
-def logentropybuildspace(morphdict, sentences):
+def logentropybuildspace(searchobject, morphdict, sentences):
 	"""
 
 	currently unused
@@ -90,9 +90,7 @@ def logentropybuildspace(morphdict, sentences):
 	sentences = [[w for w in words.lower().split() if w] for words in sentences if words]
 	sentences = [s for s in sentences if s]
 
-	# going forward we we need a list of lists of headwords
-	# homonymns are adjacent, not joined: 'ϲυγγενεύϲ ϲυγγενήϲ' vs 'ϲυγγενεύϲ·ϲυγγενήϲ'
-	bagsofwords = buildflatbagsofwords(morphdict, sentences)
+	bagsofwords = buildwordbags(searchobject, morphdict, sentences)
 
 	logentropydictionary = corpora.Dictionary(bagsofwords)
 	logentropycorpus = [logentropydictionary.doc2bow(bag) for bag in bagsofwords]
