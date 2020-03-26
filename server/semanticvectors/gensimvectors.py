@@ -19,7 +19,69 @@ from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 from server.startup import authordict, listmapper, workdict
 
 
-def executegensimsearch(searchobject):
+def executenearestneighborsquery(searchobject):
+	"""
+
+	set yourself up for executegensimsearch()
+
+	:param searchobject:
+	:return:
+	"""
+
+	if searchobject.vectorquerytype == 'nearestneighborsquery':
+		outputfunction = generatenearestneighbordata
+		indextype = 'nn'
+		return executegensimsearch(searchobject, outputfunction, indextype)
+	else:
+		reasons = ['unknown vectorquerytype sent to executegensimsearch()']
+		return emptyvectoroutput(searchobject, reasons)
+
+
+def executegenerateanalogies(searchobject):
+	"""
+
+	set yourself up for executegensimsearch()
+
+	:param searchobject:
+	:return:
+	"""
+
+	if searchobject.vectorquerytype == 'analogyfinder':
+		outputfunction = generateanalogies
+		indextype = 'nn'
+		return executegensimsearch(searchobject, outputfunction, indextype)
+	else:
+		reasons = ['unknown vectorquerytype sent to executegensimsearch()']
+		return emptyvectoroutput(searchobject, reasons)
+
+
+def executegensimlsi(searchobject):
+	"""
+
+	CURRENTLYUNUSED
+
+	set yourself up for executegensimsearch()
+
+	:param searchobject:
+	:return:
+	"""
+	so = searchobject
+
+	if so.vectorquerytype == 'CURRENTLYUNUSED':
+		outputfunction = lsigenerateoutput
+		indextype = 'lsi'
+		so.lemma = None
+		so.tovectorize = buildlemmatizesearchphrase(so.seeking)
+		if not so.tovectorize:
+			reasons = ['unable to lemmatize the search term(s) [nb: whole words required and accents matter]']
+			return emptyvectoroutput(so, reasons)
+		return executegensimsearch(searchobject, outputfunction, indextype)
+	else:
+		reasons = ['unknown vectorquerytype sent to executegensimsearch()']
+		return emptyvectoroutput(searchobject, reasons)
+
+
+def executegensimsearch(searchobject, outputfunction, indextype):
 	"""
 
 	use the searchlist to grab a collection of sentences
@@ -35,24 +97,6 @@ def executegensimsearch(searchobject):
 	activepoll = so.poll
 
 	# print('so.vectorquerytype', so.vectorquerytype)
-
-	if so.vectorquerytype == 'CURRENTLYUNUSED':
-		outputfunction = lsigenerateoutput
-		indextype = 'lsi'
-		so.lemma = None
-		so.tovectorize = buildlemmatizesearchphrase(so.seeking)
-		if not so.tovectorize:
-			reasons = ['unable to lemmatize the search term(s) [nb: whole words required and accents matter]']
-			return emptyvectoroutput(so, reasons)
-	elif so.vectorquerytype == 'nearestneighborsquery':
-		outputfunction = generatenearestneighbordata
-		indextype = 'nn'
-	elif so.vectorquerytype == 'analogyfinder':
-		outputfunction = generateanalogies
-		indextype = 'nn'
-	else:
-		reasons = ['unknown vectorquerytype sent to executegensimsearch()']
-		return emptyvectoroutput(so, reasons)
 
 	activepoll.statusis('Preparing to search')
 

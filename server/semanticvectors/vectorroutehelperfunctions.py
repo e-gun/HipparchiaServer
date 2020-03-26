@@ -258,13 +258,16 @@ def generateabsolutevectorsoutput(listsofwords: list, workssearched: list, searc
 	return jsonoutput
 
 
-def emptyvectoroutput(searchobject, reasons=list()):
+def emptyvectoroutput(searchobject, reasons=None):
 	"""
 
 	no results; say as much
 
 	:return:
 	"""
+
+	if not reasons:
+		reasons = list()
 
 	so = searchobject
 

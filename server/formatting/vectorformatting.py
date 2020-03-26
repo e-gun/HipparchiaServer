@@ -427,7 +427,7 @@ def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: 
 		ht = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=lm)
 	else:
 		extrastringone = str()
-		ht = '<span class="sought">»{skg}«</span>'
+		ht = '<span class="sought">»{skg}«</span>'.format(skg=lm)
 
 	output.title = 'Neighbors for {es}»{skg}«'.format(skg=lm, pr=pr, es=extrastringone)
 	output.found = findshtml
