@@ -10,9 +10,9 @@ import sys
 import os
 
 
-devel = True
+devel = False
 
-hipparchiaserverversion = '1.6.0'
+hipparchiaserverversion = '1.6.1'
 supplement = '+ [DEVEL]'
 
 if devel:
