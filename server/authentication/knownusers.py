@@ -8,7 +8,8 @@
 
 from server import hipparchia
 from server.hipparchiaobjects.authenticationobjects import PassUser
-
+from server.formatting.miscformatting import consolewarning
+from server.dbsupport.tablefunctions import assignuniquename
 
 def loadusersdict(knownusersandpasswords=None):
 	"""
@@ -24,7 +25,12 @@ def loadusersdict(knownusersandpasswords=None):
 	userlist = [PassUser(k, knownusersandpasswords[k]) for k in knownusersandpasswords]
 
 	if hipparchia.config['SETADEFAULTUSER']:
-		defaultuser = PassUser(hipparchia.config['DEFAULTREMOTEUSER'], hipparchia.config['DEFAULTREMOTEPASS'])
+		thepass = hipparchia.config['DEFAULTREMOTEPASS']
+		if thepass == 'yourremoteuserpassheretrytomakeitstrongplease':
+			thepass = assignuniquename()
+			consolewarning('DEFAULTREMOTEPASS cannot be left as "yourremoteuserpassheretrytomakeitstrongplease"')
+			consolewarning('temporary one-time password is "{p}"'.format(p=thepass))
+		defaultuser = PassUser(hipparchia.config['DEFAULTREMOTEUSER'], thepass)
 		userlist.append(defaultuser)
 
 	# anonymoususer = PassUser('Anonymous', 'NoPassword')

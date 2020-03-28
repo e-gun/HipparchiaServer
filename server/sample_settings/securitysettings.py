@@ -46,6 +46,6 @@ MAXIMUMLEXICALLENGTH = 18
 # and the only person who will normally fit that bill is the individual who launched HipparchiaServer
 
 LIMITACCESSTOLOGGEDINUSERS = False
-SETADEFAULTUSER = True
+SETADEFAULTUSER = False
 DEFAULTREMOTEUSER = 'hipparchia'
 DEFAULTREMOTEPASS = 'yourremoteuserpassheretrytomakeitstrongplease'
