@@ -156,7 +156,12 @@ def loadhelpdata():
 	:return:
 	"""
 
-	currentpath = path.dirname(argv[0])
+	if not hipparchia.config['EXTERNALWSGI']:
+		currentpath = path.dirname(argv[0])
+	else:
+		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
+		currentpath = path.dirname(hipparchia.config['HARDCODEDPATH'])
+
 	helppath = currentpath + '/server/helpfiles/'
 	divmapper = {'Interface': 'helpinterface.html',
 					'Browsing': 'helpbrowsing.html',

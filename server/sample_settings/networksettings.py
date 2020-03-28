@@ -67,7 +67,7 @@ MYEXTERNALIPADDRESS = '127.0.0.1'
 # no: I have my own uWSGI plans in which case EXTERNALWSGI needs to be True
 EXTERNALWSGI = False
 UWSGIPOLLPORT = 5011
-
+HARDCODEDPATH = '/home/hipparchia/hipparchia_venv/HipparchiaServer'
 
 # postgresql connection instance; see also 'securitysettings.py'
 DBHOST = '127.0.0.1'

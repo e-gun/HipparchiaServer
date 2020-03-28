@@ -6,10 +6,10 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import os
 import re
 import sys
 import time
+from os import path
 from string import punctuation
 
 import psycopg2
@@ -941,7 +941,10 @@ def readgitdata():
 	:return:
 	"""
 
-	basepath = os.path.dirname(sys.argv[0])
+	if not hipparchia.config['EXTERNALWSGI']:
+		basepath = path.dirname(sys.argv[0])
+	else:
+		basepath = path.dirname(hipparchia.config['HARDCODEDPATH'])
 
 	gitfile = '/.git/logs/HEAD'
 	line = ''
