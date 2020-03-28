@@ -21,9 +21,7 @@ def getcommandlineargs():
 	:return:
 	"""
 
-	uwsgisafe = hipparchia.config['UWSGISAFELAUNCH']
-
-	if not uwsgisafe:
+	if not hipparchia.config['EXTERNALWSGI']:
 		commandlineparser = argparse.ArgumentParser(description='script used to launch HipparchiaServer')
 		exclusivegroup = commandlineparser.add_mutually_exclusive_group()
 

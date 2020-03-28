@@ -221,12 +221,9 @@ checkCookie();
 
 function checkactivityviawebsocket(searchid) {
     $.getJSON('/confirm/'+searchid, function(portnumber) {
-        // s = new WebSocket('ws://localhost:'+portnumber+'/');
-        // NOTE: according to the above, you will not be able to get progress reports if you are not at localhost
-        // that might be something you want to ensure
-        // the following is required for remote progress reports
         let pd = $('#pollingdata');
         let ip = location.hostname;
+        // but /etc/nginx/nginx.conf might have a WS proxy and not the actual WS host...
         let s = new WebSocket('ws://'+ip+':'+portnumber+'/');
         let amready = setInterval(function(){
             if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); }

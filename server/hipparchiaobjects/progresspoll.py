@@ -164,6 +164,16 @@ class RedisProgressPoll(object):
 
 		return keytypes
 
+	def setredisvalue(self, key, value):
+		k = self.returnrediskey(key)
+		# print('setredisvalue({k}): {v}'.format(k=k, v=value))
+		self.redisconnection.set(k, value)
+
+	def getredisvalue(self, key):
+		self.redisconnection.set_response_callback('GET', self.keytypes[key])
+		k = self.returnrediskey(key)
+		return self.redisconnection.get(k)
+
 	def initializeredispoll(self):
 		for k in self.keytypes:
 			rediskey = self.returnrediskey(k)
@@ -177,16 +187,6 @@ class RedisProgressPoll(object):
 
 	def returnrediskey(self, keyname):
 		return '{id}_{k}'.format(id=self.searchid, k=keyname)
-
-	def setredisvalue(self, key, value):
-		k = self.returnrediskey(key)
-		# print('setredisvalue({k}): {v}'.format(k=k, v=value))
-		self.redisconnection.set(k, value)
-
-	def getredisvalue(self, key):
-		self.redisconnection.set_response_callback('GET', self.keytypes[key])
-		k = self.returnrediskey(key)
-		return self.redisconnection.get(k)
 
 	def getstatus(self):
 		m = self.getredisvalue('statusmessage')

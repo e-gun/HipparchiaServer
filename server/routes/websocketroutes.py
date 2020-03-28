@@ -15,6 +15,7 @@ from server.formatting.miscformatting import consolewarning
 from server.formatting.miscformatting import validatepollid
 from server.startup import progresspolldict
 from server.threading.websocketthread import startwspolling
+from server.dbsupport.redisdbfunctions import establishredisconnection
 
 
 @hipparchia.route('/confirm/<searchid>')
@@ -42,6 +43,9 @@ def checkforactivesearch(searchid):
 		pollstart = threading.Thread(target=startwspolling, name='websocketpoll', args=())
 		pollstart.start()
 
+	if hipparchia.config['EXTERNALWSGI'] and hipparchia.config['POLLCONNECTIONTYPE'] == 'redis':
+		return externalwsgipolling(pollid)
+
 	try:
 		if progresspolldict[pollid].getactivity():
 			return json.dumps(pollport)
@@ -56,3 +60,35 @@ def checkforactivesearch(searchid):
 				return json.dumps('nothing at {p}'.format(p=pollport))
 		except KeyError:
 			return json.dumps('cannot_find_the_poll')
+
+
+def externalwsgipolling(pollid):
+	"""
+
+	polls can make it through WGSI; the real problem are the threads
+
+	so ignore the problem...
+
+	:param pollid:
+	:return:
+	"""
+	# keep in sync with "progresspoll.py" and RedisProgressPoll()
+	keytypes = {'launchtime': float,
+	            'portnumber': int,
+	            'active': bytes,
+	            'remaining': int,
+	            'poolofwork': int,
+	            'statusmessage': bytes,
+	            'hitcount': int,
+	            'notes': bytes}
+
+	mykey = 'active'
+
+	pollport = hipparchia.config['UWSGIPOLLPORT']
+	c = establishredisconnection()
+	c.set_response_callback('GET', keytypes[mykey])
+	storedkey = '{id}_{k}'.format(id=pollid, k=mykey)
+	response = c.get(storedkey)
+	print('response', response)
+
+	return json.dumps(pollport)
