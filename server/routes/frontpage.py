@@ -160,7 +160,7 @@ def loadhelpdata():
 		currentpath = path.dirname(argv[0])
 	else:
 		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
-		currentpath = path.dirname(hipparchia.config['HARDCODEDPATH'])
+		currentpath = path.abspath(hipparchia.config['HARDCODEDPATH'])
 
 	helppath = currentpath + '/server/helpfiles/'
 	divmapper = {'Interface': 'helpinterface.html',

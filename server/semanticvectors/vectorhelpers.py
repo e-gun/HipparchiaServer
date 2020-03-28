@@ -944,7 +944,7 @@ def readgitdata():
 	if not hipparchia.config['EXTERNALWSGI']:
 		basepath = path.dirname(sys.argv[0])
 	else:
-		basepath = path.dirname(hipparchia.config['HARDCODEDPATH'])
+		basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
 
 	gitfile = '/.git/logs/HEAD'
 	line = ''
