@@ -7,7 +7,7 @@
 """
 
 import sys
-import os
+from os import path
 
 
 devel = True
@@ -31,11 +31,23 @@ def readgitdata() -> str:
 	:return:
 	"""
 
-	here = os.path.dirname(sys.argv[0])
+	here = path.dirname(sys.argv[0])
 	gitfile = here + '/.git/logs/HEAD'
 	line = str()
 
-	if os.path.exists(gitfile):
+	success = False
+
+	if path.exists(gitfile):
+		success = True
+
+	if not success:
+		# maybe you are doing the EXTERNALWSGI thing
+		# unfortunately hipparchia.config is not yet available...
+		gitfile = '/home/hipparchia/hipparchia_venv/HipparchiaServer/.git/logs/HEAD'
+		if path.exists(gitfile):
+			success = True
+
+	if success:
 		with open(gitfile) as fh:
 			for line in fh:
 				pass
@@ -44,6 +56,6 @@ def readgitdata() -> str:
 		gitdata = lastline.split(' ')
 		commit = gitdata[1]
 	else:
-		commit = 'git commit data not found'
+		commit = 'commit data not found'
 
 	return commit
