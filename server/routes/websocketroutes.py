@@ -72,23 +72,31 @@ def externalwsgipolling(pollid):
 	:param pollid:
 	:return:
 	"""
-	# keep in sync with "progresspoll.py" and RedisProgressPoll()
-	keytypes = {'launchtime': float,
-	            'portnumber': int,
-	            'active': bytes,
-	            'remaining': int,
-	            'poolofwork': int,
-	            'statusmessage': bytes,
-	            'hitcount': int,
-	            'notes': bytes}
-
-	mykey = 'active'
 
 	pollport = hipparchia.config['UWSGIPOLLPORT']
-	c = establishredisconnection()
-	c.set_response_callback('GET', keytypes[mykey])
-	storedkey = '{id}_{k}'.format(id=pollid, k=mykey)
-	response = c.get(storedkey)
-	print('response', response)
+
+	# the following is just to get feedback when debugging...
+	# keep keytypes in sync with "progresspoll.py" and RedisProgressPoll()
+
+	# keytypes = {'launchtime': float,
+	#             'portnumber': int,
+	#             'active': bytes,
+	#             'remaining': int,
+	#             'poolofwork': int,
+	#             'statusmessage': bytes,
+	#             'hitcount': int,
+	#             'notes': bytes}
+	#
+	# mykey = 'active'
+	#
+	# c = establishredisconnection()
+	# c.set_response_callback('GET', keytypes[mykey])
+	# storedkey = '{id}_{k}'.format(id=pollid, k=mykey)
+	# try:
+	# 	response = c.get(storedkey)
+	# except TypeError:
+	# 	# TypeError: cannot convert 'NoneType' object to bytes
+	# 	response = b'no response'
+	# print('response', response)
 
 	return json.dumps(pollport)

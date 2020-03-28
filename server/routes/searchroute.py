@@ -65,6 +65,7 @@ def executesearch(searchid, so=None):
 
 	progresspolldict[pollid] = ProgressPoll(pollid)
 	activepoll = progresspolldict[pollid]
+
 	activepoll.activate()
 	activepoll.statusis('Preparing to search')
 	so.poll = activepoll
