@@ -11,6 +11,9 @@
 # MYEXTERNALIPADDRESS needs to be set if you are going to view polls
 # 	remotely: this is basically a firewall/routing issue
 #
+# GUNICORNSAFELAUNCH means that you are not using the built-in server but are serving via nginx vel sim. If you
+#   don't know that that means, then don't even think of setting this to True.
+#
 # FLASKSERVEDFROMPORT is the port flask will serve from
 #
 # FLASKSEENATPORT might diverge from this if you are feeding flask
@@ -60,6 +63,9 @@ FLASKSEENATPORT = 5000
 PROGRESSPOLLDEFAULTPORT = 5010
 LISTENINGADDRESS = '127.0.0.1'
 MYEXTERNALIPADDRESS = '127.0.0.1'
+
+# no: I have my own uWSGI plans in which case UWSGISAFELAUNCH needs to be True
+UWSGISAFELAUNCH = False
 
 # postgresql connection instance; see also 'securitysettings.py'
 DBHOST = '127.0.0.1'

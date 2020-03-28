@@ -10,7 +10,7 @@ import sys
 import os
 
 
-devel = False
+devel = True
 
 hipparchiaserverversion = '1.6.1'
 supplement = '+ [DEVEL]'
