@@ -73,6 +73,7 @@ def externalwsgipolling(pollid):
 	:return:
 	"""
 
+	time.sleep(.10)
 	pollport = hipparchia.config['UWSGIPOLLPORT']
 
 	# the following is just to get feedback when debugging...
