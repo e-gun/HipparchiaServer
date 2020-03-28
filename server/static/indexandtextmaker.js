@@ -50,6 +50,7 @@ $('#makeanindex').click( function() {
             if ($('#autofillinput').is(':checked')) {
                 // you are using the autofill boxes
                 if (endpoint === '') {
+                    checkactivityviawebsocket(searchid);
                     let url = '';
                     if (wrk === '') {
                         url = '/indexto/' + searchid + '/' + authorid;
@@ -61,16 +62,16 @@ $('#makeanindex').click( function() {
                     $.getJSON(url, function (indexdata) {
                         loadindexintodisplayresults(indexdata);
                     });
-                    checkactivityviawebsocket(searchid);
                 } else {
+                    checkactivityviawebsocket(searchid);
                     let url = '/indexto/' + searchid + '/' + authorid + '/' + wrk + '/' + locus + '/' + endpoint;
                     $.getJSON(url, function (indexdata) {
                         loadindexintodisplayresults(indexdata);
                     });
-                    checkactivityviawebsocket(searchid);
                 }
             } else {
                 // you are using the raw entry subsystem
+                checkactivityviawebsocket(searchid);
                 let url = '';
                 if (wrk === '') {
                     url = '/indexto/' + searchid + '/' + authorid;
@@ -84,7 +85,6 @@ $('#makeanindex').click( function() {
                 $.getJSON(url, function (indexdata) {
                     loadindexintodisplayresults(indexdata);
                 });
-                checkactivityviawebsocket(searchid);
             }
         }
 });

@@ -411,14 +411,11 @@ $('#executeanalogysearch').click(function() {
     let B = $('#analogiesinputB').val();
     let C = $('#analogiesinputC').val();
     let searchid = generateId(8);
+    checkactivityviawebsocket(searchid);
     // @hipparchia.route('/vectoranalogies/<searchid>/<termone>/<termtwo>/<termthree>')
     let url = `/vectoranalogies/${searchid}/${A}/${B}/${C}`;
     $.getJSON(url, function (returnedresults) { loadanalogyresults(returnedresults); });
-    checkactivityviawebsocket(searchid);
 });
-
-
-
 
 
 function loadanalogyresults(outputdata) {
