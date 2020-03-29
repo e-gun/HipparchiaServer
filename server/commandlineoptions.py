@@ -7,8 +7,7 @@
 """
 
 import argparse
-
-from server import hipparchia
+from sys import argv
 
 
 def getcommandlineargs():
@@ -21,7 +20,7 @@ def getcommandlineargs():
 	:return:
 	"""
 
-	if not hipparchia.config['EXTERNALWSGI']:
+	if 'run.py' in argv[0]:
 		commandlineparser = argparse.ArgumentParser(description='script used to launch HipparchiaServer')
 		exclusivegroup = commandlineparser.add_mutually_exclusive_group()
 
@@ -44,9 +43,8 @@ def getcommandlineargs():
 		commandlineargs = commandlineparser.parse_args()
 
 	else:
-		# you'll nee n=workers copies of this message...
-		# consolewarning('serving via gunicorn')
-		# consolewarning('(gunicorn cannot use the vectorbot)')
+		# 'gunicorn'
+		# WARNING: gunicorn cannot use the vectorbot
 		commandlineargs = argparse.Namespace(calculatewordweights=False,
 		                                     collapsedgenreweights=False,
 		                                     dbhost=None,

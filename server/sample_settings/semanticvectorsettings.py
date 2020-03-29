@@ -118,6 +118,7 @@ LDAMINFREQ = 5          # word must be found >n times
 LDAITERATIONS = 12
 LDAMUSTBELONGERTHAN = 3
 
+# gunicorn can't autovectorize and should ignore this setting
 AUTOVECTORIZE = False
 
 # baggingmethods = {'flat': buildflatbagsofwords,

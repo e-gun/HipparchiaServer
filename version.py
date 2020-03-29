@@ -6,7 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import sys
+from sys import argv
 from os import path
 
 
@@ -31,23 +31,15 @@ def readgitdata() -> str:
 	:return:
 	"""
 
-	here = path.dirname(sys.argv[0])
-	gitfile = here + '/.git/logs/HEAD'
-	line = str()
-
-	success = False
+	if 'run.py' in argv[0]:
+		here = path.dirname(argv[0])
+		gitfile = path.join(here, '/.git/logs/HEAD')
+	else:
+		# gunicorn: '/home/hipparchia/hipparchia_venv/bin/gunicorn'
+		here = path.split(path.dirname(argv[0]))[0]  # '/home/hipparchia/hipparchia_venv'
+		gitfile = path.join(here, 'HipparchiaServer/.git/logs/HEAD')
 
 	if path.exists(gitfile):
-		success = True
-
-	if not success:
-		# maybe you are doing the EXTERNALWSGI thing
-		# unfortunately hipparchia.config is not yet available...
-		gitfile = '/home/hipparchia/hipparchia_venv/HipparchiaServer/.git/logs/HEAD'
-		if path.exists(gitfile):
-			success = True
-
-	if success:
 		with open(gitfile) as fh:
 			for line in fh:
 				pass

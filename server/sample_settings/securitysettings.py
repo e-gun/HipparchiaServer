@@ -44,6 +44,8 @@ MAXIMUMLEXICALLENGTH = 18
 # NB: you really shouldn't be opening up hipparchia to the whole internet...
 # the default configuration assumes that anyone who is able to connect to localhost can freely use the server
 # and the only person who will normally fit that bill is the individual who launched HipparchiaServer
+# if you do not change DEFAULTREMOTEPASS from 'yourremote...' a one-time random pass will be generated on the fly
+# and you will basically be unable to use remotes unless you are watching the logs for the message that announces it
 
 LIMITACCESSTOLOGGEDINUSERS = False
 SETADEFAULTUSER = False
