@@ -94,7 +94,7 @@ FORBIDUSERDEFINEDVECTORSPACES = False
 LITERALCOSINEDISTANCEENABLED = False
 CONCEPTMAPPINGENABLED = False
 TOPICMODELINGENABLED = False
-VECTORANALOGIESENABLED = False    # user interface is incomplete; results are not so hot; do not enable as thing stand
+VECTORANALOGIESENABLED = False
 CONCEPTSEARCHINGENABLED = False   # of dubious value as currently implemented
 TESTINGVECTORBUTTONENABLED = False  # maybe an in-progress/experimental function exists and you are working on/with it
 MAXVECTORSPACE = 7548165
@@ -119,6 +119,7 @@ LDAITERATIONS = 12
 LDAMUSTBELONGERTHAN = 3
 
 # gunicorn can't autovectorize and should ignore this setting
+# if you want to autobuild a vector set you can use "run.py" which can load even while gunicorn/nginx is serving
 AUTOVECTORIZE = False
 
 # baggingmethods = {'flat': buildflatbagsofwords,
