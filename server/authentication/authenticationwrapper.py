@@ -32,13 +32,10 @@ def requireauthentication(routefunction):
 	:return:
 	"""
 
-	iamloggedin = False
-
 	try:
-		iamloggedin = session['loggedin']
+		session['loggedin']
 	except KeyError:
-		# wget, curl, etc. can trigger a keyerror since they do not have a session
-		pass
+		session['loggedin'] = False
 	except RuntimeError:
 		# RuntimeError: Working outside of request context.
 		# an issue at startup
@@ -46,6 +43,27 @@ def requireauthentication(routefunction):
 
 	wrappername = routefunction.__name__
 
+	def wrapperfunction(*args, **kwargs):
+		try:
+			iamloggedin = session['loggedin']
+		except KeyError:
+			iamloggedin = False
+
+		if iamloggedin or not hipparchia.config['LIMITACCESSTOLOGGEDINUSERS']:
+			return routefunction(*args, **kwargs)
+		else:
+			return loginfailurenotification()
+
+	wrapperfunction.__name__ = wrappername
+
+	return wrapperfunction
+
+
+def loginfailurenotification():
+	"""
+
+	:return:
+	"""
 	injectjs = """
 		$('#validateusers').dialog( "open" );
 	"""
@@ -65,20 +83,13 @@ def requireauthentication(routefunction):
 	itemsweuse = set(textmakeritems + browseritems + searchitems + indexmakeritems)
 	outputdict = {i: str() for i in itemsweuse}
 
-	def wrapperfunction(*args, **kwargs):
-		if iamloggedin or not hipparchia.config['LIMITACCESSTOLOGGEDINUSERS']:
-			return routefunction(*args, **kwargs)
-		else:
-			# different functions send their output to different bits of the page: try to get the message to one of them
-			outputdict['title'] = 'not logged in'
-			outputdict['searchsummary'] = htmlresults
-			outputdict['browserhtml'] = htmlresults
-			outputdict['indexhtml'] = htmlresults
-			outputdict['js'] = injectjs
-			outputdict['newjs'] = '<script>{js}</script>'.format(js=injectjs)
-			jsonoutput = json.dumps(outputdict)
-			return jsonoutput
+	# different functions send their output to different bits of the page: try to get the message to one of them
+	outputdict['title'] = 'not logged in'
+	outputdict['searchsummary'] = htmlresults
+	outputdict['browserhtml'] = htmlresults
+	outputdict['indexhtml'] = htmlresults
+	outputdict['js'] = injectjs
+	outputdict['newjs'] = '<script>{js}</script>'.format(js=injectjs)
+	jsonoutput = json.dumps(outputdict)
 
-	wrapperfunction.__name__ = wrappername
-
-	return wrapperfunction
+	return jsonoutput
