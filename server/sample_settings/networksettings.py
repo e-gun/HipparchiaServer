@@ -45,11 +45,6 @@
 #   has other things going on with redis, then it is possible to generate conflicts is you leave this as '0'
 #
 # SEARCHLISTCONNECTIONTYPE if this is set to 'redis' you will not use Manager() to manage the searchlists but redis
-#   instead. There is a problesm with certain heardware/OS configurations that seems to crop up only when too
-#   many results get passed to the ListProxy at once. Storing the results in redis is a strategy to circumvent this.
-#   For debuggging purposes only... [Unfortunately this seems not to be the fix either]
-#
-# SEARCHLISTCONNECTIONTYPE if this is set to 'redis' you will not use Manager() to manage the searchlists but redis
 #   instead. At the moment this is all about tracking down a memory management oddity. Do not use this
 #   unless searches are hanging and you are desperate to find a fix... This code is significantly slower.
 #   Waiting for redis to do a SPOP is not nearly as fast as accessing memory directly. The longer the searchlist
@@ -76,6 +71,7 @@ CONNECTIONTYPE = 'pool'
 ENABLEPOOLCLEANING = False
 
 # you might be using redis; but note that redis is NOT pre-installed in standard or minimal installations
+# EXTERNALWSGI users will want POLLCONNECTIONTYPE = 'redis'
 REDISHOST = '127.0.0.1'
 REDISPORT = 6379
 REDISCOCKET = '/tmp/redis.sock'

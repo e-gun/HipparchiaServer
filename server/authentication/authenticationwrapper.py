@@ -32,10 +32,13 @@ def requireauthentication(routefunction):
 	:return:
 	"""
 
+	iamloggedin = False
+
 	try:
-		session['loggedin']
+		iamloggedin = session['loggedin']
 	except KeyError:
-		session['loggedin'] = False
+		# wget, curl, etc. can trigger a keyerror since they do not have a session
+		pass
 	except RuntimeError:
 		# RuntimeError: Working outside of request context.
 		# an issue at startup
@@ -63,7 +66,7 @@ def requireauthentication(routefunction):
 	outputdict = {i: str() for i in itemsweuse}
 
 	def wrapperfunction(*args, **kwargs):
-		if session['loggedin'] or not hipparchia.config['LIMITACCESSTOLOGGEDINUSERS']:
+		if iamloggedin or not hipparchia.config['LIMITACCESSTOLOGGEDINUSERS']:
 			return routefunction(*args, **kwargs)
 		else:
 			# different functions send their output to different bits of the page: try to get the message to one of them
