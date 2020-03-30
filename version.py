@@ -33,7 +33,7 @@ def readgitdata() -> str:
 
 	if 'run.py' in argv[0]:
 		here = path.dirname(argv[0])
-		gitfile = path.join(here, '/.git/logs/HEAD')
+		gitfile = path.join(here, '.git/logs/HEAD')
 	else:
 		# gunicorn: '/home/hipparchia/hipparchia_venv/bin/gunicorn'
 		here = path.split(path.dirname(argv[0]))[0]  # '/home/hipparchia/hipparchia_venv'
