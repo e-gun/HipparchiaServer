@@ -64,54 +64,6 @@ run.py:
 	hipparchia.run(threaded=True, debug=False, host=hipparchia.config['LISTENINGADDRESS'], port=hipparchia.config['FLASKSERVEDFROMPORT'],
 	               ssl_context=(basepath + crt, basepath + key))
 
-
-
-[G] [not actually a case where we need debugging ATM] REDIS debug notes:
-
-[build a connection by hand]
-
-    import redis
-    sock='/tmp/redis.sock'
-    dbid=0
-    poolsize=4
-    port = 6379
-    redisconnection = redis.ConnectionPool(host='localhost', port=port, db=dbid, max_connections=poolsize)
-    # redisconnection = redis.ConnectionPool(connection_class=redis.UnixDomainSocketConnection, path=sock, db=dbid, max_connections=poolsize)
-    c = redis.Redis(connection_pool=redisconnection)
-
-ex queries:
-
-    c.keys()
-    len([k for k in c.keys() if b'_searchlist' in k])
-    c.delete(b'dab1038f_searchlist')
-
-    r = [k for k in c.keys() if b'remain' in k]
-    a = [c.delete(key) for key in r]
-
-
-[H] can't get morphology table for: ἀπαλλάϲϲω
-
-    ...
-    d/m/v attic subj 2nd
-    d/m/v attic opt 2nd
-    d/m/v attic imperat 2nd
-    AssertionError: invalid voice submitted to findmygreektenses(): 2nd
-
-hipparchiaDB=#     select * from greek_morphology where possible_dictionary_forms like '%ἀπαλλάϲϲω%' and possible_dictionary_forms like '%2nd%' and possible_dictionary_forms like '%imperat%' and possible_dictionary_forms like '%attic%';
-
-you will see:
-
- ἀπαλλάχθητον  | 11723310 |            | <possibility_1>ἀπαλλάχθητον, ἀπαλλάϲϲω<xref_value>11723310</xref_value><xref_kind>9</xref_kind><transl>set free</transl><analysis>aor ind pass 2nd dual (doric aeolic)</analysis></possibility_1>           +
-               |          |            | <possibility_2>ἀπαλλάϲϲω<xref_value>11723310</xref_value><xref_kind>9</xref_kind><transl>set free</transl><analysis>aor imperat 2nd dual</analysis></possibility_2>                                         +
-               |          |            | <possibility_3>ἀπαλλάχθητον, ἀπαλλάϲϲω<xref_value>11723310</xref_value><xref_kind>9</xref_kind><transl>set free</transl><analysis>aor ind pass 2nd dual (doric aeolic)</analysis></possibility_3>           +
-               |          |            | <possibility_4>ἀπαλλάϲϲω<xref_value>11723310</xref_value><xref_kind>9</xref_kind><transl>set free</transl><analysis>aor imperat 2nd dual</analysis></possibility_4>                                         +
-               |          |            | <possibility_5>ἀπαλλάϲϲω<xref_value>11723310</xref_value><xref_kind>9</xref_kind><transl>set free</transl><analysis>aor ind pass 2nd dual (homeric ionic)</analysis></possibility_5>                        +
-               |          |            | <possibility_6>ἀπαλλάϲϲω<xref_value>11723310</xref_value><xref_kind>9</xref_kind><transl>set free</transl><analysis>aor ind pass 2nd dual (homeric ionic)</analysis></possibility_6>                        +
-
-there is no voice for
-
-    <possibility_4>ἀπαλλάϲϲω<xref_value>11723310</xref_value><xref_kind>9</xref_kind><transl>set free</transl><analysis>aor imperat 2nd dual</analysis></possibility_4>
-
 [I] BREAKAGE WARNING [FIXED?]
 
 # see https://github.com/matplotlib/matplotlib/issues/16739
@@ -168,3 +120,17 @@ can 'fix' matplotlib 3.2.0 as follows @ _axes.py ln 4378:
         if len(s) not in (1, x.size):
             # raise ValueError("s must be a scalar, or the same size as x and y")
             print('not raising ValueError...')
+
+[J] "/parse/iudico"
+
+This works on port 5000
+This does not work if you go via gunicorn
+
+But seemingly all other words do work !!
+
+put "print('ow',observedword)" as the first line of findbyform() and you will not see 'iudico' but you will see 'esse', etc
+so we never actually make it to the route... [@hipparchia.route('/parse/<observedword>')]
+this is not too surprising since the 'hit' is not logged
+
+
+'iudicor' and 'iudicas' work fine

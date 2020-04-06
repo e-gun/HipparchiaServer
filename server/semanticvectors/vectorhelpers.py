@@ -7,12 +7,12 @@
 """
 
 import re
-import sys
 import time
-from os import path
 from string import punctuation
 
+import numpy as np
 import psycopg2
+from sklearn.manifold import TSNE
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, worklinetemplate
@@ -929,38 +929,41 @@ def relativehomonymnweight(worda, wordb, morphdict) -> float:
 		return uniqueratio
 
 
-def readgitdata():
+def reducetotwodimensions(model) -> dict:
 	"""
+	copied from
+	https://radimrehurek.com/gensim/auto_examples/tutorials/run_word2vec.html#sphx-glr-auto-examples-tutorials-run-word2vec-py
 
-	find the commit value for the code in use
-
-	a sample lastline:
-
-		'3b0c66079f7337928b02df429f4a024dafc80586 63e01ae988d2d720b65c1bf7db54236b7ad6efa7 EG <egun@antisigma> 1510756108 -0500\tcommit: variable name changes; code tidy-ups\n'
-
+	:param model:
 	:return:
 	"""
 
-	if not hipparchia.config['EXTERNALWSGI']:
-		basepath = path.dirname(sys.argv[0])
-	else:
-		basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
+	dimensions = 2  # final num dimensions (2D, 3D, etc)
 
-	gitfile = '/.git/logs/HEAD'
-	line = ''
+	vectors = list()  # positions in vector space
+	labels = list()  # keep track of words to label our data again later
+	for word in model.wv.vocab:
+		vectors.append(model.wv[word])
+		labels.append(word)
 
-	try:
-		with open(basepath+gitfile) as fh:
-			for line in fh:
-				pass
-			lastline = line
+	# convert both lists into numpy vectors for reduction
+	vectors = np.asarray(vectors)
+	labels = np.asarray(labels)
 
-		gitdata = lastline.split(' ')
-		commit = gitdata[1]
-	except FileNotFoundError:
-		commit = 'unknowncommit'
+	# reduce using t-SNE
+	vectors = np.asarray(vectors)
+	tsne = TSNE(n_components=dimensions, random_state=0)
+	vectors = tsne.fit_transform(vectors)
 
-	return commit
+	xvalues = [v[0] for v in vectors]
+	yvalues = [v[1] for v in vectors]
+
+	returndict = dict()
+	returndict['xvalues'] = xvalues
+	returndict['yvalues'] = yvalues
+	returndict['labels'] = labels
+
+	return returndict
 
 
 """

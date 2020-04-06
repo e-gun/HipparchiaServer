@@ -5,16 +5,22 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+import json
 
 from server import hipparchia
+from server.dbsupport.tablefunctions import assignuniquename
 from server.dbsupport.vectordbfunctions import checkforstoredvector
+from server.dbsupport.vectordbfunctions import createstoredimagestable
+from server.formatting.jsformatting import generatevectorjs
+from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.searchobjects import SearchOutputObject
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.gensimanalogies import generateanalogies
 from server.semanticvectors.gensimlsi import lsigenerateoutput
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import buildlemmatizesearchphrase
+from server.semanticvectors.vectorhelpers import buildlemmatizesearchphrase, reducetotwodimensions
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 from server.startup import authordict, listmapper, workdict
 
@@ -179,3 +185,129 @@ def executegensimsearch(searchobject, outputfunction, indextype):
 		return emptyvectoroutput(so, reasons)
 
 	return output
+
+
+def twodimensionalrepresentationofspace(searchobject):
+	"""
+
+	https://radimrehurek.com/gensim/auto_examples/tutorials/run_word2vec.html#sphx-glr-auto-examples-tutorials-run-word2vec-py
+	Visualising the Word Embeddings
+
+
+	:return:
+	"""
+
+	if searchobject.vectorquerytype == 'vectortestfunction':
+		outputfunction = tsnegraphofvectors
+		indextype = 'nn'
+		return executegensimsearch(searchobject, outputfunction, indextype)
+	else:
+		reasons = ['unknown vectorquerytype sent to executegensimsearch()']
+		return emptyvectoroutput(searchobject, reasons)
+
+
+def tsnegraphofvectors(sentencetuples, workssearched, so, vectorspace):
+	"""
+
+	lifted from https://radimrehurek.com/gensim/auto_examples/tutorials/run_word2vec.html#sphx-glr-auto-examples-tutorials-run-word2vec-py
+
+
+	:param sentencetuples:
+	:param workssearched:
+	:param so:
+	:param vectorspace:
+	:return:
+	"""
+
+	import random
+
+	random.seed(0)
+
+	plotdict = reducetotwodimensions(vectorspace)
+	xvalues = plotdict['xvalues']
+	yvalues = plotdict['yvalues']
+	labels = plotdict['labels']
+
+	import matplotlib.pyplot as plt
+	import random
+	from io import BytesIO
+
+	random.seed(0)
+
+	plt.figure(figsize=(12, 12))
+	plt.scatter(xvalues, yvalues)
+
+
+	# Label randomly subsampled 25 data points
+	#
+	indices = list(range(len(labels)))
+	selected_indices = random.sample(indices, 25)
+	for i in selected_indices:
+		plt.annotate(labels[i], (xvalues[i], yvalues[i]))
+
+	graphobject = BytesIO()
+	plt.savefig(graphobject)
+	plt.clf()
+	plt.close()
+
+	graphobject = graphobject.getvalue()
+
+	imagename = svg(graphobject)
+
+	print('http://localhost:5000/getstoredfigure/{i}'.format(i=imagename))
+
+	output = SearchOutputObject(so)
+	output.image = imagename
+
+	findsjs = generatevectorjs()
+
+	output.found = str()
+	output.js = findsjs
+
+	jsonoutput = json.dumps(output.generateoutput())
+
+	# print('jsonoutput', jsonoutput)
+	return jsonoutput
+
+
+# temp fnc: delete later
+def svg(figureasbytes):
+	"""
+
+	store a graph in the image table so that you can subsequently display it in the browser
+
+	note that images get deleted after use
+
+	also note that we hand the data to the db and then immediatel grab it out of the db because of
+	constraints imposed by the way flask works
+
+	:param figureasbytes:
+	:return:
+	"""
+
+	dbconnection = ConnectionObject(ctype='rw')
+	dbconnection.setautocommit()
+	cursor = dbconnection.cursor()
+
+	# avoid psycopg2.DataError: value too long for type character varying(12)
+	randomid = assignuniquename(12)
+
+	q = """
+	INSERT INTO public.storedvectorimages 
+		(imagename, imagedata)
+		VALUES (%s, %s)
+	"""
+
+	d = (randomid, figureasbytes)
+	try:
+		cursor.execute(q, d)
+	except psycopg2.ProgrammingError:
+		# psycopg2.ProgrammingError: relation "public.storedvectorimages" does not exist
+		createstoredimagestable()
+		cursor.execute(q, d)
+
+	# print('stored {n} in vector image table'.format(n=randomid))
+
+	dbconnection.connectioncleanup()
+
+	return randomid

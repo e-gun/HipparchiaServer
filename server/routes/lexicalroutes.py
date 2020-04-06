@@ -178,7 +178,7 @@ def findbyform(observedword):
 	cleanedword = removegravity(retainedgravity)
 
 	# index clicks will send you things like 'αὖ²'
-	cleanedword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]', '', cleanedword)
+	cleanedword = re.sub(r'[⁰¹²³⁴⁵⁶⁷⁸⁹]', str(), cleanedword)
 
 	# the search syntax is '=' and not '~', so the next should be avoided unless a lot of refactoring will happen
 	# cleanedword = re.sub(r'[uv]', r'[uv]', cleanedword)

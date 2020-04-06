@@ -134,3 +134,30 @@ def loadredisresults(searchid):
 	# foundlineobjects = [dblineintolineobject(pickle.loads(f)) for f in finds]
 	foundlineobjects = [pickle.loads(f) for f in finds]
 	return foundlineobjects
+
+
+"""
+
+[G] [not actually a case where we need debugging ATM] REDIS debug notes:
+
+[build a connection by hand]
+
+    import redis
+    sock='/tmp/redis.sock'
+    dbid=0
+    poolsize=4
+    port = 6379
+    redisconnection = redis.ConnectionPool(host='localhost', port=port, db=dbid, max_connections=poolsize)
+    # redisconnection = redis.ConnectionPool(connection_class=redis.UnixDomainSocketConnection, path=sock, db=dbid, max_connections=poolsize)
+    c = redis.Redis(connection_pool=redisconnection)
+
+ex queries:
+
+    c.keys()
+    len([k for k in c.keys() if b'_searchlist' in k])
+    c.delete(b'dab1038f_searchlist')
+
+    r = [k for k in c.keys() if b'remain' in k]
+    a = [c.delete(key) for key in r]
+
+"""

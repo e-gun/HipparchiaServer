@@ -59,7 +59,7 @@ def requireauthentication(routefunction):
 	return wrapperfunction
 
 
-def loginfailurenotification():
+def loginfailurenotification() -> str:
 	"""
 
 	:return:

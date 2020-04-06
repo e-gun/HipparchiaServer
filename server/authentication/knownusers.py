@@ -11,16 +11,25 @@ from server.hipparchiaobjects.authenticationobjects import PassUser
 from server.formatting.miscformatting import consolewarning
 from server.dbsupport.tablefunctions import assignuniquename
 
+
 def loadusersdict(knownusersandpasswords=None):
 	"""
 
 	return the userobjects we know about
 
+	note that this is effectively empty: no dict of users is being passed ATM
+
+	anyone with ambitions re. a collection of users should insert them via securitysettings.py
+
+		KNOWNUSERSDICT = {'user1': 'pass1, 'user2': 'pass2'}
+
+	elaborate user and authentication schemes are a non-priority (as is encryption...)
+
 	:return:
 	"""
 
 	if not knownusersandpasswords:
-		knownusersandpasswords = dict()
+		knownusersandpasswords = hipparchia.config['KNOWNUSERSDICT']
 
 	userlist = [PassUser(k, knownusersandpasswords[k]) for k in knownusersandpasswords]
 
