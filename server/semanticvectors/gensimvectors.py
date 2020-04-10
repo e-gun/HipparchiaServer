@@ -235,8 +235,8 @@ def tsnegraphofvectors(sentencetuples, workssearched, so, vectorspace):
 	random.seed(0)
 
 	plt.figure(figsize=(12, 12))
-	plt.scatter(xvalues, yvalues)
-
+	# https://jonasjacek.github.io/colors/
+	plt.scatter(xvalues, yvalues, color='#949494')
 
 	# Label randomly subsampled 25 data points
 	#
@@ -254,14 +254,20 @@ def tsnegraphofvectors(sentencetuples, workssearched, so, vectorspace):
 
 	imagename = svg(graphobject)
 
-	print('http://localhost:5000/getstoredfigure/{i}'.format(i=imagename))
+	# print('http://localhost:5000/getstoredfigure/{i}'.format(i=imagename))
 
 	output = SearchOutputObject(so)
 	output.image = imagename
 
 	findsjs = generatevectorjs()
 
+	htmltemplate = """
+	<p id="imagearea"></p>
+	"""
+
 	output.found = str()
+	output.htmlsearch = str()
+	output.found = htmltemplate
 	output.js = findsjs
 
 	jsonoutput = json.dumps(output.generateoutput())

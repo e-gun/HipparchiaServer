@@ -83,7 +83,6 @@ def generatevectorjs() -> str:
 	jstemplate = """
 	
 		function whichVectorChoice () {
-			const vectorboxes = ['#cosdistbysentence', '#cosdistbylineorword', '#semanticvectorquery', '#nearestneighborsquery', '#tensorflowgraph', '#sentencesimilarity', '#topicmodel'];
 			let xor = [];
 			for (let i = 0; i < vectorboxes.length; i++) {
 				let opt = $(vectorboxes[i]);
