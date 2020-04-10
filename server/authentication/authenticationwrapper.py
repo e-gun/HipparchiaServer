@@ -44,12 +44,15 @@ def requireauthentication(routefunction):
 	wrappername = routefunction.__name__
 
 	def wrapperfunction(*args, **kwargs):
+		if not hipparchia.config['LIMITACCESSTOLOGGEDINUSERS']:
+			return routefunction(*args, **kwargs)
+
 		try:
 			iamloggedin = session['loggedin']
 		except KeyError:
 			iamloggedin = False
 
-		if iamloggedin or not hipparchia.config['LIMITACCESSTOLOGGEDINUSERS']:
+		if iamloggedin:
 			return routefunction(*args, **kwargs)
 		else:
 			return loginfailurenotification()
