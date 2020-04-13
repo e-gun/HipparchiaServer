@@ -18,7 +18,7 @@ from server.routes.searchroute import executesearch
 from server.startup import lemmatadict, progresspolldict
 
 if hipparchia.config['SEMANTICVECTORSENABLED']:
-	from server.semanticvectors.gensimvectors import executenearestneighborsquery, executegensimlsi, executegenerateanalogies, twodimensionalrepresentationofspace
+	from server.semanticvectors.gensimvectors import executenearestneighborsquery, executegensimlsi, executegenerateanalogies, twodimensionalrepresentationofspace, threedimensionalrepresentationofspace
 	from server.semanticvectors.scikitlearntopics import sklearnselectedworks
 	from server.semanticvectors.vectorroutehelperfunctions import findabsolutevectorsbysentence
 else:
@@ -93,7 +93,8 @@ def vectorsearch(vectortype, searchid, headform, so=None):
 							'nearestneighborsquery': executenearestneighborsquery,
 							'analogyfinder': executegenerateanalogies,
 							'topicmodel': sklearnselectedworks,
-							'vectortestfunction': twodimensionalrepresentationofspace
+							# 'vectortestfunction': twodimensionalrepresentationofspace,
+							'vectortestfunction': threedimensionalrepresentationofspace,
 							}
 
 		if so.vectorquerytype in vectorfunctions:
