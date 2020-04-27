@@ -6,6 +6,8 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import warnings
+
 from server.dbsupport.vectordbfunctions import storevectorindatabase
 from server.semanticvectors.wordbaggers import buildwordbags
 from server.threading.mpthreadcount import setthreadcount
@@ -78,7 +80,9 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 
 	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
 	try:
-		gensimmodel = Word2Vec(bagsofwords,
+		with warnings.catch_warnings():
+			warnings.filterwarnings("ignore", category=DeprecationWarning)
+			gensimmodel = Word2Vec(bagsofwords,
 						min_count=vv.minimumpresence,
 						seed=1,
 						iter=vv.trainingiterations,
