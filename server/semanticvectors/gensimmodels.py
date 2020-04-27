@@ -64,6 +64,9 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 		doesnt_match(docs)
 			[Which doc from the given list doesn't go with the others?]
 
+	note that Word2Vec will hurl out lots of DeprecationWarnings; we are blockeing them
+	one hopes that this does not yield a surprise some day...
+
 	:return:
 	"""
 
@@ -101,7 +104,9 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 		print('loss after {n} iterations was: {l}'.format(n=vv.trainingiterations, l=gensimmodel.get_latest_training_loss()))
 
 	if gensimmodel:
-		gensimmodel.delete_temporary_training_data(replace_word_vectors_with_normalized=True)
+		with warnings.catch_warnings():
+			warnings.filterwarnings("ignore", category=DeprecationWarning)
+			gensimmodel.delete_temporary_training_data(replace_word_vectors_with_normalized=True)
 
 	# print(model.wv['puer'])
 
