@@ -60,4 +60,11 @@
  <!-- load documentready last: calls on too much that is above -->
 <script src="{{ url_for('static', filename='documentready.js') }}"></script>
 
+<!-- 3d vector js -->
+<script src="{{ url_for('static', filename='3d/popper.min.js') }}"></script>
+<script src="{{ url_for('static', filename='3d/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='3d/three.min.js') }}"></script>
+<script src="{{ url_for('static', filename='3d/OrbitControls.js') }}"></script>
+<script src="{{ url_for('static', filename='3d/Lut.js') }}"></script>
+
 {% endblock %}

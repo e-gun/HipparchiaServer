@@ -552,11 +552,11 @@ def reducetothreedimensions(so, vectorspace):
 	for i, val in enumerate(indices):
 		samplevectors[i] = vectors[val]
 
-	activepoll.statusis('Reducing data to {size} features using PCA (fast)'.format(size=pcasize))
+	activepoll.statusis('Reducing data to {size} features using PCA'.format(size=pcasize))
 	pca = PCA(n_components=pcasize)
 	pcavecs = pca.fit_transform(samplevectors)
 
-	activepoll.statusis('Reducing data to {size} features using UMAP (slow-ish)'.format(size=umapsize))
+	activepoll.statusis('Reducing data to {size} features using UMAP'.format(size=umapsize))
 	umap = UMAP(n_neighbors=15, min_dist=0.1, metric='euclidean', n_components=umapsize)
 	umapvecs = umap.fit_transform(pcavecs)
 
@@ -651,13 +651,15 @@ def threedimensionaljs(jsgraphdata: str) -> str:
 		}
 	"""
 
-	jsfiles = ['popper.min.js', 'bootstrap.min.js', 'three.min.js', 'OrbitControls.js', 'Lut.js', 'graphit.js']
+	# jsfiles = ['popper.min.js', 'bootstrap.min.js', 'three.min.js', 'OrbitControls.js', 'Lut.js', 'graphit.js']
+	jsfiles = ['graphit.js']
 	jqi = ['jQuery.getScript("/static/3d/{f}");'.format(f=f) for f in jsfiles]
 	jqi = '\n'.join(jqi)
 
-	cssfiles = ['3d_bootstrap.min.css', '3d_graphit.css']
-	css = [csstemplate.format(c=c) for c in cssfiles]
-	css = '\n'.join(css)
+	css = str()
+	# cssfiles = ['3d_bootstrap.min.css', '3d_graphit.css']
+	# css = [csstemplate.format(c=c) for c in cssfiles]
+	# css = '\n'.join(css)
 
 	# can't use normal formatting because js has all those brackets...
 	# supplementaljs = scripttemplate.format(jqueryinserts=jqi, graphdata=jsgraphdata, cssinserts=css)
