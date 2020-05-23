@@ -37,7 +37,7 @@ def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> L
 
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
-	# back for checking: but the Aetolians are likley not among those passages...
+	# back for checking: but the Aetolians are likely not among those 200 or so passages...
 	templimit = 2000000
 
 	if so.lemma:
@@ -53,18 +53,21 @@ def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> L
 
 	fullmatches = lemmatizedwithinxlines(searchobject, hitlist, dbcursor)
 
-	# if so.lemmaone or so.lemmatwo:
+	# if so.lemmatwo:
 	# 	fullmatches = lemmatizedwithinxlines(searchobject, hitlist, dbcursor)
 	# else:
 	# 	fullmatches = simplewithinxlines(searchobject, hitlist, dbcursor)
 
+	# drop duplicates
+	fullmatches = list(set(fullmatches))
+
 	return fullmatches
 
 
-def lemmatizedwithinxlines(searchobject, hitlist, dbcursor):
+def lemmatizedwithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbcursor):
 	"""
 
-	the newer way of doing withinxlines
+	the alternate way of doing withinxlines
 
 	this will ask regex to do the heavy lifting
 
@@ -160,7 +163,7 @@ def lemmatizedwithinxlines(searchobject, hitlist, dbcursor):
 	return fullmatches
 
 
-def simplewithinxlines(searchobject, hitlist, dbcursor):
+def simplewithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbcursor):
 	"""
 
 	the older and potentially very slow way of doing withinxlines
