@@ -58,9 +58,6 @@ def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> L
 	# else:
 	# 	fullmatches = simplewithinxlines(searchobject, hitlist, dbcursor)
 
-	# drop duplicates
-	fullmatches = list(set(fullmatches))
-
 	return fullmatches
 
 
@@ -97,7 +94,7 @@ def lemmatizedwithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbc
 	# that is all of the hits will come from the same table
 	# this means extra/useless sifting below, but perhaps it is safer to be wasteful now lest we break later
 
-	fullmatches = list()
+	fullmatches = set()  # set to avoid duplicate hits
 	hitlinelist = list()
 	linesintheauthors = dict()
 
@@ -153,9 +150,9 @@ def lemmatizedwithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbc
 			if len(fullmatches) > so.cap:
 				break
 			if so.near and re.search(so.termtwo, wordbundles[provisionalhitline]):
-				fullmatches.append(provisionalhitline)
+				fullmatches.add(provisionalhitline)
 			elif not so.near and not re.search(so.termtwo, wordbundles[provisionalhitline]):
-				fullmatches.append(provisionalhitline)
+				fullmatches.add(provisionalhitline)
 		break
 
 	fullmatches = [m.decompose() for m in fullmatches]
@@ -183,7 +180,7 @@ def simplewithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbcurso
 
 	so = searchobject
 
-	fullmatches = list()
+	fullmatches = set()  # set to avoid duplicate hits
 
 	while True:
 		for hit in hitlist:
@@ -198,10 +195,12 @@ def simplewithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbcurso
 			hitwkid = hit[0]
 			isnear = dblooknear(hitindex, so.distance, so.termtwo, hitwkid, so.usecolumn, dbcursor)
 			if so.near and isnear:
-				fullmatches.append(hit)
+				fullmatches.add(hit)
 			elif not so.near and not isnear:
-				fullmatches.append(hit)
+				fullmatches.add(hit)
 		break
+
+	fullmatches = list(fullmatches)
 
 	return fullmatches
 
