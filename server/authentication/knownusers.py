@@ -28,10 +28,11 @@ def loadusersdict(knownusersandpasswords=None):
 	:return:
 	"""
 
-	if not knownusersandpasswords:
-		knownusersandpasswords = hipparchia.config['KNOWNUSERSDICT']
+	userlist = list()
 
-	userlist = [PassUser(k, knownusersandpasswords[k]) for k in knownusersandpasswords]
+	if not knownusersandpasswords and hipparchia.config['KNOWNUSERSDICT']:
+		knownusersandpasswords = hipparchia.config['KNOWNUSERSDICT']
+		userlist = [PassUser(k, knownusersandpasswords[k]) for k in knownusersandpasswords]
 
 	if hipparchia.config['SETADEFAULTUSER']:
 		thepass = hipparchia.config['DEFAULTREMOTEPASS']

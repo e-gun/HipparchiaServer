@@ -51,12 +51,12 @@ def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> L
 	else:
 		hitlist = list(substringsearch(so.termone, workdbname, so, dbcursor, templimit))
 
-	fullmatches = lemmatizedwithinxlines(searchobject, hitlist, dbcursor)
+	# fullmatches = lemmatizedwithinxlines(searchobject, hitlist, dbcursor)
 
-	# if so.lemmatwo:
-	# 	fullmatches = lemmatizedwithinxlines(searchobject, hitlist, dbcursor)
-	# else:
-	# 	fullmatches = simplewithinxlines(searchobject, hitlist, dbcursor)
+	if so.lemmaone or so.lemmatwo:
+		fullmatches = lemmatizedwithinxlines(searchobject, hitlist, dbcursor)
+	else:
+		fullmatches = simplewithinxlines(searchobject, hitlist, dbcursor)
 
 	return fullmatches
 
@@ -69,6 +69,7 @@ def lemmatizedwithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbc
 	this will ask regex to do the heavy lifting
 
 	nasty edge case 'fire' near 'burn' in Homer:
+
 	simplewithinxlines()
 	  Sought all 5 known forms of »πῦρ« within 1 lines of all 359 known forms of »καίω«
 	  Searched 3 texts and found 24 passages (621.25s)
@@ -76,6 +77,11 @@ def lemmatizedwithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbc
 	lemmatizedwithinxlines()
 	   Sought all 5 known forms of »πῦρ« within 1 lines of all 359 known forms of »καίω«
 	   Searched 3 texts and found 24 passages (2.82s)
+
+	note that this function is often slightly slower than simplewithinxlines(), but it does seem to be able
+	to avoid the catastrophe
+
+	lemmatized vs non-lemmatized is probably the key difference
 
 	:param hitlist:
 	:return:
