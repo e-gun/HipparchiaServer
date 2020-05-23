@@ -35,11 +35,6 @@ def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> L
 	dbcursor = dbconnection.cursor()
 	dbconnection.setautocommit()
 
-	columconverter = {'marked_up_line': 'markedup', 'accented_line': 'polytonic', 'stripped_line': 'stripped'}
-	col = columconverter[so.usecolumn]
-
-	flatten = lambda l: [item for sublist in l for item in sublist]
-
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
 	# back for checking: but the Aetolians are likley not among those passages...
@@ -50,11 +45,50 @@ def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> L
 		terms = so.lemma.formlist
 		chunked = [terms[i:i + chunksize] for i in range(0, len(terms), chunksize)]
 		chunked = [wordlistintoregex(c) for c in chunked]
-		hits = list()
+		hitlist = list()
 		for c in chunked:
-			hits += list(substringsearch(c, workdbname, so, dbcursor, templimit))
+			hitlist += list(substringsearch(c, workdbname, so, dbcursor, templimit))
 	else:
-		hits = list(substringsearch(so.termone, workdbname, so, dbcursor, templimit))
+		hitlist = list(substringsearch(so.termone, workdbname, so, dbcursor, templimit))
+
+	fullmatches = lemmatizedwithinxlines(searchobject, hitlist, dbcursor)
+
+	# if so.lemmaone or so.lemmatwo:
+	# 	fullmatches = lemmatizedwithinxlines(searchobject, hitlist, dbcursor)
+	# else:
+	# 	fullmatches = simplewithinxlines(searchobject, hitlist, dbcursor)
+
+	return fullmatches
+
+
+def lemmatizedwithinxlines(searchobject, hitlist, dbcursor):
+	"""
+
+	the newer way of doing withinxlines
+
+	this will ask regex to do the heavy lifting
+
+	nasty edge case 'fire' near 'burn' in Homer:
+	simplewithinxlines()
+	  Sought all 5 known forms of »πῦρ« within 1 lines of all 359 known forms of »καίω«
+	  Searched 3 texts and found 24 passages (621.25s)
+
+	lemmatizedwithinxlines()
+	   Sought all 5 known forms of »πῦρ« within 1 lines of all 359 known forms of »καίω«
+	   Searched 3 texts and found 24 passages (2.82s)
+
+	:param hitlist:
+	:return:
+	"""
+
+	so = searchobject
+
+	columconverter = {'marked_up_line': 'markedup', 'accented_line': 'polytonic', 'stripped_line': 'stripped'}
+	col = columconverter[so.usecolumn]
+
+	prox = int(so.session['proximity'])
+
+	flatten = lambda l: [item for sublist in l for item in sublist]
 
 	# note that at the moment we arrive here with a one-work per worker policy
 	# that is all of the hits will come from the same table
@@ -63,11 +97,10 @@ def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> L
 	fullmatches = list()
 	hitlinelist = list()
 	linesintheauthors = dict()
-	prox = int(so.session['proximity'])
-	# col = so.usecolumn[:-5]  # 'accented_line' --> 'accented'; brittle...
+
 	testing = True
 	if testing:
-		hitlinelist = [dblineintolineobject(h) for h in hits]
+		hitlinelist = [dblineintolineobject(h) for h in hitlist]
 		for l in hitlinelist:
 			wkid = l.universalid
 			# prox = 2
@@ -124,35 +157,48 @@ def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> L
 
 	fullmatches = [m.decompose() for m in fullmatches]
 
-	# old code...
+	return fullmatches
 
-	# all forms of πῦρ near all forms of καίω is insanely slow: 170 initial hits in Homer then take *aeons* to find
-	# as each of the 170 itself takes several seconds to check; there is no way it needs to be this bad;
 
-	# OLD
-	#   Sought all 5 known forms of »πῦρ« within 1 lines of all 359 known forms of »καίω«
-	#   Searched 3 texts and found 24 passages (621.25s)
-	# NEW
-	#   Sought all 5 known forms of »πῦρ« within 1 lines of all 359 known forms of »καίω«
-	#   Searched 3 texts and found 24 passages (2.82s)
+def simplewithinxlines(searchobject, hitlist, dbcursor):
+	"""
 
-	# while True:
-	# 	for hit in hits:
-	# 		if len(fullmatches) > so.cap:
-	# 			break
-	# 		# this bit is BRITTLE because of the paramater order vs the db field order
-	# 		#   dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, cursor)
-	# 		# see "worklinetemplate" for the order in which the elements will return from a search hit
-	# 		# should use lineobjects, but it is 'premature' given that the returned 'fullmatches' should look
-	# 		# like a dbline
-	# 		hitindex = hit[1]
-	# 		hitwkid = hit[0]
-	# 		isnear = dblooknear(hitindex, so.distance, so.termtwo, hitwkid, so.usecolumn, dbcursor)
-	# 		if so.near and isnear:
-	# 			fullmatches.append(hit)
-	# 		elif not so.near and not isnear:
-	# 			fullmatches.append(hit)
-	# 	break
+	the older and potentially very slow way of doing withinxlines
+
+	this will ask postgres to do the heavy lifting
+
+	nasty edge case 'fire' near 'burn' in Homer:
+	  Sought all 5 known forms of »πῦρ« within 1 lines of all 359 known forms of »καίω«
+	  Searched 3 texts and found 24 passages (621.25s)
+
+	170 initial hits in Homer then take *aeons* to find the rest
+	as each of the 170 itself takes several seconds to check
+
+	:param hitlist:
+	:return:
+	"""
+
+	so = searchobject
+
+	fullmatches = list()
+
+	while True:
+		for hit in hitlist:
+			if len(fullmatches) > so.cap:
+				break
+			# this bit is BRITTLE because of the paramater order vs the db field order
+			#   dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, cursor)
+			# see "worklinetemplate" for the order in which the elements will return from a search hit
+			# should use lineobjects, but it is 'premature' given that the returned 'fullmatches' should look
+			# like a dbline
+			hitindex = hit[1]
+			hitwkid = hit[0]
+			isnear = dblooknear(hitindex, so.distance, so.termtwo, hitwkid, so.usecolumn, dbcursor)
+			if so.near and isnear:
+				fullmatches.append(hit)
+			elif not so.near and not isnear:
+				fullmatches.append(hit)
+		break
 
 	return fullmatches
 
