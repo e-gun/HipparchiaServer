@@ -68,8 +68,12 @@ try:
 	# 	               isbold=True, baremessage=True)
 except ModuleNotFoundError as e:
 	if current_process().name == 'MainProcess':
-		print('required math module(s) not available:')
+		print('One or more required math module(s) not available. The following module could not be found:')
 		print('\t{e}'.format(e=e))
+		print('now *none* of your vector graphing functions will work')
+		print('consider executing the following:')
+		print('\t"~/hipparchia_venv/bin/pip install <<module_name>>"')
+		print('NB: "umap" should be provided by "umap-learn"; do not install "umap"; yes: confusing...')
 	matplotlib = None
 	plt = None
 	nx = None

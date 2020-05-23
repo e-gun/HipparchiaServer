@@ -209,7 +209,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		items = ['wkuinversalid', 'index', 'l5', 'l4', 'l3', 'l2', 'l1', 'l0', 'accented', 'polytonic', 'stripped',
+		items = ['wkuinversalid', 'index', 'l5', 'l4', 'l3', 'l2', 'l1', 'l0', 'markedup', 'polytonic', 'stripped',
 		         'hyphenated', 'annotations']
 		tvals = [getattr(self, i) for i in items]
 		return tuple(tvals)

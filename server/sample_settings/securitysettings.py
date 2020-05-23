@@ -32,6 +32,8 @@ DBWRITEPASS = 'consider_re-using_HipparchiaBuilder_pass'
 
 HOBBLEREGEX = False
 FOOLISHLYALLOWREGEX = ''
+# FOOLISHLYALLOWREGEX = '[]()*.!+^'
+
 
 # 62 chars in the following line of Accius: Quódsi, ut decuit, stáres mecum aut méus ⟨te⟩ maestarét dolor,
 # 14 chars for Digest 50.17.211.pr.2

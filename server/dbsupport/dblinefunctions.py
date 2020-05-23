@@ -148,7 +148,7 @@ def bulklinegrabber(table: str, column: str, criterion: str, setofcriteria, curs
 	return contents
 
 
-def grablistoflines(table: str, uidlist: list) -> list:
+def grablistoflines(table: str, uidlist: list, dbcursor=None) -> list:
 	"""
 
 	fetch many lines at once
@@ -159,8 +159,13 @@ def grablistoflines(table: str, uidlist: list) -> list:
 	:return:
 	"""
 
-	dbconnection = ConnectionObject()
-	cursor = dbconnection.cursor()
+	dbconnection = None
+	needscleanup = False
+
+	if not dbcursor:
+		dbconnection = ConnectionObject()
+		dbcursor = dbconnection.cursor()
+		needscleanup = True
 
 	lines = [int(uid.split('_ln_')[1]) for uid in uidlist]
 
@@ -168,10 +173,11 @@ def grablistoflines(table: str, uidlist: list) -> list:
 
 	q = qtemplate.format(wtmpl=worklinetemplate, tb=table)
 	d = (lines,)
-	cursor.execute(q, d)
-	lines = cursor.fetchall()
+	dbcursor.execute(q, d)
+	lines = dbcursor.fetchall()
 
-	dbconnection.connectioncleanup()
+	if needscleanup:
+		dbconnection.connectioncleanup()
 
 	lines = [dblineintolineobject(l) for l in lines]
 

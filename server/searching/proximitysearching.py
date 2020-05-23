@@ -11,7 +11,7 @@ import re
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
+from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline, grablistoflines
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.searchobjects import SearchObject
@@ -19,19 +19,12 @@ from server.searching.searchfunctions import dblooknear
 from server.searching.substringsearching import substringsearch
 
 
-def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> List[dbWorkLine]:
+def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> List[tuple]:
 	"""
 
 	after finding x, look for y within n lines of x
 
 	people who send phrases to both halves and/or a lot of regex will not always get what they want
-
-	it might be possible to do this more cleverly with a JOIN or a subquery, but this brute force way seems
-	to be 'fast enough' and those solutions seem to be quite tangled
-
-		Sought »ϲαφῶϲ« within 5 lines of »πάντα«
-		Searched 6,625 texts and found 1,428 passages (8.04s)
-		Sorted by name
 
 	:param workdbname:
 	:param searchobject:
@@ -41,6 +34,11 @@ def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> L
 	so = searchobject
 	dbcursor = dbconnection.cursor()
 	dbconnection.setautocommit()
+
+	columconverter = {'marked_up_line': 'markedup', 'accented_line': 'polytonic', 'stripped_line': 'stripped'}
+	col = columconverter[so.usecolumn]
+
+	flatten = lambda l: [item for sublist in l for item in sublist]
 
 	# you will only get session['maxresults'] back from substringsearch() unless you raise the cap
 	# "Roman" near "Aetol" will get 3786 hits in Livy, but only maxresults will come
@@ -58,23 +56,103 @@ def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> L
 	else:
 		hits = list(substringsearch(so.termone, workdbname, so, dbcursor, templimit))
 
-	fullmatches = list()
+	# note that at the moment we arrive here with a one-work per worker policy
+	# that is all of the hits will come from the same table
+	# this means extra/useless sifting below, but perhaps it is safer to be wasteful now lest we break later
 
+	fullmatches = list()
+	hitlinelist = list()
+	linesintheauthors = dict()
+	prox = int(so.session['proximity'])
+	# col = so.usecolumn[:-5]  # 'accented_line' --> 'accented'; brittle...
+	testing = True
+	if testing:
+		hitlinelist = [dblineintolineobject(h) for h in hits]
+		for l in hitlinelist:
+			wkid = l.universalid
+			# prox = 2
+			# l = 100
+			# list(range(l-prox, l+prox+1))
+			# [98, 99, 100, 101, 102]
+			environs = set(range(l.index - prox, l.index + prox + 1))
+			environs = ['{w}_ln_{x}'.format(w=wkid, x=e) for e in environs]
+			try:
+				linesintheauthors[wkid[0:6]]
+			except KeyError:
+				linesintheauthors[wkid[0:6]] = set()
+			linesintheauthors[wkid[0:6]].update(environs)
+
+	# now grab all of the lines you might need
+	linecollection = set()
+	for l in linesintheauthors:
+		if linesintheauthors[l]:
+			# example: {'lt0803': {952, 953, 951}}
+			linecollection = grablistoflines(l, list(linesintheauthors[l]), dbcursor)
+			linecollection = {'{w}_ln_{x}'.format(w=l.wkuinversalid, x=l.index): l for l in linecollection}
+
+	# then associate all of the surrounding words with those lines
+	wordbundles = dict()
+	for l in hitlinelist:
+		wkid = l.universalid
+		environs = set(range(l.index - prox, l.index + prox + 1))
+		mylines = list()
+		for e in environs:
+			try:
+				mylines.append(linecollection['{w}_ln_{x}'.format(w=wkid, x=e)])
+			except KeyError:
+				# you went out of bounds and tried to grab something that is not really there
+				# KeyError: 'lt1515w001_ln_1175'
+				# line 1175 is actually the first line of lt1515w002...
+				pass
+
+		mywords = [getattr(l, col) for l in mylines]
+		mywords = [w.split(' ') for w in mywords if mywords]
+		mywords = flatten(mywords)
+		mywords = ' '.join(mywords)
+		wordbundles[l] = mywords
+
+	# then see if we have any hits...
 	while True:
-		for hit in hits:
+		for provisionalhitline in wordbundles:
 			if len(fullmatches) > so.cap:
 				break
-			# this bit is BRITTLE because of the paramater order vs the db field order
-			#   dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, cursor)
-			# see "worklinetemplate" for the order in which the elements will return from a search hit
-			hitindex = hit[1]
-			hitwkid = hit[0]
-			isnear = dblooknear(hitindex, so.distance, so.termtwo, hitwkid, so.usecolumn, dbcursor)
-			if so.near and isnear:
-				fullmatches.append(hit)
-			elif not so.near and not isnear:
-				fullmatches.append(hit)
+			if so.near and re.search(so.termtwo, wordbundles[provisionalhitline]):
+				fullmatches.append(provisionalhitline)
+			elif not so.near and not re.search(so.termtwo, wordbundles[provisionalhitline]):
+				fullmatches.append(provisionalhitline)
 		break
+
+	fullmatches = [m.decompose() for m in fullmatches]
+
+	# old code...
+
+	# all forms of πῦρ near all forms of καίω is insanely slow: 170 initial hits in Homer then take *aeons* to find
+	# as each of the 170 itself takes several seconds to check; there is no way it needs to be this bad;
+
+	# OLD
+	#   Sought all 5 known forms of »πῦρ« within 1 lines of all 359 known forms of »καίω«
+	#   Searched 3 texts and found 24 passages (621.25s)
+	# NEW
+	#   Sought all 5 known forms of »πῦρ« within 1 lines of all 359 known forms of »καίω«
+	#   Searched 3 texts and found 24 passages (2.82s)
+
+	# while True:
+	# 	for hit in hits:
+	# 		if len(fullmatches) > so.cap:
+	# 			break
+	# 		# this bit is BRITTLE because of the paramater order vs the db field order
+	# 		#   dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, cursor)
+	# 		# see "worklinetemplate" for the order in which the elements will return from a search hit
+	# 		# should use lineobjects, but it is 'premature' given that the returned 'fullmatches' should look
+	# 		# like a dbline
+	# 		hitindex = hit[1]
+	# 		hitwkid = hit[0]
+	# 		isnear = dblooknear(hitindex, so.distance, so.termtwo, hitwkid, so.usecolumn, dbcursor)
+	# 		if so.near and isnear:
+	# 			fullmatches.append(hit)
+	# 		elif not so.near and not isnear:
+	# 			fullmatches.append(hit)
+	# 	break
 
 	return fullmatches
 
