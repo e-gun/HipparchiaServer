@@ -93,8 +93,8 @@ def vectorsearch(vectortype, searchid, headform, so=None):
 							'nearestneighborsquery': executenearestneighborsquery,
 							'analogyfinder': executegenerateanalogies,
 							'topicmodel': sklearnselectedworks,
-							# 'vectortestfunction': twodimensionalrepresentationofspace,
-							'vectortestfunction': threedimensionalrepresentationofspace,
+							'vectortestfunction': twodimensionalrepresentationofspace,
+							# 'vectortestfunction': threedimensionalrepresentationofspace,
 							}
 
 		if so.vectorquerytype in vectorfunctions:
