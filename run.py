@@ -42,7 +42,6 @@ from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.miscdbfunctions import icanpickleconnections
 
 if __name__ == '__main__':
-	# icanpickleconnections(dothecheck=True, preconfiguredanswer=hipparchia.config['ICANPICKLECONNECTIONS'])
 
 	# this code block duplicates material found in '__init__.py'; the only gain is the secho() notification so that
 	# you know where you stand at startup
@@ -64,6 +63,9 @@ if __name__ == '__main__':
 		multiprocessing.set_start_method(mpmethod)
 	finally:
 		secho('multiprocessing method set to: {m}'.format(m=mpmethod), fg='cyan')
+
+	# picklestatus = icanpickleconnections(dothecheck=True)
+	# secho('connection pickling available: {p}'.format(p=picklestatus), fg='cyan')
 
 	if hipparchia.config['ENABLELOGGING']:
 		from inspect import stack

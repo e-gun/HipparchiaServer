@@ -345,21 +345,20 @@ def probefordatabases() -> dict:
 	return available
 
 
-def icanpickleconnections(dothecheck=False, preconfiguredanswer='unknown') -> bool:
+def icanpickleconnections(dothecheck=False) -> bool:
 	"""
 
 	some platforms can/can't pickle the connection
 
 	check at startup and notify
 
-	otherwise guess
+	otherwise guess; checking every time would be the safe but very inefficient way to go
+
+	the old ICANPICKLECONNECTIONS setting used to be able to force the answer via configs
 
 	:param dothecheck:
 	:return:
 	"""
-
-	if preconfiguredanswer in [True, False]:
-		return preconfiguredanswer
 
 	if not dothecheck:
 		if osname == 'nt':
@@ -376,10 +375,8 @@ def icanpickleconnections(dothecheck=False, preconfiguredanswer='unknown') -> bo
 		j.start()
 		j.join()
 	except TypeError:
-		# can't pickle psycopg2.extensions.connection objects
-		consolewarning('edit "settings/performancesettings.py" to read:')
-		consolewarning("\tICANPICKLECONNECTIONS = False\n")
 		result = False
+
 	c[0].connectioncleanup()
 
 	return result
