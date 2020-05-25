@@ -39,22 +39,13 @@ if multiprocessing.current_process().name == 'MainProcess':
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
+from server.dbsupport.miscdbfunctions import icanpickleconnections
 
 if __name__ == '__main__':
+	# icanpickleconnections(dothecheck=True, preconfiguredanswer=hipparchia.config['ICANPICKLECONNECTIONS'])
 
-	"""
-	https://docs.python.org/3.8/library/multiprocessing.html
-	
-	spawn
-	The parent process starts a fresh python interpreter process. The child process will only inherit those resources necessary to run the process objects run() method. In particular, unnecessary file descriptors and handles from the parent process will not be inherited. Starting a process using this method is rather slow compared to using fork or forkserver.
-
-	Available on Unix and Windows. The default on Windows and macOS.
-
-	Changed in version 3.8: On macOS, the spawn start method is now the default. The fork start method should be considered unsafe as it can lead to crashes of the subprocess. See bpo-33725.
-	
-	[but we never had problems with 'fork' in macos AND spawn is a lot slower...]
-	
-	"""
+	# this code block duplicates material found in '__init__.py'; the only gain is the secho() notification so that
+	# you know where you stand at startup
 
 	mpmethod = str()
 	try:

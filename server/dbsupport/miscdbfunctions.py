@@ -345,7 +345,7 @@ def probefordatabases() -> dict:
 	return available
 
 
-def icanpickleconnections(docheck=False) -> bool:
+def icanpickleconnections(dothecheck=False, preconfiguredanswer='unknown') -> bool:
 	"""
 
 	some platforms can/can't pickle the connection
@@ -354,14 +354,14 @@ def icanpickleconnections(docheck=False) -> bool:
 
 	otherwise guess
 
-	:param docheck:
+	:param dothecheck:
 	:return:
 	"""
 
-	if hipparchia.config['ICANPICKLECONNECTIONS'] in [True, False]:
-		return hipparchia.config['ICANPICKLECONNECTIONS']
+	if preconfiguredanswer in [True, False]:
+		return preconfiguredanswer
 
-	if not docheck:
+	if not dothecheck:
 		if osname == 'nt':
 			return False
 
