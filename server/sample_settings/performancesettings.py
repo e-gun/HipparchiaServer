@@ -50,3 +50,7 @@ AUTOCONFIGWORKERS = True
 WORKERS = 3
 MPCOMMITCOUNT = 250
 LEMMACHUNKSIZE = 10
+
+# this is platform dependent; the system will tell you if you need to set it to 'False'
+# otherwise there is no need to change this unless you know the answer is True and want to assert that here
+ICANPICKLECONNECTIONS = 'unknown'

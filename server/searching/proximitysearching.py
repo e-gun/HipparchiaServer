@@ -81,7 +81,7 @@ def lemmatizedwithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbc
 	note that this function is often slightly slower than simplewithinxlines(), but it does seem to be able
 	to avoid the catastrophe
 
-	lemmatized vs non-lemmatized is probably the key difference
+	lemmatized vs non-lemmatized is probably the key difference when it comes to speed
 
 	:param hitlist:
 	:return:

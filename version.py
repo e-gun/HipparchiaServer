@@ -10,7 +10,7 @@ from sys import argv
 from os import path
 
 
-devel = False
+devel = True
 
 hipparchiaserverversion = '1.6.3'
 supplement = '+ [DEVEL]'

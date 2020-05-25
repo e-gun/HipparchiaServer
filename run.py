@@ -53,6 +53,7 @@ if __name__ == '__main__':
 	Changed in version 3.8: On macOS, the spawn start method is now the default. The fork start method should be considered unsafe as it can lead to crashes of the subprocess. See bpo-33725.
 	
 	[but we never had problems with 'fork' in macos AND spawn is a lot slower...]
+	
 	"""
 
 	mpmethod = str()

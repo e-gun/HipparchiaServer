@@ -345,12 +345,28 @@ def probefordatabases() -> dict:
 	return available
 
 
-def icanpickleconnections() -> bool:
-	if osname == 'nt':
-		return False
+def icanpickleconnections(docheck=False) -> bool:
+	"""
 
-	if osname == 'posix':
-		return True
+	some platforms can/can't pickle the connection
+
+	check at startup and notify
+
+	otherwise guess
+
+	:param docheck:
+	:return:
+	"""
+
+	if hipparchia.config['ICANPICKLECONNECTIONS'] in [True, False]:
+		return hipparchia.config['ICANPICKLECONNECTIONS']
+
+	if not docheck:
+		if osname == 'nt':
+			return False
+
+		if osname == 'posix':
+			return True
 
 	result = True
 	c = (ConnectionObject(),)
@@ -361,8 +377,8 @@ def icanpickleconnections() -> bool:
 		j.join()
 	except TypeError:
 		# can't pickle psycopg2.extensions.connection objects
-		consolewarning('to avoid seeing "EOFError: Ran out of input" messages edit "settings/networksettings.py" to read:')
-		consolewarning("\tICANPICKLECONNECTIONS = 'n'\n")
+		consolewarning('edit "settings/performancesettings.py" to read:')
+		consolewarning("\tICANPICKLECONNECTIONS = False\n")
 		result = False
 	c[0].connectioncleanup()
 
