@@ -10,9 +10,9 @@ from sys import argv
 from os import path
 
 
-devel = True
+devel = False
 
-hipparchiaserverversion = '1.6.3'
+hipparchiaserverversion = '1.6.4'
 supplement = '+ [DEVEL]'
 
 if devel:
