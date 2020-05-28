@@ -13,6 +13,7 @@ import re
 from io import BytesIO
 from multiprocessing import current_process
 
+from server import hipparchia
 from server.formatting.jsformatting import generatevectorjs
 from server.hipparchiaobjects.searchobjects import SearchOutputObject
 
@@ -37,55 +38,56 @@ from server.hipparchiaobjects.vectorobjects import VectorValues
 #
 from server.semanticvectors.vectorhelpers import reducetotwodimensions
 
-try:
-	import matplotlib
-	matplotlib.use('Agg')
-	import matplotlib.pyplot as plt
-	# from matplotlib.figure import Figure
-	import networkx as nx
-	import numpy as np
-	from sklearn.manifold import TSNE
-	from sklearn.decomposition import PCA
-	from sklearn.cluster import KMeans
-	from umap import UMAP
-	# see below on a versioning problem with matplotlib. It *seems* to be fixed but the commented-out code should linger
-	# for a little while
+matplotlib = None
+plt = None
+nx = None
+np = None
+TSNE = None
+PCA = None
+UMAP = None
+Kmeans = None
 
-	# from pkg_resources import get_distribution as checkversion
-	# from packaging.version import parse as versionparse
-	# from server.formatting.miscformatting import consolewarning
-	#
-	# ml = checkversion("matplotlib").version
-	# validmll = '3.1.3'
-	# invalidmpl = '3.2.0'
-	#
-	# if versionparse(ml) > versionparse(validmll):
-	# 	consolewarning('\tvector graphing is BROKEN if you use the 3.2.x branch of matplotlib\t', color='red',
-	# 	               isbold=True, baremessage=True)
-	# 	consolewarning('\tyou have version {v} installed\t'.format(v=ml), color='red', isbold=True, baremessage=True)
-	# 	consolewarning('\tconsider forcing the last known good version:\t', color='red', isbold=True, baremessage=True)
-	# 	consolewarning('\t"~/hipparchia_venv/bin/pip install matplotlib=={v}"\t'.format(v=validmll), color='red',
-	# 	               isbold=True, baremessage=True)
-except ModuleNotFoundError as e:
-	if current_process().name == 'MainProcess':
-		print('One or more required math module(s) not available. The following module could not be found:')
-		print('\t{e}'.format(e=e))
-		print('now *none* of your vector graphing functions will work')
-		print('consider executing the following:')
-		print('\t"~/hipparchia_venv/bin/pip install <<module_name>>"')
-		print('NB: "umap" should be provided by "umap-learn"; do not install "umap"; yes: confusing...')
-	matplotlib = None
-	plt = None
-	nx = None
-	np = None
-	TSNE = None
-	PCA = None
-	UMAP = None
-	Kmeans = None
+if hipparchia.config['SEMANTICVECTORSENABLED']:
+	try:
+		import matplotlib
+		matplotlib.use('Agg')
+		import matplotlib.pyplot as plt
+		# from matplotlib.figure import Figure
+		import networkx as nx
+		import numpy as np
+		from sklearn.manifold import TSNE
+		from sklearn.decomposition import PCA
+		from sklearn.cluster import KMeans
+		from umap import UMAP
+		# see below on a versioning problem with matplotlib. It *seems* to be fixed but the commented-out code should linger
+		# for a little while
+
+		# from pkg_resources import get_distribution as checkversion
+		# from packaging.version import parse as versionparse
+		# from server.formatting.miscformatting import consolewarning
+		#
+		# ml = checkversion("matplotlib").version
+		# validmll = '3.1.3'
+		# invalidmpl = '3.2.0'
+		#
+		# if versionparse(ml) > versionparse(validmll):
+		# 	consolewarning('\tvector graphing is BROKEN if you use the 3.2.x branch of matplotlib\t', color='red',
+		# 	               isbold=True, baremessage=True)
+		# 	consolewarning('\tyou have version {v} installed\t'.format(v=ml), color='red', isbold=True, baremessage=True)
+		# 	consolewarning('\tconsider forcing the last known good version:\t', color='red', isbold=True, baremessage=True)
+		# 	consolewarning('\t"~/hipparchia_venv/bin/pip install matplotlib=={v}"\t'.format(v=validmll), color='red',
+		# 	               isbold=True, baremessage=True)
+	except ModuleNotFoundError as e:
+		if current_process().name == 'MainProcess':
+			print('One or more required math module(s) not available. The following module could not be found:')
+			print('\t{e}'.format(e=e))
+			print('now *none* of your vector graphing functions will work')
+			print('consider executing the following:')
+			print('\t"~/hipparchia_venv/bin/pip install <<module_name>>"')
+			print('NB: "umap" should be provided by "umap-learn"; do not install "umap"; yes: confusing...')
 
 import psycopg2
 
-from server import hipparchia
 from server.dbsupport.tablefunctions import assignuniquename
 from server.dbsupport.vectordbfunctions import createstoredimagestable
 from server.hipparchiaobjects.connectionobject import ConnectionObject
