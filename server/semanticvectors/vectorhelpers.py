@@ -10,9 +10,17 @@ import re
 import time
 from string import punctuation
 
-import numpy as np
 import psycopg2
-from sklearn.manifold import TSNE
+
+try:
+	import numpy as np
+	from sklearn.manifold import TSNE
+except ImportError as ie:
+	np = None
+	TSNE = None
+	# print('"vectorgraphing.py" is missing a module: {m}'.format(m=ie))
+	# this is a benign failure if you are a non-vector user since all you really wanted was vectorranges, etc.
+	# which themselves will not really be used
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, worklinetemplate

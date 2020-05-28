@@ -356,6 +356,9 @@ def icanpickleconnections(dothecheck=False) -> bool:
 
 	the old ICANPICKLECONNECTIONS setting used to be able to force the answer via configs
 
+	note that 'False' when the answer is in fact 'True' will produce problems: the posix people can't use the nt
+	workaround; and the nt people can't do things the posix way
+
 	:param dothecheck:
 	:return:
 	"""
