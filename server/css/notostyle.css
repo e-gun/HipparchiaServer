@@ -11,9 +11,9 @@
 	/* define the default FONTS that will have precedence over the served-if-necessary fonts
 	that are delivered via @font-face below. NB: only Arial is likely to be pre-installed.
 	The others can be downloaded from various locations. Arial is available on >95% of MacOS and PC systems? */
-	--systemdefaultfont: DEFAULTLOCALFONTWILLBESUPPLIEDFROMCONFIGFILE;
-	--greekfont: DEFAULTLOCALGREEKFONTWILLBESUPPLIEDFROMCONFIGFILE;
-	--latinfont: DEFAULTLOCALNONGREEKFONTWILLBESUPPLIEDFROMCONFIGFILE;
+	--systemdefaultfont: "Noto";
+	--greekfont: "yourfonthere_otherwise_fallbacktohipparchiahostedfonts";
+	--latinfont: "yourfonthere_otherwise_fallbacktohipparchiahostedfonts";
 	/* --systemdefaultfont: ArialUnicodeMS; */
 	/* --systemdefaultfont: Alexander; */
 	/* --systemdefaultfont: Arimo; */
