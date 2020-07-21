@@ -66,6 +66,7 @@ class dbDictionaryEntry(object):
 		self.authorlist = list()
 		self.quotelist = list()
 		self.senselist = list()
+		self.flaggedsenselist = list()
 		self.flagauthor = None
 
 		if re.search(r'[a-z]', self.entry):
@@ -139,6 +140,19 @@ class dbDictionaryEntry(object):
 				authorlist = ['1 author']
 
 		return authorlist
+
+	def generateflaggedsummary(self) -> List:
+		listofsenses = self.flaggedsenselist
+		listofsenses = [s[0].upper() + s[1:] for s in listofsenses if len(s) > 1]
+		listofsenses.sort()
+		if False:
+			ss = len(listofsenses)
+			if ss != 1:
+				listofsenses = ['{n} senses'.format(n=ss)]
+			else:
+				listofsenses = ['1 sense']
+
+		return listofsenses
 
 	def generatesensessummary(self) -> List:
 		### this parsing code got moved into the builder ###

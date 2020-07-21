@@ -30,6 +30,7 @@ def formatdictionarysummary(wordentryobject) -> str:
 	authors = wordentryobject.authorlist
 	senses = wordentryobject.senselist
 	quotes = wordentryobject.quotelist
+	flagged = wordentryobject.flaggedsenselist
 
 	labelformultipleitems = '<div class="{cl}"><span class="lexiconhighlight">{lb}</span><br />'
 	labelforoneitem = '<span class="{cl}">{item}</span><br />'
@@ -38,12 +39,15 @@ def formatdictionarysummary(wordentryobject) -> str:
 
 	sections = {'authors': {'items': authors, 'classone': 'authorsummary', 'classtwo': 'authorsum', 'label': 'Citations from'},
 				 'quotes': {'items': quotes, 'classone': 'quotessummary', 'classtwo': 'quotesum', 'label': 'Quotes'},
-				 'senses': {'items': senses, 'classone': 'sensesummary', 'classtwo': 'sensesum', 'label': 'Senses'}
+				 'senses': {'items': senses, 'classone': 'sensesummary', 'classtwo': 'sensesum', 'label': 'Senses'},
+	             'flaggedsenses': {'items': flagged, 'classone': 'quotessummary', 'classtwo': 'quotesum', 'label': 'Flagged Senses'},
 				}
 
 	outputlist = list()
 
-	for section in ['senses', 'authors', 'quotes']:
+	summarizing = ['senses', 'flaggedsenses', 'authors', 'quotes']
+
+	for section in summarizing:
 		sec = sections[section]
 		items = sec['items']
 		classone = sec['classone']

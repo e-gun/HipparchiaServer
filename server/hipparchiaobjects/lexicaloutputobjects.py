@@ -5,7 +5,9 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+
 import re
+from typing import List
 
 from flask import session
 
@@ -149,8 +151,10 @@ class lexicalOutputObject(object):
 		self.entryhead = self.thiswordobject.grabheadmaterial()
 		self.entrysprincipleparts = self._buildprincipleparts()
 		self.entrydistributions = self._builddistributiondict()
-		self.entrysummary = self._buildentrysummary()
 		self.fullenty = self._buildfullentry()
+		# next needs previous to fullentry: regex search needs entry body rewrite
+		self.authorentrysummary = self._buildauthorentrysummary()
+		self.entrysummary = self._buildentrysummary()
 
 	def _buildentrydistributionss(self) -> str:
 		distributions = str()
@@ -206,9 +210,12 @@ class lexicalOutputObject(object):
 			entryword.authorlist = entryword.generateauthorsummary()
 			entryword.senselist = entryword.generatesensessummary()
 			entryword.quotelist = entryword.generatequotesummary(lemmaobject)
+			entryword.flaggedsenselist = self.authorentrysummary
+			# entryword.flaggedsenselist = entryword.generateflaggedsummary()
+			# print('entryword.flaggedsenselist', entryword.flaggedsenselist)
 
-		awq = entryword.authorlist + entryword.senselist + entryword.quotelist
-		zero = ['0 authors', '0 senses', '0 quotes']
+		awq = entryword.authorlist + entryword.senselist + entryword.quotelist + entryword.flaggedsenselist
+		zero = ['0 authors', '0 senses', '0 quotes', '0 flagged senses']
 		for z in zero:
 			try:
 				awq.remove(z)
@@ -220,6 +227,23 @@ class lexicalOutputObject(object):
 		else:
 			summary = str()
 		return summary
+
+	def _buildauthorentrysummary(self) -> List[str]:
+		# this only semi-works; the unclean boundarie
+		# note that wo.insertclickablelookups() needs to run before the regex here will work
+		wo = self.thiswordobject
+		flagged = wo.flagauthor
+		if not flagged:
+			return list(str())
+
+		# transfinder = re.compile(r'<span class="dicttrans">(.*?)</span>')
+		# note the sneaky regex...
+		transbodyfinder = re.compile(r'rans">(.*?)</span>(.*?)(</sense>|span class="dictt)')
+		senses = re.findall(transbodyfinder, wo.body)
+		flaggedsenses = [s[0] for s in senses if re.search(flagged, s[1])]
+		flaggedsenses.sort()
+		print('flaggedsenses', flaggedsenses)
+		return flaggedsenses
 
 	def _builddistributiondict(self) -> str:
 		distributions = str()
