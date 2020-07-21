@@ -26,9 +26,10 @@ class multipleWordOutputObject(object):
 
 	"""
 
-	def __init__(self, thisword, morphologyobject):
+	def __init__(self, thisword: str, morphologyobject, flagauthorid: str):
 		self.thisword = thisword
 		self.mo = morphologyobject
+		self.flagauthor = flagauthorid
 		self.thisformprevalence = getobservedwordprevalencedata(self.thisword)
 		self.usedictionary = setdictionarylanguage(thisword)
 		self.distinctpossibilities = self._builddistinctpossibilitiesdict()
@@ -73,6 +74,10 @@ class multipleWordOutputObject(object):
 			wordobjectdict[e] = probedictionary(self.usedictionary + '_dictionary', 'entry_name', seekingentry, '=', dbcursor=blankcursor, trialnumber=0)
 
 		wordobjectdict = {idx: wordobjectdict[idx] for idx in wordobjectdict if wordobjectdict[idx]}
+
+		for w in wordobjectdict:
+			for i in wordobjectdict[w]:
+				i.flagauthor = self.flagauthor
 
 		return wordobjectdict
 

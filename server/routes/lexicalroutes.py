@@ -28,6 +28,7 @@ from server.hipparchiaobjects.lexicaloutputobjects import lexicalOutputObject, m
 from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.checksession import justlatin, justtlg, probeforsessionvariables
+from server.startup import authordict
 from server.startup import progresspolldict
 
 
@@ -137,8 +138,9 @@ def dictsearch(searchterm):
 
 
 @hipparchia.route('/parse/<observedword>')
+@hipparchia.route('/parse/<observedword>/<authorid>')
 @requireauthentication
-def findbyform(observedword):
+def findbyform(observedword, authorid=None):
 	"""
 	this function sets of a chain of other functions
 	find dictionary form
@@ -147,6 +149,9 @@ def findbyform(observedword):
 	return a formatted set of info
 	:return:
 	"""
+
+	if authorid and authorid not in authordict:
+		authorid = None
 
 	observedword = observedword[:hipparchia.config['MAXIMUMLEXICALLENGTH']]
 
@@ -203,7 +208,7 @@ def findbyform(observedword):
 	# φέρεται --> morphologymatches [('<possibility_1>', '1', 'φέρω', '122883104', '<transl>fero</transl><analysis>pres ind mp 3rd sg</analysis>')]
 
 	if morphologyobject:
-		oo = multipleWordOutputObject(cleanedword, morphologyobject)
+		oo = multipleWordOutputObject(cleanedword, morphologyobject, authorid)
 		returndict['newhtml'] = oo.generateoutput()
 	else:
 		newhtml = list()

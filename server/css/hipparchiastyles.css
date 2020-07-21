@@ -272,7 +272,7 @@ body {
  */
 
 .dictauthor {
-	color: var(--dkbabyblue);
+	/* color: var(--dkbabyblue); */
 	font-weight: 600;
 	}
 
@@ -476,6 +476,10 @@ body {
 .findnumber {
 	font-weight: normal;
 	color: var(--vdkteal);
+	}
+
+.flagged {
+	border-bottom: 1px dotted darkred;
 	}
 
 .focusline {

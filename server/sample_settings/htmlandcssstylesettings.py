@@ -31,6 +31,8 @@
 #
 # ENBALEFONTPICKER allows you to select fonts from the web interface; but see notes on
 #   FONTPICKERLIST before enabling this. Anything other than True disables this option.
+#   Fontpicking is not working properly on gunicorn installations ATM; just go for the notostyles.css option
+#   as per the installation instructions and the CSS notes
 #
 # FONTPICKERLIST is a list of fonts to choose from. These can EITHER be served OR local to the client.
 #   The item set here alters DEFAULTLOCALFONT in the CSS. To avoid problems the list should contain

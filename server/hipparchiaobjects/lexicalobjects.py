@@ -66,6 +66,7 @@ class dbDictionaryEntry(object):
 		self.authorlist = list()
 		self.quotelist = list()
 		self.senselist = list()
+		self.flagauthor = None
 
 		if re.search(r'[a-z]', self.entry):
 			self.usedictionary = 'latin'
@@ -274,6 +275,10 @@ class dbDictionaryEntry(object):
 		clickableentry = re.sub(phifinder, r'id="perseus/lt\1/\2/\3"', clickableentry)
 		# clickableentry = re.sub(diofindera, r'id="perseus/lt\1/\2/\3"', clickableentry)
 		# clickableentry = re.sub(diofinderb, r'id="perseus/lt\1/\2/\3"', clickableentry)
+
+		if self.flagauthor:
+			myid = r'id="perseus/{a}'.format(a=self.flagauthor)
+			clickableentry = re.sub(myid, r'class="flagged" ' + myid, clickableentry)
 		self.body = clickableentry
 		self.haveclickablelookups = True
 		return

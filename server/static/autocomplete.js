@@ -50,7 +50,9 @@ function resetworksautocomplete(){
 $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
     source: "/getauthorhint",
+    focus: function () { showmany(postauthorpickui); },
     select: function (event, ui) {
+        showmany(postauthorpickui);
         let thisselector = $('#authorsautocomplete');
         let selector = $('#worksautocomplete');
         selector.val('');
@@ -68,7 +70,6 @@ $('#authorsautocomplete').autocomplete({
         }
         loadWorklist(auid);
         selector.prop('placeholder', '(Pick a work)');
-        showmany(postauthorpickui);
         $('#authorendpoint').val(thisselector.val());
         clearmany(allautofills);
         }

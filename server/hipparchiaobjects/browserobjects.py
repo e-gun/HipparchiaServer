@@ -83,6 +83,7 @@ class BrowserPassageObject(object):
 			self.name = authorobject.idxname
 		self.name = avoidsmallvariants(self.name)
 		self.title = avoidsmallvariants(workobject.title)
+		self.uid = authorobject.universalid
 		try:
 			if int(workobject.converted_date) < 1500:
 				self.date = int(workobject.converted_date)
@@ -146,9 +147,11 @@ class BrowserPassageObject(object):
 
 	def generatepassagetable(self):
 		outputtable = list()
+		flagauthorforparserlookup = '<div id="browsertableuid" uid="{i}"></div>'.format(i=self.uid)
+		outputtable.append(flagauthorforparserlookup)
 		outputtable.append('<table>')
 		try:
-			spacer = ''.join(['&nbsp;' for _ in range(0, hipparchia.config['MINIMUMBROWSERWIDTH'])])
+			spacer = str().join(['&nbsp;' for _ in range(0, hipparchia.config['MINIMUMBROWSERWIDTH'])])
 			outputtable.append('<tr class="spacing">{sp}</tr>'.format(sp=spacer))
 		except:
 			pass

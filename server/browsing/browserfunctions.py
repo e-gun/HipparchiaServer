@@ -11,13 +11,12 @@ import re
 from flask import session
 
 from server import hipparchia
-from server.dbsupport.citationfunctions import locusintocitation, finddblinefromlocus, finddblinefromincompletelocus, \
+from server.dbsupport.citationfunctions import finddblinefromincompletelocus, finddblinefromlocus, locusintocitation, \
 	perseusdelabeler
 from server.dbsupport.dblinefunctions import dblineintolineobject, returnfirstorlastlinenumber
-from server.dbsupport.miscdbfunctions import simplecontextgrabber, perseusidmismatch
+from server.dbsupport.miscdbfunctions import perseusidmismatch, simplecontextgrabber
 from server.formatting.bibliographicformatting import formatpublicationinfo
 from server.formatting.browserformatting import insertparserids
-from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject, BrowserPassageObject
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 from server.hipparchiaobjects.worklineobject import dbWorkLine

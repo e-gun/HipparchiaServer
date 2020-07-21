@@ -76,6 +76,7 @@ function parsepassagereturned(passagereturned) {
         e.preventDefault();
         let windowWidth = $(window).width();
         let windowHeight = $(window).height();
+        var authorid = document.getElementById('browsertableuid').attributes.uid.value;
         ldt.dialog({
                 closeOnEscape: true,
                 autoOpen: false,
@@ -89,7 +90,7 @@ function parsepassagereturned(passagereturned) {
                 });
         ldt.dialog( 'open' );
         ldt.html('[searching...]');
-        $.getJSON('/parse/' + this.id, function (definitionreturned) {
+        $.getJSON('/parse/' + this.id + '/' + authorid, function (definitionreturned) {
             ldt.html(definitionreturned['newhtml']);
             jshld.html(definitionreturned['newjs']);
         });
