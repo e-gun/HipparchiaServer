@@ -151,7 +151,7 @@ class BrowserPassageObject(object):
 		if session['authorflagging']:
 			flag = self.uid
 		else:
-			flag = 'author_flagging_is_off'
+			flag = '_'
 		flagauthorforparserlookup = '<div id="browsertableuid" uid="{i}"></div>'.format(i=flag)
 		outputtable.append(flagauthorforparserlookup)
 

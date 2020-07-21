@@ -290,7 +290,7 @@ class dbDictionaryEntry(object):
 		# clickableentry = re.sub(diofindera, r'id="perseus/lt\1/\2/\3"', clickableentry)
 		# clickableentry = re.sub(diofinderb, r'id="perseus/lt\1/\2/\3"', clickableentry)
 
-		if self.flagauthor:
+		if self.flagauthor and session['authorflagging']:
 			myid = r'id="perseus/{a}'.format(a=self.flagauthor)
 			clickableentry = re.sub(myid, r'class="flagged" ' + myid, clickableentry)
 		self.body = clickableentry
