@@ -13,6 +13,7 @@ function loadoptions() {
         // console.log(data);
         const simpletoggles = {
             'authorssummary': $('#authorssummary'),
+            'authorflagging': $('#authorflagging'),
             'bracketangled': $('#bracketangled'),
             'bracketcurly': $('#bracketcurly'),
             'bracketround': $('#bracketround'),

@@ -110,6 +110,12 @@ $('#quotesummary').change(function() {
     loadoptions();
     });
 
+$('#authorflagging').change(function() {
+    if(this.checked) { setoptions('authorflagging', 'yes'); } else { setoptions('authorflagging', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
 $('#bracketsquare').change(function() {
     if(this.checked) { setoptions('bracketsquare', 'yes'); } else { setoptions('bracketsquare', 'no');}
     refreshselections();

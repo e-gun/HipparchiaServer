@@ -232,7 +232,7 @@ class lexicalOutputObject(object):
 		# wo.insertclickablelookups() needs to run before the regex here will work
 		wo = self.thiswordobject
 		flagged = wo.flagauthor
-		if not flagged:
+		if not flagged or not session['authorflagging']:
 			return list(str())
 
 		# you get a huge mess with the Latin senses that toggle on and off constantly and do not cleanly close anywhere

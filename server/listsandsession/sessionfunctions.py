@@ -44,6 +44,7 @@ def modifysessionvariable(parameter, value):
 
 	trueorfalse = [
 		'authorssummary',
+		'authorflagging',
 		'bracketangled',
 		'bracketcurly',
 		'bracketround',

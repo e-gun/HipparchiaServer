@@ -147,8 +147,14 @@ class BrowserPassageObject(object):
 
 	def generatepassagetable(self):
 		outputtable = list()
-		flagauthorforparserlookup = '<div id="browsertableuid" uid="{i}"></div>'.format(i=self.uid)
+
+		if session['authorflagging']:
+			flag = self.uid
+		else:
+			flag = 'author_flagging_is_off'
+		flagauthorforparserlookup = '<div id="browsertableuid" uid="{i}"></div>'.format(i=flag)
 		outputtable.append(flagauthorforparserlookup)
+
 		outputtable.append('<table>')
 		try:
 			spacer = str().join(['&nbsp;' for _ in range(0, hipparchia.config['MINIMUMBROWSERWIDTH'])])

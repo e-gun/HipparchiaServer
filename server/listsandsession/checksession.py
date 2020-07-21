@@ -31,6 +31,7 @@ def probeforsessionvariables():
 		session['analogyfinder'] = False
 		session['auexclusions'] = list()
 		session['auselections'] = list()
+		session['authorflagging'] = hipparchia.config['DEFAULTAUTHORFLAGGING']
 		session['authorssummary'] = hipparchia.config['DEFAULTSUMMARIZELEXICALAUTHORS']
 		session['available'] = probefordatabases()
 		session['baggingmethod'] = hipparchia.config['DEFAULTBAGGINGMETHOD']
@@ -135,6 +136,7 @@ def convertyesnototruefalse():
 	trueorfalse = [
 		'analogyfinder'
 		'authorssummary',
+		'authorflagging',
 		'bracketangled',
 		'bracketcurly',
 		'bracketround',

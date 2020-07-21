@@ -223,7 +223,7 @@ const searchhtlmids = Array('#browserclickscriptholder', '#displayresults', '#im
     '#vectorspinnerscriptholder');
 
 const setoptionshtmlids = Array('#alt_clear_button', '#alt_moretools', '#alt_upperleftbuttons',
-    '#alt_vector_options_button', '#authorssummary', '#autofillinput', '#bracketangled', '#bracketcurly', '#bracketround',
+    '#alt_vector_options_button', '#authorssummary', '#authorflagging', '#autofillinput', '#bracketangled', '#bracketcurly', '#bracketround',
     '#bracketsquare', '#browserspinner', '#christiancorpus', '#closeoptionsbutton', '#collapseattic', '#debugdb', '#debughtml',
     '#debuglex', '#debugparse', '#fontchoice', '#frequencyindexing_n', '#frequencyindexing_y', '#greekcorpus',
     '#headwordindexing_n', '#headwordindexing_y', '#hitlimitspinner', '#indexskipsknownwords', '#inscriptioncorpus',
