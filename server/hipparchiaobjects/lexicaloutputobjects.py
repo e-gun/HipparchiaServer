@@ -229,20 +229,27 @@ class lexicalOutputObject(object):
 		return summary
 
 	def _buildauthorentrysummary(self) -> List[str]:
-		# this only semi-works; the unclean boundarie
-		# note that wo.insertclickablelookups() needs to run before the regex here will work
+		# wo.insertclickablelookups() needs to run before the regex here will work
 		wo = self.thiswordobject
 		flagged = wo.flagauthor
 		if not flagged:
 			return list(str())
 
-		# transfinder = re.compile(r'<span class="dicttrans">(.*?)</span>')
-		# note the sneaky regex...
+		# you get a huge mess with the Latin senses that toggle on and off constantly and do not cleanly close anywhere
+		"""
+		<sense id="n10676.3" level="3"> <span class="dicthi dictrend_ital">Sing.</span>, as collective term for the magistracy, <span class="dicthi dictrend_ital">the consuls</span>, when the office is in view rather than the persons: quod populus in se jus dederit, eo consulem usurum; <span class="dictcit"><span class="dictquote dictlang_la">non ipsos (sc. <dictionaryentry id="consules">consules</dictionaryentry>) libidinem ac licentiam suam pro lege habituros,</span> <bibl id="perseus/lt0914/001/3:9:5"><span class="dictauthor">Livy</span> 3, 9, 5</bibl></span> Weissenb. ad loc.: <span class="dictcit"><span class="dictquote dictlang_la">legatisque ad consulem missis,</span> <bibl id="perseus/lt0914/001/21:52:6"><span class="dictauthor">id.</span> 21, 52, 6</bibl></span> Heerw. ad loc.: <span class="dictcit"><span class="dictquote dictlang_la">aliter sine populi jussu nullius earum rerum consuli jus est,</span> <bibl><span class="dictauthor">Sallust</span> C. 29, 3</bibl></span>.—</sense>
+		"""
+
+		if wo.islatin():
+			return list(str())
+
+		# note the sneaky regex; a bit brittle
+		# the next only does LSJ entries properly; it catches c. 25% of a Latin entry
 		transbodyfinder = re.compile(r'rans">(.*?)</span>(.*?)(</sense>|span class="dictt)')
+
 		senses = re.findall(transbodyfinder, wo.body)
 		flaggedsenses = [s[0] for s in senses if re.search(flagged, s[1])]
 		flaggedsenses.sort()
-		print('flaggedsenses', flaggedsenses)
 		return flaggedsenses
 
 	def _builddistributiondict(self) -> str:
