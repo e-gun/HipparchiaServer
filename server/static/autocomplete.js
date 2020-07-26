@@ -39,6 +39,7 @@ function reloadAuthorlist(){
 }
 
 function resetworksautocomplete(){
+    showmany(postauthorpickui);
     hidemany(inputids);
     hidemany(endpointids);
     hidemany(endpointnotices);
@@ -50,9 +51,7 @@ function resetworksautocomplete(){
 $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
     source: "/getauthorhint",
-    focus: function () { showmany(postauthorpickui); },
     select: function (event, ui) {
-        showmany(postauthorpickui);
         let thisselector = $('#authorsautocomplete');
         let selector = $('#worksautocomplete');
         selector.val('');

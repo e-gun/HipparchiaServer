@@ -96,7 +96,9 @@ def frontpage():
 		# but that involves a lot kludge just to make a very optional option work
 		icanzap = 'no'
 
-	version = '{v} [git: {g}]'.format(v=hipparchiaserverversion, g=readgitdata())
+	gitlength = 5
+	commit = readgitdata()
+	version = '{v} [git: {g}]'.format(v=hipparchiaserverversion, g=commit[:gitlength])
 
 	shortversion = hipparchiaserverversion
 

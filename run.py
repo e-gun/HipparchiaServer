@@ -34,7 +34,7 @@ if multiprocessing.current_process().name == 'MainProcess':
 	c = c[:t]
 	g = '[git: {c}]'.format(c=c)
 	# p = ''.join(' ' for _ in range(pad))
-	banner = ''.join('=' for _ in range(len(g)+4))
+	banner = str().join('=' for _ in range(len(g)+4))
 	secho(vstring.format(banner=banner, v=v, g=g), bold=True, fg='cyan')
 
 from server import hipparchia
