@@ -10,7 +10,7 @@ from sys import argv
 from os import path
 
 
-stable = True
+stable = False
 release = False
 
 hipparchiaserverversion = '1.6.5'

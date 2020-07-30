@@ -23,7 +23,7 @@ from server.formatting.vectorformatting import vectorhtmlforfrontpage, vectorhtm
 from server.hipparchiaobjects.authenticationobjects import LoginForm
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
-from version import devel, hipparchiaserverversion, readgitdata
+from version import stable, hipparchiaserverversion, readgitdata
 
 
 @hipparchia.route('/')
@@ -102,7 +102,7 @@ def frontpage():
 
 	shortversion = hipparchiaserverversion
 
-	if devel:
+	if not stable:
 		shortversion = version
 
 	loginform = None
