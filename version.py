@@ -10,12 +10,17 @@ from sys import argv
 from os import path
 
 
-devel = True
+stable = False
+release = False
 
 hipparchiaserverversion = '1.6.5'
-supplement = '+ [DEVEL]'
+plus = '+'
+supplement = '[DEVEL]'
 
-if devel:
+if not release:
+	hipparchiaserverversion = hipparchiaserverversion + plus
+
+if not stable:
 	hipparchiaserverversion = hipparchiaserverversion + supplement
 
 
