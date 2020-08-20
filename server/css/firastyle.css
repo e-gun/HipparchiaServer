@@ -11,7 +11,7 @@
 	/* define the default FONTS that will have precedence over the served-if-necessary fonts
 	that are delivered via @font-face below. NB: only Arial is likely to be pre-installed.
 	The others can be downloaded from various locations. Arial is available on >95% of MacOS and PC systems? */
-	--systemdefaultfont: "Noto";
+	--systemdefaultfont: "Fira";
 	--greekfont: "yourfonthere_otherwise_fallbacktohipparchiahostedfonts";
 	--latinfont: "yourfonthere_otherwise_fallbacktohipparchiahostedfonts";
 	/* --systemdefaultfont: ArialUnicodeMS; */
@@ -84,57 +84,57 @@
 
 @font-face {
 	font-family: 'hipparchiasansstatic';
-	src: url('/static/ttf/NotoSans-Regular.ttf') format('truetype');
+	src: url('/static/ttf/FiraSans-Regular.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiamonostatic';
-	src: url('/static/ttf/NotoMono-Regular.ttf') format('truetype');
+	src: url('/static/ttf/FiraMono-Regular.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiaobliquestatic';
-	src: url('/static/ttf/NotoSans-Italic.ttf') format('truetype');
+	src: url('/static/ttf/FiraSans-Italic.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiacondensedstatic';
-	src: url('/static/ttf/NotoSansDisplay-Condensed.ttf') format('truetype');
+	src: url('/static/ttf/FiraSans-Thin.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiacondensedboldstatic';
-	src: url('/static/ttf/NotoSansDisplay-CondensedBold.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_CNDENSEDBLD.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiacondenseditalicstatic';
-	src: url('/static/ttf/NotoSansDisplay-CondensedItalic.ttf') format('truetype');
+	src: url('/static/ttf/FiraSans-ThinItalic.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiaboldstatic';
-	src: url('/static/ttf/NotoSans-Bold.ttf') format('truetype');
+	src: url('/static/ttf/FiraSans-Bold.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiasemiboldstatic';
-	src: url('/static/ttf/NotoSansDisplay-SemiBold.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_SEMIBLD.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiathinstatic';
-	src: url('/static/ttf/NotoSansDisplay-Thin.ttf') format('truetype');
+	src: url('/static/ttf/HOSTEDFONTFAMILY_THIN.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchialightstatic';
-	src: url('/static/ttf/NotoSansDisplay-Light.ttf') format('truetype');
+	src: url('/static/ttf/FiraSans-ExtraLight.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiabolditalicstatic';
-	src: url('/static/ttf/NotoSans-BoldItalic.ttf') format('truetype');
+	src: url('/static/ttf/FiraSans-BoldItalic.ttf') format('truetype');
 	}
 
 
