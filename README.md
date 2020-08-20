@@ -49,7 +49,7 @@ key features:
 			get per corpus counts of the use of the word and its derivatives
 			get a weighted chronological distribution of the word's use: mostly 'early', etc.
 			get a weighted distribution by top N genres: show if a word predominantly 'epic', etc.
-			get a summary of uses, senses, and quotes
+			get a summary of uses, senses, phrases, and quotes
 			reverse lookup: 'unexpected' returns ἀδευκήϲ, ἀδόκητοϲ, ἀδόξαϲτοϲ, ἀελπτία, ...
 				by default results return in order of word frequency
 			click to browse to passages cited in the lexical entries ('often' works)
