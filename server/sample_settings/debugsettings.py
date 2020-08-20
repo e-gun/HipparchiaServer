@@ -37,6 +37,9 @@
 #
 # SEARCHMARKEDUPLINE will enable searching for things like "hmu_date_or_numeric_equivalent_of_date". It will also ruin
 #   many, many other kinds of search
+#
+# ONTHEFLYLEXICALFIXES is False if HipparchiaBuilder did not try to fix the bad Perseus data for Euripides, etc.
+#
 
 SUPPRESSWARNINGS = True
 ENABLELOGGING = False
@@ -51,3 +54,5 @@ LEXDEBUGMODE = False
 PARSERDEBUGMODE = False
 HTMLDEBUGMODE = False
 SEARCHMARKEDUPLINE = False
+
+ONTHEFLYLEXICALFIXES = False

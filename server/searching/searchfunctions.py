@@ -358,7 +358,7 @@ def findleastcommontermcount(searchphrase: str, accentsneeded: bool) -> int:
 	return fewesthits
 
 
-def dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, cursor) -> bool:
+def dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, dbcursor) -> bool:
 	"""
 
 	search for a term within a range of lines
@@ -370,15 +370,15 @@ def dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, u
 	:param secondterm:
 	:param workid:
 	:param usecolumn:
-	:param cursor:
+	:param dbcursor:
 	:return:
 	"""
 
 	table = workid[0:6]
 	q = 'SELECT index FROM {db} WHERE ((index BETWEEN %s AND %s) AND wkuniversalid = %s AND {c} ~ %s)'.format(db=table, c=usecolumn)
 	d = (index - distanceinlines, index + distanceinlines, workid, secondterm)
-	cursor.execute(q, d)
-	hit = cursor.fetchall()
+	dbcursor.execute(q, d)
+	hit = dbcursor.fetchall()
 	if hit:
 		return True
 	else:

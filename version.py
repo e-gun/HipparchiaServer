@@ -10,7 +10,7 @@ from sys import argv
 from os import path
 
 
-stable = True
+stable = False
 release = False
 
 hipparchiaserverversion = '1.6.5'
@@ -53,6 +53,6 @@ def readgitdata() -> str:
 		gitdata = lastline.split(' ')
 		commit = gitdata[1]
 	else:
-		commit = 'commit data not found'
+		commit = 'N/A'
 
 	return commit

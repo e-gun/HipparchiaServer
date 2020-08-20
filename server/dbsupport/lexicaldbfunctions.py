@@ -627,7 +627,7 @@ def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None
 		usedictionary = 'greek'
 
 	# βοῶ̣ντεϲ -> βοῶντεϲ
-	word = re.sub(r'̣', '', word)
+	word = re.sub(r'̣', str(), word)
 
 	ihavesession = True
 	try:
@@ -648,7 +648,7 @@ def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None
 	# the things that can confuse me
 	terminalacute = re.compile(r'[άέίόύήώ]')
 
-	morphobject = None
+	morphobjects = None
 
 	# syntax = '~' if you have to deal with '[uv]' problems, e.g.
 	# but that opens up a whole new can of worms
@@ -659,14 +659,16 @@ def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None
 	# print('lookformorphologymatches() q/d', query, data)
 
 	dbcursor.execute(query, data)
-	# fetchone() because all possiblities are stored inside the analysis itself
-	analysis = dbcursor.fetchone()
+	# NOT TRUE: fetchone() because all possiblities are stored inside the analysis itself
+	# loss of case sensitivity is a problem here: Latro vs latro.
+	analyses = dbcursor.fetchall()
 
-	if analysis:
-		morphobject = dbMorphologyObject(*analysis)
+	if analyses:
+		morphobjects = [dbMorphologyObject(*a) for a in analyses]
 		if rewrite:
-			morphobject.observed = rewrite
-			morphobject.rewritten = True
+			for m in morphobjects:
+				m.observed = rewrite
+				m.rewritten = True
 	elif trialnumber < maxtrials:
 		# turn 'kal' into 'kalends', etc.
 		# not very costly as this is a dict lookup, and less costly than any call to the db
@@ -686,36 +688,52 @@ def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None
 			if trialnumber == 1:
 				# elided ending? you will ask for ἀλλ, but you need to look for ἀλλ'
 				newword = word + "'"
-				morphobject = lookformorphologymatches(newword, dbcursor, trialnumber, revertword=word)
+				morphobjects = lookformorphologymatches(newword, dbcursor, trialnumber, revertword=word)
 			elif trialnumber == 2:
 				# a proper noun?
 				newword = word[0].upper() + word[1:]
-				morphobject = lookformorphologymatches(newword, dbcursor, trialnumber, revertword=word)
+				morphobjects = lookformorphologymatches(newword, dbcursor, trialnumber, revertword=word)
 			elif re.search(r'\'$', word):
 				# the last word in a greek quotation might have a 'close quote' that was mistaken for an elision
 				newword = re.sub(r'\'', '', word)
-				morphobject = lookformorphologymatches(newword, dbcursor, trialnumber)
+				morphobjects = lookformorphologymatches(newword, dbcursor, trialnumber)
 			elif re.search(r'[ΐϊΰῧϋî]', word):
 				# desperate: ῥηϊδίωϲ --> ῥηιδίωϲ
 				diacritical = 'ΐϊΰῧϋî'
 				plain = 'ίιύῦυi'
 				xform = str.maketrans(diacritical, plain)
 				newword = word.translate(xform)
-				morphobject = lookformorphologymatches(newword, dbcursor, trialnumber=retrywithcapitalization)
+				morphobjects = lookformorphologymatches(newword, dbcursor, trialnumber=retrywithcapitalization)
 			elif re.search(terminalacute, word[-1]):
 				# an enclitic problem?
 				sub = stripaccents(word[-1])
 				newword = word[:-1] + sub
-				morphobject = lookformorphologymatches(newword, dbcursor, trialnumber=retrywithcapitalization)
+				morphobjects = lookformorphologymatches(newword, dbcursor, trialnumber=retrywithcapitalization)
 			elif re.search(terminalacute, word[-2]):
 				# πλακουντάριόν?
 				sub = stripaccents(word[-2])
 				newword = word[:-2] + sub + word[-1]
-				morphobject = lookformorphologymatches(newword, dbcursor, trialnumber=retrywithcapitalization)
+				morphobjects = lookformorphologymatches(newword, dbcursor, trialnumber=retrywithcapitalization)
 			else:
 				return None
 		except IndexError:
-			morphobject = None
+			morphobjects = None
+
+	# OK: we have a list of dbMorphologyObjects; this needs to be turned into a single object...
+	# def __init__(self, observed, xrefs, prefixrefs, possibleforms):
+	if len(morphobjects) == 1:
+		morphobject = morphobjects[0]
+	else:
+		flatten = lambda l: [item for sublist in l for item in sublist]
+		ob = morphobjects[0].observed
+		xr = flatten([m.xrefs for m in morphobjects])
+		xr = ', '.join(xr)
+		pr = flatten([m.prefixrefs for m in morphobjects])
+		pr = ', '.join(pr)
+		pf = flatten([m.possibleforms.split('\n') for m in morphobjects])
+		# note that you will have multiple '<possibility_1>' entries now... Does not matter ATM, but a bug waiting to bite
+		pf = '\n'.join(pf)
+		morphobject = dbMorphologyObject(ob, xr, pr, pf)
 
 	return morphobject
 
