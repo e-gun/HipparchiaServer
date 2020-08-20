@@ -125,7 +125,10 @@ class dbDictionaryEntry(object):
 		:param lemmaobject:
 		:return:
 		"""
-		afinder = re.compile(r'<author>(.*?)</author>')
+
+		# afinder = re.compile(r'<author>(.*?)</author>')
+		# <span class="dictauthor">Euripides</span>
+		afinder = re.compile(r'<span class="dictauthor">(.*?)</span>')
 		authorlist = re.findall(afinder, self.body)
 		authorlist = list(set(authorlist))
 		notin = ['id.', 'ib.', 'Id.']
@@ -188,7 +191,9 @@ class dbDictionaryEntry(object):
 		return listofsenses
 
 	def generatequotesummary(self, lemmaobject=None) -> List:
-		qfinder = re.compile(r'<quote lang="\w+">(.*?)</quote>')
+		# <span class="dictquote dictlang_greek">ἅλωϲιν Ἰλίου τʼ ἀνάϲταϲιν</span>
+		# qfinder = re.compile(r'<quote lang="\w+">(.*?)</quote>')
+		qfinder = re.compile(r'<span class="dictquote dictlang_\w+">(.*?)</span>')
 		quotelist = re.findall(qfinder, self.body)
 
 		# many of the 'quotes' are really just forms of the word
