@@ -161,7 +161,7 @@ body {
 	font-size: 85%;
 	}
 
-.authorsum, .quotesum, .sensesum {
+.authorsum, .quotesum, .sensesum, .phrasesum {
     padding-left: 5px;
     }
 
@@ -411,6 +411,10 @@ body {
 	font-size: 120%;
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
+
+.dictrewritten_phrase {
+	color: var(--plum);
+}
 
 .documentmetadatalabel {
     font-size: 85%;

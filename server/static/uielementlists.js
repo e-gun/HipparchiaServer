@@ -228,6 +228,6 @@ const setoptionshtmlids = Array('#alt_clear_button', '#alt_moretools', '#alt_upp
     '#debuglex', '#debugparse', '#fontchoice', '#frequencyindexing_n', '#frequencyindexing_y', '#greekcorpus',
     '#headwordindexing_n', '#headwordindexing_y', '#hitlimitspinner', '#indexskipsknownwords', '#inscriptioncorpus',
     '#latincorpus', '#linesofcontextspinner', '#manualinput', '#mophologytablesoptions', '#morphdialects', '#morphduals',
-    '#morphemptyrows', '#morphfinite', '#morphimper', '#morphinfin', '#morphpcpls', '#onehit_n', '#onehit_y', '#papyruscorpus',
+    '#morphemptyrows', '#morphfinite', '#morphimper', '#morphinfin', '#morphpcpls', '#onehit_n', '#onehit_y', '#papyruscorpus', '#phrasesummary',
     '#principleparts', '#quotesummary', '#searchinsidemarkup', '#sensesummary', '#setoptionsnavigator', '#showwordcounts',
     '#simpletextoutput', '#sortresults', '#suppresscolors', '#zaplunates', '#zapvees');

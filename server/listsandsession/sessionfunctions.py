@@ -75,6 +75,7 @@ def modifysessionvariable(parameter, value):
 		'nearestneighborsquery',
 		'onehit',
 		'papyruscorpus',
+		'phrasesummary',
 		'principleparts',
 		'quotesummary',
 		'rawinputstyle',

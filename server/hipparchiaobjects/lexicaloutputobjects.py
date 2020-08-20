@@ -154,6 +154,7 @@ class lexicalOutputObject(object):
 		self.fullenty = self._buildfullentry()
 		# next needs previous to fullentry: regex search needs entry body rewrite
 		self.authorentrysummary = self._buildauthorentrysummary()
+		self.phrasesummary = self._buildphrasesummary()
 		self.entrysummary = self._buildentrysummary()
 
 	def _buildentrydistributionss(self) -> str:
@@ -211,11 +212,12 @@ class lexicalOutputObject(object):
 			entryword.senselist = entryword.generatesensessummary()
 			entryword.quotelist = entryword.generatequotesummary(lemmaobject)
 			entryword.flaggedsenselist = self.authorentrysummary
+			entryword.phraselist = self.phrasesummary
 			# entryword.flaggedsenselist = entryword.generateflaggedsummary()
 			# print('entryword.flaggedsenselist', entryword.flaggedsenselist)
 
-		awq = entryword.authorlist + entryword.senselist + entryword.quotelist + entryword.flaggedsenselist
-		zero = ['0 authors', '0 senses', '0 quotes', '0 flagged senses']
+		awq = entryword.authorlist + entryword.senselist + entryword.quotelist + entryword.flaggedsenselist + entryword.phraselist
+		zero = ['0 authors', '0 senses', '0 quotes', '0 flagged senses', '0 phrases']
 		for z in zero:
 			try:
 				awq.remove(z)
@@ -251,6 +253,15 @@ class lexicalOutputObject(object):
 		flaggedsenses = [s[0] for s in senses if re.search(flagged, s[1])]
 		flaggedsenses.sort()
 		return flaggedsenses
+
+	def _buildphrasesummary(self) -> List[str]:
+		if not session['phrasesummary']:
+			return list(str())
+		phrasefinder = re.compile(r'<span class="dicttrans dictrewritten_phrase">(.*?)</span>')
+		phrases = re.findall(phrasefinder, self.thiswordobject.body)
+		phrases = list(set(phrases))
+		phrases.sort()
+		return phrases
 
 	def _builddistributiondict(self) -> str:
 		distributions = str()

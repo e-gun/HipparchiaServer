@@ -67,6 +67,7 @@ class dbDictionaryEntry(object):
 		self.quotelist = list()
 		self.senselist = list()
 		self.flaggedsenselist = list()
+		self.phraselist = list()
 		self.flagauthor = None
 
 		if re.search(r'[a-z]', self.entry):

@@ -719,8 +719,12 @@ def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None
 		except IndexError:
 			morphobjects = None
 
+	if not morphobjects:
+		return None
+
 	# OK: we have a list of dbMorphologyObjects; this needs to be turned into a single object...
 	# def __init__(self, observed, xrefs, prefixrefs, possibleforms):
+
 	if len(morphobjects) == 1:
 		morphobject = morphobjects[0]
 	else:

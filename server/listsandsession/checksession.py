@@ -74,6 +74,7 @@ def probeforsessionvariables():
 		session['nearornot'] = 'near'
 		session['onehit'] = hipparchia.config['DEFAULTONEHIT']
 		session['papyruscorpus'] = corpusisonandavailable('papyruscorpus')
+		session['phrasesummary'] = hipparchia.config['DEFAULTSUMMARIZEPHRASES']
 		session['principleparts'] = hipparchia.config['FINDPRINCIPLEPARTS']
 		session['proximity'] = '1'
 		session['psgexclusions'] = list()
@@ -167,6 +168,7 @@ def convertyesnototruefalse():
 		'nearestneighborsquery',
 		'onehit',
 		'papyruscorpus',
+		'phrasesummary',
 		'principleparts',
 		'quotesummary',
 		'rawinputstyle',

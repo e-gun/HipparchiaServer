@@ -116,6 +116,12 @@ $('#authorflagging').change(function() {
     loadoptions();
     });
 
+$('#phrasesummary').change(function() {
+    if(this.checked) { setoptions('phrasesummary', 'yes'); } else { setoptions('phrasesummary', 'no'); }
+    refreshselections();
+    loadoptions();
+    });
+
 $('#bracketsquare').change(function() {
     if(this.checked) { setoptions('bracketsquare', 'yes'); } else { setoptions('bracketsquare', 'no');}
     refreshselections();

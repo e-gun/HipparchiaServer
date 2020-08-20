@@ -41,6 +41,7 @@ function loadoptions() {
             'morphtables': $('#morphtables'),
             'nearestneighborsquery': $('#nearestneighborsquery'),
             'papyruscorpus': $('#papyruscorpus'),
+            'phrasesummary': $('#phrasesummary'),
             'principleparts': $('#principleparts'),
             'quotesummary': $('#quotesummary'),
             'searchinsidemarkup': $('#searchinsidemarkup'),
