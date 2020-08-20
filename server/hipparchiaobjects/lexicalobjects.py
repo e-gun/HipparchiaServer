@@ -179,6 +179,8 @@ class dbDictionaryEntry(object):
 
 		listofsenses = self.translations
 		listofsenses = [s[0].upper() + s[1:] for s in listofsenses if len(s) > 1]
+		listofsenses = [s.strip() for s in listofsenses]
+		listofsenses = list(set(listofsenses))
 		listofsenses.sort()
 
 		if session['sensesummary']:
