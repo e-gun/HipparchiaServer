@@ -126,8 +126,6 @@ class dbDictionaryEntry(object):
 		:return:
 		"""
 
-		# afinder = re.compile(r'<author>(.*?)</author>')
-		# <span class="dictauthor">Euripides</span>
 		afinder = re.compile(r'<span class="dictauthor">(.*?)</span>')
 		authorlist = re.findall(afinder, self.body)
 		authorlist = list(set(authorlist))
@@ -159,24 +157,6 @@ class dbDictionaryEntry(object):
 		return listofsenses
 
 	def generatesensessummary(self) -> List:
-		### this parsing code got moved into the builder ###
-
-		# listofsenses = self.soup.find_all(self.translationlabel)
-		# exclusions = ['ab', 'de', 'ex', 'ut', 'nihil', 'quam', 'quid']
-		# try:
-		# 	listofsenses = [s.string for s in listofsenses]
-		# 	listofsenses = [s for s in listofsenses if '.' not in s]
-		# 	listofsenses = [s for s in listofsenses if s not in exclusions]
-		# except:
-		# 	listofsenses = list()
-		#
-		# # so 'go' and 'go,' are not both on the list
-		# depunct = '[{p}]$'.format(p=re.escape(punctuation))
-		# listofsenses = [re.sub(depunct, '', s) for s in listofsenses]
-		# listofsenses = [re.sub(r'^To', 'to', s) for s in listofsenses]
-		# listofsenses = list(set(listofsenses))
-		# listofsenses.sort()
-
 		listofsenses = self.translations
 		listofsenses = [s[0].upper() + s[1:] for s in listofsenses if len(s) > 1]
 		listofsenses = [s.strip() for s in listofsenses]
@@ -193,8 +173,6 @@ class dbDictionaryEntry(object):
 		return listofsenses
 
 	def generatequotesummary(self, lemmaobject=None) -> List:
-		# <span class="dictquote dictlang_greek">ἅλωϲιν Ἰλίου τʼ ἀνάϲταϲιν</span>
-		# qfinder = re.compile(r'<quote lang="\w+">(.*?)</quote>')
 		qfinder = re.compile(r'<span class="dictquote dictlang_\w+">(.*?)</span>')
 		quotelist = re.findall(qfinder, self.body)
 
@@ -275,7 +253,7 @@ class dbDictionaryEntry(object):
 			else:
 				head = bib[0]
 				tail = bib[2]
-			bdict[''.join(bib)] = head + bib[1] + tail
+			bdict[str().join(bib)] = head + bib[1] + tail
 
 		# print('here',bdict)
 		htmlentry = self.body

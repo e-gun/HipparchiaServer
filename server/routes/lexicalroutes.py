@@ -174,6 +174,7 @@ def findbyform(observedword, authorid=None):
 
 	# the next makes sense only in the context of pointedly invalid input
 	w = depunct(observedword)
+	w = w.strip()
 	w = tidyupterm(w)
 	w = re.sub(r'[σς]', 'ϲ', w)
 
