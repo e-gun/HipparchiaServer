@@ -274,6 +274,7 @@ class lexicalOutputObject(object):
 
 	def _buildfullentry(self) -> str:
 		fullentrystring = '<br /><br />\n<span class="lexiconhighlight">Full entry:</span><br />'
+		suppressedmorph = '<br /><br />\n<span class="lexiconhighlight">(Morphology notes hidden)</span><br />'
 		w = self.thiswordobject
 		w.constructsensehierarchy()
 		w.runbodyxrefsuite()
@@ -283,6 +284,7 @@ class lexicalOutputObject(object):
 		w.xmltohtmlconversions()
 		segments = list()
 		segments.append(w.grabheadmaterial())
+		# segments.append(suppressedmorph)
 		segments.append(fullentrystring)
 		segments.append(w.grabnonheadmaterial())
 		fullentry = '\n'.join(segments)

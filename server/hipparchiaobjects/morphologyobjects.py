@@ -36,6 +36,14 @@ class MorphPossibilityObject(object):
 	def gettranslation(self):
 		transfinder = re.compile(r'<transl>(.*?)</transl>')
 		trans = re.findall(transfinder, self.transandanal)
+		try:
+			trans = trans[0].split('; ')
+		except IndexError:
+			pass
+		# flag the level labels in 'A. Useful; B. Neutr. absol; C. ...'
+		levelhighlighter = re.compile(r'^(.{1,3}\.)\s')
+		levelbracket = lambda x: '<span class="transtree">{item}</span> '.format(item=x.group(1))
+		trans = [re.sub(levelhighlighter, levelbracket, t) for t in trans]
 		return '; '.join(trans)
 
 	def getanalysislist(self):

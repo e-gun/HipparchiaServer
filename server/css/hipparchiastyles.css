@@ -946,6 +946,10 @@ body {
     font-style: italic;
     }
 
+.transtree {
+	color: var(--skyblue);
+}
+
 .ui-button {
 	margin-bottom: 3px;
 	}
