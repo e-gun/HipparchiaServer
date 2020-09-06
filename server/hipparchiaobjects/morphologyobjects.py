@@ -189,7 +189,7 @@ class MorphPossibilityObject(object):
 				consolewarning('MorphPossibilityObject.getbaseform() is confused: {e} - {s}'.format(e=self.entry, s=segments))
 
 		# not sure this ever happens with the greek data
-		baseform = re.sub(r'^\s', '', baseform)
+		baseform = re.sub(r'^\s', str(), baseform)
 
 		return baseform
 
@@ -209,7 +209,7 @@ class MorphPossibilityObject(object):
 			baseform = latattemptelision(self.entry)
 
 		# some latin words will erroneously yield ' concupio' as the base form: bad data
-		baseform = re.sub(r'^\s', '', baseform)
+		baseform = re.sub(r'^\s', str(), baseform)
 
 		return baseform
 

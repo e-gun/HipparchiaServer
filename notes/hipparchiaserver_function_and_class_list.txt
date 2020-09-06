@@ -1,20 +1,20 @@
 hipparchia_venv/ $ cloc --not-match-f='^j' HipparchiaServer/
-     187 text files.
-     186 unique files.
-      23 files ignored.
+     207 text files.
+     198 unique files.
+      31 files ignored.
 
-github.com/AlDanial/cloc v 1.84  T=0.77 s (221.2 files/s, 51402.4 lines/s)
+github.com/AlDanial/cloc v 1.86  T=0.83 s (219.4 files/s, 57660.4 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                         121           6619           9426          16055
-JavaScript                      12            381            256           2184
-HTML                            29            180             29           1941
-CSS                              2            319             75           1314
-XML                              6              0              0            664
+Python                         117           6817           9468          16423
+JavaScript                      21           1129            396           4979
+CSS                              7            953            260           3969
+HTML                            30            251             34           2337
+XML                              7              0              0            803
 Markdown                         1             63              0            223
 -------------------------------------------------------------------------------
-SUM:                           171           7562           9786          22381
+SUM:                           183           9213          10158          28734
 -------------------------------------------------------------------------------
 
 
@@ -84,6 +84,7 @@ calculatewordweights.py:def findcorpusweightviawordcounts(corpus: str) -> int:
 commandlineoptions.py:def getcommandlineargs():
 configureatstartup.py:def startupprint(message: str, color='white', isbold=False, colorcoded=False, baremessage=True):
 authentication/authenticationwrapper.py:def requireauthentication(routefunction):
+authentication/authenticationwrapper.py:def loginfailurenotification() -> str:
 authentication/knownusers.py:def loadusersdict(knownusersandpasswords=None):
 browsing/browserfunctions.py:def buildbrowseroutputobject(authorobject: dbAuthor, workobject: dbOpus, locusindexvalue: int, dbcursor) -> BrowserOutputObject:
 browsing/browserfunctions.py:def checkfordocumentmetadata(workline: dbWorkLine, workobject: dbOpus) -> str:
@@ -113,7 +114,7 @@ dbsupport/dblinefunctions.py:def grabonelinefromwork(workdbname: str, lineindex:
 dbsupport/dblinefunctions.py:def returnfirstorlastlinenumber(workid: str, dbcursor, findlastline=False, disallowt=False, disallowlevel=0) -> int:
 dbsupport/dblinefunctions.py:def makeablankline(work: str, fakelinenumber: int) -> dbWorkLine:
 dbsupport/dblinefunctions.py:def bulklinegrabber(table: str, column: str, criterion: str, setofcriteria, cursor) -> dict:
-dbsupport/dblinefunctions.py:def grablistoflines(table: str, uidlist: list) -> list:
+dbsupport/dblinefunctions.py:def grablistoflines(table: str, uidlist: list, dbcursor=None) -> list:
 dbsupport/dblinefunctions.py:def grabbundlesoflines(worksandboundaries: dict, cursor) -> list:
 dbsupport/dblinefunctions.py:def bulkenvironsfetcher(table: str, searchresultlist: list, context: int) -> list:
 dbsupport/lexicaldbfunctions.py:def headwordsearch(seeking: str, limit: str, usedictionary: str, usecolumn: str) -> List[tuple]:
@@ -138,7 +139,7 @@ dbsupport/miscdbfunctions.py:def makeanemptyauthor(universalid: str) -> dbAuthor
 dbsupport/miscdbfunctions.py:def makeanemptywork(universalid: str) -> dbOpus:
 dbsupport/miscdbfunctions.py:def getpostgresserverversion() -> str:
 dbsupport/miscdbfunctions.py:def probefordatabases() -> dict:
-dbsupport/miscdbfunctions.py:def icanpickleconnections() -> bool:
+dbsupport/miscdbfunctions.py:def icanpickleconnections(dothecheck=False) -> bool:
 dbsupport/miscdbfunctions.py:def cleanpoolifneeded():
 dbsupport/redisdbfunctions.py:def establishredisconnection() -> redis.client.Redis:
 dbsupport/redisdbfunctions.py:def buildredissearchlist(listofsearchlocations: List, searchid: str):
@@ -168,6 +169,16 @@ experimental/tensorflowvectors.py:def tfnlptraining(sentences, searchobject):
 experimental/tensorflowvectors.py:def converttexttoinexvalues(sentences, morphdict):
 experimental/tensorflowvectors.py:def generatetfbatch(sentences, batchsize, windowsize, method='cbow'):
 experimental/tensorflowvectors.py:def tfnlpwork(textasvals, wordsmappedtocodes, codesmappedtowords, activepoll):
+experimental/threedimensionalplots.py:def log(msg):
+experimental/threedimensionalplots.py:def sampleVectors(vectors, percentagetouse):
+experimental/threedimensionalplots.py:def reduceWithPCA(vectors, size):
+experimental/threedimensionalplots.py:def reduceWithUMAP(vectors, size):
+experimental/threedimensionalplots.py:def reduceWithTSNE(vectors, size):
+experimental/threedimensionalplots.py:def PCA_then_UMAP(vectors, pca_size, umap_size):
+experimental/threedimensionalplots.py:def PCA_then_TSNE(vectors, pca_size, tsne_size):
+experimental/threedimensionalplots.py:def clusterForColour(vectors, size):
+experimental/threedimensionalplots.py:def saveAsGraphitFile(model, vectors, indices, clusters, fname):
+experimental/threedimensionalplots.py:def plot2D(vectors):
 formatting/abbreviations.py:def deabbreviateauthors(authorabbr: str, lang: str) -> str:
 formatting/abbreviations.py:def deabrevviategreekauthors() -> Dict[str, str]:
 formatting/abbreviations.py:def deabrevviatelatinauthors() -> Dict[str, str]:
@@ -376,7 +387,7 @@ routes/inforoutes.py:def styesheetsamples():
 routes/inforoutes.py:def showsessioncontents():
 routes/inforoutes.py:def testroute():
 routes/lexicalroutes.py:def dictsearch(searchterm):
-routes/lexicalroutes.py:def findbyform(observedword):
+routes/lexicalroutes.py:def findbyform(observedword, authorid=None):
 routes/lexicalroutes.py:def reverselexiconsearch(searchid, searchterm):
 routes/lexicalroutes.py:def dictionaryidsearch(language, entryid):
 routes/lexicalroutes.py:def knownforms(lexicalid, language, xrefid, headword):
@@ -400,7 +411,9 @@ routes/websocketroutes.py:def checkforactivesearch(searchid):
 routes/websocketroutes.py:def externalwsgipolling(pollid):
 searching/phrasesearching.py:def phrasesearch(wkid: str, searchobject: SearchObject, cursor) -> List[dbWorkLine]:
 searching/phrasesearching.py:def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: str, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
-searching/proximitysearching.py:def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> List[dbWorkLine]:
+searching/proximitysearching.py:def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> List[tuple]:
+searching/proximitysearching.py:def lemmatizedwithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbcursor):
+searching/proximitysearching.py:def simplewithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbcursor):
 searching/proximitysearching.py:def withinxwords(workdbname: str, searchobject: SearchObject, dbconnection) -> List[dbWorkLine]:
 searching/proximitysearching.py:def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, cursor) -> dict:
 searching/searchdispatching.py:def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
@@ -415,7 +428,7 @@ searching/searchfunctions.py:def buildbetweenwhereextension(authortable: str, se
 searching/searchfunctions.py:def lookoutsideoftheline(linenumber: int, numberofextrawords: int, workid: str, searchobject: SearchObject, cursor) -> str:
 searching/searchfunctions.py:def findleastcommonterm(searchphrase: str, accentsneeded: bool) -> str:
 searching/searchfunctions.py:def findleastcommontermcount(searchphrase: str, accentsneeded: bool) -> int:
-searching/searchfunctions.py:def dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, cursor) -> bool:
+searching/searchfunctions.py:def dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, dbcursor) -> bool:
 searching/searchfunctions.py:def buildsearchobject(searchid: str, therequest: request, thesession: session) -> SearchObject:
 searching/searchfunctions.py:def loadsearchqueue(iterable, workers):
 searching/substringsearching.py:def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, cursor, templimit=None) -> Generator:
@@ -433,6 +446,8 @@ semanticvectors/gensimvectors.py:def executenearestneighborsquery(searchobject):
 semanticvectors/gensimvectors.py:def executegenerateanalogies(searchobject):
 semanticvectors/gensimvectors.py:def executegensimlsi(searchobject):
 semanticvectors/gensimvectors.py:def executegensimsearch(searchobject, outputfunction, indextype):
+semanticvectors/gensimvectors.py:def twodimensionalrepresentationofspace(searchobject):
+semanticvectors/gensimvectors.py:def threedimensionalrepresentationofspace(searchobject):
 semanticvectors/preparetextforvectorization.py:def vectorprepdispatcher(searchobject):
 semanticvectors/preparetextforvectorization.py:def breaktextsintosentences(foundsentences, searchlist, searchobject, dbconnection):
 semanticvectors/preparetextforvectorization.py:def monobreaktextsintosentences(searchlist, searchobject):
@@ -453,6 +468,12 @@ semanticvectors/vectorgraphing.py:def storevectorgraph(figureasbytes):
 semanticvectors/vectorgraphing.py:def fetchvectorgraph(imagename):
 semanticvectors/vectorgraphing.py:def givetitletograph(topic, searchterm, searchobject):
 semanticvectors/vectorgraphing.py:def generatethefineprint(vtype: str, vectorvalues: VectorValues) -> str:
+semanticvectors/vectorgraphing.py:def tsnegraphofvectors(sentencetuples, workssearched, so, vectorspace):
+semanticvectors/vectorgraphing.py:def threejsgraphofvectors(sentencetuples, workssearched, so, vectorspace):
+semanticvectors/vectorgraphing.py:def reducetothreedimensions(so, vectorspace):
+semanticvectors/vectorgraphing.py:def generategraphitdata(model, vectors, indices, clusters):
+semanticvectors/vectorgraphing.py:def threedimensionaljs(jsgraphdata: str) -> str:
+semanticvectors/vectorgraphing.py:def trheedimensionalhtml() -> str:
 semanticvectors/vectorhelpers.py:def cleantext(texttostrip):
 semanticvectors/vectorhelpers.py:def replaceabbreviations(foundstring, searchdict):
 semanticvectors/vectorhelpers.py:def recursivesplit(tosplit, listofsplitlerms):
@@ -471,7 +492,7 @@ semanticvectors/vectorhelpers.py:def mostcommonheadwords(cheat=True) -> set:
 semanticvectors/vectorhelpers.py:def mostcommonwordsviaheadwords() -> set:
 semanticvectors/vectorhelpers.py:def removestopwords(sentencestring, stopwords):
 semanticvectors/vectorhelpers.py:def relativehomonymnweight(worda, wordb, morphdict) -> float:
-semanticvectors/vectorhelpers.py:def readgitdata():
+semanticvectors/vectorhelpers.py:def reducetotwodimensions(model) -> dict:
 semanticvectors/vectorroutehelperfunctions.py:def findabsolutevectorsbysentence(searchobject):
 semanticvectors/vectorroutehelperfunctions.py:def findabsolutevectorsfromhits(searchobject, hitdict, workssearched):
 semanticvectors/vectorroutehelperfunctions.py:def generateabsolutevectorsoutput(listsofwords: list, workssearched: list, searchobject, vtype: str):

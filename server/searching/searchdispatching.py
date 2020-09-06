@@ -63,6 +63,9 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 
 	activepoll.statusis('Loading the the dispatcher...')
 
+	# of long-term interest is the new shared_memory module; using it will break the 3.6-3.7 installations
+	# https://docs.python.org/3.8/library/multiprocessing.shared_memory.html#module-multiprocessing.shared_memory
+
 	manager = Manager()
 	founddblineobjects = manager.list()
 
