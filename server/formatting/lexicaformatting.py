@@ -210,6 +210,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	"""
 
 	morphabletemplate = """
+	<--- ths table brought to you by formatparsinginformation() -->
 	<table class="morphtable">
 		<tbody>
 			{trs}
@@ -264,16 +265,26 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 		if len(subentries) == 1:
 			analysischunks = firstsubentry.getanalysislist()[0].split(' ')
 			analysischunks = ['\n<td class="morphcell">{a}</td>'.format(a=a) for a in analysischunks]
-			tr = '<tr><td class="morphcell invisible">[{ct}]</td>{tds}\n</tr>'.format(ct=chr(subcountchar), tds=''.join(analysischunks))
+			tr = '<tr><td class="morphcell invisible">[{ct}]</td>{tds}\n</tr>'.format(ct=chr(subcountchar), tds=str().join(analysischunks))
 			outputlist.append(morphabletemplate.format(trs=tr))
 		else:
 			rows = list()
+			analyses = list()
 			for e in range(len(subentries)):
-				analysischunks = subentries[e].getanalysislist()[0].split(' ')
-				analysischunks = ['<td class="morphcell">{a}</td>'.format(a=a) for a in analysischunks]
-				analysischunks = ['<td class="morphcell labelcell">[{ct}]</td>'.format(ct=chr(e + subcountchar))] + analysischunks
-				tr = '<tr>{tds}</tr>'.format(tds=''.join(analysischunks))
-				rows.append(tr)
+				# unfortunately you can get dupes in here...
+				anal = subentries[e].getanalysislist()[0].split(' ')  # e.g. ['masc', 'acc', 'sg']
+				formatted = ['<td class="morphcell">{a}</td>'.format(a=a) for a in anal]
+				analyses.append(str().join(formatted))
+				analyses = list(set(analyses))
+			analysiscount = len(analyses)
+			if analysiscount > 1:
+				for a in range(analysiscount):
+					label = ['<td class="morphcell labelcell">[{ct}]</td>'.format(ct=chr(a + subcountchar))]
+					analysischunks = label + [analyses[a]]
+					tr = '<tr>{tds}</tr>'.format(tds=str().join(analysischunks))
+					rows.append(tr)
+			elif analysiscount == 1:
+				rows.append('<tr>{tds}</tr>'.format(tds=analyses[0]))
 			outputlist.append(morphabletemplate.format(trs='\n'.join(rows)))
 		distincthtml = '\n'.join(outputlist)
 		morphhtml.append(distincthtml)
