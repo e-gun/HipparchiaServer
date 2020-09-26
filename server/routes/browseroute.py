@@ -65,14 +65,14 @@ def grabtextforbrowsing(method, author, work, location=None):
 		locationval = returnfirstorlastlinenumber(wo.universalid, dbcursor)
 		return grabtextforbrowsing('linenumber', author, work, str(locationval))
 
-	if hipparchia.config['ONTHEFLYLEXICALFIXES']:
-		perseusauthorneedsfixing = ['gr0006']
-		if method == 'perseus' and author in perseusauthorneedsfixing:
-			remapper = lexicaldbquickfixes([author+'w'+work])
-			try:
-				wo = workdict[remapper[author]]
-			except KeyError:
-				consolewarning('grabtextforbrowsing() failed to remap {a} + {w}'.format(a=author, w=work))
+	# if hipparchia.config['ONTHEFLYLEXICALFIXES']:
+	# 	perseusauthorneedsfixing = ['gr0006']
+	# 	if method == 'perseus' and author in perseusauthorneedsfixing:
+	# 		remapper = lexicaldbquickfixes([author+'w'+work])
+	# 		try:
+	# 			wo = workdict[remapper[author]]
+	# 		except KeyError:
+	# 			consolewarning('grabtextforbrowsing() failed to remap {a} + {w}'.format(a=author, w=work))
 
 	if ao and not wo:
 		try:
