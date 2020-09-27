@@ -10,7 +10,7 @@ import re
 
 from flask import session
 
-from server.formatting.miscformatting import consolewarning
+from server.formatting.miscformatting import consolewarning, htmlcommentdecorator
 
 
 def findmygreektenses(mood: str, voice: str) -> dict:
@@ -359,6 +359,7 @@ def verbtabletemplate(mood: str, voice: str, dialect='attic', duals=True, lang='
 	return thetablehtml
 
 
+@htmlcommentdecorator
 def filloutmorphtabletemplate(lookupdict: dict, wordcountdict: dict, template: str) -> str:
 	"""
 

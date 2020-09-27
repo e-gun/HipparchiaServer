@@ -26,7 +26,7 @@ def offerauthorhints():
 	:return:
 	"""
 
-	query = request.args.get('term', '')
+	query = request.args.get('term', str())
 	# need [Demetrius]
 	strippedquery = depunct(query, '[')
 
@@ -53,7 +53,7 @@ def augenrelist():
 	:return:
 	"""
 
-	query = request.args.get('term', '')
+	query = request.args.get('term', str())
 	strippedquery = depunct(query)
 
 	activegenres = returnactivelist(authorgenresdict)
@@ -79,7 +79,7 @@ def wkgenrelist():
 	:return:
 	"""
 
-	query = request.args.get('term', '')
+	query = request.args.get('term', str())
 	strippedquery = depunct(query)
 
 	activegenres = returnactivelist(workgenresdict)
@@ -106,7 +106,7 @@ def offeraulocationhints():
 	:return:
 	"""
 
-	query = request.args.get('term', '')
+	query = request.args.get('term', str())
 	strippedquery = depunct(query)
 
 	activelocations = returnactivelist(authorlocationdict)
@@ -135,7 +135,7 @@ def offerprovenancehints():
 	:return:
 	"""
 
-	query = request.args.get('term', '')
+	query = request.args.get('term', str())
 	strippedquery = depunct(query)
 
 	activelocations = returnactivelist(workprovenancedict)
@@ -165,7 +165,7 @@ def offerlemmatahints():
 	:return:
 	"""
 
-	term = request.args.get('term', '')
+	term = request.args.get('term', str())
 
 	hintlist = list()
 
@@ -189,9 +189,9 @@ def offerlemmatahints():
 
 		if qlen > 2:
 			# always true, but what if you changed 'len(term) > 2'?
-			q = a+b+query[2:]
+			q = a + b + query[2:]
 		else:
-			q = a+b
+			q = a + b
 		#hintlist = [{'value': w} for w in wordlist if q == stripaccents(w.lower()[0:qlen])]
 		hintlist = [{'value': w} for w in wordlist if q == stripaccents(w[0:qlen])]
 

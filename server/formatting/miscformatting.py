@@ -12,6 +12,30 @@ import time
 from click import secho
 
 
+def htmlcommentdecorator(function):
+	"""
+
+	insert html comments to flag which function generated which segment of the output
+
+	:param function:
+	:return:
+	"""
+
+	newresulttemplate = """
+	<!-- {f}() material begins -->
+	{r}
+	<!-- {f}() material ends -->
+	"""
+
+	def wrapper(*args, **kwargs):
+		result = function(*args, **kwargs)
+		if isinstance(result, str):
+			result = newresulttemplate.format(f=function.__name__, r=result)
+		return result
+
+	return wrapper
+
+
 def timedecorator(function):
 	"""
 

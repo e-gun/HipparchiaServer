@@ -13,13 +13,11 @@ from server.authentication.authenticationwrapper import requireauthentication
 from server.browsing.browserfunctions import browserfindlinenumberfromcitation, buildbrowseroutputobject
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dblinefunctions import returnfirstorlastlinenumber
-from server.formatting.lexicaformatting import lexicaldbquickfixes
 from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.browserobjects import BrowserOutputObject
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.parsingobjects import BrowserInputParsingObject
 from server.listsandsession.checksession import probeforsessionvariables
-from server.startup import workdict
 
 
 @hipparchia.route('/browse/<method>/<author>/<work>')

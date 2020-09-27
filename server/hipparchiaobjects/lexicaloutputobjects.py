@@ -15,6 +15,7 @@ from server.dbsupport.lexicaldbfunctions import findparserxref, grablemmataobjec
 	probedictionary, querytotalwordcounts
 from server.formatting.lexicaformatting import formatdictionarysummary, formatparsinginformation, formatprevalencedata, \
 	getobservedwordprevalencedata
+from server.formatting.miscformatting import htmlcommentdecorator
 from server.formatting.wordformatting import attemptsigmadifferentiation, setdictionarylanguage
 from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
 
@@ -166,6 +167,7 @@ class lexicalOutputObject(object):
 				distributions = '<p class="wordcounts">Prevalence (all forms):\n{pr}\n</p>'.format(pr=prev)
 		return distributions
 
+	@htmlcommentdecorator
 	def _buildprincipleparts(self) -> str:
 		morphabletemplate = """
 		<formsummary parserxref="{px}" lexicalid="{lid}" headword="{w}" lang="{lg}">known forms in use: {f}</formsummary>
@@ -203,6 +205,7 @@ class lexicalOutputObject(object):
 
 		return pppts
 
+	@htmlcommentdecorator
 	def _buildentrysummary(self) -> str:
 		blankcursor = None
 		entryword = self.thiswordobject
@@ -230,6 +233,7 @@ class lexicalOutputObject(object):
 			summary = str()
 		return summary
 
+	@htmlcommentdecorator
 	def _buildauthorentrysummary(self) -> List[str]:
 		# wo.insertclickablelookups() needs to run before the regex here will work
 		wo = self.thiswordobject

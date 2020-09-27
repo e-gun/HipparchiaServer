@@ -7,16 +7,18 @@
 """
 
 import re
-from typing import Dict, List
+from typing import List
 
 from flask import session
 
 from server import hipparchia
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable
+from server.formatting.miscformatting import htmlcommentdecorator
 from server.hipparchiaobjects.dbtextobjects import MorphPossibilityObject
 from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
 
 
+@htmlcommentdecorator
 def formatdictionarysummary(wordentryobject) -> str:
 	"""
 
@@ -76,6 +78,7 @@ def formatdictionarysummary(wordentryobject) -> str:
 	return summarystring
 
 
+@htmlcommentdecorator
 def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) -> str:
 	"""
 	sample output:
@@ -98,7 +101,6 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 	"""
 
 	morphabletemplate = """
-	<--- ths table brought to you by formatparsinginformation() -->
 	<table class="morphtable">
 		<tbody>
 			{trs}
@@ -209,6 +211,7 @@ def getobservedwordprevalencedata(dictionaryword) -> str:
 		return None
 
 
+@htmlcommentdecorator
 def formatprevalencedata(wordcountobject) -> str:
 	"""
 
