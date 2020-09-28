@@ -8,6 +8,8 @@
 
 import re
 import time
+from inspect import getsourcefile
+from os import path
 
 from click import secho
 
@@ -22,15 +24,16 @@ def htmlcommentdecorator(function):
 	"""
 
 	newresulttemplate = """
-	<!-- {f}() material begins -->
+	<!-- {s} {f}() output begins -->
 	{r}
-	<!-- {f}() material ends -->
+	<!-- {s} {f}() output ends -->
 	"""
 
 	def wrapper(*args, **kwargs):
 		result = function(*args, **kwargs)
 		if isinstance(result, str):
-			result = newresulttemplate.format(f=function.__name__, r=result)
+			s = path.basename(getsourcefile(function))
+			result = newresulttemplate.format(s=s, f=function.__name__, r=result)
 		return result
 
 	return wrapper

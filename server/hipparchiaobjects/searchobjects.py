@@ -11,6 +11,7 @@ import time
 
 from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
+from server.formatting.miscformatting import htmlcommentdecorator
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.vectorobjects import VectorValues
 from server.listsandsession.checksession import justlatin
@@ -293,6 +294,7 @@ class SearchOutputObject(object):
 		r = ' and '.join(self.reasons)
 		self.htmlsearch = '<span class="emph">nothing</span> (search not executed because {r})'.format(r=r)
 
+	@htmlcommentdecorator
 	def generatesummary(self) -> str:
 		"""
 

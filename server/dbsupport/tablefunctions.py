@@ -31,7 +31,7 @@ def assignuniquename(maxlength=None) -> str:
 
 	n = str(uuid4())
 
-	n = re.sub(r'-', '', n)
+	n = re.sub(r'-', str(), n)
 
 	if maxlength:
 		n = n[:maxlength]

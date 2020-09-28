@@ -179,7 +179,7 @@ def checkfordocumentmetadata(workline: dbWorkLine, workobject: dbOpus) -> str:
 
 	metadata.append('<tr><td>&nbsp;</td></tr>')
 
-	metadatahtml = ''.join(metadata)
+	metadatahtml = str().join(metadata)
 
 	return metadatahtml
 

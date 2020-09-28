@@ -175,7 +175,7 @@ def addobservedtags(word: str, lastword: str, hyphenated: str) -> str:
 	neveropens = re.compile(r'^[‵„“«†]')
 
 	if re.search(r'\s$', word):
-		word = re.sub(r'\s$', '', word)
+		word = re.sub(r'\s$', str(), word)
 		sp = ' '
 	else:
 		sp = str()
@@ -201,9 +201,9 @@ def addobservedtags(word: str, lastword: str, hyphenated: str) -> str:
 	elif re.search(neveropens, word):
 		observed = '{wa}<observed id="{wb}">{wb}</observed>{sp}'.format(wa=word[0], wb=word[1:], sp=sp)
 	elif re.search(r'^&nbsp;', word):
-		wb = re.sub(r'&nbsp;', '', word)
+		wb = re.sub(r'&nbsp;', str(), word)
 		# if wb='*', you have a problem...
-		wa = re.sub(re.escape(wb), '', word)
+		wa = re.sub(re.escape(wb), str(), word)
 		observed = '{wa}<observed id="{wb}">{wb}</observed>{sp}'.format(wa=wa, wb=wb, sp=sp)
 	else:
 		observed = '<observed id="{w}">{w}</observed>{sp}'.format(w=word, sp=sp)

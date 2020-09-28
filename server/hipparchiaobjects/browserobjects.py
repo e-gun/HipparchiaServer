@@ -11,6 +11,7 @@ from flask import session
 from server import hipparchia
 from server.formatting.bibliographicformatting import avoidlonglines
 from server.formatting.bracketformatting import gtltsubstitutes
+from server.formatting.miscformatting import htmlcommentdecorator
 from server.formatting.wordformatting import avoidsmallvariants
 
 
@@ -101,6 +102,7 @@ class BrowserPassageObject(object):
 		self.header = str()
 		self.authorandwork = str()
 
+	@htmlcommentdecorator
 	def generatepassageheader(self):
 		template = '<span class="currentlyviewingauthor">{n}</span>, <span class="currentlyviewingwork">{t}</span><br />'
 		self.authorandwork = template.format(n=self.name, t=self.title)
@@ -145,6 +147,7 @@ class BrowserPassageObject(object):
 			"""
 		return linetemplate
 
+	@htmlcommentdecorator
 	def generatepassagetable(self):
 		outputtable = list()
 
@@ -152,6 +155,7 @@ class BrowserPassageObject(object):
 			flag = self.uid
 		else:
 			flag = '_'
+
 		flagauthorforparserlookup = '<div id="browsertableuid" uid="{i}"></div>'.format(i=flag)
 		outputtable.append(flagauthorforparserlookup)
 
