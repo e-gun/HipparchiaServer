@@ -188,12 +188,12 @@ def highlightsearchterm(lineobject: dbWorkLine, regexequivalent, spanname) -> st
 	finds.reverse()
 
 	if not finds:
+		linetemplate = '{ln}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;{hs}<span class="{sn}">{fg}</span>{he}&nbsp;)'
 		# the find was almost certainly a hyphenated last word: 'pro-' instead of 'profuit'
 		hyph = lineobject.hyphenated
 		find = re.search(regexequivalent, hyph)
 		try:
-			newline = '{ln}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;match:&nbsp;{hs}<span class="{sn}">{fg}</span>{he}&nbsp;)'.format(
-				ln=line, hs=hyph[0:find.start()], sn=spanname, fg=find.group(), he=hyph[find.end():])
+			newline = linetemplate.format(ln=line, hs=hyph[0:find.start()], sn=spanname, fg=find.group(), he=hyph[find.end():])
 			return newline
 		except:
 			return line
@@ -253,6 +253,7 @@ def htmlifysearchfinds(listofsearchresultobjects: ResultList, searchobject: Sear
 	return html
 
 
+@htmlcommentdecorator
 def nocontexthtmlifysearchfinds(listofsearchresultobjects: ResultList) -> str:
 	"""
 

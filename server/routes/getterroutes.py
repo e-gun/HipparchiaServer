@@ -126,7 +126,7 @@ def findtheworksof(authoruid):
 
 	strippedquery = depunct(authoruid)
 
-	hint = list()
+	hintlist = list()
 
 	try:
 		myauthor = authordict[strippedquery]
@@ -136,15 +136,28 @@ def findtheworksof(authoruid):
 	if myauthor:
 		worklist = myauthor.listofworks
 		for work in worklist:
-			hint.append({'value': '{t} ({id})'.format(t=work.title, id=work.universalid[-4:])})
-		if not hint:
-			hint.append({'value': 'somehow failed to find any works: try picking the author again'})
+			hintlist.append('{t} ({id})'.format(t=work.title, id=work.universalid[-4:]))
+		if not hintlist:
+			hintlist.append('somehow failed to find any works: try picking the author again')
 	else:
-		hint.append({'value': 'author was not properly loaded: try again'})
+		hintlist.append('author was not properly loaded: try again')
 
-	hint = json.dumps(hint)
+	if hipparchia.config['SORTWORKSBYNUMBER']:
+		try:
+			sorter = {re.search(r'\(.*?\)$', h).group(0): h for h in hintlist}
+		except IndexError:
+			sorter = False
+		if sorter:
+			hintlist = [sorter[x] for x in sorted(sorter.keys())]
+	else:
+		# we are sorting by name...
+		hintlist = sorted(hintlist)
 
-	return hint
+	hintlist = [{'value': h} for h in hintlist]
+
+	hintlist = json.dumps(hintlist)
+
+	return hintlist
 
 
 @hipparchia.route('/getstructure/<author>/<work>')

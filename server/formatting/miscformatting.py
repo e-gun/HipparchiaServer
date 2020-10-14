@@ -9,7 +9,7 @@
 import re
 import time
 from inspect import getsourcefile
-from os import path
+from pathlib import Path
 
 from click import secho
 
@@ -22,7 +22,6 @@ def htmlcommentdecorator(function):
 	:param function:
 	:return:
 	"""
-
 	newresulttemplate = """
 	<!-- {s} {f}() output begins -->
 	{r}
@@ -32,8 +31,8 @@ def htmlcommentdecorator(function):
 	def wrapper(*args, **kwargs):
 		result = function(*args, **kwargs)
 		if isinstance(result, str):
-			s = path.basename(getsourcefile(function))
-			result = newresulttemplate.format(s=s, f=function.__name__, r=result)
+			s = Path(getsourcefile(function))
+			result = newresulttemplate.format(s=s.name, f=function.__name__, r=result)
 		return result
 
 	return wrapper

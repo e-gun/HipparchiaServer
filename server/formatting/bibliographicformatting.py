@@ -13,11 +13,14 @@ from flask import session
 from server.hipparchiaobjects.dbtextobjects import dbAuthor, dbOpus
 
 
-def bcedating(s=session) -> tuple:
+def bcedating(s=None) -> tuple:
 	"""
 	return the English equivalents for session['earliestdate'] and session['latestdate']
 	:return:
 	"""
+
+	if not s:
+		s = session
 
 	dmax = s['latestdate']
 	dmin = s['earliestdate']
@@ -57,6 +60,8 @@ def formatauthinfo(authorobject: dbAuthor) -> str:
 	else:
 		gn = '<!-- no author genre available -->'
 
+	fl = '<!-- no floruit available -->'
+
 	if authorobject.converted_date:
 		if float(authorobject.converted_date) == 2000:
 			fl = '"Varia" are not assigned to a date'
@@ -68,8 +73,6 @@ def formatauthinfo(authorobject: dbAuthor) -> str:
 		elif float(authorobject.converted_date) < 0:
 			fl = 'assigned to approx date: {fl} B.C.E.'.format(fl=str(authorobject.converted_date)[1:])
 			fl += ' (derived from "{rd}")'.format(rd=authorobject.recorded_date)
-	else:
-		fl = '<!-- no floruit available -->'
 
 	authinfo = template.format(n=n, id=authorobject.universalid[2:], gn=gn, fl=fl)
 
@@ -160,11 +163,11 @@ def formatpublicationinfo(pubinfo: str) -> str:
 	maxlinelen = 90
 
 	tags = [
-		{'volumename': ['', '. ']},
-		{'press': ['', ', ']},
-		{'city': ['', ', ']},
-		{'year': ['', '. ']},
-		{'series': ['', '']},
+		{'volumename': [str(), '. ']},
+		{'press': [str(), ', ']},
+		{'city': [str(), ', ']},
+		{'year': [str(), '. ']},
+		{'series': [str(), str()]},
 		{'editor': [' (', ')']},
 		# {'pages':[' (',')']}
 	]
@@ -177,14 +180,14 @@ def formatpublicationinfo(pubinfo: str) -> str:
 		seek = re.compile('<' + tag + '>(.*?)</' + tag + '>')
 		if re.search(seek, pubinfo):
 			found = re.search(seek, pubinfo)
-			data = re.sub(r'\s+$', '', found.group(1))
-			foundinfo = avoidlonglines(data, maxlinelen, '<br />', [])
+			data = re.sub(r'\s+$', str(), found.group(1))
+			foundinfo = avoidlonglines(data, maxlinelen, '<br />', list())
 			publicationhtml += '<span class="pub{t}">{va}{fi}{vb}</span>'.format(t=tag, va=val[0], fi=foundinfo, vb=val[1])
 
 	return publicationhtml
 
 
-def avoidlonglines(string: str, maxlen: int, splitval: str, stringlist=list()) -> str:
+def avoidlonglines(string: str, maxlen: int, splitval: str, stringlist=None) -> str:
 	"""
 
 	Authors like Livy can swallow the browser window by sending 351 characters worth of editors to one of the lines
@@ -199,6 +202,9 @@ def avoidlonglines(string: str, maxlen: int, splitval: str, stringlist=list()) -
 	:param stringlist:
 	:return:
 	"""
+
+	if not stringlist:
+		stringlist = list()
 
 	breakcomeswithinamarkupseries = re.compile(r'^\s[^\s]+>')
 

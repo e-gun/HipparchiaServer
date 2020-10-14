@@ -12,6 +12,7 @@ from typing import List
 
 from server import hipparchia
 from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
+from server.formatting.miscformatting import htmlcommentdecorator
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.searchobjects import SearchOutputObject, SearchObject
 from server.hipparchiaobjects.vectorobjects import VectorValues
@@ -19,6 +20,7 @@ from server.semanticvectors.vectorhelpers import vectordefaults, vectorranges, v
 from server.startup import authordict, workdict
 
 
+@htmlcommentdecorator
 def formatlsimatches(listofmatches: List[dict]) -> str:
 	"""
 
@@ -61,6 +63,7 @@ def formatlsimatches(listofmatches: List[dict]) -> str:
 	return thehtml
 
 
+@htmlcommentdecorator
 def formatnnmatches(listofneighbors: List[tuple], vectorvalues: VectorValues):
 	"""
 
@@ -130,6 +133,7 @@ def formatnnmatches(listofneighbors: List[tuple], vectorvalues: VectorValues):
 	return thehtml
 
 
+@htmlcommentdecorator
 def formatnnsimilarity(termone: str, termtwo: str, similarityscore: float) -> str:
 	"""
 
@@ -150,6 +154,7 @@ def formatnnsimilarity(termone: str, termtwo: str, similarityscore: float) -> st
 	return similarity
 
 
+@htmlcommentdecorator
 def skformatmostimilar(similaritiesdict: dict) -> str:
 	"""
 
@@ -216,6 +221,7 @@ def locusformat(dblineobject: dbWorkLine) -> str:
 	return citationtext
 
 
+@htmlcommentdecorator
 def vectorhtmlforfrontpage() -> str:
 	"""
 
@@ -305,6 +311,7 @@ def vectorhtmlforfrontpage() -> str:
 	return vectorhtml
 
 
+@htmlcommentdecorator
 def vectorhtmlforoptionsbar() -> str:
 	"""
 
@@ -451,6 +458,7 @@ def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: 
 	return jsonoutput
 
 
+@htmlcommentdecorator
 def analogiesgenerateoutput(searchobject, findstuples: list) -> str:
 	"""
 
