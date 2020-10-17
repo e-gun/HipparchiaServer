@@ -43,7 +43,7 @@ class SharedMemoryProgressPoll(object):
 		self.statusmessage = Array('c', b'')
 		self.hitcount = MPCounter()
 		self.hitcount.increment(-1)
-		self.notes = ''
+		self.notes = str()
 		self.polltype = 'SharedMemoryProgressPoll'
 		# print('SharedMemoryProgressPoll()', self.searchid)
 
@@ -84,12 +84,12 @@ class SharedMemoryProgressPoll(object):
 		self.hitcount.increment(hits)
 
 	def activate(self):
-		self.active = True
+		self.active = Value('b', True)
 
 	def deactivate(self):
-		self.active = False
+		self.active = Value('b', False)
 
-	def getactivity(self) -> bool:
+	def getactivity(self):
 		return self.active
 
 	def setnotes(self, message):
@@ -104,7 +104,7 @@ class SharedMemoryProgressPoll(object):
 		elif re.search('unavailable', self.notes) is None:
 			m = self.notes
 		else:
-			m = ''
+			m = str()
 
 		return message.format(msg=m)
 

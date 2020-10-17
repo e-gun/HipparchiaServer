@@ -116,7 +116,6 @@ if __name__ == '__main__':
 	# if you are working on Hipparchia's code, you might be interested in this; otherwise there
 	# are only bad reasons to set this to 'True'
 
-	hipparchia.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax')
 	hipparchia.run(threaded=True, debug=False, host=host, port=port)
 
 

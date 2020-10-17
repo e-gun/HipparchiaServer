@@ -348,7 +348,7 @@ def parsejscookie(cookiestring: str) -> dict:
 		cookiestring = cookiestring[1:-1]
 	except:
 		# must have tried to load a cookie that was not really there
-		cookiestring = ''
+		cookiestring = str()
 	
 	selectioncategories = ['auselections', 'wkselections', 'agnselections', 'wkgnselections', 'psgselections',
 						   'auexclusions', 'wkexclusions', 'agnexclusions', 'wkgnexclusions', 'psgexclusions',
@@ -367,19 +367,19 @@ def parsejscookie(cookiestring: str) -> dict:
 	
 	for sel in selectiondictionary:
 		selectiondictionary[sel] = re.sub(r'%20', ' ', selectiondictionary[sel])
-		selectiondictionary[sel] = re.sub(r'%22', '', selectiondictionary[sel])
+		selectiondictionary[sel] = re.sub(r'%22', str(), selectiondictionary[sel])
 		selectiondictionary[sel] = selectiondictionary[sel].strip()
 		selectiondictionary[sel] = selectiondictionary[sel].split('%2C')
 	
 	nonselections = cookiestring
 	for sel in selectioncategories:
 		try:
-			nonselections = re.sub(re.escape(re.search(r'%22' + sel + r'%22:\[(.*?)\]', nonselections).group(0)), '', nonselections)
+			nonselections = re.sub(re.escape(re.search(r'%22' + sel + r'%22:\[(.*?)\]', nonselections).group(0)), str(), nonselections)
 		except AttributeError:
 			# AttributeError: 'NoneType' object has no attribute 'group'
 			nonselections = str()
 			
-	nonselections = re.sub(r'%22', '', nonselections)
+	nonselections = re.sub(r'%22', str(), nonselections)
 	allotheroptions = nonselections.split('%2C')
 	allotheroptions[:] = [x for x in allotheroptions if x != '']
 	
@@ -577,7 +577,7 @@ def findactivebrackethighlighting(thesession=None) -> List[str]:
 	return brackets
 
 
-def selectionisactive(selected):
+def selectionisactive(selected) -> str:
 	"""
 
 	if you disable a corpus with an something still in the selction box, it remains possible to request that author, work, etc.
@@ -590,13 +590,14 @@ def selectionisactive(selected):
 	"""
 
 	active = returnactivedbs()
+
 	try:
 		prefix = selected[0:2]
 	except:
-		prefix = ''
+		prefix = str()
 
 	if prefix not in active:
-		selected = ''
+		selected = str()
 
 	return selected
 

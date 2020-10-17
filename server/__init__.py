@@ -54,3 +54,7 @@ from server.routes import browseroute, frontpage, getterroutes, hintroutes, info
 	selectionroutes, textandindexroutes, websocketroutes, resetroutes, cssroutes, vectorroutes, authenticationroutes
 if hipparchia.config['AUTOVECTORIZE']:
 	from server.threading import vectordbautopilot
+
+# put this here and not in 'run.py': otherwise gunicorn will not see it
+hipparchia.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax')
+
