@@ -14,7 +14,7 @@ $('#toggleloadslots').click( function(){ $('#loadslots').toggle()});
 
 function javascriptsessionintocookie(cookienumberstr){
     $.getJSON('/getsessionvariables', function (data) {
-		    Cookies.set('session'+cookienumberstr, data, { expires: 1000 });
+    		Cookies.set('session'+cookienumberstr, data, { sameSite: 'strict' });
 		});
 }
 

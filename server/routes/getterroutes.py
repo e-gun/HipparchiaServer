@@ -121,6 +121,14 @@ def cookieintosession(cookienum):
 def findtheworksof(authoruid):
 	"""
 	fill the hint box with constantly updated values
+
+	for "/getworksof/gr0026" the return list looks like:
+
+		[{"value": "In Timarchum (w001)"}, {"value": "De falsa legatione (w002)"}, {"value": "In Ctesiphontem (w003)"},
+		{"value": "Epistulae [Sp.] (w004)"}]
+
+	it will be sorted by work number unless told otherwise
+
 	:return:
 	"""
 
