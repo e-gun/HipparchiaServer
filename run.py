@@ -117,5 +117,3 @@ if __name__ == '__main__':
 	# are only bad reasons to set this to 'True'
 
 	hipparchia.run(threaded=True, debug=False, host=host, port=port)
-
-
