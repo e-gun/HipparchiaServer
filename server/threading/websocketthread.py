@@ -31,6 +31,9 @@ async def wscheckpoll(websocket, path):
 		progress {'active': True, 'total': -1, 'remaining': -1, 'hits': 1, 'message': 'Executing a phrase search.', 'elapsed': 2.0, 'extrainfo': '<span class="small"></span>'}
 		...
 
+	something shifted behind the scenes in pythonland...
+		progress {'active': <Synchronized wrapper for c_byte(1)>, 'total': 20, 'remaining': 20, 'hits': 48, 'message': 'Putting the results in context', 'elapsed': 14.0, 'extrainfo': '<span class="small"></span>'}
+
 	:param websocket:
 	:param path:
 	:return:
@@ -43,13 +46,13 @@ async def wscheckpoll(websocket, path):
 		return
 
 	# comes to us with quotes: "eb91fb11" --> eb91fb11
-	pollid = re.sub(r'"', '', pollid)
+	pollid = re.sub(r'"', str(), pollid)
 	pollid = validatepollid(pollid)
 
 	while True:
 		progress = dict()
 		try:
-			progress['active'] = progresspolldict[pollid].getactivity()
+			active = progresspolldict[pollid].getactivity()
 			progress['total'] = progresspolldict[pollid].worktotal()
 			progress['remaining'] = progresspolldict[pollid].getremaining()
 			progress['hits'] = progresspolldict[pollid].gethits()
@@ -59,7 +62,7 @@ async def wscheckpoll(websocket, path):
 				if progresspolldict[pollid].getnotes():
 					progress['extrainfo'] = progresspolldict[pollid].getnotes()
 			else:
-				progress['extrainfo'] = ''
+				progress['extrainfo'] = str()
 		except KeyError:
 			# the poll is deleted when the query ends; you will always end up here
 			progress['active'] = 'inactive'
@@ -72,17 +75,23 @@ async def wscheckpoll(websocket, path):
 
 		await asyncio.sleep(.4)
 
-		# print('progress', progress)
+		try:
+			# progress['active'] <Synchronized wrapper for c_byte(1)>
+			# <class 'multiprocessing.sharedctypes.Synchronized'>
+			progress['active'] = active.value
+		except AttributeError:
+			# AttributeError: 'str' object has no attribute 'value'
+			progress['active'] = active
 
 		try:
 			await websocket.send(json.dumps(progress))
 		except websockets.exceptions.ConnectionClosed:
 			# websockets.exceptions.ConnectionClosed because you reloaded the page in the middle of a search
 			pass
-		except TypeError:
+		except TypeError as e:
 			# Object of type SynchronizedString is not JSON serializable
 			# macOS and indexmaker combo is a problem; macOS is the real problem?
-			consolewarning('websocket non-fatal error: "SynchronizedString is not JSON serializable"', color='yellow', isbold=False)
+			consolewarning('websocket non-fatal error: "{e}"'.format(e=e), color='yellow', isbold=False)
 			pass
 
 	return
