@@ -128,5 +128,3 @@ class LogEntropyVectorCorpus(object):
 		self.lsicorpus = logentropycorpus
 		self.bagsofwords = bagsofwords
 		self.sentences = sentences
-
-

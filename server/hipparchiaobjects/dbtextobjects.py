@@ -31,11 +31,25 @@ class dbAuthor(object):
 	    location character varying(128) COLLATE pg_catalog."default"
 	)
 
+	slotting is supposed to be about speed of creation and access + RAM:
+
+		https://stackoverflow.com/questions/472000/usage-of-slots
+		https://towardsdatascience.com/understand-slots-in-python-e3081ef5196d
+
+	slotted vs unslotted
+	timeit.timeit(lambda: dbAuthor('self', 'universalid', 'language', 'idxname', 'akaname', 'shortname', 'cleanname', 'genres', 'recorded_date', ''), number=10000)
+	0.009311130999776651
+
+	timeit.timeit(lambda: dbAuthor('self', 'universalid', 'language', 'idxname', 'akaname', 'shortname', 'cleanname', 'genres', 'recorded_date', ''), number=10000)
+	0.0074952109998775995
+
+	vectors and dbLemmaObject are probably where you get the scale that would yield a real difference
+
 	"""
 
-	__slots__ = 'universalid', 'language', 'idxname', 'akaname', 'shortname', 'cleanname', \
-	            'genres', 'recorded_date', 'converted_date', 'location', 'authornumber', \
-	            'listofworks', 'name', 'id'
+	__slots__ = ('universalid', 'language', 'idxname', 'akaname', 'shortname', 'cleanname',
+	            'genres', 'recorded_date', 'converted_date', 'location', 'authornumber',
+	            'listofworks', 'name', 'id')
 
 	def __init__(self, universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date, converted_date, location):
 
@@ -122,10 +136,10 @@ class dbOpus(object):
 
 	"""
 
-	__slots__ = 'universalid', 'title', 'language', 'publication_info', 'levellabels_00', 'levellabels_01', \
-	            'levellabels_02', 'levellabels_03', 'levellabels_04', 'levellabels_05', 'workgenre', \
-	            'transmission', 'worktype', 'provenance', 'recorded_date', 'converted_date', 'wordcount', \
-	            'authentic', 'worknumber', 'authorid', 'starts', 'ends', 'name', 'length', 'structure', 'availablelevels'
+	__slots__ = ('universalid', 'title', 'language', 'publication_info', 'levellabels_00', 'levellabels_01',
+	            'levellabels_02', 'levellabels_03', 'levellabels_04', 'levellabels_05', 'workgenre',
+	            'transmission', 'worktype', 'provenance', 'recorded_date', 'converted_date', 'wordcount',
+	            'authentic', 'worknumber', 'authorid', 'starts', 'ends', 'name', 'length', 'structure', 'availablelevels')
 
 	def __init__(self, universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02,
 	             levellabels_03, levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance,
@@ -266,7 +280,7 @@ class dbMorphologyObject(object):
 
 	"""
 
-	__slots__ = 'observed', 'xrefs', 'prefixrefs', 'possibleforms', 'prefixcount', 'xrefcount', 'rewritten'
+	__slots__ = ('observed', 'xrefs', 'prefixrefs', 'possibleforms', 'prefixcount', 'xrefcount', 'rewritten')
 
 	def __init__(self, observed, xrefs, prefixrefs, possibleforms):
 		self.observed = observed
@@ -313,7 +327,7 @@ class dbLemmaObject(object):
 
 	"""
 
-	__slots__ = 'dictionaryentry', 'xref', 'formlist'
+	__slots__ = ('dictionaryentry', 'xref', 'formlist')
 
 	def __init__(self, dictionaryentry, xref, derivativeforms):
 		self.dictionaryentry = dictionaryentry

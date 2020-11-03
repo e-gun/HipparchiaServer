@@ -42,6 +42,9 @@ class dbWorkLine(object):
 
 	"""
 
+	__slots__ = ('wkuinversalid', 'db', 'authorid', 'workid', 'universalid', 'index', 'l0', 'l1', 'l2', 'l3', 'l4', 'l5',
+	             'markedup', 'polytonic', 'stripped', 'annotations', 'hyphenated', 'paragraphformatting', 'hasbeencleaned')
+
 	nonliterarycorpora = ['in', 'dp', 'ch']
 	# re.compile pulled out of the inset functions so that you do not compile 100k times when generating a long text
 	insetvaluefinder = re.compile(r'value=".*?" ')
