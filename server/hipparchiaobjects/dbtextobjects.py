@@ -33,6 +33,10 @@ class dbAuthor(object):
 
 	"""
 
+	__slots__ = 'universalid', 'language', 'idxname', 'akaname', 'shortname', 'cleanname', \
+	            'genres', 'recorded_date', 'converted_date', 'location', 'authornumber', \
+	            'listofworks', 'name', 'id'
+
 	def __init__(self, universalid, language, idxname, akaname, shortname, cleanname, genres, recorded_date, converted_date, location):
 
 		self.universalid = universalid
@@ -117,6 +121,11 @@ class dbOpus(object):
 
 
 	"""
+
+	__slots__ = 'universalid', 'title', 'language', 'publication_info', 'levellabels_00', 'levellabels_01', \
+	            'levellabels_02', 'levellabels_03', 'levellabels_04', 'levellabels_05', 'workgenre', \
+	            'transmission', 'worktype', 'provenance', 'recorded_date', 'converted_date', 'wordcount', \
+	            'authentic', 'worknumber', 'authorid', 'starts', 'ends', 'name', 'length', 'structure', 'availablelevels'
 
 	def __init__(self, universalid, title, language, publication_info, levellabels_00, levellabels_01, levellabels_02,
 	             levellabels_03, levellabels_04, levellabels_05, workgenre, transmission, worktype, provenance,
@@ -257,6 +266,8 @@ class dbMorphologyObject(object):
 
 	"""
 
+	__slots__ = 'observed', 'xrefs', 'prefixrefs', 'possibleforms', 'prefixcount', 'xrefcount', 'rewritten'
+
 	def __init__(self, observed, xrefs, prefixrefs, possibleforms):
 		self.observed = observed
 		self.xrefs = xrefs.split(', ')
@@ -264,6 +275,7 @@ class dbMorphologyObject(object):
 		self.possibleforms = possibleforms
 		self.prefixcount = len(self.prefixrefs)
 		self.xrefcount = len(self.xrefs)
+		self.rewritten = str()
 
 	def countpossible(self) -> int:
 		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
@@ -300,6 +312,8 @@ class dbLemmaObject(object):
 	(1 row)
 
 	"""
+
+	__slots__ = 'dictionaryentry', 'xref', 'formlist'
 
 	def __init__(self, dictionaryentry, xref, derivativeforms):
 		self.dictionaryentry = dictionaryentry

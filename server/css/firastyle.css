@@ -941,6 +941,10 @@ body {
 	font-style: italic; font-weight: bold;
 	}
 
+.transtree {
+	color: var(--skyblue);
+}
+
 .translation {
     font-size: 85%;
     font-style: italic;
