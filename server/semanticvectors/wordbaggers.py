@@ -12,7 +12,7 @@ from server.dbsupport.tablefunctions import assignuniquename
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 
 
-def buildwordbags(searchobject, morphdict: dict, sentences: list):
+def buildwordbags(searchobject, morphdict: dict, sentences: list) -> deque:
 	"""
 
 	return the bags after picking which bagging method to use
@@ -37,7 +37,7 @@ def buildwordbags(searchobject, morphdict: dict, sentences: list):
 	return bagsofwords
 
 
-def buildwinnertakesallbagsofwords(morphdict, sentences):
+def buildwinnertakesallbagsofwords(morphdict, sentences) -> deque:
 	"""
 
 	turn a list of sentences into a list of list of headwords
@@ -96,7 +96,7 @@ def buildwinnertakesallbagsofwords(morphdict, sentences):
 
 	bagsofwords = deque()
 	for s in sentences:
-		lemattized = list()
+		lemattized = deque()
 		for word in s:
 			# [('x', 4), ('y', 5), ('z', 1)]
 			try:
@@ -111,7 +111,7 @@ def buildwinnertakesallbagsofwords(morphdict, sentences):
 	return bagsofwords
 
 
-def buidunlemmatizedbagsofwords(morphdict, sentences):
+def buidunlemmatizedbagsofwords(morphdict, sentences) -> deque:
 	"""
 
 	you wasted a bunch of cycles generating the morphdict, now you will fail to use it...
@@ -128,7 +128,7 @@ def buidunlemmatizedbagsofwords(morphdict, sentences):
 	return bagsofwords
 
 
-def buildflatbagsofwords(morphdict, sentences):
+def buildflatbagsofwords(morphdict, sentences) -> deque:
 	"""
 	turn a list of sentences into a list of list of headwords
 
@@ -143,9 +143,9 @@ def buildflatbagsofwords(morphdict, sentences):
 	:return:
 	"""
 
-	bagsofwords = list()
+	bagsofwords = deque()
 	for s in sentences:
-		lemattized = list()
+		lemattized = deque()
 		for word in s:
 			try:
 				# WARNING: we are treating homonymns as if 2+ words were there instead of just one
@@ -160,7 +160,7 @@ def buildflatbagsofwords(morphdict, sentences):
 	return bagsofwords
 
 
-def buildbagsofwordswithalternates(morphdict, sentences):
+def buildbagsofwordswithalternates(morphdict, sentences) -> deque:
 	"""
 
 	buildbagsofwords() in rudimentaryvectormath.py does this but flattens rather than
@@ -177,9 +177,9 @@ def buildbagsofwordswithalternates(morphdict, sentences):
 	:return:
 	"""
 
-	bagsofwords = list()
+	bagsofwords = deque()
 	for s in sentences:
-		lemmatizedsentence = list()
+		lemmatizedsentence = deque()
 		for word in s:
 			try:
 				lemmatizedsentence.append('·'.join(morphdict[word]))
