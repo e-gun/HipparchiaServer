@@ -9,6 +9,11 @@
 import re
 from collections import defaultdict
 
+try:
+	from rich.progress import track
+except ImportError:
+	track = None
+
 from server.formatting.miscformatting import timedecorator
 from server.formatting.wordformatting import stripaccents
 
@@ -22,10 +27,10 @@ for commonly used info
 
 def buildaugenresdict(authordict: dict) -> dict:
 	"""
+
 	build lists of author genres: [ g1, g2, ...]
 
 	do this by corpus and tag it accordingly
-
 
 	:param authordict:
 	:return:
@@ -37,7 +42,7 @@ def buildaugenresdict(authordict: dict) -> dict:
 	dplist = list()
 	chlist = list()
 
-	genresdict = {'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist }
+	genresdict = {'gr': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist, 'ch': chlist}
 
 	for a in authordict:
 		if authordict[a].genres and authordict[a].genres != '':
@@ -161,21 +166,30 @@ def buildkeyedlemmata(listofentries: dict) -> defaultdict:
 	:return:
 	"""
 
-	print('building keyedlemmata', end='')
 	invals = u'jvσς'
 	outvals = u'iuϲϲ'
 
 	keyedlemmata = defaultdict(dict)
 
-	for e in listofentries:
-		if len(e) > 1:
+	if track:
+		iterable = track(listofentries, description='building keyedlemmata', transient=True)
+	else:
+		print('building keyedlemmata', end=str())
+		iterable = listofentries
+
+	for e in iterable:
+		try:
 			a = stripaccents(e[0].translate(str.maketrans(invals, outvals)))
 			b = stripaccents(e[1].translate(str.maketrans(invals, outvals)))
 			try:
 				keyedlemmata[a][b].append(e)
 			except KeyError:
 				keyedlemmata[a][b] = [e]
+		except IndexError:
+			pass
 
 	# print('keyedlemmata[C][a]', keyedlemmata['C']['a'])
+	if track:
+		print('building keyedlemmata', end=str())
 
 	return keyedlemmata
