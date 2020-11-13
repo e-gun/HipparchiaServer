@@ -19,6 +19,10 @@ from server.startup import lemmatadict
 
 
 class MorphAnalysis(object):
+
+	__slots__ = ('analysis', 'analyssiscomponents', 'dialects', 'collapseattic', 'word', 'observed', 'language',
+	             'analysisstring', 'partofspeech', 'nondialectical')
+
 	def __init__(self, word, mylanguage, collapseattic, analysisstring):
 		self.analysis = NotImplemented
 		self.analyssiscomponents = NotImplemented
@@ -121,6 +125,11 @@ class BaseFormMorphology(object):
 		generating a noun/adj table: buildhtmldeclinedtablerows()
 
 	"""
+
+	__slots__ = ('showalldialects', 'collapseattic', 'headword', 'language', 'xref', 'lexicalid', 'lemmata',
+	             'dictionaryentry', 'formlist', 'dbmorphobjects', 'morphpossibilities', 'numberofknownforms',
+	             'analyses', 'missingparts', 'principleparts', 'knowndialects')
+
 	def __init__(self, headword: str, xref: str, language: str, lexicalid: str, thesession: dict, passedlemmataobject=None):
 		# print('bfmo init', headword, xref, language, lexicalid)
 		self.showalldialects = thesession['morphdialects']
