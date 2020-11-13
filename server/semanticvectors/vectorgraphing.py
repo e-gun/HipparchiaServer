@@ -379,9 +379,13 @@ def givetitletograph(topic, searchterm, searchobject):
 			if first[:10] == first[:6]:
 				source = '{au}'.format(au=authordict[first[:6]].shortname)
 			else:
-				source = '{au}, {wk}'.format(au=authordict[first[:6]].shortname, wk=workdict[first[:10]].title)
+				try:
+					source = '{au}, {wk}'.format(au=authordict[first[:6]].shortname, wk=workdict[first[:10]].title)
+				except KeyError:
+					excluded = re.sub(r'(......)x(...)', r'\1w\2', first[:10])
+					source = '{au}, {wk} [w/ exclusions]'.format(au=authordict[first[:6]].shortname, wk=workdict[excluded].title)
 			if len(so.searchlist) == 2:
-				pl = ''
+				pl = str()
 			else:
 				pl = 's'
 			source = '{s} and {n} other location{pl}'.format(s=source, n=len(so.searchlist)-1, pl=pl)
@@ -390,7 +394,11 @@ def givetitletograph(topic, searchterm, searchobject):
 		if searched[:10] == searched[:6]:
 			source = '{au}'.format(au=authordict[searched[:6]].shortname)
 		else:
-			source = '{au}, {wk}'.format(au=authordict[searched[:6]].shortname, wk=workdict[searched[:10]].title)
+			try:
+				source = '{au}, {wk}'.format(au=authordict[searched[:6]].shortname, wk=workdict[searched[:10]].title)
+			except KeyError:
+				excluded = re.sub(r'(......)x(...)', r'\1w\2', searched[:10])
+				source = '{au}, {wk} [w/ exclusions]'.format(au=authordict[searched[:6]].shortname, wk=workdict[excluded].title)
 
 	title = '{t} »{w}«\nin {s}{l}'.format(t=topic, w=searchterm, s=source, l=less)
 
