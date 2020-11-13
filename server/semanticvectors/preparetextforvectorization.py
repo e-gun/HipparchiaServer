@@ -88,7 +88,7 @@ def breaktextsintosentences(foundsentences, searchlist, searchobject, dbconnecti
 			authortable = None
 
 		if authortable:
-			foundsentences += findsentences(authortable, so, dbcursor)
+			foundsentences.extend(findsentences(authortable, so, dbcursor))
 
 			dbconnection.checkneedtocommit(commitcount)
 
