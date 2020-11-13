@@ -172,7 +172,10 @@ class RedisProgressPoll(object):
 	def getredisvalue(self, key):
 		self.redisconnection.set_response_callback('GET', self.keytypes[key])
 		k = self.returnrediskey(key)
-		return self.redisconnection.get(k)
+		try:
+			return self.redisconnection.get(k)
+		except ConnectionError:
+			return '[cannot connect to redis server]'
 
 	def initializeredispoll(self):
 		for k in self.keytypes:
