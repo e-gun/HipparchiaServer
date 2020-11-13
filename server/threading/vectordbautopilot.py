@@ -15,7 +15,7 @@ from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.vectordbfunctions import checkforstoredvector
 from server.formatting.miscformatting import consolewarning
-from server.hipparchiaobjects.progresspoll import ProgressPoll
+from server.hipparchiaobjects.progresspoll import NullProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.gensimnearestneighbors import buildnnvectorspace
@@ -59,7 +59,7 @@ def startvectorizing():
 		workpile = determinevectorworkpile()
 
 	# [(['gr2062'], 4182615), (['gr0057'], 2594166), (['gr4090'], 2202504), ...]
-	emptypoll = ProgressPoll(1)
+	emptypoll = NullProgressPoll(None)
 	indextype = 'nn'
 
 	while workpile:
