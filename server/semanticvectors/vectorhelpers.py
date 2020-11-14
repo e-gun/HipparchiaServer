@@ -334,7 +334,7 @@ def parsevectorsentences(searchobject, lineobjects):
 		matches = allsentences
 
 	# hyphenated line-ends are a problem
-	matches = [re.sub(r'-\s{1,2}', '', m) for m in matches]
+	matches = [re.sub(r'-\s{1,2}', str(), m) for m in matches]
 
 	# more cleanup
 	matches = [m.lower() for m in matches]
@@ -360,7 +360,7 @@ def parsevectorsentences(searchobject, lineobjects):
 		for m in matches:
 			ids = re.findall(idfinder, m)
 			if ids:
-				taggedmatches.append((ids[0], re.sub(idfinder, '', m)))
+				taggedmatches.append((ids[0], re.sub(idfinder, str(), m)))
 				previousid = ids[-1]
 			else:
 				taggedmatches.append((previousid, m))

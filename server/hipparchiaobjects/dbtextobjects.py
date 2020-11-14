@@ -175,7 +175,7 @@ class dbOpus(object):
 		idx = -1
 		for label in [levellabels_00, levellabels_01, levellabels_02, levellabels_03, levellabels_04, levellabels_05]:
 			idx += 1
-			if label != '' and label != None:
+			if label:
 				self.structure[idx] = label
 
 		availablelevels = 1

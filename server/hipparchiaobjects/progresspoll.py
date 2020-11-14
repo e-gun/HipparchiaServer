@@ -253,7 +253,7 @@ class RedisProgressPoll(object):
 		elif re.search('unavailable', notes) is None:
 			m = notes
 		else:
-			m = ''
+			m = str()
 
 		return message.format(msg=m)
 

@@ -175,7 +175,7 @@ def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout=
 
 	return False if you are 'outdated'
 
-	hipparchiaDB=# select ts,versionstamp,uidlist from storedvectors;
+	hipparchiaDB=# select ts,thumbprint,uidlist from storedvectors;
 	        ts          | thumbprint |   uidlist
 	---------------------+--------------+--------------
 	2018-02-14 20:49:00 | json       | {lt0474w011}
