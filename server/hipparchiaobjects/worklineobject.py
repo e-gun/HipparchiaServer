@@ -40,10 +40,28 @@ class dbWorkLine(object):
 		annotations character varying(256) COLLATE pg_catalog."default"
 	)
 
+	worth noting anywhere you think you will be grabbing 100k+ lines:
+
+	def f(n):
+		for _ in range(n):
+			re.sub(r'e', str(), 'abcdef')
+		return
+
+	def g(n):
+		for _ in range(n):
+			'abcdef'.replace('e', str())
+		return
+
+	timeit(lambda: f(100), number=10000)
+		1.2959101439998904
+	timeit(lambda: g(100), number=10000)
+		0.3025400220001302
+
 	"""
 
 	__slots__ = ('wkuinversalid', 'db', 'authorid', 'workid', 'universalid', 'index', 'l0', 'l1', 'l2', 'l3', 'l4', 'l5',
-	             'markedup', 'polytonic', 'stripped', 'annotations', 'hyphenated', 'paragraphformatting', 'hasbeencleaned')
+	             'markedup', 'polytonic', 'stripped', 'annotations', 'hyphenated', 'paragraphformatting', 'hasbeencleaned',
+	             'mylevels', 'mynonbaselevels')
 
 	nonliterarycorpora = ['in', 'dp', 'ch']
 	# re.compile pulled out of the inset functions so that you do not compile 100k times when generating a long text
@@ -132,6 +150,8 @@ class dbWorkLine(object):
 		self.hyphenated = hyphenated_words
 		self.paragraphformatting = None
 		self.hasbeencleaned = False
+		self.mylevels = [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]
+		self.mynonbaselevels = [self.l1, self.l2, self.l3, self.l4, self.l5]
 		if self.markedup is None:
 			self.markedup = str()
 			self.polytonic = str()
@@ -194,7 +214,7 @@ class dbWorkLine(object):
 		# needs to happen after zapvees
 		# smallcaps means: "Civitatem peregrinvs vsvrpans veneat" and not "Ciuitatem peregrinus usurpans ueneat"
 		if re.search(self.smallcaps, self.markedup):
-			vlswaplambda = lambda x: x.group(1) + re.sub(r'u', 'v', x.group(2)) + x.group(3)
+			vlswaplambda = lambda x: x.group(1) + x.group(2).replace('u', 'v') + x.group(3)
 			self.markedup = re.sub(self.smallcaps, vlswaplambda, self.markedup)
 
 		self.fixhmuirrationaloragnization()
@@ -228,7 +248,7 @@ class dbWorkLine(object):
 		"""
 
 		if self.db not in dbWorkLine.nonliterarycorpora:
-			loc = [lvl for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5] if str(lvl) != '-1']
+			loc = [lvl for lvl in self.mylevels if str(lvl) != '-1']
 			loc.reverse()
 			citation = '.'.join(loc)
 		else:
@@ -319,8 +339,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		levellist = [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]
-		return self._generatelocus(levellist)
+		return self._generatelocus(self.mylevels)
 
 
 	def shortlocus(self) -> str:
@@ -330,8 +349,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		levellist = [self.l1, self.l2, self.l3, self.l4, self.l5]
-		return self._generatelocus(levellist)
+		return self._generatelocus(self.mylevels)
 
 	def uncleanlocustuple(self):
 		"""
@@ -339,7 +357,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 		cit = list()
-		for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]:
+		for lvl in self.mylevels:
 			if str(lvl) != '-1':
 				cit.append(lvl)
 		citationtuple = tuple(cit)
@@ -373,8 +391,8 @@ class dbWorkLine(object):
 		:param other:
 		:return:
 		"""
-		if self.wkuinversalid == other.wkuinversalid and self.l5 == other.l5 and self.l4 == other.l4 and \
-				self.l3 == other.l3 and self.l2 == other.l2 and self.l1 == other.l1:
+
+		if self.wkuinversalid == other.wkuinversalid and self.mynonbaselevels == other.mynonbaselevels:
 			return True
 		else:
 			return False
@@ -387,15 +405,15 @@ class dbWorkLine(object):
 		:param other:
 		:return:
 		"""
-		if self.l5 == other.l5 and self.l4 == other.l4 and self.l3 == other.l3 and self.l2 == other.l2 and \
-				self.l1 == other.l1:
+
+		if self.mynonbaselevels == other.mynonbaselevels:
 			return True
 		else:
 			return False
 
-	def toplevel(self) -> str:
+	def toplevel(self) -> int:
 		top = 0
-		for lvl in [self.l0, self.l1, self.l2, self.l3, self.l4, self.l5]:
+		for lvl in self.mylevels:
 			if str(lvl) != '-1':
 				top += 1
 			else:
@@ -414,10 +432,9 @@ class dbWorkLine(object):
 		"""
 
 		markup = re.compile(r'(<.*?>)')
-		nbsp = re.compile(r'&nbsp;')
 
-		unformatted = re.sub(markup, r'', self.markedup)
-		unformatted = re.sub(nbsp, r'', unformatted)
+		unformatted = re.sub(markup, str(), self.markedup)
+		unformatted = unformatted.replace('&nbsp;', str())
 
 		return unformatted
 
@@ -481,18 +498,18 @@ class dbWorkLine(object):
 		elisions = [w+"'" for w in polytonicwords if w+'’' in unformattedwords and re.search(dbWorkLine.minimumgreek, w)]
 		listofwords.extend(elisions)
 		listofwords = [w.translate(dbWorkLine.gravetoacute) for w in listofwords]
-		listofwords = [re.sub('v', 'u', w) for w in listofwords]
+		listofwords = [w.replace('v', 'u') for w in listofwords]
 		return listofwords
 
 	def lastword(self, version: str) -> str:
-		last = ''
+		last = str()
 		if version in ['accented', 'stripped']:
 			line = getattr(self, version).split(' ')
 			last = line[-1]
 		return last
 
 	def firstword(self, version: str) -> str:
-		first = ''
+		first = str()
 		if version in ['accented', 'stripped']:
 			line = getattr(self, version).split(' ')
 			first = line[0]
@@ -502,7 +519,7 @@ class dbWorkLine(object):
 		"""
 		return the line less its final word
 		"""
-		allbutlastword = ''
+		allbutlastword = str()
 		if version in ['accented', 'stripped']:
 			line = getattr(self, version)
 			line = line.split(' ')
@@ -801,7 +818,7 @@ class dbWorkLine(object):
 		:return:
 		"""
 
-		grouptwo = re.sub(r'_', ' ', grouptwo)
+		grouptwo = grouptwo.replace('_', ' ')
 
 		if groupone != language:
 			spanner = '<span class="{a} {b}">'.format(a=groupone, b=grouptwo)

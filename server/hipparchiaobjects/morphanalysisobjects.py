@@ -205,7 +205,7 @@ class BaseFormMorphology(object):
 
 		:return:
 		"""
-		wordset = {re.sub(r"'$", r'', a.word) for a in self.analyses}
+		wordset = {re.sub(r"'$", str(), a.word) for a in self.analyses}
 		initials = {stripaccents(w[0]) for w in wordset}
 		byinitial = {i: [w for w in wordset if stripaccents(w[0]) == i] for i in initials}
 		wco = [bulkfindwordcounts(byinitial[i]) for i in byinitial]

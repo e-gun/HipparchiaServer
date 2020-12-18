@@ -67,6 +67,7 @@ def getsessionvariables():
 @hipparchia.route('/getcookie/<cookienum>')
 def cookieintosession(cookienum):
 	"""
+
 	take a stored cookie and convert its values into the current session instance
 
 	:return:
@@ -87,7 +88,10 @@ def cookieintosession(cookienum):
 	# comes back as a string that needs parsing
 	cookiedict = parsejscookie(thecookie)
 
-	for key, value in cookiedict.items():
+	refusetoset = {'loggedin', 'userid'}
+	thingswecanset = {k: cookiedict[k] for k in cookiedict if k not in refusetoset}
+
+	for key, value in thingswecanset.items():
 		modifysessionvariable(key, value)
 
 	# you need a master list out of authorgenresdict = { 'gk': gklist, 'lt': ltlist, 'in': inlist, 'dp': dplist }

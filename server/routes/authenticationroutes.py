@@ -35,12 +35,12 @@ except ModuleNotFoundError:
 		return 'Anonymous'
 
 
+hipparchiausers = loadusersdict()
+
 @hipparchia.route('/attemptlogin', methods=['GET', 'POST'])
 def hipparchialogin():
 	# https://flask-login.readthedocs.io/en/latest/
 	# http://wtforms.readthedocs.io/en/latest/crash_course.html
-
-	users = loadusersdict()
 
 	returndata = dict()
 	p = str()
@@ -56,7 +56,7 @@ def hipparchialogin():
 		u = form.user.data
 		p = form.pw.data
 		try:
-			pu = users[u]
+			pu = hipparchiausers[u]
 		except KeyError:
 			pass
 	else:
