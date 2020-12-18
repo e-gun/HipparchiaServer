@@ -28,6 +28,11 @@ def modifysessionvariable(parameter, value):
 	:return:
 	"""
 
+	refusetoset = {'loggedin', 'userid'}
+
+	if parameter in refusetoset:
+		parameter = None
+
 	# y/n ==> t/f
 	if value == 'yes':
 		value = True
