@@ -6,8 +6,10 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 import re
+from string import punctuation
 
-from server.formatting.wordformatting import buildhipparchiatranstable, stripaccents
+from server.formatting.wordformatting import buildhipparchiatranstable, extrapunct, minimumgreek, removegravity, \
+	stripaccents
 
 
 def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
@@ -163,3 +165,33 @@ def foundindict(searchdict: dict, element: str, mustbein: str, exactmatch=True) 
 		         if getattr(searchdict[x], element) and re.search(mustbein, getattr(searchdict[x], element))]
 
 	return finds
+
+
+def findsetofallwords(listofwordclusters: list) -> set:
+	"""
+
+	get ready to vectorize by splitting and cleaning a set of lines or sentences
+
+	:param listofwordclusters:
+	:return:
+	"""
+
+	# find all words in use
+	allwords = [c.split(' ') for c in listofwordclusters]
+	# flatten
+	allwords = [item for sublist in allwords for item in sublist]
+
+	greekwords = [w for w in allwords if re.search(minimumgreek, w)]
+
+	trans = buildhipparchiatranstable()
+	latinwords = [w for w in allwords if not re.search(minimumgreek, w)]
+
+	allwords = [removegravity(w) for w in greekwords] + [stripaccents(w, trans) for w in latinwords]
+
+	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
+
+	allwords = [re.sub(punct, str(), w) for w in allwords]
+
+	allwords = set(allwords) - {''}
+
+	return allwords

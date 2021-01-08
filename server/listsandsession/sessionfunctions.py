@@ -28,10 +28,11 @@ def modifysessionvariable(parameter, value):
 	:return:
 	"""
 
+	# was already impossible to do this, but let's flag this up front and remember to worry about it over time
 	refusetoset = {'loggedin', 'userid'}
 
 	if parameter in refusetoset:
-		parameter = None
+		return
 
 	# y/n ==> t/f
 	if value == 'yes':

@@ -16,6 +16,7 @@ from server import hipparchia
 from server.authentication.authenticationwrapper import requireauthentication
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline
+from server.dbsupport.dblinefunctions import grabbundlesoflines
 from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs
@@ -24,10 +25,12 @@ from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.parsingobjects import IndexmakerInputParsingObject, TextmakerInputParsingObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
+from server.listsandsession.genericlistfunctions import polytonicsort
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import progresspolldict, workdict
 from server.textsandindices.indexmaker import buildindextowork
-from server.textsandindices.textandindiceshelperfunctions import textsegmentfindstartandstop, wordindextohtmltable
+from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects, textsegmentfindstartandstop, \
+	wordindextohtmltable
 from server.textsandindices.textbuilder import buildtext
 
 
@@ -36,7 +39,7 @@ from server.textsandindices.textbuilder import buildtext
 @hipparchia.route('/indexto/<searchid>/<author>/<work>/<passage>')
 @hipparchia.route('/indexto/<searchid>/<author>/<work>/<passage>/<endpoint>')
 @requireauthentication
-def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=None, citationdelimiter='|'):
+def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=None, citationdelimiter='|', justvocab=False):
 	"""
 	build a complete index to a an author, work, or segment of a work
 
@@ -117,6 +120,12 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 	if not stop:
 		segmenttext = '.'.join(psg)
 
+	if valid and justvocab:
+		dbconnection.connectioncleanup()
+		del progresspolldict[pollid]
+		return cdict
+	print('v, jv', valid, justvocab)
+
 	if valid:
 		output = buildindextowork(cdict, progresspolldict[pollid], useheadwords, dbcursor)
 
@@ -153,6 +162,66 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 
 	dbconnection.connectioncleanup()
 	del progresspolldict[pollid]
+
+	return results
+
+
+@hipparchia.route('/vocabularyfor/<searchid>/<author>')
+@hipparchia.route('/vocabularyfor/<searchid>/<author>/<work>')
+@hipparchia.route('/vocabularyfor/<searchid>/<author>/<work>/<passage>')
+@hipparchia.route('/vocabularyfor/<searchid>/<author>/<work>/<passage>/<endpoint>')
+@requireauthentication
+def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoint=None, citationdelimiter='|'):
+	"""
+
+	given a text span
+		figure out what words are used by this span
+		then provide a vocabulary list from that list
+
+	ex:
+		http://localhost:5000/vocabularyfor/SEARCHID/lt0631/001/1/20
+
+	this is a lot like building an index so we just leverage buildindexto() but pull away from it after the initial
+	bit where we establish endpoints and gather lines
+
+	:param searchid:
+	:param author:
+	:param work:
+	:param passage:
+	:param endpoint:
+	:param citationdelimiter:
+	:return:
+	"""
+
+	results = dict()
+	dbconnection = ConnectionObject('autocommit')
+	dbcursor = dbconnection.cursor()
+
+	justvocab = True
+
+	cdict = buildindexto(searchid, author, work, passage, endpoint, citationdelimiter, justvocab)
+	lineobjects = grabbundlesoflines(cdict, dbcursor)
+
+	allwords = [l.wordset() for l in lineobjects]
+	flatten = lambda l: [item for sublist in l for item in sublist]
+	allwords = set(flatten(allwords))
+
+	morphobjects = getrequiredmorphobjects(allwords)
+	# 'dominatio': <server.hipparchiaobjects.dbtextobjects.dbMorphologyObject object at 0x14ab92d68>, ...
+
+	baseformsmorphobjects = list()
+	for m in morphobjects:
+		try:
+			baseformsmorphobjects.extend(morphobjects[m].getpossible())
+		except AttributeError:
+			# 'NoneType' object has no attribute 'getpossible'
+			pass
+
+	vocabset = {'{w} ~~~ {t}'.format(w=b.getbaseform(), t=b.gettranslation()) for b in baseformsmorphobjects if b.gettranslation()}
+	vocablist = polytonicsort(list(vocabset))
+
+	for v in vocablist:
+		print(v)
 
 	return results
 

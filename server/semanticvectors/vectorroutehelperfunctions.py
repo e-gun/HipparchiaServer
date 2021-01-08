@@ -19,7 +19,8 @@ from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.rudimentaryvectormath import buildrudimentaryvectorspace, caclulatecosinevalues
 from server.semanticvectors.vectorgraphing import graphbliteraldistancematches
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, findwordvectorset
+from server.semanticvectors.vectorhelpers import convertmophdicttodict
+from server.listsandsession.genericlistfunctions import findsetofallwords
 from server.startup import authordict, lemmatadict, listmapper, workdict
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
@@ -165,7 +166,7 @@ def generateabsolutevectorsoutput(listsofwords: list, workssearched: list, searc
 	activepoll = so.poll
 
 	# find all words in use
-	allwords = findwordvectorset(listsofwords)
+	allwords = findsetofallwords(listsofwords)
 	# print('allwords', allwords)
 
 	# find all possible forms of all the words we used

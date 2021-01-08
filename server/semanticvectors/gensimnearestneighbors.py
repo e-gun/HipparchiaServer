@@ -14,7 +14,8 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.vectorobjects import VectorValues
 from server.semanticvectors.gensimmodels import buildgensimmodel
 from server.semanticvectors.vectorgraphing import graphnnmatches
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, findwordvectorset
+from server.semanticvectors.vectorhelpers import convertmophdicttodict
+from server.listsandsession.genericlistfunctions import findsetofallwords
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
@@ -110,7 +111,7 @@ def buildnnvectorspace(sentencetuples, searchobject):
 
 	# find all words in use
 	listsofwords = [s[1] for s in sentencetuples]
-	allwords = findwordvectorset(listsofwords)
+	allwords = findsetofallwords(listsofwords)
 
 	# find all possible forms of all the words we used
 	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}

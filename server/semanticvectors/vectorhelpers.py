@@ -27,8 +27,7 @@ from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefr
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, querytotalwordcounts
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
-from server.formatting.wordformatting import acuteorgrav, basiclemmacleanup, buildhipparchiatranstable, \
-	elidedextrapunct, extrapunct, minimumgreek, removegravity, stripaccents, tidyupterm
+from server.formatting.wordformatting import acuteorgrav, basiclemmacleanup, elidedextrapunct, removegravity, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
@@ -370,36 +369,6 @@ def parsevectorsentences(searchobject, lineobjects):
 		cleanedmatches = [(n, tidyupterm(m, punct)) for n, m in enumerate(matches)]
 
 	return cleanedmatches
-
-
-def findwordvectorset(listofwordclusters: list) -> set:
-	"""
-
-	get ready to vectorize by splitting and cleaning a set of lines or sentences
-
-	:param listofwordclusters:
-	:return:
-	"""
-
-	# find all words in use
-	allwords = [c.split(' ') for c in listofwordclusters]
-	# flatten
-	allwords = [item for sublist in allwords for item in sublist]
-
-	greekwords = [w for w in allwords if re.search(minimumgreek, w)]
-
-	trans = buildhipparchiatranstable()
-	latinwords = [w for w in allwords if not re.search(minimumgreek, w)]
-
-	allwords = [removegravity(w) for w in greekwords] + [stripaccents(w, trans) for w in latinwords]
-
-	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + extrapunct)))
-
-	allwords = [re.sub(punct, '', w) for w in allwords]
-
-	allwords = set(allwords) - {''}
-
-	return allwords
 
 
 def convertmophdicttodict(morphdict: dict) -> dict:

@@ -13,7 +13,8 @@ from server.hipparchiaobjects.helperobjects import LogEntropyVectorCorpus
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.wordbaggers import buildwordbags
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, findwordvectorset
+from server.semanticvectors.vectorhelpers import convertmophdicttodict
+from server.listsandsession.genericlistfunctions import findsetofallwords
 from server.startup import authordict, listmapper
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
@@ -37,7 +38,7 @@ def gensimexperiment(so):
 	sentencetuples = vectorprepdispatcher(so)
 	# find all words in use
 	listsofwords = [s[1] for s in sentencetuples]
-	allwords = findwordvectorset(listsofwords)
+	allwords = findsetofallwords(listsofwords)
 
 	# find all possible forms of all the words we used
 	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}

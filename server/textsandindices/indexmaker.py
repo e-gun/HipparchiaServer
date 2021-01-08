@@ -8,14 +8,12 @@
 
 import re
 from multiprocessing import Pool
-from string import punctuation
 from typing import List
 
 from flask import session
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import grabbundlesoflines, makeablankline
-from server.formatting.wordformatting import elidedextrapunct, extrapunct, minimumgreek, tidyupterm
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.genericlistfunctions import polytonicsort
 from server.textsandindices.textandindiceshelperfunctions import dictmerger, getrequiredmorphobjects
@@ -260,7 +258,7 @@ def findindexbaseforms(completeindexdict, morphobjects, activepoll) -> dict:
 				# parsed = list(set(['{bf} ({tr})'.format(bf=p.getbaseform(), tr=p.gettranslation()) for p in mo.getpossible()]))
 				parsed = list(set(['{bf}'.format(bf=p.getbaseform()) for p in mo.getpossible()]))
 				# cut the blanks
-				parsed = [re.sub(r' \( \)', '', p) for p in parsed]
+				parsed = [re.sub(r' \( \)', str(), p) for p in parsed]
 				if len(parsed) == 1:
 					homonyms = None
 				else:

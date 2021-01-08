@@ -501,6 +501,9 @@ class dbWorkLine(object):
 		listofwords = [w.replace('v', 'u') for w in listofwords]
 		return listofwords
 
+	def wordset(self) -> set:
+		return set(self.indexablewordlist())
+
 	def lastword(self, version: str) -> str:
 		last = str()
 		if version in ['accented', 'stripped']:

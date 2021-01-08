@@ -25,8 +25,8 @@ from server.formatting.vectorformatting import formatlsimatches, lsiformatoutput
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import LSIVectorCorpus
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, finddblinesfromsentences, \
-	findwordvectorset
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, finddblinesfromsentences
+from server.listsandsession.genericlistfunctions import findsetofallwords
 from server.semanticvectors.wordbaggers import buildwordbags
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
@@ -69,7 +69,7 @@ def lsifindmatches(sentencestuples, searchobject, lsispace):
 	if not lsispace:
 		# find all words in use
 		listsofwords = [s[1] for s in sentencestuples]
-		allwords = findwordvectorset(listsofwords)
+		allwords = findsetofallwords(listsofwords)
 
 		# find all possible forms of all the words we used
 		# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
