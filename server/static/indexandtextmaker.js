@@ -31,6 +31,7 @@ function generateId (len) {
 
 
 $('#makeanindex').click( function() {
+        let headertext = 'Index to ';
         let name = $('#authorsautocomplete').val();
         let authorid = name.slice(-7, -1);
         let locus = locusdataloader();
@@ -60,13 +61,13 @@ $('#makeanindex').click( function() {
                         url = '/indexto/' + searchid + '/' + authorid + '/' + wrk + '/' + locus;
                     }
                     $.getJSON(url, function (indexdata) {
-                        loadindexintodisplayresults(indexdata);
+                        loadindexintodisplayresults(indexdata, headertext);
                     });
                 } else {
                     checkactivityviawebsocket(searchid);
                     let url = '/indexto/' + searchid + '/' + authorid + '/' + wrk + '/' + locus + '/' + endpoint;
                     $.getJSON(url, function (indexdata) {
-                        loadindexintodisplayresults(indexdata);
+                        loadindexintodisplayresults(indexdata, headertext);
                     });
                 }
             } else {
@@ -83,7 +84,7 @@ $('#makeanindex').click( function() {
                     url = '/indextorawlocus/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
                 }
                 $.getJSON(url, function (indexdata) {
-                    loadindexintodisplayresults(indexdata);
+                    loadindexintodisplayresults(indexdata, headertext);
                 });
             }
         }
@@ -123,10 +124,77 @@ function loadindexintodisplayresults(indexdata) {
 
 
 //
+// VOCABLISTS
+//
+
+
+$('#makevocablist').click( function() {
+        let headertext = 'Vocabulary for ';
+        let name = $('#authorsautocomplete').val();
+        let authorid = name.slice(-7, -1);
+        let locus = locusdataloader();
+        let endpoint = endpointdataloader();
+        let wrk = $('#worksautocomplete').val().slice(-4, -1);
+        let searchid = generateId(8);
+        let rawlocus = $('#rawlocationinput').val();
+        let rawendpoint = $('#rawendpointinput').val();
+        if ($('#endpointnotice').is(':hidden')) {
+            rawendpoint = '';
+            endpoint = '';
+        }
+        $('#searchsummary').html('');
+        $('#displayresults').html('');
+
+        if (authorid !== '') {
+            if ($('#autofillinput').is(':checked')) {
+                // you are using the autofill boxes
+                if (endpoint === '') {
+                    checkactivityviawebsocket(searchid);
+                    let url = '';
+                    if (wrk === '') {
+                        url = '/vocabularyfor/' + searchid + '/' + authorid;
+                    } else if (locus === '') {
+                        url = '/vocabularyfor/' + searchid + '/' + authorid + '/' + wrk;
+                    } else {
+                        url = '/vocabularyfor/' + searchid + '/' + authorid + '/' + wrk + '/' + locus;
+                    }
+                    $.getJSON(url, function (vocabdata) {
+                        loadtextintodisplayresults(vocabdata, headertext);
+                    });
+                } else {
+                    checkactivityviawebsocket(searchid);
+                    let url = '/vocabularyfor/' + searchid + '/' + authorid + '/' + wrk + '/' + locus + '/' + endpoint;
+                    $.getJSON(url, function (vocabdata) {
+                        loadtextintodisplayresults(vocabdata, headertext);
+                    });
+                }
+            } else {
+                // you are using the raw entry subsystem
+                checkactivityviawebsocket(searchid);
+                let url = '';
+                if (wrk === '') {
+                    url = '/vocabularyfor/' + searchid + '/' + authorid;
+                } else if (rawlocus === '' && rawendpoint === '') {
+                    url = '/vocabularyfor/' + searchid + '/' + authorid + '/' + wrk;
+                } else if (rawendpoint === '') {
+                    url = '/vocabularyforrawlocus/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus;
+                } else {
+                    url = '/vocabularyforrawlocus/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
+                }
+                $.getJSON(url, function (vocabdata) {
+                    loadtextintodisplayresults(vocabdata, headertext);
+                });
+            }
+        }
+});
+
+
+//
 // TEXTMAKER
 //
 
 $('#textofthis').click( function() {
+        let headertext = 'Text of ';
         let name = $('#authorsautocomplete').val();
         let authorid = name.slice(-7, -1);
         let locus = locusdataloader();
@@ -151,12 +219,12 @@ $('#textofthis').click( function() {
                         url = '/textof/' + authorid + '/' + wrk + '/' + locus;
                     }
                     $.getJSON(url, function (returnedtext) {
-                        loadtextintodisplayresults(returnedtext);
+                        loadtextintodisplayresults(returnedtext, headertext);
                     });
                 } else {
                     let url = '/textof/' + authorid + '/' + wrk + '/' + locus + '/' + endpoint;
                     $.getJSON(url, function (returnedtext) {
-                        loadtextintodisplayresults(returnedtext);
+                        loadtextintodisplayresults(returnedtext, headertext);
                     });
                 }
             } else {
@@ -172,26 +240,25 @@ $('#textofthis').click( function() {
                     url = '/textofrawlocus/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
                 }
                 $.getJSON(url, function (returnedtext) {
-                loadtextintodisplayresults(returnedtext);
+                loadtextintodisplayresults(returnedtext, headertext);
                 });
             }
         }
     });
 
 
-function loadtextintodisplayresults(returnedtext) {
-        let linesreturned = '';
-        linesreturned += 'Text of ' + returnedtext['authorname'];
-        linesreturned += ',&nbsp;<span class="foundwork">' + returnedtext['title'] + '</span>';
-        if (returnedtext['worksegment'] === '') {
-            linesreturned += '<br /><br />';
-            } else {
-            linesreturned += '&nbsp;' + returnedtext['worksegment'] + '<br /><br />';
-            }
-        linesreturned += 'citation format:&nbsp;' + returnedtext['structure'] + '<br />';
+function loadtextintodisplayresults(returnedtext, headertext) {
+    let linesreturned = '';
+    linesreturned += headertext + returnedtext['authorname'];
+    linesreturned += ',&nbsp;<span class="foundwork">' + returnedtext['title'] + '</span>';
+    if (returnedtext['worksegment'] === '') {
+        linesreturned += '<br /><br />';
+        } else {
+        linesreturned += '&nbsp;' + returnedtext['worksegment'] + '<br /><br />';
+        }
+    linesreturned += 'citation format:&nbsp;' + returnedtext['structure'] + '<br />';
 
-        $('#searchsummary').html(linesreturned);
+    $('#searchsummary').html(linesreturned);
 
-        $('#displayresults').html(returnedtext['texthtml']);
+    $('#displayresults').html(returnedtext['texthtml']);
     }
-

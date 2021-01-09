@@ -9,6 +9,7 @@
 import json
 import locale
 import time
+import re
 
 from flask import session
 
@@ -124,7 +125,6 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 		dbconnection.connectioncleanup()
 		del progresspolldict[pollid]
 		return cdict
-	print('v, jv', valid, justvocab)
 
 	if valid:
 		output = buildindextowork(cdict, progresspolldict[pollid], useheadwords, dbcursor)
@@ -182,7 +182,7 @@ def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoi
 		http://localhost:5000/vocabularyfor/SEARCHID/lt0631/001/1/20
 
 	this is a lot like building an index so we just leverage buildindexto() but pull away from it after the initial
-	bit where we establish endpoints and gather lines
+	bit where we establish endpoints and get ready to gather the lines
 
 	:param searchid:
 	:param author:
@@ -193,7 +193,9 @@ def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoi
 	:return:
 	"""
 
-	results = dict()
+	starttime = time.time()
+	segmenttext = str()
+
 	dbconnection = ConnectionObject('autocommit')
 	dbcursor = dbconnection.cursor()
 
@@ -218,12 +220,95 @@ def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoi
 			pass
 
 	vocabset = {'{w} ~~~ {t}'.format(w=b.getbaseform(), t=b.gettranslation()) for b in baseformsmorphobjects if b.gettranslation()}
-	vocablist = polytonicsort(list(vocabset))
+	vocabset = {v.split(' ~~~ ')[0]: v.split(' ~~~ ')[1].strip() for v in vocabset}
+	vocabset = {v: vocabset[v] for v in vocabset if vocabset[v]}
 
-	for v in vocablist:
-		print(v)
+	# the following can be in entries and will cause problems...:
+	#   <tr opt="n">which had become milder</tr>
+
+	vocabset = {v: re.sub(r'<(|/)tr.*?>', str(), vocabset[v]) for v in vocabset}
+
+	# now you have { word1: definition1, word2: definition2, ...}
+
+	po = IndexmakerInputParsingObject(author, work, passage, endpoint, citationdelimiter)
+
+	ao = po.authorobject
+	wo = po.workobject
+	psg = po.passageaslist
+	stop = po.endpointlist
+
+	tableheadtemplate = """
+	<tr>
+		<th class="vocabtable">word</th>
+		<th class="vocabtable">definitions</th>
+	</tr>
+	"""
+
+	tablerowtemplate = """
+	<tr>
+		<td class="word">{w}</td>
+		<td class="trans">{t}</td>
+	</tr>
+	"""
+
+	tablehtml = """
+	<table>
+		{head}
+		{rows}
+	</table>
+	"""
+
+	rowhtml = [tablerowtemplate.format(w=k, t=vocabset[k]) for k in polytonicsort(vocabset.keys())]
+	wordsfound = len(rowhtml)
+	rowhtml = '\n'.join(rowhtml)
+
+	vocabhtml = tablehtml.format(head=tableheadtemplate, rows=rowhtml)
+
+	if not ao:
+		ao = makeanemptyauthor('gr0000')
+
+	buildtime = time.time() - starttime
+	buildtime = round(buildtime, 2)
+
+	if not stop:
+		segmenttext = '.'.join(psg)
+
+	results = dict()
+	results['authorname'] = avoidsmallvariants(ao.shortname)
+	results['title'] = avoidsmallvariants(wo.title)
+	results['structure'] = avoidsmallvariants(wo.citation())
+	results['worksegment'] = segmenttext
+	results['elapsed'] = buildtime
+	results['wordsfound'] = wordsfound
+	results['texthtml'] = vocabhtml
+	results['keytoworks'] = str()
+	results['newjs'] = supplementalindexjs()
+	results = json.dumps(results)
+
+	# print('vocabhtml', vocabhtml)
 
 	return results
+
+
+@hipparchia.route('/vocabularyforrawlocus/<searchid>/<author>/<work>/<location>')
+@hipparchia.route('/vocabularyforrawlocus/<searchid>/<author>/<work>/<location>/<endpoint>')
+@requireauthentication
+def vocabfromrawlocus(searchid: str, author: str, work=None, location=None, endpoint=None):
+	"""
+
+	the rawlocus version of generatevocabfor()
+
+	:param searchid:
+	:param author:
+	:param work:
+	:param location:
+	:param endpoint:
+	:return:
+	"""
+
+	delimiter = '.'
+
+	return generatevocabfor(searchid, author, work, location, endpoint, citationdelimiter=delimiter)
 
 
 @hipparchia.route('/indextorawlocus/<searchid>/<author>/<work>/<location>')

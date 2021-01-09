@@ -105,7 +105,7 @@ const infobuttons = Array('#authinfobutton', '#genreinfobutton');
 // action buttons
 
 const coreactionbuttons = Array('#addauthortosearchlist', '#excludeauthorfromsearchlist');
-const extendedactionbuttons = Array('#browseto', '#makeanindex', '#textofthis', '#fewerchoices');
+const extendedactionbuttons = Array('#browseto', '#makeanindex', '#textofthis', '#fewerchoices', '#makevocablist');
 const genreselectbuttons = Array('#pickgenrebutton', '#excludegenrebutton');
 const actionbuttons = Array().concat(coreactionbuttons, extendedactionbuttons, genreselectbuttons);
 
@@ -162,7 +162,7 @@ let vectoroptionarray = Array('cosdistbysentence', 'cosdistbylineorword', 'seman
 
 // collections of elements that have logical connections
 
-const corepickui = ['#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfobutton'];
+const corepickui = ['#worksautocomplete', '#makeanindex', '#textofthis', '#browseto', '#authinfobutton', '#makevocablist'];
 const postauthorpickui = Array().concat(corepickui, coreactionbuttons);
 const postbrowsepickui = Array().concat(corepickui, ['#browserdialog']);
 const extrauichoices = Array().concat(categoryautofills);
@@ -211,12 +211,13 @@ const saveslotshtmlids = Array('#load01', '#load02', '#load03', '#load04', '#loa
 
 const searchfieldhtmlids = Array('#addauthortosearchlist', '#authinfobutton', '#authorendpoint', '#authorholdings',
     '#authorsautocomplete', '#browseto', '#earliestdate', '#edts', '#endpointbutton-isclosed', '#endpointbutton-isopen',
-    '#endpointnotice', '#excludeauthor', '#excludeauthorfromsearchlist', '#excludegenrebutton', '#fewerchoicesbutton', '#fromnotice', '#genreinfobutton',
-    '#genrelistcontents', '#genresautocomplete', '#includeincerta', '#includespuria', '#includevaria', '#latestdate',
-    '#ldts', '#level00', '#level00endpoint', '#level01', '#level01endpoint', '#level02', '#level02endpoint', '#level03',
-    '#level03endpoint', '#level04', '#level04endpoint', '#level05', '#level05endpoint', '#locationsautocomplete',
-    '#makeanindex', '#morechoicesbutton','#pickgenrebutton', '#provenanceautocomplete', '#rawendpointinput', '#rawlocationinput', '#searchfield',
-    '#selectionendpoint', '#spuriacheckboxes', '#workendpoint', '#workgenresautocomplete', '#worksautocomplete');
+    '#endpointnotice', '#excludeauthor', '#excludeauthorfromsearchlist', '#excludegenrebutton', '#fewerchoicesbutton',
+    '#fromnotice', '#genreinfobutton', '#genrelistcontents', '#genresautocomplete', '#includeincerta', '#includespuria',
+    '#includevaria', '#latestdate', '#ldts', '#level00', '#level00endpoint', '#level01', '#level01endpoint', '#level02',
+    '#level02endpoint', '#level03', '#level03endpoint', '#level04', '#level04endpoint', '#level05', '#level05endpoint',
+    '#locationsautocomplete', '#makeanindex', '#makevocablist', '#morechoicesbutton','#pickgenrebutton', '#provenanceautocomplete',
+    '#rawendpointinput', '#rawlocationinput', '#searchfield', '#selectionendpoint', '#spuriacheckboxes', '#workendpoint',
+    '#workgenresautocomplete', '#worksautocomplete');
 
 const searchhtlmids = Array('#browserclickscriptholder', '#displayresults', '#imagearea', '#indexclickscriptholder',
     '#lexicadialog', '#lexicadialogtext', '#mainbody', '#pollingdata', '#searchsummary', '#vectorspinnerscriptholder',
