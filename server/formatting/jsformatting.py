@@ -150,7 +150,31 @@ def generatevectorjs() -> str:
 	return jstemplate
 
 
+def supplementalvocablistjs() -> str:
+	"""
+
+	vocab list version
+
+	note that 'vocablocation' is not currently used/useful
+
+	:return:
+	"""
+
+	return observedformjs('vocabobserved', 'vocablocation')
+
+
 def supplementalindexjs() -> str:
+	"""
+
+	indexmaker version
+
+	:return:
+	"""
+
+	return observedformjs('indexobserved', 'indexedlocation')
+
+
+def observedformjs(clickone, clicktwo) -> str:
 	"""
 
 	insert a js block to handle observed forms
@@ -160,7 +184,7 @@ def supplementalindexjs() -> str:
 
 	js = """
 		<script>
-			$('indexobserved').click( function(e) {
+			$('CLICKONE').click( function(e) {
 				e.preventDefault();
 				var windowWidth = $(window).width();
 				var windowHeight = $(window).height();
@@ -184,7 +208,7 @@ def supplementalindexjs() -> str:
 			return false;
 		});
 
-			$('indexedlocation').click( function(e) {
+			$('CLICKTWO').click( function(e) {
 				e.preventDefault();
 				$.getJSON('/browse/'+this.id, function (passagereturned) {
 				$('#browseforward').unbind('click');
@@ -204,6 +228,9 @@ def supplementalindexjs() -> str:
 
 		</script>
 	"""
+
+	js = re.sub(r'CLICKONE', clickone, js)
+	js = re.sub(r'CLICKTWO', clicktwo, js)
 
 	return js
 

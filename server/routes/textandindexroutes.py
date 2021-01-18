@@ -20,7 +20,7 @@ from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefr
 from server.dbsupport.dblinefunctions import grabbundlesoflines
 from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
 from server.formatting.bracketformatting import gtltsubstitutes
-from server.formatting.jsformatting import supplementalindexjs
+from server.formatting.jsformatting import supplementalindexjs, supplementalvocablistjs
 from server.formatting.miscformatting import consolewarning, validatepollid
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -230,6 +230,14 @@ def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoi
 
 	# now you have { word1: definition1, word2: definition2, ...}
 
+	vocabcounter = [b.getbaseform() for b in baseformsmorphobjects if b.gettranslation()]
+	vocabcount = dict()
+	for v in vocabcounter:
+		try:
+			vocabcount[v] += 1
+		except KeyError:
+			vocabcount[v] = 1
+
 	po = IndexmakerInputParsingObject(author, work, passage, endpoint, citationdelimiter)
 
 	ao = po.authorobject
@@ -240,13 +248,15 @@ def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoi
 	tableheadtemplate = """
 	<tr>
 		<th class="vocabtable">word</th>
+		<th class="vocabtable">count</th>
 		<th class="vocabtable">definitions</th>
 	</tr>
 	"""
 
 	tablerowtemplate = """
 	<tr>
-		<td class="word">{w}</td>
+		<td class="word"><vocabobserved id="{w}">{w}</vocabobserved></td>
+		<td class="count">{c}</td>
 		<td class="trans">{t}</td>
 	</tr>
 	"""
@@ -258,7 +268,16 @@ def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoi
 	</table>
 	"""
 
-	rowhtml = [tablerowtemplate.format(w=k, t=vocabset[k]) for k in polytonicsort(vocabset.keys())]
+	byfrequency = False
+	if not byfrequency:
+		rowhtml = [tablerowtemplate.format(w=k, t=vocabset[k], c=vocabcount[k]) for k in polytonicsort(vocabset.keys())]
+	else:
+		vc = [(vocabcount[v], v) for v in vocabcount]
+		vc.sort(reverse=True)
+		vk = [v[1] for v in vc]
+		vk = [v for v in vk if v in vocabset]
+		rowhtml = [tablerowtemplate.format(w=k, t=vocabset[k], c=vocabcount[k]) for k in vk]
+
 	wordsfound = len(rowhtml)
 	rowhtml = '\n'.join(rowhtml)
 
@@ -282,7 +301,7 @@ def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoi
 	results['wordsfound'] = wordsfound
 	results['texthtml'] = vocabhtml
 	results['keytoworks'] = str()
-	results['newjs'] = supplementalindexjs()
+	results['newjs'] = supplementalvocablistjs()
 	results = json.dumps(results)
 
 	# print('vocabhtml', vocabhtml)

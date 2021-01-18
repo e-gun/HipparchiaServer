@@ -1653,6 +1653,13 @@ verbform:hover{
 	text-shadow: 1px 1px 3px var(--transparentgrey);
 	}
 
+vocabobserved:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}
+
 lemmatizable {
 	color: var(--red);
 	}

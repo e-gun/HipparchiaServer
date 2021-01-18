@@ -261,4 +261,7 @@ function loadtextintodisplayresults(returnedtext, headertext) {
     $('#searchsummary').html(linesreturned);
 
     $('#displayresults').html(returnedtext['texthtml']);
+
+    $('#indexclickscriptholder').html(returnedtext['newjs']);
+
     }
