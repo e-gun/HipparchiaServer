@@ -98,3 +98,11 @@ ENOUGHALREADYWITHTHECOPYRIGHTNOTICE = False
 
 DELETEUNACCENTEDGREEKFROMINDEX = True
 DROPLATININAGREEKINDEX = True
+
+# buttons you might want to drop from the #searchfield
+# note that dropping some of these will break core functions
+# note also that the relevant paths will be active so this is not a security measure
+# ALL = ['addauthortosearchlist', 'excludeauthorfromsearchlist', 'morechoicesbutton', 'fewerchoicesbutton', 'browseto', 'textofthis', 'makeanindex', 'makevocablist', 'authinfobutton']
+# BUTTONSTOSKIP = None
+
+BUTTONSTOSKIP = ['makevocablist']

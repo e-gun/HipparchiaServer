@@ -19,7 +19,7 @@ from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.dbbuildinfo import versionchecking
 from server.dbsupport.miscdbfunctions import getpostgresserverversion
-from server.formatting.vectorformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar
+from server.formatting.htmlformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar, getsearchfieldbuttonshtml
 from server.hipparchiaobjects.authenticationobjects import LoginForm
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
@@ -59,6 +59,7 @@ def frontpage():
 
 	vectorhtml = vectorhtmlforfrontpage()
 	vectoroptionshtml = vectorhtmlforoptionsbar()
+	searchfieldbuttonshtml = getsearchfieldbuttonshtml()
 
 	# check to see which dbs we actually own
 	activelists = [l for l in listmapper if len(listmapper[l]['a']) > 0]
@@ -130,6 +131,7 @@ def frontpage():
 							havevectors=havevectors,
 							version=version,
 							shortversion=shortversion,
+							searchfield=searchfieldbuttonshtml,
 							backend=backend,
 							icanzap=icanzap,
 							loginform=loginform)

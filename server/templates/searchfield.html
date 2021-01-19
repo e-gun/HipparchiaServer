@@ -11,15 +11,7 @@
         <input type="text" name="level02" class="worklevel" id="level02" placeholder="[level02]">
         <input type="text" name="level01" class="worklevel" id="level01" placeholder="[level01]">
         <input type="text" name="level00" class="worklevel" id="level00" placeholder="[level00]">
-        <button id="addauthortosearchlist" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Include this author/work"><span class="ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="excludeauthorfromsearchlist" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Exclude this author/work"><span class="ui-icon ui-icon-minus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="morechoicesbutton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="More search choices"><span class="ui-icon ui-icon-arrowreturnthick-1-s"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="fewerchoicesbutton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Fewer search choices"><span class="ui-icon ui-icon-arrowreturnthick-1-n"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="browseto" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Browse this location"><span class="ui-icon ui-icon-note"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="textofthis" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Generate a simple text of this selection"><span class="ui-icon ui-icon-bookmark"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="makeanindex" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Build an index to this selection"><span class="ui-icon ui-icon-calculator"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="makevocablist" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Build a vocabulary list for this selection"><span class="ui-icon ui-icon-lightbulb"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="authinfobutton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Show/Hide local info about the works of this author"><span class="ui-icon ui-icon-person"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+        {{ searchfield|safe }}
     <div id="authorholdings"></div>
         <input type="text" name="genres" class="genreinput" id="genresautocomplete" placeholder="Author Categories">
         <input type="text" name="workgenres" class="genreinput" id="workgenresautocomplete" placeholder="Work Genres">
