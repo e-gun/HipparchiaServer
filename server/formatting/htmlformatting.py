@@ -231,7 +231,7 @@ def getsearchfieldbuttonshtml() -> str:
 
 
 @htmlcommentdecorator
-def getauthorholdingfieldbhtml() -> str:
+def getauthorholdingfieldhtml() -> str:
 	"""
 
 	what to show in #authorholdings
@@ -261,3 +261,36 @@ def getauthorholdingfieldbhtml() -> str:
 	returnhtml = '\n'.join(myitems)
 
 	return returnhtml
+
+
+@htmlcommentdecorator
+def getdaterangefieldhtml() -> str:
+	"""
+
+	date range spinner html
+
+	:return:
+	"""
+
+	datehtml = """
+		<br />
+		<fieldset id="edts">
+			<legend>Starting year</legend>
+			<input id="earliestdate" type="text" value="-850" width="20px;">
+		</fieldset>
+		<fieldset id="ldts">
+			<legend>Ending year</legend>
+			<input id="latestdate" type="text" value="1500" width="20px;">
+		</fieldset>
+		<fieldset id="spuriacheckboxes">
+			<legend>Include works that are...</legend>
+			spurious <input type="checkbox" id="includespuria" value="no">&nbsp;&middot;&nbsp;
+			of uncertain date<input type="checkbox" id="includeincerta" value="no">&nbsp;&middot;&nbsp;
+			of varied date (e.g., scholia)<input type="checkbox" id="includevaria" value="no"><br />
+		</fieldset>
+	"""
+
+	if not hipparchia.config['INCLUDEDATESEARCHINGHTML']:
+		return str()
+	else:
+		return datehtml

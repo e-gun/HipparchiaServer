@@ -115,5 +115,7 @@ BUTTONSTOSKIP = ['makevocablist']
 # the full known set is:
 # ['genresautocomplete', 'workgenresautocomplete', 'locationsautocomplete', 'provenanceautocomplete', 'pickgenrebutton', 'excludegenrebutton', 'genreinfobutton']
 
-# HOLDINGSTOSKIP = None
-HOLDINGSTOSKIP = ['locationsautocomplete', 'provenanceautocomplete']
+HOLDINGSTOSKIP = None
+# HOLDINGSTOSKIP = ['locationsautocomplete', 'provenanceautocomplete']
+
+INCLUDEDATESEARCHINGHTML = True

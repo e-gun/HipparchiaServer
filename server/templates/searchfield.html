@@ -15,21 +15,7 @@
     <div id="authorholdings"></div>
         {{ holdingshtml|safe }}
         <div id="genrelistcontents">&nbsp;</div>
-        <br />
-        <fieldset id="edts">
-            <legend>Starting year</legend>
-            <input id="earliestdate" type="text" value="-850" width="20px;">
-        </fieldset>
-        <fieldset id="ldts">
-            <legend>Ending year</legend>
-            <input id="latestdate" type="text" value="1500" width="20px;">
-        </fieldset>
-        <fieldset id="spuriacheckboxes">
-            <legend>Include works that are...</legend>
-            spurious <input type="checkbox" id="includespuria" value="no">&nbsp;&middot;&nbsp;
-            of uncertain date<input type="checkbox" id="includeincerta" value="no">&nbsp;&middot;&nbsp;
-            of varied date (e.g., scholia)<input type="checkbox" id="includevaria" value="no"><br />
-        </fieldset>
+        {{ datesearchinghtml|safe }}
     </div>
     <div id="selectionendpoint">
         <span id="endpointnotice" class="unobtrusive">[span end]</span>
