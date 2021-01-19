@@ -11,15 +11,9 @@
         <input type="text" name="level02" class="worklevel" id="level02" placeholder="[level02]">
         <input type="text" name="level01" class="worklevel" id="level01" placeholder="[level01]">
         <input type="text" name="level00" class="worklevel" id="level00" placeholder="[level00]">
-        {{ searchfield|safe }}
+        {{ searchfieldbuttons|safe }}
     <div id="authorholdings"></div>
-        <input type="text" name="genres" class="genreinput" id="genresautocomplete" placeholder="Author Categories">
-        <input type="text" name="workgenres" class="genreinput" id="workgenresautocomplete" placeholder="Work Genres">
-        <input type="text" name="locations" class="genreinput" id="locationsautocomplete" placeholder="Author Locations">
-        <input type="text" name="provenances" class="genreinput" id="provenanceautocomplete" placeholder="Work Provenances">
-        <button id="pickgenrebutton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Include this category and/or genre"><span class="ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="excludegenrebutton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Exclude this category and/or genre"><span class="ui-icon ui-icon-minus"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
-        <button id="genreinfobutton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Show/Hide list of available categories"><span class="ui-icon ui-icon-clipboard"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+        {{ holdingshtml|safe }}
         <div id="genrelistcontents">&nbsp;</div>
         <br />
         <fieldset id="edts">

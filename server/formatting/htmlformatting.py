@@ -188,8 +188,7 @@ def vectorhtmlforoptionsbar() -> str:
 def getsearchfieldbuttonshtml() -> str:
 	"""
 
-	which buttons to show in #searchfield?
-
+	which buttons to show in #searchfield
 
 	full set is:
 
@@ -230,3 +229,35 @@ def getsearchfieldbuttonshtml() -> str:
 
 	return buttonhtml
 
+
+@htmlcommentdecorator
+def getauthorholdingfieldbhtml() -> str:
+	"""
+
+	what to show in #authorholdings
+
+	:return:
+	"""
+
+	inputtemplate = '\t\t<input type="text" name="{b}" id="{a}" placeholder="{c}">'
+	buttontemplate = '\t\t<button id="{a}" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="{c}"><span class="ui-icon ui-icon-{b}"></span><span class="ui-button-icon-space"></span>&nbsp;</button>'
+
+	holdingsmapper = {'genresautocomplete': (inputtemplate, 'geres', 'Author Categories'),
+	                  'workgenresautocomplete': (inputtemplate, 'workgenres', 'Work Genres'),
+	                  'locationsautocomplete': (inputtemplate, 'locations', 'Author Locations'),
+	                  'provenanceautocomplete': (inputtemplate, 'provenances', 'Work Provenances'),
+	                  'pickgenrebutton': (buttontemplate, 'plus', 'Include this category and/or genre'),
+	                  'excludegenrebutton': (buttontemplate, 'minus', 'Exclude this category and/or genre'),
+	                  'genreinfobutton': (buttontemplate, 'clipboard', 'Show/Hide list of available categories')}
+
+	skipping = hipparchia.config['HOLDINGSTOSKIP']
+	if not isinstance(skipping, list):
+		skipping = list()
+
+	myitems = [h for h in holdingsmapper if h not in skipping]
+
+	myitems = [holdingsmapper[i][0].format(a=i, b=holdingsmapper[i][1], c=holdingsmapper[i][2]) for i in myitems]
+
+	returnhtml = '\n'.join(myitems)
+
+	return returnhtml

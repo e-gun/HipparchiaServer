@@ -99,10 +99,21 @@ ENOUGHALREADYWITHTHECOPYRIGHTNOTICE = False
 DELETEUNACCENTEDGREEKFROMINDEX = True
 DROPLATININAGREEKINDEX = True
 
-# buttons you might want to drop from the #searchfield
+# the next control buttons you might want to drop from the #searchfield
 # note that dropping some of these will break core functions
-# note also that the relevant paths will be active so this is not a security measure
-# ALL = ['addauthortosearchlist', 'excludeauthorfromsearchlist', 'morechoicesbutton', 'fewerchoicesbutton', 'browseto', 'textofthis', 'makeanindex', 'makevocablist', 'authinfobutton']
-# BUTTONSTOSKIP = None
+# note also that the relevant paths will remain active so this is not a security measure, just a UI issue
+# the full known set is:
+# ['addauthortosearchlist', 'excludeauthorfromsearchlist', 'morechoicesbutton', 'fewerchoicesbutton', 'browseto', 'textofthis', 'makeanindex', 'makevocablist', 'authinfobutton']
 
+# BUTTONSTOSKIP = None
 BUTTONSTOSKIP = ['makevocablist']
+
+
+# here you can toggle items in the extended searchfield
+# note that dropping some of these will break core functions and there are some nonsense combos you might pick
+# note also that the relevant paths will remain active so this is not a security measure, just a UI issue
+# the full known set is:
+# ['genresautocomplete', 'workgenresautocomplete', 'locationsautocomplete', 'provenanceautocomplete', 'pickgenrebutton', 'excludegenrebutton', 'genreinfobutton']
+
+# HOLDINGSTOSKIP = None
+HOLDINGSTOSKIP = ['locationsautocomplete', 'provenanceautocomplete']
