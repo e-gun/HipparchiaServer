@@ -9,7 +9,6 @@ import re
 from string import punctuation
 
 from server import hipparchia
-from server.listsandsession.genericlistfunctions import flattenlistoflists
 
 # the one: because sometimes you don't want to zap τ’, δ’, κτλ.
 # the other: and sometimes you do
@@ -734,7 +733,8 @@ def uforvoutsideofmarkup(textwithmarkup) -> str:
 	if ranges:
 		# e.g., ranges = [(26, 54), (57, 64), (64, 85), (102, 109), (109, 137), (138, 145), (145, 166), (181, 188)]
 		ranges = [range(r[0], r[1]) for r in ranges]
-		preserve = set(flattenlistoflists(ranges))
+		flatten = lambda l: [item for sublist in l for item in sublist]
+		preserve = set(flatten(ranges))
 		textbyposition = enumerate(textwithmarkup)
 		newstr = list()
 		for t in textbyposition:
