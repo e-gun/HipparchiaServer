@@ -12,6 +12,22 @@ from server.formatting.wordformatting import buildhipparchiatranstable, extrapun
 	stripaccents
 
 
+def flattenlistoflists(listoflists):
+	"""
+
+	turn a list of lists into a list
+
+	a = [[1,2], [3,4]]
+	flatten(a)
+	[1, 2, 3, 4]
+
+	:param listoflists:
+	:return:
+	"""
+
+	return [item for sublist in listoflists for item in sublist]
+
+
 def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
 	"""
 

@@ -8,8 +8,8 @@
 
 import json
 import locale
-import time
 import re
+import time
 
 from flask import session
 
@@ -26,8 +26,8 @@ from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.parsingobjects import IndexmakerInputParsingObject, TextmakerInputParsingObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
-from server.listsandsession.genericlistfunctions import polytonicsort
 from server.listsandsession.checksession import probeforsessionvariables
+from server.listsandsession.genericlistfunctions import flattenlistoflists, polytonicsort
 from server.startup import progresspolldict, workdict
 from server.textsandindices.indexmaker import buildindextowork
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects, textsegmentfindstartandstop, \
@@ -205,8 +205,7 @@ def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoi
 	lineobjects = grabbundlesoflines(cdict, dbcursor)
 
 	allwords = [l.wordset() for l in lineobjects]
-	flatten = lambda l: [item for sublist in l for item in sublist]
-	allwords = set(flatten(allwords))
+	allwords = set(flattenlistoflists(allwords))
 
 	morphobjects = getrequiredmorphobjects(allwords)
 	# 'dominatio': <server.hipparchiaobjects.dbtextobjects.dbMorphologyObject object at 0x14ab92d68>, ...

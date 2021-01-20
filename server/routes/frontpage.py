@@ -19,7 +19,7 @@ from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.dbbuildinfo import versionchecking
 from server.dbsupport.miscdbfunctions import getpostgresserverversion
-from server.formatting.htmlformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar, getsearchfieldbuttonshtml, getauthorholdingfieldhtml, getdaterangefieldhtml
+from server.formatting.frontpagehtmlformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar, getsearchfieldbuttonshtml, getauthorholdingfieldhtml, getdaterangefieldhtml
 from server.hipparchiaobjects.authenticationobjects import LoginForm
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper

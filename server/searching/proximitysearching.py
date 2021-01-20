@@ -7,14 +7,14 @@
 """
 
 import re
-
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, makeablankline, grablistoflines
+from server.dbsupport.dblinefunctions import dblineintolineobject, grablistoflines, grabonelinefromwork, makeablankline
 from server.formatting.wordformatting import wordlistintoregex
-from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.searchobjects import SearchObject
+from server.hipparchiaobjects.worklineobject import dbWorkLine
+from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.searching.searchfunctions import dblooknear
 from server.searching.substringsearching import substringsearch
 
@@ -94,8 +94,6 @@ def lemmatizedwithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbc
 
 	prox = int(so.session['proximity'])
 
-	flatten = lambda l: [item for sublist in l for item in sublist]
-
 	# note that at the moment we arrive here with a one-work per worker policy
 	# that is all of the hits will come from the same table
 	# this means extra/useless sifting below, but perhaps it is safer to be wasteful now lest we break later
@@ -146,7 +144,7 @@ def lemmatizedwithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbc
 
 		mywords = [getattr(l, col) for l in mylines]
 		mywords = [w.split(' ') for w in mywords if mywords]
-		mywords = flatten(mywords)
+		mywords = flattenlistoflists(mywords)
 		mywords = ' '.join(mywords)
 		wordbundles[l] = mywords
 

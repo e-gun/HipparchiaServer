@@ -28,6 +28,7 @@ from server.hipparchiaobjects.lexicaloutputobjects import lexicalOutputObject, m
 from server.hipparchiaobjects.morphanalysisobjects import BaseFormMorphology
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.listsandsession.checksession import justlatin, justtlg, probeforsessionvariables
+from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.startup import authordict
 from server.startup import progresspolldict
 
@@ -101,8 +102,7 @@ def dictsearch(searchterm):
 			usecounter = True
 
 		wordobjects = [probedictionary(setdictionarylanguage(f[0]) + '_dictionary', 'entry_name', f[0], '=', dbcursor=dbcursor, trialnumber=0) for f in foundtuples]
-		flatten = lambda l: [item for sublist in l for item in sublist]
-		wordobjects = flatten(wordobjects)
+		wordobjects = flattenlistoflists(wordobjects)
 		outputobjects = [lexicalOutputObject(w) for w in wordobjects]
 
 		# very top: list the finds
@@ -336,8 +336,7 @@ def reverselexiconsearch(searchid, searchterm):
 		dbcursor = dbconnection.cursor()
 
 		wordobjects = [probedictionary(setdictionarylanguage(e[0]) + '_dictionary', 'entry_name', e[0], '=', dbcursor=dbcursor, trialnumber=0) for e in entriestuples]
-		flatten = lambda l: [item for sublist in l for item in sublist]
-		wordobjects = flatten(wordobjects)
+		wordobjects = flattenlistoflists(wordobjects)
 		outputobjects = [lexicalOutputObject(w) for w in wordobjects]
 		if len(outputobjects) > 1:
 			usecounter = True

@@ -13,14 +13,15 @@ import psycopg2
 from flask import session
 
 from server.dbsupport.bulkdboperations import bulklexicalgrab
-from server.dbsupport.miscdbfunctions import resultiterator, cleanpoolifneeded
+from server.dbsupport.miscdbfunctions import cleanpoolifneeded, resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.abbreviations import unpackcommonabbreviations
 from server.formatting.wordformatting import stripaccents, universalregexequivalent
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.hipparchiaobjects.dbtextobjects import dbMorphologyObject, dbLemmaObject
+from server.hipparchiaobjects.dbtextobjects import dbLemmaObject, dbMorphologyObject
 from server.hipparchiaobjects.lexicalobjects import dbDictionaryEntry, dbGreekWord, dbLatinWord
 from server.hipparchiaobjects.wordcountobjects import dbHeadwordObject, dbWordCountObject
+from server.listsandsession.genericlistfunctions import flattenlistoflists
 
 
 def headwordsearch(seeking: str, limit: str, usedictionary: str, usecolumn: str) -> List[tuple]:
@@ -733,13 +734,12 @@ def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None
 	if len(morphobjects) == 1:
 		morphobject = morphobjects[0]
 	else:
-		flatten = lambda l: [item for sublist in l for item in sublist]
 		ob = morphobjects[0].observed
-		xr = flatten([m.xrefs for m in morphobjects])
+		xr = flattenlistoflists([m.xrefs for m in morphobjects])
 		xr = ', '.join(xr)
-		pr = flatten([m.prefixrefs for m in morphobjects])
+		pr = flattenlistoflists([m.prefixrefs for m in morphobjects])
 		pr = ', '.join(pr)
-		pf = flatten([m.possibleforms.split('\n') for m in morphobjects])
+		pf = flattenlistoflists([m.possibleforms.split('\n') for m in morphobjects])
 		# note that you will have multiple '<possibility_1>' entries now... Does not matter ATM, but a bug waiting to bite
 		pf = '\n'.join(pf)
 		morphobject = dbMorphologyObject(ob, xr, pr, pf)

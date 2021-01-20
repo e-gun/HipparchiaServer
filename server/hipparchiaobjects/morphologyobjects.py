@@ -11,6 +11,7 @@ import re
 from server import hipparchia
 from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import gkattemptelision, latattemptelision, minimumgreek
+from server.listsandsession.genericlistfunctions import flattenlistoflists
 
 
 class MorphPossibilityObject(object):
@@ -78,9 +79,8 @@ class MorphPossibilityObject(object):
 			return True
 
 	def _gettokens(self) -> set:
-		flatten = lambda l: [item for sublist in l for item in sublist]
-		tokens = flatten([a.split(' ') for a in self.getanalysislist()])
-		tokens = flatten([t.split('/') for t in tokens])
+		tokens = flattenlistoflists([a.split(' ') for a in self.getanalysislist()])
+		tokens = flattenlistoflists([t.split('/') for t in tokens])
 		tokens = set(tokens)
 		return tokens
 
