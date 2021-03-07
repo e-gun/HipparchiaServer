@@ -15,6 +15,7 @@ from multiprocessing import current_process
 
 from server import hipparchia
 from server.formatting.jsformatting import generatevectorjs
+from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.searchobjects import SearchOutputObject
 
 from server.hipparchiaobjects.vectorobjects import VectorValues
@@ -305,7 +306,7 @@ def storevectorgraph(figureasbytes):
 	return randomid
 
 
-def fetchvectorgraph(imagename):
+def fetchvectorgraph(imagename) -> bytes:
 	"""
 
 	grab a graph in the image table so that you can subsequently display it in the browser
@@ -336,7 +337,15 @@ def fetchvectorgraph(imagename):
 	imagedata = cursor.fetchone()
 	# need to convert to bytes, otherwise:
 	# AttributeError: 'memoryview' object has no attribute 'read'
-	imagedata = bytes(imagedata[0])
+	try:
+		imagedata = bytes(imagedata[0])
+	except TypeError:
+		# TypeError: 'NoneType' object is not subscriptable
+		# how did this happen...
+		# if you right click and download a graph in Firefox it will try to pull via the URL
+		# but that figure is almost certainly gone unless you are a debugger retaining figures...
+		imagedata = b''
+		consolewarning('fetchvectorgraph() failed to fetch image {i}'.format(i=imagename))
 
 	# print('fetched {n} from vector image table'.format(n=randomid))
 

@@ -30,6 +30,7 @@ def substringsearch(seeking: str, authortable: str, searchobject: SearchObject, 
 
 	sample 'unrestricted':
 		SELECT * FROM gr0059 WHERE  ( stripped_line ~* %s )  LIMIT 200 ('βαλλ',)
+		[i.e, SELECT * FROM gr0059 WHERE  ( stripped_line ~* 'βαλλ') LIMIT 200;]
 	sample 'between':
 		SELECT * FROM gr0032 WHERE (index BETWEEN 1846 AND 2856) AND (index NOT BETWEEN 1846 AND 2061) AND ( stripped_line ~* %s )  LIMIT 200 ('βαλλ',)
 	sample 'temptable':

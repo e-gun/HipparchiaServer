@@ -415,11 +415,11 @@ def fetchstoredimage(figurename):
 	:return:
 	"""
 
-	graph = fetchvectorgraph(figurename)
+	graphbytes = fetchvectorgraph(figurename)
 
-	response = make_response(graph)
+	response = make_response(graphbytes)
 	response.headers.set('Content-Type', 'image/png')
-	response.headers.set('Content-Disposition', 'attachment', filename='graph.png')
+	response.headers.set('Content-Disposition', 'attachment', filename='hipparchia_graph_{f}.png'.format(f=figurename))
 
 	return response
 
