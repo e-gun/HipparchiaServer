@@ -19,7 +19,8 @@ from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.dbbuildinfo import versionchecking
 from server.dbsupport.miscdbfunctions import getpostgresserverversion
-from server.formatting.frontpagehtmlformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar, getsearchfieldbuttonshtml, getauthorholdingfieldhtml, getdaterangefieldhtml
+from server.formatting.frontpagehtmlformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar, getsearchfieldbuttonshtml, \
+	getauthorholdingfieldhtml, getdaterangefieldhtml, getlexicafieldhtml
 from server.hipparchiaobjects.authenticationobjects import LoginForm
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
@@ -130,6 +131,7 @@ def frontpage():
 							searchfieldbuttons=getsearchfieldbuttonshtml(),
 							holdingshtml=getauthorholdingfieldhtml(),
 							datesearchinghtml=getdaterangefieldhtml(),
+							lexicalthml=getlexicafieldhtml(),
 							backend=backend,
 							icanzap=icanzap,
 							loginform=loginform)

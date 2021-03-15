@@ -118,4 +118,12 @@ BUTTONSTOSKIP = ['makevocablist']
 HOLDINGSTOSKIP = None
 # HOLDINGSTOSKIP = ['locationsautocomplete', 'provenanceautocomplete']
 
+
+# here you can toggle the lexical search boxes
+# note that the relevant paths will remain active so this is not a security measure, just a UI issue
+# the full known set is:
+# ['lexicon', 'parser', 'reverselexicon']
+LEXICABOXESTOSKIP = ['parser']
+
+
 INCLUDEDATESEARCHINGHTML = True

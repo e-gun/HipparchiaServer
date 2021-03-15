@@ -294,3 +294,44 @@ def getdaterangefieldhtml() -> str:
 		return str()
 	else:
 		return datehtml
+
+
+@htmlcommentdecorator
+def getlexicafieldhtml() -> str:
+	"""
+
+	word lookup html
+
+	"""
+
+	divtemplate = """
+	<div id="lexica">
+		<br />
+		{boxes}
+		<button id="lexicalsearch" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="Search dictionary or parser"><span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span>&nbsp;</button>
+	</div>
+	"""
+
+	boxtemplate = '<input type="text" name="lexicon" class="lexica" id="{a}" placeholder="{b}">'
+
+	mappings = {
+		'lexicon': '(Dictionary Search)',
+		'parser': '(Morphology Search)',
+		'reverselexicon': '(English to Greek or Latin)',
+	}
+
+	skipping = hipparchia.config['LEXICABOXESTOSKIP']
+	if not isinstance(skipping, list):
+		skipping = list()
+
+	myitems = [m for m in mappings if m not in skipping]
+
+	boxhtml = list()
+	for m in sorted(myitems):
+		boxhtml.append(boxtemplate.format(a=m, b=mappings[m]))
+
+	boxhtml = '\n'.join(boxhtml)
+
+	thehtml = divtemplate.format(boxes=boxhtml)
+
+	return thehtml

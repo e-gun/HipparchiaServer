@@ -184,15 +184,22 @@ def setsessionvariable(thevariable, thevalue):
 	:return:
 	"""
 
+	nullresult = json.dumps([{'none': 'none'}])
+
 	# need to accept '-' because of the date spinner; '_' because of 'converted_date', etc
 	validpunct = '-_'
 	thevalue = depunct(thevalue, validpunct)
+
+	if thevalue == 'null':
+		# the js sent out something unexpected while you were in the middle of swapping values
+		# 127.0.0.1 - - [09/Mar/2021 09:50:42] "GET /setsessionvariable/browsercontext/null HTTP/1.1" 500 -
+		return nullresult
 
 	try:
 		session['authorssummary']
 	except KeyError:
 		# cookies are not enabled
-		return json.dumps([{'none': 'none'}])
+		return nullresult
 
 	modifysessionvariable(thevariable, thevalue)
 

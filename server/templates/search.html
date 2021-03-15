@@ -8,13 +8,13 @@
 <div id="mainbody">
     <!-- "mainbody" allows the option sidebar to push the page contents right -->
     {% include "searchfield.html" ignore missing %}
-    {% include "lexica.html" ignore missing %}
     {% include "outputbox.html" ignore missing %}
     {% include "saveslots.html" ignore missing %}
     {% include "activeoptions.html" ignore missing %}
     {% include "hipparchiahelp.html" ignore missing %}
     {% include "wordsearchfields.html" ignore missing %}
     {% include "browserdialog.html" ignore missing %}
+    {% autoescape false %}{{ lexicalthml }}{% endautoescape %}
 
     <div id="lexicadialog">
         <div id="lexicadialogtext"></div>
