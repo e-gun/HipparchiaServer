@@ -372,18 +372,19 @@ $('#lexicalsearch').click(function(){
     let dialogtitle = '';
     let mydictfield = '';
 
-    if ( dictterm.length > 0) {
+    // if you have toggled any of the boxes off, then $('#parser').val(), etc. will be 'undefined'
+    if ( typeof dictterm !== 'undefined' && dictterm.length > 0) {
         searchterm = dictterm;
         url = '/dictsearch/';
         dialogtitle = restoreme;
         mydictfield = '#lexicon';
-    } else if ( parseterm.length > 0 ) {
+    } else if ( typeof parseterm !== 'undefined' && parseterm.length > 0 ) {
         searchterm = parseterm;
         url = '/parse/';
         dialogtitle = searchterm;
         mydictfield = '#parser';
         restoreme = searchterm;
-    } else if ( reverseterm.length > 0 ) {
+    } else if ( typeof reverseterm !== 'undefined' && reverseterm.length > 0 ) {
         $('#searchsummary').html('');
         let pd = $('#pollingdata');
         pd.html('');
