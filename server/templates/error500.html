@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Error 500: Internal Server Error</h1>
+    <p>Something went horribly wrong.</p>
+    <p>You have almost certainly triggered an exception in HipparchiaServer. Consider reporting it via the
+        <a href="https://github.com/e-gun/HipparchiaServer">GitHub</a> repository.</p>
+    <p>If you are running HipparchiaServer yourself, then the console log should contain a block of error
+    messages. If you are just a remote user, then all you can report is what you were trying to do when you got this
+    page instead.</p>
+
+    <p>If possible, you should return to the <a href="{{ url_for('frontpage') }}">front page</a>.</p>
+
+<br>
+
+<h4>[A] HipparchiaServer version:</h4>
+<pre>
+
+HipparchiaServer {{ version }}
+
+</pre>
+
+<h4>[B] Backend environment:</h4>
+<pre>
+{{ backend }}
+</pre>
+
+{% endblock %}

@@ -27,6 +27,34 @@ from server.startup import listmapper
 from version import release, hipparchiaserverversion, readgitdata
 
 
+stylesheet = hipparchia.config['CSSSTYLESHEET']
+expectedsqltemplateversion = 10082019
+# check to see which dbs we actually own
+activelists = [l for l in listmapper if len(listmapper[l]['a']) > 0]
+buildinfo = versionchecking(activelists, expectedsqltemplateversion)
+
+psqlversion = getpostgresserverversion()
+# Note that unlike the Python sys.version, the returned value will always include the patchlevel (it defaults to '0').
+pythonversion = '.'.join(python_version_tuple())
+
+backend = """
+Platform    {pf}
+PostgreSQL  {ps}
+Python      {py}
+Flask       {fl}
+"""
+
+backend = backend.format(pf=platform(), ps=psqlversion, py=pythonversion, fl=flaskversion)
+
+shortversion = hipparchiaserverversion
+gitlength = 5
+commit = readgitdata()
+version = '{v} [git: {g}]'.format(v=hipparchiaserverversion, g=commit[:gitlength])
+
+if not release:
+	shortversion = version
+
+
 @hipparchia.route('/')
 def frontpage():
 	"""
@@ -38,10 +66,6 @@ def frontpage():
 	"""
 
 	probeforsessionvariables()
-
-	expectedsqltemplateversion = 10082019
-
-	stylesheet = hipparchia.config['CSSSTYLESHEET']
 
 	fonts = hipparchia.config['FONTPICKERLIST']
 	fonts.sort()
@@ -57,23 +81,6 @@ def frontpage():
 		debugpanel = True
 
 	havevectors = hipparchia.config['SEMANTICVECTORSENABLED']
-
-	# check to see which dbs we actually own
-	activelists = [l for l in listmapper if len(listmapper[l]['a']) > 0]
-
-	buildinfo = versionchecking(activelists, expectedsqltemplateversion)
-	psqlversion = getpostgresserverversion()
-	# Note that unlike the Python sys.version, the returned value will always include the patchlevel (it defaults to '0').
-	pythonversion = '.'.join(python_version_tuple())
-
-	backend = """
-	Platform    {pf}
-	PostgreSQL  {ps}
-	Python      {py}
-	Flask       {fl}
-	"""
-
-	backend = backend.format(pf=platform(), ps=psqlversion, py=pythonversion, fl=flaskversion)
 
 	knowncorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 
@@ -94,15 +101,6 @@ def frontpage():
 		# but that involves a lot kludge just to make a very optional option work
 		icanzap = 'no'
 
-	gitlength = 5
-	commit = readgitdata()
-	version = '{v} [git: {g}]'.format(v=hipparchiaserverversion, g=commit[:gitlength])
-
-	shortversion = hipparchiaserverversion
-
-	if not release:
-		shortversion = version
-
 	loginform = None
 
 	if hipparchia.config['LIMITACCESSTOLOGGEDINUSERS']:
@@ -113,6 +111,7 @@ def frontpage():
 							activecorpora=activecorpora,
 							clab=corporalabels,
 							css=stylesheet,
+							backend=backend,
 							buildinfo=buildinfo,
 							onehit=session['onehit'],
 							picker=picker,
@@ -132,7 +131,6 @@ def frontpage():
 							holdingshtml=getauthorholdingfieldhtml(),
 							datesearchinghtml=getdaterangefieldhtml(),
 							lexicalthml=getlexicafieldhtml(),
-							backend=backend,
 							icanzap=icanzap,
 							loginform=loginform)
 
@@ -195,3 +193,25 @@ def loadhelpdata():
 	helpdict = json.dumps(helpdict)
 	
 	return helpdict
+
+
+@hipparchia.errorhandler(404)
+def pagenotfound(e):
+	return render_template('error404.html',
+						css=stylesheet,
+						backend=backend,
+						buildinfo=buildinfo,
+						version=version,
+						shortversion=shortversion,
+						), 404
+
+
+@hipparchia.errorhandler(500)
+def pagenotfound(e):
+	return render_template('error500.html',
+						css=stylesheet,
+						backend=backend,
+						buildinfo=buildinfo,
+						version=version,
+						shortversion=shortversion,
+						), 500
