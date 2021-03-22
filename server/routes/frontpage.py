@@ -13,7 +13,7 @@ from platform import platform, python_version_tuple
 from sys import argv
 
 from flask import __version__ as flaskversion
-from flask import render_template, send_file, session
+from flask import render_template, send_file, session, Response
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
@@ -145,6 +145,14 @@ def sendfavicon():
 @hipparchia.route('/apple-touch-icon-precomposed.png')
 def appletouchticon():
 	return send_file('static/images/hipparchia_apple-touch-icon-precomposed.png')
+
+
+@hipparchia.route('/robots.txt')
+def robotstxt():
+	blockall = 'User-Agent: *\nDisallow: /\n'
+	r = Response(response=blockall, status=200, mimetype='text/plain')
+	r.headers['Content-Type'] = 'text/plain; charset=utf-8'
+	return r
 
 
 @hipparchia.route('/loadhelpdata')
