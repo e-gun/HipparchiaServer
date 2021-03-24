@@ -203,23 +203,34 @@ def loadhelpdata():
 	return helpdict
 
 
-@hipparchia.errorhandler(404)
-def pagenotfound(e):
-	return render_template('error404.html',
+def errorhandlingpage(errornumber):
+	"""
+
+	generic error pages
+
+	NB: not every field is used in every error page
+
+	"""
+	template = render_template('error{e}.html'.format(e=errornumber),
 						css=stylesheet,
 						backend=backend,
 						buildinfo=buildinfo,
 						version=version,
 						shortversion=shortversion,
-						), 404
+						)
+	return template
+
+
+@hipparchia.errorhandler(400)
+def badrequesterror(e):
+	return errorhandlingpage(400), 400
+
+
+@hipparchia.errorhandler(404)
+def pagenotfound(e):
+	return errorhandlingpage(404), 404
 
 
 @hipparchia.errorhandler(500)
-def pagenotfound(e):
-	return render_template('error500.html',
-						css=stylesheet,
-						backend=backend,
-						buildinfo=buildinfo,
-						version=version,
-						shortversion=shortversion,
-						), 500
+def internalservererror(e):
+	return errorhandlingpage(500), 500

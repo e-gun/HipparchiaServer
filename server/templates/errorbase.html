@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery-ui.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js.cookie.js') }}"></script>
+
+    <title>Hipparchia</title>
+    <link rel=stylesheet type=text/css href="/css/{{ css }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='jquery-ui.css') }}">
+</head>
+<body>
+
+<!--
+
+HipparchiaServer: a container for and an interface to a database of Greek and Latin texts
+Copyright: E Gunderson 2016-20
+License: GNU GENERAL PUBLIC LICENSE 3
+    (see LICENSE in the top level directory of the distribution)
+
+-->
+
+{% block content %}{% endblock %}
+<div id="versioning">
+    <span class="unobtrusive">v{{ shortversion }}</span>
+</div>
+</body>
+</html>

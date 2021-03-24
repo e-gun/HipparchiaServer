@@ -1,20 +1,22 @@
 hipparchia_venv/ $ cloc --not-match-f='^j' HipparchiaServer/
-     207 text files.
-     198 unique files.
-      31 files ignored.
+     203 text files.
+     200 unique files.
+      27 files ignored.
 
-github.com/AlDanial/cloc v 1.86  T=0.83 s (219.4 files/s, 57660.4 lines/s)
+github.com/AlDanial/cloc v 1.88  T=0.26 s (698.0 files/s, 178779.0 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Python                         117           6817           9468          16423
-JavaScript                      21           1129            396           4979
-CSS                              7            953            260           3969
-HTML                            30            251             34           2337
-XML                              7              0              0            803
-Markdown                         1             63              0            223
+Python                         121           6975           9746          16737
+JavaScript                      18           1135            392           4233
+CSS                              4            954            242           3914
+HTML                            30            188             30           1943
+XML                              7              0              0            269
+Markdown                         1             63              0            225
+Rust                             2             12              6             44
+TOML                             1              2              1             15
 -------------------------------------------------------------------------------
-SUM:                           183           9213          10158          28734
+SUM:                           184           9329          10417          27380
 -------------------------------------------------------------------------------
 
 
@@ -233,29 +235,37 @@ formatting/betacodetounicode.py:def lowercascircumflex(match: re.match, g=1) -> 
 formatting/betacodetounicode.py:def lowercasediaresis(match: re.match, g=1) -> str:
 formatting/betacodetounicode.py:def lowercasesubscript(match: re.match, g=1) -> str:
 formatting/betacodetounicode.py:def lowercases(match: re.match, g=0) -> str:
-formatting/bibliographicformatting.py:def bcedating(s=session) -> tuple:
+formatting/bibliographicformatting.py:def bcedating(s=None) -> tuple:
 formatting/bibliographicformatting.py:def formatauthinfo(authorobject: dbAuthor) -> str:
 formatting/bibliographicformatting.py:def woformatworkinfo(workobject: dbOpus) -> str:
 formatting/bibliographicformatting.py:def formatname(workobject: dbOpus, authorobject: dbAuthor) -> str:
 formatting/bibliographicformatting.py:def formatpublicationinfo(pubinfo: str) -> str:
-formatting/bibliographicformatting.py:def avoidlonglines(string: str, maxlen: int, splitval: str, stringlist=list()) -> str:
+formatting/bibliographicformatting.py:def avoidlonglines(string: str, maxlen: int, splitval: str, stringlist=None) -> str:
 formatting/bibliographicformatting.py:def formatauthorandworkinfo(authorname: str, workobject: dbOpus, countprovided=False) -> str:
 formatting/bracketformatting.py:def gtltsubstitutes(text: str) -> str:
 formatting/bracketformatting.py:def brackethtmlifysearchfinds(listoflineobjects: list, searchobject: SearchObject, linehtmltemplate: str) -> list:
 formatting/browserformatting.py:def insertparserids(lineobject: dbWorkLine, continuationdict: dict) -> str:
 formatting/browserformatting.py:def bracketcheck(word: str) -> bool:
 formatting/browserformatting.py:def addobservedtags(word: str, lastword: str, hyphenated: str) -> str:
+formatting/frontpagehtmlformatting.py:def vectorhtmlforfrontpage() -> str:
+formatting/frontpagehtmlformatting.py:def vectorhtmlforoptionsbar() -> str:
+formatting/frontpagehtmlformatting.py:def getsearchfieldbuttonshtml() -> str:
+formatting/frontpagehtmlformatting.py:def getauthorholdingfieldhtml() -> str:
+formatting/frontpagehtmlformatting.py:def getdaterangefieldhtml() -> str:
+formatting/frontpagehtmlformatting.py:def getlexicafieldhtml() -> str:
 formatting/jsformatting.py:def insertbrowserclickjs(tagname: str) -> str:
 formatting/jsformatting.py:def insertlexicalbrowserjs() -> str:
 formatting/jsformatting.py:def generatevectorjs() -> str:
+formatting/jsformatting.py:def supplementalvocablistjs() -> str:
 formatting/jsformatting.py:def supplementalindexjs() -> str:
+formatting/jsformatting.py:def observedformjs(clickone, clicktwo) -> str:
 formatting/jsformatting.py:def dictionaryentryjs() -> str:
 formatting/jsformatting.py:def morphologychartjs() -> str:
 formatting/lexicaformatting.py:def formatdictionarysummary(wordentryobject) -> str:
-formatting/lexicaformatting.py:def lexicaldbquickfixes(listofnames: list) -> Dict[str, str]:
 formatting/lexicaformatting.py:def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) -> str:
 formatting/lexicaformatting.py:def getobservedwordprevalencedata(dictionaryword) -> str:
 formatting/lexicaformatting.py:def formatprevalencedata(wordcountobject) -> str:
+formatting/miscformatting.py:def htmlcommentdecorator(function):
 formatting/miscformatting.py:def timedecorator(function):
 formatting/miscformatting.py:def validatepollid(searchid, maxchars=36) -> str:
 formatting/miscformatting.py:def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True, baremessage=False):
@@ -281,8 +291,6 @@ formatting/vectorformatting.py:def formatnnmatches(listofneighbors: List[tuple],
 formatting/vectorformatting.py:def formatnnsimilarity(termone: str, termtwo: str, similarityscore: float) -> str:
 formatting/vectorformatting.py:def skformatmostimilar(similaritiesdict: dict) -> str:
 formatting/vectorformatting.py:def locusformat(dblineobject: dbWorkLine) -> str:
-formatting/vectorformatting.py:def vectorhtmlforfrontpage() -> str:
-formatting/vectorformatting.py:def vectorhtmlforoptionsbar() -> str:
 formatting/vectorformatting.py:def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: str, workssearched: int, searchobject: SearchObject) -> str:
 formatting/vectorformatting.py:def analogiesgenerateoutput(searchobject, findstuples: list) -> str:
 formatting/vectorformatting.py:def lsiformatoutput(findshtml: str, workssearched: int, matches: list, searchobject: SearchObject) -> str:
@@ -320,12 +328,14 @@ listsandsession/checksession.py:def justpapyri(thesession=None) -> bool:
 listsandsession/checksession.py:def justlit(thesession=None) -> bool:
 listsandsession/checksession.py:def justdoc(thesession=None) -> bool:
 listsandsession/checksession.py:def corpusisonandavailable(corpusname):
+listsandsession/genericlistfunctions.py:def flattenlistoflists(listoflists):
 listsandsession/genericlistfunctions.py:def dictitemstartswith(originaldict: dict, element: str, muststartwith: str) -> dict:
 listsandsession/genericlistfunctions.py:def findspecificdate(authorandworklist, authorobjectdict, workobjectdict, specificdate) -> list:
 listsandsession/genericlistfunctions.py:def tidyuplist(untidylist: list) -> list:
 listsandsession/genericlistfunctions.py:def dropdupes(checklist: list, matchlist: list) -> list:
 listsandsession/genericlistfunctions.py:def polytonicsort(unsortedwords: list) -> list:
 listsandsession/genericlistfunctions.py:def foundindict(searchdict: dict, element: str, mustbein: str, exactmatch=True) -> list:
+listsandsession/genericlistfunctions.py:def findsetofallwords(listofwordclusters: list) -> set:
 listsandsession/searchlistmanagement.py:def compilesearchlist(listmapper: dict, s: dict) -> list:
 listsandsession/searchlistmanagement.py:def sortsearchlist(searchlist: list, authorsdict: dict) -> list:
 listsandsession/searchlistmanagement.py:def sortresultslist(hits: list, searchobject: SearchObject, authorsdict: dict, worksdict: dict) -> dict:
@@ -347,7 +357,7 @@ listsandsession/sessionfunctions.py:def rationalizeselections(newselectionuid, s
 listsandsession/sessionfunctions.py:def reducetosessionselections(listmapper: dict, criterion: str) -> dict:
 listsandsession/sessionfunctions.py:def returnactivedbs(thesession=None) -> List[str]:
 listsandsession/sessionfunctions.py:def findactivebrackethighlighting(thesession=None) -> List[str]:
-listsandsession/sessionfunctions.py:def selectionisactive(selected):
+listsandsession/sessionfunctions.py:def selectionisactive(selected) -> str:
 listsandsession/sessionfunctions.py:def returnactivelist(selectiondict: dict) -> List[str]:
 listsandsession/validateconfig.py:def loadconfig(filepath) -> list:
 listsandsession/validateconfig.py:def parseconfig(configlist) -> List[str]:
@@ -365,7 +375,10 @@ routes/cssroutes.py:def loadcssfile(cssrequest):
 routes/frontpage.py:def frontpage():
 routes/frontpage.py:def sendfavicon():
 routes/frontpage.py:def appletouchticon():
+routes/frontpage.py:def robotstxt():
 routes/frontpage.py:def loadhelpdata():
+routes/frontpage.py:def pagenotfound(e):
+routes/frontpage.py:def pagenotfound(e):
 routes/getterroutes.py:def getsessionvariables():
 routes/getterroutes.py:def cookieintosession(cookienum):
 routes/getterroutes.py:def findtheworksof(authoruid):
@@ -401,7 +414,9 @@ routes/selectionroutes.py:def selectionmade():
 routes/selectionroutes.py:def setsessionvariable(thevariable, thevalue):
 routes/selectionroutes.py:def clearselections(category, index=-1):
 routes/selectionroutes.py:def getcurrentselections():
-routes/textandindexroutes.py:def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=None, citationdelimiter='|'):
+routes/textandindexroutes.py:def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=None, citationdelimiter='|', justvocab=False):
+routes/textandindexroutes.py:def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoint=None, citationdelimiter='|'):
+routes/textandindexroutes.py:def vocabfromrawlocus(searchid: str, author: str, work=None, location=None, endpoint=None):
 routes/textandindexroutes.py:def indexfromrawlocus(searchid: str, author: str, work=None, location=None, endpoint=None):
 routes/textandindexroutes.py:def textmaker(author: str, work=None, passage=None, endpoint=None, citationdelimiter='|'):
 routes/textandindexroutes.py:def texmakerfromrawlocus(author: str, work: str, location: str, endpoint=None):
@@ -465,7 +480,7 @@ semanticvectors/vectorgraphing.py:def graphnnmatches(searchterm, mostsimilartupl
 semanticvectors/vectorgraphing.py:def graphmatches(graphtitle, searchterm, searchobject, mostsimilartuples, terms, relevantconnections, vtype):
 semanticvectors/vectorgraphing.py:def matplotgraphmatches(graphtitle, searchterm, searchobject, mostsimilartuples, terms, relevantconnections, vtype):
 semanticvectors/vectorgraphing.py:def storevectorgraph(figureasbytes):
-semanticvectors/vectorgraphing.py:def fetchvectorgraph(imagename):
+semanticvectors/vectorgraphing.py:def fetchvectorgraph(imagename) -> bytes:
 semanticvectors/vectorgraphing.py:def givetitletograph(topic, searchterm, searchobject):
 semanticvectors/vectorgraphing.py:def generatethefineprint(vtype: str, vectorvalues: VectorValues) -> str:
 semanticvectors/vectorgraphing.py:def tsnegraphofvectors(sentencetuples, workssearched, so, vectorspace):
@@ -479,7 +494,6 @@ semanticvectors/vectorhelpers.py:def replaceabbreviations(foundstring, searchdic
 semanticvectors/vectorhelpers.py:def recursivesplit(tosplit, listofsplitlerms):
 semanticvectors/vectorhelpers.py:def findsentences(authortable, searchobject, cursor):
 semanticvectors/vectorhelpers.py:def parsevectorsentences(searchobject, lineobjects):
-semanticvectors/vectorhelpers.py:def findwordvectorset(listofwordclusters: list) -> set:
 semanticvectors/vectorhelpers.py:def convertmophdicttodict(morphdict: dict) -> dict:
 semanticvectors/vectorhelpers.py:def buildlemmatizesearchphrase(phrase: str) -> str:
 semanticvectors/vectorhelpers.py:def bruteforcefinddblinefromsentence(thissentence, modifiedsearchobject):
@@ -497,11 +511,11 @@ semanticvectors/vectorroutehelperfunctions.py:def findabsolutevectorsbysentence(
 semanticvectors/vectorroutehelperfunctions.py:def findabsolutevectorsfromhits(searchobject, hitdict, workssearched):
 semanticvectors/vectorroutehelperfunctions.py:def generateabsolutevectorsoutput(listsofwords: list, workssearched: list, searchobject, vtype: str):
 semanticvectors/vectorroutehelperfunctions.py:def emptyvectoroutput(searchobject, reasons=None):
-semanticvectors/wordbaggers.py:def buildwordbags(searchobject, morphdict: dict, sentences: list):
-semanticvectors/wordbaggers.py:def buildwinnertakesallbagsofwords(morphdict, sentences):
-semanticvectors/wordbaggers.py:def buidunlemmatizedbagsofwords(morphdict, sentences):
-semanticvectors/wordbaggers.py:def buildflatbagsofwords(morphdict, sentences):
-semanticvectors/wordbaggers.py:def buildbagsofwordswithalternates(morphdict, sentences):
+semanticvectors/wordbaggers.py:def buildwordbags(searchobject, morphdict: dict, sentences: list) -> deque:
+semanticvectors/wordbaggers.py:def buildwinnertakesallbagsofwords(morphdict, sentences) -> deque:
+semanticvectors/wordbaggers.py:def buidunlemmatizedbagsofwords(morphdict, sentences) -> deque:
+semanticvectors/wordbaggers.py:def buildflatbagsofwords(morphdict, sentences) -> deque:
+semanticvectors/wordbaggers.py:def buildbagsofwordswithalternates(morphdict, sentences) -> deque:
 textsandindices/indexmaker.py:def buildindextowork(cdict: dict, activepoll, headwords: bool, cursor) -> List[tuple]:
 textsandindices/indexmaker.py:def generatesortedoutputbyword(completeindexdict: dict, onework: bool, alphabetical: bool) -> List[tuple]:
 textsandindices/indexmaker.py:def generatesortedoutputbyheadword(completeindexdict: dict, onework: bool, alphabetical: bool, activepoll) -> List[tuple]:

@@ -105,6 +105,7 @@ key features:
 		text layout via CSS: possible to modify the style sheet to suit your own tastes
 		optional highlighting of editorial insertions: {abc}, <def>, (ghi), [jkl]
 		configurable defaults for most options
+		configurable UI elements: hide features you will never use
 		will display annotations to the original text
 		unicode support of technical, rare, and exotic characters (that you can also search for: 𐆂,𐄒, 🜚)
 		can find Coptic words and characters: 'ⲫⲓⲗⲟⲑⲉⲟⲥ', 'ϩανϭοϊ̈', etc.
@@ -167,6 +168,7 @@ minimum software requirements:
 			pyLDAvis
 			matplotlib
 			networkx
+			umap-learn
 
 	to properly interact with HipparchiaServer via a browser
 		jquery
