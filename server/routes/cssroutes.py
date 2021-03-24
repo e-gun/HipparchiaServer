@@ -7,6 +7,7 @@
 """
 
 from flask import make_response
+from flask import Response as FlaskResponse
 
 from server import hipparchia
 from server.hipparchiaobjects.cssformattingobject import CssFormattingObject
@@ -14,7 +15,7 @@ from server.listsandsession.checksession import probeforsessionvariables
 
 
 @hipparchia.route('/css/<cssrequest>', methods=['GET'])
-def loadcssfile(cssrequest):
+def loadcssfile(cssrequest) -> FlaskResponse:
 	"""
 
 	send the CSS, but insert config-based fonts, etc. into it first

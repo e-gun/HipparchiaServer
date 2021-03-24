@@ -34,8 +34,9 @@ except ModuleNotFoundError:
 	def loaduser(uid):
 		return 'Anonymous'
 
-
+JSON_STR = str
 hipparchiausers = loadusersdict()
+
 
 @hipparchia.route('/attemptlogin', methods=['GET', 'POST'])
 def hipparchialogin():
@@ -79,7 +80,7 @@ def hipparchialogin():
 
 
 @hipparchia.route('/hipparchialogout', methods=['GET'])
-def hipparchialogout():
+def hipparchialogout() -> JSON_STR:
 
 	session['loggedin'] = False
 	session['userid'] = 'Anonymous'
@@ -90,7 +91,7 @@ def hipparchialogout():
 
 
 @hipparchia.route('/checkuser', methods=['GET'])
-def checkuser():
+def checkuser() -> JSON_STR:
 
 	returndata = dict()
 	try:

@@ -17,9 +17,11 @@ from server.startup import progresspolldict
 from server.threading.websocketthread import startwspolling
 from server.dbsupport.redisdbfunctions import establishredisconnection
 
+JSON_STR = str
+
 
 @hipparchia.route('/confirm/<searchid>')
-def checkforactivesearch(searchid):
+def checkforactivesearch(searchid) -> JSON_STR:
 	"""
 
 	test the activity of a poll so you don't start conjuring a bunch of key errors if you use wscheckpoll() prematurely
@@ -62,7 +64,7 @@ def checkforactivesearch(searchid):
 			return json.dumps('cannot_find_the_poll')
 
 
-def externalwsgipolling(pollid):
+def externalwsgipolling(pollid) -> JSON_STR:
 	"""
 
 	polls can make it through WGSI; the real problem are the threads

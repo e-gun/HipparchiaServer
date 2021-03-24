@@ -34,11 +34,12 @@ else:
 	voff = lambda x: 'vectors have not been enabled in your configuration file'
 	findabsolutevectorsfromhits = voff
 
+JSON_STR = str
 
 
 @hipparchia.route('/executesearch/<searchid>', methods=['GET'])
 @requireauthentication
-def executesearch(searchid, so=None):
+def executesearch(searchid, so=None) -> JSON_STR:
 	"""
 
 	the interface to all of the other search functions
@@ -271,7 +272,7 @@ def executesearch(searchid, so=None):
 
 @hipparchia.route('/singlewordsearch/<searchid>/<searchterm>')
 @requireauthentication
-def singlewordsearch(searchid, searchterm):
+def singlewordsearch(searchid, searchterm) -> JSON_STR:
 	"""
 
 	you get sent here via the morphology tables
@@ -315,7 +316,7 @@ def singlewordsearch(searchid, searchterm):
 
 @hipparchia.route('/lemmatizesearch/<searchid>/<headform>')
 @requireauthentication
-def headwordsearch(searchid, headform):
+def headwordsearch(searchid, headform) -> JSON_STR:
 	"""
 
 	you get sent here via the morphology tables

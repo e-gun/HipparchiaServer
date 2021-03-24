@@ -21,12 +21,13 @@ from server.startup import authordict, authorgenresdict, authorlocationdict, wor
 from server.startup import progresspolldict
 
 
+PAGE_STR = str
 #
 # unadorned views for quickly peeking at the data
 #
 
 @hipparchia.route('/databasecontents/<dictionarytodisplay>')
-def databasecontents(dictionarytodisplay):
+def databasecontents(dictionarytodisplay) -> PAGE_STR:
 	"""
 	a simple dump of info available in the db
 
@@ -66,7 +67,7 @@ def databasecontents(dictionarytodisplay):
 
 
 @hipparchia.route('/csssamples')
-def styesheetsamples():
+def styesheetsamples() -> PAGE_STR:
 	"""
 
 	show what everything will look like
@@ -112,7 +113,7 @@ def styesheetsamples():
 
 
 @hipparchia.route('/showsession')
-def showsessioncontents():
+def showsessioncontents() -> PAGE_STR:
 	"""
 
 	dump the contents of the session to a browser page

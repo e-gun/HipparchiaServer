@@ -32,10 +32,12 @@ from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.startup import authordict
 from server.startup import progresspolldict
 
+JSON_STR = str
+
 
 @hipparchia.route('/dictsearch/<searchterm>')
 @requireauthentication
-def dictsearch(searchterm):
+def dictsearch(searchterm) -> JSON_STR:
 	"""
 	look up words
 	return dictionary entries
@@ -140,7 +142,7 @@ def dictsearch(searchterm):
 @hipparchia.route('/parse/<observedword>')
 @hipparchia.route('/parse/<observedword>/<authorid>')
 @requireauthentication
-def findbyform(observedword, authorid=None):
+def findbyform(observedword, authorid=None) -> JSON_STR:
 	"""
 	this function sets of a chain of other functions
 	find dictionary form
@@ -242,7 +244,7 @@ def findbyform(observedword, authorid=None):
 
 @hipparchia.route('/reverselookup/<searchid>/<searchterm>')
 @requireauthentication
-def reverselexiconsearch(searchid, searchterm):
+def reverselexiconsearch(searchid, searchterm) -> JSON_STR:
 	"""
 	attempt to find all of the greek/latin dictionary entries that might go with the english search term
 
@@ -366,7 +368,7 @@ def reverselexiconsearch(searchid, searchterm):
 
 @hipparchia.route('/dictionaryidsearch/<language>/<entryid>')
 @requireauthentication
-def dictionaryidsearch(language, entryid):
+def dictionaryidsearch(language, entryid) -> JSON_STR:
 	"""
 
 	fed by /morphologychart/
@@ -408,7 +410,7 @@ def dictionaryidsearch(language, entryid):
 
 @hipparchia.route('/morphologychart/<language>/<lexicalid>/<xrefid>/<headword>')
 @requireauthentication
-def knownforms(lexicalid, language, xrefid, headword):
+def knownforms(lexicalid, language, xrefid, headword) -> JSON_STR:
 	"""
 
 	display all known forms of...

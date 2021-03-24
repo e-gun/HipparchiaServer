@@ -18,9 +18,11 @@ from server.listsandsession.sessionfunctions import reducetosessionselections, r
 from server.startup import authorgenresdict, authorlocationdict, keyedlemmata, listmapper, workgenresdict, \
 	workprovenancedict
 
+JSON_STR = str
+
 
 @hipparchia.route('/getauthorhint', methods=['GET'])
-def offerauthorhints():
+def offerauthorhints() -> JSON_STR:
 	"""
 	fill the hint box with constantly updated values
 	:return:
@@ -47,7 +49,7 @@ def offerauthorhints():
 
 
 @hipparchia.route('/getgenrehint', methods=['GET'])
-def augenrelist():
+def augenrelist() -> JSON_STR:
 	"""
 	populate the author genres autocomplete box with constantly updated values
 	:return:
@@ -73,7 +75,7 @@ def augenrelist():
 
 
 @hipparchia.route('/getworkgenrehint', methods=['GET'])
-def wkgenrelist():
+def wkgenrelist() -> JSON_STR:
 	"""
 	populate the work genres autocomplete box with constantly updated values
 	:return:
@@ -99,7 +101,7 @@ def wkgenrelist():
 
 
 @hipparchia.route('/getaulocationhint', methods=['GET'])
-def offeraulocationhints():
+def offeraulocationhints() -> JSON_STR:
 	"""
 	fill the hint box with constantly updated values
 
@@ -126,7 +128,7 @@ def offeraulocationhints():
 
 
 @hipparchia.route('/getwkprovenancehint', methods=['GET'])
-def offerprovenancehints():
+def offerprovenancehints() -> JSON_STR:
 	"""
 	fill the hint box with constantly updated values
 	TODO: these should be pruned so as to exclude locations that are meaningless relative to the currently active DBs
@@ -155,7 +157,7 @@ def offerprovenancehints():
 
 
 @hipparchia.route('/getlemmahint', methods=['GET'])
-def offerlemmatahints():
+def offerlemmatahints() -> JSON_STR:
 	"""
 
 	fill in the hint box with eligible values

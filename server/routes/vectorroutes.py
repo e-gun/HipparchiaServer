@@ -28,10 +28,11 @@ else:
 	findabsolutevectorsbysentence = voff
 	findabsolutevectorsfromhits = voff
 
+JSON_STR = str
 
 @hipparchia.route('/vectors/<vectortype>/<searchid>/<headform>')
 @requireauthentication
-def vectorsearch(vectortype, searchid, headform, so=None):
+def vectorsearch(vectortype, searchid, headform, so=None) -> JSON_STR:
 	"""
 
 	you get sent here if you have something clicked in the vector boxes: see 'documentready.js'
@@ -117,7 +118,7 @@ def vectorsearch(vectortype, searchid, headform, so=None):
 
 @hipparchia.route('/vectoranalogies/<searchid>/<termone>/<termtwo>/<termthree>')
 @requireauthentication
-def analogysearch(searchid, termone, termtwo, termthree):
+def analogysearch(searchid, termone, termtwo, termthree) -> JSON_STR:
 	"""
 
 	the results are distinctly unsatisfying....

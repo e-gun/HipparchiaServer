@@ -13,7 +13,8 @@ from platform import platform, python_version_tuple
 from sys import argv
 
 from flask import __version__ as flaskversion
-from flask import render_template, send_file, session, Response
+from flask import render_template, send_file, session
+from flask import Response as FlaskResponse
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
@@ -26,6 +27,14 @@ from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
 from version import release, hipparchiaserverversion, readgitdata
 
+JSON_STR = str
+PAGE_STR = str
+
+""""
+
+set some variables at outer scope that both frontpage() and errorhandlingpage() will use 
+
+"""
 
 stylesheet = hipparchia.config['CSSSTYLESHEET']
 expectedsqltemplateversion = 10082019
@@ -55,12 +64,19 @@ if not release:
 	shortversion = version
 
 
+"""
+
+now define some routes...
+
+"""
+
 @hipparchia.route('/')
-def frontpage():
+def frontpage() -> PAGE_STR:
 	"""
-	the front page
-	it used to do stuff
-	now it just loads the JS which then calls all of the routes
+
+	the front page. it used to do stuff; now it just loads the JS which then calls all of the routes:
+	regular users never leave the front page
+	the only other pages are basically debug pages as seen in inforoutes.py
 
 	:return:
 	"""
@@ -137,26 +153,8 @@ def frontpage():
 	return page
 
 
-@hipparchia.route('/favicon.ico')
-def sendfavicon():
-	return send_file('static/images/hipparchia_favicon.ico')
-
-
-@hipparchia.route('/apple-touch-icon-precomposed.png')
-def appletouchticon():
-	return send_file('static/images/hipparchia_apple-touch-icon-precomposed.png')
-
-
-@hipparchia.route('/robots.txt')
-def robotstxt():
-	blockall = 'User-Agent: *\nDisallow: /\n'
-	r = Response(response=blockall, status=200, mimetype='text/plain')
-	r.headers['Content-Type'] = 'text/plain; charset=utf-8'
-	return r
-
-
 @hipparchia.route('/loadhelpdata')
-def loadhelpdata():
+def loadhelpdata() -> JSON_STR:
 	"""
 
 	do not load the help html until someone clicks on the '?' button
@@ -203,7 +201,26 @@ def loadhelpdata():
 	return helpdict
 
 
-def errorhandlingpage(errornumber):
+@hipparchia.route('/favicon.ico')
+def sendfavicon() -> FlaskResponse:
+	r = send_file('static/images/hipparchia_favicon.ico')
+	return send_file('static/images/hipparchia_favicon.ico')
+
+
+@hipparchia.route('/apple-touch-icon-precomposed.png')
+def appletouchticon() -> FlaskResponse:
+	return send_file('static/images/hipparchia_apple-touch-icon-precomposed.png')
+
+
+@hipparchia.route('/robots.txt')
+def robotstxt() -> FlaskResponse:
+	blockall = 'User-Agent: *\nDisallow: /\n'
+	r = FlaskResponse(response=blockall, status=200, mimetype='text/plain')
+	r.headers['Content-Type'] = 'text/plain; charset=utf-8'
+	return r
+
+
+def errorhandlingpage(errornumber) -> PAGE_STR:
 	"""
 
 	generic error pages
@@ -222,15 +239,16 @@ def errorhandlingpage(errornumber):
 
 
 @hipparchia.errorhandler(400)
-def badrequesterror(e):
+def badrequesterror(e) -> PAGE_STR:
+	# but this can not ever be delivered because nginx or the flask middleware will barf first and send its 400 page
 	return errorhandlingpage(400), 400
 
 
 @hipparchia.errorhandler(404)
-def pagenotfound(e):
+def pagenotfound(e) -> PAGE_STR:
 	return errorhandlingpage(404), 404
 
 
 @hipparchia.errorhandler(500)
-def internalservererror(e):
+def internalservererror(e) -> PAGE_STR:
 	return errorhandlingpage(500), 500

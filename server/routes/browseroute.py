@@ -19,11 +19,12 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.parsingobjects import BrowserInputParsingObject
 from server.listsandsession.checksession import probeforsessionvariables
 
+JSON_STR = str
 
 @hipparchia.route('/browse/<method>/<author>/<work>')
 @hipparchia.route('/browse/<method>/<author>/<work>/<location>')
 @requireauthentication
-def grabtextforbrowsing(method, author, work, location=None):
+def grabtextforbrowsing(method, author, work, location=None) -> JSON_STR:
 	"""
 
 	you want to browse something
@@ -97,7 +98,7 @@ def grabtextforbrowsing(method, author, work, location=None):
 @hipparchia.route('/browserawlocus/<author>/<work>')
 @hipparchia.route('/browserawlocus/<author>/<work>/<location>')
 @requireauthentication
-def rawcitationgrabtextforbrowsing(author: str, work: str, location=None):
+def rawcitationgrabtextforbrowsing(author: str, work: str, location=None) -> JSON_STR:
 	"""
 
 	the raw input version of grabtextforbrowsing()

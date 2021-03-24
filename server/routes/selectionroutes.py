@@ -23,9 +23,10 @@ from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \
 	workprovenancedict
 
+JSON_STR = str
 
 @hipparchia.route('/makeselection', methods=['GET'])
-def selectionmade():
+def selectionmade() -> JSON_STR:
 	"""
 	once a choice is made, parse and register it inside session['selections']
 	then return the human readable version of the same for display on the page
@@ -173,7 +174,7 @@ def selectionmade():
 
 
 @hipparchia.route('/setsessionvariable/<thevariable>/<thevalue>')
-def setsessionvariable(thevariable, thevalue):
+def setsessionvariable(thevariable, thevalue) -> JSON_STR:
 	"""
 	accept a variable name and value: hand it off to the parser/setter
 	returns:
@@ -209,7 +210,7 @@ def setsessionvariable(thevariable, thevalue):
 
 
 @hipparchia.route('/clearselections/<category>/<index>')
-def clearselections(category, index=-1):
+def clearselections(category, index=-1) -> JSON_STR:
 	"""
 	a selection gets thrown into the trash
 
@@ -244,7 +245,7 @@ def clearselections(category, index=-1):
 
 
 @hipparchia.route('/getselections')
-def getcurrentselections():
+def getcurrentselections() -> JSON_STR:
 	"""
 
 	send the html for what we have picked so that the relevant box can be populate

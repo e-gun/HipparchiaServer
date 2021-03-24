@@ -7,13 +7,14 @@
 """
 
 from flask import redirect, session, url_for
+from flask import Response as FlaskResponse
 
 from server import hipparchia
 from server.dbsupport.vectordbfunctions import createstoredimagestable, createvectorstable
 
 
 @hipparchia.route('/resetsession')
-def clearsession():
+def clearsession() -> FlaskResponse:
 	"""
 	clear the session
 	this will reset all instance and reload the front page
@@ -21,12 +22,12 @@ def clearsession():
 	"""
 
 	session.clear()
-
+	x = redirect(url_for('frontpage'))
 	return redirect(url_for('frontpage'))
 
 
 @hipparchia.route('/resetvectors')
-def resetsemanticvectors():
+def resetsemanticvectors() -> FlaskResponse:
 	"""
 
 	empty out the vectors table
@@ -43,7 +44,7 @@ def resetsemanticvectors():
 
 
 @hipparchia.route('/resetvectorimages')
-def resetvectorgraphs():
+def resetvectorgraphs() -> FlaskResponse:
 	"""
 
 	empty out the vector images table

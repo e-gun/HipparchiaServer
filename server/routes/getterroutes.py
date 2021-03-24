@@ -13,6 +13,7 @@ from string import Template
 
 from click import secho
 from flask import make_response, redirect, request, session, url_for
+from flask import Response as FlaskResponse
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
@@ -37,12 +38,13 @@ from server.startup import authordict, authorgenresdict, authorlocationdict, lis
 	workprovenancedict
 from server.semanticvectors.vectorhelpers import vectorranges
 
+JSON_STR = str
 
 # getselections is in selectionroutes.py
 # getauthorhint, etc. are in hintroutes.py
 
 @hipparchia.route('/getsessionvariables')
-def getsessionvariables():
+def getsessionvariables() -> JSON_STR:
 	"""
 	a simple fetch and report: the JS wants to know what Python knows
 
@@ -65,7 +67,7 @@ def getsessionvariables():
 
 
 @hipparchia.route('/getcookie/<cookienum>')
-def cookieintosession(cookienum):
+def cookieintosession(cookienum) -> FlaskResponse:
 	"""
 
 	take a stored cookie and convert its values into the current session instance
@@ -122,7 +124,7 @@ def cookieintosession(cookienum):
 
 
 @hipparchia.route('/getworksof/<authoruid>')
-def findtheworksof(authoruid):
+def findtheworksof(authoruid) -> JSON_STR:
 	"""
 	fill the hint box with constantly updated values
 
@@ -174,7 +176,7 @@ def findtheworksof(authoruid):
 
 @hipparchia.route('/getstructure/<author>/<work>')
 @hipparchia.route('/getstructure/<author>/<work>/<passage>')
-def findworkstructure(author, work, passage=None):
+def findworkstructure(author, work, passage=None) -> JSON_STR:
 	"""
 	request detailed info about how a work works
 	this is fed back to the js boxes : who should be active, what are the autocomplete values, etc?
@@ -222,7 +224,7 @@ def findworkstructure(author, work, passage=None):
 
 
 @hipparchia.route('/getsamplecitation/<authorid>/<workid>')
-def sampleworkcitation(authorid: str, workid: str) -> str:
+def sampleworkcitation(authorid: str, workid: str) -> JSON_STR:
 	"""
 
 	called by loadsamplecitation() in autocomplete.js
@@ -270,7 +272,7 @@ def sampleworkcitation(authorid: str, workid: str) -> str:
 
 
 @hipparchia.route('/getauthorinfo/<authorid>')
-def getauthinfo(authorid: str):
+def getauthinfo(authorid: str) -> JSON_STR:
 	"""
 	show local info about the author one is considering in the selection box
 	:return:
@@ -302,7 +304,7 @@ def getauthinfo(authorid: str):
 
 
 @hipparchia.route('/getsearchlistcontents')
-def getsearchlistcontents():
+def getsearchlistcontents() -> JSON_STR:
 	"""
 	return a formatted list of what a search would look like if executed with the current selections
 
@@ -365,7 +367,7 @@ def getsearchlistcontents():
 
 
 @hipparchia.route('/getgenrelistcontents')
-def getgenrelistcontents():
+def getgenrelistcontents() -> JSON_STR:
 	"""
 	return a basic list of what you can pick
 	:return:
@@ -404,7 +406,7 @@ def getgenrelistcontents():
 
 
 @hipparchia.route('/getstoredfigure/<figurename>')
-def fetchstoredimage(figurename):
+def fetchstoredimage(figurename) -> FlaskResponse:
 	"""
 
 	smeantic vector graphs are stored in the DB after generation
@@ -425,7 +427,7 @@ def fetchstoredimage(figurename):
 
 
 @hipparchia.route('/getvectorranges')
-def returnvectorsettingsranges():
+def returnvectorsettingsranges() -> JSON_STR:
 	"""
 
 	since vector settings names and ranges are subject to lots of tinkering, we will not
