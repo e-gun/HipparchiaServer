@@ -196,7 +196,7 @@ class CssFormattingObject(object):
 	     'LIGHT': 'Roboto-Light',
 	     'BLDITALIC': 'Roboto-BoldItalic'}
 
-	# too many missing glyphs then you get to oblique greek
+	# too many missing glyphs when you get to oblique greek
 	s = {'REGULAR': 'SourceSansPro-Regular',
 	     'MONO': 'SourceCodePro-Regular',
 	     'OBLIQUE': 'SourceSansPro-It',

@@ -22,7 +22,6 @@ def clearsession() -> FlaskResponse:
 	"""
 
 	session.clear()
-	x = redirect(url_for('frontpage'))
 	return redirect(url_for('frontpage'))
 
 

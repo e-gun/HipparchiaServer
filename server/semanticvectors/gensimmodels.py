@@ -21,7 +21,7 @@ except ImportError:
 	Word2Vec = None
 
 
-def buildgensimmodel(searchobject, morphdict, sentences):
+def buildgensimmodel(searchobject, morphdict, sentences) -> Word2Vec:
 	"""
 
 	returns a Word2Vec model
@@ -81,20 +81,46 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 
 	computeloss = False
 
-	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread (workers=1), to eliminate ordering jitter from OS thread scheduling.
+	# Note that for a fully deterministically-reproducible run, you must also limit the model to a single worker thread
+	# (workers=1), to eliminate ordering jitter from OS thread scheduling.
 	try:
 		with warnings.catch_warnings():
 			warnings.filterwarnings("ignore", category=DeprecationWarning)
-			gensimmodel = Word2Vec(bagsofwords,
-						min_count=vv.minimumpresence,
-						seed=1,
-						iter=vv.trainingiterations,
-						size=vv.dimensions,
-						sample=vv.downsample,
-						sg=1,  # the results seem terrible if you say sg=0
-						window=vv.window,
-						workers=workers,
-						compute_loss=computeloss)
+			try:
+				gensimmodel = Word2Vec(bagsofwords,
+							min_count=vv.minimumpresence,
+							seed=1,
+							iter=vv.trainingiterations,
+							size=vv.dimensions,
+							sample=vv.downsample,
+							sg=1,  # the results seem terrible if you say sg=0
+							window=vv.window,
+							workers=workers,
+							compute_loss=computeloss)
+			except TypeError:
+				# TypeError: __init__() got an unexpected keyword argument 'iter'
+				# i.e., gensim 4.0.0 changed the API
+				# see: https://radimrehurek.com/gensim/models/word2vec.html
+				#
+				# class gensim.models.word2vec.Word2Vec(sentences=None, corpus_file=None, vector_size=100, alpha=0.025,
+				# window=5, min_count=5, max_vocab_size=None, sample=0.001, seed=1, workers=3, min_alpha=0.0001, sg=0,
+				# hs=0, negative=5, ns_exponent=0.75, cbow_mean=1, hashfxn=<built-in function hash>, epochs=5,
+				# null_word=0, trim_rule=None, sorted_vocab=1, batch_words=10000, compute_loss=False, callbacks=(),
+				# comment=None, max_final_vocab=None)
+				#
+				# epochs (int, optional) – Number of iterations (epochs) over the corpus. (Formerly: iter)
+				# vector_size (int, optional) – Dimensionality of the word vectors.
+				gensimmodel = Word2Vec(bagsofwords,
+							min_count=vv.minimumpresence,
+							seed=1,
+							epochs=vv.trainingiterations,
+							vector_size=vv.dimensions,
+							sample=vv.downsample,
+							sg=1,  # the results seem terrible if you say sg=0
+							window=vv.window,
+							workers=workers,
+							compute_loss=computeloss)
+
 	except RuntimeError:
 		# RuntimeError: you must first build vocabulary before training the model
 		# this will happen if you have a tiny author with too few words
@@ -103,10 +129,28 @@ def buildgensimmodel(searchobject, morphdict, sentences):
 	if computeloss:
 		print('loss after {n} iterations was: {l}'.format(n=vv.trainingiterations, l=gensimmodel.get_latest_training_loss()))
 
+	reducedmodel = None
+
 	if gensimmodel:
 		with warnings.catch_warnings():
 			warnings.filterwarnings("ignore", category=DeprecationWarning)
-			gensimmodel.delete_temporary_training_data(replace_word_vectors_with_normalized=True)
+			try:
+				gensimmodel.delete_temporary_training_data(replace_word_vectors_with_normalized=True)
+			except AttributeError:
+				# AttributeError: 'Word2Vec' object has no attribute 'delete_temporary_training_data'
+				# i.e., gensim 4.0.0 changed the API
+				# see: https://radimrehurek.com/gensim/models/word2vec.html
+				# 	If you’re finished training a model (i.e. no more updates, only querying), you can switch to the KeyedVectors instance:
+				# 	word_vectors = model.wv
+				# 	del model
+				# this complicates our backwards-compatible-life, though.
+				# we want to return a Word2Vec and not a KeyedVectors instance
+				# gensimmodel = gensimmodel.wv
+				reducedmodel = Word2Vec([["cat", "say", "meow"], ["dog", "say", "woof"]], min_count=1)
+				reducedmodel.wv = gensimmodel.wv
+
+	if reducedmodel:
+		gensimmodel = reducedmodel
 
 	# print(model.wv['puer'])
 
