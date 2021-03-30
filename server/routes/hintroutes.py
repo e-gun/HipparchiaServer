@@ -12,7 +12,6 @@ from flask import request
 
 from server import hipparchia
 from server.formatting.wordformatting import depunct, stripaccents
-from server.listsandsession.searchlistmanagement import buildhintlist
 from server.listsandsession.genericlistfunctions import polytonicsort
 from server.listsandsession.sessionfunctions import reducetosessionselections, returnactivelist
 from server.startup import authorgenresdict, authorlocationdict, keyedlemmata, listmapper, workgenresdict, \
@@ -21,143 +20,173 @@ from server.startup import authorgenresdict, authorlocationdict, keyedlemmata, l
 JSON_STR = str
 
 
-@hipparchia.route('/getauthorhint', methods=['GET'])
-def offerauthorhints() -> JSON_STR:
+@hipparchia.route('/hints/<category>/<_>')
+def supplyhints(category, _) -> JSON_STR:
 	"""
-	fill the hint box with constantly updated values
+	return JSON to fill a hint box with constantly updated values
+
+	the json encodes a list of strings
+
+	from https://api.jqueryui.com/autocomplete/
+
+		The Autocomplete plugin does not filter the results, instead a query string is added with a term field,
+		which the server-side script should use for filtering the results.
+
+		if the source option is set to "https://example.com" and the user types foo,
+		a GET request would be made to https://example.com?term=foo
+
+	so you you have to have '?term='
+
+	you also can't do a bare '/?term='. Instead you need an anchor: '/h?term='
+
+	and this '?term=' has to be read via request.args.get()
+
 	:return:
 	"""
 
 	query = request.args.get('term', str())
-	# need [Demetrius]
-	strippedquery = depunct(query, '[')
+
+	functionmapper = {
+		'author': offerauthorhints,
+		'authgenre': augenrelist,
+		'workgenre': wkgenrelist,
+		'authlocation': offeraulocationhints,
+		'worklocation': offerprovenancehints,
+		'lemmata': offerlemmatahints,
+	}
+
+	try:
+		fnc = functionmapper[category]
+	except KeyError:
+		return json.dumps(list())
+
+	if category == 'author':
+		allowedpunctuationsting = '['
+	else:
+		allowedpunctuationsting = None
+
+	strippedquery = depunct(query, allowedpunctuationsting)
+
+	hintlist = fnc(strippedquery)
+
+	return json.dumps(hintlist)
+
+
+def offerauthorhints(query) -> list:
+	"""
+
+	author list lookup
+
+	:return:
+	"""
 
 	ad = reducetosessionselections(listmapper, 'a')
 
 	authorlist = ['{nm} [{id}]'.format(nm=ad[a].cleanname, id=ad[a].universalid) for a in ad]
-
 	authorlist.sort()
 
-	hint = list()
+	hintlist = buildhintlist(query, authorlist)
 
-	if strippedquery:
-		hint = buildhintlist(strippedquery, authorlist)
-
-	hint = json.dumps(hint)
-
-	return hint
+	return hintlist
 
 
-@hipparchia.route('/getgenrehint', methods=['GET'])
-def augenrelist() -> JSON_STR:
-	"""
-	populate the author genres autocomplete box with constantly updated values
-	:return:
+def generichintlist(query, lookupdict, errortext):
 	"""
 
-	query = request.args.get('term', str())
-	strippedquery = depunct(query)
+	DRY abstraction of repeated list lookup code used by augenrelist(), etc.
 
-	activegenres = returnactivelist(authorgenresdict)
-	activegenres.sort()
+	"""
 
-	hint = list()
-
-	if len(activegenres) > 0:
-		if strippedquery:
-			hint = buildhintlist(strippedquery, activegenres)
+	activelist = returnactivelist(lookupdict)
+	activelist.sort()
+	if len(activelist) > 0:
+		hintlist = buildhintlist(query, activelist)
 	else:
-		hint = ['(no author category data available inside of your active database(s))']
+		hintlist = ['(no {e} data available inside of your active database(s))'.format(e=errortext)]
 
-	hint = json.dumps(hint)
-
-	return hint
+	return hintlist
 
 
-@hipparchia.route('/getworkgenrehint', methods=['GET'])
-def wkgenrelist() -> JSON_STR:
-	"""
-	populate the work genres autocomplete box with constantly updated values
-	:return:
+def augenrelist(query) -> list:
 	"""
 
-	query = request.args.get('term', str())
-	strippedquery = depunct(query)
-
-	activegenres = returnactivelist(workgenresdict)
-	activegenres.sort()
-
-	hint = list()
-
-	if len(activegenres) > 0:
-		if strippedquery:
-			hint = buildhintlist(strippedquery, activegenres)
-	else:
-		hint = ['(no work category data available inside of your active database(s))']
-
-	hint = json.dumps(hint)
-
-	return hint
-
-
-@hipparchia.route('/getaulocationhint', methods=['GET'])
-def offeraulocationhints() -> JSON_STR:
-	"""
-	fill the hint box with constantly updated values
+	author genre list lookup
 
 	:return:
 	"""
 
-	query = request.args.get('term', str())
-	strippedquery = depunct(query)
+	lookupdict = authorgenresdict
+	errortext = 'author category'
 
-	activelocations = returnactivelist(authorlocationdict)
-	activelocations.sort()
-
-	hint = list()
-
-	if len(activelocations) > 0:
-		if strippedquery:
-			hint = buildhintlist(strippedquery, activelocations)
-		else:
-			hint = ['(no author location data available inside of your active database(s))']
-
-	hint = json.dumps(hint)
-
-	return hint
+	return generichintlist(query, lookupdict, errortext)
 
 
-@hipparchia.route('/getwkprovenancehint', methods=['GET'])
-def offerprovenancehints() -> JSON_STR:
+def wkgenrelist(query) -> list:
 	"""
-	fill the hint box with constantly updated values
+
+	work genre list lookup
+
+	:return:
+	"""
+
+	lookupdict = workgenresdict
+	errortext = 'work category'
+
+	return generichintlist(query, lookupdict, errortext)
+
+
+def offeraulocationhints(query) -> list:
+	"""
+
+	author location list lookup
+
+	:return:
+	"""
+
+	lookupdict = authorlocationdict
+	errortext = 'author location'
+
+	return generichintlist(query, lookupdict, errortext)
+
+
+def offerprovenancehints(query) -> list:
+	"""
+
+	work location list lookup
+
 	TODO: these should be pruned so as to exclude locations that are meaningless relative to the currently active DBs
 		e.g., if you have only Latin active, location is meaningless; and many TLG places do not match INS locations
 
 	:return:
 	"""
 
-	query = request.args.get('term', str())
-	strippedquery = depunct(query)
+	lookupdict = workprovenancedict
+	errortext = 'work provenance'
 
-	activelocations = returnactivelist(workprovenancedict)
-	activelocations.sort()
-
-	hint = list()
-
-	if len(activelocations) > 0:
-		if strippedquery:
-			hint = buildhintlist(strippedquery, activelocations)
-		else:
-			hint = ['(no work provenance data available inside of your active database(s))']
-
-	hint = json.dumps(hint)
-
-	return hint
+	return generichintlist(query, lookupdict, errortext)
 
 
-@hipparchia.route('/getlemmahint', methods=['GET'])
-def offerlemmatahints() -> JSON_STR:
+def buildhintlist(seeking: str, listofposiblities: list) -> list:
+	"""
+
+	:param seeking:
+	:param listofposiblities:
+	:return:
+	"""
+
+	query = seeking.lower()
+	qlen = len(query)
+
+	listofposiblities = [l for l in listofposiblities if l]
+	canonhints = [{'value': p} for p in listofposiblities if query == p.lower()[0:qlen]]
+	pseudo = [x for x in listofposiblities if x[0] == '[']
+	pseudohints = [{'value': p} for p in pseudo if '[{q}'.format(q=query) == p.lower()[0:qlen + 1]]
+	hintlist = canonhints + pseudohints
+
+	return hintlist
+
+
+def offerlemmatahints(query) -> list:
 	"""
 
 	fill in the hint box with eligible values
@@ -167,16 +196,14 @@ def offerlemmatahints() -> JSON_STR:
 	:return:
 	"""
 
-	term = request.args.get('term', str())
-
 	hintlist = list()
 
 	invals = u'jvσς'
 	outvals = u'iuϲϲ'
 
-	if len(term) > 2:
+	if len(query) > 2:
 		# query = stripaccents(term.lower())
-		query = stripaccents(term)
+		query = stripaccents(query)
 		qlen = len(query)
 		a = query[0].translate(str.maketrans(invals, outvals))
 		b = query[1].translate(str.maketrans(invals, outvals))
@@ -201,6 +228,5 @@ def offerlemmatahints() -> JSON_STR:
 		hintlist = hintlist[0:50]
 		hintlist = ['(>50 items: list was truncated)'] + hintlist
 
-	hint = json.dumps(hintlist)
+	return hintlist
 
-	return hint

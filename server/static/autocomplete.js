@@ -50,7 +50,7 @@ function resetworksautocomplete(){
 
 $('#authorsautocomplete').autocomplete({
     change: reloadAuthorlist(),
-    source: "/getauthorhint",
+    source: "/hints/author/_",
     select: function (event, ui) {
         let thisselector = $('#authorsautocomplete');
         let selector = $('#worksautocomplete');
@@ -414,20 +414,20 @@ function endpointloadLevellist(author, work, pariallocus){
 //
 
 $('#genresautocomplete').autocomplete({
-    source: '/getgenrehint'
+    source: '/hints/authgenre/_'
     });
 
 
 $('#workgenresautocomplete').autocomplete({
-    source: '/getworkgenrehint'
+    source: '/hints/workgenre/_'
     });
 
 $('#locationsautocomplete').autocomplete({
-    source: '/getaulocationhint'
+    source: '/hints/authlocation/_'
     });
 
 $('#provenanceautocomplete').autocomplete({
-    source: '/getwkprovenancehint'
+    source: '/hints/worklocation/_'
     });
 
 $('#pickgenrebutton').click( function() {
@@ -499,21 +499,21 @@ $('#excludegenrebutton').click( function() {
 //
 
 $('#lemmatasearchform').autocomplete({
-    source: '/getlemmahint'
+    source: '/hints/lemmata/_'
     });
 
 $('#proximatelemmatasearchform').autocomplete({
-    source: '/getlemmahint'
+    source: '/hints/lemmata/_'
     });
 
 $('#analogiesinputA').autocomplete({
-    source: '/getlemmahint'
+    source: '/hints/lemmata/_'
     });
 
 $('#analogiesinputB').autocomplete({
-    source: '/getlemmahint'
+    source: '/hints/lemmata/_'
     });
 
 $('#analogiesinputC').autocomplete({
-    source: '/getlemmahint'
+    source: '/hints/lemmata/_'
     });

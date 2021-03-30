@@ -64,8 +64,11 @@ def buildgensimmodel(searchobject, morphdict, sentences) -> Word2Vec:
 		doesnt_match(docs)
 			[Which doc from the given list doesn't go with the others?]
 
-	note that Word2Vec will hurl out lots of DeprecationWarnings; we are blockeing them
-	one hopes that this does not yield a surprise some day...
+	note that Word2Vec will hurl out lots of DeprecationWarnings; we are blocking them
+	one hopes that this does not yield a surprise some day... [surprise: it did...]
+
+	this code is a candidate for refactoring because of the gensim 3.8 vs 4.0 API difference
+	a drop down from model to model.wv requires refactoring dependent functions
 
 	:return:
 	"""

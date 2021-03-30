@@ -418,22 +418,3 @@ def removespuria(searchlist: list, worksdict: dict) -> list:
 			trimmedlist.append(aw)
 
 	return trimmedlist
-
-
-def buildhintlist(seeking: str, listofposiblities: list) -> list:
-	"""
-
-	:param seeking:
-	:param listofposiblities:
-	:return:
-	"""
-	query = seeking.lower()
-	qlen = len(query)
-
-	listofposiblities = [l for l in listofposiblities if l]
-	canonhints = [{'value': p} for p in listofposiblities if query == p.lower()[0:qlen]]
-	pseudo = [x for x in listofposiblities if x[0] == '[']
-	pseudohints = [{'value': p} for p in pseudo if '[{q}'.format(q=query) == p.lower()[0:qlen + 1]]
-	hintlist = canonhints + pseudohints
-
-	return hintlist
