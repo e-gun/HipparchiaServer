@@ -13,47 +13,29 @@ from server import hipparchia
 from server.dbsupport.vectordbfunctions import createstoredimagestable, createvectorstable
 
 
-@hipparchia.route('/resetsession')
-def clearsession() -> FlaskResponse:
-	"""
-	clear the session
-	this will reset all instance and reload the front page
-	:return:
+@hipparchia.route('/reset/<item>')
+def resetroute(item) -> FlaskResponse:
 	"""
 
-	session.clear()
-	return redirect(url_for('frontpage'))
+	reset some variable and then load the front page
 
-
-@hipparchia.route('/resetvectors')
-def resetsemanticvectors() -> FlaskResponse:
 	"""
 
-	empty out the vectors table
+	resetter = {'session': lambda: session.clear(),
+					'vectors': lambda: createvectorstable(),
+					'vectorimages': lambda: createstoredimagestable()}
 
-	then reload the front page
+	blockable = ['vectors', 'vectorimages']
 
-	:return:
-	"""
+	if item not in resetter:
+		return redirect(url_for('frontpage'))
 
-	if not hipparchia.config['BLOCKRESETPATHS']:
-		createvectorstable()
+	if item in blockable:
+		amblocked = hipparchia.config['BLOCKRESETPATHS']
+	else:
+		amblocked = False
 
-	return redirect(url_for('frontpage'))
-
-
-@hipparchia.route('/resetvectorimages')
-def resetvectorgraphs() -> FlaskResponse:
-	"""
-
-	empty out the vector images table
-
-	then reload the front page
-
-	:return:
-	"""
-
-	if not hipparchia.config['BLOCKRESETPATHS']:
-		createstoredimagestable()
+	if not amblocked:
+		resetter[item]()
 
 	return redirect(url_for('frontpage'))

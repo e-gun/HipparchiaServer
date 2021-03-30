@@ -229,4 +229,3 @@ def offerlemmatahints(query) -> list:
 		hintlist = ['(>50 items: list was truncated)'] + hintlist
 
 	return hintlist
-

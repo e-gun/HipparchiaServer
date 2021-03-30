@@ -18,9 +18,9 @@ $(document).ready( function () {
             }
         });
 
-    $('#clear_button').click( function() { window.location.href = '/resetsession'; });
-    $('#alt_clear_button').click( function() { window.location.href = '/resetsession'; });
-    $('#vectoralt_clear_button').click( function() { window.location.href = '/resetsession'; });
+    $('#clear_button').click( function() { window.location.href = '/reset/session'; });
+    $('#alt_clear_button').click( function() { window.location.href = '/reset/session'; });
+    $('#vectoralt_clear_button').click( function() { window.location.href = '/reset/session'; });
     $('#helptabs').tabs();
     $('#helpbutton').click( function() {
         if (document.getElementById('Interface').innerHTML === '<!-- placeholder -->') {
