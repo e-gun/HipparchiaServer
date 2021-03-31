@@ -222,12 +222,13 @@ closeextendedsearcharea();
 if ($('#termoneisalemma').is(":checked")) {
     $('#termonecheckbox').show(); }
 
+
 //
 // authentication
 //
 
 
-$.getJSON('/checkuser', function(data){
+$.getJSON('/authentication/checkuser', function(data){
     var u = data['userid'];
     $('#userid').html(u);
     if (u === 'Anonymous') {

@@ -6,9 +6,12 @@
 	(see LICENSE in the top level directory of the distribution)
 """
 
+from typing import TypeVar
+
 import json
 
 from flask import redirect, session, url_for
+from flask import Response as FlaskResponse
 
 
 from server import hipparchia
@@ -35,11 +38,50 @@ except ModuleNotFoundError:
 		return 'Anonymous'
 
 JSON_STR = str
+JSON_OR_RESPONSE = TypeVar('JSON_OR_RESPONSE', JSON_STR, FlaskResponse)
+
 hipparchiausers = loadusersdict()
 
 
-@hipparchia.route('/attemptlogin', methods=['GET', 'POST'])
-def hipparchialogin():
+@hipparchia.route('/authentication/<action>', methods=['GET', 'POST'])
+def authenticationactions(action: str) -> JSON_OR_RESPONSE:
+	"""
+
+	dispatcher for "/authenticate/..." requests
+
+	"""
+
+	knownfunctions = {'attemptlogin':
+							{'fnc': hipparchialogin, 'param': None},
+						'logout':
+							{'fnc': hipparchialogout, 'param': None},
+						'checkuser':
+							{'fnc': checkuser, 'param': None},
+						}
+
+	if action not in knownfunctions:
+		return json.dumps(str())
+
+	f = knownfunctions[action]['fnc']
+	p = knownfunctions[action]['param']
+
+	if p:
+		j = f(*p)
+	else:
+		j = f()
+
+	if hipparchia.config['JSONDEBUGMODE']:
+		print('/authenticate/{f}\n\t{j}'.format(f=action, j=j))
+
+	return j
+
+
+def hipparchialogin() -> FlaskResponse:
+	""""
+
+	log the user in
+
+	"""
 	# https://flask-login.readthedocs.io/en/latest/
 	# http://wtforms.readthedocs.io/en/latest/crash_course.html
 
@@ -79,8 +121,12 @@ def hipparchialogin():
 	return redirect(url_for('frontpage'))
 
 
-@hipparchia.route('/hipparchialogout', methods=['GET'])
 def hipparchialogout() -> JSON_STR:
+	"""
+
+	log the user out
+
+	"""
 
 	session['loggedin'] = False
 	session['userid'] = 'Anonymous'
@@ -90,8 +136,12 @@ def hipparchialogout() -> JSON_STR:
 	return data
 
 
-@hipparchia.route('/checkuser', methods=['GET'])
 def checkuser() -> JSON_STR:
+	"""
+
+	is the user logged in?
+
+	"""
 
 	returndata = dict()
 	try:

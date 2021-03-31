@@ -5,7 +5,7 @@ $('#executelogin').click( function() {
 });
 
 $('#executelogout').click( function() {
-    $.getJSON('/hipparchialogout', function(data){
+    $.getJSON('/authentication/logout', function(data){
          $('#userid').html(data);
     });
     $('#executelogout').hide();

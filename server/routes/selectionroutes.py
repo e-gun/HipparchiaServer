@@ -61,7 +61,7 @@ def selectionmaker(action: str, one=None, two=None) -> JSON_STR:
 		j = f()
 
 	if hipparchia.config['JSONDEBUGMODE']:
-		print('/get/json/{f}\n\t{j}'.format(f=action, j=j))
+		print('/selection/{f}/\n\t{j}'.format(f=action, j=j))
 
 	return j
 
@@ -133,7 +133,7 @@ def selectionmade(requestargs: MultiDict) -> JSON_STR:
 		wkprov = str()
 
 	# you have validated the input, now do something with it...
-	if (uid != '') and (workid != '') and (locus != '') and (endpoint != ''):
+	if uid and workid and locus and endpoint:
 		# a span in an author: 3 verrine orations, e.g. [note that the selection is 'greedy': 1start - 3end]
 		# http://127.0.0.1:5000/makeselection?auth=lt0474&work=005&locus=2|1&endpoint=2|3
 		# convert this into a 'firstline' through 'lastline' format
@@ -142,7 +142,7 @@ def selectionmade(requestargs: MultiDict) -> JSON_STR:
 		try:
 			workobject = workdict['{a}w{b}'.format(a=uid, b=workid)]
 		except KeyError:
-			consolewarning('"makeselection/" sent a bad workuniversalid: {a}w{b}'.format(a=uid, b=workid))
+			consolewarning('"/selection/make/" sent a bad workuniversalid: {a}w{b}'.format(a=uid, b=workid))
 		start = locus.split('|')
 		stop = endpoint.split('|')
 		start.reverse()
@@ -169,39 +169,39 @@ def selectionmade(requestargs: MultiDict) -> JSON_STR:
 			else:
 				msg = '"makeselection/" could not find first and last: {a}w{b} - {c} TO {d}'
 				consolewarning(msg.format(a=uid, b=workid, c=locus, d=endpoint))
-	elif (uid != '') and (workid != '') and (locus != ''):
+	elif uid and workid and locus:
 		# a specific passage
 		session['psg' + suffix].append(uid + 'w' + workid + '_AT_' + locus)
 		session['psg' + suffix] = tidyuplist(session['psg' + suffix])
 		rationalizeselections(uid + 'w' + workid + '_AT_' + locus, suffix)
-	elif (uid != '') and (workid != ''):
+	elif uid and workid:
 		# a specific work
 		session['wk' + suffix].append(uid + 'w' + workid)
 		session['wk' + suffix] = tidyuplist(session['wk' + suffix])
 		rationalizeselections(uid + 'w' + workid, suffix)
-	elif (uid != '') and (workid == ''):
+	elif uid and not workid:
 		# a specific author
 		session['au' + suffix].append(uid)
 		session['au' + suffix] = tidyuplist(session['au' + suffix])
 		rationalizeselections(uid, suffix)
 
 	# if vs elif: allow multiple simultaneous instance
-	if genre != '':
+	if genre:
 		# add to the +/- genre list and then subtract from the -/+ list
 		session['agn' + suffix].append(genre)
 		session['agn' + suffix] = tidyuplist(session['agn' + suffix])
 		session['agn' + other] = dropdupes(session['agn' + other], session['agn' + suffix])
-	if wkgenre != '':
+	if wkgenre:
 		# add to the +/- genre list and then subtract from the -/+ list
 		session['wkgn' + suffix].append(wkgenre)
 		session['wkgn' + suffix] = tidyuplist(session['wkgn' + suffix])
 		session['wkgn' + other] = dropdupes(session['wkgn' + other], session['wkgn' + suffix])
-	if auloc != '':
+	if auloc:
 		# add to the +/- locations list and then subtract from the -/+ list
 		session['aloc' + suffix].append(auloc)
 		session['aloc' + suffix] = tidyuplist(session['aloc' + suffix])
 		session['aloc' + other] = dropdupes(session['aloc' + other], session['aloc' + suffix])
-	if wkprov != '':
+	if wkprov:
 		# add to the +/- locations list and then subtract from the -/+ list
 		session['wloc' + suffix].append(wkprov)
 		session['wloc' + suffix] = tidyuplist(session['wloc' + suffix])

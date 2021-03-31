@@ -84,12 +84,13 @@ $('#addauthortosearchlist').click( function() {
         let rawlocus = $('#rawlocationinput').val();
         let rawendpoint = $('#rawendpointinput').val();
         if ($('#endpointnotice').is(':hidden')) {
-            rawendpoint = undefined;
-            endpoint = undefined;
+            rawendpoint = '';
+            endpoint = '';
         }
         resetworksautocomplete();
-        if (authorid !== undefined && authorid !== '') {
-            if (wrk === undefined || work === '') {
+        if (authorid !== '') {
+            if (wrk === '') {
+                // note the '_' is safe from depunct() but '.' is not and that you have to have at least one character
                 $.getJSON('/selection/make/_?auth=' + authorid, function (selectiondata) {
                     reloadselections(selectiondata);
                     loadWorklist(authorid);
@@ -97,7 +98,7 @@ $('#addauthortosearchlist').click( function() {
                 });
             } else if ($('#autofillinput').is(':checked')) {
                 // you are using the autofill boxes
-                if (locus === undefined || locus === '') {
+                if (locus === '') {
                    $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
                        reloadselections(selectiondata);
                    });
@@ -112,11 +113,11 @@ $('#addauthortosearchlist').click( function() {
                 }
             } else {
                 // you are using the raw entry subsystem
-                if (rawlocus === undefined || rawlocus === '') {
+                if (rawlocus === '') {
                    $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
                        reloadselections(selectiondata);
                        });
-                } else if (rawendpoint === undefined || rawendpoint === '') {
+                } else if (rawendpoint === '') {
                    $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&raw=t', function (selectiondata) {
                        reloadselections(selectiondata);
                    });
@@ -141,8 +142,8 @@ $('#excludeauthorfromsearchlist').click( function() {
         let rawlocus = $('#rawlocationinput').val();
         let rawendpoint = $('#rawendpointinput').val();
         resetworksautocomplete();
-        if (authorid !== undefined && authorid !== '') {
-            if (wrk === undefined || wrk === '') {
+        if (authorid !== '') {
+            if (wrk === '') {
                 $.getJSON('/selection/make/_?auth=' + authorid + '&exclude=t', function (selectiondata) {
                     reloadselections(selectiondata);
                     loadWorklist(authorid);
@@ -150,7 +151,7 @@ $('#excludeauthorfromsearchlist').click( function() {
                 });
             } else if ($('#autofillinput').is(':checked')) {
                 // you are using the autofill boxes
-                if (locus === undefined || locus === '') {
+                if (locus === '') {
                     $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&exclude=t', function (selectiondata) {
                         reloadselections(selectiondata);
                     });
@@ -165,11 +166,11 @@ $('#excludeauthorfromsearchlist').click( function() {
                 }
             } else {
                 // you are using the raw entry subsystem
-                if (rawlocus === undefined || rawlocus === '') {
+                if (rawlocus === '') {
                     $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&exclude=t', function (selectiondata) {
                         reloadselections(selectiondata);
                     });
-                } else if (rawendpoint === undefined || rawendpoint === '') {
+                } else if (rawendpoint === '') {
                     $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&raw=t' + '&exclude=t', function (selectiondata) {
                         reloadselections(selectiondata);
                     });
@@ -186,6 +187,7 @@ $('#excludeauthorfromsearchlist').click( function() {
         }
         $('#searchlistcontents').hide();
 });
+
 
 //
 // WORKS

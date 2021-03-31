@@ -8,7 +8,7 @@
     <span id="alertarea"></span>
 </div>
 <div id="validateusers" title="Submit username and password" class="center unobtrusive">
-    <form id="hipparchiauserlogin" method="POST" action="/attemptlogin">
+    <form id="hipparchiauserlogin" method="POST" action="/authentication/attemptlogin">
         {{ loginform.user(size=12, placeholder='[username]') }}
         {{ loginform.pw(size=12, type='password', placeholder='[password]') }}
         {{ loginform.hidden_tag() }}
