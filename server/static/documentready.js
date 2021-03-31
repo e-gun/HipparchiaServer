@@ -24,7 +24,7 @@ $(document).ready( function () {
     $('#helptabs').tabs();
     $('#helpbutton').click( function() {
         if (document.getElementById('Interface').innerHTML === '<!-- placeholder -->') {
-            $.getJSON('/loadhelpdata', function (data) {
+            $.getJSON('/get/json/helpdata', function (data) {
                 let l = data.helpcategories.length;
                 for (let i = 0; i < l; i++) {
                     let divname = data.helpcategories[i];
@@ -150,7 +150,7 @@ $(document).ready( function () {
             let w = window.innerWidth * .9;
             let h = window.innerHeight * .9;
             jQuery('<img/>').prependTo(imagetarget).attr({
-                src: '/getstoredfigure/' + output['image'],
+                src: '/get/response/vectorfigure/' + output['image'],
                 alt: '[vector graph]',
                 id: 'insertedfigure',
                 height: h

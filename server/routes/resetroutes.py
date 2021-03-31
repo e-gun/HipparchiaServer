@@ -17,7 +17,7 @@ from server.dbsupport.vectordbfunctions import createstoredimagestable, createve
 def resetroute(item) -> FlaskResponse:
 	"""
 
-	reset some variable and then load the front page
+	reset some item and then load the front page
 
 	"""
 

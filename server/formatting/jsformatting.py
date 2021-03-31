@@ -122,7 +122,7 @@ def generatevectorjs() -> str:
 					var w = window.innerWidth * .9;
 					var h = window.innerHeight * .9;
 					jQuery('<img/>').prependTo(imagetarget).attr({
-						src: '/getstoredfigure/' + output['image'],
+						src: '/get/response/vectorfigure/' + output['image'],
 						alt: '[vector graph]',
 						id: 'insertedfigure',
 						height: h

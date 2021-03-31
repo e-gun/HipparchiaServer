@@ -9,11 +9,13 @@
 import json
 import re
 from multiprocessing import current_process
+from os import path
 from string import Template
+from sys import argv
 
 from click import secho
-from flask import make_response, redirect, request, session, url_for
 from flask import Response as FlaskResponse
+from flask import make_response, redirect, request, session, url_for
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
@@ -43,30 +45,32 @@ JSON_STR = str
 # getselections is in selectionroutes.py
 # getauthorhint, etc. are in hintroutes.py
 
-@hipparchia.route('/getsessionvariables')
-def getsessionvariables() -> JSON_STR:
-	"""
-	a simple fetch and report: the JS wants to know what Python knows
-
-	:return:
+@hipparchia.route('/get/response/<fnc>/<param>')
+def responsegetter(fnc: str, param: str) -> FlaskResponse:
 	"""
 
-	returndict = {k: session[k] for k in session.keys() if k != 'csrf_token'}
+	dispatcher for "/get/response/" requests
 
-	for k in returndict.keys():
-		if isinstance(returndict[k], bool):
-			if returndict[k]:
-				returndict[k] = 'yes'
-			else:
-				returndict[k] = 'no'
+	"""
 
-	# print('rd', returndict)
-	returndict = json.dumps(returndict)
+	param = depunct(param)
 
-	return returndict
+	knownfunctions = {'cookie':
+					{'fnc': cookieintosession, 'param': [param]},
+				'vectorfigure':
+					{'fnc': fetchstoredimage, 'param': [param]},
+				}
+
+	if fnc not in knownfunctions:
+		response = redirect(url_for('frontpage'))
+	else:
+		f = knownfunctions[fnc]['fnc']
+		p = knownfunctions[fnc]['param']
+		response = f(*p)
+
+	return response
 
 
-@hipparchia.route('/getcookie/<cookienum>')
 def cookieintosession(cookienum) -> FlaskResponse:
 	"""
 
@@ -123,7 +127,100 @@ def cookieintosession(cookienum) -> FlaskResponse:
 	return response
 
 
-@hipparchia.route('/getworksof/<authoruid>')
+def fetchstoredimage(figurename) -> FlaskResponse:
+	"""
+
+	smeantic vector graphs are stored in the DB after generation
+
+	now we fetch them for display in the page
+
+	:param figurename:
+	:return:
+	"""
+
+	graphbytes = fetchvectorgraph(figurename)
+
+	response = make_response(graphbytes)
+	response.headers.set('Content-Type', 'image/png')
+	response.headers.set('Content-Disposition', 'attachment', filename='hipparchia_graph_{f}.png'.format(f=figurename))
+
+	return response
+
+
+@hipparchia.route('/get/json/<fnc>')
+@hipparchia.route('/get/json/<fnc>/<one>')
+@hipparchia.route('/get/json/<fnc>/<one>/<two>')
+@hipparchia.route('/get/json/<fnc>/<one>/<two>/<three>')
+def infogetter(fnc: str, one=None, two=None, three=None) -> JSON_STR:
+	"""
+
+	dispatcher for "/get/json" requests
+
+	"""
+
+	one = depunct(one)
+	two = depunct(two)
+	three = depunct(three)
+
+	knownfunctions = {'sessionvariables':
+							{'fnc': getsessionvariables, 'param': None},
+						'worksof':
+							{'fnc': findtheworksof, 'param': [one]},
+						'workstructure':
+							{'fnc': findworkstructure, 'param': [one, two, three]},
+						'samplecitation':
+							{'fnc': sampleworkcitation, 'param': [one, two]},
+						'authorinfo':
+							{'fnc': getauthinfo, 'param': [one]},
+						'searchlistcontents':
+							{'fnc': getsearchlistcontents, 'param': None},
+						'genrelistcontents':
+							{'fnc': getgenrelistcontents, 'param': None},
+						'vectorranges':
+							{'fnc': returnvectorsettingsranges, 'param': None},
+						'helpdata':
+							{'fnc': loadhelpdata, 'param': None},
+						}
+
+	if fnc not in knownfunctions:
+		return json.dumps(str())
+
+	f = knownfunctions[fnc]['fnc']
+	p = knownfunctions[fnc]['param']
+
+	if p:
+		j = f(*p)
+	else:
+		j = f()
+
+	if hipparchia.config['JSONDEBUGMODE']:
+		print('/get/json/{f}\n\t{j}'.format(f=fnc, j=j))
+
+	return j
+
+
+def getsessionvariables() -> JSON_STR:
+	"""
+	a simple fetch and report: the JS wants to know what Python knows
+
+	:return:
+	"""
+
+	returndict = {k: session[k] for k in session.keys() if k != 'csrf_token'}
+
+	for k in returndict.keys():
+		if isinstance(returndict[k], bool):
+			if returndict[k]:
+				returndict[k] = 'yes'
+			else:
+				returndict[k] = 'no'
+
+	# print('rd', returndict)
+	returndict = json.dumps(returndict)
+
+	return returndict
+
+
 def findtheworksof(authoruid) -> JSON_STR:
 	"""
 	fill the hint box with constantly updated values
@@ -138,12 +235,10 @@ def findtheworksof(authoruid) -> JSON_STR:
 	:return:
 	"""
 
-	strippedquery = depunct(authoruid)
-
 	hintlist = list()
 
 	try:
-		myauthor = authordict[strippedquery]
+		myauthor = authordict[authoruid]
 	except KeyError:
 		myauthor = None
 
@@ -174,8 +269,6 @@ def findtheworksof(authoruid) -> JSON_STR:
 	return hintlist
 
 
-@hipparchia.route('/getstructure/<author>/<work>')
-@hipparchia.route('/getstructure/<author>/<work>/<passage>')
 def findworkstructure(author, work, passage=None) -> JSON_STR:
 	"""
 	request detailed info about how a work works
@@ -223,7 +316,6 @@ def findworkstructure(author, work, passage=None) -> JSON_STR:
 	return results
 
 
-@hipparchia.route('/getsamplecitation/<authorid>/<workid>')
 def sampleworkcitation(authorid: str, workid: str) -> JSON_STR:
 	"""
 
@@ -405,27 +497,6 @@ def getgenrelistcontents() -> JSON_STR:
 	return genres
 
 
-@hipparchia.route('/getstoredfigure/<figurename>')
-def fetchstoredimage(figurename) -> FlaskResponse:
-	"""
-
-	smeantic vector graphs are stored in the DB after generation
-
-	now we fetch them for display in the page
-
-	:param figurename:
-	:return:
-	"""
-
-	graphbytes = fetchvectorgraph(figurename)
-
-	response = make_response(graphbytes)
-	response.headers.set('Content-Type', 'image/png')
-	response.headers.set('Content-Disposition', 'attachment', filename='hipparchia_graph_{f}.png'.format(f=figurename))
-
-	return response
-
-
 @hipparchia.route('/getvectorranges')
 def returnvectorsettingsranges() -> JSON_STR:
 	"""
@@ -481,3 +552,50 @@ def returnvectorsettingsranges() -> JSON_STR:
 	jsinjection = json.dumps(js)
 
 	return jsinjection
+
+
+def loadhelpdata() -> JSON_STR:
+	"""
+
+	do not load the help html until someone clicks on the '?' button
+
+	then send this stuff
+
+	:return:
+	"""
+
+	if not hipparchia.config['EXTERNALWSGI']:
+		currentpath = path.dirname(argv[0])
+	else:
+		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
+		currentpath = path.abspath(hipparchia.config['HARDCODEDPATH'])
+
+	helppath = currentpath + '/server/helpfiles/'
+	divmapper = {'Interface': 'helpinterface.html',
+				 'Browsing': 'helpbrowsing.html',
+				 'Dictionaries': 'helpdictionaries.html',
+				 'MakingSearchLists': 'helpsearchlists.html',
+				 'BasicSyntax': 'helpbasicsyntax.html',
+				 'RegexSearching': 'helpregex.html',
+				 'SpeedSearching': 'helpspeed.html',
+				 'LemmaSearching': 'helplemmata.html',
+				 'VectorSearching': 'helpvectors.html',
+				 'Oddities': 'helpoddities.html',
+				 'Extending': 'helpextending.html',
+				 'IncludedMaterials': 'includedmaterials.html',
+				 'Openness': 'helpopenness.html'}
+
+	helpdict = dict()
+	helpdict['helpcategories'] = list(divmapper.keys())
+
+	for d in divmapper:
+		helpfilepath = helppath + divmapper[d]
+		helpcontents = ''
+		if path.isfile(helpfilepath):
+			with open(helpfilepath, encoding='utf8') as f:
+				helpcontents = f.read()
+		helpdict[d] = helpcontents
+
+	helpdict = json.dumps(helpdict)
+
+	return helpdict

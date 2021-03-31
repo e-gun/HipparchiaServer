@@ -153,54 +153,6 @@ def frontpage() -> PAGE_STR:
 	return page
 
 
-@hipparchia.route('/loadhelpdata')
-def loadhelpdata() -> JSON_STR:
-	"""
-
-	do not load the help html until someone clicks on the '?' button
-
-	then send this stuff
-
-	:return:
-	"""
-
-	if not hipparchia.config['EXTERNALWSGI']:
-		currentpath = path.dirname(argv[0])
-	else:
-		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
-		currentpath = path.abspath(hipparchia.config['HARDCODEDPATH'])
-
-	helppath = currentpath + '/server/helpfiles/'
-	divmapper = {'Interface': 'helpinterface.html',
-					'Browsing': 'helpbrowsing.html',
-					'Dictionaries': 'helpdictionaries.html',
-					'MakingSearchLists': 'helpsearchlists.html',
-					'BasicSyntax': 'helpbasicsyntax.html',
-					'RegexSearching': 'helpregex.html',
-					'SpeedSearching': 'helpspeed.html',
-					'LemmaSearching': 'helplemmata.html',
-					'VectorSearching': 'helpvectors.html',
-					'Oddities': 'helpoddities.html',
-					'Extending': 'helpextending.html',
-					'IncludedMaterials': 'includedmaterials.html',
-					'Openness': 'helpopenness.html'}
-
-	helpdict = dict()
-	helpdict['helpcategories'] = list(divmapper.keys())
-
-	for d in divmapper:
-		helpfilepath = helppath+divmapper[d]
-		helpcontents = ''
-		if path.isfile(helpfilepath):
-			with open(helpfilepath, encoding='utf8') as f:
-				helpcontents = f.read()
-		helpdict[d] = helpcontents
-
-	helpdict = json.dumps(helpdict)
-	
-	return helpdict
-
-
 @hipparchia.route('/favicon.ico')
 def sendfavicon() -> FlaskResponse:
 	r = send_file('static/images/hipparchia_favicon.ico')

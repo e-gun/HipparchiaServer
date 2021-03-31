@@ -40,6 +40,8 @@
 #
 # ONTHEFLYLEXICALFIXES is False if HipparchiaBuilder did not try to fix the bad Perseus data for Euripides, etc.
 #
+# JSONDEBUGMODE when true will log JSON to the console in the '/get/json' routes
+
 
 SUPPRESSWARNINGS = True
 ENABLELOGGING = False
@@ -53,6 +55,7 @@ DBDEBUGMODE = False
 LEXDEBUGMODE = False
 PARSERDEBUGMODE = False
 HTMLDEBUGMODE = False
+JSONDEBUGMODE = False
 SEARCHMARKEDUPLINE = False
 
 ONTHEFLYLEXICALFIXES = False

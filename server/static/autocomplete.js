@@ -196,7 +196,7 @@ function loadWorklist(authornumber){
     $('#endpointnotice').hide();
     $('#endpointbutton-isclosed').hide();
     $('#endpointbutton-isopen').hide();
-    $.getJSON('/getworksof/'+authornumber, function (selectiondata) {
+    $.getJSON('/get/json/worksof/'+authornumber, function (selectiondata) {
         let dLen = selectiondata.length;
         let worksfound = Array();
         let wac = $('#worksautocomplete');
@@ -276,7 +276,7 @@ function loadsamplecitation(author, work) {
     // we are using the maual input style on the web page
     // so we need some hint on how to do things: check the end line for a sample citation
     // "Cic., In Verr" ==> 2.5.189.7
-    $.getJSON('/getsamplecitation/' + author + '/' + work, function (citationdata) {
+    $.getJSON('/get/json/samplecitation/' + author + '/' + work, function (citationdata) {
         let firstline = citationdata['firstline'];
         let lastline = citationdata['lastline'];
         $('#rawlocationinput').prop('placeholder', '(' + firstline + ' to ' + lastline + ')');
@@ -287,8 +287,8 @@ function loadsamplecitation(author, work) {
 function loadLevellist(author, work, pariallocus){
     // python is hoping to be sent something like:
     //
-    //  /getstructure/lt1254w001
-    //  /getstructure/lt0474w043/3|12
+    //  /get/json/workstructure/lt1254/001
+    //  /get/json/workstructure/lt0474/043/3|12
     //
     // bad things happen if you send level00 info
     //
@@ -306,7 +306,7 @@ function loadLevellist(author, work, pariallocus){
     let closebutton = $('#endpointbutton-isopen');
     let workboxval = $('#worksautocomplete').val();
 
-    $.getJSON('/getstructure/' + getpath, function (selectiondata) {
+    $.getJSON('/get/json/workstructure/' + getpath, function (selectiondata) {
         let top = selectiondata['totallevels']-1;
         let atlevel = selectiondata['level'];
         let label = selectiondata['label'];
@@ -364,8 +364,7 @@ function loadLevellist(author, work, pariallocus){
 function endpointloadLevellist(author, work, pariallocus){
     // python is hoping to be sent something like:
     //
-    //  /getstructure/lt1254w001
-    //  /getstructure/lt0474w043/3|12
+    //  /get/json/workstructure/lt0474/043/3|12
     //
     // bad things happen if you send level00 info
     //
@@ -379,7 +378,7 @@ function endpointloadLevellist(author, work, pariallocus){
         getpath = author + '/' + work;
     }
 
-    $.getJSON('/getstructure/' + getpath, function (selectiondata) {
+    $.getJSON('/get/json/workstructure/' + getpath, function (selectiondata) {
         let top = selectiondata['totallevels']-1;
         let atlevel = selectiondata['level'];
         let label = selectiondata['label'];

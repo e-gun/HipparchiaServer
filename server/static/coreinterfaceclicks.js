@@ -9,7 +9,7 @@ function refreshselections() {
 }
 
 function loadoptions() {
-    $.getJSON('/getsessionvariables', function (data) {
+    $.getJSON('/get/json/sessionvariables', function (data) {
         // console.log(data);
         const simpletoggles = {
             'authorssummary': $('#authorssummary'),
@@ -512,7 +512,7 @@ $('#endpointbutton-isclosed').click(function(){
         let author = aac.val().slice(-7, -1);
         let work = $('#worksautocomplete').val().slice(-4, -1);
         let getpath = author + '/' + work;
-        $.getJSON('/getstructure/' + getpath, function (selectiondata) {
+        $.getJSON('/get/json/workstructure/' + getpath, function (selectiondata) {
             let lvls = selectiondata['totallevels'];
             for (var i = 0; i < lvls; i++) {
                 if ($('#level' + levellist[i]).is(':visible')) {
@@ -571,7 +571,7 @@ function closeextendedsearcharea() {
 function openextendedsearcharea() {
     $('#extendsearchbutton-ispresentlyclosed').hide();
     $('#extendsearchbutton-ispresentlyopen').show();
-    $.getJSON('/getsessionvariables', function (data) {
+    $.getJSON('/get/json/sessionvariables', function (data) {
             $( "#proximityspinner" ).spinner('value', data.proximity);
             if (data.searchscope === 'lines') {
                 $('#searchlines').prop('checked', true); $('#searchwords').prop('checked', false);
