@@ -33,7 +33,7 @@ function reloadAuthorlist(){
     hidemany(loadandsaveslots);
     hidemany(levelsids);
     hidemany(endpointnoticesandbuttons);
-    $.getJSON('/getselections', function (selectiondata) {
+    $.getJSON('/selection/fetch', function (selectiondata) {
         reloadselections(selectiondata);
     });
 }
@@ -90,7 +90,7 @@ $('#addauthortosearchlist').click( function() {
         resetworksautocomplete();
         if (authorid !== '') {
             if (wrk === '') {
-                $.getJSON('/makeselection?auth=' + authorid, function (selectiondata) {
+                $.getJSON('/selection/make/_?auth=' + authorid, function (selectiondata) {
                     reloadselections(selectiondata);
                     loadWorklist(authorid);
                     $('#worksautocomplete').prop('placeholder', '(Pick a work)');
@@ -98,30 +98,30 @@ $('#addauthortosearchlist').click( function() {
             } else if ($('#autofillinput').is(':checked')) {
                 // you are using the autofill boxes
                 if (locus === '') {
-                   $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
+                   $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
                        reloadselections(selectiondata);
                    });
                 } else if (locus === endpoint){
-                   $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (selectiondata) {
+                   $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&locus=' + locus, function (selectiondata) {
                        reloadselections(selectiondata);
                    });
                 } else {
-                   $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&endpoint=' + endpoint, function (selectiondata) {
+                   $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&endpoint=' + endpoint, function (selectiondata) {
                        reloadselections(selectiondata);
                    });
                 }
             } else {
                 // you are using the raw entry subsystem
                 if (rawlocus === '') {
-                   $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
+                   $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk, function (selectiondata) {
                        reloadselections(selectiondata);
                        });
                 } else if (rawendpoint === '') {
-                   $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&raw=t', function (selectiondata) {
+                   $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&raw=t', function (selectiondata) {
                        reloadselections(selectiondata);
                    });
                 } else {
-                   $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&endpoint=' + rawendpoint + '&raw=t', function (selectiondata) {
+                   $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&endpoint=' + rawendpoint + '&raw=t', function (selectiondata) {
                        reloadselections(selectiondata);
                    });
                 }
@@ -143,7 +143,7 @@ $('#excludeauthorfromsearchlist').click( function() {
         resetworksautocomplete();
         if (authorid !== '') {
             if (wrk === '') {
-                $.getJSON('/makeselection?auth=' + authorid + '&exclude=t', function (selectiondata) {
+                $.getJSON('/selection/make/_?auth=' + authorid + '&exclude=t', function (selectiondata) {
                     reloadselections(selectiondata);
                     loadWorklist(authorid);
                     $('#worksautocomplete').prop('placeholder', '(Pick a work)');
@@ -151,30 +151,30 @@ $('#excludeauthorfromsearchlist').click( function() {
             } else if ($('#autofillinput').is(':checked')) {
                 // you are using the autofill boxes
                 if (locus === '') {
-                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&exclude=t', function (selectiondata) {
+                    $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&exclude=t', function (selectiondata) {
                         reloadselections(selectiondata);
                     });
                 } else if (locus === endpoint) {
-                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&exclude=t', function (selectiondata) {
+                    $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&exclude=t', function (selectiondata) {
                         reloadselections(selectiondata);
                     });
                 } else {
-                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&endpoint=' + endpoint + '&exclude=t', function (selectiondata) {
+                    $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&locus=' + locus + '&endpoint=' + endpoint + '&exclude=t', function (selectiondata) {
                         reloadselections(selectiondata);
                     });
                 }
             } else {
                 // you are using the raw entry subsystem
                 if (rawlocus === '') {
-                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&exclude=t', function (selectiondata) {
+                    $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&exclude=t', function (selectiondata) {
                         reloadselections(selectiondata);
                     });
                 } else if (rawendpoint === '') {
-                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&raw=t' + '&exclude=t', function (selectiondata) {
+                    $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&raw=t' + '&exclude=t', function (selectiondata) {
                         reloadselections(selectiondata);
                     });
                 } else {
-                    $.getJSON('/makeselection?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&endpoint=' + rawendpoint + '&raw=t' + '&exclude=t', function (selectiondata) {
+                    $.getJSON('/selection/make/_?auth=' + authorid + '&work=' + wrk + '&locus=' + rawlocus + '&endpoint=' + rawendpoint + '&raw=t' + '&exclude=t', function (selectiondata) {
                         reloadselections(selectiondata);
                     });
                 }
@@ -436,22 +436,22 @@ $('#pickgenrebutton').click( function() {
         let prov = $('#provenanceautocomplete').val();
 
         if (genre !== '') {
-            $.getJSON('/makeselection?genre=' + genre, function (selectiondata) {
+            $.getJSON('/selection/make/_?genre=' + genre, function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
         if (wkgenre !== '') {
-            $.getJSON('/makeselection?wkgenre=' + wkgenre, function (selectiondata) {
+            $.getJSON('/selection/make/_?wkgenre=' + wkgenre, function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
         if (loc !== '') {
-            $.getJSON('/makeselection?auloc=' + loc, function (selectiondata) {
+            $.getJSON('/selection/make/_?auloc=' + loc, function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
         if (prov !== '') {
-            $.getJSON('/makeselection?wkprov=' + prov, function (selectiondata) {
+            $.getJSON('/selection/make/_?wkprov=' + prov, function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
@@ -468,23 +468,23 @@ $('#excludegenrebutton').click( function() {
         let prov = $('#provenanceautocomplete').val();
 
         if (genre !== '') {
-            $.getJSON('/makeselection?genre=' + genre +'&exclude=t', function (selectiondata) {
+            $.getJSON('/selection/make/_?genre=' + genre +'&exclude=t', function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
         if (wkgenre !== '') {
-            $.getJSON('/makeselection?wkgenre=' + wkgenre +'&exclude=t', function (selectiondata) {
+            $.getJSON('/selection/make/_?wkgenre=' + wkgenre +'&exclude=t', function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
 
         if (loc !== '') {
-            $.getJSON('/makeselection?auloc=' + loc +'&exclude=t', function (selectiondata) {
+            $.getJSON('/selection/make/_?auloc=' + loc +'&exclude=t', function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }
         if (prov !== '') {
-            $.getJSON('/makeselection?wkprov=' + prov +'&exclude=t', function (selectiondata) {
+            $.getJSON('/selection/make/_?wkprov=' + prov +'&exclude=t', function (selectiondata) {
                 reloadselections(selectiondata);
              });
         }

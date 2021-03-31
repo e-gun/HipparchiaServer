@@ -45,6 +45,13 @@ JSON_STR = str
 # getselections is in selectionroutes.py
 # getauthorhint, etc. are in hintroutes.py
 
+"""
+
+	RESPONSE ROUTES
+
+"""
+
+
 @hipparchia.route('/get/response/<fnc>/<param>')
 def responsegetter(fnc: str, param: str) -> FlaskResponse:
 	"""
@@ -56,10 +63,10 @@ def responsegetter(fnc: str, param: str) -> FlaskResponse:
 	param = depunct(param)
 
 	knownfunctions = {'cookie':
-					{'fnc': cookieintosession, 'param': [param]},
-				'vectorfigure':
-					{'fnc': fetchstoredimage, 'param': [param]},
-				}
+						{'fnc': cookieintosession, 'param': [param]},
+					'vectorfigure':
+						{'fnc': fetchstoredimage, 'param': [param]},
+					}
 
 	if fnc not in knownfunctions:
 		response = redirect(url_for('frontpage'))
@@ -145,6 +152,13 @@ def fetchstoredimage(figurename) -> FlaskResponse:
 	response.headers.set('Content-Disposition', 'attachment', filename='hipparchia_graph_{f}.png'.format(f=figurename))
 
 	return response
+
+
+"""
+
+	JSON ROUTES
+
+"""
 
 
 @hipparchia.route('/get/json/<fnc>')
@@ -363,10 +377,11 @@ def sampleworkcitation(authorid: str, workid: str) -> JSON_STR:
 	return results
 
 
-@hipparchia.route('/getauthorinfo/<authorid>')
 def getauthinfo(authorid: str) -> JSON_STR:
 	"""
+
 	show local info about the author one is considering in the selection box
+
 	:return:
 	"""
 
@@ -395,7 +410,6 @@ def getauthinfo(authorid: str) -> JSON_STR:
 	return authinfo
 
 
-@hipparchia.route('/getsearchlistcontents')
 def getsearchlistcontents() -> JSON_STR:
 	"""
 	return a formatted list of what a search would look like if executed with the current selections
@@ -458,7 +472,6 @@ def getsearchlistcontents() -> JSON_STR:
 	return searchlistinfo
 
 
-@hipparchia.route('/getgenrelistcontents')
 def getgenrelistcontents() -> JSON_STR:
 	"""
 	return a basic list of what you can pick
@@ -497,7 +510,6 @@ def getgenrelistcontents() -> JSON_STR:
 	return genres
 
 
-@hipparchia.route('/getvectorranges')
 def returnvectorsettingsranges() -> JSON_STR:
 	"""
 

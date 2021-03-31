@@ -5,7 +5,7 @@
 //      (see LICENSE in the top level directory of the distribution)
 
 function refreshselections() {
-    $.getJSON('/getselections', function (selectiondata) { reloadselections(selectiondata); });
+    $.getJSON('/selection/fetch', function (selectiondata) { reloadselections(selectiondata); });
 }
 
 function loadoptions() {
@@ -462,7 +462,7 @@ $(function() {
 $('#authinfobutton').click(function(){
         $('#authorholdings').toggle();
         let authorid = $('#authorsautocomplete').val().slice(-7, -1);
-        $.getJSON('/getauthorinfo/' + authorid, function (selectiondata) {
+        $.getJSON('/get/json/authorinfo/' + authorid, function (selectiondata) {
                 $('#authorholdings').html(selectiondata);
                  });
     });
@@ -476,7 +476,7 @@ $('#searchinfo').click(function(){
         } else {
             slc.html('');
             slc.show();
-            $.getJSON('/getsearchlistcontents', function (selectiondata) {
+            $.getJSON('/get/json/searchlistcontents', function (selectiondata) {
                 slc.html(selectiondata);
                 });
             }
@@ -485,7 +485,7 @@ $('#searchinfo').click(function(){
 
 $('#genreinfo').click(function(){
         $('#genrelistcontents').toggle();
-        $.getJSON('/getgenrelistcontents', function (selectiondata) {
+        $.getJSON('/get/json/genrelistcontents', function (selectiondata) {
                 document.getElementById('genrelistcontents').innerHTML = selectiondata;
                 });
     });

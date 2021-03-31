@@ -10,6 +10,7 @@ import json
 import re
 
 from flask import request, session
+from werkzeug.datastructures import MultiDict
 
 from server import hipparchia
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
@@ -25,45 +26,85 @@ from server.startup import authordict, authorgenresdict, authorlocationdict, wor
 
 JSON_STR = str
 
-@hipparchia.route('/makeselection', methods=['GET'])
-def selectionmade() -> JSON_STR:
+
+@hipparchia.route('/selection/<action>', methods=['GET'])
+@hipparchia.route('/selection/<action>/<one>', methods=['GET'])
+@hipparchia.route('/selection/<action>/<one>/<two>', methods=['GET'])
+def selectionmaker(action: str, one=None, two=None) -> JSON_STR:
 	"""
+
+	dispatcher for "/selection/..." requests
+
+	"""
+
+	one = depunct(one)
+	two = depunct(two)
+
+	knownfunctions = {
+		'make':
+			{'fnc': selectionmade, 'param': [request.args]},
+		'clear':
+			{'fnc': clearselections, 'param': [one, two]},
+		'fetch':
+			{'fnc': getcurrentselections, 'param': None}
+	}
+
+	if action not in knownfunctions:
+		return json.dumps(str())
+
+	f = knownfunctions[action]['fnc']
+	p = knownfunctions[action]['param']
+
+	if p:
+		j = f(*p)
+	else:
+		j = f()
+
+	if hipparchia.config['JSONDEBUGMODE']:
+		print('/get/json/{f}\n\t{j}'.format(f=action, j=j))
+
+	return j
+
+
+def selectionmade(requestargs: MultiDict) -> JSON_STR:
+	"""
+
 	once a choice is made, parse and register it inside session['selections']
 	then return the human readable version of the same for display on the page
 
 	'_AT_' syntax is used to restrict the scope of a search
 
-	this function is also called without arguments to return the searchlist contents by
-	skipping ahead to sessionselectionsashtml()
+	"GET /selection/make/_?auth=lt0474&work=001&locus=13|4&endpoint= HTTP/1.1"
+	request.args ImmutableMultiDict([('auth', 'lt0474'), ('work', '001'), ('locus', '13|4'), ('endpoint', '')])
 
-	sample input:
-		'/makeselection?auth=gr0008&work=001&locus=3|4|23'
+	"GET /selection/make/_?auth=lt0474&work=001&locus=10&endpoint=20&raw=t HTTP/1.1"
+	request.args ImmutableMultiDict([('auth', 'lt0474'), ('work', '001'), ('locus', '10'), ('endpoint', '20'), ('raw', 't')])
 
-	sample output (pre-json):
-		{'numberofselections': 2, 'timeexclusions': '', 'exclusions': '<span class="picklabel">Works</span><br /><span class="wkexclusions" id="searchselection_02" listval="0">Bacchylides, <span class="pickedwork">Dithyrambi</span></span><br />', 'selections': '<span class="picklabel">Author categories</span><br /><span class="agnselections" id="searchselection_00" listval="0">Lyrici</span><br />\n<span class="picklabel">Authors</span><br /><span class="auselections" id="searchselection_01" listval="0">AG</span><br />\n'}
+	"GET /selection/make/_?auth=lt0474&work=001&exclude=t HTTP/1.1"
+	request.args ImmutableMultiDict([('auth', 'lt0474'), ('work', '001'), ('exclude', 't')])
 
 	:return:
 	"""
 
 	probeforsessionvariables()
 
-	uid = depunct(request.args.get('auth', ''))
-	workid = depunct(request.args.get('work', ''))
-	genre = depunct(request.args.get('genre', ''))
-	auloc = depunct(request.args.get('auloc', ''))
+	uid = depunct(requestargs.get('auth', str()))
+	workid = depunct(requestargs.get('work', str()))
+	genre = depunct(requestargs.get('genre', str()))
+	auloc = depunct(requestargs.get('auloc', str()))
 
-	rawdataentry = re.sub('[^tf]', '', request.args.get('raw', ''))
-	exclude = re.sub('[^tf]', '', request.args.get('exclude', ''))
+	rawdataentry = re.sub('[^tf]', str(), requestargs.get('raw', str()))
+	exclude = re.sub('[^tf]', str(), requestargs.get('exclude', str()))
 
 	allowedpunct = '|,.'
-	locus = depunct(request.args.get('locus', ''), allowedpunct)
-	endpoint = depunct(request.args.get('endpoint', ''), allowedpunct)
+	locus = depunct(requestargs.get('locus', str()), allowedpunct)
+	endpoint = depunct(requestargs.get('endpoint', str()), allowedpunct)
 
 	allowedpunct = '.-?'
-	wkprov = depunct(request.args.get('wkprov', ''), allowedpunct)
+	wkprov = depunct(requestargs.get('wkprov', str()), allowedpunct)
 
 	allowedpunct = '.'
-	wkgenre = depunct(request.args.get('wkgenre', ''), allowedpunct)
+	wkgenre = depunct(requestargs.get('wkgenre', str()), allowedpunct)
 
 	if exclude != 't':
 		suffix = 'selections'
@@ -173,43 +214,6 @@ def selectionmade() -> JSON_STR:
 	return getcurrentselections()
 
 
-@hipparchia.route('/setsessionvariable/<thevariable>/<thevalue>')
-def setsessionvariable(thevariable, thevalue) -> JSON_STR:
-	"""
-	accept a variable name and value: hand it off to the parser/setter
-	returns:
-		[{"latestdate": "1"}]
-		[{"spuria": "no"}]
-		etc.
-
-	:return:
-	"""
-
-	nullresult = json.dumps([{'none': 'none'}])
-
-	# need to accept '-' because of the date spinner; '_' because of 'converted_date', etc
-	validpunct = '-_'
-	thevalue = depunct(thevalue, validpunct)
-
-	if thevalue == 'null':
-		# the js sent out something unexpected while you were in the middle of swapping values
-		# 127.0.0.1 - - [09/Mar/2021 09:50:42] "GET /setsessionvariable/browsercontext/null HTTP/1.1" 500 -
-		return nullresult
-
-	try:
-		session['authorssummary']
-	except KeyError:
-		# cookies are not enabled
-		return nullresult
-
-	modifysessionvariable(thevariable, thevalue)
-
-	result = json.dumps([{thevariable: thevalue}])
-
-	return result
-
-
-@hipparchia.route('/clearselections/<category>/<index>')
 def clearselections(category, index=-1) -> JSON_STR:
 	"""
 	a selection gets thrown into the trash
@@ -244,7 +248,6 @@ def clearselections(category, index=-1) -> JSON_STR:
 	return getcurrentselections()
 
 
-@hipparchia.route('/getselections')
 def getcurrentselections() -> JSON_STR:
 	"""
 
@@ -259,3 +262,39 @@ def getcurrentselections() -> JSON_STR:
 	htmlbundles = json.dumps(htmlbundles)
 
 	return htmlbundles
+
+
+@hipparchia.route('/setsessionvariable/<thevariable>/<thevalue>')
+def setsessionvariable(thevariable, thevalue) -> JSON_STR:
+	"""
+	accept a variable name and value: hand it off to the parser/setter
+	returns:
+		[{"latestdate": "1"}]
+		[{"spuria": "no"}]
+		etc.
+
+	:return:
+	"""
+
+	nullresult = json.dumps([{'none': 'none'}])
+
+	# need to accept '-' because of the date spinner; '_' because of 'converted_date', etc
+	validpunct = '-_'
+	thevalue = depunct(thevalue, validpunct)
+
+	if thevalue == 'null':
+		# the js sent out something unexpected while you were in the middle of swapping values
+		# 127.0.0.1 - - [09/Mar/2021 09:50:42] "GET /setsessionvariable/browsercontext/null HTTP/1.1" 500 -
+		return nullresult
+
+	try:
+		session['authorssummary']
+	except KeyError:
+		# cookies are not enabled
+		return nullresult
+
+	modifysessionvariable(thevariable, thevalue)
+
+	result = json.dumps([{thevariable: thevalue}])
+
+	return result

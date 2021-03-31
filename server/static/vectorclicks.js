@@ -9,7 +9,7 @@
 //
 
 function loadvectorspinners() {
-    $.getJSON('/getvectorranges', function (vsdata) {
+    $.getJSON('/get/json/vectorranges', function (vsdata) {
         let bcsh = document.getElementById("vectorspinnerscriptholder");
         if (bcsh.hasChildNodes()) {
             bcsh.removeChild(bcsh.firstChild);

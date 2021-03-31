@@ -30,6 +30,7 @@ else:
 
 JSON_STR = str
 
+
 @hipparchia.route('/vectors/<vectortype>/<searchid>/<headform>')
 @requireauthentication
 def vectorsearch(vectortype, searchid, headform, so=None) -> JSON_STR:
