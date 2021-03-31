@@ -375,12 +375,12 @@ $('#lexicalsearch').click(function(){
     // if you have toggled any of the boxes off, then $('#parser').val(), etc. will be 'undefined'
     if ( typeof dictterm !== 'undefined' && dictterm.length > 0) {
         searchterm = dictterm;
-        url = '/dictsearch/';
+        url = '/lexica/lookup/';
         dialogtitle = restoreme;
         mydictfield = '#lexicon';
     } else if ( typeof parseterm !== 'undefined' && parseterm.length > 0 ) {
         searchterm = parseterm;
-        url = '/parse/';
+        url = '/lexica/findbyform/';
         dialogtitle = searchterm;
         mydictfield = '#parser';
         restoreme = searchterm;
@@ -395,13 +395,13 @@ $('#lexicalsearch').click(function(){
         // disgustingly, if you send 'STRING ' to window.location it strips the whitespace and turns it into 'STRING'
         if (reverseterm.slice(-1) === ' ') { reverseterm = reverseterm.slice(0, -1) + '%20'; }
         searchterm = reverseterm;
-        url = '/reverselookup/' + searchid + '/';
+        url = '/lexica/reverselookup/' + searchid + '/';
         dialogtitle = originalterm;
         mydictfield = '#reverselexicon';
         restoreme = searchterm;
     } else {
         searchterm = 'nihil';
-        url = '/dictsearch/';
+        url = '/lexica/lookup/';
         dialogtitle = searchterm;
     }
 

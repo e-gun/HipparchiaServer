@@ -35,8 +35,54 @@ from server.startup import progresspolldict
 JSON_STR = str
 
 
-@hipparchia.route('/dictsearch/<searchterm>')
+@hipparchia.route('/lexica/<action>/<one>')
+@hipparchia.route('/lexica/<action>/<one>/<two>')
+@hipparchia.route('/lexica/<action>/<one>/<two>/<three>/<four>')
 @requireauthentication
+def lexicalgetter(action: str, one=None, two=None, three=None, four=None) -> JSON_STR:
+	"""
+
+	dispatcher for "/lexica/..." requests
+
+	"""
+
+	# sanitizing is going to be the responsibility of the various functions...
+
+	# one = depunct(one)
+	# two = depunct(two)
+	# three = depunct(three)
+	# four = depunct(four)
+
+	knownfunctions = {
+		'lookup':
+			{'fnc': dictsearch, 'param': [one]},
+		'findbyform':
+			{'fnc': findbyform, 'param': [one, two]},
+		'reverselookup':
+			{'fnc': reverselexiconsearch, 'param': [one, two]},
+		'idlookup':
+			{'fnc': dictionaryidsearch, 'param': [one, two]},
+		'morphologychart':
+			{'fnc': knownforms, 'param': [one, two, three, four]},
+	}
+
+	if action not in knownfunctions:
+		return json.dumps(str())
+
+	f = knownfunctions[action]['fnc']
+	p = knownfunctions[action]['param']
+
+	if p:
+		j = f(*p)
+	else:
+		j = f()
+
+	if hipparchia.config['JSONDEBUGMODE']:
+		print('/lexica/{f}/\n\t{j}'.format(f=action, j=j))
+
+	return j
+
+
 def dictsearch(searchterm) -> JSON_STR:
 	"""
 	look up words
@@ -139,9 +185,6 @@ def dictsearch(searchterm) -> JSON_STR:
 	return jsondict
 
 
-@hipparchia.route('/parse/<observedword>')
-@hipparchia.route('/parse/<observedword>/<authorid>')
-@requireauthentication
 def findbyform(observedword, authorid=None) -> JSON_STR:
 	"""
 	this function sets of a chain of other functions
@@ -242,8 +285,6 @@ def findbyform(observedword, authorid=None) -> JSON_STR:
 	return jsondict
 
 
-@hipparchia.route('/reverselookup/<searchid>/<searchterm>')
-@requireauthentication
 def reverselexiconsearch(searchid, searchterm) -> JSON_STR:
 	"""
 	attempt to find all of the greek/latin dictionary entries that might go with the english search term
@@ -262,7 +303,7 @@ def reverselexiconsearch(searchid, searchterm) -> JSON_STR:
 	progresspolldict[pollid] = ProgressPoll(pollid)
 	activepoll = progresspolldict[pollid]
 	activepoll.activate()
-	activepoll.statusis('Search lexical entries for "{t}"'.format(t=searchterm))
+	activepoll.statusis('Searching lexical entries for "{t}"'.format(t=searchterm))
 
 	probeforsessionvariables()
 
@@ -366,8 +407,6 @@ def reverselexiconsearch(searchid, searchterm) -> JSON_STR:
 	return jsondict
 
 
-@hipparchia.route('/dictionaryidsearch/<language>/<entryid>')
-@requireauthentication
 def dictionaryidsearch(language, entryid) -> JSON_STR:
 	"""
 
@@ -408,9 +447,7 @@ def dictionaryidsearch(language, entryid) -> JSON_STR:
 	return jsondict
 
 
-@hipparchia.route('/morphologychart/<language>/<lexicalid>/<xrefid>/<headword>')
-@requireauthentication
-def knownforms(lexicalid, language, xrefid, headword) -> JSON_STR:
+def knownforms(language, lexicalid, xrefid, headword) -> JSON_STR:
 	"""
 
 	display all known forms of...

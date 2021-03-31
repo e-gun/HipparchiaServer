@@ -6,22 +6,19 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import json
 from os import name as osname
-from os import path
 from platform import platform, python_version_tuple
-from sys import argv
 
+from flask import Response as FlaskResponse
 from flask import __version__ as flaskversion
 from flask import render_template, send_file, session
-from flask import Response as FlaskResponse
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.dbbuildinfo import versionchecking
 from server.dbsupport.miscdbfunctions import getpostgresserverversion
-from server.formatting.frontpagehtmlformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar, getsearchfieldbuttonshtml, \
-	getauthorholdingfieldhtml, getdaterangefieldhtml, getlexicafieldhtml
+from server.formatting.frontpagehtmlformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar, \
+	getsearchfieldbuttonshtml, getauthorholdingfieldhtml, getdaterangefieldhtml, getlexicafieldhtml
 from server.hipparchiaobjects.authenticationobjects import LoginForm
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
@@ -30,11 +27,13 @@ from version import release, hipparchiaserverversion, readgitdata
 JSON_STR = str
 PAGE_STR = str
 
+
 """"
 
 set some variables at outer scope that both frontpage() and errorhandlingpage() will use 
 
 """
+
 
 stylesheet = hipparchia.config['CSSSTYLESHEET']
 expectedsqltemplateversion = 10082019

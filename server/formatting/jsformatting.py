@@ -201,7 +201,7 @@ def observedformjs(clickone, clicktwo) -> str:
 					});
 				$( '#lexicadialogtext' ).dialog( 'open' );
 				$( '#lexicadialogtext' ).html('[searching...]');
-				$.getJSON('/parse/'+this.id, function (definitionreturned) {
+				$.getJSON('/lexica/findbyform/'+this.id, function (definitionreturned) {
 					$( '#lexicadialogtext' ).html(definitionreturned['newhtml']);
 					$( '#lexicaljsscriptholder' ).html(definitionreturned['newjs']);
 				});
@@ -249,7 +249,7 @@ def dictionaryentryjs() -> str:
 	ensure exact matches, otherwise ἔρδω will pull up ὑπερδώριοϲ too
 
 	and so:
-		'/dictsearch/^'+this.id+'$'
+		'/lexica/lookup/^'+this.id+'$'
 
 	:return:
 	"""
@@ -279,7 +279,7 @@ def dictionaryentryjs() -> str:
 		ldt.dialog('open');
 		ldt.html('[searching...]');
 		
-		$.getJSON('/dictsearch/^'+this.id+'$', function (definitionreturned) {
+		$.getJSON('/lexica/lookup/^'+this.id+'$', function (definitionreturned) {
 			ldt.html(definitionreturned['newhtml']);
 			jshld.html(definitionreturned['newjs']);		
 			});
@@ -296,7 +296,7 @@ def dictionaryentryjs() -> str:
 			let entryid = this.getAttribute("entryid");
 			let language = this.getAttribute("language");
 
-			let url = '/dictionaryidsearch/' + language + '/' + entryid;
+			let url = '/lexica/idlookup/' + language + '/' + entryid;
 			
 			$.getJSON(url, function (definitionreturned) { 
 				ldt.html(definitionreturned['newhtml']);
@@ -329,7 +329,7 @@ def dictionaryentryjs() -> str:
 		ldt.dialog('open');
 		ldt.html('[searching...]');
 		
-		$.getJSON('/morphologychart/'+this.lang+'/'+lexid+'/'+parserxref+'/'+headword, function (definitionreturned) {
+		$.getJSON('/lexica/morphologychart/'+this.lang+'/'+lexid+'/'+parserxref+'/'+headword, function (definitionreturned) {
 			ldt.html(definitionreturned['newhtml']);
 			jshld.html(definitionreturned['newjs']);		
 			});
@@ -352,7 +352,7 @@ def morphologychartjs() -> str:
 	ensure exact matches, otherwise ἔρδω will pull up ὑπερδώριοϲ too
 
 	and so:
-		'/dictsearch/^'+this.id+'$'
+		'/lexica/lookup/^'+this.id+'$'
 
 	:return:
 	"""
@@ -422,7 +422,7 @@ def morphologychartjs() -> str:
 			let entryid = this.getAttribute("entryid");
 			let language = this.getAttribute("language");
 
-			let url = '/dictionaryidsearch/' + language + '/' + entryid;
+			let url = '/lexica/idlookup/' + language + '/' + entryid;
 			
 			$.getJSON(url, function (definitionreturned) { 
 				ldt.html(definitionreturned['newhtml']);

@@ -278,6 +278,7 @@ function loadsamplecitation(author, work) {
     // we are using the maual input style on the web page
     // so we need some hint on how to do things: check the end line for a sample citation
     // "Cic., In Verr" ==> 2.5.189.7
+    // all of these '/get/json/...' URLS end up at infogetter() in getteroutes.py
     $.getJSON('/get/json/samplecitation/' + author + '/' + work, function (citationdata) {
         let firstline = citationdata['firstline'];
         let lastline = citationdata['lastline'];

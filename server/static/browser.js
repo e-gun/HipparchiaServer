@@ -90,7 +90,7 @@ function parsepassagereturned(passagereturned) {
                 });
         ldt.dialog( 'open' );
         ldt.html('[searching...]');
-        $.getJSON('/parse/' + this.id + '/' + browsedauthorid, function (definitionreturned) {
+        $.getJSON('/lexica/findbyform/' + this.id + '/' + browsedauthorid, function (definitionreturned) {
             ldt.html(definitionreturned['newhtml']);
             jshld.html(definitionreturned['newjs']);
         });
