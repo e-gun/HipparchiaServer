@@ -22,7 +22,7 @@ from server.dbsupport.miscdbfunctions import makeanemptyauthor, makeanemptywork
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import supplementalindexjs, supplementalvocablistjs
 from server.formatting.miscformatting import consolewarning, validatepollid
-from server.formatting.wordformatting import avoidsmallvariants
+from server.formatting.wordformatting import avoidsmallvariants, depunct
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.parsingobjects import IndexmakerInputParsingObject, TextmakerInputParsingObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
@@ -37,11 +37,53 @@ from server.textsandindices.textbuilder import buildtext
 JSON_STR = str
 
 
-@hipparchia.route('/indexto/<searchid>/<author>')
-@hipparchia.route('/indexto/<searchid>/<author>/<work>')
-@hipparchia.route('/indexto/<searchid>/<author>/<work>/<passage>')
-@hipparchia.route('/indexto/<searchid>/<author>/<work>/<passage>/<endpoint>')
+@hipparchia.route('/text/<action>/<one>')
+@hipparchia.route('/text/<action>/<one>/<two>')
+@hipparchia.route('/text/<action>/<one>/<two>/<three>')
+@hipparchia.route('/text/<action>/<one>/<two>/<three>/<four>')
+@hipparchia.route('/text/<action>/<one>/<two>/<three>/<four>/<five>')
 @requireauthentication
+def textgetter(action: str, one=None, two=None, three=None, four=None, five=None) -> JSON_STR:
+	"""
+
+	dispatcher for "/text/..." requests
+
+	"""
+
+	one = depunct(one)
+	two = depunct(two)
+	three = depunct(three, allowedpunctuationsting='.')
+	four = depunct(four, allowedpunctuationsting='.')
+	five = depunct(five, allowedpunctuationsting='.')
+
+	knownfunctions = {'index':
+							{'fnc': buildindexto, 'param': [one, two, three, four, five]},
+						'vocab':
+							{'fnc': generatevocabfor, 'param': [one, two, three, four, five]},
+						'vocab_rawloc':
+							{'fnc': vocabfromrawlocus, 'param': [one, two, three, four, five]},
+						'index_rawloc':
+							{'fnc': indexfromrawlocus, 'param': [one, two, three, four, five]},
+						'make':
+							{'fnc': textmaker, 'param': [one, two, three, four]},
+						'make_rawloc':
+							{'fnc': texmakerfromrawlocus, 'param': [one, two, three, four]},
+						}
+
+	if action not in knownfunctions:
+		return json.dumps(str())
+
+	f = knownfunctions[action]['fnc']
+	p = knownfunctions[action]['param']
+
+	j = f(*p)
+
+	if hipparchia.config['JSONDEBUGMODE']:
+		print('/text/{f}\n\t{j}'.format(f=action, j=j))
+
+	return j
+
+
 def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=None, citationdelimiter='|', justvocab=False) -> JSON_STR:
 	"""
 	build a complete index to a an author, work, or segment of a work
@@ -168,11 +210,6 @@ def buildindexto(searchid: str, author: str, work=None, passage=None, endpoint=N
 	return results
 
 
-@hipparchia.route('/vocabularyfor/<searchid>/<author>')
-@hipparchia.route('/vocabularyfor/<searchid>/<author>/<work>')
-@hipparchia.route('/vocabularyfor/<searchid>/<author>/<work>/<passage>')
-@hipparchia.route('/vocabularyfor/<searchid>/<author>/<work>/<passage>/<endpoint>')
-@requireauthentication
 def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoint=None, citationdelimiter='|') -> JSON_STR:
 	"""
 
@@ -310,9 +347,6 @@ def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoi
 	return results
 
 
-@hipparchia.route('/vocabularyforrawlocus/<searchid>/<author>/<work>/<location>')
-@hipparchia.route('/vocabularyforrawlocus/<searchid>/<author>/<work>/<location>/<endpoint>')
-@requireauthentication
 def vocabfromrawlocus(searchid: str, author: str, work=None, location=None, endpoint=None) -> JSON_STR:
 	"""
 
@@ -331,9 +365,6 @@ def vocabfromrawlocus(searchid: str, author: str, work=None, location=None, endp
 	return generatevocabfor(searchid, author, work, location, endpoint, citationdelimiter=delimiter)
 
 
-@hipparchia.route('/indextorawlocus/<searchid>/<author>/<work>/<location>')
-@hipparchia.route('/indextorawlocus/<searchid>/<author>/<work>/<location>/<endpoint>')
-@requireauthentication
 def indexfromrawlocus(searchid: str, author: str, work=None, location=None, endpoint=None) -> JSON_STR:
 	"""
 
@@ -352,11 +383,6 @@ def indexfromrawlocus(searchid: str, author: str, work=None, location=None, endp
 	return buildindexto(searchid, author, work, location, endpoint, citationdelimiter=delimiter)
 
 
-@hipparchia.route('/textof/<author>')
-@hipparchia.route('/textof/<author>/<work>')
-@hipparchia.route('/textof/<author>/<work>/<passage>')
-@hipparchia.route('/textof/<author>/<work>/<passage>/<endpoint>')
-@requireauthentication
 def textmaker(author: str, work=None, passage=None, endpoint=None, citationdelimiter='|') -> JSON_STR:
 	"""
 	build a text suitable for display
@@ -434,9 +460,6 @@ def textmaker(author: str, work=None, passage=None, endpoint=None, citationdelim
 	return results
 
 
-@hipparchia.route('/textofrawlocus/<author>/<work>/<location>')
-@hipparchia.route('/textofrawlocus/<author>/<work>/<location>/<endpoint>')
-@requireauthentication
 def texmakerfromrawlocus(author: str, work: str, location: str, endpoint=None) -> JSON_STR:
 	"""
 

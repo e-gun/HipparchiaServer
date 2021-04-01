@@ -54,18 +54,18 @@ $('#makeanindex').click( function() {
                     checkactivityviawebsocket(searchid);
                     let url = '';
                     if (wrk === '') {
-                        url = '/indexto/' + searchid + '/' + authorid;
+                        url = '/text/index/' + searchid + '/' + authorid;
                     } else if (locus === '') {
-                        url = '/indexto/' + searchid + '/' + authorid + '/' + wrk;
+                        url = '/text/index/' + searchid + '/' + authorid + '/' + wrk;
                     } else {
-                        url = '/indexto/' + searchid + '/' + authorid + '/' + wrk + '/' + locus;
+                        url = '/text/index/' + searchid + '/' + authorid + '/' + wrk + '/' + locus;
                     }
                     $.getJSON(url, function (indexdata) {
                         loadindexintodisplayresults(indexdata, headertext);
                     });
                 } else {
                     checkactivityviawebsocket(searchid);
-                    let url = '/indexto/' + searchid + '/' + authorid + '/' + wrk + '/' + locus + '/' + endpoint;
+                    let url = '/text/index/' + searchid + '/' + authorid + '/' + wrk + '/' + locus + '/' + endpoint;
                     $.getJSON(url, function (indexdata) {
                         loadindexintodisplayresults(indexdata, headertext);
                     });
@@ -75,13 +75,13 @@ $('#makeanindex').click( function() {
                 checkactivityviawebsocket(searchid);
                 let url = '';
                 if (wrk === '') {
-                    url = '/indexto/' + searchid + '/' + authorid;
+                    url = '/text/index/' + searchid + '/' + authorid;
                 } else if (rawlocus === '' && rawendpoint === '') {
-                    url = '/indexto/' + searchid + '/' + authorid + '/' + wrk;
+                    url = '/text/index/' + searchid + '/' + authorid + '/' + wrk;
                 } else if (rawendpoint === '') {
-                    url = '/indextorawlocus/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus;
+                    url = '/text/index_rawloc/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus;
                 } else {
-                    url = '/indextorawlocus/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
+                    url = '/text/index_rawloc/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
                 }
                 $.getJSON(url, function (indexdata) {
                     loadindexintodisplayresults(indexdata, headertext);
@@ -152,18 +152,18 @@ $('#makevocablist').click( function() {
                     checkactivityviawebsocket(searchid);
                     let url = '';
                     if (wrk === '') {
-                        url = '/vocabularyfor/' + searchid + '/' + authorid;
+                        url = '/text/vocab/' + searchid + '/' + authorid;
                     } else if (locus === '') {
-                        url = '/vocabularyfor/' + searchid + '/' + authorid + '/' + wrk;
+                        url = '/text/vocab/' + searchid + '/' + authorid + '/' + wrk;
                     } else {
-                        url = '/vocabularyfor/' + searchid + '/' + authorid + '/' + wrk + '/' + locus;
+                        url = '/text/vocab/' + searchid + '/' + authorid + '/' + wrk + '/' + locus;
                     }
                     $.getJSON(url, function (vocabdata) {
                         loadtextintodisplayresults(vocabdata, headertext);
                     });
                 } else {
                     checkactivityviawebsocket(searchid);
-                    let url = '/vocabularyfor/' + searchid + '/' + authorid + '/' + wrk + '/' + locus + '/' + endpoint;
+                    let url = '/text/vocab/' + searchid + '/' + authorid + '/' + wrk + '/' + locus + '/' + endpoint;
                     $.getJSON(url, function (vocabdata) {
                         loadtextintodisplayresults(vocabdata, headertext);
                     });
@@ -173,13 +173,13 @@ $('#makevocablist').click( function() {
                 checkactivityviawebsocket(searchid);
                 let url = '';
                 if (wrk === '') {
-                    url = '/vocabularyfor/' + searchid + '/' + authorid;
+                    url = '/text/vocab/' + searchid + '/' + authorid;
                 } else if (rawlocus === '' && rawendpoint === '') {
-                    url = '/vocabularyfor/' + searchid + '/' + authorid + '/' + wrk;
+                    url = '/text/vocab/' + searchid + '/' + authorid + '/' + wrk;
                 } else if (rawendpoint === '') {
-                    url = '/vocabularyforrawlocus/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus;
+                    url = '/text/vocab_rawloc/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus;
                 } else {
-                    url = '/vocabularyforrawlocus/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
+                    url = '/text/vocab_rawloc/' + searchid + '/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
                 }
                 $.getJSON(url, function (vocabdata) {
                     loadtextintodisplayresults(vocabdata, headertext);
@@ -212,17 +212,17 @@ $('#textofthis').click( function() {
                 if (endpoint === '') {
                     let url = '';
                     if (wrk === '') {
-                        url = '/textof/' + authorid;
+                        url = '/text/make/' + authorid;
                     } else if (locus === '') {
-                        url = '/textof/' + authorid + '/' + wrk;
+                        url = '/text/make/' + authorid + '/' + wrk;
                     } else {
-                        url = '/textof/' + authorid + '/' + wrk + '/' + locus;
+                        url = '/text/make/' + authorid + '/' + wrk + '/' + locus;
                     }
                     $.getJSON(url, function (returnedtext) {
                         loadtextintodisplayresults(returnedtext, headertext);
                     });
                 } else {
-                    let url = '/textof/' + authorid + '/' + wrk + '/' + locus + '/' + endpoint;
+                    let url = '/text/make/' + authorid + '/' + wrk + '/' + locus + '/' + endpoint;
                     $.getJSON(url, function (returnedtext) {
                         loadtextintodisplayresults(returnedtext, headertext);
                     });
@@ -231,13 +231,13 @@ $('#textofthis').click( function() {
                 // you are using the raw entry subsystem
                 let url = '';
                 if (wrk === '') {
-                    url = '/textof/' + authorid;
+                    url = '/text/make/' + authorid;
                 } else if (rawlocus === '' && rawendpoint === '') {
-                    url = '/textof/' + authorid + '/' + wrk;
+                    url = '/text/make/' + authorid + '/' + wrk;
                 } else if (rawendpoint === '') {
-                    url = '/textofrawlocus/' + authorid + '/' + wrk + '/' + rawlocus;
+                    url = '/text/make_rawloc/' + authorid + '/' + wrk + '/' + rawlocus;
                 } else {
-                    url = '/textofrawlocus/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
+                    url = '/text/make_rawloc/' + authorid + '/' + wrk + '/' + rawlocus + '/' + rawendpoint;
                 }
                 $.getJSON(url, function (returnedtext) {
                 loadtextintodisplayresults(returnedtext, headertext);

@@ -56,7 +56,7 @@ def searchgetter(action: str, one=None, two=None) -> JSON_STR:
 	# two = depunct(two)
 
 	knownfunctions = {'standard':
-							{'fnc': executesearch, 'param': [one, request]},
+							{'fnc': executesearch, 'param': [one, None, request]},
 						'singleword':
 							{'fnc': singlewordsearch, 'param': [one, two]},
 						'lemmatized':
@@ -71,10 +71,7 @@ def searchgetter(action: str, one=None, two=None) -> JSON_STR:
 	f = knownfunctions[action]['fnc']
 	p = knownfunctions[action]['param']
 
-	if p:
-		j = f(*p)
-	else:
-		j = f()
+	j = f(*p)
 
 	if hipparchia.config['JSONDEBUGMODE']:
 		print('/search/{f}\n\t{j}'.format(f=action, j=j))
@@ -82,7 +79,7 @@ def searchgetter(action: str, one=None, two=None) -> JSON_STR:
 	return j
 
 
-def executesearch(searchid, req=request, so=None) -> JSON_STR:
+def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 	"""
 
 	the interface to all of the other search functions

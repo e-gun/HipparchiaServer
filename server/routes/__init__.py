@@ -31,9 +31,8 @@ lexicalroutes.py:@hipparchia.route('/lexica/<action>/<one>')
 lexicalroutes.py:@hipparchia.route('/lexica/<action>/<one>/<two>')
 lexicalroutes.py:@hipparchia.route('/lexica/<action>/<one>/<two>/<three>/<four>')
 resetroutes.py:@hipparchia.route('/reset/<item>')
-searchroute.py:@hipparchia.route('/executesearch/<searchid>', methods=['GET'])
-searchroute.py:@hipparchia.route('/singlewordsearch/<searchid>/<searchterm>')
-searchroute.py:@hipparchia.route('/lemmatizesearch/<searchid>/<headform>')
+searchroute.py:@hipparchia.route('/search/<action>/<one>', methods=['GET'])
+searchroute.py:@hipparchia.route('/search/<action>/<one>/<two>')
 selectionroutes.py:@hipparchia.route('/selection/<action>', methods=['GET'])
 selectionroutes.py:@hipparchia.route('/selection/<action>/<one>', methods=['GET'])
 selectionroutes.py:@hipparchia.route('/selection/<action>/<one>/<two>', methods=['GET'])
@@ -58,6 +57,5 @@ textandindexroutes.py:@hipparchia.route('/textofrawlocus/<author>/<work>/<locati
 textandindexroutes.py:@hipparchia.route('/textofrawlocus/<author>/<work>/<location>/<endpoint>')
 vectorroutes.py:@hipparchia.route('/vectors/<vectortype>/<searchid>/<headform>')
 vectorroutes.py:@hipparchia.route('/vectoranalogies/<searchid>/<termone>/<termtwo>/<termthree>')
-websocketroutes.py:@hipparchia.route('/confirm/<searchid>')
 
 """
