@@ -134,7 +134,7 @@ def generatevectorjs() -> str:
 					document.getElementById('browserclickscriptholder').appendChild(browserclickscript);
 				});		
 
-			$.getJSON('/confirm/'+searchid, function(portnumber) {
+			$.getJSON('/searc/confirm/'+searchid, function(portnumber) {
 			var ip = location.hostname;
 			var s = new WebSocket('ws://'+ip+':'+portnumber+'/');
 			var amready = setInterval(function(){ if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); } }, 10);
@@ -359,9 +359,9 @@ def morphologychartjs() -> str:
 
 	if osname != 'nt':
 		# singlewordsearch() will throw a recursion exception on Windows
-		searchurl = """let url = '/singlewordsearch/' + searchid + '/' + searchterm;"""
+		searchurl = """let url = '/search/singleword/' + searchid + '/' + searchterm;"""
 	else:
-		searchurl = """let url = '/executesearch/' + searchid + '?skg=%20' + searchterm + '%20';"""
+		searchurl = """let url = '/search/standard/' + searchid + '?skg=%20' + searchterm + '%20';"""
 
 	template = """
 	<script>
@@ -406,7 +406,7 @@ def morphologychartjs() -> str:
 			let headform = this.getAttribute("headform");
 			
 			let searchid = generateId(8);
-			let url = '/lemmatizesearch/' + searchid + '/' + headform;
+			let url = '/search/lemmatized/' + searchid + '/' + headform;
 			
 			$.getJSON(url, function (returnedresults) { displayresults(returnedresults); });
 			
@@ -431,7 +431,7 @@ def morphologychartjs() -> str:
 		});
 		
 		function checkactivityviawebsocket(searchid) {
-			$.getJSON('/confirm/'+searchid, function(portnumber) {
+			$.getJSON('/search/confirm/'+searchid, function(portnumber) {
 				let ip = location.hostname;
 				let s = new WebSocket('ws://'+ip+':'+portnumber+'/');
 				let amready = setInterval(function(){

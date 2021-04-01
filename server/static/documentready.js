@@ -121,7 +121,7 @@ $(document).ready( function () {
         // let searchid = uuidv4();
 
         if (areWeWearchingVectors() === 0) {
-            flaskpath = '/executesearch/';
+            flaskpath = '/search/standard/';
             url = flaskpath + searchid + '?' + qstring;
         } else {
             let lsv = $('#lemmatasearchform').val();

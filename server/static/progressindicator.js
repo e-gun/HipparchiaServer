@@ -10,7 +10,7 @@
 //
 
 function checkactivityviawebsocket(searchid) {
-    $.getJSON('/confirm/'+searchid, function(portnumber) {
+    $.getJSON('/search/confirm/'+searchid, function(portnumber) {
         let pd = $('#pollingdata');
         let ip = location.hostname;
         // but /etc/nginx/nginx.conf might have a WS proxy and not the actual WS host...

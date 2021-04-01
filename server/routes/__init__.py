@@ -1,12 +1,10 @@
 __all__ = ['browseroute', 'frontpage', 'getterroutes', 'hintroutes', 'inforoutes', 'lexicalroutes', 'searchroute',
-           'selectionroutes', 'textandindexroutes', 'websocketroutes', 'resetroutes', 'cssroutes', 'authenticationroutes']
+           'selectionroutes', 'textandindexroutes', 'resetroutes', 'cssroutes', 'authenticationroutes']
 
 """
 what can be found where: [routes/ $ grep "^@hipp" *.py]
 
-authenticationroutes.py:@hipparchia.route('/attemptlogin', methods=['GET', 'POST'])
-authenticationroutes.py:@hipparchia.route('/hipparchialogout', methods=['GET'])
-authenticationroutes.py:@hipparchia.route('/checkuser', methods=['GET'])
+authenticationroutes.py:@hipparchia.route('/authentication/<action>', methods=['GET', 'POST'])
 browseroute.py:@hipparchia.route('/browse/<method>/<author>/<work>')
 browseroute.py:@hipparchia.route('/browse/<method>/<author>/<work>/<location>')
 browseroute.py:@hipparchia.route('/browserawlocus/<author>/<work>')
@@ -29,12 +27,9 @@ inforoutes.py:@hipparchia.route('/databasecontents/<dictionarytodisplay>')
 inforoutes.py:@hipparchia.route('/csssamples')
 inforoutes.py:@hipparchia.route('/showsession')
 inforoutes.py:@hipparchia.route('/testroute')
-lexicalroutes.py:@hipparchia.route('/dictsearch/<searchterm>')
-lexicalroutes.py:@hipparchia.route('/parse/<observedword>')
-lexicalroutes.py:@hipparchia.route('/parse/<observedword>/<authorid>')
-lexicalroutes.py:@hipparchia.route('/reverselookup/<searchid>/<searchterm>')
-lexicalroutes.py:@hipparchia.route('/dictionaryidsearch/<language>/<entryid>')
-lexicalroutes.py:@hipparchia.route('/morphologychart/<language>/<lexicalid>/<xrefid>/<headword>')
+lexicalroutes.py:@hipparchia.route('/lexica/<action>/<one>')
+lexicalroutes.py:@hipparchia.route('/lexica/<action>/<one>/<two>')
+lexicalroutes.py:@hipparchia.route('/lexica/<action>/<one>/<two>/<three>/<four>')
 resetroutes.py:@hipparchia.route('/reset/<item>')
 searchroute.py:@hipparchia.route('/executesearch/<searchid>', methods=['GET'])
 searchroute.py:@hipparchia.route('/singlewordsearch/<searchid>/<searchterm>')
