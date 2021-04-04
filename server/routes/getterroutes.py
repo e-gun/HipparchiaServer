@@ -17,6 +17,11 @@ from click import secho
 from flask import Response as FlaskResponse
 from flask import make_response, redirect, request, session, url_for
 
+try:
+	from rich import print
+except ImportError:
+	pass
+
 from server import hipparchia
 from server.dbsupport.citationfunctions import findvalidlevelvalues
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabbundlesoflines, grabonelinefromwork, \

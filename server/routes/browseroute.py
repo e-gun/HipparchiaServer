@@ -8,6 +8,11 @@
 
 import json
 
+try:
+	from rich import print
+except ImportError:
+	pass
+
 from server import hipparchia
 from server.authentication.authenticationwrapper import requireauthentication
 from server.browsing.browserfunctions import browserfindlinenumberfromcitation, buildbrowseroutputobject
@@ -20,6 +25,7 @@ from server.hipparchiaobjects.parsingobjects import BrowserInputParsingObject
 from server.listsandsession.checksession import probeforsessionvariables
 
 JSON_STR = str
+
 
 @hipparchia.route('/browse/<method>/<author>/<work>')
 @hipparchia.route('/browse/<method>/<author>/<work>/<location>')
@@ -91,6 +97,10 @@ def grabtextforbrowsing(method, author, work, location=None) -> JSON_STR:
 	browserdata = json.dumps(passageobject.generateoutput())
 
 	dbconnection.connectioncleanup()
+
+	# this time the info is really overwhelming...
+	if hipparchia.config['JSONEXTENDEDDEBUGMODE']:
+		print('/browse/{f}/\n\t{j}'.format(f=method, j=browserdata))
 
 	return browserdata
 

@@ -8,7 +8,16 @@
 
 import multiprocessing
 
+try:
+	from rich.traceback import install as installtracebackhandler
+except ImportError:
+	installtracebackhandler = None
+
+if installtracebackhandler:
+	installtracebackhandler()
+
 from click import secho
+
 try:
 	# DeprecationWarning: 'werkzeug.contrib.profiler' has moved to'werkzeug.middleware.profiler'.
 	# This import is deprecated as ofversion 0.15 and will be removed in version 1.0.

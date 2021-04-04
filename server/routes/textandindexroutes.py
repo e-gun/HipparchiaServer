@@ -13,6 +13,11 @@ import time
 
 from flask import session
 
+try:
+	from rich import print
+except ImportError:
+	pass
+
 from server import hipparchia
 from server.authentication.authenticationwrapper import requireauthentication
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus

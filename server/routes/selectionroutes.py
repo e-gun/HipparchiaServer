@@ -12,6 +12,11 @@ import re
 from flask import request, session
 from werkzeug.datastructures import MultiDict
 
+try:
+	from rich import print
+except ImportError:
+	pass
+
 from server import hipparchia
 from server.dbsupport.citationfunctions import finddblinefromincompletelocus
 from server.formatting.miscformatting import consolewarning

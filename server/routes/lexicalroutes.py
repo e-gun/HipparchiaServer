@@ -11,6 +11,11 @@ import re
 
 from flask import session
 
+try:
+	from rich import print
+except ImportError:
+	pass
+
 from server import hipparchia
 from server.authentication.authenticationwrapper import requireauthentication
 from server.commandlineoptions import getcommandlineargs
@@ -77,7 +82,8 @@ def lexicalgetter(action: str, one=None, two=None, three=None, four=None) -> JSO
 	else:
 		j = f()
 
-	if hipparchia.config['JSONDEBUGMODE']:
+	# this time the info is really overwhelming...
+	if hipparchia.config['JSONEXTENDEDDEBUGMODE']:
 		print('/lexica/{f}/\n\t{j}'.format(f=action, j=j))
 
 	return j

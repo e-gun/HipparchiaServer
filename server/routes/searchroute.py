@@ -11,6 +11,11 @@ import re
 import threading
 import time
 
+try:
+	from rich import print
+except ImportError:
+	pass
+
 from flask import request, session
 
 from server import hipparchia

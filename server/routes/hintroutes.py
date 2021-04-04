@@ -10,6 +10,11 @@ import json
 
 from flask import request
 
+try:
+	from rich import print
+except ImportError:
+	pass
+
 from server import hipparchia
 from server.formatting.wordformatting import depunct, stripaccents
 from server.listsandsession.genericlistfunctions import polytonicsort
@@ -68,6 +73,9 @@ def supplyhints(category, _) -> JSON_STR:
 	strippedquery = depunct(query, allowedpunctuationsting)
 
 	hintlist = fnc(strippedquery)
+
+	if hipparchia.config['JSONDEBUGMODE']:
+		print('/hints/{f}\n\t{j}'.format(f=category, j=hintlist))
 
 	return json.dumps(hintlist)
 
