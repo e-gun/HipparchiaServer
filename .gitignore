@@ -12,6 +12,8 @@ ui-icons*
 j*css
 server/static/ttf/LICEN*
 server/static/ttf/READ*
+server/static/3d/
+server/experimental/
 
 # IDE
 .idea/
