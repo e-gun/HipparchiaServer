@@ -26,7 +26,7 @@ function browseuponclick(url){
 
 function rawlocusbrowseuponclick(url){
 	$.getJSON(
-	    { url: '/browserawlocus/' + url,
+	    { url: '/browse/rawlocus/' + url,
 	    success: function (passagereturned) {
 	        let bf = $('#browseforward');
 	        let bb = $('#browseback');

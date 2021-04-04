@@ -244,8 +244,9 @@ def findtheworksof(authoruid) -> JSON_STR:
 	"""
 	fill the hint box with constantly updated values
 
-	for "/getworksof/gr0026" the return list looks like:
+	127.0.0.1 - - [04/Apr/2021 13:36:32] "GET /get/json/worksof/lt0474 HTTP/1.1" 200 -
 
+	/get/json/worksof
 		[{"value": "In Timarchum (w001)"}, {"value": "De falsa legatione (w002)"}, {"value": "In Ctesiphontem (w003)"},
 		{"value": "Epistulae [Sp.] (w004)"}]
 
@@ -293,9 +294,9 @@ def findworkstructure(author, work, passage=None) -> JSON_STR:
 	request detailed info about how a work works
 	this is fed back to the js boxes : who should be active, what are the autocomplete values, etc?
 
-	sample input:
-		'/getstructure/gr0008w001/-1'
-		'/getstructure/gr0008w001/13|22'
+	127.0.0.1 - - [04/Apr/2021 13:36:16] "GET /get/json/workstructure/lt0474/037 HTTP/1.1" 200 -
+	/get/json/workstructure
+		{"totallevels": 3, "level": 2, "label": "book", "low": "1", "high": "3", "range": ["1", "2", "3"]}
 
 	:return:
 	"""
@@ -325,9 +326,6 @@ def findworkstructure(author, work, passage=None) -> JSON_STR:
 		ws['high'] = 'again'
 		ws['range'] = ['error', 'select', 'the', 'work', 'again']
 
-	# print('ws = ', ws)
-	# example: {'totallevels': 5, 'level': 2, 'label': 'par', 'low': '1', 'high': '10', 'range': ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
-
 	results = json.dumps(ws)
 
 	dbconnection.connectioncleanup()
@@ -342,7 +340,12 @@ def sampleworkcitation(authorid: str, workid: str) -> JSON_STR:
 
 	we are using the maual input style on the web page
 	so we need some hint on how to do things: check the end line for a sample citation
-	"Cic., In Verr" ==> 2.5.189.7
+
+	"In Timarchum (w001)" yields...
+
+	127.0.0.1 - - [04/Apr/2021 13:48:53] "GET /get/json/samplecitation/gr0026/001 HTTP/1.1" 200 -
+	/get/json/samplecitation
+		{"firstline": "1.1", "lastline": "196.7"}
 
 	:param authorid:
 	:param workid:

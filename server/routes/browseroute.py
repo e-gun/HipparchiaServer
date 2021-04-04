@@ -44,8 +44,13 @@ def grabtextforbrowsing(method, author, work, location=None) -> JSON_STR:
 	:return:
 	"""
 
-	if method not in ['linenumber', 'locus', 'perseus']:
+	if method not in ['linenumber', 'locus', 'perseus', 'rawlocus']:
 		method = 'linenumber'
+
+	if method == 'rawlocus':
+		# this will send us right back to this function after figuring out either the 'locus' version
+		# or the 'linenumber' version
+		return rawcitationgrabtextforbrowsing(author, work, location)
 
 	delimiterdict = {'linenumber': None, 'locus': '|', 'perseus': ':'}
 	delimiter = delimiterdict[method]
@@ -75,16 +80,20 @@ def grabtextforbrowsing(method, author, work, location=None) -> JSON_STR:
 			wo = ao.grabfirstworkobject()
 		except KeyError:
 			# you are in some serious trouble: time to abort
-			consolewarning('bad data fed to grabtextforbrowsing(): {m} / {a} / {w} / {l}'.format(m=method, a=author, w=work, l=location))
+			w = 'bad data fed to grabtextforbrowsing(): {m} / {a} / {w} / {l}'
+			consolewarning(w.format(m=method, a=author, w=work, l=location))
 			ao = None
 
 	thelocation, resultmessage = browserfindlinenumberfromcitation(method, po.passageaslist, wo, dbcursor)
+
+	cv = """<p class="currentlyviewing">error in fetching the browser data.<br />
+	I was sent a citation that returned nothing: {c}</p><br /><br />"""
 
 	if thelocation and ao:
 		passageobject = buildbrowseroutputobject(ao, wo, int(thelocation), dbcursor)
 	else:
 		passageobject = BrowserOutputObject(ao, wo, thelocation)
-		viewing = '<p class="currentlyviewing">error in fetching the browser data.<br />I was sent a citation that returned nothing: {c}</p><br /><br />'.format(c=location)
+		viewing = cv.format(c=location)
 		if not thelocation:
 			thelocation = str()
 		table = [str(thelocation), wo.universalid]
@@ -105,9 +114,6 @@ def grabtextforbrowsing(method, author, work, location=None) -> JSON_STR:
 	return browserdata
 
 
-@hipparchia.route('/browserawlocus/<author>/<work>')
-@hipparchia.route('/browserawlocus/<author>/<work>/<location>')
-@requireauthentication
 def rawcitationgrabtextforbrowsing(author: str, work: str, location=None) -> JSON_STR:
 	"""
 
