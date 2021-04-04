@@ -40,6 +40,7 @@ def grabtextforbrowsing(method, author, work, location=None) -> JSON_STR:
 		sample input: '/browse/linenumber/lt0550/001/1855'
 		sample input: '/browse/locus/lt0550/001/3|100'
 		sample input: '/browse/perseus/lt0550/001/2:717'
+		sample input: '/browse/rawlocus/lt0474/037/2.10.4'
 
 	:return:
 	"""
@@ -119,7 +120,9 @@ def rawcitationgrabtextforbrowsing(author: str, work: str, location=None) -> JSO
 
 	the raw input version of grabtextforbrowsing()
 
-		/browserawlocus/lt0550/001/3.100
+		127.0.0.1 - - [04/Apr/2021 13:36:32] "GET /browse/rawlocus/lt0474/037/2.10.4 HTTP/1.1" 200 -
+
+	figure out how to turn that citation into one of the other styles; then grabtextforbrowsing()
 
 	:param author:
 	:param work:

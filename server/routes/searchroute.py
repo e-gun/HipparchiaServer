@@ -390,7 +390,7 @@ def headwordsearch(searchid, headform) -> JSON_STR:
 	return jsonoutput
 
 
-def checkforactivesearch(searchid) -> JSON_STR:
+def checkforactivesearch(searchid, trialnumber=0) -> JSON_STR:
 	"""
 
 	test the activity of a poll so you don't start conjuring a bunch of key errors if you use wscheckpoll() prematurely
@@ -405,9 +405,16 @@ def checkforactivesearch(searchid) -> JSON_STR:
 	:return:
 	"""
 
-	pollid = validatepollid(searchid)
+	maxtrials = 4
+	trialnumber = trialnumber + 1
 
+	pollid = validatepollid(searchid)
 	pollport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
+
+	if trialnumber >= maxtrials:
+		w = 'checkforactivesearch() cannot find the poll for {p} after {t} tries'
+		consolewarning(w.format(p=pollid, t=trialnumber))
+		return json.dumps('cannot_find_the_poll')
 
 	activethreads = [t.name for t in threading.enumerate()]
 	if 'websocketpoll' not in activethreads:
@@ -421,16 +428,8 @@ def checkforactivesearch(searchid) -> JSON_STR:
 		if progresspolldict[pollid].getactivity():
 			return json.dumps(pollport)
 	except KeyError:
-		# print('websocket checkforactivesearch() KeyError', pollid)
 		time.sleep(.10)
-		try:
-			if progresspolldict[pollid].getactivity():
-				return json.dumps(pollport)
-			else:
-				consolewarning('checkforactivesearch() reports that the websocket is still inactive: there is a serious problem?')
-				return json.dumps('nothing at {p}'.format(p=pollport))
-		except KeyError:
-			return json.dumps('cannot_find_the_poll')
+		return checkforactivesearch(searchid, trialnumber)
 
 
 def externalwsgipolling(pollid) -> JSON_STR:
