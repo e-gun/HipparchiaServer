@@ -75,7 +75,7 @@ def frontpage() -> PAGE_STR:
 
 	the front page. it used to do stuff; now it just loads the JS which then calls all of the routes:
 	regular users never leave the front page
-	the only other pages are basically debug pages as seen in inforoutes.py
+	the only other pages are basically debug pages as seen in debuggingroutes.py
 
 	:return:
 	"""

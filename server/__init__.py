@@ -51,7 +51,7 @@ except:
 
 from server import configureatstartup
 from server import startup
-from server.routes import browseroute, frontpage, getterroutes, hintroutes, inforoutes, lexicalroutes, searchroute, \
+from server.routes import browseroute, frontpage, getterroutes, hintroutes, debuggingroutes, lexicalroutes, searchroute, \
 	selectionroutes, textandindexroutes, resetroutes, cssroutes, vectorroutes, authenticationroutes
 
 if hipparchia.config['AUTOVECTORIZE']:

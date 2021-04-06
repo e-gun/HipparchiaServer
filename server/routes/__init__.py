@@ -1,4 +1,4 @@
-__all__ = ['browseroute', 'frontpage', 'getterroutes', 'hintroutes', 'inforoutes', 'lexicalroutes', 'searchroute',
+__all__ = ['browseroute', 'frontpage', 'getterroutes', 'hintroutes', 'debuggingroutes', 'lexicalroutes', 'searchroute',
            'selectionroutes', 'textandindexroutes', 'resetroutes', 'cssroutes', 'authenticationroutes']
 
 """
@@ -23,10 +23,10 @@ getterroutes.py:@hipparchia.route('/get/json/<fnc>/<one>')
 getterroutes.py:@hipparchia.route('/get/json/<fnc>/<one>/<two>')
 getterroutes.py:@hipparchia.route('/get/json/<fnc>/<one>/<two>/<three>')
 hintroutes.py:@hipparchia.route('/hints/<category>/<_>')
-inforoutes.py:@hipparchia.route('/databasecontents/<dictionarytodisplay>')
-inforoutes.py:@hipparchia.route('/csssamples')
-inforoutes.py:@hipparchia.route('/showsession')
-inforoutes.py:@hipparchia.route('/testroute')
+debuggingroutes.py:@hipparchia.route('/databasecontents/<dictionarytodisplay>')
+debuggingroutes.py:@hipparchia.route('/csssamples')
+debuggingroutes.py:@hipparchia.route('/showsession')
+debuggingroutes.py:@hipparchia.route('/testroute')
 lexicalroutes.py:@hipparchia.route('/lexica/<action>/<one>')
 lexicalroutes.py:@hipparchia.route('/lexica/<action>/<one>/<two>')
 lexicalroutes.py:@hipparchia.route('/lexica/<action>/<one>/<two>/<three>/<four>')
