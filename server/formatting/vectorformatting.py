@@ -17,6 +17,8 @@ from server.hipparchiaobjects.searchobjects import SearchOutputObject, SearchObj
 from server.hipparchiaobjects.vectorobjects import VectorValues
 from server.startup import authordict, workdict
 
+JSON_STR = str
+
 
 @htmlcommentdecorator
 def formatlsimatches(listofmatches: List[dict]) -> str:
@@ -283,11 +285,12 @@ def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: 
 	return jsonoutput
 
 
-@htmlcommentdecorator
-def analogiesgenerateoutput(searchobject, findstuples: list) -> str:
+def analogiesgenerateoutput(searchobject, findstuples: list) -> JSON_STR:
 	"""
 
 	findstuples: [(word1, value1), (word2, value2), ...]
+
+	@htmlcommentdecorator here will actually kill the json...
 
 	:param searchobject:
 	:param findstuples:

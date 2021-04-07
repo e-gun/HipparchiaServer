@@ -12,8 +12,10 @@ from server.formatting.vectorformatting import analogiesgenerateoutput
 from server.semanticvectors.gensimnearestneighbors import buildnnvectorspace
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 
+JSON_STR = str
 
-def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace):
+
+def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace) -> JSON_STR:
 	"""
 
 	very much in progress
@@ -63,14 +65,20 @@ def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace):
 	except KeyError as theexception:
 		# KeyError: "word 'terra' not in vocabulary"
 		missing = re.search(r'word \'(.*?)\'', str(theexception))
-		similarities = [('"{m}" was missing from the vector space'.format(m=missing.group(1)), 0)]
+		try:
+			similarities = [('"{m}" was missing from the vector space'.format(m=missing.group(1)), 0)]
+		except AttributeError:
+			similarities = [('[you ended up with an "X not Present" in your results]', 0)]
 
 	try:
 		cosimilarities = vectorspace.wv.most_similar_cosmul(positive=positive, negative=negative, topn=5)
 	except KeyError as theexception:
 		# KeyError: "word 'terra' not in vocabulary"
 		missing = re.search(r'word \'(.*?)\'', str(theexception))
-		cosimilarities = [('"{m}" was missing from the vector space'.format(m=missing.group(1)), 0)]
+		try:
+			cosimilarities = [('"{m}" was missing from the vector space'.format(m=missing.group(1)), 0)]
+		except AttributeError:
+			cosimilarities = [('[you ended up with an "X not Present" in your results]', 0)]
 
 	simlabel = [('<b>similarities</b>', str())]
 	cosimlabel = [('<b>cosimilarities</b>', str())]
@@ -79,6 +87,10 @@ def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace):
 
 	output = simlabel + similarities + cosimlabel + cosimilarities
 
+	# print('generateanalogies() output', output)
+
 	output = analogiesgenerateoutput(searchobject, output)
+
+	# print('generateanalogies() output', output)
 
 	return output

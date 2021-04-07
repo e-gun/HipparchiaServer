@@ -100,7 +100,7 @@ def findabsolutevectorsbysentence(searchobject):
 			pass
 
 	if wordstotal > maxwords:
-		reasons = ['the vector scope max exceeded: {a} > {b} '.format(a=locale.format('%d', wordstotal, grouping=True), b=locale.format('%d', maxwords, grouping=True))]
+		reasons = ['the vector scope max exceeded: {a} > {b} '.format(a=locale.format_string('%d', wordstotal, grouping=True), b=locale.format_string('%d', maxwords, grouping=True))]
 		return emptyvectoroutput(so, reasons)
 
 	if len(searchlist) > 0:

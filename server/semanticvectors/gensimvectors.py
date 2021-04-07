@@ -47,7 +47,9 @@ def executegenerateanalogies(searchobject):
 	:return:
 	"""
 
-	if searchobject.vectorquerytype == 'analogyfinder':
+	# print('searchobject.vectorquerytype', searchobject.vectorquerytype)
+
+	if searchobject.vectorquerytype == 'analogies':
 		outputfunction = generateanalogies
 		indextype = 'nn'
 		return executegensimsearch(searchobject, outputfunction, indextype)

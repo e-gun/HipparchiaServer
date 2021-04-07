@@ -6,19 +6,22 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-from flask import redirect, session, url_for
+import json
+
+from flask import session
 
 from server import hipparchia
 from server.authentication.authenticationwrapper import requireauthentication
 from server.formatting.miscformatting import validatepollid
+from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchObject, SearchOutputObject
-from server.listsandsession.checksession import probeforsessionvariables
 from server.routes.searchroute import executesearch
 from server.startup import lemmatadict, progresspolldict
 
 if hipparchia.config['SEMANTICVECTORSENABLED']:
-	from server.semanticvectors.gensimvectors import executenearestneighborsquery, executegensimlsi, executegenerateanalogies, twodimensionalrepresentationofspace, threedimensionalrepresentationofspace
+	from server.semanticvectors.gensimvectors import executenearestneighborsquery, executegensimlsi, \
+		executegenerateanalogies, twodimensionalrepresentationofspace
 	from server.semanticvectors.scikitlearntopics import sklearnselectedworks
 	from server.semanticvectors.vectorroutehelperfunctions import findabsolutevectorsbysentence
 else:
@@ -31,21 +34,14 @@ else:
 JSON_STR = str
 
 
-@hipparchia.route('/vectors/<vectortype>/<searchid>/<headform>')
+@hipparchia.route('/vectors/<vectortype>/<searchid>/<one>')
+@hipparchia.route('/vectors/<vectortype>/<searchid>/<one>/<two>/<three>')
 @requireauthentication
-def vectorsearch(vectortype, searchid, headform, so=None) -> JSON_STR:
+def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, three=None) -> JSON_STR:
 	"""
 
-	you get sent here if you have something clicked in the vector boxes: see 'documentready.js'
+	dispatcher for "/vectors/..." requests
 
-	this is a restricted version of executesearch(): a dictionary headword
-
-	no particular virtue in breaking this out yet; but separation of vector routes is likely
-	useful in the long run
-
-	:param searchid:
-	:param headform:
-	:return:
 	"""
 
 	if not hipparchia.config['SEMANTICVECTORSENABLED']:
@@ -55,27 +51,51 @@ def vectorsearch(vectortype, searchid, headform, so=None) -> JSON_STR:
 		message = '[semantic vectors have not been enabled]'
 		return oo.generatenulloutput(itemname=target, itemval=message)
 
-	probeforsessionvariables()
-
-	vectorboxes = ['cosdistbysentence', 'cosdistbylineorword', 'semanticvectorquery', 'nearestneighborsquery',
-	               'tensorflowgraph', 'sentencesimilarity', 'topicmodel', 'analogyfinder', 'vectortestfunction']
-
-	try:
-		lemma = lemmatadict[headform]
-	except KeyError:
-		lemma = None
-
 	pollid = validatepollid(searchid)
+	one = depunct(one)
+	two = depunct(two)
+	three = depunct(three)
 
-	if not so:
-		seeking = str()
-		proximate = str()
-		proximatelemma = str()
-		so = SearchObject(pollid, seeking, proximate, lemma, proximatelemma, session)
+	simple = [pollid, one]
+	triple = [pollid, one, two, three]
 
-	if so.session['baggingmethod'] == 'unlemmatized' and not so.seeking:
-		# analogysearch() might have already set so.seeking
-		so.seeking = so.searchtermcleanup(headform)
+	knownfunctions = {'cosdistbysentence':
+							{'fnc': findabsolutevectorsbysentence, 'bso': simple, 'pref': 'LITERALCOSINEDISTANCEENABLED'},
+						# cosdistbylineorword is a funky one because it routes you back through the main search function
+						'cosdistbylineorword':
+							{'fnc': executesearch, 'bso': simple, 'pref': 'LITERALCOSINEDISTANCEENABLED'},
+						'semanticvectorquery':
+							{'fnc': executegensimlsi, 'bso': simple, 'pref': None},
+						'nearestneighborsquery':
+							{'fnc': executenearestneighborsquery, 'bso': simple, 'pref': 'CONCEPTMAPPINGENABLED'},
+						'analogies':
+							{'fnc': executegenerateanalogies, 'bso': triple, 'pref': 'VECTORANALOGIESENABLED'},
+						'topicmodel':
+							{'fnc': sklearnselectedworks, 'bso': simple, 'pref': 'TOPICMODELINGENABLED'},
+						'vectortestfunction':
+							{'fnc': twodimensionalrepresentationofspace, 'bso': simple, 'pref': 'TESTINGVECTORBUTTONENABLED'},
+						'unused':
+							{'fnc': lambda: str(), 'bso': None, 'pref': None},
+						}
+
+	if vectortype not in knownfunctions:
+		return json.dumps('this type of search is not known')
+
+	if not knownfunctions[vectortype]['pref'] or not hipparchia.conig[knownfunctions[vectortype]['pref']]:
+		return json.dumps('this type of search has not been enabled')
+
+	f = knownfunctions[vectortype]['fnc']
+	bso = knownfunctions[vectortype]['bso']
+
+	so = None
+
+	if len(bso) == 4:
+		so = buildtriplelemmasearchobject(*bso)
+
+	if len(bso) == 2:
+		so = buildsinglelemmasearchobject(*bso)
+
+	so.vectorquerytype = vectortype
 
 	progresspolldict[pollid] = ProgressPoll(pollid)
 	activepoll = progresspolldict[pollid]
@@ -83,73 +103,62 @@ def vectorsearch(vectortype, searchid, headform, so=None) -> JSON_STR:
 	activepoll.statusis('Preparing to vectorize')
 	so.poll = activepoll
 
-	output = SearchOutputObject(so)
+	if vectortype != 'cosdistbylineorword':
+		fparam = [so]
+	else:
+		fparam = [pollid, so]
 
-	# note that cosdistbylineorword requires a hitdict and has to executesearch() to get one
+	if so:
+		j = f(*fparam)
+	else:
+		j = f()
 
-	if vectortype in vectorboxes:
-		so.vectorquerytype = vectortype
+	if hipparchia.config['JSONDEBUGMODE']:
+		print('/vectors/{f}\n\t{j}'.format(f=vectortype, j=j))
 
-		vectorfunctions = {'cosdistbysentence': findabsolutevectorsbysentence,
-							'semanticvectorquery': executegensimlsi,
-							'nearestneighborsquery': executenearestneighborsquery,
-							'analogyfinder': executegenerateanalogies,
-							'topicmodel': sklearnselectedworks,
-							'vectortestfunction': twodimensionalrepresentationofspace,
-							# 'vectortestfunction': threedimensionalrepresentationofspace,
-							}
+	if vectortype != 'cosdistbylineorword':
+		del progresspolldict[pollid]
 
-		if so.vectorquerytype in vectorfunctions:
-			fnc = vectorfunctions[so.vectorquerytype]
-			jsonoutput = fnc(so)
-			del progresspolldict[pollid]
-			return jsonoutput
-
-		if so.vectorquerytype == 'cosdistbylineorword':
-			jsonoutput = executesearch(pollid, so)
-			return jsonoutput
-
-	# nothing happened...
-	target = 'searchsummary'
-	message = '[unknown or unsupported vector query type]'
-	del progresspolldict[pollid]
-
-	return output.generatenulloutput(itemname=target, itemval=message)
+	return j
 
 
-@hipparchia.route('/vectoranalogies/<searchid>/<termone>/<termtwo>/<termthree>')
-@requireauthentication
-def analogysearch(searchid, termone, termtwo, termthree) -> JSON_STR:
+def buildsinglelemmasearchobject(pollid: str, one: str) -> SearchObject:
 	"""
 
-	the results are distinctly unsatisfying....
+	build a search object w/ one lemma
 
-	what is the lesson here? it probably teaches you something about the other results that is worth knowing...
+	"""
+	try:
+		lemma = lemmatadict[one]
+	except KeyError:
+		lemma = None
 
-	A:B :: C:D
+	seeking = str()
+	proximate = str()
+	proximatelemma = str()
+	so = SearchObject(pollid, seeking, proximate, lemma, proximatelemma, session)
 
-	http://127.0.0.1:5000/vectoranalogies/0000/one/two/thee
+	if so.session['baggingmethod'] == 'unlemmatized':
+		so.seeking = so.searchtermcleanup(one)
 
-	:param searchid:
-	:param termone:
-	:param termtwo:
-	:param termthree:
-	:return:
+	return so
+
+
+def buildtriplelemmasearchobject(pollid, one, two, three) -> SearchObject:
 	"""
 
-	if not hipparchia.config['VECTORANALOGIESENABLED']:
-		return redirect(url_for('frontpage'))
+	build a search object w/ three lemmata
 
-	pollid = validatepollid(searchid)
+	"""
 
 	seeking = str()
 	proximate = str()
 
 	if not session['baggingmethod'] == 'unlemmatized':
 		try:
-			termone = lemmatadict[termone]
-			termtwo = lemmatadict[termtwo]
-			termthree = lemmatadict[termthree]
+			termone = lemmatadict[one]
+			termtwo = lemmatadict[two]
+			termthree = lemmatadict[three]
 		except KeyError:
 			termone = None
 			termtwo = None
@@ -158,9 +167,8 @@ def analogysearch(searchid, termone, termtwo, termthree) -> JSON_STR:
 		so = SearchObject(pollid, seeking, proximate, termone, termtwo, session)
 		so.lemmathree = termthree
 	else:
-		so = SearchObject(pollid, termone, termtwo, True, True, session)
+		so = SearchObject(pollid, one, two, True, True, session)
 		so.lemmathree = True
-		so.termthree = so.searchtermcleanup(termthree)
+		so.termthree = so.searchtermcleanup(three)
 
-	# vectorsearch(vectortype, searchid, headform, so=None)
-	return vectorsearch('analogyfinder', pollid, None, so=so)
+	return so
