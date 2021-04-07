@@ -81,7 +81,7 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 	if vectortype not in knownfunctions:
 		return json.dumps('this type of search is not known')
 
-	if not knownfunctions[vectortype]['pref'] or not hipparchia.conig[knownfunctions[vectortype]['pref']]:
+	if not knownfunctions[vectortype]['pref'] or not hipparchia.config[knownfunctions[vectortype]['pref']]:
 		return json.dumps('this type of search has not been enabled')
 
 	f = knownfunctions[vectortype]['fnc']
