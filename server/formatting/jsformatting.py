@@ -134,7 +134,7 @@ def generatevectorjs() -> str:
 					document.getElementById('browserclickscriptholder').appendChild(browserclickscript);
 				});		
 
-			$.getJSON('/searc/confirm/'+searchid, function(portnumber) {
+			$.getJSON('/search/confirm/'+searchid, function(portnumber) {
 			var ip = location.hostname;
 			var s = new WebSocket('ws://'+ip+':'+portnumber+'/');
 			var amready = setInterval(function(){ if (s.readyState === 1) { s.send(JSON.stringify(searchid)); clearInterval(amready); } }, 10);

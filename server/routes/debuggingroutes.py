@@ -6,7 +6,6 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import json
 import re
 import time
 from os import path
@@ -14,14 +13,13 @@ from os import path
 from flask import redirect, render_template, session, url_for
 
 from server import hipparchia
-from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.startup import authordict, authorgenresdict, authorlocationdict, workdict, workgenresdict, \
 	workprovenancedict
 from server.startup import progresspolldict
 
-
 PAGE_STR = str
+
 #
 # unadorned views for quickly peeking at the data
 #
