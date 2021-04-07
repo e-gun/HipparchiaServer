@@ -10,18 +10,23 @@ from sys import argv
 from os import path
 
 
-stable = False
-release = False
+stable = True
+release = True
+prerelease = False
 
-hipparchiaserverversion = '1.6.13'
+hipparchiaserverversion = '1.6.14'
 plus = '+'
 supplement = '[DEVEL]'
+pre = '-pre'
 
-if not release:
+if not release and not prerelease:
 	hipparchiaserverversion = hipparchiaserverversion + plus
 
-if not stable:
+if not stable and not prerelease:
 	hipparchiaserverversion = hipparchiaserverversion + supplement
+
+if prerelease:
+	hipparchiaserverversion = hipparchiaserverversion + pre
 
 
 def readgitdata() -> str:
