@@ -24,7 +24,7 @@ PAGE_STR = str
 # unadorned views for quickly peeking at the data
 #
 
-@hipparchia.route('/databasecontents/<dictionarytodisplay>')
+@hipparchia.route('/debug/databasecontents/<dictionarytodisplay>')
 def databasecontents(dictionarytodisplay) -> PAGE_STR:
 	"""
 	a simple dump of info available in the db
@@ -64,7 +64,7 @@ def databasecontents(dictionarytodisplay) -> PAGE_STR:
 	return render_template('dbcontentslister.html', found=results, numberfound=len(results), label=dictionarytodisplay, tag='Available')
 
 
-@hipparchia.route('/csssamples')
+@hipparchia.route('/debug/csssamples')
 def styesheetsamples() -> PAGE_STR:
 	"""
 
@@ -110,7 +110,7 @@ def styesheetsamples() -> PAGE_STR:
 	                       numberfound=len(spans)+len(notspans))
 
 
-@hipparchia.route('/showsession')
+@hipparchia.route('/debug/showsession')
 def showsessioncontents() -> PAGE_STR:
 	"""
 
@@ -129,8 +129,8 @@ def showsessioncontents() -> PAGE_STR:
 	return render_template('genericlistdumper.html', info=output, css=stylesheet)
 
 
-@hipparchia.route('/testroute')
-def testroute():
+@hipparchia.route('/debug/testroute')
+def testroute() -> PAGE_STR:
 	"""
 
 	execute a debugging function of your choice...
