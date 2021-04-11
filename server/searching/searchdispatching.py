@@ -42,7 +42,8 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	:param activepoll:
 	:return:
 	"""
-	# clean out the pool if neccessary before starting
+
+	# clean out the pool if necessary before starting
 	# this seems like the safest time for a reset of the pool: otherwise you could have workers working
 	# but if you have a multi-user environment AND pool problems this code might make things worse
 	cleanpoolifneeded()
@@ -159,9 +160,8 @@ def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 		# impossible, but...
 		workers = 0
 
-
 	# non-parallel multiprocessing implementation across platforms: widows can't pickle a connection;
-	# everone else needs to pickle the connection
+	# everyone else needs to pickle the connection
 	if icanpickleconnections():
 		# you need to give each job its own connection if you use a connection pool
 		# otherwise there will be problems with threading

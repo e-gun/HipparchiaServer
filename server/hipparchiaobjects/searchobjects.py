@@ -47,6 +47,7 @@ class SearchObject(object):
 		self.vectorvalues = VectorValues(frozensession)
 		self.starttime = time.time()
 		self.usedcorpora = list()
+		self.searchsqldict = dict()
 		self.sentencebundlesize = hipparchia.config['SENTENCESPERDOCUMENT']
 		self.poll = None
 		if hipparchia.config['SEARCHLISTCONNECTIONTYPE'] == 'queue':
@@ -318,6 +319,7 @@ class SearchOutputObject(object):
 
 		:return:
 		"""
+
 		stemplate = """
 		Sought {hs}
 		<br>

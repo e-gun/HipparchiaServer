@@ -22,6 +22,7 @@ from server import hipparchia
 from server.authentication.authenticationwrapper import requireauthentication
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
+from server.listsandsession.searchlistintosql import substringsearchintosqldict, rewritesqlsearchdictforlemmata, rawdsqldispatcher
 from server.formatting.miscformatting import validatepollid, consolewarning
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds
@@ -94,6 +95,18 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 	the results are returned in a json bundle that will be used to update the html on the page
 
 	note that cosdistbysentence vector queries also flow through here: they need a hitdict
+
+	overview:
+		buildsearchobject() and then start modifying elements of the SearchObject
+
+		build a search list via compilesearchlist()
+			modify search list via flagexclusions()
+			modify search list via calculatewholeauthorsearches()
+		build search list restrictions via indexrestrictions()
+
+		search via searchdispatcher()
+
+		format results via buildresultobjects()
 
 	:return:
 	"""
@@ -206,6 +219,16 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'
 			htmlsearch = htmlsearch.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.originalproximate)
 
+		# DEBUGGING AREA BEGINS
+		# print('searchlist', searchlist)
+		# so.searchsqldict = substringsearchintosqldict(so)
+		# if so.searchtype == 'simplelemma':
+		# 	so.searchsqldict = rewritesqlsearchdictforlemmata(so)
+		# print('substringsearchintosqldict()', so.searchsqldict)
+		# searchdispatcher = rawdsqldispatcher
+		# DEBUGGING AREA ENDS
+
+		# now that the SearchObject is built, do the search...
 		hits = searchdispatcher(so)
 		activepoll.statusis('Putting the results in context')
 
@@ -258,12 +281,12 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 
 		if so.lemma:
 			# clean out the whitespace/start/stop checks
-			skg = re.sub(r'\(\^\|\\s\)', '', skg)
-			skg = re.sub(r'\(\\s\|\$\)', '', skg)
+			skg = re.sub(r'\(\^\|\\s\)', str(), skg)
+			skg = re.sub(r'\(\\s\|\$\)', str(), skg)
 
 		if so.proximatelemma:
-			prx = re.sub(r'\(\^\|\\s\)', '', prx)
-			prx = re.sub(r'\(\\s\|\$\)', '', prx)
+			prx = re.sub(r'\(\^\|\\s\)', str(), prx)
+			prx = re.sub(r'\(\\s\|\$\)', str(), prx)
 
 		for r in resultlist:
 			r.lineobjects = flagsearchterms(r, skg, prx, so)
