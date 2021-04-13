@@ -26,7 +26,7 @@ class GenericSearchFunctionObject(object):
 	to self.searchfunction
 
 	one also has the option of storing the searchlist either in shared memory or in a redis set
-	the retrieval, parrsing, and ending checks for the two structures are different
+	the retrieval, parsing, and ending checks for the two structures are different
 
 	handling the matrix of possibilities for search_type and list_type combinations produces the
 	somewhat tangled set of options below

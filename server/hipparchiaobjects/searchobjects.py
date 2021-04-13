@@ -150,7 +150,9 @@ class SearchObject(object):
 	@staticmethod
 	def _isaccented(searchterm: str) -> bool:
 		accented = '[äëïöüâêîôûàèìòùáéíóúᾂᾒᾢᾃᾓᾣᾄᾔᾤᾅᾕᾥᾆᾖᾦᾇᾗᾧἂἒἲὂὒἢὢἃἓἳὃὓἣὣἄἔἴὄὔἤὤἅἕἵὅὕἥὥἆἶὖἦὦἇἷὗἧὧᾲῂῲᾴῄῴᾷῇῷᾀᾐᾠᾁᾑᾡῒῢΐΰῧἀἐἰὀὐἠὠῤἁἑἱὁὑἡὡῥὰὲὶὸὺὴὼάέίόύήώᾶῖῦῆῶϊϋ]'
-
+		# note how rare it is going to be that you want to search for "apúd" and not "apud"...
+		# the inconsistent Latin data could easily lead you to make false inferences: apúd is meaningful only
+		# inside of specific editions of specific authors
 		if re.search(accented, searchterm):
 			accented = True
 		else:

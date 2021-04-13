@@ -13,6 +13,8 @@ from pathlib import Path
 
 from click import secho
 
+from server import hipparchia
+
 
 def htmlcommentdecorator(function):
 	"""
@@ -91,9 +93,15 @@ def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True, 
 
 	send color text output because something interesting happened
 
+	'magenta' is the debugging color ATM; it is suppressed in the standard debugsettings.py
+
 	:param message:
 	:return:
 	"""
+
+	if color not in hipparchia.config['CONSOLEWARNINGTYPES']:
+		return str()
+
 	head = str()
 	tail = str()
 
@@ -104,6 +112,7 @@ def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True, 
 		'yellow': ('>>> ', str()),
 		'green': ('+++ ', str()),
 		'cyan': ('=== ', str()),
+		'magenta': ('??? ', ' ???'),
 	}
 
 	try:

@@ -435,8 +435,9 @@ def checkforactivesearch(searchid, trialnumber=0) -> JSON_STR:
 	pollport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
 
 	if trialnumber >= maxtrials:
+		# note that very short searches can trigger this: rare word in a small author, etc.
 		w = 'checkforactivesearch() cannot find the poll for {p} after {t} tries'
-		consolewarning(w.format(p=pollid, t=trialnumber))
+		consolewarning(w.format(p=pollid, t=trialnumber), color='magenta')
 		return json.dumps('cannot_find_the_poll')
 
 	activethreads = [t.name for t in threading.enumerate()]

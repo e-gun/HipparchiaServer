@@ -9,6 +9,9 @@
 #   MorphPossibilityObject.getbaseform() is confused ἐνέρριψε, ἐν, ἐν-ῥίπτω ['ἐνέρριψε', 'ἐν', 'ἐν-ῥίπτω']
 #   These are not of much interest unless you are debugging the source code
 #
+# CONSOLEWARNINGTYPES is a list of colors; if your message color is not on the list, it will not be seen
+#   valid values need to be in miscformatting.py and consolewarning().
+#
 # DBDEBUGMODE and HTMLDEBUGMODE will show DB locations of hits and/or
 # 	the raw HTML markup inside the DB there are no security
 # 	implications here; these can only be set at launch; any changes
@@ -47,6 +50,8 @@
 
 
 SUPPRESSWARNINGS = True
+# Currently we know about: ['red', 'yellow', 'green', 'cyan', 'magenta']
+CONSOLEWARNINGTYPES = ['red', 'yellow', 'green', 'cyan']
 ENABLELOGGING = False
 HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 RETAINREDISPOLLS = False
