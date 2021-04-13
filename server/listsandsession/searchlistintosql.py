@@ -7,6 +7,7 @@
 """
 
 import re
+import multiprocessing
 from multiprocessing import Manager, Process
 from multiprocessing.managers import ListProxy
 from typing import Generator, List
@@ -33,9 +34,12 @@ def substringsearchintosqldict(searchobject: SearchObject, templimit=None) -> di
     grab its searchlist and its exceptionlist and convert them into a collection of sql queries
 
     the old strategy would generate the queries as needed and on the fly: this version is slower can costs more memory
-    by definition; it generates all possible queries and it holds them in memory
+    by definition; it generates all possible queries and it holds them in memory; nevertheless the speed cost should be
+    negligible relative to the total cost of a search; the memory cost can only get interesting if you have lots of
+    users; but here too the overload problem should come from too much postgres and not too much prep
 
-    BUT these lists of queries can be handed off to a simple MP-aware helper binary that can dodge MP forking in python
+    in any case these lists of queries can be handed off to a simple MP-aware helper binary that can dodge MP
+    forking in python; this binary can be in rust or go or ...
 
     { table1: {query: q, data: d, temptable: t},
     table2: {query: q, data: d, temptable: t},
@@ -95,14 +99,16 @@ def substringsearchintosqldict(searchobject: SearchObject, templimit=None) -> di
             whr = 'WHERE {xtn} ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax, xtn=whereextensions)
         elif r['type'] == 'temptable':
             # how to construct the table...
+            # note that the temp table name can't be assigned yet because you can get collisions via lemmatization
+            # since that will give you more than one query per author table: gr1001_0, gr1001_1, ...
             q = r['where']['tempquery']
-            q = re.sub('_includelist', '_includelist_UNIQUE', q)
+            q = re.sub('_includelist', '_includelist_UNIQUENAME', q)
             returndict[authortable]['temptable'] = q
 
             # how to SELECT inside the table...
             wtempate = """
             EXISTS
-                (SELECT 1 FROM {tbl}_includelist_UNIQUE incl WHERE incl.includeindex = {tbl}.index
+                (SELECT 1 FROM {tbl}_includelist_UNIQUENAME incl WHERE incl.includeindex = {tbl}.index
             """
             whereextensions = wtempate.format(tbl=authortable)
             whr = 'WHERE {xtn} AND {au}.{col} {sy} %s)'.format(au=authortable, col=so.usecolumn, sy=mysyntax,
@@ -173,7 +179,9 @@ def rewritesqlsearchdictforlemmata(searchobject: SearchObject) -> dict:
 def rawdsqldispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
     """
 
-    quck and dirty dispacther: not polished
+    quick and dirty dispatcher: not polished
+
+    fix this up last...
 
     """
 
@@ -286,8 +294,8 @@ def rawsqlsearcher(querydict, dbcursor) -> Generator:
 
     if t:
         unique = assignuniquename()
-        t = re.sub('UNIQUE', unique, t)
-        q = re.sub('UNIQUE', unique, q)
+        t = re.sub('UNIQUENAME', unique, t)
+        q = re.sub('UNIQUENAME', unique, q)
         dbcursor.execute(t)
 
     found = list()

@@ -36,6 +36,12 @@ class SearchObject(object):
 		self.lemmathree = None
 		self.termthree = None
 		self.session = frozensession
+
+		# the next store the "where" part of the search and get filled out and assigned elsewhere
+		self.searchsqldict = dict()
+		self.searchlist = list()
+		self.indexrestrictions = dict()
+
 		# '>' will mess you up still
 		self.originalseeking = re.sub(r'<', '&lt;', self.originalseeking)
 		self.originalseeking = re.sub(r'>', '&gt;', self.originalseeking)
@@ -47,7 +53,6 @@ class SearchObject(object):
 		self.vectorvalues = VectorValues(frozensession)
 		self.starttime = time.time()
 		self.usedcorpora = list()
-		self.searchsqldict = dict()
 		self.sentencebundlesize = hipparchia.config['SENTENCESPERDOCUMENT']
 		self.poll = None
 		if hipparchia.config['SEARCHLISTCONNECTIONTYPE'] == 'queue':
@@ -63,31 +68,15 @@ class SearchObject(object):
 		else:
 			self.redisresultlist = False
 
-		# searchtermcharactersubstitutions() logic has moved here
+		self.accented = False
+		if self._isaccented(seeking) or self._isaccented(proximate):
+			self.accented = True
 
+		# tidy up the input with some basic regex-friendly swaps
 		seeking = self.searchtermcleanup(seeking)
 		proximate = self.searchtermcleanup(proximate)
-
-		# print ('seeking,proximate',seeking,proximate)
-
-		# session['accentsmatter'] logic has been transferred to here
-
-		accented = '[äëïöüâêîôûàèìòùáéíóúᾂᾒᾢᾃᾓᾣᾄᾔᾤᾅᾕᾥᾆᾖᾦᾇᾗᾧἂἒἲὂὒἢὢἃἓἳὃὓἣὣἄἔἴὄὔἤὤἅἕἵὅὕἥὥἆἶὖἦὦἇἷὗἧὧᾲῂῲᾴῄῴᾷῇῷᾀᾐᾠᾁᾑᾡῒῢΐΰῧἀἐἰὀὐἠὠῤἁἑἱὁὑἡὡῥὰὲὶὸὺὴὼάέίόύήώᾶῖῦῆῶϊϋ]'
-
-		if re.search(accented, seeking) or re.search(accented, proximate):
-			self.accented = True
-			# the following can be counted upon to slow down searches, but relatively few searches will be
-			# affected and not grievously
-			seeking = re.sub('v', '[vu]', seeking)
-			seeking = re.sub('j', '[ji]', seeking)
-			proximate = re.sub('v', '[vu]', proximate)
-			proximate = re.sub('j', '[ji]', proximate)
-		else:
-			self.accented = False
-			seeking = re.sub('v', 'u', seeking)
-			seeking = re.sub('j', 'i', seeking)
-			proximate = re.sub('v', 'u', proximate)
-			proximate = re.sub('j', 'i', proximate)
+		seeking = self._vjsubstitutes(seeking)
+		proximate = self._vjsubstitutes(proximate)
 
 		self.seeking = seeking
 		self.proximate = proximate
@@ -109,8 +98,6 @@ class SearchObject(object):
 		self.termtwo = proximate
 		self.leastcommon = None
 		self.searchtype = None
-		self.searchlist = list()
-		self.indexrestrictions = dict()
 
 		if self.accented:
 			self.usecolumn = 'accented_line'
@@ -145,7 +132,7 @@ class SearchObject(object):
 		self.distance = int(frozensession['proximity'])
 
 	@staticmethod
-	def searchtermcleanup(searchterm):
+	def searchtermcleanup(searchterm: str) -> str:
 		searchterm = re.sub('[σς]', 'ϲ', searchterm)
 		searchterm = re.sub(r'\\ϲ', r'\\s', searchterm)
 		searchterm = re.sub(r'^ ', r'(^|\\s)', searchterm)
@@ -153,7 +140,36 @@ class SearchObject(object):
 		searchterm = searchterm.lower()
 		return searchterm
 
-	def getactivecorpora(self):
+	def _vjsubstitutes(self, searchterm: str) -> str:
+		if self.accented:
+			searchterm = self._accentsdomatter(searchterm)
+		else:
+			searchterm = self._accentsdonotmatter(searchterm)
+		return searchterm
+
+	@staticmethod
+	def _isaccented(searchterm: str) -> bool:
+		accented = '[äëïöüâêîôûàèìòùáéíóúᾂᾒᾢᾃᾓᾣᾄᾔᾤᾅᾕᾥᾆᾖᾦᾇᾗᾧἂἒἲὂὒἢὢἃἓἳὃὓἣὣἄἔἴὄὔἤὤἅἕἵὅὕἥὥἆἶὖἦὦἇἷὗἧὧᾲῂῲᾴῄῴᾷῇῷᾀᾐᾠᾁᾑᾡῒῢΐΰῧἀἐἰὀὐἠὠῤἁἑἱὁὑἡὡῥὰὲὶὸὺὴὼάέίόύήώᾶῖῦῆῶϊϋ]'
+
+		if re.search(accented, searchterm):
+			accented = True
+		else:
+			accented = False
+		return accented
+
+	@staticmethod
+	def _accentsdonotmatter(searchterm: str) -> str:
+		searchterm = re.sub('v', 'u', searchterm)
+		searchterm = re.sub('j', 'i', searchterm)
+		return searchterm
+
+	@staticmethod
+	def _accentsdomatter(searchterm: str) -> str:
+		searchterm = re.sub('v', '[vu]', searchterm)
+		searchterm = re.sub('j', '[ji]', searchterm)
+		return searchterm
+
+	def getactivecorpora(self) -> list:
 		allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 		activecorpora = [c for c in allcorpora if self.session[c]]
 		return activecorpora
