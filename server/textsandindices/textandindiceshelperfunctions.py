@@ -6,6 +6,8 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import re
+
 from collections import deque
 from multiprocessing import Manager, Process
 from typing import List
@@ -278,11 +280,118 @@ def paragraphformatting(listoflines: List[dbWorkLine]) -> List[dbWorkLine]:
 
 	look for formatting that spans collections of lines
 
+	rewrite individual lines to make them part of this formatting block
+
+	presupposes "htmlifydatabase = y" in config.ini for HipparchiaBuilder
+
+	:param listoflines:
+	:return:
+	"""
+
+	spanopenfinder = re.compile(r'<span class="(.*?)">')
+	spanclosefinder = re.compile(r'</span>')
+
+	memory = str()
+
+	# it is possible that this will not yield balanced HTML: the original data is unbalanced
+	# e.g. <span class="normal"> furenti similis. <hmu_serviusformatting>sane quidam volunt, Vergilium</span></hmu_serviusformatting>
+	# this gets 'fixed' by hmurewrite() which yields '</span></span>' instead
+
+	for line in listoflines:
+		paragraphtag = spanopenedbutnotclosed(line.markedup, spanopenfinder, spanclosefinder)
+		print('[{m}], [{p}],\t{l}'.format(m=memory, p=paragraphtag, l=line.markedup))
+		if memory and paragraphtag:
+			# you are finishing old business and starting new business
+			# e.g: 	Ἑλλάδα</span>. καὶ ἑτέρωθι πάλιν <span class="expanded_text">εἶτα τὸν τοῦτο τὸ μη-
+			line.markedup = '<span class="{t}">{ln}</span>'.format(t=memory, ln=line.markedup)
+			memory = paragraphtag
+		if memory and not paragraphtag:
+			# you have ongoing business
+			if spanclosedbeforeopened(line.markedup, spanopenfinder, spanclosefinder):
+				# [a] it might be over:
+				# e.g.: μου πράϲϲοντα</span>. καὶ πάλιν ἑτέρωθι βουλόμενοϲ δεῖ-
+				line.markedup = '<span class="{t}">{ln}'.format(t=memory, ln=line.markedup)
+				memory = str()
+			else:
+				# [b] it might be continuing
+				# e.g.: the line "τίκα δὴ μάλα δώϲειν δίκην ἀφείλετο τὴν ἀλή-" in
+				# πραγμάτων προάγειν τὸν λόγον ϲεμνὸν ϲφόδρα. <span class="expanded_text">εἰ μὴ
+				# Θεϲπιαὶ καὶ Πλαταιαὶ καὶ τὸ Θηβαίουϲ αὐ-
+				# τίκα δὴ μάλα δώϲειν δίκην ἀφείλετο τὴν ἀλή-
+				# θειαν</span> ** ἀλλ’ οἱ λέγοντεϲ τὰ περὶ Θεϲπιέων καὶ Πλα-
+				line.markedup = '<span class="{t}">{ln}</span>'.format(t=memory, ln=line.markedup)
+		if paragraphtag:
+			# you are starting something new
+			line.markedup = '{ln}</span>'.format(ln=line.markedup)
+			memory = paragraphtag
+		line.generatehtmlversion()
+	return listoflines
+
+
+def spanopenedbutnotclosed(linehtml, openfinder, closefinder) -> str:
+	"""
+
+	we are looking for paragraphs of formatting that are just getting started
+
+	return the tag name if there is an <hmu_...> and not a corresponding </hmu...> in the line
+
+	otherwise return false
+
+	:return:
+	"""
+
+	opentag = str()
+	opened = list(re.finditer(openfinder, linehtml))
+	closed = list(re.finditer(closefinder, linehtml))
+
+	if not opened and not closed:
+		return str()
+
+	if len(opened) > len(closed):
+		opentag = opened[-1].group(1)
+
+	if len(opened) == len(closed) and opened[-1].end() > closed[-1].end():
+		opentag = opened[-1].group(1)
+
+	return opentag
+
+
+def spanclosedbeforeopened(linehtml, openfinder, closefinder) -> bool:
+	"""
+
+	true if there is a stray '</span>' at the head of the line
+
+	:return:
+	"""
+
+	opened = list(re.finditer(openfinder, linehtml))
+	closed = list(re.finditer(closefinder, linehtml))
+
+	if not closed:
+		return False
+
+	if closed and not opened:
+		return True
+
+	if opened[-1].end() < closed[-1].end():
+		return True
+
+	return False
+
+
+# slated for removal
+
+def oldparagraphformatting(listoflines: List[dbWorkLine]) -> List[dbWorkLine]:
+	"""
+
+	look for formatting that spans collections of lines
+
 	rewrite individual lines to make them part of this paragraph
 
 	:param listoflines:
 	:return:
 	"""
+
 	memory = None
 	for line in listoflines:
 		paragraphtag = line.hmuopenedbutnotclosed()
@@ -301,3 +410,4 @@ def paragraphformatting(listoflines: List[dbWorkLine]) -> List[dbWorkLine]:
 			line.markedup = '<{t}>{ln}</{t}>'.format(t=memory, ln=line.markedup)
 		line.generatehtmlversion()
 	return listoflines
+
