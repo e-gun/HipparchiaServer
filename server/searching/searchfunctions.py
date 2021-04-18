@@ -17,7 +17,7 @@ from flask import request, session
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
-from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable
+from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, querytotalwordcounts
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import badpucntwithbackslash, minimumgreek, removegravity
 from server.hipparchiaobjects.searchobjects import SearchObject
@@ -482,3 +482,40 @@ def loadsearchqueue(iterable, workers):
 	for _ in range(workers):
 		q.put(None)
 	return q
+
+
+def rebuildsearchobjectviasearchorder(so: SearchObject) -> SearchObject:
+	"""
+
+	rewrite the searchobject so that you look for the less common things first
+
+	"""
+
+	if so.lemmaone and so.lemmatwo:
+		hwone = querytotalwordcounts(so.lemmaone.dictionaryentry)
+		hwtwo = querytotalwordcounts(so.lemmatwo.dictionaryentry)
+		# from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
+		# print('{a}: {b}, {c}: {d}'.format(a=so.lemmaone.dictionaryentry, b=hwone.t, c=so.lemmatwo.dictionaryentry, d=hwtwo.t))
+		if hwtwo.t < hwone.t:
+			tmp = so.lemmaone
+			so.lemmaone = so.lemmatwo
+			so.lemmatwo = tmp
+	elif so.lemma or so.proximatelemma:
+		pass
+	elif so.accented or re.search(r'^[a-z]', so.termone) and so.near:
+		# choose the necessarily faster option
+		unomdifiedskg = massagesearchtermsforwhitespace(so.seeking)
+		unmodifiedprx = so.proximate
+		leastcommon = findleastcommonterm(unomdifiedskg + ' ' + unmodifiedprx, so.accented)
+		if leastcommon != unomdifiedskg:
+			tmp = so.termone
+			so.termone = so.termtwo
+			so.termtwo = tmp
+	elif len(so.termtwo) > len(so.termone) and so.near:
+		# look for the longest word first since that is probably the quicker route
+		# but you can't swap searchingfor and proximate this way in a 'is not near' search without yielding the wrong focus
+		tmp = so.termone
+		so.termone = so.termtwo
+		so.termtwo = tmp
+
+	return so

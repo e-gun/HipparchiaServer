@@ -220,6 +220,7 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 			htmlsearch = htmlsearch.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.originalproximate)
 
 		# DEBUGGING AREA BEGINS
+		consolewarning('rawsqlsearches() active')
 		searchdispatcher = rawsqlsearches
 		# DEBUGGING AREA ENDS
 

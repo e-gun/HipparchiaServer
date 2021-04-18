@@ -15,6 +15,7 @@ from typing import List, Generator
 
 import psycopg2
 
+from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
@@ -22,10 +23,10 @@ from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
-from server.threading.mpthreadcount import setthreadcount
 from server.listsandsession.searchlistintosql import searchlistintosqldict, rewritesqlsearchdictforlemmata
 from server.listsandsession.whereclauses import wholeworktemptablecontents
-from server import hipparchia
+from server.searching.searchfunctions import rebuildsearchobjectviasearchorder
+from server.threading.mpthreadcount import setthreadcount
 
 
 def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
@@ -37,23 +38,32 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
 
     assert so.searchtype in ['simple', 'simplelemma', 'proximity', 'phrase'], 'unknown searchtype sent to rawsqlsearches()'
 
+    so.poll.statusis('Executing a {t} search...'.format(t=so.searchtype))
+
     so.searchsqldict = searchlistintosqldict(so, so.termone)
-    if so.lemma:
+    if so.lemmaone:
         so.searchsqldict = rewritesqlsearchdictforlemmata(so)
 
-    hitlist = list()
+    searchfnc = lambda x: list()
 
     if so.searchtype in ['simple', 'simplelemma']:
-        hitlist = rawdsqlsearchmanager(so)
+        searchfnc = rawdsqlsearchmanager
     elif so.searchtype == 'proximity':
-        # can't do proximate lemmata yet
+        # search for the least common terms first: swap termone and termtwo if need be
+        so = rebuildsearchobjectviasearchorder(so)
         if so.scope == 'lines':
             # this will hit rawdsqlsearchmanager() 2x
-            hitlist = sqlwithinxlinessearch(so)
+            searchfnc = sqlwithinxlinessearch
         else:
             consolewarning('unable to do within-x-words ATM', color='red')
     else:
         consolewarning('rawsqlsearches() not yet supporting {t} searching'.format(t=so.searchtype), color='red')
+
+    so.searchsqldict = searchlistintosqldict(so, so.termone)
+    if so.lemmaone:
+        so.searchsqldict = rewritesqlsearchdictforlemmata(so)
+
+    hitlist = searchfnc(so)
 
     return hitlist
 
@@ -221,6 +231,10 @@ def sqlwithinxlinessearch(searchobject: SearchObject) -> List[dbWorkLine]:
     actualcap = so.cap
     so.cap = hipparchia.config['INTERMEDIATESEARCHCAP']
 
+    so.poll.statusis('Part one: Searching for "{x}"'.format(x=so.termone))
+    if so.lemmaone:
+        so.poll.statusis('Part one: Searching for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
+
     hitlines = rawdsqlsearchmanager(so)
     so.cap = actualcap
 
@@ -255,6 +269,14 @@ def sqlwithinxlinessearch(searchobject: SearchObject) -> List[dbWorkLine]:
         # print("so.indexrestrictions[a]['where']", so.indexrestrictions[a]['where'])
 
     so.searchsqldict = searchlistintosqldict(so, so.termtwo)
+    if so.lemmatwo:
+        so.lemmaone = so.lemmatwo
+        so.searchsqldict = rewritesqlsearchdictforlemmata(so)
+
+    so.poll.statusis('Part two: Searching initial hits for "{x}"'.format(x=so.termtwo))
+    if so.lemmaone:
+        so.poll.statusis('Part two: Searching initial hits for all forms of "{x}"'.format(x=so.lemma.dictionaryentry))
+
     newhitlines = rawdsqlsearchmanager(so)
 
     # newhitlines will contain, e.g., in0001w0ig_493 and in0001w0ig_492, i.e., 2 lines that are part of the same 'hit'

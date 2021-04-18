@@ -13,6 +13,7 @@ from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
 from server.formatting.miscformatting import htmlcommentdecorator
 from server.formatting.wordformatting import avoidsmallvariants
+from server.hipparchiaobjects.dbtextobjects import dbLemmaObject
 from server.hipparchiaobjects.vectorobjects import VectorValues
 from server.listsandsession.checksession import justlatin
 
@@ -25,11 +26,11 @@ class SearchObject(object):
 
 	"""
 
-	def __init__(self, searchid, seeking, proximate, lemmaobject, proximatelemmaobject, frozensession):
+	def __init__(self, searchid: str, seeking: str, proximate: str, lemmaobject: dbLemmaObject, proximatelemmaobject: dbLemmaObject, frozensession: dict):
 		self.searchid = searchid
 		self.originalseeking = seeking
 		self.originalproximate = proximate
-		self.lemma = lemmaobject
+		self.lemma = lemmaobject  # should start moving away from self.lemma and towards self.lemmaone
 		self.proximatelemma = proximatelemmaobject
 		self.lemmaone = self.lemma
 		self.lemmatwo = self.proximatelemma

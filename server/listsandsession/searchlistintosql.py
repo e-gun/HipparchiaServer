@@ -138,7 +138,7 @@ def rewritesqlsearchdictforlemmata(searchobject: SearchObject) -> dict:
     so = searchobject
     searchdict = searchobject.searchsqldict
 
-    terms = so.lemma.formlist
+    terms = so.lemmaone.formlist
 
     chunksize = hipparchia.config['LEMMACHUNKSIZE']
     newtablenames = '{t}_{c}'
