@@ -45,8 +45,13 @@
 #   the possibility of relatively unimportant speed gains. This is
 #   an option of interest only to debuggers and hard-core optimizers.
 #
+# INTERMEDIATESEARCHCAP: the maximum number of items to accept in the
+#   middle of a search. This is to keep "'et' near 'at'" from going insane
+#
 
 AUTOCONFIGWORKERS = True
 WORKERS = 3
+
 MPCOMMITCOUNT = 250
 LEMMACHUNKSIZE = 10
+INTERMEDIATESEARCHCAP = 2000000

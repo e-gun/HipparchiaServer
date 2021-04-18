@@ -7,27 +7,16 @@
 """
 
 import re
-import multiprocessing
-from multiprocessing import Manager, Process
-from multiprocessing.managers import ListProxy
-from typing import Generator, List
-
-import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import worklinetemplate, dblineintolineobject
-from server.dbsupport.miscdbfunctions import resultiterator
-from server.dbsupport.tablefunctions import assignuniquename
+from server.dbsupport.dblinefunctions import worklinetemplate
 from server.formatting.miscformatting import consolewarning
-from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.searchobjects import SearchObject
-from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.searching.searchfunctions import buildbetweenwhereextension
-from server.threading.mpthreadcount import setthreadcount
 
 
-def substringsearchintosqldict(searchobject: SearchObject, templimit=None) -> dict:
+def searchlistintosqldict(searchobject: SearchObject, seeking: str) -> dict:
     """
 
     take a searchobject
@@ -68,14 +57,9 @@ def substringsearchintosqldict(searchobject: SearchObject, templimit=None) -> di
 
     so = searchobject
     searchlist = so.indexrestrictions.keys()
-    seeking = so.termone
 
-    # templimits are used by proximity searching
-
-    if templimit:
-        lim = str(templimit)
-    else:
-        lim = str(so.cap)
+    # templimits are used by proximity searching but so.cap should have been temporarily swapped out
+    lim = str(so.cap)
 
     if so.onehit:
         mylimit = ' LIMIT 1'
@@ -174,150 +158,3 @@ def rewritesqlsearchdictforlemmata(searchobject: SearchObject) -> dict:
             target['temptable'] = searchdict[authortable]['temptable']
 
     return modifieddict
-
-
-def rawdsqldispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
-    """
-
-    quick and dirty dispatcher: not polished
-
-    fix this up last...
-
-    """
-
-    so = searchobject
-    activepoll = so.poll
-
-    workers = setthreadcount()
-
-    manager = Manager()
-    foundlineobjects = manager.list()
-
-    searchsqlbyauthor = [so.searchsqldict[k] for k in so.searchsqldict.keys()]
-    searchsqlbyauthor = manager.list(searchsqlbyauthor)
-
-    activepoll.allworkis(len(so.searchlist))
-    activepoll.remain(len(so.indexrestrictions.keys()))
-    activepoll.sethits(0)
-
-    argumentuple = [foundlineobjects, searchsqlbyauthor, so]
-
-    oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
-    argumentswithconnections = [tuple([i] + list(argumentuple) + [oneconnectionperworker[i]]) for i in range(workers)]
-
-    jobs = [Process(target=workonrawsqlsearch, args=argumentswithconnections[i]) for i in range(workers)]
-
-    for j in jobs:
-        j.start()
-    for j in jobs:
-        j.join()
-
-    # generator needs to turn into a list
-    foundlineobjects = list(foundlineobjects)
-
-    for c in oneconnectionperworker:
-        oneconnectionperworker[c].connectioncleanup()
-
-    return foundlineobjects
-
-
-def workonrawsqlsearch(workerid: int, foundlineobjects: ListProxy, listofplacestosearch: ListProxy,
-                       searchobject: SearchObject, dbconnection) -> ListProxy:
-    """
-
-    iterate through listofplacestosearch
-
-    execute rawsqlsearcher() on each item in the list
-
-    gather the results...
-
-    """
-
-
-    so = searchobject
-    activepoll = so.poll
-    dbconnection.setreadonly(False)
-    dbcursor = dbconnection.cursor()
-    commitcount = 0
-    getnetxitem = listofplacestosearch.pop
-    remainder = listofplacestosearch
-    emptyerror = IndexError
-    remaindererror = TypeError
-
-    while listofplacestosearch and activepoll.gethits() <= so.cap:
-        commitcount += 1
-        dbconnection.checkneedtocommit(commitcount)
-
-        try:
-            querydict = getnetxitem(0)
-        except emptyerror:
-            querydict = None
-            listofplacestosearch = None
-
-        if querydict:
-            foundlines = rawsqlsearcher(querydict, dbcursor)
-            lineobjects = [dblineintolineobject(f) for f in foundlines]
-            foundlineobjects.extend(lineobjects)
-
-            if lineobjects:
-                # print(authortable, len(lineobjects))
-                numberoffinds = len(lineobjects)
-                activepoll.addhits(numberoffinds)
-        else:
-            listofplacestosearch = None
-
-        try:
-            activepoll.remain(len(remainder))
-        except remaindererror:
-            pass
-
-    # print('workonrawsqlsearch() worker #{i} finished'.format(i=workerid))
-
-    return foundlineobjects
-
-
-def rawsqlsearcher(querydict, dbcursor) -> Generator:
-    """
-
-    as per substringsearchintosqldict():
-        sq = { table1: {query: q, data: d, temptable: t},
-        table2: {query: q, data: d, temptable: t},
-        ... }
-
-    only sent the dict at sq[tableN]
-
-    """
-
-    t = querydict['temptable']
-    q = querydict['query']
-    d = (querydict['data'],)
-
-    if t:
-        unique = assignuniquename()
-        t = re.sub('UNIQUENAME', unique, t)
-        q = re.sub('UNIQUENAME', unique, q)
-        dbcursor.execute(t)
-
-    found = list()
-
-    try:
-        dbcursor.execute(q, d)
-        found = resultiterator(dbcursor)
-    except psycopg2.DataError:
-        # e.g., invalid regular expression: parentheses () not balanced
-        consolewarning(
-            'DataError; cannot search for »{d}«\n\tcheck for unbalanced parentheses and/or bad regex'.format(d=d[0]),
-            color='red')
-    except psycopg2.InternalError:
-        # current transaction is aborted, commands ignored until end of transaction block
-        consolewarning('psycopg2.InternalError; did not execute query="{q}" and data="{d}'.format(q=q, d=d),
-                       color='red')
-    except psycopg2.DatabaseError:
-        # psycopg2.DatabaseError: error with status PGRES_TUPLES_OK and no message from the libpq
-        # added to track PooledConnection threading issues
-        # will see: 'DatabaseError for <cursor object at 0x136bab520; closed: 0> @ Process-4'
-        consolewarning('DatabaseError for {c} @ {p}'.format(c=dbcursor, p=multiprocessing.current_process().name),
-                       color='red')
-        consolewarning('\tq, d', q, d)
-
-    return found

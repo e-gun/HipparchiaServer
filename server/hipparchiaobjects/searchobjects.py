@@ -123,6 +123,7 @@ class SearchObject(object):
 			self.nearstr = ' not'
 
 		self.cap = int(frozensession['maxresults'])
+		self.tempcap = None
 
 		if frozensession['onehit']:
 			self.onehit = True

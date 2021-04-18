@@ -22,7 +22,8 @@ from server import hipparchia
 from server.authentication.authenticationwrapper import requireauthentication
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
-from server.listsandsession.searchlistintosql import substringsearchintosqldict, rewritesqlsearchdictforlemmata, rawdsqldispatcher
+from server.listsandsession.searchlistintosql import searchlistintosqldict, rewritesqlsearchdictforlemmata
+from server.searching.rawsqlsearching import rawsqlsearches, prepsearchsqldict
 from server.formatting.miscformatting import validatepollid, consolewarning
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds
@@ -220,12 +221,7 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 			htmlsearch = htmlsearch.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.originalproximate)
 
 		# DEBUGGING AREA BEGINS
-		# print('searchlist', searchlist)
-		# so.searchsqldict = substringsearchintosqldict(so)
-		# if so.searchtype == 'simplelemma':
-		# 	so.searchsqldict = rewritesqlsearchdictforlemmata(so)
-		# print('substringsearchintosqldict()', so.searchsqldict)
-		# searchdispatcher = rawdsqldispatcher
+		searchdispatcher = rawsqlsearches
 		# DEBUGGING AREA ENDS
 
 		# now that the SearchObject is built, do the search...

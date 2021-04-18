@@ -102,22 +102,20 @@ def lemmatizedwithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbc
 	hitlinelist = list()
 	linesintheauthors = dict()
 
-	testing = True
-	if testing:
-		hitlinelist = [dblineintolineobject(h) for h in hitlist]
-		for l in hitlinelist:
-			wkid = l.universalid
-			# prox = 2
-			# l = 100
-			# list(range(l-prox, l+prox+1))
-			# [98, 99, 100, 101, 102]
-			environs = set(range(l.index - prox, l.index + prox + 1))
-			environs = ['{w}_ln_{x}'.format(w=wkid, x=e) for e in environs]
-			try:
-				linesintheauthors[wkid[0:6]]
-			except KeyError:
-				linesintheauthors[wkid[0:6]] = set()
-			linesintheauthors[wkid[0:6]].update(environs)
+	hitlinelist = [dblineintolineobject(h) for h in hitlist]
+	for l in hitlinelist:
+		wkid = l.universalid
+		# prox = 2
+		# l = 100
+		# list(range(l-prox, l+prox+1))
+		# [98, 99, 100, 101, 102]
+		environs = set(range(l.index - prox, l.index + prox + 1))
+		environs = ['{w}_ln_{x}'.format(w=wkid, x=e) for e in environs]
+		try:
+			linesintheauthors[wkid[0:6]]
+		except KeyError:
+			linesintheauthors[wkid[0:6]] = set()
+		linesintheauthors[wkid[0:6]].update(environs)
 
 	# now grab all of the lines you might need
 	linecollection = set()
@@ -164,7 +162,7 @@ def lemmatizedwithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbc
 	return fullmatches
 
 
-def simplewithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbcursor):
+def simplewithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbcursor) -> List[tuple]:
 	"""
 
 	the older and potentially very slow way of doing withinxlines
@@ -190,14 +188,11 @@ def simplewithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbcurso
 		for hit in hitlist:
 			if len(fullmatches) > so.cap:
 				break
-			# this bit is BRITTLE because of the paramater order vs the db field order
-			#   dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, cursor)
-			# see "worklinetemplate" for the order in which the elements will return from a search hit
-			# should use lineobjects, but it is 'premature' given that the returned 'fullmatches' should look
-			# like a dbline
-			hitindex = hit[1]
-			hitwkid = hit[0]
-			isnear = dblooknear(hitindex, so.distance, so.termtwo, hitwkid, so.usecolumn, dbcursor)
+			hitasline = dbWorkLine(*hit)
+			# NB: the returned 'fullmatches' should look like a dbline [i.e., a tuple] and not a lineobject
+			hitindex = hitasline.index
+			uid = hitasline.universalid
+			isnear = dblooknear(hitindex, so.distance, so.termtwo, uid, so.usecolumn, dbcursor)
 			if so.near and isnear:
 				fullmatches.add(hit)
 			elif not so.near and not isnear:

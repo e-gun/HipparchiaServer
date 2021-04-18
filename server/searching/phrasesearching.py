@@ -62,10 +62,10 @@ def phrasesearch(wkid: str, searchobject: SearchObject, cursor) -> List[dbWorkLi
 			hitindex = hit[1]
 			wordset = lookoutsideoftheline(hitindex, phraselen - 1, wkid, so, cursor)
 			if not so.accented:
-				wordset = re.sub(r'[.?!;:,·’]', r'', wordset)
+				wordset = re.sub(r'[.?!;:,·’]', str(), wordset)
 			else:
 				# the difference is in the apostrophe: δ vs δ’
-				wordset = re.sub(r'[.?!;:,·]', r'', wordset)
+				wordset = re.sub(r'[.?!;:,·]', str(), wordset)
 
 			if so.near and re.search(searchphrase, wordset):
 				fullmatches.append(hit)

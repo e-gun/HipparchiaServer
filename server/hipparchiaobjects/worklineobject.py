@@ -59,7 +59,7 @@ class dbWorkLine(object):
 
 	"""
 
-	__slots__ = ('wkuinversalid', 'db', 'authorid', 'workid', 'universalid', 'index', 'l0', 'l1', 'l2', 'l3', 'l4', 'l5',
+	__slots__ = ('wkuinversalid', 'db', 'authorid', 'workid', 'universalid', 'index', 'uniqueid', 'l0', 'l1', 'l2', 'l3', 'l4', 'l5',
 	             'markedup', 'polytonic', 'stripped', 'annotations', 'hyphenated', 'paragraphformatting', 'hasbeencleaned',
 	             'mylevels', 'mynonbaselevels')
 
@@ -137,6 +137,7 @@ class dbWorkLine(object):
 		self.workid = wkuinversalid[7:]
 		self.universalid = wkuinversalid
 		self.index = index
+		self.uniqueid = '{a}_{b}'.format(a=self.wkuinversalid, b=self.index)
 		self.l5 = level_05_value
 		self.l4 = level_04_value
 		self.l3 = level_03_value
