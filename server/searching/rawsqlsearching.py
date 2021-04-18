@@ -37,7 +37,9 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
 
     assert so.searchtype in ['simple', 'simplelemma', 'proximity', 'phrase'], 'unknown searchtype sent to rawsqlsearches()'
 
-    so.searchsqldict = prepsearchsqldict(so)
+    so.searchsqldict = searchlistintosqldict(so, so.termone)
+    if so.lemma:
+        so.searchsqldict = rewritesqlsearchdictforlemmata(so)
 
     hitlist = list()
 
@@ -54,21 +56,6 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
         consolewarning('rawsqlsearches() not yet supporting {t} searching'.format(t=so.searchtype), color='red')
 
     return hitlist
-
-
-def prepsearchsqldict(searchobject: SearchObject, forcelemmata=False) -> dict:
-    """
-
-    should the searchsqldict be lemmatized or not?
-
-    """
-    so = searchobject
-    searchsqldict = searchlistintosqldict(so, so.termone)
-
-    if so.lemma or forcelemmata:
-        searchsqldict = rewritesqlsearchdictforlemmata(so)
-
-    return searchsqldict
 
 
 def rawdsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:

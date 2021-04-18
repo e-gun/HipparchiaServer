@@ -22,8 +22,7 @@ from server import hipparchia
 from server.authentication.authenticationwrapper import requireauthentication
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
-from server.listsandsession.searchlistintosql import searchlistintosqldict, rewritesqlsearchdictforlemmata
-from server.searching.rawsqlsearching import rawsqlsearches, prepsearchsqldict
+from server.searching.rawsqlsearching import rawsqlsearches
 from server.formatting.miscformatting import validatepollid, consolewarning
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds

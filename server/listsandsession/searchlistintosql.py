@@ -145,7 +145,6 @@ def rewritesqlsearchdictforlemmata(searchobject: SearchObject) -> dict:
 
     chunked = [terms[i:i + chunksize] for i in range(0, len(terms), chunksize)]
     chunked = [wordlistintoregex(c) for c in chunked]
-
     modifieddict = dict()
     for authortable in searchdict:
         count = -1
