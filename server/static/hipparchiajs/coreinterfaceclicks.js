@@ -565,6 +565,7 @@ function closeextendedsearcharea() {
     }
     $('#vectorizing-ison').hide();
     $('#vectorizing-isoff').show();
+    hidemany(extrasearchuielements);
     hidemany(vectorcheckboxspans);
 }
 
@@ -584,9 +585,7 @@ function openextendedsearcharea() {
                 $('#wordisnear').prop('checked', false); $('#wordisnotnear').prop('checked', true);
             }
             });
-    $('#complexsearching').show();
-    $('#termonecheckbox').show();
-    $('#termtwocheckbox').show();
+    showmany(extrasearchuielements);
     showmany(vectorcheckboxspans);
 }
 
