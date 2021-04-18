@@ -263,9 +263,6 @@ def sqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
     # the temptable follows the paradigm of wholeworktemptablecontents()
     # r {'type': 'temptable', 'where': {'tempquery': '\n\tCREATE TEMPORARY TABLE in0f08_includelist AS \n\t\tSELECT values \n\t\t\tAS includeindex FROM unnest(ARRAY[768,769,770,771,772,773,774,775,776,777,778,779,780,781,782,783,784,785,786,787,788,789,790,791,792,793,794,795,796,797,798,799,800,801,802,803,804,805,806,807,808,809,810,763,764,765,766,767]) values\n\t'}}
 
-    # originalrestrictions = so.indexrestrictions
-    # originalsearchlist = so.searchlist
-
     so.indexrestrictions = dict()
     authorsandlines = dict()
 
@@ -294,6 +291,7 @@ def sqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
     if so.lemmaone:
         so.poll.statusis('Part two: Searching initial hits for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
 
+    so.poll.sethits(0)
     newhitlines = rawdsqlsearchmanager(so)
 
     # newhitlines will contain, e.g., in0001w0ig_493 and in0001w0ig_492, i.e., 2 lines that are part of the same 'hit'
@@ -331,16 +329,28 @@ def sqlwithinxwords(so: SearchObject) -> List[dbWorkLine]:
 
     dbconnection = ConnectionObject()
     dbcursor = dbconnection.cursor()
-    for hit in initialhitlines:
+
+    so.poll.statusis('Part two: Searching initial hits for "{x}"'.format(x=so.termtwo))
+    if so.lemmatwo:
+        so.poll.statusis('Part two: Searching initial hits for all forms of "{x}"'.format(x=so.lemmatwo.dictionaryentry))
+
+    so.poll.sethits(0)
+
+    while initialhitlines and len(fullmatches) < so.cap:
+        hit = initialhitlines.pop()
         leadandlag = grableadingandlagging(hit, so, dbcursor)
+        # print('leadandlag for {h}: {l}'.format(h=hit.uniqueid, l=leadandlag))
         lagging = leadandlag['lag']
         leading = leadandlag['lead']
-        # print(hitline.universalid, so.termtwo, '\n\t[lag] ', lagging, '\n\t[lead]', leading)
 
         if so.near and (re.search(so.termtwo, leading) or re.search(so.termtwo, lagging)):
             fullmatches.append(hit)
+            so.poll.addhits(1)
         elif not so.near and not re.search(so.termtwo, leading) and not re.search(so.termtwo, lagging):
             fullmatches.append(hit)
+            so.poll.addhits(1)
+
+    dbconnection.connectioncleanup()
 
     return fullmatches
 
