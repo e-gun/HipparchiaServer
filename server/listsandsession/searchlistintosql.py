@@ -7,12 +7,15 @@
 """
 
 import re
+from typing import List
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import worklinetemplate
 from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.searchobjects import SearchObject
+from server.hipparchiaobjects.worklineobject import dbWorkLine
+from server.listsandsession.whereclauses import wholeworktemptablecontents
 from server.searching.searchfunctions import buildbetweenwhereextension
 
 
@@ -157,3 +160,65 @@ def rewritesqlsearchdictforlemmata(searchobject: SearchObject) -> dict:
             target['temptable'] = searchdict[authortable]['temptable']
 
     return modifieddict
+
+
+def perparesoforsecondsqldict(so: SearchObject, initialhitlines: List[dbWorkLine], usebetweensyntax=True) -> SearchObject:
+    """
+
+
+
+    """
+
+    so.indexrestrictions = dict()
+    authorsandlines = dict()
+
+    if not usebetweensyntax:
+        # consolewarning('sqlwithinxlinessearch(): temptable')
+        # time trials...
+        # Sought all 13 known forms of »ὕβριϲ« within 4 lines of all 230 known forms of »φεύγω«
+        # Searched 7,873 texts and found 9 passages (11.87s)
+        # Searched between 400 B.C.E. and 350 B.C.E.
+
+        # Sought all 230 known forms of »φεύγω« within 4 lines of all 16 known forms of »κρίϲιϲ«
+        # Searched 7,873 texts and found 12 passages (14.64s)
+        # Searched between 400 B.C.E. and 350 B.C.E.
+
+        for hl in initialhitlines:
+            linestosearch = list(range(hl.index - so.distance, hl.index + so.distance + 1))
+            try:
+                authorsandlines[hl.authorid].extend(linestosearch)
+            except KeyError:
+                authorsandlines[hl.authorid] = linestosearch
+
+        so.searchlist = list(authorsandlines.keys())
+
+        for a in authorsandlines:
+            so.indexrestrictions[a] = dict()
+            so.indexrestrictions[a]['type'] = 'temptable'
+            so.indexrestrictions[a]['where'] = wholeworktemptablecontents(a, set(authorsandlines[a]))
+            # print("so.indexrestrictions[a]['where']", so.indexrestrictions[a]['where'])
+    else:
+        # Sought all 13 known forms of »ὕβριϲ« within 4 lines of all 230 known forms of »φεύγω«
+        # Searched 7,873 texts and found 9 passages (9.35s)
+        # Searched between 400 B.C.E. and 350 B.C.E.
+
+        # Sought all 230 known forms of »φεύγω« within 4 lines of all 16 known forms of »κρίϲιϲ«
+        # Searched 7,873 texts and found 12 passages (11.35s)
+        # Searched between 400 B.C.E. and 350 B.C.E.
+
+        # consolewarning('sqlwithinxlinessearch(): between')
+        for hl in initialhitlines:
+            boundiaries = (hl.index - so.distance, hl.index + so.distance)
+            try:
+                authorsandlines[hl.authorid].append(boundiaries)
+            except KeyError:
+                authorsandlines[hl.authorid] = [boundiaries]
+        for a in authorsandlines:
+            so.searchlist = list(authorsandlines.keys())
+            so.indexrestrictions[a] = dict()
+            so.indexrestrictions[a]['where'] = dict()
+            so.indexrestrictions[a]['type'] = 'between'
+            so.indexrestrictions[a]['where']['listofboundaries'] = authorsandlines[a]
+            so.indexrestrictions[a]['where']['listofomissions'] = list()
+
+    return so

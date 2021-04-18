@@ -23,7 +23,8 @@ from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
-from server.listsandsession.searchlistintosql import searchlistintosqldict, rewritesqlsearchdictforlemmata
+from server.listsandsession.searchlistintosql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
+    perparesoforsecondsqldict
 from server.listsandsession.whereclauses import wholeworktemptablecontents
 from server.searching.searchfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging
 from server.threading.mpthreadcount import setthreadcount
@@ -91,7 +92,7 @@ def rawdsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
     searchsqlbyauthor = [so.searchsqldict[k] for k in so.searchsqldict.keys()]
     searchsqlbyauthor = manager.list(searchsqlbyauthor)
 
-    activepoll.allworkis(len(so.searchlist))
+    activepoll.allworkis(len(searchsqlbyauthor))
     activepoll.remain(len(searchsqlbyauthor))
     activepoll.sethits(0)
 
@@ -126,20 +127,29 @@ def workonrawsqlsearch(workerid: int, foundlineobjects: ListProxy, listofplacest
 
     gather the results...
 
+    listofplacestosearch elements are dicts and the whole looks like:
+
+        [{'temptable': '', 'query': 'SELECT ...', 'data': ('ὕβριν',)},
+        {'temptable': '', 'query': 'SELECT ...', 'data': ('ὕβριν',)} ...]
+
+    this is supposed to give you one query per hipparchiaDB table unless you are lemmatizing
+
     """
 
-
+    # if workerid == 0:
+    #     print('{w} - listofplacestosearch'.format(w=workerid), listofplacestosearch)
     so = searchobject
     activepoll = so.poll
     dbconnection.setreadonly(False)
     dbcursor = dbconnection.cursor()
     commitcount = 0
     getnetxitem = listofplacestosearch.pop
-    remainder = listofplacestosearch
     emptyerror = IndexError
     remaindererror = TypeError
 
     while listofplacestosearch and activepoll.gethits() <= so.cap:
+        # if workerid == 0:
+        #     print('remain:', len(listofplacestosearch))
         commitcount += 1
         dbconnection.checkneedtocommit(commitcount)
 
@@ -162,7 +172,7 @@ def workonrawsqlsearch(workerid: int, foundlineobjects: ListProxy, listofplacest
             listofplacestosearch = None
 
         try:
-            activepoll.remain(len(remainder))
+            activepoll.remain(len(listofplacestosearch))
         except remaindererror:
             pass
 
@@ -251,6 +261,9 @@ def sqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
 
     dblooknear() vs a temptable makes the other version faster?
 
+    check the second pass for inefficiencies
+
+
     """
 
     initialhitlines = generatepreliminaryhitlist(so)
@@ -263,24 +276,7 @@ def sqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
     # the temptable follows the paradigm of wholeworktemptablecontents()
     # r {'type': 'temptable', 'where': {'tempquery': '\n\tCREATE TEMPORARY TABLE in0f08_includelist AS \n\t\tSELECT values \n\t\t\tAS includeindex FROM unnest(ARRAY[768,769,770,771,772,773,774,775,776,777,778,779,780,781,782,783,784,785,786,787,788,789,790,791,792,793,794,795,796,797,798,799,800,801,802,803,804,805,806,807,808,809,810,763,764,765,766,767]) values\n\t'}}
 
-    so.indexrestrictions = dict()
-    authorsandlines = dict()
-
-    # first build up { table1: [listoflinesweneed], table2: [listoflinesweneed], ...}
-    for hl in initialhitlines:
-        linestosearch = list(range(hl.index - so.distance, hl.index + so.distance + 1))
-        try:
-            authorsandlines[hl.authorid].extend(linestosearch)
-        except KeyError:
-            authorsandlines[hl.authorid] = linestosearch
-
-    so.searchlist = list(authorsandlines.keys())
-
-    for a in authorsandlines:
-        so.indexrestrictions[a] = dict()
-        so.indexrestrictions[a]['type'] = 'temptable'
-        so.indexrestrictions[a]['where'] = wholeworktemptablecontents(a, set(authorsandlines[a]))
-        # print("so.indexrestrictions[a]['where']", so.indexrestrictions[a]['where'])
+    so = perparesoforsecondsqldict(so, initialhitlines)
 
     so.searchsqldict = searchlistintosqldict(so, so.termtwo)
     if so.lemmatwo:
