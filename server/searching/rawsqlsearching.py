@@ -25,7 +25,7 @@ from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.searchlistintosql import searchlistintosqldict, rewritesqlsearchdictforlemmata
 from server.listsandsession.whereclauses import wholeworktemptablecontents
-from server.searching.searchfunctions import rebuildsearchobjectviasearchorder
+from server.searching.searchfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging
 from server.threading.mpthreadcount import setthreadcount
 
 
@@ -55,7 +55,7 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
             # this will hit rawdsqlsearchmanager() 2x
             searchfnc = sqlwithinxlinessearch
         else:
-            consolewarning('unable to do within-x-words ATM', color='red')
+            searchfnc = sqlwithinxwords
     else:
         consolewarning('rawsqlsearches() not yet supporting {t} searching'.format(t=so.searchtype), color='red')
 
@@ -77,6 +77,8 @@ def rawdsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
 
     fix this up last...
 
+    polling broken on second pass of a porximity search
+
     """
 
     activepoll = so.poll
@@ -90,7 +92,7 @@ def rawdsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
     searchsqlbyauthor = manager.list(searchsqlbyauthor)
 
     activepoll.allworkis(len(so.searchlist))
-    activepoll.remain(len(so.indexrestrictions.keys()))
+    activepoll.remain(len(searchsqlbyauthor))
     activepoll.sethits(0)
 
     argumentuple = [foundlineobjects, searchsqlbyauthor, so]
@@ -218,16 +220,13 @@ def rawsqlsearcher(querydict, dbcursor) -> Generator:
     return found
 
 
-def sqlwithinxlinessearch(searchobject: SearchObject) -> List[dbWorkLine]:
+def generatepreliminaryhitlist(so: SearchObject) -> List[dbWorkLine]:
     """
 
-    after finding x, look for y within n lines of x
-
-    people who send phrases to both halves and/or a lot of regex will not always get what they want
+    grab the hits for part one of a two part search
 
     """
 
-    so = searchobject
     actualcap = so.cap
     so.cap = hipparchia.config['INTERMEDIATESEARCHCAP']
 
@@ -237,6 +236,24 @@ def sqlwithinxlinessearch(searchobject: SearchObject) -> List[dbWorkLine]:
 
     hitlines = rawdsqlsearchmanager(so)
     so.cap = actualcap
+
+    return hitlines
+
+
+def sqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
+    """
+
+    after finding x, look for y within n lines of x
+
+    people who send phrases to both halves and/or a lot of regex will not always get what they want
+
+    note that this implementations is significantly slower than the standard withinxlines() + simplewithinxlines()
+
+    dblooknear() vs a temptable makes the other version faster?
+
+    """
+
+    initialhitlines = generatepreliminaryhitlist(so)
 
     # we are going to need a new searchsqldict w/ a new temptable
     # sq = { table1: {query: q, data: d, temptable: t},
@@ -253,7 +270,7 @@ def sqlwithinxlinessearch(searchobject: SearchObject) -> List[dbWorkLine]:
     authorsandlines = dict()
 
     # first build up { table1: [listoflinesweneed], table2: [listoflinesweneed], ...}
-    for hl in hitlines:
+    for hl in initialhitlines:
         linestosearch = list(range(hl.index - so.distance, hl.index + so.distance + 1))
         try:
             authorsandlines[hl.authorid].extend(linestosearch)
@@ -275,7 +292,7 @@ def sqlwithinxlinessearch(searchobject: SearchObject) -> List[dbWorkLine]:
 
     so.poll.statusis('Part two: Searching initial hits for "{x}"'.format(x=so.termtwo))
     if so.lemmaone:
-        so.poll.statusis('Part two: Searching initial hits for all forms of "{x}"'.format(x=so.lemma.dictionaryentry))
+        so.poll.statusis('Part two: Searching initial hits for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
 
     newhitlines = rawdsqlsearchmanager(so)
 
@@ -283,7 +300,7 @@ def sqlwithinxlinessearch(searchobject: SearchObject) -> List[dbWorkLine]:
     # so we need can't use newhitlines directly but have to check it against the initial hits
     # that's fine since "not near" would push us in this direction in any case
 
-    initialhitlinedict = {hl.uniqueid: hl for hl in hitlines}
+    initialhitlinedict = {hl.uniqueid: hl for hl in initialhitlines}
     newhitlineids = set()
     for nhl in newhitlines:
         indices = list(range(nhl.index - so.distance, nhl.index + so.distance + 1))
@@ -301,4 +318,29 @@ def sqlwithinxlinessearch(searchobject: SearchObject) -> List[dbWorkLine]:
     return finalhitlines
 
 
+def sqlwithinxwords(so: SearchObject) -> List[dbWorkLine]:
+    """
+
+    after finding x, look for y within n words of x
+
+    """
+
+    initialhitlines = generatepreliminaryhitlist(so)
+
+    fullmatches = list()
+
+    dbconnection = ConnectionObject()
+    dbcursor = dbconnection.cursor()
+    for hit in initialhitlines:
+        leadandlag = grableadingandlagging(hit, so, dbcursor)
+        lagging = leadandlag['lag']
+        leading = leadandlag['lead']
+        # print(hitline.universalid, so.termtwo, '\n\t[lag] ', lagging, '\n\t[lead]', leading)
+
+        if so.near and (re.search(so.termtwo, leading) or re.search(so.termtwo, lagging)):
+            fullmatches.append(hit)
+        elif not so.near and not re.search(so.termtwo, leading) and not re.search(so.termtwo, lagging):
+            fullmatches.append(hit)
+
+    return fullmatches
 
