@@ -49,9 +49,9 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
             # this will hit rawdsqlsearchmanager() 2x
             hitlist = sqlwithinxlinessearch(so)
         else:
-            print("can't do within-x-words yet")
+            consolewarning('unable to do within-x-words ATM', color='red')
     else:
-        print('rawsqlsearches() not yet supporting {t} searching'.format(t=so.searchtype))
+        consolewarning('rawsqlsearches() not yet supporting {t} searching'.format(t=so.searchtype), color='red')
 
     return hitlist
 
@@ -265,7 +265,7 @@ def sqlwithinxlinessearch(searchobject: SearchObject) -> List[dbWorkLine]:
         so.indexrestrictions[a] = dict()
         so.indexrestrictions[a]['type'] = 'temptable'
         so.indexrestrictions[a]['where'] = wholeworktemptablecontents(a, set(authorsandlines[a]))
-        print("so.indexrestrictions[a]['where']", so.indexrestrictions[a]['where'])
+        # print("so.indexrestrictions[a]['where']", so.indexrestrictions[a]['where'])
 
     so.searchsqldict = searchlistintosqldict(so, so.termtwo)
     newhitlines = rawdsqlsearchmanager(so)

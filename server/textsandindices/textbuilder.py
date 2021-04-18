@@ -36,8 +36,8 @@ def buildtext(work: str, firstline: int, lastline: int, linesevery: int, cursor)
 	qtemplate = """
 	SELECT {wltmp} FROM {a} WHERE (index >= %s and index <= %s) ORDER BY index ASC
 	"""
-	query = qtemplate.format(wltmp=worklinetemplate, a=auid)
 
+	query = qtemplate.format(wltmp=worklinetemplate, a=auid)
 	data = (firstline, lastline)
 	cursor.execute(query, data)
 	results = cursor.fetchall()
@@ -124,7 +124,7 @@ def buildtext(work: str, firstline: int, lastline: int, linesevery: int, cursor)
 			if thisline.samelevelas(previousline) is not True:
 				columna = thisline.shortlocus()
 			else:
-				columna = ''
+				columna = str()
 			try:
 				linenumber = int(thisline.l0)
 			except ValueError:

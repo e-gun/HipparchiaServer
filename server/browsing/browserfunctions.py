@@ -77,7 +77,7 @@ def buildbrowseroutputobject(authorobject: dbAuthor, workobject: dbOpus, locusin
 	for line in lines:
 		if workobject.isnotliterary() and line.index == workobject.starts:
 			# line.index == workobject.starts added as a check because
-			# otherwise you will re-see date info in the middle of some documents
+			# otherwise you will re-see date info in the middle of some documents:
 			# it gets reasserted with a CD block reinitialization
 			metadata = checkfordocumentmetadata(line, workobject)
 			if metadata:

@@ -299,7 +299,7 @@ def paragraphformatting(listoflines: List[dbWorkLine]) -> List[dbWorkLine]:
 
 	for line in listoflines:
 		paragraphtag = spanopenedbutnotclosed(line.markedup, spanopenfinder, spanclosefinder)
-		print('[{m}], [{p}],\t{l}'.format(m=memory, p=paragraphtag, l=line.markedup))
+		# print('[{m}], [{p}],\t{l}'.format(m=memory, p=paragraphtag, l=line.markedup))
 		if memory and paragraphtag:
 			# you are finishing old business and starting new business
 			# e.g: 	Ἑλλάδα</span>. καὶ ἑτέρωθι πάλιν <span class="expanded_text">εἶτα τὸν τοῦτο τὸ μη-
