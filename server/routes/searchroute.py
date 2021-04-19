@@ -25,7 +25,7 @@ from server.formatting.jsformatting import insertbrowserclickjs
 from server.searching.rawsqlsearching import rawsqlsearches
 from server.formatting.miscformatting import validatepollid, consolewarning
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
-	nocontexthtmlifysearchfinds
+	nocontexthtmlifysearchfinds, rewriteskgandprx
 from server.formatting.wordformatting import universalregexequivalent, wordlistintoregex
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchOutputObject, SearchObject
@@ -208,47 +208,10 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 
 		activepoll.statusis('Converting results to HTML')
 
-		failtext = """
-		<br>
-		<pre>
-		Search Failed: an invalid regular expression is present in
-		
-			{x}
-			
-		check for unbalanced parentheses, etc.</pre>
-		"""
-
-		if not skg:
-			try:
-				skg = re.compile(universalregexequivalent(so.termone))
-			except re.error:
-				skg = 're.error: BAD REGULAR EXPRESSION'
-				htmlsearch = htmlsearch + failtext.format(x=so.termone)
-		else:
-			# 'doloreq[uv]e' will turn into 'doloreq[[UVuv]v]e' if you don't debracket
-			skg = re.sub(r'\[uv\]', 'u', skg)
-			skg = re.sub(r'u', '[UVuv]', skg)
-			skg = re.sub(r'i', '[IJij]', skg)
-
-		if not prx and so.proximate != '' and so.searchtype == 'proximity':
-			try:
-				prx = re.compile(universalregexequivalent(so.termtwo))
-			except re.error:
-				prx = 're.error: BAD REGULAR EXPRESSION'
-				htmlsearch = htmlsearch + failtext.format(x=so.termtwo)
-		elif prx:
-			prx = re.sub(r'\[uv\]', 'u', prx)
-			prx = re.sub(r'u', '[UVuv]', prx)
-			prx = re.sub(r'i', '[IJij]', prx)
-
-		if so.lemmaone:
-			# clean out the whitespace/start/stop checks
-			skg = re.sub(r'\(\^\|\\s\)', str(), skg)
-			skg = re.sub(r'\(\\s\|\$\)', str(), skg)
-
-		if so.lemmatwo:
-			prx = re.sub(r'\(\^\|\\s\)', str(), prx)
-			prx = re.sub(r'\(\\s\|\$\)', str(), prx)
+		sandp = rewriteskgandprx(skg, prx, htmlsearch, so)
+		skg = sandp['skg']
+		prx = sandp['prx']
+		htmlsearch = sandp['html']
 
 		for r in resultlist:
 			r.lineobjects = flagsearchterms(r, skg, prx, so)

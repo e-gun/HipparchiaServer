@@ -18,6 +18,7 @@ from server.dbsupport.dblinefunctions import bulkenvironsfetcher
 from server.formatting.bibliographicformatting import formatname
 from server.formatting.bracketformatting import brackethtmlifysearchfinds
 from server.formatting.miscformatting import htmlcommentdecorator
+from server.formatting.wordformatting import universalregexequivalent
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.searchobjects import SearchObject, SearchResult
 from server.listsandsession.sessionfunctions import findactivebrackethighlighting
@@ -100,6 +101,59 @@ def buildresultobjects(hitdict: dict, authordict: dict, workdict: dict, searchob
 			r.lineobjects = paragraphformatting(r.lineobjects)
 
 		return updatedresultlist
+
+
+def rewriteskgandprx(skg: str, prx: str, htmlsearch: str, so: SearchObject) -> dict:
+	"""
+
+	removing some regex spam from executesearch()
+
+	"""
+
+	failtext = """
+	<br>
+	<pre>
+	Search Failed: an invalid regular expression is present in
+
+		{x}
+
+	check for unbalanced parentheses, etc.</pre>
+	"""
+
+	if not skg:
+		try:
+			skg = re.compile(universalregexequivalent(so.termone))
+		except re.error:
+			skg = 're.error: BAD REGULAR EXPRESSION'
+			htmlsearch = htmlsearch + failtext.format(x=so.termone)
+	else:
+		# 'doloreq[uv]e' will turn into 'doloreq[[UVuv]v]e' if you don't debracket
+		skg = re.sub(r'\[uv\]', 'u', skg)
+		skg = re.sub(r'u', '[UVuv]', skg)
+		skg = re.sub(r'i', '[IJij]', skg)
+
+	if not prx and so.proximate != '' and so.searchtype == 'proximity':
+		try:
+			prx = re.compile(universalregexequivalent(so.termtwo))
+		except re.error:
+			prx = 're.error: BAD REGULAR EXPRESSION'
+			htmlsearch = htmlsearch + failtext.format(x=so.termtwo)
+	elif prx:
+		prx = re.sub(r'\[uv\]', 'u', prx)
+		prx = re.sub(r'u', '[UVuv]', prx)
+		prx = re.sub(r'i', '[IJij]', prx)
+
+	if so.lemmaone:
+		# clean out the whitespace/start/stop checks
+		skg = re.sub(r'\(\^\|\\s\)', str(), skg)
+		skg = re.sub(r'\(\\s\|\$\)', str(), skg)
+
+	if so.lemmatwo:
+		prx = re.sub(r'\(\^\|\\s\)', str(), prx)
+		prx = re.sub(r'\(\\s\|\$\)', str(), prx)
+
+	r = {'skg': skg, 'prx': prx, 'html': htmlsearch}
+	return r
 
 
 def flagsearchterms(searchresultobject: SearchResult, skg: str, prx: str, searchobject: SearchObject) -> LineList:
