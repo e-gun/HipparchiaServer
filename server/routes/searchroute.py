@@ -122,8 +122,6 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 
 	frozensession = so.session
 
-	phrasefinder = re.compile(r'[^\s]\s[^\s]')
-
 	progresspolldict[pollid] = ProgressPoll(pollid)
 	activepoll = progresspolldict[pollid]
 
@@ -166,7 +164,7 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 
 		isgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
 
-		if so.lemma:
+		if so.lemmaone:
 			so.termone = wordlistintoregex(so.lemma.formlist)
 			skg = so.termone
 			if re.search(isgreek, skg):
@@ -174,55 +172,18 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 				# but the greek lemmata are accented
 				so.usecolumn = 'accented_line'
 
-		if so.proximatelemma:
-			so.termtwo = wordlistintoregex(so.proximatelemma.formlist)
+		if so.lemmatwo:
+			so.termtwo = wordlistintoregex(so.lemmatwo.formlist)
 			prx = so.termtwo
 			if re.search(isgreek, prx):
 				so.usecolumn = 'accented_line'
 
-		if so.lemma and not (so.proximatelemma or so.proximate):
-			# print('executesearch(): b - simplelemma')
-			so.searchtype = 'simplelemma'
-			so.usewordlist = 'polytonic'
-			thesearch = 'all forms of »{skg}«'.format(skg=so.lemma.dictionaryentry)
-			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>'.format(n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry)
-		elif so.lemma and so.proximatelemma:
-			# print('executesearch(): c - proximity of lemma to lemma')
-			so.searchtype = 'proximity'
-			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.proximatelemma.dictionaryentry)
-			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of all {pn} known forms of <span class="sought">»{pskg}«</span>'
-			htmlsearch = htmlsearch.format(n=len(so.lemma.formlist), skg=so.lemma.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pn=len(so.proximatelemma.formlist), pskg=so.proximatelemma.dictionaryentry)
-		elif (so.lemma or so.proximatelemma) and (so.seeking or so.proximate):
-			# print('executesearch(): d - proximity of lemma to word')
-			so.searchtype = 'proximity'
-			if so.lemma:
-				lm = so.lemma
-				t = so.originalproximate
-			else:
-				lm = so.proximatelemma
-				t = so.seeking
-			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=lm.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=t)
-			htmlsearch = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pskg}«</span>'
-			htmlsearch = htmlsearch.format(n=len(lm.formlist), skg=lm.dictionaryentry, ns=so.nearstr, sp=so.proximity, sc=so.scope, pskg=t)
-		elif len(so.proximate) < 1 and re.search(phrasefinder, so.seeking) is None:
-			# print('executesearch(): e - basic wordsearch')
-			so.searchtype = 'simple'
-			thesearch = so.originalseeking
-			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=so.originalseeking)
-		elif re.search(phrasefinder, so.seeking):
-			# print('executesearch(): f - phrase search')
-			so.searchtype = 'phrase'
-			thesearch = so.originalseeking
-			htmlsearch = '<span class="sought">»{skg}«</span>'.format(skg=so.originalseeking)
-		else:
-			# print('executesearch(): g - proximity of two terms')
-			so.searchtype = 'proximity'
-			thesearch = '{skg}{ns} within {sp} {sc} of {pr}'.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.originalproximate)
-			htmlsearch = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'
-			htmlsearch = htmlsearch.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.originalproximate)
+		so.setsearchtype()
+		thesearch = so.generatesearchdescription()
+		htmlsearch = so.generatehtmlsearchdescription()
 
 		# DEBUGGING AREA BEGINS
-		if commandlineargs.rawsql:
+		if commandlineargs.rawsql or hipparchia.config['SEARCHCODESTYLE'] == 'rawsql':
 			consolewarning('rawsqlsearches() active')
 			dosearch = rawsqlsearches
 		else:
@@ -233,7 +194,7 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 		hits = dosearch(so)
 		activepoll.statusis('Putting the results in context')
 
-		# hits [<server.hipparchiaclasses.dbWorkLine object at 0x10d952da0>, <server.hipparchiaclasses.dbWorkLine object at 0x10d952c50>, ... ]
+		# hits is List[dbWorkLine]
 		hitdict = sortresultslist(hits, so, authordict, workdict)
 
 		if so.vectorquerytype == 'cosdistbylineorword':
@@ -280,12 +241,12 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 			prx = re.sub(r'u', '[UVuv]', prx)
 			prx = re.sub(r'i', '[IJij]', prx)
 
-		if so.lemma:
+		if so.lemmaone:
 			# clean out the whitespace/start/stop checks
 			skg = re.sub(r'\(\^\|\\s\)', str(), skg)
 			skg = re.sub(r'\(\\s\|\$\)', str(), skg)
 
-		if so.proximatelemma:
+		if so.lemmatwo:
 			prx = re.sub(r'\(\^\|\\s\)', str(), prx)
 			prx = re.sub(r'\(\\s\|\$\)', str(), prx)
 

@@ -38,9 +38,11 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
     speed notes: [NB: linux is *way* faster than a virtualized big sur; vfio issues, I guess]
         simple: Sought »μετείληφεν« Searched 7,461 texts and found 132 passages (5.79s) [consonant w/ old]
         lemmatized: Sought all 28 known forms of »μακρόβιοϲ« Searched 7,461 texts and found 200 passages (29.56s) [faster?]
-        withinxlines: Sought »μακρόβιον« within 1 lines of »θαυμαϲτῶϲ« Searched 7,461 texts and found 1 passage (6.75s) [consonant]
+        withinxlines: Sought »μεγιστοσ« within 3 lines of »θαυμαστ« Searched 7,461 texts and found 20 passages (6.51s)  [consonant]
         winthinxwords: Sought »μακρόβιον« within 8 words of »γλῶτταν« Searched 7,461 texts and found 2 passages (6.87s) [consonant]
         sqlphrasesearch: Sought »ἡ φύϲιϲ μετείληφεν« Searched 7,461 texts and found 1 passage (6.63s) [consonant w/ old]
+
+    consonant means <1s slower
 
     """
 
@@ -76,6 +78,7 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
             consolewarning('rawsqlsearches() cannot do a sql subqueryphrasesearch()', color='red')
             pass
     else:
+        # should be hard to reach this because of "assert" above
         consolewarning('rawsqlsearches() does not support {t} searching'.format(t=so.searchtype), color='red')
 
     so.searchsqldict = searchlistintosqldict(so, so.termone)

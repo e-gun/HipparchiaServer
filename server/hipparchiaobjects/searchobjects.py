@@ -31,7 +31,7 @@ class SearchObject(object):
 		self.originalseeking = seeking
 		self.originalproximate = proximate
 		self.lemma = lemmaobject  # should start moving away from self.lemma and towards self.lemmaone
-		self.proximatelemma = proximatelemmaobject
+		self.proximatelemma = proximatelemmaobject  # should start moving away from self.proximatelemma and towards self.lemmatwo
 		self.lemmaone = self.lemma
 		self.lemmatwo = self.proximatelemma
 		self.lemmathree = None
@@ -223,6 +223,81 @@ class SearchObject(object):
 			return True
 		else:
 			return False
+
+	def setsearchtype(self):
+		phrasefinder = re.compile(r'[^\s]\s[^\s]')
+		if self.lemmaone and not (self.lemmatwo or self.proximate):
+			self.searchtype = 'simplelemma'
+			self.usewordlist = 'polytonic'
+		elif self.lemmaone and self.lemmatwo:
+			self.searchtype = 'proximity'
+		elif (self.lemmaone or self.lemmatwo) and (self.seeking or self.proximate):
+			self.searchtype = 'proximity'
+		elif len(self.proximate) < 1 and re.search(phrasefinder, self.seeking) is None:
+			self.searchtype = 'simple'
+		elif re.search(phrasefinder, self.seeking):
+			self.searchtype = 'phrase'
+		else:
+			self.searchtype = 'proximity'
+
+	def generatesearchdescription(self) -> str:
+		# used to set the page title; called by executesearch()
+		assert self.searchtype in ['simple', 'simplelemma', 'proximity', 'phrase'], 'unknown searchtype sent to generatesearchdescription()'
+
+		if self.searchtype == 'simplelemma':
+			return 'all forms of »{skg}«'.format(skg=self.lemmaone.dictionaryentry)
+		elif self.lemmaone and self.lemmatwo:
+			# proximity of lemma to lemma
+			s = '{skg}{ns} within {sp} {sc} of {pr}'
+			return s.format(skg=self.lemmaone.dictionaryentry, ns=self.nearstr, sp=self.proximity, sc=self.scope, pr=self.lemmatwo.dictionaryentry)
+		elif (self.lemmaone or self.lemmatwo) and (self.seeking or self.proximate):
+			# proximity of lemma to word
+			if self.lemmaone:
+				lm = self.lemmaone
+				t = self.originalproximate
+			else:
+				lm = self.lemmatwo
+				t = self.seeking
+			s = '{skg}{ns} within {sp} {sc} of {pr}'
+			return s.format(skg=lm.dictionaryentry, ns=self.nearstr, sp=self.proximity, sc=self.scope, pr=t)
+		elif self.searchtype == 'simple':
+			return self.originalseeking
+		elif self.searchtype == 'phrase':
+			return self.originalseeking
+		else:
+			# proximity of two terms
+			s = '{skg}{ns} within {sp} {sc} of {pr}'
+			return s.format(skg=self.originalseeking, ns=self.nearstr, sp=self.proximity, sc=self.scope, pr=self.originalproximate)
+
+	def generatehtmlsearchdescription(self) -> str:
+		# used to set the page title; called by executesearch()
+		assert self.searchtype in ['simple', 'simplelemma', 'proximity', 'phrase'], 'unknown searchtype sent to generatehtmlsearchdescription()'
+
+		if self.searchtype == 'simplelemma':
+			s = 'all {n} known forms of <span class="sought">»{skg}«</span>'
+			return s.format(n=len(self.lemmaone.formlist), skg=self.lemmaone.dictionaryentry)
+		elif self.lemmaone and self.lemmatwo:
+			# proximity of lemma to lemma
+			s = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of all {pn} known forms of <span class="sought">»{pskg}«</span>'
+			return s.format(n=len(self.lemmaone.formlist), skg=self.lemmaone.dictionaryentry, ns=self.nearstr, sp=self.proximity, sc=self.scope, pn=len(self.lemmatwo.formlist), pskg=self.lemmatwo.dictionaryentry)
+		elif (self.lemmaone or self.lemmatwo) and (self.seeking or self.proximate):
+			# proximity of lemma to word
+			if self.lemmaone:
+				lm = self.lemmaone
+				t = self.originalproximate
+			else:
+				lm = self.lemmatwo
+				t = self.seeking
+			s = 'all {n} known forms of <span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pskg}«</span>'
+			return s.format(n=len(lm.formlist), skg=lm.dictionaryentry, ns=self.nearstr, sp=self.proximity, sc=self.scope, pskg=t)
+		elif self.searchtype == 'simple':
+			return '<span class="sought">»{skg}«</span>'.format(skg=self.originalseeking)
+		elif self.searchtype == 'phrase':
+			return '<span class="sought">»{skg}«</span>'.format(skg=self.originalseeking)
+		else:
+			# proximity of two terms
+			s = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'
+			return s.format(skg=self.originalseeking, ns=self.nearstr, sp=self.proximity, sc=self.scope, pr=self.originalproximate)
 
 	def wholecorporasearched(self):
 		# note that the searchroute.py searchlist might be empty by the time you check this: searchlist.pop()
