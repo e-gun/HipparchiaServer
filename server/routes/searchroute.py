@@ -26,7 +26,7 @@ from server.searching.rawsqlsearching import rawsqlsearches
 from server.formatting.miscformatting import validatepollid, consolewarning
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds, rewriteskgandprx
-from server.formatting.wordformatting import universalregexequivalent, wordlistintoregex
+from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchOutputObject, SearchObject
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions, \
@@ -48,6 +48,7 @@ else:
 JSON_STR = str
 
 commandlineargs = getcommandlineargs()
+
 
 @hipparchia.route('/search/<action>/<one>', methods=['GET'])
 @hipparchia.route('/search/<action>/<one>/<two>')
@@ -182,13 +183,11 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 		thesearch = so.generatesearchdescription()
 		htmlsearch = so.generatehtmlsearchdescription()
 
-		# DEBUGGING AREA BEGINS
 		if commandlineargs.rawsql or hipparchia.config['SEARCHCODESTYLE'] == 'rawsql':
-			consolewarning('rawsqlsearches() active')
+			consolewarning('rawsqlsearches() active', color='black')
 			dosearch = rawsqlsearches
 		else:
 			dosearch = searchdispatcher
-		# DEBUGGING AREA ENDS
 
 		# now that the SearchObject is built, do the search...
 		hits = dosearch(so)
@@ -295,8 +294,8 @@ def singlewordsearch(searchid, searchterm) -> JSON_STR:
 	searchterm = cleaninitialquery(searchterm)
 	seeking = ' {s} '.format(s=searchterm)
 	proximate = str()
-	lemma = str()
-	proximatelemma = str()
+	lemma = None
+	proximatelemma = None
 
 	so = SearchObject(pollid, seeking, proximate, lemma, proximatelemma, session)
 

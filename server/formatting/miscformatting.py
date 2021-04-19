@@ -14,6 +14,9 @@ from pathlib import Path
 from click import secho
 
 from server import hipparchia
+from server.commandlineoptions import getcommandlineargs
+
+commandlineargs = getcommandlineargs()
 
 
 def htmlcommentdecorator(function):
@@ -93,14 +96,20 @@ def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True, 
 
 	send color text output because something interesting happened
 
-	'magenta' is the debugging color ATM; it is suppressed in the standard debugsettings.py
+	'magenta' and 'black' are the debugging colors ATM; they are suppressed in the standard debugsettings.py
 
 	:param message:
 	:return:
 	"""
 
-	if color not in hipparchia.config['CONSOLEWARNINGTYPES']:
+	if color not in ['red', 'yellow', 'green', 'cyan', 'magenta', 'black']:
 		return str()
+
+	if color not in hipparchia.config['CONSOLEWARNINGTYPES'] and not commandlineargs.debugmessages:
+		return str()
+
+	if color == 'black':
+		isbold = True
 
 	head = str()
 	tail = str()
@@ -113,6 +122,7 @@ def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True, 
 		'green': ('+++ ', str()),
 		'cyan': ('=== ', str()),
 		'magenta': ('??? ', ' ???'),
+		'black': ('[debugging] ', ' [debugging]'),
 	}
 
 	try:

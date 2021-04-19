@@ -11,7 +11,7 @@ import time
 
 from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
-from server.formatting.miscformatting import htmlcommentdecorator
+from server.formatting.miscformatting import htmlcommentdecorator, consolewarning
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.dbtextobjects import dbLemmaObject
 from server.hipparchiaobjects.vectorobjects import VectorValues
@@ -239,6 +239,7 @@ class SearchObject(object):
 			self.searchtype = 'phrase'
 		else:
 			self.searchtype = 'proximity'
+		consolewarning('searchtype set to {t}'.format(t=self.searchtype), color='black')
 
 	def generatesearchdescription(self) -> str:
 		# used to set the page title; called by executesearch()

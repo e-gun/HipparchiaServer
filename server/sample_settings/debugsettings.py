@@ -50,7 +50,7 @@
 
 
 SUPPRESSWARNINGS = True
-# Currently we know about: ['red', 'yellow', 'green', 'cyan', 'magenta']
+# Currently we know about: ['red', 'yellow', 'green', 'cyan', 'magenta', 'black']
 CONSOLEWARNINGTYPES = ['red', 'yellow', 'green', 'cyan']
 ENABLELOGGING = False
 HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
