@@ -357,9 +357,11 @@ def sqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
     dbcursor = dbconnection.cursor()
 
     setofhits = set()
-    print('initialhitlines')
-    for i in initialhitlines:
-        print(i.index, i.markedup)
+
+    # print('initialhitlines')
+    # for i in initialhitlines:
+    #     print(i.index, i.markedup)
+
     while initialhitlines:
         # windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]
         # figure out which line is really the line with the goods
@@ -367,7 +369,7 @@ def sqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
         # subsequent lines means that you really should check your work carefully; this is not an especially costly
         # operation relative to the whole search and esp. relative to the speed gains of using a subquery search
         lineobject = initialhitlines.pop()
-        if lineobject.authorid not in setofhits:
+        if not so.onehit or lineobject.authorid not in setofhits:
             if re.search(sp, getattr(lineobject, so.usewordlist)):
                 listoffinds.append(lineobject)
                 so.poll.addhits(1)

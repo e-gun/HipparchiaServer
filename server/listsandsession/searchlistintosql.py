@@ -247,17 +247,6 @@ def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: 
 
     but the 'queries' needs to be swapped out
 
-
-    a search in x., hell and x., mem less book 3 of hell and book 2 of mem:
-
-    SELECT secondpass.index, secondpass.accented_line
-        FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
-            (SELECT index, accented_line,
-                concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) as linebundle
-                FROM gr0032 WHERE ( (index BETWEEN 1 AND 7918) OR (index BETWEEN 7919 AND 11999) ) AND ( (index NOT BETWEEN 1846 AND 2856) AND (index NOT BETWEEN 8845 AND 9864) ) ) firstpass
-            ) secondpass
-    WHERE secondpass.linebundle ~ %s  LIMIT 200
-
     a search in x., hell and x., mem less book 3 of hell and book 2 of mem:
 
     SELECT secondpass.index, secondpass.accented_line
@@ -282,33 +271,33 @@ def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: 
 
     BUT, workonrawsqlsearch() is going to call dblineintolineobject() on the results, so you want something that will fit that...
 
-    and so we will use worklinetemplatelist t generate a full collection of terms and in order
-
-
+    SELECT second.wkuniversalid, second.index, second.level_05_value, second.level_04_value, second.level_03_value, second.level_02_value, second.level_01_value, second.level_00_value, second.marked_up_line, second.accented_line, second.stripped_line, second.hyphenated_words, second.annotations FROM
+        (SELECT * FROM
+            (SELECT wkuniversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations, concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) AS linebundle
+                FROM gr0014  ) first
+        ) second
+    WHERE second.linebundle ~ 'λαβόντα παρ ὑμῶν' LIMIT 200;
 
     """
 
     sp = ['second.{x}'.format(x=x) for x in worklinetemplatelist]
     sp = ', '.join(sp)
-    fp = ['first.{x}'.format(x=x) for x in worklinetemplatelist]
-    fp = ', '.join(fp)
     wl = ', '.join(worklinetemplatelist)
 
     if not so.onehit:
-        lim = ' LIMIT ' + str(so.cap)
+        lim = ' LIMIT {c}'.format(c=so.cap)
     else:
         # the windowing problem means that '1' might be something that gets discarded
         lim = ' LIMIT 5'
 
     qtemplate = """
     SELECT {sp} FROM
-        (SELECT * FROM
-            (SELECT {wl}, concat({co}, ' ', lead({co}) OVER (ORDER BY index ASC)) AS linebundle
+        ( SELECT * FROM
+            ( SELECT {wl}, concat({co}, ' ', lead({co}) OVER (ORDER BY index ASC) ) AS linebundle
                 FROM {db} {whr} ) first
         ) second
     WHERE second.linebundle ~ %s {lim}"""
 
-    query = qtemplate.format(sp=sp, fp=fp, wl=wl, co=so.usecolumn, db=authortable, whr=whereclause, lim=lim)
+    query = qtemplate.format(sp=sp, wl=wl, co=so.usecolumn, db=authortable, whr=whereclause, lim=lim)
 
     return query
-
