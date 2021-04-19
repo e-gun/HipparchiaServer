@@ -84,12 +84,14 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphra
             if not subqueryphrasesearch:
                 whr = 'WHERE {xtn} ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax, xtn=whereextensions)
             else:
-                if whereextensions:
-                    # whereextensions will come back with an extraneous ' AND'
-                    whereextensions = whereextensions[:-4]
-                    whr = 'WHERE {xtn}'.format(xtn=whereextensions)
+                # whereextensions will come back with an extraneous ' AND'
+                whereextensions = whereextensions[:-4]
+                whr = 'WHERE {xtn}'.format(xtn=whereextensions)
         elif r['type'] == 'unrestricted':
-            whr = 'WHERE {xtn} ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax, xtn=whereextensions)
+            if not subqueryphrasesearch:
+                whr = 'WHERE {xtn} ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax, xtn=whereextensions)
+            else:
+                whr = str()
         elif r['type'] == 'temptable':
             # how to construct the table...
             # note that the temp table name can't be assigned yet because you can get collisions via lemmatization
@@ -300,8 +302,8 @@ def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: 
 
     qtemplate = """
     SELECT {sp} FROM
-        (SELECT {fp} FROM
-            (SELECT {wl}, {co}, concat({co}, ' ', lead({co}) OVER (ORDER BY index ASC)) AS linebundle
+        (SELECT * FROM
+            (SELECT {wl}, concat({co}, ' ', lead({co}) OVER (ORDER BY index ASC)) AS linebundle
                 FROM {db} {whr} ) first
         ) second
     WHERE second.linebundle ~ %s {lim}"""

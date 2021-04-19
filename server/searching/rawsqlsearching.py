@@ -357,7 +357,9 @@ def sqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
     dbcursor = dbconnection.cursor()
 
     setofhits = set()
-    print('initialhitlines', initialhitlines)
+    print('initialhitlines')
+    for i in initialhitlines:
+        print(i.index, i.markedup)
     while initialhitlines:
         # windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]
         # figure out which line is really the line with the goods
@@ -555,6 +557,8 @@ def rawsqlsearcher(querydict, dbcursor) -> Generator:
 
     found = list()
 
+    # debugmessage('rawsqlsearcher() q:\n\t{q}\nd:\n\t{d}'.format(q=q, d=d))
+
     try:
         dbcursor.execute(q, d)
         found = resultiterator(dbcursor)
@@ -574,7 +578,5 @@ def rawsqlsearcher(querydict, dbcursor) -> Generator:
         consolewarning('DatabaseError for {c} @ {p}'.format(c=dbcursor, p=multiprocessing.current_process().name),
                        color='red')
         consolewarning('\tq, d', q, d)
-
-    debugmessage('rawsqlsearcher() q:\n\t{q}\nd:\n\t{d}'.format(q=q, d=d))
 
     return found
