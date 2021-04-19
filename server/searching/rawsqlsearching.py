@@ -60,14 +60,13 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
 
     flow control for searching governed by so.searchtype
 
-    speed notes: [NB: linux is *way* faster than a virtualized big sur; vfio issues, I guess]
-        simple: Sought »μετείληφεν« Searched 7,461 texts and found 132 passages (5.79s) [consonant w/ old]
-        lemmatized: Sought all 28 known forms of »μακρόβιοϲ« Searched 7,461 texts and found 200 passages (29.56s) [faster?]
-        withinxlines: Sought »μεγιστοσ« within 3 lines of »θαυμαστ« Searched 7,461 texts and found 20 passages (6.51s)  [consonant]
-        winthinxwords: Sought »μακρόβιον« within 8 words of »γλῶτταν« Searched 7,461 texts and found 2 passages (6.87s) [consonant]
-        sqlphrasesearch: Sought »ἡ φύϲιϲ μετείληφεν« Searched 7,461 texts and found 1 passage (6.63s) [consonant w/ old]
+    speed notes: the speed of these searches is consonant with that of the old search code; usu. <1s difference
 
-    consonant means <1s slower
+    it is tempting to eliminate sqlphrasesearch() in order to keep the code base more streamlined: the savings are small
+    for example:
+        Sought »δοῦναι τοῦ καταϲκευάϲματοϲ«; Searched 236,835 texts and found 3 passages (6.26s)
+    vs
+        Sought »δοῦναι τοῦ καταϲκευάϲματοϲ«; Searched 236,835 texts and found 3 passages (9.01s)
 
     """
 
@@ -96,12 +95,11 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
         so.leastcommon = findleastcommonterm(so.termone, so.accented)
         lccount = findleastcommontermcount(so.termone, so.accented)
         if 0 < lccount < 500:
-            # standard phrase search
+            # debugmessage('searchfnc = sqlphrasesearch')
             searchfnc = sqlphrasesearch
         else:
-            # subqueryphrasesearch
+            # debugmessage('searchfnc = sqlsubqueryphrasesearch')
             searchfnc = sqlsubqueryphrasesearch
-            pass
     else:
         # should be hard to reach this because of "assert" above
         consolewarning('rawsqlsearches() does not support {t} searching'.format(t=so.searchtype), color='red')
@@ -273,7 +271,7 @@ def sqlphrasesearch(so: SearchObject) -> List[dbWorkLine]:
 
     you are searching for a relatively rare word: we will keep things simple-ish
 
-    note that the second half of this is not yet MP and could/should be for speed
+    note that the second half of this is not MP: but searches already only take 6s; so clean code probably wins here
 
     """
 
@@ -328,12 +326,12 @@ def sqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
     line ends and line beginning issues can be overcome this way, but then you have plenty of
     bookkeeping to do to to get the proper results focussed on the right line
 
+    these searches take linear time: same basic time for any given scope regardless of the query
+
     """
 
     # rebuild the searchsqldict but this time pass through rewritequerystringforsubqueryphrasesearching()
     so.searchsqldict = searchlistintosqldict(so, so.phrase, subqueryphrasesearch=True)
-
-    # debugmessage('so.searchsqldict: {d}'.format(d=so.searchsqldict))
 
     # the windowed collection of lines; you will need to work to find the centers
     # windowing will increase the number of hits: 2+ lines per actual find

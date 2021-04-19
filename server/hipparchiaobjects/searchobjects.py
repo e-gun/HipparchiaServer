@@ -239,7 +239,7 @@ class SearchObject(object):
 			self.searchtype = 'phrase'
 		else:
 			self.searchtype = 'proximity'
-		debugmessage('searchtype set to {t}'.format(t=self.searchtype))
+		# debugmessage('searchtype set to {t}'.format(t=self.searchtype))
 
 	def generatesearchdescription(self) -> str:
 		# used to set the page title; called by executesearch()
