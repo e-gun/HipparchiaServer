@@ -25,8 +25,8 @@ from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.searchlistintosql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
     perparesoforsecondsqldict
-from server.listsandsession.whereclauses import wholeworktemptablecontents
-from server.searching.searchfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging
+from server.searching.searchfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging, \
+    findleastcommonterm, findleastcommontermcount, lookoutsideoftheline
 from server.threading.mpthreadcount import setthreadcount
 
 
@@ -48,7 +48,7 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
     searchfnc = lambda x: list()
 
     if so.searchtype in ['simple', 'simplelemma']:
-        searchfnc = rawdsqlsearchmanager
+        searchfnc = rawsqlsearchmanager
     elif so.searchtype == 'proximity':
         # search for the least common terms first: swap termone and termtwo if need be
         so = rebuildsearchobjectviasearchorder(so)
@@ -57,8 +57,19 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
             searchfnc = sqlwithinxlinessearch
         else:
             searchfnc = sqlwithinxwords
+    elif so.searchtype == 'phrase':
+        so.phrase = so.termone
+        so.leastcommon = findleastcommonterm(so.termone, so.accented)
+        lccount = findleastcommontermcount(so.termone, so.accented)
+        if 0 < lccount < 500:
+            # standard phrase search
+            searchfnc = sqlphrasesearch
+        else:
+            # subqueryphrasesearch
+            consolewarning('rawsqlsearches() cannot do a sql subqueryphrasesearch()', color='red')
+            pass
     else:
-        consolewarning('rawsqlsearches() not yet supporting {t} searching'.format(t=so.searchtype), color='red')
+        consolewarning('rawsqlsearches() does not support {t} searching'.format(t=so.searchtype), color='red')
 
     so.searchsqldict = searchlistintosqldict(so, so.termone)
     if so.lemmaone:
@@ -69,7 +80,7 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
     return hitlist
 
 
-def rawdsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
+def rawsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
     """
 
     quick and dirty dispatcher: not polished
@@ -244,7 +255,7 @@ def generatepreliminaryhitlist(so: SearchObject) -> List[dbWorkLine]:
     if so.lemmaone:
         so.poll.statusis('Part one: Searching for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
 
-    hitlines = rawdsqlsearchmanager(so)
+    hitlines = rawsqlsearchmanager(so)
     so.cap = actualcap
 
     return hitlines
@@ -258,11 +269,6 @@ def sqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
     people who send phrases to both halves and/or a lot of regex will not always get what they want
 
     note that this implementations is significantly slower than the standard withinxlines() + simplewithinxlines()
-
-    dblooknear() vs a temptable makes the other version faster?
-
-    check the second pass for inefficiencies
-
 
     """
 
@@ -283,12 +289,12 @@ def sqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
         so.lemmaone = so.lemmatwo
         so.searchsqldict = rewritesqlsearchdictforlemmata(so)
 
-    so.poll.statusis('Part two: Searching initial hits for "{x}"'.format(x=so.termtwo))
+    so.poll.statusis('Part two: Searching among the initial hits for "{x}"'.format(x=so.termtwo))
     if so.lemmaone:
-        so.poll.statusis('Part two: Searching initial hits for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
+        so.poll.statusis('Part two: Searching among the initial hits for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
 
     so.poll.sethits(0)
-    newhitlines = rawdsqlsearchmanager(so)
+    newhitlines = rawsqlsearchmanager(so)
 
     # newhitlines will contain, e.g., in0001w0ig_493 and in0001w0ig_492, i.e., 2 lines that are part of the same 'hit'
     # so we need can't use newhitlines directly but have to check it against the initial hits
@@ -317,22 +323,29 @@ def sqlwithinxwords(so: SearchObject) -> List[dbWorkLine]:
 
     after finding x, look for y within n words of x
 
+    note that the second half of this is not yet MP and could/should be for speed
+
     """
 
     initialhitlines = generatepreliminaryhitlist(so)
 
     fullmatches = list()
 
+    so.poll.statusis('Part two: Searching among the initial hits for "{x}"'.format(x=so.termtwo))
+    if so.lemmatwo:
+        so.poll.statusis('Part two: Searching among the initial hits for all forms of "{x}"'.format(x=so.lemmatwo.dictionaryentry))
+
+    so.poll.sethits(0)
+    commitcount = 0
+
     dbconnection = ConnectionObject()
     dbcursor = dbconnection.cursor()
 
-    so.poll.statusis('Part two: Searching initial hits for "{x}"'.format(x=so.termtwo))
-    if so.lemmatwo:
-        so.poll.statusis('Part two: Searching initial hits for all forms of "{x}"'.format(x=so.lemmatwo.dictionaryentry))
-
-    so.poll.sethits(0)
-
     while initialhitlines and len(fullmatches) < so.cap:
+        commitcount += 1
+        if commitcount == hipparchia.config['MPCOMMITCOUNT']:
+            dbconnection.commit()
+            commitcount = 0
         hit = initialhitlines.pop()
         leadandlag = grableadingandlagging(hit, so, dbcursor)
         # print('leadandlag for {h}: {l}'.format(h=hit.uniqueid, l=leadandlag))
@@ -350,3 +363,54 @@ def sqlwithinxwords(so: SearchObject) -> List[dbWorkLine]:
 
     return fullmatches
 
+
+def sqlphrasesearch(so: SearchObject) -> List[dbWorkLine]:
+    """
+
+    you are searching for a relatively rare word: we will keep things simple-ish
+
+    note that the second half of this is not yet MP and could/should be for speed
+
+    """
+
+    so.termone = so.leastcommon
+    searchphrase = so.phrase
+    phraselen = len(searchphrase.split(' '))
+
+    initialhitlines = generatepreliminaryhitlist(so)
+
+    so.poll.statusis('Part two: Searching among the initial hits for the full phrase "{p}"'.format(p=so.originalseeking))
+    so.poll.sethits(0)
+
+
+    fullmatches = list()
+
+    dbconnection = ConnectionObject()
+    dbcursor = dbconnection.cursor()
+    commitcount = 0
+    while initialhitlines and len(fullmatches) <= so.cap:
+        commitcount += 1
+        if commitcount == hipparchia.config['MPCOMMITCOUNT']:
+            dbconnection.commit()
+            commitcount = 0
+
+        hit = initialhitlines.pop()
+
+        wordset = lookoutsideoftheline(hit.index, phraselen - 1, hit.authorid, so, dbcursor)
+
+        if not so.accented:
+            wordset = re.sub(r'[.?!;:,·’]', str(), wordset)
+        else:
+            # the difference is in the apostrophe: δ vs δ’
+            wordset = re.sub(r'[.?!;:,·]', str(), wordset)
+
+        if so.near and re.search(searchphrase, wordset):
+            fullmatches.append(hit)
+            so.poll.addhits(1)
+        elif not so.near and re.search(searchphrase, wordset) is None:
+            fullmatches.append(hit)
+            so.poll.addhits(1)
+
+    dbconnection.connectioncleanup()
+
+    return fullmatches

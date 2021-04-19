@@ -36,6 +36,7 @@ class SearchObject(object):
 		self.lemmatwo = self.proximatelemma
 		self.lemmathree = None
 		self.termthree = None
+		self.phrase = str()
 		self.session = frozensession
 
 		# the next store the "where" part of the search and get filled out and assigned elsewhere
