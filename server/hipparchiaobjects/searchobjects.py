@@ -252,7 +252,7 @@ class SearchObject(object):
 			s = '{skg}{ns} within {sp} {sc} of {pr}'
 			return s.format(skg=self.lemmaone.dictionaryentry, ns=self.nearstr, sp=self.proximity, sc=self.scope, pr=self.lemmatwo.dictionaryentry)
 		elif (self.lemmaone or self.lemmatwo) and (self.seeking or self.proximate):
-			# proximity of lemma to word
+			# proximity of lemma to word or word to word
 			if self.lemmaone:
 				lm = self.lemmaone
 				t = self.originalproximate
