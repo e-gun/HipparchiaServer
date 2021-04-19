@@ -23,7 +23,7 @@ from server.authentication.authenticationwrapper import requireauthentication
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.searching.rawsqlsearching import rawsqlsearches
-from server.formatting.miscformatting import validatepollid, consolewarning
+from server.formatting.miscformatting import validatepollid, consolewarning, debugmessage
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds, rewriteskgandprx
 from server.formatting.wordformatting import wordlistintoregex
@@ -184,7 +184,7 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 		htmlsearch = so.generatehtmlsearchdescription()
 
 		if commandlineargs.rawsql or hipparchia.config['SEARCHCODESTYLE'] == 'rawsql':
-			consolewarning('rawsqlsearches() active', color='black')
+			debugmessage('rawsqlsearches() active')
 			dosearch = rawsqlsearches
 		else:
 			dosearch = searchdispatcher

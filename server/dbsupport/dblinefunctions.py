@@ -14,11 +14,11 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 
 # this next should be used by *lots* of functions to make sure that what you ask for fits the dbWorkLine() params
-worklinetemplate = ['wkuniversalid', 'index', 'level_05_value', 'level_04_value', 'level_03_value',
+worklinetemplatelist = ['wkuniversalid', 'index', 'level_05_value', 'level_04_value', 'level_03_value',
 					'level_02_value', 'level_01_value', 'level_00_value', 'marked_up_line',
 					'accented_line', 'stripped_line', 'hyphenated_words', 'annotations']
 
-worklinetemplate = ', '.join(worklinetemplate)
+worklinetemplate = ', '.join(worklinetemplatelist)
 
 
 def dblineintolineobject(dbline: tuple) -> dbWorkLine:

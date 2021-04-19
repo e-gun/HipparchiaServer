@@ -142,3 +142,12 @@ def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True, 
 	secho(template.format(head=head, tail=tail, msg=message), bold=isbold, fg=color)
 
 	return
+
+
+def debugmessage(message: str):
+	"""
+
+	black console warnings are debug messages...
+
+	"""
+	return consolewarning(message, color='black')

@@ -112,6 +112,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 
 	:return:
 	"""
+	# print('subqueryphrasesearch()')
 	so = searchobject
 	activepoll = so.poll
 
@@ -136,7 +137,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 	dbcursor = sfo.dbconnection.cursor()
 
 	qcomb = QueryCombinator(searchphrase)
-	# the last time is the full phrase:  ('one two three four five', '')
+	# the last item is the full phrase:  ('one two three four five', '')
 	combinations = qcomb.combinations()
 	combinations.pop()
 	# lines start/end
@@ -177,7 +178,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 
 			query = querytemplate.format(db=authortable, co=so.usecolumn, whr=whr, lim=lim)
 			data = (sp,)
-			# print('subqueryphrasesearch() q,d:',query, data)
+			# print('subqueryphrasesearch() find indices() q,d:\n\t',query, data)
 			dbcursor.execute(query, data)
 			indices = [i[0] for i in dbcursor.fetchall()]
 			# this will yield a bunch of windows: you need to find the centers; see 'while...' below
@@ -187,6 +188,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 				for i in indices:
 					query = 'SELECT {wtmpl} FROM {tb} WHERE index=%s'.format(wtmpl=worklinetemplate, tb=authortable)
 					data = (i,)
+					# print('subqueryphrasesearch() iterate through indices() q,d:\n\t', query, data)
 					dbcursor.execute(query, data)
 					locallineobjects.append(dblineintolineobject(dbcursor.fetchone()))
 
@@ -219,6 +221,7 @@ def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: st
 						# usually you won't get a hit by grabbing the next db line, but sometimes you do...
 						query = 'SELECT {wtmpl} FROM {tb} WHERE index=%s'.format(wtmpl=worklinetemplate, tb=authortable)
 						data = (lineobject.index + 1,)
+						# print('subqueryphrasesearch() "while locallineobjects..." loop q,d:\n\t', query, data)
 						dbcursor.execute(query, data)
 						try:
 							nextline = dblineintolineobject(dbcursor.fetchone())
