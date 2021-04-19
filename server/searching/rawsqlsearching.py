@@ -16,11 +16,12 @@ from typing import List, Generator
 import psycopg2
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import dblineintolineobject
+from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
-from server.formatting.miscformatting import consolewarning
+from server.formatting.miscformatting import consolewarning, debugmessage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.searchlistintosql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
@@ -37,7 +38,7 @@ from server.threading.mpthreadcount import setthreadcount
     [a2] sqlwithinxlinessearch ('proximity' by lines)
     [a3] sqlwithinxwords ('proximity' by words)
     [a4] sqlphrasesearch ('prases' if the phrase contains an uncommon word)
-    [a5] sqlsubqueryphrasesearch ('prases' via a more elaborate SQL query)
+    [a5] sqlsubqueryphrasesearch ('prhases' via a much more elaborate set of SQL queries)
 
 [b] most of the searches nevertheless call basicsqlsearcher()
     two-step searches will call basicsqlsearcher() via  generatepreliminaryhitlist()
@@ -99,7 +100,7 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
             searchfnc = sqlphrasesearch
         else:
             # subqueryphrasesearch
-            consolewarning('rawsqlsearches() cannot do a sql subqueryphrasesearch()', color='red')
+            searchfnc = sqlsubqueryphrasesearch
             pass
     else:
         # should be hard to reach this because of "assert" above
@@ -110,6 +111,14 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
         so.searchsqldict = rewritesqlsearchdictforlemmata(so)
 
     hitlist = searchfnc(so)
+
+    if so.onehit:
+        # you might still have two hits from the same author; purge the doubles
+        # use unique keys property of a dict() to do it
+        uniqueauthors = {h.authorid: h for h in hitlist}
+        hitlist = [uniqueauthors[a] for a in uniqueauthors]
+
+    hitlist = hitlist[:so.cap]
 
     return hitlist
 
@@ -136,7 +145,7 @@ def basicsqlsearcher(so: SearchObject) -> List[dbWorkLine]:
         return list()
 
 
-def generatepreliminaryhitlist(so: SearchObject) -> List[dbWorkLine]:
+def generatepreliminaryhitlist(so: SearchObject, recap=hipparchia.config['INTERMEDIATESEARCHCAP']) -> List[dbWorkLine]:
     """
 
     grab the hits for part one of a two part search
@@ -144,7 +153,7 @@ def generatepreliminaryhitlist(so: SearchObject) -> List[dbWorkLine]:
     """
 
     actualcap = so.cap
-    so.cap = hipparchia.config['INTERMEDIATESEARCHCAP']
+    so.cap = recap
 
     so.poll.statusis('Part one: Searching for "{x}"'.format(x=so.termone))
     if so.lemmaone:
@@ -274,9 +283,9 @@ def sqlphrasesearch(so: SearchObject) -> List[dbWorkLine]:
 
     initialhitlines = generatepreliminaryhitlist(so)
 
-    so.poll.statusis('Part two: Searching among the initial hits for the full phrase "{p}"'.format(p=so.originalseeking))
+    m = 'Part two: Searching among the {h} initial hits for the full phrase "{p}"'
+    so.poll.statusis(m.format(h=so.poll.gethits(), p=so.originalseeking))
     so.poll.sethits(0)
-
 
     fullmatches = list()
 
@@ -319,32 +328,90 @@ def sqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
     line ends and line beginning issues can be overcome this way, but then you have plenty of
     bookkeeping to do to to get the proper results focussed on the right line
 
-    tablestosearch:
-        ['lt0400', 'lt0022', ...]
-
-    a search inside of Ar., Eth. Eud.:
-
-    SELECT secondpass.index, secondpass.accented_line
-        FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
-            (SELECT index, accented_line,
-                concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) as linebundle
-                FROM gr0086 WHERE ( (index BETWEEN 15982 AND 18745) ) ) firstpass
-            ) secondpass
-        WHERE secondpass.linebundle ~ %s  LIMIT 200
-
-    a search in x., hell and x., mem less book 3 of hell and book 2 of mem:
-
-    SELECT secondpass.index, secondpass.accented_line
-        FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
-            (SELECT index, accented_line,
-                concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) as linebundle
-                FROM gr0032 WHERE ( (index BETWEEN 1 AND 7918) OR (index BETWEEN 7919 AND 11999) ) AND ( (index NOT BETWEEN 1846 AND 2856) AND (index NOT BETWEEN 8845 AND 9864) ) ) firstpass
-            ) secondpass
-    WHERE secondpass.linebundle ~ %s  LIMIT 200
-
     """
 
-    return list()
+    # rebuild the searchsqldict but this time pass through rewritequerystringforsubqueryphrasesearching()
+    so.searchsqldict = searchlistintosqldict(so, so.phrase, subqueryphrasesearch=True)
+
+    # debugmessage('so.searchsqldict: {d}'.format(d=so.searchsqldict))
+
+    # the windowed collection of lines; you will need to work to find the centers
+    # windowing will increase the number of hits: 2+ lines per actual find
+    initialhitlines = generatepreliminaryhitlist(so, recap=so.cap * 3)
+
+    m = 'Part two: Searching among the {h} initial hits for the full phrase "{p}"'
+    so.poll.statusis(m.format(h=so.poll.gethits(), p=so.originalseeking))
+    so.poll.sethits(0)
+
+    sp = re.sub(r'^\s', r'(^|\\s)', so.phrase)
+    sp = re.sub(r'\s$', r'(\\s|$)', sp)
+
+    combinations = QueryCombinator(so.phrase)
+    # the last item is the full phrase and it will have already been searched:  ('one two three four five', '')
+    combinations = combinations.combinations()
+    combinations.pop()
+
+    listoffinds = list()
+
+    dbconnection = ConnectionObject()
+    dbcursor = dbconnection.cursor()
+
+    setofhits = set()
+    print('initialhitlines', initialhitlines)
+    while initialhitlines:
+        # windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]
+        # figure out which line is really the line with the goods
+        # it is not nearly so simple as picking the 2nd element in any run of 3: no always runs of 3 + matches in
+        # subsequent lines means that you really should check your work carefully; this is not an especially costly
+        # operation relative to the whole search and esp. relative to the speed gains of using a subquery search
+        lineobject = initialhitlines.pop()
+        if lineobject.authorid not in setofhits:
+            if re.search(sp, getattr(lineobject, so.usewordlist)):
+                listoffinds.append(lineobject)
+                so.poll.addhits(1)
+                setofhits.add(lineobject.authorid)
+            else:
+                try:
+                    nextline = initialhitlines[0]
+                except IndexError:
+                    nextline = makeablankline('gr0000w000', -1)
+
+                if lineobject.wkuinversalid != nextline.wkuinversalid or lineobject.index != (nextline.index - 1):
+                    # you grabbed the next line on the pile (e.g., index = 9999), not the actual next line (e.g., index = 101)
+                    # usually you won't get a hit by grabbing the next db line, but sometimes you do...
+                    query = 'SELECT {wtmpl} FROM {tb} WHERE index=%s'.format(wtmpl=worklinetemplate, tb=lineobject.authorid)
+                    data = (lineobject.index + 1,)
+                    # print('subqueryphrasesearch() "while locallineobjects..." loop q,d:\n\t', query, data)
+                    dbcursor.execute(query, data)
+                    try:
+                        nextline = dblineintolineobject(dbcursor.fetchone())
+                    except:
+                        nextline = makeablankline('gr0000w000', -1)
+
+                for c in combinations:
+                    tail = c[0] + '$'
+                    head = '^' + c[1]
+                    # debugging
+                    # print('re',getattr(lo,so.usewordlist),tail, head, getattr(next,so.usewordlist))
+
+                    t = False
+                    h = False
+                    try:
+                        t = re.search(tail, getattr(lineobject, so.usewordlist))
+                    except re.error:
+                        pass
+                    try:
+                        h = re.search(head, getattr(nextline, so.usewordlist))
+                    except re.error:
+                        pass
+
+                    if t and h:
+                        listoffinds.append(lineobject)
+                        so.poll.addhits(1)
+                        setofhits.add(lineobject.authorid)
+
+    dbconnection.connectioncleanup()
+    return listoffinds
 
 
 """
@@ -508,6 +575,6 @@ def rawsqlsearcher(querydict, dbcursor) -> Generator:
                        color='red')
         consolewarning('\tq, d', q, d)
 
-    # print('rawsqlsearcher() q:\n\t{q}\nd:\n\t{d}'.format(q=q, d=d))
+    debugmessage('rawsqlsearcher() q:\n\t{q}\nd:\n\t{d}'.format(q=q, d=d))
 
     return found

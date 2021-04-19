@@ -10,7 +10,7 @@ import re
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import worklinetemplate
+from server.dbsupport.dblinefunctions import worklinetemplate, worklinetemplatelist
 from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.searchobjects import SearchObject
@@ -19,7 +19,7 @@ from server.listsandsession.whereclauses import wholeworktemptablecontents
 from server.searching.searchfunctions import buildbetweenwhereextension
 
 
-def searchlistintosqldict(searchobject: SearchObject, seeking: str) -> dict:
+def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphrasesearch=False) -> dict:
     """
 
     take a searchobject
@@ -81,7 +81,13 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str) -> dict:
 
         if r['type'] == 'between':
             whereextensions = buildbetweenwhereextension(authortable, so)
-            whr = 'WHERE {xtn} ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax, xtn=whereextensions)
+            if not subqueryphrasesearch:
+                whr = 'WHERE {xtn} ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax, xtn=whereextensions)
+            else:
+                if whereextensions:
+                    # whereextensions will come back with an extraneous ' AND'
+                    whereextensions = whereextensions[:-4]
+                    whr = 'WHERE {xtn}'.format(xtn=whereextensions)
         elif r['type'] == 'unrestricted':
             whr = 'WHERE {xtn} ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax, xtn=whereextensions)
         elif r['type'] == 'temptable':
@@ -105,8 +111,11 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str) -> dict:
             consolewarning('error in substringsearch(): unknown whereclause type', r['type'])
             whr = 'WHERE ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax)
 
-        qtemplate = 'SELECT {wtmpl} FROM {db} {whr} {lm}'
-        q = qtemplate.format(wtmpl=worklinetemplate, db=authortable, whr=whr, lm=mylimit)
+        if not subqueryphrasesearch:
+            qtemplate = 'SELECT {wtmpl} FROM {db} {whr} {lm}'
+            q = qtemplate.format(wtmpl=worklinetemplate, db=authortable, whr=whr, lm=mylimit)
+        else:
+            q = rewritequerystringforsubqueryphrasesearching(authortable, whr, so)
         d = (seeking,)
         returndict[authortable]['query'] = q
         returndict[authortable]['data'] = d
@@ -114,7 +123,7 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str) -> dict:
     return returndict
 
 
-def rewritesqlsearchdictforlemmata(searchobject: SearchObject) -> dict:
+def rewritesqlsearchdictforlemmata(so: SearchObject) -> dict:
     """
 
     you have
@@ -138,8 +147,8 @@ def rewritesqlsearchdictforlemmata(searchobject: SearchObject) -> dict:
     }
 
     """
-    so = searchobject
-    searchdict = searchobject.searchsqldict
+
+    searchdict = so.searchsqldict
 
     terms = so.lemmaone.formlist
 
@@ -165,7 +174,9 @@ def rewritesqlsearchdictforlemmata(searchobject: SearchObject) -> dict:
 def perparesoforsecondsqldict(so: SearchObject, initialhitlines: List[dbWorkLine], usebetweensyntax=True) -> SearchObject:
     """
 
+    after finding initialhitlines sqlwithinxlinessearch() will run a second query
 
+    it needs a new sqldict
 
     """
 
@@ -222,3 +233,80 @@ def perparesoforsecondsqldict(so: SearchObject, initialhitlines: List[dbWorkLine
             so.indexrestrictions[a]['where']['listofomissions'] = list()
 
     return so
+
+
+def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: str, so: SearchObject) -> str:
+    """
+
+        you have
+    { table1: {query: q, data: d, temptable: t},
+    table2: {query: q, data: d, temptable: t},
+    ... }
+
+    but the 'queries' needs to be swapped out
+
+
+    a search in x., hell and x., mem less book 3 of hell and book 2 of mem:
+
+    SELECT secondpass.index, secondpass.accented_line
+        FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
+            (SELECT index, accented_line,
+                concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) as linebundle
+                FROM gr0032 WHERE ( (index BETWEEN 1 AND 7918) OR (index BETWEEN 7919 AND 11999) ) AND ( (index NOT BETWEEN 1846 AND 2856) AND (index NOT BETWEEN 8845 AND 9864) ) ) firstpass
+            ) secondpass
+    WHERE secondpass.linebundle ~ %s  LIMIT 200
+
+    a search in x., hell and x., mem less book 3 of hell and book 2 of mem:
+
+    SELECT secondpass.index, secondpass.accented_line
+        FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
+            (SELECT index, accented_line,
+                concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) as linebundle
+                FROM gr0032 WHERE ( (index BETWEEN 1 AND 7918) OR (index BETWEEN 7919 AND 11999) ) AND ( (index NOT BETWEEN 1846 AND 2856) AND (index NOT BETWEEN 8845 AND 9864) ) ) firstpass
+            ) secondpass
+    WHERE secondpass.linebundle ~ %s  LIMIT 200
+
+    hipparchiaDB=# SELECT secondpass.index, secondpass.accented_line FROM
+                            (SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
+                                            (SELECT index, accented_line, concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) AS linebundle
+                                                    FROM gr0014 WHERE ( (index BETWEEN 4897 AND 7556) OR (index BETWEEN 7557 AND 10317) ) ) firstpass
+                            ) secondpass
+                    WHERE secondpass.linebundle ~ 'λαβόντα παρ ὑμῶν';
+     index |                       accented_line
+    -------+------------------------------------------------------------
+      7485 | τὴν πρὸϲ τοὺϲ τετελευτηκόταϲ εὔνοιαν ὑπάρχουϲαν προλαβόντα
+      9795 | χρηϲτὸν εἶναι δεῖ τὸν τὰ τηλικαῦτα διοικεῖν ἀξιοῦντα οὐδὲ
+      9796 | τὸ πιϲτευθῆναι προλαβόντα παρ ὑμῶν εἰϲ τὸ μείζω δύναϲθαι
+
+    BUT, workonrawsqlsearch() is going to call dblineintolineobject() on the results, so you want something that will fit that...
+
+    and so we will use worklinetemplatelist t generate a full collection of terms and in order
+
+
+
+    """
+
+    sp = ['second.{x}'.format(x=x) for x in worklinetemplatelist]
+    sp = ', '.join(sp)
+    fp = ['first.{x}'.format(x=x) for x in worklinetemplatelist]
+    fp = ', '.join(fp)
+    wl = ', '.join(worklinetemplatelist)
+
+    if not so.onehit:
+        lim = ' LIMIT ' + str(so.cap)
+    else:
+        # the windowing problem means that '1' might be something that gets discarded
+        lim = ' LIMIT 5'
+
+    qtemplate = """
+    SELECT {sp} FROM
+        (SELECT {fp} FROM
+            (SELECT {wl}, {co}, concat({co}, ' ', lead({co}) OVER (ORDER BY index ASC)) AS linebundle
+                FROM {db} {whr} ) first
+        ) second
+    WHERE second.linebundle ~ %s {lim}"""
+
+    query = qtemplate.format(sp=sp, fp=fp, wl=wl, co=so.usecolumn, db=authortable, whr=whereclause, lim=lim)
+
+    return query
+
