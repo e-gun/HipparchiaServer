@@ -35,6 +35,13 @@ def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
 
     flow control for searching governed by so.searchtype
 
+    speed notes: [NB: linux is *way* faster than a virtualized big sur; vfio issues, I guess]
+        simple: Sought »μετείληφεν« Searched 7,461 texts and found 132 passages (5.79s) [consonant w/ old]
+        lemmatized: Sought all 28 known forms of »μακρόβιοϲ« Searched 7,461 texts and found 200 passages (29.56s) [faster?]
+        withinxlines: Sought »μακρόβιον« within 1 lines of »θαυμαϲτῶϲ« Searched 7,461 texts and found 1 passage (6.75s) [consonant]
+        winthinxwords: Sought »μακρόβιον« within 8 words of »γλῶτταν« Searched 7,461 texts and found 2 passages (6.87s) [consonant]
+        sqlphrasesearch: Sought »ἡ φύϲιϲ μετείληφεν« Searched 7,461 texts and found 1 passage (6.63s) [consonant w/ old]
+
     """
 
     assert so.searchtype in ['simple', 'simplelemma', 'proximity', 'phrase'], 'unknown searchtype sent to rawsqlsearches()'
@@ -88,8 +95,6 @@ def rawsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
     note that you need so.searchsqldict to be properly configured before you get here
 
     fix this up last...
-
-    polling broken on second pass of a porximity search
 
     """
 
@@ -414,3 +419,39 @@ def sqlphrasesearch(so: SearchObject) -> List[dbWorkLine]:
     dbconnection.connectioncleanup()
 
     return fullmatches
+
+
+def sqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
+    """
+
+    use subquery syntax to grab multi-line windows of text for phrase searching
+
+    line ends and line beginning issues can be overcome this way, but then you have plenty of
+    bookkeeping to do to to get the proper results focussed on the right line
+
+    tablestosearch:
+        ['lt0400', 'lt0022', ...]
+
+    a search inside of Ar., Eth. Eud.:
+
+    SELECT secondpass.index, secondpass.accented_line
+        FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
+            (SELECT index, accented_line,
+                concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) as linebundle
+                FROM gr0086 WHERE ( (index BETWEEN 15982 AND 18745) ) ) firstpass
+            ) secondpass
+        WHERE secondpass.linebundle ~ %s  LIMIT 200
+
+    a search in x., hell and x., mem less book 3 of hell and book 2 of mem:
+
+    SELECT secondpass.index, secondpass.accented_line
+        FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
+            (SELECT index, accented_line,
+                concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) as linebundle
+                FROM gr0032 WHERE ( (index BETWEEN 1 AND 7918) OR (index BETWEEN 7919 AND 11999) ) AND ( (index NOT BETWEEN 1846 AND 2856) AND (index NOT BETWEEN 8845 AND 9864) ) ) firstpass
+            ) secondpass
+    WHERE secondpass.linebundle ~ %s  LIMIT 200
+
+    """
+
+    return list()

@@ -33,6 +33,7 @@ from server.listsandsession.searchlistmanagement import calculatewholeauthorsear
 	sortresultslist
 from server.listsandsession.checksession import probeforsessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
+from server.commandlineoptions import getcommandlineargs
 from server.searching.searchdispatching import searchdispatcher
 from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
 from server.startup import authordict, listmapper, progresspolldict, workdict, lemmatadict
@@ -46,6 +47,7 @@ else:
 
 JSON_STR = str
 
+commandlineargs = getcommandlineargs()
 
 @hipparchia.route('/search/<action>/<one>', methods=['GET'])
 @hipparchia.route('/search/<action>/<one>/<two>')
@@ -220,12 +222,15 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 			htmlsearch = htmlsearch.format(skg=so.originalseeking, ns=so.nearstr, sp=so.proximity, sc=so.scope, pr=so.originalproximate)
 
 		# DEBUGGING AREA BEGINS
-		consolewarning('rawsqlsearches() active')
-		searchdispatcher = rawsqlsearches
+		if commandlineargs.rawsql:
+			consolewarning('rawsqlsearches() active')
+			dosearch = rawsqlsearches
+		else:
+			dosearch = searchdispatcher
 		# DEBUGGING AREA ENDS
 
 		# now that the SearchObject is built, do the search...
-		hits = searchdispatcher(so)
+		hits = dosearch(so)
 		activepoll.statusis('Putting the results in context')
 
 		# hits [<server.hipparchiaclasses.dbWorkLine object at 0x10d952da0>, <server.hipparchiaclasses.dbWorkLine object at 0x10d952c50>, ... ]
