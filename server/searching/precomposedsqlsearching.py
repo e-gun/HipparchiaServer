@@ -81,25 +81,25 @@ def precomposedsqlsearch(so: SearchObject) -> List[dbWorkLine]:
     searchfnc = lambda x: list()
 
     if so.searchtype in ['simple', 'simplelemma']:
-        searchfnc = basicsqlsearcher
+        searchfnc = basicprecomposedsqlsearcher
     elif so.searchtype == 'proximity':
         # search for the least common terms first: swap termone and termtwo if need be
         so = rebuildsearchobjectviasearchorder(so)
         if so.scope == 'lines':
             # this will hit rawdsqlsearchmanager() 2x
-            searchfnc = sqlwithinxlinessearch
+            searchfnc = precomposedsqlwithinxlinessearch
         else:
-            searchfnc = sqlwithinxwords
+            searchfnc = precomposedsqlwithinxwords
     elif so.searchtype == 'phrase':
         so.phrase = so.termone
         so.leastcommon = findleastcommonterm(so.termone, so.accented)
         lccount = findleastcommontermcount(so.termone, so.accented)
         if 0 < lccount < 500:
             # debugmessage('searchfnc = sqlphrasesearch')
-            searchfnc = sqlphrasesearch
+            searchfnc = precomposedsqlphrasesearch
         else:
             # debugmessage('searchfnc = sqlsubqueryphrasesearch')
-            searchfnc = sqlsubqueryphrasesearch
+            searchfnc = precomposedsqlsubqueryphrasesearch
     else:
         # should be hard to reach this because of "assert" above
         consolewarning('rawsqlsearches() does not support {t} searching'.format(t=so.searchtype), color='red')
@@ -121,7 +121,7 @@ def precomposedsqlsearch(so: SearchObject) -> List[dbWorkLine]:
     return hitlist
 
 
-def basicsqlsearcher(so: SearchObject) -> List[dbWorkLine]:
+def basicprecomposedsqlsearcher(so: SearchObject) -> List[dbWorkLine]:
     """
 
     give me sql and I will search
@@ -136,7 +136,7 @@ def basicsqlsearcher(so: SearchObject) -> List[dbWorkLine]:
     nosharedlibrary = True
 
     if nosharedlibrary:
-        hits = rawsqlsearchmanager(so)
+        hits = precomposedsqlsearchmanager(so)
         return hits
     else:
         consolewarning('basicsqlsearcher() does not support shared library searching'.format(t=so.searchtype), color='red')
@@ -157,13 +157,13 @@ def generatepreliminaryhitlist(so: SearchObject, recap=hipparchia.config['INTERM
     if so.lemmaone:
         so.poll.statusis('Part one: Searching for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
 
-    hitlines = basicsqlsearcher(so)
+    hitlines = basicprecomposedsqlsearcher(so)
     so.cap = actualcap
 
     return hitlines
 
 
-def sqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
+def precomposedsqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
     """
 
     after finding x, look for y within n lines of x
@@ -196,7 +196,7 @@ def sqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
         so.poll.statusis('Part two: Searching among the initial hits for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
 
     so.poll.sethits(0)
-    newhitlines = basicsqlsearcher(so)
+    newhitlines = basicprecomposedsqlsearcher(so)
 
     # newhitlines will contain, e.g., in0001w0ig_493 and in0001w0ig_492, i.e., 2 lines that are part of the same 'hit'
     # so we need can't use newhitlines directly but have to check it against the initial hits
@@ -220,7 +220,7 @@ def sqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
     return finalhitlines
 
 
-def sqlwithinxwords(so: SearchObject) -> List[dbWorkLine]:
+def precomposedsqlwithinxwords(so: SearchObject) -> List[dbWorkLine]:
     """
 
     after finding x, look for y within n words of x
@@ -266,7 +266,7 @@ def sqlwithinxwords(so: SearchObject) -> List[dbWorkLine]:
     return fullmatches
 
 
-def sqlphrasesearch(so: SearchObject) -> List[dbWorkLine]:
+def precomposedsqlphrasesearch(so: SearchObject) -> List[dbWorkLine]:
     """
 
     you are searching for a relatively rare word: we will keep things simple-ish
@@ -318,7 +318,7 @@ def sqlphrasesearch(so: SearchObject) -> List[dbWorkLine]:
     return fullmatches
 
 
-def sqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
+def precomposedsqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
     """
 
     use subquery syntax to grab multi-line windows of text for phrase searching
@@ -423,7 +423,7 @@ def sqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
 """
 
 
-def rawsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
+def precomposedsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
     """
 
     quick and dirty dispatcher: not polished
@@ -453,7 +453,7 @@ def rawsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
     oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
     argumentswithconnections = [tuple([i] + list(argumentuple) + [oneconnectionperworker[i]]) for i in range(workers)]
 
-    jobs = [Process(target=workonrawsqlsearch, args=argumentswithconnections[i]) for i in range(workers)]
+    jobs = [Process(target=workonprecomposedsqlsearch, args=argumentswithconnections[i]) for i in range(workers)]
 
     for j in jobs:
         j.start()
@@ -469,8 +469,8 @@ def rawsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
     return foundlineobjects
 
 
-def workonrawsqlsearch(workerid: int, foundlineobjects: ListProxy, listofplacestosearch: ListProxy,
-                       searchobject: SearchObject, dbconnection) -> ListProxy:
+def workonprecomposedsqlsearch(workerid: int, foundlineobjects: ListProxy, listofplacestosearch: ListProxy,
+                               searchobject: SearchObject, dbconnection) -> ListProxy:
     """
 
     iterate through listofplacestosearch
@@ -512,7 +512,7 @@ def workonrawsqlsearch(workerid: int, foundlineobjects: ListProxy, listofplacest
             listofplacestosearch = None
 
         if querydict:
-            foundlines = rawsqlsearcher(querydict, dbcursor)
+            foundlines = precomposedsqlsearcher(querydict, dbcursor)
             lineobjects = [dblineintolineobject(f) for f in foundlines]
             foundlineobjects.extend(lineobjects)
 
@@ -533,7 +533,7 @@ def workonrawsqlsearch(workerid: int, foundlineobjects: ListProxy, listofplacest
     return foundlineobjects
 
 
-def rawsqlsearcher(querydict, dbcursor) -> Generator:
+def precomposedsqlsearcher(querydict, dbcursor) -> Generator:
     """
 
     as per substringsearchintosqldict():
@@ -559,24 +559,26 @@ def rawsqlsearcher(querydict, dbcursor) -> Generator:
 
     # debugmessage('rawsqlsearcher() q:\n\t{q}\nd:\n\t{d}'.format(q=q, d=d))
 
+    warnings = {
+        1: 'DataError; cannot search for »{d}«\n\tcheck for unbalanced parentheses and/or bad regex',
+        2: 'psycopg2.InternalError; did not execute query="{q}" and data="{d}',
+        3: 'precomposedsqlsearcher() DatabaseError for {c} @ {p}'
+    }
+
     try:
         dbcursor.execute(q, d)
         found = resultiterator(dbcursor)
     except psycopg2.DataError:
         # e.g., invalid regular expression: parentheses () not balanced
-        consolewarning(
-            'DataError; cannot search for »{d}«\n\tcheck for unbalanced parentheses and/or bad regex'.format(d=d[0]),
-            color='red')
+        consolewarning(warnings[1].format(d=d[0]), color='red')
     except psycopg2.InternalError:
         # current transaction is aborted, commands ignored until end of transaction block
-        consolewarning('psycopg2.InternalError; did not execute query="{q}" and data="{d}'.format(q=q, d=d),
-                       color='red')
+        consolewarning(warnings[2].format(q=q, d=d), color='red')
     except psycopg2.DatabaseError:
         # psycopg2.DatabaseError: error with status PGRES_TUPLES_OK and no message from the libpq
         # added to track PooledConnection threading issues
         # will see: 'DatabaseError for <cursor object at 0x136bab520; closed: 0> @ Process-4'
-        consolewarning('DatabaseError for {c} @ {p}'.format(c=dbcursor, p=multiprocessing.current_process().name),
-                       color='red')
-        consolewarning('\tq, d', q, d)
+        consolewarning(warnings[3].format(c=dbcursor, p=multiprocessing.current_process().name), color='red')
+        consolewarning('\tq, d: {q}, {d}'.format(q=q, d=q))
 
     return found
