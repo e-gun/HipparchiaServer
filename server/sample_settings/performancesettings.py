@@ -48,10 +48,10 @@
 # INTERMEDIATESEARCHCAP: the maximum number of items to accept in the
 #   middle of a search. This is to keep "'et' near 'at'" from going insane
 #
-# SEARCHCODESTYLE: 'rawsql' is the newer code; 'taditional' is tried, true
-#   and faster. 'rawsql' will be needed some day for a non-forking version
-#   of Hipparchia. Setting anything other than 'rawsql' will give you
-#   'traditional'
+# SEARCHCODESTYLE: 'precomposed' is the newer code; 'dynamic' is tried, true
+#   and faster. 'precomposed' will be needed some day for a non-forking version
+#   of Hipparchia. Setting anything other than 'precomposed' will give you
+#   'dynamic'
 
 
 AUTOCONFIGWORKERS = True
@@ -60,4 +60,4 @@ WORKERS = 3
 MPCOMMITCOUNT = 250
 LEMMACHUNKSIZE = 10
 INTERMEDIATESEARCHCAP = 2000000
-SEARCHCODESTYLE = 'traditional'
+SEARCHCODESTYLE = 'dynamic'

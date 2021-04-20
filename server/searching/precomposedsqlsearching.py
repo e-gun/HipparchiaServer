@@ -33,22 +33,22 @@ from server.threading.mpthreadcount import setthreadcount
 """
     OVERVIEW
 
-[a] rawsqlsearches() picks a searchfnc: 
-    [a1] basicsqlsearcher ('simple' and 'single lemma' searching)
-    [a2] sqlwithinxlinessearch ('proximity' by lines)
-    [a3] sqlwithinxwords ('proximity' by words)
-    [a4] sqlphrasesearch ('phrases' if the phrase contains an uncommon word)
-    [a5] sqlsubqueryphrasesearch ('phrases' via a much more elaborate set of SQL queries)
+[a] precomposedsqlsearch() picks a searchfnc: 
+    [a1] basicprecomposedsqlsearcher ('simple' and 'single lemma' searching)
+    [a2] precomposedsqlwithinxlinessearch ('proximity' by lines)
+    [a3] precomposedsqlwithinxwords ('proximity' by words)
+    [a4] precomposedsqlphrasesearch ('phrases' if the phrase contains an uncommon word)
+    [a5] precomposedsqlsubqueryphrasesearch ('phrases' via a much more elaborate set of SQL queries)
 
-[b] most of the searches nevertheless call basicsqlsearcher()
-    two-step searches will call basicsqlsearcher() via  generatepreliminaryhitlist()
+[b] most of the searches nevertheless call basicprecomposedsqlsearcher()
+    two-step searches will call basicprecomposedsqlsearcher() via  generatepreliminaryhitlist()
 
 [c] eventually searching should either flow through a shared library or go through the in-house search code
 
 [d] the in-house search code flow is: 
-    [d1] rawsqlsearchmanager() - build a collection of MP workers who then workonrawsqlsearch()
-    [d2] workonrawsqlsearch() - iterate through listofplacestosearch & execute rawsqlsearcher() on each item in the list
-    [d3] rawsqlsearcher() - execute the basic sql query and return the hits
+    [d1] precomposedsqlsearchmanager() - build a collection of MP workers who then workonprecomposedsqlsearch()
+    [d2] workonprecomposedsqlsearch() - iterate through listofplacestosearch & execute precomposedsqlsearcher() on each item in the list
+    [d3] precomposedsqlsearcher() - execute the basic sql query and return the hits
     
 [e] the shared library is barely begun; but refactoring the search code has cleaned up some old crud
 

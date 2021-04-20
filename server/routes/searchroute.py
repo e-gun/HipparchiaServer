@@ -183,8 +183,8 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 		thesearch = so.generatesearchdescription()
 		htmlsearch = so.generatehtmlsearchdescription()
 
-		if commandlineargs.rawsql or hipparchia.config['SEARCHCODESTYLE'] == 'rawsql':
-			debugmessage('rawsqlsearches() active')
+		if commandlineargs.precomposed or hipparchia.config['SEARCHCODESTYLE'] == 'precomposed':
+			debugmessage('precomposedqlsearches() active')
 			dosearch = precomposedsqlsearch
 		else:
 			dosearch = dynamicsqlsearchdispatcher

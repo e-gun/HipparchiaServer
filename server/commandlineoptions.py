@@ -37,7 +37,7 @@ def getcommandlineargs():
 		commandlineparser.add_argument('--forcefont', required=False, type=str, help='[force setting] assign a value to DEFAULTLOCALFONT; "MyFont Sans" requires quotation marks to handle the space in the name')
 		exclusivegroup.add_argument('--pooledconnection', action='store_true', help='[force setting] force a pooled DB connection')
 		exclusivegroup.add_argument('--simpleconnection', action='store_true', help='[force setting] force a simple DB connection')
-		commandlineparser.add_argument('--rawsql', action='store_true', help='[debugging] force activation of the rawsql search code')
+		commandlineparser.add_argument('--precomposed', action='store_true', help='[debugging] force activation of the precomposedsql search code')
 		commandlineparser.add_argument('--threadcount', required=False, type=int, help='[force setting] override the config file threadcount')
 		commandlineparser.add_argument('--calculatewordweights', action='store_true', help='[info] generate word weight info')
 		commandlineparser.add_argument('--collapsedgenreweights', action='store_true', help='[info] generate word weight info & merge related genres ("allret", etc.)')
@@ -59,7 +59,7 @@ def getcommandlineargs():
 		                                     pooledconnection=None,
 		                                     portoverride=None,
 		                                     profiling=None,
-		                                     rawsql=False,
+		                                     precomposed=False,
 		                                     simpleconnection=None,
 		                                     skiplemma=None,
 		                                     threadcount=None)
