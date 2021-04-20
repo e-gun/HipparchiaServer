@@ -19,14 +19,14 @@ from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
-from server.formatting.miscformatting import consolewarning, debugmessage
+from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
-from server.listsandsession.searchlistintosql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
+from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
     perparesoforsecondsqldict
-from server.searching.searchfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging, \
+from server.searching.searchhelperfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging, \
     findleastcommonterm, findleastcommontermcount, lookoutsideoftheline
 from server.threading.mpthreadcount import setthreadcount
 
@@ -37,8 +37,8 @@ from server.threading.mpthreadcount import setthreadcount
     [a1] basicsqlsearcher ('simple' and 'single lemma' searching)
     [a2] sqlwithinxlinessearch ('proximity' by lines)
     [a3] sqlwithinxwords ('proximity' by words)
-    [a4] sqlphrasesearch ('prases' if the phrase contains an uncommon word)
-    [a5] sqlsubqueryphrasesearch ('prhases' via a much more elaborate set of SQL queries)
+    [a4] sqlphrasesearch ('phrases' if the phrase contains an uncommon word)
+    [a5] sqlsubqueryphrasesearch ('phrases' via a much more elaborate set of SQL queries)
 
 [b] most of the searches nevertheless call basicsqlsearcher()
     two-step searches will call basicsqlsearcher() via  generatepreliminaryhitlist()
@@ -55,7 +55,7 @@ from server.threading.mpthreadcount import setthreadcount
 """
 
 
-def rawsqlsearches(so: SearchObject) -> List[dbWorkLine]:
+def precomposedsqlsearch(so: SearchObject) -> List[dbWorkLine]:
     """
 
     flow control for searching governed by so.searchtype

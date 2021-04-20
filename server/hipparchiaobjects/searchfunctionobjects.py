@@ -253,7 +253,7 @@ class QueuedSearchFunctionObject(GenericSearchFunctionObject):
 
 	meanwhile implementing a Queue for results was not immediately fun or obvious or obviously going to help
 
-	need the following in "searchdispatching.py" to turn this on:
+	need the following in "dynamicsqlsearchdispatching.py" to turn this on:
 
 		# experiment with JoinableQueue
 		# https://docs.python.org/3.7/library/multiprocessing.html#multiprocessing.JoinableQueue

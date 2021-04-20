@@ -22,7 +22,7 @@ from server import hipparchia
 from server.authentication.authenticationwrapper import requireauthentication
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
-from server.searching.rawsqlsearching import rawsqlsearches
+from server.searching.precomposedsqlsearching import precomposedsqlsearch
 from server.formatting.miscformatting import validatepollid, consolewarning, debugmessage
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds, rewriteskgandprx
@@ -34,8 +34,8 @@ from server.listsandsession.searchlistmanagement import calculatewholeauthorsear
 from server.listsandsession.checksession import probeforsessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.commandlineoptions import getcommandlineargs
-from server.searching.searchdispatching import searchdispatcher
-from server.searching.searchfunctions import buildsearchobject, cleaninitialquery
+from server.searching.dynamicsqlsearchdispatching import dynamicsqlsearchdispatcher
+from server.searching.searchhelperfunctions import buildsearchobject, cleaninitialquery
 from server.startup import authordict, listmapper, progresspolldict, workdict, lemmatadict
 from server.threading.websocketthread import startwspolling
 
@@ -185,9 +185,9 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 
 		if commandlineargs.rawsql or hipparchia.config['SEARCHCODESTYLE'] == 'rawsql':
 			debugmessage('rawsqlsearches() active')
-			dosearch = rawsqlsearches
+			dosearch = precomposedsqlsearch
 		else:
-			dosearch = searchdispatcher
+			dosearch = dynamicsqlsearchdispatcher
 
 		# now that the SearchObject is built, do the search...
 		hits = dosearch(so)

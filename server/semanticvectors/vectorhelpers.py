@@ -31,8 +31,8 @@ from server.formatting.wordformatting import acuteorgrav, basiclemmacleanup, eli
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
-from server.searching.searchdispatching import searchdispatcher
-from server.searching.searchfunctions import buildbetweenwhereextension
+from server.searching.dynamicsqlsearchdispatching import dynamicsqlsearchdispatcher
+from server.searching.searchhelperfunctions import buildbetweenwhereextension
 from server.semanticvectors.wordbaggers import buildflatbagsofwords
 from server.startup import lemmatadict
 # bleh: numpy and scipy will fail to install on FreeBSD 11.x
@@ -452,7 +452,7 @@ def bruteforcefinddblinefromsentence(thissentence, modifiedsearchobject):
 	mso.termone = mso.seeking
 	mso.termtwo = ' '.join(thissentence[-5:])
 	mso.poll = nullpoll
-	hits = searchdispatcher(mso)
+	hits = dynamicsqlsearchdispatcher(mso)
 
 	# if len(hits) > 1:
 	# 	print('findlocusfromsentence() found {h} hits when looking for {s}'.format(h=len(hits), s=mso.seeking))

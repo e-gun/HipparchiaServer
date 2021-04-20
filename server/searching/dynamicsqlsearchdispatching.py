@@ -13,23 +13,21 @@ from multiprocessing.managers import ListProxy
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import dblineintolineobject
 from server.dbsupport.miscdbfunctions import icanpickleconnections, cleanpoolifneeded
 from server.dbsupport.redisdbfunctions import buildredissearchlist, loadredisresults
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.searchfunctionobjects import returnsearchfncobject
 from server.hipparchiaobjects.searchobjects import SearchObject
-from server.searching.phrasesearching import phrasesearch, subqueryphrasesearch
-from server.searching.proximitysearching import withinxlines, withinxwords
-from server.searching.searchfunctions import findleastcommonterm, findleastcommontermcount, loadsearchqueue, \
+from server.hipparchiaobjects.worklineobject import dbWorkLine
+from server.searching.dynamicsqlsearching import phrasesearch, subqueryphrasesearch, withinxlines, withinxwords, \
+	substringsearch
+from server.searching.searchhelperfunctions import findleastcommonterm, findleastcommontermcount, loadsearchqueue, \
 	massagesearchtermsforwhitespace
-from server.searching.substringsearching import substringsearch
 from server.threading.mpthreadcount import setthreadcount
 
 
-def searchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
+def dynamicsqlsearchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 	"""
 
 	assign the search to multiprocessing workers

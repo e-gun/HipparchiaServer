@@ -16,7 +16,7 @@ from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.whereclauses import wholeworktemptablecontents
-from server.searching.searchfunctions import buildbetweenwhereextension
+from server.searching.searchhelperfunctions import buildbetweenwhereextension
 
 
 def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphrasesearch=False) -> dict:
@@ -247,15 +247,13 @@ def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: 
 
     but the 'queries' needs to be swapped out
 
-    a search in x., hell and x., mem less book 3 of hell and book 2 of mem:
+    notes on lead and lag: examining the next row and the previous row
 
-    SELECT secondpass.index, secondpass.accented_line
-        FROM (SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
-            (SELECT index, accented_line,
-                concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)) as linebundle
-                FROM gr0032 WHERE ( (index BETWEEN 1 AND 7918) OR (index BETWEEN 7919 AND 11999) ) AND ( (index NOT BETWEEN 1846 AND 2856) AND (index NOT BETWEEN 8845 AND 9864) ) ) firstpass
-            ) secondpass
-    WHERE secondpass.linebundle ~ %s  LIMIT 200
+    lead and lag example
+        https://fle.github.io/detect-value-changes-between-successive-lines-with-postgresql.html
+
+    partitions: [over clauses]
+        http://tapoueh.org/blog/2013/08/20-Window-Functions
 
     hipparchiaDB=# SELECT secondpass.index, secondpass.accented_line FROM
                             (SELECT firstpass.index, firstpass.linebundle, firstpass.accented_line FROM
