@@ -19,7 +19,7 @@ from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
-from server.formatting.miscformatting import consolewarning
+from server.formatting.miscformatting import consolewarning, debugmessage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.hipparchiaobjects.searchobjects import SearchObject
@@ -126,10 +126,11 @@ def basicprecomposedsqlsearcher(so: SearchObject) -> List[dbWorkLine]:
 
     give me sql and I will search
 
-    this is hollow at the moment because rawsqlsearchmanager( is a candidate for a rust library that will
+    this is hollow at the moment because precomposedsqlsearchmanager() is a candidate for a rust library that will
     allow MP without triggering python's MP
 
-    the same library would need to offer internally the same functionality as workonrawsqlsearch() and rawsqlsearcher()
+    the same library would need to offer internally the same functionality as workonprecomposedsqlsearch()
+    and precomposedsqlsearcher()
 
     """
 
@@ -139,6 +140,22 @@ def basicprecomposedsqlsearcher(so: SearchObject) -> List[dbWorkLine]:
         hits = precomposedsqlsearchmanager(so)
         return hits
     else:
+        # potential flow:
+        # [1] send the searchdict to redis as a list of json.dups(items) (keyed to the searchid)
+        # [2a] invoke the external function by sending it the searchid
+        # [2b] you will also need to send things like the cap value, psql login info, and redis login info
+        # [3] wait for the function to (a) gather; (b) search; (c) store
+        # [4] pull the results back from redis via the searchid
+        # redis makes sense because the activity poll is going to have to be done via redis anyway...
+
+        # the following modifications to the searchdict are required to feed the golang module
+        # [a] the keys need to be renamed: temptable -> TempTable; query -> PsqlQuery; data -> PsqlData
+        # [b] the tuple inside of 'data' needs to come out and up: ('x',) -> 'x'
+        # [c] the '%s' in the 'query' needs to become '$1' for string substitution
+
+        # the searched items are stored under the redis key 'searchid_results'
+        # json.loads() will leave you with a dictionary of k/v pairs that can be turned into a dbWorkLine
+
         consolewarning('basicsqlsearcher() does not support shared library searching'.format(t=so.searchtype), color='red')
         return list()
 
@@ -475,7 +492,7 @@ def workonprecomposedsqlsearch(workerid: int, foundlineobjects: ListProxy, listo
 
     iterate through listofplacestosearch
 
-    execute rawsqlsearcher() on each item in the list
+    execute precomposedsqlsearcher() on each item in the list
 
     gather the results...
 
@@ -557,6 +574,7 @@ def precomposedsqlsearcher(querydict, dbcursor) -> Generator:
 
     found = list()
 
+    # debugmessage('rawsqlsearcher() querydict = {q}'.format(q=querydict))
     # debugmessage('rawsqlsearcher() q:\n\t{q}\nd:\n\t{d}'.format(q=q, d=d))
 
     warnings = {
