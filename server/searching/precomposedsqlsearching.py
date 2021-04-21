@@ -574,8 +574,8 @@ def precomposedsqlsearcher(querydict, dbcursor) -> Generator:
 
     found = list()
 
-    # debugmessage('rawsqlsearcher() querydict = {q}'.format(q=querydict))
-    # debugmessage('rawsqlsearcher() q:\n\t{q}\nd:\n\t{d}'.format(q=q, d=d))
+    # debugmessage('precomposedsqlsearcher() querydict = {q}'.format(q=querydict))
+    # debugmessage('precomposedsqlsearcher() q:\n\t{q}\nd:\n\t{d}'.format(q=q, d=d))
 
     warnings = {
         1: 'DataError; cannot search for »{d}«\n\tcheck for unbalanced parentheses and/or bad regex',
