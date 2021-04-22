@@ -1,3 +1,2 @@
-__all__ = ['dynamicsqlsearchdispatching.py', 'dynamicsqlsearching', 'precomposedsqlsearching',
-           'precomposesql.py',
-           'searchhelperfunctions']
+__all__ = ['dynamicsqlsearchdispatching', 'dynamicsqlsearching', 'precomposedsqlsearching',
+           'precomposesql', 'searchhelperfunctions']

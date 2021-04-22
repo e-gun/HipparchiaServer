@@ -6,6 +6,7 @@
         (see LICENSE in the top level directory of the distribution)
 """
 
+import json
 import multiprocessing
 import re
 from multiprocessing import Manager
@@ -18,6 +19,7 @@ import psycopg2
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
 from server.dbsupport.miscdbfunctions import resultiterator
+from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.miscformatting import consolewarning, debugmessage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
@@ -25,10 +27,28 @@ from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
-    perparesoforsecondsqldict
+    perparesoforsecondsqldict, rewritesqlsearchdictforgolang
 from server.searching.searchhelperfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging, \
-    findleastcommonterm, findleastcommontermcount, lookoutsideoftheline
+    findleastcommonterm, findleastcommontermcount, lookoutsideoftheline, redishitintodbworkline
 from server.threading.mpthreadcount import setthreadcount
+
+gosearch = None
+try:
+    from server.golangmodule import hipparchiagolangsearching as gosearch
+except ImportError as e:
+    debugmessage('golang search module unavailable:\n\t"{e}"'.format(e=e))
+
+
+if gosearch:
+    # these don't log you on; they just tell the go module how to log on
+    goredislogin = gosearch.NewRedisLogin('{h}:{p}'.format(h=hipparchia.config['REDISHOST'],
+                                          p=hipparchia.config['REDISPORT']), str(), hipparchia.config['REDISDBID'])
+    gopsqlloginro = gosearch.NewPostgresLogin(hipparchia.config['DBHOST'], hipparchia.config['DBPORT'],
+                                            hipparchia.config['DBUSER'], hipparchia.config['DBPASS'],
+                                            hipparchia.config['DBNAME'])
+    gopsqlloginrw = gosearch.NewPostgresLogin(hipparchia.config['DBHOST'], hipparchia.config['DBPORT'],
+                                            hipparchia.config['DBWRITEUSER'], hipparchia.config['DBPDBWRITEASS'],
+                                            hipparchia.config['DBNAME'])
 
 """
     OVERVIEW
@@ -126,41 +146,61 @@ def basicprecomposedsqlsearcher(so: SearchObject) -> List[dbWorkLine]:
 
     give me sql and I will search
 
-    this is hollow at the moment because precomposedsqlsearchmanager() is a candidate for a rust library that will
-    allow MP without triggering python's MP
-
-    the same library would need to offer internally the same functionality as workonprecomposedsqlsearch()
-    and precomposedsqlsearcher()
+    this function just picks a pathway: use the golang module or do things in house?
 
     """
 
     usesharedlibrary = hipparchia.config['GOLANGTHREADING']
 
-
-    nosharedlibrary = True
-
-    if nosharedlibrary:
+    if not usesharedlibrary:
         hits = precomposedsqlsearchmanager(so)
-        return hits
     else:
-        # potential flow:
-        # [1] send the searchdict to redis as a list of json.dups(items) (keyed to the searchid)
-        # [2a] invoke the external function by sending it the searchid
-        # [2b] you will also need to send things like the cap value, psql login info, and redis login info
-        # [3] wait for the function to (a) gather; (b) search; (c) store
-        # [4] pull the results back from redis via the searchid
-        # redis makes sense because the activity poll is going to have to be done via redis anyway...
+        consolewarning('_hipparchiagolangsearching.so is unloadable at the moment: searches will fail', color='red')
+        hits = sharedlibrarysearcher(so)
 
-        # the following modifications to the searchdict are required to feed the golang module
-        # [a] the keys need to be renamed: temptable -> TempTable; query -> PsqlQuery; data -> PsqlData
-        # [b] the tuple inside of 'data' needs to come out and up: ('x',) -> 'x'
-        # [c] the '%s' in the 'query' needs to become '$1' for string substitution
+    return hits
 
-        # the searched items are stored under the redis key 'searchid_results'
-        # json.loads() will leave you with a dictionary of k/v pairs that can be turned into a dbWorkLine
 
-        consolewarning('basicsqlsearcher() does not support shared library searching'.format(t=so.searchtype), color='red')
-        return list()
+def sharedlibrarysearcher(so: SearchObject) -> List[dbWorkLine]:
+    """
+
+    [1] send the searchdict to redis as a list of json.dumps(items) (keyed to the searchid)
+    [2] send the external fnc the searchid, cap value, worken #, psql login info, redis login info
+    [3] wait for the function to (a) gather; (b) search; (c) store
+    [4] pull the results back from redis via the searchid
+    NB: redis makes sense because the activity poll is going to have to be done via redis anyway...
+
+    the searched items are stored under the redis key 'searchid_results'
+    json.loads() will leave you with a dictionary of k/v pairs that can be turned into a dbWorkLine
+
+    """
+
+    rc = establishredisconnection()
+
+    so.searchsqldict = rewritesqlsearchdictforgolang(so)
+    debugmessage('storing search at "{r}"'.format(r=so.searchid))
+    for s in so.searchsqldict:
+        rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
+
+    if 1 < 0:
+        searcher = gosearch.HipparchiaGolangSearcher
+        resultrediskey = searcher(so.searchid, so.cap, hipparchia.config['WORKERS'], goredislogin, gopsqlloginrw)
+        debugmessage('search completed and stored at {r}'.format(r=resultrediskey))
+    else:
+        resultrediskey = 'queries_results'
+        # resultrediskey = '5870a552_results'
+
+    redisresults = list()
+    while resultrediskey:
+        r = rc.spop(resultrediskey)
+        if r:
+            redisresults.append(r)
+        else:
+            resultrediskey = None
+
+    hits = [redishitintodbworkline(r) for r in redisresults]
+
+    return hits
 
 
 def generatepreliminaryhitlist(so: SearchObject, recap=hipparchia.config['INTERMEDIATESEARCHCAP']) -> List[dbWorkLine]:

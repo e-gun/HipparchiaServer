@@ -6,6 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import json
 import re
 import time
 from multiprocessing import JoinableQueue
@@ -24,6 +25,8 @@ from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.checksession import probeforsessionvariables, justtlg
 from server.startup import lemmatadict
+
+JSONDICT = str
 
 
 def cleaninitialquery(seeking: str) -> str:
@@ -608,3 +611,33 @@ def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, curso
 	returndict = {'lag': lagging, 'lead': leading}
 
 	return returndict
+
+
+def redishitintodbworkline(redisresult: JSONDICT) -> dbWorkLine:
+	"""
+
+	convert a golang struct stored as json in the redis server into dbWorkLine objects
+
+	"""
+
+	# type DbWorkline struct {
+	# 	WkUID		string
+	# 	TbIndex		int
+	# 	Lvl5Value	string
+	# 	Lvl4Value	string
+	# 	Lvl3Value	string
+	# 	Lvl2Value	string
+	# 	Lvl1Value	string
+	# 	Lvl0Value	string
+	# 	MarkedUp	string
+	# 	Accented	string
+	# 	Stripped	string
+	# 	Hypenated	string
+	# 	Annotations	string
+	# }
+
+	ln = json.loads(redisresult)
+	lineobject = dbWorkLine(ln['WkUID'], ln['TbIndex'], ln['Lvl5Value'], ln['Lvl4Value'], ln['Lvl3Value'],
+							ln['Lvl2Value'], ln['Lvl1Value'], ln['Lvl0Value'], ln['MarkedUp'], ln['Accented'],
+							ln['Stripped'], ln['Hypenated'], ln['Annotations'])
+	return lineobject

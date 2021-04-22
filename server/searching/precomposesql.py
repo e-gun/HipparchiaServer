@@ -299,3 +299,29 @@ def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: 
     query = qtemplate.format(sp=sp, wl=wl, co=so.usecolumn, db=authortable, whr=whereclause, lim=lim)
 
     return query
+
+
+def rewritesqlsearchdictforgolang(so: SearchObject) -> dict:
+    """
+
+    you presently have
+    { table1: {query: q, data: d, temptable: t},
+    table2: {query: q, data: d, temptable: t},
+    ... }
+
+    the following modifications to the searchdict are required to feed the golang module
+    [a] the keys need to be renamed: temptable -> TempTable; query -> PsqlQuery; data -> PsqlData
+    [b] the tuple inside of 'data' needs to come out and up: ('x',) -> 'x'
+    [c] the '%s' in the 'query' needs to become '$1' for string substitution
+
+    """
+
+    ssq = so.searchsqldict
+    newdict = dict()
+    for s in ssq:
+        newdict[s] = dict()
+        newdict[s]['TempTable'] = ssq[s]['temptable']
+        newdict[s]['PsqlQuery'] = re.sub(r'%s', r'$1', ssq[s]['query'])
+        newdict[s]['PsqlData'] = ssq[s]['data'][0]
+
+    return newdict
