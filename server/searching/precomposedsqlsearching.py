@@ -134,6 +134,9 @@ def basicprecomposedsqlsearcher(so: SearchObject) -> List[dbWorkLine]:
 
     """
 
+    usesharedlibrary = hipparchia.config['GOLANGTHREADING']
+
+
     nosharedlibrary = True
 
     if nosharedlibrary:

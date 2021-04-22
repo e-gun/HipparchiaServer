@@ -52,7 +52,13 @@
 #   and faster. 'precomposed' will be needed some day for a non-forking version
 #   of Hipparchia. Setting anything other than 'precomposed' will give you
 #   'dynamic'
-
+#
+# GOLANGTHREADING: this is *experimental*; it requires SEARCHCODESTYLE = 'precomposed'
+#   as well as a working redis installation (the latter is not present by
+#   default). If True, your searches will multiprocess by being set through a
+#   golang shared object whose goroutines will spawn multiple workers. The
+#   point of this is to obviate the need for python to spawn/fork, etc.
+#
 
 AUTOCONFIGWORKERS = True
 WORKERS = 3
@@ -61,3 +67,4 @@ MPCOMMITCOUNT = 250
 LEMMACHUNKSIZE = 10
 INTERMEDIATESEARCHCAP = 2000000
 SEARCHCODESTYLE = 'dynamic'
+GOLANGTHREADING = False
