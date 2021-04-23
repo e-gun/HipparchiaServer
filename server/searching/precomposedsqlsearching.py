@@ -157,73 +157,16 @@ def basicprecomposedsqlsearcher(so: SearchObject) -> List[dbWorkLine]:
 
     if not usesharedlibrary:
         hits = precomposedsqlsearchmanager(so)
-    elif hipparchia.config['GOLANGLOADING'] != 'cli':
-        consolewarning('_hipparchiagolangsearching.so is unloadable at the moment: searches will fail', color='red')
-        hits = sharedlibrarysearcher(so)
     else:
-        hits = sharedlibraryclisearcher(so)
+        hits = precomposedgolangsearcher(so)
 
     return hits
 
 
-def sharedlibraryclisearcher(so: SearchObject) -> List[dbWorkLine]:
+def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
     """
 
-    you have decided to call the "golanggrabber" binary
-
-    """
-
-    rc = establishredisconnection()
-
-    so.searchsqldict = rewritesqlsearchdictforgolang(so)
-    debugmessage('storing search at "{r}"'.format(r=so.searchid))
-    for s in so.searchsqldict:
-        rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
-
-    resultrediskey = str()
-
-    debugmessage('calling golang via CLI')
-    command = 'golanggrabber'  # cwd is 'hipparchia_venv/HipparchiaServer/server/golangmodule'
-    command = '/Users/erik/hipparchia_venv/HipparchiaServer/server/golangmodule/golanggrabber'
-    commandandarguments = formatgolanggrabberarguments(command, so)
-
-    try:
-        result = subprocess.run(commandandarguments, capture_output=True)
-    except FileNotFoundError:
-        consolewarning('cannot find the golang executable "{x}'.format(x=command), color='red')
-        return list()
-
-    if result.returncode == 0:
-        stdo = result.stdout.decode('UTF-8')
-        outputlist = stdo.split('\n')
-        for o in outputlist:
-            debugmessage(o)
-        resultrediskey = [o for o in outputlist if o]
-        resultrediskey = resultrediskey[-1]
-        # but this looks like: 'results sent to redis as ff128837_results'
-        # so you need a little more work
-        resultrediskey = resultrediskey.split()[-1]
-        print('basicprecomposedsqlsearcher() resultrediskey = {x}'.format(x=resultrediskey))
-    else:
-        consolewarning('{c} sent an error:\n{r}', color='red')
-        debugmessage(result)
-
-    redisresults = list()
-
-    while resultrediskey:
-        r = rc.spop(resultrediskey)
-        if r:
-            redisresults.append(r)
-        else:
-            resultrediskey = None
-
-    hits = [redishitintodbworkline(r) for r in redisresults]
-
-    return hits
-
-
-def sharedlibrarysearcher(so: SearchObject) -> List[dbWorkLine]:
-    """
+    you are using golang to do the search
 
     [1] send the searchdict to redis as a list of json.dumps(items) (keyed to the searchid)
     [2] send the external fnc the searchid, cap value, worker #, psql login info, redis login info
@@ -243,16 +186,13 @@ def sharedlibrarysearcher(so: SearchObject) -> List[dbWorkLine]:
     for s in so.searchsqldict:
         rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
 
-    if 1 < 0:
-        # _hipparchiagolangsearching.so is unloadable at the moment: searches will fail
-        searcher = gosearch.HipparchiaGolangSearcher
-        resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), goredislogin, gopsqlloginrw)
-        debugmessage('search completed and stored at {r}'.format(r=resultrediskey))
+    if hipparchia.config['GOLANGLOADING'] != 'cli':
+        resultrediskey = sharedlibrarysearcher(so)
     else:
-        resultrediskey = 'queries_results'
-        # resultrediskey = '5870a552_results'
+        resultrediskey = sharedlibraryclisearcher(so)
 
     redisresults = list()
+
     while resultrediskey:
         r = rc.spop(resultrediskey)
         if r:
@@ -263,6 +203,63 @@ def sharedlibrarysearcher(so: SearchObject) -> List[dbWorkLine]:
     hits = [redishitintodbworkline(r) for r in redisresults]
 
     return hits
+
+
+def sharedlibraryclisearcher(so: SearchObject) -> str:
+    """
+
+    you have decided to call the "golanggrabber" binary
+
+    """
+
+    resultrediskey = str()
+
+    debugmessage('calling golang via CLI')
+    command = './golanggrabber'  # cwd is 'hipparchia_venv/HipparchiaServer/server/golangmodule'
+    commandandarguments = formatgolanggrabberarguments(command, so)
+
+    try:
+        result = subprocess.run(commandandarguments, capture_output=True)
+    except FileNotFoundError:
+        consolewarning('cannot find the golang executable "{x}'.format(x=command), color='red')
+        return resultrediskey
+
+    if result.returncode == 0:
+        stdo = result.stdout.decode('UTF-8')
+        outputlist = stdo.split('\n')
+        for o in outputlist:
+            debugmessage(o)
+        resultrediskey = [o for o in outputlist if o]
+        resultrediskey = resultrediskey[-1]
+        # but this looks like: 'results sent to redis as ff128837_results'
+        # so you need a little more work
+        resultrediskey = resultrediskey.split()[-1]
+        print('basicprecomposedsqlsearcher() resultrediskey = {x}'.format(x=resultrediskey))
+    else:
+        consolewarning('{c} sent an error:\n{r}', color='red')
+        debugmessage(repr(result))
+
+    return resultrediskey
+
+
+def sharedlibrarysearcher(so: SearchObject) -> str:
+    """
+
+    use the shared library to do the goland search
+
+    """
+
+    consolewarning('_hipparchiagolangsearching.so is unloadable at the moment: searches will fail', color='red')
+
+    if 1 < 0:
+        searcher = gosearch.HipparchiaGolangSearcher
+        resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), goredislogin, gopsqlloginrw)
+        debugmessage('search completed and stored at {r}'.format(r=resultrediskey))
+    else:
+        resultrediskey = 'queries_results'
+        # resultrediskey = '5870a552_results'
+
+    return resultrediskey
 
 
 def generatepreliminaryhitlist(so: SearchObject, recap=hipparchia.config['INTERMEDIATESEARCHCAP']) -> List[dbWorkLine]:
