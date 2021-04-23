@@ -59,6 +59,15 @@
 #   golang shared object whose goroutines will spawn multiple workers. The
 #   point of this is to obviate the need for python to spawn/fork, etc.
 #
+# GOLANGLOADING: how to call the external functons; 'module' is the right way; but
+#   you can do it as an external app for testing purposes: 'cli'. NB, the cli executable
+#   is probably not installed, but if it is, it should be stored next to the module:
+#   that is, inside "HipparchiaServer/server/golangmodule/". This setting has no effect
+#   if GOLANGTHREADING is not True. Please note the security implications of 'cli': you
+#   will be sending a db password to a process and this event could be snooped by another user
+#   on your same system
+#
+
 
 AUTOCONFIGWORKERS = True
 WORKERS = 3
@@ -68,3 +77,4 @@ LEMMACHUNKSIZE = 10
 INTERMEDIATESEARCHCAP = 2000000
 SEARCHCODESTYLE = 'dynamic'
 GOLANGTHREADING = False
+GOLANGLOADING = 'module'

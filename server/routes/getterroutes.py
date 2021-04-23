@@ -610,7 +610,8 @@ def loadhelpdata() -> JSON_STR:
 
 	for d in divmapper:
 		helpfilepath = helppath + divmapper[d]
-		helpcontents = ''
+		helpcontents = str()
+		# print('helpfilepath', helpfilepath)
 		if path.isfile(helpfilepath):
 			with open(helpfilepath, encoding='utf8') as f:
 				helpcontents = f.read()

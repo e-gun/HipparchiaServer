@@ -21,10 +21,12 @@ from server.dbsupport.dblinefunctions import dblineintolineobject, makeablanklin
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, querytotalwordcounts
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.wordformatting import badpucntwithbackslash, minimumgreek, removegravity, wordlistintoregex
+from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.checksession import probeforsessionvariables, justtlg
 from server.startup import lemmatadict
+from server.threading.mpthreadcount import setthreadcount
 
 JSONDICT = str
 
@@ -641,3 +643,46 @@ def redishitintodbworkline(redisresult: JSONDICT) -> dbWorkLine:
 							ln['Lvl2Value'], ln['Lvl1Value'], ln['Lvl0Value'], ln['MarkedUp'], ln['Accented'],
 							ln['Stripped'], ln['Hypenated'], ln['Annotations'])
 	return lineobject
+
+
+def formatgolanggrabberarguments(command: str, so: SearchObject) -> list:
+	"""
+
+	Usage of ./golanggrabber:
+	-c int
+		max hit count (default 200)
+	-k string
+		redis key to use (default "queries")
+	-p string
+		psql logon information (as a JSON string) (default "{\"Host\": \"localhost\", \"Port\": 5432, \"User\": \"hippa_rd\", \"Pass\": \"xxxx\", \"DBName\": \"hipparchiaDB\"}")
+	-r string
+		redis logon information (as a JSON string) (default "{\"Addr\": \"localhost:6379\", \"Password\": \"\", \"DB\": 0}")
+	-t int
+		number of goroutines to dispatch (default 5)
+
+	"""
+
+	arguments = dict()
+
+	arguments['k'] = so.searchid
+	arguments['c'] = so.cap
+	arguments['t'] = setthreadcount()
+
+	rld = {'Addr': '{a}:{b}'.format(a=hipparchia.config['REDISHOST'], b=hipparchia.config['REDISPORT']),
+		   'Password': str(),
+		   'DB': hipparchia.config['REDISDBID']}
+	arguments['r'] = json.dumps(rld)
+
+	# rw user by default atm; can do this smarter...
+	psd = {'Host': hipparchia.config['DBHOST'],
+		   'Port': hipparchia.config['DBPORT'],
+		   'User': hipparchia.config['DBWRITEUSER'],
+		   'Pass': hipparchia.config['DBWRITEPASS'],
+		   'DBName': hipparchia.config['DBNAME']}
+	arguments['p'] = json.dumps(psd)
+
+	argumentlist = [['-{k}'.format(k=k), '{v}'.format(v=arguments[k])] for k in arguments]
+	argumentlist = flattenlistoflists(argumentlist)
+	commandandarguments = [command] + argumentlist
+
+	return commandandarguments

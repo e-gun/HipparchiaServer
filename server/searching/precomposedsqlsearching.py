@@ -9,6 +9,8 @@
 import json
 import multiprocessing
 import re
+import subprocess
+
 from multiprocessing import Manager
 from multiprocessing.context import Process
 from multiprocessing.managers import ListProxy
@@ -29,7 +31,8 @@ from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
     perparesoforsecondsqldict, rewritesqlsearchdictforgolang
 from server.searching.searchhelperfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging, \
-    findleastcommonterm, findleastcommontermcount, lookoutsideoftheline, redishitintodbworkline
+    findleastcommonterm, findleastcommontermcount, lookoutsideoftheline, redishitintodbworkline, \
+    formatgolanggrabberarguments
 from server.threading.mpthreadcount import setthreadcount
 
 gosearch = None
@@ -47,7 +50,7 @@ if gosearch:
                                             hipparchia.config['DBUSER'], hipparchia.config['DBPASS'],
                                             hipparchia.config['DBNAME'])
     gopsqlloginrw = gosearch.NewPostgresLogin(hipparchia.config['DBHOST'], hipparchia.config['DBPORT'],
-                                            hipparchia.config['DBWRITEUSER'], hipparchia.config['DBPDBWRITEASS'],
+                                            hipparchia.config['DBWRITEUSER'], hipparchia.config['DBWRITEPASS'],
                                             hipparchia.config['DBNAME'])
 
 """
@@ -154,9 +157,67 @@ def basicprecomposedsqlsearcher(so: SearchObject) -> List[dbWorkLine]:
 
     if not usesharedlibrary:
         hits = precomposedsqlsearchmanager(so)
-    else:
+    elif hipparchia.config['GOLANGLOADING'] != 'cli':
         consolewarning('_hipparchiagolangsearching.so is unloadable at the moment: searches will fail', color='red')
         hits = sharedlibrarysearcher(so)
+    else:
+        hits = sharedlibraryclisearcher(so)
+
+    return hits
+
+
+def sharedlibraryclisearcher(so: SearchObject) -> List[dbWorkLine]:
+    """
+
+    you have decided to call the "golanggrabber" binary
+
+    """
+
+    rc = establishredisconnection()
+
+    so.searchsqldict = rewritesqlsearchdictforgolang(so)
+    debugmessage('storing search at "{r}"'.format(r=so.searchid))
+    for s in so.searchsqldict:
+        rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
+
+    resultrediskey = str()
+
+    debugmessage('calling golang via CLI')
+    command = 'golanggrabber'  # cwd is 'hipparchia_venv/HipparchiaServer/server/golangmodule'
+    command = '/Users/erik/hipparchia_venv/HipparchiaServer/server/golangmodule/golanggrabber'
+    commandandarguments = formatgolanggrabberarguments(command, so)
+
+    try:
+        result = subprocess.run(commandandarguments, capture_output=True)
+    except FileNotFoundError:
+        consolewarning('cannot find the golang executable "{x}'.format(x=command), color='red')
+        return list()
+
+    if result.returncode == 0:
+        stdo = result.stdout.decode('UTF-8')
+        outputlist = stdo.split('\n')
+        for o in outputlist:
+            debugmessage(o)
+        resultrediskey = [o for o in outputlist if o]
+        resultrediskey = resultrediskey[-1]
+        # but this looks like: 'results sent to redis as ff128837_results'
+        # so you need a little more work
+        resultrediskey = resultrediskey.split()[-1]
+        print('basicprecomposedsqlsearcher() resultrediskey = {x}'.format(x=resultrediskey))
+    else:
+        consolewarning('{c} sent an error:\n{r}', color='red')
+        debugmessage(result)
+
+    redisresults = list()
+
+    while resultrediskey:
+        r = rc.spop(resultrediskey)
+        if r:
+            redisresults.append(r)
+        else:
+            resultrediskey = None
+
+    hits = [redishitintodbworkline(r) for r in redisresults]
 
     return hits
 
@@ -183,8 +244,9 @@ def sharedlibrarysearcher(so: SearchObject) -> List[dbWorkLine]:
         rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
 
     if 1 < 0:
+        # _hipparchiagolangsearching.so is unloadable at the moment: searches will fail
         searcher = gosearch.HipparchiaGolangSearcher
-        resultrediskey = searcher(so.searchid, so.cap, hipparchia.config['WORKERS'], goredislogin, gopsqlloginrw)
+        resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), goredislogin, gopsqlloginrw)
         debugmessage('search completed and stored at {r}'.format(r=resultrediskey))
     else:
         resultrediskey = 'queries_results'
