@@ -105,8 +105,13 @@ def consolewarning(message: str, color='yellow', isbold=False, colorcoded=True, 
 	if color not in ['red', 'yellow', 'green', 'cyan', 'magenta', 'black']:
 		return str()
 
-	if color not in hipparchia.config['CONSOLEWARNINGTYPES'] and not commandlineargs.debugmessages:
-		return str()
+	# consolewarning() is called by configureatstartup.py; but we don't know how to satisfy the next condition yet...
+	try:
+		if color not in hipparchia.config['CONSOLEWARNINGTYPES'] and not commandlineargs.debugmessages:
+			return str()
+	except KeyError:
+		# might as well accept whatever early startup messages are coming our way...
+		pass
 
 	if color == 'black':
 		isbold = True
