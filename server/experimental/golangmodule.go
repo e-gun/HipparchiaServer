@@ -159,7 +159,7 @@ func grabber(clientnumber int, hitcap int64, searchkey string, r RedisLogin, p P
 		// [a] get a query
 		byteArray, err := redisclient.SPop(searchkey).Result()
 		if err != nil { break }
-		fmt.Println(fmt.Sprintf("grabber #%d found work", clientnumber))
+		// fmt.Println(fmt.Sprintf("grabber #%d found work", clientnumber))
 
 		// [b] decode it
 		var prq PrerolledQuery
@@ -210,3 +210,8 @@ func checkerror(err error) {
 		panic(err)
 	}
 }
+
+
+// note: we need a connection pool...
+// panic: pq: remaining connection slots are reserved for non-replication superuser connections
+

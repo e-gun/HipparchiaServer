@@ -52,6 +52,7 @@ def getcommandlineargs():
 		                                     dbhost=None,
 		                                     dbname=None,
 		                                     dbport=None,
+		                                     debugmessages=None,
 		                                     disablevectorbot=True,
 		                                     enabledebugui=None,
 		                                     forcefont=None,

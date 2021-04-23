@@ -165,7 +165,7 @@ def sharedlibrarysearcher(so: SearchObject) -> List[dbWorkLine]:
     """
 
     [1] send the searchdict to redis as a list of json.dumps(items) (keyed to the searchid)
-    [2] send the external fnc the searchid, cap value, worken #, psql login info, redis login info
+    [2] send the external fnc the searchid, cap value, worker #, psql login info, redis login info
     [3] wait for the function to (a) gather; (b) search; (c) store
     [4] pull the results back from redis via the searchid
     NB: redis makes sense because the activity poll is going to have to be done via redis anyway...
