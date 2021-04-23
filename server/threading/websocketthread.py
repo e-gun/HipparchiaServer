@@ -67,6 +67,7 @@ async def wscheckpoll(websocket, path):
 			break
 
 		await asyncio.sleep(.4)
+		# print('progress %', ((progress['total'] - progress['remaining']) / progress['total']) * 100)
 
 		try:
 			# something changed amid backend updates and json.dumps() started choking on progresspolldict[pollid].getactivity()

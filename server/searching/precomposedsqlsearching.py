@@ -234,7 +234,6 @@ def sharedlibraryclisearcher(so: SearchObject) -> str:
         # but this looks like: 'results sent to redis as ff128837_results'
         # so you need a little more work
         resultrediskey = resultrediskey.split()[-1]
-        print('basicprecomposedsqlsearcher() resultrediskey = {x}'.format(x=resultrediskey))
     else:
         consolewarning('{c} sent an error:\n{r}', color='red')
         debugmessage(repr(result))

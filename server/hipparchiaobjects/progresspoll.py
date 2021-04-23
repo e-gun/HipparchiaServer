@@ -173,6 +173,7 @@ class RedisProgressPoll(object):
 	def getredisvalue(self, key):
 		self.redisconnection.set_response_callback('GET', self.keytypes[key])
 		k = self.returnrediskey(key)
+		# print(k, self.redisconnection.get(k))
 		return self.redisconnection.get(k)
 
 	def initializeredispoll(self):
