@@ -10,11 +10,12 @@ import json
 import multiprocessing
 import re
 import subprocess
-
 from multiprocessing import Manager
 from multiprocessing.context import Process
 from multiprocessing.managers import ListProxy
+from os import path
 from typing import List, Generator
+from pathlib import Path
 
 import psycopg2
 
@@ -215,7 +216,15 @@ def sharedlibraryclisearcher(so: SearchObject) -> str:
     resultrediskey = str()
 
     debugmessage('calling golang via CLI')
-    command = './golanggrabber'  # cwd is 'hipparchia_venv/HipparchiaServer/server/golangmodule'
+
+    if not hipparchia.config['EXTERNALWSGI']:
+        basepath = path.dirname(__file__)
+        basepath = '/'.join(basepath.split('/')[:-2])
+    else:
+        # path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
+        basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
+
+    command = basepath + '/server/golangmodule/golanggrabber'
     commandandarguments = formatgolanggrabberarguments(command, so)
 
     try:
