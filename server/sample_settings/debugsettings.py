@@ -12,6 +12,10 @@
 # CONSOLEWARNINGTYPES is a list of colors; if your message color is not on the list, it will not be seen
 #   valid values need to be in miscformatting.py and consolewarning().
 #
+# GOLANGCLILOGLEVEL and GOLANGMODLOGLEVEL set the logging level threshold for the golang code: 0 is silent;
+#   4 is very noisy. The cli messages are caught as 'black' CONSOLEWARNINGTYPES; the module messages cannot be
+#   kept out of the console.
+#
 # DBDEBUGMODE and HTMLDEBUGMODE will show DB locations of hits and/or
 # 	the raw HTML markup inside the DB there are no security
 # 	implications here; these can only be set at launch; any changes

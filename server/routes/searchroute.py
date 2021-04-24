@@ -124,11 +124,10 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 	frozensession = so.session
 
 	progresspolldict[pollid] = ProgressPoll(pollid)
-	activepoll = progresspolldict[pollid]
+	so.poll = progresspolldict[pollid]
 
-	activepoll.activate()
-	activepoll.statusis('Preparing to search')
-	so.poll = activepoll
+	so.poll.activate()
+	so.poll.statusis('Preparing to search')
 
 	searchlist = list()
 	nosearch = True
@@ -138,7 +137,7 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 	activecorpora = [c for c in allcorpora if frozensession[c]]
 
 	if (len(so.seeking) > 0 or so.lemma or frozensession['tensorflowgraph'] or frozensession['topicmodel']) and activecorpora:
-		activepoll.statusis('Compiling the list of works to search')
+		so.poll.statusis('Compiling the list of works to search')
 		searchlist = compilesearchlist(listmapper, frozensession)
 
 	if len(searchlist) > 0:
@@ -150,14 +149,14 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 		searchlist = flagexclusions(searchlist, frozensession)
 		workssearched = len(searchlist)
 
-		activepoll.statusis('Calculating full authors to search')
+		so.poll.statusis('Calculating full authors to search')
 
 		searchlist = calculatewholeauthorsearches(searchlist, authordict)
 
 		so.searchlist = searchlist
 		so.usedcorpora = so.wholecorporasearched()
 
-		activepoll.statusis('Configuring the search restrictions')
+		so.poll.statusis('Configuring the search restrictions')
 		so.indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
 
 		# fork over to the associative vectors framework if that option we checked
@@ -191,7 +190,7 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 
 		# now that the SearchObject is built, do the search...
 		hits = dosearch(so)
-		activepoll.statusis('Putting the results in context')
+		so.poll.statusis('Putting the results in context')
 
 		# hits is List[dbWorkLine]
 		hitdict = sortresultslist(hits, so, authordict, workdict)
@@ -205,7 +204,7 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 
 		resultlist = buildresultobjects(hitdict, authordict, workdict, so)
 
-		activepoll.statusis('Converting results to HTML')
+		so.poll.statusis('Converting results to HTML')
 
 		sandp = rewriteskgandprx(skg, prx, htmlsearch, so)
 		skg = sandp['skg']
@@ -254,7 +253,7 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 		output.setresultcount(0, 'passages')
 		output.explainemptysearch()
 
-	activepoll.deactivate()
+	so.poll.deactivate()
 	jsonoutput = json.dumps(output.generateoutput())
 
 	del progresspolldict[pollid]

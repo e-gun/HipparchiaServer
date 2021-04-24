@@ -252,19 +252,24 @@ def sharedlibraryclisearcher(so: SearchObject) -> str:
 def sharedlibrarysearcher(so: SearchObject) -> str:
     """
 
-    use the shared library to do the goland search
+    use the shared library to do the golang search
+
+    at the moment the progress polls will not update; it seems that the module locks python up
+
+    the cli version can read set the poll data and have it get read by wscheckpoll()
+    the module is setting the poll data, but it is not getting read by wscheckpoll()
+        wscheckpoll() will loop 0-2 times: wscheckpoll() {'total': -1, 'remaining': -1, 'hits': -1, ...}
+        then it locks during the search
+        then it unlocks after the search is over: wscheckpoll() {'total': 776, 'remaining': 0, 'hits': 18, ... }
+
+        conversely if the cli app is searching wscheckpoll() will update every .4s, as expected
 
     """
 
-    # consolewarning('_hipparchiagolangsearching.so is unloadable at the moment: searches will fail', color='red')
-
-    if 1 > 0:
-        searcher = gosearch.HipparchiaGolangSearcher
-        resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), hipparchia.config['GOLANGMODLOGLEVEL'], goredislogin, gopsqlloginrw)
-        debugmessage('search completed and stored at {r}'.format(r=resultrediskey))
-    else:
-        resultrediskey = 'queries_results'
-        # resultrediskey = '5870a552_results'
+    debugmessage('calling golang via the golang module')
+    searcher = gosearch.HipparchiaGolangSearcher
+    resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), hipparchia.config['GOLANGMODLOGLEVEL'], goredislogin, gopsqlloginrw)
+    debugmessage('search completed and stored at {r}'.format(r=resultrediskey))
 
     return resultrediskey
 
@@ -279,9 +284,9 @@ def generatepreliminaryhitlist(so: SearchObject, recap=hipparchia.config['INTERM
     actualcap = so.cap
     so.cap = recap
 
-    so.poll.statusis('Part one: Searching for "{x}"'.format(x=so.termone))
+    so.poll.statusis('Searching for "{x}"'.format(x=so.termone))
     if so.lemmaone:
-        so.poll.statusis('Part one: Searching for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
+        so.poll.statusis('Searching for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
 
     hitlines = basicprecomposedsqlsearcher(so)
     so.cap = actualcap
@@ -317,9 +322,9 @@ def precomposedsqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
         so.lemmaone = so.lemmatwo
         so.searchsqldict = rewritesqlsearchdictforlemmata(so)
 
-    so.poll.statusis('Part two: Searching among the initial hits for "{x}"'.format(x=so.termtwo))
+    so.poll.statusis('Now searching among the initial finds for "{x}"'.format(x=so.termtwo))
     if so.lemmaone:
-        so.poll.statusis('Part two: Searching among the initial hits for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
+        so.poll.statusis('Now searching among the initial finds for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
 
     so.poll.sethits(0)
     newhitlines = basicprecomposedsqlsearcher(so)
@@ -359,9 +364,9 @@ def precomposedsqlwithinxwords(so: SearchObject) -> List[dbWorkLine]:
 
     fullmatches = list()
 
-    so.poll.statusis('Part two: Searching among the initial hits for "{x}"'.format(x=so.termtwo))
+    so.poll.statusis('Now searching among the initial finds for "{x}"'.format(x=so.termtwo))
     if so.lemmatwo:
-        so.poll.statusis('Part two: Searching among the initial hits for all forms of "{x}"'.format(x=so.lemmatwo.dictionaryentry))
+        so.poll.statusis('Now searching among the initial finds for all forms of "{x}"'.format(x=so.lemmatwo.dictionaryentry))
 
     so.poll.sethits(0)
     commitcount = 0
@@ -407,7 +412,7 @@ def precomposedsqlphrasesearch(so: SearchObject) -> List[dbWorkLine]:
 
     initialhitlines = generatepreliminaryhitlist(so)
 
-    m = 'Part two: Searching among the {h} initial hits for the full phrase "{p}"'
+    m = 'Now searching among the {h} initial hits for the full phrase "{p}"'
     so.poll.statusis(m.format(h=so.poll.gethits(), p=so.originalseeking))
     so.poll.sethits(0)
 
@@ -463,7 +468,7 @@ def precomposedsqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
     # windowing will increase the number of hits: 2+ lines per actual find
     initialhitlines = generatepreliminaryhitlist(so, recap=so.cap * 3)
 
-    m = 'Part two: Searching among the {h} initial hits for the full phrase "{p}"'
+    m = 'Now searching among the {h} initial hits for the full phrase "{p}"'
     so.poll.statusis(m.format(h=so.poll.gethits(), p=so.originalseeking))
     so.poll.sethits(0)
 

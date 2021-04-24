@@ -150,7 +150,7 @@ class RedisProgressPoll(object):
 		self.initializeredispoll()
 
 	def __del__(self):
-		if hipparchia.config['RETAINREDISPOLLS'] != 'yes':
+		if not hipparchia.config['RETAINREDISPOLLS']:
 			self.deleteredispoll()
 
 	def setkeytypes(self):

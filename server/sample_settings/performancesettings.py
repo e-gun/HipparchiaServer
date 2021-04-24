@@ -53,19 +53,19 @@
 #   of Hipparchia. Setting anything other than 'precomposed' will give you
 #   'dynamic'
 #
-# GOLANGTHREADING: this is *experimental*; it requires SEARCHCODESTYLE = 'precomposed'
+# GOLANGTHREADING: this is non-standard; it requires SEARCHCODESTYLE = 'precomposed'
 #   as well as a working redis installation (the latter is not present by
 #   default). If True, your searches will multiprocess by being set through a
 #   golang shared object whose goroutines will spawn multiple workers. The
 #   point of this is to obviate the need for python to spawn/fork, etc.
 #
-# GOLANGLOADING: how to call the external functions; 'module' is the right way; but
-#   you can do it as an external app for testing purposes: 'cli'. NB, the cli executable
-#   is probably not installed, but if it is, it should be stored next to the module:
-#   that is, inside "HipparchiaServer/server/golangmodule/". This setting has no effect
-#   if GOLANGTHREADING is not True. Please note the security implications of 'cli': you
-#   will be sending a db password to a process and this event could be snooped by another user
-#   on your same system
+# GOLANGLOADING: how to call the external functions; 'module' is *supposed* to be the right way;
+#   but the module seems to have GIL issues that kill off progress polling. The 'cli' option
+#   does not yield this problem. NB, the cli executable is probably not installed, but if it is,
+#   it should be stored next to the module: that is, inside "HipparchiaServer/server/golangmodule/".
+#   This setting has no effect if GOLANGTHREADING is not True. Please note the security
+#   implications of 'cli': you will be sending a db password to a process and this event could be
+#   snooped by another user on your same system
 #
 
 
@@ -77,4 +77,4 @@ LEMMACHUNKSIZE = 10
 INTERMEDIATESEARCHCAP = 2000000
 SEARCHCODESTYLE = 'dynamic'
 GOLANGTHREADING = False
-GOLANGLOADING = 'module'
+GOLANGLOADING = 'cli'
