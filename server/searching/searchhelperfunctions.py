@@ -649,16 +649,18 @@ def formatgolanggrabberarguments(command: str, so: SearchObject) -> list:
 	"""
 
 	Usage of ./golanggrabber:
-	-c int
-		max hit count (default 200)
-	-k string
-		redis key to use (default "queries")
-	-p string
-		psql logon information (as a JSON string) (default "{\"Host\": \"localhost\", \"Port\": 5432, \"User\": \"hippa_rd\", \"Pass\": \"xxxx\", \"DBName\": \"hipparchiaDB\"}")
-	-r string
-		redis logon information (as a JSON string) (default "{\"Addr\": \"localhost:6379\", \"Password\": \"\", \"DB\": 0}")
-	-t int
-		number of goroutines to dispatch (default 5)
+	  -c int
+			max hit count (default 200)
+	  -k string
+			redis key to use (default "queries")
+	  -l int
+			logging level: 0 is silent; 3 is very noisy (default 1)
+	  -p string
+			psql logon information (as a JSON string) (default "{\"Host\": \"localhost\", \"Port\": 5432, \"User\": \"hippa_wr\", \"Pass\": \"xxxxxx\", \"DBName\": \"hipparchiaDB\"}")
+	  -r string
+			redis logon information (as a JSON string) (default "{\"Addr\": \"localhost:6379\", \"Password\": \"\", \"DB\": 0}")
+	  -t int
+			number of goroutines to dispatch (default 5)
 
 	"""
 
@@ -667,6 +669,7 @@ def formatgolanggrabberarguments(command: str, so: SearchObject) -> list:
 	arguments['k'] = so.searchid
 	arguments['c'] = so.cap
 	arguments['t'] = setthreadcount()
+	arguments['l'] = hipparchia.config['GOLANGCLILOGLEVEL']
 
 	rld = {'Addr': '{a}:{b}'.format(a=hipparchia.config['REDISHOST'], b=hipparchia.config['REDISPORT']),
 		   'Password': str(),

@@ -53,6 +53,8 @@ SUPPRESSWARNINGS = True
 # Currently we know about: ['red', 'yellow', 'green', 'cyan', 'magenta', 'black']
 # the last two are only of interest if you are debugging
 CONSOLEWARNINGTYPES = ['red', 'yellow', 'green', 'cyan']
+GOLANGCLILOGLEVEL = 1
+GOLANGMODLOGLEVEL = 0
 ENABLELOGGING = False
 HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 RETAINREDISPOLLS = False

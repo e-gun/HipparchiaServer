@@ -15,7 +15,6 @@ from multiprocessing.context import Process
 from multiprocessing.managers import ListProxy
 from os import path
 from typing import List, Generator
-from pathlib import Path
 
 import psycopg2
 
@@ -257,11 +256,11 @@ def sharedlibrarysearcher(so: SearchObject) -> str:
 
     """
 
-    consolewarning('_hipparchiagolangsearching.so is unloadable at the moment: searches will fail', color='red')
+    # consolewarning('_hipparchiagolangsearching.so is unloadable at the moment: searches will fail', color='red')
 
-    if 1 < 0:
+    if 1 > 0:
         searcher = gosearch.HipparchiaGolangSearcher
-        resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), goredislogin, gopsqlloginrw)
+        resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), hipparchia.config['GOLANGMODLOGLEVEL'], goredislogin, gopsqlloginrw)
         debugmessage('search completed and stored at {r}'.format(r=resultrediskey))
     else:
         resultrediskey = 'queries_results'
