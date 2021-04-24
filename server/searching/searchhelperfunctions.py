@@ -682,7 +682,11 @@ def formatgolanggrabberarguments(command: str, so: SearchObject) -> list:
 		   'User': hipparchia.config['DBWRITEUSER'],
 		   'Pass': hipparchia.config['DBWRITEPASS'],
 		   'DBName': hipparchia.config['DBNAME']}
-	arguments['p'] = json.dumps(psd)
+
+	if hipparchia.config['GOLANGBINARYKNOWSLOGININFO']:
+		pass
+	else:
+		arguments['p'] = json.dumps(psd)
 
 	argumentlist = [['-{k}'.format(k=k), '{v}'.format(v=arguments[k])] for k in arguments]
 	argumentlist = flattenlistoflists(argumentlist)

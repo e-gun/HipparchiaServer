@@ -63,9 +63,13 @@
 #   but the module seems to have GIL issues that kill off progress polling. The 'cli' option
 #   does not yield this problem. NB, the cli executable is probably not installed, but if it is,
 #   it should be stored next to the module: that is, inside "HipparchiaServer/server/golangmodule/".
-#   This setting has no effect if GOLANGTHREADING is not True. Please note the security
-#   implications of 'cli': you will be sending a db password to a process and this event could be
-#   snooped by another user on your same system
+#   This setting has no effect if GOLANGTHREADING is not True. Please note the SECURITY
+#   IMPLICATIONS of 'cli': you will be sending a db password to a process and this event could be
+#   snooped by another user on your same system: "ps aux | grep gol" will expose the DB password.
+#   This can be avoided by building the binary yourself and hard coding the pw into it; then you can
+#   call the cli binary without sending the password.
+#
+# GOLANGBINARYKNOWSLOGININFO: almost certainly False unless you know it to be True as per the above.
 #
 
 
@@ -78,3 +82,4 @@ INTERMEDIATESEARCHCAP = 2000000
 SEARCHCODESTYLE = 'dynamic'
 GOLANGTHREADING = False
 GOLANGLOADING = 'cli'
+GOLANGBINARYKNOWSLOGININFO = False
