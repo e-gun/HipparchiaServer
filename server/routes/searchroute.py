@@ -37,7 +37,7 @@ from server.commandlineoptions import getcommandlineargs
 from server.searching.dynamicsqlsearchdispatching import dynamicsqlsearchdispatcher
 from server.searching.searchhelperfunctions import buildsearchobject, cleaninitialquery
 from server.startup import authordict, listmapper, progresspolldict, workdict, lemmatadict
-from server.threading.websocketthread import startwspolling
+from server.threading.websocketthread import checkforlivewebsocket
 
 if hipparchia.config['SEMANTICVECTORSENABLED']:
 	from server.semanticvectors.vectorroutehelperfunctions import findabsolutevectorsfromhits
@@ -363,11 +363,7 @@ def checkforactivesearch(searchid, trialnumber=0) -> JSON_STR:
 		# consolewarning(w.format(p=pollid, t=trialnumber), color='magenta')
 		return json.dumps('cannot_find_the_poll')
 
-	activethreads = [t.name for t in threading.enumerate()]
-
-	if 'websocketpoll' not in activethreads:
-		pollstart = threading.Thread(target=startwspolling, name='websocketpoll', args=())
-		pollstart.start()
+	checkforlivewebsocket()
 
 	if hipparchia.config['EXTERNALWSGI'] and hipparchia.config['POLLCONNECTIONTYPE'] == 'redis':
 		return externalwsgipolling(pollid)
@@ -376,7 +372,7 @@ def checkforactivesearch(searchid, trialnumber=0) -> JSON_STR:
 		if progresspolldict[pollid].getactivity():
 			return json.dumps(pollport)
 	except KeyError:
-		time.sleep(.10)
+		time.sleep(.20)
 		return checkforactivesearch(searchid, trialnumber)
 
 

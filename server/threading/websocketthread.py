@@ -11,6 +11,7 @@ import json
 import re
 import subprocess
 import websockets
+import threading
 
 from os import path
 
@@ -28,6 +29,39 @@ except ImportError:
 
 
 failurestring = '{f} returned: this is not supposed to happen. Polling must be broken'
+
+
+class WebSocketCheckBorg(object):
+	"""
+
+	a borg to hold a permanent value
+
+	"""
+	_sockethasbeenactivated = False
+	def __init__(self):
+		pass
+
+	def setasactive(self):
+		WebSocketCheckBorg._sockethasbeenactivated = True
+
+	def checkifactive(self):
+		return WebSocketCheckBorg._sockethasbeenactivated
+
+
+def checkforlivewebsocket():
+	"""
+
+	only turn on the websockets once
+
+	"""
+	b = WebSocketCheckBorg()
+	if not b.checkifactive():
+		pollstart = threading.Thread(target=startwspolling, name='websocketpoll', args=())
+		pollstart.start()
+		b.setasactive()
+	else:
+		debugmessage('websockets have already been activated')
+	return
 
 
 def startwspolling(theport=None):
@@ -49,10 +83,12 @@ def startwspolling(theport=None):
 	if hipparchia.config['GOLANGPROVIDESWEBSOCKETS']:
 		debugmessage('websockets are to be provided via the golang socket server')
 		startgolangwebsocketserver(theport)
+		return
 
 	if hipparchia.config['GOLANGLOADING'] != 'cli':
 		debugmessage('websockets are to be provided via the golang socket server')
 		startgolangwebsocketserver(theport)
+		return
 
 	startpythonwspolling(theport)
 
@@ -110,6 +146,7 @@ def startgolangwebsocketserver(theport):
 
 	subprocess.Popen(commandandarguments)
 	debugmessage('successfully opened {b}'.format(b=binary))
+
 	return
 
 
