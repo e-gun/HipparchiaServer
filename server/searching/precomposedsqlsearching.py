@@ -223,7 +223,7 @@ def sharedlibraryclisearcher(so: SearchObject) -> str:
         # path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
         basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
 
-    command = basepath + '/server/golangmodule/golanggrabber'
+    command = basepath + '/server/golangmodule/golanggrabber-cli'
     commandandarguments = formatgolanggrabberarguments(command, so)
 
     try:

@@ -9,12 +9,15 @@
 import asyncio
 import json
 import re
-
+import subprocess
 import websockets
+
+from os import path
 
 from server import hipparchia
 from server.formatting.miscformatting import consolewarning, debugmessage
 from server.formatting.miscformatting import validatepollid
+from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.startup import progresspolldict
 
 gosearch = None
@@ -24,10 +27,10 @@ except ImportError:
 	pass
 
 
-warningstring = '{f} returned: this is not supposed to happen. Polling must be broken'
+failurestring = '{f} returned: this is not supposed to happen. Polling must be broken'
 
 
-def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
+def startwspolling(theport=None):
 	"""
 
 	you need a websocket poll server
@@ -36,44 +39,81 @@ def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 
 	"""
 
+	if not theport:
+		theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
+
 	if not gosearch:
+		debugmessage('websockets are to be provided via the python socket server')
 		startpythonwspolling(theport)
+
+	if hipparchia.config['GOLANGPROVIDESWEBSOCKETS']:
+		debugmessage('websockets are to be provided via the golang socket server')
+		startgolangwebsocketserver(theport)
 
 	if hipparchia.config['GOLANGLOADING'] != 'cli':
 		debugmessage('websockets are to be provided via the golang socket server')
 		startgolangwebsocketserver(theport)
 
+	startpythonwspolling(theport)
+
 	# actually this function never returns
-	consolewarning('warningstring'.format(f='startwspolling()'), color='red')
+	consolewarning(failurestring.format(f='startwspolling()'), color='red')
 	return
 
 
 def startgolangwebsocketserver(theport):
 	"""
 
-	use the golang websocket server.
+	use the golang websocket server
 
-	it wants: (PORT, DEBUGGINGTHRESHOLD, FAILTHRESHOLD, REDISLOGININFO) as its parameters
+	it locks if you try to use it as a module; so we will invoke it via a binary
 
-		import hipparchiagolangsearching as gs
-		r = gs.NewRedisLogin('localhost:6379', '', 0)
-		gs.StartHipparchiaPollWebsocket(5005, 2, 5, r)
+	you can probably just run it without arguments since the build defaults are the same
+	as the defaults in the configuration files for HipparchiaServer
+
+	nevertheless, we will be doing this the tedious way...
+
+	Usage of ./WebSocketApp:
+	  -l int
+			logging level: 0 is silent; 2 is very noisy
+	  -p int
+			port on which to open the websocket server (default 5010)
+	  -r string
+			redis logon information (as a JSON string) (default "{\"Addr\": \"localhost:6379\", \"Password\": \"\", \"DB\": 0}")
+	  -t int
+			fail threshold before messages stop being sent (default 5)
 
 	"""
 
-	rl = '{h}:{p}'.format(h=hipparchia.config['REDISHOST'], p=hipparchia.config['REDISPORT'])
-	goredislogin = gosearch.NewRedisLogin(rl, str(), hipparchia.config['REDISDBID'])
-	gosearch.StartHipparchiaPollWebsocket(theport,
-										  hipparchia.config['GOLANGWSSLOGLEVEL'],
-										  hipparchia.config['GOLANGWSFAILTHRESHOLD'],
-										  goredislogin)
+	if not hipparchia.config['EXTERNALWSGI']:
+		basepath = path.dirname(__file__)
+		basepath = '/'.join(basepath.split('/')[:-2])
+	else:
+		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
+		basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
 
-	# actually this function never returns
-	consolewarning('warningstring'.format(f='startgolangwebsocketserver()'), color='red')
+	binary = '/server/golangmodule/WebSocketApp'
+	command = basepath + binary
+
+	arguments = dict()
+
+	rld = {'Addr': '{a}:{b}'.format(a=hipparchia.config['REDISHOST'], b=hipparchia.config['REDISPORT']),
+		   'Password': str(),
+		   'DB': hipparchia.config['REDISDBID']}
+	arguments['r'] = json.dumps(rld)
+	arguments['l'] = hipparchia.config['GOLANGWSSLOGLEVEL']
+	arguments['p'] = theport
+	# arguments['t'] = 5
+	argumentlist = [['-{k}'.format(k=k), '{v}'.format(v=arguments[k])] for k in arguments]
+	argumentlist = flattenlistoflists(argumentlist)
+	commandandarguments = [command] + argumentlist
+
+	subprocess.Popen(commandandarguments)
+	debugmessage('successfully opened {b}'.format(b=binary))
 	return
 
 
-def startpythonwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
+def startpythonwspolling(theport):
 	"""
 
 	launch a websocket poll server
@@ -116,7 +156,7 @@ def startpythonwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
 		loop.close()
 
 	# actually this function never returns
-	consolewarning('warningstring'.format(f='startpythonwspolling()'), color='red')
+	consolewarning(failurestring.format(f='startpythonwspolling()'), color='red')
 	return
 
 
