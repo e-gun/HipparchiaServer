@@ -13,9 +13,111 @@ import re
 import websockets
 
 from server import hipparchia
-from server.formatting.miscformatting import consolewarning
+from server.formatting.miscformatting import consolewarning, debugmessage
 from server.formatting.miscformatting import validatepollid
 from server.startup import progresspolldict
+
+gosearch = None
+try:
+	from server.golangmodule import hipparchiagolangsearching as gosearch
+except ImportError:
+	pass
+
+
+warningstring = '{f} returned: this is not supposed to happen. Polling must be broken'
+
+
+def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
+	"""
+
+	you need a websocket poll server
+
+	pick between python and golang as a delivery medium
+
+	"""
+
+	if not gosearch:
+		startpythonwspolling(theport)
+
+	if hipparchia.config['GOLANGLOADING'] != 'cli':
+		debugmessage('websockets are to be provided via the golang socket server')
+		startgolangwebsocketserver(theport)
+
+	# actually this function never returns
+	consolewarning('warningstring'.format(f='startwspolling()'), color='red')
+	return
+
+
+def startgolangwebsocketserver(theport):
+	"""
+
+	use the golang websocket server.
+
+	it wants: (PORT, DEBUGGINGTHRESHOLD, FAILTHRESHOLD, REDISLOGININFO) as its parameters
+
+		import hipparchiagolangsearching as gs
+		r = gs.NewRedisLogin('localhost:6379', '', 0)
+		gs.StartHipparchiaPollWebsocket(5005, 2, 5, r)
+
+	"""
+
+	rl = '{h}:{p}'.format(h=hipparchia.config['REDISHOST'], p=hipparchia.config['REDISPORT'])
+	goredislogin = gosearch.NewRedisLogin(rl, str(), hipparchia.config['REDISDBID'])
+	gosearch.StartHipparchiaPollWebsocket(theport,
+										  hipparchia.config['GOLANGWSSLOGLEVEL'],
+										  hipparchia.config['GOLANGWSFAILTHRESHOLD'],
+										  goredislogin)
+
+	# actually this function never returns
+	consolewarning('warningstring'.format(f='startgolangwebsocketserver()'), color='red')
+	return
+
+
+def startpythonwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
+	"""
+
+	launch a websocket poll server
+
+	tricky because loop.run_forever() will run forever: requires threading
+
+	the poll is more or less eternal: the libary was coded that way, and it is kind of irritating
+
+	multiple servers on multiple ports is possible, but not yet implemented: a multi-client model is not a priority
+
+	:param theport:
+	:return:
+	"""
+
+	try:
+		theport = int(theport)
+	except ValueError:
+		theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
+
+	theip = hipparchia.config['MYEXTERNALIPADDRESS']
+
+	# because we are not in the main thread we cannot ask for the default loop
+	loop = asyncio.new_event_loop()
+	asyncio.set_event_loop(loop)
+
+	wspolling = websockets.serve(wscheckpoll, theip, port=theport, loop=loop)
+	consolewarning('opening websocket at {p}'.format(p=theport), color='cyan', isbold=False)
+
+	try:
+		loop.run_until_complete(wspolling)
+	except OSError:
+		consolewarning('websocket could not be launched: cannot get access to {i}:{p}'.format(p=theport, i=theip),
+					   color='red')
+		pass
+
+	try:
+		loop.run_forever()
+	finally:
+		loop.run_until_complete(loop.shutdown_asyncgens())
+		loop.close()
+
+	# actually this function never returns
+	consolewarning('warningstring'.format(f='startpythonwspolling()'), color='red')
+	return
 
 
 async def wscheckpoll(websocket, path):
@@ -57,7 +159,7 @@ async def wscheckpoll(websocket, path):
 			else:
 				progress['extrainfo'] = str()
 		except KeyError:
-			# the poll is deleted when the query ends; you will always end up here
+			# the poll key is deleted from progresspolldict when the query ends; you will always end up here
 			progress['active'] = 'inactive'
 			try:
 				await websocket.send(json.dumps(progress))
@@ -89,50 +191,4 @@ async def wscheckpoll(websocket, path):
 			consolewarning('websocket non-fatal error: "{e}"'.format(e=e), color='yellow', isbold=False)
 			pass
 
-	return
-
-
-def startwspolling(theport=hipparchia.config['PROGRESSPOLLDEFAULTPORT']):
-	"""
-
-	launch a websocket poll server
-
-	tricky because loop.run_forever() will run forever: requires threading
-
-	the poll is more or less eternal: the libary was coded that way, and it is kind of irritating
-
-	multiple servers on multiple ports is possible, but not yet implemented: a multi-client model is not a priority
-
-	:param theport:
-	:return:
-	"""
-
-	try:
-		theport = int(theport)
-	except ValueError:
-		theport = hipparchia.config['PROGRESSPOLLDEFAULTPORT']
-
-	theip = hipparchia.config['MYEXTERNALIPADDRESS']
-
-	# because we are not in the main thread we cannot ask for the default loop
-	loop = asyncio.new_event_loop()
-	asyncio.set_event_loop(loop)
-
-	wspolling = websockets.serve(wscheckpoll, theip, port=theport, loop=loop)
-	consolewarning('opening websocket at {p}'.format(p=theport), color='cyan', isbold=False)
-
-	try:
-		loop.run_until_complete(wspolling)
-	except OSError:
-		consolewarning('websocket could not be launched: cannot get access to {i}:{p}'.format(p=theport, i=theip), color='red')
-		pass
-
-	try:
-		loop.run_forever()
-	finally:
-		loop.run_until_complete(loop.shutdown_asyncgens())
-		loop.close()
-
-	# actually this function never returns
-	consolewarning('wow: startwspolling() returned')
 	return

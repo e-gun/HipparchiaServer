@@ -71,7 +71,8 @@
 #
 # GOLANGBINARYKNOWSLOGININFO: almost certainly False unless you know it to be True as per the above.
 #
-
+# GOLANGWSFAILTHRESHOLD: how many empty results before the golang websocket stops yielding info about "searchid"
+#
 
 AUTOCONFIGWORKERS = True
 WORKERS = 3
@@ -83,3 +84,4 @@ SEARCHCODESTYLE = 'dynamic'
 GOLANGTHREADING = False
 GOLANGLOADING = 'cli'
 GOLANGBINARYKNOWSLOGININFO = False
+GOLANGWSFAILTHRESHOLD = 5

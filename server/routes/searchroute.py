@@ -364,6 +364,7 @@ def checkforactivesearch(searchid, trialnumber=0) -> JSON_STR:
 		return json.dumps('cannot_find_the_poll')
 
 	activethreads = [t.name for t in threading.enumerate()]
+
 	if 'websocketpoll' not in activethreads:
 		pollstart = threading.Thread(target=startwspolling, name='websocketpoll', args=())
 		pollstart.start()

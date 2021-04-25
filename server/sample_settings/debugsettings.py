@@ -14,7 +14,8 @@
 #
 # GOLANGCLILOGLEVEL and GOLANGMODLOGLEVEL set the logging level threshold for the golang code: 0 is silent;
 #   4 is very noisy. The cli messages are caught as 'black' CONSOLEWARNINGTYPES; the module messages cannot be
-#   kept out of the console.
+#   kept out of the console. GOLANGWSSLOGLEVEL is for the golang websocket server; not going to be easy to debug
+#   via HipparchiaServer; see note NOTES in HipparchiaGolangModule for a python shell route
 #
 # DBDEBUGMODE and HTMLDEBUGMODE will show DB locations of hits and/or
 # 	the raw HTML markup inside the DB there are no security
@@ -59,6 +60,7 @@ SUPPRESSWARNINGS = True
 CONSOLEWARNINGTYPES = ['red', 'yellow', 'green', 'cyan']
 GOLANGCLILOGLEVEL = 1
 GOLANGMODLOGLEVEL = 0
+GOLANGWSSLOGLEVEL = 0
 ENABLELOGGING = False
 HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'
 RETAINREDISPOLLS = False
