@@ -61,7 +61,8 @@
 #
 # GOLANGLOADING: how to call the external functions; 'module' is *supposed* to be the right way;
 #   but the module seems to have GIL issues that kill off progress polling. The 'cli' option
-#   does not yield this problem. NB, the cli executable is probably not installed, but if it is,
+#   does not yield this problem. 'module' requires a GOLANGTHWSBINARY. This is not installed by default.
+#   NB, the cli executable is also not installed by default, but if it is,
 #   it should be stored next to the module: that is, inside "HipparchiaServer/server/golangmodule/".
 #   This setting has no effect if GOLANGTHREADING is not True. Please note the SECURITY
 #   IMPLICATIONS of 'cli': you will be sending a db password to a process and this event could be
@@ -80,9 +81,14 @@ WORKERS = 3
 MPCOMMITCOUNT = 250
 LEMMACHUNKSIZE = 10
 INTERMEDIATESEARCHCAP = 2000000
+
 SEARCHCODESTYLE = 'dynamic'
+# SEARCHCODESTYLE = 'precomposed'
+
 GOLANGTHREADING = False
 GOLANGLOADING = 'cli'
+# GOLANGLOADING = 'module'
+
 GOLANGLCLBINARYNAME = 'golanggrabber-cli'
 GOLANGBINARYKNOWSLOGININFO = False
 GOLANGWSFAILTHRESHOLD = 3
