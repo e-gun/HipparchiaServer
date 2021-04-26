@@ -248,6 +248,7 @@ async def wscheckpoll(websocket, path):
 			break
 
 		await asyncio.sleep(.4)
+		# print(progress)
 		# print('progress %', ((progress['Poolofwork'] - progress['Remaining']) / progress['Poolofwork']) * 100)
 
 		try:

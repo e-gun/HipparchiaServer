@@ -223,7 +223,7 @@ def golangclibinarysearcher(so: SearchObject) -> str:
         # path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
         basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
 
-    command = basepath + '/server/golangmodule/golanggrabber-cli'
+    command = basepath + '/server/golangmodule/' + hipparchia.config['GOLANGLCLBINARYNAME']
     commandandarguments = formatgolanggrabberarguments(command, so)
 
     try:

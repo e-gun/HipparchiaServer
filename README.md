@@ -112,6 +112,8 @@ key features:
 		forward-compatible unicode: attempt to properly code characters which are not yet available in most fonts
 		known unknowns: unhandled characters preserve their betacode messages in the metadata for future fixes
 		debugging options can be enabled at launch time (see "./run.py -h")
+        (optional) threading via golang extensions
+        (optional) websockets via golang extentions
 
 ```
 

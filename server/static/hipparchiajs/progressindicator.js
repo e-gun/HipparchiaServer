@@ -49,6 +49,6 @@ function displayprogress(progress){
    if ( h > 0) { thehtml += '<br />(<span class="progress">' + h + '</span> found)'; }
 
    thehtml += '<br />' + x;
-
+   // console.log(r);
    $('#pollingdata').html(thehtml);
 }
