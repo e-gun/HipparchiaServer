@@ -227,19 +227,19 @@ async def wscheckpoll(websocket, path):
 		progress = dict()
 		try:
 			active = progresspolldict[pollid].getactivity()
-			progress['poolofwork'] = progresspolldict[pollid].worktotal()
-			progress['remaining'] = progresspolldict[pollid].getremaining()
-			progress['hitcount'] = progresspolldict[pollid].gethits()
-			progress['statusmessage'] = progresspolldict[pollid].getstatus()
-			progress['launchtime'] = progresspolldict[pollid].getlaunchtime()
+			progress['Poolofwork'] = progresspolldict[pollid].worktotal()
+			progress['Remaining'] = progresspolldict[pollid].getremaining()
+			progress['Hitcount'] = progresspolldict[pollid].gethits()
+			progress['Statusmessage'] = progresspolldict[pollid].getstatus()
+			progress['Launchtime'] = progresspolldict[pollid].getlaunchtime()
 			if not hipparchia.config['SUPPRESSLONGREQUESTMESSAGE']:
 				if progresspolldict[pollid].getnotes():
-					progress['notes'] = progresspolldict[pollid].getnotes()
+					progress['Notes'] = progresspolldict[pollid].getnotes()
 			else:
-				progress['notes'] = str()
+				progress['Notes'] = str()
 		except KeyError:
 			# the poll key is deleted from progresspolldict when the query ends; you will always end up here
-			progress['active'] = 'inactive'
+			progress['Active'] = 'inactive'
 			try:
 				await websocket.send(json.dumps(progress))
 			except websockets.exceptions.ConnectionClosed:
@@ -254,10 +254,10 @@ async def wscheckpoll(websocket, path):
 			# something changed amid backend updates and json.dumps() started choking on progresspolldict[pollid].getactivity()
 			# active is (now) a <Synchronized wrapper for c_byte(1)>; that was the unexpected change: it was 'bool'
 			# <class 'multiprocessing.sharedctypes.Synchronized'>
-			progress['active'] = active.value
+			progress['Active'] = active.value
 		except AttributeError:
 			# AttributeError: 'str' (or 'int' or 'bool') object has no attribute 'value'
-			progress['active'] = active
+			progress['Active'] = active
 
 		try:
 			await websocket.send(json.dumps(progress))

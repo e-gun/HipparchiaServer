@@ -28,13 +28,13 @@ function checkactivityviawebsocket(searchid) {
 }
 
 function displayprogress(progress){
-    let r = progress['remaining'];
-    let t = progress['poolofwork'];
-    let h = progress['hitcount'];
+    let r = progress['Remaining'];
+    let t = progress['Poolofwork'];
+    let h = progress['Hitcount'];
     let pct = Math.round((t-r) / t * 100);
-    let m = progress['statusmessage'];
-    let l = progress['launchtime'];
-    let x = progress['notes'];
+    let m = progress['Statusmessage'];
+    let l = progress['Launchtime'];
+    let x = progress['Notes'];
 
     let thehtml = '';
 
