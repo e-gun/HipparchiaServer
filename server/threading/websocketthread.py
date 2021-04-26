@@ -130,7 +130,7 @@ def startgolangwebsocketserver(theport):
 		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
 		basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
 
-	binary = '/server/golangmodule/WebSocketApp'
+	binary = '/server/golangmodule/' + hipparchia.config['GOLANGTHWSBINARYNAME']
 	command = basepath + binary
 
 	arguments = dict()
