@@ -21,6 +21,7 @@ function checkactivityviawebsocket(searchid) {
         s.onmessage = function(e){
             let progress = JSON.parse(e.data);
             displayprogress(progress);
+            console.log(progress)
             if  (progress['active'] === 'inactive') { pd.html(''); s.close(); s = null; }
             }
     });
@@ -28,14 +29,16 @@ function checkactivityviawebsocket(searchid) {
 
 function displayprogress(progress){
     let r = progress['remaining'];
-    let t = progress['total'];
-    let h = progress['hits'];
+    let t = progress['poolofwork'];
+    let h = progress['hitcount'];
     let pct = Math.round((t-r) / t * 100);
-    let m = progress['message'];
-    let e = progress['elapsed'];
-    let x = progress['extrainfo'];
+    let m = progress['statusmessage'];
+    let l = progress['launchtime'];
+    let x = progress['notes'];
 
     let thehtml = '';
+
+    let e = Math.round((new Date().getTime() / 1000 ) - l);
 
     if (t !== -1) {
         thehtml += m + ': <span class="progress">' + pct + '%</span> completed&nbsp;(' + e + 's)';

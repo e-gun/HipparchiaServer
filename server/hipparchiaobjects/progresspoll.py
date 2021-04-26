@@ -59,6 +59,9 @@ class SharedMemoryProgressPoll(object):
 		elapsed = round(time.time() - self.launchtime, 0)
 		return elapsed
 
+	def getlaunchtime(self):
+		return self.launchtime
+
 	def getremaining(self) -> int:
 		return self.remaining.value
 
@@ -193,6 +196,9 @@ class RedisProgressPoll(object):
 	def getstatus(self):
 		m = self.getredisvalue('statusmessage')
 		return m.decode('utf-8')
+
+	def getlaunchtime(self):
+		return self.getredisvalue('launchtime')
 
 	def getelapsed(self):
 		launch = self.getredisvalue('launchtime')

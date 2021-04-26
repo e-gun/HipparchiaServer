@@ -187,9 +187,9 @@ def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
         rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
 
     if hipparchia.config['GOLANGLOADING'] != 'cli':
-        resultrediskey = sharedlibrarysearcher(so)
+        resultrediskey = golangsharedlibrarysearcher(so)
     else:
-        resultrediskey = sharedlibraryclisearcher(so)
+        resultrediskey = golangclibinarysearcher(so)
 
     redisresults = list()
 
@@ -205,7 +205,7 @@ def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
     return hits
 
 
-def sharedlibraryclisearcher(so: SearchObject) -> str:
+def golangclibinarysearcher(so: SearchObject) -> str:
     """
 
     you have decided to call the "golanggrabber" binary
@@ -249,7 +249,7 @@ def sharedlibraryclisearcher(so: SearchObject) -> str:
     return resultrediskey
 
 
-def sharedlibrarysearcher(so: SearchObject) -> str:
+def golangsharedlibrarysearcher(so: SearchObject) -> str:
     """
 
     use the shared library to do the golang search
@@ -269,7 +269,7 @@ def sharedlibrarysearcher(so: SearchObject) -> str:
     debugmessage('calling golang via the golang module')
     searcher = gosearch.HipparchiaGolangSearcher
     resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), hipparchia.config['GOLANGMODLOGLEVEL'], goredislogin, gopsqlloginrw)
-    debugmessage('search completed and stored at {r}'.format(r=resultrediskey))
+    debugmessage('search completed and stored at "{r}"'.format(r=resultrediskey))
 
     return resultrediskey
 

@@ -38,6 +38,7 @@ class WebSocketCheckBorg(object):
 
 	"""
 	_sockethasbeenactivated = False
+
 	def __init__(self):
 		pass
 
@@ -60,7 +61,8 @@ def checkforlivewebsocket():
 		pollstart.start()
 		b.setasactive()
 	else:
-		debugmessage('websockets have already been activated')
+		# debugmessage('websockets have already been activated')
+		pass
 	return
 
 
@@ -225,16 +227,16 @@ async def wscheckpoll(websocket, path):
 		progress = dict()
 		try:
 			active = progresspolldict[pollid].getactivity()
-			progress['total'] = progresspolldict[pollid].worktotal()
+			progress['poolofwork'] = progresspolldict[pollid].worktotal()
 			progress['remaining'] = progresspolldict[pollid].getremaining()
-			progress['hits'] = progresspolldict[pollid].gethits()
-			progress['message'] = progresspolldict[pollid].getstatus()
-			progress['elapsed'] = progresspolldict[pollid].getelapsed()
+			progress['hitcount'] = progresspolldict[pollid].gethits()
+			progress['statusmessage'] = progresspolldict[pollid].getstatus()
+			progress['launchtime'] = progresspolldict[pollid].getlaunchtime()
 			if not hipparchia.config['SUPPRESSLONGREQUESTMESSAGE']:
 				if progresspolldict[pollid].getnotes():
-					progress['extrainfo'] = progresspolldict[pollid].getnotes()
+					progress['notes'] = progresspolldict[pollid].getnotes()
 			else:
-				progress['extrainfo'] = str()
+				progress['notes'] = str()
 		except KeyError:
 			# the poll key is deleted from progresspolldict when the query ends; you will always end up here
 			progress['active'] = 'inactive'
@@ -267,5 +269,4 @@ async def wscheckpoll(websocket, path):
 			# macOS and indexmaker combo is a problem; macOS is the real problem?
 			consolewarning('websocket non-fatal error: "{e}"'.format(e=e), color='yellow', isbold=False)
 			pass
-
 	return
