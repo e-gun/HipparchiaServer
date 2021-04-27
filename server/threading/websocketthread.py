@@ -111,15 +111,17 @@ def startgolangwebsocketserver(theport):
 
 	nevertheless, we will be doing this the tedious way...
 
-	Usage of ./WebSocketApp:
+	Usage of ./HipparchiaGoWebSocketApp:
 	  -l int
 			logging level: 0 is silent; 2 is very noisy
 	  -p int
 			port on which to open the websocket server (default 5010)
 	  -r string
 			redis logon information (as a JSON string) (default "{\"Addr\": \"localhost:6379\", \"Password\": \"\", \"DB\": 0}")
+	  -s int
+			save the polls instead of deleting them: 0 is no; 1 is yes
 	  -t int
-			fail threshold before messages stop being sent (default 5)
+			fail threshold before messages stop being sent (default 4)
 
 	"""
 
@@ -139,9 +141,13 @@ def startgolangwebsocketserver(theport):
 		   'Password': str(),
 		   'DB': hipparchia.config['REDISDBID']}
 	arguments['r'] = json.dumps(rld)
+	if hipparchia.config['RETAINREDISPOLLS']:
+		arguments['s'] = 1
+	else:
+		arguments['s'] = 0
 	arguments['l'] = hipparchia.config['GOLANGWSSLOGLEVEL']
 	arguments['p'] = theport
-	# arguments['t'] = 5
+	arguments['t'] = hipparchia.config['GOLANGWSFAILTHRESHOLD']
 	argumentlist = [['-{k}'.format(k=k), '{v}'.format(v=arguments[k])] for k in arguments]
 	argumentlist = flattenlistoflists(argumentlist)
 	commandandarguments = [command] + argumentlist
