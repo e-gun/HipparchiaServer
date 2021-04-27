@@ -311,7 +311,7 @@ def rewritesqlsearchdictforgolang(so: SearchObject) -> dict:
 
     the following modifications to the searchdict are required to feed the golang module
     [a] the keys need to be renamed: temptable -> TempTable; query -> PsqlQuery; data -> PsqlData
-    [b] the tuple inside of 'data' needs to come out and up: ('x',) -> 'x'
+    [b] any tuple inside of 'data' needs to come out and up: ('x',) -> 'x'
     [c] the '%s' in the 'query' needs to become '$1' for string substitution
 
     """
