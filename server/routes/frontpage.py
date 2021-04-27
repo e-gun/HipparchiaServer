@@ -27,13 +27,11 @@ from version import release, hipparchiaserverversion, readgitdata
 JSON_STR = str
 PAGE_STR = str
 
-
 """"
 
 set some variables at outer scope that both frontpage() and errorhandlingpage() will use 
 
 """
-
 
 stylesheet = hipparchia.config['CSSSTYLESHEET']
 expectedsqltemplateversion = 10082019
@@ -45,14 +43,33 @@ psqlversion = getpostgresserverversion()
 # Note that unlike the Python sys.version, the returned value will always include the patchlevel (it defaults to '0').
 pythonversion = '.'.join(python_version_tuple())
 
-backend = """
+theenvironment = """
 Platform    {pf}
 PostgreSQL  {ps}
 Python      {py}
 Flask       {fl}
+
+Search      {sr}
+WS          {ws}
+Go          {go}
+{gs}        {gx}
 """
 
-backend = backend.format(pf=platform(), ps=psqlversion, py=pythonversion, fl=flaskversion)
+if hipparchia.config['GOLANGPROVIDESWEBSOCKETS']:
+	ws = hipparchia.config['GOLANGTHWSBINARYNAME']
+else:
+	ws = 'python websockets'
+
+if hipparchia.config['GOLANGTHREADING']:
+	gs = 'GoHelper'
+	gx = hipparchia.config['GOLANGLOADING']
+else:
+	gs = str()
+	gx = str()
+
+theenvironment = theenvironment.format(pf=platform(), ps=psqlversion, py=pythonversion, fl=flaskversion, ws= ws,
+									   sr=hipparchia.config['SEARCHCODESTYLE'], go=hipparchia.config['GOLANGTHREADING'],
+									   gs=gs, gx=gx)
 
 shortversion = hipparchiaserverversion
 gitlength = 5
@@ -68,6 +85,7 @@ if not release:
 now define some routes...
 
 """
+
 
 @hipparchia.route('/')
 def frontpage() -> PAGE_STR:
@@ -122,32 +140,32 @@ def frontpage() -> PAGE_STR:
 		loginform = LoginForm()
 
 	page = render_template('search.html',
-							activelists=activelists,
-							activecorpora=activecorpora,
-							clab=corporalabels,
-							css=stylesheet,
-							backend=backend,
-							buildinfo=buildinfo,
-							onehit=session['onehit'],
-							picker=picker,
-							fonts=fonts,
-							hwindexing=session['headwordindexing'],
-							indexbyfrequency=session['indexbyfrequency'],
-							spuria=session['spuria'],
-							varia=session['varia'],
-							undated=session['incerta'],
-							debug=debugpanel,
-							vectorhtml=vectorhtmlforfrontpage(),
-							vectoroptionshtml=vectorhtmlforoptionsbar(),
-							havevectors=havevectors,
-							version=version,
-							shortversion=shortversion,
-							searchfieldbuttons=getsearchfieldbuttonshtml(),
-							holdingshtml=getauthorholdingfieldhtml(),
-							datesearchinghtml=getdaterangefieldhtml(),
-							lexicalthml=getlexicafieldhtml(),
-							icanzap=icanzap,
-							loginform=loginform)
+						   activelists=activelists,
+						   activecorpora=activecorpora,
+						   clab=corporalabels,
+						   css=stylesheet,
+						   backend=theenvironment,
+						   buildinfo=buildinfo,
+						   onehit=session['onehit'],
+						   picker=picker,
+						   fonts=fonts,
+						   hwindexing=session['headwordindexing'],
+						   indexbyfrequency=session['indexbyfrequency'],
+						   spuria=session['spuria'],
+						   varia=session['varia'],
+						   undated=session['incerta'],
+						   debug=debugpanel,
+						   vectorhtml=vectorhtmlforfrontpage(),
+						   vectoroptionshtml=vectorhtmlforoptionsbar(),
+						   havevectors=havevectors,
+						   version=version,
+						   shortversion=shortversion,
+						   searchfieldbuttons=getsearchfieldbuttonshtml(),
+						   holdingshtml=getauthorholdingfieldhtml(),
+						   datesearchinghtml=getdaterangefieldhtml(),
+						   lexicalthml=getlexicafieldhtml(),
+						   icanzap=icanzap,
+						   loginform=loginform)
 
 	return page
 
@@ -180,12 +198,12 @@ def errorhandlingpage(errornumber) -> PAGE_STR:
 
 	"""
 	template = render_template('error{e}.html'.format(e=errornumber),
-						css=stylesheet,
-						backend=backend,
-						buildinfo=buildinfo,
-						version=version,
-						shortversion=shortversion,
-						)
+							   css=stylesheet,
+							   backend=theenvironment,
+							   buildinfo=buildinfo,
+							   version=version,
+							   shortversion=shortversion,
+							   )
 	return template
 
 
