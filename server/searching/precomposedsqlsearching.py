@@ -66,14 +66,17 @@ if gosearch:
 [b] most of the searches nevertheless call basicprecomposedsqlsearcher()
     two-step searches will call basicprecomposedsqlsearcher() via  generatepreliminaryhitlist()
 
-[c] eventually searching should either flow through a shared library or go through the in-house search code
+[c] searching can flow through a golang helper [precomposedgolangsearcher()] or move through the in-house 
+    search code [precomposedsqlsearchmanager()]
 
 [d] the in-house search code flow is: 
     [d1] precomposedsqlsearchmanager() - build a collection of MP workers who then workonprecomposedsqlsearch()
     [d2] workonprecomposedsqlsearch() - iterate through listofplacestosearch & execute precomposedsqlsearcher() on each item in the list
     [d3] precomposedsqlsearcher() - execute the basic sql query and return the hits
     
-[e] the shared library is barely begun; but refactoring the search code has cleaned up some old crud
+[e] the golang help comes either in the form of a binary opened by subprocess [golangclibinarysearcher()] or via 
+    a python module that is imported [golangsharedlibrarysearcher()]. The latter is the "right" way, but gopy is
+    being fussy about generating something with usable internal imports.  
 
 """
 
@@ -490,10 +493,6 @@ def precomposedsqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
 
     setofhits = set()
 
-    # print('initialhitlines')
-    # for i in initialhitlines:
-    #     print(i.index, i.markedup)
-
     while initialhitlines:
         # windows of indices come back: e.g., three lines that look like they match when only one matches [3131, 3132, 3133]
         # figure out which line is really the line with the goods
@@ -517,7 +516,6 @@ def precomposedsqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
                     # usually you won't get a hit by grabbing the next db line, but sometimes you do...
                     query = 'SELECT {wtmpl} FROM {tb} WHERE index=%s'.format(wtmpl=worklinetemplate, tb=lineobject.authorid)
                     data = (lineobject.index + 1,)
-                    # print('subqueryphrasesearch() "while locallineobjects..." loop q,d:\n\t', query, data)
                     dbcursor.execute(query, data)
                     try:
                         nextline = dblineintolineobject(dbcursor.fetchone())
@@ -527,8 +525,6 @@ def precomposedsqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
                 for c in combinations:
                     tail = c[0] + '$'
                     head = '^' + c[1]
-                    # debugging
-                    # print('re',getattr(lo,so.usewordlist),tail, head, getattr(next,so.usewordlist))
 
                     t = False
                     h = False
@@ -651,7 +647,6 @@ def workonprecomposedsqlsearch(workerid: int, foundlineobjects: ListProxy, listo
             foundlineobjects.extend(lineobjects)
 
             if lineobjects:
-                # print(authortable, len(lineobjects))
                 numberoffinds = len(lineobjects)
                 activepoll.addhits(numberoffinds)
         else:
@@ -661,8 +656,6 @@ def workonprecomposedsqlsearch(workerid: int, foundlineobjects: ListProxy, listo
             activepoll.remain(len(listofplacestosearch))
         except remaindererror:
             pass
-
-    # print('workonrawsqlsearch() worker #{i} finished'.format(i=workerid))
 
     return foundlineobjects
 
