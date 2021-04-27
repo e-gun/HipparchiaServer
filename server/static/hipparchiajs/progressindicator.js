@@ -38,7 +38,7 @@ function displayprogress(progress){
 
     let thehtml = '';
 
-    if (r !== undefined && t !== undefined) {
+    if (r !== undefined && t !== undefined  && !isNaN(pct)) {
         let e = Math.round((new Date().getTime() / 1000) - l);
 
         if (t !== -1) {
@@ -52,7 +52,7 @@ function displayprogress(progress){
         }
 
         thehtml += '<br />' + x;
-        // console.log(r);
+        // console.log(pct);
     }
    $('#pollingdata').html(thehtml);
 }

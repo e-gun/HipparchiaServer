@@ -8,13 +8,15 @@
 
 import platform
 from multiprocessing import Manager, Process
+from multiprocessing.managers import ListProxy
 
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.semanticvectors.vectorhelpers import findsentences
 from server.threading.mpthreadcount import setthreadcount
 
 
-def vectorprepdispatcher(searchobject):
+def vectorprepdispatcher(so: SearchObject):
 	"""
 
 	assign the vector prep to multiprocessing workers
@@ -28,8 +30,6 @@ def vectorprepdispatcher(searchobject):
 	:param activepoll:
 	:return:
 	"""
-
-	so = searchobject
 
 	if platform.system() == 'Windows':
 		# otherwise: RecursionError: maximum recursion depth exceeded while calling a Python object
@@ -60,7 +60,7 @@ def vectorprepdispatcher(searchobject):
 	return fs
 
 
-def breaktextsintosentences(foundsentences, searchlist, searchobject, dbconnection):
+def breaktextsintosentences(foundsentences: ListProxy, searchlist: ListProxy, so: SearchObject, dbconnection: ConnectionObject):
 	"""
 
 	break a text into sentences that contain the term we are looking for
@@ -74,7 +74,6 @@ def breaktextsintosentences(foundsentences, searchlist, searchobject, dbconnecti
 	:return:
 	"""
 
-	so = searchobject
 	activepoll = so.poll
 
 	dbcursor = dbconnection.cursor()

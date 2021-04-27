@@ -9,6 +9,7 @@
 import re
 import time
 from string import punctuation
+from typing import List
 
 import psycopg2
 
@@ -30,6 +31,8 @@ from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.wordformatting import acuteorgrav, basiclemmacleanup, elidedextrapunct, removegravity, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
+from server.hipparchiaobjects.searchobjects import SearchObject
+from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
 from server.searching.dynamicsqlsearchdispatching import dynamicsqlsearchdispatcher
 from server.searching.searchhelperfunctions import buildbetweenwhereextension
@@ -212,20 +215,21 @@ def recursivesplit(tosplit, listofsplitlerms):
 	return tosplit
 
 
-def findsentences(authortable, searchobject, cursor):
+def findsentences(authortable: str, so: SearchObject, dbcursor: ConnectionObject.cursor) -> List[tuple]:
 	"""
 
 	grab a chunk of a database
 
 	turn it into a collection of sentences
 
+	findsentences() results[0] ('line/ch0005w001/2749', 'ϲυνάγωγοϲ κατεϲκεύαϲεν τὸ ἐνϲόριον τοῖϲ ἀπελευθέροιϲ καὶ θρέμμαϲιν')
+	findsentences() results[0] ('line/gr1326w001/1', 'βαϲϲαρικά οἵ τ’ ἔχον ὑλάταο θεοῦ ἕδοϲ ἀπόλλωνοϲ τέμβρον ἐρύϲθειάν τε καὶ εἰναλίην ἀμαμαϲϲόν')
+
 	:param authortable:
 	:param searchobject:
-	:param cursor:
+	:param dbcursor:
 	:return:
 	"""
-
-	so = searchobject
 
 	r = so.indexrestrictions[authortable]
 
@@ -234,7 +238,7 @@ def findsentences(authortable, searchobject, cursor):
 		q = r['where']['tempquery']
 		avoidcollisions = assignuniquename()
 		q = re.sub('_includelist', '_includelist_{a}'.format(a=avoidcollisions), q)
-		cursor.execute(q)
+		dbcursor.execute(q)
 		# now you can work with it
 		wtempate = """
 		EXISTS
@@ -265,19 +269,20 @@ def findsentences(authortable, searchobject, cursor):
 	# 	whr = 'WHERE'
 	# query = 'SELECT {c} FROM {db} {whr} level_00_value != %s'.format(c=so.usecolumn, db=authortable, whr=whr)
 	data = ('t',)
-	cursor.execute(query, data)
-	results = resultiterator(cursor)
+	dbcursor.execute(query, data)
+	results = resultiterator(dbcursor)
 	results = [dblineintolineobject(line) for line in results]
 
 	# kill off titles and salutations: dangerous if there is a body l1 value of 't' out there
 	results = [r for r in results if r.l1 not in ['t', 'sa']]
 
 	results = parsevectorsentences(so, results)
+	# print('findsentences() results[0]', results[0])
 
 	return results
 
 
-def parsevectorsentences(searchobject, lineobjects):
+def parsevectorsentences(so: SearchObject, lineobjects: List[dbWorkLine]) -> List[tuple]:
 	"""
 
 	take raw lines, join them together, clean them and then return tuples of lines and ids
@@ -294,7 +299,6 @@ def parsevectorsentences(searchobject, lineobjects):
 	:param lineobjects:
 	:return:
 	"""
-	so = searchobject
 
 	requiresids = ['semanticvectorquery', 'nearestneighborsquery', 'sentencesimilarity']
 
