@@ -410,7 +410,22 @@ def precomposedsqlphrasesearch(so: SearchObject) -> List[dbWorkLine]:
 
     note that the second half of this is not MP: but searches already only take 6s; so clean code probably wins here
 
+    FIXME:
+
+    can't find the phrases in here...:
+        κατεϲκεύαϲεν τὸ ἐνϲόριον FAILS
+        ϲεν τὸ ἐνϲόριον το SUCCEEDS
+
+    1 Ῥουφεῖνα Ἰουδαία ἀρχι-
+    2 ϲυνάγωγοϲ κατεϲκεύα-
+    3 ϲεν τὸ ἐνϲόριον τοῖϲ ἀπε-     ( match: ἀπελευθέροιϲ )
+    4 λευθέροιϲ καὶ θρέμ(μ)αϲιν
+    5 μηδενὸϲ ἄλ(λ)ου ἐξουϲίαν ἔ-
+
+    multiple hyphenated words is the problem
+
     """
+    debugmessage('executing a precomposedsqlphrasesearch()')
 
     so.termone = so.leastcommon
     searchphrase = so.phrase
@@ -466,6 +481,7 @@ def precomposedsqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
     these searches take linear time: same basic time for any given scope regardless of the query
 
     """
+    debugmessage('executing a precomposedsqlsubqueryphrasesearch()')
 
     # rebuild the searchsqldict but this time pass through rewritequerystringforsubqueryphrasesearching()
     so.searchsqldict = searchlistintosqldict(so, so.phrase, subqueryphrasesearch=True)

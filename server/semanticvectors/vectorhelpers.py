@@ -222,8 +222,17 @@ def findsentences(authortable: str, so: SearchObject, dbcursor: ConnectionObject
 
 	turn it into a collection of sentences
 
-	findsentences() results[0] ('line/ch0005w001/2749', 'ϲυνάγωγοϲ κατεϲκεύαϲεν τὸ ἐνϲόριον τοῖϲ ἀπελευθέροιϲ καὶ θρέμμαϲιν')
-	findsentences() results[0] ('line/gr1326w001/1', 'βαϲϲαρικά οἵ τ’ ἔχον ὑλάταο θεοῦ ἕδοϲ ἀπόλλωνοϲ τέμβρον ἐρύϲθειάν τε καὶ εἰναλίην ἀμαμαϲϲόν')
+	findsentences() results[0] ('line/gr0014w001/1', 'ἀντὶ πολλῶν ἄν ὦ ἄνδρεϲ ἀθηναῖοι χρημάτων ὑμᾶϲ ἑλέϲθαι νομίζω εἰ φανερὸν γένοιτο τὸ μέλλον ϲυνοίϲειν τῇ πόλει περὶ ὧν νυνὶ ϲκοπεῖτε')
+
+	FIXME:
+
+	findsentences() results[0] ('line/gr0014w002/233', 'μαϲτότεροϲ παρὰ πᾶϲι νομίζεται')
+
+	ὁ μὲν γὰρ ὅϲῳ
+	3.6 πλείον’ ὑπὲρ τὴν ἀξίαν πεποίηκε τὴν αὑτοῦ, τοϲούτῳ θαυ-
+	3.7 μαϲτότεροϲ παρὰ πᾶϲι νομίζεται·
+
+	the hyphenation is killing us...
 
 	:param authortable:
 	:param searchobject:
@@ -252,11 +261,11 @@ def findsentences(authortable: str, so: SearchObject, dbcursor: ConnectionObject
 		whereextensions = whereextensions[:-4]
 		whr = 'WHERE {xtn} '.format(xtn=whereextensions)
 	elif r['type'] == 'unrestricted':
-		whr = ''
+		whr = str()
 	else:
 		# should never see this
 		print('error in substringsearch(): unknown whereclause type', r['type'])
-		whr = ''
+		whr = str()
 
 	# vanilla grab-it-all
 	query = 'SELECT {wtmpl} FROM {db} {whr}'.format(wtmpl=worklinetemplate, db=authortable, whr=whr)

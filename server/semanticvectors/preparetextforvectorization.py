@@ -9,14 +9,15 @@
 import platform
 from multiprocessing import Manager, Process
 from multiprocessing.managers import ListProxy
+from typing import List
 
-from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.connectionobject import ConnectionObject
+from server.hipparchiaobjects.searchobjects import SearchObject
 from server.semanticvectors.vectorhelpers import findsentences
 from server.threading.mpthreadcount import setthreadcount
 
 
-def vectorprepdispatcher(so: SearchObject):
+def vectorprepdispatcher(so: SearchObject) -> List[tuple]:
 	"""
 
 	assign the vector prep to multiprocessing workers
@@ -25,6 +26,7 @@ def vectorprepdispatcher(so: SearchObject):
 		activepoll:
 			<server.hipparchiaclasses.ProgressPoll object at 0x1102c15f8>
 
+	findsentences() results[0] ('line/gr0014w001/1', 'ἀντὶ πολλῶν ἄν ὦ ἄνδρεϲ ἀθηναῖοι χρημάτων ὑμᾶϲ ἑλέϲθαι νομίζω εἰ φανερὸν γένοιτο τὸ μέλλον ϲυνοίϲειν τῇ πόλει περὶ ὧν νυνὶ ϲκοπεῖτε')
 
 	:param searchobject:
 	:param activepoll:
@@ -60,12 +62,14 @@ def vectorprepdispatcher(so: SearchObject):
 	return fs
 
 
-def breaktextsintosentences(foundsentences: ListProxy, searchlist: ListProxy, so: SearchObject, dbconnection: ConnectionObject):
+def breaktextsintosentences(foundsentences: ListProxy, searchlist: ListProxy, so: SearchObject, dbconnection: ConnectionObject) -> List[tuple]:
 	"""
 
 	break a text into sentences that contain the term we are looking for
 
 	that is, findsentences() both chunks and searches
+
+	findsentences() results[0] ('line/gr0014w001/1', 'ἀντὶ πολλῶν ἄν ὦ ἄνδρεϲ ἀθηναῖοι χρημάτων ὑμᾶϲ ἑλέϲθαι νομίζω εἰ φανερὸν γένοιτο τὸ μέλλον ϲυνοίϲειν τῇ πόλει περὶ ὧν νυνὶ ϲκοπεῖτε')
 
 	:param foundsentences:
 	:param searchlist:
@@ -99,10 +103,12 @@ def breaktextsintosentences(foundsentences: ListProxy, searchlist: ListProxy, so
 	return foundsentences
 
 
-def monobreaktextsintosentences(searchlist, searchobject):
+def monobreaktextsintosentences(searchlist: list, searchobject) -> List[tuple]:
 	"""
 
 	A wrapper for breaktextsintosentences() since Windows can't MP it...
+
+	findsentences() results[0] ('line/gr0014w001/1', 'ἀντὶ πολλῶν ἄν ὦ ἄνδρεϲ ἀθηναῖοι χρημάτων ὑμᾶϲ ἑλέϲθαι νομίζω εἰ φανερὸν γένοιτο τὸ μέλλον ϲυνοίϲειν τῇ πόλει περὶ ὧν νυνὶ ϲκοπεῖτε')
 
 	:param searchlist:
 	:param searchobject:
