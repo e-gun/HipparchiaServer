@@ -322,6 +322,8 @@ def rewritesqlsearchdictforgolang(so: SearchObject) -> dict:
         newdict[s] = dict()
         newdict[s]['TempTable'] = ssq[s]['temptable']
         newdict[s]['PsqlQuery'] = re.sub(r'%s', r'$1', ssq[s]['query'])
-        newdict[s]['PsqlData'] = ssq[s]['data'][0]
-
+        if isinstance(ssq[s]['data'], tuple):
+            newdict[s]['PsqlData'] = ssq[s]['data'][0]
+        else:
+            newdict[s]['PsqlData'] = ssq[s]['data']
     return newdict
