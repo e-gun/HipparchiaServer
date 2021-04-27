@@ -10,11 +10,11 @@ from sys import argv
 from os import path
 
 
-stable = False
-release = False
+stable = True
+release = True
 prerelease = False
 
-hipparchiaserverversion = '1.7.1'
+hipparchiaserverversion = '1.7.0'
 plus = '+'
 supplement = '[DEVEL]'
 pre = '-pre'
