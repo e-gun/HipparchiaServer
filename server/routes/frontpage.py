@@ -52,7 +52,7 @@ Flask       {fl}
 Search      {sr}
 WS          {ws}
 Go          {go}
-{gs}        {gx}
+GoHelper    {gx}
 """
 
 if hipparchia.config['GOLANGPROVIDESWEBSOCKETS']:
@@ -61,15 +61,13 @@ else:
 	ws = 'python websockets'
 
 if hipparchia.config['GOLANGTHREADING']:
-	gs = 'GoHelper'
 	gx = hipparchia.config['GOLANGLOADING']
 else:
-	gs = str()
-	gx = str()
+	gx = '[Inactive]'
 
 theenvironment = theenvironment.format(pf=platform(), ps=psqlversion, py=pythonversion, fl=flaskversion, ws= ws,
 									   sr=hipparchia.config['SEARCHCODESTYLE'], go=hipparchia.config['GOLANGTHREADING'],
-									   gs=gs, gx=gx)
+									   gx=gx)
 
 shortversion = hipparchiaserverversion
 gitlength = 5
