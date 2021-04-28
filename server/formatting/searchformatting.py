@@ -145,12 +145,20 @@ def rewriteskgandprx(skg: str, prx: str, htmlsearch: str, so: SearchObject) -> d
 
 	if so.lemmaone:
 		# clean out the whitespace/start/stop checks
-		skg = re.sub(r'\(\^\|\\s\)', str(), skg)
-		skg = re.sub(r'\(\\s\|\$\)', str(), skg)
+		try:
+			skg = re.sub(r'\(\^\|\\s\)', str(), skg)
+			skg = re.sub(r'\(\\s\|\$\)', str(), skg)
+		except TypeError:
+			# TypeError: expected string or bytes-like object
+			# re.compile('([πΠ][εἐἑἒἓἔἕὲέΕἘἙἚἛἜἝ][ρΡῥῬ][ιἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗΐἸἹἺἻἼἽἾἿΙ][ιἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗΐἸἹἺἻἼἽἾἿΙ]ὼ[νΝ])')
+			skg = so.originalseeking
 
 	if so.lemmatwo:
-		prx = re.sub(r'\(\^\|\\s\)', str(), prx)
-		prx = re.sub(r'\(\\s\|\$\)', str(), prx)
+		try:
+			prx = re.sub(r'\(\^\|\\s\)', str(), prx)
+			prx = re.sub(r'\(\\s\|\$\)', str(), prx)
+		except TypeError:
+			prx = so.originalproximate
 
 	r = {'skg': skg, 'prx': prx, 'html': htmlsearch}
 	return r

@@ -28,6 +28,7 @@ function checkactivityviawebsocket(searchid) {
 }
 
 function displayprogress(progress){
+    // note that morphologychartjs() has its own version of this function: changes here should be made there too
     let r = progress['Remaining'];
     let t = progress['Poolofwork'];
     let h = progress['Hitcount'];
@@ -52,7 +53,6 @@ function displayprogress(progress){
         }
 
         thehtml += '<br />' + x;
-        // console.log(pct);
     }
    $('#pollingdata').html(thehtml);
 }
