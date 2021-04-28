@@ -261,7 +261,7 @@ def tftrainondata(sentences, searchobject):
 	plotonly = min(500, vocabularysize)
 	lowdimembs = tsne.fit_transform(finalembeddings[:plotonly, :])
 	labels = [dataset['codesmappedtowords'][i] for i in range(plotonly)]
-	tfplotwithlabels(lowdimembs, labels, os.path.join('.', 'testplot.png'))
+	tfplotwithlabels(lowdimembs, labels, os.path.join('', 'testplot.png'))
 
 	return
 
