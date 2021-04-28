@@ -31,8 +31,7 @@ from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
     perparesoforsecondsqldict, rewritesqlsearchdictforgolang
 from server.searching.searchhelperfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging, \
-    findleastcommonterm, findleastcommontermcount, lookoutsideoftheline, redishitintodbworkline, \
-    formatgolanggrabberarguments
+    findleastcommonterm, redishitintodbworkline, formatgolanggrabberarguments
 from server.threading.mpthreadcount import setthreadcount
 
 gosearch = None
@@ -60,8 +59,7 @@ if gosearch:
     [a1] basicprecomposedsqlsearcher ('simple' and 'single lemma' searching)
     [a2] precomposedsqlwithinxlinessearch ('proximity' by lines)
     [a3] precomposedsqlwithinxwords ('proximity' by words)
-    [a4] precomposedsqlphrasesearch ('phrases' if the phrase contains an uncommon word)
-    [a5] precomposedsqlsubqueryphrasesearch ('phrases' via a much more elaborate set of SQL queries)
+    [a4] precomposedsqlsubqueryphrasesearch ('phrases' via a much more elaborate set of SQL queries)
 
 [b] most of the searches nevertheless call basicprecomposedsqlsearcher()
     two-step searches will call basicprecomposedsqlsearcher() via  generatepreliminaryhitlist()
@@ -120,13 +118,7 @@ def precomposedsqlsearch(so: SearchObject) -> List[dbWorkLine]:
     elif so.searchtype == 'phrase':
         so.phrase = so.termone
         so.leastcommon = findleastcommonterm(so.termone, so.accented)
-        lccount = findleastcommontermcount(so.termone, so.accented)
-        if 0 < lccount < 500:
-            # debugmessage('searchfnc = sqlphrasesearch')
-            searchfnc = precomposedsqlphrasesearch
-        else:
-            # debugmessage('searchfnc = sqlsubqueryphrasesearch')
-            searchfnc = precomposedsqlsubqueryphrasesearch
+        searchfnc = precomposedsqlsubqueryphrasesearch
     else:
         # should be hard to reach this because of "assert" above
         consolewarning('rawsqlsearches() does not support {t} searching'.format(t=so.searchtype), color='red')
@@ -209,75 +201,6 @@ def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
     hits = [redishitintodbworkline(r) for r in redisresults]
 
     return hits
-
-
-def golangclibinarysearcher(so: SearchObject) -> str:
-    """
-
-    you have decided to call the "golanggrabber" binary
-
-    """
-
-    resultrediskey = str()
-
-    debugmessage('calling golang via CLI')
-
-    if not hipparchia.config['EXTERNALWSGI']:
-        basepath = path.dirname(__file__)
-        basepath = '/'.join(basepath.split('/')[:-2])
-    else:
-        # path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
-        basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
-
-    command = basepath + '/server/golangmodule/' + hipparchia.config['GOLANGLCLBINARYNAME']
-    commandandarguments = formatgolanggrabberarguments(command, so)
-
-    try:
-        result = subprocess.run(commandandarguments, capture_output=True)
-    except FileNotFoundError:
-        consolewarning('cannot find the golang executable "{x}'.format(x=command), color='red')
-        return resultrediskey
-
-    if result.returncode == 0:
-        stdo = result.stdout.decode('UTF-8')
-        outputlist = stdo.split('\n')
-        for o in outputlist:
-            debugmessage(o)
-        resultrediskey = [o for o in outputlist if o]
-        resultrediskey = resultrediskey[-1]
-        # but this looks like: 'results sent to redis as ff128837_results'
-        # so you need a little more work
-        resultrediskey = resultrediskey.split()[-1]
-    else:
-        consolewarning('{c} sent an error:\n{r}', color='red')
-        debugmessage(repr(result))
-
-    return resultrediskey
-
-
-def golangsharedlibrarysearcher(so: SearchObject) -> str:
-    """
-
-    use the shared library to do the golang search
-
-    at the moment the progress polls will not update; it seems that the module locks python up
-
-    the cli version can read set the poll data and have it get read by wscheckpoll()
-    the module is setting the poll data, but it is not getting read by wscheckpoll()
-        wscheckpoll() will loop 0-2 times: wscheckpoll() {'total': -1, 'remaining': -1, 'hits': -1, ...}
-        then it locks during the search
-        then it unlocks after the search is over: wscheckpoll() {'total': 776, 'remaining': 0, 'hits': 18, ... }
-
-        conversely if the cli app is searching wscheckpoll() will update every .4s, as expected
-
-    """
-
-    debugmessage('calling golang via the golang module')
-    searcher = gosearch.HipparchiaGolangSearcher
-    resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), hipparchia.config['GOLANGMODLOGLEVEL'], goredislogin, gopsqlloginrw)
-    debugmessage('search completed and stored at "{r}"'.format(r=resultrediskey))
-
-    return resultrediskey
 
 
 def generatepreliminaryhitlist(so: SearchObject, recap=hipparchia.config['INTERMEDIATESEARCHCAP']) -> List[dbWorkLine]:
@@ -395,73 +318,6 @@ def precomposedsqlwithinxwords(so: SearchObject) -> List[dbWorkLine]:
             fullmatches.append(hit)
             so.poll.addhits(1)
         elif not so.near and not re.search(so.termtwo, leading) and not re.search(so.termtwo, lagging):
-            fullmatches.append(hit)
-            so.poll.addhits(1)
-
-    dbconnection.connectioncleanup()
-
-    return fullmatches
-
-
-def precomposedsqlphrasesearch(so: SearchObject) -> List[dbWorkLine]:
-    """
-
-    you are searching for a relatively rare word: we will keep things simple-ish
-
-    note that the second half of this is not MP: but searches already only take 6s; so clean code probably wins here
-
-    FIXME:
-
-    can't find the phrases in here...:
-        κατεϲκεύαϲεν τὸ ἐνϲόριον FAILS
-        ϲεν τὸ ἐνϲόριον το SUCCEEDS
-
-    1 Ῥουφεῖνα Ἰουδαία ἀρχι-
-    2 ϲυνάγωγοϲ κατεϲκεύα-
-    3 ϲεν τὸ ἐνϲόριον τοῖϲ ἀπε-     ( match: ἀπελευθέροιϲ )
-    4 λευθέροιϲ καὶ θρέμ(μ)αϲιν
-    5 μηδενὸϲ ἄλ(λ)ου ἐξουϲίαν ἔ-
-
-    multiple hyphenated words is the problem
-
-    """
-    debugmessage('executing a precomposedsqlphrasesearch()')
-
-    so.termone = so.leastcommon
-    searchphrase = so.phrase
-    phraselen = len(searchphrase.split(' '))
-
-    initialhitlines = generatepreliminaryhitlist(so)
-
-    m = 'Now searching among the {h} initial hits for the full phrase "{p}"'
-    so.poll.statusis(m.format(h=so.poll.gethits(), p=so.originalseeking))
-    so.poll.sethits(0)
-
-    fullmatches = list()
-
-    dbconnection = ConnectionObject()
-    dbcursor = dbconnection.cursor()
-    commitcount = 0
-    while initialhitlines and len(fullmatches) <= so.cap:
-        commitcount += 1
-        if commitcount == hipparchia.config['MPCOMMITCOUNT']:
-            dbconnection.commit()
-            commitcount = 0
-
-        hit = initialhitlines.pop()
-
-        wordset = lookoutsideoftheline(hit.index, phraselen - 1, hit.authorid, so, dbcursor)
-
-        if not so.accented:
-            wordset = re.sub(r'[.?!;:,·’]', str(), wordset)
-        else:
-            # the difference is in the apostrophe: δ vs δ’
-            wordset = re.sub(r'[.?!;:,·]', str(), wordset)
-
-        if so.near and re.search(searchphrase, wordset):
-            fullmatches.append(hit)
-            so.poll.addhits(1)
-        elif not so.near and re.search(searchphrase, wordset) is None:
             fullmatches.append(hit)
             so.poll.addhits(1)
 
@@ -726,3 +582,81 @@ def precomposedsqlsearcher(querydict, dbcursor) -> Generator:
         consolewarning('\tq, d: {q}, {d}'.format(q=q, d=q))
 
     return found
+
+
+"""
+
+    THE GOLANG SEARCH CODE
+
+"""
+
+
+def golangclibinarysearcher(so: SearchObject) -> str:
+    """
+
+    you have decided to call the "golanggrabber" binary
+
+    """
+
+    resultrediskey = str()
+
+    debugmessage('calling golang via CLI')
+
+    if not hipparchia.config['EXTERNALWSGI']:
+        basepath = path.dirname(__file__)
+        basepath = '/'.join(basepath.split('/')[:-2])
+    else:
+        # path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
+        basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
+
+    command = basepath + '/server/golangmodule/' + hipparchia.config['GOLANGLCLBINARYNAME']
+    commandandarguments = formatgolanggrabberarguments(command, so)
+
+    try:
+        result = subprocess.run(commandandarguments, capture_output=True)
+    except FileNotFoundError:
+        consolewarning('cannot find the golang executable "{x}'.format(x=command), color='red')
+        return resultrediskey
+
+    if result.returncode == 0:
+        stdo = result.stdout.decode('UTF-8')
+        outputlist = stdo.split('\n')
+        for o in outputlist:
+            debugmessage(o)
+        resultrediskey = [o for o in outputlist if o]
+        resultrediskey = resultrediskey[-1]
+        # but this looks like: 'results sent to redis as ff128837_results'
+        # so you need a little more work
+        resultrediskey = resultrediskey.split()[-1]
+    else:
+        consolewarning('{c} sent an error:\n{r}', color='red')
+        debugmessage(repr(result))
+
+    return resultrediskey
+
+
+def golangsharedlibrarysearcher(so: SearchObject) -> str:
+    """
+
+    use the shared library to do the golang search
+
+    at the moment the progress polls will not update; it seems that the module locks python up
+
+    the cli version can read set the poll data and have it get read by wscheckpoll()
+    the module is setting the poll data, but it is not getting read by wscheckpoll()
+        wscheckpoll() will loop 0-2 times: wscheckpoll() {'total': -1, 'remaining': -1, 'hits': -1, ...}
+        then it locks during the search
+        then it unlocks after the search is over: wscheckpoll() {'total': 776, 'remaining': 0, 'hits': 18, ... }
+
+        conversely if the cli app is searching wscheckpoll() will update every .4s, as expected
+
+    """
+
+    debugmessage('calling golang via the golang module')
+    searcher = gosearch.HipparchiaGolangSearcher
+    resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), hipparchia.config['GOLANGMODLOGLEVEL'],
+                              goredislogin, gopsqlloginrw)
+    debugmessage('search completed and stored at "{r}"'.format(r=resultrediskey))
+
+    return resultrediskey
+
