@@ -28,6 +28,7 @@ from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefr
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, querytotalwordcounts
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
+from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import acuteorgrav, basiclemmacleanup, elidedextrapunct, removegravity, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
@@ -224,15 +225,7 @@ def findsentences(authortable: str, so: SearchObject, dbcursor: ConnectionObject
 
 	findsentences() results[0] ('line/gr0014w001/1', 'ἀντὶ πολλῶν ἄν ὦ ἄνδρεϲ ἀθηναῖοι χρημάτων ὑμᾶϲ ἑλέϲθαι νομίζω εἰ φανερὸν γένοιτο τὸ μέλλον ϲυνοίϲειν τῇ πόλει περὶ ὧν νυνὶ ϲκοπεῖτε')
 
-	FIXME:
-
-	findsentences() results[0] ('line/gr0014w002/233', 'μαϲτότεροϲ παρὰ πᾶϲι νομίζεται')
-
-	ὁ μὲν γὰρ ὅϲῳ
-	3.6 πλείον’ ὑπὲρ τὴν ἀξίαν πεποίηκε τὴν αὑτοῦ, τοϲούτῳ θαυ-
-	3.7 μαϲτότεροϲ παρὰ πᾶϲι νομίζεται·
-
-	the hyphenation is killing us...
+	findsentences() results[0] (0, 'ἐπὶ πολλῶν μὲν ἄν τιϲ ἰδεῖν ὦ ἄνδρεϲ ἀθηναῖοι δοκεῖ μοι τὴν παρὰ τῶν θεῶν εὔνοιαν φανερὰν γιγνομένην τῇ πόλει οὐχ ἥκιϲτα δ’ ἐν τοῖϲ παροῦϲι πράγμαϲι')
 
 	:param authortable:
 	:param searchobject:
@@ -264,7 +257,7 @@ def findsentences(authortable: str, so: SearchObject, dbcursor: ConnectionObject
 		whr = str()
 	else:
 		# should never see this
-		print('error in substringsearch(): unknown whereclause type', r['type'])
+		consolewarning('error in substringsearch(): unknown whereclause type: {w}'.format(w=r['type']), color='red')
 		whr = str()
 
 	# vanilla grab-it-all
@@ -303,6 +296,41 @@ def parsevectorsentences(so: SearchObject, lineobjects: List[dbWorkLine]) -> Lis
 		('lt0588w001_ln_10', 'hi si didicerint non eadem omnibus esse honesta atque turpia sed omnia maiorum institutis iudicari non admirabuntur nos in graiorum uirtutibus exponendis mores eorum secutos'),
 		('lt0588w001_ln_13', 'neque enim cimoni fuit turpe atheniensium summo uiro sororem germanam habere in matrimonio quippe cum ciues eius eodem uterentur instituto'),
 		(id, text), ...]
+
+	FIXME: [see notes about progress so far...]
+
+	findsentences() results[0] ('line/gr0014w002/233', 'μαϲτότεροϲ παρὰ πᾶϲι νομίζεται')
+
+	this is the WRONG first sentence; but the subsequent sentences seem to be fine...
+
+	this is super-hard to debug: if you use slices of D. Ol 2 you will get the right answer...
+
+	wholetext
+	⊏line/gr0014w002/233⊐μαϲτότεροϲ παρὰ πᾶϲι νομίζεται· ὑμεῖϲ δ’ ὅϲῳ χεῖρον ἢ ⊏line/gr0014w002/213⊐Ἐπὶ πολλῶν μὲν ἄν τιϲ ἰδεῖν, ὦ ἄνδρεϲ Ἀθηναῖοι, δοκεῖ ⊏line/gr0014w002/214⊐μοι τὴν παρὰ τῶν θεῶν εὔνοιαν φανερὰν γιγνομένην τῇ πόλει, ⊏line/gr0014w002/215⊐οὐχ ἥκιϲτα δ’ ἐν τοῖϲ παροῦϲι πράγμαϲι· τὸ γὰρ τοὺϲ πολεμή- ⊏line/gr0014w002/216⊐ϲονταϲ Φιλίππῳ γεγενῆϲθαι καὶ χώραν ὅμορον καὶ δύναμίν ⊏line/gr0014w002/217⊐τινα κεκτημένουϲ, καὶ τὸ μέγιϲτον ἁπάντων, τὴν ὑπὲρ τοῦ ⊏line/gr0014w002/218⊐πολέμου γνώμην τοιαύτην ἔχονταϲ ὥϲτε τὰϲ πρὸϲ ἐκεῖνον ⊏line/gr0014w002/219⊐διαλλαγὰϲ πρῶτον μὲν ἀπίϲτουϲ, εἶτα τῆϲ ἑαυτῶν πατρίδοϲ ⊏line/gr0014w002/220⊐νομίζειν ἀνάϲταϲιν, δαιμονίᾳ τινὶ καὶ θείᾳ παντάπαϲιν ἔοικεν ⊏line/gr0014w002/221⊐εὐεργεϲίᾳ. δεῖ τοίνυν, ὦ ἄνδρεϲ Ἀθηναῖοι, τοῦτ’ ἤδη ϲκοπεῖν ⊏line/gr0014w002/222⊐αὐτούϲ, ὅπωϲ μὴ χείρουϲ περὶ ἡμᾶϲ αὐτοὺϲ εἶναι δόξομεν τῶν ⊏line/gr0014w002/223⊐ὑπαρχόντων, ὡϲ ἔϲτι τῶν αἰϲχρῶν, μᾶλλον δὲ τῶν αἰϲχίϲτων, ⊏line/gr0014w002/224⊐μὴ μόνον πόλεων καὶ τόπων ὧν ἦμέν ποτε κύριοι φαίνεϲθαι ⊏line/gr0014w002/225⊐προϊεμένουϲ, ἀλλὰ καὶ τῶν ὑπὸ τῆϲ τύχηϲ παραϲκευαϲθέντων ⊏line/gr0014w002/226⊐ϲυμμάχων καὶ καιρῶν.  ⊏line/gr0014w002/227⊐Τὸ μὲν οὖν, ὦ ἄνδρεϲ Ἀθηναῖοι, τὴν Φιλίππου ῥώμην ⊏line/gr0014w002/228⊐διεξιέναι καὶ διὰ τούτων τῶν λόγων προτρέπειν τὰ δέοντα ⊏line/gr0014w002/229⊐ποιεῖν ὑμᾶϲ, οὐχὶ καλῶϲ ἔχειν ἡγοῦμαι. διὰ τί; ὅτι μοι ⊏line/gr0014w002/230⊐δοκεῖ πάνθ’ ὅϲ’ ἂν εἴποι τιϲ ὑπὲρ τούτων, ἐκείνῳ μὲν ἔχειν ⊏line/gr0014w002/231⊐φιλοτιμίαν, ἡμῖν δ’ οὐχὶ καλῶϲ πεπρᾶχθαι. ὁ μὲν γὰρ ὅϲῳ ⊏line/gr0014w002/232⊐πλείον’ ὑπὲρ τὴν ἀξίαν πεποίηκε τὴν αὑτοῦ, τοϲούτῳ θαυ- ⊏line/gr0014w002/234⊐προϲῆκε κέχρηϲθε τοῖϲ πράγμαϲι, τοϲούτῳ πλείον’ αἰϲχύνην ⊏line/gr0014w002/235⊐ὠφλήκατε. ταῦτα μὲν οὖν παραλείψω. καὶ γὰρ εἰ μετ’ ⊏line/gr0014w002/236⊐ἀληθείαϲ τιϲ, ὦ ἄνδρεϲ Ἀθηναῖοι, ϲκοποῖτο, ἐνθένδ’ ἂν αὐτὸν ⊏line/gr0014w002/237⊐ἴδοι μέγαν γεγενημένον, οὐχὶ παρ’ αὑτοῦ. ὧν οὖν ἐκεῖνοϲ ⊏line/gr0014w002/238⊐μὲν ὀφείλει τοῖϲ ὑπὲρ αὐτοῦ πεπολιτευμένοιϲ χάριν, ὑμῖν ⊏line/gr0014w002/239⊐δὲ δίκην προϲήκει λαβεῖν, τούτων οὐχὶ νῦν ὁρῶ τὸν καιρὸν ⊏line/gr0014w002/240⊐τοῦ λέγειν· ἃ δὲ καὶ χωρὶϲ τούτων ἔνι, καὶ βέλτιόν ἐϲτιν ⊏line/gr0014w002/241⊐ἀκηκοέναι πάνταϲ ὑμᾶϲ, καὶ μεγάλ’, ὦ ἄνδρεϲ Ἀθηναῖοι, κατ’ ⊏line/gr0014w002/242⊐ἐκείνου φαίνοιτ’ ἂν ὀνείδη βουλομένοιϲ ὀρθῶϲ δοκιμάζειν, ⊏line/gr0014w002/243⊐ταῦτ’ εἰπεῖν πειράϲομαι. ⊏line/gr0014w002/244⊐Τὸ μὲν οὖν ἐπίορκον κἄπιϲτον καλεῖν ἄνευ τοῦ τὰ πε- ⊏line/gr0014w002/245⊐πραγμένα δεικνύναι λοιδορίαν εἶναί τιϲ ἂν φήϲειε κενὴν ⊏line/gr0014w002/246⊐δικαίωϲ· τὸ δὲ πάνθ’ ὅϲα πώποτ’ ἔπραξε διεξιόντα ἐφ’ ἅπαϲι ⊏line/gr0014w002/247⊐τούτοιϲ ἐλέγχειν, καὶ βραχέοϲ λόγου ϲυμβαίνει δεῖϲθαι, καὶ ⊏line/gr0014w002/248⊐δυοῖν ἕνεχ’ ἡγοῦμαι ϲυμφέρειν εἰρῆϲθαι, τοῦ τ’ ἐκεῖνον, ὅπερ ...
+
+	results
+	[('line/gr0014w002/233', 'μαϲτότεροϲ παρὰ πᾶϲι νομίζεται'), ('line/gr0014w002/213', 'ὑμεῖϲ δ’ ὅϲῳ χεῖρον ἢ ἐπὶ πολλῶν μὲν ἄν τιϲ ἰδεῖν ὦ ἄνδρεϲ ἀθηναῖοι δοκεῖ μοι τὴν παρὰ τῶν θεῶν εὔνοιαν φανερὰν γιγνομένην τῇ πόλει οὐχ ἥκιϲτα δ’ ἐν τοῖϲ παροῦϲι πράγμαϲι'), ('line/gr0014w002/216', 'τὸ γὰρ τοὺϲ πολεμήϲονταϲ φιλίππῳ γεγενῆϲθαι καὶ χώραν ὅμορον καὶ δύναμίν τινα κεκτημένουϲ καὶ τὸ μέγιϲτον ἁπάντων τὴν ὑπὲρ τοῦ πολέμου γνώμην τοιαύτην ἔχονταϲ ὥϲτε τὰϲ πρὸϲ ἐκεῖνον διαλλαγὰϲ πρῶτον μὲν ἀπίϲτουϲ εἶτα τῆϲ ἑαυτῶν πατρίδοϲ νομίζειν ἀνάϲταϲιν δαιμονίᾳ τινὶ καὶ θείᾳ παντάπαϲιν ἔοικεν εὐεργεϲίᾳ'), ('line/gr0014w002/222', 'δεῖ τοίνυν ὦ ἄνδρεϲ ἀθηναῖοι τοῦτ’ ἤδη ϲκοπεῖν αὐτούϲ ὅπωϲ μὴ χείρουϲ περὶ ἡμᾶϲ αὐτοὺϲ εἶναι δόξομεν τῶν ὑπαρχόντων ὡϲ ἔϲτι τῶν αἰϲχρῶν μᾶλλον δὲ τῶν αἰϲχίϲτων μὴ μόνον πόλεων καὶ τόπων ὧν ἦμέν ποτε κύριοι φαίνεϲθαι προϊεμένουϲ ἀλλὰ καὶ τῶν ὑπὸ τῆϲ τύχηϲ παραϲκευαϲθέντων ϲυμμάχων καὶ καιρῶν'), ('line/gr0014w002/227', 'τὸ μὲν οὖν ὦ ἄνδρεϲ ἀθηναῖοι τὴν φιλίππου ῥώμην διεξιέναι καὶ διὰ τούτων τῶν λόγων προτρέπειν τὰ δέοντα ποιεῖν ὑμᾶϲ οὐχὶ καλῶϲ ἔχειν ἡγοῦμαι'), ('line/gr0014w002/229', 'διὰ τί'), ('line/gr0014w002/230', 'ὅτι μοι δοκεῖ πάνθ’ ὅϲ’ ἂν εἴποι τιϲ ὑπὲρ τούτων ἐκείνῳ μὲν ἔχειν φιλοτιμίαν ἡμῖν δ’ οὐχὶ καλῶϲ πεπρᾶχθαι'), ('line/gr0014w002/232', 'ὁ μὲν γὰρ ὅϲῳ πλείον’ ὑπὲρ τὴν ἀξίαν πεποίηκε τὴν αὑτοῦ τοϲούτῳ θαυπροϲῆκε κέχρηϲθε τοῖϲ πράγμαϲι τοϲούτῳ πλείον’ αἰϲχύνην ὠφλήκατε'), ('line/gr0014w002/235', 'ταῦτα μὲν οὖν παραλείψω'), ...]
+
+	Τὸ μὲν οὖν, ὦ ἄνδρεϲ Ἀθηναῖοι, τὴν Φιλίππου ῥώμην 	3.1
+	διεξιέναι καὶ διὰ τούτων τῶν λόγων προτρέπειν τὰ δέοντα
+	ποιεῖν ὑμᾶϲ, οὐχὶ καλῶϲ ἔχειν ἡγοῦμαι. διὰ τί; ὅτι μοι
+	δοκεῖ πάνθ’ ὅϲ’ ἂν εἴποι τιϲ ὑπὲρ τούτων, ἐκείνῳ μὲν ἔχειν
+	φιλοτιμίαν, ἡμῖν δ’ οὐχὶ καλῶϲ πεπρᾶχθαι. ὁ μὲν γὰρ ὅϲῳ
+	πλείον’ ὑπὲρ τὴν ἀξίαν πεποίηκε τὴν αὑτοῦ, τοϲούτῳ θαυ-
+	μαϲτότεροϲ παρὰ πᾶϲι νομίζεται· ὑμεῖϲ δ’ ὅϲῳ χεῖρον ἢ 	3.7
+	προϲῆκε κέχρηϲθε τοῖϲ πράγμαϲι, τοϲούτῳ πλείον’ αἰϲχύνην
+	ὠφλήκατε.
+
+	THE HUNT....
+
+	but the function is sent the whole text:
+
+	r0 markedup: &nbsp;&nbsp;&nbsp;Ἐπὶ πολλῶν μὲν ἄν τιϲ ἰδεῖν, ὦ ἄνδρεϲ Ἀθηναῖοι, δοκεῖ
+
+	allsentences[0]: Ἐπὶ πολλῶν μὲν ἄν τιϲ ἰδεῖν, ὦ ἄνδρεϲ Ἀθηναῖοι, δοκεῖ μοι τὴν παρὰ τῶν θεῶν εὔνοιαν φανερὰν γιγνομένην τῇ πόλει, οὐχ ἥκιϲτα δ’ ἐν τοῖϲ παροῦϲι πράγμαϲι
+	matches[0] is fine @ matches = [' '.join(m.split()) for m in matches]
+
+	end: (0, 'ἐπὶ πολλῶν μὲν ἄν τιϲ ἰδεῖν ὦ ἄνδρεϲ ἀθηναῖοι δοκεῖ μοι τὴν παρὰ τῶν θεῶν εὔνοιαν φανερὰν γιγνομένην τῇ πόλει οὐχ ἥκιϲτα δ’ ἐν τοῖϲ παροῦϲι πράγμαϲι')
 
 	:param searchobject:
 	:param lineobjects:
@@ -347,6 +375,7 @@ def parsevectorsentences(so: SearchObject, lineobjects: List[dbWorkLine]) -> Lis
 
 	# hyphenated line-ends are a problem
 	matches = [re.sub(r'-\s{1,2}', str(), m) for m in matches]
+	# matches = [re.sub(r'-\s{0,2}', str(), m) for m in matches]
 
 	# more cleanup
 	matches = [m.lower() for m in matches]
@@ -363,7 +392,6 @@ def parsevectorsentences(so: SearchObject, lineobjects: List[dbWorkLine]) -> Lis
 	# FIXME: there is a problem with  τ’ and δ’ and the rest (refactor via indexmaker.py)
 	# nevertheless, most of these words are going to be stopwords anyway
 	punct = re.compile('[{s}]'.format(s=re.escape(punctuation + elidedextrapunct)))
-
 	if so.vectorquerytype in requiresids:
 		# now we mark the source of every sentence by turning it into a tuple: (location, text)
 		previousid = lineobjects[0].getlineurl()

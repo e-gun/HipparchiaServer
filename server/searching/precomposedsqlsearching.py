@@ -96,7 +96,6 @@ def precomposedsqlsearch(so: SearchObject) -> List[dbWorkLine]:
 
     assert so.searchtype in ['simple', 'simplelemma', 'proximity', 'phrase'], 'unknown searchtype sent to rawsqlsearches()'
 
-    debugmessage('this is a precomposedsqlsearch()')
     so.poll.statusis('Executing a {t} search...'.format(t=so.searchtype))
 
     so.searchsqldict = searchlistintosqldict(so, so.termone)
