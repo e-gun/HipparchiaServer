@@ -6,36 +6,24 @@
         (see LICENSE in the top level directory of the distribution)
 """
 
-import json
-import multiprocessing
 import re
-import subprocess
-from multiprocessing import Manager
-from multiprocessing.context import Process
-from multiprocessing.managers import ListProxy
-from os import path
-from typing import List, Generator
-
-import psycopg2
+from typing import List
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
-from server.dbsupport.miscdbfunctions import resultiterator
-from server.dbsupport.redisdbfunctions import establishredisconnection
-from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.miscformatting import consolewarning, debugmessage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
+from server.searching.precomposedsearchpythoninterface import precomposedsqlsearchmanager
 from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
-    perparesoforsecondsqldict, rewritesqlsearchdictforgolang
+    perparesoforsecondsqldict
 from server.searching.searchhelperfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging, \
-    findleastcommonterm, redishitintodbworkline, formatgolanggrabberarguments
-from server.threading.mpthreadcount import setthreadcount
+    findleastcommonterm
 
-gosearch = None
 try:
+    from server.searching.precomposedsearchgolanginterface import gosearch, precomposedgolangsearcher
     from server.golangmodule import hipparchiagolangsearching as gosearch
 except ImportError as e:
     debugmessage('golang search module unavailable:\n\t"{e}"'.format(e=e))
@@ -43,14 +31,7 @@ except ImportError as e:
 
 if gosearch:
     # these don't log you on; they just tell the go module how to log on
-    goredislogin = gosearch.NewRedisLogin('{h}:{p}'.format(h=hipparchia.config['REDISHOST'],
-                                          p=hipparchia.config['REDISPORT']), str(), hipparchia.config['REDISDBID'])
-    gopsqlloginro = gosearch.NewPostgresLogin(hipparchia.config['DBHOST'], hipparchia.config['DBPORT'],
-                                            hipparchia.config['DBUSER'], hipparchia.config['DBPASS'],
-                                            hipparchia.config['DBNAME'])
-    gopsqlloginrw = gosearch.NewPostgresLogin(hipparchia.config['DBHOST'], hipparchia.config['DBPORT'],
-                                            hipparchia.config['DBWRITEUSER'], hipparchia.config['DBWRITEPASS'],
-                                            hipparchia.config['DBNAME'])
+    pass
 
 """
     OVERVIEW
@@ -86,11 +67,7 @@ def precomposedsqlsearch(so: SearchObject) -> List[dbWorkLine]:
 
     speed notes: the speed of these searches is consonant with that of the old search code; usu. <1s difference
 
-    it is tempting to eliminate sqlphrasesearch() in order to keep the code base more streamlined: the savings are small
-    for example:
-        Sought »δοῦναι τοῦ καταϲκευάϲματοϲ«; Searched 236,835 texts and found 3 passages (6.26s)
-    vs
-        Sought »δοῦναι τοῦ καταϲκευάϲματοϲ«; Searched 236,835 texts and found 3 passages (9.01s)
+    sqlphrasesearch() was eliminated in order to keep the code base more streamlined
 
     """
 
@@ -139,7 +116,7 @@ def precomposedsqlsearch(so: SearchObject) -> List[dbWorkLine]:
     return hitlist
 
 
-def basicprecomposedsqlsearcher(so: SearchObject) -> List[dbWorkLine]:
+def basicprecomposedsqlsearcher(so: SearchObject, themanager=None) -> List[dbWorkLine]:
     """
 
     give me sql and I will search
@@ -148,56 +125,17 @@ def basicprecomposedsqlsearcher(so: SearchObject) -> List[dbWorkLine]:
 
     """
 
-    usesharedlibrary = hipparchia.config['GOLANGTHREADING']
+    if not themanager:
+        usesharedlibrary = hipparchia.config['GOLANGTHREADING']
 
-    if not usesharedlibrary:
-        debugmessage('dispatching via precomposedsqlsearchmanager()')
-        hits = precomposedsqlsearchmanager(so)
-    else:
-        debugmessage('dispatching via precomposedgolangsearcher()')
-        hits = precomposedgolangsearcher(so)
-
-    return hits
-
-
-def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
-    """
-
-    you are using golang to do the search
-
-    [1] send the searchdict to redis as a list of json.dumps(items) (keyed to the searchid)
-    [2] send the external fnc the searchid, cap value, worker #, psql login info, redis login info
-    [3] wait for the function to (a) gather; (b) search; (c) store
-    [4] pull the results back from redis via the searchid
-    NB: redis makes sense because the activity poll is going to have to be done via redis anyway...
-
-    the searched items are stored under the redis key 'searchid_results'
-    json.loads() will leave you with a dictionary of k/v pairs that can be turned into a dbWorkLine
-
-    """
-
-    rc = establishredisconnection()
-
-    so.searchsqldict = rewritesqlsearchdictforgolang(so)
-    debugmessage('storing search at "{r}"'.format(r=so.searchid))
-    for s in so.searchsqldict:
-        rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
-
-    if hipparchia.config['GOLANGLOADING'] != 'cli':
-        resultrediskey = golangsharedlibrarysearcher(so)
-    else:
-        resultrediskey = golangclibinarysearcher(so)
-
-    redisresults = list()
-
-    while resultrediskey:
-        r = rc.spop(resultrediskey)
-        if r:
-            redisresults.append(r)
+        if not usesharedlibrary:
+            debugmessage('dispatching via precomposedsqlsearchmanager()')
+            themanager = precomposedsqlsearchmanager
         else:
-            resultrediskey = None
+            debugmessage('dispatching via precomposedgolangsearcher()')
+            themanager = precomposedgolangsearcher
 
-    hits = [redishitintodbworkline(r) for r in redisresults]
+    hits = themanager(so)
 
     return hits
 
@@ -415,247 +353,3 @@ def precomposedsqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
 
     dbconnection.connectioncleanup()
     return listoffinds
-
-
-"""
-
-    THE IN-HOUSE SEARCH CODE
-
-"""
-
-
-def precomposedsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
-    """
-
-    quick and dirty dispatcher: not polished
-
-    note that you need so.searchsqldict to be properly configured before you get here
-
-    fix this up last...
-
-    """
-
-    activepoll = so.poll
-
-    workers = setthreadcount()
-
-    manager = Manager()
-    foundlineobjects = manager.list()
-
-    searchsqlbyauthor = [so.searchsqldict[k] for k in so.searchsqldict.keys()]
-    searchsqlbyauthor = manager.list(searchsqlbyauthor)
-
-    activepoll.allworkis(len(searchsqlbyauthor))
-    activepoll.remain(len(searchsqlbyauthor))
-    activepoll.sethits(0)
-
-    argumentuple = [foundlineobjects, searchsqlbyauthor, so]
-
-    oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
-    argumentswithconnections = [tuple([i] + list(argumentuple) + [oneconnectionperworker[i]]) for i in range(workers)]
-
-    jobs = [Process(target=workonprecomposedsqlsearch, args=argumentswithconnections[i]) for i in range(workers)]
-
-    for j in jobs:
-        j.start()
-    for j in jobs:
-        j.join()
-
-    # generator needs to turn into a list
-    foundlineobjects = list(foundlineobjects)
-
-    for c in oneconnectionperworker:
-        oneconnectionperworker[c].connectioncleanup()
-
-    return foundlineobjects
-
-
-def workonprecomposedsqlsearch(workerid: int, foundlineobjects: ListProxy, listofplacestosearch: ListProxy,
-                               searchobject: SearchObject, dbconnection) -> ListProxy:
-    """
-
-    iterate through listofplacestosearch
-
-    execute precomposedsqlsearcher() on each item in the list
-
-    gather the results...
-
-    listofplacestosearch elements are dicts and the whole looks like:
-
-        [{'temptable': '', 'query': 'SELECT ...', 'data': ('ὕβριν',)},
-        {'temptable': '', 'query': 'SELECT ...', 'data': ('ὕβριν',)} ...]
-
-    this is supposed to give you one query per hipparchiaDB table unless you are lemmatizing
-
-    """
-
-    # if workerid == 0:
-    #     print('{w} - listofplacestosearch'.format(w=workerid), listofplacestosearch)
-    so = searchobject
-    activepoll = so.poll
-    dbconnection.setreadonly(False)
-    dbcursor = dbconnection.cursor()
-    commitcount = 0
-    getnetxitem = listofplacestosearch.pop
-    emptyerror = IndexError
-    remaindererror = TypeError
-
-    while listofplacestosearch and activepoll.gethits() <= so.cap:
-        # if workerid == 0:
-        #     print('remain:', len(listofplacestosearch))
-        commitcount += 1
-        dbconnection.checkneedtocommit(commitcount)
-
-        try:
-            querydict = getnetxitem(0)
-        except emptyerror:
-            querydict = None
-            listofplacestosearch = None
-
-        if querydict:
-            foundlines = precomposedsqlsearcher(querydict, dbcursor)
-            lineobjects = [dblineintolineobject(f) for f in foundlines]
-            foundlineobjects.extend(lineobjects)
-
-            if lineobjects:
-                numberoffinds = len(lineobjects)
-                activepoll.addhits(numberoffinds)
-        else:
-            listofplacestosearch = None
-
-        try:
-            activepoll.remain(len(listofplacestosearch))
-        except remaindererror:
-            pass
-
-    return foundlineobjects
-
-
-def precomposedsqlsearcher(querydict, dbcursor) -> Generator:
-    """
-
-    as per substringsearchintosqldict():
-        sq = { table1: {query: q, data: d, temptable: t},
-        table2: {query: q, data: d, temptable: t},
-        ... }
-
-    only sent the dict at sq[tableN]
-
-    """
-
-    t = querydict['temptable']
-    q = querydict['query']
-    d = (querydict['data'],)
-
-    if t:
-        unique = assignuniquename()
-        t = re.sub('UNIQUENAME', unique, t)
-        q = re.sub('UNIQUENAME', unique, q)
-        dbcursor.execute(t)
-
-    found = list()
-
-    # debugmessage('precomposedsqlsearcher() querydict = {q}'.format(q=querydict))
-    # debugmessage('precomposedsqlsearcher() q:\n\t{q}\nd:\n\t{d}'.format(q=q, d=d))
-
-    warnings = {
-        1: 'DataError; cannot search for »{d}«\n\tcheck for unbalanced parentheses and/or bad regex',
-        2: 'psycopg2.InternalError; did not execute query="{q}" and data="{d}',
-        3: 'precomposedsqlsearcher() DatabaseError for {c} @ {p}'
-    }
-
-    try:
-        dbcursor.execute(q, d)
-        found = resultiterator(dbcursor)
-    except psycopg2.DataError:
-        # e.g., invalid regular expression: parentheses () not balanced
-        consolewarning(warnings[1].format(d=d[0]), color='red')
-    except psycopg2.InternalError:
-        # current transaction is aborted, commands ignored until end of transaction block
-        consolewarning(warnings[2].format(q=q, d=d), color='red')
-    except psycopg2.DatabaseError:
-        # psycopg2.DatabaseError: error with status PGRES_TUPLES_OK and no message from the libpq
-        # added to track PooledConnection threading issues
-        # will see: 'DatabaseError for <cursor object at 0x136bab520; closed: 0> @ Process-4'
-        consolewarning(warnings[3].format(c=dbcursor, p=multiprocessing.current_process().name), color='red')
-        consolewarning('\tq, d: {q}, {d}'.format(q=q, d=q))
-
-    return found
-
-
-"""
-
-    THE GOLANG SEARCH CODE
-
-"""
-
-
-def golangclibinarysearcher(so: SearchObject) -> str:
-    """
-
-    you have decided to call the "golanggrabber" binary
-
-    """
-
-    resultrediskey = str()
-
-    debugmessage('calling golang via CLI')
-
-    if not hipparchia.config['EXTERNALWSGI']:
-        basepath = path.dirname(__file__)
-        basepath = '/'.join(basepath.split('/')[:-2])
-    else:
-        # path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
-        basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
-
-    command = basepath + '/server/golangmodule/' + hipparchia.config['GOLANGLCLBINARYNAME']
-    commandandarguments = formatgolanggrabberarguments(command, so)
-
-    try:
-        result = subprocess.run(commandandarguments, capture_output=True)
-    except FileNotFoundError:
-        consolewarning('cannot find the golang executable "{x}'.format(x=command), color='red')
-        return resultrediskey
-
-    if result.returncode == 0:
-        stdo = result.stdout.decode('UTF-8')
-        outputlist = stdo.split('\n')
-        for o in outputlist:
-            debugmessage(o)
-        resultrediskey = [o for o in outputlist if o]
-        resultrediskey = resultrediskey[-1]
-        # but this looks like: 'results sent to redis as ff128837_results'
-        # so you need a little more work
-        resultrediskey = resultrediskey.split()[-1]
-    else:
-        consolewarning('{c} sent an error:\n{r}', color='red')
-        debugmessage(repr(result))
-
-    return resultrediskey
-
-
-def golangsharedlibrarysearcher(so: SearchObject) -> str:
-    """
-
-    use the shared library to do the golang search
-
-    at the moment the progress polls will not update; it seems that the module locks python up
-
-    the cli version can read set the poll data and have it get read by wscheckpoll()
-    the module is setting the poll data, but it is not getting read by wscheckpoll()
-        wscheckpoll() will loop 0-2 times: wscheckpoll() {'total': -1, 'remaining': -1, 'hits': -1, ...}
-        then it locks during the search
-        then it unlocks after the search is over: wscheckpoll() {'total': 776, 'remaining': 0, 'hits': 18, ... }
-
-        conversely if the cli app is searching wscheckpoll() will update every .4s, as expected
-
-    """
-
-    debugmessage('calling golang via the golang module')
-    searcher = gosearch.HipparchiaGolangSearcher
-    resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), hipparchia.config['GOLANGMODLOGLEVEL'],
-                              goredislogin, gopsqlloginrw)
-    debugmessage('search completed and stored at "{r}"'.format(r=resultrediskey))
-
-    return resultrediskey
-
