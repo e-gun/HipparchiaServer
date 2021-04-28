@@ -37,6 +37,17 @@ if gosearch:
                                             hipparchia.config['DBWRITEUSER'], hipparchia.config['DBWRITEPASS'],
                                             hipparchia.config['DBNAME'])
 
+try:
+    import redis
+    c = establishredisconnection()
+    c.ping()
+    canuseredis = True
+    del c
+except ImportError:
+    canuseredis = False
+except redis.exceptions.ConnectionError:
+    canuseredis = False
+
 
 def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
     """
@@ -54,8 +65,14 @@ def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
 
     """
 
+    warning = 'attempted to search via golang but {x} is not available using precomposedsqlsearchmanager() instead'
+
     if not gosearch:
-        consolewarning('attempted to search via golang but golang is not available', color='red')
+        consolewarning(warning.format(x='golang'), color='red')
+        return precomposedsqlsearchmanager(so)
+
+    if not canuseredis:
+        consolewarning(warning.format(x='redis'), color='red')
         return precomposedsqlsearchmanager(so)
 
     rc = establishredisconnection()

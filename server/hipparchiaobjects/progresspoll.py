@@ -11,7 +11,7 @@ import time
 from multiprocessing import Array, Value
 
 from server import hipparchia
-from server.formatting.miscformatting import debugmessage
+from server.formatting.miscformatting import debugmessage, consolewarning
 from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.hipparchiaobjects.helperobjects import MPCounter
 
@@ -337,6 +337,22 @@ if hipparchia.config['POLLCONNECTIONTYPE'] != 'redis':
 	class ProgressPoll(SharedMemoryProgressPoll):
 		pass
 else:
-	debugmessage('RedisProgressPoll selected')
-	class ProgressPoll(RedisProgressPoll):
-		pass
+	try:
+		import redis
+		c = establishredisconnection()
+		c.ping()
+		canuseredis = True
+		del c
+	except ImportError:
+		canuseredis = False
+	except redis.exceptions.ConnectionError:
+		canuseredis = False
+
+	if canuseredis:
+		debugmessage('RedisProgressPoll selected')
+		class ProgressPoll(RedisProgressPoll):
+			pass
+	else:
+		consolewarning('configuration asked for a RedisProgressPoll, but you cannot connect to redis')
+		class ProgressPoll(SharedMemoryProgressPoll):
+			pass
