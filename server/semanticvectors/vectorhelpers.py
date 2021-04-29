@@ -227,6 +227,8 @@ def findsentences(authortable: str, so: SearchObject, dbcursor: ConnectionObject
 
 	findsentences() results[0] (0, 'ἐπὶ πολλῶν μὲν ἄν τιϲ ἰδεῖν ὦ ἄνδρεϲ ἀθηναῖοι δοκεῖ μοι τὴν παρὰ τῶν θεῶν εὔνοιαν φανερὰν γιγνομένην τῇ πόλει οὐχ ἥκιϲτα δ’ ἐν τοῖϲ παροῦϲι πράγμαϲι')
 
+	candidate for refactoring: note the overlap with searchlistintosqldict()
+
 	:param authortable:
 	:param searchobject:
 	:param dbcursor:
