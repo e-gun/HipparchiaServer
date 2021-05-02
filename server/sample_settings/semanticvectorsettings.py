@@ -99,6 +99,7 @@ TOPICMODELINGENABLED = False
 VECTORANALOGIESENABLED = False
 CONCEPTSEARCHINGENABLED = False   # of dubious value as currently implemented
 TESTINGVECTORBUTTONENABLED = False  # maybe an in-progress/experimental function exists and you are working on/with it
+GOLANGVECTORHELPER = False
 MAXVECTORSPACE = 7548165
 MAXSENTENCECOMPARISONSPACE = 50000
 VECTORDIMENSIONS = 300

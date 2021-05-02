@@ -205,7 +205,7 @@ def setcontinuationvalue(thisline: dbWorkLine, previousline: dbWorkLine, previou
 	return newcv
 
 
-def getrequiredmorphobjects(setofterms: set, furtherdeabbreviate=False):
+def getrequiredmorphobjects(setofterms: set, furtherdeabbreviate=False) -> dict:
 	"""
 
 	take a set of terms
@@ -239,14 +239,14 @@ def getrequiredmorphobjects(setofterms: set, furtherdeabbreviate=False):
 	return morphobjects
 
 
-def mpmorphology(terms: list, furtherdeabbreviate: bool, morphobjects, dbconnection: ConnectionObject):
+def mpmorphology(terms: list, furtherdeabbreviate: bool, dictofmorphobjects, dbconnection: ConnectionObject) -> dict:
 	"""
 
 	build a dict of morphology objects
 
 	:param terms:
 	:param furtherdeabbreviate:
-	:param morphobjects:
+	:param dictofmorphobjects:
 	:param dbconnection:
 	:return:
 	"""
@@ -268,11 +268,11 @@ def mpmorphology(terms: list, furtherdeabbreviate: bool, morphobjects, dbconnect
 		if term:
 			mo = lookformorphologymatches(term, dbcursor, furtherdeabbreviate=furtherdeabbreviate)
 			if mo:
-				morphobjects[term] = mo
+				dictofmorphobjects[term] = mo
 			else:
-				morphobjects[term] = None
+				dictofmorphobjects[term] = None
 
-	return morphobjects
+	return dictofmorphobjects
 
 
 def paragraphformatting(listoflines: List[dbWorkLine]) -> List[dbWorkLine]:

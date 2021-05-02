@@ -170,8 +170,8 @@ def cleantext(texttostrip):
 	searchdict = {**praenomina, **datestrings}
 
 	htmlstrip = re.compile(r'<.*?>')
-	wholetext = re.sub(htmlstrip, '', texttostrip)
-	wholetext = re.sub('&nbsp;', '', wholetext)
+	wholetext = re.sub(htmlstrip, str(), texttostrip)
+	wholetext = re.sub('&nbsp;', str(), wholetext)
 	wholetext = re.sub(r'\w+\.', lambda x: replaceabbreviations(x.group(0), searchdict), wholetext)
 	# speakers in plays? need to think about catching:  'XY. (says something) AB. (replies)'
 
@@ -375,7 +375,7 @@ def parsevectorsentences(so: SearchObject, lineobjects: List[dbWorkLine]) -> Lis
 	else:
 		matches = allsentences
 
-	# hyphenated line-ends are a problem
+	# hyphenated line-ends are a problem: oriun- tur --> oriuntur
 	matches = [re.sub(r'-\s{1,2}', str(), m) for m in matches]
 	# matches = [re.sub(r'-\s{0,2}', str(), m) for m in matches]
 
@@ -423,6 +423,9 @@ def convertmophdicttodict(morphdict: dict) -> dict:
 	value = { maybeA, maybeB, maybeC}
 
 	{'θεῶν': {'θεόϲ', 'θέα', 'θεάω', 'θεά'}, 'πώ': {'πω'}, 'πολλά': {'πολύϲ'}, 'πατήρ': {'πατήρ'}, ... }
+
+	relies heavily on dbMorphologyObject.getpossible()
+	and this itself is going to rely on MorphPossibilityObject.getbaseform()
 
 	:return:
 	"""

@@ -6,6 +6,8 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+from typing import List
+
 import warnings
 
 from server.dbsupport.vectordbfunctions import storevectorindatabase
@@ -21,7 +23,7 @@ except ImportError:
 	Word2Vec = None
 
 
-def buildgensimmodel(searchobject, morphdict, sentences) -> Word2Vec:
+def buildgensimmodel(searchobject, morphdict: dict, sentences: List[str]) -> Word2Vec:
 	"""
 
 	returns a Word2Vec model

@@ -110,12 +110,12 @@ def buildnnvectorspace(sentencetuples, searchobject):
 	activepoll = searchobject.poll
 
 	# find all words in use
-	listsofwords = [s[1] for s in sentencetuples]
-	allwords = findsetofallwords(listsofwords)
+	thesentences = [s[1] for s in sentencetuples]
+	allwords = findsetofallwords(thesentences)
 
 	# find all possible forms of all the words we used
 	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
-	wl = '{:,}'.format(len(listsofwords))
+	wl = '{:,}'.format(len(thesentences))
 	activepoll.statusis(
 		'No stored model for this search. Generating a new one.<br />Finding headwords for {n} sentences'.format(n=wl))
 
@@ -135,7 +135,7 @@ def buildnnvectorspace(sentencetuples, searchobject):
 		morphdict = {t: '·'.join(morphdict[t]) for t in morphdict}
 
 	activepoll.statusis('No stored model for this search. Generating a new one.<br />Building vectors for the headwords in the {n} sentences'.format(n=wl))
-	vectorspace = buildgensimmodel(searchobject, morphdict, listsofwords)
+	vectorspace = buildgensimmodel(searchobject, morphdict, thesentences)
 
 	return vectorspace
 

@@ -17,7 +17,7 @@ from server.listsandsession.genericlistfunctions import flattenlistoflists
 class MorphPossibilityObject(object):
 	"""
 
-	the embedded morphological possibilities
+	generate an object to deal with the morphological possibilities embedded inside of dbMorphologyObject.possibleforms
 
 	"""
 	tenses = {'pres', 'aor', 'fut', 'perf', 'imperf', 'plup', 'futperf'}

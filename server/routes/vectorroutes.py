@@ -24,6 +24,7 @@ if hipparchia.config['SEMANTICVECTORSENABLED']:
 		executegenerateanalogies, twodimensionalrepresentationofspace
 	from server.semanticvectors.scikitlearntopics import sklearnselectedworks
 	from server.semanticvectors.vectorroutehelperfunctions import findabsolutevectorsbysentence
+	from server.semanticvectors.golangvectorsearches import golangvectors
 else:
 	voff = lambda x: 'vectors have not been enabled in your configuration file'
 	executegensimsearch = voff
@@ -102,6 +103,9 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 	activepoll.activate()
 	activepoll.statusis('Preparing to vectorize')
 	so.poll = activepoll
+
+	if hipparchia.config['GOLANGVECTORHELPER']:
+		return golangvectors(so)
 
 	if vectortype != 'cosdistbylineorword':
 		fparam = [so]
