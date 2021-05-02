@@ -129,7 +129,6 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 	so.poll.activate()
 	so.poll.statusis('Preparing to search')
 
-	searchlist = list()
 	nosearch = True
 	output = SearchOutputObject(so)
 
@@ -138,29 +137,17 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 
 	if (len(so.seeking) > 0 or so.lemma or frozensession['tensorflowgraph'] or frozensession['topicmodel']) and activecorpora:
 		so.poll.statusis('Compiling the list of works to search')
-		searchlist = compilesearchlist(listmapper, frozensession)
+		so.searchlist = compilesearchlist(listmapper, frozensession)
 
-	if len(searchlist) > 0:
+	if so.searchlist:
+		# calculatewholeauthorsearches() + configurewhereclausedata()
+		so = updatesearchlistandsearchobject(so)
+
 		nosearch = False
 		skg = None
 		prx = None
-		# mark works that have passage exclusions associated with them:
-		# gr0001x001 instead of gr0001w001 if you are skipping part of w001
-		searchlist = flagexclusions(searchlist, frozensession)
-		workssearched = len(searchlist)
 
-		so.poll.statusis('Calculating full authors to search')
-
-		searchlist = calculatewholeauthorsearches(searchlist, authordict)
-
-		so.searchlist = searchlist
-		so.usedcorpora = so.wholecorporasearched()
-
-		so.poll.statusis('Configuring the search restrictions')
-		so.indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
-
-		# fork over to the associative vectors framework if that option we checked
-		# return the data derived therefrom instead of "search result" data
+		workssearched = len(so.searchlist)
 
 		isgreek = re.compile('[α-ωἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
 
@@ -246,7 +233,7 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 			output.reasons.append('there are no active databases')
 		if len(so.seeking) == 0:
 			output.reasons.append('there is no search term')
-		if len(so.seeking) > 0 and len(searchlist) == 0:
+		if len(so.seeking) > 0 and len(so.searchlist) == 0:
 			output.reasons.append('zero works match the search criteria')
 
 		output.title = '(empty query)'
@@ -415,3 +402,25 @@ def externalwsgipolling(pollid) -> JSON_STR:
 	# print('response', response)
 
 	return json.dumps(pollport)
+
+
+def updatesearchlistandsearchobject(so: SearchObject) -> SearchObject:
+	"""
+
+	you have a searchlist; now tell the searchobject more about it...
+
+	this has been peel off so that golangvectors() can call it too
+
+	"""
+
+	# mark works that have passage exclusions associated with them:
+	# gr0001x001 instead of gr0001w001 if you are skipping part of w001
+	searchlist = flagexclusions(so.searchlist, so.session)
+
+	so.poll.statusis('Calculating full authors to search')
+	so.searchlist = calculatewholeauthorsearches(searchlist, authordict)
+	so.usedcorpora = so.wholecorporasearched()
+	so.poll.statusis('Configuring the search restrictions')
+	so.indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
+
+	return so

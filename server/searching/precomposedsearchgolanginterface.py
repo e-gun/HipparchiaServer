@@ -18,7 +18,8 @@ from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.searching.precomposesql import rewritesqlsearchdictforgolang
 from server.searching.precomposedsearchpythoninterface import precomposedsqlsearchmanager
-from server.searching.searchhelperfunctions import redishitintodbworkline, formatgolanggrabberarguments
+from server.searching.searchhelperfunctions import redishitintodbworkline, formatgolanggrabberarguments, \
+    genericgolangcliexecution
 from server.threading.mpthreadcount import setthreadcount
 
 gosearch = None
@@ -112,41 +113,9 @@ def golangclibinarysearcher(so: SearchObject) -> str:
 
     """
 
-    resultrediskey = str()
+    debugmessage('calling {e}'.format(e=hipparchia.config['GOLANGCLIBINARYNAME']))
 
-    debugmessage('calling golang via CLI')
-
-    if not hipparchia.config['EXTERNALWSGI']:
-        basepath = path.dirname(__file__)
-        basepath = '/'.join(basepath.split('/')[:-2])
-    else:
-        # path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
-        basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
-
-    command = basepath + '/server/golangmodule/' + hipparchia.config['GOLANGLCLBINARYNAME']
-    commandandarguments = formatgolanggrabberarguments(command, so)
-
-    try:
-        result = subprocess.run(commandandarguments, capture_output=True)
-    except FileNotFoundError:
-        consolewarning('cannot find the golang executable "{x}'.format(x=command), color='red')
-        return resultrediskey
-
-    if result.returncode == 0:
-        stdo = result.stdout.decode('UTF-8')
-        outputlist = stdo.split('\n')
-        for o in outputlist:
-            debugmessage(o)
-        resultrediskey = [o for o in outputlist if o]
-        resultrediskey = resultrediskey[-1]
-        # but this looks like: 'results sent to redis as ff128837_results'
-        # so you need a little more work
-        resultrediskey = resultrediskey.split()[-1]
-    else:
-        consolewarning('{c} sent an error:\n{r}', color='red')
-        debugmessage(repr(result))
-
-    return resultrediskey
+    return genericgolangcliexecution(hipparchia.config['GOLANGCLIBINARYNAME'], formatgolanggrabberarguments, so)
 
 
 def golangsharedlibrarysearcher(so: SearchObject) -> str:

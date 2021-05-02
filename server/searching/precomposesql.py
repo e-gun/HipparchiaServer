@@ -19,7 +19,7 @@ from server.listsandsession.whereclauses import wholeworktemptablecontents
 from server.searching.searchhelperfunctions import buildbetweenwhereextension
 
 
-def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphrasesearch=False) -> dict:
+def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphrasesearch=False, vectors=False) -> dict:
     """
 
     take a searchobject
@@ -54,6 +54,8 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphra
     }
     }
 
+    a bit fiddly because more than one class of query is constructed here: vanilla, subquery, vector...
+
     """
 
     returndict = dict()
@@ -81,7 +83,7 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphra
 
         if r['type'] == 'between':
             whereextensions = buildbetweenwhereextension(authortable, so)
-            if not subqueryphrasesearch:
+            if not subqueryphrasesearch and not vectors:
                 whr = 'WHERE {xtn} ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax, xtn=whereextensions)
             else:
                 # whereextensions will come back with an extraneous ' AND'
@@ -106,16 +108,21 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphra
                 (SELECT 1 FROM {tbl}_includelist_UNIQUENAME incl WHERE incl.includeindex = {tbl}.index
             """
             whereextensions = wtempate.format(tbl=authortable)
-            whr = 'WHERE {xtn} AND {au}.{col} {sy} %s)'.format(au=authortable, col=so.usecolumn, sy=mysyntax,
+            if not vectors:
+                whr = 'WHERE {xtn} AND {au}.{col} {sy} %s)'.format(au=authortable, col=so.usecolumn, sy=mysyntax,
                                                                xtn=whereextensions)
+            else:
+                whr = 'WHERE {xtn}'.format(xtn=whereextensions)
         else:
             # should never see this
             consolewarning('error in substringsearch(): unknown whereclause type', r['type'])
             whr = 'WHERE ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax)
 
-        if not subqueryphrasesearch:
+        if not subqueryphrasesearch and not vectors:
             qtemplate = 'SELECT {wtmpl} FROM {db} {whr} {lm}'
             q = qtemplate.format(wtmpl=worklinetemplate, db=authortable, whr=whr, lm=mylimit)
+        elif vectors:
+            q = 'SELECT {wtmpl} FROM {db}'.format(wtmpl=worklinetemplate, db=authortable)
         else:
             q = rewritequerystringforsubqueryphrasesearching(authortable, whr, so)
         d = (seeking,)

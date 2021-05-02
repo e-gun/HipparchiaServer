@@ -8,8 +8,10 @@
 
 import json
 import re
+import subprocess
 import time
 from multiprocessing import JoinableQueue
+from os import path
 from string import punctuation
 from typing import List
 
@@ -20,11 +22,12 @@ from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate, grabonelinefromwork
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, querytotalwordcounts
 from server.formatting.betacodetounicode import replacegreekbetacode
+from server.formatting.miscformatting import debugmessage, consolewarning
 from server.formatting.wordformatting import badpucntwithbackslash, minimumgreek, removegravity, wordlistintoregex
-from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.checksession import probeforsessionvariables, justtlg
+from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.startup import lemmatadict
 from server.threading.mpthreadcount import setthreadcount
 
@@ -643,6 +646,53 @@ def redishitintodbworkline(redisresult: JSONDICT) -> dbWorkLine:
 							ln['Lvl2Value'], ln['Lvl1Value'], ln['Lvl0Value'], ln['MarkedUp'], ln['Accented'],
 							ln['Stripped'], ln['Hypenated'], ln['Annotations'])
 	return lineobject
+
+
+def genericgolangcliexecution(theprogram: str, formatterfunction, so: SearchObject) -> str:
+	"""
+
+	call a golang cli helper; report the result key
+
+	this basically sets you up for either GOLANGCLIBINARYNAME or GOLANGVECTORBINARYNAME
+
+	and you will need the relevant formatgolangXXXarguments() too
+
+	note that the last line of the output of the binary is super-important: it needs to be the result key
+
+	"""
+	resultrediskey = str()
+
+	if not hipparchia.config['EXTERNALWSGI']:
+		basepath = path.dirname(__file__)
+		basepath = '/'.join(basepath.split('/')[:-2])
+	else:
+		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
+		basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
+
+	command = basepath + '/server/golangmodule/' + theprogram
+	commandandarguments = formatterfunction(command, so)
+
+	try:
+		result = subprocess.run(commandandarguments, capture_output=True)
+	except FileNotFoundError:
+		consolewarning('cannot find the golang executable "{x}'.format(x=command), color='red')
+		return resultrediskey
+
+	if result.returncode == 0:
+		stdo = result.stdout.decode('UTF-8')
+		outputlist = stdo.split('\n')
+		for o in outputlist:
+			debugmessage(o)
+		resultrediskey = [o for o in outputlist if o]
+		resultrediskey = resultrediskey[-1]
+		# but this looks like: 'results sent to redis as ff128837_results'
+		# so you need a little more work
+		resultrediskey = resultrediskey.split()[-1]
+	else:
+		consolewarning('{c} sent an error:\n{r}', color='red')
+		debugmessage(repr(result))
+
+	return resultrediskey
 
 
 def formatgolanggrabberarguments(command: str, so: SearchObject) -> list:
