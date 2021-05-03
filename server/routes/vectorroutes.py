@@ -16,14 +16,12 @@ from server.formatting.miscformatting import validatepollid
 from server.formatting.wordformatting import depunct
 from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchObject, SearchOutputObject
-from server.routes.searchroute import executesearch
 from server.startup import lemmatadict, progresspolldict
 
 if hipparchia.config['SEMANTICVECTORSENABLED']:
 	from server.semanticvectors.gensimvectors import executenearestneighborsquery, executegensimlsi, \
 		executegenerateanalogies, twodimensionalrepresentationofspace
 	from server.semanticvectors.scikitlearntopics import sklearnselectedworks
-	from server.semanticvectors.vectorroutehelperfunctions import findabsolutevectorsbysentence
 	from server.semanticvectors.golangvectorsearches import golangvectors
 else:
 	voff = lambda x: 'vectors have not been enabled in your configuration file'

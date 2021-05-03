@@ -7,11 +7,15 @@
 """
 
 import json
+import locale
 import warnings
 from typing import List
+
 from server import hipparchia
 from server.dbsupport.redisdbfunctions import establishredisconnection
+from server.dbsupport.vectordbfunctions import storevectorindatabase, checkforstoredvector
 from server.formatting.miscformatting import consolewarning, debugmessage
+from server.formatting.vectorformatting import ldatopicsgenerateoutput
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.listsandsession.searchlistmanagement import compilesearchlist
@@ -19,11 +23,11 @@ from server.routes.searchroute import updatesearchlistandsearchobject
 from server.searching.precomposedsearchgolanginterface import golangclibinarysearcher, golangsharedlibrarysearcher
 from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforgolang
 from server.searching.searchhelperfunctions import genericgolangcliexecution
-from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
-from server.startup import listmapper
+from server.semanticvectors.vectorhelpers import mostcommonwordsviaheadwords, removestopwords
+from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
+from server.startup import listmapper, workdict
 from server.threading.mpthreadcount import setthreadcount
-from server.dbsupport.vectordbfunctions import storevectorindatabase
 
 try:
     from gensim.models import Word2Vec
@@ -34,6 +38,33 @@ except ImportError:
         print('gensim not available')
     Word2Vec = None
 
+try:
+    from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
+    from sklearn.linear_model import SGDClassifier
+    from sklearn.model_selection import GridSearchCV
+    from sklearn.pipeline import Pipeline
+    from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
+except ImportError:
+    if current_process().name == 'MainProcess':
+        consolewarning('sklearn is unavailable', color='black')
+    CountVectorizer = None
+    TfidfTransformer = None
+    SGDClassifier = None
+    GridSearchCV = None
+    Pipeline = None
+
+try:
+    # will hurl out a bunch of DeprecationWarning messages at the moment...
+    # lib/python3.6/re.py:191: DeprecationWarning: bad escape \s
+    import pyLDAvis
+    import pyLDAvis.sklearn as ldavis
+except ImportError:
+    if current_process().name == 'MainProcess':
+        consolewarning('pyLDAvis is unavailable', color='black')
+    pyLDAvis = None
+    ldavis = None
+
+
 JSON_STR = str
 JSONDICT = str
 
@@ -41,7 +72,7 @@ JSONDICT = str
 def golangvectors(so: SearchObject) -> JSON_STR:
     """
 
-    the flow inside of go, but this overview is useful for refactoring hipparchia's python
+    the flow inside of go, but this overview is useful for looking at hipparchia's python
 
     our paradigm case is going to be a nearest neighbors query; to do this you need to...
 
@@ -55,107 +86,168 @@ def golangvectors(so: SearchObject) -> JSON_STR:
     [h] build the lemmatized bags of words ('unlemmatized' can skip [f] and [g]...)
     [i] store the bags
 
-    note that we are assuming you also have the golanggrabber available
+    in order to meet the requirements of [a] above we need to
+      [0] test if this is a viable search: scope problems? already a model on file? ... [jump away if so...]
+      [1] generate a searchlist
+      [2] do a searchlistintosqldict()
+      [3] store the searchlist to redis
+      [4] run a search on that dict with the golang helper in order to acquire the lines that will become bags
+      [5] tell HipparchiaGoVectorHelper can be told to just collect and work on those lines
 
-    127.0.0.1:6379> spop 2b10de72_vectorresults 4
-    1) "{\"Loc\":\"line/lt0472w001/615\",\"Sent\":\"acceptum facio reddo lesbia mius praesens malus\xc2\xb2 multus dico\xc2\xb2 non possum reticeo detondeo qui\xc2\xb9 ego in reor attulo\"}"
-    2) "{\"Loc\":\"line/lt0472w001/1294\",\"Sent\":\"jacio hederiger quandoquidem fortuna meus atque tuus ego miser aspicio et si puriter ago qui\xc2\xb2 enim genus\xc2\xb9 figura curro duco subtemen curro fundo\xc2\xb9\"}"
-    3) "{\"Loc\":\"line/lt0472w001/2296\",\"Sent\":\"qui\xc2\xb2 tu nunc chordus\xc2\xb9 quis\xc2\xb9 tu praepono nos possum\"}"
-    4) "{\"Loc\":\"line/lt0472w001/1105\",\"Sent\":\"rasilis subeo foris\xc2\xb9\"}"
+      then after [a]-[i] happens....
+
+      [6] collect the bags of words and hand them over to Word2Vec(), etc. [*]
+
+    NB: we are assuming you also have the golanggrabber available
+
+    n6:
+        127.0.0.1:6379> spop 2b10de72_vectorresults 4
+        1) "{\"Loc\":\"line/lt0472w001/615\",\"Sent\":\"acceptum facio reddo lesbia mius praesens malus\xc2\xb2 multus dico\xc2\xb2 non possum reticeo detondeo qui\xc2\xb9 ego in reor attulo\"}"
+        2) "{\"Loc\":\"line/lt0472w001/1294\",\"Sent\":\"jacio hederiger quandoquidem fortuna meus atque tuus ego miser aspicio et si puriter ago qui\xc2\xb2 enim genus\xc2\xb9 figura curro duco subtemen curro fundo\xc2\xb9\"}"
+        3) "{\"Loc\":\"line/lt0472w001/2296\",\"Sent\":\"qui\xc2\xb2 tu nunc chordus\xc2\xb9 quis\xc2\xb9 tu praepono nos possum\"}"
+        4) "{\"Loc\":\"line/lt0472w001/1105\",\"Sent\":\"rasilis subeo foris\xc2\xb9\"}"
 
     """
 
+    # [0] is this really going to happen?
+
+    # [i] do we bail out before even getting started?
+    # note that this can / will return independently and break here
+    abortjson = checkneedtoabort(so)
+    if abortjson:
+        del so.poll
+        return abortjson
+
+    # [ii] do we actually have a model stored already?
+    # note that this can / will return independently and break here
+    # def checkforstoredvector(so: SearchObject, vectortype=None, careabout='thumbprint'):
+    themodel = checkforstoredvector(so)
+
+    if not themodel:
+        # [1] generate a searchlist: use executesearch() as the template
+
+        so.poll.statusis('Preparing to search')
+        so.usecolumn = 'marked_up_line'
+        so.cap = 99999999
+
+        # calculatewholeauthorsearches() + configurewhereclausedata()
+        so = updatesearchlistandsearchobject(so)
+
+        # [2] do a searchlistintosqldict() [this is killing lda...]
+        so.searchsqldict = searchlistintosqldict(so, str(), vectors=True)
+        so.searchsqldict = rewritesqlsearchdictforgolang(so)
+
+        # [3] store the searchlist to redis
+        rc = establishredisconnection()
+        debugmessage('storing search at "{r}"'.format(r=so.searchid))
+        for s in so.searchsqldict:
+            rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
+
+        # [4] run a search on that dict with the golang helper in order to acquire the lines that will become bags
+        so.poll.statusis('Grabbing a collection of lines')
+        if hipparchia.config['GOLANGLOADING'] != 'cli':
+            resultrediskey = golangsharedlibrarysearcher(so)
+        else:
+            resultrediskey = golangclibinarysearcher(so)
+
+        # [5] tell HipparchiaGoVectorHelper can be told to just collect and work on those lines
+
+        so.poll.statusis('Preparing and bagging the collection of sentences')
+        target = so.searchid + '_results'
+        if resultrediskey == target:
+            vectorresultskey = golangclibinaryvectorhelper(so)
+        else:
+            fail = 'search for lines failed to return a proper result key: {a} ≠ {b}'.format(a=resultrediskey, b=target)
+            consolewarning(fail, color='red')
+            vectorresultskey = str()
+
+        # this means that [a]-[i] has now happened....
+
+        # [6] collect the sentences and hand them over to Word2Vec(), etc.
+
+        debugmessage('golangvectors() reports that the vectorresultskey = {r}'.format(r=vectorresultskey))
+
+        debugmessage('fetching search from "{r}"'.format(r=vectorresultskey))
+
+        redisresults = list()
+        while vectorresultskey:
+            r = rc.spop(vectorresultskey)
+            if r:
+                redisresults.append(r)
+            else:
+                vectorresultskey = None
+
+        hits = redishitintobagofwordsdict(redisresults)
+        bagsofwords = [hits[k].split(' ') for k in hits]
+        debugmessage('first bag is {b}'.format(b=bagsofwords[0]))
+        debugmessage('# of bags is {b}'.format(b=len(bagsofwords)))
+
+        if so.vectorquerytype == 'nearestneighborsquery':
+            themodel = golangbuildgensimmodel(so, bagsofwords)
+        elif so.vectorquerytype == 'topicmodel':
+            stops = list(mostcommonwordsviaheadwords())
+            bagsofsentences = [' '.join(b) for b in bagsofwords]
+            debugmessage('first sbag is {b}'.format(b=bagsofsentences[0]))
+            bagsofsentences = [removestopwords(s, stops) for s in bagsofsentences]
+            debugmessage('first sbag is now {b}'.format(b=bagsofsentences[0]))
+            themodel = golangsklearnselectedworks(so, bagsofsentences)
+        else:
+            pass
+
+    # so we have a model one way or the other by now...
+    if so.vectorquerytype == 'nearestneighborsquery':
+        jsonoutput = generatenearestneighbordata(None, len(so.searchlist), so, themodel)
+    elif so.vectorquerytype == 'topicmodel':
+        # def ldatopicsgenerateoutput(ldavishtmlandjs: str, workssearched: int, settings: dict, searchobject: SearchObject):
+        jsonoutput = ldatopicsgenerateoutput(themodel, so)
+    else:
+        jsonoutput = json.dumps('golang cannot execute {s} queries'.format(s=so.vectorquerytype))
+
+    return jsonoutput
+
+
+def checkneedtoabort(so: SearchObject) -> str:
+    """
+
+    can/should we even do this?
+
+    """
+
+    abortjson = None
     abort = lambda x: emptyvectoroutput(so, x)
-
-    consolewarning('in progress; will not return results', color='red')
-
-    # in order to meet the requirements of [a] above we need to
-    #   [1] generate a searchlist
-    #   [2] do a searchlistintosqldict()
-    #   [3] store the searchlist to redis
-    #   [4] run a search on that dict with the golang searcher
-    #   [5] do nothing: leave those lines from #3 in redis
-
-    # [1] generate a searchlist: use executesearch() as the template
-
-    # print('so.vectorquerytype', so.vectorquerytype)
-
-    so.poll.statusis('Preparing to search')
-    so.usecolumn = 'marked_up_line'
     activecorpora = so.getactivecorpora()
-    so.cap = 99999999
+    so.poll.statusis('Compiling the list of works to search')
+    so.searchlist = compilesearchlist(listmapper, so.session)
 
     # so.seeking should only be set via a fallback when session['baggingmethod'] == 'unlemmatized'
     if (so.lemmaone or so.tovectorize or so.seeking) and activecorpora:
-        so.poll.statusis('Compiling the list of works to search')
-        so.searchlist = compilesearchlist(listmapper, so.session)
+        pass
     elif not activecorpora:
-        return abort(['no active corpora'])
+        abortjson = abort(['no active corpora'])
     elif not so.searchlist:
-        return abort(['empty list of places to look'])
+        abortjson = abort(['empty list of places to look'])
+    elif so.vectorquerytype == 'topicmodel':
+        # we don't have and don't need a lemmaone, etc.
+        pass
     else:
         # note that some vector queries do not need a term; fix this later...
-        return abort(['there was no search term'])
+        abortjson = abort(['there was no search term'])
 
-    # calculatewholeauthorsearches() + configurewhereclausedata()
-    so = updatesearchlistandsearchobject(so)
+    maxwords = hipparchia.config['MAXVECTORSPACE']
+    wordstotal = 0
+    for work in so.searchlist:
+        work = work[:10]
+        try:
+            wordstotal += workdict[work].wordcount
+        except TypeError:
+            # TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
+            pass
 
-    # [2] do a searchlistintosqldict()
-    so.searchsqldict = searchlistintosqldict(so, str(), vectors=True)
-    so.searchsqldict = rewritesqlsearchdictforgolang(so)
-    debugmessage('\nso.searchsqldict:\n{d}\n'.format(d=so.searchsqldict))
+    if wordstotal > maxwords:
+        m = 'the vector scope max exceeded: {a} > {b} '
+        abortjson = abort([m.format(a=locale.format_string('%d', wordstotal, grouping=True), b=locale.format_string('%d', maxwords, grouping=True))])
 
-    # [3] store the searchlist to redis
-    rc = establishredisconnection()
-    debugmessage('storing search at "{r}"'.format(r=so.searchid))
-    for s in so.searchsqldict:
-        rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
-
-    # [4] run a search on that dict
-    so.poll.statusis('Grabbing a collection of lines')
-    if hipparchia.config['GOLANGLOADING'] != 'cli':
-        resultrediskey = golangsharedlibrarysearcher(so)
-    else:
-        resultrediskey = golangclibinarysearcher(so)
-
-    # [5] we now have a collection of lines stored in redis
-    # HipparchiaGoVectorHelper can be told to just collect  and work on those lines
-
-    so.poll.statusis('Preparing and bagging the collection of lines')
-    target = so.searchid + '_results'
-    if resultrediskey == target:
-        vectorresultskey = golangclibinaryvectorhelper(so)
-    else:
-        fail = 'search for lines failed to return a proper result key: {a} ≠ {b}'.format(a=resultrediskey, b=target)
-        consolewarning(fail, color='red')
-        vectorresultskey = str()
-
-    # OK we are done: the bags of words are waiting for us on redis
-    # these should be collected and then handed over to Word2Vec()
-
-    debugmessage('golangvectors() reports that the vectorresultskey = {r}'.format(r=vectorresultskey))
-
-    debugmessage('fetching search from "{r}"'.format(r=vectorresultskey))
-
-    redisresults = list()
-    while vectorresultskey:
-        r = rc.spop(vectorresultskey)
-        if r:
-            redisresults.append(r)
-        else:
-            vectorresultskey = None
-
-    hits = redishitintobagofwordsdict(redisresults)
-    bagsofwords = [hits[k].split(' ') for k in hits]
-    # debugmessage('first bag is {b}'.format(b=bagsofwords[0]))
-    # debugmessage('# of bags is {b}'.format(b=len(bagsofwords)))
-
-    so.poll.statusis('Building the Word2Vec model')
-    themodel = golangbuildgensimmodel(so, bagsofwords)
-
-    jsonoutput = generatenearestneighbordata(None, len(so.searchlist), so, themodel)
-
-    return jsonoutput
+    return abortjson
 
 
 def redishitintobagofwordsdict(redisresults: List[JSONDICT]) -> dict:
@@ -381,3 +473,87 @@ def golangbuildgensimmodel(so: SearchObject, bagsofwords: list) -> Word2Vec:
     storevectorindatabase(so, typelabel, gensimmodel)
 
     return gensimmodel
+
+
+def golangsklearnselectedworks(so: SearchObject, bagsofsentences: list):
+    """
+    see:
+        http://scikit-learn.org/stable/auto_examples/applications/plot_topics_extraction_with_nmf_lda.html#sphx-glr-auto-examples-applications-plot-topics-extraction-with-nmf-lda-py
+
+    see also:
+
+        https://nlpforhackers.io/topic-modeling/
+
+    CountVectorizer:
+    max_df : float in range [0.0, 1.0] or int, default=1.0
+        When building the vocabulary ignore terms that have a document frequency strictly higher than the given threshold (corpus-specific stop words).
+
+    min_df : float in range [0.0, 1.0] or int, default=1
+        When building the vocabulary ignore terms that have a document frequency strictly lower than the given threshold. This value is also called cut-off in the literature.
+
+
+    see:
+        https://stackoverflow.com/questions/27697766/understanding-min-df-and-max-df-in-scikit-countvectorizer#35615151
+
+    max_df is used for removing terms that appear too frequently, also known as "corpus-specific stop words". For example:
+
+        max_df = 0.50 means "ignore terms that appear in more than 50% of the documents".
+        max_df = 25 means "ignore terms that appear in more than 25 documents".
+
+    The default max_df is 1.0, which means "ignore terms that appear in more than 100% of the documents". Thus, the default setting does not ignore any terms.
+
+    min_df is used for removing terms that appear too infrequently. For example:
+
+        min_df = 0.01 means "ignore terms that appear in less than 1% of the documents".
+        min_df = 5 means "ignore terms that appear in less than 5 documents".
+
+    The default min_df is 1, which means "ignore terms that appear in less than 1 document". Thus, the default setting does not ignore any terms.
+
+    notes:
+        maxfreq of 1 will give you a lot of excessively common words: 'this', 'that', etc.
+        maxfreq of
+
+    on the general issue of graphing see also:
+        https://speakerdeck.com/bmabey/visualizing-topic-models
+        https://de.dariah.eu/tatom/topic_model_visualization.html
+
+    on the axes:
+        https://stats.stackexchange.com/questions/222/what-are-principal-component-scores
+
+    """
+
+    activepoll = so.poll
+    vv = so.vectorvalues
+
+    settings = {
+        'maxfeatures': vv.ldamaxfeatures,
+        'components': vv.ldacomponents,  # topics
+        'maxfreq': vv.ldamaxfreq,  # fewer than n% of sentences should have this word (i.e., purge common words)
+        'minfreq': vv.ldaminfreq,  # word must be found >n times
+        'iterations': vv.ldaiterations,
+        'mustbelongerthan': vv.ldamustbelongerthan
+    }
+
+    activepoll.statusis('Running the LDA vectorizer')
+    # Use tf (raw term count) features for LDA.
+    ldavectorizer = CountVectorizer(max_df=settings['maxfreq'],
+                                    min_df=settings['minfreq'],
+                                    max_features=settings['maxfeatures'])
+
+    ldavectorized = ldavectorizer.fit_transform(bagsofsentences)
+
+    ldamodel = LatentDirichletAllocation(n_components=settings['components'],
+                                         max_iter=settings['iterations'],
+                                         learning_method='online',
+                                         learning_offset=50.,
+                                         random_state=0)
+
+    ldamodel.fit(ldavectorized)
+
+    visualisation = ldavis.prepare(ldamodel, ldavectorized, ldavectorizer)
+    # pyLDAvis.save_html(visualisation, 'ldavis.html')
+
+    ldavishtmlandjs = pyLDAvis.prepared_data_to_html(visualisation)
+    storevectorindatabase(so, 'lda', ldavishtmlandjs)
+
+    return ldavishtmlandjs

@@ -874,7 +874,7 @@ def mostcommonwordsviaheadwords() -> set:
 	return mostcommonwords
 
 
-def removestopwords(sentencestring, stopwords):
+def removestopwords(sentencestring: str, stopwords: list) -> str:
 	"""
 
 	take a sentence and throw out the stopwords in it

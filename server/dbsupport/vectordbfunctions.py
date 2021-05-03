@@ -171,7 +171,7 @@ def storevectorindatabase(so: SearchObject, vectortype: str, vectorspace):
 	return
 
 
-def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout='thumbprint'):
+def checkforstoredvector(so: SearchObject, vectortype=None, careabout='thumbprint'):
 	"""
 
 	the stored vector might not reflect the current math rules
@@ -185,16 +185,19 @@ def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout=
 	2018-02-14 20:50:00 | json       | {lt0474w057}
 	(2 rows)
 
-	:param searchobject:
+	:param so:
 	:param vectortype:
 	:param careabout:
 	:return:
 	"""
 
-	if searchobject.wholecorporasearched():
-		uidlist = searchobject.wholecorporasearched()
+	if not vectortype:
+		vectortype = so.vectorquerytype
+
+	if so.wholecorporasearched():
+		uidlist = so.wholecorporasearched()
 	else:
-		uidlist = sorted(searchobject.searchlist)
+		uidlist = sorted(so.searchlist)
 
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
@@ -204,7 +207,7 @@ def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout=
 		FROM public.storedvectors 
 		WHERE uidlist=%s AND vectortype=%s AND baggingmethod = %s
 	"""
-	d = (uidlist, vectortype, searchobject.session['baggingmethod'])
+	d = (uidlist, vectortype, so.session['baggingmethod'])
 
 	try:
 		cursor.execute(q.format(crit=careabout), d)
@@ -221,7 +224,7 @@ def checkforstoredvector(searchobject: SearchObject, vectortype: str, careabout=
 		return False
 
 	storedvectorvalues = pickle.loads(result[0])
-	currentvectorvalues = searchobject.vectorvalues
+	currentvectorvalues = so.vectorvalues
 
 	if storedvectorvalues == currentvectorvalues:
 		returnval = pickle.loads(result[1])

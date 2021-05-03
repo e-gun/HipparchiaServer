@@ -385,7 +385,7 @@ def lsiformatoutput(findshtml: str, workssearched: int, matches: list, searchobj
 	return jsonoutput
 
 
-def ldatopicsgenerateoutput(ldavishtmlandjs: str, workssearched: int, settings: dict, searchobject: SearchObject):
+def ldatopicsgenerateoutput(ldavishtmlandjs: str, searchobject: SearchObject):
 	"""
 
 	pyLDAvis.prepared_data_to_html() outputs something that is almost pure JS and looks like this:
@@ -421,6 +421,18 @@ def ldatopicsgenerateoutput(ldavishtmlandjs: str, workssearched: int, settings: 
 	so = searchobject
 	activepoll = so.poll
 	output = SearchOutputObject(so)
+
+	workssearched = len(so.searchlist)
+
+	vv = searchobject.vectorvalues
+	settings = {
+		'maxfeatures': vv.ldamaxfeatures,
+		'components': vv.ldacomponents,  # topics
+		'maxfreq': vv.ldamaxfreq,  # fewer than n% of sentences should have this word (i.e., purge common words)
+		'minfreq': vv.ldaminfreq,  # word must be found >n times
+		'iterations': vv.ldaiterations,
+		'mustbelongerthan': vv.ldamustbelongerthan
+	}
 
 	lines = ldavishtmlandjs.split('\n')
 	lines = [re.sub(r'\t', str(), l) for l in lines if l]

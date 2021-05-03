@@ -237,6 +237,6 @@ def ldatopicgraphing(sentencetuples, workssearched, searchobject, headwordstops=
 		ldavishtmlandjs = pyLDAvis.prepared_data_to_html(visualisation)
 		storevectorindatabase(searchobject, 'lda', ldavishtmlandjs)
 
-	jsonoutput = ldatopicsgenerateoutput(ldavishtmlandjs, workssearched, settings, searchobject)
+	jsonoutput = ldatopicsgenerateoutput(ldavishtmlandjs, searchobject)
 
 	return jsonoutput
