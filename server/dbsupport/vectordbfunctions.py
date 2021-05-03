@@ -109,7 +109,7 @@ def createstoredimagestable():
 	return
 
 
-def storevectorindatabase(searchobject: SearchObject, vectortype: str, vectorspace):
+def storevectorindatabase(so: SearchObject, vectortype: str, vectorspace):
 	"""
 
 	you have just calculated a new vectorpace, store it so you do not need to recalculate it
@@ -132,10 +132,13 @@ def storevectorindatabase(searchobject: SearchObject, vectortype: str, vectorspa
 	:return:
 	"""
 
-	if searchobject.wholecorporasearched():
-		uidlist = searchobject.wholecorporasearched()
+	if hipparchia.config['DISABLEVECTORSTORAGE']:
+		consolewarning('DISABLEVECTORSTORAGE = True; the vector space for {i} was not stored'.format(i=so.searchid), color='black')
+
+	if so.wholecorporasearched():
+		uidlist = so.wholecorporasearched()
 	else:
-		uidlist = sorted(searchobject.searchlist)
+		uidlist = sorted(so.searchlist)
 
 	dbconnection = ConnectionObject(ctype='rw')
 	dbcursor = dbconnection.cursor()
@@ -145,7 +148,7 @@ def storevectorindatabase(searchobject: SearchObject, vectortype: str, vectorspa
 		(uidlist = %s AND vectortype = %s AND baggingmethod = %s)
 	"""
 
-	d = (uidlist, vectortype, searchobject.session['baggingmethod'])
+	d = (uidlist, vectortype, so.session['baggingmethod'])
 	dbcursor.execute(q, d)
 
 	q = """
@@ -156,9 +159,9 @@ def storevectorindatabase(searchobject: SearchObject, vectortype: str, vectorspa
 
 	pickledvectors = pickle.dumps(vectorspace)
 	ts = datetime.now().strftime("%Y-%m-%d %H:%M")
-	thumbprint = pickle.dumps(searchobject.vectorvalues)
+	thumbprint = pickle.dumps(so.vectorvalues)
 
-	d = (ts, thumbprint, uidlist, vectortype, searchobject.session['baggingmethod'], pickledvectors)
+	d = (ts, thumbprint, uidlist, vectortype, so.session['baggingmethod'], pickledvectors)
 	dbcursor.execute(q, d)
 
 	# print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))

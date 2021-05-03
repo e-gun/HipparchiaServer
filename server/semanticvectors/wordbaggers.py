@@ -132,7 +132,7 @@ def buildflatbagsofwords(morphdict, sentences) -> deque:
 	"""
 	turn a list of sentences into a list of list of headwords
 
-	here we put homonymns next to one another:
+	here we put alternate possibilities next to one another:
 		ϲυγγενεύϲ ϲυγγενήϲ
 
 	in buildbagsofwordswithalternates() we have one 'word':
