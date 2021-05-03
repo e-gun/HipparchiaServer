@@ -60,12 +60,7 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 	simple = [pollid, one]
 	triple = [pollid, one, two, three]
 
-	knownfunctions = {'cosdistbysentence':
-							{'fnc': findabsolutevectorsbysentence, 'bso': simple, 'pref': 'LITERALCOSINEDISTANCEENABLED'},
-						# cosdistbylineorword is a funky one because it routes you back through the main search function
-						'cosdistbylineorword':
-							{'fnc': executesearch, 'bso': simple, 'pref': 'LITERALCOSINEDISTANCEENABLED'},
-						'semanticvectorquery':
+	knownfunctions = {	'semanticvectorquery':
 							{'fnc': executegensimlsi, 'bso': simple, 'pref': None},
 						'nearestneighborsquery':
 							{'fnc': executenearestneighborsquery, 'bso': simple, 'pref': 'CONCEPTMAPPINGENABLED'},
@@ -107,10 +102,7 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 	if hipparchia.config['GOLANGVECTORHELPER']:
 		return golangvectors(so)
 
-	if vectortype != 'cosdistbylineorword':
-		fparam = [so]
-	else:
-		fparam = [pollid, so]
+	fparam = [so]
 
 	if so:
 		j = f(*fparam)
@@ -119,9 +111,6 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 
 	if hipparchia.config['JSONDEBUGMODE']:
 		print('/vectors/{f}\n\t{j}'.format(f=vectortype, j=j))
-
-	if vectortype != 'cosdistbylineorword':
-		del progresspolldict[pollid]
 
 	return j
 
