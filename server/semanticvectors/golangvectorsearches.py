@@ -112,7 +112,7 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
 
     # [4] run a search on that dict
-
+    so.poll.statusis('Grabbing a collection of lines')
     if hipparchia.config['GOLANGLOADING'] != 'cli':
         resultrediskey = golangsharedlibrarysearcher(so)
     else:
@@ -121,6 +121,7 @@ def golangvectors(so: SearchObject) -> JSON_STR:
     # [5] we now have a collection of lines stored in redis
     # HipparchiaGoVectorHelper can be told to just collect  and work on those lines
 
+    so.poll.statusis('Preparing and bagging the collection of lines')
     target = so.searchid + '_results'
     if resultrediskey == target:
         vectorresultskey = golangclibinaryvectorhelper(so)
@@ -145,9 +146,11 @@ def golangvectors(so: SearchObject) -> JSON_STR:
             vectorresultskey = None
 
     hits = redishitintobagofwordsdict(redisresults)
-    bagsofwords = [hits[k] for k in hits]
-    debugmessage('first bag is {b}'.format(b=bagsofwords[0]))
+    bagsofwords = [hits[k].split(' ') for k in hits]
+    # debugmessage('first bag is {b}'.format(b=bagsofwords[0]))
+    # debugmessage('# of bags is {b}'.format(b=len(bagsofwords)))
 
+    so.poll.statusis('Building the Word2Vec model')
     themodel = golangbuildgensimmodel(so, bagsofwords)
 
     jsonoutput = generatenearestneighbordata(None, len(so.searchlist), so, themodel)

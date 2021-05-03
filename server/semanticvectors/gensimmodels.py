@@ -6,11 +6,11 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import warnings
 from typing import List
 
-import warnings
-
 from server.dbsupport.vectordbfunctions import storevectorindatabase
+from server.formatting.miscformatting import debugmessage
 from server.semanticvectors.wordbaggers import buildwordbags
 from server.threading.mpthreadcount import setthreadcount
 
@@ -81,6 +81,8 @@ def buildgensimmodel(searchobject, morphdict: dict, sentences: List[str]) -> Wor
 	sentences = [s for s in sentences if s]
 
 	bagsofwords = buildwordbags(searchobject, morphdict, sentences)
+	# debugmessage('first bag is {b}'.format(b=bagsofwords[0]))
+	# debugmessage('# of bags is {b}'.format(b=len(bagsofwords)))
 
 	workers = setthreadcount()
 
@@ -157,7 +159,7 @@ def buildgensimmodel(searchobject, morphdict: dict, sentences: List[str]) -> Wor
 	if reducedmodel:
 		gensimmodel = reducedmodel
 
-	# print(model.wv['puer'])
+	# print(gensimmodel.wv['ludo'])
 
 	storevectorindatabase(searchobject, 'nn', gensimmodel)
 
