@@ -122,7 +122,7 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphra
             qtemplate = 'SELECT {wtmpl} FROM {db} {whr} {lm}'
             q = qtemplate.format(wtmpl=worklinetemplate, db=authortable, whr=whr, lm=mylimit)
         elif vectors:
-            q = 'SELECT {wtmpl} FROM {db}'.format(wtmpl=worklinetemplate, db=authortable)
+            q = 'SELECT {wtmpl} FROM {db} {whr}'.format(wtmpl=worklinetemplate, db=authortable, whr=whr)
         else:
             q = rewritequerystringforsubqueryphrasesearching(authortable, whr, so)
         d = (seeking,)
