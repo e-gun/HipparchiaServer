@@ -30,8 +30,7 @@ from server.semanticvectors.gensimnearestneighbors import generatenearestneighbo
 from server.semanticvectors.modelbuilders import buildgensimmodel, buildsklearnselectedworks, \
     gensimgenerateanalogies
 from server.semanticvectors.vectorhelpers import mostcommonwordsviaheadwords, removestopwords, cleanvectortext, \
-    recursivesplit, convertmophdicttodict
-from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
+    recursivesplit, convertmophdicttodict, emptyvectoroutput
 from server.startup import listmapper, workdict
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
@@ -268,7 +267,10 @@ def checkneedtoabort(so: SearchObject) -> str:
 
     """
 
-    abortjson = None
+    if so.iamarobot:
+        return str()
+
+    abortjson = str()
     abort = lambda x: emptyvectoroutput(so, x)
     activecorpora = so.getactivecorpora()
     so.poll.statusis('Compiling the list of works to search')

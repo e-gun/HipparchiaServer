@@ -12,12 +12,8 @@ from server.dbsupport.lexicaldbfunctions import lookformorphologymatches
 from server.formatting.vectorformatting import formatnnmatches, formatnnsimilarity, nearestneighborgenerateoutput
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.vectorobjects import VectorValues
-from server._deprecated._vectors.unused_gensim import buildgensimmodel
 from server.semanticvectors.vectorgraphing import graphnnmatches
-from server.semanticvectors.vectorhelpers import convertmophdicttodict
-from server.listsandsession.genericlistfunctions import findsetofallwords
-from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
-from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
+from server.semanticvectors.vectorhelpers import emptyvectoroutput
 
 
 def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vectorspace):
@@ -58,10 +54,7 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 
 	if not vectorspace:
 		# not supposed to make it here any longer...
-		vectorspace = buildnnvectorspace(sentencetuples, so)
-		if vectorspace == 'failed to build model':
-			reasons = [vectorspace]
-			return emptyvectoroutput(so, reasons)
+		return emptyvectoroutput(so, ['generatenearestneighbordata() was not sent a model'])
 
 	if termone and termtwo:
 		similarity = findword2vecsimilarities(termone, termtwo, vectorspace)
@@ -94,56 +87,6 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 	output = nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject)
 
 	return output
-
-
-def buildnnvectorspace(sentencetuples, searchobject):
-	"""
-
-	find the words
-	find the morphology objects you need for those words
-	build vectors
-
-	:return:
-	"""
-
-	wordbundler = False
-
-	activepoll = searchobject.poll
-
-	# find all words in use
-	try:
-		thesentences = [s[1] for s in sentencetuples]
-	except TypeError:
-		# no sentences were passed: a possibility in the new code that should get factored away eventually
-		return 'failed to build model'
-
-	allwords = findsetofallwords(thesentences)
-
-	# find all possible forms of all the words we used
-	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
-	wl = '{:,}'.format(len(thesentences))
-	activepoll.statusis(
-		'No stored model for this search. Generating a new one.<br />Finding headwords for {n} sentences'.format(n=wl))
-
-	morphdict = getrequiredmorphobjects(allwords, furtherdeabbreviate=True)
-
-	# associate each word with its possible headwords
-	morphdict = convertmophdicttodict(morphdict)
-
-	# import re
-	# teststring = r'aesa'
-	# kvpairs = [(k,morphdict[k]) for k in morphdict.keys() if re.search(teststring, k)]
-	# print('convertmophdicttodict', kvpairs)
-	# sample selection:
-	# convertmophdicttodict [('caesare', {'caesar'}), ('caesarisque', {'caesar'}), ('caesari', {'caesar'}), ('caesar', {'caesar'}), ('caesa', {'caesum', 'caesa', 'caesus¹', 'caedo'}), ('caesaremque', {'caesar'}), ('caesaris', {'caesar'}), ('caesarem', {'caesar'})]
-
-	if wordbundler:
-		morphdict = {t: '·'.join(morphdict[t]) for t in morphdict}
-
-	activepoll.statusis('No stored model for this search. Generating a new one.<br />Building vectors for the headwords in the {n} sentences'.format(n=wl))
-	vectorspace = buildgensimmodel(searchobject, morphdict, thesentences)
-
-	return vectorspace
 
 
 def findapproximatenearestneighbors(query, mymodel, vectorvalues: VectorValues):

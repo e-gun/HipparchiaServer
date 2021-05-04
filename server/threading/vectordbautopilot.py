@@ -17,10 +17,9 @@ from server.dbsupport.vectordbfunctions import checkforstoredvector
 from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.progresspoll import NullProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchObject
-from server.listsandsession.whereclauses import configurewhereclausedata
-from server.semanticvectors.gensimnearestneighbors import buildnnvectorspace
-from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.startup import authordict, listmapper, progresspolldict, workdict
+from server.semanticvectors.golangvectorsearches import golangvectors
+from server.semanticvectors.vectorpipeline import pythonvectors
+from server.startup import authordict, listmapper, progresspolldict
 
 
 def startvectorizing():
@@ -59,8 +58,14 @@ def startvectorizing():
 		workpile = determinevectorworkpile()
 
 	# [(['gr2062'], 4182615), (['gr0057'], 2594166), (['gr4090'], 2202504), ...]
+
+	if hipparchia.config['GOLANGVECTORHELPER']:
+		vectorfunction = golangvectors
+	else:
+		vectorfunction = pythonvectors
+
 	emptypoll = NullProgressPoll(None)
-	indextype = 'nn'
+	modeltype = 'nearestneighborsquery'
 
 	while workpile:
 		if len(progresspolldict.keys()) != 0:
@@ -71,41 +76,45 @@ def startvectorizing():
 		searching = workpile.pop()
 		searchlist = searching[0]
 		wordcount = searching[1]
+
 		so = buildfakesearchobject()
 		so.searchlist = searchlist
 		so.poll = emptypoll
+		so.vectorquerytype = modeltype
+		so.termone = 'FAKESEARCH'
 
-		vectorspace = checkforstoredvector(so, indextype)
+		for c in hipparchia.config['CORPORATOAUTOBUILD']:
+			so.session[c] = True
+
+		vectorspace = checkforstoredvector(so, modeltype)
 
 		if not vectorspace:
-			indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
-			so.indexrestrictions = indexrestrictions
-			sentencetuples = vectorprepdispatcher(so)
-			vectorspace = buildnnvectorspace(sentencetuples, so)
+			jsonmessage = vectorfunction(so)
+			if '<!-- FAILED -->' in jsonmessage:
+				consolewarning('vectorbot failed on {s} and will be shutting down'.format(s=searchlist), color='red')
+				workpile = list()
+				jsonmessage = None
 
-			# the vectorspace is stored in the db at the end of the call to buildnnvectorspace()
-
-			if vectorspace and len(searchlist) > 1:
+			if jsonmessage and len(searchlist) > 1:
 				v = '{i}+ {n} more items vectorized ({w} words)'
 			else:
 				v = '{i} vectorized ({w} words)'
-			if vectorspace and wordcount > 5000:
+			if jsonmessage and wordcount > 5000:
 				consolewarning(v.format(i=searchlist[0], w=wordcount, n=len(searchlist) - 1), color='green',
 				               isbold=False)
 
-			if vectorspace and len(workpile) % 25 == 0:
+			if jsonmessage and len(workpile) % 25 == 0:
 				consolewarning('{n} items remain to vectorize'.format(n=len(workpile)), color='green', isbold=False)
 
-			if not vectorspace and len(workpile) % 100 == 0:
-				consolewarning(
-					'{n} items remain to vectorize, but vectors are not returned with shorter authors'.format(
-						n=len(workpile)), color='green', isbold=False)
-				consolewarning('aborting vectorization', color='green', isbold=False)
-				workpile = list()
-			del vectorspace
+			# if not vectorspace and len(workpile) % 100 == 0:
+			# 	consolewarning(
+			# 		'{n} items remain to vectorize, but vectors are not returned with shorter authors'.format(
+			# 			n=len(workpile)), color='green', isbold=False)
+			# 	consolewarning('aborting vectorization', color='green', isbold=False)
+			# 	workpile = list()
 
 	if hipparchia.config['AUTOVECTORIZE'] and not commandlineargs.disablevectorbot and multiprocessing.current_process().name == 'MainProcess':
-		consolewarning('vectorbot finished', color='green')
+		consolewarning('vectorbot shutting down', color='green')
 
 	return
 
@@ -204,12 +213,24 @@ def buildfakesearchobject(qtype='nearestneighborsquery') -> SearchObject:
 	for x in trueorfalse:
 		frozensession[x] = False
 
+	for x in ['agnexclusions', 'agnselections', 'alocexclusions', 'alocselections', 'analogyfinder', 'auexclusions',
+			  'auselections']:
+		frozensession[x] = list()
+
+	for s in ['wkexclusions', 'wkgnexclusions', 'wkgnselections', 'wkselections', 'wlocexclusions',
+			  'wlocselections']:
+		frozensession[s] = list()
+
+	for p in ['psgexclusions', 'psgselections']:
+		frozensession[p] = list()
+
 	so = SearchObject(1, str(), str(), None, None, frozensession)
 
 	# parsevectorsentences() needs the following:
 	so.vectorquerytype = qtype
 	so.usecolumn = 'marked_up_line'
 	so.sortorder = 'shortname'
+	so.iamarobot = True
 
 	return so
 

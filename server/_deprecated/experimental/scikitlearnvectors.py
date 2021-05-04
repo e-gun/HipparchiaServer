@@ -14,7 +14,7 @@ from time import time
 
 from click import secho
 
-from server.semanticvectors.scikitlearntopics import ldatopicgraphing
+from server._deprecated._vectors.scikitlearntopics import ldatopicgraphing
 
 try:
 	from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
@@ -45,11 +45,11 @@ except ImportError:
 from server import hipparchia
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
-from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorhelpers import convertmophdicttodict, mostcommonwordsviaheadwords, mostcommoninflectedforms
-from server.semanticvectors.wordbaggers import buildwordbags
+from server._deprecated._vectors.preparetextforvectorization import vectorprepdispatcher
+from server.semanticvectors.vectorhelpers import convertmophdicttodict, mostcommonwordsviaheadwords, \
+	mostcommoninflectedforms, emptyvectoroutput
+from server._deprecated._vectors.wordbaggers import buildwordbags
 from server.dbsupport.dblinefunctions import grablistoflines
-from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 from server.formatting.vectorformatting import skformatmostimilar
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.startup import authordict, listmapper, workdict

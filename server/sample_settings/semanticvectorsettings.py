@@ -123,6 +123,7 @@ LDAMUSTBELONGERTHAN = 3
 # gunicorn can't autovectorize and should ignore this setting
 # if you want to autobuild a vector set you can use "run.py" which can load even while gunicorn/nginx is serving
 AUTOVECTORIZE = False
+CORPORATOAUTOBUILD = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
 
 # baggingmethods = {'flat': buildflatbagsofwords,
 #                   'alternates': buildbagsofwordswithalternates,

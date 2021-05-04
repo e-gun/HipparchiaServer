@@ -38,6 +38,7 @@ class SearchObject(object):
 		self.termthree = None
 		self.phrase = str()
 		self.session = frozensession
+		self.iamarobot = False  # but the vectorbot is...
 
 		# the next store the "where" part of the search and get filled out and assigned elsewhere
 		self.searchsqldict = dict()
@@ -343,6 +344,7 @@ class SearchOutputObject(object):
 		self.onehit = searchobject.session['onehit']
 		self.usedcorpora = searchobject.usedcorpora
 		self.searchsummary = str()
+		self.success = str()
 
 		self.icandodates = False
 		if justlatin(searchobject.session) is False:
@@ -427,6 +429,7 @@ class SearchOutputObject(object):
 		Sorted by {sb}
 		<br>
 		{hitmax}
+		{success}
 		"""
 
 		# pluralization check
@@ -454,7 +457,7 @@ class SearchOutputObject(object):
 			hitmax = '[Search suspended: result cap reached.]'
 
 		summary = stemplate.format(hs=self.htmlsearch, tx=tx, fd=fd, tm=self.searchtime, betw=betw,
-		                           onehit=onehit, sb=self.sortby, hitmax=hitmax)
+		                           onehit=onehit, sb=self.sortby, hitmax=hitmax, success=self.success)
 
 		return summary
 

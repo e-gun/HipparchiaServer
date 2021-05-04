@@ -7,7 +7,6 @@
 """
 
 import json
-from typing import List
 
 from server import hipparchia
 from server.dbsupport.redisdbfunctions import establishredisconnection

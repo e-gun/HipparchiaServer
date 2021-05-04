@@ -6,21 +6,14 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import locale
 from multiprocessing import current_process
 
 from click import secho
 
-from server import hipparchia
 from server.dbsupport.vectordbfunctions import checkforstoredvector, storevectorindatabase
 from server.formatting.vectorformatting import ldatopicsgenerateoutput
-from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
-from server.listsandsession.whereclauses import configurewhereclausedata
-from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
 from server.semanticvectors.vectorhelpers import convertmophdicttodict
-from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
-from server.semanticvectors.wordbaggers import buildwordbags
-from server.startup import authordict, listmapper, workdict
+from server._deprecated._vectors.wordbaggers import buildwordbags
 from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 
 try:
@@ -50,76 +43,6 @@ except ImportError:
 	ldavis = None
 
 from server.semanticvectors.vectorhelpers import mostcommonwordsviaheadwords, removestopwords, mostcommoninflectedforms
-
-
-def sklearnselectedworks(searchobject):
-	"""
-
-	:param activepoll:
-	:param searchobject:
-	:return:
-	"""
-
-	if not ldavis or not CountVectorizer:
-		reasons = ['requisite software not installed: sklearn and/or ldavis is unavailable']
-		return emptyvectoroutput(searchobject, reasons)
-
-	so = searchobject
-	activepoll = so.poll
-
-	activepoll.statusis('Preparing to search')
-
-	so.usecolumn = 'marked_up_line'
-	so.vectortype = 'topicmodel'
-
-	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
-	activecorpora = [c for c in allcorpora if so.session[c]]
-
-	if activecorpora:
-		activepoll.statusis('Compiling the list of works to search')
-		searchlist = compilesearchlist(listmapper, so.session)
-	else:
-		reasons = ['search list contained zero items']
-		return emptyvectoroutput(so, reasons)
-
-	# make sure you don't go nuts
-	maxwords = hipparchia.config['MAXVECTORSPACE']
-	wordstotal = 0
-	for work in searchlist:
-		work = work[:10]
-		try:
-			wordstotal += workdict[work].wordcount
-		except TypeError:
-			# TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
-			pass
-
-	if wordstotal > maxwords:
-		reasons = ['the vector scope max exceeded: {a} > {b} '.format(a=locale.format_string('%d', wordstotal, grouping=True), b=locale.format_string('%d', maxwords, grouping=True))]
-		return emptyvectoroutput(so, reasons)
-
-	if len(searchlist) > 0:
-		searchlist = flagexclusions(searchlist, so.session)
-		workssearched = len(searchlist)
-		searchlist = calculatewholeauthorsearches(searchlist, authordict)
-		so.searchlist = searchlist
-
-		indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
-		so.indexrestrictions = indexrestrictions
-
-		# find all sentences
-		activepoll.statusis('Finding all sentences')
-		so.seeking = r'.'
-
-		sentencetuples = vectorprepdispatcher(so)
-		if len(sentencetuples) > hipparchia.config['MAXSENTENCECOMPARISONSPACE']:
-			reasons = ['scope of search exceeded allowed maximum: {a} > {b}'.format(a=len(sentencetuples), b=hipparchia.config['MAXSENTENCECOMPARISONSPACE'])]
-			return emptyvectoroutput(so, reasons)
-		output = ldatopicgraphing(sentencetuples, workssearched, so)
-
-	else:
-		return emptyvectoroutput(so)
-
-	return output
 
 
 def ldatopicgraphing(sentencetuples, workssearched, searchobject, headwordstops=True):

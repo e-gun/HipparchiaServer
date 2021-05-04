@@ -11,8 +11,8 @@ from gensim.models import LogEntropyModel, LsiModel
 
 from server.hipparchiaobjects.helperobjects import LogEntropyVectorCorpus
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
-from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.wordbaggers import buildwordbags
+from server._deprecated._vectors.preparetextforvectorization import vectorprepdispatcher
+from server._deprecated._vectors.wordbaggers import buildwordbags
 from server.semanticvectors.vectorhelpers import convertmophdicttodict
 from server.listsandsession.genericlistfunctions import findsetofallwords
 from server.startup import authordict, listmapper

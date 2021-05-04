@@ -14,16 +14,18 @@ from gensim.models import Word2Vec
 from server import hipparchia
 from server.dbsupport.vectordbfunctions import checkforstoredvector, storevectorindatabase
 from server.formatting.vectorformatting import analogiesgenerateoutput
+from server.listsandsession.genericlistfunctions import findsetofallwords
 from server.listsandsession.searchlistmanagement import compilesearchlist, flagexclusions, calculatewholeauthorsearches
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server._deprecated._vectors.gensimlsi import lsigenerateoutput
 from server.semanticvectors.gensimfunctions import Word2Vec, JSON_STR
-from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server._deprecated._vectors.misc_unused_vectors import tsnegraphofvectors, threejsgraphofvectors
-from server.semanticvectors.vectorhelpers import buildlemmatizesearchphrase
-from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
-from server.semanticvectors.wordbaggers import buildwordbags
+from server._deprecated._vectors.preparetextforvectorization import vectorprepdispatcher
+from server._deprecated._vectors.misc_unused_vectors import tsnegraphofvectors, threejsgraphofvectors, \
+	buildlemmatizesearchphrase
+from server.semanticvectors.vectorhelpers import emptyvectoroutput, convertmophdicttodict
+from server._deprecated._vectors.wordbaggers import buildwordbags
 from server.startup import listmapper, workdict, authordict
+from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
 from server.threading.mpthreadcount import setthreadcount
 
 
@@ -411,3 +413,53 @@ def generateanalogies(sentencetuples, workssearched, searchobject, vectorspace) 
     # print('generateanalogies() output', output)
 
     return output
+
+
+def buildnnvectorspace(sentencetuples, searchobject):
+	"""
+
+	find the words
+	find the morphology objects you need for those words
+	build vectors
+
+	:return:
+	"""
+
+	wordbundler = False
+
+	activepoll = searchobject.poll
+
+	# find all words in use
+	try:
+		thesentences = [s[1] for s in sentencetuples]
+	except TypeError:
+		# no sentences were passed: a possibility in the new code that should get factored away eventually
+		return 'failed to build model'
+
+	allwords = findsetofallwords(thesentences)
+
+	# find all possible forms of all the words we used
+	# consider subtracting some set like: rarewordsthatpretendtobecommon = {}
+	wl = '{:,}'.format(len(thesentences))
+	activepoll.statusis(
+		'No stored model for this search. Generating a new one.<br />Finding headwords for {n} sentences'.format(n=wl))
+
+	morphdict = getrequiredmorphobjects(allwords, furtherdeabbreviate=True)
+
+	# associate each word with its possible headwords
+	morphdict = convertmophdicttodict(morphdict)
+
+	# import re
+	# teststring = r'aesa'
+	# kvpairs = [(k,morphdict[k]) for k in morphdict.keys() if re.search(teststring, k)]
+	# print('convertmophdicttodict', kvpairs)
+	# sample selection:
+	# convertmophdicttodict [('caesare', {'caesar'}), ('caesarisque', {'caesar'}), ('caesari', {'caesar'}), ('caesar', {'caesar'}), ('caesa', {'caesum', 'caesa', 'caesus¹', 'caedo'}), ('caesaremque', {'caesar'}), ('caesaris', {'caesar'}), ('caesarem', {'caesar'})]
+
+	if wordbundler:
+		morphdict = {t: '·'.join(morphdict[t]) for t in morphdict}
+
+	activepoll.statusis('No stored model for this search. Generating a new one.<br />Building vectors for the headwords in the {n} sentences'.format(n=wl))
+	vectorspace = buildgensimmodel(searchobject, morphdict, thesentences)
+
+	return vectorspace

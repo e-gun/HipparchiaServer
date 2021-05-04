@@ -8,7 +8,7 @@
 
 from server._deprecated._vectors.unused_gensim import executegensimsearch, generateanalogies
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
-from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
+from server.semanticvectors.vectorhelpers import emptyvectoroutput
 
 
 def executenearestneighborsquery(searchobject):

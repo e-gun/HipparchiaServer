@@ -40,7 +40,7 @@ from server.startup import authordict, listmapper, progresspolldict, workdict, l
 from server.threading.websocketthread import checkforlivewebsocket
 
 if hipparchia.config['SEMANTICVECTORSENABLED']:
-	from server.semanticvectors.vectorroutehelperfunctions import findabsolutevectorsfromhits
+	from server._deprecated._vectors.misc_unused_vectors import findabsolutevectorsfromhits
 else:
 	voff = lambda x: 'vectors have not been enabled in your configuration file'
 	findabsolutevectorsfromhits = voff

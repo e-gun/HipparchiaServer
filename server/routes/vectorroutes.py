@@ -57,9 +57,7 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 	simple = [pollid, one]
 	triple = [pollid, one, two, three]
 
-	knownfunctions = {	'semanticvectorquery':
-							{'bso': simple, 'pref': None},
-						'nearestneighborsquery':
+	knownfunctions = {	'nearestneighborsquery':
 							{'bso': simple, 'pref': 'CONCEPTMAPPINGENABLED'},
 						'analogies':
 							{'bso': triple, 'pref': 'VECTORANALOGIESENABLED'},
@@ -94,9 +92,7 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 
 	if hipparchia.config['GOLANGVECTORHELPER']:
 		j = golangvectors(so)
-
 	else:
-
 		j = pythonvectors(so)
 
 	if hipparchia.config['JSONDEBUGMODE']:

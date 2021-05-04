@@ -5,22 +5,13 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+import json
 import re
 import time
 from string import punctuation
 from typing import List
 
 import psycopg2
-
-try:
-	import numpy as np
-	from sklearn.manifold import TSNE
-except ImportError as ie:
-	np = None
-	TSNE = None
-	# print('"vectorgraphing.py" is missing a module: {m}'.format(m=ie))
-	# this is a benign failure if you are a non-vector user since all you really wanted was vectorranges, etc.
-	# which themselves will not really be used
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, worklinetemplate
@@ -31,16 +22,23 @@ from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import acuteorgrav, basiclemmacleanup, elidedextrapunct, removegravity, tidyupterm
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.progresspoll import ProgressPoll
-from server.hipparchiaobjects.searchobjects import SearchObject
-from server.hipparchiaobjects.worklineobject import dbWorkLine
+from server.hipparchiaobjects.searchobjects import SearchObject, SearchOutputObject
 from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
+from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.searching.dynamicsqlsearchdispatching import dynamicsqlsearchdispatcher
 from server.searching.searchhelperfunctions import buildbetweenwhereextension
-from server.semanticvectors.wordbaggers import buildflatbagsofwords
 from server.startup import lemmatadict
-# bleh: numpy and scipy will fail to install on FreeBSD 11.x
-# the work-around functions below might be needed instead: presumably there are markedly slower...
-from server.textsandindices.textandindiceshelperfunctions import getrequiredmorphobjects
+
+try:
+	import numpy as np
+	from sklearn.manifold import TSNE
+except ImportError as ie:
+	np = None
+	TSNE = None
+# print('"vectorgraphing.py" is missing a module: {m}'.format(m=ie))
+# this is a benign failure if you are a non-vector user since all you really wanted was vectorranges, etc.
+# which themselves will not really be used
+
 
 vectorranges = {
 	'ldacomponents': range(1, 51),
@@ -452,32 +450,6 @@ def convertmophdicttodict(morphdict: dict) -> dict:
 	newmorphdict = {k: v for k, v in newmorphdict.items() if v - delenda == v}
 
 	return newmorphdict
-
-
-def buildlemmatizesearchphrase(phrase: str) -> str:
-	"""
-
-	turn a search into a collection of headwords
-
-	:param phrase:
-	:return:
-	"""
-
-	# phrase = 'vias urbis munera'
-	phrase = phrase.strip()
-	words = phrase.split(' ')
-
-	morphdict = getrequiredmorphobjects(words, furtherdeabbreviate=True)
-	morphdict = convertmophdicttodict(morphdict)
-	# morphdict {'munera': {'munero', 'munus'}, 'urbis': {'urbs'}, 'uias': {'via', 'vio'}}
-
-	listoflistofheadwords = buildflatbagsofwords(morphdict, [words])
-	# [['via', 'vio', 'urbs', 'munero', 'munus']]
-
-	lemmatizesearchphrase = ' '.join(listoflistofheadwords[0])
-	# lemmatizesearchphrase = 'via vio urbs munus munero'
-
-	return lemmatizesearchphrase
 
 
 def bruteforcefinddblinefromsentence(thissentence, modifiedsearchobject):
@@ -993,129 +965,34 @@ def reducetotwodimensions(model) -> dict:
 	return returndict
 
 
-"""
-qui¹ - 252258
-et - 227461
-in - 183991
-edo¹ - 159485
-is - 132687
-sum¹ - 118388
-hic - 100294
-non - 96510
-ab - 92200
-ut - 76251
-si - 68954
-ad - 68314
-cum - 67464
-a - 65642
-ex - 65447
-video - 59061
-eo¹ - 58429
-tu - 57950
-ego - 53963
-quis¹ - 52881
-dico² - 48947
-ille - 44237
-sed - 44146
-de - 42799
-neque - 41911
-facio - 41864
-possum - 41647
-atque - 40752
-vel - 39938
-sui - 39732
-res - 38768
-verus - 36390
-quam - 36164
-vaco - 34484
-volo¹ - 34173
-verum - 33960
-aut - 32020
-ipse - 31921
-huc - 31591
-habeo - 30683
-venio - 30506
-do - 30195
-omne - 29962
-ito - 28879
-magnus - 28258
-vis - 27077
-b - 25918
-alius² - 25430
-for - 25212
-idem - 24600
-ὁ - 11774357
-καί - 4507884
-τίϲ - 2470088
-ἔδω - 1975836
-δέ - 1956680
-εἰμί - 1871655
-δέω¹ - 1791349
-ἐν - 1772435
-δεῖ - 1760164
-δέομαι - 1758948
-εἰϲ - 1462703
-αὐτόϲ - 1370472
-οὐ - 1080583
-τιϲ - 1057788
-οὗτοϲ - 958661
-γάροϲ - 768756
-γάρον - 768664
-γάρ - 768318
-μένω - 664175
-ἐγώ - 637360
-μέν - 633860
-τῷ - 588950
-ζεύϲ - 523874
-ἡμόϲ - 523162
-κατά - 514164
-ἐπί - 509941
-ὡϲ - 494902
-διά - 471148
-πρόϲ - 445770
-ϲύ - 442052
-πᾶϲ - 441801
-προϲάμβ - 435408
-τε - 434017
-ἐκ - 430405
-ἕ - 426187
-ὅϲ - 423775
-ἀλλά - 422349
-γίγνομαι - 407624
-ὅϲτιϲ - 393943
-ἤ¹ - 391617
-ἤ² - 389621
-ἔχω - 389518
-λέγω¹ - 370838
-μή - 365352
-ὅτι¹ - 358520
-ὅτι² - 356884
-τῇ - 347564
-τήιοϲ - 328408
-ἀπό - 320122
-εἰ - 312686
-περί - 307599
-θεόϲ - 304809
-ἐάν - 304374
-φημί - 287951
-ἄλλοϲ - 277173
-ἐκάϲ - 271358
-ἄν¹ - 269787
-ἄνω¹ - 258911
-πηρόϲ - 250986
-παρά - 250106
-ἀνά - 248289
-αὐτοῦ - 243025
-ποιέω - 239161
-πολύϲ - 237066
-ἄναξ - 230384
-λόγοϲ - 228499
-ἄνα - 226730
-ἄν² - 226125
-οὖν - 217914
-οὕτωϲ - 208591
-οὐδείϲ - 205806
-μετά - 199346
-ἔτι - 197966
-ὑπό - 194308
-"""
+def emptyvectoroutput(searchobject, reasons=None):
+	"""
+
+	no results; say as much
+
+	:return:
+	"""
+
+	if not reasons:
+		reasons = list()
+
+	so = searchobject
+
+	output = SearchOutputObject(so)
+	output.success = '<!-- FAILED -->'
+	output.reasons = reasons
+
+	allcorpora = ['greekcorpus', 'latincorpus', 'papyruscorpus', 'inscriptioncorpus', 'christiancorpus']
+	activecorpora = [c for c in allcorpora if so.session[c]]
+
+	if not activecorpora:
+		output.reasons.append('there are no active databases')
+	if not (so.lemma or so.seeking):
+		output.reasons.append('no search term was provided')
+
+	output.explainemptysearch()
+
+	jsonoutput = json.dumps(output.generateoutput())
+
+	return jsonoutput
+
