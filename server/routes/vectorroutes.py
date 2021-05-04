@@ -19,9 +19,6 @@ from server.hipparchiaobjects.searchobjects import SearchObject, SearchOutputObj
 from server.startup import lemmatadict, progresspolldict
 
 if hipparchia.config['SEMANTICVECTORSENABLED']:
-	from server.semanticvectors.gensimvectors import executenearestneighborsquery, executegenerateanalogies
-	from server._deprecated._vectors.unused_gensim import executegensimlsi, twodimensionalrepresentationofspace
-	from server.semanticvectors.scikitlearntopics import sklearnselectedworks
 	from server.semanticvectors.golangvectorsearches import golangvectors
 	from server.semanticvectors.vectorpipeline import pythonvectors
 else:
@@ -61,26 +58,22 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 	triple = [pollid, one, two, three]
 
 	knownfunctions = {	'semanticvectorquery':
-							{'fnc': executegensimlsi, 'bso': simple, 'pref': None},
+							{'bso': simple, 'pref': None},
 						'nearestneighborsquery':
-							{'fnc': executenearestneighborsquery, 'bso': simple, 'pref': 'CONCEPTMAPPINGENABLED'},
+							{'bso': simple, 'pref': 'CONCEPTMAPPINGENABLED'},
 						'analogies':
-							{'fnc': executegenerateanalogies, 'bso': triple, 'pref': 'VECTORANALOGIESENABLED'},
+							{'bso': triple, 'pref': 'VECTORANALOGIESENABLED'},
 						'topicmodel':
-							{'fnc': sklearnselectedworks, 'bso': simple, 'pref': 'TOPICMODELINGENABLED'},
+							{'bso': simple, 'pref': 'TOPICMODELINGENABLED'},
 						'vectortestfunction':
-							{'fnc': twodimensionalrepresentationofspace, 'bso': simple, 'pref': 'TESTINGVECTORBUTTONENABLED'},
+							{'bso': simple, 'pref': 'TESTINGVECTORBUTTONENABLED'},
 						'unused':
 							{'fnc': lambda: str(), 'bso': None, 'pref': None},
 						}
 
-	if vectortype not in knownfunctions:
-		return json.dumps('this type of search is not known')
-
 	if not knownfunctions[vectortype]['pref'] or not hipparchia.config[knownfunctions[vectortype]['pref']]:
 		return json.dumps('this type of search has not been enabled')
 
-	f = knownfunctions[vectortype]['fnc']
 	bso = knownfunctions[vectortype]['bso']
 
 	so = None
@@ -100,17 +93,11 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 	so.poll = activepoll
 
 	if hipparchia.config['GOLANGVECTORHELPER']:
-		return golangvectors(so)
+		j = golangvectors(so)
 
-	if 1 > 0:
-		return pythonvectors(so)
-
-	fparam = [so]
-
-	if so:
-		j = f(*fparam)
 	else:
-		j = f()
+
+		j = pythonvectors(so)
 
 	if hipparchia.config['JSONDEBUGMODE']:
 		print('/vectors/{f}\n\t{j}'.format(f=vectortype, j=j))

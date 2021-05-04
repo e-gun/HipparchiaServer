@@ -6,8 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-from server._deprecated._vectors.unused_gensim import executegensimsearch
-from server.semanticvectors.gensimanalogies import generateanalogies
+from server._deprecated._vectors.unused_gensim import executegensimsearch, generateanalogies
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 

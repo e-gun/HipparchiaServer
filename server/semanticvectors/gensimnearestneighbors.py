@@ -12,7 +12,7 @@ from server.dbsupport.lexicaldbfunctions import lookformorphologymatches
 from server.formatting.vectorformatting import formatnnmatches, formatnnsimilarity, nearestneighborgenerateoutput
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.vectorobjects import VectorValues
-from server.semanticvectors.gensimmodels import buildgensimmodel
+from server._deprecated._vectors.unused_gensim import buildgensimmodel
 from server.semanticvectors.vectorgraphing import graphnnmatches
 from server.semanticvectors.vectorhelpers import convertmophdicttodict
 from server.listsandsession.genericlistfunctions import findsetofallwords
