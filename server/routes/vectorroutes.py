@@ -19,8 +19,8 @@ from server.hipparchiaobjects.searchobjects import SearchObject, SearchOutputObj
 from server.startup import lemmatadict, progresspolldict
 
 if hipparchia.config['SEMANTICVECTORSENABLED']:
-	from server.semanticvectors.gensimvectors import executenearestneighborsquery, executegensimlsi, \
-		executegenerateanalogies, twodimensionalrepresentationofspace
+	from server.semanticvectors.gensimvectors import executenearestneighborsquery, executegenerateanalogies
+	from server._deprecated._vectors.unused_gensim import executegensimlsi, twodimensionalrepresentationofspace
 	from server.semanticvectors.scikitlearntopics import sklearnselectedworks
 	from server.semanticvectors.golangvectorsearches import golangvectors
 else:

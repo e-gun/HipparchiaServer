@@ -17,7 +17,7 @@ from server.hipparchiaobjects.searchobjects import SearchOutputObject
 from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, compilesearchlist, flagexclusions
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.rudimentaryvectormath import buildrudimentaryvectorspace, caclulatecosinevalues
+from server._deprecated._vectors.rudimentaryvectormath import buildrudimentaryvectorspace, caclulatecosinevalues
 from server.semanticvectors.vectorgraphing import graphbliteraldistancematches
 from server.semanticvectors.vectorhelpers import convertmophdicttodict
 from server.listsandsession.genericlistfunctions import findsetofallwords
