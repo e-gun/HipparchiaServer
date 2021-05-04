@@ -75,8 +75,6 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphra
 
     # print(so.indexrestrictions)
 
-    print('so.searchlist', so.searchlist)
-
     for authortable in searchlist:
         r = so.indexrestrictions[authortable]
         whereextensions = str()

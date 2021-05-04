@@ -81,8 +81,8 @@ def vectorhtmlforfrontpage() -> str:
 	if not hipparchia.config['SEMANTICVECTORSENABLED']:
 		return str()
 
-	textmapper = {'LITERALCOSINEDISTANCEENABLED': cdc,
-	              'CONCEPTSEARCHINGENABLED': cs,
+	textmapper = {#'LITERALCOSINEDISTANCEENABLED': cdc,
+	              # 'CONCEPTSEARCHINGENABLED': cs,
 	              'CONCEPTMAPPINGENABLED': cm,
 	              # 'TENSORFLOWVECTORSENABLED': tf,
 	              # 'SENTENCESIMILARITYENABLED': ss,

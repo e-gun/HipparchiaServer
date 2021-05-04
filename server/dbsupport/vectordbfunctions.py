@@ -194,6 +194,10 @@ def checkforstoredvector(so: SearchObject, vectortype=None, careabout='thumbprin
 	if not vectortype:
 		vectortype = so.vectorquerytype
 
+	if vectortype == 'analogyfinder':
+		# the same model can be used for either.
+		vectortype = 'nearestneighborsquery'
+
 	if so.wholecorporasearched():
 		uidlist = so.wholecorporasearched()
 	else:

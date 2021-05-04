@@ -8,6 +8,7 @@
 
 import json
 import locale
+import re
 import warnings
 from typing import List
 
@@ -15,7 +16,7 @@ from server import hipparchia
 from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.dbsupport.vectordbfunctions import storevectorindatabase, checkforstoredvector
 from server.formatting.miscformatting import consolewarning, debugmessage
-from server.formatting.vectorformatting import ldatopicsgenerateoutput
+from server.formatting.vectorformatting import analogiesgenerateoutput, ldatopicsgenerateoutput
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.listsandsession.searchlistmanagement import compilesearchlist
@@ -109,6 +110,8 @@ def golangvectors(so: SearchObject) -> JSON_STR:
 
     """
 
+    assert so.vectorquerytype in ['analogies', 'nearestneighborsquery', 'topicmodel']
+
     # [0] is this really going to happen?
 
     # [i] do we bail out before even getting started?
@@ -128,7 +131,7 @@ def golangvectors(so: SearchObject) -> JSON_STR:
 
         so.poll.statusis('Preparing to search')
         so.usecolumn = 'marked_up_line'
-        so.cap = 99999999
+        so.cap = 199999999
 
         # calculatewholeauthorsearches() + configurewhereclausedata()
         so = updatesearchlistandsearchobject(so)
@@ -184,25 +187,28 @@ def golangvectors(so: SearchObject) -> JSON_STR:
 
         if so.vectorquerytype == 'nearestneighborsquery':
             themodel = golangbuildgensimmodel(so, bagsofwords)
+        elif so.vectorquerytype == 'analogies':
+            # the same gensim model can serve both analogies and neighbors
+            themodel = golangbuildgensimmodel(so, bagsofwords)
         elif so.vectorquerytype == 'topicmodel':
             stops = list(mostcommonwordsviaheadwords())
             bagsofsentences = [' '.join(b) for b in bagsofwords]
-            debugmessage('first sbag is {b}'.format(b=bagsofsentences[0]))
             bagsofsentences = [removestopwords(s, stops) for s in bagsofsentences]
-            debugmessage('first sbag is now {b}'.format(b=bagsofsentences[0]))
             themodel = golangsklearnselectedworks(so, bagsofsentences)
         else:
             pass
 
     # so we have a model one way or the other by now...
+
     if so.vectorquerytype == 'nearestneighborsquery':
         jsonoutput = generatenearestneighbordata(None, len(so.searchlist), so, themodel)
+    elif so.vectorquerytype == 'analogies':
+        jsonoutput = golanggenerateanalogies(themodel, so)
     elif so.vectorquerytype == 'topicmodel':
         # def ldatopicsgenerateoutput(ldavishtmlandjs: str, workssearched: int, settings: dict, searchobject: SearchObject):
         jsonoutput = ldatopicsgenerateoutput(themodel, so)
     else:
         jsonoutput = json.dumps('golang cannot execute {s} queries'.format(s=so.vectorquerytype))
-
     return jsonoutput
 
 
@@ -229,6 +235,9 @@ def checkneedtoabort(so: SearchObject) -> str:
     elif so.vectorquerytype == 'topicmodel':
         # we don't have and don't need a lemmaone, etc.
         pass
+    elif so.vectorquerytype == 'analogies':
+        if not so.lemmaone or not so.lemmatwo or not so.lemmathree:
+            abortjson = abort('[did not have three lemmata]')
     else:
         # note that some vector queries do not need a term; fix this later...
         abortjson = abort(['there was no search term'])
@@ -557,3 +566,66 @@ def golangsklearnselectedworks(so: SearchObject, bagsofsentences: list):
     storevectorindatabase(so, 'lda', ldavishtmlandjs)
 
     return ldavishtmlandjs
+
+
+def golanggenerateanalogies(vectorspace: Word2Vec, so: SearchObject) -> JSON_STR:
+    """
+
+    	most_similar(positive=None, negative=None, topn=10, restrict_vocab=None, indexer=None)
+    		[analogies; most_similar(positive=['woman', 'king'], negative=['man']) --> queen]
+
+    	most_similar_cosmul(positive=None, negative=None, topn=10)
+    	[analogy finder; most_similar_cosmul(positive=['baghdad', 'england'], negative=['london']) --> iraq]
+
+    :param sentencetuples:
+    :param searchobject:
+    :param vectorspace:
+    :return:
+    """
+
+    if so.session['baggingmethod'] != 'unlemmatized':
+        a = so.lemmaone.dictionaryentry
+        b = so.lemmatwo.dictionaryentry
+        c = so.lemmathree.dictionaryentry
+    else:
+        a = so.lemmaone
+        b = so.lemmatwo
+        c = so.termthree
+
+    positive = [a, b]
+    negative = [c]
+
+    # similarities are less interesting than cosimilarities
+    # similarities = vectorspace.wv.most_similar(positive=positive, negative=negative, topn=4)
+
+    try:
+        similarities = vectorspace.wv.most_similar(positive=positive, negative=negative, topn=4)
+    except KeyError as theexception:
+        # KeyError: "word 'terra' not in vocabulary"
+        # raise KeyError(f"Key '{key}' not present")
+        missing = re.search(r'word \'(.*?)\'', str(theexception))
+        try:
+            similarities = [('"{m}" was missing from the vector space'.format(m=missing.group(1)), 0)]
+        except AttributeError:
+            similarities = [('[a term was missing from the vector space]', 0)]
+
+    try:
+        cosimilarities = vectorspace.wv.most_similar_cosmul(positive=positive, negative=negative, topn=5)
+    except KeyError as theexception:
+        # KeyError: "word 'terra' not in vocabulary"
+        missing = re.search(r'word \'(.*?)\'', str(theexception))
+        try:
+            cosimilarities = [('"{m}" was missing from the vector space'.format(m=missing.group(1)), 0)]
+        except AttributeError:
+            cosimilarities = [('[a term was missing from the vector space]', 0)]
+
+    simlabel = [('<b>similarities</b>', str())]
+    cosimlabel = [('<b>cosimilarities</b>', str())]
+    similarities = [(s[0], round(s[1], 3)) for s in similarities]
+    cosimilarities = [(s[0], round(s[1], 3)) for s in cosimilarities]
+
+    output = simlabel + similarities + cosimlabel + cosimilarities
+
+    output = analogiesgenerateoutput(so, output)
+
+    return output
