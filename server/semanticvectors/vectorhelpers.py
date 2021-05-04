@@ -5,7 +5,6 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
-
 import re
 import time
 from string import punctuation
@@ -102,7 +101,7 @@ vectorlabels = {
 }
 
 
-def cleantext(texttostrip):
+def cleanvectortext(texttostrip):
 	"""
 
 	if we are using the marked up line, then a lot of gunk needs to go
@@ -174,6 +173,11 @@ def cleantext(texttostrip):
 	wholetext = re.sub('&nbsp;', str(), wholetext)
 	wholetext = re.sub(r'\w+\.', lambda x: replaceabbreviations(x.group(0), searchdict), wholetext)
 	# speakers in plays? need to think about catching:  'XY. (says something) AB. (replies)'
+
+	invals = "vjσς"
+	outvals = "uiϲϲ"
+	text = wholetext.lower()
+	wholetext = text.translate(str.maketrans(invals, outvals))
 
 	return wholetext
 
@@ -350,7 +354,7 @@ def parsevectorsentences(so: SearchObject, lineobjects: List[dbWorkLine]) -> Lis
 		wholetext = ' '.join([getattr(l, col) for l in lineobjects])
 
 	if so.usecolumn == 'marked_up_line':
-		wholetext = cleantext(wholetext)
+		wholetext = cleanvectortext(wholetext)
 
 	# need to split at all possible sentence ends
 	# need to turn off semicolon in latin...

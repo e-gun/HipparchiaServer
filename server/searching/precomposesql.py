@@ -67,9 +67,9 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphra
     lim = str(so.cap)
 
     if so.onehit:
-        mylimit = ' LIMIT 1'
+        mylimit = ' ORDER BY index ASC LIMIT 1'
     else:
-        mylimit = ' LIMIT {lim}'.format(lim=lim)
+        mylimit = ' ORDER BY index ASC LIMIT {lim}'.format(lim=lim)
 
     mysyntax = '~*'
 

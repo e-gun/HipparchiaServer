@@ -57,6 +57,7 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 		termtwo = None
 
 	if not vectorspace:
+		# not supposed to make it here any longer...
 		vectorspace = buildnnvectorspace(sentencetuples, so)
 		if vectorspace == 'failed to build model':
 			reasons = [vectorspace]
@@ -110,7 +111,12 @@ def buildnnvectorspace(sentencetuples, searchobject):
 	activepoll = searchobject.poll
 
 	# find all words in use
-	thesentences = [s[1] for s in sentencetuples]
+	try:
+		thesentences = [s[1] for s in sentencetuples]
+	except TypeError:
+		# no sentences were passed: a possibility in the new code that should get factored away eventually
+		return 'failed to build model'
+
 	allwords = findsetofallwords(thesentences)
 
 	# find all possible forms of all the words we used

@@ -23,12 +23,14 @@ if hipparchia.config['SEMANTICVECTORSENABLED']:
 	from server._deprecated._vectors.unused_gensim import executegensimlsi, twodimensionalrepresentationofspace
 	from server.semanticvectors.scikitlearntopics import sklearnselectedworks
 	from server.semanticvectors.golangvectorsearches import golangvectors
+	from server.semanticvectors.vectorpipeline import pythonvectors
 else:
 	voff = lambda x: 'vectors have not been enabled in your configuration file'
 	executegensimsearch = voff
 	sklearnselectedworks = voff
 	findabsolutevectorsbysentence = voff
 	findabsolutevectorsfromhits = voff
+	pythonvectors = voff
 
 JSON_STR = str
 
@@ -99,6 +101,9 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 
 	if hipparchia.config['GOLANGVECTORHELPER']:
 		return golangvectors(so)
+
+	if 1 > 0:
+		return pythonvectors(so)
 
 	fparam = [so]
 
