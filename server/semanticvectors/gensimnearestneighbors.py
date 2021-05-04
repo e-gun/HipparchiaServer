@@ -15,8 +15,10 @@ from server.hipparchiaobjects.vectorobjects import VectorValues
 from server.semanticvectors.vectorgraphing import graphnnmatches
 from server.semanticvectors.vectorhelpers import emptyvectoroutput
 
+JSON_STR = str
 
-def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vectorspace):
+
+def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vectorspace) -> JSON_STR:
 	"""
 
 	this is where we go after executegensimsearch() makes its function pick
@@ -40,6 +42,10 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 	vv = so.vectorvalues
 	activepoll = so.poll
 	imagename = str()
+
+	if so.iamarobot:
+		return str()
+
 	try:
 		termone = so.lemma.dictionaryentry
 	except AttributeError:

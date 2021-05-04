@@ -193,7 +193,7 @@ def buildgensimmodel(so: SearchObject, bagsofwords: List[List[str]]) -> Word2Vec
 
     # print(model.wv['puer'])
 
-    storevectorindatabase(so, typelabel, gensimmodel)
+    storevectorindatabase(so, gensimmodel)
 
     return gensimmodel
 
@@ -277,7 +277,7 @@ def buildsklearnselectedworks(so: SearchObject, bagsofsentences: list):
     # pyLDAvis.save_html(visualisation, 'ldavis.html')
 
     ldavishtmlandjs = pyLDAvis.prepared_data_to_html(visualisation)
-    storevectorindatabase(so, 'lda', ldavishtmlandjs)
+    storevectorindatabase(so, ldavishtmlandjs)
 
     return ldavishtmlandjs
 

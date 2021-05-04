@@ -40,7 +40,7 @@ def createvectorstable():
 		ts timestamp without time zone,
 		thumbprint bytea,
 		uidlist text[] COLLATE pg_catalog."default",
-		vectortype character varying(10) COLLATE pg_catalog."default",
+		vectortype character varying(24) COLLATE pg_catalog."default",
 		baggingmethod character varying(24) COLLATE pg_catalog."default",
 		calculatedvectorspace bytea
 	)
@@ -109,7 +109,7 @@ def createstoredimagestable():
 	return
 
 
-def storevectorindatabase(so: SearchObject, vectortype: str, vectorspace):
+def storevectorindatabase(so: SearchObject, vectorspace):
 	"""
 
 	you have just calculated a new vectorpace, store it so you do not need to recalculate it
@@ -131,6 +131,10 @@ def storevectorindatabase(so: SearchObject, vectortype: str, vectorspace):
 	:param vectortype:
 	:return:
 	"""
+
+	vectortype = so.vectorquerytype
+	if vectortype == 'analogies':
+		vectortype = 'nearestneighborsquery'
 
 	if hipparchia.config['DISABLEVECTORSTORAGE']:
 		consolewarning('DISABLEVECTORSTORAGE = True; the vector space for {i} was not stored'.format(i=so.searchid), color='black')
@@ -171,7 +175,7 @@ def storevectorindatabase(so: SearchObject, vectortype: str, vectorspace):
 	return
 
 
-def checkforstoredvector(so: SearchObject, vectortype=None, careabout='thumbprint'):
+def checkforstoredvector(so: SearchObject):
 	"""
 
 	the stored vector might not reflect the current math rules
@@ -191,11 +195,10 @@ def checkforstoredvector(so: SearchObject, vectortype=None, careabout='thumbprin
 	:return:
 	"""
 
-	if not vectortype:
-		vectortype = so.vectorquerytype
+	careabout = 'thumbprint'
 
-	if vectortype == 'analogyfinder':
-		# the same model can be used for either.
+	vectortype = so.vectorquerytype
+	if vectortype == 'analogies':
 		vectortype = 'nearestneighborsquery'
 
 	if so.wholecorporasearched():
@@ -229,6 +232,8 @@ def checkforstoredvector(so: SearchObject, vectortype=None, careabout='thumbprin
 
 	storedvectorvalues = pickle.loads(result[0])
 	currentvectorvalues = so.vectorvalues
+
+	print('s/c', storedvectorvalues, currentvectorvalues)
 
 	if storedvectorvalues == currentvectorvalues:
 		returnval = pickle.loads(result[1])

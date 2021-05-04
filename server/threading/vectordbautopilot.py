@@ -86,7 +86,7 @@ def startvectorizing():
 		for c in hipparchia.config['CORPORATOAUTOBUILD']:
 			so.session[c] = True
 
-		vectorspace = checkforstoredvector(so, modeltype)
+		vectorspace = checkforstoredvector(so)
 
 		if not vectorspace:
 			jsonmessage = vectorfunction(so)

@@ -210,6 +210,9 @@ def acquireandbagthewords(so: SearchObject) -> List[List[str]]:
         unusedlistofdicts = buildlineandlocus(linesweneed[0], allsentences)
         del unusedlistofdicts
 
+    # we might be using a lot of memory...
+    del linesweneed
+
     # clean out the location info
     allsentences = [re.sub(r'⊏.*?⊐', str(), s) for s in allsentences]
     # consolewarning('trimming sentences: remove next line of code later')
@@ -403,7 +406,6 @@ def winnertakesallbagger(morphdict: dict, allsentences: [List[str]]) -> List[Lis
     dbconnection = ConnectionObject(readonlyconnection=False)
     dbconnection.setautocommit()
     dbcursor = dbconnection.cursor()
-
     rnd = assignuniquename(6)
 
     tqtemplate = """
