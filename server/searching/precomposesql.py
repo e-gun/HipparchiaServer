@@ -54,6 +54,8 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphra
     }
     }
 
+    'ch0814': {'temptable': '\n\tCREATE TEMPORARY TABLE ch0814_includelist_UNIQUENAME AS \n\t\tSELECT values \n\t\t\tAS includeindex FROM unnest(ARRAY[11380,11381,11382,11383,11384,11385,11386,11387,11388]) values\n\t', 'query': 'SELECT wkuniversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations FROM ch0814 WHERE \n            EXISTS\n                (SELECT 1 FROM ch0814_includelist_UNIQUENAME incl WHERE incl.includeindex = ch0814.index\n            ', 'data': ('',)}
+
     a bit fiddly because more than one class of query is constructed here: vanilla, subquery, vector...
 
     """
@@ -112,7 +114,7 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphra
                 whr = 'WHERE {xtn} AND {au}.{col} {sy} %s)'.format(au=authortable, col=so.usecolumn, sy=mysyntax,
                                                                xtn=whereextensions)
             else:
-                whr = 'WHERE {xtn}'.format(xtn=whereextensions)
+                whr = 'WHERE {xtn} )'.format(xtn=whereextensions)
         else:
             # should never see this
             consolewarning('error in substringsearch(): unknown whereclause type', r['type'])
