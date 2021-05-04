@@ -11,7 +11,7 @@ from server.listsandsession.searchlistmanagement import compilesearchlist, flage
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server._deprecated._vectors.gensimlsi import lsigenerateoutput
 from server.semanticvectors.preparetextforvectorization import vectorprepdispatcher
-from server.semanticvectors.vectorgraphing import tsnegraphofvectors, threejsgraphofvectors
+from server._deprecated._vectors.misc_unused_vectors import tsnegraphofvectors, threejsgraphofvectors
 from server.semanticvectors.vectorhelpers import buildlemmatizesearchphrase
 from server.semanticvectors.vectorroutehelperfunctions import emptyvectoroutput
 from server.startup import listmapper, workdict, authordict
