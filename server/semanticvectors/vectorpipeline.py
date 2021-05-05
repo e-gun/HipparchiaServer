@@ -99,7 +99,7 @@ def pythonvectors(so: SearchObject) -> JSON_STR:
     assert so.vectorquerytype in ['analogies', 'nearestneighborsquery', 'topicmodel']
 
     # [0] is this really going to happen?
-
+    so.poll.statusis('Checking for valid search')
     # [i] do we bail out before even getting started?
     # note that this can / will return independently and break here
     abortjson = checkneedtoabort(so)
@@ -108,12 +108,12 @@ def pythonvectors(so: SearchObject) -> JSON_STR:
         return abortjson
 
     # [ii] do we actually have a model stored already?
+    so.poll.statusis('Checking for stored search')
     themodel = checkforstoredvector(so)
 
     if not themodel:
         # [1] generate a searchlist: use executesearch() as the template
 
-        so.poll.statusis('Preparing to search')
         so.usecolumn = 'marked_up_line'
         so.cap = 199999999
 
@@ -126,6 +126,7 @@ def pythonvectors(so: SearchObject) -> JSON_STR:
         bagsofwords = acquireandbagthewords(so)
 
         # [4] hand the bags over to Word2Vec(), etc.
+        so.poll.statusis('Building the model')
         if so.vectorquerytype == 'nearestneighborsquery':
             themodel = buildgensimmodel(so, bagsofwords)
         elif so.vectorquerytype == 'analogies':
@@ -172,27 +173,31 @@ def acquireandbagthewords(so: SearchObject) -> List[List[str]]:
     """
 
     # [a] grab db lines that are relevant to the search
+    so.poll.statusis('Grabbing the required lines')
     linesweneed = basicprecomposedsqlsearcher(so)
 
     # these lines might have returned from an SPop and so be out of order...
     # dbWorkLine has __eq__, __gt__, and __lt__
+    so.poll.statusis('Sorting the lines')
     linesweneed = sorted(linesweneed)
 
     # kill off titles and salutations: dangerous if there is a body l1 value of 't' out there
+    so.poll.statusis('Pruning the lines')
     linesweneed = [r for r in linesweneed if r.l1 not in ['t', 'sa']]
 
     # [b] turn them into a unified text block
     # note that we will shortly discard the getlineurl() info ...
-
+    so.poll.statusis('Joining the lines')
     wholetext = ' '.join(['⊏{i}⊐{t}'.format(i=l.getlineurl(), t=l.markedup) for l in linesweneed])
 
     # [c] do some preliminary cleanups
+    so.poll.statusis('Cleaning the lines')
     wholetext = re.sub(r'-\s{1,2}', str(), wholetext)
     wholetext = cleanvectortext(wholetext)  # this contains a de-abbreviator, html stripper, etc.
     wholetext = wholetext.lower()
 
     # [d1] break the text into sentences
-
+    so.poll.statusis('Finding the sentences')
     terminations = ['.', '?', '!', '·', ';']
     allsentences = recursivesplit([wholetext], terminations)
 
@@ -220,10 +225,12 @@ def acquireandbagthewords(so: SearchObject) -> List[List[str]]:
 
     morphdict = dict()
     if so.session['baggingmethod'] != 'unlemmatized':
+        so.poll.statusis('Determining the set of words')
         # [e] figure out all of the words used in the passage
         allwords = findsetofallwords(allsentences)
 
         # [f] find all of the parsing info relative to these words
+        so.poll.statusis('Building the parsing table')
         mo = getrequiredmorphobjects(allwords, furtherdeabbreviate=True)
 
         # [g] figure out which headwords to associate with the collection of words

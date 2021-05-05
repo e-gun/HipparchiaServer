@@ -8,7 +8,7 @@
 
 import pickle
 from datetime import datetime
-
+from hashlib import md5
 import psycopg2
 
 from server import hipparchia
@@ -40,8 +40,8 @@ def createvectorstable():
 	CREATE TABLE public.storedvectors
 	(
 		ts timestamp without time zone,
-		thumbprint bytea,
-		uidlist text[] COLLATE pg_catalog."default",
+		thumbprint character varying(32) COLLATE pg_catalog."default",
+		uidlist character varying(32) COLLATE pg_catalog."default",
 		vectortype character varying(24) COLLATE pg_catalog."default",
 		baggingmethod character varying(24) COLLATE pg_catalog."default",
 		calculatedvectorspace bytea
@@ -146,6 +146,9 @@ def storevectorindatabase(so: SearchObject, vectorspace):
 	else:
 		uidlist = sorted(so.searchlist)
 
+	uidlist = md5(pickle.dumps(uidlist)).hexdigest()
+	thumbprint = md5(pickle.dumps(so.vectorvalues)).hexdigest()
+
 	dbconnection = ConnectionObject(ctype='rw')
 	dbcursor = dbconnection.cursor()
 
@@ -165,7 +168,6 @@ def storevectorindatabase(so: SearchObject, vectorspace):
 
 	pickledvectors = pickle.dumps(vectorspace)
 	ts = datetime.now().strftime("%Y-%m-%d %H:%M")
-	thumbprint = pickle.dumps(so.vectorvalues)
 
 	d = (ts, thumbprint, uidlist, vectortype, so.session['baggingmethod'], pickledvectors)
 	dbcursor.execute(q, d)
@@ -209,6 +211,8 @@ def checkforstoredvector(so: SearchObject):
 	else:
 		uidlist = sorted(so.searchlist)
 
+	uidlist = md5(pickle.dumps(uidlist)).hexdigest()
+
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
@@ -233,13 +237,12 @@ def checkforstoredvector(so: SearchObject):
 	if not result:
 		return False
 
-	storedvectorvalues = pickle.loads(result[0])
-	currentvectorvalues = so.vectorvalues
+	storedvectorvalues = result[0]
+	currentvectorvalues = md5(pickle.dumps(so.vectorvalues)).hexdigest()
 
 	if storedvectorvalues == currentvectorvalues:
 		returnval = pickle.loads(result[1])
 	else:
-		# print('vv not a match')
 		returnval = False
 
 	dbconnection.connectioncleanup()
@@ -316,9 +319,9 @@ def wholecorpuscheck(so: SearchObject):
 
 	this is kludgy because so.wholecorporasearched() fails for checkforstoredvector() ATM
 
-	BUT the logic is correct if you execute()
+	BUT the logic there is correct if you execute()
 
-	just lifting the logic from there...
+	just lifting the logic from there and transposing it here: a bug waiting to happen if one and only one changes
 
 	"""
 
@@ -349,7 +352,5 @@ def wholecorpuscheck(so: SearchObject):
 			fullcorpora.append(corpora[key])
 		else:
 			pass
-
-	# print('fullcorpora', fullcorpora)
 
 	return fullcorpora
