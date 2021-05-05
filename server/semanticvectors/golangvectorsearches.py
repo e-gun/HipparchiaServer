@@ -88,14 +88,13 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         [b] already a model on file? ... [jump down to #7 if so]
       [1] generate a searchlist
       [2] do a searchlistintosqldict()
-      [3] store the searchlist to redis
-      [4] run a search on that dict with the golang helper in order to acquire the lines that will become bags
-      [5] tell HipparchiaGoVectorHelper can be told to just collect and work on those lines
+      [3] run a search on that dict with the golang helper in order to acquire the lines that will become bags
+      [4] tell HipparchiaGoVectorHelper can be told to just collect and work on those lines
 
       then after [a]-[i] happens....
 
-      [6] collect the bags of words and hand them over to Word2Vec(), etc. [*]
-      [7] run queries against the model and return the JSON results
+      [5] collect the bags of words and hand them over to Word2Vec(), etc. [*]
+      [6] run queries against the model and return the JSON results
 
     NB: we are assuming you also have the golanggrabber available
 
@@ -144,28 +143,19 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         for s in so.searchsqldict:
             rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
 
-        # [4] run a search on that dict with the golang helper in order to acquire the lines that will become bags
-        so.poll.statusis('Grabbing a collection of lines')
-        if hipparchia.config['GOLANGLOADING'] != 'cli':
-            resultrediskey = golangsharedlibrarysearcher(so)
-        else:
-            resultrediskey = golangclibinarysearcher(so)
+        # [4] run a search on that dict with the golang helper
+        # don't use golangsharedlibrarysearcher() because the round trip kills you:
+        #   grab lines; store lines; fetch lines; process lines...
+        # instead run the search internally to the helper
 
-        # [5] tell HipparchiaGoVectorHelper can be told to just collect and work on those lines
-        so.poll.statusis('Preparing and bagging the collection of sentences')
+        so.poll.statusis('Grabbing a collection of lines')
         so.poll.allworkis(-1)  # this turns off the % completed notice in the JS
         so.poll.sethits(0)
-        target = so.searchid + '_results'
-        if resultrediskey == target:
-            vectorresultskey = golangclibinaryvectorhelper(so)
-        else:
-            fail = 'search for lines failed to return a proper result key: {a} ≠ {b}'.format(a=resultrediskey, b=target)
-            consolewarning(fail, color='red')
-            vectorresultskey = str()
+        vectorresultskey = golangclibinaryvectorhelper(so)
 
         # this means that [a]-[i] has now happened....
 
-        # [6] collect the sentences and hand them over to Word2Vec(), etc.
+        # [5] collect the sentences and hand them over to Word2Vec(), etc.
         so.poll.statusis('Fetching the bags of words')
         debugmessage('golangvectors() reports that the vectorresultskey = {r}'.format(r=vectorresultskey))
         debugmessage('fetching search from "{r}"'.format(r=vectorresultskey))
@@ -201,7 +191,7 @@ def golangvectors(so: SearchObject) -> JSON_STR:
             pass
 
     # so we have a model one way or the other by now...
-    # [7] run queries against the model and return the JSON results
+    # [6] run queries against the model and return the JSON results
 
     if so.vectorquerytype == 'nearestneighborsquery':
         jsonoutput = generatenearestneighbordata(None, len(so.searchlist), so, themodel)
@@ -231,32 +221,37 @@ def golangclibinaryvectorhelper(so: SearchObject) -> str:
 
 def formatgolangvectorhelperarguments(command: str, so: SearchObject) -> list:
     """
-
-    Usage of ./HipparchiaGoVectorHelper:
-      -b string
-            the bagging method: choices are [alternates], [flat], unlemmatized, [winntertakesall] (default "unlemmatized")
+    Usage of ./HipparchiaGoDBHelper:
+      -c int
+            max hit count (default 200)
       -k string
-            the search key
+            redis key to use (default "go")
       -l int
-            logging level: 0 is silent; 4 is very noisy (default 4)
+            logging level: 0 is silent; 5 is very noisy (default 1)
       -p string
             psql logon information (as a JSON string) (default "{\"Host\": \"localhost\", \"Port\": 5432, \"User\": \"hippa_wr\", \"Pass\": \"\", \"DBName\": \"hipparchiaDB\"}")
       -r string
             redis logon information (as a JSON string) (default "{\"Addr\": \"localhost:6379\", \"Password\": \"\", \"DB\": 0}")
+      -sv
+            [vectors] assert that this is a vectorizing run
+      -svb string
+            [vectors] the bagging method: choices are alternates, flat, unlemmatized, winnertakesall (default "winnertakesall")
+      -svdb string
+            [vectors][for manual debugging] db to grab from (default "lt0448")
+      -sve int
+            [vectors][for manual debugging] last line to grab (default 26)
+      -svs int
+            [vectors][for manual debugging] first line to grab (default 1)
+      -t int
+            number of goroutines to dispatch (default 5)
       -v    print version and exit
-      -xb string
-            [for manual debugging] db to grab from (default "lt0448")
-      -xe int
-            [for manual debugging] last line to grab (default 26)
-      -xs int
-            [for manual debugging] first line to grab (default 1)
 
     """
 
     arguments = dict()
 
-    arguments['b'] = so.session['baggingmethod']
-    arguments['k'] = so.searchid + '_results'
+    arguments['svb'] = so.session['baggingmethod']
+    arguments['k'] = so.searchid
     arguments['l'] = hipparchia.config['GOLANGVECTORLOGLEVEL']
 
     rld = {'Addr': '{a}:{b}'.format(a=hipparchia.config['REDISHOST'], b=hipparchia.config['REDISPORT']),
@@ -277,6 +272,7 @@ def formatgolangvectorhelperarguments(command: str, so: SearchObject) -> list:
         arguments['p'] = json.dumps(psd)
 
     argumentlist = [['-{k}'.format(k=k), '{v}'.format(v=arguments[k])] for k in arguments]
+    argumentlist.append(['-sv'])
     argumentlist = flattenlistoflists(argumentlist)
     commandandarguments = [command] + argumentlist
 

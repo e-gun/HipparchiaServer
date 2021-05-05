@@ -697,20 +697,30 @@ def genericgolangcliexecution(theprogram: str, formatterfunction, so: SearchObje
 
 def formatgolanggrabberarguments(command: str, so: SearchObject) -> list:
 	"""
-
-	Usage of ./golanggrabber:
+	Usage of ./HipparchiaGoDBHelper:
 	  -c int
 			max hit count (default 200)
 	  -k string
-			redis key to use (default "queries")
+			redis key to use (default "go")
 	  -l int
-			logging level: 0 is silent; 3 is very noisy (default 1)
+			logging level: 0 is silent; 5 is very noisy (default 1)
 	  -p string
-			psql logon information (as a JSON string) (default "{\"Host\": \"localhost\", \"Port\": 5432, \"User\": \"hippa_wr\", \"Pass\": \"xxxxxx\", \"DBName\": \"hipparchiaDB\"}")
+			psql logon information (as a JSON string) (default "{\"Host\": \"localhost\", \"Port\": 5432, \"User\": \"hippa_wr\", \"Pass\": \"\", \"DBName\": \"hipparchiaDB\"}")
 	  -r string
 			redis logon information (as a JSON string) (default "{\"Addr\": \"localhost:6379\", \"Password\": \"\", \"DB\": 0}")
+	  -sv
+			[vectors] assert that this is a vectorizing run
+	  -svb string
+			[vectors] the bagging method: choices are alternates, flat, unlemmatized, winnertakesall (default "winnertakesall")
+	  -svdb string
+			[vectors][for manual debugging] db to grab from (default "lt0448")
+	  -sve int
+			[vectors][for manual debugging] last line to grab (default 26)
+	  -svs int
+			[vectors][for manual debugging] first line to grab (default 1)
 	  -t int
 			number of goroutines to dispatch (default 5)
+	  -v    print version and exit
 
 	"""
 
