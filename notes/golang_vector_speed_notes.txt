@@ -1,0 +1,101 @@
+building a gensim nn model for cicero w/ various options....
+
+
+fastest is 68.01s
+straight python all the way...
+
+
+<!--
+
+HipparchiaServer 1.7.1+[DEVEL] [git: 28acc]
+
+Software environment:
+
+Platform    macOS-11.2.3-x86_64-i386-64bit
+PostgreSQL  13.2
+Python      3.9.4
+Flask       1.1.2
+
+Search      precomposed
+WS          HipparchiaGoWebSocketApp
+Go          False
+GoHelper    [Inactive]
+Vectors     [Inactive]
+
+-->
+
+
+
+257 cicero [pre HipparchiaGoVectorHelper  v0.1.1]
+
+<!--
+
+HipparchiaServer 1.7.1+[DEVEL] [git: 28acc]
+
+Software environment:
+
+Platform    macOS-11.2.3-x86_64-i386-64bit
+PostgreSQL  13.2
+Python      3.9.4
+Flask       1.1.2
+
+Search      precomposed
+WS          HipparchiaGoWebSocketApp
+Go          False
+GoHelper    [Inactive]
+Vectors     w/ golang assistance
+
+-->
+
+
+
+
+103s
+<!--
+
+HipparchiaServer 1.7.1+[DEVEL] [git: 28acc]
+
+Software environment:
+
+Platform    macOS-11.2.3-x86_64-i386-64bit
+PostgreSQL  13.2
+Python      3.9.4
+Flask       1.1.2
+
+Search      precomposed
+WS          HipparchiaGoWebSocketApp
+Go          True
+GoHelper    cli
+Vectors     [Inactive]
+
+-->
+
+
+
+107s cicero
+
+[GVM] Hipparchia GoVectorMorphology CLI Debugging Interface (v.0.1.1) [loglevel=4] [debugging]
+
+[a huge amount of time is spent waiting for the line collection; need to just send the query straight to GoVectorMorphology]
+
+<!--
+
+HipparchiaServer 1.7.1+[DEVEL] [git: 28acc]
+
+Software environment:
+
+Platform    macOS-11.2.3-x86_64-i386-64bit
+PostgreSQL  13.2
+Python      3.9.4
+Flask       1.1.2
+
+Search      precomposed
+WS          HipparchiaGoWebSocketApp
+Go          True
+GoHelper    cli
+Vectors     w/ golang assistance
+
+-->
+
+
+

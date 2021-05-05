@@ -66,14 +66,14 @@ if hipparchia.config['GOLANGVECTORHELPER']:
 else:
 	gv = '[Inactive]'
 
-if hipparchia.config['GOLANGTHREADING']:
+if hipparchia.config['GOLANGGRABBER']:
 	gx = hipparchia.config['GOLANGLOADING']
 else:
 	gx = '[Inactive]'
 
 
 theenvironment = theenvironment.format(pf=platform(), ps=psqlversion, py=pythonversion, fl=flaskversion, ws= ws,
-									   sr=hipparchia.config['SEARCHCODESTYLE'], go=hipparchia.config['GOLANGTHREADING'],
+									   sr=hipparchia.config['SEARCHCODESTYLE'], go=hipparchia.config['GOLANGGRABBER'],
 									   gx=gx, gv=gv)
 
 shortversion = hipparchiaserverversion

@@ -113,12 +113,14 @@ def golangvectors(so: SearchObject) -> JSON_STR:
     # [0] is this really going to happen?
 
     # [i] do we bail out before even getting started?
+    so.poll.statusis('Checking for valid search')
     abortjson = checkneedtoabort(so)
     if abortjson:
         del so.poll
         return abortjson
 
     # [ii] do we actually have a model stored already?
+    so.poll.statusis('Checking for stored search')
     themodel = checkforstoredvector(so)
 
     if not themodel:
@@ -131,11 +133,12 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         # calculatewholeauthorsearches() + configurewhereclausedata()
         so = updatesearchlistandsearchobject(so)
 
-        # [2] do a searchlistintosqldict() [this is killing lda...]
+        # [2] do a searchlistintosqldict()
         so.searchsqldict = searchlistintosqldict(so, str(), vectors=True)
         so.searchsqldict = rewritesqlsearchdictforgolang(so)
 
         # [3] store the searchlist to redis
+        so.poll.statusis('Dispatching the search instructions to the searcher')
         rc = establishredisconnection()
         debugmessage('storing search at "{r}"'.format(r=so.searchid))
         for s in so.searchsqldict:
@@ -149,8 +152,9 @@ def golangvectors(so: SearchObject) -> JSON_STR:
             resultrediskey = golangclibinarysearcher(so)
 
         # [5] tell HipparchiaGoVectorHelper can be told to just collect and work on those lines
-
         so.poll.statusis('Preparing and bagging the collection of sentences')
+        so.poll.allworkis(-1)  # this turns off the % completed notice in the JS
+        so.poll.sethits(0)
         target = so.searchid + '_results'
         if resultrediskey == target:
             vectorresultskey = golangclibinaryvectorhelper(so)
@@ -162,9 +166,8 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         # this means that [a]-[i] has now happened....
 
         # [6] collect the sentences and hand them over to Word2Vec(), etc.
-
+        so.poll.statusis('Fetching the bags of words')
         debugmessage('golangvectors() reports that the vectorresultskey = {r}'.format(r=vectorresultskey))
-
         debugmessage('fetching search from "{r}"'.format(r=vectorresultskey))
 
         redisresults = list()
@@ -183,6 +186,7 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         debugmessage('first bag is {b}'.format(b=bagsofwords[0]))
         debugmessage('# of bags is {b}'.format(b=len(bagsofwords)))
 
+        so.poll.statusis('Building the model')
         if so.vectorquerytype == 'nearestneighborsquery':
             themodel = buildgensimmodel(so, bagsofwords)
         elif so.vectorquerytype == 'analogies':

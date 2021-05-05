@@ -53,7 +53,7 @@
 #   of Hipparchia. Setting anything other than 'precomposed' will give you
 #   'dynamic'
 #
-# GOLANGTHREADING: this is non-standard; it requires SEARCHCODESTYLE = 'precomposed'
+# GOLANGGRABBER: this is non-standard; it requires SEARCHCODESTYLE = 'precomposed'
 #   as well as a working redis installation (the latter is not present by
 #   default). If True, your searches will multiprocess by being set through a
 #   golang shared object whose goroutines will spawn multiple workers. The
@@ -64,7 +64,7 @@
 #   does not yield this problem. 'module' requires a GOLANGTHWSBINARY. This is not installed by default.
 #   NB, the cli executable is also not installed by default, but if it is,
 #   it should be stored next to the module: that is, inside "HipparchiaServer/server/golangmodule/".
-#   This setting has no effect if GOLANGTHREADING is not True. Please note the SECURITY
+#   This setting has no effect if GOLANGGRABBER is not True. Please note the SECURITY
 #   IMPLICATIONS of 'cli': you will be sending a db password to a process and this event could be
 #   snooped by another user on your same system: "ps aux | grep gol" will expose the DB password.
 #   This can be avoided by building the binary yourself and hard coding the pw into it; then you can
@@ -85,7 +85,7 @@ INTERMEDIATESEARCHCAP = 2000000
 SEARCHCODESTYLE = 'dynamic'
 # SEARCHCODESTYLE = 'precomposed'
 
-GOLANGTHREADING = False
+GOLANGGRABBER = False
 GOLANGLOADING = 'cli'
 # GOLANGLOADING = 'module'
 

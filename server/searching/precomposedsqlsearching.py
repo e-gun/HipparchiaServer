@@ -126,7 +126,7 @@ def basicprecomposedsqlsearcher(so: SearchObject, themanager=None) -> List[dbWor
     """
 
     if not themanager:
-        usesharedlibrary = hipparchia.config['GOLANGTHREADING']
+        usesharedlibrary = hipparchia.config['GOLANGGRABBER']
 
         if not usesharedlibrary:
             debugmessage('dispatching via precomposedsqlsearchmanager()')

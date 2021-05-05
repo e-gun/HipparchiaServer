@@ -175,8 +175,10 @@ def acquireandbagthewords(so: SearchObject) -> List[List[str]]:
     # [a] grab db lines that are relevant to the search
     so.poll.statusis('Grabbing the required lines')
     linesweneed = basicprecomposedsqlsearcher(so)
+    so.poll.allworkis(-1)  # this turns off the % completed notice in the JS
+    so.poll.sethits(0)
 
-    # these lines might have returned from an SPop and so be out of order...
+    # return from an SPop will leave them out of order...
     # dbWorkLine has __eq__, __gt__, and __lt__
     so.poll.statusis('Sorting the lines')
     linesweneed = sorted(linesweneed)
@@ -332,7 +334,7 @@ def pythonpipelinewordbagbuilder(so: SearchObject, morphdict, allsentences):
     otherwise these are basically identical
 
     """
-    so.poll.statusis('Building bags of words')
+    so.poll.statusis('Filling the bags of words')
 
     baggingmethods = {'flat': flatbagger,
                       'alternates': alternatesbagger,

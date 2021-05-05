@@ -92,7 +92,7 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphra
                 whereextensions = whereextensions[:-4]
                 whr = 'WHERE {xtn}'.format(xtn=whereextensions)
         elif r['type'] == 'unrestricted':
-            if not subqueryphrasesearch:
+            if not subqueryphrasesearch and not vectors:
                 whr = 'WHERE {xtn} ( {c} {sy} %s )'.format(c=so.usecolumn, sy=mysyntax, xtn=whereextensions)
             else:
                 whr = str()
