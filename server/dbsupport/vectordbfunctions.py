@@ -9,6 +9,7 @@
 import pickle
 from datetime import datetime
 from hashlib import md5
+
 import psycopg2
 
 from server import hipparchia
@@ -16,9 +17,9 @@ from server.dbsupport.dblinefunctions import bulklinegrabber
 from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchObject
-from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, flagexclusions
+from server.listsandsession.searchlistmanagement import compilesearchlist
 from server.searching.searchhelperfunctions import grableadingandlagging
-from server.startup import authordict
+from server.startup import listmapper
 
 
 def createvectorstable():
@@ -134,6 +135,8 @@ def storevectorindatabase(so: SearchObject, vectorspace):
 	:return:
 	"""
 
+	thumbprint = so.vectorvalues.thumbprint()
+
 	vectortype = so.vectorquerytype
 	if vectortype == 'analogies':
 		vectortype = 'nearestneighborsquery'
@@ -141,13 +144,8 @@ def storevectorindatabase(so: SearchObject, vectorspace):
 	if hipparchia.config['DISABLEVECTORSTORAGE']:
 		consolewarning('DISABLEVECTORSTORAGE = True; the vector space for {i} was not stored'.format(i=so.searchid), color='black')
 
-	if so.wholecorporasearched():
-		uidlist = so.wholecorporasearched()
-	else:
-		uidlist = sorted(so.searchlist)
-
+	uidlist = compilesearchlist(listmapper, so.session)
 	uidlist = md5(pickle.dumps(uidlist)).hexdigest()
-	thumbprint = md5(pickle.dumps(so.vectorvalues)).hexdigest()
 
 	dbconnection = ConnectionObject(ctype='rw')
 	dbcursor = dbconnection.cursor()
@@ -199,32 +197,27 @@ def checkforstoredvector(so: SearchObject):
 	:return:
 	"""
 
-	careabout = 'thumbprint'
+	currentvectorvalues = so.vectorvalues.thumbprint()
 
 	vectortype = so.vectorquerytype
 	if vectortype == 'analogies':
 		vectortype = 'nearestneighborsquery'
 
-	full = wholecorpuscheck(so)
-	if full:
-		uidlist = full
-	else:
-		uidlist = sorted(so.searchlist)
-
+	uidlist = compilesearchlist(listmapper, so.session)
 	uidlist = md5(pickle.dumps(uidlist)).hexdigest()
 
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
 	q = """
-	SELECT {crit}, calculatedvectorspace 
+	SELECT thumbprint, calculatedvectorspace 
 		FROM public.storedvectors 
 		WHERE uidlist=%s AND vectortype=%s AND baggingmethod = %s
 	"""
 	d = (uidlist, vectortype, so.session['baggingmethod'])
 
 	try:
-		cursor.execute(q.format(crit=careabout), d)
+		cursor.execute(q, d)
 		result = cursor.fetchone()
 	except psycopg2.ProgrammingError:
 		# psycopg2.ProgrammingError: relation "public.storedvectors" does not exist
@@ -238,7 +231,6 @@ def checkforstoredvector(so: SearchObject):
 		return False
 
 	storedvectorvalues = result[0]
-	currentvectorvalues = md5(pickle.dumps(so.vectorvalues)).hexdigest()
 
 	if storedvectorvalues == currentvectorvalues:
 		returnval = pickle.loads(result[1])
@@ -312,45 +304,3 @@ def fetchverctorenvirons(hitdict: dict, searchobject: SearchObject) -> list:
 	dbconnection.connectioncleanup()
 
 	return environs
-
-
-def wholecorpuscheck(so: SearchObject):
-	""""
-
-	this is kludgy because so.wholecorporasearched() fails for checkforstoredvector() ATM
-
-	BUT the logic there is correct if you execute()
-
-	just lifting the logic from there and transposing it here: a bug waiting to happen if one and only one changes
-
-	"""
-
-	sl = flagexclusions(so.searchlist, so.session)
-	sl = calculatewholeauthorsearches(sl, authordict)
-
-	corpora = {
-		'lt': 'Latin',
-		'gr': 'Greek',
-		'ch': 'Christian',
-		'in': 'Inscriptional',
-		'dp': 'Papyrus'
-	}
-
-	corporasizes = {
-		'lt': 362,
-		'gr': 1823,
-		'ch': 291,
-		'in': 463,
-		'dp': 516
-	}
-
-	fullcorpora = list()
-
-	for key in corpora:
-		test = [x for x in sl if x[:2] == key and len(x) == 6]
-		if len(test) == corporasizes[key]:
-			fullcorpora.append(corpora[key])
-		else:
-			pass
-
-	return fullcorpora

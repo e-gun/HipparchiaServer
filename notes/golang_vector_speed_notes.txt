@@ -117,3 +117,13 @@ Vectors     w/ golang assistance
 
 -->
 
+
+
+Sought all 1
+[debugging] [HGH] Hipparchia Golang Helper CLI Debugging Interface (v.0.0.3) [loglevel=4] [debugging]
+
+Searched 1 texts and found 15 proximate terms to graph (58.55s)
+Sorted by proximity
+
+you pay 10s to load the bags into redis; you also pay to fetch it...
+so golang is a lot faster, but there is a high overhead in calling it...

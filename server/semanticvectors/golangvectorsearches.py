@@ -16,7 +16,6 @@ from server.formatting.vectorformatting import ldatopicsgenerateoutput
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.routes.searchroute import updatesearchlistandsearchobject
-from server.searching.precomposedsearchgolanginterface import golangclibinarysearcher, golangsharedlibrarysearcher
 from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforgolang
 from server.searching.searchhelperfunctions import genericgolangcliexecution
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
@@ -143,14 +142,13 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         for s in so.searchsqldict:
             rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
 
-        # [4] run a search on that dict with the golang helper
+        # [4] run a search for the lines we need on that dict with the golang helper
         # don't use golangsharedlibrarysearcher() because the round trip kills you:
         #   grab lines; store lines; fetch lines; process lines...
-        # instead run the search internally to the helper
+        # instead run the search that grabs the lines internally to the helper
+        # that then hands these off to the bagger
 
         so.poll.statusis('Grabbing a collection of lines')
-        so.poll.allworkis(-1)  # this turns off the % completed notice in the JS
-        so.poll.sethits(0)
         vectorresultskey = golangclibinaryvectorhelper(so)
 
         # this means that [a]-[i] has now happened....

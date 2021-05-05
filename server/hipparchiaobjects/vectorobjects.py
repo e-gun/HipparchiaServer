@@ -5,6 +5,8 @@
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
+import pickle
+from hashlib import md5
 
 from flask import session
 
@@ -54,3 +56,8 @@ class VectorValues(object):
 			return True
 		else:
 			return False
+
+	def thumbprint(self):
+		tp = [(k, self.__dict__[k]) for k in self.__dict__.keys()]
+		return md5(pickle.dumps(tp)).hexdigest()
+
