@@ -8,7 +8,6 @@
 
 import json
 import re
-import threading
 import time
 
 try:
@@ -23,7 +22,7 @@ from server.authentication.authenticationwrapper import requireauthentication
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.searching.precomposedsqlsearching import precomposedsqlsearch
-from server.formatting.miscformatting import validatepollid, consolewarning, debugmessage
+from server.formatting.miscformatting import validatepollid, debugmessage
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds, rewriteskgandprx
 from server.formatting.wordformatting import wordlistintoregex
@@ -409,18 +408,17 @@ def updatesearchlistandsearchobject(so: SearchObject) -> SearchObject:
 
 	you have a searchlist; now tell the searchobject more about it...
 
-	this has been peel off so that golangvectors() can call it too
+	this has been peeled off so that golangvectors() can call it too
 
 	"""
 
 	# mark works that have passage exclusions associated with them:
 	# gr0001x001 instead of gr0001w001 if you are skipping part of w001
-	searchlist = flagexclusions(so.searchlist, so.session)
+	so.searchlist = flagexclusions(so.searchlist, so.session)
 
 	so.poll.statusis('Calculating full authors to search')
-	so.searchlist = calculatewholeauthorsearches(searchlist, authordict)
+	so.searchlist = calculatewholeauthorsearches(so.searchlist, authordict)
 	so.usedcorpora = so.wholecorporasearched()
 	so.poll.statusis('Configuring the search restrictions')
-	so.indexrestrictions = configurewhereclausedata(searchlist, workdict, so)
-
+	so.indexrestrictions = configurewhereclausedata(so.searchlist, workdict, so)
 	return so

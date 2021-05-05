@@ -83,7 +83,7 @@ def startvectorizing():
 		so.vectorquerytype = modeltype
 		so.termone = 'FAKESEARCH'
 
-		for c in hipparchia.config['CORPORATOAUTOBUILD']:
+		for c in hipparchia.config['CORPORATOAUTOVECTORIZE']:
 			so.session[c] = True
 
 		vectorspace = checkforstoredvector(so)

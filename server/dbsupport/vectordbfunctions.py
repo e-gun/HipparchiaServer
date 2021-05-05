@@ -16,7 +16,9 @@ from server.dbsupport.dblinefunctions import bulklinegrabber
 from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchObject
+from server.listsandsession.searchlistmanagement import calculatewholeauthorsearches, flagexclusions
 from server.searching.searchhelperfunctions import grableadingandlagging
+from server.startup import authordict
 
 
 def createvectorstable():
@@ -201,8 +203,9 @@ def checkforstoredvector(so: SearchObject):
 	if vectortype == 'analogies':
 		vectortype = 'nearestneighborsquery'
 
-	if so.wholecorporasearched():
-		uidlist = so.wholecorporasearched()
+	full = wholecorpuscheck(so)
+	if full:
+		uidlist = full
 	else:
 		uidlist = sorted(so.searchlist)
 
@@ -232,8 +235,6 @@ def checkforstoredvector(so: SearchObject):
 
 	storedvectorvalues = pickle.loads(result[0])
 	currentvectorvalues = so.vectorvalues
-
-	print('s/c', storedvectorvalues, currentvectorvalues)
 
 	if storedvectorvalues == currentvectorvalues:
 		returnval = pickle.loads(result[1])
@@ -308,3 +309,47 @@ def fetchverctorenvirons(hitdict: dict, searchobject: SearchObject) -> list:
 	dbconnection.connectioncleanup()
 
 	return environs
+
+
+def wholecorpuscheck(so: SearchObject):
+	""""
+
+	this is kludgy because so.wholecorporasearched() fails for checkforstoredvector() ATM
+
+	BUT the logic is correct if you execute()
+
+	just lifting the logic from there...
+
+	"""
+
+	sl = flagexclusions(so.searchlist, so.session)
+	sl = calculatewholeauthorsearches(sl, authordict)
+
+	corpora = {
+		'lt': 'Latin',
+		'gr': 'Greek',
+		'ch': 'Christian',
+		'in': 'Inscriptional',
+		'dp': 'Papyrus'
+	}
+
+	corporasizes = {
+		'lt': 362,
+		'gr': 1823,
+		'ch': 291,
+		'in': 463,
+		'dp': 516
+	}
+
+	fullcorpora = list()
+
+	for key in corpora:
+		test = [x for x in sl if x[:2] == key and len(x) == 6]
+		if len(test) == corporasizes[key]:
+			fullcorpora.append(corpora[key])
+		else:
+			pass
+
+	# print('fullcorpora', fullcorpora)
+
+	return fullcorpora

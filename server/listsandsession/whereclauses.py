@@ -100,7 +100,7 @@ def configurewhereclausedata(searchlist: list, workdict: dict, searchobject: Sea
 	# only valid for whole works: still need to handle works with inset selections and exclusions
 	nonliteraryinclusionmapper = {n: wholeworktemptablecontents(n, nonliteryauthors[n]) for n in nonliteryauthors}
 
-	# [C] WORKS WITH INTERANL INCLUSIONS/EXCLUSIONS
+	# [C] WORKS WITH INTERANAL INCLUSIONS/EXCLUSIONS
 	# now take care of the includes and excludes (which will ultimately be versions of the 'between' syntax
 	# sample
 	# ixlist [('gr0032w001', {'listofboundaries': [(908, 1845), (5434, 6683)], 'listofomissions': None}), ('gr0032w002', {'listofboundaries': [(9959, 10037)], 'listofomissions': None}), ('gr0003w001', {'listofboundaries': [(4883, 7059)], 'listofomissions': [(4907, 4931), (4932, 4950)]})]
