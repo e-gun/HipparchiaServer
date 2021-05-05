@@ -224,7 +224,13 @@ def buildfakesearchobject(qtype='nearestneighborsquery') -> SearchObject:
 	for p in ['psgexclusions', 'psgselections']:
 		frozensession[p] = list()
 
-	so = SearchObject(1, str(), str(), None, None, frozensession)
+	for c in ['christiancorpus', 'latincorpus', 'greekcorpus', 'inscriptioncorpus']:
+		frozensession[c] = True
+
+	frozensession['latestdate'] = 1500
+	frozensession['earliestdate'] = -850
+
+	so = SearchObject('1', str(), str(), None, None, frozensession)
 
 	# parsevectorsentences() needs the following:
 	so.vectorquerytype = qtype

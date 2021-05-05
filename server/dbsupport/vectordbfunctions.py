@@ -144,7 +144,14 @@ def storevectorindatabase(so: SearchObject, vectorspace):
 	if hipparchia.config['DISABLEVECTORSTORAGE']:
 		consolewarning('DISABLEVECTORSTORAGE = True; the vector space for {i} was not stored'.format(i=so.searchid), color='black')
 
-	uidlist = compilesearchlist(listmapper, so.session)
+	if not so.iamarobot:
+		uidlist = compilesearchlist(listmapper, so.session)
+	else:
+		if so.wholecorporasearched():
+			uidlist = so.wholecorporasearched()
+		else:
+			uidlist = sorted(so.searchlist)
+
 	uidlist = md5(pickle.dumps(uidlist)).hexdigest()
 
 	dbconnection = ConnectionObject(ctype='rw')
@@ -203,7 +210,14 @@ def checkforstoredvector(so: SearchObject):
 	if vectortype == 'analogies':
 		vectortype = 'nearestneighborsquery'
 
-	uidlist = compilesearchlist(listmapper, so.session)
+	if not so.iamarobot:
+		uidlist = compilesearchlist(listmapper, so.session)
+	else:
+		if so.wholecorporasearched():
+			uidlist = so.wholecorporasearched()
+		else:
+			uidlist = sorted(so.searchlist)
+
 	uidlist = md5(pickle.dumps(uidlist)).hexdigest()
 
 	dbconnection = ConnectionObject()
