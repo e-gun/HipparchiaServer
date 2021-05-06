@@ -201,7 +201,7 @@ def checkforstoredvector(so: SearchObject):
 		vectortype = 'nearestneighborsquery'
 
 	uidlist = so.searchlistthumbprint
-	debugmessage('checkforstoredvector() checking for {u}'.format(u=uidlist))
+	# debugmessage('checkforstoredvector() checking for {u}'.format(u=uidlist))
 
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()

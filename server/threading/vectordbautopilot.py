@@ -68,7 +68,7 @@ def startvectorizing():
 
 	while workpile:
 		if len(progresspolldict.keys()) != 0:
-			consolewarning('vectorbot pausing to make way for a search')
+			# consolewarning('vectorbot pausing to make way for a search')
 			time.sleep(30)
 
 		# the typical searchlist is one item: ['lt1414']
@@ -98,7 +98,8 @@ def startvectorizing():
 			jsonmessage = None
 
 		if '<!-- MODEL EXISTS -->' in jsonmessage:
-			debugmessage('startvectorizing() says that {i} has already been built'.format(i=searchlist[0]))
+			# debugmessage('startvectorizing() says that {i} has already been built'.format(i=searchlist[0]))
+			pass
 
 		if built and len(searchlist) > 1:
 			v = '{i}+ {n} more items vectorized ({w} words)'

@@ -173,11 +173,11 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         # there are (currently unused) vector styles that can require it
         bagsofwords = [hits[k].split(' ') for k in hits]
 
-        try:
-            debugmessage('first bag is {b}'.format(b=bagsofwords[0]))
-            debugmessage('# of bags is {b}'.format(b=len(bagsofwords)))
-        except IndexError:
-            debugmessage('you have a problem: there were no bags of words')
+        # try:
+        #     debugmessage('first bag is {b}'.format(b=bagsofwords[0]))
+        #     debugmessage('# of bags is {b}'.format(b=len(bagsofwords)))
+        # except IndexError:
+        #     debugmessage('you have a problem: there were no bags of words')
 
         so.poll.statusis('Building the model')
         if so.vectorquerytype == 'nearestneighborsquery':
