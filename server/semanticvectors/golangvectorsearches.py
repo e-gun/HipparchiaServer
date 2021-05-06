@@ -119,6 +119,10 @@ def golangvectors(so: SearchObject) -> JSON_STR:
 
     # [ii] do we actually have a model stored already?
     so.poll.statusis('Checking for stored search')
+    # calculatewholeauthorsearches() + configurewhereclausedata()
+    so = updatesearchlistandsearchobject(so)
+    so.setsearchlistthumbprint()
+
     themodel = checkforstoredvector(so)
 
     if not themodel:
@@ -127,9 +131,6 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         so.poll.statusis('Preparing to search')
         so.usecolumn = 'marked_up_line'
         so.cap = 199999999
-
-        # calculatewholeauthorsearches() + configurewhereclausedata()
-        so = updatesearchlistandsearchobject(so)
 
         # [2] do a searchlistintosqldict()
         so.searchsqldict = searchlistintosqldict(so, str(), vectors=True)
@@ -171,8 +172,12 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         # note that we are about to toss the 'Loc' info that we compiled (and used as a k in k/v pairs...)
         # there are (currently unused) vector styles that can require it
         bagsofwords = [hits[k].split(' ') for k in hits]
-        debugmessage('first bag is {b}'.format(b=bagsofwords[0]))
-        debugmessage('# of bags is {b}'.format(b=len(bagsofwords)))
+
+        try:
+            debugmessage('first bag is {b}'.format(b=bagsofwords[0]))
+            debugmessage('# of bags is {b}'.format(b=len(bagsofwords)))
+        except IndexError:
+            debugmessage('you have a problem: there were no bags of words')
 
         so.poll.statusis('Building the model')
         if so.vectorquerytype == 'nearestneighborsquery':
@@ -187,9 +192,14 @@ def golangvectors(so: SearchObject) -> JSON_STR:
             themodel = buildsklearnselectedworks(so, bagsofsentences)
         else:
             pass
+    elif so.iamarobot:
+        # there is a model and the bot is attempting to build something that has already been build
+        return '<!-- MODEL EXISTS -->'
 
     # so we have a model one way or the other by now...
     # [6] run queries against the model and return the JSON results
+    if so.iamarobot:
+        return '<!-- MODEL BUILT -->'
 
     if so.vectorquerytype == 'nearestneighborsquery':
         jsonoutput = generatenearestneighbordata(None, len(so.searchlist), so, themodel)

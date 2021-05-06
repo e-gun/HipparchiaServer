@@ -6,12 +6,14 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import pickle
 import re
 import time
+from hashlib import md5
 
 from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
-from server.formatting.miscformatting import htmlcommentdecorator, debugmessage
+from server.formatting.miscformatting import htmlcommentdecorator
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.dbtextobjects import dbLemmaObject
 from server.hipparchiaobjects.vectorobjects import VectorValues
@@ -58,6 +60,7 @@ class SearchObject(object):
 		self.usedcorpora = list()
 		self.sentencebundlesize = hipparchia.config['SENTENCESPERDOCUMENT']
 		self.poll = None
+		self.searchlistthumbprint = None
 		if hipparchia.config['SEARCHLISTCONNECTIONTYPE'] == 'queue':
 			self.usequeue = True
 		else:
@@ -134,6 +137,14 @@ class SearchObject(object):
 			self.onehit = False
 
 		self.distance = int(frozensession['proximity'])
+
+	def setsearchlistthumbprint(self):
+		#  { 'in0d0f': {'type': 'unrestricted', 'where': False}, ... }
+		# as this is a dict you can't count on the same order of items and so the same tp
+		# need access to sort to make it deterministic
+		tp = [(k, self.indexrestrictions[k]['type'], self.indexrestrictions[k]['where']) for k in self.indexrestrictions]
+		tp.sort()
+		self.searchlistthumbprint = md5(pickle.dumps(tp)).hexdigest()
 
 	@staticmethod
 	def searchtermcleanup(searchterm: str) -> str:

@@ -13,8 +13,7 @@ from typing import List
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
-from server.dbsupport.vectordbfunctions import checkforstoredvector
-from server.formatting.miscformatting import consolewarning
+from server.formatting.miscformatting import consolewarning, debugmessage
 from server.hipparchiaobjects.progresspoll import NullProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.semanticvectors.golangvectorsearches import golangvectors
@@ -86,32 +85,32 @@ def startvectorizing():
 		for c in hipparchia.config['CORPORATOAUTOVECTORIZE']:
 			so.session[c] = True
 
-		vectorspace = checkforstoredvector(so)
+		jsonmessage = vectorfunction(so)
 
-		if not vectorspace:
-			jsonmessage = vectorfunction(so)
-			if '<!-- FAILED -->' in jsonmessage:
-				consolewarning('vectorbot failed on {s} and will be shutting down'.format(s=searchlist), color='red')
-				workpile = list()
-				jsonmessage = None
+		if jsonmessage == '<!-- MODEL BUILT -->':
+			built = True
+		else:
+			built = False
 
-			if jsonmessage and len(searchlist) > 1:
-				v = '{i}+ {n} more items vectorized ({w} words)'
-			else:
-				v = '{i} vectorized ({w} words)'
-			if jsonmessage and wordcount > 5000:
-				consolewarning(v.format(i=searchlist[0], w=wordcount, n=len(searchlist) - 1), color='green',
-				               isbold=False)
+		if '<!-- MODEL FAILED -->' in jsonmessage:
+			consolewarning('vectorbot failed on {s} and will be shutting down'.format(s=searchlist), color='red')
+			workpile = list()
+			jsonmessage = None
 
-			if jsonmessage and len(workpile) % 25 == 0:
-				consolewarning('{n} items remain to vectorize'.format(n=len(workpile)), color='green', isbold=False)
+		if '<!-- MODEL EXISTS -->' in jsonmessage:
+			debugmessage('startvectorizing() says that {i} has already been built'.format(i=searchlist[0]))
 
-			# if not vectorspace and len(workpile) % 100 == 0:
-			# 	consolewarning(
-			# 		'{n} items remain to vectorize, but vectors are not returned with shorter authors'.format(
-			# 			n=len(workpile)), color='green', isbold=False)
-			# 	consolewarning('aborting vectorization', color='green', isbold=False)
-			# 	workpile = list()
+		if built and len(searchlist) > 1:
+			v = '{i}+ {n} more items vectorized ({w} words)'
+		else:
+			v = '{i} vectorized ({w} words)'
+
+		if built and wordcount > 5000:
+			consolewarning(v.format(i=searchlist[0], w=wordcount, n=len(searchlist) - 1), color='green',
+						   isbold=False)
+
+		if built and len(workpile) % 25 == 0:
+			consolewarning('{n} items remain to vectorize'.format(n=len(workpile)), color='green', isbold=False)
 
 	if hipparchia.config['AUTOVECTORIZE'] and not commandlineargs.disablevectorbot and multiprocessing.current_process().name == 'MainProcess':
 		consolewarning('vectorbot shutting down', color='green')
@@ -230,7 +229,7 @@ def buildfakesearchobject(qtype='nearestneighborsquery') -> SearchObject:
 	frozensession['latestdate'] = 1500
 	frozensession['earliestdate'] = -850
 
-	so = SearchObject('1', str(), str(), None, None, frozensession)
+	so = SearchObject('vectorbot', str(), str(), None, None, frozensession)
 
 	# parsevectorsentences() needs the following:
 	so.vectorquerytype = qtype

@@ -98,6 +98,8 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 	if hipparchia.config['JSONDEBUGMODE']:
 		print('/vectors/{f}\n\t{j}'.format(f=vectortype, j=j))
 
+	del activepoll
+
 	return j
 
 

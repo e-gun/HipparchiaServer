@@ -57,7 +57,7 @@ class VectorValues(object):
 		else:
 			return False
 
-	def thumbprint(self):
+	def getvectorvaluethumbprint(self):
 		tp = [(k, self.__dict__[k]) for k in self.__dict__.keys()]
 		return md5(pickle.dumps(tp)).hexdigest()
 

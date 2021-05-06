@@ -109,6 +109,9 @@ def pythonvectors(so: SearchObject) -> JSON_STR:
 
     # [ii] do we actually have a model stored already?
     so.poll.statusis('Checking for stored search')
+    # calculatewholeauthorsearches() + configurewhereclausedata()
+    so = updatesearchlistandsearchobject(so)
+    so.setsearchlistthumbprint()
     themodel = checkforstoredvector(so)
 
     if not themodel:
@@ -116,9 +119,6 @@ def pythonvectors(so: SearchObject) -> JSON_STR:
 
         so.usecolumn = 'marked_up_line'
         so.cap = 199999999
-
-        # calculatewholeauthorsearches() + configurewhereclausedata()
-        so = updatesearchlistandsearchobject(so)
 
         # [2] do a searchlistintosqldict() [this is killing lda...]
         so.searchsqldict = searchlistintosqldict(so, str(), vectors=True)
@@ -139,9 +139,14 @@ def pythonvectors(so: SearchObject) -> JSON_STR:
             themodel = buildsklearnselectedworks(so, bagsofsentences)
         else:
             pass
+    elif so.iamarobot:
+        # there is a model and the bot is attempting to build something that has already been build
+        return '<!-- MODEL EXISTS -->'
 
     # so we have a model one way or the other by now...
     # [5] run queries against the model
+    if so.iamarobot:
+        return '<!-- MODEL BUILT -->'
 
     if so.vectorquerytype == 'nearestneighborsquery':
         jsonoutput = generatenearestneighbordata(None, len(so.searchlist), so, themodel)

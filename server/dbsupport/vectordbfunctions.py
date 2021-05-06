@@ -8,18 +8,15 @@
 
 import pickle
 from datetime import datetime
-from hashlib import md5
 
 import psycopg2
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import bulklinegrabber
-from server.formatting.miscformatting import consolewarning
+from server.formatting.miscformatting import consolewarning, debugmessage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchObject
-from server.listsandsession.searchlistmanagement import compilesearchlist
 from server.searching.searchhelperfunctions import grableadingandlagging
-from server.startup import listmapper
 
 
 def createvectorstable():
@@ -135,7 +132,7 @@ def storevectorindatabase(so: SearchObject, vectorspace):
 	:return:
 	"""
 
-	thumbprint = so.vectorvalues.thumbprint()
+	vvthumbprint = so.vectorvalues.getvectorvaluethumbprint()
 
 	vectortype = so.vectorquerytype
 	if vectortype == 'analogies':
@@ -144,15 +141,8 @@ def storevectorindatabase(so: SearchObject, vectorspace):
 	if hipparchia.config['DISABLEVECTORSTORAGE']:
 		consolewarning('DISABLEVECTORSTORAGE = True; the vector space for {i} was not stored'.format(i=so.searchid), color='black')
 
-	if not so.iamarobot:
-		uidlist = compilesearchlist(listmapper, so.session)
-	else:
-		if so.wholecorporasearched():
-			uidlist = so.wholecorporasearched()
-		else:
-			uidlist = sorted(so.searchlist)
-
-	uidlist = md5(pickle.dumps(uidlist)).hexdigest()
+	uidlist = so.searchlistthumbprint
+	debugmessage('storevectorindatabase() storing {u}'.format(u=uidlist))
 
 	dbconnection = ConnectionObject(ctype='rw')
 	dbcursor = dbconnection.cursor()
@@ -174,7 +164,7 @@ def storevectorindatabase(so: SearchObject, vectorspace):
 	pickledvectors = pickle.dumps(vectorspace)
 	ts = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-	d = (ts, thumbprint, uidlist, vectortype, so.session['baggingmethod'], pickledvectors)
+	d = (ts, vvthumbprint, uidlist, vectortype, so.session['baggingmethod'], pickledvectors)
 	dbcursor.execute(q, d)
 
 	# print('stored {u} in vector table (type={t})'.format(u=uidlist, t=vectortype))
@@ -204,31 +194,24 @@ def checkforstoredvector(so: SearchObject):
 	:return:
 	"""
 
-	currentvectorvalues = so.vectorvalues.thumbprint()
+	currentvectorvalues = so.vectorvalues.getvectorvaluethumbprint()
 
 	vectortype = so.vectorquerytype
 	if vectortype == 'analogies':
 		vectortype = 'nearestneighborsquery'
 
-	if not so.iamarobot:
-		uidlist = compilesearchlist(listmapper, so.session)
-	else:
-		if so.wholecorporasearched():
-			uidlist = so.wholecorporasearched()
-		else:
-			uidlist = sorted(so.searchlist)
-
-	uidlist = md5(pickle.dumps(uidlist)).hexdigest()
+	uidlist = so.searchlistthumbprint
+	debugmessage('checkforstoredvector() checking for {u}'.format(u=uidlist))
 
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
 	q = """
-	SELECT thumbprint, calculatedvectorspace 
+	SELECT calculatedvectorspace 
 		FROM public.storedvectors 
-		WHERE uidlist=%s AND vectortype=%s AND baggingmethod = %s
+		WHERE thumbprint=%s AND uidlist=%s AND vectortype=%s AND baggingmethod = %s
 	"""
-	d = (uidlist, vectortype, so.session['baggingmethod'])
+	d = (currentvectorvalues, uidlist, vectortype, so.session['baggingmethod'])
 
 	try:
 		cursor.execute(q, d)
@@ -242,16 +225,13 @@ def checkforstoredvector(so: SearchObject):
 		result = False
 
 	if not result:
+		# debugmessage('checkforstoredvector(): returning "False"')
 		return False
 
-	storedvectorvalues = result[0]
-
-	if storedvectorvalues == currentvectorvalues:
-		returnval = pickle.loads(result[1])
-	else:
-		returnval = False
+	returnval = pickle.loads(result[0])
 
 	dbconnection.connectioncleanup()
+	# debugmessage('checkforstoredvector(): returning a model')
 
 	return returnval
 
