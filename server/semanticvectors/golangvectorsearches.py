@@ -105,7 +105,8 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         4) "{\"Loc\":\"line/lt0472w001/1105\",\"Sent\":\"rasilis subeo foris\xc2\xb9\"}"
 
     """
-    debugmessage('golangvectors()')
+
+    # debugmessage('golangvectors()')
     assert so.vectorquerytype in ['analogies', 'nearestneighborsquery', 'topicmodel']
 
     # [0] is this really going to happen?

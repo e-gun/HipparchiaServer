@@ -66,39 +66,39 @@ def buildgensimmodel(so: SearchObject, bagsofwords: List[List[str]]) -> Word2Vec
     the model to make queries against it
 
     WordEmbeddingsKeyedVectors in keyedvectors.py is your friend here for learning what you can really do
-    	most_similar(positive=None, negative=None, topn=10, restrict_vocab=None, indexer=None)
-    		[analogies; most_similar(positive=['woman', 'king'], negative=['man']) --> queen]
+        most_similar(positive=None, negative=None, topn=10, restrict_vocab=None, indexer=None)
+            [analogies; most_similar(positive=['woman', 'king'], negative=['man']) --> queen]
 
-    	similar_by_word(word, topn=10, restrict_vocab=None)
-    		[the top-N most similar words]
+        similar_by_word(word, topn=10, restrict_vocab=None)
+            [the top-N most similar words]
 
-    	similar_by_vector(vector, topn=10, restrict_vocab=None)
+        similar_by_vector(vector, topn=10, restrict_vocab=None)
 
-    	similarity_matrix(dictionary, tfidf=None, threshold=0.0, exponent=2.0, nonzero_limit=100, dtype=REAL)
+        similarity_matrix(dictionary, tfidf=None, threshold=0.0, exponent=2.0, nonzero_limit=100, dtype=REAL)
 
-    	wmdistance(document1, document2)
-    		[Word Mover's Distance between two documents]
+        wmdistance(document1, document2)
+            [Word Mover's Distance between two documents]
 
-    	most_similar_cosmul(positive=None, negative=None, topn=10)
-    		[analogy finder; most_similar_cosmul(positive=['baghdad', 'england'], negative=['london']) --> iraq]
+        most_similar_cosmul(positive=None, negative=None, topn=10)
+            [analogy finder; most_similar_cosmul(positive=['baghdad', 'england'], negative=['london']) --> iraq]
 
-    	cosine_similarities(vector_1, vectors_all)
+        cosine_similarities(vector_1, vectors_all)
 
-    	distances(word_or_vector, other_words=())
+        distances(word_or_vector, other_words=())
 
-    	distance(w1, w2)
-    		[distance('woman', 'man')]
+        distance(w1, w2)
+            [distance('woman', 'man')]
 
-    	similarity(w1, w2)
-    		[similarity('woman', 'man')]
+        similarity(w1, w2)
+            [similarity('woman', 'man')]
 
-    	n_similarity(ws1, ws2)
-    		[sets of words: n_similarity(['sushi', 'shop'], ['japanese', 'restaurant'])]
+        n_similarity(ws1, ws2)
+            [sets of words: n_similarity(['sushi', 'shop'], ['japanese', 'restaurant'])]
 
 
     FYI: Doc2VecKeyedVectors
-    	doesnt_match(docs)
-    		[Which doc from the given list doesn't go with the others?]
+        doesnt_match(docs)
+            [Which doc from the given list doesn't go with the others?]
 
     note that Word2Vec will hurl out lots of DeprecationWarnings; we are blocking them
     one hopes that this does not yield a surprise some day... [surprise: it did...]
@@ -285,11 +285,11 @@ def buildsklearnselectedworks(so: SearchObject, bagsofsentences: list):
 def gensimgenerateanalogies(vectorspace: Word2Vec, so: SearchObject) -> JSON_STR:
     """
 
-    	most_similar(positive=None, negative=None, topn=10, restrict_vocab=None, indexer=None)
-    		[analogies; most_similar(positive=['woman', 'king'], negative=['man']) --> queen]
+    most_similar(positive=None, negative=None, topn=10, restrict_vocab=None, indexer=None)
+        [analogies; most_similar(positive=['woman', 'king'], negative=['man']) --> queen]
 
-    	most_similar_cosmul(positive=None, negative=None, topn=10)
-    	[analogy finder; most_similar_cosmul(positive=['baghdad', 'england'], negative=['london']) --> iraq]
+    most_similar_cosmul(positive=None, negative=None, topn=10)
+    [analogy finder; most_similar_cosmul(positive=['baghdad', 'england'], negative=['london']) --> iraq]
 
     :param sentencetuples:
     :param searchobject:

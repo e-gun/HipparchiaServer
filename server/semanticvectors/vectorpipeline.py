@@ -95,7 +95,8 @@ def pythonvectors(so: SearchObject) -> JSON_STR:
     [4] hand the bags over to Word2Vec(), etc. [*]
     [5] run queries against the model and return the JSON results
     """
-    debugmessage('pythonvectors()')
+
+    # debugmessage('pythonvectors()')
     assert so.vectorquerytype in ['analogies', 'nearestneighborsquery', 'topicmodel']
 
     # [0] is this really going to happen?
