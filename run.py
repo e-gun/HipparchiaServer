@@ -55,23 +55,25 @@ if __name__ == '__main__':
 	# this code block duplicates material found in '__init__.py'; the only gain is the secho() notification so that
 	# you know where you stand at startup
 
-	mpmethod = str()
-	try:
-		# mpmethod = 'forkserver'
-		# this will get you into trouble with the vectorbot
-		# TypeError: can't pickle psycopg2.extensions.connection objects
-		mpmethod = 'fork'
-		multiprocessing.set_start_method(mpmethod)
-	except RuntimeError:
-		#   File "/usr/local/Cellar/python/3.7.6_1/Frameworks/Python.framework/Versions/3.7/lib/python3.7/multiprocessing/context.py", line 242, in set_start_method
-		#     raise RuntimeError('context has already been set')
-		# RuntimeError: context has already been set
-		pass
-	except:
-		mpmethod = 'spawn'
-		multiprocessing.set_start_method(mpmethod)
-	finally:
-		secho('multiprocessing method set to: {m}'.format(m=mpmethod), fg='cyan')
+	# mpmethod = str()
+	# try:
+	# 	# mpmethod = 'forkserver'
+	# 	# this will get you into trouble with the vectorbot
+	# 	# TypeError: can't pickle psycopg2.extensions.connection objects
+	# 	mpmethod = 'fork'
+	# 	multiprocessing.set_start_method(mpmethod)
+	# except RuntimeError:
+	# 	#   File "/usr/local/Cellar/python/3.7.6_1/Frameworks/Python.framework/Versions/3.7/lib/python3.7/multiprocessing/context.py", line 242, in set_start_method
+	# 	#     raise RuntimeError('context has already been set')
+	# 	# RuntimeError: context has already been set
+	# 	pass
+	# except:
+	# 	mpmethod = 'spawn'
+	# 	multiprocessing.set_start_method(mpmethod)
+	# finally:
+	# 	secho('multiprocessing method set to: {m}'.format(m=mpmethod), fg='cyan')
+
+	secho('multiprocessing method set by OS default to: {m}'.format(m=multiprocessing.get_start_method()), fg='cyan')
 
 	# picklestatus = icanpickleconnections(dothecheck=True)
 	# secho('connection pickling available: {p}'.format(p=picklestatus), fg='cyan')
