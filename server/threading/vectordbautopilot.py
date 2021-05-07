@@ -66,6 +66,8 @@ def startvectorizing():
 	emptypoll = NullProgressPoll(None)
 	modeltype = 'nearestneighborsquery'
 
+	minwords = 500
+
 	while workpile:
 		if len(progresspolldict.keys()) != 0:
 			# consolewarning('vectorbot pausing to make way for a search')
@@ -76,44 +78,46 @@ def startvectorizing():
 		searchlist = searching[0]
 		wordcount = searching[1]
 
-		so = buildfakesearchobject()
-		so.searchlist = searchlist
-		so.poll = emptypoll
-		so.vectorquerytype = modeltype
-		so.termone = 'FAKESEARCH'
+		if wordcount > minwords:
+			so = buildfakesearchobject()
+			so.searchlist = searchlist
+			so.poll = emptypoll
+			so.vectorquerytype = modeltype
+			so.termone = 'FAKESEARCH'
 
-		for c in hipparchia.config['CORPORATOAUTOVECTORIZE']:
-			so.session[c] = True
+			for c in hipparchia.config['CORPORATOAUTOVECTORIZE']:
+				so.session[c] = True
 
-		jsonmessage = vectorfunction(so)
+			jsonmessage = vectorfunction(so)
 
-		if jsonmessage == '<!-- MODEL BUILT -->':
-			built = True
-		else:
-			built = False
+			if jsonmessage == '<!-- MODEL BUILT -->':
+				built = True
+			else:
+				built = False
 
-		if '<!-- MODEL FAILED -->' in jsonmessage:
-			consolewarning('vectorbot failed on {s} and will be shutting down'.format(s=searchlist), color='red')
-			workpile = list()
-			jsonmessage = None
+			if '<!-- MODEL FAILED -->' in jsonmessage:
+				consolewarning('vectorbot failed on {s} and will be shutting down'.format(s=searchlist), color='red')
+				workpile = list()
+				jsonmessage = None
 
-		if '<!-- MODEL EXISTS -->' in jsonmessage:
-			# debugmessage('startvectorizing() says that {i} has already been built'.format(i=searchlist[0]))
-			pass
+			if '<!-- MODEL EXISTS -->' in jsonmessage:
+				# debugmessage('startvectorizing() says that {i} has already been built'.format(i=searchlist[0]))
+				pass
 
-		if built and len(searchlist) > 1:
-			v = '{i}+ {n} more items vectorized ({w} words)'
-		else:
-			v = '{i} vectorized ({w} words)'
+			if built and len(searchlist) > 1:
+				v = '{i}+ {n} more items vectorized ({w} words)'
+			else:
+				v = '{i} vectorized ({w} words)'
 
-		if built and wordcount > 5000:
-			consolewarning(v.format(i=searchlist[0], w=wordcount, n=len(searchlist) - 1), color='green',
-						   isbold=False)
+			if built and wordcount > 5000:
+				consolewarning(v.format(i=searchlist[0], w=wordcount, n=len(searchlist) - 1), color='green',
+							   isbold=False)
 
-		if built and len(workpile) % 25 == 0:
-			consolewarning('{n} items remain to vectorize'.format(n=len(workpile)), color='green', isbold=False)
+			if built and len(workpile) % 25 == 0:
+				consolewarning('{n} items remain to vectorize'.format(n=len(workpile)), color='green', isbold=False)
 
 	if hipparchia.config['AUTOVECTORIZE'] and not commandlineargs.disablevectorbot and multiprocessing.current_process().name == 'MainProcess':
+		consolewarning('only short authors remain (fewer than {min} words in the corpus...)'.format(min=minwords), color='green')
 		consolewarning('vectorbot shutting down', color='green')
 
 	return

@@ -58,7 +58,7 @@ SUPPRESSWARNINGS = True
 # Currently we know about: ['red', 'yellow', 'green', 'cyan', 'magenta', 'black']
 # the last two are only of interest if you are debugging
 CONSOLEWARNINGTYPES = ['red', 'yellow', 'green', 'cyan']
-GOLANGCLILOGLEVEL = 1
+GOLANGCLILOGLEVEL = 0
 GOLANGMODLOGLEVEL = 0
 GOLANGWSSLOGLEVEL = 0
 GOLANGVECTORLOGLEVEL = 0
