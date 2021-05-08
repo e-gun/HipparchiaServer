@@ -249,6 +249,7 @@ async def wscheckpoll(websocket, path):
 		progress = dict()
 		try:
 			active = progresspolldict[pollid].getactivity()
+			progress['ID'] = pollid
 			progress['Poolofwork'] = progresspolldict[pollid].worktotal()
 			progress['Remaining'] = progresspolldict[pollid].getremaining()
 			progress['Hitcount'] = progresspolldict[pollid].gethits()
