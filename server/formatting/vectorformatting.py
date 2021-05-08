@@ -281,7 +281,7 @@ def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: 
 	activepoll.deactivate()
 
 	jsonoutput = json.dumps(output.generateoutput())
-
+	del activepoll
 	return jsonoutput
 
 

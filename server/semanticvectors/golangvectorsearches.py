@@ -232,15 +232,15 @@ def formatgolangvectorhelperarguments(command: str, so: SearchObject) -> list:
     """
     Usage of ./HipparchiaGoDBHelper:
       -c int
-            max hit count (default 200)
+            [searches] max hit count (default 200)
       -k string
-            redis key to use (default "go")
+            [searches] redis key to use (default "go")
       -l int
-            logging level: 0 is silent; 5 is very noisy (default 1)
+            [common] logging level: 0 is silent; 5 is very noisy (default 1)
       -p string
-            psql logon information (as a JSON string) (default "{\"Host\": \"localhost\", \"Port\": 5432, \"User\": \"hippa_wr\", \"Pass\": \"\", \"DBName\": \"hipparchiaDB\"}")
+            [common] psql logon information (as a JSON string) (default "{\"Host\": \"localhost\", \"Port\": 5432, \"User\": \"hippa_wr\", \"Pass\": \"\", \"DBName\": \"hipparchiaDB\"}")
       -r string
-            redis logon information (as a JSON string) (default "{\"Addr\": \"localhost:6379\", \"Password\": \"\", \"DB\": 0}")
+            [common] redis logon information (as a JSON string) (default "{\"Addr\": \"localhost:6379\", \"Password\": \"\", \"DB\": 0}")
       -sv
             [vectors] assert that this is a vectorizing run
       -svb string
@@ -252,16 +252,16 @@ def formatgolangvectorhelperarguments(command: str, so: SearchObject) -> list:
       -svs int
             [vectors][for manual debugging] first line to grab (default 1)
       -t int
-            number of goroutines to dispatch (default 5)
-      -v    print version and exit
+            [common] number of goroutines to dispatch (default 5)
+      -v    [common] print version and exit
       -ws
             [websockets] assert that you are requesting the websocket server
       -wsf int
-            fail threshold before messages stop being sent (default 4)
+            [websockets] fail threshold before messages stop being sent (default 4)
       -wsp int
-            port on which to open the websocket server (default 5010)
+            [websockets] port on which to open the websocket server (default 5010)
       -wss int
-            save the polls instead of deleting them: 0 is no; 1 is yes
+            [websockets] save the polls instead of deleting them: 0 is no; 1 is yes
 
     """
 
