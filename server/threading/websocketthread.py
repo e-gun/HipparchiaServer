@@ -106,22 +106,38 @@ def startgolangwebsocketserver(theport):
 
 	it locks if you try to use it as a module; so we will invoke it via a binary
 
-	you can probably just run it without arguments since the build defaults are the same
-	as the defaults in the configuration files for HipparchiaServer
-
-	nevertheless, we will be doing this the tedious way...
-
-	Usage of ./HipparchiaGoWebSocketApp:
+	Usage of ./HipparchiaGoDBHelper:
+	  -c int
+			max hit count (default 200)
+	  -k string
+			redis key to use (default "go")
 	  -l int
-			logging level: 0 is silent; 2 is very noisy
-	  -p int
-			port on which to open the websocket server (default 5010)
+			logging level: 0 is silent; 5 is very noisy (default 1)
+	  -p string
+			psql logon information (as a JSON string) (default "{\"Host\": \"localhost\", \"Port\": 5432, \"User\": \"hippa_wr\", \"Pass\": \"\", \"DBName\": \"hipparchiaDB\"}")
 	  -r string
 			redis logon information (as a JSON string) (default "{\"Addr\": \"localhost:6379\", \"Password\": \"\", \"DB\": 0}")
-	  -s int
-			save the polls instead of deleting them: 0 is no; 1 is yes
+	  -sv
+			[vectors] assert that this is a vectorizing run
+	  -svb string
+			[vectors] the bagging method: choices are alternates, flat, unlemmatized, winnertakesall (default "winnertakesall")
+	  -svdb string
+			[vectors][for manual debugging] db to grab from (default "lt0448")
+	  -sve int
+			[vectors][for manual debugging] last line to grab (default 26)
+	  -svs int
+			[vectors][for manual debugging] first line to grab (default 1)
 	  -t int
+			number of goroutines to dispatch (default 5)
+	  -v    print version and exit
+	  -ws
+			[websockets] assert that you are requesting the websocket server
+	  -wsf int
 			fail threshold before messages stop being sent (default 4)
+	  -wsp int
+			port on which to open the websocket server (default 5010)
+	  -wss int
+			save the polls instead of deleting them: 0 is no; 1 is yes
 
 	"""
 
@@ -132,7 +148,7 @@ def startgolangwebsocketserver(theport):
 		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
 		basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
 
-	binary = '/server/golangmodule/' + hipparchia.config['GOLANGTHWSBINARYNAME']
+	binary = '/server/golangmodule/' + hipparchia.config['GOLANGCLIBINARYNAME']
 	command = basepath + binary
 
 	arguments = dict()
@@ -142,15 +158,15 @@ def startgolangwebsocketserver(theport):
 		   'DB': hipparchia.config['REDISDBID']}
 	arguments['r'] = json.dumps(rld)
 	if hipparchia.config['RETAINREDISPOLLS']:
-		arguments['s'] = 1
+		arguments['wss'] = 1
 	else:
-		arguments['s'] = 0
+		arguments['wss'] = 0
 	arguments['l'] = hipparchia.config['GOLANGWSSLOGLEVEL']
-	arguments['p'] = theport
-	arguments['t'] = hipparchia.config['GOLANGWSFAILTHRESHOLD']
+	arguments['wsp'] = theport
+	arguments['wsf'] = hipparchia.config['GOLANGWSFAILTHRESHOLD']
 	argumentlist = [['-{k}'.format(k=k), '{v}'.format(v=arguments[k])] for k in arguments]
 	argumentlist = flattenlistoflists(argumentlist)
-	commandandarguments = [command] + argumentlist
+	commandandarguments = [command] + ['-ws'] + argumentlist
 
 	subprocess.Popen(commandandarguments)
 	debugmessage('successfully opened {b}'.format(b=binary))

@@ -222,7 +222,7 @@ def golangclibinaryvectorhelper(so: SearchObject) -> str:
 
     """
 
-    bin = hipparchia.config['GOLANGVECTORBINARYNAME']
+    bin = hipparchia.config['GOLANGCLIBINARYNAME']
 
     vectorresultskey = genericgolangcliexecution(bin, formatgolangvectorhelperarguments, so)
     return vectorresultskey
@@ -254,6 +254,14 @@ def formatgolangvectorhelperarguments(command: str, so: SearchObject) -> list:
       -t int
             number of goroutines to dispatch (default 5)
       -v    print version and exit
+      -ws
+            [websockets] assert that you are requesting the websocket server
+      -wsf int
+            fail threshold before messages stop being sent (default 4)
+      -wsp int
+            port on which to open the websocket server (default 5010)
+      -wss int
+            save the polls instead of deleting them: 0 is no; 1 is yes
 
     """
 
