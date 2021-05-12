@@ -361,6 +361,10 @@ def checkforactivesearch(searchid, trialnumber=0) -> JSON_STR:
 		time.sleep(.20)
 		return checkforactivesearch(searchid, trialnumber)
 
+	# should seldom make it here; but super-short requests will: 'confirm' on a vector search that will abort, e.g.
+	time.sleep(.1)
+	return checkforactivesearch(searchid, trialnumber)
+
 
 def externalwsgipolling(pollid) -> JSON_STR:
 	"""
@@ -421,4 +425,5 @@ def updatesearchlistandsearchobject(so: SearchObject) -> SearchObject:
 	so.usedcorpora = so.wholecorporasearched()
 	so.poll.statusis('Configuring the search restrictions')
 	so.indexrestrictions = configurewhereclausedata(so.searchlist, workdict, so)
+	
 	return so

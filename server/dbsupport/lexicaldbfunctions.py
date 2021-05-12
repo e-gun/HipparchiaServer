@@ -830,3 +830,40 @@ def bulkfindmorphologyobjects(listofwords: List[str], language: str) -> List[dbM
 	morphobjects = [dbMorphologyObject(*r) for r in results]
 
 	return morphobjects
+
+
+def rankheadwordsbyprevalence(listofheadwords: list) -> dict:
+	"""
+
+	"""
+
+	# print('rankheadwordsbyprevalence() listofheadwords', listofheadwords)
+
+	dbconnection = ConnectionObject(readonlyconnection=False)
+	dbconnection.setautocommit()
+	dbcursor = dbconnection.cursor()
+	rnd = assignuniquename(6)
+
+	tqtemplate = """
+	CREATE TEMPORARY TABLE temporary_headwordlist_{rnd} AS
+		SELECT headwords AS hw FROM unnest(ARRAY[{allwords}]) headwords
+	"""
+
+	qtemplate = """
+	SELECT entry_name, total_count FROM {db} 
+		WHERE EXISTS 
+			(SELECT 1 FROM temporary_headwordlist_{rnd} temptable WHERE temptable.hw = {db}.entry_name)
+	"""
+
+	tempquery = tqtemplate.format(rnd=rnd, allwords=list(listofheadwords))
+	dbcursor.execute(tempquery)
+	# https://www.psycopg.org/docs/extras.html#psycopg2.extras.execute_values
+	# third parameter is
+
+	query = qtemplate.format(rnd=rnd, db='dictionary_headword_wordcounts')
+	dbcursor.execute(query)
+	results = resultiterator(dbcursor)
+
+	ranked = {r[0]: r[1] for r in results}
+
+	return ranked

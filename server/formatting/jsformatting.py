@@ -445,7 +445,8 @@ def morphologychartjs() -> str:
 			});
 		}
 	
-		function displayprogress(progress){
+		function displayprogress(searchid, progress){
+			// note that morphologychartjs() has its own version of this function: changes here should be made there too
 			let r = progress['Remaining'];
 			let t = progress['Poolofwork'];
 			let h = progress['Hitcount'];
@@ -453,24 +454,28 @@ def morphologychartjs() -> str:
 			let m = progress['Statusmessage'];
 			let l = progress['Launchtime'];
 			let x = progress['Notes'];
+			let id = progress['ID'];
+			let a = progress['Activity'];
 		
+			// let thehtml = '[' + id + ' activity =' + a +'] ';
 			let thehtml = '';
 		
-			if (r !== undefined && t !== undefined  && !isNaN(pct)) {
-				let e = Math.round((new Date().getTime() / 1000) - l);
+			if (id === searchid) {
+				if (r !== undefined && t !== undefined && !isNaN(pct)) {
+					let e = Math.round((new Date().getTime() / 1000) - l);
 		
-				if (t !== -1) {
-					thehtml += m + ': <span class="progress">' + pct + '%</span> completed&nbsp;(' + e + 's)';
-				} else {
-					thehtml += m + '&nbsp;(' + e + 's)';
+					if (t !== -1) {
+						thehtml += m + ': <span class="progress">' + pct + '%</span> completed&nbsp;(' + e + 's)';
+					} else {
+						thehtml += m + '&nbsp;(' + e + 's)';
+					}
+		
+					if (h > 0) {
+						thehtml += '<br />(<span class="progress">' + h + '</span> found)';
+					}
+		
+					thehtml += '<br />' + x;
 				}
-		
-				if (h > 0) {
-					thehtml += '<br />(<span class="progress">' + h + '</span> found)';
-				}
-		
-				thehtml += '<br />' + x;
-				// console.log(pct);
 			}
 		$('#pollingdata').html(thehtml);
 		}

@@ -10,6 +10,7 @@ import re
 
 from typing import List
 
+from server.dbsupport.lexicaldbfunctions import rankheadwordsbyprevalence
 from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
 from server.formatting.miscformatting import htmlcommentdecorator
 from server.hipparchiaobjects.worklineobject import dbWorkLine
@@ -76,7 +77,7 @@ def formatnnmatches(listofneighbors: List[tuple], vectorvalues: VectorValues):
 	firstrowtemplate = """
 	<tr class="vectorrow">
 		<td class="vectorscore">{s}</td>
-		<td class="vectorword"><lemmaheadword id="{w}">{w}</lemmaheadword></td>
+		<td class="vectorword"><lemmaheadword id="{w}">{w}</lemmaheadword> <span class="unobtrusive">{p}</span></td>
 		<td class="imageholder" rowspan="{n}"><p id="imagearea"></p></td>
 	</tr>
 	"""
@@ -84,7 +85,7 @@ def formatnnmatches(listofneighbors: List[tuple], vectorvalues: VectorValues):
 	rowtemplate = """
 	<tr class="vectorrow">
 		<td class="vectorscore">{s}</td>
-		<td class="vectorword"><lemmaheadword id="{w}">{w}</lemmaheadword></td>
+		<td class="vectorword"><lemmaheadword id="{w}">{w}</lemmaheadword> <span class="unobtrusive">{p}</span></td>
 	</tr>
 	"""
 
@@ -95,21 +96,33 @@ def formatnnmatches(listofneighbors: List[tuple], vectorvalues: VectorValues):
 	</tr>
 	"""
 
+	# prevalence = {word: count for word in results}
+	prevalence = rankheadwordsbyprevalence([w[0] for w in listofneighbors])
+	for w in [n[0] for n in listofneighbors]:
+		try:
+			prevalence[w]
+		except KeyError:
+			prevalence[w] = 'unk'
+
 	cap = vectorvalues.neighborscap
 	numberofungraphedtodisplay = 10
 	surplus = len(listofneighbors) - cap
 	ungraphed = listofneighbors[cap:cap + numberofungraphedtodisplay]
 	listofneighbors = listofneighbors[:cap]
 
-	try:
-		firstrow = firstrowtemplate.format(s=round(listofneighbors[0][1], 3), w=listofneighbors[0][0], n=len(listofneighbors)+len(ungraphed))
-	except IndexError:
-		firstrow = firstrowtemplate.format(s='', w='no most common neighbors found', n=1)
+	wordsandscore = {w[0]: w[1] for w in listofneighbors}
 
-	rows = [firstrow] + [rowtemplate.format(s=round(n[1], 3), w=n[0]) for n in listofneighbors[1:]]
+	try:
+		firstrow = firstrowtemplate.format(s=round(listofneighbors[0][1], 3), w=listofneighbors[0][0], n=len(listofneighbors)+len(ungraphed), p=prevalence[
+			listofneighbors[0][0]])
+	except IndexError:
+		firstrow = firstrowtemplate.format(s=str(), w='no most common neighbors found', n=1)
+
+	rows = [firstrow] + [rowtemplate.format(s=round(wordsandscore[n[0]], 3), w=n[0], p=prevalence[n[0]]) for n in
+						 listofneighbors[1:]]
 	if ungraphed:
-		rows.append(rowtemplate.format(s='', w='(next {n} words)'.format(n=numberofungraphedtodisplay)))
-		rows += [rowtemplate.format(s=round(n[1], 3), w=n[0]) for n in ungraphed]
+		rows.append(rowtemplate.format(s=str(), w='(next {n} words)'.format(n=numberofungraphedtodisplay), p=str()))
+		rows += [rowtemplate.format(s=round(n[1], 3), w=n[0], p=prevalence[n[0]]) for n in ungraphed]
 
 	if surplus > 0:
 		wtw = 'word that was'

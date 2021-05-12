@@ -85,10 +85,9 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 	so.vectorquerytype = vectortype
 
 	progresspolldict[pollid] = ProgressPoll(pollid)
-	activepoll = progresspolldict[pollid]
-	activepoll.activate()
-	activepoll.statusis('Preparing to vectorize')
-	so.poll = activepoll
+	so.poll = progresspolldict[pollid]
+	so.poll.activate()
+	so.poll.statusis('Preparing to vectorize')
 
 	if hipparchia.config['GOLANGVECTORHELPER']:
 		j = golangvectors(so)
@@ -98,7 +97,10 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 	if hipparchia.config['JSONDEBUGMODE']:
 		print('/vectors/{f}\n\t{j}'.format(f=vectortype, j=j))
 
-	del activepoll
+	try:
+		del so.poll
+	except AttributeError:
+		pass
 
 	return j
 

@@ -13,13 +13,11 @@ from string import punctuation
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.miscdbfunctions import resultiterator
-from server.dbsupport.tablefunctions import assignuniquename
+from server.dbsupport.lexicaldbfunctions import rankheadwordsbyprevalence
 from server.dbsupport.vectordbfunctions import checkforstoredvector
 from server.formatting.miscformatting import consolewarning, debugmessage
 from server.formatting.vectorformatting import ldatopicsgenerateoutput
 from server.formatting.wordformatting import elidedextrapunct
-from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.genericlistfunctions import findsetofallwords
 from server.listsandsession.searchlistmanagement import compilesearchlist
@@ -418,32 +416,8 @@ def winnertakesallbagger(morphdict: dict, allsentences: [List[str]]) -> List[Lis
 
     allheadwords = {item for x in morphdict for item in morphdict[x]}
 
-    dbconnection = ConnectionObject(readonlyconnection=False)
-    dbconnection.setautocommit()
-    dbcursor = dbconnection.cursor()
-    rnd = assignuniquename(6)
-
-    tqtemplate = """
-    CREATE TEMPORARY TABLE temporary_headwordlist_{rnd} AS
-    	SELECT headwords AS hw FROM unnest(ARRAY[{allwords}]) headwords
-    """
-
-    qtemplate = """
-    SELECT entry_name, total_count FROM {db} 
-    	WHERE EXISTS 
-    		(SELECT 1 FROM temporary_headwordlist_{rnd} temptable WHERE temptable.hw = {db}.entry_name)
-    """
-
-    tempquery = tqtemplate.format(rnd=rnd, allwords=list(allheadwords))
-    dbcursor.execute(tempquery)
-    # https://www.psycopg.org/docs/extras.html#psycopg2.extras.execute_values
-    # third parameter is
-
-    query = qtemplate.format(rnd=rnd, db='dictionary_headword_wordcounts')
-    dbcursor.execute(query)
-    results = resultiterator(dbcursor)
-
-    randkedheadwords = {r[0]: r[1] for r in results}
+    # randkedheadwords = {word: count for word in results}
+    randkedheadwords = rankheadwordsbyprevalence(list(allheadwords))
 
     # PART TWO: let the winners take all
 

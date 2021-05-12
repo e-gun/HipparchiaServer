@@ -89,7 +89,9 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 			html = '<pre>["{t}" was not found in the vector space]</pre>'.format(t=termone)
 
 	findshtml = '{h}'.format(h=html)
-	activepoll.allworkis(0)  # this wil NaN the JS and turn off the display
+
+	activepoll.allworkis(-1)
+	# so.poll.deactivate()
 
 	output = nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject)
 

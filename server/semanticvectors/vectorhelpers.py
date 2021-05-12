@@ -978,6 +978,9 @@ def emptyvectoroutput(searchobject, reasons=None):
 
 	so = searchobject
 
+	so.poll.allworkis(-1)
+	so.poll.deactivate()
+
 	output = SearchOutputObject(so)
 	output.success = '<!-- FAILED -->'
 	output.reasons = reasons

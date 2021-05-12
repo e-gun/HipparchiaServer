@@ -37,6 +37,7 @@ function displayprogress(searchid, progress){
     let l = progress['Launchtime'];
     let x = progress['Notes'];
     let id = progress['ID'];
+    let a = progress['Activity'];
 
     // let thehtml = '[' + id + '] ';
     let thehtml = '';
