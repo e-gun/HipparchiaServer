@@ -149,8 +149,10 @@ class RedisProgressPoll(object):
 		self.notes = str()
 		self.keytypes = self.setkeytypes()
 		self.polltype = 'RedisProgressPoll'
+		self.expireval = 600
 		self.redisconnection = establishredisconnection()
 		self.initializeredispoll()
+
 
 	def __del__(self):
 		if not hipparchia.config['RETAINREDISPOLLS']:
@@ -184,6 +186,7 @@ class RedisProgressPoll(object):
 			rediskey = self.returnrediskey(k)
 			redisvalue = getattr(self, k)
 			self.redisconnection.set(rediskey, redisvalue)
+			self.redisconnection.expire(k, self.expireval)
 
 	def deleteredispoll(self):
 		for k in self.keytypes:
