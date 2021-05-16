@@ -866,4 +866,15 @@ def rankheadwordsbyprevalence(listofheadwords: list) -> dict:
 
 	ranked = {r[0]: r[1] for r in results}
 
+	# you have a problem: you just tossed a bunch of headwords that did not have good prevalence data
+	# discovered when Ϲωκράτηϲ went missing from Plato
+
+	r = set(ranked.keys())
+	h = set(listofheadwords)
+	delta = h - r
+
+	nullranked = {d: 0 for d in delta}
+
+	ranked = {**ranked, **nullranked}
+
 	return ranked

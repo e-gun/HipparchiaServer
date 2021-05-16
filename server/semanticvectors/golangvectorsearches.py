@@ -113,6 +113,7 @@ def golangvectors(so: SearchObject) -> JSON_STR:
 
     # [i] do we bail out before even getting started?
     so.poll.statusis('Checking for valid search')
+
     abortjson = checkneedtoabort(so)
     if abortjson:
         del so.poll
@@ -123,6 +124,8 @@ def golangvectors(so: SearchObject) -> JSON_STR:
     # calculatewholeauthorsearches() + configurewhereclausedata()
     so = updatesearchlistandsearchobject(so)
     so.setsearchlistthumbprint()
+    so.poll.allworkis(-1)  # this turns off the % completed notice in the JS
+    so.poll.sethits(0)
 
     themodel = checkforstoredvector(so)
 
@@ -152,6 +155,8 @@ def golangvectors(so: SearchObject) -> JSON_STR:
 
         so.poll.statusis('Grabbing a collection of lines')
         vectorresultskey = golangclibinaryvectorhelper(so)
+        so.poll.allworkis(-1)
+        so.poll.sethits(0)
 
         # this means that [a]-[i] has now happened....
 
