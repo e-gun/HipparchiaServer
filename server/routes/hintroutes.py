@@ -209,14 +209,14 @@ def offerlemmatahints(query) -> list:
 	invals = u'jvσς'
 	outvals = u'iuϲϲ'
 
-	if len(query) > 2:
+	if len(query) > 1:
 		# query = stripaccents(term.lower())
 		query = stripaccents(query)
 		qlen = len(query)
-		a = query[0].translate(str.maketrans(invals, outvals))
-		b = query[1].translate(str.maketrans(invals, outvals))
+		bag = query[0:2]
+		key = stripaccents(bag.translate(str.maketrans(invals, outvals)))
 		try:
-			wordlist = keyedlemmata[a][b]
+			wordlist = keyedlemmata[key]
 		except KeyError:
 			wordlist = list()
 
@@ -226,9 +226,9 @@ def offerlemmatahints(query) -> list:
 
 		if qlen > 2:
 			# always true, but what if you changed 'len(term) > 2'?
-			q = a + b + query[2:]
+			q = key + query[2:]
 		else:
-			q = a + b
+			q = key
 		#hintlist = [{'value': w} for w in wordlist if q == stripaccents(w.lower()[0:qlen])]
 		hintlist = [{'value': w} for w in wordlist if q == stripaccents(w[0:qlen])]
 

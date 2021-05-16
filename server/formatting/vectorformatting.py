@@ -102,7 +102,7 @@ def formatnnmatches(listofneighbors: List[tuple], vectorvalues: VectorValues):
 		try:
 			prevalence[w]
 		except KeyError:
-			prevalence[w] = 'unk'
+			prevalence[w] = '--'
 
 	cap = vectorvalues.neighborscap
 	numberofungraphedtodisplay = 10

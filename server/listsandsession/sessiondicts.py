@@ -155,7 +155,7 @@ def buildworkprovenancedict(workdict: dict) -> dict:
 
 
 @timedecorator
-def buildkeyedlemmata(listofentries: dict) -> defaultdict:
+def buildkeyedlemmata(listofentries: list) -> defaultdict:
 	"""
 
 	a list of 140k words is too long to send to 'getlemmahint' without offering quicker access
@@ -169,7 +169,7 @@ def buildkeyedlemmata(listofentries: dict) -> defaultdict:
 	invals = u'jvσς'
 	outvals = u'iuϲϲ'
 
-	keyedlemmata = defaultdict(dict)
+	keyedlemmata = defaultdict(list)
 
 	if track:
 		iterable = track(listofentries, description='building keyedlemmata', transient=True)
@@ -179,16 +179,16 @@ def buildkeyedlemmata(listofentries: dict) -> defaultdict:
 
 	for e in iterable:
 		try:
-			a = stripaccents(e[0].translate(str.maketrans(invals, outvals)))
-			b = stripaccents(e[1].translate(str.maketrans(invals, outvals)))
+			# might IndexError here...
+			bag = e[0:2]
+			key = stripaccents(bag.translate(str.maketrans(invals, outvals)))
 			try:
-				keyedlemmata[a][b].append(e)
+				keyedlemmata[key].append(e)
 			except KeyError:
-				keyedlemmata[a][b] = [e]
+				keyedlemmata[key] = [e]
 		except IndexError:
 			pass
 
-	# print('keyedlemmata[C][a]', keyedlemmata['C']['a'])
 	if track:
 		print('building keyedlemmata', end=str())
 
