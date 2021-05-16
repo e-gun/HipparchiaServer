@@ -112,6 +112,7 @@ def loadlemmataasobjects() -> dict:
 	# print('lemmatadict["molestus"]', lemmatadict['molestus'].formlist)
 	# print('lemmatadict["Mausoleus"]', lemmatadict['Mausoleus'].formlist)
 	# print('lemmatadict["λύω"]', lemmatadict['λύω'].formlist)
+	# print('lemmatadict["Δημοϲθένηϲ"]', lemmatadict['Δημοϲθένηϲ'].formlist)
 
 	dbconnection.connectioncleanup()
 
