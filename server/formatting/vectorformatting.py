@@ -16,7 +16,7 @@ from server.formatting.miscformatting import htmlcommentdecorator
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.hipparchiaobjects.searchobjects import SearchOutputObject, SearchObject
 from server.hipparchiaobjects.vectorobjects import VectorValues
-from server.startup import authordict, workdict
+from server.startup import authordict, workdict, lemmatadict
 
 JSON_STR = str
 
@@ -95,6 +95,28 @@ def formatnnmatches(listofneighbors: List[tuple], vectorvalues: VectorValues):
 		<td class="vectorword"><spance class="small">(not showing {n} {wtw} above the cutoff)</span></td>
 	</tr>
 	"""
+
+	# we don't want a click for "mausoleus" in the output: only "Mausoleus" can be found
+
+	modifiedlist = list()
+	for item in listofneighbors:
+		word = item[0]
+		score = item[1]
+		newtuple = (word, score)
+		try:
+			exceptiontest = lemmatadict[word]
+			pass
+		except KeyError:
+			# print('formatnnmatches() KeyError for {w}'.format(w=word))
+			try:
+				exceptiontest = lemmatadict[word.capitalize()]
+				newtuple = (word.capitalize(), score)
+			except KeyError:
+				# print('formatnnmatches() Double KeyError for {w}'.format(w=word))
+				pass
+		modifiedlist.append(newtuple)
+
+	listofneighbors = modifiedlist
 
 	# prevalence = {word: count for word in results}
 	prevalence = rankheadwordsbyprevalence([w[0] for w in listofneighbors])

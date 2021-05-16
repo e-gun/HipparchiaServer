@@ -91,7 +91,7 @@ def loadlemmataasobjects() -> dict:
 	:return:
 	"""
 
-	print('loading all lemmata...', end='')
+	print('loading all lemmata...', end=str())
 	dbconnection = ConnectionObject()
 	cursor = dbconnection.cursor()
 
@@ -108,8 +108,9 @@ def loadlemmataasobjects() -> dict:
 		results = resultiterator(cursor)
 		lemmatadict = {**{r[0]: dbLemmaObject(*r) for r in results}, **lemmatadict}
 
-	print('\t', len(lemmatadict), 'lemmata loaded', end='')
+	print('\t', len(lemmatadict), 'lemmata loaded', end=str())
 	# print('lemmatadict["molestus"]', lemmatadict['molestus'].formlist)
+	# print('lemmatadict["Mausoleus"]', lemmatadict['Mausoleus'].formlist)
 	# print('lemmatadict["λύω"]', lemmatadict['λύω'].formlist)
 
 	dbconnection.connectioncleanup()
