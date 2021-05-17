@@ -349,7 +349,7 @@ def pythonpipelinewordbagbuilder(so: SearchObject, morphdict, allsentences):
 
     bagsofwords = bagofwordsfunction(morphdict, allsentences)
 
-    debugmessage('pythonpipelinewordbagbuilder() bagsofwords[0:2]:\n\t{b}'.format(b=bagsofwords[0:2]))
+    # debugmessage('pythonpipelinewordbagbuilder() bagsofwords[0:2]:\n\t{b}'.format(b=bagsofwords[0:2]))
 
     return bagsofwords
 

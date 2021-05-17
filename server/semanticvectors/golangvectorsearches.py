@@ -175,12 +175,18 @@ def golangvectors(so: SearchObject) -> JSON_STR:
 
         js = [json.loads(r) for r in redisresults]
         hits = {j['Loc']: j['Sent'] for j in js}
+
         # note that we are about to toss the 'Loc' info that we compiled (and used as a k in k/v pairs...)
         # there are (currently unused) vector styles that can require it
-        bagsofwords = [hits[k].split(' ') for k in hits]
+        bagsofsentences = [hits[k] for k in hits]
+
+        stops = list(mostcommonwordsviaheadwords())
+        bagsofsentences = [removestopwords(s, stops) for s in bagsofsentences]
+
+        bagsofwords = [b.split(' ') for b in bagsofsentences]
 
         # try:
-        #     debugmessage('first bag is {b}'.format(b=bagsofwords[0]))
+        #     debugmessage('10-100th bags are {b}'.format(b=bagsofwords[10:100]))
         #     debugmessage('# of bags is {b}'.format(b=len(bagsofwords)))
         # except IndexError:
         #     debugmessage('you have a problem: there were no bags of words')
