@@ -49,7 +49,6 @@ PostgreSQL  {ps}
 Python      {py}
 Flask       {fl}
 
-Search      {sr}
 WS          {ws}
 Go          {go}
 GoHelper    {gx}
@@ -73,8 +72,7 @@ else:
 
 
 theenvironment = theenvironment.format(pf=platform(), ps=psqlversion, py=pythonversion, fl=flaskversion, ws= ws,
-									   sr=hipparchia.config['SEARCHCODESTYLE'], go=hipparchia.config['GOLANGGRABBER'],
-									   gx=gx, gv=gv)
+									   go=hipparchia.config['GOLANGGRABBER'], gx=gx, gv=gv)
 
 shortversion = hipparchiaserverversion
 gitlength = 5

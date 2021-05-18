@@ -48,11 +48,6 @@
 # INTERMEDIATESEARCHCAP: the maximum number of items to accept in the
 #   middle of a search. This is to keep "'et' near 'at'" from going insane
 #
-# SEARCHCODESTYLE: 'precomposed' is the newer code; 'dynamic' is tried, true
-#   and faster. 'precomposed' will be needed some day for a non-forking version
-#   of Hipparchia. Setting anything other than 'precomposed' will give you
-#   'dynamic'
-#
 # GOLANGGRABBER: this is non-standard; it requires SEARCHCODESTYLE = 'precomposed'
 #   as well as a working redis installation (the latter is not present by
 #   default). If True, your searches will multiprocess by being set through a
@@ -81,9 +76,6 @@ WORKERS = 3
 MPCOMMITCOUNT = 250
 LEMMACHUNKSIZE = 10
 INTERMEDIATESEARCHCAP = 2000000
-
-SEARCHCODESTYLE = 'dynamic'
-# SEARCHCODESTYLE = 'precomposed'
 
 GOLANGGRABBER = False
 GOLANGLOADING = 'cli'

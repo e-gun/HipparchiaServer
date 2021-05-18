@@ -22,7 +22,7 @@ from server.authentication.authenticationwrapper import requireauthentication
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
 from server.searching.precomposedsqlsearching import precomposedsqlsearch
-from server.formatting.miscformatting import validatepollid, debugmessage
+from server.formatting.miscformatting import validatepollid
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds, rewriteskgandprx
 from server.formatting.wordformatting import wordlistintoregex
@@ -33,7 +33,6 @@ from server.listsandsession.searchlistmanagement import calculatewholeauthorsear
 from server.listsandsession.checksession import probeforsessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.commandlineoptions import getcommandlineargs
-from server.searching.dynamicsqlsearchdispatching import dynamicsqlsearchdispatcher
 from server.searching.searchhelperfunctions import buildsearchobject, cleaninitialquery
 from server.startup import authordict, listmapper, progresspolldict, workdict, lemmatadict
 from server.threading.websocketthread import checkforlivewebsocket
@@ -168,14 +167,8 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 		thesearch = so.generatesearchdescription()
 		htmlsearch = so.generatehtmlsearchdescription()
 
-		if commandlineargs.precomposed or hipparchia.config['SEARCHCODESTYLE'] == 'precomposed':
-			debugmessage('precomposedqlsearches() active')
-			dosearch = precomposedsqlsearch
-		else:
-			dosearch = dynamicsqlsearchdispatcher
-
 		# now that the SearchObject is built, do the search...
-		hits = dosearch(so)
+		hits = precomposedsqlsearch(so)
 		so.poll.statusis('Putting the results in context')
 
 		# hits is List[dbWorkLine]

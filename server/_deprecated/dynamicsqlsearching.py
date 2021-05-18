@@ -19,7 +19,7 @@ from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.helperobjects import QueryCombinator
-from server.hipparchiaobjects.searchfunctionobjects import returnsearchfncobject
+from server._deprecated.searchfunctionobjects import returnsearchfncobject
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.genericlistfunctions import flattenlistoflists
@@ -179,6 +179,8 @@ def withinxlines(workdbname: str, searchobject: SearchObject, dbconnection) -> L
 
 def lemmatizedwithinxlines(searchobject: SearchObject, hitlist: List[tuple], dbcursor):
     """
+
+    BROKEN ATM: 1.7.4 (probably most/all of 1.7.x)
 
     the alternate way of doing withinxlines
 

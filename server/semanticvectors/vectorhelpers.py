@@ -25,7 +25,7 @@ from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchObject, SearchOutputObject
 from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
-from server.searching.dynamicsqlsearchdispatching import dynamicsqlsearchdispatcher
+from server.searching.precomposedsqlsearching import precomposedsqlsearch
 from server.searching.searchhelperfunctions import buildbetweenwhereextension
 from server.startup import lemmatadict
 
@@ -474,7 +474,7 @@ def bruteforcefinddblinefromsentence(thissentence, modifiedsearchobject):
 	mso.termone = mso.seeking
 	mso.termtwo = ' '.join(thissentence[-5:])
 	mso.poll = nullpoll
-	hits = dynamicsqlsearchdispatcher(mso)
+	hits = precomposedsqlsearch(mso)
 
 	# if len(hits) > 1:
 	# 	print('findlocusfromsentence() found {h} hits when looking for {s}'.format(h=len(hits), s=mso.seeking))

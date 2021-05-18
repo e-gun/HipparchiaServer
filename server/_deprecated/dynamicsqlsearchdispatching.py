@@ -17,7 +17,7 @@ from server.dbsupport.miscdbfunctions import icanpickleconnections, cleanpoolifn
 from server.dbsupport.redisdbfunctions import buildredissearchlist, loadredisresults
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
-from server.hipparchiaobjects.searchfunctionobjects import returnsearchfncobject
+from server._deprecated.searchfunctionobjects import returnsearchfncobject
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.searching.dynamicsqlsearching import phrasesearch, subqueryphrasesearch, withinxlines, withinxwords, \
