@@ -46,7 +46,7 @@ function displayprogress(searchid, progress){
         if (r !== undefined && t !== undefined && !isNaN(pct)) {
             let e = Math.round((new Date().getTime() / 1000) - l);
 
-            if (t !== -1) {
+            if (t !== -1 && pct < 100) {
                 thehtml += m + ': <span class="progress">' + pct + '%</span> completed&nbsp;(' + e + 's)';
             } else {
                 thehtml += m + '&nbsp;(' + e + 's)';
