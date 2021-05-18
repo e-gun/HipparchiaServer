@@ -9,7 +9,7 @@
 import json
 
 from server import hipparchia
-from server.dbsupport.redisdbfunctions import establishredisconnection
+from server.dbsupport.redisdbfunctions import establishredisconnection, mutiredisfetch
 from server.dbsupport.vectordbfunctions import checkforstoredvector
 from server.formatting.miscformatting import consolewarning, debugmessage
 from server.formatting.vectorformatting import ldatopicsgenerateoutput
@@ -21,7 +21,7 @@ from server.searching.searchhelperfunctions import genericgolangcliexecution
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.modelbuilders import buildgensimmodel, buildsklearnselectedworks, \
     gensimgenerateanalogies
-from server.semanticvectors.vectorhelpers import mostcommonwordsviaheadwords, removestopwords, mutiredisfetch
+from server.semanticvectors.vectorhelpers import mostcommonwordsviaheadwords, removestopwords
 from server.semanticvectors.vectorpipeline import checkneedtoabort
 
 try:
@@ -165,15 +165,7 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         debugmessage('golangvectors() reports that the vectorresultskey = {r}'.format(r=vectorresultskey))
         debugmessage('fetching search from "{r}"'.format(r=vectorresultskey))
 
-        redisresults = list()
-        while vectorresultskey:
-            r = rc.spop(vectorresultskey)
-            if r:
-                redisresults.append(r)
-            else:
-                vectorresultskey = None
-
-        # redisresults = mutiredisfetch(vectorresultskey)
+        redisresults = mutiredisfetch(vectorresultskey)
         debugmessage('fetched {r} bags'.format(r=len(redisresults)))
 
         js = [json.loads(r) for r in redisresults]

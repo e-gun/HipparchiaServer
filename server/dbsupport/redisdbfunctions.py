@@ -7,7 +7,7 @@
 """
 
 import pickle
-from multiprocessing import current_process
+from multiprocessing import current_process, Queue, Process
 from typing import List
 
 from click import secho
@@ -134,6 +134,53 @@ def loadredisresults(searchid):
 	# foundlineobjects = [dblineintolineobject(pickle.loads(f)) for f in finds]
 	foundlineobjects = [pickle.loads(f) for f in finds]
 	return foundlineobjects
+
+
+def mutiredisfetch(vectorresultskey):
+	"""
+
+	parallelize redis fetching
+
+	"""
+	q = Queue()
+	processes = list()
+	results = list()
+	for _ in range(0, hipparchia.config['WORKERS']):
+		p = Process(target=redisfetch, args=(vectorresultskey, q))
+		processes.append(p)
+		p.start()
+	for _ in processes:
+		oneresult = q.get()  # will block
+		results.append(oneresult)
+	for p in processes:
+		p.join()
+
+	compositeresults = list()
+	for r in results:
+		compositeresults.extend(r)
+
+	return compositeresults
+
+
+def redisfetch(vectorresultskey, queue):
+	"""
+
+	generic fetcher to be used with mutiredisfetch()
+
+	"""
+	rc = establishredisconnection()
+	redisresults = list()
+
+	while vectorresultskey:
+		r = rc.spop(vectorresultskey)
+		if r:
+			redisresults.append(r)
+		else:
+			vectorresultskey = None
+
+	queue.put(redisresults)
+	return
+
 
 
 """

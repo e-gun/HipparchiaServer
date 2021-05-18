@@ -12,7 +12,7 @@ from os import path
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.redisdbfunctions import establishredisconnection
+from server.dbsupport.redisdbfunctions import establishredisconnection, mutiredisfetch
 from server.formatting.miscformatting import debugmessage, consolewarning
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
@@ -88,14 +88,16 @@ def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
     else:
         resultrediskey = golangclibinarysearcher(so)
 
-    redisresults = list()
+    # redisresults = list()
+    #
+    # while resultrediskey:
+    #     r = rc.spop(resultrediskey)
+    #     if r:
+    #         redisresults.append(r)
+    #     else:
+    #         resultrediskey = None
 
-    while resultrediskey:
-        r = rc.spop(resultrediskey)
-        if r:
-            redisresults.append(r)
-        else:
-            resultrediskey = None
+    redisresults = mutiredisfetch(resultrediskey)
 
     hits = [redishitintodbworkline(r) for r in redisresults]
 

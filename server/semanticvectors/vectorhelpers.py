@@ -8,7 +8,6 @@
 import json
 import re
 import time
-from multiprocessing import Process, Queue
 from string import punctuation
 from typing import List
 
@@ -18,7 +17,6 @@ from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, grabonelinefromwork, worklinetemplate
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, querytotalwordcounts
 from server.dbsupport.miscdbfunctions import resultiterator
-from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import acuteorgrav, basiclemmacleanup, elidedextrapunct, removegravity, tidyupterm
@@ -1000,49 +998,3 @@ def emptyvectoroutput(searchobject, reasons=None):
 	jsonoutput = json.dumps(output.generateoutput())
 
 	return jsonoutput
-
-
-def mutiredisfetch(vectorresultskey):
-	"""
-
-	parallelize redis fetching
-
-	"""
-	q = Queue()
-	processes = list()
-	results = list()
-	for _ in range(0, hipparchia.config['WORKERS']):
-		p = Process(target=redisfetch, args=(vectorresultskey, q))
-		processes.append(p)
-		p.start()
-	for _ in processes:
-		oneresult = q.get()  # will block
-		results.append(oneresult)
-	for p in processes:
-		p.join()
-
-	compositeresults = list()
-	for r in results:
-		compositeresults.extend(r)
-
-	return compositeresults
-
-
-def redisfetch(vectorresultskey, queue):
-	"""
-
-	generic fetcher to be used with mutiredisfetch()
-
-	"""
-	rc = establishredisconnection()
-	redisresults = list()
-
-	while vectorresultskey:
-		r = rc.spop(vectorresultskey)
-		if r:
-			redisresults.append(r)
-		else:
-			vectorresultskey = None
-
-	queue.put(redisresults)
-	return
