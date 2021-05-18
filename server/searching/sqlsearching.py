@@ -16,14 +16,14 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
-from server.searching.precomposedsearchpythoninterface import precomposedsqlsearchmanager
+from server.searching.searchpythoninterface import precomposedsqlsearchmanager
 from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
     perparesoforsecondsqldict
 from server.searching.searchhelperfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging, \
     findleastcommonterm
 
 try:
-    from server.searching.precomposedsearchgolanginterface import gosearch, precomposedgolangsearcher
+    from server.searching.searchgolanginterface import gosearch, precomposedgolangsearcher
     from server.golangmodule import hipparchiagolangsearching as gosearch
 except ImportError as e:
     debugmessage('golang search module unavailable:\n\t"{e}"'.format(e=e))

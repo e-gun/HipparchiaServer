@@ -21,7 +21,7 @@ from server import hipparchia
 from server.authentication.authenticationwrapper import requireauthentication
 from server.formatting.bracketformatting import gtltsubstitutes
 from server.formatting.jsformatting import insertbrowserclickjs
-from server.searching.precomposedsqlsearching import precomposedsqlsearch
+from server.searching.sqlsearching import precomposedsqlsearch
 from server.formatting.miscformatting import validatepollid
 from server.formatting.searchformatting import buildresultobjects, flagsearchterms, htmlifysearchfinds, \
 	nocontexthtmlifysearchfinds, rewriteskgandprx

@@ -25,7 +25,7 @@ from server.hipparchiaobjects.progresspoll import ProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchObject, SearchOutputObject
 from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
-from server.searching.precomposedsqlsearching import precomposedsqlsearch
+from server.searching.sqlsearching import precomposedsqlsearch
 from server.searching.searchhelperfunctions import buildbetweenwhereextension
 from server.startup import lemmatadict
 

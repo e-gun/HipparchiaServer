@@ -14,7 +14,7 @@ from server.formatting.miscformatting import debugmessage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
-from server.searching.precomposedsqlsearching import generatepreliminaryhitlist
+from server.searching.sqlsearching import generatepreliminaryhitlist
 from server.searching.searchhelperfunctions import lookoutsideoftheline
 
 

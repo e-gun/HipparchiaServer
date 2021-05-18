@@ -22,7 +22,7 @@ from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.genericlistfunctions import findsetofallwords
 from server.listsandsession.searchlistmanagement import compilesearchlist
 from server.routes.searchroute import updatesearchlistandsearchobject
-from server.searching.precomposedsqlsearching import basicprecomposedsqlsearcher
+from server.searching.sqlsearching import basicprecomposedsqlsearcher
 from server.searching.precomposesql import searchlistintosqldict
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.modelbuilders import buildgensimmodel, buildsklearnselectedworks, \
@@ -111,6 +111,9 @@ def pythonvectors(so: SearchObject) -> JSON_STR:
     # calculatewholeauthorsearches() + configurewhereclausedata()
     so = updatesearchlistandsearchobject(so)
     so.setsearchlistthumbprint()
+    so.poll.allworkis(-1)  # this turns off the % completed notice in the JS
+    so.poll.sethits(0)
+
     themodel = checkforstoredvector(so)
 
     if not themodel:

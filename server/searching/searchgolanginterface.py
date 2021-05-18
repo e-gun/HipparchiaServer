@@ -17,7 +17,7 @@ from server.formatting.miscformatting import debugmessage, consolewarning
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.searching.precomposesql import rewritesqlsearchdictforgolang
-from server.searching.precomposedsearchpythoninterface import precomposedsqlsearchmanager
+from server.searching.searchpythoninterface import precomposedsqlsearchmanager
 from server.searching.searchhelperfunctions import redishitintodbworkline, formatgolanggrabberarguments, \
     genericgolangcliexecution
 from server.threading.mpthreadcount import setthreadcount
