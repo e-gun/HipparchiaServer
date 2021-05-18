@@ -21,7 +21,7 @@ from server.searching.searchhelperfunctions import genericgolangcliexecution
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.modelbuilders import buildgensimmodel, buildsklearnselectedworks, \
     gensimgenerateanalogies
-from server.semanticvectors.vectorhelpers import mostcommonwordsviaheadwords, removestopwords
+from server.semanticvectors.vectorhelpers import mostcommonwordsviaheadwords, removestopwords, mutiredisfetch
 from server.semanticvectors.vectorpipeline import checkneedtoabort
 
 try:
@@ -172,6 +172,9 @@ def golangvectors(so: SearchObject) -> JSON_STR:
                 redisresults.append(r)
             else:
                 vectorresultskey = None
+
+        # redisresults = mutiredisfetch(vectorresultskey)
+        debugmessage('fetched {r} bags'.format(r=len(redisresults)))
 
         js = [json.loads(r) for r in redisresults]
         hits = {j['Loc']: j['Sent'] for j in js}

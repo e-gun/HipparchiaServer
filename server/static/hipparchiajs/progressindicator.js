@@ -40,9 +40,9 @@ function displayprogress(searchid, progress){
     let a = progress['Activity'];
 
     // let thehtml = '[' + id + '] ';
-    let thehtml = '';
 
     if (id === searchid) {
+        let thehtml = '';
         if (r !== undefined && t !== undefined && !isNaN(pct)) {
             let e = Math.round((new Date().getTime() / 1000) - l);
 
@@ -58,6 +58,6 @@ function displayprogress(searchid, progress){
 
             thehtml += '<br />' + x;
         }
+        $('#pollingdata').html(thehtml);
     }
-   $('#pollingdata').html(thehtml);
 }

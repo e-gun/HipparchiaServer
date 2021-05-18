@@ -458,26 +458,25 @@ def morphologychartjs() -> str:
 			let a = progress['Activity'];
 		
 			// let thehtml = '[' + id + ' activity =' + a +'] ';
-			let thehtml = '';
-		
 			if (id === searchid) {
+				let thehtml = '';
 				if (r !== undefined && t !== undefined && !isNaN(pct)) {
 					let e = Math.round((new Date().getTime() / 1000) - l);
-		
+			
 					if (t !== -1) {
 						thehtml += m + ': <span class="progress">' + pct + '%</span> completed&nbsp;(' + e + 's)';
 					} else {
 						thehtml += m + '&nbsp;(' + e + 's)';
 					}
-		
+			
 					if (h > 0) {
 						thehtml += '<br />(<span class="progress">' + h + '</span> found)';
 					}
-		
+			
 					thehtml += '<br />' + x;
 				}
+				$('#pollingdata').html(thehtml);
 			}
-		$('#pollingdata').html(thehtml);
 		}
 
 	</script>    
