@@ -179,7 +179,7 @@ def infogetter(fnc: str, one=None, two=None, three=None) -> JSON_STR:
 
 	one = depunct(one)
 	two = depunct(two)
-	three = depunct(three)
+	three = depunct(three, allowedpunctuationsting='.|')
 
 	knownfunctions = {'sessionvariables':
 							{'fnc': getsessionvariables, 'param': None},
