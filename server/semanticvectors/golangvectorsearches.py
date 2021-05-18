@@ -180,8 +180,9 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         # there are (currently unused) vector styles that can require it
         bagsofsentences = [hits[k] for k in hits]
 
-        stops = list(mostcommonwordsviaheadwords())
-        bagsofsentences = [removestopwords(s, stops) for s in bagsofsentences]
+        # do this inside the module...
+        # stops = list(mostcommonwordsviaheadwords())
+        # bagsofsentences = [removestopwords(s, stops) for s in bagsofsentences]
 
         bagsofwords = [b.split(' ') for b in bagsofsentences]
 
