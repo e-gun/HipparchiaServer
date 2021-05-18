@@ -14,7 +14,7 @@ stable = True
 release = True
 prerelease = False
 
-hipparchiaserverversion = '1.7.3'
+hipparchiaserverversion = '1.7.4'
 plus = '+'
 supplement = '[DEVEL]'
 pre = '-pre'

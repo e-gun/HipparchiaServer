@@ -506,7 +506,7 @@ def depunct(stringtoclean: str, allowedpunctuationsting=None) -> str:
 		badpunct = str().join(badpunct)
 	badpunct = r'[{np}]'.format(np=re.escape(badpunct))
 
-	cleaned = re.sub(badpunct, '', stringtoclean)
+	cleaned = re.sub(badpunct, str(), stringtoclean)
 
 	return cleaned
 

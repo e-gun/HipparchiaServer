@@ -116,7 +116,7 @@ def golangvectors(so: SearchObject) -> JSON_STR:
 
     abortjson = checkneedtoabort(so)
     if abortjson:
-        del so.poll
+        so.poll.deleteredispoll()
         return abortjson
 
     # [ii] do we actually have a model stored already?

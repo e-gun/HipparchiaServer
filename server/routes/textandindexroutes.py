@@ -57,9 +57,9 @@ def textgetter(action: str, one=None, two=None, three=None, four=None, five=None
 
 	one = depunct(one)
 	two = depunct(two)
-	three = depunct(three, allowedpunctuationsting='.')
-	four = depunct(four, allowedpunctuationsting='.')
-	five = depunct(five, allowedpunctuationsting='.')
+	three = depunct(three, allowedpunctuationsting='.|')
+	four = depunct(four, allowedpunctuationsting='.|')
+	five = depunct(five, allowedpunctuationsting='.|')
 
 	knownfunctions = {'index':
 							{'fnc': buildindexto, 'param': [one, two, three, four, five]},
@@ -410,6 +410,8 @@ def textmaker(author: str, work=None, passage=None, endpoint=None, citationdelim
 	wo = po.workobject
 
 	segmenttext = str()
+
+	# consolewarning('po.passageaslist: {p}'.format(p=po.passageaslist))
 
 	if ao and wo:
 		# we have both an author and a work, maybe we also have a subset of the work
