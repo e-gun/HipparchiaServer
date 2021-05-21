@@ -28,11 +28,9 @@ from server.threading.mpthreadcount import setthreadcount
 def precomposedsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
     """
 
-    quick and dirty dispatcher: not polished
+    quick and dirty dispatcher
 
     note that you need so.searchsqldict to be properly configured before you get here
-
-    fix this up last...
 
     """
 
@@ -90,8 +88,6 @@ def workonprecomposedsqlsearch(workerid: int, foundlineobjects: ListProxy, listo
 
     """
 
-    # if workerid == 0:
-    #     print('{w} - listofplacestosearch'.format(w=workerid), listofplacestosearch)
     so = searchobject
     activepoll = so.poll
     dbconnection.setreadonly(False)

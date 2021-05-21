@@ -88,15 +88,6 @@ def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
     else:
         resultrediskey = golangclibinarysearcher(so)
 
-    # redisresults = list()
-    #
-    # while resultrediskey:
-    #     r = rc.spop(resultrediskey)
-    #     if r:
-    #         redisresults.append(r)
-    #     else:
-    #         resultrediskey = None
-
     redisresults = mutiredisfetch(resultrediskey)
 
     hits = [redishitintodbworkline(r) for r in redisresults]

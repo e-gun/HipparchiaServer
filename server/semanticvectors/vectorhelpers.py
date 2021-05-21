@@ -737,35 +737,9 @@ def mostcommonheadwords(cheat=True) -> set:
 		# this is what you will get if you calculate
 		# since it tends not to change, you can cheat unless/until you modify
 		# either the dictionaries or wordswecareabout or the cutoff...
-		wordstoskip = {'omne', 'νωδόϲ', 'aut', 'eccere', 'quin', 'tu', 'ambi',
-			'fue', 'hau¹', 'ἠμέν', 'eu', 'διό', 'πρόϲ', 'μέχριπερ', 'αὐτόϲ',
-			'περί', 'ἀτάρ', 'ὄφρα', 'ῥά¹', 'πω²', 'cata', 'apage', 'τίϲ',
-			'per1', 'ne³', 'αὐτοῦ', 'ἕ', 'de²', 'chaere', 'ἄν²', 'ἤ¹', 'euoe',
-			'for', 'neque', 'εἶἑν', 'b', 'ab', 'vaha', 'ἐπί²', 'ὅτι', 'Juno',
-			'euhoe', 'sum¹', 'au', 'μένω', 'sine', 'oho', 'sui', 'ὡϲ', 'ehem',
-			'istic¹', 'τοι¹', 'pro²', 'ἤ²', 'io¹', 'τήιοϲ', 'em³', 'ohe',
-			'abusque', 'ἆρα²', 'alius²', 'μέϲφι', 'atque', 'fu', 'em²', 'γοῦν',
-			'proh', 'ἔτι', 'cis', 'vel', 'παι', 'bombax', 'τίη', 'πηρόϲ',
-			'babae', 'en', 'edo¹', 'θην', 'δέ', 'si', 'ai¹', 'in', 'γάρον',
-			'ἐάν', 'heia', 'οὐδείϲ', 'hui', 'eho', 'quis¹', 'οὐ', 'τῇ',
-			'alleluja', 'κατά¹', 'οὗτοϲ', 'καί', 'huc', 'tatae', 'heus!', 'ad',
-			'non', 'ille', 'verus', 'κατά', 'γίγνομαι', 'ἄν¹', 'ζεύϲ', 'ἄνω¹',
-			'ὁτιή', 'ἐν', 'πῃ', 'δέ¹', 'cum', 'γάροϲ', 'μετά', 'ἐκάϲ', 'ἀλλά',
-			'hallelujah', 'eheu', 'ἐξέτι', 'incircum', 'mu', 'eo¹', 'προϲάμβ',
-			'a', 'praeterpropter', 'et', 'qui¹', 'tat', 'evax', 'venio',
-			'ὅϲτιϲ', 'penes', 'νή²', 'εἰϲ', 'παρά', 'γάρ', 'ἀμφί', 'ἤγουν',
-			'oh', 'ἰδέ¹', 'trans', 'idem', 'ἐπάν', 'o²', 'ἐκ', 'ὅϲ', 'ito',
-			'res', 'ἀνά', 'ἠτε', 'tenus²', 'τοίνυν', 'ἐπί', 'papae', 'ἄτερ',
-			'atat', 'verum', 'τιϲ', 'ἀπέκ', 'st', 'heu!', 'ah', 'εἰ', 'εἰμί',
-			'πᾶϲ', 'buttuti', 'am', 'a²', 'hem', 'τοιγάρ', 'ἄλλοϲ', 'cum¹',
-			'οὖν', 'ambe', 'μή', 'vah', 'is', 'οὐ²', 'ὑπέκ', 'hic', 'sub', 'τε',
-			'μήν¹', 'μά¹', 'καὶ¹', 'ἐρι²', 'οὕτωϲ', 'euax', 'ὑπό', 'ipse',
-			'an¹', 'quam', 'vae', 'Q', 'ἄνα', 'τε¹', 'de', 'prior', 'magnus',
-			'phu²', 'προπάροιθε', 'hehae', 'eia', 'oiei', 'εἰ¹', 'uls', 'aha',
-			'in¹', 'Pollux', 'abs', 'πλήν', 'δή¹', 'ce', 'ὅτι¹', 'μέν', 'sed',
-			'ἀπό', 'θωρακοί', 'hei', 'τῷ', 'πότε', 'ego', 'ha!', 'a³', 'prox',
-			'pol', 'ex', 'ei²', 'dudum', 'διά', 'ὁ', 'ut', 'ὅτι²', 'phy', 'fi¹',
-			'ἐπεί¹', 'ἐγώ', 'ϲύ', 'ϲύν', 'euge', 'ho!', 'ὁΐ', 'oi', 'γε', 'ἡμόϲ'}
+		l = set(hwlat100) - keeplatin
+		g = set(hwgrk150) - keepgreek
+		wordstoskip = l.union(g)
 	else:
 		wordswecareabout = {
 			'facio', 'possum', 'video', 'dico²', 'vaco', 'volo¹', 'habeo', 'do', 'vis',
@@ -785,7 +759,7 @@ def mostcommonheadwords(cheat=True) -> set:
 
 		# grab the raw data: a greek query and a latin query
 		# note that different limits have been set for each language
-		for gl in {('', 50), ('^', 75)}:
+		for gl in {('', 75), ('^', 100)}:
 			yesorno = gl[0]
 			lim = gl[1]
 			dbcursor.execute(qtemplate.format(yesorno=yesorno, lim=lim))
@@ -998,3 +972,47 @@ def emptyvectoroutput(searchobject, reasons=None):
 	jsonoutput = json.dumps(output.generateoutput())
 
 	return jsonoutput
+
+
+"""
+
+CHEAT SKIPWORD BLOCKS
+
+"""
+
+hwlat100 = ['qui¹', 'et', 'in', 'edo¹', 'is', 'sum¹', 'hic', 'non', 'ab', 'ut', 'Cos²', 'si', 'ad', 'cum', 'ex', 'a', 'eo¹',
+	  'ego', 'quis¹', 'tu', 'Eos', 'dico²', 'ille', 'sed', 'de', 'neque', 'facio', 'possum', 'atque', 'sui', 'res',
+	  'quam', 'aut', 'ipse', 'huc', 'habeo', 'do', 'omne', 'video', 'ito', 'magnus', 'b', 'alius²', 'for', 'idem',
+	  'suum', 'etiam', 'per', 'enim', 'omnes', 'ita', 'suus', 'omnis', 'autem', 'vel', 'vel', 'Alius¹', 'qui²', 'quo',
+	  'nam', 'bonus', 'neo¹', 'meus', 'volo¹', 'ne³', 'ne¹', 'suo', 'verus', 'pars', 'reor', 'sua', 'vaco', 'verum',
+	  'primus', 'unus', 'multus', 'causa', 'jam', 'tamen', 'Sue', 'nos', 'dies', 'Ios', 'modus', 'tuus', 'venio',
+	  'pro¹', 'pro²', 'ago', 'deus', 'annus', 'locus', 'homo', 'pater', 'eo²', 'tantus', 'fero', 'quidem', 'noster',
+	  'an', 'locum']
+
+hwgrk150 = ['ὁ', 'καί', 'τίϲ', 'ἔδω', 'δέ', 'εἰμί', 'δέω¹', 'δεῖ', 'δέομαι', 'εἰϲ', 'αὐτόϲ', 'τιϲ', 'οὗτοϲ', 'ἐν',
+			'γάροϲ', 'γάρον', 'γάρ', 'οὐ', 'μένω', 'μέν', 'τῷ', 'ἐγώ', 'ἡμόϲ', 'κατά', 'Ζεύϲ', 'ἐπί', 'ὡϲ', 'διά',
+			'πρόϲ', 'προϲάμβ', 'τε', 'πᾶϲ', 'ἐκ', 'ἕ', 'ϲύ', 'Ἀλλά', 'γίγνομαι', 'ἁμόϲ', 'ὅϲτιϲ', 'ἤ¹', 'ἤ²', 'ἔχω',
+			'ὅϲ', 'μή', 'ὅτι¹', 'λέγω¹', 'ὅτι²', 'τῇ', 'Τήιοϲ', 'ἀπό', 'εἰ', 'περί', 'ἐάν', 'θεόϲ', 'φημί', 'ἐκάϲ',
+			'ἄν¹', 'ἄνω¹', 'ἄλλοϲ', 'qui¹', 'πηρόϲ', 'παρά', 'ἀνά', 'αὐτοῦ', 'ποιέω', 'ἄναξ', 'ἄνα', 'ἄν²', 'πολύϲ',
+			'οὖν', 'λόγοϲ', 'οὕτωϲ', 'μετά', 'ἔτι', 'ὑπό', 'ἑαυτοῦ', 'ἐκεῖνοϲ', 'εἶπον', 'πρότεροϲ', 'edo¹', 'μέγαϲ',
+			'ἵημι', 'εἷϲ', 'οὐδόϲ', 'οὐδέ', 'ἄνθρωποϲ', 'ἠμί', 'μόνοϲ', 'κύριοϲ', 'διό', 'οὐδείϲ', 'ἐπεί', 'πόλιϲ',
+			'τοιοῦτοϲ', 'χάω', 'καθά', 'θεάομαι', 'γε', 'ἕτεροϲ', 'δοκέω', 'λαμβάνω', 'δή', 'δίδωμι', 'ἵνα',
+			'βαϲιλεύϲ', 'φύϲιϲ', 'ἔτοϲ', 'πατήρ', 'ϲῶμα', 'καλέω', 'ἐρῶ', 'υἱόϲ', 'ὅϲοϲ', 'γαῖα', 'οὔτε', 'οἷοϲ',
+			'ἀνήρ', 'ὁράω', 'ψυχή', 'Ἔχιϲ', 'ὥϲπερ', 'αὐτόϲε', 'χέω', 'ὑπέρ', 'ϲόϲ', 'θεάω', 'νῦν', 'ἐμόϲ', 'δύναμαι',
+			'φύω', 'πάλιν', 'ὅλοξ', 'ἀρχή', 'καλόϲ', 'δύναμιϲ', 'πωϲ', 'δύο', 'ἀγαθόϲ', 'οἶδα', 'δείκνυμι', 'χρόνοϲ',
+			'ὅμοιοϲ', 'ἕκαϲτοϲ', 'ὁμοῖοϲ', 'ὥϲτε', 'ἡμέρα', 'γράφω', 'δραχμή', 'μέροϲ']
+
+keeplatin = {'facio', 'possum', 'habeo', 'video', 'magnus', 'bonus', 'volo¹', 'primus', 'venio', 'ago', 'deus', 'annus',
+			 'locus', 'pater', 'fero'}
+
+keepgreek = {'ἔχω', 'λέγω¹', 'θεόϲ', 'φημί', 'ποιέω', 'ἵημι', 'μόνοϲ', 'κύριοϲ', 'πόλιϲ', 'θεάομαι', 'δοκέω', 'λαμβάνω',
+			 'δίδωμι', 'βαϲιλεύϲ', 'φύϲιϲ', 'ἔτοϲ', 'πατήρ', 'ϲῶμα', 'καλέω', 'ἐρῶ', 'υἱόϲ', 'γαῖα', 'ἀνήρ', 'ὁράω',
+			 'ψυχή', 'δύναμαι', 'ἀρχή', 'καλόϲ', 'δύναμιϲ', 'ἀγαθόϲ', 'οἶδα', 'δείκνυμι', 'χρόνοϲ', 'γράφω', 'δραχμή',
+			 'μέροϲ'}
+
+# golang might want to know this...
+
+# l = set(hwlat100) - keeplatin
+# g = set(hwgrk150) - keepgreek
+# wordstoskip = l.union(g)
+# ws = ' '.join([w for w in wordstoskip])

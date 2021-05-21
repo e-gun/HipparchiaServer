@@ -142,10 +142,13 @@ def mutiredisfetch(vectorresultskey):
 	parallelize redis fetching
 
 	"""
+
+	workers = setthreadcount()
+
 	q = Queue()
 	processes = list()
 	results = list()
-	for _ in range(0, hipparchia.config['WORKERS']):
+	for _ in range(workers):
 		p = Process(target=redisfetch, args=(vectorresultskey, q))
 		processes.append(p)
 		p.start()
@@ -179,6 +182,7 @@ def redisfetch(vectorresultskey, queue):
 			vectorresultskey = None
 
 	queue.put(redisresults)
+
 	return
 
 
