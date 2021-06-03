@@ -16,14 +16,14 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
-from server.searching.searchpythoninterface import precomposedsqlsearchmanager
+from server.searching.searchviapythoninterface import precomposedsqlsearchmanager
 from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
     perparesoforsecondsqldict
-from server.searching.searchhelperfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging, \
+from server.searching.miscsearchfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging, \
     findleastcommonterm
 
 try:
-    from server.searching.searchgolanginterface import gosearch, precomposedgolangsearcher
+    from server.searching.searchviahelperinterface import gosearch, precomposedexternalsearcher
     from server.golangmodule import hipparchiagolangsearching as gosearch
 except ImportError as e:
     debugmessage('golang search module unavailable:\n\t"{e}"'.format(e=e))
@@ -126,14 +126,14 @@ def basicprecomposedsqlsearcher(so: SearchObject, themanager=None) -> List[dbWor
     """
 
     if not themanager:
-        usesharedlibrary = hipparchia.config['GOLANGGRABBER']
+        usesharedlibrary = hipparchia.config['EXTERNALGRABBER']
 
         if not usesharedlibrary:
             debugmessage('dispatching via precomposedsqlsearchmanager()')
             themanager = precomposedsqlsearchmanager
         else:
             debugmessage('dispatching via precomposedgolangsearcher()')
-            themanager = precomposedgolangsearcher
+            themanager = precomposedexternalsearcher
 
     hits = themanager(so)
 

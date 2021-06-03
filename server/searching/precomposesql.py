@@ -16,7 +16,7 @@ from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.whereclauses import wholeworktemptablecontents
-from server.searching.searchhelperfunctions import buildbetweenwhereextension
+from server.searching.miscsearchfunctions import buildbetweenwhereextension
 
 
 def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphrasesearch=False, vectors=False) -> dict:

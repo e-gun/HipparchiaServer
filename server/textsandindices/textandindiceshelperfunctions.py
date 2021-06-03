@@ -19,7 +19,7 @@ from server.dbsupport.lexicaldbfunctions import lookformorphologymatches
 from server.dbsupport.miscdbfunctions import icanpickleconnections
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
-from server.searching.searchhelperfunctions import atsignwhereclauses
+from server.searching.miscsearchfunctions import atsignwhereclauses
 from server.threading.mpthreadcount import setthreadcount
 
 

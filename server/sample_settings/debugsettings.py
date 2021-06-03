@@ -12,11 +12,6 @@
 # CONSOLEWARNINGTYPES is a list of colors; if your message color is not on the list, it will not be seen
 #   valid values need to be in miscformatting.py and consolewarning().
 #
-# GOLANGCLILOGLEVEL and GOLANGMODLOGLEVEL set the logging level threshold for the golang code: 0 is silent;
-#   4 is very noisy. The cli messages are caught as 'black' CONSOLEWARNINGTYPES; the module messages cannot be
-#   kept out of the console. GOLANGWSSLOGLEVEL is for the golang websocket server; not going to be easy to debug
-#   via HipparchiaServer; see note NOTES in HipparchiaGolangModule for a python shell route
-#
 # DBDEBUGMODE and HTMLDEBUGMODE will show DB locations of hits and/or
 # 	the raw HTML markup inside the DB there are no security
 # 	implications here; these can only be set at launch; any changes
@@ -58,10 +53,6 @@ SUPPRESSWARNINGS = True
 # Currently we know about: ['red', 'yellow', 'green', 'cyan', 'magenta', 'black']
 # the last two are only of interest if you are debugging
 CONSOLEWARNINGTYPES = ['red', 'yellow', 'green', 'cyan']
-GOLANGCLILOGLEVEL = 0
-GOLANGMODLOGLEVEL = 0
-GOLANGWSSLOGLEVEL = 0
-GOLANGVECTORLOGLEVEL = 0
 
 ENABLELOGGING = False
 HIPPARCHIALOGFILE = '../HipparchiaData/hipparchia_access.log'

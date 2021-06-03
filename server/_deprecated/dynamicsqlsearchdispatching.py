@@ -22,7 +22,7 @@ from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.searching.dynamicsqlsearching import phrasesearch, subqueryphrasesearch, withinxlines, withinxwords, \
 	substringsearch
-from server.searching.searchhelperfunctions import findleastcommonterm, findleastcommontermcount, loadsearchqueue, \
+from server.searching.miscsearchfunctions import findleastcommonterm, findleastcommontermcount, loadsearchqueue, \
 	massagesearchtermsforwhitespace
 from server.threading.mpthreadcount import setthreadcount
 

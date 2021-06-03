@@ -7,8 +7,6 @@
 """
 
 import json
-import subprocess
-from os import path
 from typing import List
 
 from server import hipparchia
@@ -16,10 +14,10 @@ from server.dbsupport.redisdbfunctions import establishredisconnection, mutiredi
 from server.formatting.miscformatting import debugmessage, consolewarning
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
+from server.searching.miscsearchfunctions import redishitintodbworkline, formatexternalgrabberarguments, \
+    genericexternalcliexecution, haveexternalhelper, getexternalhelperpath
 from server.searching.precomposesql import rewritesqlsearchdictforgolang
-from server.searching.searchpythoninterface import precomposedsqlsearchmanager
-from server.searching.searchhelperfunctions import redishitintodbworkline, formatgolanggrabberarguments, \
-    genericgolangcliexecution
+from server.searching.searchviapythoninterface import precomposedsqlsearchmanager
 from server.threading.mpthreadcount import setthreadcount
 
 gosearch = None
@@ -50,7 +48,7 @@ except redis.exceptions.ConnectionError:
     canuseredis = False
 
 
-def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
+def precomposedexternalsearcher(so: SearchObject) -> List[dbWorkLine]:
     """
 
     you are using golang to do the search
@@ -66,10 +64,13 @@ def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
 
     """
 
-    warning = 'attempted to search via golang but {x} is not available using precomposedsqlsearchmanager() instead'
+    warning = 'attempted to search via external helper but {x} is not available using precomposedsqlsearchmanager() instead'
 
-    if not gosearch:
-        consolewarning(warning.format(x='golang'), color='red')
+    if not gosearch or not haveexternalhelper(getexternalhelperpath()):
+        x = 'the external module'
+        if not haveexternalhelper(getexternalhelperpath()):
+            x = hipparchia.config['EXTERNALBINARYNAME']
+        consolewarning(warning.format(x=x), color='red')
         return precomposedsqlsearchmanager(so)
 
     if not canuseredis:
@@ -83,8 +84,12 @@ def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
     for s in so.searchsqldict:
         rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
 
-    if hipparchia.config['GOLANGLOADING'] != 'cli':
-        resultrediskey = golangsharedlibrarysearcher(so)
+    # if 1 > 0:
+    #     consolewarning('precomposedgolangsearcher() merely stored the search in redis and did not execute it')
+    #     return list()
+
+    if not hipparchia.config['GRABBERCALLEDVIACLI']:
+        resultrediskey = helpersharedlibrarysearcher(so)
     else:
         resultrediskey = golangclibinarysearcher(so)
 
@@ -106,15 +111,15 @@ def golangclibinarysearcher(so: SearchObject) -> str:
 
     """
 
-    debugmessage('calling {e}'.format(e=hipparchia.config['GOLANGCLIBINARYNAME']))
+    debugmessage('calling {e}'.format(e=hipparchia.config['EXTERNALBINARYNAME']))
 
-    return genericgolangcliexecution(hipparchia.config['GOLANGCLIBINARYNAME'], formatgolanggrabberarguments, so)
+    return genericexternalcliexecution(hipparchia.config['EXTERNALBINARYNAME'], formatexternalgrabberarguments, so)
 
 
-def golangsharedlibrarysearcher(so: SearchObject) -> str:
+def helpersharedlibrarysearcher(so: SearchObject) -> str:
     """
 
-    use the shared library to do the golang search
+    use the external shared library to do the search
 
     at the moment the progress polls will not update; it seems that the module locks python up
 
@@ -128,9 +133,9 @@ def golangsharedlibrarysearcher(so: SearchObject) -> str:
 
     """
 
-    debugmessage('calling golang via the golang module')
+    debugmessage('calling the helper via the external module')
     searcher = gosearch.HipparchiaGolangSearcher
-    resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), hipparchia.config['GOLANGMODLOGLEVEL'],
+    resultrediskey = searcher(so.searchid, so.cap, setthreadcount(), hipparchia.config['EXTERNALMODLOGLEVEL'],
                               goredislogin, gopsqlloginrw)
     debugmessage('search completed and stored at "{r}"'.format(r=resultrediskey))
 

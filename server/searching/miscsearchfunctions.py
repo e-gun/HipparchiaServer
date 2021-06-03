@@ -648,7 +648,36 @@ def redishitintodbworkline(redisresult: JSONDICT) -> dbWorkLine:
 	return lineobject
 
 
-def genericgolangcliexecution(theprogram: str, formatterfunction, so: SearchObject) -> str:
+def getexternalhelperpath(theprogram=hipparchia.config['EXTERNALBINARYNAME']):
+	"""
+
+	find the path
+
+	"""
+	if not hipparchia.config['EXTERNALWSGI']:
+		basepath = path.dirname(__file__)
+		basepath = '/'.join(basepath.split('/')[:-2])
+	else:
+		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
+		basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
+
+	thepath = '{b}/server/{e}/{p}'.format(b=basepath, e=hipparchia.config['EXTERNALBINARYDIR'], p=theprogram)
+	return thepath
+
+
+def haveexternalhelper(thepath):
+	"""
+
+	is it there?
+
+	"""
+	if path.isfile(thepath):
+		return True
+	else:
+		return False
+
+
+def genericexternalcliexecution(theprogram: str, formatterfunction, so: SearchObject) -> str:
 	"""
 
 	call a golang cli helper; report the result key
@@ -662,14 +691,7 @@ def genericgolangcliexecution(theprogram: str, formatterfunction, so: SearchObje
 	"""
 	resultrediskey = str()
 
-	if not hipparchia.config['EXTERNALWSGI']:
-		basepath = path.dirname(__file__)
-		basepath = '/'.join(basepath.split('/')[:-2])
-	else:
-		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
-		basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
-
-	command = basepath + '/server/golangmodule/' + theprogram
+	command = getexternalhelperpath(theprogram)
 	commandandarguments = formatterfunction(command, so)
 
 	try:
@@ -695,7 +717,7 @@ def genericgolangcliexecution(theprogram: str, formatterfunction, so: SearchObje
 	return resultrediskey
 
 
-def formatgolanggrabberarguments(command: str, so: SearchObject) -> list:
+def formatexternalgrabberarguments(command: str, so: SearchObject) -> list:
 	"""
 	Usage of ./HipparchiaGoDBHelper:
 	  -c int
@@ -729,7 +751,7 @@ def formatgolanggrabberarguments(command: str, so: SearchObject) -> list:
 	arguments['k'] = so.searchid
 	arguments['c'] = so.cap
 	arguments['t'] = setthreadcount()
-	arguments['l'] = hipparchia.config['GOLANGCLILOGLEVEL']
+	arguments['l'] = hipparchia.config['EXTERNALCLILOGLEVEL']
 
 	rld = {'Addr': '{a}:{b}'.format(a=hipparchia.config['REDISHOST'], b=hipparchia.config['REDISPORT']),
 		   'Password': str(),
@@ -743,7 +765,7 @@ def formatgolanggrabberarguments(command: str, so: SearchObject) -> list:
 		   'Pass': hipparchia.config['DBWRITEPASS'],
 		   'DBName': hipparchia.config['DBNAME']}
 
-	if hipparchia.config['GOLANGBINARYKNOWSLOGININFO']:
+	if hipparchia.config['EXTERNALBINARYKNOWSLOGININFO']:
 		pass
 	else:
 		arguments['p'] = json.dumps(psd)

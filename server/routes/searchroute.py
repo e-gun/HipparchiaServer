@@ -33,7 +33,7 @@ from server.listsandsession.searchlistmanagement import calculatewholeauthorsear
 from server.listsandsession.checksession import probeforsessionvariables
 from server.listsandsession.whereclauses import configurewhereclausedata
 from server.commandlineoptions import getcommandlineargs
-from server.searching.searchhelperfunctions import buildsearchobject, cleaninitialquery
+from server.searching.miscsearchfunctions import buildsearchobject, cleaninitialquery
 from server.startup import authordict, listmapper, progresspolldict, workdict, lemmatadict
 from server.threading.websocketthread import checkforlivewebsocket
 

@@ -50,29 +50,31 @@ Python      {py}
 Flask       {fl}
 
 WS          {ws}
-Go          {go}
-GoHelper    {gx}
-Vectors     {gv}
+Grabber     {gr}
+IsActive	{ac}
+via CLI     {gx}
+Vectors     {vv}
 """
 
-if hipparchia.config['GOLANGPROVIDESWEBSOCKETS']:
-	ws = hipparchia.config['GOLANGTHWSBINARYNAME']
+if hipparchia.config['EXTERNALWEBSOCKETS']:
+	ws = hipparchia.config['EXTERNALBINARYNAME']
 else:
 	ws = 'python websockets'
 
-if hipparchia.config['GOLANGVECTORHELPER']:
-	gv = 'w/ golang assistance'
+if hipparchia.config['EXTERNALVECTORHELPER']:
+	vv = 'w/ external assistance'
 else:
-	gv = '[Inactive]'
+	vv = 'pure python pipeline'
 
-if hipparchia.config['GOLANGGRABBER']:
-	gx = hipparchia.config['GOLANGLOADING']
+if hipparchia.config['EXTERNALGRABBER']:
+	gx = hipparchia.config['GRABBERCALLEDVIACLI']
 else:
 	gx = '[Inactive]'
 
 
-theenvironment = theenvironment.format(pf=platform(), ps=psqlversion, py=pythonversion, fl=flaskversion, ws= ws,
-									   go=hipparchia.config['GOLANGGRABBER'], gx=gx, gv=gv)
+theenvironment = theenvironment.format(pf=platform(), ps=psqlversion, py=pythonversion, fl=flaskversion, ws=ws,
+									   gr=hipparchia.config['EXTERNALBINARYNAME'], gx=gx,
+									   ac=hipparchia.config['EXTERNALGRABBER'], vv=vv)
 
 shortversion = hipparchiaserverversion
 gitlength = 5

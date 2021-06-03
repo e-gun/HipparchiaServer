@@ -16,7 +16,7 @@ from server.commandlineoptions import getcommandlineargs
 from server.formatting.miscformatting import consolewarning, debugmessage
 from server.hipparchiaobjects.progresspoll import NullProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchObject
-from server.semanticvectors.golangvectorsearches import golangvectors
+from server.semanticvectors.externalvectorsearches import externalvectors
 from server.semanticvectors.vectorpipeline import pythonvectors
 from server.startup import authordict, listmapper, progresspolldict
 
@@ -58,8 +58,8 @@ def startvectorizing():
 
 	# [(['gr2062'], 4182615), (['gr0057'], 2594166), (['gr4090'], 2202504), ...]
 
-	if hipparchia.config['GOLANGVECTORHELPER']:
-		vectorfunction = golangvectors
+	if hipparchia.config['EXTERNALVECTORHELPER']:
+		vectorfunction = externalvectors
 	else:
 		vectorfunction = pythonvectors
 

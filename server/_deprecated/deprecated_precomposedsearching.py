@@ -15,7 +15,7 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.searching.sqlsearching import generatepreliminaryhitlist
-from server.searching.searchhelperfunctions import lookoutsideoftheline
+from server.searching.miscsearchfunctions import lookoutsideoftheline
 
 
 def precomposedsqlphrasesearch(so: SearchObject) -> List[dbWorkLine]:

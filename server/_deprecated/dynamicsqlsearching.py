@@ -23,7 +23,7 @@ from server._deprecated.searchfunctionobjects import returnsearchfncobject
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.genericlistfunctions import flattenlistoflists
-from server.searching.searchhelperfunctions import lookoutsideoftheline, buildbetweenwhereextension, dblooknear, \
+from server.searching.miscsearchfunctions import lookoutsideoftheline, buildbetweenwhereextension, dblooknear, \
     grableadingandlagging
 
 """

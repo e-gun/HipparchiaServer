@@ -19,6 +19,7 @@ nullapp = Flask('will_be_deleted_soon')
 settingfiles = {'debugsettings.py',
 		'defaultsessionvalues.py',
 		'generaldisplaysettings.py',
+		'helpersettings.py',
 		'htmlandcssstylesettings.py',
 		'inputsettings.py',
 		'networksettings.py',

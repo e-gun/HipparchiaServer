@@ -19,6 +19,8 @@ from server import hipparchia
 from server.formatting.miscformatting import consolewarning, debugmessage
 from server.formatting.miscformatting import validatepollid
 from server.listsandsession.genericlistfunctions import flattenlistoflists
+from server.searching.miscsearchfunctions import redishitintodbworkline, formatexternalgrabberarguments, \
+	genericexternalcliexecution, haveexternalhelper, getexternalhelperpath
 from server.startup import progresspolldict
 
 gosearch = None
@@ -82,14 +84,14 @@ def startwspolling(theport=None):
 		debugmessage('websockets are to be provided via the python socket server')
 		startpythonwspolling(theport)
 
-	if hipparchia.config['GOLANGPROVIDESWEBSOCKETS']:
-		debugmessage('websockets are to be provided via the golang socket server')
-		startgolangwebsocketserver(theport)
+	if hipparchia.config['EXTERNALWEBSOCKETS']:
+		debugmessage('websockets are to be provided via the helper app socket server')
+		helperappwebsocketserver(theport)
 		return
 
-	if hipparchia.config['GOLANGLOADING'] != 'cli':
-		debugmessage('websockets are to be provided via the golang socket server')
-		startgolangwebsocketserver(theport)
+	if not hipparchia.config['GRABBERCALLEDVIACLI']:
+		debugmessage('websockets are to be provided via the helper app socket server')
+		helperappwebsocketserver(theport)
 		return
 
 	startpythonwspolling(theport)
@@ -99,7 +101,7 @@ def startwspolling(theport=None):
 	return
 
 
-def startgolangwebsocketserver(theport):
+def helperappwebsocketserver(theport):
 	"""
 
 	use the golang websocket server
@@ -141,15 +143,11 @@ def startgolangwebsocketserver(theport):
 
 	"""
 
-	if not hipparchia.config['EXTERNALWSGI']:
-		basepath = path.dirname(__file__)
-		basepath = '/'.join(basepath.split('/')[:-2])
-	else:
-		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
-		basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
+	# if 1 > 0:
+	# 	consolewarning("helperappwebsocketserver() disabled")
+	# 	return
 
-	binary = '/server/golangmodule/' + hipparchia.config['GOLANGCLIBINARYNAME']
-	command = basepath + binary
+	command = getexternalhelperpath()
 
 	arguments = dict()
 
@@ -161,15 +159,24 @@ def startgolangwebsocketserver(theport):
 		arguments['wss'] = 1
 	else:
 		arguments['wss'] = 0
-	arguments['l'] = hipparchia.config['GOLANGWSSLOGLEVEL']
+	arguments['l'] = hipparchia.config['EXTERNALWSSLOGLEVEL']
 	arguments['wsp'] = theport
-	arguments['wsf'] = hipparchia.config['GOLANGWSFAILTHRESHOLD']
-	argumentlist = [['-{k}'.format(k=k), '{v}'.format(v=arguments[k])] for k in arguments]
+	arguments['wsf'] = hipparchia.config['EXTERNALBINARYFAILTHRESHOLD']
+	if 'Rust' not in hipparchia.config['EXTERNALBINARYNAME']:
+		# irritating '--x' vs '-x' issue...
+		prefix = '-'
+	else:
+		prefix = '--'
+
+	argumentlist = [['{p}{k}'.format(p=prefix, k=k), '{v}'.format(v=arguments[k])] for k in arguments]
+
+	debugmessage('argumentlist={a}'.format(a=argumentlist))
+
 	argumentlist = flattenlistoflists(argumentlist)
-	commandandarguments = [command] + ['-ws'] + argumentlist
+	commandandarguments = [command] + ['{p}ws'.format(p=prefix)] + argumentlist
 
 	subprocess.Popen(commandandarguments)
-	debugmessage('successfully opened {b}'.format(b=binary))
+	debugmessage('successfully opened {b}'.format(b=hipparchia.config['EXTERNALBINARYNAME']))
 
 	return
 

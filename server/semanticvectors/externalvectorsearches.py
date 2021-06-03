@@ -17,7 +17,7 @@ from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.routes.searchroute import updatesearchlistandsearchobject
 from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforgolang
-from server.searching.searchhelperfunctions import genericgolangcliexecution
+from server.searching.miscsearchfunctions import genericexternalcliexecution
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.modelbuilders import buildgensimmodel, buildsklearnselectedworks, \
     gensimgenerateanalogies
@@ -64,7 +64,7 @@ JSON_STR = str
 JSONDICT = str
 
 
-def golangvectors(so: SearchObject) -> JSON_STR:
+def externalvectors(so: SearchObject) -> JSON_STR:
     """
 
     the flow inside of go, but this overview is useful for looking at hipparchia's python
@@ -154,7 +154,7 @@ def golangvectors(so: SearchObject) -> JSON_STR:
         # that then hands these off to the bagger
 
         so.poll.statusis('Grabbing a collection of lines')
-        vectorresultskey = golangclibinaryvectorhelper(so)
+        vectorresultskey = externalclibinaryvectorhelper(so)
         so.poll.allworkis(-1)
         so.poll.sethits(0)
 
@@ -221,7 +221,7 @@ def golangvectors(so: SearchObject) -> JSON_STR:
     return jsonoutput
 
 
-def golangclibinaryvectorhelper(so: SearchObject) -> str:
+def externalclibinaryvectorhelper(so: SearchObject) -> str:
     """
 
     use the cli interface to HipparchiaGoVectorHelper to execute [a]-[i]
@@ -229,13 +229,13 @@ def golangclibinaryvectorhelper(so: SearchObject) -> str:
 
     """
 
-    bin = hipparchia.config['GOLANGCLIBINARYNAME']
+    bin = hipparchia.config['EXTERNALBINARYNAME']
 
-    vectorresultskey = genericgolangcliexecution(bin, formatgolangvectorhelperarguments, so)
+    vectorresultskey = genericexternalcliexecution(bin, formatexternalappvectorhelperarguments, so)
     return vectorresultskey
 
 
-def formatgolangvectorhelperarguments(command: str, so: SearchObject) -> list:
+def formatexternalappvectorhelperarguments(command: str, so: SearchObject) -> list:
     """
     Usage of ./HipparchiaGoDBHelper:
       -c int
@@ -276,7 +276,7 @@ def formatgolangvectorhelperarguments(command: str, so: SearchObject) -> list:
 
     arguments['svb'] = so.session['baggingmethod']
     arguments['k'] = so.searchid
-    arguments['l'] = hipparchia.config['GOLANGVECTORLOGLEVEL']
+    arguments['l'] = hipparchia.config['EXTERNAVECTORLOGLEVEL']
 
     rld = {'Addr': '{a}:{b}'.format(a=hipparchia.config['REDISHOST'], b=hipparchia.config['REDISPORT']),
            'Password': str(),
@@ -290,7 +290,7 @@ def formatgolangvectorhelperarguments(command: str, so: SearchObject) -> list:
            'Pass': hipparchia.config['DBWRITEPASS'],
            'DBName': hipparchia.config['DBNAME']}
 
-    if hipparchia.config['GOLANGBINARYKNOWSLOGININFO']:
+    if hipparchia.config['EXTERNALBINARYKNOWSLOGININFO']:
         pass
     else:
         arguments['p'] = json.dumps(psd)

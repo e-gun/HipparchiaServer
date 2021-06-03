@@ -19,7 +19,7 @@ from server.hipparchiaobjects.searchobjects import SearchObject, SearchOutputObj
 from server.startup import lemmatadict, progresspolldict
 
 if hipparchia.config['SEMANTICVECTORSENABLED']:
-	from server.semanticvectors.golangvectorsearches import golangvectors
+	from server.semanticvectors.externalvectorsearches import externalvectors
 	from server.semanticvectors.vectorpipeline import pythonvectors
 else:
 	voff = lambda x: 'vectors have not been enabled in your configuration file'
@@ -90,7 +90,7 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 	so.poll.statusis('Preparing to vectorize')
 
 	if hipparchia.config['GOLANGVECTORHELPER']:
-		j = golangvectors(so)
+		j = externalvectors(so)
 	else:
 		j = pythonvectors(so)
 

@@ -26,7 +26,7 @@ from server.hipparchiaobjects.searchobjects import SearchObject, SearchOutputObj
 from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.searching.sqlsearching import precomposedsqlsearch
-from server.searching.searchhelperfunctions import buildbetweenwhereextension
+from server.searching.miscsearchfunctions import buildbetweenwhereextension
 from server.startup import lemmatadict
 
 try:
@@ -35,9 +35,9 @@ try:
 except ImportError as ie:
 	np = None
 	TSNE = None
-# print('"vectorgraphing.py" is missing a module: {m}'.format(m=ie))
-# this is a benign failure if you are a non-vector user since all you really wanted was vectorranges, etc.
-# which themselves will not really be used
+	# print('"vectorgraphing.py" is missing a module: {m}'.format(m=ie))
+	# this is a benign failure if you are a non-vector user since all you really wanted was vectorranges, etc.
+	# which themselves will not really be used
 
 
 vectorranges = {

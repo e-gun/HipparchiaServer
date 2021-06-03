@@ -16,7 +16,7 @@ from server.dbsupport.dblinefunctions import bulklinegrabber
 from server.formatting.miscformatting import consolewarning, debugmessage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.searchobjects import SearchObject
-from server.searching.searchhelperfunctions import grableadingandlagging
+from server.searching.miscsearchfunctions import grableadingandlagging
 
 
 def createvectorstable():
