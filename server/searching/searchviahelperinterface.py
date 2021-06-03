@@ -22,7 +22,7 @@ from server.threading.mpthreadcount import setthreadcount
 
 gosearch = None
 try:
-    from server.golangmodule import hipparchiagolangsearching as gosearch
+    from server.externalmodule import hipparchiagolangsearching as gosearch
 except ImportError as e:
     debugmessage('golang search module unavailable:\n\t"{e}"'.format(e=e))
 
@@ -66,7 +66,7 @@ def precomposedexternalsearcher(so: SearchObject) -> List[dbWorkLine]:
 
     warning = 'attempted to search via external helper but {x} is not available using precomposedsqlsearchmanager() instead'
 
-    if not gosearch or not haveexternalhelper(getexternalhelperpath()):
+    if not gosearch and not haveexternalhelper(getexternalhelperpath()):
         x = 'the external module'
         if not haveexternalhelper(getexternalhelperpath()):
             x = hipparchia.config['EXTERNALBINARYNAME']
@@ -91,7 +91,7 @@ def precomposedexternalsearcher(so: SearchObject) -> List[dbWorkLine]:
     if not hipparchia.config['GRABBERCALLEDVIACLI']:
         resultrediskey = helpersharedlibrarysearcher(so)
     else:
-        resultrediskey = golangclibinarysearcher(so)
+        resultrediskey = helperclibinarysearcher(so)
 
     redisresults = mutiredisfetch(resultrediskey)
 
@@ -100,7 +100,7 @@ def precomposedexternalsearcher(so: SearchObject) -> List[dbWorkLine]:
     return hits
 
 
-def golangclibinarysearcher(so: SearchObject) -> str:
+def helperclibinarysearcher(so: SearchObject) -> str:
     """
 
     you have decided to call the "golanggrabber" binary

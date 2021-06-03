@@ -336,7 +336,7 @@ class NullProgressPoll(object):
 		return message.format(msg=m)
 
 
-if hipparchia.config['POLLCONNECTIONTYPE'] != 'redis':
+if hipparchia.config['POLLCONNECTIONTYPE'] != 'redis' and not hipparchia.config['EXTERNALWEBSOCKETS']:
 	class ProgressPoll(SharedMemoryProgressPoll):
 		pass
 else:

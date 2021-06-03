@@ -24,7 +24,7 @@ from server.searching.miscsearchfunctions import rebuildsearchobjectviasearchord
 
 try:
     from server.searching.searchviahelperinterface import gosearch, precomposedexternalsearcher
-    from server.golangmodule import hipparchiagolangsearching as gosearch
+    from server.externalmodule import hipparchiagolangsearching as gosearch
 except ImportError as e:
     debugmessage('golang search module unavailable:\n\t"{e}"'.format(e=e))
 

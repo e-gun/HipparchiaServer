@@ -10,22 +10,20 @@ import asyncio
 import json
 import re
 import subprocess
-import websockets
 import threading
 
-from os import path
+import websockets
 
 from server import hipparchia
 from server.formatting.miscformatting import consolewarning, debugmessage
 from server.formatting.miscformatting import validatepollid
 from server.listsandsession.genericlistfunctions import flattenlistoflists
-from server.searching.miscsearchfunctions import redishitintodbworkline, formatexternalgrabberarguments, \
-	genericexternalcliexecution, haveexternalhelper, getexternalhelperpath
+from server.searching.miscsearchfunctions import getexternalhelperpath
 from server.startup import progresspolldict
 
 gosearch = None
 try:
-	from server.golangmodule import hipparchiagolangsearching as gosearch
+	from server.externalmodule import hipparchiagolangsearching as gosearch
 except ImportError:
 	pass
 
@@ -143,9 +141,11 @@ def helperappwebsocketserver(theport):
 
 	"""
 
-	# if 1 > 0:
-	# 	consolewarning("helperappwebsocketserver() disabled")
-	# 	return
+	if 'Rust' not in hipparchia.config['EXTERNALBINARYNAME']:
+		# irritating '--x' vs '-x' issue...
+		prefix = '-'
+	else:
+		prefix = '--'
 
 	command = getexternalhelperpath()
 
@@ -162,15 +162,10 @@ def helperappwebsocketserver(theport):
 	arguments['l'] = hipparchia.config['EXTERNALWSSLOGLEVEL']
 	arguments['wsp'] = theport
 	arguments['wsf'] = hipparchia.config['EXTERNALBINARYFAILTHRESHOLD']
-	if 'Rust' not in hipparchia.config['EXTERNALBINARYNAME']:
-		# irritating '--x' vs '-x' issue...
-		prefix = '-'
-	else:
-		prefix = '--'
 
 	argumentlist = [['{p}{k}'.format(p=prefix, k=k), '{v}'.format(v=arguments[k])] for k in arguments]
 
-	debugmessage('argumentlist={a}'.format(a=argumentlist))
+	# debugmessage('argumentlist={a}'.format(a=argumentlist))
 
 	argumentlist = flattenlistoflists(argumentlist)
 	commandandarguments = [command] + ['{p}ws'.format(p=prefix)] + argumentlist

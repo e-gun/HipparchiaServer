@@ -745,6 +745,11 @@ def formatexternalgrabberarguments(command: str, so: SearchObject) -> list:
 	  -v    print version and exit
 
 	"""
+	if 'Rust' not in hipparchia.config['EXTERNALBINARYNAME']:
+		# irritating '--x' vs '-x' issue...
+		prefix = '-'
+	else:
+		prefix = '--'
 
 	arguments = dict()
 
@@ -770,7 +775,7 @@ def formatexternalgrabberarguments(command: str, so: SearchObject) -> list:
 	else:
 		arguments['p'] = json.dumps(psd)
 
-	argumentlist = [['-{k}'.format(k=k), '{v}'.format(v=arguments[k])] for k in arguments]
+	argumentlist = [['{p}{k}'.format(k=k, p=prefix), '{v}'.format(v=arguments[k])] for k in arguments]
 	argumentlist = flattenlistoflists(argumentlist)
 	commandandarguments = [command] + argumentlist
 

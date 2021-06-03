@@ -1,6 +1,8 @@
 # python
 *.pyc
 server/settings/
+server/externalmodule/*.*
+server/externalbinaries/H*
 zz_*
 config.py
 .DS_Store
