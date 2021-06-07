@@ -89,7 +89,7 @@ def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, thr
 	so.poll.activate()
 	so.poll.statusis('Preparing to vectorize')
 
-	if hipparchia.config['GOLANGVECTORHELPER']:
+	if hipparchia.config['EXTERNALVECTORHELPER']:
 		j = externalvectors(so)
 	else:
 		j = pythonvectors(so)

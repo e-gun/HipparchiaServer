@@ -16,7 +16,7 @@ from server.formatting.vectorformatting import ldatopicsgenerateoutput
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.routes.searchroute import updatesearchlistandsearchobject
-from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforgolang
+from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforexternalhelper
 from server.searching.miscsearchfunctions import genericexternalcliexecution
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.modelbuilders import buildgensimmodel, buildsklearnselectedworks, \
@@ -138,7 +138,7 @@ def externalvectors(so: SearchObject) -> JSON_STR:
 
         # [2] do a searchlistintosqldict()
         so.searchsqldict = searchlistintosqldict(so, str(), vectors=True)
-        so.searchsqldict = rewritesqlsearchdictforgolang(so)
+        so.searchsqldict = rewritesqlsearchdictforexternalhelper(so)
 
         # [3] store the searchlist to redis
         so.poll.statusis('Dispatching the search instructions to the searcher')

@@ -16,7 +16,7 @@ from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.searching.miscsearchfunctions import redishitintodbworkline, formatexternalgrabberarguments, \
     genericexternalcliexecution, haveexternalhelper, getexternalhelperpath
-from server.searching.precomposesql import rewritesqlsearchdictforgolang
+from server.searching.precomposesql import rewritesqlsearchdictforexternalhelper
 from server.searching.searchviapythoninterface import precomposedsqlsearchmanager
 from server.threading.mpthreadcount import setthreadcount
 
@@ -79,7 +79,7 @@ def precomposedexternalsearcher(so: SearchObject) -> List[dbWorkLine]:
 
     rc = establishredisconnection()
 
-    so.searchsqldict = rewritesqlsearchdictforgolang(so)
+    so.searchsqldict = rewritesqlsearchdictforexternalhelper(so)
     debugmessage('storing search at "{r}"'.format(r=so.searchid))
     for s in so.searchsqldict:
         rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))

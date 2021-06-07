@@ -91,6 +91,16 @@
 # Windows 10 is not ready for semantic vectors
 #	TypeError: can't pickle psycopg2.extensions.connection objects
 
+# consider seeing also helpersettings.py/EXTERNALVECTORHELPER
+# "EXTERNALVECTORHELPER = False" for Cicero yields
+# Sought all 11 known forms of »pudor«
+# Searched 1 texts and found 15 proximate terms to graph (83.47s)
+#
+# "EXTERNALVECTORHELPER = True" for Cicero yields
+# Sought all 11 known forms of »pudor«
+# Searched 1 texts and found 15 proximate terms to graph (21.3s)
+# and 2/3 of that time is spend inside of Word2Vec; i.e., the prep is 7s vs 70s
+
 SEMANTICVECTORSENABLED = False
 FORBIDUSERDEFINEDVECTORSPACES = False
 CONCEPTMAPPINGENABLED = False

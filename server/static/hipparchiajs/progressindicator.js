@@ -40,7 +40,6 @@ function displayprogress(searchid, progress){
     let a = progress['Activity'];
 
     // let thehtml = '[' + id + '] ';
-    console.log(progress);
 
     if (id === searchid) {
         let thehtml = '';

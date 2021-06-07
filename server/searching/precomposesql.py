@@ -310,7 +310,7 @@ def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: 
     return query
 
 
-def rewritesqlsearchdictforgolang(so: SearchObject) -> dict:
+def rewritesqlsearchdictforexternalhelper(so: SearchObject) -> dict:
     """
 
     you presently have
