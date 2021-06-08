@@ -139,7 +139,7 @@ def cleanvectortext(texttostrip):
 		'Ser.': 'Servius',
 		'Sex.': 'Sextus',
 		'T.': 'Titus',
-		'Ti': 'Tiberius',
+		'Ti.': 'Tiberius',
 		'V.': 'Vibius'
 	}
 

@@ -148,13 +148,16 @@ def mutiredisfetch(vectorresultskey):
 	q = Queue()
 	processes = list()
 	results = list()
+
 	for _ in range(workers):
 		p = Process(target=redisfetch, args=(vectorresultskey, q))
 		processes.append(p)
 		p.start()
+
 	for _ in processes:
 		oneresult = q.get()  # will block
 		results.append(oneresult)
+
 	for p in processes:
 		p.join()
 

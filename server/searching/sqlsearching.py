@@ -28,11 +28,6 @@ try:
 except ImportError as e:
     debugmessage('golang search module unavailable:\n\t"{e}"'.format(e=e))
 
-
-if gosearch:
-    # these don't log you on; they just tell the go module how to log on
-    pass
-
 """
     OVERVIEW
 

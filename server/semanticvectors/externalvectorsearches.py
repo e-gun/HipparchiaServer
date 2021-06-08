@@ -143,7 +143,8 @@ def externalvectors(so: SearchObject) -> JSON_STR:
         # [3] store the searchlist to redis
         so.poll.statusis('Dispatching the search instructions to the searcher')
         rc = establishredisconnection()
-        debugmessage('storing search at "{r}"'.format(r=so.searchid))
+        # debugmessage('storing search at "{r}"'.format(r=so.searchid))
+
         for s in so.searchsqldict:
             rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
 
@@ -162,11 +163,9 @@ def externalvectors(so: SearchObject) -> JSON_STR:
 
         # [5] collect the sentences and hand them over to Word2Vec(), etc.
         so.poll.statusis('Fetching the bags of words')
-        debugmessage('golangvectors() reports that the vectorresultskey = {r}'.format(r=vectorresultskey))
-        debugmessage('fetching search from "{r}"'.format(r=vectorresultskey))
 
         redisresults = mutiredisfetch(vectorresultskey)
-        debugmessage('fetched {r} bags'.format(r=len(redisresults)))
+        debugmessage('fetched {r} bags from {k}'.format(k=vectorresultskey, r=len(redisresults)))
 
         js = [json.loads(r) for r in redisresults]
         hits = {j['Loc']: j['Sent'] for j in js}
@@ -227,17 +226,34 @@ def externalclibinaryvectorhelper(so: SearchObject) -> str:
     use the cli interface to HipparchiaGoVectorHelper to execute [a]-[i]
     as outlined in golangvectors() above
 
+    note that it is possible to use the module to do the vectors:
+
+    [ hipparchia_venv/HipparchiaServer/ % python3 ]
+
+        import server.externalmodule.hipparchiagolangsearching as gs
+        r = gs.NewRedisLogin('localhost:6379', '', 0)
+        p = gs.NewPostgresLogin('localhost', 5432, 'hippa_rd', 'MYPASSWORD', 'hipparchiaDB')
+        b = gs.HipparchiaBagger
+        b('x', 'winnertakesall', 5, 'lt0448', 1, 26, 3, '', '', r, p)
+
+    but we are currently not implementing that
+
+    note the two "missing" parameters: these are stopword strings that *must* be supplied by
+    module users: 'one two three...'
+
     """
 
     bin = hipparchia.config['EXTERNALBINARYNAME']
-
     vectorresultskey = genericexternalcliexecution(bin, formatexternalappvectorhelperarguments, so)
+
     return vectorresultskey
 
 
 def formatexternalappvectorhelperarguments(command: str, so: SearchObject) -> list:
     """
-    Usage of ./HipparchiaGoDBHelper:
+    Hipparchia Golang Helper CLI Debugging Interface (v.1.1.0)
+
+     Usage of ./HipparchiaGoDBHelper:
       -c int
             [searches] max hit count (default 200)
       -k string
@@ -256,6 +272,10 @@ def formatexternalappvectorhelperarguments(command: str, so: SearchObject) -> li
             [vectors][for manual debugging] db to grab from (default "lt0448")
       -sve int
             [vectors][for manual debugging] last line to grab (default 26)
+      -svhw string
+            [vectors] provide a string of headwords to skip 'one two three...' (default "(suppressed owing to length)")
+      -svin string
+            [vectors][provide a string of inflected forms to skip 'one two three...' (default "(suppressed owing to length)")
       -svs int
             [vectors][for manual debugging] first line to grab (default 1)
       -t int
@@ -264,11 +284,13 @@ def formatexternalappvectorhelperarguments(command: str, so: SearchObject) -> li
       -ws
             [websockets] assert that you are requesting the websocket server
       -wsf int
-            [websockets] fail threshold before messages stop being sent (default 4)
+            [websockets] fail threshold before messages stop being sent (default 3)
       -wsp int
             [websockets] port on which to open the websocket server (default 5010)
       -wss int
             [websockets] save the polls instead of deleting them: 0 is no; 1 is yes
+
+      note that "-svhw" and "-svin" are currently uncalled: the built-in defaults are the only option
 
     """
 

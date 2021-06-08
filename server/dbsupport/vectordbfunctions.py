@@ -142,7 +142,7 @@ def storevectorindatabase(so: SearchObject, vectorspace):
 		consolewarning('DISABLEVECTORSTORAGE = True; the vector space for {i} was not stored'.format(i=so.searchid), color='black')
 
 	uidlist = so.searchlistthumbprint
-	debugmessage('storevectorindatabase() storing {u}'.format(u=uidlist))
+	# debugmessage('storevectorindatabase() storing {u}'.format(u=uidlist))
 
 	dbconnection = ConnectionObject(ctype='rw')
 	dbcursor = dbconnection.cursor()
