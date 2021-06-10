@@ -136,7 +136,9 @@ this is not too surprising since the 'hit' is not logged
 'iudicor' and 'iudicas' work fine
 
 
-[K] subqueryphrasesearch + indexrestrictions = double temptable problem
+[K] subqueryphrasesearch + indexrestrictions = SQL  [FIXED]
+
+[note that 1.6.11, etc do not have ths problem: this is a precomposed search issue]
 
 τῷ φίλῳ μου will search properly over unlimited time; but if you cut the time you end up with TT rules for both query and data
 
@@ -162,3 +164,105 @@ this is not too surprising since the 'hit' is not logged
         ) second
     WHERE second.linebundle ~ %s  LIMIT 200
 
+
+
+[i] after the call to configurewhereclausedata() by updatesearchlistandsearchobject() we will have, for example,
+
+
+'in151e': {'type': 'temptable', 'where': {'tempquery': '\n\tCREATE TEMPORARY TABLE in151e_includelist AS \n\t\tSELECT values \n\t\t\tAS includeindex FROM unnest(ARRAY[48392,48393,48394,48395,48396,48397,48398,48399,48400,48401,48402,48403,48404,48405,48406,48407,48408,48409,48410,48411,48412,48413,48414,48415,48416,48417,48418,48419,48420,48421,48422,48423,48424,48425,48426,48427,48428,48429,48430,48431,48432,48433,48434,48435,48436,48437,48438,48439,48440,48441,48442,48443,48444,48445,48446]) values\n\t'}},
+and
+'in0f2e': {'type': 'temptable', 'where': {'tempquery': '\n\tCREATE TEMPORARY TABLE in0f2e_includelist AS \n\t\tSELECT values \n\t\t\tAS includeindex FROM unnest(ARRAY[7248]) values\n\t'}},
+
+[ii] soon we got to precomposedsqlsearch() and that sends us to precomposedsqlsubqueryphrasesearch()
+
+there we call searchlistintosqldict()
+
+then we get to the real culprit: rewritequerystringforsubqueryphrasesearching() inside of precompsesql.py
+
+the example in the description of the function is a major author "between"; we need to also handle inscriptions and unnest(ARRAY[])
+
+n books of homer looks like:
+
+    configurewhereclausedata() indexedauthorlist {'gr0012': {'type': 'between', 'where': {'listofboundaries': [(1491, 1952), (16153, 16587), (1, 612)], 'listofomissions': []}}}
+
+    >>> rewritequerystringforsubqueryphrasesearching() sent WHERE ( (index BETWEEN 1491 AND 1952) OR (index BETWEEN 1 AND 612) )
+    >>> rewritequerystringforsubqueryphrasesearching() returned
+        SELECT second.wkuniversalid, second.index, second.level_05_value, second.level_04_value, second.level_03_value, second.level_02_value, second.level_01_value, second.level_00_value, second.marked_up_line, second.accented_line, second.stripped_line, second.hyphenated_words, second.annotations FROM
+            ( SELECT * FROM
+                ( SELECT wkuniversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations, concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC) ) AS linebundle
+                    FROM gr0012 WHERE ( (index BETWEEN 1491 AND 1952) OR (index BETWEEN 1 AND 612) ) ) first
+            ) second
+        WHERE second.linebundle ~ %s  LIMIT 200
+
+an inscription looks like
+
+>>> rewritequerystringforsubqueryphrasesearching() sent WHERE
+            EXISTS
+                (SELECT 1 FROM in0c1e_includelist_UNIQUENAME incl WHERE incl.includeindex = in0c1e.index
+             AND in0c1e.accented_line ~* %s)
+
+
+>>> rewritequerystringforsubqueryphrasesearching() returned
+    SELECT second.wkuniversalid, second.index, second.level_05_value, second.level_04_value, second.level_03_value, second.level_02_value, second.level_01_value, second.level_00_value, second.marked_up_line, second.accented_line, second.stripped_line, second.hyphenated_words, second.annotations FROM
+        ( SELECT * FROM
+            ( SELECT wkuniversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations, concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC) ) AS linebundle
+                FROM in0618 WHERE
+            EXISTS
+                (SELECT 1 FROM in0618_includelist_UNIQUENAME incl WHERE incl.includeindex = in0618.index
+             AND in0618.accented_line ~* %s) ) first
+        ) second
+    WHERE second.linebundle ~ %s  LIMIT 200
+
+
+can test "ἀνέθηκεν ὑπὲρ" via the following:
+
+Mysia and Troas [Munich] (Olympene),
+2684
+line 6
+
+  	Region:  Mys.: Olympene
+  	City:  Serçeler
+  	Additional publication info:  IK 33,38
+
+	   [ἀγ]αθῇ τύχῃ·
+	[ ]κ̣α̣ϲ̣τ̣ο̣ϲ̣
+	ἀνέθηκεν
+	ὑπὲρ τῶν ἰ-
+	δίων εὐχή-
+	ν.
+
+127.0.0.1 - - [10/Jun/2021 12:32:38] "GET /search/standard/03f2fce2?skg=ἀνέθηκεν&prx=ὑπὲρ HTTP/1.1" 200 -
+127.0.0.1 - - [10/Jun/2021 12:32:39] "GET /search/confirm/03f2fce2 HTTP/1.1" 200 -
+
+==
+
+THIS ONE WORKS
+
+
+hipparchiaDB=# CREATE TEMPORARY TABLE in110f_includelist_UNIQUENAME AS
+        SELECT values
+            AS includeindex FROM unnest(ARRAY[16197,16198,16199,16200,16201,16202,16203,16204,16205,16206,16207]) values;
+
+hipparchiaDB=# SELECT second.wkuniversalid, second.index, second.level_05_value, second.level_04_value, second.level_03_value, second.level_02_value, second.level_01_value, second.level_00_value, second.marked_up_line, second.accented_line, second.stripped_line, second.hyphenated_words, second.annotations FROM
+        ( SELECT * FROM
+            ( SELECT wkuniversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations, concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)
+            ) AS linebundle
+                FROM in110f WHERE EXISTS
+                ( SELECT 1 FROM in110f_includelist_UNIQUENAME incl WHERE incl.includeindex = in110f.index ) ) first
+        ) second
+    WHERE second.linebundle ~ 'ἀνέθηκεν ὑπὲρ'  LIMIT 200;
+
+
+VS WHAT YOU GET NOW IN PRE v1.7.6 rewritequerystringforsubqueryphrasesearching():
+
+    SELECT second.wkuniversalid, second.index, second.level_05_value, second.level_04_value, second.level_03_value, second.level_02_value, second.level_01_value, second.level_00_value, second.marked_up_line, second.accented_line, second.stripped_line, second.hyphenated_words, second.annotations FROM
+        ( SELECT * FROM
+            ( SELECT wkuniversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations, concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC) ) AS linebundle
+                FROM in110f WHERE
+            EXISTS
+                (SELECT 1 FROM in110f_includelist_UNIQUENAME incl WHERE incl.includeindex = in110f.index
+             AND in110f.accented_line ~* 'ἀνέθηκεν') ) first
+        ) second
+    WHERE second.linebundle ~ 'ἀνέθηκεν'  LIMIT 200;
+
+delete "AND in110f.accented_line ~* 'ἀνέθηκεν'"

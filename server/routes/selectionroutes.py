@@ -105,7 +105,7 @@ def selectionmade(requestargs: MultiDict) -> JSON_STR:
 	locus = depunct(requestargs.get('locus', str()), allowedpunct)
 	endpoint = depunct(requestargs.get('endpoint', str()), allowedpunct)
 
-	allowedpunct = '.-?'
+	allowedpunct = '.-?():'
 	wkprov = depunct(requestargs.get('wkprov', str()), allowedpunct)
 
 	allowedpunct = '.'

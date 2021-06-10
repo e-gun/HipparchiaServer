@@ -12,9 +12,9 @@ from os import path
 
 stable = False
 release = False
-prerelease = False
+prerelease = True
 
-hipparchiaserverversion = '1.7.5'
+hipparchiaserverversion = '1.7.6'
 plus = '+'
 supplement = '[DEVEL]'
 pre = '-pre'

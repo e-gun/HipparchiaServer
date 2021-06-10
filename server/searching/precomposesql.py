@@ -126,11 +126,15 @@ def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphra
         elif vectors:
             q = 'SELECT {wtmpl} FROM {db} {whr}'.format(wtmpl=worklinetemplate, db=authortable, whr=whr)
         else:
-            q = rewritequerystringforsubqueryphrasesearching(authortable, whr, so)
+            if r['type'] == 'temptable':
+                ttstripper = True
+            else:
+                ttstripper = False
+            q = rewritequerystringforsubqueryphrasesearching(authortable, whr, ttstripper, so)
         d = (seeking,)
         returndict[authortable]['query'] = q
         returndict[authortable]['data'] = d
-
+        # consolewarning("{a}:\nq\t{q}\nd\t{d}\nt\t{t}".format(a=authortable, q=q, d=d, t=returndict[authortable]['temptable']), color="cyan")
     return returndict
 
 
@@ -246,7 +250,7 @@ def perparesoforsecondsqldict(so: SearchObject, initialhitlines: List[dbWorkLine
     return so
 
 
-def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: str, so: SearchObject) -> str:
+def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: str, ttstripper: bool, so: SearchObject) -> str:
     """
 
         you have
@@ -276,6 +280,7 @@ def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: 
       9795 | χρηϲτὸν εἶναι δεῖ τὸν τὰ τηλικαῦτα διοικεῖν ἀξιοῦντα οὐδὲ
       9796 | τὸ πιϲτευθῆναι προλαβόντα παρ ὑμῶν εἰϲ τὸ μείζω δύναϲθαι
 
+
     BUT, workonrawsqlsearch() is going to call dblineintolineobject() on the results, so you want something that will fit that...
 
     SELECT second.wkuniversalid, second.index, second.level_05_value, second.level_04_value, second.level_03_value, second.level_02_value, second.level_01_value, second.level_00_value, second.marked_up_line, second.accented_line, second.stripped_line, second.hyphenated_words, second.annotations FROM
@@ -284,6 +289,59 @@ def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: 
                 FROM gr0014  ) first
         ) second
     WHERE second.linebundle ~ 'λαβόντα παρ ὑμῶν' LIMIT 200;
+
+
+    the above works for "two books of homer", etc. There is a problem with inscriptions + restrictions
+
+    Pick "Serçeler" and "2 to 25 CE" to find your test target:
+
+        Mysia and Troas [Munich] (Olympene),
+        2684
+        line 6
+
+        Region:  Mys.: Olympene
+        City:  Serçeler
+        Additional publication info:  IK 33,38
+
+        [ἀγ]αθῇ τύχῃ·
+        [ ]κ̣α̣ϲ̣τ̣ο̣ϲ̣
+        ἀνέθηκεν
+        ὑπὲρ τῶν ἰ-
+        δίων εὐχή-
+        ν.
+
+
+    without intervesion we will later see: workonprecomposedsqlsearch() querydict:
+
+    {'temptable': '
+    CREATE TEMPORARY TABLE in110f_includelist_UNIQUENAME AS
+        SELECT values
+            AS includeindex FROM unnest(ARRAY[16197,16198,16199,16200,16201,16202,16203,16204,16205,16206,16207]) values
+    ', 'query': "
+    SELECT second.wkuniversalid, second.index, second.level_05_value, second.level_04_value, second.level_03_value, second.level_02_value, second.level_01_value, second.level_00_value, second.marked_up_line, second.accented_line, second.stripped_line, second.hyphenated_words, second.annotations FROM
+        ( SELECT * FROM
+            ( SELECT wkuniversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations, concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC) ) AS linebundle
+                FROM in110f WHERE
+            EXISTS
+                (SELECT 1 FROM in110f_includelist_UNIQUENAME incl WHERE incl.includeindex = in110f.index
+             AND in110f.accented_line ~* %s) ) first
+        ) second
+    WHERE second.linebundle ~ %s  LIMIT 200", 'data': ('ἀνέθηκεν ὑπὲρ',)}
+
+
+    what you need is
+
+    SELECT second.wkuniversalid, second.index, second.level_05_value, second.level_04_value, second.level_03_value, second.level_02_value, second.level_01_value, second.level_00_value, second.marked_up_line, second.accented_line, second.stripped_line, second.hyphenated_words, second.annotations FROM
+        ( SELECT * FROM
+            ( SELECT wkuniversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations, concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC)
+            ) AS linebundle
+                FROM in110f WHERE EXISTS
+                ( SELECT 1 FROM in110f_includelist_UNIQUENAME incl WHERE incl.includeindex = in110f.index ) ) first
+        ) second
+    WHERE second.linebundle ~ 'ἀνέθηκεν ὑπὲρ'  LIMIT 200;
+
+    you are only looking at the temp table index, you are not actually searching for your target at this point
+    therefore you need to delete "AND in110f.accented_line ~* %s"
 
     """
 
@@ -306,6 +364,12 @@ def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: 
     WHERE second.linebundle ~ %s {lim}"""
 
     query = qtemplate.format(sp=sp, wl=wl, co=so.usecolumn, db=authortable, whr=whereclause, lim=lim)
+
+    if ttstripper:
+        kill = re.compile('AND .*?.accented_line ~. %s')
+        query = re.sub(kill, str(), query)
+
+    # consolewarning("rewritequerystringforsubqueryphrasesearching() returned {q}".format(q=query))
 
     return query
 

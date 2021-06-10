@@ -105,6 +105,7 @@ def workonprecomposedsqlsearch(workerid: int, foundlineobjects: ListProxy, listo
 
         try:
             querydict = getnetxitem(0)
+            # consolewarning("workonprecomposedsqlsearch() querydict:\n\t{q}".format(q=querydict))
         except emptyerror:
             querydict = None
             listofplacestosearch = None
@@ -159,7 +160,7 @@ def precomposedsqlsearcher(querydict, dbcursor) -> Generator:
         1: 'DataError; cannot search for »{d}«\n\tcheck for unbalanced parentheses and/or bad regex',
         2: 'psycopg2.InternalError; did not execute query="{q}" and data="{d}',
         3: 'precomposedsqlsearcher() DatabaseError for {c} @ {p}',
-        4: 'IndexError: malformed query/data combination; empty results returned'
+        4: 'precomposedsqlsearcher() IndexError: malformed query/data combination; empty results returned'
     }
 
     try:
@@ -180,7 +181,7 @@ def precomposedsqlsearcher(querydict, dbcursor) -> Generator:
     except IndexError:
         found = list()
         consolewarning(warnings[4], color='red')
-        # consolewarning("Index failure on q/d:\n\tq = {q}".format(q=q, d=q), color='red')
-        # consolewarning("\td = :{d}\n===========".format(q=q, d=q), color='yellow')
+        consolewarning("\tq = {q}".format(q=q, d=q), color='red')
+        consolewarning("\td = :{d}\n===========".format(q=q, d=q), color='yellow')
 
     return found
