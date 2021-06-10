@@ -444,9 +444,9 @@ class SearchOutputObject(object):
 		"""
 
 		# pluralization check
-		tx = 'Searched 1 text'
+		tx = 'Searched 1 item'
 		if self.scope != 1:
-			tx = 'Searched {t} texts'.format(t=self.scope)
+			tx = 'Searched {t} items'.format(t=self.scope)
 
 		# pluralization check
 		fd = '1 passage'

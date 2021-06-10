@@ -138,14 +138,15 @@ def executesearch(searchid: str, so=None, req=request) -> JSON_STR:
 		so.searchlist = compilesearchlist(listmapper, frozensession)
 
 	if so.searchlist:
+		# do this before updatesearchlistandsearchobject() which collapses items and cuts your total
+		workssearched = len(so.searchlist)
+
 		# calculatewholeauthorsearches() + configurewhereclausedata()
 		so = updatesearchlistandsearchobject(so)
 
 		nosearch = False
 		skg = None
 		prx = None
-
-		workssearched = len(so.searchlist)
 
 		isgreek = re.compile('[α-ωϲἀἁἂἃἄἅἆἇᾀᾁᾂᾃᾄᾅᾆᾇᾲᾳᾴᾶᾷᾰᾱὰάἐἑἒἓἔἕὲέἰἱἲἳἴἵἶἷὶίῐῑῒΐῖῗὀὁὂὃὄὅόὸὐὑὒὓὔὕὖὗϋῠῡῢΰῦῧύὺᾐᾑᾒᾓᾔᾕᾖᾗῂῃῄῆῇἤἢἥἣὴήἠἡἦἧὠὡὢὣὤὥὦὧᾠᾡᾢᾣᾤᾥᾦᾧῲῳῴῶῷώὼ]')
 
