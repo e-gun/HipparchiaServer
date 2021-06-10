@@ -134,3 +134,31 @@ this is not too surprising since the 'hit' is not logged
 
 
 'iudicor' and 'iudicas' work fine
+
+
+[K] subqueryphrasesearch + indexrestrictions = double temptable problem
+
+τῷ φίλῳ μου will search properly over unlimited time; but if you cut the time you end up with TT rules for both query and data
+
+!!! Index failure on q/d:
+	q =
+    SELECT second.wkuniversalid, second.index, second.level_05_value, second.level_04_value, second.level_03_value, second.level_02_value, second.level_01_value, second.level_00_value, second.marked_up_line, second.accented_line, second.stripped_line, second.hyphenated_words, second.annotations FROM
+        ( SELECT * FROM
+            ( SELECT wkuniversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations, concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC) ) AS linebundle
+                FROM dp6501 WHERE
+            EXISTS
+                (SELECT 1 FROM dp6501_includelist_18d442b4e864480395647bfabca00ed0 incl WHERE incl.includeindex = dp6501.index
+             AND dp6501.accented_line ~* %s) ) first
+        ) second
+    WHERE second.linebundle ~ %s  LIMIT 200 !!!
+>>> 	d = :
+    SELECT second.wkuniversalid, second.index, second.level_05_value, second.level_04_value, second.level_03_value, second.level_02_value, second.level_01_value, second.level_00_value, second.marked_up_line, second.accented_line, second.stripped_line, second.hyphenated_words, second.annotations FROM
+        ( SELECT * FROM
+            ( SELECT wkuniversalid, index, level_05_value, level_04_value, level_03_value, level_02_value, level_01_value, level_00_value, marked_up_line, accented_line, stripped_line, hyphenated_words, annotations, concat(accented_line, ' ', lead(accented_line) OVER (ORDER BY index ASC) ) AS linebundle
+                FROM dp6501 WHERE
+            EXISTS
+                (SELECT 1 FROM dp6501_includelist_18d442b4e864480395647bfabca00ed0 incl WHERE incl.includeindex = dp6501.index
+             AND dp6501.accented_line ~* %s) ) first
+        ) second
+    WHERE second.linebundle ~ %s  LIMIT 200
+
