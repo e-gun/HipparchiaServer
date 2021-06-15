@@ -6,6 +6,7 @@
         (see LICENSE in the top level directory of the distribution)
 """
 import multiprocessing
+import pickle
 import re
 from typing import List, Generator
 from multiprocessing.managers import ListProxy
@@ -15,6 +16,7 @@ import psycopg2
 from server import hipparchia
 from server.dbsupport.dblinefunctions import worklinetemplate, dblineintolineobject, makeablankline, grablistoflines
 from server.dbsupport.miscdbfunctions import resultiterator
+from server.dbsupport.redisdbfunctions import establishredisconnection
 from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.miscformatting import consolewarning
 from server.formatting.wordformatting import wordlistintoregex
@@ -867,3 +869,22 @@ ADDITONAL SEARCH NOTES
 	was 20x slower than the current implementation
 
 """
+
+
+def loadredisresults(searchid):
+	"""
+
+	search results were passed to redis
+
+	grab and return them
+
+	:param searchid:
+	:return:
+	"""
+
+	redisfindsid = '{id}_findslist'.format(id=searchid)
+	rc = establishredisconnection()
+	finds = rc.lrange(redisfindsid, 0, -1)
+	# foundlineobjects = [dblineintolineobject(pickle.loads(f)) for f in finds]
+	foundlineobjects = [pickle.loads(f) for f in finds]
+	return foundlineobjects

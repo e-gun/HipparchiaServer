@@ -14,6 +14,7 @@ from server.dbsupport.lexicaldbfunctions import rankheadwordsbyprevalence
 from server.formatting.jsformatting import generatevectorjs, insertbrowserclickjs
 from server.formatting.miscformatting import htmlcommentdecorator
 from server.hipparchiaobjects.worklineobject import dbWorkLine
+from server.hipparchiaobjects.progresspoll import RedisProgressPoll
 from server.hipparchiaobjects.searchobjects import SearchOutputObject, SearchObject
 from server.hipparchiaobjects.vectorobjects import VectorValues
 from server.startup import authordict, workdict, lemmatadict
@@ -313,9 +314,13 @@ def nearestneighborgenerateoutput(findshtml: str, mostsimilar: list, imagename: 
 	output.sortby = 'proximity'
 	output.image = imagename
 	output.searchtime = so.getelapsedtime()
-	activepoll.deactivate()
 
 	jsonoutput = json.dumps(output.generateoutput())
+	activepoll.deactivate()
+
+	if isinstance(activepoll, RedisProgressPoll):
+		activepoll.deleteredispoll()
+
 	del activepoll
 	return jsonoutput
 

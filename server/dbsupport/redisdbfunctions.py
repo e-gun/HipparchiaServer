@@ -6,7 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import pickle
+import platform
 from multiprocessing import current_process, Queue, Process
 from typing import List
 
@@ -117,31 +117,15 @@ def buildredissearchlist(listofsearchlocations: List, searchid: str):
 	return
 
 
-def loadredisresults(searchid):
-	"""
-
-	search results were passed to redis
-
-	grab and return them
-
-	:param searchid:
-	:return:
-	"""
-
-	redisfindsid = '{id}_findslist'.format(id=searchid)
-	rc = establishredisconnection()
-	finds = rc.lrange(redisfindsid, 0, -1)
-	# foundlineobjects = [dblineintolineobject(pickle.loads(f)) for f in finds]
-	foundlineobjects = [pickle.loads(f) for f in finds]
-	return foundlineobjects
-
-
 def mutiredisfetch(vectorresultskey):
 	"""
 
 	parallelize redis fetching
 
 	"""
+
+	if platform.system() == 'Windows':
+		return monoredisfetch(vectorresultskey)
 
 	workers = setthreadcount()
 
@@ -188,6 +172,24 @@ def redisfetch(vectorresultskey, queue):
 
 	return
 
+
+def monoredisfetch(vectorresultskey):
+	"""
+
+	windows hates mutiredisfetch()
+
+	"""
+	rc = establishredisconnection()
+	redisresults = list()
+
+	while vectorresultskey:
+		r = rc.spop(vectorresultskey)
+		if r:
+			redisresults.append(r)
+		else:
+			vectorresultskey = None
+
+	return redisresults
 
 
 """

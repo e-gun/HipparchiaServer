@@ -91,7 +91,8 @@ def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vec
 	findshtml = '{h}'.format(h=html)
 
 	activepoll.allworkis(-1)
-	# so.poll.deactivate()
+	activepoll.sethits(0)
+	activepoll.deactivate()
 
 	output = nearestneighborgenerateoutput(findshtml, mostsimilar, imagename, workssearched, searchobject)
 

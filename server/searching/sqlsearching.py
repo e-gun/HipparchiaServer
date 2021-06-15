@@ -183,9 +183,10 @@ def precomposedsqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
         so.lemmaone = so.lemmatwo
         so.searchsqldict = rewritesqlsearchdictforlemmata(so)
 
-    so.poll.statusis('Now searching among the initial finds for "{x}"'.format(x=so.termtwo))
+    m = 'Now searching among the {n} initial finds for {l}"{x}"'
+    so.poll.statusis(m.format(n=len(initialhitlines), x=so.termtwo, l=str()))
     if so.lemmaone:
-        so.poll.statusis('Now searching among the initial finds for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
+        so.poll.statusis(m.format(n=len(initialhitlines), x=so.lemmaone.dictionaryentry, l="all forms of "))
 
     so.poll.sethits(0)
     newhitlines = basicprecomposedsqlsearcher(so)

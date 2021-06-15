@@ -659,7 +659,8 @@ def getexternalhelperpath(theprogram=hipparchia.config['EXTERNALBINARYNAME']):
 		basepath = '/'.join(basepath.split('/')[:-2])
 	else:
 		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
-		basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
+		# basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
+		basepath = sys.path[0]
 
 	thepath = '{b}/server/{e}/{p}'.format(b=basepath, e=hipparchia.config['EXTERNALBINARYDIR'], p=theprogram)
 	return thepath
@@ -711,8 +712,12 @@ def genericexternalcliexecution(theprogram: str, formatterfunction, so: SearchOb
 		# so you need a little more work
 		resultrediskey = resultrediskey.split()[-1]
 	else:
-		consolewarning('{c} sent an error:\n{r}', color='red')
-		debugmessage(repr(result))
+		e = repr(result)
+		e = re.sub(r'\\n', '\n', e)
+		e = re.sub(r'\\t', '\t', e)
+		consolewarning('{c} returned an error'.format(c=hipparchia.config['EXTERNALBINARYNAME']), color='red')
+		consolewarning('{e}'.format(e=e), color='yellow')
+		# debugmessage(repr(result))
 
 	return resultrediskey
 

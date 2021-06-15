@@ -240,8 +240,13 @@ class RedisProgressPoll(object):
 		self.setredisvalue('active', 'no')
 
 	def getactivity(self):
+		try:
+			activity = self.getredisvalue('active')
+		except TypeError:
+			# TypeError: cannot convert 'NoneType' object to bytes
+			# the key is invalid/gone
+			return False
 		# some idiot broke the ability of redis_2 to do bool in redis_3...
-		activity = self.getredisvalue('active')
 		if activity.decode('utf-8') == 'yes':
 			return True
 		else:

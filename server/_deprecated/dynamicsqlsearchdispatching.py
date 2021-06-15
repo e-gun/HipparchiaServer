@@ -14,7 +14,8 @@ from typing import List
 
 from server import hipparchia
 from server.dbsupport.miscdbfunctions import icanpickleconnections, cleanpoolifneeded
-from server.dbsupport.redisdbfunctions import buildredissearchlist, loadredisresults
+from server.dbsupport.redisdbfunctions import buildredissearchlist
+from server._deprecated.dynamicsqlsearching import loadredisresults
 from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server._deprecated.searchfunctionobjects import returnsearchfncobject
