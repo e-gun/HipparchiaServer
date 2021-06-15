@@ -7,6 +7,7 @@
 """
 
 import multiprocessing
+import platform
 import re
 from multiprocessing import Manager
 from multiprocessing.context import Process
@@ -16,6 +17,7 @@ from typing import List, Generator
 import psycopg2
 
 from server.dbsupport.dblinefunctions import dblineintolineobject
+from server.dbsupport.miscdbfunctions import icanpickleconnections
 from server.dbsupport.miscdbfunctions import resultiterator
 from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.miscformatting import consolewarning
@@ -50,8 +52,16 @@ def precomposedsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
 
     argumentuple = [foundlineobjects, searchsqlbyauthor, so]
 
-    oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
+    if icanpickleconnections():
+        oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
+    else:
+        oneconnectionperworker = {i: None for i in range(workers)}
+
     argumentswithconnections = [tuple([i] + list(argumentuple) + [oneconnectionperworker[i]]) for i in range(workers)]
+
+    if platform.system() == 'Windows':
+        # windows hates multiprocessing; but in practice windows should never be coming here: HipparchiaGoDBHelper...
+        return workonprecomposedsqlsearch(*argumentswithconnections[0])
 
     jobs = [Process(target=workonprecomposedsqlsearch, args=argumentswithconnections[i]) for i in range(workers)]
 
@@ -87,6 +97,9 @@ def workonprecomposedsqlsearch(workerid: int, foundlineobjects: ListProxy, listo
     this is supposed to give you one query per hipparchiaDB table unless you are lemmatizing
 
     """
+
+    if not dbconnection:
+        dbconnection = ConnectionObject()
 
     so = searchobject
     activepoll = so.poll
@@ -125,6 +138,9 @@ def workonprecomposedsqlsearch(workerid: int, foundlineobjects: ListProxy, listo
             activepoll.remain(len(listofplacestosearch))
         except remaindererror:
             pass
+
+    if not icanpickleconnections():
+        dbconnection.connectioncleanup()
 
     return foundlineobjects
 

@@ -6,8 +6,8 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+import platform
 import re
-
 from collections import deque
 from multiprocessing import Manager, Process
 from typing import List
@@ -215,15 +215,21 @@ def getrequiredmorphobjects(setofterms: set, furtherdeabbreviate=False) -> dict:
 	:param terms:
 	:return:
 	"""
-	manager = Manager()
-	terms = manager.list(setofterms)
-	morphobjects = manager.dict()
+
 	workers = setthreadcount()
 
 	if icanpickleconnections():
 		oneconnectionperworker = {i: ConnectionObject() for i in range(workers)}
 	else:
 		oneconnectionperworker = {i: None for i in range(workers)}
+
+	if platform.system() == 'Windows':
+		# windows hates multiprocessing; but in practice windows should never be coming here: HipparchiaGoDBHelper...
+		return mpmorphology(list(setofterms), furtherdeabbreviate, dict(), oneconnectionperworker[0])
+
+	manager = Manager()
+	terms = manager.list(list(setofterms))
+	morphobjects = manager.dict()
 
 	jobs = [Process(target=mpmorphology, args=(terms, furtherdeabbreviate, morphobjects, oneconnectionperworker[i]))
 	        for i in range(workers)]
@@ -271,6 +277,9 @@ def mpmorphology(terms: list, furtherdeabbreviate: bool, dictofmorphobjects, dbc
 				dictofmorphobjects[term] = mo
 			else:
 				dictofmorphobjects[term] = None
+
+	if not icanpickleconnections():
+		dbconnection.connectioncleanup()
 
 	return dictofmorphobjects
 
