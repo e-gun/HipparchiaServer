@@ -659,8 +659,6 @@ def getexternalhelperpath(theprogram=hipparchia.config['EXTERNALBINARYNAME']):
 		basepath = path.dirname(__file__)
 		basepath = '/'.join(basepath.split('/')[:-2])
 	else:
-		# path.dirname(argv[0]) = /home/hipparchia/hipparchia_venv/bin
-		# basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
 		basepath = sys.path[0]
 
 	thepath = '{b}/server/{e}/{p}'.format(b=basepath, e=hipparchia.config['EXTERNALBINARYDIR'], p=theprogram)
