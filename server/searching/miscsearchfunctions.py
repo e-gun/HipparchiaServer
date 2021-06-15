@@ -13,6 +13,7 @@ import time
 from multiprocessing import JoinableQueue
 from os import path
 from string import punctuation
+import sys
 from typing import List
 
 from flask import request, session
