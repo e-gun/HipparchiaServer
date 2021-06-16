@@ -656,10 +656,9 @@ def getexternalhelperpath(theprogram=hipparchia.config['EXTERNALBINARYNAME']):
 
 	"""
 	if not hipparchia.config['EXTERNALWSGI']:
-		basepath = path.dirname(__file__)
-		basepath = '/'.join(basepath.split('/')[:-2])
-	else:
 		basepath = sys.path[0]
+	else:
+		basepath = path.abspath(hipparchia.config['HARDCODEDPATH'])
 
 	thepath = '{b}/server/{e}/{p}'.format(b=basepath, e=hipparchia.config['EXTERNALBINARYDIR'], p=theprogram)
 	return thepath
