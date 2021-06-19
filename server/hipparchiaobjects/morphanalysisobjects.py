@@ -219,7 +219,7 @@ class BaseFormMorphology(object):
 		pos = [<server.hipparchiaobjects.morphologyobjects.MorphPossibilityObject object at 0x14ff0b320>, ...]
 
 		for p in pos:
-			print(p.xref, p.observed, p.getanalysislist())
+			print(p.xref, p.observed, p.anal)
 
 			92033245 πνεύματοϲ ['neut gen sg']
 			92033245 πνεύματι ['neut dat sg']
@@ -240,7 +240,7 @@ class BaseFormMorphology(object):
 		# 90643736 πεπιαϲμένωϲ ['perf part mp masc acc pl (attic doric)']
 		# 90643736 πιεζεύμενα ['pres part mp neut nom/voc/acc pl (epic doric ionic)']
 		# 90643736 πιεζεύμενα ['pres part mp neut nom/voc/acc pl (epic doric ionic)']
-		pset = {'{a}_{b}'.format(a=p.observed, b=p.getanalysislist()[0]): p for p in pos}
+		pset = {'{a}_{b}'.format(a=p.observed, b=p.anal): p for p in pos}
 		pos = [pset[k] for k in pset.keys()]
 		return pos
 
@@ -279,7 +279,7 @@ class BaseFormMorphology(object):
 				mylanguage = 'greek'
 			if m.amlatin():
 				mylanguage = 'latin'
-			analysislist = m.getanalysislist()
+			analysislist = m.anal
 			available.extend([MorphAnalysis(m.observed, mylanguage, self.collapseattic, a) for a in analysislist])
 			# drop any items that failed to generate an analysis
 			available = [a for a in available if a]

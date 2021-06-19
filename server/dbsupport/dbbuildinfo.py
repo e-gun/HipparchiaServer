@@ -6,6 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
+from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 
 
@@ -71,11 +72,12 @@ def versionchecking(activedbs: list, expectedsqltemplateversion: str) -> str:
 
 	q = 'SELECT corpusname, templateversion, corpusbuilddate FROM builderversion'
 
-	warning = """
-		WARNING: VERSION MISMATCH
-		{d} has a builder template version of {v}
+	warn = """
+		WARNING: VERSION MISMATCH"""
+	info = """
+		{d} has a builder template version of >>{v}<<
 		(and was compiled {t})
-		This version of HipparchiaServer expects the template version to be {e}.
+		This version of HipparchiaServer expects the template version to be >>{e}<<.
 		You should either rebuild your data or revert to a compatible version of HipparchiaServer
 		FAILED SEARCHES / UNEXPECTED OUTPUT POSSIBLE
 		"""
@@ -93,7 +95,9 @@ def versionchecking(activedbs: list, expectedsqltemplateversion: str) -> str:
 	for db in activedbs:
 		if db in corpora:
 			if int(corpora[db][0]) != expectedsqltemplateversion:
-				print(warning.format(d=labeldecoder[db], v=corpora[db][0], t=corpora[db][1], e=expectedsqltemplateversion))
+				consolewarning(warn, baremessage=True, color='red')
+				consolewarning(info.format(d=labeldecoder[db], v=corpora[db][0], t=corpora[db][1],
+										   e=expectedsqltemplateversion), baremessage=True, color='yellow')
 
 	buildinfo = ['\t{corpus}: {date} [{prolix}]'.format(corpus=c, date=corpora[c][1], prolix=labeldecoder[c])
 				for c in sorted(corpora.keys())]

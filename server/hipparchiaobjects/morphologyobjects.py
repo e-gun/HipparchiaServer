@@ -19,43 +19,53 @@ class MorphPossibilityObject(object):
 
 	generate an object to deal with the morphological possibilities embedded inside of dbMorphologyObject.possibleforms
 
+	possibilitydict is JSON from teh database:
+		{
+				'headword': 'WORD',
+				'scansion': 'SCAN',
+				'xref_value': 'VAL',
+				'xref_kind': 'KIND',
+				'transl': 'TRANS',
+				'analysis': 'ANAL'
+		}
+
+	old:
+
+	findalltuple ('<possibility_1>', '1', 'fīliīs, filia', '30273503', '9', '<transl>a daughter; female offspring</transl><analysis>fem abl pl</analysis>')
+	findalltuple ('<possibility_2>', '2', 'fīliīs, filia', '30273503', '9', '<transl>a daughter; female offspring</transl><analysis>fem dat pl</analysis>')
+	findalltuple ('<possibility_3>', '3', 'fīliīs, filius', '30284765', '9', '<transl>a son; a son of mother earth</transl><analysis>masc abl pl</analysis>')
+	findalltuple ('<possibility_4>', '4', 'fīliīs, filius', '30284765', '9', '<transl>a son; a son of mother earth</transl><analysis>masc dat pl</analysis>')
+
 	"""
 	tenses = {'pres', 'aor', 'fut', 'perf', 'imperf', 'plup', 'futperf'}
 	genders = {'masc', 'fem', 'neut', 'masc/neut', 'masc/fem'}
 
-	def __init__(self, observedform, findalltuple, prefixcount):
+	def __init__(self, observedform, possibilitynumber, possibilitydict, prefixcount):
+		# print('possibilitydict', possibilitydict)
 		# print('findalltuple', findalltuple)
 		self.observed = observedform
-		self.number = findalltuple[1]
-		self.entry = findalltuple[2]
-		self.xref = findalltuple[3]
-		self.xkind = findalltuple[4]
-		self.transandanal = findalltuple[5]
+		self.number = possibilitynumber
+		self.entry = possibilitydict['headword']
+		self.xref = possibilitydict['xref_value']
+		self.xkind = possibilitydict['xref_kind']
+		self.transl = possibilitydict['transl']
+		self.anal = possibilitydict['analysis']
 		self.prefixcount = prefixcount
 		self.rewritten = False
 
 	def gettranslation(self):
-		transfinder = re.compile(r'<transl>(.*?)</transl>')
-		trans = re.findall(transfinder, self.transandanal)
+		trans = self.transl
 		try:
-			trans = trans[0].split('; ')
+			trans = trans.split('; ')
 		except IndexError:
 			pass
+		# print('trans=', trans)
 		# flag the level labels in 'A. Useful; B. Neutr. absol; C. ...'
 		levelhighlighter = re.compile(r'^(.{1,3}\.)\s')
 		levelbracket = lambda x: '<span class="transtree">{item}</span> '.format(item=x.group(1))
 		trans = [re.sub(levelhighlighter, levelbracket, t) for t in trans]
-		return '; '.join(trans)
-
-	def getanalysislist(self):
-		analysisfinder = re.compile(r'<analysis>(.*?)</analysis>')
-		analysislist = re.findall(analysisfinder, self.transandanal)
-		return analysislist
-
-	def getxreflist(self):
-		xreffinder = re.compile(r'<xref_value>(.*?)</xref_value')
-		xreflist = re.findall(xreffinder, self.transandanal)
-		return xreflist
+		t = '; '.join(trans)
+		return t
 
 	def amgreek(self) -> bool:
 		if re.search(minimumgreek, self.entry):
@@ -71,15 +81,13 @@ class MorphPossibilityObject(object):
 			return False
 
 	def canbeanadverb(self) -> bool:
-		analysislist = self.getanalysislist()
-		test = [a for a in analysislist if 'adverb' in a]
-		if not test:
+		if 'adverb' in self.anal:
 			return False
 		else:
 			return True
 
 	def _gettokens(self) -> set:
-		tokens = flattenlistoflists([a.split(' ') for a in self.getanalysislist()])
+		tokens = self.anal.split(' ')
 		tokens = flattenlistoflists([t.split('/') for t in tokens])
 		tokens = set(tokens)
 		return tokens

@@ -277,12 +277,30 @@ class dbMorphologyObject(object):
 	           |          |            |
 	(1 row)
 
+	possible_dictionary_forms is going to be JSON:
+		{'NUMBER': {
+				'headword': 'WORD',
+				'scansion': 'SCAN',
+				'xref_value': 'VAL',
+				'xref_kind': 'KIND',
+				'transl': 'TRANS',
+				'analysis': 'ANAL'
+			},
+		'NUMBER': {
+				'headword': 'WORD',
+				'scansion': 'SCAN',
+				'xref_value': 'VAL',
+				'xref_kind': 'KIND',
+				'transl': 'TRANS',
+				'analysis': 'ANAL'
+			},
+		...}
 
 	"""
 
 	__slots__ = ('observed', 'xrefs', 'prefixrefs', 'possibleforms', 'prefixcount', 'xrefcount', 'rewritten')
 
-	def __init__(self, observed, xrefs, prefixrefs, possibleforms):
+	def __init__(self, observed: str, xrefs, prefixrefs, possibleforms: dict):
 		self.observed = observed
 		self.xrefs = xrefs.split(', ')
 		self.prefixrefs = [x for x in prefixrefs.split(', ') if x]
@@ -292,15 +310,11 @@ class dbMorphologyObject(object):
 		self.rewritten = str()
 
 	def countpossible(self) -> int:
-		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
-		thepossible = re.findall(possiblefinder, self.possibleforms)
-		return len(thepossible)
+		return len(self.possibleforms)
 
 	def getpossible(self) -> List[MorphPossibilityObject]:
-		possiblefinder = re.compile(r'(<possibility_(\d{1,2})>)(.*?)<xref_value>(.*?)</xref_value><xref_kind>(.*?)</xref_kind>(.*?)</possibility_\d{1,2}>')
-		thepossible = re.findall(possiblefinder, self.possibleforms)
-		listofpossibilitiesobjects = [MorphPossibilityObject(self.observed, p, self.prefixcount) for p in thepossible]
-		return listofpossibilitiesobjects
+		po = [MorphPossibilityObject(self.observed, p, self.possibleforms[p], self.prefixcount) for p in self.possibleforms]
+		return po
 
 
 class dbLemmaObject(object):
