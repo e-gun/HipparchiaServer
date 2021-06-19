@@ -40,7 +40,7 @@ class MorphPossibilityObject(object):
 	tenses = {'pres', 'aor', 'fut', 'perf', 'imperf', 'plup', 'futperf'}
 	genders = {'masc', 'fem', 'neut', 'masc/neut', 'masc/fem'}
 
-	def __init__(self, observedform, possibilitynumber, possibilitydict, prefixcount):
+	def __init__(self, observedform: str, possibilitynumber, possibilitydict: dict, prefixcount: int):
 		# print('possibilitydict', possibilitydict)
 		# print('findalltuple', findalltuple)
 		self.observed = observedform

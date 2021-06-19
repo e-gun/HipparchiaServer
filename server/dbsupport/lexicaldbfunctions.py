@@ -740,13 +740,14 @@ def lookformorphologymatches(word: str, dbcursor, trialnumber=0, revertword=None
 		pr = flattenlistoflists([m.prefixrefs for m in morphobjects])
 		pr = ', '.join(pr)
 		pf = [m.possibleforms for m in morphobjects]
+		hw = flattenlistoflists([m.headwords for m in morphobjects])
 
 		# note that you will have multiple '<possibility_1>' entries now... Does not matter ATM, but a bug waiting to bite
 		mergedpf = dict()
 		for p in pf:
 			mergedpf = {**mergedpf, **p}
 
-		morphobject = dbMorphologyObject(ob, xr, pr, mergedpf)
+		morphobject = dbMorphologyObject(ob, xr, pr, mergedpf, hw)
 
 	return morphobject
 

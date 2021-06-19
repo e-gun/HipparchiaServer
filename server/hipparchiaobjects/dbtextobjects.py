@@ -250,12 +250,17 @@ class dbMorphologyObject(object):
 
 	an object that corresponds to a db line
 
-	CREATE TABLE public.greek_morphology (
-		observed_form character varying(64) COLLATE pg_catalog."default",
-		xrefs character varying(128) COLLATE pg_catalog."default",
-		prefixrefs character varying(128) COLLATE pg_catalog."default",
-		possible_dictionary_forms text COLLATE pg_catalog."default"
+	CREATE TABLE public.latin_morphology
+	(
+		observed_form             character varying(64),
+		xrefs                     character varying(128),
+		prefixrefs                character varying(128),
+		possible_dictionary_forms jsonb,
+		related_headwords         character varying(256)
 	)
+	WITH (
+	  OIDS=FALSE
+	);
 
 	hipparchiaDB=# select count(observed_form) from greek_morphology;
 	 count
@@ -267,14 +272,6 @@ class dbMorphologyObject(object):
 	 count
 	--------
 	 270227
-	(1 row)
-
-
-	hipparchiaDB=# select * from greek_morphology where observed_form='καταμείναντεϲ';
-	observed_form |  xrefs   | prefixrefs |                                                                       possible_dictionary_forms
-	---------------+----------+------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	καταμείναντεϲ | 58645029 |            | <possibility_1>καταμένω<xref_value>58645029</xref_value><xref_kind>9</xref_kind><transl>stay</transl><analysis>aor part act masc nom/voc pl</analysis></possibility_1>+
-	           |          |            |
 	(1 row)
 
 	possible_dictionary_forms is going to be JSON:
@@ -298,15 +295,16 @@ class dbMorphologyObject(object):
 
 	"""
 
-	__slots__ = ('observed', 'xrefs', 'prefixrefs', 'possibleforms', 'prefixcount', 'xrefcount', 'rewritten')
+	__slots__ = ('observed', 'xrefs', 'prefixrefs', 'possibleforms', 'prefixcount', 'xrefcount', 'headwords', 'rewritten')
 
-	def __init__(self, observed: str, xrefs, prefixrefs, possibleforms: dict):
+	def __init__(self, observed: str, xrefs, prefixrefs, possibleforms: dict, headwords: list):
 		self.observed = observed
 		self.xrefs = xrefs.split(', ')
 		self.prefixrefs = [x for x in prefixrefs.split(', ') if x]
 		self.possibleforms = possibleforms
 		self.prefixcount = len(self.prefixrefs)
 		self.xrefcount = len(self.xrefs)
+		self.headwords = headwords
 		self.rewritten = str()
 
 	def countpossible(self) -> int:
