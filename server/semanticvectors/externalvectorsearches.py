@@ -167,7 +167,6 @@ def externalvectors(so: SearchObject) -> JSON_STR:
 
         redisresults = mutiredisfetch(vectorresultskey)
         debugmessage('fetched {r} bags from {k}'.format(k=vectorresultskey, r=len(redisresults)))
-        print('redisresults[0:3]', redisresults[0:3])
 
         try:
             # golang results are in dict form...

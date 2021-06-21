@@ -153,7 +153,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 		outputlist.append(obsvstring.format(ct=chr(count + countchar), xdf=xdf))
 
 		if len(subentries) == 1:
-			analysischunks = firstsubentry.anal.split(' ')
+			analysischunks = firstsubentry.analysis.split(' ')
 			analysischunks = ['\n<td class="morphcell">{a}</td>'.format(a=a) for a in analysischunks]
 			tr = '<tr><td class="morphcell invisible">[{ct}]</td>{tds}\n</tr>'.format(ct=chr(subcountchar), tds=str().join(analysischunks))
 			outputlist.append(morphabletemplate.format(trs=tr))
@@ -162,7 +162,7 @@ def formatparsinginformation(possibilitieslist: List[MorphPossibilityObject]) ->
 			analyses = list()
 			for e in range(len(subentries)):
 				# unfortunately you can get dupes in here...
-				anal = subentries[e].anal.split(' ')  # e.g. ['masc', 'acc', 'sg']
+				anal = subentries[e].analysis.split(' ')  # e.g. ['masc', 'acc', 'sg']
 				formatted = ['<td class="morphcell">{a}</td>'.format(a=a) for a in anal]
 				analyses.append(str().join(formatted))
 				analyses = list(set(analyses))

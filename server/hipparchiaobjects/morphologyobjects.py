@@ -49,7 +49,7 @@ class MorphPossibilityObject(object):
 		self.xref = possibilitydict['xref_value']
 		self.xkind = possibilitydict['xref_kind']
 		self.transl = possibilitydict['transl']
-		self.anal = possibilitydict['analysis']
+		self.analysis = possibilitydict['analysis']
 		self.prefixcount = prefixcount
 		self.rewritten = False
 
@@ -81,13 +81,13 @@ class MorphPossibilityObject(object):
 			return False
 
 	def canbeanadverb(self) -> bool:
-		if 'adverb' in self.anal:
+		if 'adverb' in self.analysis:
 			return False
 		else:
 			return True
 
 	def _gettokens(self) -> set:
-		tokens = self.anal.split(' ')
+		tokens = self.analysis.split(' ')
 		tokens = flattenlistoflists([t.split('/') for t in tokens])
 		tokens = set(tokens)
 		return tokens

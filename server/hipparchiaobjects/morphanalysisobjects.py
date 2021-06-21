@@ -24,6 +24,7 @@ class MorphAnalysis(object):
 	             'analysisstring', 'partofspeech', 'nondialectical')
 
 	def __init__(self, word, mylanguage, collapseattic, analysisstring):
+		# print('MorphAnalysis() self.analysisstring', analysisstring)
 		self.analysis = NotImplemented
 		self.analyssiscomponents = NotImplemented
 		self.dialects = NotImplemented
@@ -128,10 +129,9 @@ class BaseFormMorphology(object):
 
 	__slots__ = ('showalldialects', 'collapseattic', 'headword', 'language', 'xref', 'lexicalid', 'lemmata',
 	             'dictionaryentry', 'formlist', 'dbmorphobjects', 'morphpossibilities', 'numberofknownforms',
-	             'analyses', 'missingparts', 'principleparts', 'knowndialects')
+				 'listofanalyses', 'missingparts', 'principleparts', 'knowndialects')
 
 	def __init__(self, headword: str, xref: str, language: str, lexicalid: str, thesession: dict, passedlemmataobject=None):
-		# print('bfmo init', headword, xref, language, lexicalid)
 		self.showalldialects = thesession['morphdialects']
 		self.collapseattic = thesession['collapseattic']
 		assert language in ['greek', 'latin'], 'BaseFormMorphology() only knows words that are "greek_morphology" or "latin_morphology"'
@@ -155,15 +155,15 @@ class BaseFormMorphology(object):
 		self.dbmorphobjects = bulkfindmorphologyobjects(self.formlist, self.language)
 		self.morphpossibilities = self._getmorphpossibilities()
 		self.numberofknownforms = len(self.morphpossibilities)
-		self.analyses = self._getalanlyses()
+		self.listofanalyses = self._getalanlyses()
 		self.missingparts = {'will_be_None_or_an_accurate_list_later'}
 		self.principleparts = None
 		self.knowndialects = self._getknowndialects()
 
 	def iammostlyconjugated(self):
 		# 'annus' has 'anno' in it: a single verbal lookalike
-		vv = [v for v in self.analyses if isinstance(v.getanalysis(), ConjugatedFormAnalysis)]
-		dd = [d for d in self.analyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
+		vv = [v for v in self.listofanalyses if isinstance(v.getanalysis(), ConjugatedFormAnalysis)]
+		dd = [d for d in self.listofanalyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
 		# print('mostlyconjugatedforms: len(vv) & len(dd)', self.headword, len(vv), len(dd))
 		if len(vv) > len(dd):
 			return True
@@ -171,7 +171,7 @@ class BaseFormMorphology(object):
 			return False
 
 	def iamdeclined(self):
-		dd = [d for d in self.analyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
+		dd = [d for d in self.listofanalyses if isinstance(d.getanalysis(), DeclinedFormAnalysis)]
 		if dd:
 			return True
 		else:
@@ -179,19 +179,19 @@ class BaseFormMorphology(object):
 
 	def getprincipleparts(self) -> list:
 		if not self.principleparts:
-			ppf = PrinciplePartFunctions(self.analyses, self.language)
+			ppf = PrinciplePartFunctions(self.listofanalyses, self.language)
 			self.principleparts = ppf.determineprincipleparts()
 		return self.principleparts
 
 	def buildhtmlverbtablerows(self, thesession: dict) -> List[str]:
 		keyedwcounts = self._generatekeyedwordcounts()
-		cff = ConjugatedFormFunctions(self.headword, self.analyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
+		cff = ConjugatedFormFunctions(self.headword, self.listofanalyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
 		returnarray = cff.buildhtmlverbtablerows(thesession)
 		return returnarray
 
 	def buildhtmldeclinedtablerows(self) -> List[str]:
 		keyedwcounts = self._generatekeyedwordcounts()
-		dff = DeclinedFormFunctions(self.headword, self.analyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
+		dff = DeclinedFormFunctions(self.headword, self.listofanalyses, self.language, keyedwcounts, self.knowndialects, self.showalldialects, self.collapseattic)
 		returnarray = dff.buildhtmldeclinedtablerows()
 		return returnarray
 
@@ -205,7 +205,7 @@ class BaseFormMorphology(object):
 
 		:return:
 		"""
-		wordset = {re.sub(r"'$", str(), a.word) for a in self.analyses}
+		wordset = {re.sub(r"'$", str(), a.word) for a in self.listofanalyses}
 		initials = {stripaccents(w[0]) for w in wordset}
 		byinitial = {i: [w for w in wordset if stripaccents(w[0]) == i] for i in initials}
 		wco = [bulkfindwordcounts(byinitial[i]) for i in byinitial]
@@ -240,7 +240,7 @@ class BaseFormMorphology(object):
 		# 90643736 πεπιαϲμένωϲ ['perf part mp masc acc pl (attic doric)']
 		# 90643736 πιεζεύμενα ['pres part mp neut nom/voc/acc pl (epic doric ionic)']
 		# 90643736 πιεζεύμενα ['pres part mp neut nom/voc/acc pl (epic doric ionic)']
-		pset = {'{a}_{b}'.format(a=p.observed, b=p.anal): p for p in pos}
+		pset = {'{a}_{b}'.format(a=p.observed, b=p.analysis): p for p in pos}
 		pos = [pset[k] for k in pset.keys()]
 		return pos
 
@@ -250,7 +250,7 @@ class BaseFormMorphology(object):
 			return alldialects
 
 		alldialects = set()
-		parsing = [x.analysis for x in self.analyses if x.analysis]
+		parsing = [x.analysis for x in self.listofanalyses if x.analysis]
 		for p in parsing:
 			dialectlist = p.dialects
 			alldialects.update(dialectlist)
@@ -279,8 +279,8 @@ class BaseFormMorphology(object):
 				mylanguage = 'greek'
 			if m.amlatin():
 				mylanguage = 'latin'
-			analysislist = m.anal
-			available.extend([MorphAnalysis(m.observed, mylanguage, self.collapseattic, a) for a in analysislist])
+			# this is a key server 1.8.0 / builder 1.5.0 change...
+			available.append(MorphAnalysis(m.observed, mylanguage, self.collapseattic, m.analysis))
 			# drop any items that failed to generate an analysis
 			available = [a for a in available if a]
 		return available
@@ -572,8 +572,8 @@ class PrinciplePartFunctions(object):
 	loaded into a BaseFormMorphology() object on an as needed basis
 
 	"""
-	def __init__(self, analyses: list, language: str):
-		self.analyses = analyses
+	def __init__(self, analyses: List[MorphAnalysis], language: str):
+		self.listofanalyses = analyses
 		self.language = language
 		self.principleparts = None
 		self.missingparts = True
@@ -588,9 +588,7 @@ class PrinciplePartFunctions(object):
 		elif self.language == 'latin':
 			pplen = 4
 
-		# print('self.analyses[0].partofspeech',self.analyses[0].partofspeech)
-		# print('self.analyses[0].partofspeech', self.analyses[0].getanalysis())
-		verbforms = [a for a in self.analyses if a.partofspeech == 'conjugated' and isinstance(a.getanalysis(), ConjugatedFormAnalysis)]
+		verbforms = [a for a in self.listofanalyses if a.partofspeech == 'conjugated' and isinstance(a.getanalysis(), ConjugatedFormAnalysis)]
 
 		if not verbforms:
 			return
@@ -658,7 +656,7 @@ class PrinciplePartFunctions(object):
 
 		substitutetemplate = '{w}&nbsp;&nbsp;[{a}]'
 
-		verbforms = [a for a in self.analyses if a.partofspeech == 'conjugated']
+		verbforms = [a for a in self.listofanalyses if a.partofspeech == 'conjugated']
 
 		for a in alternates:
 			for v in verbforms:
