@@ -7,6 +7,7 @@
 """
 
 import json
+from json import JSONDecodeError
 
 from server import hipparchia
 from server.dbsupport.redisdbfunctions import establishredisconnection, mutiredisfetch
@@ -166,9 +167,16 @@ def externalvectors(so: SearchObject) -> JSON_STR:
 
         redisresults = mutiredisfetch(vectorresultskey)
         debugmessage('fetched {r} bags from {k}'.format(k=vectorresultskey, r=len(redisresults)))
+        print('redisresults[0:3]', redisresults[0:3])
 
-        js = [json.loads(r) for r in redisresults]
-        hits = {j['Loc']: j['Sent'] for j in js}
+        try:
+            # golang results are in dict form...
+            js = [json.loads(r) for r in redisresults]
+            hits = {j['Loc']: j['Sent'] for j in js}
+        except JSONDecodeError:
+            # rust results are a list of binary strings...
+            js = [r.decode('utf-8') for r in redisresults]
+            hits = {k: v for (k, v) in enumerate(js)}
 
         # note that we are about to toss the 'Loc' info that we compiled (and used as a k in k/v pairs...)
         # there are (currently unused) vector styles that can require it
@@ -294,6 +302,12 @@ def formatexternalappvectorhelperarguments(command: str, so: SearchObject) -> li
 
     """
 
+    if 'Rust' not in hipparchia.config['EXTERNALBINARYNAME']:
+        # irritating '--x' vs '-x' issue...
+        prefix = '-'
+    else:
+        prefix = '--'
+
     arguments = dict()
 
     arguments['svb'] = so.session['baggingmethod']
@@ -317,8 +331,8 @@ def formatexternalappvectorhelperarguments(command: str, so: SearchObject) -> li
     else:
         arguments['p'] = json.dumps(psd)
 
-    argumentlist = [['-{k}'.format(k=k), '{v}'.format(v=arguments[k])] for k in arguments]
-    argumentlist.append(['-sv'])
+    argumentlist = [['{x}{k}'.format(k=k, x=prefix), '{v}'.format(v=arguments[k])] for k in arguments]
+    argumentlist.append(['{x}sv'.format(x=prefix)])
     argumentlist = flattenlistoflists(argumentlist)
     commandandarguments = [command] + argumentlist
 

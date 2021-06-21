@@ -232,6 +232,8 @@ def acquireandbagthewords(so: SearchObject) -> List[List[str]]:
     # consolewarning('trimming sentences: remove next line of code later')
     # allsentences = allsentences[:20]
 
+    # consolewarning('acquireandbagthewords(): {s} sentences found'.format(s=len(allsentences)), color='red')
+
     morphdict = dict()
     if so.session['baggingmethod'] != 'unlemmatized':
         so.poll.statusis('Determining the set of words')

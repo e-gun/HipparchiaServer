@@ -34,7 +34,7 @@ set some variables at outer scope that both frontpage() and errorhandlingpage() 
 """
 
 stylesheet = hipparchia.config['CSSSTYLESHEET']
-expectedsqltemplateversion = 10082019
+expectedsqltemplateversion = 6182021
 # check to see which dbs we actually own
 activelists = [l for l in listmapper if len(listmapper[l]['a']) > 0]
 buildinfo = versionchecking(activelists, expectedsqltemplateversion)
