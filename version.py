@@ -12,7 +12,7 @@ from os import path
 
 stable = False
 release = False
-prerelease = True
+prerelease = False
 
 hipparchiaserverversion = '1.8.0'
 plus = '+'
