@@ -10,7 +10,7 @@ import json
 from json import JSONDecodeError
 
 from server import hipparchia
-from server.dbsupport.redisdbfunctions import establishredisconnection, mutiredisfetch
+from server.dbsupport.redisdbfunctions import establishredisconnection, redisfetch
 from server.dbsupport.vectordbfunctions import checkforstoredvector
 from server.formatting.miscformatting import consolewarning, debugmessage
 from server.formatting.vectorformatting import ldatopicsgenerateoutput
@@ -165,7 +165,7 @@ def externalvectors(so: SearchObject) -> JSON_STR:
         # [5] collect the sentences and hand them over to Word2Vec(), etc.
         so.poll.statusis('Fetching the bags of words')
 
-        redisresults = mutiredisfetch(vectorresultskey)
+        redisresults = redisfetch(vectorresultskey)
         debugmessage('fetched {r} bags from {k}'.format(k=vectorresultskey, r=len(redisresults)))
 
         try:

@@ -10,7 +10,7 @@ import json
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.redisdbfunctions import establishredisconnection, mutiredisfetch
+from server.dbsupport.redisdbfunctions import establishredisconnection, redisfetch
 from server.formatting.miscformatting import debugmessage, consolewarning
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
@@ -93,7 +93,7 @@ def precomposedexternalsearcher(so: SearchObject) -> List[dbWorkLine]:
     else:
         resultrediskey = helperclibinarysearcher(so)
 
-    redisresults = mutiredisfetch(resultrediskey)
+    redisresults = redisfetch(resultrediskey)
 
     hits = [redishitintodbworkline(r) for r in redisresults]
 

@@ -6,8 +6,7 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import platform
-from multiprocessing import current_process, Queue, Process
+from multiprocessing import current_process
 from typing import List
 
 from click import secho
@@ -117,79 +116,28 @@ def buildredissearchlist(listofsearchlocations: List, searchid: str):
 	return
 
 
-def mutiredisfetch(vectorresultskey):
+def redisfetch(vectorresultskey) -> List[bytearray]:
 	"""
 
-	parallelize redis fetching
+	pop a big wad of results from redis
 
 	"""
 
-	if platform.system() == 'Windows':
-		return monoredisfetch(vectorresultskey)
-
-	workers = setthreadcount()
-
-	q = Queue()
-	processes = list()
-	results = list()
-
-	for _ in range(workers):
-		p = Process(target=redisfetch, args=(vectorresultskey, q))
-		processes.append(p)
-		p.start()
-
-	for _ in processes:
-		oneresult = q.get()  # will block
-		results.append(oneresult)
-
-	for p in processes:
-		p.join()
-
-	compositeresults = list()
-	for r in results:
-		compositeresults.extend(r)
-
-	return compositeresults
-
-
-def redisfetch(vectorresultskey, queue):
-	"""
-
-	generic fetcher to be used with mutiredisfetch()
-
-	"""
 	rc = establishredisconnection()
-	redisresults = list()
 
-	while vectorresultskey:
-		r = rc.spop(vectorresultskey)
-		if r:
-			redisresults.append(r)
-		else:
-			vectorresultskey = None
+	tofetch = rc.scard(vectorresultskey)
+	allresults = rc.spop(vectorresultskey, tofetch)
 
-	queue.put(redisresults)
+	# all at once is FAR faster than iterating...
 
-	return
+	# while vectorresultskey:
+	# 	r = rc.spop(vectorresultskey)
+	# 	if r:
+	# 		redisresults.append(r)
+	# 	else:
+	# 		vectorresultskey = None
 
-
-def monoredisfetch(vectorresultskey):
-	"""
-
-	windows hates mutiredisfetch()
-
-	"""
-	rc = establishredisconnection()
-	redisresults = list()
-
-	while vectorresultskey:
-		r = rc.spop(vectorresultskey)
-		if r:
-			redisresults.append(r)
-		else:
-			vectorresultskey = None
-
-	return redisresults
+	return allresults
 
 
 """

@@ -271,7 +271,11 @@ async def wscheckpoll(websocket, path):
 				# you reloaded the page in the middle of a search and both the poll and the socket vanished
 				pass
 			break
-
+		except TypeError:
+			# TypeError: int() argument must be a string, a bytes-like object or a number, not 'NoneType
+			# the poll is gone...
+			break
+		
 		await asyncio.sleep(.4)
 		# print(progress)
 		# print('progress %', ((progress['Poolofwork'] - progress['Remaining']) / progress['Poolofwork']) * 100)
