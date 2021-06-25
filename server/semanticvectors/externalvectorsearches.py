@@ -98,6 +98,8 @@ def externalvectors(so: SearchObject) -> JSON_STR:
 
     NB: we are assuming you also have the golanggrabber available
 
+    at the moment only the cli binary will search: the module version has not been configured yet...
+
     n6:
         127.0.0.1:6379> spop 2b10de72_vectorresults 4
         1) "{\"Loc\":\"line/lt0472w001/615\",\"Sent\":\"acceptum facio reddo lesbia mius praesens malus\xc2\xb2 multus dico\xc2\xb2 non possum reticeo detondeo qui\xc2\xb9 ego in reor attulo\"}"
@@ -258,13 +260,13 @@ def externalclibinaryvectorhelper(so: SearchObject) -> str:
 
 def formatexternalappvectorhelperarguments(command: str, so: SearchObject) -> list:
     """
-    Hipparchia Golang Helper CLI Debugging Interface (v.1.1.0)
+    Hipparchia Golang Helper CLI Debugging Interface (v.1.3.0)
 
-     Usage of ./HipparchiaGoDBHelper:
+    Usage of ./HipparchiaGoDBHelper:
       -c int
             [searches] max hit count (default 200)
       -k string
-            [searches] redis key to use (default "go")
+            [searches] redis key to use
       -l int
             [common] logging level: 0 is silent; 5 is very noisy (default 1)
       -p string
@@ -275,6 +277,8 @@ def formatexternalappvectorhelperarguments(command: str, so: SearchObject) -> li
             [vectors] assert that this is a vectorizing run
       -svb string
             [vectors] the bagging method: choices are alternates, flat, unlemmatized, winnertakesall (default "winnertakesall")
+      -svbs int
+            [vectors] number of sentences per bag (default 1)
       -svdb string
             [vectors][for manual debugging] db to grab from (default "lt0448")
       -sve int
@@ -287,7 +291,7 @@ def formatexternalappvectorhelperarguments(command: str, so: SearchObject) -> li
             [vectors][for manual debugging] first line to grab (default 1)
       -t int
             [common] number of goroutines to dispatch (default 5)
-      -v    [common] print version and exit
+      -v	[common] print version and exit
       -ws
             [websockets] assert that you are requesting the websocket server
       -wsf int
@@ -310,6 +314,7 @@ def formatexternalappvectorhelperarguments(command: str, so: SearchObject) -> li
     arguments = dict()
 
     arguments['svb'] = so.session['baggingmethod']
+    arguments['svbs'] = so.session['vsentperdoc']
     arguments['k'] = so.searchid
     arguments['l'] = hipparchia.config['EXTERNAVECTORLOGLEVEL']
 
