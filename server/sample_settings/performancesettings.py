@@ -46,28 +46,11 @@
 #   an option of interest only to debuggers and hard-core optimizers.
 #
 # INTERMEDIATESEARCHCAP: the maximum number of items to accept in the
-#   middle of a search. This is to keep "'et' near 'at'" from going insane
-#
-# GOLANGGRABBER: this is non-standard; it requires SEARCHCODESTYLE = 'precomposed'
-#   as well as a working redis installation (the latter is not present by
-#   default). If True, your searches will multiprocess by being set through a
-#   golang shared object whose goroutines will spawn multiple workers. The
-#   point of this is to obviate the need for python to spawn/fork, etc.
-#
-# GOLANGLOADING: how to call the external functions; 'module' is *supposed* to be the right way;
-#   but the module seems to have GIL issues that kill off progress polling. The 'cli' option
-#   does not yield this problem. 'module' requires a GOLANGTHWSBINARY. This is not installed by default.
-#   NB, the cli executable is also not installed by default, but if it is,
-#   it should be stored next to the module: that is, inside "HipparchiaServer/server/golangmodule/".
-#   This setting has no effect if GOLANGGRABBER is not True. Please note the SECURITY
-#   IMPLICATIONS of 'cli': you will be sending a db password to a process and this event could be
-#   snooped by another user on your same system: "ps aux | grep gol" will expose the DB password.
-#   This can be avoided by building the binary yourself and hard coding the pw into it; then you can
-#   call the cli binary without sending the password.
-#
-# GOLANGBINARYKNOWSLOGININFO: almost certainly False unless you know it to be True as per the above.
-#
-# GOLANGWSFAILTHRESHOLD: how many empty results before the golang websocket stops yielding info about "searchid"
+#   middle of a search. This is to keep "'et' near 'at'" from going insane.
+#   Nevertheless, there is an issue here with the external binary. See the
+#   notes at generatepreliminaryhitlist(). 215k or so seems to be a limit
+#   imposed by redis as we currently interact with it. This corner case
+#   might not get addressed for a while.
 #
 
 AUTOCONFIGWORKERS = True

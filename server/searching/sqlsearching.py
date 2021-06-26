@@ -140,6 +140,18 @@ def generatepreliminaryhitlist(so: SearchObject, recap=hipparchia.config['INTERM
 
     grab the hits for part one of a two part search
 
+    INTERMEDIATESEARCHCAP is interesting...
+
+    you can test via "Sought »α« within 1 lines of »ι«"
+
+    216247 or so looks like it is the cap for the grabber at the moment
+    this despite "var c int64" in golang and rust; note that the exact fail # varies
+    redis itself is freaking out / running out of memory?
+
+    https://redis.io/topics/faq says that the sky is the limit...
+
+    but perhaps a single set is not allowed to grow beyond 512MB or something like that
+
     """
 
     actualcap = so.cap

@@ -137,6 +137,7 @@ def externalvectors(so: SearchObject) -> JSON_STR:
 
         so.poll.statusis('Preparing to search')
         so.usecolumn = 'marked_up_line'
+
         so.cap = 199999999
 
         # [2] do a searchlistintosqldict()
