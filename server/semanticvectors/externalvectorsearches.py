@@ -170,14 +170,9 @@ def externalvectors(so: SearchObject) -> JSON_STR:
         redisresults = redisfetch(vectorresultskey)
         debugmessage('fetched {r} bags from {k}'.format(k=vectorresultskey, r=len(redisresults)))
 
-        try:
-            # golang results are in dict form...
-            js = [json.loads(r) for r in redisresults]
-            hits = {j['Loc']: j['Bag'] for j in js}
-        except JSONDecodeError:
-            # rust results are a list of binary strings...
-            js = [r.decode('utf-8') for r in redisresults]
-            hits = {k: v for (k, v) in enumerate(js)}
+        # results results are in dict form...
+        js = [json.loads(r) for r in redisresults]
+        hits = {j['Loc']: j['Bag'] for j in js}
 
         # note that we are about to toss the 'Loc' info that we compiled (and used as a k in k/v pairs...)
         # there are (currently unused) vector styles that can require it
