@@ -144,13 +144,10 @@ def generatepreliminaryhitlist(so: SearchObject, recap=hipparchia.config['INTERM
 
     you can test via "Sought »α« within 1 lines of »ι«"
 
-    216247 or so looks like it is the cap for the grabber at the moment
-    this despite "var c int64" in golang and rust; note that the exact fail # varies
-    redis itself is freaking out / running out of memory?
+    400k or so seems to be the practical worst case: if you search for "α" in all of the databases you will get 392275
+    lines back as your intermediate result. You just grabbed a huge % of the total possible collection of lines.
 
-    https://redis.io/topics/faq says that the sky is the limit...
-
-    but perhaps a single set is not allowed to grow beyond 512MB or something like that
+    you can pull this in about 5s, so there is really no reason to worry about the cap if using the grabber
 
     """
 

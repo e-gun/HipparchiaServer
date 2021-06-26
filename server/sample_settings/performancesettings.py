@@ -48,10 +48,11 @@
 # INTERMEDIATESEARCHCAP: the maximum number of items to accept in the
 #   middle of a search. This is to keep "'et' near 'at'" from going insane.
 #   Nevertheless, there is an issue here with the external binary. See the
-#   notes at generatepreliminaryhitlist(). 215k or so seems to be a limit
-#   imposed by redis as we currently interact with it. This corner case
-#   might not get addressed for a while.
-#
+#   notes at generatepreliminaryhitlist(). 400k or so seems to be the worst
+#   case: if you search for "α" in all of the databases you will get 392275
+#   lines back as your intermediate result. You just grabbed a huge % of the
+#   total possible collection of lines. People who don't use a helper app
+#   should fear this number, but golang can get you to 400k in 5s.
 
 AUTOCONFIGWORKERS = True
 WORKERS = 3
