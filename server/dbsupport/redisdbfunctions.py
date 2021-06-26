@@ -121,21 +121,54 @@ def redisfetch(vectorresultskey) -> List[bytearray]:
 
 	pop a big wad of results from redis
 
+	>> import redis
+	>> rc = redis.ConnectionPool(host='127.0.0.1', port=6379, db=0)
+	>> c = redis.Redis(connection_pool=rc)
+
+	>> c.sadd('x', 1)
+	1
+	>> c.sadd('x', 3)
+	1
+	>> c.scard('x')
+	2
+	>> c.spop('x', 2)
+	Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "C:\Users\Erik\hipparchia_venv\lib\site-packages\redis\client.py", line 2290, in spop
+	return self.execute_command('SPOP', name, *args)
+	File "C:\Users\Erik\hipparchia_venv\lib\site-packages\redis\client.py", line 901, in execute_command
+	return self.parse_response(conn, command_name, **options)
+	File "C:\Users\Erik\hipparchia_venv\lib\site-packages\redis\client.py", line 915, in parse_response
+	response = connection.read_response()
+	File "C:\Users\Erik\hipparchia_venv\lib\site-packages\redis\connection.py", line 756, in read_response
+	raise response
+	redis.exceptions.ResponseError: wrong number of arguments for 'spop' command
+
+	https://redis.io/commands/spop
+
+	>= 3.2: Added the count argument.
+
 	"""
+	allresults = list()
 
 	rc = establishredisconnection()
 
 	tofetch = rc.scard(vectorresultskey)
-	allresults = rc.spop(vectorresultskey, tofetch)
+
+	try:
+		allresults = rc.spop(vectorresultskey, tofetch)
+	except redis.exceptions.ResponseError:
+		print('silly windows is alone unable to send number to pop to spop')
+		pass
 
 	# all at once is FAR faster than iterating...
-
-	# while vectorresultskey:
-	# 	r = rc.spop(vectorresultskey)
-	# 	if r:
-	# 		redisresults.append(r)
-	# 	else:
-	# 		vectorresultskey = None
+	if not allresults:
+		while vectorresultskey:
+			r = rc.spop(vectorresultskey)
+			if r:
+				allresults.append(r)
+			else:
+				vectorresultskey = None
 
 	return allresults
 

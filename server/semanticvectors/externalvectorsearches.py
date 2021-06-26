@@ -75,7 +75,7 @@ def externalvectors(so: SearchObject) -> JSON_STR:
     [a] grab db lines that are relevant to the search
     [b] turn them into a unified text block
     [c] do some preliminary cleanups
-    [d] break the text into sentences and assemble []SentenceWithLocus (NB: these are "unlemmatized bags of words")
+    [d] break the text into sentences and assemble []BagWithLocus (NB: these are "unlemmatized bags of words")
     [e] figure out all of the words used in the passage
     [f] find all of the parsing info relative to these words
     [g] figure out which headwords to associate with the collection of words
@@ -102,10 +102,10 @@ def externalvectors(so: SearchObject) -> JSON_STR:
 
     n6:
         127.0.0.1:6379> spop 2b10de72_vectorresults 4
-        1) "{\"Loc\":\"line/lt0472w001/615\",\"Sent\":\"acceptum facio reddo lesbia mius praesens malus\xc2\xb2 multus dico\xc2\xb2 non possum reticeo detondeo qui\xc2\xb9 ego in reor attulo\"}"
-        2) "{\"Loc\":\"line/lt0472w001/1294\",\"Sent\":\"jacio hederiger quandoquidem fortuna meus atque tuus ego miser aspicio et si puriter ago qui\xc2\xb2 enim genus\xc2\xb9 figura curro duco subtemen curro fundo\xc2\xb9\"}"
-        3) "{\"Loc\":\"line/lt0472w001/2296\",\"Sent\":\"qui\xc2\xb2 tu nunc chordus\xc2\xb9 quis\xc2\xb9 tu praepono nos possum\"}"
-        4) "{\"Loc\":\"line/lt0472w001/1105\",\"Sent\":\"rasilis subeo foris\xc2\xb9\"}"
+        1) "{\"Loc\":\"line/lt0472w001/615\",\"Bag\":\"acceptum facio reddo lesbia mius praesens malus\xc2\xb2 multus dico\xc2\xb2 non possum reticeo detondeo qui\xc2\xb9 ego in reor attulo\"}"
+        2) "{\"Loc\":\"line/lt0472w001/1294\",\"Bag\":\"jacio hederiger quandoquidem fortuna meus atque tuus ego miser aspicio et si puriter ago qui\xc2\xb2 enim genus\xc2\xb9 figura curro duco subtemen curro fundo\xc2\xb9\"}"
+        3) "{\"Loc\":\"line/lt0472w001/2296\",\"Bag\":\"qui\xc2\xb2 tu nunc chordus\xc2\xb9 quis\xc2\xb9 tu praepono nos possum\"}"
+        4) "{\"Loc\":\"line/lt0472w001/1105\",\"Bag\":\"rasilis subeo foris\xc2\xb9\"}"
 
     """
 
@@ -173,7 +173,7 @@ def externalvectors(so: SearchObject) -> JSON_STR:
         try:
             # golang results are in dict form...
             js = [json.loads(r) for r in redisresults]
-            hits = {j['Loc']: j['Sent'] for j in js}
+            hits = {j['Loc']: j['Bag'] for j in js}
         except JSONDecodeError:
             # rust results are a list of binary strings...
             js = [r.decode('utf-8') for r in redisresults]
