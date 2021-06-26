@@ -119,7 +119,7 @@ def buildredissearchlist(listofsearchlocations: List, searchid: str):
 def redisfetch(vectorresultskey) -> List[bytearray]:
 	"""
 
-	pop a big wad of results from redis
+	pop a big wad of results from redis [if you can...]
 
 	>> import redis
 	>> rc = redis.ConnectionPool(host='127.0.0.1', port=6379, db=0)
@@ -132,15 +132,9 @@ def redisfetch(vectorresultskey) -> List[bytearray]:
 	>> c.scard('x')
 	2
 	>> c.spop('x', 2)
+
 	Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "C:\Users\Erik\hipparchia_venv\lib\site-packages\redis\client.py", line 2290, in spop
-	return self.execute_command('SPOP', name, *args)
-	File "C:\Users\Erik\hipparchia_venv\lib\site-packages\redis\client.py", line 901, in execute_command
-	return self.parse_response(conn, command_name, **options)
-	File "C:\Users\Erik\hipparchia_venv\lib\site-packages\redis\client.py", line 915, in parse_response
-	response = connection.read_response()
-	File "C:\Users\Erik\hipparchia_venv\lib\site-packages\redis\connection.py", line 756, in read_response
+	...
 	raise response
 	redis.exceptions.ResponseError: wrong number of arguments for 'spop' command
 
