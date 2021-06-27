@@ -7,7 +7,6 @@
 """
 
 import json
-from json import JSONDecodeError
 
 from server import hipparchia
 from server.dbsupport.redisdbfunctions import establishredisconnection, redisfetch
@@ -17,8 +16,8 @@ from server.formatting.vectorformatting import ldatopicsgenerateoutput
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.listsandsession.genericlistfunctions import flattenlistoflists
 from server.routes.searchroute import updatesearchlistandsearchobject
-from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforexternalhelper
 from server.searching.miscsearchfunctions import genericexternalcliexecution
+from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforexternalhelper
 from server.semanticvectors.gensimnearestneighbors import generatenearestneighbordata
 from server.semanticvectors.modelbuilders import buildgensimmodel, buildsklearnselectedworks, \
     gensimgenerateanalogies

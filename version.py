@@ -1,20 +1,21 @@
-#!../bin/python
+# -*- coding: utf-8 -*-
 """
-	HipparchiaServer: an interface to a database of Greek and Latin texts
-	Copyright: E Gunderson 2016-21
-	License: GNU GENERAL PUBLIC LICENSE 3
-		(see LICENSE in the top level directory of the distribution)
+    HipparchiaServer: an interface to a database of Greek and Latin texts
+    Copyright: E Gunderson 2016-21
+    License: GNU GENERAL PUBLIC LICENSE 3
+        (see LICENSE in the top level directory of the distribution)
 """
 
 from sys import argv
 from os import path
 
+from constants import VERSION
 
 stable = False
 release = False
 prerelease = True
 
-hipparchiaserverversion = '1.8.1'
+hipparchiaserverversion = VERSION
 plus = '+'
 supplement = '[DEVEL]'
 pre = '-pre'

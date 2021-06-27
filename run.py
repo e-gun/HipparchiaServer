@@ -48,35 +48,14 @@ if multiprocessing.current_process().name == 'MainProcess':
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
-from server.dbsupport.miscdbfunctions import icanpickleconnections
+from server.compatability import checkcompatability
 
 if __name__ == '__main__':
 
 	# this code block duplicates material found in '__init__.py'; the only gain is the secho() notification so that
 	# you know where you stand at startup
 
-	# mpmethod = str()
-	# try:
-	# 	# mpmethod = 'forkserver'
-	# 	# this will get you into trouble with the vectorbot
-	# 	# TypeError: can't pickle psycopg2.extensions.connection objects
-	# 	mpmethod = 'fork'
-	# 	multiprocessing.set_start_method(mpmethod)
-	# except RuntimeError:
-	# 	#   File "/usr/local/Cellar/python/3.7.6_1/Frameworks/Python.framework/Versions/3.7/lib/python3.7/multiprocessing/context.py", line 242, in set_start_method
-	# 	#     raise RuntimeError('context has already been set')
-	# 	# RuntimeError: context has already been set
-	# 	pass
-	# except:
-	# 	mpmethod = 'spawn'
-	# 	multiprocessing.set_start_method(mpmethod)
-	# finally:
-	# 	secho('multiprocessing method set to: {m}'.format(m=mpmethod), fg='cyan')
-
 	secho('multiprocessing method set by OS default to: {m}'.format(m=multiprocessing.get_start_method()), fg='cyan')
-
-	# picklestatus = icanpickleconnections(dothecheck=True)
-	# secho('connection pickling available: {p}'.format(p=picklestatus), fg='cyan')
 
 	if hipparchia.config['ENABLELOGGING']:
 		from inspect import stack
@@ -92,26 +71,8 @@ if __name__ == '__main__':
 		#  where Werkzeug isn't used as the underlying WSGI server.
 		hipparchia.logger.addHandler(handler)
 
-	"""
-	sometimes ^C will not kill every thread and you will still have an open server port
-	this will leave you unable to restart without rebooting: 'socket already in use'
-	you need to find the process that is holding the port open and kill it
-	for example
-	
-	less fancy:
-	
-		$ ps ax | grep ipparchia | grep run.py
-		$ kill -15 >>THEPID<<
-	
-	>>THEPID<< == 11980 in the following
-	
-		11980 s007  S+     0:40.40 /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python /Users/erik/hipparchia_venv/HipparchiaServer/run.py
-	
-	"more fancy" requires using lsof...
-	
-	"""
-
 	commandlineargs = getcommandlineargs()
+	checkcompatability()
 
 	host = hipparchia.config['LISTENINGADDRESS']
 

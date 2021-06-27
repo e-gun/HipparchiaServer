@@ -15,7 +15,7 @@ from flask import render_template, send_file, session
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs
-from server.dbsupport.dbbuildinfo import versionchecking
+from server.compatability import dbversionchecking
 from server.dbsupport.miscdbfunctions import getpostgresserverversion
 from server.formatting.frontpagehtmlformatting import vectorhtmlforfrontpage, vectorhtmlforoptionsbar, \
 	getsearchfieldbuttonshtml, getauthorholdingfieldhtml, getdaterangefieldhtml, getlexicafieldhtml
@@ -34,10 +34,9 @@ set some variables at outer scope that both frontpage() and errorhandlingpage() 
 """
 
 stylesheet = hipparchia.config['CSSSTYLESHEET']
-expectedsqltemplateversion = 6182021
 # check to see which dbs we actually own
 activelists = [l for l in listmapper if len(listmapper[l]['a']) > 0]
-buildinfo = versionchecking(activelists, expectedsqltemplateversion)
+buildinfo = dbversionchecking(activelists)
 
 psqlversion = getpostgresserverversion()
 # Note that unlike the Python sys.version, the returned value will always include the patchlevel (it defaults to '0').
