@@ -26,25 +26,25 @@ except ImportError:
 	# maybe you have an older version of werkzeug...
 	from werkzeug.contrib.profiler import ProfilerMiddleware
 
-from version import hipparchiaserverversion as hipparchiaversion
-from version import readgitdata
+from server.versioning import fetchhipparchiaserverversion
+from server.versioning import readgitdata
 
-if multiprocessing.current_process().name == 'MainProcess':
-	# stupid Windows will fork new copies and reload all of this
-	vstring = """
-	{banner}
-	  {v}
-	  {g}
-	{banner}
-	"""
-	v = 'HipparchiaServer v{v}'.format(v=hipparchiaversion)
-	c = readgitdata()
-	t = len(v) - len('[git: ]')
-	c = c[:t]
-	g = '[git: {c}]'.format(c=c)
-	# p = ''.join(' ' for _ in range(pad))
-	banner = str().join('=' for _ in range(len(g)+4))
-	secho(vstring.format(banner=banner, v=v, g=g), bold=True, fg='cyan')
+# if multiprocessing.current_process().name == 'MainProcess':
+# 	# stupid Windows will fork new copies and reload all of this
+# 	vstring = """
+# 	{banner}
+# 	  {v}
+# 	  {g}
+# 	{banner}
+# 	"""
+# 	v = 'HipparchiaServer v{v}'.format(v=fetchhipparchiaserverversion())
+# 	c = readgitdata()
+# 	t = len(v) - len('[git: ]')
+# 	c = c[:t]
+# 	g = '[git: {c}]'.format(c=c)
+# 	# p = ''.join(' ' for _ in range(pad))
+# 	banner = str().join('=' for _ in range(len(g)+4))
+# 	secho(vstring.format(banner=banner, v=v, g=g), bold=True, fg='cyan')
 
 from server import hipparchia
 from server.commandlineoptions import getcommandlineargs

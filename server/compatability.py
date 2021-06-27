@@ -11,7 +11,7 @@ import subprocess
 
 from distutils.version import LooseVersion
 
-from constants import GOHELPERMIN, RUSTHELPERMIN, BUILDERMIN, SQLTEMPLATE
+from versionconstants import GOHELPERMIN, RUSTHELPERMIN, BUILDERMIN, SQLTEMPLATE
 from server.formatting.miscformatting import consolewarning
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.searching.miscsearchfunctions import getexternalhelperpath
@@ -58,7 +58,8 @@ def checkcompatability():
             return
 
         if binversion >= minversion:
-            consolewarning('checkcompatability() says that {b} {x} >= {y}'.format(b=bin, x=v[1], y=vmin))
+            # consolewarning('checkcompatability() says that {b} {x} >= {y}'.format(b=bin, x=v[1], y=vmin))
+            pass
         else:
             w = '{b} is out of date. You have {x}. You need {y}. Some/Many functions are likely to fail.'
             consolewarning(w.format(b=bin, x=v[1], y=vmin), color='red')

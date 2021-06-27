@@ -9,25 +9,30 @@
 from sys import argv
 from os import path
 
-from constants import VERSION
+from versionconstants import VERSION, STABLE, RELEASE, PRERELEASE
 
-stable = False
-release = False
-prerelease = True
 
-hipparchiaserverversion = VERSION
-plus = '+'
-supplement = '[DEVEL]'
-pre = '-pre'
+def fetchhipparchiaserverversion() -> str:
+	"""
 
-if not release and not prerelease:
-	hipparchiaserverversion = hipparchiaserverversion + plus
+	return the version...
 
-if not stable and not prerelease:
-	hipparchiaserverversion = hipparchiaserverversion + supplement
+	"""
+	hipparchiaserverversion = VERSION
+	plus = '+'
+	supplement = '[DEVEL]'
+	pre = '-pre'
 
-if prerelease:
-	hipparchiaserverversion = hipparchiaserverversion + pre
+	if not RELEASE and not PRERELEASE:
+		hipparchiaserverversion = hipparchiaserverversion + plus
+
+	if not STABLE and not PRERELEASE:
+		hipparchiaserverversion = hipparchiaserverversion + supplement
+
+	if PRERELEASE:
+		hipparchiaserverversion = hipparchiaserverversion + pre
+
+	return hipparchiaserverversion
 
 
 def readgitdata() -> str:

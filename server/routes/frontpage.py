@@ -22,7 +22,8 @@ from server.formatting.frontpagehtmlformatting import vectorhtmlforfrontpage, ve
 from server.hipparchiaobjects.authenticationobjects import LoginForm
 from server.listsandsession.checksession import probeforsessionvariables
 from server.startup import listmapper
-from version import release, hipparchiaserverversion, readgitdata
+from server.versioning import fetchhipparchiaserverversion, readgitdata
+from versionconstants import RELEASE as release
 
 JSON_STR = str
 PAGE_STR = str
@@ -75,10 +76,10 @@ theenvironment = theenvironment.format(pf=platform(), ps=psqlversion, py=pythonv
 									   gr=hipparchia.config['EXTERNALBINARYNAME'], gx=gx,
 									   ac=hipparchia.config['EXTERNALGRABBER'], vv=vv)
 
-shortversion = hipparchiaserverversion
+shortversion = fetchhipparchiaserverversion()
 gitlength = 5
 commit = readgitdata()
-version = '{v} [git: {g}]'.format(v=hipparchiaserverversion, g=commit[:gitlength])
+version = '{v} [git: {g}]'.format(v=fetchhipparchiaserverversion(), g=commit[:gitlength])
 
 if not release:
 	shortversion = version

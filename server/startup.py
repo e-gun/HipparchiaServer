@@ -23,14 +23,29 @@ from server.listsandsession.genericlistfunctions import dictitemstartswith, find
 from server.listsandsession.sessiondicts import buildaugenresdict, buildauthorlocationdict, buildkeyedlemmata, \
 	buildworkgenresdict, buildworkprovenancedict
 from server.threading.mpthreadcount import setthreadcount
+from server.versioning import fetchhipparchiaserverversion, readgitdata
+
 
 if current_process().name == 'MainProcess':
-	commandlineargs = getcommandlineargs()
-
 	# stupid Windows will fork new copies and reload all of this
 
-	terminaltext = """
+	vstring = """
+	{banner}
+	  {v}
+	  {g}
+	{banner}"""
+	v = 'HipparchiaServer v{v}'.format(v=fetchhipparchiaserverversion())
+	c = readgitdata()
+	t = len(v) - len('[git: ]')
+	c = c[:t]
+	g = '[git: {c}]'.format(c=c)
+	# p = ''.join(' ' for _ in range(pad))
+	banner = str().join('=' for _ in range(len(g) + 4))
+	secho(vstring.format(banner=banner, v=v, g=g), bold=True, fg='cyan')
 
+	commandlineargs = getcommandlineargs()
+
+	terminaltext = """
 	{project} / Copyright (C) {year} / {fullname}
 	{mail}
 
@@ -41,7 +56,6 @@ if current_process().name == 'MainProcess':
 	This is free software, and you are welcome to redistribute
 	it and/or modify it under the terms of the GNU General
 	Public License version 3.
-
 	"""
 
 	project = 'HipparchiaServer'
