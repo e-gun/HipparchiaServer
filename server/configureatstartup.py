@@ -134,6 +134,19 @@ if commandlineargs.simpleconnection:
 if commandlineargs.threadcount:
 	hipparchia.config['WORKERS'] = commandlineargs.threadcount
 	hipparchia.config['AUTOCONFIGWORKERS'] = False
+if commandlineargs.purepython:
+	hipparchia.config['EXTERNALGRABBER'] = False
+	hipparchia.config['EXTERNALVECTORHELPER'] = False
+	hipparchia.config['EXTERNALWEBSOCKETS'] = False
+if commandlineargs.forcehelper:
+	hipparchia.config['EXTERNALGRABBER'] = True
+	hipparchia.config['EXTERNALVECTORHELPER'] = True
+	hipparchia.config['EXTERNALWEBSOCKETS'] = True
+if commandlineargs.modulehelper:
+	hipparchia.config['GRABBERCALLEDVIACLI'] = False
+if commandlineargs.novectors:
+	hipparchia.config['SEMANTICVECTORSENABLED'] = False
+	hipparchia.config['AUTOVECTORIZE'] = False
 # if commandlineargs.calculatewordweights:
 # 	hipparchia.config['NULL'] = commandlineargs.calculatewordweights
 if commandlineargs.collapsedgenreweights:

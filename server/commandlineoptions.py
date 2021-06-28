@@ -38,6 +38,10 @@ def getcommandlineargs():
 		exclusivegroup.add_argument('--pooledconnection', action='store_true', help='[force setting] force a pooled DB connection')
 		exclusivegroup.add_argument('--simpleconnection', action='store_true', help='[force setting] force a simple DB connection')
 		commandlineparser.add_argument('--threadcount', required=False, type=int, help='[force setting] override the config file threadcount')
+		commandlineparser.add_argument('--purepython', action='store_true', help='[force setting] disallow use of an external go/rust helper; only use internal local python code')
+		commandlineparser.add_argument('--forcehelper', action='store_true', help='[force setting] demand use external go/rust helper; avoid use of internal local python code')
+		commandlineparser.add_argument('--modulehelper', action='store_true', help='[force setting] call the use external helper as a module instead of a cli binary')
+		commandlineparser.add_argument('--novectors', action='store_true', help='[force setting] disable the semantic vector code')
 		commandlineparser.add_argument('--calculatewordweights', action='store_true', help='[info] generate word weight info')
 		commandlineparser.add_argument('--collapsedgenreweights', action='store_true', help='[info] generate word weight info & merge related genres ("allret", etc.)')
 
