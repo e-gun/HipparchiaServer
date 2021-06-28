@@ -247,15 +247,17 @@ class SearchObject(object):
 			self.searchtype = 'proximity'
 		elif len(self.proximate) < 1 and re.search(phrasefinder, self.seeking) is None:
 			self.searchtype = 'simple'
+		elif len(self.proximate) > 0 and re.search(phrasefinder, self.seeking) or re.search(phrasefinder, self.proximate):
+			self.searchtype = 'phraseandproximity'
 		elif re.search(phrasefinder, self.seeking):
 			self.searchtype = 'phrase'
 		else:
 			self.searchtype = 'proximity'
-		# debugmessage('searchtype set to {t}'.format(t=self.searchtype))
+		# print('searchtype set to {t}'.format(t=self.searchtype))
 
 	def generatesearchdescription(self) -> str:
 		# used to set the page title; called by executesearch()
-		assert self.searchtype in ['simple', 'simplelemma', 'proximity', 'phrase'], 'unknown searchtype sent to generatesearchdescription()'
+		assert self.searchtype in ['simple', 'simplelemma', 'proximity', 'phrase', 'phraseandproximity'], 'unknown searchtype sent to generatesearchdescription()'
 
 		if self.searchtype == 'simplelemma':
 			return 'all forms of »{skg}«'.format(skg=self.lemmaone.dictionaryentry)
@@ -277,6 +279,8 @@ class SearchObject(object):
 			return self.originalseeking
 		elif self.searchtype == 'phrase':
 			return self.originalseeking
+		elif self.searchtype == 'phraseandproximity':
+			return self.originalseeking
 		else:
 			# proximity of two terms
 			s = '{skg}{ns} within {sp} {sc} of {pr}'
@@ -284,7 +288,7 @@ class SearchObject(object):
 
 	def generatehtmlsearchdescription(self) -> str:
 		# used to set the page title; called by executesearch()
-		assert self.searchtype in ['simple', 'simplelemma', 'proximity', 'phrase'], 'unknown searchtype sent to generatehtmlsearchdescription()'
+		assert self.searchtype in ['simple', 'simplelemma', 'proximity', 'phrase', 'phraseandproximity'], 'unknown searchtype sent to generatehtmlsearchdescription()'
 
 		if self.searchtype == 'simplelemma':
 			s = 'all {n} known forms of <span class="sought">»{skg}«</span>'
@@ -307,6 +311,9 @@ class SearchObject(object):
 			return '<span class="sought">»{skg}«</span>'.format(skg=self.originalseeking)
 		elif self.searchtype == 'phrase':
 			return '<span class="sought">»{skg}«</span>'.format(skg=self.originalseeking)
+		elif self.searchtype == 'phraseandproximity':
+			s = '<span class="sought">»{skg}«</span> within {sp} {sc} of <span class="sought">»{x}«</span>'
+			return s.format(skg=self.originalseeking, x=self.termtwo, sc=self.scope, sp=self.proximity)
 		else:
 			# proximity of two terms
 			s = '<span class="sought">»{skg}«</span>{ns} within {sp} {sc} of <span class="sought">»{pr}«</span>'

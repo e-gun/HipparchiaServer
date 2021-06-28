@@ -112,8 +112,9 @@ key features:
 		forward-compatible unicode: attempt to properly code characters which are not yet available in most fonts
 		known unknowns: unhandled characters preserve their betacode messages in the metadata for future fixes
 		debugging options can be enabled at launch time (see "./run.py -h")
-        (optional) threading via golang extensions
-        (optional) websockets via golang extentions
+        (optional) threading via helper extension
+        (optional) websockets via helper extension
+        (optional) semantic vectors via helper extension
 
 ```
 
@@ -288,3 +289,42 @@ What you will see when you point a browser at a HipparchiaServer:
 
 1. analogy finder
 ![morphology table](screenshots/25_analogy_finder.png)
+
+
+CLI options:
+```% ./run.py --help
+usage: run.py [-h] [--dbhost DBHOST] [--dbname DBNAME] [--dbport DBPORT] [--debugmessages] [--enabledebugui] [--portoverride PORTOVERRIDE]
+              [--profiling] [--skiplemma] [--disablevectorbot] [--forceuniversalbetacode] [--forcefont FORCEFONT]
+              [--pooledconnection | --simpleconnection] [--threadcount THREADCOUNT] [--purepython] [--forcehelper] [--modulehelper] [--novectors]
+              [--calculatewordweights] [--collapsedgenreweights]
+
+script used to launch HipparchiaServer
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --dbhost DBHOST       [debugging] override the config file database host address
+  --dbname DBNAME       [debugging] override the config file database name
+  --dbport DBPORT       [debugging] override the config file database listening port
+  --debugmessages       [debugging] show debugging warnings in the console even if CONSOLEWARNINGTYPES is not configured for it
+  --enabledebugui       [debugging] forcibly enable the web debug UI
+  --portoverride PORTOVERRIDE
+                        [debugging] override the config file listening port
+  --profiling           [debugging] enable the profiler
+  --skiplemma           [debugging] use empty lemmatadict for fast startup (some functions will be lost)
+  --disablevectorbot    [force setting] disable the vectorbot for this run
+  --forceuniversalbetacode
+                        [force setting] all input on the search line will be parsed as betacode
+  --forcefont FORCEFONT
+                        [force setting] assign a value to DEFAULTLOCALFONT; "MyFont Sans" requires quotation marks to handle the space in the name
+  --pooledconnection    [force setting] force a pooled DB connection
+  --simpleconnection    [force setting] force a simple DB connection
+  --threadcount THREADCOUNT
+                        [force setting] override the config file threadcount
+  --purepython          [force setting] disallow use of an external go/rust helper; only use internal local python code
+  --forcehelper         [force setting] demand use external go/rust helper; avoid use of internal local python code
+  --modulehelper        [force setting] call the use external helper as a module instead of a cli binary
+  --novectors           [force setting] disable the semantic vector code
+  --calculatewordweights
+                        [info] generate word weight info
+  --collapsedgenreweights
+                        [info] generate word weight info & merge related genres ("allret", etc.)```

@@ -16,11 +16,10 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
-from server.searching.searchviapythoninterface import precomposedsqlsearchmanager
+from server.searching.miscsearchfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging
 from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
     perparesoforsecondsqldict
-from server.searching.miscsearchfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging, \
-    findleastcommonterm
+from server.searching.searchviapythoninterface import precomposedsqlsearchmanager
 
 try:
     from server.searching.searchviahelperinterface import gosearch, precomposedexternalsearcher
@@ -66,7 +65,7 @@ def precomposedsqlsearch(so: SearchObject) -> List[dbWorkLine]:
 
     """
 
-    assert so.searchtype in ['simple', 'simplelemma', 'proximity', 'phrase'], 'unknown searchtype sent to rawsqlsearches()'
+    assert so.searchtype in ['simple', 'simplelemma', 'proximity', 'phrase', 'phraseandproximity'], 'unknown searchtype sent to rawsqlsearches()'
 
     so.poll.statusis('Executing a {t} search...'.format(t=so.searchtype))
 
@@ -88,8 +87,11 @@ def precomposedsqlsearch(so: SearchObject) -> List[dbWorkLine]:
             searchfnc = precomposedsqlwithinxwords
     elif so.searchtype == 'phrase':
         so.phrase = so.termone
-        so.leastcommon = findleastcommonterm(so.termone, so.accented)
+        # so.leastcommon = findleastcommonterm(so.termone, so.accented)
         searchfnc = precomposedsqlsubqueryphrasesearch
+    elif so.searchtype == 'phraseandproximity':
+        so.phrase = so.termone
+        searchfnc = precomposedphraseandproximitysearch
     else:
         # should be hard to reach this because of "assert" above
         consolewarning('rawsqlsearches() does not support {t} searching'.format(t=so.searchtype), color='red')
@@ -124,10 +126,10 @@ def basicprecomposedsqlsearcher(so: SearchObject, themanager=None) -> List[dbWor
         usesharedlibrary = hipparchia.config['EXTERNALGRABBER']
 
         if not usesharedlibrary:
-            debugmessage('dispatching via precomposedsqlsearchmanager()')
+            debugmessage('searching via python')
             themanager = precomposedsqlsearchmanager
         else:
-            debugmessage('dispatching via precomposedgolangsearcher()')
+            debugmessage('searching via external helper code')
             themanager = precomposedexternalsearcher
 
     hits = themanager(so)
@@ -279,6 +281,7 @@ def precomposedsqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
     these searches take linear time: same basic time for any given scope regardless of the query
 
     """
+
     debugmessage('executing a precomposedsqlsubqueryphrasesearch()')
 
     # rebuild the searchsqldict but this time pass through rewritequerystringforsubqueryphrasesearching()
@@ -358,3 +361,82 @@ def precomposedsqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
 
     dbconnection.connectioncleanup()
     return listoffinds
+
+
+def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
+    """
+
+    do a precomposedsqlsubqueryphrasesearch() and then search inside the results for part two...
+
+    """
+
+    p = so.proximate
+    so.proximate = str()
+    c = so.cap
+    so.cap = hipparchia.config['INTERMEDIATESEARCHCAP']
+
+    initialhitlines = precomposedsqlsubqueryphrasesearch(so)
+
+    so.seeking = p
+    so.setsearchtype()
+    so.cap = c
+
+    so = perparesoforsecondsqldict(so, initialhitlines)
+    so.searchsqldict = searchlistintosqldict(so, so.termtwo)
+    so.poll.sethits(0)
+
+    # note that 'basic' is too basic here
+    newhitlines = basicprecomposedsqlsearcher(so)
+    initialhitlinedict = {hl.uniqueid: hl for hl in initialhitlines}
+    newhitlineids = set()
+    for nhl in newhitlines:
+        indices = list(range(nhl.index - so.distance, nhl.index + so.distance + 1))
+        ids = ['{a}_{b}'.format(a=nhl.wkuinversalid, b=i) for i in indices]
+        newhitlineids.update(ids)
+
+    finalhitlines = list()
+    if so.near:
+        # "is near"
+        finalhitlines = [initialhitlinedict[hl] for hl in initialhitlinedict if hl in newhitlineids]
+    elif not so.near:
+        # "is not near"
+        finalhitlines = [initialhitlinedict[hl] for hl in initialhitlinedict if hl not in newhitlineids]
+
+    # # turn the found lines into the 'where' for the second part...
+    # # model this off of configurewhereclausedata() -> wholeworktemptablecontents()
+    # if so.scope == 'words':
+    #     # words is a lot trickier than lines... hacking something together ATM
+    #     d = 4
+    # else:
+    #     d = so.distance
+    #
+    # setsoflines = dict()
+    # for h in initialhitlines:
+    #     try:
+    #         setsoflines[h.authorid]
+    #     except KeyError:
+    #         setsoflines[h.authorid] = set()
+    #     r = range(h.index - d, h.index + d + 1)
+    #     setsoflines[h.authorid].update(list(r))
+    #
+    # # au: {'type': 'temptable', 'where': {'tempdata': (10083, 10084, 10085, 10086, ...}}
+    # temptable = dict()
+    #
+    # for s in setsoflines:
+    #     temptable[s] = {'type': 'temptable', 'where': {'tempdata': tuple(setsoflines[s])}}
+    #
+    # so.indexrestrictions = temptable
+    #
+    # phrasefinder = re.compile(r'[^\s]\s[^\s]')
+    #
+    # if re.search(phrasefinder, so.seeking):
+    #     so.phrase = so.seeking
+    #     so.searchsqldict = searchlistintosqldict(so, so.phrase, subqueryphrasesearch=True)
+    #     finalhits = precomposedsqlsubqueryphrasesearch(so)
+    # else:
+    #     # lemmata still not handled
+    #     so.searchsqldict = searchlistintosqldict(so, so.seeking)
+    #     finalhits = generatepreliminaryhitlist(so)
+
+    return finalhitlines
+
