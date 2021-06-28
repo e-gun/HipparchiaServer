@@ -6,16 +6,16 @@
 		(see LICENSE in the top level directory of the distribution)
 """
 
-import psycopg2
-import psycopg2.pool as connectionpool
 import sys
 import threading
 
+import psycopg2
+import psycopg2.pool as connectionpool
+
 from server import hipparchia
+from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.miscformatting import consolewarning
 from server.threading.mpthreadcount import setthreadcount
-from server.dbsupport.tablefunctions import assignuniquename
-from server.commandlineoptions import getcommandlineargs
 
 
 class GenericConnectionObject(object):
@@ -68,14 +68,6 @@ class GenericConnectionObject(object):
 	dbhost = hipparchia.config['DBHOST']
 	dbport = hipparchia.config['DBPORT']
 	dbname = hipparchia.config['DBNAME']
-
-	commandlineargs = getcommandlineargs()
-	if commandlineargs.dbhost:
-		dbhost = commandlineargs.dbhost
-	if commandlineargs.dbport:
-		dbport = commandlineargs.dbport
-	if commandlineargs.dbname:
-		dbname = commandlineargs.dbname
 
 	def __init__(self, autocommit, readonlyconnection):
 		# note that only autocommit='autocommit' will make a difference
@@ -384,21 +376,9 @@ class SimpleConnectionObject(GenericConnectionObject):
 		return self.thisisafallback
 
 
-commandlineargs = getcommandlineargs()
-
-if not commandlineargs.simpleconnection or commandlineargs.pooledconnection:
-	if hipparchia.config['CONNECTIONTYPE'] == 'simple':
-		class ConnectionObject(SimpleConnectionObject):
-			pass
-	else:
-		class ConnectionObject(PooledConnectionObject):
-			pass
+if hipparchia.config['CONNECTIONTYPE'] == 'simple':
+	class ConnectionObject(SimpleConnectionObject):
+		pass
 else:
-	if commandlineargs.simpleconnection:
-		class ConnectionObject(SimpleConnectionObject):
-			pass
-		consolewarning('simple DB connections')
-	if commandlineargs.pooledconnection:
-		class ConnectionObject(PooledConnectionObject):
-			pass
-		consolewarning('pooled DB connections')
+	class ConnectionObject(PooledConnectionObject):
+		pass

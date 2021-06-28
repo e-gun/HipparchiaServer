@@ -152,7 +152,7 @@ def redisfetch(vectorresultskey) -> List[bytearray]:
 	try:
 		allresults = rc.spop(vectorresultskey, tofetch)
 	except redis.exceptions.ResponseError:
-		print('silly windows is alone unable to send number to pop to spop')
+		# print('silly windows is alone unable to send number to pop to spop')
 		pass
 
 	# all at once is FAR faster than iterating...

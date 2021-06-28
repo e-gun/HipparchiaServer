@@ -12,6 +12,7 @@ from multiprocessing import current_process
 from flask import Flask
 
 from server import hipparchia
+from server.commandlineoptions import getcommandlineargs
 from server.formatting.miscformatting import consolewarning
 
 nullapp = Flask('will_be_deleted_soon')
@@ -97,3 +98,43 @@ for k in hipparchia.config.keys():
 		hipparchia.config[k] = True
 	if hipparchia.config[k] == 'no':
 		hipparchia.config[k] = False
+
+# rewrite hipparchia.config in light of the command line options
+# this needs to happen very early in the startup process...
+
+commandlineargs = getcommandlineargs()
+# print('commandlineargs', commandlineargs)
+
+if commandlineargs.dbhost:
+	hipparchia.config['DBHOST'] = commandlineargs.dbhost
+if commandlineargs.dbname:
+	hipparchia.config['DBHOST'] = commandlineargs.dbname
+if commandlineargs.dbport:
+	hipparchia.config['DBPORT'] = commandlineargs.dbport
+# if commandlineargs.debugmessages:
+# 	hipparchia.config['NULL'] = commandlineargs.debugmessages
+if commandlineargs.enabledebugui:
+	hipparchia.config['ALLOWUSERTOSETDEBUGMODES'] = commandlineargs.enabledebugui
+if commandlineargs.portoverride:
+	hipparchia.config['FLASKSERVEDFROMPORT'] = commandlineargs.portoverride
+# if commandlineargs.profiling:
+# 	hipparchia.config['NULL'] = commandlineargs.profiling
+# if commandlineargs.portoverride:
+# 	hipparchia.config['NULL'] = commandlineargs.skiplemma
+if commandlineargs.disablevectorbot:
+	hipparchia.config['AUTOVECTORIZE'] = commandlineargs.disablevectorbot
+if commandlineargs.forceuniversalbetacode:
+	hipparchia.config['UNIVERSALASSUMESBETACODE'] = commandlineargs.forceuniversalbetacode
+if commandlineargs.forcefont:
+	hipparchia.config['HOSTEDFONTFAMILY'] = commandlineargs.forcefont
+if commandlineargs.pooledconnection:
+	hipparchia.config['CONNECTIONTYPE'] = commandlineargs.pooledconnection
+if commandlineargs.simpleconnection:
+	hipparchia.config['CONNECTIONTYPE'] = 'simple'
+if commandlineargs.threadcount:
+	hipparchia.config['WORKERS'] = commandlineargs.threadcount
+	hipparchia.config['AUTOCONFIGWORKERS'] = False
+# if commandlineargs.calculatewordweights:
+# 	hipparchia.config['NULL'] = commandlineargs.calculatewordweights
+if commandlineargs.collapsedgenreweights:
+	hipparchia.config['COLLAPSEDGENRECOUNTS'] = commandlineargs.collapsedgenreweights

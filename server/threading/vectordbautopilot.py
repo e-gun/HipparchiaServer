@@ -53,7 +53,7 @@ def startvectorizing():
 
 	commandlineargs = getcommandlineargs()
 
-	if hipparchia.config['AUTOVECTORIZE'] and not commandlineargs.disablevectorbot:
+	if hipparchia.config['AUTOVECTORIZE']:
 		workpile = determinevectorworkpile()
 
 	# [(['gr2062'], 4182615), (['gr0057'], 2594166), (['gr4090'], 2202504), ...]
@@ -116,7 +116,7 @@ def startvectorizing():
 			if built and len(workpile) % 25 == 0:
 				consolewarning('{n} items remain to vectorize'.format(n=len(workpile)), color='green', isbold=False)
 
-	if hipparchia.config['AUTOVECTORIZE'] and not commandlineargs.disablevectorbot and multiprocessing.current_process().name == 'MainProcess':
+	if hipparchia.config['AUTOVECTORIZE'] and multiprocessing.current_process().name == 'MainProcess':
 		consolewarning('only short authors remain (fewer than {min} words in the corpus...)'.format(min=minwords), color='green')
 		consolewarning('vectorbot shutting down', color='green')
 

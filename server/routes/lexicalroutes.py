@@ -18,7 +18,6 @@ except ImportError:
 
 from server import hipparchia
 from server.authentication.authenticationwrapper import requireauthentication
-from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.lexicaldbfunctions import findentrybyid, headwordsearch, lookformorphologymatches, \
 	probedictionary, querytotalwordcounts, reversedictionarylookup
 from server.formatting.betacodetounicode import replacegreekbetacode
@@ -104,8 +103,7 @@ def dictsearch(searchterm) -> JSON_STR:
 	dbconnection = ConnectionObject()
 	dbcursor = dbconnection.cursor()
 
-	commandlineargs = getcommandlineargs()
-	if commandlineargs.forceuniversalbetacode or hipparchia.config['UNIVERSALASSUMESBETACODE']:
+	if hipparchia.config['UNIVERSALASSUMESBETACODE']:
 		searchterm = replacegreekbetacode(searchterm.upper())
 
 	allowedpunct = '^$.'

@@ -30,7 +30,6 @@ def getcommandlineargs():
 		commandlineparser.add_argument('--debugmessages', action='store_true', help='[debugging] show debugging warnings in the console even if CONSOLEWARNINGTYPES is not configured for it')
 		commandlineparser.add_argument('--enabledebugui', action='store_true', help='[debugging] forcibly enable the web debug UI')
 		commandlineparser.add_argument('--portoverride', required=False, type=int, help='[debugging] override the config file listening port')
-		commandlineparser.add_argument('--precomposed', action='store_true', help='[debugging] force activation of the precomposedsql search code')
 		commandlineparser.add_argument('--profiling', action='store_true', help='[debugging] enable the profiler')
 		commandlineparser.add_argument('--skiplemma', action='store_true', help='[debugging] use empty lemmatadict for fast startup (some functions will be lost)')
 		commandlineparser.add_argument('--disablevectorbot', action='store_true', help='[force setting] disable the vectorbot for this run')
@@ -60,7 +59,6 @@ def getcommandlineargs():
 		                                     pooledconnection=None,
 		                                     portoverride=None,
 		                                     profiling=None,
-		                                     precomposed=False,
 		                                     simpleconnection=None,
 		                                     skiplemma=None,
 		                                     threadcount=None)

@@ -9,17 +9,16 @@
 import json
 import re
 import subprocess
+import sys
 import time
 from multiprocessing import JoinableQueue
 from os import path
 from string import punctuation
-import sys
 from typing import List
 
 from flask import request, session
 
 from server import hipparchia
-from server.commandlineoptions import getcommandlineargs
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate, grabonelinefromwork
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, querytotalwordcounts
 from server.formatting.betacodetounicode import replacegreekbetacode
@@ -447,10 +446,6 @@ def buildsearchobject(searchid: str, therequest: request, thesession: session) -
 		#   this is something that could/should be debugged within that function,
 		#   but in practice it is silly to allow hybrid betacode/unicode? this only
 		#   makes the life of a person who wants unicode+regex w/ a betacode option more difficult
-		replacebeta = True
-
-	commandlineargs = getcommandlineargs()
-	if commandlineargs.forceuniversalbetacode:
 		replacebeta = True
 
 	if hipparchia.config['TLGASSUMESBETACODE']:

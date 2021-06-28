@@ -9,7 +9,6 @@
 from os import cpu_count
 
 from server import hipparchia
-from server.commandlineoptions import getcommandlineargs
 from server.formatting.miscformatting import consolewarning
 
 
@@ -22,15 +21,10 @@ def setthreadcount(startup=False) -> int:
 	:return:
 	"""
 
-	commandlineargs = getcommandlineargs()
-
-	if not commandlineargs.threadcount:
-		if not hipparchia.config['AUTOCONFIGWORKERS']:
-			workers = hipparchia.config['WORKERS']
-		else:
-			workers = int(cpu_count() / 2) + 1
+	if not hipparchia.config['AUTOCONFIGWORKERS']:
+		workers = hipparchia.config['WORKERS']
 	else:
-		workers = commandlineargs.threadcount
+		workers = int(cpu_count() / 2) + 1
 
 	if workers < 1:
 		workers = 1

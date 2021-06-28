@@ -11,7 +11,6 @@ import re
 from flask import session
 
 from server import hipparchia
-from server.commandlineoptions import getcommandlineargs
 
 
 class CssFormattingObject(object):
@@ -297,14 +296,9 @@ class CssFormattingObject(object):
 		return inverted
 
 	def _determineface(self):
-		commandlineargs = getcommandlineargs()
-		if not commandlineargs.forcefont:
-			try:
-				self.faces = self.hostedfontdict[self.pickedfamily]
-			except KeyError:
-				self._deface()
-				self.knownface = False
-		else:
+		try:
+			self.faces = self.hostedfontdict[self.pickedfamily]
+		except KeyError:
 			self._deface()
 			self.knownface = False
 
@@ -319,21 +313,13 @@ class CssFormattingObject(object):
 		re.sub(fingerprint, '', self.css)
 
 	def _swapdefaults(self):
-		commandlineargs = getcommandlineargs()
-		if not commandlineargs.forcefont:
-			for s in self.substitutes:
-				searchfor = re.compile(s + 'WILLBESUPPLIEDFROMCONFIGFILE')
-				swap = '"{f}"'.format(f=hipparchia.config[s])
-				self.css = re.sub(searchfor, swap, self.css)
-		else:
-			for s in self.substitutes:
-				searchfor = re.compile(s + 'WILLBESUPPLIEDFROMCONFIGFILE')
-				swap = '"{f}"'.format(f=commandlineargs.forcefont)
-				self.css = re.sub(searchfor, swap, self.css)
+		for s in self.substitutes:
+			searchfor = re.compile(s + 'WILLBESUPPLIEDFROMCONFIGFILE')
+			swap = '"{f}"'.format(f=hipparchia.config[s])
+			self.css = re.sub(searchfor, swap, self.css)
 
 	def _pickerswaps(self):
-		commandlineargs = getcommandlineargs()
-		if self.pickerinuse and not commandlineargs.forcefont:
+		if self.pickerinuse:
 			searchfor = re.compile('DEFAULTLOCALFONTWILLBESUPPLIEDFROMCONFIGFILE')
 			swap = '"{f}"'.format(f=self.pickedfamily)
 			self.css = re.sub(searchfor, swap, self.css)
