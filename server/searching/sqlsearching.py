@@ -10,7 +10,7 @@ import re
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
+from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate, grabonelinefromwork
 from server.formatting.miscformatting import consolewarning, debugmessage
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
@@ -288,10 +288,10 @@ def precomposedsqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
 
     """
 
-    debugmessage('executing a precomposedsqlsubqueryphrasesearch()')
-
     # rebuild the searchsqldict but this time pass through rewritequerystringforsubqueryphrasesearching()
     so.searchsqldict = searchlistintosqldict(so, so.phrase, subqueryphrasesearch=True)
+
+    # debugmessage('precomposedsqlsubqueryphrasesearch() so.searchsqldict: {d}'.format(d=so.searchsqldict))
 
     # the windowed collection of lines; you will need to work to find the centers
     # windowing will increase the number of hits: 2+ lines per actual find
@@ -376,7 +376,35 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
 
     at the moment this is set up for "within x lines" and not "within x words"; that will come later
 
+    corner case tester: two line-enders: non solum + temporum dignitatem
+
+    [12]   Caesar, De Bello Gallico: book 7, chapter 54, section 4, line 2
+
+    7.54.3.3 multatos agris, omnibus ereptis sociis, imposito stipendio,
+    7.54.4.1 obsidibus summa cum contumelia extortis, et quam in
+    7.54.4.2 fortunam quamque in amplitudinem deduxisset, ut non
+    7.54.4.3 solum in pristinum statum redissent, sed omnium tem-
+    7.54.4.4 porum dignitatem et gratiam antecessisse viderentur.
+
+
+    corner case tester: two distant line-enders: temporum dignitatem + obsides Galliae
+
+    ut non
+    solum in pristinum statum redissent, sed omnium tem- 	7.54.4.3
+    porum dignitatem et gratiam antecessisse viderentur.
+    his datis mandatis eos ab se dimisit.
+          Noviodunum erat oppidum Haeduorum ad ripas 	7.55.1.1
+    Ligeris opportuno loco positum. huc Caesar omnes ob- 	7.55.2.1
+    sides Galliae, frumentum, pecuniam publicam, suorum
+
+
+
     """
+
+    #
+    # initially do "within x lines"
+    #
+
     phrasefinder = re.compile(r'[^\s]\s[^\s]')
     if re.search(phrasefinder, so.seeking) and re.search(phrasefinder, so.proximate):
         secondsearch = precomposedsqlsubqueryphrasesearch
@@ -393,6 +421,11 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
     pl = so.lemmatwo
     so.lemmatwo = str()
     so.phrase = so.seeking
+    firstterm = so.phrase
+    if so.lemmaone:
+        secondterm = so.lemmaone.formlist
+    else:
+        secondterm = so.seeking
 
     so.cap = hipparchia.config['INTERMEDIATESEARCHCAP']
 
@@ -425,49 +458,61 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
         ids = ['{a}_{b}'.format(a=nhl.wkuinversalid, b=i) for i in indices]
         newhitlineids.update(ids)
 
-    finalhitlines = list()
+    maybefinalhitines = list()
     if so.near:
         # "is near"
-        finalhitlines = [initialhitlinedict[hl] for hl in initialhitlinedict if hl in newhitlineids]
+        maybefinalhitines = [initialhitlinedict[hl] for hl in initialhitlinedict if hl in newhitlineids]
     elif not so.near:
         # "is not near"
-        finalhitlines = [initialhitlinedict[hl] for hl in initialhitlinedict if hl not in newhitlineids]
+        maybefinalhitines = [initialhitlinedict[hl] for hl in initialhitlinedict if hl not in newhitlineids]
 
-    # # turn the found lines into the 'where' for the second part...
-    # # model this off of configurewhereclausedata() -> wholeworktemptablecontents()
-    # if so.scope == 'words':
-    #     # words is a lot trickier than lines... hacking something together ATM
-    #     d = 4
-    # else:
-    #     d = so.distance
     #
-    # setsoflines = dict()
-    # for h in initialhitlines:
-    #     try:
-    #         setsoflines[h.authorid]
-    #     except KeyError:
-    #         setsoflines[h.authorid] = set()
-    #     r = range(h.index - d, h.index + d + 1)
-    #     setsoflines[h.authorid].update(list(r))
+    # if neccessary, do "within x words"
     #
-    # # au: {'type': 'temptable', 'where': {'tempdata': (10083, 10084, 10085, 10086, ...}}
-    # temptable = dict()
-    #
-    # for s in setsoflines:
-    #     temptable[s] = {'type': 'temptable', 'where': {'tempdata': tuple(setsoflines[s])}}
-    #
-    # so.indexrestrictions = temptable
-    #
-    # phrasefinder = re.compile(r'[^\s]\s[^\s]')
-    #
-    # if re.search(phrasefinder, so.seeking):
-    #     so.phrase = so.seeking
-    #     so.searchsqldict = searchlistintosqldict(so, so.phrase, subqueryphrasesearch=True)
-    #     finalhits = precomposedsqlsubqueryphrasesearch(so)
-    # else:
-    #     # lemmata still not handled
-    #     so.searchsqldict = searchlistintosqldict(so, so.seeking)
-    #     finalhits = generatepreliminaryhitlist(so)
+
+    if so.scope == 'words':
+        finalhitlines = paredowntowithinxwords(so, firstterm, secondterm, maybefinalhitines)
+    else:
+        finalhitlines = maybefinalhitines
+
+    # to humor rewriteskgandprx()
+    so.termone = firstterm
+    so.termtwo = secondterm
 
     return finalhitlines
 
+
+def paredowntowithinxwords(so: SearchObject, firstterm: str, secondterm: str, hitlines: List[dbWorkLine]) -> List[dbWorkLine]:
+    """
+
+    pare down within lines finds to within words finds
+
+    """
+
+    dbconnection = ConnectionObject()
+    dbcursor = dbconnection.cursor()
+    fullmatches = list()
+    commitcount = 0
+
+    while hitlines and len(fullmatches) < so.cap:
+        commitcount += 1
+        if commitcount == hipparchia.config['MPCOMMITCOUNT']:
+            dbconnection.commit()
+            commitcount = 0
+        hit = hitlines.pop()
+        leadandlag = grableadingandlagging(hit, so, dbcursor, firstterm)
+
+        # debugmessage('leadandlag for {h}: {l}'.format(h=hit.uniqueid, l=leadandlag))
+
+        lagging = leadandlag['lag']
+        leading = leadandlag['lead']
+
+        if so.near and (re.search(secondterm, leading) or re.search(secondterm, lagging)):
+            fullmatches.append(hit)
+            so.poll.addhits(1)
+        elif not so.near and not re.search(secondterm, leading) and not re.search(secondterm, lagging):
+            fullmatches.append(hit)
+            so.poll.addhits(1)
+
+    dbconnection.connectioncleanup()
+    return fullmatches

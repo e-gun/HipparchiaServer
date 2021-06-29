@@ -265,6 +265,7 @@ class SearchObject(object):
 			self.searchtype = 'proximity'
 		else:
 			self.searchtype = 'simple'
+		# debugmessage('SearchObject().setsearchtype(): {t}'.format(t=self.searchtype))
 
 	def generatesearchdescription(self) -> str:
 		# used to set the page title; called by executesearch()

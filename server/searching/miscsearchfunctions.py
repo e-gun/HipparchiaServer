@@ -527,12 +527,15 @@ def rebuildsearchobjectviasearchorder(so: SearchObject) -> SearchObject:
 	return so
 
 
-def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, cursor) -> dict:
+def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, cursor, override=None) -> dict:
 	"""
 
 	take a dbline and grab the N words in front of it and after it
 
 	it would be a good idea to have an autocommit connection here?
+
+	override was added so that the rewritten so of precomposedphraseandproximitysearch() can set 'seeking' as it
+	wishes
 
 	:param hitline:
 	:param searchobject:
@@ -547,10 +550,18 @@ def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, curso
 	if so.lemma:
 		seeking = wordlistintoregex(so.lemma.formlist)
 		so.usewordlist = 'polytonic'
+	elif override:
+		seeking = override
 	else:
 		seeking = so.termone
 
-	searchzone = getattr(hitline, so.usewordlist)
+	# expanded searchzone bacause "seeking" might be a multi-line phrase
+	prev = grabonelinefromwork(hitline.authorid, hitline.index - 1, cursor)
+	next = grabonelinefromwork(hitline.authorid, hitline.index + 1, cursor)
+	prev = dbWorkLine(*prev)
+	next = dbWorkLine(*next)
+
+	searchzone = ' '.join([getattr(prev, so.usewordlist), getattr(hitline, so.usewordlist), getattr(next, so.usewordlist)])
 
 	match = re.search(r'{s}'.format(s=seeking), searchzone)
 	# but what if you just found 'paucitate' inside of 'paucitatem'?

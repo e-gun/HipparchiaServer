@@ -187,12 +187,14 @@ def rewritesqlsearchdictforlemmata(so: SearchObject) -> dict:
     return modifieddict
 
 
-def perparesoforsecondsqldict(so: SearchObject, initialhitlines: List[dbWorkLine], usebetweensyntax=False) -> SearchObject:
+def perparesoforsecondsqldict(so: SearchObject, initialhitlines: List[dbWorkLine], usebetweensyntax=True) -> SearchObject:
     """
 
     after finding initialhitlines sqlwithinxlinessearch() will run a second query
 
     it needs a new sqldict
+
+    note that "usebetweensyntax=False" will break precomposedphraseandproximitysearch()
 
     """
 

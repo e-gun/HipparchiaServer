@@ -161,6 +161,7 @@ def rewriteskgandprx(skg: str, prx: str, htmlsearch: str, so: SearchObject) -> d
 			prx = so.originalproximate
 
 	r = {'skg': skg, 'prx': prx, 'html': htmlsearch}
+	# print(r)
 	return r
 
 
