@@ -13,7 +13,7 @@ from hashlib import md5
 
 from server import hipparchia
 from server.formatting.bibliographicformatting import bcedating
-from server.formatting.miscformatting import htmlcommentdecorator
+from server.formatting.miscformatting import debugmessage, htmlcommentdecorator
 from server.formatting.wordformatting import avoidsmallvariants
 from server.hipparchiaobjects.dbtextobjects import dbLemmaObject
 from server.hipparchiaobjects.vectorobjects import VectorValues
@@ -238,22 +238,33 @@ class SearchObject(object):
 
 	def setsearchtype(self):
 		phrasefinder = re.compile(r'[^\s]\s[^\s]')
-		if self.lemmaone and not (self.lemmatwo or self.proximate):
+
+		if re.search(phrasefinder, self.seeking) or re.search(phrasefinder, self.proximate):
+			containsaphrase = True
+		else:
+			containsaphrase = False
+
+		if self.lemmaone or self.lemmatwo:
+			containsalemma = True
+		else:
+			containsalemma = False
+
+		if self.proximate or self.lemmatwo:
+			iscomplex = True
+		else:
+			iscomplex = False
+
+		if containsaphrase and not iscomplex:
+			self.searchtype = 'phrase'
+		elif containsaphrase and iscomplex:
+			self.searchtype = 'phraseandproximity'
+		elif containsalemma and not iscomplex:
 			self.searchtype = 'simplelemma'
 			self.usewordlist = 'polytonic'
-		elif self.lemmaone and self.lemmatwo:
+		elif iscomplex:
 			self.searchtype = 'proximity'
-		elif (self.lemmaone or self.lemmatwo) and (self.seeking or self.proximate):
-			self.searchtype = 'proximity'
-		elif len(self.proximate) < 1 and re.search(phrasefinder, self.seeking) is None:
-			self.searchtype = 'simple'
-		elif len(self.proximate) > 0 and re.search(phrasefinder, self.seeking) or re.search(phrasefinder, self.proximate):
-			self.searchtype = 'phraseandproximity'
-		elif re.search(phrasefinder, self.seeking):
-			self.searchtype = 'phrase'
 		else:
-			self.searchtype = 'proximity'
-		# print('searchtype set to {t}'.format(t=self.searchtype))
+			self.searchtype = 'simple'
 
 	def generatesearchdescription(self) -> str:
 		# used to set the page title; called by executesearch()
@@ -285,6 +296,18 @@ class SearchObject(object):
 			# proximity of two terms
 			s = '{skg}{ns} within {sp} {sc} of {pr}'
 			return s.format(skg=self.originalseeking, ns=self.nearstr, sp=self.proximity, sc=self.scope, pr=self.originalproximate)
+
+	def swapseekingandproxmate(self):
+		s = self.seeking
+		p = self.proximate
+		self.seeking = p
+		self.proximate = s
+
+	def swaplemmaoneandtwo(self):
+		o = self.lemmaone
+		t = self.lemmatwo
+		self.lemmaone = t
+		self.lemmatwo = o
 
 	def generatehtmlsearchdescription(self) -> str:
 		# used to set the page title; called by executesearch()

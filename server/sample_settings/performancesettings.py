@@ -38,13 +38,6 @@
 # 	partial results that will present themselves as successfully
 # 	executed searches. That is no good at all.
 #
-# LEMMACHUNKSIZE: how many lemmatized forms to search for at once
-#   the query is a regex 'or' that can have > 400 variations; this
-#   makes for slow faster; 40 tries of 10 variants is faster. Again,
-#   there is no particular reason to change this other than to explore
-#   the possibility of relatively unimportant speed gains. This is
-#   an option of interest only to debuggers and hard-core optimizers.
-#
 # INTERMEDIATESEARCHCAP: the maximum number of items to accept in the
 #   middle of a search. This is to keep "'et' near 'at'" from going insane.
 #   Nevertheless, there is an issue here with the external binary. See the
@@ -58,5 +51,4 @@ AUTOCONFIGWORKERS = True
 WORKERS = 3
 
 MPCOMMITCOUNT = 250
-LEMMACHUNKSIZE = 10
 INTERMEDIATESEARCHCAP = 2000000

@@ -167,7 +167,8 @@ def rewritesqlsearchdictforlemmata(so: SearchObject) -> dict:
 
     terms = so.lemmaone.formlist
 
-    chunksize = hipparchia.config['LEMMACHUNKSIZE']
+    chunksize = min(int(len(terms) / (hipparchia.config['WORKERS'] * 2)), 25)
+
     newtablenames = '{t}_{c}'
 
     chunked = [terms[i:i + chunksize] for i in range(0, len(terms), chunksize)]
@@ -186,7 +187,7 @@ def rewritesqlsearchdictforlemmata(so: SearchObject) -> dict:
     return modifieddict
 
 
-def perparesoforsecondsqldict(so: SearchObject, initialhitlines: List[dbWorkLine], usebetweensyntax=True) -> SearchObject:
+def perparesoforsecondsqldict(so: SearchObject, initialhitlines: List[dbWorkLine], usebetweensyntax=False) -> SearchObject:
     """
 
     after finding initialhitlines sqlwithinxlinessearch() will run a second query

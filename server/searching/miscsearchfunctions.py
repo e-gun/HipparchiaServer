@@ -21,6 +21,7 @@ from flask import request, session
 from server import hipparchia
 from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate, grabonelinefromwork
 from server.dbsupport.lexicaldbfunctions import findcountsviawordcountstable, querytotalwordcounts
+from server.dbsupport.tablefunctions import assignuniquename
 from server.formatting.betacodetounicode import replacegreekbetacode
 from server.formatting.miscformatting import debugmessage, consolewarning
 from server.formatting.wordformatting import badpucntwithbackslash, minimumgreek, removegravity, wordlistintoregex
@@ -671,6 +672,22 @@ def haveexternalhelper(thepath):
 		return False
 
 
+def insertuniqunames(sqldict: dict) -> dict:
+	"""
+
+	swap out "_UNIQUENAME" in the prerolled queries
+
+	"""
+
+	for item in sqldict:
+		if sqldict[item]['temptable']:
+			u = assignuniquename()
+			sqldict[item]['query'] = re.sub(r'UNIQUENAME', u, sqldict[item]['query'])
+			sqldict[item]['temptable'] = re.sub(r'UNIQUENAME', u, sqldict[item]['temptable'])
+
+	return sqldict
+
+
 def genericexternalcliexecution(theprogram: str, formatterfunction, so: SearchObject) -> str:
 	"""
 
@@ -705,10 +722,12 @@ def genericexternalcliexecution(theprogram: str, formatterfunction, so: SearchOb
 		# so you need a little more work
 		resultrediskey = resultrediskey.split()[-1]
 	else:
-		e = repr(result)
+		o = str(result.stdout)
+		e = str(result.stderr)
 		e = re.sub(r'\\n', '\n', e)
 		e = re.sub(r'\\t', '\t', e)
 		consolewarning('{c} returned an error'.format(c=hipparchia.config['EXTERNALBINARYNAME']), color='red')
+		consolewarning('{e}'.format(e=o), color='cyan')
 		consolewarning('{e}'.format(e=e), color='yellow')
 		# debugmessage(repr(result))
 

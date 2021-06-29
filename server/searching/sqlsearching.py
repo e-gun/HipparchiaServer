@@ -16,7 +16,8 @@ from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.hipparchiaobjects.searchobjects import SearchObject
 from server.hipparchiaobjects.worklineobject import dbWorkLine
-from server.searching.miscsearchfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging
+from server.searching.miscsearchfunctions import rebuildsearchobjectviasearchorder, grableadingandlagging, \
+    insertuniqunames
 from server.searching.precomposesql import searchlistintosqldict, rewritesqlsearchdictforlemmata, \
     perparesoforsecondsqldict
 from server.searching.searchviapythoninterface import precomposedsqlsearchmanager
@@ -122,6 +123,8 @@ def basicprecomposedsqlsearcher(so: SearchObject, themanager=None) -> List[dbWor
 
     """
 
+    so.searchsqldict = insertuniqunames(so.searchsqldict)
+
     if not themanager:
         usesharedlibrary = hipparchia.config['EXTERNALGRABBER']
 
@@ -157,6 +160,9 @@ def generatepreliminaryhitlist(so: SearchObject, recap=hipparchia.config['INTERM
     so.cap = recap
 
     so.poll.statusis('Searching for "{x}"'.format(x=so.termone))
+    if so.searchtype == 'phraseandproximity':
+        so.poll.statusis('Searching for "{x}"'.format(x=so.phrase))
+
     if so.lemmaone:
         so.poll.statusis('Searching for all forms of "{x}"'.format(x=so.lemmaone.dictionaryentry))
 
@@ -291,8 +297,8 @@ def precomposedsqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
     # windowing will increase the number of hits: 2+ lines per actual find
     initialhitlines = generatepreliminaryhitlist(so, recap=so.cap * 3)
 
-    m = 'Now searching among the {h} initial hits for the full phrase "{p}"'
-    so.poll.statusis(m.format(h=so.poll.gethits(), p=so.originalseeking))
+    m = 'Generating final list of hits by searching among the {h} preliminary hits'
+    so.poll.statusis(m.format(h=so.poll.gethits()))
     so.poll.sethits(0)
 
     sp = re.sub(r'^\s', r'(^|\\s)', so.phrase)
@@ -368,27 +374,52 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
 
     do a precomposedsqlsubqueryphrasesearch() and then search inside the results for part two...
 
-    """
+    at the moment this is set up for "within x lines" and not "within x words"; that will come later
 
-    p = so.proximate
-    so.proximate = str()
+    """
+    phrasefinder = re.compile(r'[^\s]\s[^\s]')
+    if re.search(phrasefinder, so.seeking) and re.search(phrasefinder, so.proximate):
+        secondsearch = precomposedsqlsubqueryphrasesearch
+    elif not re.search(phrasefinder, so.seeking) and re.search(phrasefinder, so.proximate):
+        so.swapseekingandproxmate()
+        so.swaplemmaoneandtwo()
+        secondsearch = basicprecomposedsqlsearcher
+    else:
+        secondsearch = basicprecomposedsqlsearcher
+
     c = so.cap
+    ps = so.proximate
+    so.proximate = str()
+    pl = so.lemmatwo
+    so.lemmatwo = str()
+    so.phrase = so.seeking
+
     so.cap = hipparchia.config['INTERMEDIATESEARCHCAP']
 
     initialhitlines = precomposedsqlsubqueryphrasesearch(so)
 
-    so.seeking = p
+    so.seeking = ps
+    so.lemmaone = pl
     so.setsearchtype()
     so.cap = c
 
+    if secondsearch == precomposedsqlsubqueryphrasesearch:
+        so.phrase = ps
+    else:
+        so.phrase = str()
+
     so = perparesoforsecondsqldict(so, initialhitlines)
-    so.searchsqldict = searchlistintosqldict(so, so.termtwo)
+    so.searchsqldict = searchlistintosqldict(so, so.seeking)
+    if so.lemmaone:
+        so.searchsqldict = rewritesqlsearchdictforlemmata(so)
+
     so.poll.sethits(0)
 
-    # note that 'basic' is too basic here
-    newhitlines = basicprecomposedsqlsearcher(so)
+    newhitlines = secondsearch(so)
+
     initialhitlinedict = {hl.uniqueid: hl for hl in initialhitlines}
     newhitlineids = set()
+
     for nhl in newhitlines:
         indices = list(range(nhl.index - so.distance, nhl.index + so.distance + 1))
         ids = ['{a}_{b}'.format(a=nhl.wkuinversalid, b=i) for i in indices]
