@@ -10,8 +10,9 @@ import re
 from typing import List
 
 from server import hipparchia
-from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate, grabonelinefromwork
+from server.dbsupport.dblinefunctions import dblineintolineobject, makeablankline, worklinetemplate
 from server.formatting.miscformatting import consolewarning, debugmessage
+from server.formatting.wordformatting import wordlistintoregex
 from server.hipparchiaobjects.connectionobject import ConnectionObject
 from server.hipparchiaobjects.helperobjects import QueryCombinator
 from server.hipparchiaobjects.searchobjects import SearchObject
@@ -132,7 +133,7 @@ def basicprecomposedsqlsearcher(so: SearchObject, themanager=None) -> List[dbWor
             debugmessage('searching via python')
             themanager = precomposedsqlsearchmanager
         else:
-            debugmessage('searching via external helper code')
+            # debugmessage('searching via external helper code')
             themanager = precomposedexternalsearcher
 
     hits = themanager(so)
@@ -241,37 +242,11 @@ def precomposedsqlwithinxwords(so: SearchObject) -> List[dbWorkLine]:
 
     initialhitlines = generatepreliminaryhitlist(so)
 
-    fullmatches = list()
-
     so.poll.statusis('Now searching among the initial finds for "{x}"'.format(x=so.termtwo))
     if so.lemmatwo:
         so.poll.statusis('Now searching among the initial finds for all forms of "{x}"'.format(x=so.lemmatwo.dictionaryentry))
 
-    so.poll.sethits(0)
-    commitcount = 0
-
-    dbconnection = ConnectionObject()
-    dbcursor = dbconnection.cursor()
-
-    while initialhitlines and len(fullmatches) < so.cap:
-        commitcount += 1
-        if commitcount == hipparchia.config['MPCOMMITCOUNT']:
-            dbconnection.commit()
-            commitcount = 0
-        hit = initialhitlines.pop()
-        leadandlag = grableadingandlagging(hit, so, dbcursor)
-        # print('leadandlag for {h}: {l}'.format(h=hit.uniqueid, l=leadandlag))
-        lagging = leadandlag['lag']
-        leading = leadandlag['lead']
-
-        if so.near and (re.search(so.termtwo, leading) or re.search(so.termtwo, lagging)):
-            fullmatches.append(hit)
-            so.poll.addhits(1)
-        elif not so.near and not re.search(so.termtwo, leading) and not re.search(so.termtwo, lagging):
-            fullmatches.append(hit)
-            so.poll.addhits(1)
-
-    dbconnection.connectioncleanup()
+    fullmatches = paredowntowithinxwords(so, None, so.termtwo, initialhitlines)
 
     return fullmatches
 
@@ -397,8 +372,6 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
     Ligeris opportuno loco positum. huc Caesar omnes ob- 	7.55.2.1
     sides Galliae, frumentum, pecuniam publicam, suorum
 
-
-
     """
 
     #
@@ -422,10 +395,6 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
     so.lemmatwo = str()
     so.phrase = so.seeking
     firstterm = so.phrase
-    if so.lemmaone:
-        secondterm = so.lemmaone.formlist
-    else:
-        secondterm = so.seeking
 
     so.cap = hipparchia.config['INTERMEDIATESEARCHCAP']
 
@@ -443,6 +412,7 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
 
     so = perparesoforsecondsqldict(so, initialhitlines)
     so.searchsqldict = searchlistintosqldict(so, so.seeking)
+
     if so.lemmaone:
         so.searchsqldict = rewritesqlsearchdictforlemmata(so)
 
@@ -470,14 +440,21 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
     # if neccessary, do "within x words"
     #
 
+    if so.lemmaone:
+        secondterm = wordlistintoregex(so.lemmaone.formlist)
+    else:
+        secondterm = so.seeking
+
     if so.scope == 'words':
         finalhitlines = paredowntowithinxwords(so, firstterm, secondterm, maybefinalhitines)
     else:
         finalhitlines = maybefinalhitines
 
     # to humor rewriteskgandprx()
+    # but it doesn't 100% work yet...
     so.termone = firstterm
     so.termtwo = secondterm
+    so.lemmatwo = so.lemmaone
 
     return finalhitlines
 
@@ -485,9 +462,25 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
 def paredowntowithinxwords(so: SearchObject, firstterm: str, secondterm: str, hitlines: List[dbWorkLine]) -> List[dbWorkLine]:
     """
 
-    pare down within lines finds to within words finds
+    pare down hitlines finds to within words finds
+
+    corner case tester: within N words + lemma + phrase
+
+    Sought all 25 known forms of »βαϲιλεύϲ« within 5 words of »μεγάλην δύναμιν«
+    Searched 3,182 works and found 1 passage (2.58s)
+    Searched between 850 B.C.E. and 300 B.C.E.
+    Sorted by name
+    [1]   Ctesias, Fragmenta: Volume-Jacoby#-F 3c,688,F, fragment 14, line 54
+
+    3c,688,F.14.52    (40) καὶ ἐλυπήθη λύπην ϲφοδρὰν Μεγάβυζοϲ, καὶ ἐπένθηϲε, καὶ ἠιτήϲατο
+    3c,688,F.14.53 ἐπὶ Ϲυρίαν τὴν ἑαυτοῦ χώραν ἀπιέναι. ἐνταῦθα λάθραι καὶ τοὺϲ ἄλλουϲ τῶν
+    3c,688,F.14.54 Ἑλλήνων προέπεμπε. καὶ ἀπήιει, καὶ ἀπέϲτη βαϲιλέωϲ, καὶ ἀθροίζει μεγάλην
+    3c,688,F.14.55 δύναμιν ἄχρι πεντεκαίδεκα μυριάδων χωρὶϲ τῶν ἱππέων [καὶ τῶν πεζῶν].
+    3c,688,F.14.56 καὶ πέμπεται Οὔϲιριϲ κατ’ αὐτοῦ ϲὺν ⟨κ⟩ μυριάϲι, καὶ ϲυνάπτεται πόλεμοϲ, καὶ
 
     """
+
+    so.poll.sethits(0)
 
     dbconnection = ConnectionObject()
     dbcursor = dbconnection.cursor()

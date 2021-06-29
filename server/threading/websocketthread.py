@@ -171,7 +171,8 @@ def helperappwebsocketserver(theport):
 	commandandarguments = [command] + ['{p}ws'.format(p=prefix)] + argumentlist
 
 	subprocess.Popen(commandandarguments)
-	debugmessage('successfully opened {b}'.format(b=hipparchia.config['EXTERNALBINARYNAME']))
+
+	# debugmessage('successfully opened {b}'.format(b=hipparchia.config['EXTERNALBINARYNAME']))
 
 	return
 

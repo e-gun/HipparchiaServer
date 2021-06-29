@@ -80,7 +80,8 @@ def precomposedexternalsearcher(so: SearchObject) -> List[dbWorkLine]:
     rc = establishredisconnection()
 
     so.searchsqldict = rewritesqlsearchdictforexternalhelper(so)
-    debugmessage('storing search at "{r}"'.format(r=so.searchid))
+    # debugmessage('storing search at "{r}"'.format(r=so.searchid))
+
     for s in so.searchsqldict:
         rc.sadd(so.searchid, json.dumps(so.searchsqldict[s]))
 

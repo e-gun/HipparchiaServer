@@ -547,11 +547,11 @@ def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, curso
 	# look out for off-by-one errors
 	distance = so.distance + 1
 
-	if so.lemma:
+	if override:
+		seeking = override
+	elif so.lemma:
 		seeking = wordlistintoregex(so.lemma.formlist)
 		so.usewordlist = 'polytonic'
-	elif override:
-		seeking = override
 	else:
 		seeking = so.termone
 
