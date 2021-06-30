@@ -37,6 +37,7 @@ except ImportError as e:
     [a2] precomposedsqlwithinxlinessearch ('proximity' by lines)
     [a3] precomposedsqlwithinxwords ('proximity' by words)
     [a4] precomposedsqlsubqueryphrasesearch ('phrases' via a much more elaborate set of SQL queries)
+    [a5] precomposedphraseandproximitysearch ('phrases' near other phrases, lemmata, or words)
 
 [b] most of the searches nevertheless call basicprecomposedsqlsearcher()
     two-step searches will call basicprecomposedsqlsearcher() via  generatepreliminaryhitlist()
@@ -349,8 +350,6 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
 
     do a precomposedsqlsubqueryphrasesearch() and then search inside the results for part two...
 
-    at the moment this is set up for "within x lines" and not "within x words"; that will come later
-
     corner case tester: two line-enders: non solum + temporum dignitatem
 
     [12]   Caesar, De Bello Gallico: book 7, chapter 54, section 4, line 2
@@ -371,6 +370,46 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
           Noviodunum erat oppidum Haeduorum ad ripas 	7.55.1.1
     Ligeris opportuno loco positum. huc Caesar omnes ob- 	7.55.2.1
     sides Galliae, frumentum, pecuniam publicam, suorum
+
+    the old code will trick you by pretending it is doing a valid search even though it is not really set up
+    to handle this situation and was not supposed to promise that it could do phrase+
+    [it's the phrase-spanning-two-lines bit that yields the problem since you do "lemma+" but have no handler for
+    the multi-line issue]
+
+    0.0.0-1.8.1
+
+    Sought all 19 known forms of »χώρα« within 1 lines of »μεγάλην δύναμιν«
+    Searched 3,182 works and found 1 passage (0.77s)
+    Searched between 850 B.C.E. and 300 B.C.E.
+    Sorted by name
+    [1]   Ctesias, Fragmenta: Volume-Jacoby#-F 3c,688,F, fragment 5, line 47
+
+    3c,688,F.5.45 τόπουϲ. (3) γενόμενον δ’ ἀποϲτάτην καὶ πείϲαντα τὸ ϲύμπαν ἔθνοϲ ἀντέχεϲθαι
+    3c,688,F.5.46 τῆϲ ἐλευθερίαϲ, αἱρεθῆναι ϲτρατηγὸν διὰ τὴν ἀνδρείαν. ἔπειτα πυνθανόμενον
+    3c,688,F.5.47 ἀθροιζομένην ἐπ’ αὐτὸν μεγάλην δύναμιν, καθοπλίϲαι τοὺϲ Καδουϲίουϲ παν-
+    3c,688,F.5.48 δημεί, καὶ καταϲτρατοπεδεῦϲαι πρὸϲ ταῖϲ εἰϲ τὴν χώραν εἰϲβολαῖϲ, ἔχοντα
+    3c,688,F.5.49 τοὺϲ ϲύμπανταϲ οὐκ ἐλάττουϲ εἴκοϲι μυριάδων. (4) τοῦ δὲ βαϲιλέωϲ Ἀρταίου
+
+    1.8.2+
+
+    Sought all 19 known forms of »χώρα« within 1 lines of »μεγάλην δύναμιν«
+    Searched 2,346 works and found 2 passages (2.2s)
+    Searched between 850 B.C.E. and 300 B.C.E.
+    Sorted by name
+    [1]   Ctesias, Fragmenta: Volume-Jacoby#-F 3c,688,F, fragment 5, line 47
+
+    3c,688,F.5.45 τόπουϲ. (3) γενόμενον δ’ ἀποϲτάτην καὶ πείϲαντα τὸ ϲύμπαν ἔθνοϲ ἀντέχεϲθαι
+    3c,688,F.5.46 τῆϲ ἐλευθερίαϲ, αἱρεθῆναι ϲτρατηγὸν διὰ τὴν ἀνδρείαν. ἔπειτα πυνθανόμενον
+    3c,688,F.5.47 ἀθροιζομένην ἐπ’ αὐτὸν μεγάλην δύναμιν, καθοπλίϲαι τοὺϲ Καδουϲίουϲ παν-
+    3c,688,F.5.48 δημεί, καὶ καταϲτρατοπεδεῦϲαι πρὸϲ ταῖϲ εἰϲ τὴν χώραν εἰϲβολαῖϲ, ἔχοντα
+    3c,688,F.5.49 τοὺϲ ϲύμπανταϲ οὐκ ἐλάττουϲ εἴκοϲι μυριάδων. (4) τοῦ δὲ βαϲιλέωϲ Ἀρταίου
+    [2]   Ctesias, Fragmenta: Volume-Jacoby#-F 3c,688,F, fragment 14, line 54
+
+    3c,688,F.14.52    (40) καὶ ἐλυπήθη λύπην ϲφοδρὰν Μεγάβυζοϲ, καὶ ἐπένθηϲε, καὶ ἠιτήϲατο
+    3c,688,F.14.53 ἐπὶ Ϲυρίαν τὴν ἑαυτοῦ χώραν ἀπιέναι. ἐνταῦθα λάθραι καὶ τοὺϲ ἄλλουϲ τῶν
+    3c,688,F.14.54 Ἑλλήνων προέπεμπε. καὶ ἀπήιει, καὶ ἀπέϲτη βαϲιλέωϲ, καὶ ἀθροίζει μεγάλην
+    3c,688,F.14.55 δύναμιν ἄχρι πεντεκαίδεκα μυριάδων χωρὶϲ τῶν ἱππέων [καὶ τῶν πεζῶν].
+    3c,688,F.14.56 καὶ πέμπεται Οὔϲιριϲ κατ’ αὐτοῦ ϲὺν ⟨κ⟩ μυριάϲι, καὶ ϲυνάπτεται πόλεμοϲ, καὶ
 
     """
 
@@ -437,7 +476,7 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
         maybefinalhitines = [initialhitlinedict[hl] for hl in initialhitlinedict if hl not in newhitlineids]
 
     #
-    # if neccessary, do "within x words"
+    # if neccessary, do "within x words" as x lines hits will always be a subset of the first set
     #
 
     if so.lemmaone:
@@ -451,7 +490,8 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
         finalhitlines = maybefinalhitines
 
     # to humor rewriteskgandprx()
-    # but it doesn't 100% work yet...
+    # but that formatting doesn't 100% work yet...
+
     so.termone = firstterm
     so.termtwo = secondterm
     so.lemmatwo = so.lemmaone
@@ -463,20 +503,6 @@ def paredowntowithinxwords(so: SearchObject, firstterm: str, secondterm: str, hi
     """
 
     pare down hitlines finds to within words finds
-
-    corner case tester: within N words + lemma + phrase
-
-    Sought all 25 known forms of »βαϲιλεύϲ« within 5 words of »μεγάλην δύναμιν«
-    Searched 3,182 works and found 1 passage (2.58s)
-    Searched between 850 B.C.E. and 300 B.C.E.
-    Sorted by name
-    [1]   Ctesias, Fragmenta: Volume-Jacoby#-F 3c,688,F, fragment 14, line 54
-
-    3c,688,F.14.52    (40) καὶ ἐλυπήθη λύπην ϲφοδρὰν Μεγάβυζοϲ, καὶ ἐπένθηϲε, καὶ ἠιτήϲατο
-    3c,688,F.14.53 ἐπὶ Ϲυρίαν τὴν ἑαυτοῦ χώραν ἀπιέναι. ἐνταῦθα λάθραι καὶ τοὺϲ ἄλλουϲ τῶν
-    3c,688,F.14.54 Ἑλλήνων προέπεμπε. καὶ ἀπήιει, καὶ ἀπέϲτη βαϲιλέωϲ, καὶ ἀθροίζει μεγάλην
-    3c,688,F.14.55 δύναμιν ἄχρι πεντεκαίδεκα μυριάδων χωρὶϲ τῶν ἱππέων [καὶ τῶν πεζῶν].
-    3c,688,F.14.56 καὶ πέμπεται Οὔϲιριϲ κατ’ αὐτοῦ ϲὺν ⟨κ⟩ μυριάϲι, καὶ ϲυνάπτεται πόλεμοϲ, καὶ
 
     """
 

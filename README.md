@@ -322,6 +322,9 @@ optional arguments:
                         [force setting] override the config file threadcount
   --purepython          [force setting] disallow use of an external go/rust helper; only use internal local python code
   --forcehelper         [force setting] demand use external go/rust helper; avoid use of internal local python code
+  --helpername HELPERNAME
+                        [force setting] provide the name of a cli binary
+
   --modulehelper        [force setting] call the use external helper as a module instead of a cli binary
   --novectors           [force setting] disable the semantic vector code
   --calculatewordweights

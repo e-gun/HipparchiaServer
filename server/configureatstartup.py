@@ -142,6 +142,8 @@ if commandlineargs.forcehelper:
 	hipparchia.config['EXTERNALGRABBER'] = True
 	hipparchia.config['EXTERNALVECTORHELPER'] = True
 	hipparchia.config['EXTERNALWEBSOCKETS'] = True
+if commandlineargs.helpername:
+	hipparchia.config['EXTERNALBINARYNAME'] = commandlineargs.helpername
 if commandlineargs.modulehelper:
 	hipparchia.config['GRABBERCALLEDVIACLI'] = False
 if commandlineargs.novectors:
