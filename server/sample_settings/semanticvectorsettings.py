@@ -49,13 +49,8 @@
 #   all of Latin. 13518316 is all Greek literature up to 300 BCE.
 # 	75233492 is all Greek literature. It takes >12GB of RAM to autovectorize
 #   all of greek, so be careful about this if you turn on AUTOVECTORIZE
-#   with MAXVECTORSPACE > 75233492.
-#   [12GB for all of greek is no longer true after the __slot__ modification.
-#   The new value is unclear. An 8G system can build the vectorspace, though.]
-#   If you search for the literal cosine distances of a common word you can easily
-#   chew up >24GB of RAM. Your system will hang unless/until Hipparchia
-#   receives more memory optimizations. Gensim NN vectorization of all
-#   of Latin will take 554.08s on a 6-threaded 3.6GHz machine.
+#   with MAXVECTORSPACE > 75233492. Your system will likely become very
+#   unresponsive. It might hang.
 #
 # VECTORDISTANCECUTOFF: how close Word A needs to be to Word B for the associative matrix
 #   calculations to decide that there is a relationship worth pursuing: a value between 1 and 0

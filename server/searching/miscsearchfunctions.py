@@ -537,6 +537,9 @@ def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, curso
 	override was added so that the rewritten so of precomposedphraseandproximitysearch() can set 'seeking' as it
 	wishes
 
+	note that this could be faster if you took a set of lines and then grabbed all of the triplets in a single query,
+	etc. instead of looping this... but in practice it is not clear how many searches will gain how much speed
+
 	:param hitline:
 	:param searchobject:
 	:param cursor:

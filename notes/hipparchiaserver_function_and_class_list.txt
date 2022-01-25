@@ -1,32 +1,63 @@
-hipparchia_venv/ $ cloc --not-match-f='^j' --not-match-d='^golang' HipparchiaServer/
-                        207 text files.
-                        204 unique files.
+hipparchia_venv/ $  cloc --not-match-f='^j' --not-match-d='^external' HipparchiaServer/
+                        211 text files.
+                        209 unique files.
                          31 files ignored.
 
-                   github.com/AlDanial/cloc v 1.90  T=0.64 s (291.2 files/s, 79358.1 lines/s)
+                   github.com/AlDanial/cloc v 1.90  T=0.28 s (680.4 files/s, 183781.2 lines/s)
                    -------------------------------------------------------------------------------
                    Language                     files          blank        comment           code
                    -------------------------------------------------------------------------------
-                   Python                         126           7875          10582          18402
+                   Python                         131           8047          10921          18646
                    JavaScript                      18           1137            395           4241
                    CSS                              4            954            242           3914
                    HTML                            31            192             35           1954
-                   XML                              7              0              0            750
-                   Markdown                         1             63              0            227
+                   XML                              7              0              0            848
+                   Markdown                         1             68              0            265
                    -------------------------------------------------------------------------------
-                   SUM:                           187          10221          11254          29488
+                   SUM:                           192          10398          11593          29868
                    -------------------------------------------------------------------------------
-
-
+                   (hipparchia_venv) 1034 •erik@big-sur-box• erik/hipparchia_venv/ %
 
 server/ $ grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
-grep "^class" */*.py && grep "^def " *.py && grep "^def " */*.py
+
 _deprecated/searchfunctionobjects.py:class GenericSearchFunctionObject(object):
 _deprecated/searchfunctionobjects.py:class RedisSearchFunctionObject(GenericSearchFunctionObject):
 _deprecated/searchfunctionobjects.py:class ManagedListSearchFunctionObject(GenericSearchFunctionObject):
 _deprecated/searchfunctionobjects.py:class QueuedSearchFunctionObject(GenericSearchFunctionObject):
 dbsupport/redisdbfunctions.py:class NullRedis(object):
 dbsupport/redisdbfunctions.py:class PooledRedisBorg(object):
+externalmodule/build.py:class CheckedFunction(Function):
+externalmodule/go.py:class GoClass(object):
+externalmodule/go.py:class Slice_bool(GoClass):
+externalmodule/go.py:class Slice_byte(GoClass):
+externalmodule/go.py:class Slice_float32(GoClass):
+externalmodule/go.py:class Slice_float64(GoClass):
+externalmodule/go.py:class Slice_int(GoClass):
+externalmodule/go.py:class Slice_int16(GoClass):
+externalmodule/go.py:class Slice_int32(GoClass):
+externalmodule/go.py:class Slice_int64(GoClass):
+externalmodule/go.py:class Slice_int8(GoClass):
+externalmodule/go.py:class Slice_rune(GoClass):
+externalmodule/go.py:class Slice_string(GoClass):
+externalmodule/go.py:class Slice_uint(GoClass):
+externalmodule/go.py:class Slice_uint16(GoClass):
+externalmodule/go.py:class Slice_uint32(GoClass):
+externalmodule/go.py:class Slice_uint64(GoClass):
+externalmodule/go.py:class Slice_uint8(GoClass):
+externalmodule/go.py:class Ptr_redis_Pool(GoClass):
+externalmodule/go.py:class context_Context(GoClass):
+externalmodule/go.py:class redis_Conn(GoClass):
+externalmodule/go.py:class redis_Pool(GoClass):
+externalmodule/go.py:class redis_PoolStats(GoClass):
+externalmodule/hipparchiagolangsearching.py:class BagWithLocus(go.GoClass):
+externalmodule/hipparchiagolangsearching.py:class CompositePollingData(go.GoClass):
+externalmodule/hipparchiagolangsearching.py:class DbMorphology(go.GoClass):
+externalmodule/hipparchiagolangsearching.py:class DbWorkline(go.GoClass):
+externalmodule/hipparchiagolangsearching.py:class PostgresLogin(go.GoClass):
+externalmodule/hipparchiagolangsearching.py:class PrerolledQuery(go.GoClass):
+externalmodule/hipparchiagolangsearching.py:class RedisLogin(go.GoClass):
+externalmodule/hipparchiagolangsearching.py:class WeightedHeadword(go.GoClass):
+externalmodule/hipparchiagolangsearching.py:class WHWList(go.GoClass):
 hipparchiaobjects/authenticationobjects.py:class PassUser(object):
 hipparchiaobjects/browserobjects.py:class BrowserOutputObject(object):
 hipparchiaobjects/browserobjects.py:class BrowserPassageObject(object):
@@ -85,7 +116,11 @@ calculatewordweights.py:def findgenreweightfromworkobject(genre: str, language: 
 calculatewordweights.py:def findcorpusweight(corpus: str, language: str) -> int:
 calculatewordweights.py:def findcorpusweightviawordcounts(corpus: str) -> int:
 commandlineoptions.py:def getcommandlineargs():
+compatability.py:def checkcompatability():
+compatability.py:def dbversionchecking(activedbs: list) -> str:
 configureatstartup.py:def startupprint(message: str, color='white', isbold=False, colorcoded=False, baremessage=True):
+versioning.py:def fetchhipparchiaserverversion() -> str:
+versioning.py:def readgitdata() -> str:
 _deprecated/deprecated_precomposedsearching.py:def precomposedsqlphrasesearch(so: SearchObject) -> List[dbWorkLine]:
 _deprecated/dynamicsqlsearchdispatching.py:def dynamicsqlsearchdispatcher(searchobject: SearchObject) -> List[dbWorkLine]:
 _deprecated/dynamicsqlsearchdispatching.py:def workonsimplesearch(workerid: int, foundlineobjects: ListProxy, listofplacestosearch: ListProxy, searchobject: SearchObject, dbconnection) -> ListProxy:
@@ -99,6 +134,7 @@ _deprecated/dynamicsqlsearching.py:def simplewithinxlines(searchobject: SearchOb
 _deprecated/dynamicsqlsearching.py:def withinxwords(workdbname: str, searchobject: SearchObject, dbconnection) -> List[dbWorkLine]:
 _deprecated/dynamicsqlsearching.py:def phrasesearch(wkid: str, searchobject: SearchObject, cursor) -> List[dbWorkLine]:
 _deprecated/dynamicsqlsearching.py:def subqueryphrasesearch(workerid, foundlineobjects: ListProxy, searchphrase: str, listofplacestosearch: ListProxy,
+_deprecated/dynamicsqlsearching.py:def loadredisresults(searchid):
 _deprecated/searchfunctionobjects.py:def returnsearchfncobject(workerid, foundlineobjects, listofplacestosearch, searchobject, dbconnection, searchfunction):
 authentication/authenticationwrapper.py:def requireauthentication(routefunction):
 authentication/authenticationwrapper.py:def loginfailurenotification() -> str:
@@ -125,7 +161,6 @@ dbsupport/citationfunctions.py:def perseuslookupchangecase(citationlist: list) -
 dbsupport/citationfunctions.py:def perseusdelabeler(citationlist: list, workobject: dbOpus) -> list:
 dbsupport/citationfunctions.py:def perseuscitationsintohipparchiacitations(citationlist: list) -> list:
 dbsupport/dbbuildinfo.py:def buildoptionchecking() -> dict:
-dbsupport/dbbuildinfo.py:def versionchecking(activedbs: list, expectedsqltemplateversion: str) -> str:
 dbsupport/dblinefunctions.py:def dblineintolineobject(dbline: tuple) -> dbWorkLine:
 dbsupport/dblinefunctions.py:def grabonelinefromwork(workdbname: str, lineindex: int, cursor) -> tuple:
 dbsupport/dblinefunctions.py:def returnfirstorlastlinenumber(workid: str, dbcursor, findlastline=False, disallowt=False, disallowlevel=0) -> int:
@@ -161,15 +196,24 @@ dbsupport/miscdbfunctions.py:def icanpickleconnections(dothecheck=False) -> bool
 dbsupport/miscdbfunctions.py:def cleanpoolifneeded():
 dbsupport/redisdbfunctions.py:def establishredisconnection() -> redis.client.Redis:
 dbsupport/redisdbfunctions.py:def buildredissearchlist(listofsearchlocations: List, searchid: str):
-dbsupport/redisdbfunctions.py:def loadredisresults(searchid):
-dbsupport/redisdbfunctions.py:def mutiredisfetch(vectorresultskey):
-dbsupport/redisdbfunctions.py:def redisfetch(vectorresultskey, queue):
+dbsupport/redisdbfunctions.py:def redisfetch(vectorresultskey) -> List[bytearray]:
 dbsupport/tablefunctions.py:def assignuniquename(maxlength=None) -> str:
 dbsupport/vectordbfunctions.py:def createvectorstable():
 dbsupport/vectordbfunctions.py:def createstoredimagestable():
 dbsupport/vectordbfunctions.py:def storevectorindatabase(so: SearchObject, vectorspace):
 dbsupport/vectordbfunctions.py:def checkforstoredvector(so: SearchObject):
 dbsupport/vectordbfunctions.py:def fetchverctorenvirons(hitdict: dict, searchobject: SearchObject) -> list:
+externalmodule/build.py:def add_checked_function(mod, name, retval, params, failure_expression='', *a, **kw):
+externalmodule/build.py:def add_checked_string_function(mod, name, retval, params, failure_expression='', *a, **kw):
+externalmodule/go.py:def main():
+externalmodule/go.py:def Init():
+externalmodule/hipparchiagolangsearching.py:def RedisPool():
+externalmodule/hipparchiagolangsearching.py:def Set_RedisPool(value):
+externalmodule/hipparchiagolangsearching.py:def NewPostgresLogin(ho, po, us, pw, db):
+externalmodule/hipparchiagolangsearching.py:def NewRedisLogin(ad, pw, db):
+externalmodule/hipparchiagolangsearching.py:def HipparchiaBagger(key, baggingmethod, goroutines, bagsize, thedb, thestart, theend, loglevel, headwordstoskip, inflectedtoskip, rl, pl):
+externalmodule/hipparchiagolangsearching.py:def HipparchiaGolangSearcher(thekey, hitcap, workercount, loglevel, rl, pl):
+externalmodule/hipparchiagolangsearching.py:def StartHipparchiaPollWebsocket(port, loglevel, failthreshold, saving, rl, goRun=False):
 formatting/abbreviations.py:def deabbreviateauthors(authorabbr: str, lang: str) -> str:
 formatting/abbreviations.py:def deabrevviategreekauthors() -> Dict[str, str]:
 formatting/abbreviations.py:def deabrevviatelatinauthors() -> Dict[str, str]:
@@ -307,13 +351,6 @@ formatting/wordformatting.py:def setdictionarylanguage(thisword) -> str:
 formatting/wordformatting.py:def uforvoutsideofmarkup(textwithmarkup) -> str:
 formatting/wordformatting.py:def citationcharacterset() -> set:
 formatting/wordformatting.py:def reducetovalidcitationcharacters(text: str, supplement=None) -> str:
-golangmodule/go.py:def main():
-golangmodule/go.py:def Init():
-golangmodule/hipparchiagolangsearching.py:def NewRedisLogin(ad, pw, db):
-golangmodule/hipparchiagolangsearching.py:def NewPostgresLogin(ho, po, us, pw, db):
-golangmodule/hipparchiagolangsearching.py:def HipparchiaBagger(searchkey, baggingmethod, goroutines, thedb, thestart, theend, loglevel, r, p):
-golangmodule/hipparchiagolangsearching.py:def HipparchiaGolangSearcher(searchkey, hitcap, goroutines, loglevel, r, p):
-golangmodule/hipparchiagolangsearching.py:def StartHipparchiaPollWebsocket(port, loglevel, failthreshold, saving, rl, goRun=False):
 listsandsession/checksession.py:def probeforsessionvariables():
 listsandsession/checksession.py:def convertyesnototruefalse():
 listsandsession/checksession.py:def corpusselectionsasavalue(thesession=None) -> int:
@@ -432,45 +469,50 @@ routes/textandindexroutes.py:def texmakerfromrawlocus(author: str, work: str, lo
 routes/vectorroutes.py:def dispatchvectorsearch(vectortype: str, searchid: str, one=None, two=None, three=None) -> JSON_STR:
 routes/vectorroutes.py:def buildsinglelemmasearchobject(pollid: str, one: str) -> SearchObject:
 routes/vectorroutes.py:def buildtriplelemmasearchobject(pollid, one, two, three) -> SearchObject:
+searching/miscsearchfunctions.py:def cleaninitialquery(seeking: str) -> str:
+searching/miscsearchfunctions.py:def massagesearchtermsforwhitespace(query: str) -> str:
+searching/miscsearchfunctions.py:def atsignwhereclauses(uidwithatsign, operand, authors) -> List[tuple]:
+searching/miscsearchfunctions.py:def buildbetweenwhereextension(authortable: str, searchobject: SearchObject) -> str:
+searching/miscsearchfunctions.py:def lookoutsideoftheline(linenumber: int, numberofextrawords: int, workid: str, searchobject: SearchObject, cursor) -> str:
+searching/miscsearchfunctions.py:def findleastcommonterm(searchphrase: str, accentsneeded: bool) -> str:
+searching/miscsearchfunctions.py:def findleastcommontermcount(searchphrase: str, accentsneeded: bool) -> int:
+searching/miscsearchfunctions.py:def dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, dbcursor) -> bool:
+searching/miscsearchfunctions.py:def buildsearchobject(searchid: str, therequest: request, thesession: session) -> SearchObject:
+searching/miscsearchfunctions.py:def loadsearchqueue(iterable, workers):
+searching/miscsearchfunctions.py:def rebuildsearchobjectviasearchorder(so: SearchObject) -> SearchObject:
+searching/miscsearchfunctions.py:def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, cursor, override=None) -> dict:
+searching/miscsearchfunctions.py:def redishitintodbworkline(redisresult: JSONDICT) -> dbWorkLine:
+searching/miscsearchfunctions.py:def getexternalhelperpath(theprogram=hipparchia.config['EXTERNALBINARYNAME']):
+searching/miscsearchfunctions.py:def haveexternalhelper(thepath):
+searching/miscsearchfunctions.py:def insertuniqunames(sqldict: dict) -> dict:
+searching/miscsearchfunctions.py:def genericexternalcliexecution(theprogram: str, formatterfunction, so: SearchObject) -> str:
+searching/miscsearchfunctions.py:def formatexternalgrabberarguments(command: str, so: SearchObject) -> list:
 searching/precomposesql.py:def searchlistintosqldict(searchobject: SearchObject, seeking: str, subqueryphrasesearch=False, vectors=False) -> dict:
 searching/precomposesql.py:def rewritesqlsearchdictforlemmata(so: SearchObject) -> dict:
 searching/precomposesql.py:def perparesoforsecondsqldict(so: SearchObject, initialhitlines: List[dbWorkLine], usebetweensyntax=True) -> SearchObject:
-searching/precomposesql.py:def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: str, so: SearchObject) -> str:
-searching/precomposesql.py:def rewritesqlsearchdictforgolang(so: SearchObject) -> dict:
-searching/searchgolanginterface.py:def precomposedgolangsearcher(so: SearchObject) -> List[dbWorkLine]:
-searching/searchgolanginterface.py:def golangclibinarysearcher(so: SearchObject) -> str:
-searching/searchgolanginterface.py:def golangsharedlibrarysearcher(so: SearchObject) -> str:
-searching/searchhelperfunctions.py:def cleaninitialquery(seeking: str) -> str:
-searching/searchhelperfunctions.py:def massagesearchtermsforwhitespace(query: str) -> str:
-searching/searchhelperfunctions.py:def atsignwhereclauses(uidwithatsign, operand, authors) -> List[tuple]:
-searching/searchhelperfunctions.py:def buildbetweenwhereextension(authortable: str, searchobject: SearchObject) -> str:
-searching/searchhelperfunctions.py:def lookoutsideoftheline(linenumber: int, numberofextrawords: int, workid: str, searchobject: SearchObject, cursor) -> str:
-searching/searchhelperfunctions.py:def findleastcommonterm(searchphrase: str, accentsneeded: bool) -> str:
-searching/searchhelperfunctions.py:def findleastcommontermcount(searchphrase: str, accentsneeded: bool) -> int:
-searching/searchhelperfunctions.py:def dblooknear(index: int, distanceinlines: int, secondterm: str, workid: str, usecolumn: str, dbcursor) -> bool:
-searching/searchhelperfunctions.py:def buildsearchobject(searchid: str, therequest: request, thesession: session) -> SearchObject:
-searching/searchhelperfunctions.py:def loadsearchqueue(iterable, workers):
-searching/searchhelperfunctions.py:def rebuildsearchobjectviasearchorder(so: SearchObject) -> SearchObject:
-searching/searchhelperfunctions.py:def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, cursor) -> dict:
-searching/searchhelperfunctions.py:def redishitintodbworkline(redisresult: JSONDICT) -> dbWorkLine:
-searching/searchhelperfunctions.py:def genericgolangcliexecution(theprogram: str, formatterfunction, so: SearchObject) -> str:
-searching/searchhelperfunctions.py:def formatgolanggrabberarguments(command: str, so: SearchObject) -> list:
-searching/searchpythoninterface.py:def precomposedsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
-searching/searchpythoninterface.py:def workonprecomposedsqlsearch(workerid: int, foundlineobjects: ListProxy, listofplacestosearch: ListProxy,
-searching/searchpythoninterface.py:def precomposedsqlsearcher(querydict, dbcursor) -> Generator:
+searching/precomposesql.py:def rewritequerystringforsubqueryphrasesearching(authortable: str, whereclause: str, ttstripper: bool, so: SearchObject) -> str:
+searching/precomposesql.py:def rewritesqlsearchdictforexternalhelper(so: SearchObject) -> dict:
+searching/searchviahelperinterface.py:def precomposedexternalsearcher(so: SearchObject) -> List[dbWorkLine]:
+searching/searchviahelperinterface.py:def helperclibinarysearcher(so: SearchObject) -> str:
+searching/searchviahelperinterface.py:def helpersharedlibrarysearcher(so: SearchObject) -> str:
+searching/searchviapythoninterface.py:def precomposedsqlsearchmanager(so: SearchObject) -> List[dbWorkLine]:
+searching/searchviapythoninterface.py:def workonprecomposedsqlsearch(workerid: int, foundlineobjects: ListProxy, listofplacestosearch: ListProxy,
+searching/searchviapythoninterface.py:def precomposedsqlsearcher(querydict, dbcursor) -> Generator:
 searching/sqlsearching.py:def precomposedsqlsearch(so: SearchObject) -> List[dbWorkLine]:
 searching/sqlsearching.py:def basicprecomposedsqlsearcher(so: SearchObject, themanager=None) -> List[dbWorkLine]:
 searching/sqlsearching.py:def generatepreliminaryhitlist(so: SearchObject, recap=hipparchia.config['INTERMEDIATESEARCHCAP']) -> List[dbWorkLine]:
 searching/sqlsearching.py:def precomposedsqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
 searching/sqlsearching.py:def precomposedsqlwithinxwords(so: SearchObject) -> List[dbWorkLine]:
 searching/sqlsearching.py:def precomposedsqlsubqueryphrasesearch(so: SearchObject) -> List[dbWorkLine]:
+searching/sqlsearching.py:def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
+searching/sqlsearching.py:def paredowntowithinxwords(so: SearchObject, firstterm: str, secondterm: str, hitlines: List[dbWorkLine]) -> List[dbWorkLine]:
+semanticvectors/externalvectorsearches.py:def externalvectors(so: SearchObject) -> JSON_STR:
+semanticvectors/externalvectorsearches.py:def externalclibinaryvectorhelper(so: SearchObject) -> str:
+semanticvectors/externalvectorsearches.py:def formatexternalappvectorhelperarguments(command: str, so: SearchObject) -> list:
 semanticvectors/gensimnearestneighbors.py:def generatenearestneighbordata(sentencetuples, workssearched, searchobject, vectorspace) -> JSON_STR:
 semanticvectors/gensimnearestneighbors.py:def findapproximatenearestneighbors(query, mymodel, vectorvalues: VectorValues):
 semanticvectors/gensimnearestneighbors.py:def findword2vecsimilarities(termone, termtwo, mymodel):
 semanticvectors/gensimnearestneighbors.py:def trimbypartofspeech(listofwords: List[str], partofspeech: str, baggingmethod: str) -> set:
-semanticvectors/golangvectorsearches.py:def golangvectors(so: SearchObject) -> JSON_STR:
-semanticvectors/golangvectorsearches.py:def golangclibinaryvectorhelper(so: SearchObject) -> str:
-semanticvectors/golangvectorsearches.py:def formatgolangvectorhelperarguments(command: str, so: SearchObject) -> list:
 semanticvectors/modelbuilders.py:def buildgensimmodel(so: SearchObject, bagsofwords: List[List[str]]) -> Word2Vec:
 semanticvectors/modelbuilders.py:def buildsklearnselectedworks(so: SearchObject, bagsofsentences: list):
 semanticvectors/modelbuilders.py:def gensimgenerateanalogies(vectorspace: Word2Vec, so: SearchObject) -> JSON_STR:
@@ -536,5 +578,5 @@ threading/vectordbautopilot.py:def determinevectorworkpile(tempcap=False) -> Lis
 threading/vectordbautopilot.py:def buildfakesearchobject(qtype='nearestneighborsquery') -> SearchObject:
 threading/websocketthread.py:def checkforlivewebsocket():
 threading/websocketthread.py:def startwspolling(theport=None):
-threading/websocketthread.py:def startgolangwebsocketserver(theport):
+threading/websocketthread.py:def helperappwebsocketserver(theport):
 threading/websocketthread.py:def startpythonwspolling(theport):

@@ -31,6 +31,7 @@ key features:
 				not within N lines or words
 			lemmatized searches: look for all known forms of a word
 			lemmatized searches can be combined with non-lemmatized proximity searches
+			phrase searches can be combined with other types: phrase + phrase, phrase + lemmatized or phrase + word
 		results
 			results can be limited to a maximum number of hits
 			results can be limited to one hit per author/work

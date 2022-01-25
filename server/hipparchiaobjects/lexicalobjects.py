@@ -258,7 +258,13 @@ class dbDictionaryEntry(object):
 		# print('here',bdict)
 		htmlentry = self.body
 		for key in bdict.keys():
-			htmlentry = re.sub(key, bdict[key], htmlentry)
+			# print('insertclickablelookups(): key =', key)
+			# will choke on the following:
+			#	<bibl n="Perseus:abo:tlg,0085,011:46a**:16" default="NO" valid="yes"><author>Aeschylus</author> <bibtitle>Dict.</bibtitle> fr. 46a**.16</bibl>
+			try:
+				htmlentry = re.sub(key, bdict[key], htmlentry)
+			except re.error:
+				pass
 
 		# now do the work of finding the lookups
 		# latin old style: <bibl n="Perseus:abo:phi,0550,001:3:765" default="NO" valid="yes">

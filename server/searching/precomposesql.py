@@ -168,6 +168,10 @@ def rewritesqlsearchdictforlemmata(so: SearchObject) -> dict:
     terms = so.lemmaone.formlist
 
     chunksize = min(int(len(terms) / (hipparchia.config['WORKERS'] * 2)), 25)
+    if not chunksize:
+        # otherwise: ValueError: range() arg 3 must not be zero
+        # when you get to "chunked = [terms[i:i + chunksize] for i in range(0, len(terms), chunksize)]"
+        chunksize = 1
 
     newtablenames = '{t}_{c}'
 
