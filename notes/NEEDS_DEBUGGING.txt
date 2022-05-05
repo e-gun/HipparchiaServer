@@ -266,3 +266,23 @@ VS WHAT YOU GET NOW IN PRE v1.7.6 rewritequerystringforsubqueryphrasesearching()
     WHERE second.linebundle ~ 'ἀνέθηκεν'  LIMIT 200;
 
 delete "AND in110f.accented_line ~* 'ἀνέθηκεν'"
+
+
+[L] numba / umap-learn / numpy problems
+
+starting w/ vectors enabled might yield:
+    ValueError: numpy.ndarray size changed, may indicate binary incompatibility. Expected 96 from C header, got 88 from PyObject
+
+see:
+    https://stackoverflow.com/questions/66060487/valueerror-numpy-ndarray-size-changed-may-indicate-binary-incompatibility-exp
+
+which python + which numba + which numpy is the issue: ick
+
+but the following 'worked':
+    pip uninstall numba
+
+you will be warned about this:
+
+    ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+    umap-learn 0.5.3 requires numba>=0.49, which is not installed.
+    pynndescent 0.5.6 requires numba>=0.51.2, which is not installed.
