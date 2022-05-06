@@ -21,80 +21,6 @@ from server.textsandindices.textandindiceshelperfunctions import dictmerger, get
 from server.threading.mpthreadcount import setthreadcount
 
 
-def buildvocablist(cdict: dict, activepoll, headwords: bool, cursor) -> List[tuple]:
-	"""
-
-	a special case of buildindextowork()
-
-	want to yield [(headword1, count1, firsthit1, dfns1), ...]
-
-	"""
-
-	lineobjects = grabbundlesoflines(cdict, cursor)
-	completeindexdict = pooledindexmaker(lineobjects)
-	# completeindexdict: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),...], wordB: [(...)]}
-	# {'illic': [('lt0472w001', 2048, '68A.35')], 'carpitur': [('lt0472w001', 2048, '68A.35')], ...}
-
-	# drop all but first instance
-	trimmeddict = dict()
-	for c in completeindexdict:
-		# [('lt0472w001', 2048, '68A.35'), ('lt0472w001', 11, '68A.35'), ('lt0472w001', 9999, '68A.35')]
-		s = sorted(completeindexdict[c], key=lambda x: x[1])
-		try:
-			trimmeddict[c] = [s[0]]
-		except TypeError:
-			# 'NoneType' object is not subscriptable
-			pass
-
-	morphobjects = getrequiredmorphobjects(trimmeddict.keys())
-	augmentedindexdict = findindexbaseforms(trimmeddict, morphobjects, activepoll)
-
-	# sample items in an augmentedindexdict
-	# erant {'baseforms': 'sum¹', 'homonyms': None, 'loci': [('lt2300w001', 5, '1.4')]}
-	# regis {'baseforms': ['rex', 'rego (to keep straight)'], 'homonyms': 2, 'loci': [('lt2300w001', 7, '1.6')]}
-	# qui {'baseforms': ['qui¹', 'quis²', 'quis¹', 'qui²'], 'homonyms': 4, 'loci': [('lt2300w001', 7, '1.6'), ('lt2300w001', 4, '1.3')]}
-
-	hwdict = dict()
-	for a in augmentedindexdict:
-		# print(a, augmentedindexdict[a])
-		if augmentedindexdict[a]['baseforms']:
-			# c {'baseforms': False, 'homonyms': None, 'loci': [('lt0474w001', 4, '<indexedlocation id="linenumber/lt0474/001/4">1.3</indexedlocation>')]}
-			for b in augmentedindexdict[a]['baseforms']:
-				try:
-					if augmentedindexdict[a]['loci]'][0][2] < hwdict[b][2]:
-						hwdict[b] = (a, augmentedindexdict[a]['loci'][0])
-				except KeyError:
-					hwdict[b] = (a, augmentedindexdict[a]['loci'][0])
-
-	# now you should have {hw1: (w, ('lt2300w001', 7, '1.6')), hw2: (w, ('lt2300w001', 4, '1.3')), ...}
-
-	ww = polytonicsort(hwdict.keys())
-	hwlist = [(w, hwdict[w][0], hwdict[w][1]) for w in ww]
-	# [..., ('usus²', 'usu', ('lt0474w001', 10, '<indexedlocation id="linenumber/lt0474/001/10">2.4</indexedlocation>')),
-	# ('ut', 'ut', ('lt0474w001', 10, '<indexedlocation id="linenumber/lt0474/001/10">2.4</indexedlocation>')),
-	# ('utor', 'usu', ('lt0474w001', 10, '<indexedlocation id="linenumber/lt0474/001/10">2.4</indexedlocation>')), ...]
-
-	qstring = 'SELECT id_number FROM {d}_dictionary WHERE {c} = %s ORDER BY id_number ASC LIMIT {lim}'
-	usedictionary = 'latin'
-
-	translatedlist = list()
-	for w in hwlist:
-		query = qstring.format(d=usedictionary, c='entry_name', lim=1)
-		print(query, w[0])
-		cursor.execute(query, (w[0],))
-		try:
-			entry = cursor.fetchall()
-		except:
-			entry = tuple()
-
-		if entry:
-			dbe = findentrybyid(usedictionary, entry[0])
-			trans = dbe.translations
-			translatedlist.append((w[0], w[1], w[2][2], trans))
-
-	return translatedlist
-
-
 def buildindextowork(cdict: dict, activepoll, headwords: bool, cursor) -> List[tuple]:
 	"""
 
@@ -120,12 +46,6 @@ def buildindextowork(cdict: dict, activepoll, headwords: bool, cursor) -> List[t
 	:param cursor:
 	:return:
 	"""
-
-	# testing buildvocablist()
-	# test = buildvocablist(cdict, activepoll, headwords, cursor)
-	# print('VOCAB')
-	# for t in test:
-	# 	print(t)
 
 	alphabetical = True
 
