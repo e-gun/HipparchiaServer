@@ -311,7 +311,8 @@ def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoi
 	</table>
 	"""
 
-	byfrequency = False
+	byfrequency = session['indexbyfrequency']
+
 	if not byfrequency:
 		rowhtml = [tablerowtemplate.format(w=k, t=vocabset[k], c=vocabcount[k]) for k in polytonicsort(vocabset.keys())]
 	else:

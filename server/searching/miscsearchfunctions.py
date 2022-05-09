@@ -561,8 +561,17 @@ def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, curso
 	# expanded searchzone bacause "seeking" might be a multi-line phrase
 	prev = grabonelinefromwork(hitline.authorid, hitline.index - 1, cursor)
 	next = grabonelinefromwork(hitline.authorid, hitline.index + 1, cursor)
-	prev = dbWorkLine(*prev)
-	next = dbWorkLine(*next)
+
+	if prev:
+		# TypeError: server.hipparchiaobjects.worklineobject.dbWorkLine() argument after * must be an iterable, not NoneType
+		prev = dbWorkLine(*prev)
+	else:
+		prev = makeablankline(hitline.authorid, hitline.index - 1)
+
+	if next:
+		next = dbWorkLine(*next)
+	else:
+		next = makeablankline(hitline.authorid, hitline.index + 1)
 
 	searchzone = ' '.join([getattr(prev, so.usewordlist), getattr(hitline, so.usewordlist), getattr(next, so.usewordlist)])
 
