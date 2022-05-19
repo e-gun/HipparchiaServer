@@ -183,16 +183,28 @@ def buildgensimmodel(so: SearchObject, bagsofwords: List[List[str]]) -> Word2Vec
     try:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=DeprecationWarning)
-            gensimmodel = Word2Vec(bagsofwords,
-                                   min_count=vv.minimumpresence,
-                                   seed=1,
-                                   epochs=vv.trainingiterations,
-                                   vector_size=vv.dimensions,
-                                   sample=vv.downsample,
-                                   sg=1,  # the results seem terrible if you say sg=0
-                                   window=vv.window,
-                                   workers=workers,
-                                   compute_loss=computeloss)
+            try:
+                gensimmodel = Word2Vec(bagsofwords,
+                                       min_count=vv.minimumpresence,
+                                       seed=1,
+                                       epochs=vv.trainingiterations,
+                                       vector_size=vv.dimensions,
+                                       sample=vv.downsample,
+                                       sg=1,  # the results seem terrible if you say sg=0
+                                       window=vv.window,
+                                       workers=workers,
+                                       compute_loss=computeloss)
+            except TypeError:
+                gensimmodel = Word2Vec(bagsofwords,
+                                       min_count=vv.minimumpresence,
+                                       seed=1,
+                                       iter=vv.trainingiterations,
+                                       size=vv.dimensions,
+                                       sample=vv.downsample,
+                                       sg=1,  # the results seem terrible if you say sg=0
+                                       window=vv.window,
+                                       workers=workers,
+                                       compute_loss=computeloss)
 
     except RuntimeError:
         # RuntimeError: you must first build vocabulary before training the model

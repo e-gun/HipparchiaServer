@@ -281,6 +281,10 @@ which python + which numba + which numpy is the issue: ick
 but the following 'worked':
     pip uninstall numba
 
+better might be:
+    pip install gensim==3.8.3
+    [need to find the max viable version... gensim-4.2.0 is latest]
+
 you will be warned about this:
 
     ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.

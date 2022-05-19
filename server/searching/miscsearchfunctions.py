@@ -502,6 +502,9 @@ def rebuildsearchobjectviasearchorder(so: SearchObject) -> SearchObject:
 		hwtwo = querytotalwordcounts(so.lemmatwo.dictionaryentry)
 		# from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
 		# print('{a}: {b}, {c}: {d}'.format(a=so.lemmaone.dictionaryentry, b=hwone.t, c=so.lemmatwo.dictionaryentry, d=hwtwo.t))
+		if not hwtwo.t or not hwone.t:
+			# if you send an empty string to a lemma checkbox you can end up here with a None
+			return so
 		if hwtwo.t < hwone.t:
 			tmp = so.lemmaone
 			so.lemmaone = so.lemmatwo
