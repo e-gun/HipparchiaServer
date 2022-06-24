@@ -184,6 +184,7 @@ def buildgensimmodel(so: SearchObject, bagsofwords: List[List[str]]) -> Word2Vec
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=DeprecationWarning)
             try:
+                # gensim 4 API
                 gensimmodel = Word2Vec(bagsofwords,
                                        min_count=vv.minimumpresence,
                                        seed=1,
@@ -195,6 +196,7 @@ def buildgensimmodel(so: SearchObject, bagsofwords: List[List[str]]) -> Word2Vec
                                        workers=workers,
                                        compute_loss=computeloss)
             except TypeError:
+                # gensim 3.8.3 API
                 gensimmodel = Word2Vec(bagsofwords,
                                        min_count=vv.minimumpresence,
                                        seed=1,

@@ -19,6 +19,15 @@ from server import hipparchia
 
 
 def checkcompatability():
+    """
+
+    make sure the helper binary works with this version of the server
+
+    slated for removal...
+
+    note the distutils is deprecated and going away in 3.12
+
+    """
     if hipparchia.config['EXTERNALGRABBER']:
         bin = hipparchia.config['EXTERNALBINARYNAME']
         p = getexternalhelperpath(bin)

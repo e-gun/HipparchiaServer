@@ -117,8 +117,7 @@ def startvectorizing():
 				consolewarning('{n} items remain to vectorize'.format(n=len(workpile)), color='green', isbold=False)
 
 	if hipparchia.config['AUTOVECTORIZE'] and multiprocessing.current_process().name == 'MainProcess':
-		consolewarning('only short authors remain (fewer than {min} words in the corpus...)'.format(min=minwords), color='green')
-		consolewarning('vectorbot shutting down', color='green')
+		consolewarning('vectorbot shutting down: only authors with fewer than {min} words remain'.format(min=minwords), color='green')
 
 	return
 
