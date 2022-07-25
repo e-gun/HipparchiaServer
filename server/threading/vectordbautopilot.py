@@ -110,14 +110,13 @@ def startvectorizing():
 				v = '{i} vectorized ({w} words)'
 
 			if built and wordcount > 5000:
-				consolewarning(v.format(i=searchlist[0], w=wordcount, n=len(searchlist) - 1), color='green',
-							   isbold=False)
+				consolewarning(v.format(i=searchlist[0], w=wordcount, n=len(searchlist) - 1), color='green', isbold=False)
 
 			if built and len(workpile) % 25 == 0:
 				consolewarning('{n} items remain to vectorize'.format(n=len(workpile)), color='green', isbold=False)
 
 	if hipparchia.config['AUTOVECTORIZE'] and multiprocessing.current_process().name == 'MainProcess':
-		consolewarning('vectorbot shutting down: only authors with fewer than {min} words remain'.format(min=minwords), color='green')
+		consolewarning('vectorbot shutting down: only items with fewer than {min} words remain'.format(min=minwords), color='green')
 
 	return
 
