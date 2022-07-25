@@ -156,12 +156,20 @@ def dictsearch(searchterm) -> JSON_STR:
 		wordobjects = [probedictionary(setdictionarylanguage(f[0]) + '_dictionary', 'entry_name', f[0], '=', dbcursor=dbcursor, trialnumber=0) for f in foundtuples]
 		wordobjects = flattenlistoflists(wordobjects)
 		# drop duplicates: logeion new has key collisions...
-		ws = {w.id: w for w in wordobjects}
+		# BUT hipparchiaDB=# select entry_name, id_number from greek_dictionary where entry_name ~ '^χρά' order by id_number desc;
+		#  entry_name | id_number
+		# ------------+-----------
+		#  χράομαι    |    114553
+		#  χράω       |    114553
+		#  χράω       |    114552
+		# (3 rows)
+
+		ws = {'{b}_{a}'.format(a=w.id, b=w.entry): w for w in wordobjects}
 		wss = sorted(ws.keys())
 		wordobjects = [ws[w] for w in wss]
 
-		for w in wordobjects:
-			print(w.id, w.entry)
+		# for w in wordobjects:
+		# 	print(w.id, w.entry)
 		outputobjects = [lexicalOutputObject(w) for w in wordobjects]
 
 		# very top: list the finds
