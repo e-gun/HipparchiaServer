@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     HipparchiaServer: an interface to a database of Greek and Latin texts
-    Copyright: E Gunderson 2016-21
+    Copyright: E Gunderson 2016-22
     License: GNU GENERAL PUBLIC LICENSE 3
         (see LICENSE in the top level directory of the distribution)
 """
@@ -121,7 +121,7 @@ def basicprecomposedsqlsearcher(so: SearchObject, themanager=None) -> List[dbWor
 
     give me sql and I will search
 
-    this function just picks a pathway: use the golang module or do things in house?
+    this function just picks a pathway: use the external module or do things in house?
 
     """
 
@@ -179,9 +179,7 @@ def precomposedsqlwithinxlinessearch(so: SearchObject) -> List[dbWorkLine]:
 
     after finding x, look for y within n lines of x
 
-    people who send phrases to both halves and/or a lot of regex will not always get what they want
-
-    note that this implementations is significantly slower than the standard withinxlines() + simplewithinxlines()
+    note that this implementations is slower than the "dynamic" version of withinxlines() + simplewithinxlines()
 
     """
 
@@ -476,7 +474,7 @@ def precomposedphraseandproximitysearch(so: SearchObject) -> List[dbWorkLine]:
         maybefinalhitines = [initialhitlinedict[hl] for hl in initialhitlinedict if hl not in newhitlineids]
 
     #
-    # if neccessary, do "within x words" as x lines hits will always be a subset of the first set
+    # if necessary, do "within x words"; x-lines hits will always be a superset of the target set
     #
 
     if so.lemmaone:

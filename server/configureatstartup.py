@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 	HipparchiaServer: an interface to a database of Greek and Latin texts
-	Copyright: E Gunderson 2016-21
+	Copyright: E Gunderson 2016-22
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
@@ -111,8 +111,11 @@ if commandlineargs.dbname:
 	hipparchia.config['DBHOST'] = commandlineargs.dbname
 if commandlineargs.dbport:
 	hipparchia.config['DBPORT'] = commandlineargs.dbport
-# if commandlineargs.debugmessages:
-# 	hipparchia.config['NULL'] = commandlineargs.debugmessages
+if commandlineargs.debugmessages:
+	w = set(hipparchia.config['CONSOLEWARNINGTYPES'])
+	w.add('black')
+	w.add('magenta')
+	hipparchia.config['CONSOLEWARNINGTYPES'] = list(w)
 if commandlineargs.enabledebugui:
 	hipparchia.config['ALLOWUSERTOSETDEBUGMODES'] = commandlineargs.enabledebugui
 if commandlineargs.portoverride:
@@ -142,6 +145,7 @@ if commandlineargs.forcehelper:
 	hipparchia.config['EXTERNALGRABBER'] = True
 	hipparchia.config['EXTERNALVECTORHELPER'] = True
 	hipparchia.config['EXTERNALWEBSOCKETS'] = True
+	hipparchia.config['POLLCONNECTIONTYPE'] = 'redis'
 if commandlineargs.helpername:
 	hipparchia.config['EXTERNALBINARYNAME'] = commandlineargs.helpername
 if commandlineargs.modulehelper:

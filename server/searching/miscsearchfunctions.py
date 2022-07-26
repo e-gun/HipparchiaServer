@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 	HipparchiaServer: an interface to a database of Greek and Latin texts
-	Copyright: E Gunderson 2016-21
+	Copyright: E Gunderson 2016-22
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
@@ -502,6 +502,10 @@ def rebuildsearchobjectviasearchorder(so: SearchObject) -> SearchObject:
 		hwtwo = querytotalwordcounts(so.lemmatwo.dictionaryentry)
 		# from server.hipparchiaobjects.wordcountobjects import dbWordCountObject
 		# print('{a}: {b}, {c}: {d}'.format(a=so.lemmaone.dictionaryentry, b=hwone.t, c=so.lemmatwo.dictionaryentry, d=hwtwo.t))
+		if not hwtwo or not hwone:
+			# if you send an empty string to a lemma checkbox you can end up here with a None
+			# in which case 'hwtwo.t < hwone.t' will give you an AttributeError
+			return so
 		if hwtwo.t < hwone.t:
 			tmp = so.lemmaone
 			so.lemmaone = so.lemmatwo
@@ -537,6 +541,9 @@ def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, curso
 	override was added so that the rewritten so of precomposedphraseandproximitysearch() can set 'seeking' as it
 	wishes
 
+	note that this could be faster if you took a set of lines and then grabbed all of the triplets in a single query,
+	etc. instead of looping this... but in practice it is not clear how many searches will gain how much speed
+
 	:param hitline:
 	:param searchobject:
 	:param cursor:
@@ -558,8 +565,17 @@ def grableadingandlagging(hitline: dbWorkLine, searchobject: SearchObject, curso
 	# expanded searchzone bacause "seeking" might be a multi-line phrase
 	prev = grabonelinefromwork(hitline.authorid, hitline.index - 1, cursor)
 	next = grabonelinefromwork(hitline.authorid, hitline.index + 1, cursor)
-	prev = dbWorkLine(*prev)
-	next = dbWorkLine(*next)
+
+	if prev:
+		# TypeError: server.hipparchiaobjects.worklineobject.dbWorkLine() argument after * must be an iterable, not NoneType
+		prev = dbWorkLine(*prev)
+	else:
+		prev = makeablankline(hitline.authorid, hitline.index - 1)
+
+	if next:
+		next = dbWorkLine(*next)
+	else:
+		next = makeablankline(hitline.authorid, hitline.index + 1)
 
 	searchzone = ' '.join([getattr(prev, so.usewordlist), getattr(hitline, so.usewordlist), getattr(next, so.usewordlist)])
 

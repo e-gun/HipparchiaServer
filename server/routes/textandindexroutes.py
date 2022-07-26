@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 	HipparchiaServer: an interface to a database of Greek and Latin texts
-	Copyright: E Gunderson 2016-21
+	Copyright: E Gunderson 2016-22
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
@@ -311,7 +311,8 @@ def generatevocabfor(searchid: str, author: str, work=None, passage=None, endpoi
 	</table>
 	"""
 
-	byfrequency = False
+	byfrequency = session['indexbyfrequency']
+
 	if not byfrequency:
 		rowhtml = [tablerowtemplate.format(w=k, t=vocabset[k], c=vocabcount[k]) for k in polytonicsort(vocabset.keys())]
 	else:

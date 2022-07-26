@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     HipparchiaServer: an interface to a database of Greek and Latin texts
-    Copyright: E Gunderson 2016-21
+    Copyright: E Gunderson 2016-22
     License: GNU GENERAL PUBLIC LICENSE 3
         (see LICENSE in the top level directory of the distribution)
 """
@@ -168,6 +168,10 @@ def rewritesqlsearchdictforlemmata(so: SearchObject) -> dict:
     terms = so.lemmaone.formlist
 
     chunksize = min(int(len(terms) / (hipparchia.config['WORKERS'] * 2)), 25)
+    if not chunksize:
+        # otherwise: ValueError: range() arg 3 must not be zero
+        # when you get to "chunked = [terms[i:i + chunksize] for i in range(0, len(terms), chunksize)]"
+        chunksize = 1
 
     newtablenames = '{t}_{c}'
 

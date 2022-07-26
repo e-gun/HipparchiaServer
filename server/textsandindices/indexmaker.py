@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 	HipparchiaServer: an interface to a database of Greek and Latin texts
-	Copyright: E Gunderson 2016-21
+	Copyright: E Gunderson 2016-22
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
@@ -14,6 +14,7 @@ from flask import session
 
 from server import hipparchia
 from server.dbsupport.dblinefunctions import grabbundlesoflines, makeablankline
+from server.dbsupport.lexicaldbfunctions import findentrybyid
 from server.hipparchiaobjects.worklineobject import dbWorkLine
 from server.listsandsession.genericlistfunctions import polytonicsort
 from server.textsandindices.textandindiceshelperfunctions import dictmerger, getrequiredmorphobjects
@@ -61,26 +62,14 @@ def buildindextowork(cdict: dict, activepoll, headwords: bool, cursor) -> List[t
 
 	lineobjects = grabbundlesoflines(cdict, cursor)
 
-	pooling = True
-
-	if pooling:
-		# index to arisotle: 13.336s
-		# 2x as fast to produce the final result; even faster inside the relevant loop
-		# the drawback is the problem sending the poll object into the pool
-		activepoll.statusis('Compiling the index')
-		if activepoll.polltype == 'RedisProgressPoll':
-			activepoll.allworkis(len(lineobjects))
-			activepoll.remain(len(lineobjects))
-		else:
-			activepoll.allworkis(-1)
-			activepoll.setnotes('(progress information unavailable)')
-		completeindexdict = pooledindexmaker(lineobjects)
-	else:
-		# index to aristotle: 28.587s
-		activepoll.statusis('Compiling the index')
+	activepoll.statusis('Compiling the index')
+	if activepoll.polltype == 'RedisProgressPoll':
 		activepoll.allworkis(len(lineobjects))
 		activepoll.remain(len(lineobjects))
-		completeindexdict = linesintoindex(lineobjects, activepoll)
+	else:
+		activepoll.allworkis(-1)
+		activepoll.setnotes('(progress information unavailable)')
+	completeindexdict = pooledindexmaker(lineobjects)
 
 	# completeindexdict: { wordA: [(workid1, index1, locus1), (workid2, index2, locus2),...], wordB: [(...)]}
 	# {'illic': [('lt0472w001', 2048, '68A.35')], 'carpitur': [('lt0472w001', 2048, '68A.35')], ...}

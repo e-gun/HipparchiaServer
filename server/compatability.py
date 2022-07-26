@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     HipparchiaServer: an interface to a database of Greek and Latin texts
-    Copyright: E Gunderson 2016-21
+    Copyright: E Gunderson 2016-22
     License: GNU GENERAL PUBLIC LICENSE 3
         (see LICENSE in the top level directory of the distribution)
 """
@@ -19,11 +19,20 @@ from server import hipparchia
 
 
 def checkcompatability():
-    if hipparchia.config['EXTERNALGRABBER']:
-        bin = hipparchia.config['EXTERNALBINARYNAME']
-        p = getexternalhelperpath(bin)
+    """
 
-        if 'Rust' in bin:
+    make sure the helper binary works with this version of the server
+
+    slated for removal...
+
+    note the distutils is deprecated and going away in 3.12
+
+    """
+    if hipparchia.config['EXTERNALGRABBER']:
+        extbin = hipparchia.config['EXTERNALBINARYNAME']
+        p = getexternalhelperpath(extbin)
+
+        if 'Rust' in extbin:
             vmin = RUSTHELPERMIN
             pre = '--'
         else:
@@ -53,18 +62,21 @@ def checkcompatability():
         except ValueError:
             binversion = None
             consolewarning('checkcompatability() failed to parse version info string "{v}"'.format(v=version))
+        except TypeError:
+            # TypeError: 'NoneType' object is not subscriptable
+            binversion = None
 
         if not binversion or not minversion:
             return
 
         if binversion >= minversion:
-            debugmessage('checkcompatability() says that {b} {x} >= {y}'.format(b=bin, x=v[1], y=vmin))
+            debugmessage('checkcompatability() says that {b} {x} >= {y}'.format(b=extbin, x=v[1], y=vmin))
             pass
         else:
             w = '{b} is out of date. You have {x}. You need {y}. Some/Many functions are likely to fail.'
-            consolewarning(w.format(b=bin, x=v[1], y=vmin), color='red')
+            consolewarning(w.format(b=extbin, x=v[1], y=vmin), color='red')
             w = 'You should either upgrade {b} or disable the helper in "settings/helpersettings.py"'
-            consolewarning(w.format(b=bin))
+            consolewarning(w.format(b=extbin))
             consolewarning('I am now forcibly disabling the grabber...')
             hipparchia.config['EXTERNALGRABBER'] = False
 

@@ -1,7 +1,7 @@
 #!../bin/python
 """
 	HipparchiaServer: an interface to a database of Greek and Latin texts
-	Copyright: E Gunderson 2016-21
+	Copyright: E Gunderson 2016-22
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
@@ -58,6 +58,14 @@ if __name__ == '__main__':
 	secho('multiprocessing method set by OS default to: {m}'.format(m=multiprocessing.get_start_method()), fg='cyan')
 
 	if hipparchia.config['ENABLELOGGING']:
+		# it is tricky to modify flask's logging
+		# console log is via werkzeug.serving.WSGIRequestHandler.log()
+		# this calls werkzeug.serving._internal._log()
+		# but good luck manipulating this from the outside: most stackoverflow advice is outdated/does nothing
+		# this seems to be because the internal _logger variable is not created until needed by werkzeug
+		# you can do what you want if you are willing to edit serving.py which has at line 438:
+		# f"{self.address_string()} - - [{self.log_date_time_string()}] {message}\n"
+
 		from inspect import stack
 		from os import path
 		import logging

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 	HipparchiaServer: an interface to a database of Greek and Latin texts
-	Copyright: E Gunderson 2016-21
+	Copyright: E Gunderson 2016-22
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
@@ -110,15 +110,13 @@ def startvectorizing():
 				v = '{i} vectorized ({w} words)'
 
 			if built and wordcount > 5000:
-				consolewarning(v.format(i=searchlist[0], w=wordcount, n=len(searchlist) - 1), color='green',
-							   isbold=False)
+				consolewarning(v.format(i=searchlist[0], w=wordcount, n=len(searchlist) - 1), color='green', isbold=False)
 
 			if built and len(workpile) % 25 == 0:
 				consolewarning('{n} items remain to vectorize'.format(n=len(workpile)), color='green', isbold=False)
 
 	if hipparchia.config['AUTOVECTORIZE'] and multiprocessing.current_process().name == 'MainProcess':
-		consolewarning('only short authors remain (fewer than {min} words in the corpus...)'.format(min=minwords), color='green')
-		consolewarning('vectorbot shutting down', color='green')
+		consolewarning('vectorbot shutting down: only items with fewer than {min} words remain'.format(min=minwords), color='green')
 
 	return
 
