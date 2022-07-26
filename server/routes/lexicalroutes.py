@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 	HipparchiaServer: an interface to a database of Greek and Latin texts
-	Copyright: E Gunderson 2016-21
+	Copyright: E Gunderson 2016-22
 	License: GNU GENERAL PUBLIC LICENSE 3
 		(see LICENSE in the top level directory of the distribution)
 """
@@ -160,11 +160,11 @@ def dictsearch(searchterm) -> JSON_STR:
 		#  entry_name | id_number
 		# ------------+-----------
 		#  χράομαι    |    114553
-		#  χράω       |    114553
-		#  χράω       |    114552
+		#  χράω²      |    114553
+		#  χράω¹      |    114552
 		# (3 rows)
 
-		ws = {'{b}_{a}'.format(a=w.id, b=w.entry): w for w in wordobjects}
+		ws = {'{a}_{b}'.format(a=w.id, b=w.entry): w for w in wordobjects}
 		wss = sorted(ws.keys())
 		wordobjects = [ws[w] for w in wss]
 
