@@ -135,15 +135,15 @@ class CssFormattingObject(object):
 	     'BLDITALIC': 'Lato-BoldItalic'}
 
 	n = {'REGULAR': 'NotoSans-Regular',
-	     'MONO': 'NotoMono-Regular',
+	     'MONO': 'NotoSansMono-Regular',
 	     'OBLIQUE': 'NotoSans-Italic',
-	     'CONDENSED': 'NotoSansDisplay-Condensed',
-	     'CNDENSEDBLD': 'NotoSansDisplay-CondensedBold',
-	     'CNDENSEDOBL': 'NotoSansDisplay-CondensedItalic',
+	     'CONDENSED': 'NotoSans-Light',
+	     'CNDENSEDBLD': 'NotoSans-SemiBold',
+	     'CNDENSEDOBL': 'NotoSans-SemiBoldItalic',
 	     'BOLD': 'NotoSans-Bold',
-	     'SEMIBLD': 'NotoSansDisplay-SemiBold',
-	     'THIN': 'NotoSansDisplay-Thin',
-	     'LIGHT': 'NotoSansDisplay-Light',
+	     'SEMIBLD': 'NotoSans-SemiBold',
+	     'THIN': 'NotoSans-Thin',
+	     'LIGHT': 'NotoSans-Light',
 	     'BLDITALIC': 'NotoSans-BoldItalic'}
 
 	nd = {'REGULAR': 'NotoSansDisplay-Regular',

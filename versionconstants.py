@@ -8,7 +8,7 @@
 
 VERSION = '1.8.3'
 STABLE = True
-RELEASE = True
+RELEASE = False
 PRERELEASE = False
 
 GOHELPERMIN = '1.3.0'

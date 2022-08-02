@@ -89,7 +89,7 @@
 
 @font-face {
 	font-family: 'hipparchiamonostatic';
-	src: url('/static/ttf/NotoMono-Regular.ttf') format('truetype');
+	src: url('/static/ttf/NotoSansMono-Regular.ttf') format('truetype');
 	}
 
 @font-face {
@@ -99,17 +99,17 @@
 
 @font-face {
 	font-family: 'hipparchiacondensedstatic';
-	src: url('/static/ttf/NotoSansDisplay-Condensed.ttf') format('truetype');
+	src: url('/static/ttf/NotoSans-Light.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiacondensedboldstatic';
-	src: url('/static/ttf/NotoSansDisplay-CondensedBold.ttf') format('truetype');
+	src: url('/static/ttf/NotoSans-SemiBold.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiacondenseditalicstatic';
-	src: url('/static/ttf/NotoSansDisplay-CondensedItalic.ttf') format('truetype');
+	src: url('/static/ttf/NotoSans-SemiBoldItalic.ttf') format('truetype');
 	}
 
 @font-face {
@@ -119,17 +119,17 @@
 
 @font-face {
 	font-family: 'hipparchiasemiboldstatic';
-	src: url('/static/ttf/NotoSansDisplay-SemiBold.ttf') format('truetype');
+	src: url('/static/ttf/NotoSans-SemiBold.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchiathinstatic';
-	src: url('/static/ttf/NotoSansDisplay-Thin.ttf') format('truetype');
+	src: url('/static/ttf/NotoSans-Thin.ttf') format('truetype');
 	}
 
 @font-face {
 	font-family: 'hipparchialightstatic';
-	src: url('/static/ttf/NotoSansDisplay-Light.ttf') format('truetype');
+	src: url('/static/ttf/NotoSans-Light.ttf') format('truetype');
 	}
 
 @font-face {
@@ -941,14 +941,14 @@ body {
 	font-style: italic; font-weight: bold;
 	}
 
-.transtree {
-	color: var(--skyblue);
-}
-
 .translation {
     font-size: 85%;
     font-style: italic;
     }
+
+.transtree {
+	color: var(--skyblue);
+}
 
 .ui-button {
 	margin-bottom: 3px;
@@ -1647,6 +1647,13 @@ unclickablebibl {
     }
 
 verbform:hover{
+	border-bottom: 1px dotted black;
+	border-top: 1px dotted black;
+	color: var(--dkbabyblue);
+	text-shadow: 1px 1px 3px var(--transparentgrey);
+	}
+
+vocabobserved:hover{
 	border-bottom: 1px dotted black;
 	border-top: 1px dotted black;
 	color: var(--dkbabyblue);
