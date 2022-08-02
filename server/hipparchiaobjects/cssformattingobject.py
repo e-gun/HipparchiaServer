@@ -137,13 +137,13 @@ class CssFormattingObject(object):
 	n = {'REGULAR': 'NotoSans-Regular',
 	     'MONO': 'NotoSansMono-Regular',
 	     'OBLIQUE': 'NotoSans-Italic',
-	     'CONDENSED': 'NotoSans-Light',
-	     'CNDENSEDBLD': 'NotoSans-SemiBold',
-	     'CNDENSEDOBL': 'NotoSans-SemiBoldItalic',
+	     'CONDENSED': 'NotoSansDisplay_ExtraCondensed-Regular',
+	     'CNDENSEDBLD': 'NotoSansDisplay_ExtraCondensed-SemiBold',
+	     'CNDENSEDOBL': 'NotoSansDisplay_ExtraCondensed-Italic',
 	     'BOLD': 'NotoSans-Bold',
 	     'SEMIBLD': 'NotoSans-SemiBold',
 	     'THIN': 'NotoSans-Thin',
-	     'LIGHT': 'NotoSans-Light',
+	     'LIGHT': 'NotoSans-ExtraLight',
 	     'BLDITALIC': 'NotoSans-BoldItalic'}
 
 	nd = {'REGULAR': 'NotoSansDisplay-Regular',
