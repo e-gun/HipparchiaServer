@@ -6,9 +6,9 @@
         (see LICENSE in the top level directory of the distribution)
 """
 
-VERSION = '1.8.3'
+VERSION = '1.8.4'
 STABLE = True
-RELEASE = False
+RELEASE = True
 PRERELEASE = False
 
 GOHELPERMIN = '1.3.0'
