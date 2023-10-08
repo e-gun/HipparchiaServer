@@ -7,6 +7,7 @@
 """
 
 import re
+import multiprocessing
 
 from io import BytesIO
 from multiprocessing import current_process
@@ -74,7 +75,7 @@ if hipparchia.config['SEMANTICVECTORSENABLED']:
 		# 	consolewarning('\t"~/hipparchia_venv/bin/pip install matplotlib=={v}"\t'.format(v=validmll), color='red',
 		# 	               isbold=True, baremessage=True)
 	except ModuleNotFoundError as e:
-		if current_process().name == 'MainProcess':
+		if multiprocessing.current_process().name == 'MainProcess':
 			print('One or more required math module(s) not available. The following module could not be found:')
 			print('\t{e}'.format(e=e))
 			print('now *none* of your vector graphing functions will work')

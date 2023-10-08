@@ -8,6 +8,7 @@
 
 import json
 import locale
+import multiprocessing
 import re
 from string import punctuation
 from typing import List
@@ -62,7 +63,7 @@ try:
     import pyLDAvis
     import pyLDAvis.sklearn as ldavis
 except ImportError:
-    if current_process().name == 'MainProcess':
+    if multiprocessing.current_process().name == 'MainProcess':
         consolewarning('pyLDAvis is unavailable', color='black')
     pyLDAvis = None
     ldavis = None

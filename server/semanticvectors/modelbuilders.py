@@ -5,6 +5,8 @@
     License: GNU GENERAL PUBLIC LICENSE 3
         (see LICENSE in the top level directory of the distribution)
 """
+
+import multiprocessing
 import re
 import warnings
 from typing import List
@@ -45,7 +47,7 @@ try:
     import pyLDAvis
     import pyLDAvis.sklearn as ldavis
 except ImportError:
-    if current_process().name == 'MainProcess':
+    if multiprocessing.current_process().name == 'MainProcess':
         consolewarning('pyLDAvis is unavailable', color='black')
     pyLDAvis = None
     ldavis = None

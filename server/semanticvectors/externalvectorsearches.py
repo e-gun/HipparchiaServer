@@ -7,6 +7,7 @@
 """
 
 import json
+import multiprocessing
 
 from server import hipparchia
 from server.dbsupport.redisdbfunctions import establishredisconnection, redisfetch
@@ -40,7 +41,7 @@ try:
     from sklearn.pipeline import Pipeline
     from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
 except ImportError:
-    if current_process().name == 'MainProcess':
+    if multiprocessing.current_process().name == 'MainProcess':
         consolewarning('sklearn is unavailable', color='black')
     CountVectorizer = None
     TfidfTransformer = None
@@ -54,7 +55,7 @@ try:
     import pyLDAvis
     import pyLDAvis.sklearn as ldavis
 except ImportError:
-    if current_process().name == 'MainProcess':
+    if multiprocessing.current_process().name == 'MainProcess':
         consolewarning('pyLDAvis is unavailable', color='black')
     pyLDAvis = None
     ldavis = None
